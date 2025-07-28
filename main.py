@@ -16,14 +16,14 @@ swe.set_ephe_path('ephe')
 
 app = FastAPI()
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://astrology-app-sigma.vercel.app/"],  # Update to frontend URL in production
+    allow_origins=["https://astrology-app-sigma.vercel.app"],  # Your Vercel URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 class BirthData(BaseModel):
     year: int
