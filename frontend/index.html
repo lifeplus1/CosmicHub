@@ -14,6 +14,7 @@
         .conjunction { color: green; }
         .quincunx, .sesquiquadrate { color: purple; }
         .semi-sextile, .quintile, .bi-quintile { color: gray; }
+        .zodiac-icon { font-size: 1.2em; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -92,7 +93,30 @@
         </div>
         <div id="transitResult"></div>
 
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Saved Charts</h2>
+                <button id="loadCharts" class="btn btn-secondary">Load Saved Charts</button>
+                <div id="savedCharts" class="mt-3"></div>
+            </div>
+        </div>
+
         <script>
+            const zodiacIcons = {
+                'Aries': '♈',
+                'Taurus': '♉',
+                'Gemini': '♊',
+                'Cancer': '♋',
+                'Leo': '♌',
+                'Virgo': '♍',
+                'Libra': '♎',
+                'Scorpio': '♏',
+                'Sagittarius': '♐',
+                'Capricorn': '♑',
+                'Aquarius': '♒',
+                'Pisces': '♓'
+            };
+
             async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
                 for (let i = 0; i < retries; i++) {
                     try {
@@ -109,7 +133,7 @@
                 }
             }
 
-            function displayResult(result, elementId) {
+            function displayResult(result, elementId, birthData, chartType) {
                 let html = '<h3>Resolved Location</h3>';
                 html += `<p>City: ${result.resolved_location.city}<br>Lat: ${result.resolved_location.latitude}<br>Lon: ${result.resolved_location.longitude}<br>Timezone: ${result.resolved_location.timezone}</p>`;
 
@@ -117,20 +141,23 @@
                 for (let planet in result.planets) {
                     let p = result.planets[planet];
                     let retroClass = p.retrograde ? 'class="retrograde"' : '';
-                    html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td><td>${p.house}</td><td ${retroClass}>${p.retrograde ? 'Yes 🚫' : 'No'}</td></tr>`;
+                    let icon = zodiacIcons[p.sign] || '';
+                    html += `<tr><td>${planet}</td><td>${p.position}</td><td><span class="zodiac-icon">${icon}</span>${p.sign}</td><td>${p.house}</td><td ${retroClass}>${p.retrograde ? 'Yes 🚫' : 'No'}</td></tr>`;
                 }
                 html += '</tbody></table>';
 
                 html += '<h3>Houses</h3><table class="table table-striped"><thead><tr><th>House</th><th>Cusp</th><th>Sign</th></tr></thead><tbody>';
                 result.houses.forEach(h => {
-                    html += `<tr><td>${h.house}</td><td>${h.cusp}</td><td>${h.sign}</td></tr>`;
+                    let icon = zodiacIcons[h.sign] || '';
+                    html += `<tr><td>${h.house}</td><td>${h.cusp}</td><td><span class="zodiac-icon">${icon}</span>${h.sign}</td></tr>`;
                 });
                 html += '</tbody></table>';
 
                 html += '<h3>Angles</h3><table class="table table-striped"><thead><tr><th>Angle</th><th>Position</th><th>Sign</th><th>House</th></tr></thead><tbody>';
                 for (let angle in result.angles) {
                     let a = result.angles[angle];
-                    html += `<tr><td>${angle}</td><td>${a.position}</td><td>${a.sign}</td><td>${a.house}</td></tr>`;
+                    let icon = zodiacIcons[a.sign] || '';
+                    html += `<tr><td>${angle}</td><td>${a.position}</td><td><span class="zodiac-icon">${icon}</span>${a.sign}</td><td>${a.house}</td></tr>`;
                 }
                 html += '</tbody></table>';
 
@@ -141,18 +168,23 @@
                 });
                 html += '</tbody></table>';
 
+                if (birthData && chartType) {
+                    html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartType}', ${JSON.stringify(birthData)}, ${JSON.stringify(result)})">Save Chart</button>`;
+                }
+
                 document.getElementById(elementId).innerHTML = html;
             }
 
-            function displayTransitResult(result) {
+            function displayTransitResult(result, birthData) {
                 let html = '<h3>Natal Chart</h3>';
-                displayResult(result.natal, 'transitResult');
+                displayResult(result.natal, 'transitResult', birthData.natal, 'transit');
 
                 html = document.getElementById('transitResult').innerHTML;
                 html += '<h3>Transit Planets</h3><table class="table table-striped"><thead><tr><th>Planet</th><th>Position</th><th>Sign</th></tr></thead><tbody>';
                 for (let planet in result.transits) {
                     let p = result.transits[planet];
-                    html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td></tr>`;
+                    let icon = zodiacIcons[p.sign] || '';
+                    html += `<tr><td>${planet}</td><td>${p.position}</td><td><span class="zodiac-icon">${icon}</span>${p.sign}</td></tr>`;
                 }
                 html += '</tbody></table>';
 
@@ -166,6 +198,53 @@
                 document.getElementById('transitResult').innerHTML = html;
             }
 
+            async function saveChart(chartType, birthData, chartData) {
+                try {
+                    const response = await fetchWithRetry('https://astrology-app-065g.onrender.com/save-chart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': 'your_secure_key'
+                        },
+                        body: JSON.stringify({ chart_type, birth_data, chart_data })
+                    });
+                    alert(response.message);
+                    loadSavedCharts();
+                } catch (error) {
+                    alert(`Error saving chart: ${error.message}`);
+                }
+            }
+
+            async function loadSavedCharts() {
+                try {
+                    const charts = await fetchWithRetry('https://astrology-app-065g.onrender.com/get-charts', {
+                        method: 'GET',
+                        headers: {
+                            'X-API-Key': 'your_secure_key'
+                        }
+                    });
+                    let html = '<h3>Saved Charts</h3>';
+                    if (charts.length === 0) {
+                        html += '<p>No saved charts found.</p>';
+                    } else {
+                        charts.forEach(chart => {
+                            html += `<div class="card mb-3"><div class="card-body">`;
+                            html += `<h4>${chart.type} Chart (Saved: ${new Date(chart.created_at).toLocaleString()})</h4>`;
+                            html += `<p>Birth Data: ${JSON.stringify(chart.birth_data)}</p>`;
+                            if (chart.type === 'natal') {
+                                displayResult(chart.chart_data, `savedChart_${chart.id}`, null, null);
+                            } else {
+                                displayTransitResult(chart.chart_data, null);
+                            }
+                            html += `</div></div>`;
+                        });
+                    }
+                    document.getElementById('savedCharts').innerHTML = html;
+                } catch (error) {
+                    document.getElementById('savedCharts').innerHTML = `<p class="alert alert-danger">Error loading charts: ${error.message}</p>`;
+                }
+            }
+
             document.getElementById('birthForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
@@ -175,11 +254,11 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Replace with your secure key
+                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
                         },
                         body: JSON.stringify(data)
                     });
-                    displayResult(result, 'result');
+                    displayResult(result, 'result', data, 'natal');
                 } catch (error) {
                     document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
                 }
@@ -194,16 +273,17 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Replace with your secure key
+                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
                         },
                         body: JSON.stringify(data)
                     });
-                    displayTransitResult(result);
+                    displayTransitResult(result, data);
                 } catch (error) {
                     document.getElementById('transitResult').innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
                 }
             });
+
+            document.getElementById('loadCharts').addEventListener('click', loadSavedCharts);
         </script>
-    </div>
 </body>
 </html>

@@ -12,6 +12,8 @@ import timezonefinder
 import traceback
 import logging
 import itertools
+import sqlite3
+from typing import List
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +25,21 @@ try:
 except Exception as e:
     logger.error(f"Failed to set ephe path: {str(e)}")
     raise Exception(f"Ephe path error: {str(e)}")
+
+# Initialize SQLite database
+def init_db():
+    conn = sqlite3.connect('charts.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS charts
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  type TEXT,
+                  birth_data TEXT,
+                  chart_data TEXT,
+                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # Planet IDs (global)
 planet_ids = {
@@ -37,6 +54,7 @@ planet_ids = {
     'Neptune': swe.NEPTUNE,
     'Pluto': swe.PLUTO,
     'Chiron': swe.CHIRON,
+    'North Node': swe.MEAN_NODE,
 }
 
 # Zodiac signs (global)
@@ -71,7 +89,7 @@ app.add_middleware(
 )
 
 # API Key auth
-API_KEY = os.getenv("API_KEY", "your_api_key")
+API_KEY = os.getenv("API_KEY", "c3a579e58484f1eb21bfc96966df9a25")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 async def get_api_key(api_key: str = Security(api_key_header)):
@@ -90,6 +108,13 @@ class BirthData(BaseModel):
 class TransitData(BaseModel):
     natal: BirthData
     transit_date: str = "2025-07-28"
+
+class SavedChart(BaseModel):
+    id: int
+    type: str
+    birth_data: dict
+    chart_data: dict
+    created_at: str
 
 # Load city cache
 def load_city_cache():
@@ -166,8 +191,8 @@ def calculate_chart(data: BirthData):
             xx = swe.calc_ut(jd, ipl)[0]
             lon = xx[0] % 360
             lat = xx[1]
-            speed = xx[3]
-            retrograde = speed < 0
+            speed = xx[3] if planet != 'North Node' else 0  # North Node has no speed
+            retrograde = speed < 0 if planet != 'North Node' else False
             degrees = int(lon)
             minutes = int((lon - degrees) * 60)
             sign_index = int(lon // 30)
@@ -184,7 +209,7 @@ def calculate_chart(data: BirthData):
                 'sign': sign,
                 'house': house,
                 'retrograde': retrograde,
-                'lon': lon  # For transits
+                'lon': lon
             }
             planets_lon[planet] = lon
         
@@ -208,7 +233,7 @@ def calculate_chart(data: BirthData):
                 if house > 12:
                     house = 1
             angles_data[angle] = {
-                'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
+                'position': f"{int(lon):02}°{sign[:2]}{int((lon - int(lon)) * 60):02}'",
                 'sign': sign,
                 'house': house
             }
@@ -303,3 +328,41 @@ async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_k
         'transits': transit_planets,
         'transit_aspects': transit_aspects
     }
+
+@app.post("/save-chart")
+async def save_chart(chart_type: str, birth_data: BirthData, chart_data: dict, api_key: str = Depends(get_api_key)):
+    try:
+        conn = sqlite3.connect('charts.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO charts (type, birth_data, chart_data) VALUES (?, ?, ?)",
+                  (chart_type, json.dumps(birth_data.dict()), json.dumps(chart_data)))
+        conn.commit()
+        chart_id = c.lastrowid
+        conn.close()
+        return {"message": "Chart saved successfully", "chart_id": chart_id}
+    except Exception as e:
+        logger.error(f"Save chart failed: {str(e)}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+@app.get("/get-charts", response_model=List[SavedChart])
+async def get_charts(api_key: str = Depends(get_api_key)):
+    try:
+        conn = sqlite3.connect('charts.db')
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute("SELECT id, type, birth_data, chart_data, created_at FROM charts ORDER BY created_at DESC")
+        charts = c.fetchall()
+        conn.close()
+        return [
+            {
+                "id": chart['id'],
+                "type": chart['type'],
+                "birth_data": json.loads(chart['birth_data']),
+                "chart_data": json.loads(chart['chart_data']),
+                "created_at": chart['created_at']
+            }
+            for chart in charts
+        ]
+    except Exception as e:
+        logger.error(f"Get charts failed: {str(e)}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
