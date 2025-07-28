@@ -289,7 +289,7 @@
                         let a = result.angles[angle];
                         let icon = zodiacIcons[a.sign] || '';
                         html += `<tr><td>${angle}</td><td>${a.position}</td><td><span class="zodiac-icon">${icon}</span>${a.sign}</td><td>${a.house}</td></tr>`;
-                    });
+                    };
                     html += '</tbody></table>';
 
                     html += '<h3>Aspects</h3><table class="table table-striped"><thead><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
