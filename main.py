@@ -24,6 +24,24 @@ except Exception as e:
     logger.error(f"Failed to set ephe path: {str(e)}")
     raise Exception(f"Ephe path error: {str(e)}")
 
+# Planet IDs (global scope)
+planet_ids = {
+    'Sun': swe.SUN,
+    'Moon': swe.MOON,
+    'Mercury': swe.MERCURY,
+    'Venus': swe.VENUS,
+    'Mars': swe.MARS,
+    'Jupiter': swe.JUPITER,
+    'Saturn': swe.SATURN,
+    'Uranus': swe.URANUS,
+    'Neptune': swe.NEPTUNE,
+    'Pluto': swe.PLUTO,
+    'Chiron': swe.CHIRON,
+}
+
+# Zodiac signs (global scope)
+signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
+
 app = FastAPI()
 
 # Add CORS middleware
@@ -39,7 +57,7 @@ app.add_middleware(
 )
 
 # API Key auth
-API_KEY = os.getenv("API_KEY", "c3a579e58484f1eb21bfc96966df9a25")
+API_KEY = os.getenv("API_KEY", "your_api_key")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 async def get_api_key(api_key: str = Security(api_key_header)):
@@ -127,22 +145,6 @@ def calculate_chart(data: BirthData):
         ascmc = house_data[1]
         
         eps = swe.calc_ut(jd, swe.ECL_NUT)[0][0]
-        
-        planet_ids = {
-            'Sun': swe.SUN,
-            'Moon': swe.MOON,
-            'Mercury': swe.MERCURY,
-            'Venus': swe.VENUS,
-            'Mars': swe.MARS,
-            'Jupiter': swe.JUPITER,
-            'Saturn': swe.SATURN,
-            'Uranus': swe.URANUS,
-            'Neptune': swe.NEPTUNE,
-            'Pluto': swe.PLUTO,
-            'Chiron': swe.CHIRON,
-        }
-        
-        signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
         
         planets_lon = {}
         planet_data = {}
@@ -256,46 +258,50 @@ async def calculate_positions(data: BirthData, api_key: str = Depends(get_api_ke
 
 @app.post("/transits")
 async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_key)):
-    natal_chart = calculate_chart(data.natal)
-    
     try:
-        transit_dt = datetime.strptime(data.transit_date, "%Y-%m-%d")
-        transit_jd = swe.utc_to_jd(transit_dt.year, transit_dt.month, transit_dt.day, 12, 0, 0, 1)[1]
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid transit date format. Use YYYY-MM-DD.")
-    
-    transit_planets_lon = {}
-    transit_planets = {}
-    for planet, ipl in planet_ids.items():
-        xx = swe.calc_ut(transit_jd, ipl)[0]
-        lon = xx[0] % 360
-        degrees = int(lon)
-        minutes = int((lon - degrees) * 60)
-        sign_index = int(lon // 30)
-        sign = signs[sign_index]
-        transit_planets[planet] = {
-            'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
-            'sign': sign
+        natal_chart = calculate_chart(data.natal)
+        
+        try:
+            transit_dt = datetime.strptime(data.transit_date, "%Y-%m-%d")
+            transit_jd = swe.utc_to_jd(transit_dt.year, transit_dt.month, transit_dt.day, 12, 0, 0, 1)[1]
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid transit date format. Use YYYY-MM-DD.")
+        
+        transit_planets_lon = {}
+        transit_planets = {}
+        for planet, ipl in planet_ids.items():
+            xx = swe.calc_ut(transit_jd, ipl)[0]
+            lon = xx[0] % 360
+            degrees = int(lon)
+            minutes = int((lon - degrees) * 60)
+            sign_index = int(lon // 30)
+            sign = signs[sign_index]
+            transit_planets[planet] = {
+                'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
+                'sign': sign
+            }
+            transit_planets_lon[planet] = lon
+        
+        transit_aspects = []
+        for t_planet, t_lon in transit_planets_lon.items():
+            for n_planet, n_data in natal_chart['planets'].items():
+                n_lon = n_data['lon']
+                diff = abs(t_lon - n_lon)
+                diff = min(diff, 360 - diff)
+                for asp_name, (target, orb) in aspect_types.items():
+                    if abs(diff - target) <= orb:
+                        transit_aspects.append({
+                            'transit_planet': t_planet,
+                            'natal_point': n_planet,
+                            'aspect': asp_name,
+                            'orb': f"{abs(diff - target):.2f}°"
+                        })
+        
+        return {
+            'natal': natal_chart,
+            'transits': transit_planets,
+            'transit_aspects': transit_aspects
         }
-        transit_planets_lon[planet] = lon
-    
-    transit_aspects = []
-    for t_planet, t_lon in transit_planets_lon.items():
-        for n_planet, n_data in natal_chart['planets'].items():
-            n_lon = n_data['lon']  # Add 'lon': lon to planet_data in calculate_chart if needed
-            diff = abs(t_lon - n_lon)
-            diff = min(diff, 360 - diff)
-            for asp_name, (target, orb) in aspect_types.items():
-                if abs(diff - target) <= orb:
-                    transit_aspects.append({
-                        'transit_planet': t_planet,
-                        'natal_point': n_planet,
-                        'aspect': asp_name,
-                        'orb': f"{abs(diff - target):.2f}°"
-                    })
-    
-    return {
-        'natal': natal_chart,
-        'transits': transit_planets,
-        'transit_aspects': transit_aspects
-    }
+    except Exception as e:
+        logger.error(f"Transits request failed: {str(e)}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
