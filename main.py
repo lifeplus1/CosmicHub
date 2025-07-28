@@ -38,8 +38,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# API Key auth (change 'your_api_key' to a secret in production)
-API_KEY = os.getenv("API_KEY", "your_api_key")  # Fallback for local testing
+# API Key auth
+API_KEY = os.getenv("API_KEY", "your_api_key")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 async def get_api_key(api_key: str = Security(api_key_header)):
@@ -57,7 +57,7 @@ class BirthData(BaseModel):
 
 class TransitData(BaseModel):
     natal: BirthData
-    transit_date: str = "2025-07-28"  # Default current date
+    transit_date: str = "2025-07-28"
 
 # Load city cache
 def load_city_cache():
@@ -81,10 +81,8 @@ def save_city_cache(cache):
 def calculate_chart(data: BirthData):
     try:
         logger.info(f"Processing request for city: {data.city}")
-        # Load city cache
         city_cache = load_city_cache()
 
-        # Check cache first
         if data.city in city_cache:
             logger.info(f"Using cached data for {data.city}")
             latitude = city_cache[data.city]['latitude']
@@ -105,7 +103,6 @@ def calculate_chart(data: BirthData):
             if not timezone_str:
                 raise HTTPException(status_code=404, detail="Timezone not found for this location.")
             
-            # Save to cache
             city_cache[data.city] = {
                 'latitude': latitude,
                 'longitude': longitude,
@@ -114,7 +111,6 @@ def calculate_chart(data: BirthData):
             save_city_cache(city_cache)
             logger.info(f"Cached {data.city}")
         
-        # Convert local time to UTC
         local_tz = pytz.timezone(timezone_str)
         local_dt = datetime(data.year, data.month, data.day, data.hour, data.minute)
         try:
@@ -124,18 +120,14 @@ def calculate_chart(data: BirthData):
         except pytz.UnknownTimeZoneError:
             raise HTTPException(status_code=400, detail="Invalid timezone.")
         
-        # Convert to Julian Day
         jd = swe.utc_to_jd(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour, utc_dt.minute, utc_dt.second, 1)[1]
         
-        # House cusps and angles (Placidus)
         house_data = swe.houses(jd, latitude, longitude, b'P')
         cusps = house_data[0]
         ascmc = house_data[1]
         
-        # Obliquity (epsilon)
         eps = swe.calc_ut(jd, swe.ECL_NUT)[0][0]
         
-        # Planet IDs (added Chiron)
         planet_ids = {
             'Sun': swe.SUN,
             'Moon': swe.MOON,
@@ -150,10 +142,8 @@ def calculate_chart(data: BirthData):
             'Chiron': swe.CHIRON,
         }
         
-        # Zodiac signs
         signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
         
-        # Planet data
         planets_lon = {}
         planet_data = {}
         for planet, ipl in planet_ids.items():
@@ -181,7 +171,6 @@ def calculate_chart(data: BirthData):
             }
             planets_lon[planet] = lon
         
-        # Angles longitudes
         angles_lon = {
             'Ascendant': ascmc[0] % 360,
             'Midheaven': ascmc[1] % 360,
@@ -190,7 +179,6 @@ def calculate_chart(data: BirthData):
             'IC': (ascmc[1] + 180) % 360
         }
         
-        # Angles data with sign and house
         angles_data = {}
         for angle, lon in angles_lon.items():
             sign_index = int(lon // 30)
@@ -208,7 +196,6 @@ def calculate_chart(data: BirthData):
                 'house': house
             }
         
-        # House data
         houses = []
         for i in range(12):
             cusp = cusps[i] % 360
@@ -220,7 +207,6 @@ def calculate_chart(data: BirthData):
                 'sign': sign
             })
         
-        # Aspects (planets to planets and planets to angles)
         aspect_types = {
             'Conjunction': (0, 8),
             'Semi-Sextile': (30, 2),
@@ -263,14 +249,19 @@ def calculate_chart(data: BirthData):
         logger.error(f"Request failed: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
+@app.post("/calculate")
+async def calculate_positions(data: BirthData, api_key: str = Depends(get_api_key)):
+    return calculate_chart(data)
+
 @app.post("/transits")
 async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_key)):
-    # Calculate natal chart
     natal_chart = calculate_chart(data.natal)
     
-    # Current transits (fixed date July 28, 2025, 12:00 UTC)
-    transit_dt = datetime(2025, 7, 28, 12, 0)
-    transit_jd = swe.utc_to_jd(2025, 7, 28, 12, 0, 0, 1)[1]
+    try:
+        transit_dt = datetime.strptime(data.transit_date, "%Y-%m-%d")
+        transit_jd = swe.utc_to_jd(transit_dt.year, transit_dt.month, transit_dt.day, 12, 0, 0, 1)[1]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid transit date format. Use YYYY-MM-DD.")
     
     transit_planets = {}
     for planet, ipl in planet_ids.items():
@@ -285,10 +276,9 @@ async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_k
             'sign': sign
         }
     
-    # Transit aspects to natal
     transit_aspects = []
-    for t_planet, t_lon in transit_planets.items():
-        t_lon = float(t_lon['position'].split('°')[0]) + float(t_lon['position'].split('°')[1][:2]) / 60
+    for t_planet, t_data in transit_planets.items():
+        t_lon = float(t_data['position'].split('°')[0]) + float(t_data['position'].split('°')[1][:2]) / 60
         for n_planet, n_data in natal_chart['planets'].items():
             n_lon = float(n_data['position'].split('°')[0]) + float(n_data['position'].split('°')[1][:2]) / 60
             diff = abs(t_lon - n_lon)
