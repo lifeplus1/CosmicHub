@@ -17,7 +17,10 @@
         .square { color: red; }
         .conjunction { color: green; }
         .opposition { color: orange; }
-        /* Add more aspect colors as needed */
+        /* Add for minor aspects */
+        .sextile { color: lightblue; }
+        .quincunx { color: purple; }
+        .semi-sextile { color: gray; }
         pre { white-space: pre-wrap; }
     </style>
 </head>
@@ -40,7 +43,7 @@
                 try {
                     const response = await fetch(url, {
                         ...options,
-                        signal: AbortSignal.timeout(90000)
+                        signal: AbortSignal.timeout(90000)  // 90s timeout
                     });
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return await response.json();
@@ -94,7 +97,7 @@
 
             html += '<h2>Aspects</h2><table><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr>';
             result.aspects.forEach(a => {
-                let aspClass = a.aspect.toLowerCase();  // e.g., 'trine' for class
+                let aspClass = a.aspect.toLowerCase();  # e.g., 'trine' for class
                 html += `<tr class="${aspClass}"><td>${a.point1}</td><td>${a.point2}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
             });
             html += '</table>';

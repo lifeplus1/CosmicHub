@@ -1,9 +1,10 @@
 import swisseph as swe
 import pytz
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Depends, Security
+from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
 from geopy.geocoders import Nominatim
@@ -37,6 +38,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# API Key auth (change 'your_api_key' to a secret in production)
+API_KEY = "your_api_key"
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+async def get_api_key(api_key: str = Security(api_key_header)):
+    if api_key != API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid API Key")
+    return api_key
+
 class BirthData(BaseModel):
     year: int
     month: int
@@ -44,6 +54,10 @@ class BirthData(BaseModel):
     hour: int
     minute: int
     city: str
+
+class TransitData(BaseModel):
+    natal: BirthData
+    transit_date: str = "2025-07-28"  # Default current date
 
 # Load city cache
 def load_city_cache():
@@ -64,8 +78,7 @@ def save_city_cache(cache):
     except Exception as e:
         logger.error(f"Failed to save cities.json: {str(e)}")
 
-@app.post("/calculate")
-async def calculate_positions(data: BirthData):
+def calculate_chart(data: BirthData):
     try:
         logger.info(f"Processing request for city: {data.city}")
         # Load city cache
@@ -122,7 +135,7 @@ async def calculate_positions(data: BirthData):
         # Obliquity (epsilon)
         eps = swe.calc_ut(jd, swe.ECL_NUT)[0][0]
         
-        # Planet IDs
+        # Planet IDs (added Chiron)
         planet_ids = {
             'Sun': swe.SUN,
             'Moon': swe.MOON,
@@ -134,6 +147,7 @@ async def calculate_positions(data: BirthData):
             'Uranus': swe.URANUS,
             'Neptune': swe.NEPTUNE,
             'Pluto': swe.PLUTO,
+            'Chiron': swe.CHIRON,
         }
         
         # Zodiac signs
@@ -167,7 +181,7 @@ async def calculate_positions(data: BirthData):
             }
             planets_lon[planet] = lon
         
-        # Angles longitudes (for aspects and sign/house)
+        # Angles longitudes
         angles_lon = {
             'Ascendant': ascmc[0] % 360,
             'Midheaven': ascmc[1] % 360,
@@ -248,3 +262,48 @@ async def calculate_positions(data: BirthData):
     except Exception as e:
         logger.error(f"Request failed: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+@app.post("/transits")
+async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_key)):
+    # Calculate natal chart
+    natal_chart = calculate_chart(data.natal)
+    
+    # Current transits (fixed date July 28, 2025, 12:00 UTC)
+    transit_dt = datetime(2025, 7, 28, 12, 0)
+    transit_jd = swe.utc_to_jd(2025, 7, 28, 12, 0, 0, 1)[1]
+    
+    transit_planets = {}
+    for planet, ipl in planet_ids.items():
+        xx = swe.calc_ut(transit_jd, ipl)[0]
+        lon = xx[0] % 360
+        degrees = int(lon)
+        minutes = int((lon - degrees) * 60)
+        sign_index = int(lon // 30)
+        sign = signs[sign_index]
+        transit_planets[planet] = {
+            'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
+            'sign': sign
+        }
+    
+    # Transit aspects to natal
+    transit_aspects = []
+    for t_planet, t_lon in transit_planets.items():
+        t_lon = float(t_lon['position'].split('°')[0]) + float(t_lon['position'].split('°')[1][:2]) / 60
+        for n_planet, n_data in natal_chart['planets'].items():
+            n_lon = float(n_data['position'].split('°')[0]) + float(n_data['position'].split('°')[1][:2]) / 60
+            diff = abs(t_lon - n_lon)
+            diff = min(diff, 360 - diff)
+            for asp_name, (target, orb) in aspect_types.items():
+                if abs(diff - target) <= orb:
+                    transit_aspects.append({
+                        'transit_planet': t_planet,
+                        'natal_point': n_planet,
+                        'aspect': asp_name,
+                        'orb': f"{abs(diff - target):.2f}°"
+                    })
+    
+    return {
+        'natal': natal_chart,
+        'transits': transit_planets,
+        'transit_aspects': transit_aspects
+    }
