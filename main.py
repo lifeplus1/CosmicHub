@@ -12,7 +12,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(level=logging.DEBUG, filename='/app/app.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=os.getenv("LOG_FILE", "app.log"),  # Use app.log locally, /app/app.log on Render
+    filemode='a',
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 try:
@@ -102,21 +107,4 @@ async def transits(request: Request, data: TransitData):
 @app.post("/save-chart")
 async def save_chart_endpoint(request: Request, chart_data: ChartData):
     if not os.getenv("FIREBASE_CREDENTIALS"):
-        raise HTTPException(status_code=503, detail="Firebase not initialized")
-    try:
-        uid = await verify_firebase_token(request)
-        return save_chart(uid, chart_data.chart_type, chart_data.birth_data, chart_data.chart_data)
-    except Exception as e:
-        logger.error(f"Save-chart endpoint failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/get-charts")
-async def get_charts_endpoint(request: Request):
-    if not os.getenv("FIREBASE_CREDENTIALS"):
-        raise HTTPException(status_code=503, detail="Firebase not initialized")
-    try:
-        uid = await verify_firebase_token(request)
-        return get_charts(uid)
-    except Exception as e:
-        logger.error(f"Get-charts endpoint failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status)
