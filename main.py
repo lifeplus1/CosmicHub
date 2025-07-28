@@ -9,8 +9,8 @@ import os
 from geopy.geocoders import Nominatim
 import timezonefinder
 import traceback
-import itertools
 import logging
+import itertools
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -167,6 +167,33 @@ async def calculate_positions(data: BirthData):
             }
             planets_lon[planet] = lon
         
+        # Angles longitudes (for aspects and sign/house)
+        angles_lon = {
+            'Ascendant': ascmc[0] % 360,
+            'Midheaven': ascmc[1] % 360,
+            'Vertex': ascmc[3] % 360,
+            'Antivertex': (ascmc[3] + 180) % 360,
+            'IC': (ascmc[1] + 180) % 360
+        }
+        
+        # Angles data with sign and house
+        angles_data = {}
+        for angle, lon in angles_lon.items():
+            sign_index = int(lon // 30)
+            sign = signs[sign_index]
+            house_pos = swe.house_pos(ascmc[2], latitude, eps, [lon, 0], b'P')
+            house = int(house_pos)
+            fraction = house_pos - house
+            if fraction > 0.9:
+                house += 1
+                if house > 12:
+                    house = 1
+            angles_data[angle] = {
+                'position': f"{int(lon):02}°{sign[:2]}{int((lon - int(lon)) * 60):02}'",
+                'sign': sign,
+                'house': house
+            }
+        
         # House data
         houses = []
         for i in range(12):
@@ -179,38 +206,29 @@ async def calculate_positions(data: BirthData):
                 'sign': sign
             })
         
-        # Angles
-        angles = {
-            'Ascendant': f"{ascmc[0]:.2f} degrees",
-            'Midheaven': f"{ascmc[1]:.2f} degrees",
-            'Vertex': f"{ascmc[3]:.2f} degrees",
-            'Antivertex': f"{(ascmc[3] + 180) % 360:.2f} degrees",
-            'IC': f"{(ascmc[1] + 180) % 360:.2f} degrees"
-        }
-        
-        # Aspect definitions (major and minor with orbs)
-    aspect_types = {
-        'Conjunction': (0, 8),
-        'Semi-Sextile': (30, 2),
-        'Sextile': (60, 4),
-        'Quintile': (72, 2),
-        'Square': (90, 6),
-        'Trine': (120, 6),
-        'Sesquiquadrate': (135, 3),
-        'Bi-Quintile': (144, 2),
-        'Quincunx': (150, 3),
-        'Opposition': (180, 8),
-    }
+        # Aspects (planets to planets and planets to angles)
+        aspect_types = {
+            'Conjunction': (0, 8),
+            'Semi-Sextile': (30, 2),
+            'Sextile': (60, 4),
+            'Quintile': (72, 2),
+            'Square': (90, 6),
+            'Trine': (120, 6),
+            'Sesquiquadrate': (135, 3),
+            'Bi-Quintile': (144, 2),
+            'Quincunx': (150, 3),
+            'Opposition': (180, 8),
         }
         aspects = []
-        for p1, p2 in itertools.combinations(planet_ids.keys(), 2):
-            diff = abs(planets_lon[p1] - planets_lon[p2])
+        all_points_lon = {**planets_lon, **angles_lon}
+        for p1, p2 in itertools.combinations(all_points_lon.keys(), 2):
+            diff = abs(all_points_lon[p1] - all_points_lon[p2])
             diff = min(diff, 360 - diff)
             for asp_name, (target, orb) in aspect_types.items():
                 if abs(diff - target) <= orb:
                     aspects.append({
-                        'planet1': p1,
-                        'planet2': p2,
+                        'point1': p1,
+                        'point2': p2,
                         'aspect': asp_name,
                         'orb': f"{abs(diff - target):.2f}°"
                     })
@@ -224,7 +242,7 @@ async def calculate_positions(data: BirthData):
             },
             'planets': planet_data,
             'houses': houses,
-            'angles': angles,
+            'angles': angles_data,
             'aspects': aspects
         }
     except Exception as e:
