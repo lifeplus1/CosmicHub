@@ -105,356 +105,356 @@
         </div>
 
         <script>
-            // Global variables and functions
-            let chartStore = {};
-            let API_KEY = '';
-            let fetchWithRetry;
+    // Global variables and functions
+    let chartStore = {};
+    let API_KEY = '';
+    let fetchWithRetry;
 
-            const zodiacIcons = {
-                'Aries': '♈',
-                'Taurus': '♉',
-                'Gemini': '♊',
-                'Cancer': '♋',
-                'Leo': '♌',
-                'Virgo': '♍',
-                'Libra': '♎',
-                'Scorpio': '♏',
-                'Sagittarius': '♐',
-                'Capricorn': '♑',
-                'Aquarius': '♒',
-                'Pisces': '♓'
-            };
+    const zodiacIcons = {
+        'Aries': '♈',
+        'Taurus': '♉',
+        'Gemini': '♊',
+        'Cancer': '♋',
+        'Leo': '♌',
+        'Virgo': '♍',
+        'Libra': '♎',
+        'Scorpio': '♏',
+        'Sagittarius': '♐',
+        'Capricorn': '♑',
+        'Aquarius': '♒',
+        'Pisces': '♓'
+    };
 
-            const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+    const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
 
-            async function saveChart(chartId) {
-                const { birthData, chartData, chartType } = chartStore[chartId] || {};
-                if (!birthData || !chartData || !chartType) {
-                    alert('Error: Chart data not found');
+    async function saveChart(chartId) {
+        const { birthData, chartData, chartType } = chartStore[chartId] || {};
+        if (!birthData || !chartData || !chartType) {
+            alert('Error: Chart data not found');
+            return;
+        }
+        try {
+            const response = await fetchWithRetry('https://astrology-app-065g.onrender.com/save-chart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ chart_type: chartType, birth_data: birthData, chart_data: chartData })
+            });
+            alert(response.message);
+            await loadSavedCharts(); // Call global loadSavedCharts
+        } catch (error) {
+            alert(`Error saving chart: ${error.message}`);
+        }
+    }
+
+    async function loadSavedCharts() {
+        const savedCharts = document.getElementById('savedCharts');
+        if (!savedCharts) {
+            console.error('Element with ID savedCharts not found');
+            return;
+        }
+        try {
+            const charts = await fetchWithRetry('https://astrology-app-065g.onrender.com/get-charts', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            let html = '<h3>Saved Charts</h3>';
+            if (charts.length === 0) {
+                html += '<p>No saved charts found.</p>';
+            } else {
+                charts.forEach(chart => {
+                    html += `<div class="card mb-3"><div class="card-body">`;
+                    html += `<h4>${chart.type} Chart (Saved: ${new Date(chart.created_at).toLocaleString()})</h4>`;
+                    html += `<p>Birth Data: ${JSON.stringify(chart.birth_data)}</p>`;
+                    html += `<div id="savedChart_${chart.id}" class="chart-container"></div>`;
+                    setTimeout(() => {
+                        if (chart.type === 'natal') {
+                            displayResult(chart.chart_data, `savedChart_${chart.id}`, null, null);
+                        } else {
+                            displayTransitResult(chart.chart_data, null);
+                        }
+                    }, 0);
+                    html += `</div></div>`;
+                });
+            }
+            savedCharts.innerHTML = html;
+        } catch (error) {
+            savedCharts.innerHTML = `<p class="alert alert-danger">Error loading charts: ${error.message}</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Fetch API key with retry
+        const maxRetries = 3;
+        let retries = 0;
+        while (retries < maxRetries) {
+            try {
+                const response = await fetch('/api/get-api-key', { method: 'GET' });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status} - ${errorText}`);
+                }
+                const data = await response.json();
+                API_KEY = data.apiKey;
+                if (!API_KEY) throw new Error('API key not found in response');
+                console.log('API key fetched successfully');
+                break;
+            } catch (error) {
+                retries++;
+                console.error(`Attempt ${retries} failed to fetch API key:`, error.message);
+                if (retries === maxRetries) {
+                    document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: Unable to load API key - ${error.message}. Please check server configuration.</p>`;
                     return;
                 }
+                await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+            }
+        }
+
+        fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+            for (let i = 0; i < retries; i++) {
                 try {
-                    const response = await fetchWithRetry('https://astrology-app-065g.onrender.com/save-chart', {
-                        method: 'POST',
+                    const response = await fetch(url, {
+                        ...options,
                         headers: {
-                            'Content-Type': 'application/json'
+                            ...options.headers,
+                            'X-API-Key': API_KEY
                         },
-                        body: JSON.stringify({ chart_type: chartType, birth_data: birthData, chart_data: chartData })
+                        signal: AbortSignal.timeout(90000)
                     });
-                    alert(response.message);
-                    loadSavedCharts();
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`HTTP ${response.status} - ${errorText}`);
+                    }
+                    return await response.json();
                 } catch (error) {
-                    alert(`Error saving chart: ${error.message}`);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        };
+
+        function drawChart(elementId, planets, houses, angles) {
+            const width = 400, height = 400, radius = 150;
+            const svg = d3.select(`#${elementId}`)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+            // Zodiac circle
+            const zodiacArc = d3.arc().innerRadius(radius - 20).outerRadius(radius);
+            const zodiacData = signs.map((sign, i) => ({
+                sign,
+                startAngle: (i * 30) * Math.PI / 180,
+                endAngle: ((i + 1) * 30) * Math.PI / 180
+            }));
+
+            svg.selectAll('.zodiac')
+                .data(zodiacData)
+                .enter()
+                .append('path')
+                .attr('d', zodiacArc)
+                .attr('fill', '#e9ecef')
+                .attr('stroke', '#ccc');
+
+            svg.selectAll('.zodiac-label')
+                .data(zodiacData)
+                .enter()
+                .append('text')
+                .attr('transform', d => `translate(${Math.cos(d.startAngle + 15 * Math.PI / 180) * (radius - 10)}, ${Math.sin(d.startAngle + 15 * Math.PI / 180) * (radius - 10)})`)
+                .attr('text-anchor', 'middle')
+                .text(d => zodiacIcons[d.sign] || d.sign);
+
+            // House cusps
+            houses.forEach(h => {
+                const cuspValue = parseFloat(h.cusp);
+                if (!isNaN(cuspValue)) {
+                    const angle = (cuspValue * Math.PI / 180) - (Math.PI / 2);
+                    svg.append('line')
+                        .attr('x1', 0)
+                        .attr('y1', 0)
+                        .attr('x2', Math.cos(angle) * (radius - 30))
+                        .attr('y2', Math.sin(angle) * (radius - 30))
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1);
+                }
+            });
+
+            // Planets
+            for (let planet in planets) {
+                const lon = planets[planet].lon;
+                if (!isNaN(lon)) {
+                    const angle = (lon * Math.PI / 180) - (Math.PI / 2);
+                    svg.append('text')
+                        .attr('x', Math.cos(angle) * (radius - 40))
+                        .attr('y', Math.sin(angle) * (radius - 40))
+                        .attr('text-anchor', 'middle')
+                        .text(planet.substring(0, 3))
+                        .attr('fill', planets[planet].retrograde ? 'red' : 'black');
                 }
             }
 
-            document.addEventListener('DOMContentLoaded', async () => {
-                // Fetch API key with retry
-                const maxRetries = 3;
-                let retries = 0;
-                while (retries < maxRetries) {
-                    try {
-                        const response = await fetch('/api/get-api-key', { method: 'GET' });
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            throw new Error(`HTTP ${response.status} - ${errorText}`);
-                        }
-                        const data = await response.json();
-                        API_KEY = data.apiKey;
-                        if (!API_KEY) throw new Error('API key not found in response');
-                        console.log('API key fetched successfully');
-                        break;
-                    } catch (error) {
-                        retries++;
-                        console.error(`Attempt ${retries} failed to fetch API key:`, error.message);
-                        if (retries === maxRetries) {
-                            document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: Unable to load API key - ${error.message}. Please check server configuration.</p>`;
-                            return;
-                        }
-                        await new Promise(resolve => setTimeout(resolve, 1000 * retries));
-                    }
-                }
-
-                fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
-                    for (let i = 0; i < retries; i++) {
-                        try {
-                            const response = await fetch(url, {
-                                ...options,
-                                headers: {
-                                    ...options.headers,
-                                    'X-API-Key': API_KEY
-                                },
-                                signal: AbortSignal.timeout(90000)
-                            });
-                            if (!response.ok) {
-                                const errorText = await response.text();
-                                throw new Error(`HTTP ${response.status} - ${errorText}`);
-                            }
-                            return await response.json();
-                        } catch (error) {
-                            if (i === retries - 1) throw error;
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                        }
-                    }
-                };
-
-                function drawChart(elementId, planets, houses, angles) {
-                    const width = 400, height = 400, radius = 150;
-                    const svg = d3.select(`#${elementId}`)
-                        .append('svg')
-                        .attr('width', width)
-                        .attr('height', height)
-                        .append('g')
-                        .attr('transform', `translate(${width / 2}, ${height / 2})`);
-
-                    // Zodiac circle
-                    const zodiacArc = d3.arc().innerRadius(radius - 20).outerRadius(radius);
-                    const zodiacData = signs.map((sign, i) => ({
-                        sign,
-                        startAngle: (i * 30) * Math.PI / 180,
-                        endAngle: ((i + 1) * 30) * Math.PI / 180
-                    }));
-
-                    svg.selectAll('.zodiac')
-                        .data(zodiacData)
-                        .enter()
-                        .append('path')
-                        .attr('d', zodiacArc)
-                        .attr('fill', '#e9ecef')
-                        .attr('stroke', '#ccc');
-
-                    svg.selectAll('.zodiac-label')
-                        .data(zodiacData)
-                        .enter()
-                        .append('text')
-                        .attr('transform', d => `translate(${Math.cos(d.startAngle + 15 * Math.PI / 180) * (radius - 10)}, ${Math.sin(d.startAngle + 15 * Math.PI / 180) * (radius - 10)})`)
+            // Angles
+            for (let angle in angles) {
+                const lon = angles[angle].lon;
+                if (!isNaN(lon)) {
+                    const rad = (lon * Math.PI / 180) - (Math.PI / 2);
+                    svg.append('line')
+                        .attr('x1', 0)
+                        .attr('y1', 0)
+                        .attr('x2', Math.cos(rad) * radius)
+                        .attr('y2', Math.sin(rad) * radius)
+                        .attr('stroke', 'blue')
+                        .attr('stroke-width', 2);
+                    svg.append('text')
+                        .attr('x', Math.cos(rad) * (radius - 50))
+                        .attr('y', Math.sin(rad) * (radius - 50))
                         .attr('text-anchor', 'middle')
-                        .text(d => zodiacIcons[d.sign] || d.sign);
-
-                    // House cusps
-                    houses.forEach(h => {
-                        const cuspValue = parseFloat(h.cusp);
-                        if (!isNaN(cuspValue)) {
-                            const angle = (cuspValue * Math.PI / 180) - (Math.PI / 2);
-                            svg.append('line')
-                                .attr('x1', 0)
-                                .attr('y1', 0)
-                                .attr('x2', Math.cos(angle) * (radius - 30))
-                                .attr('y2', Math.sin(angle) * (radius - 30))
-                                .attr('stroke', 'black')
-                                .attr('stroke-width', 1);
-                        }
-                    });
-
-                    // Planets
-                    for (let planet in planets) {
-                        const lon = planets[planet].lon;
-                        if (!isNaN(lon)) {
-                            const angle = (lon * Math.PI / 180) - (Math.PI / 2);
-                            svg.append('text')
-                                .attr('x', Math.cos(angle) * (radius - 40))
-                                .attr('y', Math.sin(angle) * (radius - 40))
-                                .attr('text-anchor', 'middle')
-                                .text(planet.substring(0, 3))
-                                .attr('fill', planets[planet].retrograde ? 'red' : 'black');
-                        }
-                    }
-
-                    // Angles
-                    for (let angle in angles) {
-                        const lon = angles[angle].lon;
-                        if (!isNaN(lon)) {
-                            const rad = (lon * Math.PI / 180) - (Math.PI / 2);
-                            svg.append('line')
-                                .attr('x1', 0)
-                                .attr('y1', 0)
-                                .attr('x2', Math.cos(rad) * radius)
-                                .attr('y2', Math.sin(rad) * radius)
-                                .attr('stroke', 'blue')
-                                .attr('stroke-width', 2);
-                            svg.append('text')
-                                .attr('x', Math.cos(rad) * (radius - 50))
-                                .attr('y', Math.sin(rad) * (radius - 50))
-                                .attr('text-anchor', 'middle')
-                                .text(angle.substring(0, 3))
-                                .attr('fill', 'blue');
-                        }
-                    }
+                        .text(angle.substring(0, 3))
+                        .attr('fill', 'blue');
                 }
+            }
+        }
 
-                function displayResult(result, elementId, birthData, chartType) {
-                    const chartId = Date.now().toString();
-                    chartStore[chartId] = { birthData, chartData: result, chartType };
+        function displayResult(result, elementId, birthData, chartType) {
+            const chartId = Date.now().toString();
+            chartStore[chartId] = { birthData, chartData: result, chartType };
 
-                    let html = '<div class="chart-container"><div id="chart_' + chartId + '"></div></div>';
-                    html += '<h3>Resolved Location</h3>';
-                    html += `<p>City: ${result.resolved_location.city}<br>Lat: ${result.resolved_location.latitude}<br>Lon: ${result.resolved_location.longitude}<br>Timezone: ${result.resolved_location.timezone}</p>`;
+            let html = '<div class="chart-container"><div id="chart_' + chartId + '"></div></div>';
+            html += '<h3>Resolved Location</h3>';
+            html += `<p>City: ${result.resolved_location.city}<br>Lat: ${result.resolved_location.latitude}<br>Lon: ${result.resolved_location.longitude}<br>Timezone: ${result.resolved_location.timezone}</p>`;
 
-                    html += '<h3>Planets</h3><table class="table table-striped"><thead><tr><th>Planet</th><th>Position</th><th>Sign</th><th>House</th><th>Retrograde</th></tr></thead><tbody>';
-                    for (let planet in result.planets) {
-                        let p = result.planets[planet];
-                        let retroClass = p.retrograde ? 'class="retrograde"' : '';
-                        let icon = zodiacIcons[p.sign] || '';
-                        html += `<tr><td>${planet}</td><td>${p.position}</td><td><span class="zodiac-icon">${icon}</span>${p.sign}</td><td>${p.house}</td><td ${retroClass}>${p.retrograde ? 'Yes 🚫' : 'No'}</td></tr>`;
-                    }
-                    html += '</tbody></table>';
+            html += '<h3>Planets</h3><table class="table table-striped"><thead><tr><th>Planet</th><th>Position</th><th>Sign</th><th>House</th><th>Retrograde</th></tr></thead><tbody>';
+            for (let planet in result.planets) {
+                let p = result.planets[planet];
+                let retroClass = p.retrograde ? 'class="retrograde"' : '';
+                let icon = zodiacIcons[p.sign] || '';
+                html += `<tr><td>${planet}</td><td>${p.position}</td><td><span class="zodiac-icon">${icon}</span>${p.sign}</td><td>${p.house}</td><td ${retroClass}>${p.retrograde ? 'Yes 🚫' : 'No'}</td></tr>`;
+            }
+            html += '</tbody></table>';
 
-                    html += '<h3>Houses</h3><table class="table table-striped"><thead><tr><th>House</th><th>Cusp</th><th>Sign</th></tr></thead><tbody>';
-                    result.houses.forEach(h => {
-                        let icon = zodiacIcons[h.sign] || '';
-                        html += `<tr><td>${h.house}</td><td>${h.cusp}</td><td><span class="zodiac-icon">${icon}</span>${h.sign}</td></tr>`;
-                    });
-                    html += '</tbody></table>';
-
-                    html += '<h3>Angles</h3><table class="table table-striped"><thead><tr><th>Angle</th><th>Position</th><th>Sign</th><th>House</th></tr></thead><tbody>';
-                    for (let angle in result.angles) {
-                        let a = result.angles[angle];
-                        let icon = zodiacIcons[a.sign] || '';
-                        html += `<tr><td>${angle}</td><td>${a.position}</td><td><span class="zodiac-icon">${icon}</span>${a.sign}</td><td>${a.house}</td></tr>`;
-                    }
-                    html += '</tbody></table>';
-
-                    html += '<h3>Aspects</h3><table class="table table-striped"><thead><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
-                    result.aspects.forEach(a => {
-                        let aspClass = a.aspect.toLowerCase().replace(' ', '-');
-                        html += `<tr class="${aspClass}"><td>${a.point1}</td><td>${a.point2}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
-                    });
-                    html += '</tbody></table>';
-
-                    if (birthData && chartType) {
-                        html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartId}')">Save Chart</button>`;
-                    }
-
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        element.innerHTML = html;
-                        setTimeout(() => drawChart('chart_' + chartId, result.planets, result.houses, result.angles), 0);
-                    } else {
-                        console.error(`Element with ID ${elementId} not found`);
-                    }
-                }
-
-                function displayTransitResult(result, birthData) {
-                    const chartId = Date.now().toString();
-                    chartStore[chartId] = { birthData: birthData.natal, chartData: result, chartType: 'transit' };
-
-                    let html = '<h3>Natal Chart</h3>';
-                    html += '<div class="chart-container"><div id="natalChart_' + chartId + '"></div></div>';
-                    displayResult(result.natal, 'transitResult', birthData.natal, 'transit');
-
-                    html = document.getElementById('transitResult').innerHTML;
-                    html += '<h3>Transit Planets</h3><table class="table table-striped"><thead><tr><th>Planet</th><th>Position</th><th>Sign</th></tr></thead><tbody>';
-                    for (let planet in result.transits) {
-                        let p = result.transits[planet];
-                        let icon = zodiacIcons[p.sign] || '';
-                        html += `<tr><td>${planet}</td><td>${p.position}</td><td><span class="zodiac-icon">${icon}</span>${p.sign}</td></tr>`;
-                    }
-                    html += '</tbody></table>';
-
-                    html += '<h3>Transit Aspects to Natal</h3><table class="table table-striped"><thead><tr><th>Transit Planet</th><th>Natal Point</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
-                    result.transit_aspects.forEach(a => {
-                        let aspClass = a.aspect.toLowerCase().replace(' ', '-');
-                        html += `<tr class="${aspClass}"><td>${a.transit_planet}</td><td>${a.natal_point}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
-                    });
-                    html += '</tbody></table>';
-
-                    html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartId}')">Save Chart</button>`;
-                    const transitResult = document.getElementById('transitResult');
-                    if (transitResult) {
-                        transitResult.innerHTML = html;
-                        setTimeout(() => drawChart('natalChart_' + chartId, result.natal.planets, result.natal.houses, result.natal.angles), 0);
-                    } else {
-                        console.error('Element with ID transitResult not found');
-                    }
-                }
-
-                async function loadSavedCharts() {
-                    const savedCharts = document.getElementById('savedCharts');
-                    if (!savedCharts) {
-                        console.error('Element with ID savedCharts not found');
-                        return;
-                    }
-                    try {
-                        const charts = await fetchWithRetry('https://astrology-app-065g.onrender.com/get-charts', {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-                        let html = '<h3>Saved Charts</h3>';
-                        if (charts.length === 0) {
-                            html += '<p>No saved charts found.</p>';
-                        } else {
-                            charts.forEach(chart => {
-                                html += `<div class="card mb-3"><div class="card-body">`;
-                                html += `<h4>${chart.type} Chart (Saved: ${new Date(chart.created_at).toLocaleString()})</h4>`;
-                                html += `<p>Birth Data: ${JSON.stringify(chart.birth_data)}</p>`;
-                                html += `<div id="savedChart_${chart.id}" class="chart-container"></div>`;
-                                setTimeout(() => {
-                                    if (chart.type === 'natal') {
-                                        displayResult(chart.chart_data, `savedChart_${chart.id}`, null, null);
-                                    } else {
-                                        displayTransitResult(chart.chart_data, null);
-                                    }
-                                }, 0);
-                                html += `</div></div>`;
-                            });
-                        }
-                        savedCharts.innerHTML = html;
-                    } catch (error) {
-                        savedCharts.innerHTML = `<p class="alert alert-danger">Error loading charts: ${error.message}</p>`;
-                    }
-                }
-
-                document.getElementById('birthForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.target);
-                    const data = Object.fromEntries(formData);
-                    try {
-                        const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(data)
-                        });
-                        displayResult(result, 'result', data, 'natal');
-                    } catch (error) {
-                        const resultElement = document.getElementById('result');
-                        if (resultElement) {
-                            resultElement.innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
-                        } else {
-                            console.error('Element with ID result not found');
-                        }
-                    }
-                });
-
-                document.getElementById('transitForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.target);
-                    const data = Object.fromEntries(formData);
-                    try {
-                        const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/transits', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(data)
-                        });
-                        displayTransitResult(result, data);
-                    } catch (error) {
-                        const transitResult = document.getElementById('transitResult');
-                        if (transitResult) {
-                            transitResult.innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
-                        } else {
-                            console.error('Element with ID transitResult not found');
-                        }
-                    }
-                });
-
-                document.getElementById('loadCharts').addEventListener('click', loadSavedCharts);
+            html += '<h3>Houses</h3><table class="table table-striped"><thead><tr><th>House</th><th>Cusp</th><th>Sign</th></tr></thead><tbody>';
+            result.houses.forEach(h => {
+                let icon = zodiacIcons[h.sign] || '';
+                html += `<tr><td>${h.house}</td><td>${h.cusp}</td><td><span class="zodiac-icon">${icon}</span>${h.sign}</td></tr>`;
             });
-        </script>
+            html += '</tbody></table>';
+
+            html += '<h3>Angles</h3><table class="table table-striped"><thead><tr><th>Angle</th><th>Position</th><th>Sign</th><th>House</th></tr></thead><tbody>';
+            for (let angle in result.angles) {
+                let a = result.angles[angle];
+                let icon = zodiacIcons[a.sign] || '';
+                html += `<tr><td>${angle}</td><td>${a.position}</td><td><span class="zodiac-icon">${icon}</span>${a.sign}</td><td>${a.house}</td></tr>`;
+            }
+            html += '</tbody></table>';
+
+            html += '<h3>Aspects</h3><table class="table table-striped"><thead><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
+            result.aspects.forEach(a => {
+                let aspClass = a.aspect.toLowerCase().replace(' ', '-');
+                html += `<tr class="${aspClass}"><td>${a.point1}</td><td>${a.point2}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
+            });
+            html += '</tbody></table>';
+
+            if (birthData && chartType) {
+                html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartId}')">Save Chart</button>`;
+            }
+
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = html;
+                setTimeout(() => drawChart('chart_' + chartId, result.planets, result.houses, result.angles), 0);
+            } else {
+                console.error(`Element with ID ${elementId} not found`);
+            }
+        }
+
+        function displayTransitResult(result, birthData) {
+            const chartId = Date.now().toString();
+            chartStore[chartId] = { birthData: birthData.natal, chartData: result, chartType: 'transit' };
+
+            let html = '<h3>Natal Chart</h3>';
+            html += '<div class="chart-container"><div id="natalChart_' + chartId + '"></div></div>';
+            displayResult(result.natal, 'transitResult', birthData.natal, 'transit');
+
+            html = document.getElementById('transitResult').innerHTML;
+            html += '<h3>Transit Planets</h3><table class="table table-striped"><thead><tr><th>Planet</th><th>Position</th><th>Sign</th></tr></thead><tbody>';
+            for (let planet in result.transits) {
+                let p = result.transits[planet];
+                let icon = zodiacIcons[p.sign] || '';
+                html += `<tr><td>${planet}</td><td>${p.position}</td><td><span class="zodiac-icon">${icon}</span>${p.sign}</td></tr>`;
+            }
+            html += '</tbody></table>';
+
+            html += '<h3>Transit Aspects to Natal</h3><table class="table table-striped"><thead><tr><th>Transit Planet</th><th>Natal Point</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
+            result.transit_aspects.forEach(a => {
+                let aspClass = a.aspect.toLowerCase().replace(' ', '-');
+                html += `<tr class="${aspClass}"><td>${a.transit_planet}</td><td>${a.natal_point}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
+            });
+            html += '</tbody></table>';
+
+            html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartId}')">Save Chart</button>`;
+            const transitResult = document.getElementById('transitResult');
+            if (transitResult) {
+                transitResult.innerHTML = html;
+                setTimeout(() => drawChart('natalChart_' + chartId, result.natal.planets, result.natal.houses, result.natal.angles), 0);
+            } else {
+                console.error('Element with ID transitResult not found');
+            }
+        }
+
+        document.getElementById('birthForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            try {
+                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                displayResult(result, 'result', data, 'natal');
+            } catch (error) {
+                const resultElement = document.getElementById('result');
+                if (resultElement) {
+                    resultElement.innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
+                } else {
+                    console.error('Element with ID result not found');
+                }
+            }
+        });
+
+        document.getElementById('transitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            try {
+                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/transits', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                displayTransitResult(result, data);
+            } catch (error) {
+                const transitResult = document.getElementById('transitResult');
+                if (transitResult) {
+                    transitResult.innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
+                } else {
+                    console.error('Element with ID transitResult not found');
+                }
+            }
+        });
+
+        document.getElementById('loadCharts').addEventListener('click', loadSavedCharts);
+    });
+</script>
     </div>
 </body>
 </html>
