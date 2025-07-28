@@ -9,15 +9,25 @@ from backend.auth import verify_firebase_token
 from firebase_admin import credentials, initialize_app
 import os
 from dotenv import load_dotenv
+import sys
 
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename=os.getenv("LOG_FILE", "app.log"),  # Use app.log locally, /app/app.log on Render
-    filemode='a',
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Configure logging with fallback to stdout if LOG_FILE is unset
+log_file = os.getenv("LOG_FILE")
+if log_file:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename=log_file,
+        filemode='a',
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+else:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        stream=sys.stdout,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
 logger = logging.getLogger(__name__)
 
 try:
@@ -28,6 +38,11 @@ except Exception as e:
     raise
 
 app = FastAPI()
+
+# Debug root endpoint
+@app.get("/")
+async def root():
+    return {"message": "FastAPI is running"}
 
 # Firebase initialization
 cred_data = os.getenv("FIREBASE_CREDENTIALS")
@@ -107,4 +122,21 @@ async def transits(request: Request, data: TransitData):
 @app.post("/save-chart")
 async def save_chart_endpoint(request: Request, chart_data: ChartData):
     if not os.getenv("FIREBASE_CREDENTIALS"):
-        raise HTTPException(status)
+        raise HTTPException(status_code=503, detail="Firebase not initialized")
+    try:
+        uid = await verify_firebase_token(request)
+        return save_chart(uid, chart_data.chart_type, chart_data.birth_data, chart_data.chart_data)
+    except Exception as e:
+        logger.error(f"Save-chart endpoint failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/get-charts")
+async def get_charts_endpoint(request: Request):
+    if not os.getenv("FIREBASE_CREDENTIALS"):
+        raise HTTPException(status_code=503, detail="Firebase not initialized")
+    try:
+        uid = await verify_firebase_token(request)
+        return get_charts(uid)
+    except Exception as e:
+        logger.error(f"Get-charts endpoint failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
