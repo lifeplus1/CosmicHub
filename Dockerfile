@@ -1,6 +1,6 @@
 FROM python:3.12.4
 
-# Install build dependencies for pyswisseph
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -24,5 +24,4 @@ RUN pip install --no-cache-dir -r requirements.txt -v
 
 EXPOSE $PORT
 
-# Use shell to expand $PORT
 CMD uvicorn main:app --host 0.0.0.0 --port $PORT --timeout-keep-alive 120
