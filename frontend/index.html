@@ -6,6 +6,8 @@
     <title>Astrology App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
     <style>
         body { padding: 20px; background: #f4f6f9; font-family: 'Arial', sans-serif; }
         .card { margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -29,12 +31,38 @@
             pointer-events: none;
             z-index: 1000;
         }
+        .auth-container { max-width: 400px; margin: 0 auto; }
+        .auth-error { color: #dc3545; font-size: 0.9em; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-center mb-4">Birth Chart Calculator</h1>
-        
+
+        <div id="authSection" class="auth-container mb-4">
+            <div id="authCard" class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center">Login / Sign Up</h2>
+                    <form id="authForm">
+                        <div class="mb-3">
+                            <label class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="authEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password:</label>
+                            <input type="password" class="form-control" id="authPassword" required>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-primary" onclick="signIn()">Login</button>
+                            <button type="button" class="btn btn-secondary" onclick="signUp()">Sign Up</button>
+                        </div>
+                        <p id="authError" class="auth-error mt-2"></p>
+                    </form>
+                    <button id="signOut" class="btn btn-danger mt-3" style="display: none;">Sign Out</button>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title">Natal Chart</h2>
@@ -107,7 +135,7 @@
         </div>
         <div id="transitResult"></div>
 
-        <div class="card">
+        <div class="card" id="savedChartsCard" style="display: none;">
             <div class="card-body">
                 <h2 class="card-title">Saved Charts</h2>
                 <button id="loadCharts" class="btn btn-secondary">Load Saved Charts</button>
@@ -116,10 +144,23 @@
         </div>
 
         <script>
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDEQ5i07TflWq30lwBsoJLzGNEUgSNLTOw",
+                authDomain: "astrology-app-9c2e9.firebaseapp.com",
+                projectId: "astrology-app-9c2e9",
+                storageBucket: "astrology-app-9c2e9.firebasestorage.app",
+                messagingSenderId: "341259782663",
+                appId: "1:341259782663:web:132d7b85d8518c5f3bf8a2",
+                measurementId: "G-M2776G401M"
+            };
+            firebase.initializeApp(firebaseConfig);
+
             // Global variables and functions
             let chartStore = {};
             let API_KEY = '';
             let fetchWithRetry;
+            let currentUser = null;
 
             const zodiacIcons = {
                 'Aries': '♈',
@@ -173,17 +214,71 @@
                 'Bi-Quintile': { color: '#6c757d', strokeWidth: 1, dash: '3,3' }
             };
 
+            function signIn() {
+                const email = document.getElementById('authEmail').value;
+                const password = document.getElementById('authPassword').value;
+                firebase.auth().signInWithEmailAndPassword(email, password)
+                    .then(userCredential => {
+                        currentUser = userCredential.user;
+                        updateAuthUI();
+                    })
+                    .catch(error => {
+                        document.getElementById('authError').textContent = `Error: ${error.message}`;
+                    });
+            }
+
+            function signUp() {
+                const email = document.getElementById('authEmail').value;
+                const password = document.getElementById('authPassword').value;
+                firebase.auth().createUserWithEmailAndPassword(email, password)
+                    .then(userCredential => {
+                        currentUser = userCredential.user;
+                        updateAuthUI();
+                    })
+                    .catch(error => {
+                        document.getElementById('authError').textContent = `Error: ${error.message}`;
+                    });
+            }
+
+            function signOut() {
+                firebase.auth().signOut().then(() => {
+                    currentUser = null;
+                    updateAuthUI();
+                });
+            }
+
+            function updateAuthUI() {
+                const authCard = document.getElementById('authCard');
+                const signOutBtn = document.getElementById('signOut');
+                const savedChartsCard = document.getElementById('savedChartsCard');
+                if (currentUser) {
+                    authCard.style.display = 'none';
+                    signOutBtn.style.display = 'block';
+                    savedChartsCard.style.display = 'block';
+                } else {
+                    authCard.style.display = 'block';
+                    signOutBtn.style.display = 'none';
+                    savedChartsCard.style.display = 'none';
+                }
+            }
+
             async function saveChart(chartId) {
+                if (!currentUser) {
+                    alert('Please log in to save charts.');
+                    return;
+                }
                 const { birthData, chartData, chartType } = chartStore[chartId] || {};
                 if (!birthData || !chartData || !chartType) {
                     alert('Error: Chart data not found');
                     return;
                 }
                 try {
+                    const idToken = await currentUser.getIdToken();
                     const response = await fetchWithRetry('https://astrology-app-065g.onrender.com/save-chart', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
                         },
                         body: JSON.stringify({ chart_type: chartType, birth_data: birthData, chart_data: chartData })
                     });
@@ -195,16 +290,22 @@
             }
 
             async function loadSavedCharts() {
+                if (!currentUser) {
+                    document.getElementById('savedCharts').innerHTML = '<p class="alert alert-warning">Please log in to view saved charts.</p>';
+                    return;
+                }
                 const savedCharts = document.getElementById('savedCharts');
                 if (!savedCharts) {
                     console.error('Element with ID savedCharts not found');
                     return;
                 }
                 try {
+                    const idToken = await currentUser.getIdToken();
                     const charts = await fetchWithRetry('https://astrology-app-065g.onrender.com/get-charts', {
                         method: 'GET',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
                         }
                     });
                     let html = '<h3>Saved Charts</h3>';
@@ -233,6 +334,12 @@
             }
 
             document.addEventListener('DOMContentLoaded', async () => {
+                // Initialize Firebase auth state listener
+                firebase.auth().onAuthStateChanged(user => {
+                    currentUser = user;
+                    updateAuthUI();
+                });
+
                 // Create tooltip div
                 const tooltip = d3.select('body').append('div')
                     .attr('class', 'tooltip')
@@ -496,8 +603,10 @@
                     });
                     html += '</tbody></table>';
 
-                    if (birthData && chartType) {
+                    if (birthData && chartType && currentUser) {
                         html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartId}')">Save Chart</button>`;
+                    } else if (!currentUser) {
+                        html += `<p class="alert alert-warning">Log in to save charts.</p>`;
                     }
 
                     const element = document.getElementById(elementId);
@@ -533,7 +642,12 @@
                     });
                     html += '</tbody></table>';
 
-                    html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartId}')">Save Chart</button>`;
+                    if (currentUser) {
+                        html += `<button class="btn btn-success mb-3" onclick="saveChart('${chartId}')">Save Chart</button>`;
+                    } else {
+                        html += `<p class="alert alert-warning">Log in to save charts.</p>`;
+                    }
+
                     const transitResult = document.getElementById('transitResult');
                     if (transitResult) {
                         transitResult.innerHTML = html;
@@ -543,52 +657,7 @@
                     }
                 }
 
-                document.getElementById('birthForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.target);
-                    const data = Object.fromEntries(formData);
-                    try {
-                        const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(data)
-                        });
-                        displayResult(result, 'result', data, 'natal');
-                    } catch (error) {
-                        const resultElement = document.getElementById('result');
-                        if (resultElement) {
-                            resultElement.innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
-                        } else {
-                            console.error('Element with ID result not found');
-                        }
-                    }
-                });
-
-                document.getElementById('transitForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.target);
-                    const data = Object.fromEntries(formData);
-                    try {
-                        const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/transits', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(data)
-                        });
-                        displayTransitResult(result, data);
-                    } catch (error) {
-                        const transitResult = document.getElementById('transitResult');
-                        if (transitResult) {
-                            transitResult.innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
-                        } else {
-                            console.error('Element with ID transitResult not found');
-                        }
-                    }
-                });
-
+                document.getElementById('signOut').addEventListener('click', signOut);
                 document.getElementById('loadCharts').addEventListener('click', loadSavedCharts);
             });
         </script>
