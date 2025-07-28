@@ -8,6 +8,9 @@ from backend.database import save_chart, get_charts
 from backend.auth import verify_firebase_token
 from firebase_admin import credentials, initialize_app
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load .env file
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
