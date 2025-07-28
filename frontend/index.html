@@ -126,22 +126,31 @@
                 // Store chart data globally
                 let chartStore = {};
 
-                // Fetch API key
+                // Fetch API key with retry
                 let API_KEY = '';
-                try {
-                    const response = await fetch('/api/get-api-key', { method: 'GET' });
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Failed to fetch API key: HTTP ${response.status} - ${errorText}`);
+                const maxRetries = 3;
+                let retries = 0;
+                while (retries < maxRetries) {
+                    try {
+                        const response = await fetch('/api/get-api-key', { method: 'GET' });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP ${response.status} - ${errorText}`);
+                        }
+                        const data = await response.json();
+                        API_KEY = data.apiKey;
+                        if (!API_KEY) throw new Error('API key not found in response');
+                        console.log('API key fetched successfully');
+                        break;
+                    } catch (error) {
+                        retries++;
+                        console.error(`Attempt ${retries} failed to fetch API key:`, error.message);
+                        if (retries === maxRetries) {
+                            document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: Unable to load API key - ${error.message}. Please check server configuration.</p>`;
+                            return;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1000 * retries));
                     }
-                    const data = await response.json();
-                    API_KEY = data.apiKey;
-                    if (!API_KEY) throw new Error('API key not found in response');
-                    console.log('API key fetched successfully');
-                } catch (error) {
-                    console.error('Failed to fetch API key:', error.message);
-                    document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: Unable to load API key - ${error.message}. Please check server configuration or try again later.</p>`;
-                    return;
                 }
 
                 async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
@@ -155,7 +164,10 @@
                                 },
                                 signal: AbortSignal.timeout(90000)
                             });
-                            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                            if (!response.ok) {
+                                const errorText = await response.text();
+                                throw new Error(`HTTP ${response.status} - ${errorText}`);
+                            }
                             return await response.json();
                         } catch (error) {
                             if (i === retries - 1) throw error;
@@ -219,7 +231,7 @@
                             const angle = (lon * Math.PI / 180) - (Math.PI / 2);
                             svg.append('text')
                                 .attr('x', Math.cos(angle) * (radius - 40))
-                                .attr('y', Math.sin(angle) * (radius - 30))
+                                .attr('y', Math.sin(angle) * (radius - 40))
                                 .attr('text-anchor', 'middle')
                                 .text(planet.substring(0, 3))
                                 .attr('fill', planets[planet].retrograde ? 'red' : 'black');
@@ -277,7 +289,7 @@
                         let a = result.angles[angle];
                         let icon = zodiacIcons[a.sign] || '';
                         html += `<tr><td>${angle}</td><td>${a.position}</td><td><span class="zodiac-icon">${icon}</span>${a.sign}</td><td>${a.house}</td></tr>`;
-                    }
+                    });
                     html += '</tbody></table>';
 
                     html += '<h3>Aspects</h3><table class="table table-striped"><thead><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
@@ -440,7 +452,7 @@
                 });
 
                 document.getElementById('loadCharts').addEventListener('click', loadSavedCharts);
-            });
+            
         </script>
     </div>
 </body>
