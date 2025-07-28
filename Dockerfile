@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy only necessary files
+# Copy necessary files
 COPY requirements.txt .
 COPY backend/ ./backend/
 COPY main.py .
