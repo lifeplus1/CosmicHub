@@ -13,7 +13,7 @@ import traceback
 import logging
 import itertools
 import sqlite3
-from typing import List
+from typing import List, Dict
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -28,20 +28,24 @@ except Exception as e:
 
 # Initialize SQLite database
 def init_db():
-    conn = sqlite3.connect('charts.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS charts
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  type TEXT,
-                  birth_data TEXT,
-                  chart_data TEXT,
-                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect('charts.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS charts
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      type TEXT,
+                      birth_data TEXT,
+                      chart_data TEXT,
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {str(e)}")
+        raise Exception(f"Database init error: {str(e)}")
 
 init_db()
 
-# Planet IDs (global)
+# Planet IDs (global, added South Node)
 planet_ids = {
     'Sun': swe.SUN,
     'Moon': swe.MOON,
@@ -55,6 +59,7 @@ planet_ids = {
     'Pluto': swe.PLUTO,
     'Chiron': swe.CHIRON,
     'North Node': swe.MEAN_NODE,
+    'South Node': swe.MEAN_NODE,  # South Node uses same ID, offset by 180°
 }
 
 # Zodiac signs (global)
@@ -108,6 +113,11 @@ class BirthData(BaseModel):
 class TransitData(BaseModel):
     natal: BirthData
     transit_date: str = "2025-07-28"
+
+class SaveChartRequest(BaseModel):
+    chart_type: str
+    birth_data: BirthData
+    chart_data: Dict
 
 class SavedChart(BaseModel):
     id: int
@@ -188,11 +198,23 @@ def calculate_chart(data: BirthData):
         planets_lon = {}
         planet_data = {}
         for planet, ipl in planet_ids.items():
-            xx = swe.calc_ut(jd, ipl)[0]
-            lon = xx[0] % 360
-            lat = xx[1]
-            speed = xx[3] if planet != 'North Node' else 0  # North Node has no speed
-            retrograde = speed < 0 if planet != 'North Node' else False
+            if planet == 'South Node':
+                # South Node is 180° opposite North Node
+                north_node_data = planet_data.get('North Node', None)
+                if north_node_data:
+                    lon = (north_node_data['lon'] + 180) % 360
+                    lat = -north_node_data['lat'] if 'lat' in north_node_data else 0
+                    speed = 0
+                    retrograde = False
+                else:
+                    continue  # Skip if North Node not calculated yet
+            else:
+                xx = swe.calc_ut(jd, ipl)[0]
+                lon = xx[0] % 360
+                lat = xx[1]
+                speed = xx[3] if planet != 'North Node' else 0
+                retrograde = speed < 0 if planet != 'North Node' else False
+            
             degrees = int(lon)
             minutes = int((lon - degrees) * 60)
             sign_index = int(lon // 30)
@@ -209,7 +231,8 @@ def calculate_chart(data: BirthData):
                 'sign': sign,
                 'house': house,
                 'retrograde': retrograde,
-                'lon': lon
+                'lon': lon,
+                'lat': lat
             }
             planets_lon[planet] = lon
         
@@ -296,6 +319,20 @@ async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_k
     transit_planets_lon = {}
     transit_planets = {}
     for planet, ipl in planet_ids.items():
+        if planet == 'South Node':
+            north_node_data = transit_planets.get('North Node', None)
+            if north_node_data:
+                lon = (north_node_data['lon'] + 180) % 360
+                degrees = int(lon)
+                minutes = int((lon - degrees) * 60)
+                sign_index = int(lon // 30)
+                sign = signs[sign_index]
+                transit_planets[planet] = {
+                    'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
+                    'sign': sign
+                }
+                transit_planets_lon[planet] = lon
+            continue
         xx = swe.calc_ut(transit_jd, ipl)[0]
         lon = xx[0] % 360
         degrees = int(lon)
@@ -330,12 +367,13 @@ async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_k
     }
 
 @app.post("/save-chart")
-async def save_chart(chart_type: str, birth_data: BirthData, chart_data: dict, api_key: str = Depends(get_api_key)):
+async def save_chart(request: SaveChartRequest, api_key: str = Depends(get_api_key)):
     try:
+        logger.info(f"Saving chart: type={request.chart_type}, birth_data={request.birth_data}")
         conn = sqlite3.connect('charts.db')
         c = conn.cursor()
         c.execute("INSERT INTO charts (type, birth_data, chart_data) VALUES (?, ?, ?)",
-                  (chart_type, json.dumps(birth_data.dict()), json.dumps(chart_data)))
+                  (request.chart_type, json.dumps(request.birth_data.dict()), json.dumps(request.chart_data)))
         conn.commit()
         chart_id = c.lastrowid
         conn.close()
