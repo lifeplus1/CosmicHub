@@ -22,19 +22,18 @@ COPY ephe/ ./ephe/
 RUN echo "Starting dependency installation..." && \
     pip3 cache purge && \
     echo "Installing pyswisseph==2.10.3.2..." && \
-    pip3 install --no-cache-dir --force-reinstall --no-binary pyswisseph pyswisseph==2.10.3.2 -v 2>&1 | tee /app/pip_install_swisseph.log && \
+    pip3 install --no-cache-dir --force-reinstall --no-binary pyswisseph pyswisseph==2.10.3.2 -v 2>&1 && \
     echo "Verifying swisseph import..." && \
-    python3 -c "import swisseph; print('swisseph version: ' + swisseph.__version__)" 2>&1 | tee /app/swisseph_verify.log && \
+    python3 -c "import swisseph; print('swisseph version: ' + str(swisseph.__version__))" 2>&1 && \
     echo "Installing requirements.txt..." && \
-    pip3 install --no-cache-dir -r requirements.txt -v 2>&1 | tee /app/pip_install_requirements.log && \
+    pip3 install --no-cache-dir -r requirements.txt -v 2>&1 && \
     echo "Dependency installation complete."
 
 # Ensure log file directory is writable
 RUN mkdir -p /app && chmod -R 777 /app
 
 ENV LOG_FILE=/app/app.log
-ENV API_KEY=c3a579e58484f1eb21bfc96966df9a25
 
 EXPOSE $PORT
 
-CMD echo "Starting Uvicorn..." && uvicorn main:app --host 0.0.0.0 --port $PORT --timeout-keep-alive 120 2>&1 | tee /app/uvicorn.log
+CMD ["/bin/sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT --timeout-keep-alive 120"]

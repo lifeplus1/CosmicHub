@@ -158,9 +158,7 @@ async def get_charts_endpoint(request: Request):
         raise HTTPException(status_code=503, detail="Firebase not initialized")
     try:
         uid = await verify_firebase_token(request)
-        result = get_charts(uid)
-        logger.debug("Get-charts endpoint executed successfully")
-        return result
+        return get_charts(uid)
     except Exception as e:
         logger.error(f"Get-charts endpoint failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
