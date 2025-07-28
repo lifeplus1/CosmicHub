@@ -105,7 +105,7 @@
         </div>
 
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded', async () => {
                 const zodiacIcons = {
                     'Aries': '♈',
                     'Taurus': '♉',
@@ -126,11 +126,29 @@
                 // Store chart data globally
                 let chartStore = {};
 
+                // Fetch API key
+                let API_KEY = '';
+                try {
+                    const response = await fetch('/api/get-api-key');
+                    if (!response.ok) throw new Error(`Failed to fetch API key: HTTP ${response.status}`);
+                    const data = await response.json();
+                    API_KEY = data.apiKey;
+                    if (!API_KEY) throw new Error('API key not found');
+                } catch (error) {
+                    console.error('Failed to fetch API key:', error);
+                    document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: Unable to load API key. Please try again later.</p>`;
+                    return;
+                }
+
                 async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
                     for (let i = 0; i < retries; i++) {
                         try {
                             const response = await fetch(url, {
                                 ...options,
+                                headers: {
+                                    ...options.headers,
+                                    'X-API-Key': API_KEY
+                                },
                                 signal: AbortSignal.timeout(90000)
                             });
                             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -206,28 +224,22 @@
 
                     // Angles
                     for (let angle in angles) {
-                        const position = angles[angle].position;
-                        const match = position.match(/^(\d+)°\w{2}(\d{2})'$/);
-                        if (match) {
-                            const degrees = parseFloat(match[1]);
-                            const minutes = parseFloat(match[2]) / 60;
-                            const lon = degrees + minutes;
-                            if (!isNaN(lon)) {
-                                const rad = (lon * Math.PI / 180) - (Math.PI / 2);
-                                svg.append('line')
-                                    .attr('x1', 0)
-                                    .attr('y1', 0)
-                                    .attr('x2', Math.cos(rad) * radius)
-                                    .attr('y2', Math.sin(rad) * radius)
-                                    .attr('stroke', 'blue')
-                                    .attr('stroke-width', 2);
-                                svg.append('text')
-                                    .attr('x', Math.cos(rad) * (radius - 50))
-                                    .attr('y', Math.sin(rad) * (radius - 50))
-                                    .attr('text-anchor', 'middle')
-                                    .text(angle.substring(0, 3))
-                                    .attr('fill', 'blue');
-                            }
+                        const lon = angles[angle].lon;
+                        if (!isNaN(lon)) {
+                            const rad = (lon * Math.PI / 180) - (Math.PI / 2);
+                            svg.append('line')
+                                .attr('x1', 0)
+                                .attr('y1', 0)
+                                .attr('x2', Math.cos(rad) * radius)
+                                .attr('y2', Math.sin(rad) * radius)
+                                .attr('stroke', 'blue')
+                                .attr('stroke-width', 2);
+                            svg.append('text')
+                                .attr('x', Math.cos(rad) * (radius - 50))
+                                .attr('y', Math.sin(rad) * (radius - 50))
+                                .attr('text-anchor', 'middle')
+                                .text(angle.substring(0, 3))
+                                .attr('fill', 'blue');
                         }
                     }
                 }
@@ -328,8 +340,7 @@
                         const response = await fetchWithRetry('https://astrology-app-065g.onrender.com/save-chart', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
-                                'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
+                                'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ chart_type: chartType, birth_data: birthData, chart_data: chartData })
                         });
@@ -350,8 +361,7 @@
                         const charts = await fetchWithRetry('https://astrology-app-065g.onrender.com/get-charts', {
                             method: 'GET',
                             headers: {
-                                'Content-Type': 'application/json',
-                                'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
+                                'Content-Type': 'application/json'
                             }
                         });
                         let html = '<h3>Saved Charts</h3>';
@@ -387,8 +397,7 @@
                         const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
-                                'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
+                                'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(data)
                         });
@@ -411,8 +420,7 @@
                         const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/transits', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
-                                'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
+                                'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(data)
                         });
