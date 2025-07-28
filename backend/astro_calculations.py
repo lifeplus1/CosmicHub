@@ -1,4 +1,4 @@
-import pyswisseph as swe
+import swisseph as swe
 from datetime import datetime
 import pytz
 from geopy.geocoders import Nominatim
@@ -31,20 +31,7 @@ def calculate_chart(year, month, day, hour, minute, lat, lon, timezone):
     dt_utc = tz.localize(dt).astimezone(pytz.UTC)
     jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour + dt_utc.minute / 60.0)
     
-    planets = {}
-    for i, name in enumerate(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron', 'North Node', 'South Node']):
-        lon, _ = swe.calc_ut(jd, i)[:2]
-        sign = signs[int(lon / 30)]
-        house = calculate_house(lon, houses)
-        retrograde = swe.calc_ut(jd, i)[3] < 0
-        planets[name] = {
-            "position": f"{int(lon % 30)}°{sign}{int((lon % 30 - int(lon % 30)) * 60)}'",
-            "sign": sign,
-            "house": house,
-            "retrograde": retrograde,
-            "lon": lon
-        }
-    
+    # Define houses first
     houses = []
     for i in range(12):
         cusp = swe.houses(jd, lat, lon, b'P')[0][i]
@@ -53,6 +40,21 @@ def calculate_chart(year, month, day, hour, minute, lat, lon, timezone):
             "cusp": f"{int(cusp % 30)}°{signs[int(cusp / 30)]}{int((cusp % 30 - int(cusp % 30)) * 60)}'",
             "sign": signs[int(cusp / 30)]
         })
+    
+    planets = {}
+    for i, name in enumerate(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron', 'North Node', 'South Node']):
+        result = swe.calc_ut(jd, i)
+        lon = result[0][0]  # Extract longitude from nested tuple
+        sign = signs[int(lon / 30)]
+        house = calculate_house(lon, houses)
+        retrograde = result[3] < 0 if len(result) > 3 else False
+        planets[name] = {
+            "position": f"{int(lon % 30)}°{sign}{int((lon % 30 - int(lon % 30)) * 60)}'",
+            "sign": sign,
+            "house": house,
+            "retrograde": retrograde,
+            "lon": lon
+        }
     
     angles = {
         "Ascendant": {
@@ -70,7 +72,7 @@ def calculate_chart(year, month, day, hour, minute, lat, lon, timezone):
     }
     
     aspects = calculate_aspects(planets, angles)
-    return {"resolved_location": {"city": city, "latitude": lat, "longitude": lon, "timezone": timezone}, "planets": planets, "houses": houses, "angles": angles, "aspects": aspects}
+    return {"resolved_location": {"latitude": lat, "longitude": lon, "timezone": timezone}, "planets": planets, "houses": houses, "angles": angles, "aspects": aspects}
 
 def calculate_house(lon, houses):
     return 1
