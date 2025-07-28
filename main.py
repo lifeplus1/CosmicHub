@@ -167,7 +167,8 @@ def calculate_chart(data: BirthData):
                 'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
                 'sign': sign,
                 'house': house,
-                'retrograde': retrograde
+                'retrograde': retrograde,
+                'lon': lon
             }
             planets_lon[planet] = lon
         
@@ -263,6 +264,7 @@ async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_k
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid transit date format. Use YYYY-MM-DD.")
     
+    transit_planets_lon = {}
     transit_planets = {}
     for planet, ipl in planet_ids.items():
         xx = swe.calc_ut(transit_jd, ipl)[0]
@@ -275,12 +277,12 @@ async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_k
             'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
             'sign': sign
         }
+        transit_planets_lon[planet] = lon
     
     transit_aspects = []
-    for t_planet, t_data in transit_planets.items():
-        t_lon = float(t_data['position'].split('°')[0]) + float(t_data['position'].split('°')[1][:2]) / 60
+    for t_planet, t_lon in transit_planets_lon.items():
         for n_planet, n_data in natal_chart['planets'].items():
-            n_lon = float(n_data['position'].split('°')[0]) + float(n_data['position'].split('°')[1][:2]) / 60
+            n_lon = n_data['lon']  # Add 'lon': lon to planet_data in calculate_chart if needed
             diff = abs(t_lon - n_lon)
             diff = min(diff, 360 - diff)
             for asp_name, (target, orb) in aspect_types.items():
