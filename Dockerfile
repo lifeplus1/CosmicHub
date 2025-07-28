@@ -1,8 +1,11 @@
-FROM python:3.12.4-slim
+FROM python:3.12.4
 
 # Install build dependencies for pyswisseph
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    gcc \
+    g++ \
+    make \
     libssl-dev \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -16,8 +19,8 @@ COPY main.py .
 COPY cities.json .
 COPY ephe/ ./ephe/
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies with verbose output
+RUN pip install --no-cache-dir -r requirements.txt -v
 
 EXPOSE $PORT
 
