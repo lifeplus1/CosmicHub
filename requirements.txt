@@ -1,7 +1,8 @@
 fastapi[all]
-uvicorn[standard]
+uvicorn
 pyswisseph==2.10.3.2
 pytz
 geopy
 timezonefinder
 firebase-admin
+pytest
