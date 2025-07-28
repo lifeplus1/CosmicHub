@@ -121,6 +121,8 @@
                     'Pisces': '♓'
                 };
 
+                const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+
                 // Store chart data globally
                 let chartStore = {};
 
@@ -175,45 +177,58 @@
 
                     // House cusps
                     houses.forEach(h => {
-                        const angle = (parseFloat(h.cusp) * Math.PI / 180) - (Math.PI / 2);
-                        svg.append('line')
-                            .attr('x1', 0)
-                            .attr('y1', 0)
-                            .attr('x2', Math.cos(angle) * (radius - 30))
-                            .attr('y2', Math.sin(angle) * (radius - 30))
-                            .attr('stroke', 'black')
-                            .attr('stroke-width', 1);
+                        const cuspValue = parseFloat(h.cusp);
+                        if (!isNaN(cuspValue)) {
+                            const angle = (cuspValue * Math.PI / 180) - (Math.PI / 2);
+                            svg.append('line')
+                                .attr('x1', 0)
+                                .attr('y1', 0)
+                                .attr('x2', Math.cos(angle) * (radius - 30))
+                                .attr('y2', Math.sin(angle) * (radius - 30))
+                                .attr('stroke', 'black')
+                                .attr('stroke-width', 1);
+                        }
                     });
 
                     // Planets
                     for (let planet in planets) {
                         const lon = planets[planet].lon;
-                        const angle = (lon * Math.PI / 180) - (Math.PI / 2);
-                        svg.append('text')
-                            .attr('x', Math.cos(angle) * (radius - 40))
-                            .attr('y', Math.sin(angle) * (radius - 40))
-                            .attr('text-anchor', 'middle')
-                            .text(planet.substring(0, 3))
-                            .attr('fill', planets[planet].retrograde ? 'red' : 'black');
+                        if (!isNaN(lon)) {
+                            const angle = (lon * Math.PI / 180) - (Math.PI / 2);
+                            svg.append('text')
+                                .attr('x', Math.cos(angle) * (radius - 40))
+                                .attr('y', Math.sin(angle) * (radius - 40))
+                                .attr('text-anchor', 'middle')
+                                .text(planet.substring(0, 3))
+                                .attr('fill', planets[planet].retrograde ? 'red' : 'black');
+                        }
                     }
 
                     // Angles
                     for (let angle in angles) {
-                        const lon = parseFloat(angles[angle].position.split('°')[0]) + (parseFloat(angles[angle].position.split('°')[1].substring(2, 4)) / 60);
-                        const rad = (lon * Math.PI / 180) - (Math.PI / 2);
-                        svg.append('line')
-                            .attr('x1', 0)
-                            .attr('y1', 0)
-                            .attr('x2', Math.cos(rad) * radius)
-                            .attr('y2', Math.sin(rad) * radius)
-                            .attr('stroke', 'blue')
-                            .attr('stroke-width', 2);
-                        svg.append('text')
-                            .attr('x', Math.cos(rad) * (radius - 50))
-                            .attr('y', Math.sin(rad) * (radius - 50))
-                            .attr('text-anchor', 'middle')
-                            .text(angle.substring(0, 3))
-                            .attr('fill', 'blue');
+                        const position = angles[angle].position;
+                        const match = position.match(/^(\d+)°\w{2}(\d{2})'$/);
+                        if (match) {
+                            const degrees = parseFloat(match[1]);
+                            const minutes = parseFloat(match[2]) / 60;
+                            const lon = degrees + minutes;
+                            if (!isNaN(lon)) {
+                                const rad = (lon * Math.PI / 180) - (Math.PI / 2);
+                                svg.append('line')
+                                    .attr('x1', 0)
+                                    .attr('y1', 0)
+                                    .attr('x2', Math.cos(rad) * radius)
+                                    .attr('y2', Math.sin(rad) * radius)
+                                    .attr('stroke', 'blue')
+                                    .attr('stroke-width', 2);
+                                svg.append('text')
+                                    .attr('x', Math.cos(rad) * (radius - 50))
+                                    .attr('y', Math.sin(rad) * (radius - 50))
+                                    .attr('text-anchor', 'middle')
+                                    .text(angle.substring(0, 3))
+                                    .attr('fill', 'blue');
+                            }
+                        }
                     }
                 }
 
@@ -335,6 +350,7 @@
                         const charts = await fetchWithRetry('https://astrology-app-065g.onrender.com/get-charts', {
                             method: 'GET',
                             headers: {
+                                'Content-Type': 'application/json',
                                 'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
                             }
                         });
