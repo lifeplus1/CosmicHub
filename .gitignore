@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.envastrology-app-9c2e9-firebase-adminsdk.json
-astrology-app-9c2e9-firebase-adminsdk.json
-astrology-app-9c2e9-firebase-adminsdk.json
+firebase-adminsdk.json
+.env
+*.json
+!cities.json
