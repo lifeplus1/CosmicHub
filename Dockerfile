@@ -1,6 +1,5 @@
 FROM python:3.12.4
 
-# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -8,19 +7,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     libssl-dev \
     libffi-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy necessary files
 COPY requirements.txt .
 COPY backend/ ./backend/
 COPY main.py .
 COPY cities.json .
 COPY ephe/ ./ephe/
 
-# Install dependencies with verbose output
-RUN pip install --no-cache-dir -r requirements.txt -v
+# Install and verify swisseph
+RUN pip3 cache purge \
+    && pip3 install --no-cache-dir --force-reinstall --no-binary pyswisseph pyswisseph==2.10.3.2 -v \
+    && python3 -c "import swisseph; print('swisseph version:', swisseph.__version__)" \
+    && pip3 install --no-cache-dir -r requirements.txt -v
 
 EXPOSE $PORT
 

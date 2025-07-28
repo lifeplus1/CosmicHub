@@ -13,12 +13,10 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 try:
-    import pyswisseph as swe
-    logger.debug("Successfully imported pyswisseph")
-    logger.debug(f"Ephemeris path: {os.path.abspath('./ephe')}")
-    logger.debug(f"Ephemeris files: {os.listdir('./ephe')}")
+    import swisseph as swe
+    logger.debug("swisseph imported successfully")
 except Exception as e:
-    logger.error(f"Failed to import pyswisseph: {str(e)}")
+    logger.error(f"swisseph import failed: {str(e)}")
     raise
 
 app = FastAPI()
