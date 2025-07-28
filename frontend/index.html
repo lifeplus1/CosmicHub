@@ -5,27 +5,26 @@
     <title>Astrology App</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        form { border: 1px solid #ddd; padding: 20px; background: #f9f9f9; }
+        form { border: 1px solid #ddd; padding: 20px; background: #f9f9f9; margin-bottom: 20px; }
         label { display: block; margin-bottom: 10px; }
         button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
-        #result { margin-top: 20px; }
+        #result, #transitResult { margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background: #f2f2f2; }
         .retrograde { color: red; font-weight: bold; }
-        .trine { color: blue; }
-        .square { color: red; }
+        .trine, .sextile { color: blue; }
+        .square, .opposition { color: red; }
         .conjunction { color: green; }
-        .opposition { color: orange; }
-        /* Add for minor aspects */
-        .sextile { color: lightblue; }
-        .quincunx { color: purple; }
-        .semi-sextile { color: gray; }
+        .quincunx, .sesquiquadrate { color: purple; }
+        .semi-sextile, .quintile, .bi-quintile { color: gray; }
         pre { white-space: pre-wrap; }
+        h2 { color: #333; }
     </style>
 </head>
 <body>
     <h1>Birth Chart Calculator</h1>
+    <h2>Natal Chart</h2>
     <form id="birthForm">
         <label>Year: <input type="number" name="year" required></label>
         <label>Month: <input type="number" name="month" min="1" max="12" required></label>
@@ -33,22 +32,31 @@
         <label>Hour: <input type="number" name="hour" min="0" max="23" required></label>
         <label>Minute: <input type="number" name="minute" min="0" max="59" required></label>
         <label>City: <input type="text" name="city" required placeholder="e.g., New York, USA"></label>
-        <button type="submit">Calculate</button>
+        <button type="submit">Calculate Natal</button>
     </form>
     <div id="result"></div>
+
+    <h2>Transits</h2>
+    <form id="transitForm">
+        <label>Year: <input type="number" name="natal[year]" required></label>
+        <label>Month: <input type="number" name="natal[month]" min="1" max="12" required></label>
+        <label>Day: <input type="number" name="natal[day]" min="1" max="31" required></label>
+        <label>Hour: <input type="number" name="natal[hour]" min="0" max="23" required></label>
+        <label>Minute: <input type="number" name="natal[minute]" min="0" max="59" required></label>
+        <label>City: <input type="text" name="natal[city]" required placeholder="e.g., New York, USA"></label>
+        <label>Transit Date (YYYY-MM-DD): <input type="text" name="transit_date" value="2025-07-28" required></label>
+        <button type="submit">Calculate Transits</button>
+    </form>
+    <div id="transitResult"></div>
 
     <script>
         async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, {
-                    ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Paste your key here
-                    },
-                    signal: AbortSignal.timeout(90000)
-                });
+                        ...options,
+                        signal: AbortSignal.timeout(90000)
+                    });
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return await response.json();
                 } catch (error) {
@@ -58,23 +66,7 @@
             }
         }
 
-        document.getElementById('birthForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            try {
-                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                displayResult(result);
-            } catch (error) {
-                document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
-            }
-        });
-
-        function displayResult(result) {
+        function displayResult(result, elementId) {
             let html = '<h2>Resolved Location</h2>';
             html += `<p>City: ${result.resolved_location.city}<br>Lat: ${result.resolved_location.latitude}<br>Lon: ${result.resolved_location.longitude}<br>Timezone: ${result.resolved_location.timezone}</p>`;
 
@@ -101,13 +93,73 @@
 
             html += '<h2>Aspects</h2><table><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr>';
             result.aspects.forEach(a => {
-                let aspClass = a.aspect.toLowerCase();  # e.g., 'trine' for class
+                let aspClass = a.aspect.toLowerCase().replace(' ', '-'); // e.g., 'trine' for class
                 html += `<tr class="${aspClass}"><td>${a.point1}</td><td>${a.point2}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
             });
             html += '</table>';
 
-            document.getElementById('result').innerHTML = html;
+            document.getElementById(elementId).innerHTML = html;
         }
-</script>
+
+        function displayTransitResult(result) {
+            let html = '<h2>Natal Chart</h2>';
+            displayResult(result.natal, 'transitResult');
+
+            html = document.getElementById('transitResult').innerHTML;
+            html += '<h2>Transit Planets</h2><table><tr><th>Planet</th><th>Position</th><th>Sign</th></tr>';
+            for (let planet in result.transits) {
+                let p = result.transits[planet];
+                html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td></tr>`;
+            }
+            html += '</table>';
+
+            html += '<h2>Transit Aspects to Natal</h2><table><tr><th>Transit Planet</th><th>Natal Point</th><th>Aspect</th><th>Orb</th></tr>';
+            result.transit_aspects.forEach(a => {
+                let aspClass = a.aspect.toLowerCase().replace(' ', '-');
+                html += `<tr class="${aspClass}"><td>${a.transit_planet}</td><td>${a.natal_point}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
+            });
+            html += '</table>';
+
+            document.getElementById('transitResult').innerHTML = html;
+        }
+
+        document.getElementById('birthForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            try {
+                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': 'your_secure_key'  // Replace with your secure key
+                    },
+                    body: JSON.stringify(data)
+                });
+                displayResult(result, 'result');
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        });
+
+        document.getElementById('transitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            try {
+                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/transits', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Replace with your secure key
+                    },
+                    body: JSON.stringify(data)
+                });
+                displayTransitResult(result);
+            } catch (error) {
+                document.getElementById('transitResult').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        });
+    </script>
 </body>
 </html>
