@@ -10,24 +10,32 @@ from geopy.geocoders import Nominatim
 import timezonefinder
 import traceback
 import itertools
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Set path to ephemeris files
-swe.set_ephe_path('ephe')
+try:
+    swe.set_ephe_path('ephe')
+except Exception as e:
+    logger.error(f"Failed to set ephe path: {str(e)}")
+    raise Exception(f"Ephe path error: {str(e)}")
 
 app = FastAPI()
 
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[                 # Your Vercel URLs
+    allow_origins=[
         "https://astrology-app-sigma.vercel.app",
-        "https://astrology-app-git-main-christophers-projects-17e93f49.vercel.app",
-        "https://astrology-app-christophers-projects-17e93f49.vercel.app"
+        "https://astrology-app-git-main-christophers-projects-17e93f49.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 class BirthData(BaseModel):
     year: int
@@ -39,38 +47,46 @@ class BirthData(BaseModel):
 
 # Load city cache
 def load_city_cache():
-    if os.path.exists('cities.json'):
-        with open('cities.json', 'r') as f:
-            return json.load(f)
-    return {}
+    try:
+        if os.path.exists('cities.json'):
+            with open('cities.json', 'r') as f:
+                return json.load(f)
+        return {}
+    except Exception as e:
+        logger.error(f"Failed to load cities.json: {str(e)}")
+        return {}
 
 # Save to city cache
 def save_city_cache(cache):
-    with open('cities.json', 'w') as f:
-        json.dump(cache, f, indent=4)
+    try:
+        with open('cities.json', 'w') as f:
+            json.dump(cache, f, indent=4)
+    except Exception as e:
+        logger.error(f"Failed to save cities.json: {str(e)}")
 
 @app.post("/calculate")
 async def calculate_positions(data: BirthData):
     try:
+        logger.info(f"Processing request for city: {data.city}")
         # Load city cache
         city_cache = load_city_cache()
 
         # Check cache first
         if data.city in city_cache:
+            logger.info(f"Using cached data for {data.city}")
             latitude = city_cache[data.city]['latitude']
             longitude = city_cache[data.city]['longitude']
             timezone_str = city_cache[data.city]['timezone']
         else:
-            # Get lat/lon from city
+            logger.info(f"Fetching geolocation for {data.city}")
             geolocator = Nominatim(user_agent="astro_app")
-            location = geolocator.geocode(data.city, timeout=5)  # Reduced timeout
+            location = geolocator.geocode(data.city, timeout=5)
             if not location:
                 raise HTTPException(status_code=404, detail="City not found. Try including country, e.g., 'Paris, France'.")
             
             latitude = location.latitude
             longitude = location.longitude
             
-            # Get timezone from lat/lon
             tf = timezonefinder.TimezoneFinder()
             timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
             if not timezone_str:
@@ -83,6 +99,7 @@ async def calculate_positions(data: BirthData):
                 'timezone': timezone_str
             }
             save_city_cache(city_cache)
+            logger.info(f"Cached {data.city}")
         
         # Convert local time to UTC
         local_tz = pytz.timezone(timezone_str)
@@ -205,5 +222,5 @@ async def calculate_positions(data: BirthData):
             'aspects': aspects
         }
     except Exception as e:
-        print("Error:", traceback.format_exc())
+        logger.error(f"Request failed: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
