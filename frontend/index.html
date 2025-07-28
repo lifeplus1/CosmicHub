@@ -216,7 +216,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-API-Key': 'your_secure_key'
+                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
                         },
                         body: JSON.stringify({ chart_type: chartType, birth_data: birthData, chart_data: chartData })
                     });
@@ -232,7 +232,7 @@
                     const charts = await fetchWithRetry('https://astrology-app-065g.onrender.com/get-charts', {
                         method: 'GET',
                         headers: {
-                            'X-API-Key': 'your_secure_key'
+                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'
                         }
                     });
                     let html = '<h3>Saved Charts</h3>';
