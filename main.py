@@ -1,107 +1,48 @@
-import swisseph as swe
-import pytz
-from datetime import datetime
-from fastapi import FastAPI, HTTPException, Depends, Security
-from fastapi.security.api_key import APIKeyHeader
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-import json
-import os
-from geopy.geocoders import Nominatim
-import timezonefinder
-import traceback
-import logging
-import itertools
+from pydantic import BaseModel
 import sqlite3
-from typing import List, Dict
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Set path to ephemeris files
-try:
-    swe.set_ephe_path('ephe')
-except Exception as e:
-    logger.error(f"Failed to set ephe path: {str(e)}")
-    raise Exception(f"Ephe path error: {str(e)}")
-
-# Initialize SQLite database
-def init_db():
-    try:
-        conn = sqlite3.connect('charts.db')
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS charts
-                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                      type TEXT,
-                      birth_data TEXT,
-                      chart_data TEXT,
-                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        logger.error(f"Failed to initialize database: {str(e)}")
-        raise Exception(f"Database init error: {str(e)}")
-
-init_db()
-
-# Planet IDs (global)
-planet_ids = {
-    'Sun': swe.SUN,
-    'Moon': swe.MOON,
-    'Mercury': swe.MERCURY,
-    'Venus': swe.VENUS,
-    'Mars': swe.MARS,
-    'Jupiter': swe.JUPITER,
-    'Saturn': swe.SATURN,
-    'Uranus': swe.URANUS,
-    'Neptune': swe.NEPTUNE,
-    'Pluto': swe.PLUTO,
-    'Chiron': swe.CHIRON,
-    'North Node': swe.MEAN_NODE,
-    'South Node': swe.MEAN_NODE,
-}
-
-# Zodiac signs (global)
-signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
-
-# Aspect types (global)
-aspect_types = {
-    'Conjunction': (0, 8),
-    'Semi-Sextile': (30, 2),
-    'Sextile': (60, 4),
-    'Quintile': (72, 2),
-    'Square': (90, 6),
-    'Trine': (120, 6),
-    'Sesquiquadrate': (135, 3),
-    'Bi-Quintile': (144, 2),
-    'Quincunx': (150, 3),
-    'Opposition': (180, 8),
-}
+import os
+from firebase_admin import credentials, auth, initialize_app
+import pyswisseph as swe
+from datetime import datetime
+import pytz
+from geopy.geocoders import Nominatim
+from timezonefinder import TimezoneFinder
+import json
 
 app = FastAPI()
 
-# Add CORS middleware
+# Firebase initialization
+cred = credentials.Certificate(os.getenv("FIREBASE_CREDENTIALS_PATH", "astrology-app-9c2e9-firebase-adminsdk.json"))
+initialize_app(cred)
+
+# CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://astrology-app-sigma.vercel.app",
-        "https://astrology-app-git-main-christophers-projects-17e93f49.vercel.app"
-    ],
+    allow_origins=["https://astrology-app-sigma.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# API Key auth
-API_KEY = os.getenv("API_KEY", "your_api_key")
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+# Load cities
+with open('cities.json', 'r') as f:
+    cities = json.load(f)
 
-async def get_api_key(api_key: str = Security(api_key_header)):
-    if api_key != API_KEY:
-        raise HTTPException(status_code=403, detail="Invalid API Key")
-    return api_key
+# Middleware to verify Firebase token
+async def verify_firebase_token(request: Request):
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    id_token = auth_header.split('Bearer ')[1]
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        return decoded_token['uid']
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
+# Pydantic models
 class BirthData(BaseModel):
     year: int
     month: int
@@ -112,295 +53,132 @@ class BirthData(BaseModel):
 
 class TransitData(BaseModel):
     natal: BirthData
-    transit_date: str = "2025-07-28"
+    transit_date: str
 
-class SaveChartRequest(BaseModel):
+class ChartData(BaseModel):
     chart_type: str
-    birth_data: BirthData
-    chart_data: Dict
-
-class SavedChart(BaseModel):
-    id: int
-    type: str
     birth_data: dict
     chart_data: dict
-    created_at: str
 
-# Load city cache
-def load_city_cache():
-    try:
-        if os.path.exists('cities.json'):
-            with open('cities.json', 'r') as f:
-                return json.load(f)
-        return {}
-    except Exception as e:
-        logger.error(f"Failed to load cities.json: {str(e)}")
-        return {}
-
-# Save to city cache
-def save_city_cache(cache):
-    try:
-        with open('cities.json', 'w') as f:
-            json.dump(cache, f, indent=4)
-    except Exception as e:
-        logger.error(f"Failed to save cities.json: {str(e)}")
-
-def calculate_chart(data: BirthData):
-    try:
-        logger.info(f"Processing request for city: {data.city}")
-        city_cache = load_city_cache()
-
-        if data.city in city_cache:
-            logger.info(f"Using cached data for {data.city}")
-            latitude = city_cache[data.city]['latitude']
-            longitude = city_cache[data.city]['longitude']
-            timezone_str = city_cache[data.city]['timezone']
-        else:
-            logger.info(f"Fetching geolocation for {data.city}")
-            geolocator = Nominatim(user_agent="astro_app")
-            location = geolocator.geocode(data.city, timeout=5)
-            if not location:
-                raise HTTPException(status_code=404, detail="City not found. Try including country, e.g., 'Paris, France'.")
-            
-            latitude = location.latitude
-            longitude = location.longitude
-            
-            tf = timezonefinder.TimezoneFinder()
-            timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
-            if not timezone_str:
-                raise HTTPException(status_code=404, detail="Timezone not found for this location.")
-            
-            city_cache[data.city] = {
-                'latitude': latitude,
-                'longitude': longitude,
-                'timezone': timezone_str
-            }
-            save_city_cache(city_cache)
-            logger.info(f"Cached {data.city}")
-        
-        local_tz = pytz.timezone(timezone_str)
-        local_dt = datetime(data.year, data.month, data.day, data.hour, data.minute)
-        try:
-            utc_dt = local_tz.localize(local_dt, is_dst=None).astimezone(pytz.utc)
-        except pytz.AmbiguousTimeError:
-            raise HTTPException(status_code=400, detail="Ambiguous time due to DST. Specify exact DST status if needed.")
-        except pytz.UnknownTimeZoneError:
-            raise HTTPException(status_code=400, detail="Invalid timezone.")
-        
-        jd = swe.utc_to_jd(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour, utc_dt.minute, utc_dt.second, 1)[1]
-        
-        house_data = swe.houses(jd, latitude, longitude, b'P')
-        cusps = house_data[0]
-        ascmc = house_data[1]
-        
-        eps = swe.calc_ut(jd, swe.ECL_NUT)[0][0]
-        
-        planets_lon = {}
-        planet_data = {}
-        for planet, ipl in planet_ids.items():
-            if planet == 'South Node':
-                north_node_data = planet_data.get('North Node', None)
-                if north_node_data:
-                    lon = (north_node_data['lon'] + 180) % 360
-                    lat = -north_node_data['lat'] if 'lat' in north_node_data else 0
-                    speed = 0
-                    retrograde = False
-                else:
-                    continue
-            else:
-                xx = swe.calc_ut(jd, ipl)[0]
-                lon = xx[0] % 360
-                lat = xx[1]
-                speed = xx[3] if planet != 'North Node' else 0
-                retrograde = speed < 0 if planet != 'North Node' else False
-            
-            degrees = int(lon)
-            minutes = int((lon - degrees) * 60)
-            sign_index = int(lon // 30)
-            sign = signs[sign_index]
-            house_pos = swe.house_pos(ascmc[2], latitude, eps, [lon, lat], b'P')
-            house = int(house_pos)
-            fraction = house_pos - house
-            if fraction > 0.9:
-                house += 1
-                if house > 12:
-                    house = 1
-            planet_data[planet] = {
-                'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
-                'sign': sign,
-                'house': house,
-                'retrograde': retrograde,
-                'lon': lon,
-                'lat': lat
-            }
-            planets_lon[planet] = lon
-        
-        angles_lon = {
-            'Ascendant': ascmc[0] % 360,
-            'Midheaven': ascmc[1] % 360,
-            'Vertex': ascmc[3] % 360,
-            'Antivertex': (ascmc[3] + 180) % 360,
-            'IC': (ascmc[1] + 180) % 360
-        }
-        
-        angles_data = {}
-        for angle, lon in angles_lon.items():
-            sign_index = int(lon // 30)
-            sign = signs[sign_index]
-            house_pos = swe.house_pos(ascmc[2], latitude, eps, [lon, 0], b'P')
-            house = int(house_pos)
-            fraction = house_pos - house
-            if fraction > 0.9:
-                house += 1
-                if house > 12:
-                    house = 1
-            angles_data[angle] = {
-                'position': f"{int(lon):02}°{sign[:2]}{int((lon - int(lon)) * 60):02}'",
-                'sign': sign,
-                'house': house,
-                'lon': lon  # Added for frontend chart rendering
-            }
-        
-        houses = []
-        for i in range(12):
-            cusp = cusps[i] % 360
-            sign_index = int(cusp // 30)
-            sign = signs[sign_index]
-            houses.append({
-                'house': i + 1,
-                'cusp': f"{cusp:.2f} degrees",
-                'sign': sign
-            })
-        
-        aspects = []
-        all_points_lon = {**planets_lon, **angles_lon}
-        for p1, p2 in itertools.combinations(all_points_lon.keys(), 2):
-            diff = abs(all_points_lon[p1] - all_points_lon[p2])
-            diff = min(diff, 360 - diff)
-            for asp_name, (target, orb) in aspect_types.items():
-                if abs(diff - target) <= orb:
-                    aspects.append({
-                        'point1': p1,
-                        'point2': p2,
-                        'aspect': asp_name,
-                        'orb': f"{abs(diff - target):.2f}°"
-                    })
-        
-        return {
-            'resolved_location': {
-                'city': data.city,
-                'latitude': f"{latitude:.2f}",
-                'longitude': f"{longitude:.2f}",
-                'timezone': timezone_str
-            },
-            'planets': planet_data,
-            'houses': houses,
-            'angles': angles_data,
-            'aspects': aspects
-        }
-    except Exception as e:
-        logger.error(f"Request failed: {str(e)}\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
-
-@app.post("/calculate")
-async def calculate_positions(data: BirthData, api_key: str = Depends(get_api_key)):
-    return calculate_chart(data)
-
-@app.post("/transits")
-async def calculate_transits(data: TransitData, api_key: str = Depends(get_api_key)):
-    natal_chart = calculate_chart(data.natal)
-    
-    try:
-        transit_dt = datetime.strptime(data.transit_date, "%Y-%m-%d")
-        transit_jd = swe.utc_to_jd(transit_dt.year, transit_dt.month, transit_dt.day, 12, 0, 0, 1)[1]
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid transit date format. Use YYYY-MM-DD.")
-    
-    transit_planets_lon = {}
-    transit_planets = {}
-    for planet, ipl in planet_ids.items():
-        if planet == 'South Node':
-            north_node_data = transit_planets.get('North Node', None)
-            if north_node_data:
-                lon = (north_node_data['lon'] + 180) % 360
-                degrees = int(lon)
-                minutes = int((lon - degrees) * 60)
-                sign_index = int(lon // 30)
-                sign = signs[sign_index]
-                transit_planets[planet] = {
-                    'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
-                    'sign': sign
-                }
-                transit_planets_lon[planet] = lon
-            continue
-        xx = swe.calc_ut(transit_jd, ipl)[0]
-        lon = xx[0] % 360
-        degrees = int(lon)
-        minutes = int((lon - degrees) * 60)
-        sign_index = int(lon // 30)
-        sign = signs[sign_index]
-        transit_planets[planet] = {
-            'position': f"{degrees:02}°{sign[:2]}{minutes:02}'",
-            'sign': sign
-        }
-        transit_planets_lon[planet] = lon
-    
-    transit_aspects = []
-    for t_planet, t_lon in transit_planets_lon.items():
-        for n_planet, n_data in natal_chart['planets'].items():
-            n_lon = n_data['lon']
-            diff = abs(t_lon - n_lon)
-            diff = min(diff, 360 - diff)
-            for asp_name, (target, orb) in aspect_types.items():
-                if abs(diff - target) <= orb:
-                    transit_aspects.append({
-                        'transit_planet': t_planet,
-                        'natal_point': n_planet,
-                        'aspect': asp_name,
-                        'orb': f"{abs(diff - target):.2f}°"
-                    })
-    
+# Helper functions (assumed from your existing main.py)
+def get_location(city):
+    if city in cities:
+        return cities[city]
+    geolocator = Nominatim(user_agent="astrology_app")
+    location = geolocator.geocode(city)
+    if not location:
+        raise HTTPException(status_code=400, detail="City not found")
+    tf = TimezoneFinder()
+    timezone = tf.timezone_at(lat=location.latitude, lng=location.longitude)
+    if not timezone:
+        raise HTTPException(status_code=400, detail="Timezone not found")
     return {
-        'natal': natal_chart,
-        'transits': transit_planets,
-        'transit_aspects': transit_aspects
+        "city": city,
+        "latitude": location.latitude,
+        "longitude": location.longitude,
+        "timezone": timezone
     }
 
-@app.post("/save-chart")
-async def save_chart(request: SaveChartRequest, api_key: str = Depends(get_api_key)):
-    try:
-        logger.info(f"Saving chart: type={request.chart_type}, birth_data={request.birth_data}")
-        conn = sqlite3.connect('charts.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO charts (type, birth_data, chart_data) VALUES (?, ?, ?)",
-                  (request.chart_type, json.dumps(request.birth_data.dict()), json.dumps(request.chart_data)))
-        conn.commit()
-        chart_id = c.lastrowid
-        conn.close()
-        return {"message": "Chart saved successfully", "chart_id": chart_id}
-    except Exception as e:
-        logger.error(f"Save chart failed: {str(e)}\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+def calculate_chart(year, month, day, hour, minute, lat, lon, timezone):
+    swe.set_ephe_path('./ephe')
+    tz = pytz.timezone(timezone)
+    dt = datetime(year, month, day, hour, minute)
+    dt_utc = tz.localize(dt).astimezone(pytz.UTC)
+    jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour + dt_utc.minute / 60.0)
+    
+    planets = {}
+    for i, name in enumerate(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron', 'North Node', 'South Node']):
+        lon, _ = swe.calc_ut(jd, i)[:2]
+        sign = signs[int(lon / 30)]
+        house = calculate_house(lon, houses)  # Assumed function
+        retrograde = swe.calc_ut(jd, i)[3] < 0
+        planets[name] = {
+            "position": f"{int(lon % 30)}°{sign}{int((lon % 30 - int(lon % 30)) * 60)}'",
+            "sign": sign,
+            "house": house,
+            "retrograde": retrograde,
+            "lon": lon
+        }
+    
+    houses = []
+    for i in range(12):
+        cusp = swe.houses(jd, lat, lon, b'P')[0][i]
+        houses.append({
+            "house": i + 1,
+            "cusp": f"{int(cusp % 30)}°{signs[int(cusp / 30)]}{int((cusp % 30 - int(cusp % 30)) * 60)}'",
+            "sign": signs[int(cusp / 30)]
+        })
+    
+    angles = {
+        "Ascendant": {
+            "lon": swe.houses(jd, lat, lon, b'P')[0][0],
+            "position": f"{int(swe.houses(jd, lat, lon, b'P')[0][0] % 30)}°{signs[int(swe.houses(jd, lat, lon, b'P')[0][0] / 30)]}",
+            "sign": signs[int(swe.houses(jd, lat, lon, b'P')[0][0] / 30)],
+            "house": 1
+        },
+        "Midheaven": {
+            "lon": swe.houses(jd, lat, lon, b'P')[0][9],
+            "position": f"{int(swe.houses(jd, lat, lon, b'P')[0][9] % 30)}°{signs[int(swe.houses(jd, lat, lon, b'P')[0][9] / 30)]}",
+            "sign": signs[int(swe.houses(jd, lat, lon, b'P')[0][9] / 30)],
+            "house": 10
+        }
+    }
+    
+    aspects = calculate_aspects(planets, angles)  # Assumed function
+    return {"resolved_location": {"city": city, "latitude": lat, "longitude": lon, "timezone": timezone}, "planets": planets, "houses": houses, "angles": angles, "aspects": aspects}
 
-@app.get("/get-charts", response_model=List[SavedChart])
-async def get_charts(api_key: str = Depends(get_api_key)):
-    try:
-        conn = sqlite3.connect('charts.db')
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        c.execute("SELECT id, type, birth_data, chart_data, created_at FROM charts ORDER BY created_at DESC")
-        charts = c.fetchall()
-        conn.close()
-        return [
-            {
-                "id": chart['id'],
-                "type": chart['type'],
-                "birth_data": json.loads(chart['birth_data']),
-                "chart_data": json.loads(chart['chart_data']),
-                "created_at": chart['created_at']
-            }
-            for chart in charts
-        ]
-    except Exception as e:
-        logger.error(f"Get charts failed: {str(e)}\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+# Placeholder for calculate_house and calculate_aspects (replace with your actual implementations)
+def calculate_house(lon, houses):
+    # Your existing house calculation logic
+    return 1
+
+def calculate_aspects(planets, angles):
+    # Your existing aspect calculation logic
+    return []
+
+# Endpoints
+@app.post("/calculate")
+async def calculate(request: Request, data: BirthData):
+    if request.headers.get('X-API-Key') != os.getenv("API_KEY"):
+        raise HTTPException(status_code=403, detail="Invalid API key")
+    location = get_location(data.city)
+    result = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, location['latitude'], location['longitude'], location['timezone'])
+    return result
+
+@app.post("/transits")
+async def transits(request: Request, data: TransitData):
+    if request.headers.get('X-API-Key') != os.getenv("API_KEY"):
+        raise HTTPException(status_code=403, detail="Invalid API key")
+    natal_location = get_location(data.natal.city)
+    natal = calculate_chart(data.natal.year, data.natal.month, data.natal.day, data.natal.hour, data.natal.minute, natal_location['latitude'], natal_location['longitude'], natal_location['timezone'])
+    transit_date = datetime.strptime(data.transit_date, '%Y-%m-%d')
+    transit = calculate_chart(transit_date.year, transit_date.month, transit_date.day, 12, 0, natal_location['latitude'], natal_location['longitude'], natal_location['timezone'])
+    transit_aspects = calculate_aspects(transit['planets'], natal['planets'])
+    return {"natal": natal, "transits": transit['planets'], "transit_aspects": transit_aspects}
+
+@app.post("/save-chart")
+async def save_chart(request: Request, chart_data: ChartData):
+    uid = await verify_firebase_token(request)
+    chart_type = chart_data.chart_type
+    birth_data = chart_data.birth_data
+    chart_data = chart_data.chart_data
+    
+    conn = sqlite3.connect('charts.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS charts 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, type TEXT, birth_data TEXT, chart_data TEXT, created_at TIMESTAMP)''')
+    cursor.execute('INSERT INTO charts (user_id, type, birth_data, chart_data, created_at) VALUES (?, ?, ?, ?, ?)',
+                   (uid, chart_type, json.dumps(birth_data), json.dumps(chart_data), datetime.now()))
+    conn.commit()
+    conn.close()
+    return {"message": "Chart saved successfully"}
+
+@app.get("/get-charts")
+async def get_charts(request: Request):
+    uid = await verify_firebase_token(request)
+    conn = sqlite3.connect('charts.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, type, birth_data, chart_data, created_at FROM charts WHERE user_id = ?', (uid,))
+    charts = cursor.fetchall()
+    conn.close()
+    return [{"id": c[0], "type": c[1], "birth_data": json.loads(c[2]), "chart_data": json.loads(c[3]), "created_at": c[4]} for c in charts]

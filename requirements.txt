@@ -1,6 +1,7 @@
-fastapi
+fastapi[all]
 uvicorn
 pyswisseph
 pytz
 geopy
 timezonefinder
+firebase-admin
