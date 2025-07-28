@@ -42,9 +42,13 @@
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, {
-                        ...options,
-                        signal: AbortSignal.timeout(90000)  // 90s timeout
-                    });
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Paste your key here
+                    },
+                    signal: AbortSignal.timeout(90000)
+                });
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return await response.json();
                 } catch (error) {
