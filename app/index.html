@@ -6,8 +6,8 @@
     <title>Astrology App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js" type="module"></script>
     <style>
         body { padding: 20px; background: #f4f6f9; font-family: 'Arial', sans-serif; }
         .card { margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -134,6 +134,9 @@
         </div>
 
         <script>
+
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+            import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, getIdToken } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
             // Firebase configuration
             const firebaseConfig = {
                 apiKey: "AIzaSyDEQ5i07TflWq30lwBsoJLzGNEUgSNLTOw",
@@ -144,7 +147,10 @@
                 appId: "1:341259782663:web:132d7b85d8518c5f3bf8a2",
                 measurementId: "G-M2776G401M"
             };
-            firebase.initializeApp(firebaseConfig);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+            // Use auth for login, token, etc.
 
             // Global variables and functions
             let chartStore = {};
