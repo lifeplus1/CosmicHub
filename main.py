@@ -19,7 +19,7 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update to frontend URL in production
+    allow_origins=["https://astrology-app-sigma.vercel.app/"],  # Update to frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
