@@ -39,7 +39,7 @@ app.add_middleware(
 )
 
 # API Key auth
-API_KEY = os.getenv("API_KEY", "your_api_key")
+API_KEY = os.getenv("API_KEY", "c3a579e58484f1eb21bfc96966df9a25")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 async def get_api_key(api_key: str = Security(api_key_header)):
