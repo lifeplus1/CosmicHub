@@ -12,7 +12,13 @@
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background: #f2f2f2; }
-        pre { white-space: pre-wrap; } /* Fallback for raw JSON */
+        .retrograde { color: red; font-weight: bold; }
+        .trine { color: blue; }
+        .square { color: red; }
+        .conjunction { color: green; }
+        .opposition { color: orange; }
+        /* Add more aspect colors as needed */
+        pre { white-space: pre-wrap; }
     </style>
 </head>
 <body>
@@ -34,7 +40,7 @@
                 try {
                     const response = await fetch(url, {
                         ...options,
-                        signal: AbortSignal.timeout(90000)  // 90s timeout
+                        signal: AbortSignal.timeout(90000)
                     });
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return await response.json();
@@ -68,7 +74,8 @@
             html += '<h2>Planets</h2><table><tr><th>Planet</th><th>Position</th><th>Sign</th><th>House</th><th>Retrograde</th></tr>';
             for (let planet in result.planets) {
                 let p = result.planets[planet];
-                html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td><td>${p.house}</td><td>${p.retrograde ? 'Yes' : 'No'}</td></tr>`;
+                let retroClass = p.retrograde ? 'class="retrograde"' : '';
+                html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td><td>${p.house}</td><td ${retroClass}>${p.retrograde ? 'Yes 🚫' : 'No'}</td></tr>`;
             }
             html += '</table>';
 
@@ -78,15 +85,17 @@
             });
             html += '</table>';
 
-            html += '<h2>Angles</h2><table><tr><th>Angle</th><th>Position</th></tr>';
+            html += '<h2>Angles</h2><table><tr><th>Angle</th><th>Position</th><th>Sign</th><th>House</th></tr>';
             for (let angle in result.angles) {
-                html += `<tr><td>${angle}</td><td>${result.angles[angle]}</td></tr>`;
+                let a = result.angles[angle];
+                html += `<tr><td>${angle}</td><td>${a.position}</td><td>${a.sign}</td><td>${a.house}</td></tr>`;
             }
             html += '</table>';
 
-            html += '<h2>Aspects</h2><table><tr><th>Planet1</th><th>Planet2</th><th>Aspect</th><th>Orb</th></tr>';
+            html += '<h2>Aspects</h2><table><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr>';
             result.aspects.forEach(a => {
-                html += `<tr><td>${a.planet1}</td><td>${a.planet2}</td><td>${a.aspect}</td><td>${a.orb}</td></tr>`;
+                let aspClass = a.aspect.toLowerCase();  // e.g., 'trine' for class
+                html += `<tr class="${aspClass}"><td>${a.point1}</td><td>${a.point2}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
             });
             html += '</table>';
 
