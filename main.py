@@ -14,7 +14,11 @@ import json
 app = FastAPI()
 
 # Firebase initialization
-cred = credentials.Certificate(os.getenv("FIREBASE_CREDENTIALS_PATH", "/app/astrology-app-9c2e9-firebase-adminsdk.json"))
+cred_data = os.getenv("FIREBASE_CREDENTIALS")
+if cred_data:
+    cred = credentials.Certificate(json.loads(cred_data))
+else:
+    cred = credentials.Certificate("/app/astrology-app-9c2e9-firebase-adminsdk.json")
 initialize_app(cred)
 
 # CORS setup

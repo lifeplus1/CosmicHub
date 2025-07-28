@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-firebase-adminsdk.json
-.env
 *.json
 !cities.json
+firebase-adminsdk.json
+*.env
