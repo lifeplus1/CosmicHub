@@ -84,6 +84,7 @@ def get_location(city):
     }
 
 def calculate_chart(year, month, day, hour, minute, lat, lon, timezone):
+    print(os.listdir('./ephe'))  # Debug line
     swe.set_ephe_path('./ephe')
     tz = pytz.timezone(timezone)
     dt = datetime(year, month, day, hour, minute)
