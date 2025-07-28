@@ -10,9 +10,9 @@ from firebase_admin import credentials, initialize_app
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # Load .env file
+load_dotenv()
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, filename='/app/app.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 try:
@@ -27,10 +27,14 @@ app = FastAPI()
 # Firebase initialization
 cred_data = os.getenv("FIREBASE_CREDENTIALS")
 if cred_data:
-    cred = credentials.Certificate(json.loads(cred_data))
-    initialize_app(cred)
+    try:
+        cred = credentials.Certificate(json.loads(cred_data))
+        initialize_app(cred)
+    except Exception as e:
+        logger.error(f"Firebase initialization failed: {str(e)}")
+        raise
 else:
-    logger.warning("FIREBASE_CREDENTIALS not set, skipping Firebase initialization for local development")
+    logger.warning("FIREBASE_CREDENTIALS not set, skipping Firebase initialization")
 
 # CORS setup
 app.add_middleware(
@@ -42,8 +46,12 @@ app.add_middleware(
 )
 
 # Load cities
-with open('cities.json', 'r') as f:
-    cities = json.load(f)
+try:
+    with open('cities.json', 'r') as f:
+        cities = json.load(f)
+except Exception as e:
+    logger.error(f"Failed to load cities.json: {str(e)}")
+    raise
 
 # Pydantic models
 class BirthData(BaseModel):
@@ -68,31 +76,47 @@ class ChartData(BaseModel):
 async def calculate(request: Request, data: BirthData):
     if request.headers.get('X-API-Key') != os.getenv("API_KEY"):
         raise HTTPException(status_code=403, detail="Invalid API key")
-    location = get_location(data.city, cities)
-    result = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, location['latitude'], location['longitude'], location['timezone'])
-    return result
+    try:
+        location = get_location(data.city, cities)
+        result = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, location['latitude'], location['longitude'], location['timezone'])
+        return result
+    except Exception as e:
+        logger.error(f"Calculate endpoint failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/transits")
 async def transits(request: Request, data: TransitData):
     if request.headers.get('X-API-Key') != os.getenv("API_KEY"):
         raise HTTPException(status_code=403, detail="Invalid API key")
-    natal_location = get_location(data.natal.city, cities)
-    natal = calculate_chart(data.natal.year, data.natal.month, data.natal.day, data.natal.hour, data.natal.minute, natal_location['latitude'], natal_location['longitude'], natal_location['timezone'])
-    transit_date = datetime.strptime(data.transit_date, '%Y-%m-%d')
-    transit = calculate_chart(transit_date.year, transit_date.month, transit_date.day, 12, 0, natal_location['latitude'], natal_location['longitude'], natal_location['timezone'])
-    transit_aspects = calculate_aspects(transit['planets'], natal['planets'])
-    return {"natal": natal, "transits": transit['planets'], "transit_aspects": transit_aspects}
+    try:
+        natal_location = get_location(data.natal.city, cities)
+        natal = calculate_chart(data.natal.year, data.natal.month, data.natal.day, data.natal.hour, data.natal.minute, natal_location['latitude'], natal_location['longitude'], natal_location['timezone'])
+        transit_date = datetime.strptime(data.transit_date, '%Y-%m-%d')
+        transit = calculate_chart(transit_date.year, transit_date.month, transit_date.day, 12, 0, natal_location['latitude'], natal_location['longitude'], natal_location['timezone'])
+        transit_aspects = calculate_aspects(transit['planets'], natal['planets'])
+        return {"natal": natal, "transits": transit['planets'], "transit_aspects": transit_aspects}
+    except Exception as e:
+        logger.error(f"Transits endpoint failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/save-chart")
 async def save_chart_endpoint(request: Request, chart_data: ChartData):
     if not os.getenv("FIREBASE_CREDENTIALS"):
-        raise HTTPException(status_code=503, detail="Firebase not initialized for local development")
-    uid = await verify_firebase_token(request)
-    return save_chart(uid, chart_data.chart_type, chart_data.birth_data, chart_data.chart_data)
+        raise HTTPException(status_code=503, detail="Firebase not initialized")
+    try:
+        uid = await verify_firebase_token(request)
+        return save_chart(uid, chart_data.chart_type, chart_data.birth_data, chart_data.chart_data)
+    except Exception as e:
+        logger.error(f"Save-chart endpoint failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/get-charts")
 async def get_charts_endpoint(request: Request):
     if not os.getenv("FIREBASE_CREDENTIALS"):
-        raise HTTPException(status_code=503, detail="Firebase not initialized for local development")
-    uid = await verify_firebase_token(request)
-    return get_charts(uid)
+        raise HTTPException(status_code=503, detail="Firebase not initialized")
+    try:
+        uid = await verify_firebase_token(request)
+        return get_charts(uid)
+    except Exception as e:
+        logger.error(f"Get-charts endpoint failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
