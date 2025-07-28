@@ -1,6 +1,6 @@
 fastapi[all]
 uvicorn
-pyswisseph
+pyswisseph==2.10.3.2
 pytz
 geopy
 timezonefinder
