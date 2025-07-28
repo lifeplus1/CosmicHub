@@ -45,7 +45,7 @@ def init_db():
 
 init_db()
 
-# Planet IDs (global, added South Node)
+# Planet IDs (global)
 planet_ids = {
     'Sun': swe.SUN,
     'Moon': swe.MOON,
@@ -59,7 +59,7 @@ planet_ids = {
     'Pluto': swe.PLUTO,
     'Chiron': swe.CHIRON,
     'North Node': swe.MEAN_NODE,
-    'South Node': swe.MEAN_NODE,  # South Node uses same ID, offset by 180°
+    'South Node': swe.MEAN_NODE,
 }
 
 # Zodiac signs (global)
@@ -94,7 +94,7 @@ app.add_middleware(
 )
 
 # API Key auth
-API_KEY = os.getenv("API_KEY", "c3a579e58484f1eb21bfc96966df9a25")
+API_KEY = os.getenv("API_KEY", "your_api_key")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 async def get_api_key(api_key: str = Security(api_key_header)):
@@ -199,7 +199,6 @@ def calculate_chart(data: BirthData):
         planet_data = {}
         for planet, ipl in planet_ids.items():
             if planet == 'South Node':
-                # South Node is 180° opposite North Node
                 north_node_data = planet_data.get('North Node', None)
                 if north_node_data:
                     lon = (north_node_data['lon'] + 180) % 360
@@ -207,7 +206,7 @@ def calculate_chart(data: BirthData):
                     speed = 0
                     retrograde = False
                 else:
-                    continue  # Skip if North Node not calculated yet
+                    continue
             else:
                 xx = swe.calc_ut(jd, ipl)[0]
                 lon = xx[0] % 360
@@ -258,7 +257,8 @@ def calculate_chart(data: BirthData):
             angles_data[angle] = {
                 'position': f"{int(lon):02}°{sign[:2]}{int((lon - int(lon)) * 60):02}'",
                 'sign': sign,
-                'house': house
+                'house': house,
+                'lon': lon  # Added for frontend chart rendering
             }
         
         houses = []

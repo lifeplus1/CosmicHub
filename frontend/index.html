@@ -105,29 +105,51 @@
         </div>
 
         <script>
+            // Global variables and functions
+            let chartStore = {};
+            let API_KEY = '';
+            let fetchWithRetry;
+
+            const zodiacIcons = {
+                'Aries': '♈',
+                'Taurus': '♉',
+                'Gemini': '♊',
+                'Cancer': '♋',
+                'Leo': '♌',
+                'Virgo': '♍',
+                'Libra': '♎',
+                'Scorpio': '♏',
+                'Sagittarius': '♐',
+                'Capricorn': '♑',
+                'Aquarius': '♒',
+                'Pisces': '♓'
+            };
+
+            const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+
+            async function saveChart(chartId) {
+                const { birthData, chartData, chartType } = chartStore[chartId] || {};
+                if (!birthData || !chartData || !chartType) {
+                    alert('Error: Chart data not found');
+                    return;
+                }
+                try {
+                    const response = await fetchWithRetry('https://astrology-app-065g.onrender.com/save-chart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ chart_type: chartType, birth_data: birthData, chart_data: chartData })
+                    });
+                    alert(response.message);
+                    loadSavedCharts();
+                } catch (error) {
+                    alert(`Error saving chart: ${error.message}`);
+                }
+            }
+
             document.addEventListener('DOMContentLoaded', async () => {
-                const zodiacIcons = {
-                    'Aries': '♈',
-                    'Taurus': '♉',
-                    'Gemini': '♊',
-                    'Cancer': '♋',
-                    'Leo': '♌',
-                    'Virgo': '♍',
-                    'Libra': '♎',
-                    'Scorpio': '♏',
-                    'Sagittarius': '♐',
-                    'Capricorn': '♑',
-                    'Aquarius': '♒',
-                    'Pisces': '♓'
-                };
-
-                const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-
-                // Store chart data globally
-                let chartStore = {};
-
                 // Fetch API key with retry
-                let API_KEY = '';
                 const maxRetries = 3;
                 let retries = 0;
                 while (retries < maxRetries) {
@@ -153,7 +175,7 @@
                     }
                 }
 
-                async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+                fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
                     for (let i = 0; i < retries; i++) {
                         try {
                             const response = await fetch(url, {
@@ -174,7 +196,7 @@
                             await new Promise(resolve => setTimeout(resolve, delay));
                         }
                     }
-                }
+                };
 
                 function drawChart(elementId, planets, houses, angles) {
                     const width = 400, height = 400, radius = 150;
@@ -289,7 +311,7 @@
                         let a = result.angles[angle];
                         let icon = zodiacIcons[a.sign] || '';
                         html += `<tr><td>${angle}</td><td>${a.position}</td><td><span class="zodiac-icon">${icon}</span>${a.sign}</td><td>${a.house}</td></tr>`;
-                    };
+                    }
                     html += '</tbody></table>';
 
                     html += '<h3>Aspects</h3><table class="table table-striped"><thead><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
@@ -343,27 +365,6 @@
                         setTimeout(() => drawChart('natalChart_' + chartId, result.natal.planets, result.natal.houses, result.natal.angles), 0);
                     } else {
                         console.error('Element with ID transitResult not found');
-                    }
-                }
-
-                async function saveChart(chartId) {
-                    const { birthData, chartData, chartType } = chartStore[chartId] || {};
-                    if (!birthData || !chartData || !chartType) {
-                        alert('Error: Chart data not found');
-                        return;
-                    }
-                    try {
-                        const response = await fetchWithRetry('https://astrology-app-065g.onrender.com/save-chart', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ chart_type: chartType, birth_data: birthData, chart_data: chartData })
-                        });
-                        alert(response.message);
-                        loadSavedCharts();
-                    } catch (error) {
-                        alert(`Error saving chart: ${error.message}`);
                     }
                 }
 
