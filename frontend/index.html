@@ -19,6 +19,16 @@
         .chart-container { display: flex; justify-content: center; margin-bottom: 20px; }
         svg { background: #ffffff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .chart-title { font-size: 1.5em; font-weight: bold; text-align: center; margin-bottom: 10px; }
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -143,6 +153,7 @@
                 'North Node': '☊',
                 'South Node': '☋',
                 'Ascendant': 'Asc',
+                'Descendant': 'DC',
                 'Midheaven': 'MC',
                 'Vertex': 'Vx',
                 'Antivertex': 'Avx',
@@ -222,6 +233,11 @@
             }
 
             document.addEventListener('DOMContentLoaded', async () => {
+                // Create tooltip div
+                const tooltip = d3.select('body').append('div')
+                    .attr('class', 'tooltip')
+                    .style('display', 'none');
+
                 // Fetch API key with retry
                 const maxRetries = 3;
                 let retries = 0;
@@ -351,7 +367,17 @@
                         }
                     });
 
-                    // Aspect lines
+                    // Add Descendant to angles
+                    if (angles['Ascendant'] && !isNaN(angles['Ascendant'].lon)) {
+                        angles['Descendant'] = {
+                            lon: (angles['Ascendant'].lon + 180) % 360,
+                            position: `${Math.floor((angles['Ascendant'].lon + 180) % 360)}°${signs[Math.floor(((angles['Ascendant'].lon + 180) % 360) / 30)]}${Math.floor(((angles['Ascendant'].lon + 180) % 360 - Math.floor((angles['Ascendant'].lon + 180) % 360)) * 60)}'`,
+                            sign: signs[Math.floor(((angles['Ascendant'].lon + 180) % 360) / 30)],
+                            house: angles['Ascendant'].house <= 6 ? angles['Ascendant'].house + 6 : angles['Ascendant'].house - 6
+                        };
+                    }
+
+                    // Aspect lines with tooltips
                     aspects.forEach(a => {
                         const point1 = planetSymbols[a.point1] ? planets[a.point1] : angles[a.point1];
                         const point2 = planetSymbols[a.point2] ? planets[a.point2] : angles[a.point2];
@@ -367,7 +393,16 @@
                                 .attr('y2', r * Math.sin(angle2))
                                 .attr('stroke', style.color)
                                 .attr('stroke-width', style.strokeWidth)
-                                .attr('stroke-dasharray', style.dash);
+                                .attr('stroke-dasharray', style.dash)
+                                .on('mouseover', function(event) {
+                                    tooltip.style('display', 'block')
+                                        .html(`${planetSymbols[a.point1] || a.point1} ${a.aspect} ${planetSymbols[a.point2] || a.point2}<br>Orb: ${a.orb}`)
+                                        .style('left', (event.pageX + 10) + 'px')
+                                        .style('top', (event.pageY - 10) + 'px');
+                                })
+                                .on('mouseout', function() {
+                                    tooltip.style('display', 'none');
+                                });
                         }
                     });
 
@@ -438,8 +473,17 @@
                     html += '</tbody></table>';
 
                     html += '<h3>Angles</h3><table class="table table-striped"><thead><tr><th>Angle</th><th>Position</th><th>Sign</th><th>House</th></tr></thead><tbody>';
-                    for (let angle in result.angles) {
-                        let a = result.angles[angle];
+                    // Add Descendant to angles for display
+                    const displayAngles = { ...result.angles };
+                    if (result.angles['Ascendant'] && !isNaN(result.angles['Ascendant'].lon)) {
+                        displayAngles['Descendant'] = {
+                            position: `${Math.floor((result.angles['Ascendant'].lon + 180) % 360)}°${signs[Math.floor(((result.angles['Ascendant'].lon + 180) % 360) / 30)]}${Math.floor(((result.angles['Ascendant'].lon + 180) % 360 - Math.floor((result.angles['Ascendant'].lon + 180) % 360)) * 60)}'`,
+                            sign: signs[Math.floor(((result.angles['Ascendant'].lon + 180) % 360) / 30)],
+                            house: result.angles['Ascendant'].house <= 6 ? result.angles['Ascendant'].house + 6 : result.angles['Ascendant'].house - 6
+                        };
+                    }
+                    for (let angle in displayAngles) {
+                        let a = displayAngles[angle];
                         let icon = zodiacIcons[a.sign] || '';
                         html += `<tr><td>${planetSymbols[angle] || angle}</td><td>${a.position}</td><td><span class="zodiac-icon">${icon}</span>${a.sign}</td><td>${a.house}</td></tr>`;
                     }
@@ -459,7 +503,7 @@
                     const element = document.getElementById(elementId);
                     if (element) {
                         element.innerHTML = html;
-                        setTimeout(() => drawChart('chart_' + chartId, result.planets, result.houses, result.angles, result.aspects), 0);
+                        setTimeout(() => drawChart('chart_' + chartId, result.planets, result.houses, { ...result.angles, ...displayAngles }, result.aspects), 0);
                     } else {
                         console.error(`Element with ID ${elementId} not found`);
                     }
@@ -493,7 +537,7 @@
                     const transitResult = document.getElementById('transitResult');
                     if (transitResult) {
                         transitResult.innerHTML = html;
-                        setTimeout(() => drawChart('natalChart_' + chartId, result.natal.planets, result.natal.houses, result.natal.angles, result.natal.aspects), 0);
+                        setTimeout(() => drawChart('natalChart_' + chartId, result.natal.planets, result.natal.houses, { ...result.natal.angles, ...displayAngles }, result.natal.aspects), 0);
                     } else {
                         console.error('Element with ID transitResult not found');
                     }
