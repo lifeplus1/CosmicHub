@@ -6,3 +6,4 @@ geopy
 timezonefinder
 firebase-admin
 pytest
+python-dotenv
