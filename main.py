@@ -18,7 +18,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://astrology-app-sigma.vercel.app"],  # Your Vercel URL
+    allow_origins=[                 # Your Vercel URLs
+        "https://astrology-app-sigma.vercel.app",
+        "https://astrology-app-git-main-christophers-projects-17e93f49.vercel.app",
+        "https://astrology-app-christophers-projects-17e93f49.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
