@@ -10,4 +10,9 @@
         "longitude": 2.35,
         "timezone": "Europe/Paris"
     }
+    "Naperville": {
+        "latitude": 41.748,
+        "longitude": -88.186,
+        "timezone": "America/Chicago"
+    }
 }
