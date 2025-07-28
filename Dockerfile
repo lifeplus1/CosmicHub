@@ -29,6 +29,8 @@ RUN echo "Starting dependency installation..." \
     && pip3 install --no-cache-dir -r requirements.txt -v 2>&1 | tee /app/pip_install_requirements.log \
     && echo "Dependency installation complete."
 
+ENV LOG_FILE=/app/app.log
+
 EXPOSE $PORT
 
 CMD echo "Starting Uvicorn..." && uvicorn main:app --host 0.0.0.0 --port $PORT --timeout-keep-alive 120 2>&1 | tee /app/uvicorn.log
