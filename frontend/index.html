@@ -2,164 +2,208 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Astrology App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        form { border: 1px solid #ddd; padding: 20px; background: #f9f9f9; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 10px; }
-        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
-        #result, #transitResult { margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #f2f2f2; }
+        body { padding: 20px; }
+        .card { margin-bottom: 20px; }
         .retrograde { color: red; font-weight: bold; }
         .trine, .sextile { color: blue; }
         .square, .opposition { color: red; }
         .conjunction { color: green; }
         .quincunx, .sesquiquadrate { color: purple; }
         .semi-sextile, .quintile, .bi-quintile { color: gray; }
-        pre { white-space: pre-wrap; }
-        h2 { color: #333; }
     </style>
 </head>
 <body>
-    <h1>Birth Chart Calculator</h1>
-    <h2>Natal Chart</h2>
-    <form id="birthForm">
-        <label>Year: <input type="number" name="year" required></label>
-        <label>Month: <input type="number" name="month" min="1" max="12" required></label>
-        <label>Day: <input type="number" name="day" min="1" max="31" required></label>
-        <label>Hour: <input type="number" name="hour" min="0" max="23" required></label>
-        <label>Minute: <input type="number" name="minute" min="0" max="59" required></label>
-        <label>City: <input type="text" name="city" required placeholder="e.g., New York, USA"></label>
-        <button type="submit">Calculate Natal</button>
-    </form>
-    <div id="result"></div>
+    <div class="container">
+        <h1 class="text-center mb-4">Birth Chart Calculator</h1>
+        
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Natal Chart</h2>
+                <form id="birthForm">
+                    <div class="mb-3">
+                        <label class="form-label">Year:</label>
+                        <input type="number" class="form-control" name="year" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Month:</label>
+                        <input type="number" class="form-control" name="month" min="1" max="12" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Day:</label>
+                        <input type="number" class="form-control" name="day" min="1" max="31" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hour:</label>
+                        <input type="number" class="form-control" name="hour" min="0" max="23" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Minute:</label>
+                        <input type="number" class="form-control" name="minute" min="0" max="59" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">City:</label>
+                        <input type="text" class="form-control" name="city" required placeholder="e.g., New York, USA">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Natal</button>
+                </form>
+            </div>
+        </div>
+        <div id="result"></div>
 
-    <h2>Transits</h2>
-    <form id="transitForm">
-        <label>Year: <input type="number" name="natal[year]" required></label>
-        <label>Month: <input type="number" name="natal[month]" min="1" max="12" required></label>
-        <label>Day: <input type="number" name="natal[day]" min="1" max="31" required></label>
-        <label>Hour: <input type="number" name="natal[hour]" min="0" max="23" required></label>
-        <label>Minute: <input type="number" name="natal[minute]" min="0" max="59" required></label>
-        <label>City: <input type="text" name="natal[city]" required placeholder="e.g., New York, USA"></label>
-        <label>Transit Date (YYYY-MM-DD): <input type="text" name="transit_date" value="2025-07-28" required></label>
-        <button type="submit">Calculate Transits</button>
-    </form>
-    <div id="transitResult"></div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Transits</h2>
+                <form id="transitForm">
+                    <div class="mb-3">
+                        <label class="form-label">Year:</label>
+                        <input type="number" class="form-control" name="natal[year]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Month:</label>
+                        <input type="number" class="form-control" name="natal[month]" min="1" max="12" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Day:</label>
+                        <input type="number" class="form-control" name="natal[day]" min="1" max="31" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hour:</label>
+                        <input type="number" class="form-control" name="natal[hour]" min="0" max="23" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Minute:</label>
+                        <input type="number" class="form-control" name="natal[minute]" min="0" max="59" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">City:</label>
+                        <input type="text" class="form-control" name="natal[city]" required placeholder="e.g., New York, USA">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Transit Date (YYYY-MM-DD):</label>
+                        <input type="text" class="form-control" name="transit_date" value="2025-07-28" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Transits</button>
+                </form>
+            </div>
+        </div>
+        <div id="transitResult"></div>
 
-    <script>
-        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        ...options,
-                        signal: AbortSignal.timeout(90000)
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    return await response.json();
-                } catch (error) {
-                    if (i === retries - 1) throw error;
-                    await new Promise(resolve => setTimeout(resolve, delay));
+        <script>
+            async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, {
+                            ...options,
+                            signal: AbortSignal.timeout(90000)
+                        });
+                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                        return await response.json();
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
                 }
             }
-        }
 
-        function displayResult(result, elementId) {
-            let html = '<h2>Resolved Location</h2>';
-            html += `<p>City: ${result.resolved_location.city}<br>Lat: ${result.resolved_location.latitude}<br>Lon: ${result.resolved_location.longitude}<br>Timezone: ${result.resolved_location.timezone}</p>`;
+            function displayResult(result, elementId) {
+                let html = '<h3>Resolved Location</h3>';
+                html += `<p>City: ${result.resolved_location.city}<br>Lat: ${result.resolved_location.latitude}<br>Lon: ${result.resolved_location.longitude}<br>Timezone: ${result.resolved_location.timezone}</p>`;
 
-            html += '<h2>Planets</h2><table><tr><th>Planet</th><th>Position</th><th>Sign</th><th>House</th><th>Retrograde</th></tr>';
-            for (let planet in result.planets) {
-                let p = result.planets[planet];
-                let retroClass = p.retrograde ? 'class="retrograde"' : '';
-                html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td><td>${p.house}</td><td ${retroClass}>${p.retrograde ? 'Yes 🚫' : 'No'}</td></tr>`;
-            }
-            html += '</table>';
+                html += '<h3>Planets</h3><table class="table table-striped"><thead><tr><th>Planet</th><th>Position</th><th>Sign</th><th>House</th><th>Retrograde</th></tr></thead><tbody>';
+                for (let planet in result.planets) {
+                    let p = result.planets[planet];
+                    let retroClass = p.retrograde ? 'class="retrograde"' : '';
+                    html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td><td>${p.house}</td><td ${retroClass}>${p.retrograde ? 'Yes 🚫' : 'No'}</td></tr>`;
+                }
+                html += '</tbody></table>';
 
-            html += '<h2>Houses</h2><table><tr><th>House</th><th>Cusp</th><th>Sign</th></tr>';
-            result.houses.forEach(h => {
-                html += `<tr><td>${h.house}</td><td>${h.cusp}</td><td>${h.sign}</td></tr>`;
-            });
-            html += '</table>';
-
-            html += '<h2>Angles</h2><table><tr><th>Angle</th><th>Position</th><th>Sign</th><th>House</th></tr>';
-            for (let angle in result.angles) {
-                let a = result.angles[angle];
-                html += `<tr><td>${angle}</td><td>${a.position}</td><td>${a.sign}</td><td>${a.house}</td></tr>`;
-            }
-            html += '</table>';
-
-            html += '<h2>Aspects</h2><table><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr>';
-            result.aspects.forEach(a => {
-                let aspClass = a.aspect.toLowerCase().replace(' ', '-'); // e.g., 'trine' for class
-                html += `<tr class="${aspClass}"><td>${a.point1}</td><td>${a.point2}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
-            });
-            html += '</table>';
-
-            document.getElementById(elementId).innerHTML = html;
-        }
-
-        function displayTransitResult(result) {
-            let html = '<h2>Natal Chart</h2>';
-            displayResult(result.natal, 'transitResult');
-
-            html = document.getElementById('transitResult').innerHTML;
-            html += '<h2>Transit Planets</h2><table><tr><th>Planet</th><th>Position</th><th>Sign</th></tr>';
-            for (let planet in result.transits) {
-                let p = result.transits[planet];
-                html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td></tr>`;
-            }
-            html += '</table>';
-
-            html += '<h2>Transit Aspects to Natal</h2><table><tr><th>Transit Planet</th><th>Natal Point</th><th>Aspect</th><th>Orb</th></tr>';
-            result.transit_aspects.forEach(a => {
-                let aspClass = a.aspect.toLowerCase().replace(' ', '-');
-                html += `<tr class="${aspClass}"><td>${a.transit_planet}</td><td>${a.natal_point}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
-            });
-            html += '</table>';
-
-            document.getElementById('transitResult').innerHTML = html;
-        }
-
-        document.getElementById('birthForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            try {
-                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Replace with your secure key
-                    },
-                    body: JSON.stringify(data)
+                html += '<h3>Houses</h3><table class="table table-striped"><thead><tr><th>House</th><th>Cusp</th><th>Sign</th></tr></thead><tbody>';
+                result.houses.forEach(h => {
+                    html += `<tr><td>${h.house}</td><td>${h.cusp}</td><td>${h.sign}</td></tr>`;
                 });
-                displayResult(result, 'result');
-            } catch (error) {
-                document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
-            }
-        });
+                html += '</tbody></table>';
 
-        document.getElementById('transitForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            try {
-                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/transits', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Replace with your secure key
-                    },
-                    body: JSON.stringify(data)
+                html += '<h3>Angles</h3><table class="table table-striped"><thead><tr><th>Angle</th><th>Position</th><th>Sign</th><th>House</th></tr></thead><tbody>';
+                for (let angle in result.angles) {
+                    let a = result.angles[angle];
+                    html += `<tr><td>${angle}</td><td>${a.position}</td><td>${a.sign}</td><td>${a.house}</td></tr>`;
+                }
+                html += '</tbody></table>';
+
+                html += '<h3>Aspects</h3><table class="table table-striped"><thead><tr><th>Point1</th><th>Point2</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
+                result.aspects.forEach(a => {
+                    let aspClass = a.aspect.toLowerCase().replace(' ', '-');
+                    html += `<tr class="${aspClass}"><td>${a.point1}</td><td>${a.point2}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
                 });
-                displayTransitResult(result);
-            } catch (error) {
-                document.getElementById('transitResult').innerHTML = `<p>Error: ${error.message}</p>`;
+                html += '</tbody></table>';
+
+                document.getElementById(elementId).innerHTML = html;
             }
-        });
-    </script>
+
+            function displayTransitResult(result) {
+                let html = '<h3>Natal Chart</h3>';
+                displayResult(result.natal, 'transitResult');
+
+                html = document.getElementById('transitResult').innerHTML;
+                html += '<h3>Transit Planets</h3><table class="table table-striped"><thead><tr><th>Planet</th><th>Position</th><th>Sign</th></tr></thead><tbody>';
+                for (let planet in result.transits) {
+                    let p = result.transits[planet];
+                    html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td></tr>`;
+                }
+                html += '</tbody></table>';
+
+                html += '<h3>Transit Aspects to Natal</h3><table class="table table-striped"><thead><tr><th>Transit Planet</th><th>Natal Point</th><th>Aspect</th><th>Orb</th></tr></thead><tbody>';
+                result.transit_aspects.forEach(a => {
+                    let aspClass = a.aspect.toLowerCase().replace(' ', '-');
+                    html += `<tr class="${aspClass}"><td>${a.transit_planet}</td><td>${a.natal_point}</td><td>${a.aspect} 🔄</td><td>${a.orb}</td></tr>`;
+                });
+                html += '</tbody></table>';
+
+                document.getElementById('transitResult').innerHTML = html;
+            }
+
+            document.getElementById('birthForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+                try {
+                    const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Replace with your secure key
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    displayResult(result, 'result');
+                } catch (error) {
+                    document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
+                }
+            });
+
+            document.getElementById('transitForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+                try {
+                    const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/transits', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': 'c3a579e58484f1eb21bfc96966df9a25'  // Replace with your secure key
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    displayTransitResult(result);
+                } catch (error) {
+                    document.getElementById('transitResult').innerHTML = `<p class="alert alert-danger">Error: ${error.message}</p>`;
+                }
+            });
+        </script>
+    </div>
 </body>
 </html>
