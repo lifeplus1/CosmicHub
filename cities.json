@@ -1,0 +1,13 @@
+
+{
+    "New York, USA": {
+        "latitude": 40.71,
+        "longitude": -74.01,
+        "timezone": "America/New_York"
+    },
+    "Paris, France": {
+        "latitude": 48.86,
+        "longitude": 2.35,
+        "timezone": "Europe/Paris"
+    }
+}

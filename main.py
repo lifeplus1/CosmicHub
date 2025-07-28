@@ -1,15 +1,17 @@
-import swisseph as swe  # pyswisseph
+import swisseph as swe
 import pytz
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import json
+import os
 from geopy.geocoders import Nominatim
 import timezonefinder
-import traceback  # For error logging
-import itertools  # For planet pairs
-from fastapi.middleware.cors import CORSMiddleware
+import traceback
+import itertools
 
-# Set path to ephemeris files (update if your path differs)
+# Set path to ephemeris files
 swe.set_ephe_path('ephe')
 
 app = FastAPI()
@@ -17,55 +19,84 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (change to specific for production)
+    allow_origins=["*"],  # Update to frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 class BirthData(BaseModel):
-    year: int  # e.g., 1990
-    month: int  # 1-12
-    day: int  # 1-31
-    hour: int  # 0-23
-    minute: int  # 0-59
-    city: str  # e.g., 'New York' or 'New York, USA' for accuracy
+    year: int
+    month: int
+    day: int
+    hour: int
+    minute: int
+    city: str
+
+# Load city cache
+def load_city_cache():
+    if os.path.exists('cities.json'):
+        with open('cities.json', 'r') as f:
+            return json.load(f)
+    return {}
+
+# Save to city cache
+def save_city_cache(cache):
+    with open('cities.json', 'w') as f:
+        json.dump(cache, f, indent=4)
 
 @app.post("/calculate")
-def calculate_positions(data: BirthData):
+async def calculate_positions(data: BirthData):
     try:
-        # Get lat/lon from city
-        geolocator = Nominatim(user_agent="astro_app")
-        location = geolocator.geocode(data.city)
-        if not location:
-            raise HTTPException(status_code=404, detail="City not found. Try including country, e.g., 'Paris, France'.")
-        
-        latitude = location.latitude
-        longitude = location.longitude
-        
-        # Get timezone from lat/lon
-        tf = timezonefinder.TimezoneFinder()
-        timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
-        if not timezone_str:
-            raise HTTPException(status_code=404, detail="Timezone not found for this location.")
+        # Load city cache
+        city_cache = load_city_cache()
+
+        # Check cache first
+        if data.city in city_cache:
+            latitude = city_cache[data.city]['latitude']
+            longitude = city_cache[data.city]['longitude']
+            timezone_str = city_cache[data.city]['timezone']
+        else:
+            # Get lat/lon from city
+            geolocator = Nominatim(user_agent="astro_app")
+            location = geolocator.geocode(data.city, timeout=5)  # Reduced timeout
+            if not location:
+                raise HTTPException(status_code=404, detail="City not found. Try including country, e.g., 'Paris, France'.")
+            
+            latitude = location.latitude
+            longitude = location.longitude
+            
+            # Get timezone from lat/lon
+            tf = timezonefinder.TimezoneFinder()
+            timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
+            if not timezone_str:
+                raise HTTPException(status_code=404, detail="Timezone not found for this location.")
+            
+            # Save to cache
+            city_cache[data.city] = {
+                'latitude': latitude,
+                'longitude': longitude,
+                'timezone': timezone_str
+            }
+            save_city_cache(city_cache)
         
         # Convert local time to UTC
         local_tz = pytz.timezone(timezone_str)
         local_dt = datetime(data.year, data.month, data.day, data.hour, data.minute)
         try:
-            utc_dt = local_tz.localize(local_dt, is_dst=None).astimezone(pytz.utc)  # Handle DST ambiguity
+            utc_dt = local_tz.localize(local_dt, is_dst=None).astimezone(pytz.utc)
         except pytz.AmbiguousTimeError:
             raise HTTPException(status_code=400, detail="Ambiguous time due to DST. Specify exact DST status if needed.")
         except pytz.UnknownTimeZoneError:
             raise HTTPException(status_code=400, detail="Invalid timezone.")
         
-        # Convert to Julian Day for Swiss Ephemeris
+        # Convert to Julian Day
         jd = swe.utc_to_jd(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour, utc_dt.minute, utc_dt.second, 1)[1]
         
-        # Add house cusps and angles (Placidus system)
+        # House cusps and angles (Placidus)
         house_data = swe.houses(jd, latitude, longitude, b'P')
-        cusps = house_data[0]  # 12 house cusps
-        ascmc = house_data[1]  # Asc, MC, ARMC, etc.
+        cusps = house_data[0]
+        ascmc = house_data[1]
         
         # Obliquity (epsilon)
         eps = swe.calc_ut(jd, swe.ECL_NUT)[0][0]
@@ -84,27 +115,26 @@ def calculate_positions(data: BirthData):
             'Pluto': swe.PLUTO,
         }
         
-        # Zodiac signs list
+        # Zodiac signs
         signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
         
-        # Calculate planet positions (longitudes)
+        # Planet data
         planets_lon = {}
         planet_data = {}
         for planet, ipl in planet_ids.items():
             xx = swe.calc_ut(jd, ipl)[0]
             lon = xx[0] % 360
             lat = xx[1]
-            speed = xx[3]  # For retrograde
+            speed = xx[3]
             retrograde = speed < 0
             degrees = int(lon)
             minutes = int((lon - degrees) * 60)
             sign_index = int(lon // 30)
             sign = signs[sign_index]
-            # House calculation
             house_pos = swe.house_pos(ascmc[2], latitude, eps, [lon, lat], b'P')
             house = int(house_pos)
             fraction = house_pos - house
-            if fraction > 0.9:  # Close to next cusp
+            if fraction > 0.9:
                 house += 1
                 if house > 12:
                     house = 1
@@ -116,7 +146,7 @@ def calculate_positions(data: BirthData):
             }
             planets_lon[planet] = lon
         
-        # House data with cusps and signs
+        # House data
         houses = []
         for i in range(12):
             cusp = cusps[i] % 360
@@ -128,7 +158,7 @@ def calculate_positions(data: BirthData):
                 'sign': sign
             })
         
-        # Angles (Ascendant, Midheaven, Vertex, Antivertex, IC)
+        # Angles
         angles = {
             'Ascendant': f"{ascmc[0]:.2f} degrees",
             'Midheaven': f"{ascmc[1]:.2f} degrees",
@@ -137,7 +167,7 @@ def calculate_positions(data: BirthData):
             'IC': f"{(ascmc[1] + 180) % 360:.2f} degrees"
         }
         
-        # Aspect definitions (major aspects with orbs)
+        # Aspects
         aspect_types = {
             'Conjunction': (0, 8),
             'Sextile': (60, 4),
@@ -145,12 +175,10 @@ def calculate_positions(data: BirthData):
             'Trine': (120, 6),
             'Opposition': (180, 8),
         }
-        
-        # Calculate aspects
         aspects = []
         for p1, p2 in itertools.combinations(planet_ids.keys(), 2):
             diff = abs(planets_lon[p1] - planets_lon[p2])
-            diff = min(diff, 360 - diff)  # Shortest arc
+            diff = min(diff, 360 - diff)
             for asp_name, (target, orb) in aspect_types.items():
                 if abs(diff - target) <= orb:
                     aspects.append({
@@ -173,5 +201,5 @@ def calculate_positions(data: BirthData):
             'aspects': aspects
         }
     except Exception as e:
-        print("Error:", traceback.format_exc())  # Log to console for debugging
+        print("Error:", traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
