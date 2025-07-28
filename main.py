@@ -25,14 +25,14 @@ app = FastAPI()
 cred_data = os.getenv("FIREBASE_CREDENTIALS")
 if cred_data:
     cred = credentials.Certificate(json.loads(cred_data))
+    initialize_app(cred)
 else:
-    cred = credentials.Certificate("/app/astrology-app-9c2e9-firebase-adminsdk.json")
-initialize_app(cred)
+    logger.warning("FIREBASE_CREDENTIALS not set, skipping Firebase initialization for local development")
 
 # CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://astrology-app-sigma.vercel.app"],
+    allow_origins=["https://astrology-app-sigma.vercel.app", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -82,10 +82,14 @@ async def transits(request: Request, data: TransitData):
 
 @app.post("/save-chart")
 async def save_chart_endpoint(request: Request, chart_data: ChartData):
+    if not os.getenv("FIREBASE_CREDENTIALS"):
+        raise HTTPException(status_code=503, detail="Firebase not initialized for local development")
     uid = await verify_firebase_token(request)
     return save_chart(uid, chart_data.chart_type, chart_data.birth_data, chart_data.chart_data)
 
 @app.get("/get-charts")
 async def get_charts_endpoint(request: Request):
+    if not os.getenv("FIREBASE_CREDENTIALS"):
+        raise HTTPException(status_code=503, detail="Firebase not initialized for local development")
     uid = await verify_firebase_token(request)
     return get_charts(uid)

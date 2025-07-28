@@ -1,9 +1,20 @@
 import sqlite3
 import json
 from datetime import datetime
+import os
+
+def adapt_datetime(dt):
+    return dt.isoformat()
+
+def convert_datetime(s):
+    return datetime.fromisoformat(s.decode())
+
+sqlite3.register_adapter(datetime, adapt_datetime)
+sqlite3.register_converter("TIMESTAMP", convert_datetime)
 
 def save_chart(uid, chart_type, birth_data, chart_data):
-    conn = sqlite3.connect('charts.db')
+    db_path = os.getenv("TEST_DB_PATH", "charts.db")
+    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS charts 
                      (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, type TEXT, birth_data TEXT, chart_data TEXT, created_at TIMESTAMP)''')
@@ -14,7 +25,8 @@ def save_chart(uid, chart_type, birth_data, chart_data):
     return {"message": "Chart saved successfully"}
 
 def get_charts(uid):
-    conn = sqlite3.connect('charts.db')
+    db_path = os.getenv("TEST_DB_PATH", "charts.db")
+    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
     cursor = conn.cursor()
     cursor.execute('SELECT id, type, birth_data, chart_data, created_at FROM charts WHERE user_id = ?', (uid,))
     charts = cursor.fetchall()

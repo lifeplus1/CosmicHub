@@ -5,11 +5,20 @@ import os
 
 @pytest.fixture
 def db_setup():
-    if os.path.exists("test_charts.db"):
-        os.remove("test_charts.db")
+    db_path = "test_charts_unique.db"
+    if os.path.exists(db_path):
+        os.remove(db_path)
+    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS charts 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, type TEXT, birth_data TEXT, chart_data TEXT, created_at TIMESTAMP)''')
+    conn.commit()
+    conn.close()
+    os.environ["TEST_DB_PATH"] = db_path
     yield
-    if os.path.exists("test_charts.db"):
-        os.remove("test_charts.db")
+    if os.path.exists(db_path):
+        os.remove(db_path)
+    os.environ.pop("TEST_DB_PATH", None)
 
 def test_save_and_get_charts(db_setup):
     uid = "test_user"
