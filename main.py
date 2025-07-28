@@ -39,7 +39,7 @@ app.add_middleware(
 )
 
 # API Key auth (change 'your_api_key' to a secret in production)
-API_KEY = "your_api_key"
+API_KEY = os.getenv("API_KEY", "your_api_key")  # Fallback for local testing
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 async def get_api_key(api_key: str = Security(api_key_header)):
