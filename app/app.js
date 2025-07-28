@@ -13,7 +13,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const API_BASE_URL = "https://astrology-app-<new-id>.onrender.com"; // Replace with new Render URL
+const API_BASE_URL = "https://astrology-app-0emh.onrender.com"; // Replace with actual Render URL
 
 async function calculateChart(birthData) {
     try {
@@ -53,7 +53,6 @@ document.getElementById("chart-form")?.addEventListener("submit", async (e) => {
     }
 });
 
-// Monitor authentication state
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("User logged in:", user.uid);
