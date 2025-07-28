@@ -3,38 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <title>Astrology App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        form { border: 1px solid #ddd; padding: 20px; background: #f9f9f9; }
+        label { display: block; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        pre { white-space: pre-wrap; } /* Fallback for raw JSON */
+    </style>
 </head>
 <body>
     <h1>Birth Chart Calculator</h1>
     <form id="birthForm">
-        <label>Year: <input type="number" name="year" required></label><br>
-        <label>Month: <input type="number" name="month" min="1" max="12" required></label><br>
-        <label>Day: <input type="number" name="day" min="1" max="31" required></label><br>
-        <label>Hour: <input type="number" name="hour" min="0" max="23" required></label><br>
-        <label>Minute: <input type="number" name="minute" min="0" max="59" required></label><br>
-        <label>City: <input type="text" name="city" required placeholder="e.g., New York, USA"></label><br>
+        <label>Year: <input type="number" name="year" required></label>
+        <label>Month: <input type="number" name="month" min="1" max="12" required></label>
+        <label>Day: <input type="number" name="day" min="1" max="31" required></label>
+        <label>Hour: <input type="number" name="hour" min="0" max="23" required></label>
+        <label>Minute: <input type="number" name="minute" min="0" max="59" required></label>
+        <label>City: <input type="text" name="city" required placeholder="e.g., New York, USA"></label>
         <button type="submit">Calculate</button>
     </form>
     <div id="result"></div>
 
     <script>
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: AbortSignal.timeout(90000)  // 90s timeout
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
         document.getElementById('birthForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
             try {
-                const response = await fetch('https://astrology-app-065g.onrender.com/calculate', {
+                const result = await fetchWithRetry('https://astrology-app-065g.onrender.com/calculate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const result = await response.json();
-                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                displayResult(result);
             } catch (error) {
                 document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
             }
         });
-    </script>
+
+        function displayResult(result) {
+            let html = '<h2>Resolved Location</h2>';
+            html += `<p>City: ${result.resolved_location.city}<br>Lat: ${result.resolved_location.latitude}<br>Lon: ${result.resolved_location.longitude}<br>Timezone: ${result.resolved_location.timezone}</p>`;
+
+            html += '<h2>Planets</h2><table><tr><th>Planet</th><th>Position</th><th>Sign</th><th>House</th><th>Retrograde</th></tr>';
+            for (let planet in result.planets) {
+                let p = result.planets[planet];
+                html += `<tr><td>${planet}</td><td>${p.position}</td><td>${p.sign}</td><td>${p.house}</td><td>${p.retrograde ? 'Yes' : 'No'}</td></tr>`;
+            }
+            html += '</table>';
+
+            html += '<h2>Houses</h2><table><tr><th>House</th><th>Cusp</th><th>Sign</th></tr>';
+            result.houses.forEach(h => {
+                html += `<tr><td>${h.house}</td><td>${h.cusp}</td><td>${h.sign}</td></tr>`;
+            });
+            html += '</table>';
+
+            html += '<h2>Angles</h2><table><tr><th>Angle</th><th>Position</th></tr>';
+            for (let angle in result.angles) {
+                html += `<tr><td>${angle}</td><td>${result.angles[angle]}</td></tr>`;
+            }
+            html += '</table>';
+
+            html += '<h2>Aspects</h2><table><tr><th>Planet1</th><th>Planet2</th><th>Aspect</th><th>Orb</th></tr>';
+            result.aspects.forEach(a => {
+                html += `<tr><td>${a.planet1}</td><td>${a.planet2}</td><td>${a.aspect}</td><td>${a.orb}</td></tr>`;
+            });
+            html += '</table>';
+
+            document.getElementById('result').innerHTML = html;
+        }
+</script>
 </body>
 </html>
