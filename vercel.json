@@ -1,4 +1,15 @@
 {
+    "version": 2,
+    "builds": [
+        {
+            "src": "frontend/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "api/get-api-key.js",
+            "use": "@vercel/node"
+        }
+    ],
     "routes": [
         {
             "src": "/api/get-api-key",
