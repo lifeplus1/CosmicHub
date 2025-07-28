@@ -188,13 +188,19 @@ async def calculate_positions(data: BirthData):
             'IC': f"{(ascmc[1] + 180) % 360:.2f} degrees"
         }
         
-        # Aspects
-        aspect_types = {
-            'Conjunction': (0, 8),
-            'Sextile': (60, 4),
-            'Square': (90, 6),
-            'Trine': (120, 6),
-            'Opposition': (180, 8),
+        # Aspect definitions (major and minor with orbs)
+    aspect_types = {
+        'Conjunction': (0, 8),
+        'Semi-Sextile': (30, 2),
+        'Sextile': (60, 4),
+        'Quintile': (72, 2),
+        'Square': (90, 6),
+        'Trine': (120, 6),
+        'Sesquiquadrate': (135, 3),
+        'Bi-Quintile': (144, 2),
+        'Quincunx': (150, 3),
+        'Opposition': (180, 8),
+    }
         }
         aspects = []
         for p1, p2 in itertools.combinations(planet_ids.keys(), 2):
