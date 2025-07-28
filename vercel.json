@@ -3,6 +3,10 @@
         {
             "src": "/api/get-api-key",
             "dest": "/api/get-api-key.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/frontend/$1"
         }
     ]
 }

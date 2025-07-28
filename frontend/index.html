@@ -129,14 +129,18 @@
                 // Fetch API key
                 let API_KEY = '';
                 try {
-                    const response = await fetch('/api/get-api-key');
-                    if (!response.ok) throw new Error(`Failed to fetch API key: HTTP ${response.status}`);
+                    const response = await fetch('/api/get-api-key', { method: 'GET' });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Failed to fetch API key: HTTP ${response.status} - ${errorText}`);
+                    }
                     const data = await response.json();
                     API_KEY = data.apiKey;
-                    if (!API_KEY) throw new Error('API key not found');
+                    if (!API_KEY) throw new Error('API key not found in response');
+                    console.log('API key fetched successfully');
                 } catch (error) {
-                    console.error('Failed to fetch API key:', error);
-                    document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: Unable to load API key. Please try again later.</p>`;
+                    console.error('Failed to fetch API key:', error.message);
+                    document.getElementById('result').innerHTML = `<p class="alert alert-danger">Error: Unable to load API key - ${error.message}. Please check server configuration or try again later.</p>`;
                     return;
                 }
 
@@ -215,7 +219,7 @@
                             const angle = (lon * Math.PI / 180) - (Math.PI / 2);
                             svg.append('text')
                                 .attr('x', Math.cos(angle) * (radius - 40))
-                                .attr('y', Math.sin(angle) * (radius - 40))
+                                .attr('y', Math.sin(angle) * (radius - 30))
                                 .attr('text-anchor', 'middle')
                                 .text(planet.substring(0, 3))
                                 .attr('fill', planets[planet].retrograde ? 'red' : 'black');
