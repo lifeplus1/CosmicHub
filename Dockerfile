@@ -19,20 +19,21 @@ COPY cities.json .
 COPY ephe/ ./ephe/
 
 # Install and verify dependencies with debug logging
-RUN echo " Alemannic German
-    && pip3 cache purge \
-    && echo "Installing pyswisseph==2.10.3.2..." \
-    && pip3 install --no-cache-dir --force-reinstall --no-binary pyswisseph pyswisseph==2.10.3.2 -v 2>&1 | tee /app/pip_install_swisseph.log \
-    && echo "Verifying swisseph import..." \
-    && python3 -c "import swisseph; print('swisseph version: ' + swisseph.__version__)" 2>&1 | tee /app/swisseph_verify.log \
-    && echo "Installing requirements.txt..." \
-    && pip3 install --no-cache-dir -r requirements.txt -v 2>&1 | tee /app/pip_install_requirements.log \
-    && echo "Dependency installation complete."
+RUN echo "Starting dependency installation..." && \
+    pip3 cache purge && \
+    echo "Installing pyswisseph==2.10.3.2..." && \
+    pip3 install --no-cache-dir --force-reinstall --no-binary pyswisseph pyswisseph==2.10.3.2 -v 2>&1 | tee /app/pip_install_swisseph.log && \
+    echo "Verifying swisseph import..." && \
+    python3 -c "import swisseph; print('swisseph version: ' + swisseph.__version__)" 2>&1 | tee /app/swisseph_verify.log && \
+    echo "Installing requirements.txt..." && \
+    pip3 install --no-cache-dir -r requirements.txt -v 2>&1 | tee /app/pip_install_requirements.log && \
+    echo "Dependency installation complete."
 
 # Ensure log file directory is writable
 RUN mkdir -p /app && chmod -R 777 /app
 
 ENV LOG_FILE=/app/app.log
+ENV API_KEY=c3a579e58484f1eb21bfc96966df9a25
 
 EXPOSE $PORT
 

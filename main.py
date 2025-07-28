@@ -9,7 +9,6 @@ from backend.auth import verify_firebase_token
 from firebase_admin import credentials, initialize_app
 import os
 import sys
-
 from dotenv import load_dotenv
 
 load_dotenv()
