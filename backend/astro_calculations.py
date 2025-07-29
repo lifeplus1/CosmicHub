@@ -1,191 +1,123 @@
+import logging
+import pytz
 import swisseph as swe
 from datetime import datetime
-import pytz
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
-import logging
 import os
 
 logger = logging.getLogger(__name__)
 
-signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
+# Set ephemeris path for pyswisseph (if needed)
+swe.set_ephe_path(os.getenv("EPHE_PATH", "/usr/share/swisseph"))
 
-def get_location(city, cities):
-    logger.debug(f"Looking up location for city: {city}")
-    if city in cities:
-        logger.debug(f"Found city in cities.json: {cities[city]}")
-        return cities[city]
-    geolocator = Nominatim(user_agent="astrology_app")
-    location = geolocator.geocode(city)
-    if not location:
-        logger.error(f"City not found: {city}")
-        raise ValueError(f"City not found: {city}")
-    tf = TimezoneFinder()
-    timezone = tf.timezone_at(lat=location.latitude, lng=location.longitude)
-    if not timezone:
-        logger.error(f"Timezone not found for {city}")
-        raise ValueError(f"Timezone not found for {city}")
-    result = {
-        "city": city,
-        "latitude": location.latitude,
-        "longitude": location.longitude,
-        "timezone": timezone
-    }
-    logger.debug(f"Resolved location: {result}")
-    return result
-
-def calculate_house(lon, houses):
-    for i, house in enumerate(houses):
-        cusp = house["cusp_degrees"]
-        next_cusp = houses[(i + 1) % 12]["cusp_degrees"]
-        if next_cusp < cusp:  # Handle wrap-around at 360°
-            if lon >= cusp or lon < next_cusp:
-                return i + 1
-        else:
-            if cusp <= lon < next_cusp:
-                return i + 1
-    logger.warning(f"Could not determine house for longitude {lon}")
-    return 1
-
-def calculate_aspects(planets, angles=None):
-    aspects = []
-    all_points = {**planets}
-    if angles:
-        all_points.update(angles)
-    aspect_types = [
-        (0, "Conjunction", 10),
-        (60, "Sextile", 6),
-        (90, "Square", 8),
-        (120, "Trine", 8),
-        (180, "Opposition", 10)
-    ]
-    points = list(all_points.keys())
-    for i, point1 in enumerate(points):
-        for point2 in points[i+1:]:
-            lon1 = all_points[point1]["lon"]
-            lon2 = all_points[point2]["lon"]
-            diff = abs(lon1 - lon2)
-            if diff > 180:
-                diff = 360 - diff
-            for angle, aspect_name, orb in aspect_types:
-                if abs(diff - angle) <= orb:
-                    aspects.append({
-                        "point1": point1,
-                        "point2": point2,
-                        "aspect": aspect_name,
-                        "orb": abs(diff - angle)
-                    })
-    logger.debug(f"Calculated aspects: {aspects}")
-    return aspects
-
-def calculate_chart(year, month, day, hour, minute, lat, lon, timezone):
-    logger.debug(f"Calculating chart for {year}-{month}-{day} {hour}:{minute} at {lat}, {lon}, {timezone}")
-    ephe_path = './ephe'
-    if not os.path.exists(ephe_path):
-        logger.error(f"Ephemeris path {ephe_path} does not exist")
-        raise FileNotFoundError(f"Ephemeris path {ephe_path} not found")
-    swe.set_ephe_path(ephe_path)
-    logger.debug(f"Set ephemeris path: {ephe_path}")
-
+def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None):
+    """
+    Calculate astrological chart data based on birth details.
+    Args:
+        year: Year of birth (e.g., 2000)
+        month: Month of birth (1-12)
+        day: Day of birth (1-31)
+        hour: Hour of birth (0-23)
+        minute: Minute of birth (0-59)
+        lat: Latitude of birth location (optional if city provided)
+        lon: Longitude of birth location (optional if city provided)
+        timezone: Timezone name (e.g., 'America/New_York', optional)
+        city: City name (e.g., 'New York, NY, USA') for geocoding if lat/lon missing
+    Returns:
+        dict: Dictionary containing the Julian day and other chart data
+    Raises:
+        ValueError: If the date, timezone, or coordinates are invalid
+    """
+    logger.debug(f"Input: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}")
     try:
+        # Geocode city if lat/lon not provided
+        if city and (lat is None or lon is None):
+            geolocator = Nominatim(user_agent="astrology_app")
+            location = geolocator.geocode(city)
+            if not location:
+                raise ValueError(f"Could not geocode city: {city}")
+            lat, lon = location.latitude, location.longitude
+            logger.debug(f"Geocoded {city} to lat={lat}, lon={lon}")
+
+        # Determine timezone if not provided
+        if not timezone and lat is not None and lon is not None:
+            tf = TimezoneFinder()
+            timezone = tf.timezone_at(lat=lat, lng=lon)
+            if not timezone:
+                raise ValueError(f"Could not determine timezone for lat={lat}, lon={lon}")
+            logger.debug(f"Inferred timezone: {timezone}")
+        timezone = timezone or "UTC"
+
+        # Validate and convert to UTC
         tz = pytz.timezone(timezone)
         dt = datetime(year, month, day, hour, minute)
+        logger.debug(f"Local datetime: {dt}")
         dt_utc = tz.localize(dt).astimezone(pytz.UTC)
         logger.debug(f"UTC datetime: {dt_utc}")
-        jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, dt_utc.second, 1)
-        if jd[0] != 0:
-            logger.error(f"Invalid Julian day: {jd}")
-            raise ValueError("Invalid date for Julian day calculation")
-        jd = jd[1]
-        logger.debug(f"Julian day: {jd}")
-    except Exception as e:
-        logger.error(f"Failed to calculate Julian day: {str(e)}")
-        raise
 
-    try:
-        houses_cusps, ascmc = swe.houses(jd, lat, lon, b'P')
-        houses = []
-        for i, cusp in enumerate(houses_cusps):
-            houses.append({
-                "house": i + 1,
-                "cusp": f"{int(cusp % 30)}°{signs[int(cusp / 30)]}{int((cusp % 30 - int(cusp % 30)) * 60)}'",
-                "sign": signs[int(cusp / 30)],
-                "cusp_degrees": cusp
-            })
-        logger.debug(f"Houses: {houses}")
-    except Exception as e:
-        logger.error(f"Failed to calculate houses: {str(e)}")
-        raise
+        # Calculate Julian day
+        jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)  # Seconds=0
+        logger.debug(f"Julian day ET: {jd[0]}, UT: {jd[1]}")
+        julian_day = jd[1]  # Use UT for calculations
 
-    planets = {}
-    planet_ids = [
-        (swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"),
-        (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), (swe.SATURN, "Saturn"), (swe.URANUS, "Uranus"),
-        (swe.NEPTUNE, "Neptune"), (swe.PLUTO, "Pluto"), (swe.CHIRON, "Chiron"),
-        (swe.TRUE_NODE, "North Node")
-    ]
-    try:
-        for planet_id, name in planet_ids:
-            result = swe.calc_ut(jd, planet_id)
-            lon = result[0]
-            sign = signs[int(lon / 30)]
-            house = calculate_house(lon, houses)
-            retrograde = result[3] < 0 if len(result) > 3 else False
-            planets[name] = {
-                "position": f"{int(lon % 30)}°{sign}{int((lon % 30 - int(lon % 30)) * 60)}'",
-                "sign": sign,
-                "house": house,
-                "retrograde": retrograde,
-                "lon": lon
-            }
-            logger.debug(f"{name}: {planets[name]}")
-        # South Node is opposite North Node
-        north_node_lon = planets["North Node"]["lon"]
-        south_node_lon = (north_node_lon + 180) % 360
-        planets["South Node"] = {
-            "position": f"{int(south_node_lon % 30)}°{signs[int(south_node_lon / 30)]}{int((south_node_lon % 30 - int(south_node_lon % 30)) * 60)}'",
-            "sign": signs[int(south_node_lon / 30)],
-            "house": calculate_house(south_node_lon, houses),
-            "retrograde": False,
-            "lon": south_node_lon
+        # Placeholder for additional calculations
+        chart_data = {
+            "julian_day": julian_day,
+            "latitude": lat,
+            "longitude": lon,
+            "timezone": timezone
         }
-        logger.debug(f"South Node: {planets['South Node']}")
-    except Exception as e:
-        logger.error(f"Failed to calculate planets: {str(e)}")
-        raise
 
+        return chart_data
+
+    except swe.SwissephError as e:
+        logger.error(f"SwissephError in Julian day calculation: {str(e)}")
+        raise ValueError(f"Invalid date for Julian day calculation: {str(e)}")
+    except pytz.exceptions.UnknownTimeZoneError:
+        logger.error(f"Invalid timezone: {timezone}")
+        raise ValueError(f"Invalid timezone: {timezone}")
+    except Exception as e:
+        logger.error(f"Error in calculation: {str(e)}")
+        raise ValueError(f"Invalid date for Julian day calculation: {str(e)}")
+
+def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None) -> bool:
+    """
+    Validate input parameters for chart calculation.
+    Returns True if valid, raises ValueError otherwise.
+    """
+    logger.debug(f"Validating: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}")
     try:
-        angles = {
-            "Ascendant": {
-                "lon": ascmc[0],
-                "position": f"{int(ascmc[0] % 30)}°{signs[int(ascmc[0] / 30)]}{int((ascmc[0] % 30 - int(ascmc[0] % 30)) * 60)}'",
-                "sign": signs[int(ascmc[0] / 30)],
-                "house": 1
-            },
-            "Midheaven": {
-                "lon": ascmc[1],
-                "position": f"{int(ascmc[1] % 30)}°{signs[int(ascmc[1] / 30)]}{int((ascmc[1] % 30 - int(ascmc[1] % 30)) * 60)}'",
-                "sign": signs[int(ascmc[1] / 30)],
-                "house": 10
-            }
+        # Validate date
+        datetime(year, month, day, hour, minute)
+        # Validate lat/lon if provided
+        if lat is not None and lon is not None:
+            if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                raise ValueError(f"Invalid coordinates: lat={lat}, lon={lon}")
+        # Validate timezone if provided
+        if timezone:
+            pytz.timezone(timezone)
+        return True
+    except Exception as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise ValueError(f"Invalid input: {str(e)}")
+
+def get_planetary_positions(julian_day: float) -> dict:
+    """
+    Calculate planetary positions for a given Julian day.
+    Args:
+        julian_day: Julian day (UT) for calculations
+    Returns:
+        dict: Planetary positions (e.g., Sun, Moon)
+    """
+    try:
+        planets = {
+            "sun": swe.calc_ut(julian_day, swe.SUN)[0],
+            "moon": swe.calc_ut(julian_day, swe.MOON)[0],
+            # Add other planets as needed
         }
-        logger.debug(f"Angles: {angles}")
-    except Exception as e:
-        logger.error(f"Failed to calculate angles: {str(e)}")
-        raise
-
-    try:
-        aspects = calculate_aspects(planets, angles)
-    except Exception as e:
-        logger.error(f"Failed to calculate aspects: {str(e)}")
-        raise
-
-    result = {
-        "resolved_location": {"latitude": lat, "longitude": lon, "timezone": timezone},
-        "planets": planets,
-        "houses": houses,
-        "angles": angles,
-        "aspects": aspects
-    }
-    logger.debug(f"Chart result: {result}")
-    return result
+        logger.debug(f"Planetary positions: {planets}")
+        return planets
+    except swe.SwissephError as e:
+        logger.error(f"Error calculating planetary positions: {str(e)}")
+        raise ValueError(f"Error in planetary position calculation: {str(e)}")
