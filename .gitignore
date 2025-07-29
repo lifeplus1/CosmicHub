@@ -22,4 +22,4 @@ venv/
 .vscode/
 .idea/
 *.sublime-project
-*.sublime-workspace
+*.sublime-workspacefirebase-adminsdk.json
