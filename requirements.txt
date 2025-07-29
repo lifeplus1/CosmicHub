@@ -1,9 +1,7 @@
-fastapi[all]
-uvicorn
-pyswisseph==2.10.3.2
-pytz
-geopy
-timezonefinder
-firebase-admin
-pytest
-python-dotenv
+fastapi>=0.115.0
+uvicorn>=0.30.6
+geopy>=2.4.1
+timezonefinder>=6.5.0
+pyswisseph>=2.10.3.2
+pydantic>=2.9.2
+pytz>=2024.1
