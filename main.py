@@ -75,3 +75,25 @@ async def save_chart(data: BirthData, uid: str = Depends(verify_firebase_token))
     except Exception as e:
         logger.error(f"Error saving chart: {str(e)}")
         raise HTTPException(500, "Internal server error")
+
+
+import stripe
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+@app.post("/create-checkout-session")
+async def create_checkout_session(uid: str = Depends(verify_firebase_token)):
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price": "price_12345",  # Replace with your Stripe price ID
+                "quantity": 1
+            }],
+            mode="subscription",
+            success_url="https://astrology-app-sigma.vercel.app/success",
+            cancel_url="https://astrology-app-sigma.vercel.app/cancel"
+        )
+        return {"id": session.id}
+    except Exception as e:
+        logger.error(f"Error creating checkout session: {str(e)}")
+        raise HTTPException(500, str(e))

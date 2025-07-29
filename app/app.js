@@ -44,6 +44,10 @@ async function saveChart(chartData) {
     const user = auth.currentUser;
     if (!user) throw new Error("User not logged in. Please log in to save charts.");
     try {
+        const charts = await getCharts();
+        if (charts.length >= 3 && !user.isPremium) {
+            throw new Error("Free chart limit reached. Upgrade to premium.");
+        }
         const token = await user.getIdToken();
         const response = await fetch(`${API_BASE_URL}/save-chart`, {
             method: "POST",
@@ -55,7 +59,7 @@ async function saveChart(chartData) {
         });
         if (!response.ok) throw new Error((await response.json()).detail || "Failed to save chart");
         console.log("Chart saved for user:", user.uid);
-        await addDoc(collection(db, "users", user.uid, "charts"), chartData); // Optional: Save to Firestore
+        await addDoc(collection(db, "users", user.uid, "charts"), chartData); // Optional
     } catch (error) {
         console.error("Error saving chart:", error);
         throw new Error(`Failed to save chart: ${error.message}`);
@@ -147,3 +151,4 @@ onAuthStateChanged(auth, (user) => {
         output.innerHTML = `<p>Not logged in. Please log in to save or view charts.</p>`;
     }
 });
+
