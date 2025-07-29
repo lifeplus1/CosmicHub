@@ -1,8 +1,9 @@
-# In astro_calculations.py
+# In backend/astro_calculations.py
 from datetime import datetime
 import pytz
 import swisseph as swe
 import logging
+import os  # Ensure os is imported
 from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
@@ -10,10 +11,27 @@ from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
+def get_planetary_positions(julian_day: float) -> dict:
+    logger.debug(f"Calculating planetary positions for JD: {julian_day}")
+    try:
+        planets = {
+            "sun": swe.calc_ut(julian_day, swe.SUN)[0][0],
+            "moon": swe.calc_ut(julian_day, swe.MOON)[0][0],
+            "mercury": swe.calc_ut(julian_day, swe.MERCURY)[0][0],
+            "venus": swe.calc_ut(julian_day, swe.VENUS)[0][0],
+            "mars": swe.calc_ut(julian_day, swe.MARS)[0][0],
+            "jupiter": swe.calc_ut(julian_day, swe.JUPITER)[0][0],
+            "saturn": swe.calc_ut(julian_day, swe.SATURN)[0][0]
+    }
+        logger.debug(f"Planetary positions: {planets}")
+        return planets
+    except Exception as e:
+        logger.error(f"Error in planetary positions: {str(e)}", exc_info=True)
+        raise ValueError(f"Error in planetary calculation: {str(e)}")
+
 def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None) -> bool:
     logger.debug(f"Validating inputs: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}")
     try:
-        # Validate date
         if not (1900 <= year <= 2100):
             logger.error(f"Year {year} outside valid range (1900-2100)")
             raise ValueError(f"Year {year} must be between 1900 and 2100")
@@ -97,6 +115,9 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
             loc = get_location(city)
             lat, lon = loc["latitude"], loc["longitude"]
             timezone = loc["timezone"] or timezone
+        if not lat or not lon:
+            logger.error("Latitude and longitude are required")
+            raise ValueError("Latitude and longitude are required")
         timezone = timezone or "UTC"
         logger.debug(f"Using timezone: {timezone}")
         tz = pytz.timezone(timezone)
@@ -105,29 +126,26 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
         dt_utc = tz.localize(dt).astimezone(pytz.UTC)
         logger.debug(f"UTC datetime: {dt_utc}")
         jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)
-        logger.debug(f"Julian day result: {jd}")
-        if jd[0] != 0:
+        logger.debug(f"Julian day result: status={jd[0]}, julian_day={jd[1]}")
+        if jd[0] < 0:  # Check for error status
             logger.error(f"Invalid Julian day calculation, status: {jd[0]}")
             raise ValueError(f"Invalid Julian day calculation, status: {jd[0]}")
         julian_day = jd[1]
 
-        # Calculate houses
         houses = swe.houses(julian_day, lat, lon, b'P')[0]
         houses_data = [{"house": i+1, "cusp": float(cusp)} for i, cusp in enumerate(houses)]
 
-        # Calculate angles
         angles = {
             "ascendant": float(houses[0]),
             "mc": float(houses[9])
         }
 
-        # Calculate aspects
         planets = get_planetary_positions(julian_day)
         aspects = []
         for p1, pos1 in planets.items():
             for p2, pos2 in planets.items():
                 if p1 < p2:
-                    diff = abs(pos1 - pos2)
+                    diff = abs(pos1 - pos2)  # Use longitude directly (float values)
                     if diff > 180:
                         diff = 360 - diff
                     if 0 <= diff <= 2:
@@ -140,7 +158,7 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
             "latitude": float(lat),
             "longitude": float(lon),
             "timezone": timezone,
-            "planets": {k: float(v[0]) if isinstance(v, tuple) else float(v) for k, v in planets.items()},
+            "planets": {k: float(v) for k, v in planets.items()},  # Use float directly
             "houses": houses_data,
             "angles": angles,
             "aspects": aspects
