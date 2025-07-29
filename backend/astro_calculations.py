@@ -82,11 +82,11 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
         }
         logger.debug(f"Chart data: {chart_data}")
         return chart_data
-    except swe.SwissephError as e:
-        logger.error(f"SwissephError: {str(e)}")
-        raise ValueError(f"Invalid date: {str(e)}")
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
+        logger.error(f"Unexpected error: {str(e)}")
         raise ValueError(f"Invalid date or calculation: {str(e)}")
 
 def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None) -> bool:
@@ -117,6 +117,6 @@ def get_planetary_positions(julian_day: float) -> dict:
         }
         logger.debug(f"Planetary positions: {planets}")
         return planets
-    except swe.SwissephError as e:
+    except Exception as e:
         logger.error(f"Error in planetary positions: {str(e)}")
         raise ValueError(f"Error in planetary calculation: {str(e)}")
