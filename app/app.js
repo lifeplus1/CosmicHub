@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { loadStripe } from "https://js.stripe.com/v3/buy-button.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDEQ5i07TflWq30lwBsoJLzGNEUgSNLTOw",
@@ -59,7 +60,7 @@ async function saveChart(chartData) {
         });
         if (!response.ok) throw new Error((await response.json()).detail || "Failed to save chart");
         console.log("Chart saved for user:", user.uid);
-        await addDoc(collection(db, "users", user.uid, "charts"), chartData); // Optional
+        await addDoc(collection(db, "users", user.uid, "charts"), chartData); // Optional Firestore save
     } catch (error) {
         console.error("Error saving chart:", error);
         throw new Error(`Failed to save chart: ${error.message}`);
@@ -92,6 +93,9 @@ function renderChart(chart) {
         <p>Timezone: ${chart.timezone}</p>
         <h4>Planets</h4>
         <ul>${Object.entries(chart.planets || {}).map(([name, pos]) => `<li>${name}: ${pos.toFixed(2)}°</li>`).join('')}</ul>
+        ${chart.houses ? `<h4>Houses</h4><ul>${chart.houses.map(h => `<li>House ${h.house}: ${h.cusp.toFixed(2)}°</li>`).join('')}</ul>` : ''}
+        ${chart.angles ? `<h4>Angles</h4><ul>${Object.entries(chart.angles).map(([name, pos]) => `<li>${name}: ${pos.toFixed(2)}°</li>`).join('')}</ul>` : ''}
+        ${chart.aspects ? `<h4>Aspects</h4><ul>${chart.aspects.map(a => `<li>${a.point1} ${a.aspect} ${a.point2} (orb: ${a.orb.toFixed(2)}°)</li>`).join('')}</ul>` : ''}
     `;
 }
 
@@ -143,6 +147,29 @@ document.getElementById("view-charts")?.addEventListener("click", async () => {
     }
 });
 
+document.getElementById("subscribe")?.addEventListener("click", async () => {
+    const output = document.getElementById("chart-output");
+    output.innerHTML = "<p>Redirecting to subscription...</p>";
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Please log in to subscribe.");
+        const token = await user.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        const session = await response.json();
+        if (!response.ok) throw new Error(session.detail || "Failed to create checkout session");
+        const stripe = await loadStripe("pk_test_51Rq7i8ECbCGPGjQmaIOVV20NdgVCBeqoaM6jJdsgQnGofLycSPknCTf6NrO8xaogCjS1O30cHx1OCvRWXIMTyJDP0093jgFNj3"); // Replace with your Stripe public key
+        await stripe.redirectToCheckout({ sessionId: session.id });
+    } catch (error) {
+        output.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+});
+
 onAuthStateChanged(auth, (user) => {
     const output = document.getElementById("chart-output");
     if (user) {
@@ -151,4 +178,3 @@ onAuthStateChanged(auth, (user) => {
         output.innerHTML = `<p>Not logged in. Please log in to save or view charts.</p>`;
     }
 });
-
