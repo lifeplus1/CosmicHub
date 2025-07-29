@@ -22,6 +22,7 @@ def get_location(city: str) -> dict:
         timezone = tf.timezone_at(lat=lat, lng=lon)
         if not timezone:
             raise ValueError(f"Could not determine timezone for {city}")
+        logger.debug(f"Resolved location: lat={lat}, lon={lon}, tz={timezone}")
         return {"latitude": lat, "longitude": lon, "timezone": timezone}
     except Exception as e:
         logger.error(f"Error in get_location: {str(e)}")
@@ -40,17 +41,19 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
         dt_utc = tz.localize(dt).astimezone(pytz.UTC)
         logger.debug(f"UTC datetime: {dt_utc}")
         jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)
-        logger.debug(f"Julian day ET: {jd[0]}, UT: {jd[1]}")
+        logger.debug(f"Julian day result: {jd}")
+        if jd[0] != 0:
+            raise ValueError(f"Invalid Julian day calculation, status: {jd[0]}")
         julian_day = jd[1]
 
         # Calculate houses
         houses = swe.houses(julian_day, lat, lon, b'P')[0]  # Placidus system
-        houses_data = [{"house": i+1, "cusp": cusp} for i, cusp in enumerate(houses)]
+        houses_data = [{"house": i+1, "cusp": float(cusp)} for i, cusp in enumerate(houses)]
 
         # Calculate angles (ASC, MC)
         angles = {
-            "ascendant": houses[0],  # House 1 cusp
-            "mc": houses[9]         # House 10 cusp
+            "ascendant": float(houses[0]),  # House 1 cusp
+            "mc": float(houses[9])         # House 10 cusp
         }
 
         # Calculate aspects (simplified example)
@@ -63,27 +66,28 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
                     if diff > 180:
                         diff = 360 - diff
                     if 0 <= diff <= 2:  # Conjunction
-                        aspects.append({"point1": p1, "point2": p2, "aspect": "conjunction", "orb": diff})
+                        aspects.append({"point1": p1, "point2": p2, "aspect": "conjunction", "orb": float(diff)})
                     elif 178 <= diff <= 182:  # Opposition
-                        aspects.append({"point1": p1, "point2": p2, "aspect": "opposition", "orb": abs(180 - diff)})
+                        aspects.append({"point1": p1, "point2": p2, "aspect": "opposition", "orb": float(abs(180 - diff))})
 
         chart_data = {
-            "julian_day": julian_day,
-            "latitude": lat,
-            "longitude": lon,
+            "julian_day": float(julian_day),
+            "latitude": float(lat),
+            "longitude": float(lon),
             "timezone": timezone,
-            "planets": planets,
+            "planets": {k: float(v[0]) for k, v in planets.items()},
             "houses": houses_data,
             "angles": angles,
             "aspects": aspects
         }
+        logger.debug(f"Chart data: {chart_data}")
         return chart_data
     except swe.SwissephError as e:
         logger.error(f"SwissephError: {str(e)}")
         raise ValueError(f"Invalid date: {str(e)}")
     except Exception as e:
         logger.error(f"Error: {str(e)}")
-        raise ValueError(f"Invalid date: {str(e)}")
+        raise ValueError(f"Invalid date or calculation: {str(e)}")
 
 def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None) -> bool:
     logger.debug(f"Validating: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}")
