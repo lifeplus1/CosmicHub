@@ -18,7 +18,7 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://astrology-app-sigma.vercel.app"],  # Add your frontend URLs
+    allow_origins=["http://localhost:3000", "https://astrology-app-sigma.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,7 +67,6 @@ async def save_chart(data: BirthData, uid: str = Depends(verify_firebase_token))
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
         chart_data["user_id"] = uid
-        # Save to Firestore or PostgreSQL here
         return chart_data
     except ValueError as e:
         raise HTTPException(400, str(e))
