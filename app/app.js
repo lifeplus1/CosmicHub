@@ -2,12 +2,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/fireba
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY", // Replace with your Firebase config
-    authDomain: "astrology-app-9c2e9.firebaseapp.com",
-    projectId: "astrology-app-9c2e9",
-    storageBucket: "astrology-app-9c2e9.appspot.com",
-    messagingSenderId: "113047913682",
-    appId: "1:113047913682:web:4b4f2zH4Qb1Z1Z1Z1Z1Z1Z"
+  apiKey: "AIzaSyDEQ5i07TflWq30lwBsoJLzGNEUgSNLTOw",
+  authDomain: "astrology-app-9c2e9.firebaseapp.com",
+  projectId: "astrology-app-9c2e9",
+  storageBucket: "astrology-app-9c2e9.firebasestorage.app",
+  messagingSenderId: "341259782663",
+  appId: "1:341259782663:web:132d7b85d8518c5f3bf8a2",
+  measurementId: "G-M2776G401M"
 };
 
 const app = initializeApp(firebaseConfig);
