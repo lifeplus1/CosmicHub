@@ -4,7 +4,7 @@ import json
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from firebase_admin import credentials, auth, initialize_app
+from firebase_admin import credentials, firestore, auth, initialize_app
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from backend.astro_calculations import calculate_chart, get_location, validate_inputs, get_planetary_positions
 import stripe
@@ -103,15 +103,23 @@ async def calculate(data: BirthData, x_api_key: str = Header(...)):
         logger.error(f"Unexpected error in /calculate: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
+# Initialize Firestore
+db = firestore.client()
+
 # Save chart endpoint
 @app.post("/save-chart")
 async def save_chart(data: BirthData, uid: str = Depends(verify_firebase_token)):
-    logger.debug(f"Saving chart for user {uid}: {data.dict()}")
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
         chart_data["user_id"] = uid
-        return chart_data
+        chart_data["created_at"] = firestore.SERVER_TIMESTAMP
+        
+        # Save to Firestore
+        doc_ref = db.collection("users").document(uid).collection("charts").document()
+        doc_ref.set(chart_data)
+        logger.debug(f"Saved chart for user {uid}: {chart_data}")
+        return {"id": doc_ref.id, **chart_data}
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(400, str(e))
