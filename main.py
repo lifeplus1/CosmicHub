@@ -1,14 +1,21 @@
 import logging
 import os
 import json
-from fastapi import FastAPI
-from firebase_admin import credentials, initialize_app
+from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from firebase_admin import credentials, auth, initialize_app
+from fastapi.security import OAuth2AuthorizationCodeBearer
+from backend.astro_calculations import calculate_chart, get_location, validate_inputs, get_planetary_positions
+import stripe
 
+# Configure logging
 logging.basicConfig(level=logging.DEBUG, filename="/app/app.log", format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
 
+# Initialize Firebase Admin
 try:
     firebase_cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "/app/firebase-adminsdk.json")
     if os.path.exists(firebase_cred_path):
@@ -31,12 +38,49 @@ except Exception as e:
     logger.error(f"Firebase initialization failed: {str(e)}", exc_info=True)
     raise
 
+# Initialize FastAPI
 app = FastAPI()
-# Rest of main.py unchanged
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "https://astrology-app-sigma.vercel.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Pydantic model for birth data
+class BirthData(BaseModel):
+    year: int
+    month: int
+    day: int
+    hour: int
+    minute: int
+    city: str
+    timezone: str = None
+    lat: float = None
+    lon: float = None
+
+# Firebase token verification
+oauth2_scheme = OAuth2AuthorizationCodeBearer(
+    authorizationUrl="https://accounts.google.com/o/oauth2/auth",
+    tokenUrl="https://oauth2.googleapis.com/token"
+)
+
+async def verify_firebase_token(authorization: str = Header(...)):
+    try:
+        token = authorization.split("Bearer ")[1]
+        decoded = auth.verify_id_token(token)
+        return decoded["uid"]
+    except Exception as e:
+        logger.error(f"Firebase auth error: {str(e)}")
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+
+# Calculate endpoint
 @app.post("/calculate")
 async def calculate(data: BirthData, x_api_key: str = Header(...)):
-    logger.info(f"Received /calculate request: {data.dict()}")
+    logger.debug(f"Received data: {data.dict()}")
     try:
         if x_api_key != os.getenv("API_KEY"):
             logger.error(f"Invalid API key: {x_api_key}")
@@ -52,3 +96,45 @@ async def calculate(data: BirthData, x_api_key: str = Header(...)):
     except Exception as e:
         logger.error(f"Unexpected error in /calculate: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Internal server error: {str(e)}")
+
+# Save chart endpoint
+@app.post("/save-chart")
+async def save_chart(data: BirthData, uid: str = Depends(verify_firebase_token)):
+    logger.debug(f"Saving chart for user {uid}: {data.dict()}")
+    try:
+        chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
+        chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
+        chart_data["user_id"] = uid
+        return chart_data
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        logger.error(f"Error saving chart: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Internal server error: {str(e)}")
+
+# Stripe checkout session endpoint
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+@app.post("/create-checkout-session")
+async def create_checkout_session(uid: str = Depends(verify_firebase_token)):
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price": "price_12345",  # Replace with your Stripe price ID
+                "quantity": 1
+            }],
+            mode="subscription",
+            success_url="https://astrology-app-sigma.vercel.app/success",
+            cancel_url="https://astrology-app-sigma.vercel.app/cancel"
+        )
+        return {"id": session.id}
+    except Exception as e:
+        logger.error(f"Error creating checkout session: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Internal server error: {str(e)}")
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
