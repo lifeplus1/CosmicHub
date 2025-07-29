@@ -1,27 +1,38 @@
 import logging
 import os
 import json
-from fastapi import FastAPI, HTTPException, Header
-from firebase_admin import credentials, auth, initialize_app
+from fastapi import FastAPI
+from firebase_admin import credentials, initialize_app
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, filename="/app/app.log", format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
 
-firebase_creds = os.getenv("FIREBASE_CREDENTIALS")
-if not firebase_creds:
-    logger.error("FIREBASE_CREDENTIALS environment variable is not set")
-    raise ValueError("FIREBASE_CREDENTIALS not set")
 try:
-    creds_dict = json.loads(firebase_creds)
-except json.JSONDecodeError as e:
-    logger.error(f"Invalid FIREBASE_CREDENTIALS format: {str(e)}")
-    raise ValueError("Invalid FIREBASE_CREDENTIALS JSON")
-cred = credentials.Certificate(creds_dict)
-initialize_app(cred)
+    firebase_cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "/app/firebase-adminsdk.json")
+    if os.path.exists(firebase_cred_path):
+        logger.info(f"Using Firebase credentials file: {firebase_cred_path}")
+        cred = credentials.Certificate(firebase_cred_path)
+    else:
+        firebase_creds = os.getenv("FIREBASE_CREDENTIALS")
+        if not firebase_creds:
+            logger.error("FIREBASE_CREDENTIALS or FIREBASE_CREDENTIALS_PATH not set")
+            raise ValueError("FIREBASE_CREDENTIALS or FIREBASE_CREDENTIALS_PATH not set")
+        try:
+            creds_dict = json.loads(firebase_creds)
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid FIREBASE_CREDENTIALS format: {str(e)}")
+            raise ValueError(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
+        cred = credentials.Certificate(creds_dict)
+    initialize_app(cred)
+    logger.info("Firebase initialized successfully")
+except Exception as e:
+    logger.error(f"Firebase initialization failed: {str(e)}", exc_info=True)
+    raise
 
 app = FastAPI()
+# Rest of main.py unchanged
 
 @app.post("/calculate")
 async def calculate(data: BirthData, x_api_key: str = Header(...)):
