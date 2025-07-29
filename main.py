@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from firebase_admin import credentials, auth, initialize_app
 import os
+import json
 from backend.astro_calculations import calculate_chart, get_location, validate_inputs, get_planetary_positions
 import logging
 
@@ -10,7 +11,8 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Initialize Firebase Admin
-cred = credentials.Certificate(os.getenv("FIREBASE_CREDENTIALS"))
+firebase_creds = json.loads(os.getenv("FIREBASE_CREDENTIALS"))
+cred = credentials.Certificate(firebase_creds)
 initialize_app(cred)
 
 app = FastAPI()
