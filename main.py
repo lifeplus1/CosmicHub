@@ -80,19 +80,24 @@ async def verify_firebase_token(authorization: str = Header(...)):
 # Calculate endpoint
 @app.post("/calculate")
 async def calculate(data: BirthData, x_api_key: str = Header(...)):
-    logger.debug(f"Received data: {data.dict()}")
+    logger.debug(f"Received data: {data.dict()}, API Key: {x_api_key}")
     try:
-        if x_api_key != os.getenv("API_KEY"):
+        expected_key = os.getenv("API_KEY")
+        logger.debug(f"Expected API Key: {expected_key}")
+        if x_api_key != expected_key:
             logger.error(f"Invalid API key: {x_api_key}")
             raise HTTPException(401, "Invalid API key")
+        logger.debug("Starting input validation")
         validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
+        logger.debug("Input validation passed, calculating chart")
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
+        logger.debug("Chart calculation complete, fetching planetary positions")
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
         logger.debug(f"Chart calculated: {chart_data}")
         return chart_data
     except ValueError as e:
-        logger.error(f"Validation error: {str(e)}")
-        raise HTTPException(400, str(e))
+        logger.error(f"Validation error in /calculate: {str(e)}", exc_info=True)
+        raise HTTPException(400, f"Invalid input: {str(e)}")
     except Exception as e:
         logger.error(f"Unexpected error in /calculate: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Internal server error: {str(e)}")
