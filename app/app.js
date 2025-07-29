@@ -2,19 +2,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/fireba
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDEQ5i07TflWq30lwBsoJLzGNEUgSNLTOw",
-  authDomain: "astrology-app-9c2e9.firebaseapp.com",
-  projectId: "astrology-app-9c2e9",
-  storageBucket: "astrology-app-9c2e9.firebasestorage.app",
-  messagingSenderId: "341259782663",
-  appId: "1:341259782663:web:132d7b85d8518c5f3bf8a2",
-  measurementId: "G-M2776G401M"
+    apiKey: "AIzaSyDEQ5i07TflWq30lwBsoJLzGNEUgSNLTOw",
+    authDomain: "astrology-app-9c2e9.firebaseapp.com",
+    projectId: "astrology-app-9c2e9",
+    storageBucket: "astrology-app-9c2e9.firebasestorage.app",
+    messagingSenderId: "341259782663",
+    appId: "1:341259782663:web:132d7b85d8518c5f3bf8a2",
+    measurementId: "G-M2776G401M"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const API_BASE_URL = "https://astrology-app-0emh.onrender.com"; // Replace with actual Render URL
+const API_BASE_URL = "https://astrology-app-0emh.onrender.com";
 
 async function calculateChart(birthData) {
     try {
@@ -27,8 +27,8 @@ async function calculateChart(birthData) {
             body: JSON.stringify(birthData)
         });
         const data = await response.json();
-        if (!response.ok) throw new Error(data.detail || "Chart calculation failed");
-        console.log("Chart data:", data); // Debug
+        if (!response.ok || data.error) throw new Error(data.error || "Chart calculation failed");
+        console.log("Chart data:", data);
         return data;
     } catch (error) {
         console.error("Error calculating chart:", error);
@@ -38,37 +38,26 @@ async function calculateChart(birthData) {
 
 function renderChart(chart) {
     const output = document.getElementById("chart-output");
-    if (!chart.planets || !chart.houses || !chart.angles || !chart.aspects) {
-        output.innerHTML = "<p>Error: Incomplete chart data received.</p>";
+    if (!chart || !chart.planets || !chart.houses || !chart.angles || !chart.aspects) {
+        output.innerHTML = `<p>Error: Incomplete chart data received. ${chart?.error || ''}</p>`;
         console.error("Incomplete chart data:", chart);
         return;
     }
     output.innerHTML = `
         <h3>Chart Data</h3>
         <h4>Location</h4>
-        <p>Latitude: ${chart.resolved_location.latitude}</p>
-        <p>Longitude: ${chart.resolved_location.longitude}</p>
-        <p>Timezone: ${chart.resolved_location.timezone}</p>
+        <p>Latitude: ${chart.latitude}</p>
+        <p>Longitude: ${chart.longitude}</p>
+        <p>Timezone: ${chart.timezone}</p>
         <h4>Planets</h4>
-        <ul>
-            ${Object.entries(chart.planets).map(([name, data]) => `
-                <li>${name}: ${data.position}, ${data.sign}, House ${data.house}${data.retrograde ? ", Retrograde" : ""}</li>
-            `).join('')}
-        </ul>
+        <ul>${Object.entries(chart.planets).map(([name, data]) => `<li>${name}: ${data.position}, ${data.sign}, House ${data.house}${data.retrograde ? ", Retrograde" : ""}</li>`).join('')}</ul>
         <h4>Houses</h4>
-        <ul>
-            ${chart.houses.map(h => `<li>House ${h.house}: ${h.cusp}, ${h.sign}</li>`).join('')}
-        </ul>
+        <ul>${chart.houses.map(h => `<li>House ${h.house}: ${h.cusp}, ${h.sign}</li>`).join('')}</ul>
         <h4>Angles</h4>
-        <ul>
-            ${Object.entries(chart.angles).map(([name, data]) => `<li>${name}: ${data.position}, ${data.sign}, House ${data.house}</li>`).join('')}
-        </ul>
+        <ul>${Object.entries(chart.angles).map(([name, data]) => `<li>${name}: ${data.position}, ${data.sign}, House ${data.house}</li>`).join('')}</ul>
         <h4>Aspects</h4>
-        <ul>
-            ${chart.aspects.length ? chart.aspects.map(a => `<li>${a.point1} ${a.aspect} ${a.point2} (orb: ${a.orb.toFixed(2)}°)</li>`).join('') : '<li>No aspects</li>'}
-        </ul>
+        <ul>${chart.aspects.length ? chart.aspects.map(a => `<li>${a.point1} ${a.aspect} ${a.point2} (orb: ${a.orb.toFixed(2)}°)</li>`).join('') : '<li>No aspects</li>'}</ul>
     `;
-    // Add SVG wheel rendering logic here
 }
 
 document.getElementById("chart-form")?.addEventListener("submit", async (e) => {
