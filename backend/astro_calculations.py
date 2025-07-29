@@ -96,4 +96,23 @@ def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat
             pytz.timezone(timezone)
         return True
     except Exception as e:
-        logger.error(f
+        logger.error(f"Validation error: {str(e)}")
+        raise ValueError(f"Invalid input: {str(e)}")
+
+def get_planetary_positions(julian_day: float) -> dict:
+    logger.debug(f"Calculating planetary positions for JD: {julian_day}")
+    try:
+        planets = {
+            "sun": swe.calc_ut(julian_day, swe.SUN)[0],
+            "moon": swe.calc_ut(julian_day, swe.MOON)[0],
+            "mercury": swe.calc_ut(julian_day, swe.MERCURY)[0],
+            "venus": swe.calc_ut(julian_day, swe.VENUS)[0],
+            "mars": swe.calc_ut(julian_day, swe.MARS)[0],
+            "jupiter": swe.calc_ut(julian_day, swe.JUPITER)[0],
+            "saturn": swe.calc_ut(julian_day, swe.SATURN)[0]
+        }
+        logger.debug(f"Planetary positions: {planets}")
+        return planets
+    except swe.SwissephError as e:
+        logger.error(f"Error in planetary positions: {str(e)}")
+        raise ValueError(f"Error in planetary calculation: {str(e)}")
