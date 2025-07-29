@@ -1,0 +1,23 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
+def calculate_aspects(planets: dict) -> list:
+    logger.debug(f"Calculating aspects for planets: {planets}")
+    try:
+        aspects = []
+        for p1, pos1 in planets.items():
+            for p2, pos2 in planets.items():
+                if p1 < p2:
+                    diff = abs(float(pos1) - float(pos2))
+                    if diff > 180:
+                        diff = 360 - diff
+                    if 0 <= diff <= 2:
+                        aspects.append({"point1": p1, "point2": p2, "aspect": "conjunction", "orb": float(diff)})
+                    elif 178 <= diff <= 182:
+                        aspects.append({"point1": p1, "point2": p2, "aspect": "opposition", "orb": float(abs(180 - diff))})
+        logger.debug(f"Aspects: {aspects}")
+        return aspects
+    except Exception as e:
+        logger.error(f"Error in aspect calculation: {str(e)}", exc_info=True)
+        raise ValueError(f"Error in aspect calculation: {str(e)}")

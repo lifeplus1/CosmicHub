@@ -1,33 +1,16 @@
 # In backend/astro_calculations.py
 from datetime import datetime
 import pytz
-import swisseph as swe
 import logging
-import os  # Ensure os is imported
 from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from functools import lru_cache
+from .astro.ephemeris import init_ephemeris, get_planetary_positions
+from .astro.house_systems import calculate_houses
+from .astro.aspects import calculate_aspects
 
 logger = logging.getLogger(__name__)
-
-def get_planetary_positions(julian_day: float) -> dict:
-    logger.debug(f"Calculating planetary positions for JD: {julian_day}")
-    try:
-        planets = {
-            "sun": swe.calc_ut(julian_day, swe.SUN)[0][0],
-            "moon": swe.calc_ut(julian_day, swe.MOON)[0][0],
-            "mercury": swe.calc_ut(julian_day, swe.MERCURY)[0][0],
-            "venus": swe.calc_ut(julian_day, swe.VENUS)[0][0],
-            "mars": swe.calc_ut(julian_day, swe.MARS)[0][0],
-            "jupiter": swe.calc_ut(julian_day, swe.JUPITER)[0][0],
-            "saturn": swe.calc_ut(julian_day, swe.SATURN)[0][0]
-    }
-        logger.debug(f"Planetary positions: {planets}")
-        return planets
-    except Exception as e:
-        logger.error(f"Error in planetary positions: {str(e)}", exc_info=True)
-        raise ValueError(f"Error in planetary calculation: {str(e)}")
 
 def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None) -> bool:
     logger.debug(f"Validating inputs: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}")
@@ -69,12 +52,6 @@ def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat
             raise ValueError("City is required")
         logger.debug("Input validation successful")
         return True
-    except ValueError as e:
-        logger.error(f"Validation error: {str(e)}", exc_info=True)
-        raise
-    except Exception as e:
-        logger.error(f"Unexpected validation error: {str(e)}", exc_info=True)
-        raise ValueError(f"Unexpected validation error: {str(e)}")
 
 @lru_cache(maxsize=1000)
 def get_location(city: str) -> dict:
@@ -101,15 +78,10 @@ def get_location(city: str) -> dict:
         logger.error(f"Error in get_location: {str(e)}", exc_info=True)
         raise ValueError(f"Error resolving location: {str(e)}")
 
-def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None):
-    logger.debug(f"Calculating chart: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}")
+def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None, house_system: str = 'P'):
+    logger.debug(f"Calculating chart: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}, house_system={house_system}")
     try:
-        ephe_path = os.getenv("EPHE_PATH", "/app/ephe")
-        if not os.path.exists(ephe_path):
-            logger.error(f"Ephemeris path {ephe_path} does not exist")
-            raise ValueError(f"Ephemeris path {ephe_path} not found")
-        swe.set_ephe_path(ephe_path)
-
+        init_ephemeris()
         if city and (lat is None or lon is None):
             logger.debug("Fetching location data for city")
             loc = get_location(city)
@@ -127,40 +99,23 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
         logger.debug(f"UTC datetime: {dt_utc}")
         jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)
         logger.debug(f"Julian day result: status={jd[0]}, julian_day={jd[1]}")
-        if jd[0] < 0:  # Check for error status
+        if jd[0] < 0:
             logger.error(f"Invalid Julian day calculation, status: {jd[0]}")
             raise ValueError(f"Invalid Julian day calculation, status: {jd[0]}")
         julian_day = jd[1]
 
-        houses = swe.houses(julian_day, lat, lon, b'P')[0]
-        houses_data = [{"house": i+1, "cusp": float(cusp)} for i, cusp in enumerate(houses)]
-
-        angles = {
-            "ascendant": float(houses[0]),
-            "mc": float(houses[9])
-        }
-
         planets = get_planetary_positions(julian_day)
-        aspects = []
-        for p1, pos1 in planets.items():
-            for p2, pos2 in planets.items():
-                if p1 < p2:
-                    diff = abs(pos1 - pos2)  # Use longitude directly (float values)
-                    if diff > 180:
-                        diff = 360 - diff
-                    if 0 <= diff <= 2:
-                        aspects.append({"point1": p1, "point2": p2, "aspect": "conjunction", "orb": float(diff)})
-                    elif 178 <= diff <= 182:
-                        aspects.append({"point1": p1, "point2": p2, "aspect": "opposition", "orb": float(abs(180 - diff))})
+        houses_data = calculate_houses(julian_day, lat, lon, house_system)
+        aspects = calculate_aspects(planets)
 
         chart_data = {
             "julian_day": float(julian_day),
             "latitude": float(lat),
             "longitude": float(lon),
             "timezone": timezone,
-            "planets": {k: float(v) for k, v in planets.items()},  # Use float directly
-            "houses": houses_data,
-            "angles": angles,
+            "planets": {k: float(v) for k, v in planets.items()},
+            "houses": houses_data["houses"],
+            "angles": houses_data["angles"],
             "aspects": aspects
         }
         logger.debug(f"Chart data: {chart_data}")
