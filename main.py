@@ -1,99 +1,43 @@
-from fastapi import FastAPI, HTTPException, Header, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from firebase_admin import credentials, auth, initialize_app
+import logging
 import os
 import json
-from backend.astro_calculations import calculate_chart, get_location, validate_inputs, get_planetary_positions
-import logging
+from fastapi import FastAPI, HTTPException, Header
+from firebase_admin import credentials, auth, initialize_app
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize Firebase Admin
-firebase_creds = json.loads(os.getenv("FIREBASE_CREDENTIALS"))
-cred = credentials.Certificate(firebase_creds)
+logger.info("Starting FastAPI application")
+
+firebase_creds = os.getenv("FIREBASE_CREDENTIALS")
+if not firebase_creds:
+    logger.error("FIREBASE_CREDENTIALS environment variable is not set")
+    raise ValueError("FIREBASE_CREDENTIALS not set")
+try:
+    creds_dict = json.loads(firebase_creds)
+except json.JSONDecodeError as e:
+    logger.error(f"Invalid FIREBASE_CREDENTIALS format: {str(e)}")
+    raise ValueError("Invalid FIREBASE_CREDENTIALS JSON")
+cred = credentials.Certificate(creds_dict)
 initialize_app(cred)
 
 app = FastAPI()
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://astrology-app-sigma.vercel.app"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class BirthData(BaseModel):
-    year: int
-    month: int
-    day: int
-    hour: int
-    minute: int
-    city: str
-    timezone: str = None
-    lat: float = None
-    lon: float = None
-
-async def verify_firebase_token(authorization: str = Header(...)):
-    try:
-        token = authorization.split("Bearer ")[1]
-        decoded = auth.verify_id_token(token)
-        return decoded["uid"]
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
-
 @app.post("/calculate")
 async def calculate(data: BirthData, x_api_key: str = Header(...)):
-    logger.debug(f"Received data: {data.dict()}")
+    logger.info(f"Received /calculate request: {data.dict()}")
     try:
         if x_api_key != os.getenv("API_KEY"):
+            logger.error(f"Invalid API key: {x_api_key}")
             raise HTTPException(401, "Invalid API key")
         validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
+        logger.debug(f"Chart calculated: {chart_data}")
         return chart_data
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(400, str(e))
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(500, "Internal server error")
-
-@app.post("/save-chart")
-async def save_chart(data: BirthData, uid: str = Depends(verify_firebase_token)):
-    logger.debug(f"Saving chart for user {uid}: {data.dict()}")
-    try:
-        chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
-        chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
-        chart_data["user_id"] = uid
-        return chart_data
-    except ValueError as e:
-        raise HTTPException(400, str(e))
-    except Exception as e:
-        logger.error(f"Error saving chart: {str(e)}")
-        raise HTTPException(500, "Internal server error")
-
-
-import stripe
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-
-@app.post("/create-checkout-session")
-async def create_checkout_session(uid: str = Depends(verify_firebase_token)):
-    try:
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[{
-                "price": "price_12345",  # Replace with your Stripe price ID
-                "quantity": 1
-            }],
-            mode="subscription",
-            success_url="https://astrology-app-sigma.vercel.app/success",
-            cancel_url="https://astrology-app-sigma.vercel.app/cancel"
-        )
-        return {"id": session.id}
-    except Exception as e:
-        logger.error(f"Error creating checkout session: {str(e)}")
-        raise HTTPException(500, str(e))
+        logger.error(f"Unexpected error in /calculate: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Internal server error: {str(e)}")
