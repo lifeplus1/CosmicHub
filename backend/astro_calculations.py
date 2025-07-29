@@ -8,7 +8,6 @@ import os
 
 logger = logging.getLogger(__name__)
 
-# Set ephemeris path for pyswisseph
 swe.set_ephe_path(os.getenv("EPHE_PATH", "/usr/share/swisseph"))
 
 def get_location(city: str) -> dict:
@@ -43,11 +42,40 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
         jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)
         logger.debug(f"Julian day ET: {jd[0]}, UT: {jd[1]}")
         julian_day = jd[1]
+
+        # Calculate houses
+        houses = swe.houses(julian_day, lat, lon, b'P')[0]  # Placidus system
+        houses_data = [{"house": i+1, "cusp": cusp} for i, cusp in enumerate(houses)]
+
+        # Calculate angles (ASC, MC)
+        angles = {
+            "ascendant": houses[0],  # House 1 cusp
+            "mc": houses[9]         # House 10 cusp
+        }
+
+        # Calculate aspects (simplified example)
+        planets = get_planetary_positions(julian_day)
+        aspects = []
+        for p1, pos1 in planets.items():
+            for p2, pos2 in planets.items():
+                if p1 < p2:
+                    diff = abs(pos1 - pos2)
+                    if diff > 180:
+                        diff = 360 - diff
+                    if 0 <= diff <= 2:  # Conjunction
+                        aspects.append({"point1": p1, "point2": p2, "aspect": "conjunction", "orb": diff})
+                    elif 178 <= diff <= 182:  # Opposition
+                        aspects.append({"point1": p1, "point2": p2, "aspect": "opposition", "orb": abs(180 - diff)})
+
         chart_data = {
             "julian_day": julian_day,
             "latitude": lat,
             "longitude": lon,
-            "timezone": timezone
+            "timezone": timezone,
+            "planets": planets,
+            "houses": houses_data,
+            "angles": angles,
+            "aspects": aspects
         }
         return chart_data
     except swe.SwissephError as e:
@@ -68,19 +96,4 @@ def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat
             pytz.timezone(timezone)
         return True
     except Exception as e:
-        logger.error(f"Validation error: {str(e)}")
-        raise ValueError(f"Invalid input: {str(e)}")
-
-def get_planetary_positions(julian_day: float) -> dict:
-    logger.debug(f"Calculating planetary positions for JD: {julian_day}")
-    try:
-        planets = {
-            "sun": swe.calc_ut(julian_day, swe.SUN)[0],
-            "moon": swe.calc_ut(julian_day, swe.MOON)[0],
-            # Add more planets
-        }
-        logger.debug(f"Planetary positions: {planets}")
-        return planets
-    except swe.SwissephError as e:
-        logger.error(f"Error in planetary positions: {str(e)}")
-        raise ValueError(f"Error in planetary calculation: {str(e)}")
+        logger.error(f
