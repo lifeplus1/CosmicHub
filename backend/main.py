@@ -10,14 +10,15 @@ from backend.astro_calculations import calculate_chart, get_location, validate_i
 import stripe
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, filename="/app/app.log", format="%(asctime)s %(levelname)s %(name)s %(message)s")
+log_file = os.getenv("LOG_FILE", "app.log")  # Default to app.log locally
+logging.basicConfig(level=logging.DEBUG, filename=log_file, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
 
 # Initialize Firebase Admin
 try:
-    firebase_cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "/app/firebase-adminsdk.json")
+    firebase_cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-adminsdk.json")
     if os.path.exists(firebase_cred_path):
         logger.info(f"Using Firebase credentials file: {firebase_cred_path}")
         cred = credentials.Certificate(firebase_cred_path)
@@ -119,10 +120,19 @@ async def save_chart(data: BirthData, uid: str = Depends(verify_firebase_token))
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 # Stripe checkout session endpoint
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+try:
+    stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+    if not stripe.api_key:
+        logger.warning("STRIPE_SECRET_KEY not set, Stripe endpoints may fail")
+except ImportError:
+    logger.error("Stripe module not installed, Stripe endpoints will fail")
+    stripe = None
 
 @app.post("/create-checkout-session")
 async def create_checkout_session(uid: str = Depends(verify_firebase_token)):
+    if not stripe:
+        logger.error("Stripe module not available")
+        raise HTTPException(500, "Stripe integration not available")
     try:
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],

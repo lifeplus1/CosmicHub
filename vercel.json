@@ -1,33 +1,9 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "frontend/dist/**/*.{js,css}",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "frontend/dist/index.html",
-      "use": "@vercel/static"
-    }
+    { "src": "frontend/package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
   "routes": [
-    {
-      "src": "/assets/(.*)",
-      "dest": "/frontend/dist/assets/$1",
-      "headers": {
-        "Content-Type": "application/javascript",
-        "Cache-Control": "public, max-age=0, must-revalidate"
-      }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/index.html",
-      "headers": {
-        "Cache-Control": "public, max-age=0, must-revalidate"
-      }
-    }
-  ],
-  "env": {
-    "BACKEND_URL": "https://astrology-app-0emh.onrender.com"
-  }
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
