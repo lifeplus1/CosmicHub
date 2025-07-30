@@ -1,6 +1,0 @@
-FROM python:3.12
-WORKDIR /app
-COPY . .
-RUN pip install -r backend/requirements.txt
-COPY backend/ephe /app/ephe
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
