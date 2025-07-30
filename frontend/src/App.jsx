@@ -3,10 +3,12 @@ import { useState } from 'react';
 
 function App() {
   const [chart, setChart] = useState(null);
+  const [error, setError] = useState(null);
+  const [houseSystem, setHouseSystem] = useState('P');
 
   const fetchChart = async () => {
     try {
-      const response = await fetch('https://astrology-app-0emh.onrender.com/calculate', {
+      const response = await fetch(`https://astrology-app-0emh.onrender.com/calculate?house_system=${houseSystem}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,20 +24,25 @@ function App() {
           timezone: 'America/New_York'
         })
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       setChart(data);
+      setError(null);
     } catch (error) {
       console.error('Error:', error);
+      setError(error.message);
     }
   };
 
   return (
     <div>
       <h1>Astrology App</h1>
+      <select value={houseSystem} onChange={(e) => setHouseSystem(e.target.value)}>
+        <option value="P">Placidus</option>
+        <option value="E">Equal House</option>
+      </select>
       <button onClick={fetchChart}>Calculate Chart</button>
+      {error && <p>Error: {error}</p>}
       {chart && <pre>{JSON.stringify(chart, null, 2)}</pre>}
     </div>
   );
