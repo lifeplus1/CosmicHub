@@ -4,7 +4,7 @@ python-dotenv
 firebase-admin
 geopy
 timezonefinder
-swisseph
+pyswisseph==2.10.3.2
 stripe
 requests
 pytz
