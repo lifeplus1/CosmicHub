@@ -52,6 +52,12 @@ def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat
             raise ValueError("City is required")
         logger.debug("Input validation successful")
         return True
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}", exc_info=True)
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected validation error: {str(e)}", exc_info=True)
+        raise ValueError(f"Unexpected validation error: {str(e)}")
 
 @lru_cache(maxsize=1000)
 def get_location(city: str) -> dict:
@@ -74,8 +80,12 @@ def get_location(city: str) -> dict:
                 logger.warning(f"Geocoding timeout for {city}, attempt {attempt + 1}")
                 if attempt == 2:
                     raise ValueError("Geocoding service timed out")
-    except Exception as e:
+        raise ValueError("Geocoding failed after retries")
+    except ValueError as e:
         logger.error(f"Error in get_location: {str(e)}", exc_info=True)
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in get_location: {str(e)}", exc_info=True)
         raise ValueError(f"Error resolving location: {str(e)}")
 
 def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None, house_system: str = 'P'):
