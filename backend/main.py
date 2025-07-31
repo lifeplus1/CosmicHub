@@ -48,8 +48,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://astrology-app-sigma.vercel.app",
-        "https://astrology-g4gtsa5kg-christophers-projects-17e93f49.vercel.app"
+        "https://astrology-app-mauve.vercel.app",
+        "https://astrology-app-git-main-christophers-projects-17e93f49.vercel.app",
+        "https://astrology-damab7x1r-christophers-projects-17e93f49.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
