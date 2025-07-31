@@ -52,6 +52,9 @@ export default function Navbar() {
           {user ? (
             <>
               <Text color={color} mr={4}>Welcome, {userInfo?.email || user.email}</Text>
+              <Button colorScheme="white" variant="ghost" mr={2} onClick={() => navigate("/save-chart")}>Save Chart</Button>
+              <Button colorScheme="white" variant="ghost" mr={2} onClick={() => navigate("/analyze-personality")}>Analyze Personality</Button>
+              <Button colorScheme="white" variant="ghost" mr={2} onClick={() => navigate("/ai-chat")}>AI Chat</Button>
               <Button colorScheme="red" variant="outline" onClick={handleLogout}>Log Out</Button>
             </>
           ) : (
@@ -64,4 +67,4 @@ export default function Navbar() {
       </Flex>
     </Box>
   );
-};
+}

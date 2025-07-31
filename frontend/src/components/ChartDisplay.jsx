@@ -1,5 +1,16 @@
 import { Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Box, Text, Card, CardBody, Heading } from "@chakra-ui/react";
 
+const zodiacSigns = [
+  "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+];
+
+const getZodiacSign = (degree) => {
+  const signIndex = Math.floor(degree / 30);
+  const signDegree = (degree % 30).toFixed(2);
+  return `${signDegree}° ${zodiacSigns[signIndex]}`;
+};
+
 export default function ChartDisplay({ chart }) {
   return (
     <Card mt={4} shadow="md" borderRadius="md" bg="white">
@@ -28,9 +39,9 @@ export default function ChartDisplay({ chart }) {
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              {Object.entries(chart.planets).map(([planet, position]) => (
-                <Text key={planet}>
-                  {planet.charAt(0).toUpperCase() + planet.slice(1)}: {position.toFixed(2)}°
+              {Object.entries(chart.planets).map(([planet, position], index) => (
+                <Text key={index}>
+                  {planet.charAt(0).toUpperCase() + planet.slice(1)}: {getZodiacSign(position)}
                 </Text>
               ))}
             </AccordionPanel>
@@ -44,8 +55,8 @@ export default function ChartDisplay({ chart }) {
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              {chart.houses.map((house) => (
-                <Text key={house.house}>House {house.house}: {house.cusp.toFixed(2)}°</Text>
+              {chart.houses.map((house, index) => (
+                <Text key={index}>House {house.house}: {getZodiacSign(house.cusp)}</Text>
               ))}
             </AccordionPanel>
           </AccordionItem>
@@ -58,8 +69,8 @@ export default function ChartDisplay({ chart }) {
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              <Text>Ascendant: {chart.angles.ascendant.toFixed(2)}°</Text>
-              <Text>Midheaven (MC): {chart.angles.mc.toFixed(2)}°</Text>
+              <Text>Ascendant: {getZodiacSign(chart.angles.ascendant)}</Text>
+              <Text>Midheaven (MC): {getZodiacSign(chart.angles.mc)}</Text>
             </AccordionPanel>
           </AccordionItem>
 
@@ -74,12 +85,11 @@ export default function ChartDisplay({ chart }) {
               {chart.aspects.length > 0 ? (
                 chart.aspects.map((aspect, index) => (
                   <Text key={index}>
-                    {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)} -{" "}
-                    {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)}: {aspect.aspect} (Orb: {aspect.orb.toFixed(2)}°)
+                    {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)} {aspect.aspect} {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)} (Orb: {aspect.orb.toFixed(2)}°)
                   </Text>
                 ))
               ) : (
-                <Text>No aspects found</Text>
+                <Text>No major aspects found</Text>
               )}
             </AccordionPanel>
           </AccordionItem>
