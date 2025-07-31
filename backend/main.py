@@ -47,7 +47,7 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://astrology-app-sigma.vercel.app"],
+    allow_origins=["http://localhost:3000", "https://astrology-app-sigma.vercel.app", "https://astrology-g4gtsa5kg-christophers-projects-17e93f49.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
