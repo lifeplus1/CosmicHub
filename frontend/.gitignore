@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 *.local
+.env
+*.env
 
 # Editor directories and files
 .vscode/*
@@ -22,13 +24,13 @@ node_modules
 *.sw?
 .vercel
 
- node_modules/
-  frontend/dist/
-  frontend/public/static/js/
-  .vscode/
-  .idea/
-  .DS_Store
+node_modules/
+frontend/dist/
+frontend/public/static/js/
+.vscode/
+.idea/
+.DS_Store
 
-  # Add sensitive files
-  firebase-adminsdk.json
-  charts.db
+# Add sensitive files
+firebase-adminsdk.json
+charts.db
