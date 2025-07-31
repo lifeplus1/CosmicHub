@@ -1,4 +1,3 @@
-// frontend/src/App.jsx
 import { useState } from 'react';
 import { ChakraProvider, Box, Heading, FormControl, FormLabel, Input, Select, Button, VStack, Text, useToast } from '@chakra-ui/react';
 import axios from 'axios';
