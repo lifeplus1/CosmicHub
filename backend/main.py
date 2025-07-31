@@ -13,6 +13,9 @@ from astro.personality import get_personality_traits
 from astro.ephemeris import get_planetary_positions
 import stripe
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configure logging
 log_file = os.getenv("LOG_FILE", "app.log")
@@ -21,11 +24,10 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
 
-
-
 # Load Firebase credentials
 try:
     firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
+    logger.error(f"FIREBASE_CREDENTIALS: {repr(firebase_credentials)}")
     if not firebase_credentials:
         raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
     cred_dict = json.loads(firebase_credentials)
