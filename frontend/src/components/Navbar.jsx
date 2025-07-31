@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Button, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Text, Button, useColorModeValue, Heading } from "@chakra-ui/react";
 import { useAuth } from "./AuthProvider";
 import { logOut } from "../lib/auth";
 import { useNavigate } from "react-router-dom";

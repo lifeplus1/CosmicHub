@@ -34,17 +34,28 @@ try:
         firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
         if not firebase_credentials:
             logger.error("FIREBASE_CREDENTIALS environment variable is not set")
-            raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
-        try:
-            cred_dict = json.loads(firebase_credentials)
-            logger.debug(f"FIREBASE_CREDENTIALS loaded: project_id={cred_dict.get('project_id')}")
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
-            raise ValueError(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
-        cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred)
-    
-    logger.info("Firebase initialized successfully")
+            # Fail gracefully in test/CI, but raise in production
+            if os.getenv("CI") or os.getenv("PYTEST_CURRENT_TEST"):
+                # In CI or pytest, skip Firebase init
+                firebase_admin = None
+                cred = None
+                logger.warning("Skipping Firebase initialization in CI/test environment.")
+            else:
+                raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
+        else:
+            try:
+                cred_dict = json.loads(firebase_credentials)
+                logger.debug(f"FIREBASE_CREDENTIALS loaded: project_id={cred_dict.get('project_id')}")
+                cred = credentials.Certificate(cred_dict)
+                firebase_admin.initialize_app(cred)
+                logger.info("Firebase initialized successfully")
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
+                raise ValueError(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
+            except Exception as e:
+                logger.error(f"Failed to initialize Firebase: {str(e)}")
+                raise
+
 except Exception as e:
     logger.error(f"Failed to initialize Firebase: {str(e)}")
     raise
