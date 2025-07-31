@@ -42,7 +42,8 @@ wheels/
 
 #Sensitive files
 
-firebase-adminsdk.json charts.db
+firebase-adminsdk.json 
+charts.db
 
 #Node.js
 
