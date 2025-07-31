@@ -3,6 +3,8 @@ import json
 from datetime import datetime
 import os
 
+DB_PATH = os.path.join(os.path.dirname(__file__), 'data/charts.db')
+
 def adapt_datetime(dt):
     return dt.isoformat()
 

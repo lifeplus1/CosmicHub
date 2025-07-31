@@ -10,7 +10,7 @@ env:
   API_KEY: ${{ secrets.API_KEY }}
   LOG_FILE: app.log
   PORT: 8000
-  EPHE_PATH: /app/ephe
+  EPHE_PATH: /app/backend/ephe
   FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
 
 jobs:
