@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    outDir: 'dist', // Explicitly set output directory to 'dist'
+    sourcemap: true // Optional: for debugging
+  },
   test: {
     environment: 'jsdom',
     setupFiles: './src/setupTests.js',
