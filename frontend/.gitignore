@@ -21,3 +21,14 @@ node_modules
 *.sln
 *.sw?
 .vercel
+
+ node_modules/
+  frontend/dist/
+  frontend/public/static/js/
+  .vscode/
+  .idea/
+  .DS_Store
+
+  # Add sensitive files
+  firebase-adminsdk.json
+  charts.db

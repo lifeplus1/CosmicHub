@@ -17,7 +17,5 @@
       "dest": "/"
     }
   ],
-  "env": {
-    "API_KEY": "@api_key"
-  }
+  "env": {}
 }
