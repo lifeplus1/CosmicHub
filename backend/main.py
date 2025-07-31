@@ -1,3 +1,4 @@
+
 import logging
 import os
 import json
@@ -191,17 +192,6 @@ async def chat(message: dict, user: dict = Depends(verify_firebase_token)):
         logger.error(f"Chat error: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Chat error: {str(e)}")
 
-@app.post("/logout")
-async def logout(user: dict = Depends(verify_firebase_token)):
-    try:
-        # No server-side action needed, but can log or clear session data if used
-        logger.debug(f"User {user['uid']} logged out")
-        return {"message": "Logged out successfully"}
-    except Exception as e:
-        logger.error(f"Logout error: {str(e)}")
-        raise HTTPException(500, f"Logout error: {str(e)}")
-
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
-

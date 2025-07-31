@@ -7,7 +7,6 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { getAuthToken, logOut } from "./lib/auth";
-import Navbar from "./components/Navbar"
 
 function ProtectedChartPage() {
   const { user, loading } = useAuth();
@@ -148,13 +147,12 @@ function ProtectedChartPage() {
 function App() {
   return (
     <ChakraProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/chart" element={<ProtectedChartPage />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<ProtectedChartPage />} />
           </Routes>
         </AuthProvider>
       </Router>
