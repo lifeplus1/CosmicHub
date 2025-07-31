@@ -5,8 +5,7 @@ from fastapi import FastAPI, HTTPException, Header, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import firebase_admin
-from firebase_admin import credentials, auth
-from fastapi.security import OAuth2AuthorizationCodeBearer
+from firebase_admin import credentials, auth, firestore
 from astro_calculations import calculate_chart, get_location, validate_inputs
 from astro.personality import get_personality_traits
 from astro.ephemeris import get_planetary_positions
@@ -24,19 +23,27 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
 
-# Load Firebase credentials
+# Initialize Firebase
 try:
-    firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
-    logger.debug(f"FIREBASE_CREDENTIALS: {firebase_credentials}")
-    if not firebase_credentials:
-        raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
-    cred_dict = json.loads(firebase_credentials)
-    cred = credentials.Certificate(cred_dict)
-    firebase_admin.initialize_app(cred)
+    emulator_host = os.getenv("FIRESTORE_EMULATOR_HOST")
+    if emulator_host:
+        logger.info(f"Using Firestore emulator at {emulator_host}")
+        firebase_admin.initialize_app(options={'projectId': 'test-project'})
+    else:
+        firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
+        if not firebase_credentials:
+            logger.error("FIREBASE_CREDENTIALS environment variable is not set")
+            raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
+        try:
+            cred_dict = json.loads(firebase_credentials)
+            logger.debug(f"FIREBASE_CREDENTIALS loaded: project_id={cred_dict.get('project_id')}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
+            raise ValueError(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
+    
     logger.info("Firebase initialized successfully")
-except json.JSONDecodeError as e:
-    logger.error(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
-    raise ValueError(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
 except Exception as e:
     logger.error(f"Failed to initialize Firebase: {str(e)}")
     raise
@@ -47,10 +54,10 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:5174",
         "http://localhost:3000",
         "https://astrology-app-mauve.vercel.app",
         "https://astrology-app-git-main-christophers-projects-17e93f49.vercel.app",
-        "https://astrology-damab7x1r-christophers-projects-17e93f49.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -68,16 +75,16 @@ class BirthData(BaseModel):
     lat: float = None
     lon: float = None
 
-oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl="https://accounts.google.com/o/oauth2/auth",
-    tokenUrl="https://oauth2.googleapis.com/token"
-)
-
 async def verify_firebase_token(authorization: str = Header(...)):
     try:
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Invalid authorization header")
         token = authorization.split("Bearer ")[1]
+        if os.getenv("FIRESTORE_EMULATOR_HOST"):
+            logger.debug("Emulator mode: Bypassing token verification")
+            return {"uid": token}
         decoded = auth.verify_id_token(token)
-        return decoded["uid"]
+        return decoded
     except Exception as e:
         logger.error(f"Firebase auth error: {str(e)}")
         raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
@@ -91,13 +98,9 @@ except ImportError:
     stripe = None
 
 @app.post("/calculate")
-async def calculate(data: BirthData, x_api_key: str = Header(...), house_system: str = Query("P", enum=["P", "E"])):
-    logger.debug(f"Received data: {data.dict()}, API Key: {x_api_key}, House System: {house_system}")
+async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "E"])):
+    logger.debug(f"Received data: {data.dict()}, House System: {house_system}")
     try:
-        expected_key = os.getenv("API_KEY")
-        if x_api_key != expected_key:
-            logger.error(f"Invalid API key: {x_api_key}")
-            raise HTTPException(401, "Invalid API key")
         validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city, house_system)
         logger.debug(f"Chart calculated: {chart_data}")
@@ -109,27 +112,37 @@ async def calculate(data: BirthData, x_api_key: str = Header(...), house_system:
         logger.error(f"Unexpected error in /calculate: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
+@app.get("/user/profile")
+async def get_user_profile(user: dict = Depends(verify_firebase_token)):
+    try:
+        return {"uid": user["uid"], "email": user.get("email", ""), "created_at": user.get("iat", "")}
+    except Exception as e:
+        logger.error(f"Error fetching user profile: {str(e)}")
+        raise HTTPException(500, f"Internal server error: {str(e)}")
+
 @app.post("/save-chart")
-async def save_chart(data: BirthData, uid: str = Depends(verify_firebase_token)):
+async def save_chart(data: BirthData, user: dict = Depends(verify_firebase_token)):
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
-        chart_data["user_id"] = uid
+        chart_data["user_id"] = user["uid"]
         chart_data["created_at"] = firestore.SERVER_TIMESTAMP
         db = firestore.client()
-        doc_ref = db.collection("users").document(uid).collection("charts").document()
+        doc_ref = db.collection("users").document(user["uid"]).collection("charts").document()
         doc_ref.set(chart_data)
-        logger.debug(f"Saved chart for user {uid}: {chart_data}")
+        logger.debug(f"Saved chart for user {user['uid']}: {chart_data}")
         return {"id": doc_ref.id, **chart_data}
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(400, str(e))
     except Exception as e:
         logger.error(f"Error saving chart: {str(e)}", exc_info=True)
+        if "PERMISSION_DENIED" in str(e):
+            raise HTTPException(403, "Permission denied: Check Firestore rules")
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/analyze-personality")
-async def analyze_personality(data: BirthData, uid: str = Depends(verify_firebase_token)):
+async def analyze_personality(data: BirthData, user: dict = Depends(verify_firebase_token)):
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         personality = get_personality_traits(chart_data)
@@ -142,7 +155,7 @@ async def analyze_personality(data: BirthData, uid: str = Depends(verify_firebas
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/create-checkout-session")
-async def create_checkout_session(uid: str = Depends(verify_firebase_token)):
+async def create_checkout_session(user: dict = Depends(verify_firebase_token)):
     if not stripe:
         logger.error("Stripe module not available")
         raise HTTPException(500, "Stripe integration not available")
@@ -154,9 +167,9 @@ async def create_checkout_session(uid: str = Depends(verify_firebase_token)):
                 "quantity": 1
             }],
             mode="subscription",
-            success_url="https://astrology-app-sigma.vercel.app/success",
-            cancel_url="https://astrology-app-sigma.vercel.app/cancel",
-            metadata={"user_id": uid}
+            success_url="https://astrology-app-mauve.vercel.app/success",
+            cancel_url="https://astrology-app-mauve.vercel.app/cancel",
+            metadata={"user_id": user["uid"]}
         )
         return {"id": session.id}
     except Exception as e:
@@ -164,7 +177,7 @@ async def create_checkout_session(uid: str = Depends(verify_firebase_token)):
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/chat")
-async def chat(message: dict, uid: str = Depends(verify_firebase_token)):
+async def chat(message: dict, user: dict = Depends(verify_firebase_token)):
     try:
         api_key = os.getenv("XAI_API_KEY")
         response = requests.post(
@@ -178,6 +191,17 @@ async def chat(message: dict, uid: str = Depends(verify_firebase_token)):
         logger.error(f"Chat error: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Chat error: {str(e)}")
 
+@app.post("/logout")
+async def logout(user: dict = Depends(verify_firebase_token)):
+    try:
+        # No server-side action needed, but can log or clear session data if used
+        logger.debug(f"User {user['uid']} logged out")
+        return {"message": "Logged out successfully"}
+    except Exception as e:
+        logger.error(f"Logout error: {str(e)}")
+        raise HTTPException(500, f"Logout error: {str(e)}")
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+

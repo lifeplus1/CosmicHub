@@ -1,4 +1,3 @@
-# In backend/astro_calculations.py
 from datetime import datetime
 import pytz
 import logging
@@ -10,7 +9,6 @@ from astro.ephemeris import init_ephemeris, get_planetary_positions
 from astro.house_systems import calculate_houses
 from astro.aspects import calculate_aspects
 import swisseph as swe
-
 
 logger = logging.getLogger(__name__)
 

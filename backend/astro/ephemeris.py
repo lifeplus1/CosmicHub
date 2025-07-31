@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def init_ephemeris():
-    ephe_path = os.getenv("EPHE_PATH", "/app/ephe")
+    ephe_path = os.getenv("EPHE_PATH", "./ephe")
     if not os.path.exists(ephe_path):
         logger.error(f"Ephemeris path {ephe_path} does not exist")
         raise ValueError(f"Ephemeris path {ephe_path} not found")

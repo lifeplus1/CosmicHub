@@ -1,62 +1,90 @@
-import React from 'react';
-import { Box, Heading, Text, SimpleGrid, Card, CardHeader, CardBody } from '@chakra-ui/react';
+import { Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Box, Text, Card, CardBody, Heading } from "@chakra-ui/react";
 
-const ChartDisplay = ({ chart }) => {
+export default function ChartDisplay({ chart }) {
   return (
-    <Box mt={6}>
-      <Heading as="h2" size="md" mb={4}>Your Natal Chart</Heading>
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-        <Card>
-          <CardHeader>
-            <Heading size="sm">Planets</Heading>
-          </CardHeader>
-          <CardBody>
-            {chart.planets && chart.planets.length > 0 ? (
-              chart.planets.map((planet, index) => (
-                <Text key={index}>
-                  {planet.name}: {planet.sign} at {planet.degrees.toFixed(2)}° (House {planet.house})
-                </Text>
-              ))
-            ) : (
-              <Text>No planet data available</Text>
-            )}
-          </CardBody>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Heading size="sm">Houses</Heading>
-          </CardHeader>
-          <CardBody>
-            {chart.houses && chart.houses.length > 0 ? (
-              chart.houses.map((house, index) => (
-                <Text key={index}>
-                  House {house.number}: {house.sign} at {house.cusp.toFixed(2)}°
-                </Text>
-              ))
-            ) : (
-              <Text>No house data available</Text>
-            )}
-          </CardBody>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Heading size="sm">Aspects</Heading>
-          </CardHeader>
-          <CardBody>
-            {chart.aspects && chart.aspects.length > 0 ? (
-              chart.aspects.map((aspect, index) => (
-                <Text key={index}>
-                  {aspect.planet1} {aspect.type} {aspect.planet2}: {aspect.orb.toFixed(2)}°
-                </Text>
-              ))
-            ) : (
-              <Text>No aspect data available</Text>
-            )}
-          </CardBody>
-        </Card>
-      </SimpleGrid>
-    </Box>
-  );
-};
+    <Card mt={4} shadow="md" borderRadius="md" bg="white">
+      <CardBody>
+        <Accordion allowMultiple>
+          <AccordionItem>
+            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+              <Box flex="1" textAlign="left">
+                <Heading size="md" color="blue.700">Location & Time</Heading>
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel pb={4}>
+              <Text>Latitude: {chart.latitude.toFixed(2)}°</Text>
+              <Text>Longitude: {chart.longitude.toFixed(2)}°</Text>
+              <Text>Timezone: {chart.timezone}</Text>
+              <Text>Julian Day: {chart.julian_day.toFixed(6)}</Text>
+            </AccordionPanel>
+          </AccordionItem>
 
-export default ChartDisplay;
+          <AccordionItem>
+            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+              <Box flex="1" textAlign="left">
+                <Heading size="md" color="blue.700">Planets</Heading>
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel pb={4}>
+              {Object.entries(chart.planets).map(([planet, position]) => (
+                <Text key={planet}>
+                  {planet.charAt(0).toUpperCase() + planet.slice(1)}: {position.toFixed(2)}°
+                </Text>
+              ))}
+            </AccordionPanel>
+          </AccordionItem>
+
+          <AccordionItem>
+            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+              <Box flex="1" textAlign="left">
+                <Heading size="md" color="blue.700">Houses</Heading>
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel pb={4}>
+              {chart.houses.map((house) => (
+                <Text key={house.house}>House {house.house}: {house.cusp.toFixed(2)}°</Text>
+              ))}
+            </AccordionPanel>
+          </AccordionItem>
+
+          <AccordionItem>
+            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+              <Box flex="1" textAlign="left">
+                <Heading size="md" color="blue.700">Angles</Heading>
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel pb={4}>
+              <Text>Ascendant: {chart.angles.ascendant.toFixed(2)}°</Text>
+              <Text>Midheaven (MC): {chart.angles.mc.toFixed(2)}°</Text>
+            </AccordionPanel>
+          </AccordionItem>
+
+          <AccordionItem>
+            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+              <Box flex="1" textAlign="left">
+                <Heading size="md" color="blue.700">Aspects</Heading>
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel pb={4}>
+              {chart.aspects.length > 0 ? (
+                chart.aspects.map((aspect, index) => (
+                  <Text key={index}>
+                    {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)} -{" "}
+                    {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)}: {aspect.aspect} (Orb: {aspect.orb.toFixed(2)}°)
+                  </Text>
+                ))
+              ) : (
+                <Text>No aspects found</Text>
+              )}
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      </CardBody>
+    </Card>
+  );
+}
