@@ -40,8 +40,7 @@ wheels/
 .vercel
 
 #Sensitive files
-
-firebase-adminsdk.json 
+backend/firebase-adminsdk.json
 charts.db
 
 #Node.js
@@ -54,3 +53,11 @@ frontend/public/static/js/
 
 .DS_Store 
 Thumbs.db
+
+node_modules/
+frontend/node_modules/
+frontend/dist/
+backend/venv/
+backend/__pycache__/
+backend/.env
+backend/logs/
