@@ -12,6 +12,7 @@ from astro.ephemeris import get_planetary_positions
 import stripe
 import requests
 from dotenv import load_dotenv
+from database import save_chart, get_charts
 
 # Load .env file
 load_dotenv()
@@ -131,24 +132,28 @@ async def get_user_profile(user: dict = Depends(verify_firebase_token)):
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/save-chart")
-async def save_chart(data: BirthData, user: dict = Depends(verify_firebase_token)):
+async def save_chart_endpoint(data: BirthData, user: dict = Depends(verify_firebase_token)):
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
-        chart_data["user_id"] = user["uid"]
-        chart_data["created_at"] = firestore.SERVER_TIMESTAMP
-        db = firestore.client()
-        doc_ref = db.collection("users").document(user["uid"]).collection("charts").document()
-        doc_ref.set(chart_data)
-        logger.debug(f"Saved chart for user {user['uid']}: {chart_data}")
-        return {"id": doc_ref.id, **chart_data}
+        result = save_chart(user["uid"], "natal", data.dict(), chart_data)  # Adjust type as needed
+        return result
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(400, str(e))
     except Exception as e:
-        logger.error(f"Error saving chart: {str(e)}", exc_info=True)
+        logger.error(f"Error saving chart: {str(e)}")
         if "PERMISSION_DENIED" in str(e):
             raise HTTPException(403, "Permission denied: Check Firestore rules")
+        raise HTTPException(500, f"Internal server error: {str(e)}")
+    
+@app.get("/charts")
+async def list_charts(user: dict = Depends(verify_firebase_token)):
+    try:
+        charts = get_charts(user["uid"])
+        return charts
+    except Exception as e:
+        logger.error(f"Error fetching charts: {str(e)}")
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/analyze-personality")
