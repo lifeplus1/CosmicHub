@@ -65,6 +65,11 @@ jobs:
         run: |
           pwd
           ls -la
+          cat .env || echo ".env not found"
+          echo "Node version:"
+          node --version
+          echo "NPM version:"
+          npm --version
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -73,7 +78,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install Vercel CLI
         run: npm install -g vercel@44.7.0
-      - name: Debug Vercel Token
+      - name: Debug Vercel Token and Environment
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
             echo "Error: VERCEL_TOKEN is not set"
@@ -81,8 +86,24 @@ jobs:
           else
             echo "VERCEL_TOKEN is set"
           fi
+          echo "VITE_FIREBASE_API_KEY is set: $([[ -n "$VITE_FIREBASE_API_KEY" ]] && echo 'yes' || echo 'no')"
+          echo "VITE_FIREBASE_AUTH_DOMAIN is set: $([[ -n "$VITE_FIREBASE_AUTH_DOMAIN" ]] && echo 'yes' || echo 'no')"
+          echo "VITE_FIREBASE_PROJECT_ID is set: $([[ -n "$VITE_FIREBASE_PROJECT_ID" ]] && echo 'yes' || echo 'no')"
+          echo "VITE_FIREBASE_STORAGE_BUCKET is set: $([[ -n "$VITE_FIREBASE_STORAGE_BUCKET" ]] && echo 'yes' || echo 'no')"
+          echo "VITE_FIREBASE_MESSAGING_SENDER_ID is set: $([[ -n "$VITE_FIREBASE_MESSAGING_SENDER_ID" ]] && echo 'yes' || echo 'no')"
+          echo "VITE_FIREBASE_APP_ID is set: $([[ -n "$VITE_FIREBASE_APP_ID" ]] && echo 'yes' || echo 'no')"
+          echo "VITE_BACKEND_URL=$VITE_BACKEND_URL"
+          echo "VITE_API_KEY is set: $([[ -n "$VITE_API_KEY" ]] && echo 'yes' || echo 'no')"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_BACKEND_URL: https://astrology-app-0emh.onrender.com
+          VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
       - name: Clear Vercel Cache
         run: vercel cache purge --project $VERCEL_PROJECT_ID --token=$VERCEL_TOKEN
         env:
@@ -90,8 +111,9 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       - name: Build and Debug Output
         run: |
-          npm ci
-          npm run build || echo "Build failed, check logs above"
+          npm ci || echo "npm ci failed, check logs above"
+          npm list || echo "Failed to list dependencies"
+          npm run build --verbose || echo "Build failed, check logs above"
           ls -la dist || echo "dist directory not found"
           cat dist/index.html || echo "dist/index.html not found"
         env:

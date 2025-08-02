@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist', // Explicitly set output directory to 'dist'
-    sourcemap: true // Optional: for debugging
+    sourcemap: false // Optional: for debugging
   },
   test: {
     environment: 'jsdom',

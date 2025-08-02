@@ -13,6 +13,7 @@ import stripe
 import requests
 from dotenv import load_dotenv
 from database import save_chart, get_charts
+from auth import verify_firebase_token  # Assuming auth.py has this function
 
 # Load .env file
 load_dotenv()
@@ -34,9 +35,7 @@ try:
         firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
         if not firebase_credentials:
             logger.error("FIREBASE_CREDENTIALS environment variable is not set")
-            # Fail gracefully in test/CI, but raise in production
             if os.getenv("CI") or os.getenv("PYTEST_CURRENT_TEST"):
-                # In CI or pytest, skip Firebase init
                 firebase_admin = None
                 cred = None
                 logger.warning("Skipping Firebase initialization in CI/test environment.")
@@ -55,7 +54,6 @@ try:
             except Exception as e:
                 logger.error(f"Failed to initialize Firebase: {str(e)}")
                 raise
-
 except Exception as e:
     logger.error(f"Failed to initialize Firebase: {str(e)}")
     raise
@@ -85,20 +83,6 @@ class BirthData(BaseModel):
     timezone: str = None
     lat: float = None
     lon: float = None
-
-async def verify_firebase_token(authorization: str = Header(...)):
-    try:
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Invalid authorization header")
-        token = authorization.split("Bearer ")[1]
-        if os.getenv("FIRESTORE_EMULATOR_HOST"):
-            logger.debug("Emulator mode: Bypassing token verification")
-            return {"uid": token}
-        decoded = auth.verify_id_token(token)
-        return decoded
-    except Exception as e:
-        logger.error(f"Firebase auth error: {str(e)}")
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
 try:
     stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
