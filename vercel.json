@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "projects": [
+    {
+      "name": "astrology-app-frontend",
+      "root": "frontend",
+      "builds": [
+        {
+          "src": "package.json",
+          "use": "@vercel/node",
+          "config": {
+            "buildCommand": "npm run build",
+            "outputDirectory": "dist"
+          }
+        }
+      ]
+    }
+  ]
+}
