@@ -31,18 +31,18 @@ export default function Signup() {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={10}>
+    <Box maxW="md" mx="auto" mt={10} bg="purple.800" color="white" borderRadius="lg" shadow="lg" p={4}>
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           <FormControl isRequired>
-            <FormLabel>Email</FormLabel>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <FormLabel color="yellow.200">Email</FormLabel>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} bg="purple.700" color="white" borderColor="gold" />
           </FormControl>
           <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <FormLabel color="yellow.200">Password</FormLabel>
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} bg="purple.700" color="white" borderColor="gold" />
           </FormControl>
-          <Button type="submit" colorScheme="blue" isLoading={isLoading}>Sign Up</Button>
+          <Button type="submit" colorScheme="yellow" isLoading={isLoading}>Sign Up</Button>
         </VStack>
       </form>
     </Box>

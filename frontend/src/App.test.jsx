@@ -1,6 +1,4 @@
-// frontend/src/App.test.jsx
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
 import { ChakraProvider } from '@chakra-ui/react';
 import App from './App';
 import axios from 'axios';
@@ -12,11 +10,11 @@ describe('App', () => {
   it('renders chart page', () => {
     render(
       <ChakraProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <App />
       </ChakraProvider>
     );
-    expect(screen.getByText(/Cosmic Insights/i)).toBeInTheDocument();
+    const headings = screen.getAllByText(/Cosmic Insights/i);
+    const chartPageHeading = headings.find((element) => element.tagName.toLowerCase() === 'h1');
+    expect(chartPageHeading).toBeInTheDocument();
   });
 });
