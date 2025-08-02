@@ -20,12 +20,14 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Set FIREBASE_CREDENTIALS for Backend Tests
-        run: echo "FIREBASE_CREDENTIALS='${{ secrets.FIREBASE_CREDENTIALS }}'" >> $GITHUB_ENV
+        env:
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
       - name: Run Backend Tests
         run: |
           cd backend
           pytest
+        env:
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:

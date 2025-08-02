@@ -71,51 +71,51 @@ function ChartPage() {
     formData.year && formData.month && formData.day && formData.hour && formData.minute && formData.city;
 
   return (
-    <Box maxW="600px" mx="auto" p={4}>
-      <Heading as="h1" mb={6} textAlign="center">
-        Astrology App
+    <Box maxW="600px" mx="auto" p={4} bg="purple.800" color="white" borderRadius="lg" shadow="lg">
+      <Heading as="h1" mb={6} textAlign="center" color="gold">
+        Cosmic Insights
       </Heading>
       <VStack spacing={4} align="stretch">
         <FormControl>
-          <FormLabel>Year</FormLabel>
-          <Input type="number" name="year" value={formData.year} onChange={handleInputChange} placeholder="e.g., 1990" />
+          <FormLabel color="yellow.200">Year</FormLabel>
+          <Input type="number" name="year" value={formData.year} onChange={handleInputChange} placeholder="e.g., 1990" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Month</FormLabel>
-          <Input type="number" name="month" value={formData.month} onChange={handleInputChange} placeholder="e.g., 1" />
+          <FormLabel color="yellow.200">Month</FormLabel>
+          <Input type="number" name="month" value={formData.month} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Day</FormLabel>
-          <Input type="number" name="day" value={formData.day} onChange={handleInputChange} placeholder="e.g., 1" />
+          <FormLabel color="yellow.200">Day</FormLabel>
+          <Input type="number" name="day" value={formData.day} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Hour (24h)</FormLabel>
-          <Input type="number" name="hour" value={formData.hour} onChange={handleInputChange} placeholder="e.g., 12" />
+          <FormLabel color="yellow.200">Hour (24h)</FormLabel>
+          <Input type="number" name="hour" value={formData.hour} onChange={handleInputChange} placeholder="e.g., 12" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Minute</FormLabel>
-          <Input type="number" name="minute" value={formData.minute} onChange={handleInputChange} placeholder="e.g., 0" />
+          <FormLabel color="yellow.200">Minute</FormLabel>
+          <Input type="number" name="minute" value={formData.minute} onChange={handleInputChange} placeholder="e.g., 0" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>City</FormLabel>
-          <Input name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g., New York" />
+          <FormLabel color="yellow.200">City</FormLabel>
+          <Input name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g., New York" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>House System</FormLabel>
-          <Select value={houseSystem} onChange={(e) => setHouseSystem(e.target.value)}>
-            <option value="P">Placidus</option>
-            <option value="E">Equal House</option>
+          <FormLabel color="yellow.200">House System</FormLabel>
+          <Select value={houseSystem} onChange={(e) => setHouseSystem(e.target.value)} bg="purple.700" color="white" borderColor="gold">
+            <option value="P" style={{ backgroundColor: "#4B0082" }}>Placidus</option>
+            <option value="E" style={{ backgroundColor: "#4B0082" }}>Equal House</option>
           </Select>
         </FormControl>
         <Button
-          colorScheme="teal"
+          colorScheme="yellow"
           onClick={fetchChart}
           isLoading={loadingChart}
           isDisabled={!isFormValid()}
         >
           Calculate Chart
         </Button>
-        {error && <Text color="red.500">{error}</Text>}
+        {error && <Text color="red.300">{error}</Text>}
         {chart && <ChartDisplay chart={chart} />}
       </VStack>
     </Box>
@@ -139,7 +139,7 @@ function ProtectedChartPage() {
   const toast = useToast();
   const navigate = useNavigate();
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading) return <Text color="white">Loading...</Text>;
   if (!user) return <Navigate to="/login" replace />;
 
   const handleInputChange = (e) => {
@@ -190,68 +190,55 @@ function ProtectedChartPage() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      toast({ title: "Logged Out", status: "success", duration: 3000, isClosable: true });
-      navigate("/login");
-    } catch (error) {
-      toast({ title: "Logout Failed", description: error.message, status: "error", duration: 3000, isClosable: true });
-    }
-  };
-
   const isFormValid = () =>
     formData.year && formData.month && formData.day && formData.hour && formData.minute && formData.city;
 
   return (
-    <Box maxW="600px" mx="auto" p={4}>
-      <Heading as="h1" mb={6} textAlign="center">
-        Astrology App
+    <Box maxW="600px" mx="auto" p={4} bg="purple.800" color="white" borderRadius="lg" shadow="lg">
+      <Heading as="h1" mb={6} textAlign="center" color="gold">
+        Cosmic Insights
       </Heading>
       <VStack spacing={4} align="stretch">
         <FormControl>
-          <FormLabel>Year</FormLabel>
-          <Input type="number" name="year" value={formData.year} onChange={handleInputChange} placeholder="e.g., 1990" />
+          <FormLabel color="yellow.200">Year</FormLabel>
+          <Input type="number" name="year" value={formData.year} onChange={handleInputChange} placeholder="e.g., 1990" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Month</FormLabel>
-          <Input type="number" name="month" value={formData.month} onChange={handleInputChange} placeholder="e.g., 1" />
+          <FormLabel color="yellow.200">Month</FormLabel>
+          <Input type="number" name="month" value={formData.month} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Day</FormLabel>
-          <Input type="number" name="day" value={formData.day} onChange={handleInputChange} placeholder="e.g., 1" />
+          <FormLabel color="yellow.200">Day</FormLabel>
+          <Input type="number" name="day" value={formData.day} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Hour (24h)</FormLabel>
-          <Input type="number" name="hour" value={formData.hour} onChange={handleInputChange} placeholder="e.g., 12" />
+          <FormLabel color="yellow.200">Hour (24h)</FormLabel>
+          <Input type="number" name="hour" value={formData.hour} onChange={handleInputChange} placeholder="e.g., 12" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>Minute</FormLabel>
-          <Input type="number" name="minute" value={formData.minute} onChange={handleInputChange} placeholder="e.g., 0" />
+          <FormLabel color="yellow.200">Minute</FormLabel>
+          <Input type="number" name="minute" value={formData.minute} onChange={handleInputChange} placeholder="e.g., 0" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>City</FormLabel>
-          <Input name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g., New York" />
+          <FormLabel color="yellow.200">City</FormLabel>
+          <Input name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g., New York" bg="purple.700" color="white" borderColor="gold" />
         </FormControl>
         <FormControl>
-          <FormLabel>House System</FormLabel>
-          <Select value={houseSystem} onChange={(e) => setHouseSystem(e.target.value)}>
-            <option value="P">Placidus</option>
-            <option value="E">Equal House</option>
+          <FormLabel color="yellow.200">House System</FormLabel>
+          <Select value={houseSystem} onChange={(e) => setHouseSystem(e.target.value)} bg="purple.700" color="white" borderColor="gold">
+            <option value="P" style={{ backgroundColor: "#4B0082" }}>Placidus</option>
+            <option value="E" style={{ backgroundColor: "#4B0082" }}>Equal House</option>
           </Select>
         </FormControl>
         <Button
-          colorScheme="teal"
+          colorScheme="yellow"
           onClick={fetchChart}
           isLoading={loadingChart}
           isDisabled={!isFormValid()}
         >
           Calculate Chart
         </Button>
-        <Button colorScheme="red" onClick={handleLogout}>
-          Log Out
-        </Button>
-        {error && <Text color="red.500">{error}</Text>}
+        {error && <Text color="red.300">{error}</Text>}
         {chart && <ChartDisplay chart={chart} />}
       </VStack>
     </Box>

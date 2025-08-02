@@ -1,4 +1,5 @@
-import { Box, Flex, Text, Button, useColorModeValue, Heading } from "@chakra-ui/react";
+
+import { Box, Flex, Text, Button, useColorModeValue } from "@chakra-ui/react";
 import { useAuth } from "./AuthProvider";
 import { logOut } from "../lib/auth";
 import { useNavigate } from "react-router-dom";
@@ -41,26 +42,26 @@ export default function Navbar() {
     }
   };
 
-  const bg = useColorModeValue("blue.500", "blue.900");
-  const color = useColorModeValue("white", "gray.200");
+  const bg = useColorModeValue("purple.900", "purple.800");
+  const color = useColorModeValue("gold", "yellow.200");
 
   return (
-    <Box bg={bg} px={4} py={2} shadow="md">
+    <Box bg={bg} px={4} py={2} shadow="lg" borderBottom="2px solid" borderColor="gold">
       <Flex alignItems="center" justifyContent="space-between">
-        <Heading size="md" color={color}>Astrology App</Heading>
+        <Heading size="md" color={color}>Cosmic Insights</Heading>
         <Flex alignItems="center">
           {user ? (
             <>
               <Text color={color} mr={4}>Welcome, {userInfo?.email || user.email}</Text>
-              <Button colorScheme="white" variant="ghost" mr={2} onClick={() => navigate("/save-chart")}>Save Chart</Button>
-              <Button colorScheme="white" variant="ghost" mr={2} onClick={() => navigate("/analyze-personality")}>Analyze Personality</Button>
-              <Button colorScheme="white" variant="ghost" mr={2} onClick={() => navigate("/ai-chat")}>AI Chat</Button>
-              <Button colorScheme="red" variant="outline" onClick={handleLogout}>Log Out</Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/save-chart")}>Save Chart</Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/analyze-personality")}>Personality</Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/chat")}>AI Chat</Button>
+              <Button colorScheme="red" variant="outline" borderColor="gold" color={color} onClick={handleLogout}>Log Out</Button>
             </>
           ) : (
             <>
-              <Button colorScheme="white" variant="ghost" onClick={() => navigate("/login")}>Login</Button>
-              <Button colorScheme="white" variant="ghost" onClick={() => navigate("/signup")}>Signup</Button>
+              <Button colorScheme="yellow" variant="ghost" onClick={() => navigate("/login")}>Login</Button>
+              <Button colorScheme="yellow" variant="ghost" onClick={() => navigate("/signup")}>Signup</Button>
             </>
           )}
         </Flex>

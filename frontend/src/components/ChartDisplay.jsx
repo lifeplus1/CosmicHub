@@ -5,23 +5,40 @@ const zodiacSigns = [
   "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
 ];
 
+const planetSymbols = {
+  sun: "☉", moon: "☾", mercury: "☿", venus: "♀", mars: "♂",
+  jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇",
+  chiron: "⚷", ceres: "⚳", pallas: "⚴", juno: "⚵", vesta: "⚶",
+  ascendant: "Asc", descendant: "Dsc", mc: "MC", ic: "IC",
+  vertex: "Vx", antivertex: "Av"
+};
+
 const getZodiacSign = (degree) => {
-  const signIndex = Math.floor(degree / 30);
-  const signDegree = (degree % 30).toFixed(2);
+  const normalizedDegree = degree % 360;
+  const signIndex = Math.floor(normalizedDegree / 30);
+  const signDegree = (normalizedDegree % 30).toFixed(2);
   return `${signDegree}° ${zodiacSigns[signIndex]}`;
 };
 
 export default function ChartDisplay({ chart }) {
   return (
-    <Card mt={4} shadow="md" borderRadius="md" bg="white">
+    <Card
+      mt={4}
+      shadow="lg"
+      borderRadius="lg"
+      bgGradient="linear(to-b, purple.800, purple.900)"
+      color="white"
+      border="1px solid"
+      borderColor="gold"
+    >
       <CardBody>
         <Accordion allowMultiple>
-          <AccordionItem>
-            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+          <AccordionItem borderColor="gold">
+            <AccordionButton bg="purple.700" _hover={{ bg: "purple.600" }}>
               <Box flex="1" textAlign="left">
-                <Heading size="md" color="blue.700">Location & Time</Heading>
+                <Heading size="md" color="gold">Location & Time</Heading>
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="gold" />
             </AccordionButton>
             <AccordionPanel pb={4}>
               <Text>Latitude: {chart.latitude.toFixed(2)}°</Text>
@@ -31,61 +48,66 @@ export default function ChartDisplay({ chart }) {
             </AccordionPanel>
           </AccordionItem>
 
-          <AccordionItem>
-            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+          <AccordionItem borderColor="gold">
+            <AccordionButton bg="purple.700" _hover={{ bg: "purple.600" }}>
               <Box flex="1" textAlign="left">
-                <Heading size="md" color="blue.700">Planets</Heading>
+                <Heading size="md" color="gold">Planets & Points</Heading>
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="gold" />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              {Object.entries(chart.planets).map(([planet, position], index) => (
-                <Text key={index}>
-                  {planet.charAt(0).toUpperCase() + planet.slice(1)}: {getZodiacSign(position)}
+              {Object.entries(chart.planets).map(([point, data], index) => (
+                <Text key={`point-${index}`}>
+                  {planetSymbols[point]} {point.charAt(0).toUpperCase() + point.slice(1)}: {getZodiacSign(data.position)} {data.retrograde ? "℞" : ""}
                 </Text>
               ))}
             </AccordionPanel>
           </AccordionItem>
 
-          <AccordionItem>
-            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+          <AccordionItem borderColor="gold">
+            <AccordionButton bg="purple.700" _hover={{ bg: "purple.600" }}>
               <Box flex="1" textAlign="left">
-                <Heading size="md" color="blue.700">Houses</Heading>
+                <Heading size="md" color="gold">Houses</Heading>
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="gold" />
             </AccordionButton>
             <AccordionPanel pb={4}>
               {chart.houses.map((house, index) => (
-                <Text key={index}>House {house.house}: {getZodiacSign(house.cusp)}</Text>
+                <Text key={`house-${index}`}>House {house.house}: {getZodiacSign(house.cusp)}</Text>
               ))}
             </AccordionPanel>
           </AccordionItem>
 
-          <AccordionItem>
-            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+          <AccordionItem borderColor="gold">
+            <AccordionButton bg="purple.700" _hover={{ bg: "purple.600" }}>
               <Box flex="1" textAlign="left">
-                <Heading size="md" color="blue.700">Angles</Heading>
+                <Heading size="md" color="gold">Angles & Vertex</Heading>
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="gold" />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              <Text>Ascendant: {getZodiacSign(chart.angles.ascendant)}</Text>
-              <Text>Midheaven (MC): {getZodiacSign(chart.angles.mc)}</Text>
+              <Text>{planetSymbols.ascendant} Ascendant: {getZodiacSign(chart.angles.ascendant)}</Text>
+              <Text>{planetSymbols.descendant} Descendant: {getZodiacSign(chart.angles.descendant)}</Text>
+              <Text>{planetSymbols.mc} Midheaven (MC): {getZodiacSign(chart.angles.mc)}</Text>
+              <Text>{planetSymbols.ic} Imum Coeli (IC): {getZodiacSign(chart.angles.ic)}</Text>
+              <Text>{planetSymbols.vertex} Vertex: {getZodiacSign(chart.angles.vertex)}</Text>
+              <Text>{planetSymbols.antivertex} Anti-Vertex: {getZodiacSign(chart.angles.antivertex)}</Text>
             </AccordionPanel>
           </AccordionItem>
 
-          <AccordionItem>
-            <AccordionButton bg="blue.50" _hover={{ bg: "blue.100" }}>
+          <AccordionItem borderColor="gold">
+            <AccordionButton bg="purple.700" _hover={{ bg: "purple.600" }}>
               <Box flex="1" textAlign="left">
-                <Heading size="md" color="blue.700">Aspects</Heading>
+                <Heading size="md" color="gold">Aspects</Heading>
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="gold" />
             </AccordionButton>
             <AccordionPanel pb={4}>
               {chart.aspects.length > 0 ? (
                 chart.aspects.map((aspect, index) => (
-                  <Text key={index}>
-                    {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)} {aspect.aspect} {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)} (Orb: {aspect.orb.toFixed(2)}°)
+                  <Text key={`aspect-${index}`}>
+                    {planetSymbols[aspect.point1]} {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)} -{" "}
+                    {planetSymbols[aspect.point2]} {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)}: {aspect.aspect} (Orb: {aspect.orb.toFixed(2)}°)
                   </Text>
                 ))
               ) : (

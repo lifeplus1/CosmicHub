@@ -123,9 +123,16 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
             "latitude": float(lat),
             "longitude": float(lon),
             "timezone": timezone,
-            "planets": {k: float(v) for k, v in planets.items()},
+            "planets": {k: {"position": v["position"], "retrograde": v["retrograde"]} for k, v in planets.items()},
             "houses": houses_data["houses"],
-            "angles": houses_data["angles"],
+            "angles": {
+                "ascendant": houses_data["angles"]["ascendant"],
+                "descendant": (houses_data["angles"]["ascendant"] + 180) % 360,
+                "mc": houses_data["angles"]["mc"],
+                "ic": (houses_data["angles"]["mc"] + 180) % 360,
+                "vertex": houses_data["vertex"],
+                "antivertex": (houses_data["vertex"] + 180) % 360,
+            },
             "aspects": aspects
         }
         logger.debug(f"Chart data: {chart_data}")
