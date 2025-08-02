@@ -67,8 +67,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5174",
         "http://localhost:3000",
-        "https://astrology-app-mauve.vercel.app",
-        "https://astrology-app-git-main-christophers-projects-17e93f49.vercel.app",
+        "https://*.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
