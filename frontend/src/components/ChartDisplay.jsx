@@ -1,4 +1,4 @@
-import { Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Box, Text, Card, CardBody, Heading } from "@chakra-ui/react";
+import { Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Box, Text, Card, CardBody, Heading, Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react";
 
 const zodiacSigns = [
   "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -18,6 +18,26 @@ const getZodiacSign = (degree) => {
   const signIndex = Math.floor(normalizedDegree / 30);
   const signDegree = (normalizedDegree % 30).toFixed(2);
   return `${signDegree}° ${zodiacSigns[signIndex]}`;
+};
+
+// Function to determine the house of a planet based on its position
+const getHouseForPlanet = (position, houses) => {
+  const normalizedPosition = position % 360;
+  for (let i = 0; i < houses.length; i++) {
+    const currentCusp = houses[i].cusp % 360;
+    const nextCusp = houses[(i + 1) % houses.length].cusp % 360;
+    // Handle house boundaries crossing 0/360 degrees
+    if (nextCusp > currentCusp) {
+      if (normalizedPosition >= currentCusp && normalizedPosition < nextCusp) {
+        return houses[i].house;
+      }
+    } else {
+      if (normalizedPosition >= currentCusp || normalizedPosition < nextCusp) {
+        return houses[i].house;
+      }
+    }
+  }
+  return "Unknown"; // Fallback in case of edge cases
 };
 
 export default function ChartDisplay({ chart }) {
@@ -56,11 +76,28 @@ export default function ChartDisplay({ chart }) {
               <AccordionIcon color="gold" />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              {Object.entries(chart.planets).map(([point, data], index) => (
-                <Text key={`point-${index}`}>
-                  {planetSymbols[point]} {point.charAt(0).toUpperCase() + point.slice(1)}: {getZodiacSign(data.position)} {data.retrograde ? "℞" : ""}
-                </Text>
-              ))}
+              <Table variant="simple" colorScheme="yellow">
+                <Thead>
+                  <Tr>
+                    <Th color="gold" borderColor="gold">Planet</Th>
+                    <Th color="gold" borderColor="gold">Sign</Th>
+                    <Th color="gold" borderColor="gold">House</Th>
+                    <Th color="gold" borderColor="gold">Retrograde</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {Object.entries(chart.planets).map(([point, data], index) => (
+                    <Tr key={`point-${index}`} bg="purple.700" _hover={{ bg: "purple.600" }}>
+                      <Td borderColor="gold">
+                        {planetSymbols[point]} {point.charAt(0).toUpperCase() + point.slice(1)}
+                      </Td>
+                      <Td borderColor="gold">{getZodiacSign(data.position)}</Td>
+                      <Td borderColor="gold">{getHouseForPlanet(data.position, chart.houses)}</Td>
+                      <Td borderColor="gold">{data.retrograde ? "℞" : "—"}</Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
             </AccordionPanel>
           </AccordionItem>
 
