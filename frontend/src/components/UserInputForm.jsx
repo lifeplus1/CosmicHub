@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { Box, Input, Button } from '@chakra-ui/react';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,7 +14,6 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Only initialize Firebase if all required config values are present
 let auth;
 if (firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId) {
   try {
@@ -81,15 +81,15 @@ const UserInputForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} />
-      <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} />
-      <input type="time" name="birthTime" value={formData.birthTime} onChange={handleChange} />
-      <input type="text" name="birthPlace" placeholder="Birth Place" value={formData.birthPlace} onChange={handleChange} />
-      <button type="submit">Submit</button>
-    </form>
+    <Box as="form" onSubmit={handleSubmit}>
+      <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <Input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} />
+      <Input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} />
+      <Input type="time" name="birthTime" value={formData.birthTime} onChange={handleChange} />
+      <Input type="text" name="birthPlace" placeholder="Birth Place" value={formData.birthPlace} onChange={handleChange} />
+      <Button type="submit" colorScheme="blue">Submit</Button>
+    </Box>
   );
 };
 
