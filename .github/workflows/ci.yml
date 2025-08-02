@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -58,12 +60,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensure full repository is checked out
+          fetch-depth: 0
       - name: Debug Directory Structure
         run: |
           pwd
           ls -la
-          ls -la frontend
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -82,11 +83,27 @@ jobs:
           fi
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      - name: Deploy to Vercel
+      - name: Clear Vercel Cache
+        run: vercel cache clear --token=$VERCEL_TOKEN
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - name: Build and Debug Output
         run: |
           npm ci
           npm run build
-          vercel deploy --prod --token=$VERCEL_TOKEN --confirm --cwd .
+          ls -la dist || echo "dist directory not found"
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_BACKEND_URL: https://astrology-app-0emh.onrender.com
+          VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
+      - name: Deploy to Vercel
+        run: |
+          vercel deploy --prod --token=$VERCEL_TOKEN --confirm --cwd . --log=debug
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -105,6 +122,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
