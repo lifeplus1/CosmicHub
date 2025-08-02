@@ -2,26 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist",
-        "buildCommand": "npm run build",
-        "installCommand": "npm install"
-      }
+      "src": "./src/**/*",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/assets/(.*)",
-      "dest": "/dist/assets/$1",
-      "headers": {
-        "Content-Type": "application/javascript"
-      }
-    },
-    {
       "src": "/(.*)",
-      "dest": "/dist/index.html"
+      "dest": "/"
     }
   ]
 }
