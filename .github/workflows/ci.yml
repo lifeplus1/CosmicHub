@@ -57,6 +57,13 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure full repository is checked out
+      - name: Debug Directory Structure
+        run: |
+          pwd
+          ls -la
+          ls -la frontend
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
