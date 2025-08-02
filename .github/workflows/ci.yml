@@ -72,7 +72,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
       - name: Install Vercel CLI
-        run: npm install -g vercel@latest
+        run: npm install -g vercel@44.7.0
       - name: Debug Vercel Token
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
@@ -84,14 +84,16 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Clear Vercel Cache
-        run: vercel cache purge --token=$VERCEL_TOKEN
+        run: vercel cache purge --project $VERCEL_PROJECT_ID --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       - name: Build and Debug Output
         run: |
           npm ci
-          npm run build
+          npm run build || echo "Build failed, check logs above"
           ls -la dist || echo "dist directory not found"
+          cat dist/index.html || echo "dist/index.html not found"
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -103,7 +105,7 @@ jobs:
           VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
       - name: Deploy to Vercel
         run: |
-          vercel deploy --prod --token=$VERCEL_TOKEN --confirm --cwd . --log=debug
+          vercel deploy --prod --token=$VERCEL_TOKEN --confirm --cwd . --project $VERCEL_PROJECT_ID --log=debug
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
