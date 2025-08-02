@@ -138,7 +138,7 @@ jobs:
           VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
       - name: Deploy to Vercel
         run: |
-          vercel deploy --prod --token=$VERCEL_TOKEN --confirm --cwd . --scope $VERCEL_ORG_ID --log=debug
+          vercel deploy --prod --token=$VERCEL_TOKEN --confirm --cwd . --scope $VERCEL_ORG_ID
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
