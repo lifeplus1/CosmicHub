@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend  # Set default working directory for all run steps
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node.js
