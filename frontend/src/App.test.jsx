@@ -7,6 +7,10 @@ import { vi } from 'vitest';
 import { AuthProvider } from './components/AuthProvider';
 
 vi.mock('axios');
+vi.mock('./lib/firebase', () => ({
+  auth: { currentUser: null },
+  db: {},
+}));
 vi.mock('./components/AuthProvider', () => ({
   AuthProvider: ({ children }) => <div>{children}</div>,
   useAuth: () => ({ user: null, loading: false }),
