@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Heading, FormControl, FormLabel, Textarea, Button, VStack, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "./AuthProvider";
-import { getAuthToken } from "./lib/auth";
+import { getAuthToken } from "../lib/auth"; // Updated path
 
 export default function AIChat() {
   const { user, loading } = useAuth();

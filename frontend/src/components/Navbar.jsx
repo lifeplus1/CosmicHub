@@ -1,11 +1,11 @@
 import { Box, Flex, Text, Button, Heading, useColorModeValue } from "@chakra-ui/react";
 import { useAuth } from "./AuthProvider";
-import { logOut } from "../lib/auth";
+import { logOut } from "../lib/auth"; // Updated path
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { getAuthToken } from "../lib/auth";
+import { getAuthToken } from "../lib/auth"; // Updated path
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -66,5 +66,5 @@ export default function Navbar() {
         </Flex>
       </Flex>
     </Box>
-    );
-  }
+  );
+}

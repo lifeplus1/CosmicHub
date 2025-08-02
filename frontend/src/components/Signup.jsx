@@ -1,8 +1,7 @@
-// frontend/src/components/Signup.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, FormControl, FormLabel, Input, VStack, useToast } from "@chakra-ui/react";
-import { signUp } from "../lib/auth";
+import { signUp } from "../lib/auth"; // Updated path
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {

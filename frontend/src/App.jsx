@@ -1,3 +1,4 @@
+// frontend/src/App.jsx
 import { useState } from "react";
 import { ChakraProvider, Box, Heading, FormControl, FormLabel, Input, Select, Button, VStack, Text, useToast } from "@chakra-ui/react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
@@ -7,8 +8,11 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import SaveChart from "./components/SaveChart";
+import AnalyzePersonality from "./components/AnalyzePersonality";
+import AIChat from "./components/AIChat";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
-import { getAuthToken, logOut } from "./lib/auth";
+import { getAuthToken, logOut } from "./lib/auth"; // Updated path
 
 function ChartPage() {
   const [formData, setFormData] = useState({
@@ -255,6 +259,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/chart" element={<ProtectedChartPage />} />
+            <Route path="/save-chart" element={<SaveChart />} />
+            <Route path="/analyze-personality" element={<AnalyzePersonality />} />
+            <Route path="/chat" element={<AIChat />} />
             <Route path="/" element={<ChartPage />} />
           </Routes>
           <Footer />
