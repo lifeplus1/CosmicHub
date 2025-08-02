@@ -113,7 +113,7 @@ jobs:
           VITE_BACKEND_URL: https://astrology-app-0emh.onrender.com
           VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
       - name: Clear Vercel Cache
-        run: vercel cache purge --token=$VERCEL_TOKEN
+        run: vercel cache purge --yes --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
