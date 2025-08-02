@@ -1,5 +1,4 @@
-
-import { Box, Flex, Text, Button, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Text, Button, Heading, useColorModeValue } from "@chakra-ui/react";
 import { useAuth } from "./AuthProvider";
 import { logOut } from "../lib/auth";
 import { useNavigate } from "react-router-dom";
@@ -67,5 +66,5 @@ export default function Navbar() {
         </Flex>
       </Flex>
     </Box>
-  );
-}
+    );
+  }
