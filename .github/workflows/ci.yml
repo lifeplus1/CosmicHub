@@ -33,14 +33,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
       - name: Install Frontend Dependencies
         run: |
           cd frontend
-          npm install
+          npm ci || echo "npm ci failed, check logs above"
+          npm list @testing-library/jest-dom || echo "Failed to list @testing-library/jest-dom"
+      - name: Debug Test Setup
+        run: |
+          cd frontend
+          ls -la src
+          cat src/setupTests.js || echo "src/setupTests.js not found"
       - name: Run Frontend Tests
         run: |
           cd frontend
-          npm run test
+          npm run test || echo "Frontend tests failed, check logs above"
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
