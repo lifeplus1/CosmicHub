@@ -84,7 +84,7 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Clear Vercel Cache
-        run: vercel cache clear --token=$VERCEL_TOKEN
+        run: vercel cache purge --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Build and Debug Output
