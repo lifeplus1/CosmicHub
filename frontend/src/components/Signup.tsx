@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, FormControl, FormLabel, Input, VStack, useToast } from "@chakra-ui/react";
-import { signUp } from "../lib/auth"; // Updated path
+// If signUp is a default export:
+// import signUp from "../auth";
+
+// If signUp is a named export, ensure it is exported as such in ../auth.ts:
+// export const signUp = async (email: string, password: string) => { ... }
+import { signUp } from "../auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {

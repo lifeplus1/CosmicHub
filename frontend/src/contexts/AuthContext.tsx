@@ -1,6 +1,5 @@
-// frontend/src/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -14,18 +13,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const auth = getAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-    });
+    const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
   }, [auth]);
 
-  const getAuthToken = async (): Promise<string | null> => {
+  const getAuthToken = async () => {
     if (!user) return null;
     try {
       return await user.getIdToken();
     } catch (error) {
-      console.error("Error getting auth token:", error);
+      console.error('Error getting auth token:', error);
       return null;
     }
   };
@@ -40,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

@@ -1,7 +1,7 @@
 // frontend/src/components/ChartDisplay.test.tsx
 import { render, screen } from '@testing-library/react';
 import { ChakraProvider } from '@chakra-ui/react';
-import ChartDisplay from './ChartDisplay';
+import ChartDisplay from '../components/ChartDisplay';
 
 interface PlanetData {
   position: number;

@@ -7,4 +7,4 @@ declare module "./components/Footer";
 declare module "./components/SaveChart";
 declare module "./components/AnalyzePersonality";
 declare module "./components/AIChat";
-declare module "./lib/auth";
+declare module "./auth";

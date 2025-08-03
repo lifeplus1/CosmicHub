@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, FormControl, FormLabel, Input, VStack, useToast } from "@chakra-ui/react";
-import { logIn } from "../lib/auth"; // Updated path
+import { logIn } from "../auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");

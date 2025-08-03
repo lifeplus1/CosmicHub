@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { auth } from "../lib/firebase.js";
+import { auth } from "../firebase";
 
 interface AuthContextType {
   user: User | null;

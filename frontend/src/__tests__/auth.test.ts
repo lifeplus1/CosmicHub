@@ -1,5 +1,5 @@
 import { vi, describe, it, expect } from 'vitest';
-import { getAuthToken, logOut } from './auth';
+import { getAuthToken, logOut } from '../auth';
 
 vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({
@@ -17,7 +17,8 @@ describe('Auth', () => {
   });
 
   it('logs out', async () => {
+    const { signOut } = await import('firebase/auth');
     await logOut();
-    // Optionally, check if signOut was called
+    expect(signOut).toHaveBeenCalled();
   });
 });
