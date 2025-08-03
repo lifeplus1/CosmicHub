@@ -1,7 +1,7 @@
 // frontend/src/components/Navbar.tsx
 import { Box, Flex, Text, Button, Heading, useColorModeValue, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { useAuth } from "../contexts/AuthContext"; // Adjust path
+import { useAuth } from "./AuthProvider";
 import { logOut, getAuthToken } from "../lib/auth"; // Adjust path
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
