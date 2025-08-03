@@ -1,18 +1,23 @@
 // frontend/src/App.test.jsx
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 import App from './App';
 import { AuthProvider } from './components/AuthProvider';
+
+vi.mock('react-router-dom', () => ({
+  BrowserRouter: ({ children }) => <div>{children}</div>,
+  useNavigate: vi.fn(),
+  Routes: ({ children }) => <div>{children}</div>,
+  Route: () => null,
+}));
 
 describe('App', () => {
   it('renders App component', () => {
     render(
-      <MemoryRouter>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </MemoryRouter>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     );
-    expect(screen.getByText(/Cosmic Insights/)).toBeInTheDocument(); // Adjust based on actual content
+    expect(screen.getByText(/Cosmic Insights/)).toBeInTheDocument();
   });
 });

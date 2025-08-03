@@ -5,13 +5,13 @@ import { getAuthToken, logOut } from './auth';
 const mockGetIdToken = vi.fn(() => Promise.resolve('mock-token'));
 const mockSignOut = vi.fn(() => Promise.resolve());
 
-vi.mock('firebase/auth', () => {
-  const getAuth = vi.fn(() => ({
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({
     currentUser: { uid: 'mock-uid' },
     signOut: mockSignOut,
-  }));
-  return { getAuth, getIdToken: mockGetIdToken };
-});
+  })),
+  getIdToken: mockGetIdToken,
+}));
 
 describe('Auth', () => {
   it('gets auth token', async () => {
