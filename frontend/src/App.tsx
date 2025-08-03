@@ -1,4 +1,4 @@
-// frontend/src/App.tsx (updated to consolidate form, add save logic, remove duplicate SaveChart form)
+// frontend/src/App.tsx
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import {
   ChakraProvider,
@@ -23,8 +23,9 @@ import Footer from "./components/Footer";
 import AnalyzePersonality from "./components/AnalyzePersonality";
 import AIChat from "./components/AIChat";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
-import SavedCharts from "./components/SavedCharts"; // New import
+import SavedCharts from "./components/SavedCharts";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getAuthToken } from "./lib/auth";
 
 interface ChartData {
   latitude: number;
@@ -46,7 +47,7 @@ const App: React.FC = () => {
     longitude: "",
     timezone: "",
   });
-  const [houseSystem, setHouseSystem] = useState("placidus");
+  const [houseSystem, setHouseSystem] = useState("P"); // Updated to match backend enum
   const [chart, setChart] = useState<ChartData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -63,9 +64,21 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
+      const [year, month, day] = birthData.date.split("-").map(Number);
+      const [hour, minute] = birthData.time.split(":").map(Number);
+      const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/calculate?house_system=${houseSystem}`,
-        { params: birthData }
+        {
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          lat: Number(birthData.latitude),
+          lon: Number(birthData.longitude),
+          timezone: birthData.timezone,
+          city: "Unknown", // Add city if needed by backend
+        }
       );
       setChart(response.data);
       toast({ title: "Chart Calculated", status: "success", duration: 3000 });
@@ -86,14 +99,26 @@ const App: React.FC = () => {
   const handleSaveChart = async () => {
     if (!user || !chart) return;
     try {
-      await addDoc(collection(db, `users/${user.uid}/charts`), {
-        birthData,
-        houseSystem,
-        chart,
-        createdAt: new Date().toISOString(),
-      });
+      const token = await getAuthToken();
+      const [year, month, day] = birthData.date.split("-").map(Number);
+      const [hour, minute] = birthData.time.split(":").map(Number);
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/save-chart`,
+        {
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          lat: Number(birthData.latitude),
+          lon: Number(birthData.longitude),
+          timezone: birthData.timezone,
+          city: "Unknown", // Add city if needed
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       toast({ title: "Chart Saved", status: "success", duration: 3000 });
-    } catch (err) {
+    } catch (err: any) {
       toast({ title: "Save Failed", description: err.message, status: "error", duration: 3000 });
     }
   };
@@ -151,6 +176,16 @@ const App: React.FC = () => {
                       />
                     </FormControl>
                     <FormControl>
+                      <FormLabel>City</FormLabel>
+                      <Input
+                        type="text"
+                        name="city"
+                        value={birthData.city}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </FormControl>
+                    <FormControl>
                       <FormLabel>Timezone</FormLabel>
                       <Input
                         type="text"
@@ -167,9 +202,8 @@ const App: React.FC = () => {
                         value={houseSystem}
                         onChange={(e) => setHouseSystem(e.target.value)}
                       >
-                        <option value="placidus">Placidus</option>
-                        <option value="whole_sign">Whole Sign</option>
-                        <option value="koch">Koch</option>
+                        <option value="P">Placidus</option>
+                        <option value="E">Equal House</option>
                       </Select>
                     </FormControl>
                     <Button type="submit" colorScheme="teal" isLoading={loading}>
