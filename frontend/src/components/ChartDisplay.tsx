@@ -33,6 +33,10 @@ interface AspectData {
   point2: string;
   aspect: string;
   orb: number;
+  point1_sign?: string;
+  point2_sign?: string;
+  point1_house?: number;
+  point2_house?: number;
 }
 
 interface ChartData {
@@ -141,10 +145,16 @@ const ChartDisplay: React.FC<{ chart: ChartData }> = ({ chart }) => {
                   {Object.entries(chart.planets).map(([point, data]) => (
                     <Tr key={point}>
                       <Td borderColor="gold">
-                        {planetSymbols[point] || point} {point.charAt(0).toUpperCase() + point.slice(1)}
+                        <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
                       </Td>
-                      <Td borderColor="gold">{getZodiacSign(data.position)}</Td>
-                      <Td borderColor="gold">{getHouseForPlanet(data.position, chart.houses)}</Td>
+                      <Td borderColor="gold">
+                        <Box display="flex" alignItems="center">
+                          <Text as="span" fontWeight="bold" color="yellow.200">{getZodiacSign(data.position)}</Text>
+                        </Box>
+                      </Td>
+                      <Td borderColor="gold">
+                        <Text as="span" color="yellow.200">{getHouseForPlanet(data.position, chart.houses)}</Text>
+                      </Td>
                       <Td borderColor="gold">{data.retrograde ? "℞" : "—"}</Td>
                     </Tr>
                   ))}
@@ -216,6 +226,8 @@ const ChartDisplay: React.FC<{ chart: ChartData }> = ({ chart }) => {
                 <Thead>
                   <Tr>
                     <Th>Aspect</Th>
+                    <Th>Point 1</Th>
+                    <Th>Point 2</Th>
                     <Th>Orb</Th>
                   </Tr>
                 </Thead>
@@ -223,8 +235,29 @@ const ChartDisplay: React.FC<{ chart: ChartData }> = ({ chart }) => {
                   {chart.aspects.map((aspect, index) => (
                     <Tr key={index}>
                       <Td borderColor="gold">
-                        {planetSymbols[aspect.point1] || aspect.point1} {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)} -{" "}
-                        {planetSymbols[aspect.point2] || aspect.point2} {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)}: {aspect.aspect}
+                        <b>{aspect.aspect}</b>
+                      </Td>
+                      <Td borderColor="gold">
+                        <Box>
+                          <b>{planetSymbols[aspect.point1] || aspect.point1}</b> {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)}
+                          {aspect.point1_sign && (
+                            <Text as="span" color="yellow.200" ml={2}>{aspect.point1_sign}</Text>
+                          )}
+                          {aspect.point1_house && (
+                            <Text as="span" color="teal.200" ml={2}>House {aspect.point1_house}</Text>
+                          )}
+                        </Box>
+                      </Td>
+                      <Td borderColor="gold">
+                        <Box>
+                          <b>{planetSymbols[aspect.point2] || aspect.point2}</b> {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)}
+                          {aspect.point2_sign && (
+                            <Text as="span" color="yellow.200" ml={2}>{aspect.point2_sign}</Text>
+                          )}
+                          {aspect.point2_house && (
+                            <Text as="span" color="teal.200" ml={2}>House {aspect.point2_house}</Text>
+                          )}
+                        </Box>
                       </Td>
                       <Td borderColor="gold">{aspect.orb.toFixed(2)}°</Td>
                     </Tr>
