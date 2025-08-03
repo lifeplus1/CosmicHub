@@ -1,14 +1,22 @@
 # backend/auth.py
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from firebase_admin import auth, initialize_app
+from firebase_admin import auth, initialize_app, credentials, _apps  # Import _apps
 import os
+import json
 
-# Initialize Firebase Admin SDK (only once)
-if not len(getattr(auth, '_apps', {})):  # Check if already initialized
+# Initialize Firebase Admin SDK only if not already initialized
+if not _apps:  # Check if any Firebase apps exist
     firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
     if firebase_credentials:
-        initialize_app(credential=auth.Certificate(firebase_credentials))
+        try:
+            # Parse JSON string from environment variable
+            cred_dict = json.loads(firebase_credentials)
+            initialize_app(credential=credentials.Certificate(cred_dict))
+        except json.JSONDecodeError as e:
+            raise Exception(f"Failed to parse FIREBASE_CREDENTIALS: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to initialize Firebase: {str(e)}")
     else:
         raise Exception("FIREBASE_CREDENTIALS environment variable not set")
 

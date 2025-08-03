@@ -1,19 +1,18 @@
+# backend/main.py
 import logging
 import os
 import json
-from fastapi import FastAPI, HTTPException, Header, Depends, Query
+from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
-from astro_calculations import calculate_chart, get_location, validate_inputs
-from astro.personality import get_personality_traits
-from astro.ephemeris import get_planetary_positions
 import stripe
 import requests
 from dotenv import load_dotenv
+from auth import get_current_user  # Imports Firebase initialization
+from astro_calculations import calculate_chart, get_location, validate_inputs
+from astro.personality import get_personality_traits
+from astro.ephemeris import get_planetary_positions
 from database import save_chart, get_charts
-from auth import get_current_user  # Assuming auth.py has this function
 
 # Load .env file
 load_dotenv()
@@ -25,39 +24,6 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
 
-# Initialize Firebase
-try:
-    emulator_host = os.getenv("FIRESTORE_EMULATOR_HOST")
-    if emulator_host:
-        logger.info(f"Using Firestore emulator at {emulator_host}")
-        firebase_admin.initialize_app(options={'projectId': 'test-project'})
-    else:
-        firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
-        if not firebase_credentials:
-            logger.error("FIREBASE_CREDENTIALS environment variable is not set")
-            if os.getenv("CI") or os.getenv("PYTEST_CURRENT_TEST"):
-                firebase_admin = None
-                cred = None
-                logger.warning("Skipping Firebase initialization in CI/test environment.")
-            else:
-                raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
-        else:
-            try:
-                cred_dict = json.loads(firebase_credentials)
-                logger.debug(f"FIREBASE_CREDENTIALS loaded: project_id={cred_dict.get('project_id')}")
-                cred = credentials.Certificate(cred_dict)
-                firebase_admin.initialize_app(cred)
-                logger.info("Firebase initialized successfully")
-            except json.JSONDecodeError as e:
-                logger.error(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
-                raise ValueError(f"Invalid FIREBASE_CREDENTIALS JSON: {str(e)}")
-            except Exception as e:
-                logger.error(f"Failed to initialize Firebase: {str(e)}")
-                raise
-except Exception as e:
-    logger.error(f"Failed to initialize Firebase: {str(e)}")
-    raise
-
 app = FastAPI()
 
 # Add CORS middleware
@@ -66,7 +32,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5174",
         "http://localhost:3000",
-        "https://*.vercel.app"
+        "https://*.vercel.app"  # Allow all Vercel subdomains
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -80,9 +46,9 @@ class BirthData(BaseModel):
     hour: int
     minute: int
     city: str
-    timezone: str = None
-    lat: float = None
-    lon: float = None
+    timezone: str | None = None
+    lat: float | None = None
+    lon: float | None = None
 
 try:
     stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -108,19 +74,21 @@ async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.get("/user/profile")
-async def get_user_profile(user: dict = Depends(get_current_user)):
+async def get_user_profile(user_id: str = Depends(get_current_user)):
     try:
-        return {"uid": user["uid"], "email": user.get("email", ""), "created_at": user.get("iat", "")}
+        from firebase_admin import auth
+        user = auth.get_user(user_id)
+        return {"uid": user_id, "email": user.email, "created_at": user.user_metadata.creation_timestamp}
     except Exception as e:
         logger.error(f"Error fetching user profile: {str(e)}")
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/save-chart")
-async def save_chart_endpoint(data: BirthData, user: dict = Depends(get_current_user)):
+async def save_chart_endpoint(data: BirthData, user_id: str = Depends(get_current_user)):
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
-        result = save_chart(user["uid"], "natal", data.dict(), chart_data)  # Adjust type as needed
+        result = save_chart(user_id, "natal", data.dict(), chart_data)
         return result
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
@@ -130,18 +98,18 @@ async def save_chart_endpoint(data: BirthData, user: dict = Depends(get_current_
         if "PERMISSION_DENIED" in str(e):
             raise HTTPException(403, "Permission denied: Check Firestore rules")
         raise HTTPException(500, f"Internal server error: {str(e)}")
-    
+
 @app.get("/charts")
-async def list_charts(user: dict = Depends(get_current_user)):
+async def list_charts(user_id: str = Depends(get_current_user)):
     try:
-        charts = get_charts(user["uid"])
+        charts = get_charts(user_id)
         return charts
     except Exception as e:
         logger.error(f"Error fetching charts: {str(e)}")
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/analyze-personality")
-async def analyze_personality(data: BirthData, user: dict = Depends(get_current_user)):
+async def analyze_personality(data: BirthData, user_id: str = Depends(get_current_user)):
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         personality = get_personality_traits(chart_data)
@@ -154,7 +122,7 @@ async def analyze_personality(data: BirthData, user: dict = Depends(get_current_
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/create-checkout-session")
-async def create_checkout_session(user: dict = Depends(get_current_user)):
+async def create_checkout_session(user_id: str = Depends(get_current_user)):
     if not stripe:
         logger.error("Stripe module not available")
         raise HTTPException(500, "Stripe integration not available")
@@ -162,13 +130,13 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[{
-                "price": "your_stripe_price_id",  # Replace with actual price ID
+                "price": os.getenv("STRIPE_PRICE_ID", "your_stripe_price_id"),  # Use env variable
                 "quantity": 1
             }],
             mode="subscription",
             success_url="https://astrology-app-mauve.vercel.app/success",
             cancel_url="https://astrology-app-mauve.vercel.app/cancel",
-            metadata={"user_id": user["uid"]}
+            metadata={"user_id": user_id}
         )
         return {"id": session.id}
     except Exception as e:
@@ -176,9 +144,11 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/chat")
-async def chat(message: dict, user: dict = Depends(get_current_user)):
+async def chat(message: dict, user_id: str = Depends(get_current_user)):
     try:
         api_key = os.getenv("XAI_API_KEY")
+        if not api_key:
+            raise HTTPException(500, "XAI_API_KEY not set")
         response = requests.post(
             "https://api.x.ai/v1/chat/completions",
             headers={"Authorization": f"Bearer {api_key}"},
