@@ -1,20 +1,20 @@
-// frontend/src/components/Navbar.tsx (updated to add saved charts link)
-import { Box, Flex, Text, Button, Heading, useColorModeValue } from "@chakra-ui/react";
-import { useAuth } from "./AuthProvider";
-import { logOut } from "../lib/auth";
+// frontend/src/components/Navbar.tsx
+import { Box, Flex, Text, Button, Heading, useColorModeValue, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
+import { ChevronDownIcon } from "@chakra-ui/icons";
+import { useAuth } from "../contexts/AuthContext"; // Adjust path
+import { logOut, getAuthToken } from "../lib/auth"; // Adjust path
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { getAuthToken } from "../lib/auth";
 
 interface UserInfo {
   email: string;
-  [key: string]: any;
+  // Add other properties as needed
 }
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const { user } = useAuth() || { user: null }; // Fallback for safety
   const navigate = useNavigate();
   const toast = useToast();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -24,18 +24,25 @@ export default function Navbar() {
       (async () => {
         try {
           const token = await getAuthToken();
+          if (!token) throw new Error("No auth token available");
           const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/user/profile`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
           setUserInfo(response.data);
         } catch (error) {
-          console.error("Error fetching user profile:", error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch user profile",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
         }
       })();
+    } else {
+      setUserInfo(null);
     }
-  }, [user]);
+  }, [user, toast]);
 
   const handleLogout = async () => {
     try {
@@ -61,8 +68,15 @@ export default function Navbar() {
               <Text color={color} mr={4}>Welcome, {userInfo?.email || user.email}</Text>
               <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/")}>Home</Button>
               <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/saved-charts")}>Saved Charts</Button>
-              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/analyze-personality")}>Personality</Button>
-              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/chat")}>AI Chat</Button>
+              <Menu>
+                <MenuButton as={Button} colorScheme="yellow" variant="ghost" rightIcon={<ChevronDownIcon />}>
+                  More
+                </MenuButton>
+                <MenuList bg={bg}>
+                  <MenuItem onClick={() => navigate("/analyze-personality")}>Personality</MenuItem>
+                  <MenuItem onClick={() => navigate("/chat")}>AI Chat</MenuItem>
+                </MenuList>
+              </Menu>
               <Button colorScheme="red" variant="outline" borderColor="gold" color={color} onClick={handleLogout}>Log Out</Button>
             </>
           ) : (
@@ -74,5 +88,5 @@ export default function Navbar() {
         </Flex>
       </Flex>
     </Box>
-    );
-  }
+  );
+}
