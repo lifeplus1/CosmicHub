@@ -13,7 +13,7 @@ import stripe
 import requests
 from dotenv import load_dotenv
 from database import save_chart, get_charts
-from auth import verify_firebase_token  # Assuming auth.py has this function
+from auth import get_current_user  # Assuming auth.py has this function
 
 # Load .env file
 load_dotenv()
@@ -108,7 +108,7 @@ async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.get("/user/profile")
-async def get_user_profile(user: dict = Depends(verify_firebase_token)):
+async def get_user_profile(user: dict = Depends(get_current_user)):
     try:
         return {"uid": user["uid"], "email": user.get("email", ""), "created_at": user.get("iat", "")}
     except Exception as e:
@@ -116,7 +116,7 @@ async def get_user_profile(user: dict = Depends(verify_firebase_token)):
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/save-chart")
-async def save_chart_endpoint(data: BirthData, user: dict = Depends(verify_firebase_token)):
+async def save_chart_endpoint(data: BirthData, user: dict = Depends(get_current_user)):
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
@@ -132,7 +132,7 @@ async def save_chart_endpoint(data: BirthData, user: dict = Depends(verify_fireb
         raise HTTPException(500, f"Internal server error: {str(e)}")
     
 @app.get("/charts")
-async def list_charts(user: dict = Depends(verify_firebase_token)):
+async def list_charts(user: dict = Depends(get_current_user)):
     try:
         charts = get_charts(user["uid"])
         return charts
@@ -141,7 +141,7 @@ async def list_charts(user: dict = Depends(verify_firebase_token)):
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/analyze-personality")
-async def analyze_personality(data: BirthData, user: dict = Depends(verify_firebase_token)):
+async def analyze_personality(data: BirthData, user: dict = Depends(get_current_user)):
     try:
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         personality = get_personality_traits(chart_data)
@@ -154,7 +154,7 @@ async def analyze_personality(data: BirthData, user: dict = Depends(verify_fireb
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/create-checkout-session")
-async def create_checkout_session(user: dict = Depends(verify_firebase_token)):
+async def create_checkout_session(user: dict = Depends(get_current_user)):
     if not stripe:
         logger.error("Stripe module not available")
         raise HTTPException(500, "Stripe integration not available")
@@ -176,7 +176,7 @@ async def create_checkout_session(user: dict = Depends(verify_firebase_token)):
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/chat")
-async def chat(message: dict, user: dict = Depends(verify_firebase_token)):
+async def chat(message: dict, user: dict = Depends(get_current_user)):
     try:
         api_key = os.getenv("XAI_API_KEY")
         response = requests.post(
