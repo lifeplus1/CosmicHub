@@ -1,9 +1,37 @@
-// frontend/src/components/ChartDisplay.test.jsx
+// frontend/src/components/ChartDisplay.test.tsx
 import { render, screen } from '@testing-library/react';
 import { ChakraProvider } from '@chakra-ui/react';
 import ChartDisplay from './ChartDisplay';
 
-const mockChart = {
+interface PlanetData {
+  position: number;
+  retrograde: boolean;
+}
+
+interface HouseData {
+  house: number;
+  cusp: number;
+}
+
+interface AspectData {
+  point1: string;
+  point2: string;
+  aspect: string;
+  orb: number;
+}
+
+interface ChartData {
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  julian_day: number;
+  planets: Record<string, PlanetData>;
+  houses: HouseData[];
+  angles: Record<string, number>;
+  aspects: AspectData[];
+}
+
+const mockChart: ChartData = {
   latitude: 40.7128,
   longitude: -74.0060,
   timezone: 'America/New_York',
@@ -37,6 +65,7 @@ describe('ChartDisplay', () => {
     expect(screen.getByText(/Latitude: 40.71°/)).toBeInTheDocument();
     expect(screen.getByText('0.00° Leo')).toBeInTheDocument();
     expect(screen.getByText('0.00° Sagittarius')).toBeInTheDocument();
-    expect(screen.getByText('℞')).toBeInTheDocument(); // For Moon retrograde
+    expect(screen.getByText('℞')).toBeInTheDocument();
   });
 });
+

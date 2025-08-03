@@ -10,9 +10,9 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    setupFiles: './src/setupTests.js', // Ensure this path is correct
+    setupFiles: './src/setupTests.js',
     globals: true,
-    include: ['src/**/*.{test,spec}.{js,jsx}'],
+    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

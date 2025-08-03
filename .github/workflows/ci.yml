@@ -1,9 +1,9 @@
 name: Monorepo CI/CD
 on:
   push:
-    branches: [main]
+    branches: [typescript-migration]
   pull_request:
-    branches: [main]
+    branches: [typescript-migration]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
       - name: Debug Frontend Dependencies
         run: |
           cd frontend
-          npm list @testing-library/jest-dom @testing-library/react vitest
+          npm list @testing-library/jest-dom @testing-library/react vitest typescript
           ls -la src
           cat src/setupTests.js || echo "src/setupTests.js not found"
       - name: Run Frontend Tests
