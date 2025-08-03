@@ -65,6 +65,7 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('VITE_BACKEND_URL:', import.meta.env.VITE_BACKEND_URL);
       const [year, month, day] = birthData.date.split("-").map(Number);
       const [hour, minute] = birthData.time.split(":").map(Number);
       const response = await axios.post(
