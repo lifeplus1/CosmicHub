@@ -39,7 +39,9 @@ interface ChartData {
 }
 
 const App: React.FC = () => {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  console.log('AuthContext value in App:', authContext);
+  const { user } = authContext;
   const [birthData, setBirthData] = useState({
     date: "",
     time: "",
