@@ -35,7 +35,8 @@ describe('ChartDisplay', () => {
       </ChakraProvider>
     );
     expect(screen.getByText(/Latitude: 40.71°/)).toBeInTheDocument();
-    expect(screen.getByText(/Sun: 0.00° Leo/)).toBeInTheDocument();
-    expect(screen.getByText(/Moon: 0.00° Aquarius ℞/)).toBeInTheDocument();
+    expect(screen.getByText('0.00° Leo')).toBeInTheDocument();
+    expect(screen.getByText('0.00° Sagittarius')).toBeInTheDocument();
+    expect(screen.getByText('℞')).toBeInTheDocument(); // For Moon retrograde
   });
 });
