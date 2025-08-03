@@ -12,7 +12,10 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('./components/AuthProvider', () => ({
-  AuthProvider: ({ children }) => <div>{children}</div>,
+  // Mock the AuthProvider component
+  AuthProvider: ({ children }) => <>{children}</>,
+  // Mock the useAuth hook
+  useAuth: () => ({ user: null, loading: false }),
 }));
 
 describe('App', () => {
