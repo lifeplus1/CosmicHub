@@ -46,12 +46,8 @@ const App: React.FC = () => {
   const [birthData, setBirthData] = useState({
     date: "",
     time: "",
-    latitude: "",
-    longitude: "",
-    timezone: "",
     city: "",
   });
-  const [houseSystem, setHouseSystem] = useState("P"); // Updated to match backend enum
   const [chart, setChart] = useState<ChartData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,7 +55,7 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const db = getFirestore();
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setBirthData({ ...birthData, [e.target.name]: e.target.value });
   };
 
@@ -68,20 +64,16 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('VITE_BACKEND_URL:', import.meta.env.VITE_BACKEND_URL);
       const [year, month, day] = birthData.date.split("-").map(Number);
       const [hour, minute] = birthData.time.split(":").map(Number);
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/calculate?house_system=${houseSystem}`,
+        `${import.meta.env.VITE_BACKEND_URL}/calculate`,
         {
           year,
           month,
           day,
           hour,
           minute,
-          lat: Number(birthData.latitude),
-          lon: Number(birthData.longitude),
-          timezone: birthData.timezone,
           city: birthData.city,
         }
       );
@@ -115,9 +107,7 @@ const App: React.FC = () => {
           day,
           hour,
           minute,
-          lat: Number(birthData.latitude),
-          lon: Number(birthData.longitude),
-          timezone: birthData.timezone,
+          // Removed latitude, longitude, timezone for simplified form
           city: birthData.city,
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -138,92 +128,50 @@ const App: React.FC = () => {
               path="/"
               element={
                 <VStack spacing={4}>
-                  <Heading>Astrology App</Heading>
+                  <Heading color="gold">Astrology Chart Calculator</Heading>
                   <form onSubmit={handleSubmit}>
-                    <FormControl>
-                      <FormLabel>Date of Birth</FormLabel>
+                    <FormControl isRequired>
+                      <FormLabel color="yellow.200">Date of Birth</FormLabel>
                       <Input
                         type="date"
                         name="date"
                         value={birthData.date}
                         onChange={handleInputChange}
-                        required
+                        bg="purple.700"
+                        color="white"
+                        borderColor="gold"
                       />
                     </FormControl>
-                    <FormControl>
-                      <FormLabel>Time of Birth</FormLabel>
+                    <FormControl isRequired>
+                      <FormLabel color="yellow.200">Time of Birth</FormLabel>
                       <Input
                         type="time"
                         name="time"
                         value={birthData.time}
                         onChange={handleInputChange}
-                        required
+                        bg="purple.700"
+                        color="white"
+                        borderColor="gold"
                       />
                     </FormControl>
-                    <FormControl>
-                      <FormLabel>Latitude</FormLabel>
-                      <Input
-                        type="number"
-                        name="latitude"
-                        value={birthData.latitude}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Longitude</FormLabel>
-                      <Input
-                        type="number"
-                        name="longitude"
-                        value={birthData.longitude}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>City</FormLabel>
+                    <FormControl isRequired>
+                      <FormLabel color="yellow.200">City</FormLabel>
                       <Input
                         type="text"
                         name="city"
                         value={birthData.city}
                         onChange={handleInputChange}
-                        required
+                        bg="purple.700"
+                        color="white"
+                        borderColor="gold"
                       />
                     </FormControl>
-                    <FormControl>
-                      <FormLabel>Timezone</FormLabel>
-                      <Input
-                        type="text"
-                        name="timezone"
-                        value={birthData.timezone}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>House System</FormLabel>
-                      <Select
-                        name="houseSystem"
-                        value={houseSystem}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setHouseSystem(e.target.value)}
-                      >
-                        <option value="P">Placidus</option>
-                        <option value="E">Equal House</option>
-                      </Select>
-                    </FormControl>
-                    <Button type="submit" colorScheme="teal" isLoading={loading}>
+                    <Button type="submit" colorScheme="teal" isLoading={loading} w="100%">
                       Calculate Chart
                     </Button>
                   </form>
                   {error && <Text color="red.500">{error}</Text>}
                   {chart && <ChartDisplay chart={chart} />}
-                  {user && chart && (
-                    <Button colorScheme="yellow" onClick={handleSaveChart}>
-                      Save Chart
-                    </Button>
-                  )}
-                  <AnalyzePersonality />
-                  <AIChat />
                 </VStack>
               }
             />
