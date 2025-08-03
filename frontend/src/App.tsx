@@ -1,3 +1,4 @@
+// frontend/src/App.tsx (updated to consolidate form, add save logic, remove duplicate SaveChart form)
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import {
   ChakraProvider,
@@ -19,11 +20,11 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import SaveChart from "./components/SaveChart";
 import AnalyzePersonality from "./components/AnalyzePersonality";
 import AIChat from "./components/AIChat";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
-import { getAuthToken, logOut } from "./lib/auth";
+import SavedCharts from "./components/SavedCharts"; // New import
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 
 interface ChartData {
   latitude: number;
@@ -37,6 +38,7 @@ interface ChartData {
 }
 
 const App: React.FC = () => {
+  const { user } = useAuth();
   const [birthData, setBirthData] = useState({
     date: "",
     time: "",
@@ -50,6 +52,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
+  const db = getFirestore();
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setBirthData({ ...birthData, [e.target.name]: e.target.value });
@@ -65,6 +68,7 @@ const App: React.FC = () => {
         { params: birthData }
       );
       setChart(response.data);
+      toast({ title: "Chart Calculated", status: "success", duration: 3000 });
     } catch (error: any) {
       setError(error.response?.data?.detail || "Failed to fetch chart data");
       toast({
@@ -76,6 +80,21 @@ const App: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveChart = async () => {
+    if (!user || !chart) return;
+    try {
+      await addDoc(collection(db, `users/${user.uid}/charts`), {
+        birthData,
+        houseSystem,
+        chart,
+        createdAt: new Date().toISOString(),
+      });
+      toast({ title: "Chart Saved", status: "success", duration: 3000 });
+    } catch (err) {
+      toast({ title: "Save Failed", description: err.message, status: "error", duration: 3000 });
     }
   };
 
@@ -159,12 +178,17 @@ const App: React.FC = () => {
                   </form>
                   {error && <Text color="red.500">{error}</Text>}
                   {chart && <ChartDisplay chart={chart} />}
-                  <SaveChart chart={chart} />
+                  {user && chart && (
+                    <Button colorScheme="yellow" onClick={handleSaveChart}>
+                      Save Chart
+                    </Button>
+                  )}
                   <AnalyzePersonality chart={chart} />
                   <AIChat />
                 </VStack>
               }
             />
+            <Route path="/saved-charts" element={user ? <SavedCharts /> : <Navigate to="/login" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="*" element={<Navigate to="/" />} />

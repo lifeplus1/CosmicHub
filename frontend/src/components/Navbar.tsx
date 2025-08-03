@@ -1,11 +1,12 @@
+// frontend/src/components/Navbar.tsx (updated to add saved charts link)
 import { Box, Flex, Text, Button, Heading, useColorModeValue } from "@chakra-ui/react";
 import { useAuth } from "./AuthProvider";
-import { logOut } from "../lib/auth"; // Updated path
+import { logOut } from "../lib/auth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { getAuthToken } from "../lib/auth"; // Updated path
+import { getAuthToken } from "../lib/auth";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -52,7 +53,8 @@ export default function Navbar() {
           {user ? (
             <>
               <Text color={color} mr={4}>Welcome, {userInfo?.email || user.email}</Text>
-              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/save-chart")}>Save Chart</Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/")}>Home</Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/saved-charts")}>Saved Charts</Button>
               <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/analyze-personality")}>Personality</Button>
               <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate("/chat")}>AI Chat</Button>
               <Button colorScheme="red" variant="outline" borderColor="gold" color={color} onClick={handleLogout}>Log Out</Button>
@@ -66,5 +68,5 @@ export default function Navbar() {
         </Flex>
       </Flex>
     </Box>
-  );
-}
+    );
+  }
