@@ -6,12 +6,13 @@
       "use": "@vercel/static-build",
       "config": {
         "distDir": "frontend/dist",
-        "buildCommand": "npm run build",
-        "installCommand": "npm ci"
+        "buildCommand": "cd frontend && npm ci && npm run build",
+        "installCommand": "cd frontend && npm ci"
       }
     }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-  ]
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "root": "."
 }
