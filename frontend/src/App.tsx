@@ -119,8 +119,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <ChakraProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ChakraProvider>
         <Navbar />
         <Box p={4}>
           <Routes>
@@ -185,8 +185,8 @@ const App: React.FC = () => {
           </Routes>
         </Box>
         <Footer />
-      </AuthProvider>
-    </ChakraProvider>
+      </ChakraProvider>
+    </AuthProvider>
   );
 };
 
