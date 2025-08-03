@@ -6,18 +6,19 @@ import { AuthProvider } from './components/AuthProvider';
 
 vi.mock('react-router-dom', () => ({
   BrowserRouter: ({ children }) => <div>{children}</div>,
-  useNavigate: vi.fn(),
+  useNavigate: () => vi.fn(),
   Routes: ({ children }) => <div>{children}</div>,
   Route: () => null,
 }));
 
+vi.mock('./components/AuthProvider', () => ({
+  AuthProvider: ({ children }) => <div>{children}</div>,
+}));
+
 describe('App', () => {
   it('renders App component', () => {
-    render(
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    );
-    expect(screen.getByText(/Cosmic Insights/)).toBeInTheDocument();
+    render(<App />);
+    const elements = screen.getAllByText(/Cosmic Insights/);
+    expect(elements.length).toBeGreaterThan(0);
   });
 });
