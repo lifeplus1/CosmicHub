@@ -46,6 +46,7 @@ const App: React.FC = () => {
     latitude: "",
     longitude: "",
     timezone: "",
+    city: "",
   });
   const [houseSystem, setHouseSystem] = useState("P"); // Updated to match backend enum
   const [chart, setChart] = useState<ChartData | null>(null);
@@ -77,7 +78,7 @@ const App: React.FC = () => {
           lat: Number(birthData.latitude),
           lon: Number(birthData.longitude),
           timezone: birthData.timezone,
-          city: "Unknown", // Add city if needed by backend
+          city: birthData.city,
         }
       );
       setChart(response.data);
@@ -113,7 +114,7 @@ const App: React.FC = () => {
           lat: Number(birthData.latitude),
           lon: Number(birthData.longitude),
           timezone: birthData.timezone,
-          city: "Unknown", // Add city if needed
+          city: birthData.city,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -200,7 +201,7 @@ const App: React.FC = () => {
                       <Select
                         name="houseSystem"
                         value={houseSystem}
-                        onChange={(e) => setHouseSystem(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setHouseSystem(e.target.value)}
                       >
                         <option value="P">Placidus</option>
                         <option value="E">Equal House</option>
