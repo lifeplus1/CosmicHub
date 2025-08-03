@@ -10,7 +10,7 @@ export default function Login() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setIsLoading(true);
     try {
@@ -18,7 +18,13 @@ export default function Login() {
       toast({ title: "Logged In", status: "success", duration: 3000, isClosable: true });
       navigate("/chart");
     } catch (error) {
-      toast({ title: "Login Failed", description: error.message, status: "error", duration: 3000, isClosable: true });
+      toast({ 
+        title: "Login Failed", 
+        description: error instanceof Error ? error.message : "An unknown error occurred", 
+        status: "error", 
+        duration: 3000, 
+        isClosable: true 
+      });
     }
     setIsLoading(false);
   };

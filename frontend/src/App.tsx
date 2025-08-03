@@ -1,5 +1,6 @@
 // frontend/src/App.tsx
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import {
   ChakraProvider,
   Box,
@@ -15,15 +16,15 @@ import {
 } from "@chakra-ui/react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
-import ChartDisplay from "./components/ChartDisplay";
-import Login from "./components/Login";
-import Signup from "./components/Signup";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import AnalyzePersonality from "./components/AnalyzePersonality";
-import AIChat from "./components/AIChat";
-import { AuthProvider, useAuth } from "./components/AuthProvider";
-import SavedCharts from "./components/SavedCharts";
+import ChartDisplay from "./components/ChartDisplay.js";
+import Login from "./components/Login.js";
+import Signup from "./components/Signup.js";
+import Navbar from "./components/Navbar.js";
+import Footer from "./components/Footer.js";
+import AnalyzePersonality from "./components/AnalyzePersonality.js";
+import AIChat from "./components/AIChat.js";
+import { AuthProvider, useAuth } from "./components/AuthProvider.js";
+import SavedCharts from "./components/SavedCharts.js";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { getAuthToken } from "./lib/auth";
 
@@ -221,7 +222,7 @@ const App: React.FC = () => {
                       Save Chart
                     </Button>
                   )}
-                  <AnalyzePersonality chart={chart} />
+                  <AnalyzePersonality />
                   <AIChat />
                 </VStack>
               }

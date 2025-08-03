@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Box, Heading, FormControl, FormLabel, Textarea, Button, VStack, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "./AuthProvider";
 import { getAuthToken } from "../lib/auth"; // Updated path
 
+interface ChatResponse {
+  choices: { message: { content: string } }[];
+}
+
 export default function AIChat() {
   const { user, loading } = useAuth();
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState(null);
+  const [response, setResponse] = useState<ChatResponse | null>(null);
   const [error, setError] = useState(null);
   const toast = useToast();
   const navigate = useNavigate();
@@ -38,10 +42,11 @@ export default function AIChat() {
       });
     } catch (error) {
       console.error("Error:", error);
-      setError(error.response?.data?.detail || "Failed to get response");
+      const err = error as any;
+      setError(err.response?.data?.detail || "Failed to get response");
       toast({
         title: "Error",
-        description: error.response?.data?.detail || "Failed to get response",
+        description: err.response?.data?.detail || "Failed to get response",
         status: "error",
         duration: 5000,
         isClosable: true,

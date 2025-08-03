@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Box, Heading, FormControl, FormLabel, Input, Select, Button, VStack, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "./AuthProvider";
 import { getAuthToken } from "../lib/auth"; // Updated path
+
+interface PersonalityResult {
+  sun_sign: string;
+  traits: string;
+}
 
 export default function AnalyzePersonality() {
   const { user, loading } = useAuth();
@@ -16,7 +21,7 @@ export default function AnalyzePersonality() {
     city: "",
   });
   const [houseSystem, setHouseSystem] = useState("P");
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<PersonalityResult | null>(null);
   const [error, setError] = useState(null);
   const toast = useToast();
   const navigate = useNavigate();
@@ -24,7 +29,7 @@ export default function AnalyzePersonality() {
   if (loading) return <Text color="white">Loading...</Text>;
   if (!user) return <Navigate to="/login" replace />;
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -58,10 +63,11 @@ export default function AnalyzePersonality() {
       });
     } catch (error) {
       console.error("Error:", error);
-      setError(error.response?.data?.detail || "Failed to analyze personality");
+      const err = error as any;
+      setError(err.response?.data?.detail || "Failed to analyze personality");
       toast({
         title: "Error",
-        description: error.response?.data?.detail || "Failed to analyze personality",
+        description: err.response?.data?.detail || "Failed to analyze personality",
         status: "error",
         duration: 5000,
         isClosable: true,

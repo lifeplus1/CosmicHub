@@ -11,7 +11,7 @@ export default function Signup() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setIsLoading(true);
     try {
@@ -24,7 +24,13 @@ export default function Signup() {
       toast({ title: "Account Created", status: "success", duration: 3000, isClosable: true });
       navigate("/chart");
     } catch (error) {
-      toast({ title: "Signup Failed", description: error.message, status: "error", duration: 3000, isClosable: true });
+      toast({ 
+        title: "Signup Failed", 
+        description: error instanceof Error ? error.message : String(error), 
+        status: "error", 
+        duration: 3000, 
+        isClosable: true 
+      });
     }
     setIsLoading(false);
   };

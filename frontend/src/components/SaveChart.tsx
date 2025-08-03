@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Box, Heading, FormControl, FormLabel, Input, Select, Button, VStack, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "./AuthProvider";
@@ -23,7 +23,7 @@ export default function SaveChart() {
   if (loading) return <Text color="white">Loading...</Text>;
   if (!user) return <Navigate to="/login" replace />;
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -57,10 +57,11 @@ export default function SaveChart() {
       navigate("/chart");
     } catch (error) {
       console.error("Error:", error);
-      setError(error.response?.data?.detail || "Failed to save chart");
+      const err = error as any;
+      setError(err.response?.data?.detail || "Failed to save chart");
       toast({
         title: "Error",
-        description: error.response?.data?.detail || "Failed to save chart",
+        description: err.response?.data?.detail || "Failed to save chart",
         status: "error",
         duration: 5000,
         isClosable: true,

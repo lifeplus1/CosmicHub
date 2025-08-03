@@ -8,11 +8,16 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { getAuthToken } from "../lib/auth";
 
+interface UserInfo {
+  email: string;
+  [key: string]: any;
+}
+
 export default function Navbar() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -38,7 +43,8 @@ export default function Navbar() {
       toast({ title: "Logged Out", status: "success", duration: 3000, isClosable: true });
       navigate("/login");
     } catch (error) {
-      toast({ title: "Logout Failed", description: error.message, status: "error", duration: 3000, isClosable: true });
+      const err = error as any;
+      toast({ title: "Logout Failed", description: err.message, status: "error", duration: 3000, isClosable: true });
     }
   };
 
