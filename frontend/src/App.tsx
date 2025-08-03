@@ -12,7 +12,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ChartDisplay from "./components/ChartDisplay";
 import Login from "./components/Login";
@@ -81,99 +81,97 @@ const App: React.FC = () => {
 
   return (
     <ChakraProvider>
-      <Router>
-        <AuthProvider>
-          <Navbar />
-          <Box p={4}>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <VStack spacing={4}>
-                    <Heading>Astrology App</Heading>
-                    <form onSubmit={handleSubmit}>
-                      <FormControl>
-                        <FormLabel>Date of Birth</FormLabel>
-                        <Input
-                          type="date"
-                          name="date"
-                          value={birthData.date}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Time of Birth</FormLabel>
-                        <Input
-                          type="time"
-                          name="time"
-                          value={birthData.time}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Latitude</FormLabel>
-                        <Input
-                          type="number"
-                          name="latitude"
-                          value={birthData.latitude}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Longitude</FormLabel>
-                        <Input
-                          type="number"
-                          name="longitude"
-                          value={birthData.longitude}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Timezone</FormLabel>
-                        <Input
-                          type="text"
-                          name="timezone"
-                          value={birthData.timezone}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>House System</FormLabel>
-                        <Select
-                          name="houseSystem"
-                          value={houseSystem}
-                          onChange={(e) => setHouseSystem(e.target.value)}
-                        >
-                          <option value="placidus">Placidus</option>
-                          <option value="whole_sign">Whole Sign</option>
-                          <option value="koch">Koch</option>
-                        </Select>
-                      </FormControl>
-                      <Button type="submit" colorScheme="teal" isLoading={loading}>
-                        Calculate Chart
-                      </Button>
-                    </form>
-                    {error && <Text color="red.500">{error}</Text>}
-                    {chart && <ChartDisplay chart={chart} />}
-                    <SaveChart chart={chart} />
-                    <AnalyzePersonality chart={chart} />
-                    <AIChat />
-                  </VStack>
-                }
-              />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </Box>
-          <Footer />
-        </AuthProvider>
-      </Router>
+      <AuthProvider>
+        <Navbar />
+        <Box p={4}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <VStack spacing={4}>
+                  <Heading>Astrology App</Heading>
+                  <form onSubmit={handleSubmit}>
+                    <FormControl>
+                      <FormLabel>Date of Birth</FormLabel>
+                      <Input
+                        type="date"
+                        name="date"
+                        value={birthData.date}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Time of Birth</FormLabel>
+                      <Input
+                        type="time"
+                        name="time"
+                        value={birthData.time}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Latitude</FormLabel>
+                      <Input
+                        type="number"
+                        name="latitude"
+                        value={birthData.latitude}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Longitude</FormLabel>
+                      <Input
+                        type="number"
+                        name="longitude"
+                        value={birthData.longitude}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Timezone</FormLabel>
+                      <Input
+                        type="text"
+                        name="timezone"
+                        value={birthData.timezone}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>House System</FormLabel>
+                      <Select
+                        name="houseSystem"
+                        value={houseSystem}
+                        onChange={(e) => setHouseSystem(e.target.value)}
+                      >
+                        <option value="placidus">Placidus</option>
+                        <option value="whole_sign">Whole Sign</option>
+                        <option value="koch">Koch</option>
+                      </Select>
+                    </FormControl>
+                    <Button type="submit" colorScheme="teal" isLoading={loading}>
+                      Calculate Chart
+                    </Button>
+                  </form>
+                  {error && <Text color="red.500">{error}</Text>}
+                  {chart && <ChartDisplay chart={chart} />}
+                  <SaveChart chart={chart} />
+                  <AnalyzePersonality chart={chart} />
+                  <AIChat />
+                </VStack>
+              }
+            />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Box>
+        <Footer />
+      </AuthProvider>
     </ChakraProvider>
   );
 };
