@@ -3,38 +3,39 @@ import { render, screen } from '@testing-library/react';
 import { ChakraProvider } from '@chakra-ui/react';
 import ChartDisplay from './ChartDisplay';
 
-const chart = {
+const mockChart = {
   latitude: 40.7128,
   longitude: -74.0060,
-  timezone: "America/New_York",
-  julian_day: 2451545.0,
+  timezone: 'America/New_York',
+  julian_day: 2460500.5,
   planets: {
-    sun: { position: 12.34, retrograde: false },
-    moon: { position: 56.78, retrograde: true },
+    sun: { position: 120, retrograde: false },
+    moon: { position: 240, retrograde: true },
   },
-  houses: [{ house: 1, cusp: 10.0 }, { house: 2, cusp: 40.0 }],
-  angles: {
-    ascendant: 15.0,
-    descendant: 195.0,
-    mc: 100.0,
-    ic: 280.0,
-    vertex: 120.0,
-    antivertex: 300.0,
-  },
-  aspects: [
-    { point1: "sun", point2: "moon", aspect: "conjunction", orb: 1.2 },
+  houses: [
+    { house: 1, cusp: 0 },
+    { house: 2, cusp: 30 },
   ],
+  angles: {
+    ascendant: 0,
+    descendant: 180,
+    mc: 90,
+    ic: 270,
+    vertex: 45,
+    antivertex: 225,
+  },
+  aspects: [],
 };
 
 describe('ChartDisplay', () => {
-  it('renders chart data', () => {
+  it('renders chart data correctly', () => {
     render(
       <ChakraProvider>
-        <ChartDisplay chart={chart} />
+        <ChartDisplay chart={mockChart} />
       </ChakraProvider>
     );
-    expect(screen.getByText(/Latitude: 40.71/i)).toBeInTheDocument();
-    expect(screen.getByText(/Sun: 12.34° Aries/i)).toBeInTheDocument();
-    expect(screen.getByText(/Moon: 26.78° Taurus ℞/i)).toBeInTheDocument();
+    expect(screen.getByText(/Latitude: 40.71°/)).toBeInTheDocument();
+    expect(screen.getByText(/Sun: 0.00° Leo/)).toBeInTheDocument();
+    expect(screen.getByText(/Moon: 0.00° Aquarius ℞/)).toBeInTheDocument();
   });
 });

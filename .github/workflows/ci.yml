@@ -38,6 +38,12 @@ jobs:
         run: |
           cd frontend
           npm ci
+      - name: Debug Frontend Dependencies
+        run: |
+          cd frontend
+          npm list @testing-library/jest-dom @testing-library/react vitest
+          ls -la src
+          cat src/setupTests.js || echo "src/setupTests.js not found"
       - name: Run Frontend Tests
         run: |
           cd frontend
