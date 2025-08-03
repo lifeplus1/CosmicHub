@@ -32,7 +32,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5174",
         "http://localhost:3000",
-        "https://*.vercel.app"  # Allow all Vercel subdomains
+        "https://astrology-app-pied.vercel.app",  # Allow specific Vercel subdomain 
     ],
     allow_credentials=True,
     allow_methods=["*"],
