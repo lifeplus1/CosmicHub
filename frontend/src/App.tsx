@@ -172,6 +172,9 @@ const App: React.FC = () => {
                   </form>
                   {error && <Text color="red.500">{error}</Text>}
                   {chart && <ChartDisplay chart={chart} />}
+                  {!user && (
+                    <Button colorScheme="yellow" variant="solid" w="100%" mt={4} onClick={() => navigate("/signup")}>Sign Up for an Account</Button>
+                  )}
                 </VStack>
               }
             />
