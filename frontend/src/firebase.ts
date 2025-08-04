@@ -4,11 +4,11 @@ import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: 'astrology-app-9c2e9.firebaseapp.com',
-  projectId: 'astrology-app-9c2e9',
-  storageBucket: 'astrology-app-9c2e9.appspot.com',
-  messagingSenderId: '341259782663',
-  appId: '1:341259782663:web:132d7b85d8518c5f3bf8a2', // Replace with your actual appId
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
