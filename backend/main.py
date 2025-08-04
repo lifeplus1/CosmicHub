@@ -1,8 +1,7 @@
 import logging
 import os
-import json
 from typing import Optional, Dict, Any, List
-from fastapi import FastAPI, HTTPException, Depends, Query, Request, Response
+from fastapi import FastAPI, HTTPException, Depends, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
@@ -12,16 +11,9 @@ from dotenv import load_dotenv
 # from auth import get_current_user  # Absolute import for Firebase Auth
 from database import save_chart, get_charts
 
-# Mock auth function for development - simulating elite user
+# Using mock auth function for development - simulating elite user
 def get_current_user() -> str:
     return "elite_user_dev_123"
-
-# Mock database functions for development are commented out - using real ones now
-# def save_chart(user_id: str, chart_data: dict) -> dict:
-#     return {"success": True, "id": "mock_chart_id"}
-
-# def get_charts(user_id: str) -> list:
-#     return []
 
 # Mock user profile for elite user
 def get_user_profile_mock(user_id: str) -> Dict[str, Any]:
@@ -57,11 +49,8 @@ from astro.calculations.chart import validate_inputs, calculate_multi_system_cha
 from astro.calculations.numerology import calculate_numerology
 from astro.calculations.synastry import calculate_synastry_chart
 from astro.calculations.pdf_export import create_chart_pdf, create_synastry_pdf, create_multi_system_pdf
-from astro.calculations.transits import calculate_transits
+from astro.calculations.transits import calculate_transits, calculate_lunar_transits
 from astro.calculations.ai_interpretations import generate_advanced_interpretation
-# from healwave.routers.presets import router as presets_router  # New: HealWave presets
-# from healwave.routers.subscriptions import router as subscriptions_router  # New: HealWave subscriptions
-
 # Load .env file
 load_dotenv()
 
@@ -78,7 +67,7 @@ from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response as StarletteResponse
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: StarletteRequest, call_next) -> StarletteResponse:
+    async def dispatch(self, request: StarletteRequest, call_next) -> StarletteResponse:  # type: ignore
         response = await call_next(request)
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'DENY'
@@ -109,6 +98,8 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:5178",  # Current frontend port
+        "http://localhost:5177",  # Previous frontend port
         "http://localhost:5174",
         "http://localhost:5173",
         "http://localhost:3000",
@@ -120,11 +111,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Include routers
-# Include HealWave routers  
-# app.include_router(presets_router, prefix="/healwave")
-# app.include_router(subscriptions_router, prefix="/healwave")
 
 class BirthData(BaseModel):
     year: int
@@ -213,9 +199,8 @@ except ImportError:
     stripe = None
 
 @app.post("/calculate", response_model=ChartResponse)
-async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "E"]), request: Optional[Request] = None):
-    if request:
-        rate_limiter(request)
+async def calculate(data: BirthData, request: Request, house_system: str = Query("P", enum=["P", "E"])):
+    rate_limiter(request)
     request_id = str(uuid.uuid4())
     logger.debug(f"[{request_id}] Received data: {data.model_dump()}, House System: {house_system}")
     try:
@@ -234,10 +219,9 @@ async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/calculate-multi-system", response_model=ChartResponse)
-async def calculate_multi_system(data: BirthData, house_system: str = Query("P", enum=["P", "E"]), request: Optional[Request] = None):
+async def calculate_multi_system(data: BirthData, request: Request, house_system: str = Query("P", enum=["P", "E"])):
     """Calculate chart with multiple astrology systems (Western, Vedic, Chinese, Mayan, Uranian)"""
-    if request:
-        rate_limiter(request)
+    rate_limiter(request)
     request_id = str(uuid.uuid4())
     logger.debug(f"[{request_id}] Multi-system calculation for: {data.model_dump()}")
     try:
@@ -253,13 +237,12 @@ async def calculate_multi_system(data: BirthData, house_system: str = Query("P",
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.get("/user/profile", response_model=UserProfileResponse)
-async def get_user_profile(user_id: str = Depends(get_current_user), request: Optional[Request] = None):
+async def get_user_profile(request: Request, user_id: str = Depends(get_current_user)):
     if request:
         rate_limiter(request)
     request_id = str(uuid.uuid4())
     try:
-        # FOR DEVELOPMENT: Return mock elite user profile
-        # TODO: Replace with actual Firebase user lookup
+        # Return mock elite user profile for development
         mock_profile = get_user_profile_mock(user_id)
         return UserProfileResponse(uid=user_id, email=mock_profile["email"], created_at="2024-01-01")
     except Exception as e:
@@ -275,7 +258,7 @@ async def get_user_subscription(user_id: str = Depends(get_current_user)):
         raise HTTPException(500, f"Error fetching subscription: {str(e)}")
 
 @app.post("/save-chart", response_model=SaveChartResponse)
-async def save_chart_endpoint(data: BirthData, user_id: str = Depends(get_current_user), request: Optional[Request] = None):
+async def save_chart_endpoint(data: BirthData, request: Request, user_id: str = Depends(get_current_user)):
     if request:
         rate_limiter(request)
     request_id = str(uuid.uuid4())
@@ -294,7 +277,7 @@ async def save_chart_endpoint(data: BirthData, user_id: str = Depends(get_curren
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.get("/charts", response_model=ChartsListResponse)
-async def list_charts(user_id: str = Depends(get_current_user), request: Optional[Request] = None):
+async def list_charts(request: Request, user_id: str = Depends(get_current_user)):
     if request:
         rate_limiter(request)
     request_id = str(uuid.uuid4())
@@ -306,7 +289,7 @@ async def list_charts(user_id: str = Depends(get_current_user), request: Optiona
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/analyze-personality", response_model=PersonalityResponse)
-async def analyze_personality(data: BirthData, user_id: str = Depends(get_current_user), request: Optional[Request] = None):
+async def analyze_personality(data: BirthData, request: Request, user_id: str = Depends(get_current_user)):
     if request:
         rate_limiter(request)
     request_id = str(uuid.uuid4())
@@ -322,7 +305,7 @@ async def analyze_personality(data: BirthData, user_id: str = Depends(get_curren
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/calculate-numerology", response_model=NumerologyResponse)
-async def calculate_numerology_endpoint(data: NumerologyData, request: Optional[Request] = None):
+async def calculate_numerology_endpoint(data: NumerologyData, request: Request):
     if request:
         rate_limiter(request)
     request_id = str(uuid.uuid4())
@@ -344,7 +327,7 @@ async def calculate_numerology_endpoint(data: NumerologyData, request: Optional[
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/calculate-synastry", response_model=SynastryResponse)
-async def calculate_synastry(data: SynastryData, request: Optional[Request] = None):
+async def calculate_synastry(data: SynastryData, request: Request):
     if request:
         rate_limiter(request)
     request_id = str(uuid.uuid4())
@@ -387,17 +370,16 @@ async def calculate_synastry(data: SynastryData, request: Optional[Request] = No
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/create-checkout-session", response_model=CheckoutSessionResponse)
-async def create_checkout_session(user_id: str = Depends(get_current_user), request: Request = None):
-    rate_limiter(request)
+async def create_checkout_session(user_id: str = Depends(get_current_user)):
     request_id = str(uuid.uuid4())
     if not stripe:
         logger.error(f"[{request_id}] Stripe module not available")
         raise HTTPException(500, "Stripe integration not available")
     try:
         from firebase_admin import auth
-        user = auth.get_user(user_id)
+        user = auth.get_user(user_id)  # type: ignore
         session = stripe.checkout.Session.create(
-            customer_email=user.email,
+            customer_email=user.email,  # type: ignore
             payment_method_types=["card"],
             line_items=[{
                 "price": os.getenv("STRIPE_PRICE_ID", "your_stripe_price_id"),
@@ -414,8 +396,7 @@ async def create_checkout_session(user_id: str = Depends(get_current_user), requ
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(message: dict, user_id: str = Depends(get_current_user), request: Request = None):
-    rate_limiter(request)
+async def chat(message: Dict[str, Any], user_id: str = Depends(get_current_user)):
     request_id = str(uuid.uuid4())
     try:
         api_key = os.getenv("XAI_API_KEY")
@@ -424,7 +405,7 @@ async def chat(message: dict, user_id: str = Depends(get_current_user), request:
         response = requests.post(
             "https://api.x.ai/v1/chat/completions",
             headers={"Authorization": f"Bearer {api_key}"},
-            json={"model": "grok", "messages": [{"role": "user", "content": message["text"]}]}
+            json={"model": "grok", "messages": [{"role": "user", "content": message["text"]}]}  # type: ignore
         )
         response.raise_for_status()
         return {"response": response.json()}
@@ -433,12 +414,12 @@ async def chat(message: dict, user_id: str = Depends(get_current_user), request:
         raise HTTPException(500, f"Chat error: {str(e)}")
 
 @app.get("/health")
-async def health_check(request: Request = None):
+async def health_check(request: Request):
     rate_limiter(request)
     return {"status": "ok"}
 
 @app.post("/export-pdf", response_model=PdfResponse)
-async def export_chart_pdf(data: PdfExportData, request: Request = None):
+async def export_chart_pdf(data: PdfExportData, request: Request):
     """Generate PDF report for chart data"""
     request_id = str(uuid.uuid4())[:8]
     rate_limiter(request)
@@ -449,19 +430,19 @@ async def export_chart_pdf(data: PdfExportData, request: Request = None):
         if data.report_type == "synastry":
             if not data.chart_data.get('synastry'):
                 raise HTTPException(400, "Synastry data required for synastry PDF")
-            pdf_base64 = create_synastry_pdf(data.chart_data['synastry'])
+            pdf_base64 = create_synastry_pdf(data.chart_data['synastry'])  # type: ignore
             filename = "synastry_report.pdf"
         
         elif data.report_type == "multi_system":
             if not data.chart_data.get('charts'):
                 raise HTTPException(400, "Multi-system charts required for multi-system PDF")
-            pdf_base64 = create_multi_system_pdf(data.chart_data)
+            pdf_base64 = create_multi_system_pdf(data.chart_data)  # type: ignore
             filename = "multi_system_report.pdf"
         
         else:  # standard chart PDF
             if not data.chart_data.get('chart'):
                 raise HTTPException(400, "Chart data required for standard PDF")
-            pdf_base64 = create_chart_pdf(data.chart_data['chart'], data.birth_info)
+            pdf_base64 = create_chart_pdf(data.chart_data['chart'], data.birth_info)  # type: ignore
             filename = "astrology_chart.pdf"
         
         logger.info(f"[{request_id}] PDF generated successfully: {filename}")
@@ -472,7 +453,7 @@ async def export_chart_pdf(data: PdfExportData, request: Request = None):
         raise HTTPException(500, f"PDF export failed: {str(e)}")
 
 @app.post("/export-synastry-pdf", response_model=PdfResponse)
-async def export_synastry_pdf(data: SynastryData, request: Optional[Request] = None):
+async def export_synastry_pdf(data: SynastryData, request: Request):
     """Generate PDF report specifically for synastry analysis"""
     request_id = str(uuid.uuid4())[:8]
     if request:
@@ -489,7 +470,7 @@ async def export_synastry_pdf(data: SynastryData, request: Optional[Request] = N
         synastry_result = calculate_synastry_chart(person1_dict, person2_dict)
         
         # Generate PDF - pass the synastry result as dict since that's what the function expects
-        pdf_base64 = create_synastry_pdf(synastry_result)
+        pdf_base64 = create_synastry_pdf(synastry_result)  # type: ignore
         filename = f"synastry_report_{request_id}.pdf"
         
         logger.info(f"[{request_id}] Synastry PDF generated successfully")
@@ -500,7 +481,7 @@ async def export_synastry_pdf(data: SynastryData, request: Optional[Request] = N
         raise HTTPException(500, f"Synastry PDF export failed: {str(e)}")
 
 @app.post("/calculate-transits", response_model=TransitResponse)
-async def calculate_transits_endpoint(data: TransitData, request: Request = None):
+async def calculate_transits_endpoint(data: TransitData, request: Request):
     """Calculate planetary transits for a given period"""
     request_id = str(uuid.uuid4())[:8]
     rate_limiter(request)
@@ -509,11 +490,20 @@ async def calculate_transits_endpoint(data: TransitData, request: Request = None
         logger.info(f"[{request_id}] Transit calculation request: {data.start_date} to {data.end_date}")
         
         # Convert BirthData to dict format expected by transit calculation
-        birth_dict = {
-            'datetime': data.birth_data.datetime,
-            'latitude': data.birth_data.latitude,
-            'longitude': data.birth_data.longitude,
-            'timezone': data.birth_data.timezone
+        from datetime import datetime
+        birth_datetime = datetime(
+            data.birth_data.year, 
+            data.birth_data.month, 
+            data.birth_data.day, 
+            data.birth_data.hour, 
+            data.birth_data.minute
+        )
+        
+        birth_dict: Dict[str, Any] = {
+            'datetime': birth_datetime,
+            'latitude': data.birth_data.lat or 0.0,
+            'longitude': data.birth_data.lon or 0.0,
+            'timezone': data.birth_data.timezone or "UTC"
         }
         
         # Calculate transits
@@ -533,7 +523,7 @@ async def calculate_transits_endpoint(data: TransitData, request: Request = None
         raise HTTPException(500, f"Transit calculation failed: {str(e)}")
 
 @app.post("/calculate-lunar-transits", response_model=TransitResponse)
-async def calculate_lunar_transits_endpoint(data: TransitData, request: Request = None):
+async def calculate_lunar_transits_endpoint(data: TransitData, request: Request):
     """Calculate Moon transits for a given period"""
     request_id = str(uuid.uuid4())[:8]
     rate_limiter(request)
@@ -542,11 +532,20 @@ async def calculate_lunar_transits_endpoint(data: TransitData, request: Request 
         logger.info(f"[{request_id}] Lunar transit calculation request: {data.start_date} to {data.end_date}")
         
         # Convert BirthData to dict format
-        birth_dict = {
-            'datetime': data.birth_data.datetime,
-            'latitude': data.birth_data.latitude,
-            'longitude': data.birth_data.longitude,
-            'timezone': data.birth_data.timezone
+        from datetime import datetime
+        birth_datetime = datetime(
+            data.birth_data.year, 
+            data.birth_data.month, 
+            data.birth_data.day, 
+            data.birth_data.hour, 
+            data.birth_data.minute
+        )
+        
+        birth_dict: Dict[str, Any] = {
+            'datetime': birth_datetime,
+            'latitude': data.birth_data.lat or 0.0,
+            'longitude': data.birth_data.lon or 0.0,
+            'timezone': data.birth_data.timezone or "UTC"
         }
         
         # Calculate lunar transits
@@ -564,7 +563,7 @@ async def calculate_lunar_transits_endpoint(data: TransitData, request: Request 
         raise HTTPException(500, f"Lunar transit calculation failed: {str(e)}")
 
 @app.post("/ai-interpretation", response_model=AIInterpretationResponse)
-async def generate_ai_interpretation(data: AIInterpretationData, request: Request = None):
+async def generate_ai_interpretation(data: AIInterpretationData, request: Request):
     """Generate advanced AI-powered astrological interpretation"""
     request_id = str(uuid.uuid4())[:8]
     rate_limiter(request)
