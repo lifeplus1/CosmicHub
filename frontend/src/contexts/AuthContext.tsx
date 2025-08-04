@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { auth } from '../firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -10,7 +11,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const auth = getAuth();
+  // Use the shared auth instance from firebase.ts
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
