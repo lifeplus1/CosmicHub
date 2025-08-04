@@ -12,7 +12,8 @@ from .database import get_db  # Relative import for Firestore
 from .astro.calculations.chart import calculate_chart
 from .astro.calculations.personality import get_personality_traits
 from .astro.calculations.ephemeris import get_planetary_positions
-from .astro.calculations.chart import validate_inputs, get_location
+from .astro.calculations.chart import validate_inputs, get_location, calculate_multi_system_chart
+from .astro.calculations.numerology import calculate_numerology
 from .database import save_chart, get_charts
 from .healwave.routers.presets import router as presets_router  # New: HealWave presets
 from .healwave.routers.subscriptions import router as subscriptions_router  # New: HealWave subscriptions
@@ -106,6 +107,15 @@ class ChartsListResponse(BaseModel):
 class PersonalityResponse(BaseModel):
     personality: dict
 
+class NumerologyData(BaseModel):
+    name: str
+    year: int
+    month: int
+    day: int
+
+class NumerologyResponse(BaseModel):
+    numerology: dict
+
 class CheckoutSessionResponse(BaseModel):
     id: str
 
@@ -139,6 +149,24 @@ async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "
         raise HTTPException(400, f"Invalid input: {str(e)}")
     except Exception as e:
         logger.error(f"[{request_id}] Unexpected error in /calculate: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Internal server error: {str(e)}")
+
+@app.post("/calculate-multi-system", response_model=ChartResponse)
+async def calculate_multi_system(data: BirthData, house_system: str = Query("P", enum=["P", "E"]), request: Request = None):
+    """Calculate chart with multiple astrology systems (Western, Vedic, Chinese, Mayan, Uranian)"""
+    rate_limiter(request)
+    request_id = str(uuid.uuid4())
+    logger.debug(f"[{request_id}] Multi-system calculation for: {data.dict()}")
+    try:
+        validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
+        multi_chart = calculate_multi_system_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city, house_system)
+        logger.debug(f"[{request_id}] Returning multi-system chart")
+        return {"chart": multi_chart}
+    except ValueError as e:
+        logger.error(f"[{request_id}] Validation error in /calculate-multi-system: {str(e)}", exc_info=True)
+        raise HTTPException(400, f"Invalid input: {str(e)}")
+    except Exception as e:
+        logger.error(f"[{request_id}] Unexpected error in /calculate-multi-system: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.get("/user/profile", response_model=UserProfileResponse)
@@ -195,6 +223,27 @@ async def analyze_personality(data: BirthData, user_id: str = Depends(get_curren
         raise HTTPException(400, str(e))
     except Exception as e:
         logger.error(f"[{request_id}] Error analyzing personality: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Internal server error: {str(e)}")
+
+@app.post("/calculate-numerology", response_model=NumerologyResponse)
+async def calculate_numerology_endpoint(data: NumerologyData, request: Request = None):
+    rate_limiter(request)
+    request_id = str(uuid.uuid4())
+    logger.debug(f"[{request_id}] Numerology calculation for: {data.model_dump()}")
+    try:
+        # Convert to datetime object
+        from datetime import datetime
+        birth_date = datetime(data.year, data.month, data.day)
+        
+        # Calculate numerology
+        numerology_data = calculate_numerology(data.name, birth_date)
+        logger.debug(f"[{request_id}] Returning numerology analysis")
+        return {"numerology": numerology_data}
+    except ValueError as e:
+        logger.error(f"[{request_id}] Validation error in /calculate-numerology: {str(e)}", exc_info=True)
+        raise HTTPException(400, f"Invalid input: {str(e)}")
+    except Exception as e:
+        logger.error(f"[{request_id}] Unexpected error in /calculate-numerology: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/create-checkout-session", response_model=CheckoutSessionResponse)

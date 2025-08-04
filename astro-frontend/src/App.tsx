@@ -18,6 +18,8 @@ import Signup from './components/Signup';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import Contact from './components/Contact';
+import ChartCalculator from './components/ChartCalculator';
+import NumerologyCalculator from './components/NumerologyCalculator';
 import { AuthProvider } from './contexts/AuthContext';
 import { getAuthToken } from './auth';
 
@@ -183,6 +185,8 @@ function MainApp() {
             }
           />
           <Route path="/saved-charts" element={user ? <SavedCharts /> : <Navigate to="/login" />} />
+          <Route path="/calculator" element={<ChartCalculator />} />
+          <Route path="/numerology" element={<NumerologyCalculator />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/analyze-personality" element={<AnalyzePersonality />} />

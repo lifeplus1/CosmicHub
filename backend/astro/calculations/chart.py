@@ -9,6 +9,10 @@ from functools import lru_cache
 from .ephemeris import init_ephemeris, get_planetary_positions
 from .house_systems import calculate_houses
 from .aspects import calculate_aspects
+from .vedic import calculate_vedic_planets, calculate_vedic_houses, get_vedic_chart_analysis
+from .chinese import calculate_chinese_astrology
+from .mayan import calculate_mayan_astrology
+from .uranian import calculate_uranian_astrology
 import swisseph as swe
 
 logger = logging.getLogger(__name__)
@@ -144,3 +148,161 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
     except Exception as e:
         logger.error(f"Unexpected error in calculate_chart: {str(e)}", exc_info=True)
         raise ValueError(f"Invalid date or calculation: {str(e)}")
+
+def calculate_multi_system_chart(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None, house_system: str = 'P'):
+    """Calculate chart with multiple astrology systems"""
+    logger.debug(f"Calculating multi-system chart for {year}-{month}-{day} {hour}:{minute}")
+    try:
+        # Base Western tropical chart
+        base_chart = calculate_chart(year, month, day, hour, minute, lat, lon, timezone, city, house_system)
+        julian_day = base_chart["julian_day"]
+        planets = base_chart["planets"]
+        
+        # Vedic (Sidereal) astrology
+        vedic_data = calculate_vedic_planets(julian_day)
+        vedic_houses = calculate_vedic_houses(julian_day, lat, lon)
+        vedic_analysis = get_vedic_chart_analysis({**vedic_data, **vedic_houses})
+        
+        # Chinese astrology
+        chinese_data = calculate_chinese_astrology(year, month, day, hour)
+        
+        # Mayan astrology
+        mayan_data = calculate_mayan_astrology(year, month, day)
+        
+        # Uranian astrology
+        uranian_data = calculate_uranian_astrology(julian_day, planets)
+        
+        # Combine all systems
+        multi_chart = {
+            "birth_info": {
+                "date": f"{year}-{month:02d}-{day:02d}",
+                "time": f"{hour:02d}:{minute:02d}",
+                "location": {"latitude": lat, "longitude": lon, "timezone": timezone},
+                "julian_day": julian_day
+            },
+            "western_tropical": base_chart,
+            "vedic_sidereal": {
+                "ayanamsa": vedic_data.get("ayanamsa", 0),
+                "planets": vedic_data.get("planets", {}),
+                "houses": vedic_houses,
+                "analysis": vedic_analysis,
+                "description": "Vedic astrology uses the sidereal zodiac and focuses on karma, dharma, and spiritual evolution"
+            },
+            "chinese": {
+                **chinese_data,
+                "description": "Chinese astrology based on 12-year animal cycle, Five Elements theory, and Four Pillars"
+            },
+            "mayan": {
+                **mayan_data,
+                "description": "Mayan astrology using the 260-day sacred calendar (Tzolkin) and Long Count system"
+            },
+            "uranian": {
+                **uranian_data,
+                "description": "Uranian astrology focuses on transneptunian points, midpoints, and 90-degree dial"
+            },
+            "synthesis": {
+                "primary_themes": extract_primary_themes(base_chart, vedic_analysis, chinese_data, mayan_data),
+                "life_purpose": synthesize_life_purpose(base_chart, vedic_analysis, chinese_data, mayan_data),
+                "personality_integration": integrate_personality_traits(base_chart, vedic_analysis, chinese_data, mayan_data),
+                "spiritual_path": synthesize_spiritual_guidance(vedic_analysis, mayan_data, uranian_data)
+            }
+        }
+        
+        logger.debug("Multi-system chart calculation completed")
+        return multi_chart
+        
+    except Exception as e:
+        logger.error(f"Error in multi-system chart calculation: {str(e)}")
+        raise ValueError(f"Multi-system calculation failed: {str(e)}")
+
+def extract_primary_themes(western_chart, vedic_analysis, chinese_data, mayan_data):
+    """Extract primary themes from all astrology systems"""
+    themes = []
+    
+    # Western themes from sun sign
+    if western_chart.get("planets", {}).get("sun"):
+        sun_pos = western_chart["planets"]["sun"]["position"]
+        sun_sign = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+                   "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"][int(sun_pos // 30)]
+        themes.append(f"Western: {sun_sign} solar expression")
+    
+    # Vedic themes
+    if vedic_analysis.get("moon_sign"):
+        themes.append(f"Vedic: {vedic_analysis['moon_sign']} moon nature")
+    
+    # Chinese themes
+    if chinese_data.get("year", {}).get("animal"):
+        themes.append(f"Chinese: {chinese_data['year']['animal']} year energy")
+    
+    # Mayan themes
+    if mayan_data.get("day_sign", {}).get("name"):
+        themes.append(f"Mayan: {mayan_data['day_sign']['name']} day sign")
+    
+    return themes
+
+def synthesize_life_purpose(western_chart, vedic_analysis, chinese_data, mayan_data):
+    """Synthesize life purpose from multiple systems"""
+    purpose_elements = []
+    
+    # Add Western north node if available
+    purpose_elements.append("Western: Growth through personal expression and relationships")
+    
+    # Vedic purpose
+    if vedic_analysis.get("analysis"):
+        purpose_elements.append(f"Vedic: {vedic_analysis.get('analysis', 'Spiritual growth and karma resolution')}")
+    
+    # Chinese purpose
+    if chinese_data.get("personality_summary"):
+        purpose_elements.append(f"Chinese: {chinese_data.get('personality_summary', 'Balance of elements and ancestral wisdom')}")
+    
+    # Mayan purpose
+    if mayan_data.get("life_purpose"):
+        purpose_elements.append(f"Mayan: {mayan_data.get('life_purpose', 'Sacred calendar alignment')}")
+    
+    return purpose_elements
+
+def integrate_personality_traits(western_chart, vedic_analysis, chinese_data, mayan_data):
+    """Integrate personality traits from all systems"""
+    traits = {
+        "core_nature": [],
+        "emotional_patterns": [],
+        "social_expression": [],
+        "hidden_aspects": []
+    }
+    
+    # Western traits from sun and moon
+    traits["core_nature"].append("Western: Rational, individualistic approach")
+    
+    # Vedic emotional patterns
+    if vedic_analysis.get("moon_nakshatra"):
+        traits["emotional_patterns"].append(f"Vedic: {vedic_analysis['moon_nakshatra']} lunar influence")
+    
+    # Chinese social expression
+    if chinese_data.get("year", {}).get("traits"):
+        traits["social_expression"].append(f"Chinese: {chinese_data['year'].get('traits', 'Unknown')}")
+    
+    # Mayan hidden aspects
+    if mayan_data.get("day_sign", {}).get("traits"):
+        traits["hidden_aspects"].append(f"Mayan: {mayan_data['day_sign'].get('traits', 'Unknown')}")
+    
+    return traits
+
+def synthesize_spiritual_guidance(vedic_analysis, mayan_data, uranian_data):
+    """Synthesize spiritual guidance from relevant systems"""
+    guidance = []
+    
+    # Vedic spiritual path
+    if vedic_analysis.get("moon_nakshatra"):
+        guidance.append(f"Vedic path: Work with {vedic_analysis['moon_nakshatra']} energy for spiritual growth")
+    
+    # Mayan spiritual guidance
+    if mayan_data.get("spiritual_guidance"):
+        guidance.append(f"Mayan path: {mayan_data.get('spiritual_guidance', 'Follow sacred calendar timing')}")
+    
+    # Uranian collective patterns
+    if uranian_data.get("pattern_analysis", {}).get("karmic_patterns"):
+        karmic = uranian_data["pattern_analysis"].get("karmic_patterns", [])
+        if karmic:
+            guidance.append(f"Uranian insight: {karmic[0] if karmic else 'Work with collective unconscious patterns'}")
+    
+    return guidance

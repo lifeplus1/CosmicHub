@@ -91,6 +91,12 @@ export default function Navbar() {
               <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate('/')}> 
                 Home
               </Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate('/calculator')}>
+                ✨ Multi-System Calculator
+              </Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate('/numerology')}>
+                🔢 Numerology
+              </Button>
               <Button colorScheme="yellow" variant="solid" mr={2} px={6} fontWeight="bold" onClick={() => navigate('/saved-charts')}>
                 Saved Charts
               </Button>
@@ -131,6 +137,12 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate('/calculator')}>
+                ✨ Multi-System Calculator
+              </Button>
+              <Button colorScheme="yellow" variant="ghost" mr={2} onClick={() => navigate('/numerology')}>
+                🔢 Numerology
+              </Button>
               <Button colorScheme="yellow" variant="ghost" onClick={() => navigate('/login')}>
                 Login
               </Button>
