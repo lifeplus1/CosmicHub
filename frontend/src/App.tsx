@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { Box, Button, ChakraProvider, FormControl, FormLabel, Heading, Input, Text, VStack } from '@chakra-ui/react';
+import theme from './theme';
 import axios from 'axios';
 import { useAuth } from './contexts/AuthContext';
 import { useToast } from '@chakra-ui/toast';
@@ -12,6 +13,9 @@ import ChartDisplay from './components/ChartDisplay';
 import SavedCharts from './components/SavedCharts';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
+import Contact from './components/Contact';
 import { AuthProvider } from './contexts/AuthContext';
 import { getAuthToken } from './auth';
 
@@ -179,6 +183,9 @@ function MainApp() {
           <Route path="/saved-charts" element={user ? <SavedCharts /> : <Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Box>
@@ -190,7 +197,7 @@ function MainApp() {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <MainApp />
       </ChakraProvider>
     </AuthProvider>

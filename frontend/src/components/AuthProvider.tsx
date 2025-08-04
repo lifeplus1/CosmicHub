@@ -21,7 +21,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     setUser(user);
     setLoading(false);
-    if (!user && window.location.pathname !== "/signup") {
+    const publicPaths = ["/signup", "/privacy", "/terms", "/contact"];
+    if (!user && !publicPaths.includes(window.location.pathname)) {
       navigate("/login");
     }
   });

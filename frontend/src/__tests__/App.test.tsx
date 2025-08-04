@@ -38,7 +38,7 @@ describe('App', () => {
         </ChakraProvider>
       </AuthProvider>,
     );
-    const elements = screen.getAllByText(/Cosmic Insights/);
+    const elements = screen.getAllByText(/Cosmic Hub/);
     expect(elements.length).toBeGreaterThan(0);
   });
 
