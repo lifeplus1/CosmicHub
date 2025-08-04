@@ -45,6 +45,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
   
   const menuBg = useColorModeValue('gray.100', 'gray.800');
   const menuItemHoverBg = useColorModeValue('gray.200', 'gray.700');
+  const menuTextColor = useColorModeValue('gray.800', 'white');
+  const menuSubTextColor = useColorModeValue('gray.600', 'gray.300');
 
   const handleLogout = async () => {
     try {
@@ -129,6 +131,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
         shadow="xl"
         minW="240px"
         py={2}
+        zIndex={9999}
       >
         {/* User Info Header */}
         <MenuItem
@@ -145,10 +148,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
               bg={`${getTierColor(userTier)}.500`}
             />
             <VStack align="start" spacing={0} flex={1}>
-              <Text fontWeight="semibold" fontSize="sm">
+              <Text fontWeight="semibold" fontSize="sm" color={menuTextColor}>
                 {user.displayName || 'Cosmic Explorer'}
               </Text>
-              <Text fontSize="xs" color="gray.500">
+              <Text fontSize="xs" color={menuSubTextColor}>
                 {user.email}
               </Text>
               <Badge
@@ -171,6 +174,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
           icon={<Icon as={FaUser} />}
           onClick={() => navigate('/profile')}
           _hover={{ bg: menuItemHoverBg }}
+          color={menuTextColor}
         >
           View Profile
         </MenuItem>
@@ -179,6 +183,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
           icon={<Icon as={FaSave} />}
           onClick={() => navigate('/saved-charts')}
           _hover={{ bg: menuItemHoverBg }}
+          color={menuTextColor}
         >
           Saved Charts
         </MenuItem>
@@ -187,6 +192,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
           icon={<Icon as={FaChartLine} />}
           onClick={() => navigate('/calculator')}
           _hover={{ bg: menuItemHoverBg }}
+          color={menuTextColor}
         >
           Chart Calculator
         </MenuItem>
@@ -199,6 +205,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
             icon={<Icon as={FaCreditCard} />}
             onClick={() => navigate('/profile')}
             _hover={{ bg: menuItemHoverBg }}
+            color={menuTextColor}
           >
             Manage Subscription
           </MenuItem>
@@ -218,6 +225,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ userInfo }) => {
           icon={<Icon as={FaCog} />}
           onClick={() => navigate('/profile')}
           _hover={{ bg: menuItemHoverBg }}
+          color={menuTextColor}
         >
           Account Settings
         </MenuItem>
