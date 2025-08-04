@@ -1,3 +1,4 @@
+# backend/astro/calculations/ephemeris.py
 import swisseph as swe
 import os
 import logging
@@ -40,11 +41,11 @@ def get_planetary_positions(julian_day: float) -> dict:
                 logger.error(f"Error calculating position for {name}: {pos[0][0]}")
                 raise ValueError(f"Error calculating position for {name}")
             positions[name] = {
-                "position": float(pos[0][0]),  # Longitude
-                "retrograde": pos[0][3] < 0  # Speed < 0 indicates retrograde
+                "position": float(pos[0][0]),
+                "retrograde": pos[0][3] < 0
             }
         logger.debug(f"Planetary positions: {positions}")
         return positions
     except Exception as e:
         logger.error(f"Error in planetary positions: {str(e)}", exc_info=True)
-        raise ValueError(f"Error in planetary positions: {str(e)}")
+        return {}  # Fallback to empty dict

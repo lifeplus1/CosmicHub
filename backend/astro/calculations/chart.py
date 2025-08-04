@@ -1,3 +1,4 @@
+# backend/astro/calculations/chart.py
 from datetime import datetime
 import pytz
 import logging
@@ -114,9 +115,9 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
             raise ValueError(f"Invalid Julian day calculation, status: {jd[0]}")
         julian_day = jd[1]
 
-        planets = get_planetary_positions(julian_day)
-        houses_data = calculate_houses(julian_day, lat, lon, house_system)
-        aspects = calculate_aspects(planets)
+        planets = get_planetary_positions(julian_day) or {}
+        houses_data = calculate_houses(julian_day, lat, lon, house_system) or {"houses": [], "angles": {}}
+        aspects = calculate_aspects(planets) or []
 
         chart_data = {
             "julian_day": float(julian_day),
@@ -126,12 +127,12 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
             "planets": {k: {"position": v["position"], "retrograde": v["retrograde"]} for k, v in planets.items()},
             "houses": houses_data["houses"],
             "angles": {
-                "ascendant": float(houses_data["angles"]["ascendant"]),
-                "descendant": float((houses_data["angles"]["ascendant"] + 180) % 360),
-                "mc": float(houses_data["angles"]["mc"]),
-                "ic": float((houses_data["angles"]["mc"] + 180) % 360),
-                "vertex": float(houses_data["angles"]["vertex"]),
-                "antivertex": float((houses_data["angles"]["vertex"] + 180) % 360),
+                "ascendant": float(houses_data["angles"].get("ascendant", 0)),
+                "descendant": float((houses_data["angles"].get("ascendant", 0) + 180) % 360),
+                "mc": float(houses_data["angles"].get("mc", 0)),
+                "ic": float((houses_data["angles"].get("mc", 0) + 180) % 360),
+                "vertex": float(houses_data["angles"].get("vertex", 0)),
+                "antivertex": float((houses_data["angles"].get("vertex", 0) + 180) % 360),
             },
             "aspects": aspects
         }
