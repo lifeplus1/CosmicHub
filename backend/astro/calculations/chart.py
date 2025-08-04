@@ -2,6 +2,7 @@
 from datetime import datetime
 import pytz
 import logging
+from typing import Dict, Any, Optional, Tuple
 from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
@@ -17,7 +18,7 @@ import swisseph as swe
 
 logger = logging.getLogger(__name__)
 
-def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None) -> bool:
+def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat: Optional[float] = None, lon: Optional[float] = None, timezone: Optional[str] = None, city: Optional[str] = None) -> bool:
     logger.debug(f"Validating inputs: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}")
     try:
         if not (1900 <= year <= 2100):
@@ -65,7 +66,7 @@ def validate_inputs(year: int, month: int, day: int, hour: int, minute: int, lat
         raise ValueError(f"Unexpected validation error: {str(e)}")
 
 @lru_cache(maxsize=1000)
-def get_location(city: str) -> dict:
+def get_location(city: str) -> Dict[str, Any]:
     logger.debug(f"Resolving location for city: {city}")
     try:
         geolocator = Nominatim(user_agent="astrology_app", timeout=5)
@@ -93,7 +94,7 @@ def get_location(city: str) -> dict:
         logger.error(f"Unexpected error in get_location: {str(e)}", exc_info=True)
         raise ValueError(f"Error resolving location: {str(e)}")
 
-def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None, house_system: str = 'P'):
+def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat: Optional[float] = None, lon: Optional[float] = None, timezone: Optional[str] = None, city: Optional[str] = None, house_system: str = 'P') -> Dict[str, Any]:
     logger.debug(f"Calculating chart: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}, house_system={house_system}")
     try:
         init_ephemeris()
@@ -149,7 +150,7 @@ def calculate_chart(year: int, month: int, day: int, hour: int, minute: int, lat
         logger.error(f"Unexpected error in calculate_chart: {str(e)}", exc_info=True)
         raise ValueError(f"Invalid date or calculation: {str(e)}")
 
-def calculate_multi_system_chart(year: int, month: int, day: int, hour: int, minute: int, lat: float = None, lon: float = None, timezone: str = None, city: str = None, house_system: str = 'P'):
+def calculate_multi_system_chart(year: int, month: int, day: int, hour: int, minute: int, lat: Optional[float] = None, lon: Optional[float] = None, timezone: Optional[str] = None, city: Optional[str] = None, house_system: str = 'P') -> Dict[str, Any]:
     """Calculate chart with multiple astrology systems"""
     logger.debug(f"Calculating multi-system chart for {year}-{month}-{day} {hour}:{minute}")
     try:
@@ -157,10 +158,13 @@ def calculate_multi_system_chart(year: int, month: int, day: int, hour: int, min
         base_chart = calculate_chart(year, month, day, hour, minute, lat, lon, timezone, city, house_system)
         julian_day = base_chart["julian_day"]
         planets = base_chart["planets"]
+        # Extract validated coordinates from base chart
+        validated_lat = base_chart["birth_info"]["latitude"]
+        validated_lon = base_chart["birth_info"]["longitude"]
         
         # Vedic (Sidereal) astrology
         vedic_data = calculate_vedic_planets(julian_day)
-        vedic_houses = calculate_vedic_houses(julian_day, lat, lon)
+        vedic_houses = calculate_vedic_houses(julian_day, validated_lat, validated_lon)
         vedic_analysis = get_vedic_chart_analysis({**vedic_data, **vedic_houses})
         
         # Chinese astrology
