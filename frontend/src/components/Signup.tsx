@@ -10,6 +10,7 @@ import { signUp } from "../auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {
+  console.log("Signup component mounted");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,7 @@ export default function Signup() {
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
+    console.log("Form submitted");
     console.log("Signup button clicked", { email, password });
     setIsLoading(true);
     try {
