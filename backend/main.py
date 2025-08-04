@@ -1,4 +1,3 @@
-# backend/main.py
 import logging
 import os
 import json
@@ -8,11 +7,15 @@ from pydantic import BaseModel
 import requests
 import uuid
 from dotenv import load_dotenv
-from .auth import get_current_user  # Imports Firebase initialization
-from .astro.calculations.chart import calculate_chart  # Updated import
+from .auth import get_current_user  # Relative import for Firebase Auth
+from .database import get_db  # Relative import for Firestore
+from .astro.calculations.chart import calculate_chart
 from .astro.calculations.personality import get_personality_traits
 from .astro.calculations.ephemeris import get_planetary_positions
+from .astro.calculations.chart import validate_inputs, get_location
 from .database import save_chart, get_charts
+from .healwave.routers.presets import router as presets_router  # New: HealWave presets
+from .healwave.routers.subscriptions import router as subscriptions_router  # New: HealWave subscriptions
 
 # Load .env file
 load_dotenv()
@@ -23,7 +26,6 @@ logging.basicConfig(level=logging.DEBUG, filename=log_file, format="%(asctime)s 
 logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
-
 
 # Security headers middleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -47,7 +49,6 @@ def rate_limiter(request: Request):
     endpoint = request.url.path
     now = time.time()
     window = now - RATE_PERIOD
-    # Remove old requests
     rate_limit_store[(ip, endpoint)] = [t for t in rate_limit_store[(ip, endpoint)] if t > window]
     if len(rate_limit_store[(ip, endpoint)]) >= RATE_LIMIT:
         raise HTTPException(429, "Too Many Requests")
@@ -63,14 +64,18 @@ app.add_middleware(
         "http://localhost:5174",
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://astrology-app-pied.vercel.app",  # Allow specific Vercel subdomain
-        "https://astrology-app-0emh.onrender.com",  # Allow Render subdomain 
+        "https://astrology-app-pied.vercel.app",  # Astrology frontend
+        "https://healwave.yourdomain.com",  # HealWave frontend (update with actual domain)
+        "https://astrology-app-0emh.onrender.com",  # Backend
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(presets_router, prefix="/healwave")
+app.include_router(subscriptions_router, prefix="/healwave")
 
 class BirthData(BaseModel):
     year: int
@@ -122,8 +127,6 @@ async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "
     request_id = str(uuid.uuid4())
     logger.debug(f"[{request_id}] Received data: {data.dict()}, House System: {house_system}")
     try:
-        # Assuming validate_inputs and get_location are moved to chart.py or imported
-        from astro.calculations.chart import validate_inputs, get_location
         validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city, house_system)
         if not chart_data.get("planets"):
@@ -202,15 +205,18 @@ async def create_checkout_session(user_id: str = Depends(get_current_user), requ
         logger.error(f"[{request_id}] Stripe module not available")
         raise HTTPException(500, "Stripe integration not available")
     try:
+        from firebase_admin import auth
+        user = auth.get_user(user_id)
         session = stripe.checkout.Session.create(
+            customer_email=user.email,
             payment_method_types=["card"],
             line_items=[{
-                "price": os.getenv("STRIPE_PRICE_ID", "your_stripe_price_id"),  # Use env variable
+                "price": os.getenv("STRIPE_PRICE_ID", "your_stripe_price_id"),
                 "quantity": 1
             }],
             mode="subscription",
-            success_url="https://astrology-app-mauve.vercel.app/success",
-            cancel_url="https://astrology-app-mauve.vercel.app/cancel",
+            success_url=os.getenv("CHECKOUT_SUCCESS_URL", "https://astrology-app-pied.vercel.app/success"),
+            cancel_url=os.getenv("CHECKOUT_CANCEL_URL", "https://astrology-app-pied.vercel.app/cancel"),
             metadata={"user_id": user_id}
         )
         return {"id": session.id}
