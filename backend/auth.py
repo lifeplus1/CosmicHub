@@ -47,8 +47,18 @@ security = HTTPBearer()
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
+        if not token:
+            logger.error("No token provided")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="No authentication token provided",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Verify the Firebase ID token
         decoded_token = auth.verify_id_token(token)
         uid = decoded_token.get('uid')
+        
         if not uid:
             logger.error("No UID found in decoded token")
             raise HTTPException(
@@ -56,26 +66,35 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 detail="Invalid token: No UID found",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        
         logger.info(f"User authenticated: {uid}")
-        return uid
-    except auth.InvalidIdTokenError:
-        logger.error("Invalid Firebase ID token")
+        return str(uid)
+        
+    except auth.ExpiredIdTokenError as e:
+        logger.error(f"Firebase ID token expired: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired - please refresh and try again",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except auth.RevokedIdTokenError as e:
+        logger.error(f"Firebase ID token revoked: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token revoked - please login again",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except auth.InvalidIdTokenError as e:
+        logger.error(f"Invalid Firebase ID token: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except auth.ExpiredIdTokenError:
-        logger.error("Firebase ID token expired")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
     except Exception as e:
         logger.error(f"Token verification failed: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token verification failed: {str(e)}",
+            detail=f"Authentication failed: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )

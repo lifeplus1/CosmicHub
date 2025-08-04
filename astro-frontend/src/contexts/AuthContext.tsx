@@ -21,10 +21,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getAuthToken = async () => {
     if (!user) return null;
     try {
-      return await user.getIdToken();
+      // Force refresh the token to ensure it's not expired
+      const token = await user.getIdToken(true);
+      return token;
     } catch (error) {
       console.error('Error getting auth token:', error);
-      return null;
+      // If token refresh fails, try to get a cached token
+      try {
+        return await user.getIdToken(false);
+      } catch (fallbackError) {
+        console.error('Error getting cached auth token:', fallbackError);
+        return null;
+      }
     }
   };
 

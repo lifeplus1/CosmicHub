@@ -1,15 +1,54 @@
 import axios from 'axios';
+import { auth } from '../firebase';
 
-const API_URL = 'https://astrology-app-0emh.onrender.com';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://astrology-app-0emh.onrender.com';
+
+// Helper function to get current auth token
+const getAuthToken = async (): Promise<string | null> => {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error('No authenticated user found');
+    return null;
+  }
+  
+  try {
+    // Force refresh token to ensure it's valid
+    const token = await user.getIdToken(true);
+    return token;
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    return null;
+  }
+};
+
+// Helper function to create authorized headers
+const getAuthHeaders = async () => {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
 
 export const fetchChart = async (data: any) => {
-  return axios.post(`${API_URL}/api/chart`, data, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
+  try {
+    const headers = await getAuthHeaders();
+    return axios.post(`${API_URL}/api/chart`, data, { headers });
+  } catch (error) {
+    console.error('Error fetching chart:', error);
+    throw error;
+  }
 };
 
 export const fetchPersonalityAnalysis = async (userId: string) => {
-  return axios.get(`${API_URL}/api/analyze/personality/${userId}`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
+  try {
+    const headers = await getAuthHeaders();
+    return axios.get(`${API_URL}/api/analyze/personality/${userId}`, { headers });
+  } catch (error) {
+    console.error('Error fetching personality analysis:', error);
+    throw error;
+  }
 };
