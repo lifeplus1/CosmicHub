@@ -145,7 +145,7 @@ const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = (
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {Object.entries(chart.planets).map(([point, data]) => (
+                  {Object.entries(chart.planets || {}).map(([point, data]) => (
                     <Tr key={point}>
                       <Td borderColor="gold">
                         <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
@@ -207,7 +207,7 @@ const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = (
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {Object.entries(chart.angles).map(([angle, degree]) => (
+                  {Object.entries(chart.angles || {}).map(([angle, degree]) => (
                     <Tr key={angle}>
                       <Td borderColor="gold">{planetSymbols[angle] || angle}</Td>
                       <Td borderColor="gold">{typeof degree === 'number' && !isNaN(degree) ? degree.toFixed(2) : ''}°</Td>
