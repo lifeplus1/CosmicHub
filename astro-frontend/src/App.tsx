@@ -9,7 +9,7 @@ import { useToast } from '@chakra-ui/toast';
 import { getFirestore } from 'firebase/firestore';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ChartDisplay from './components/ChartDisplay';
+import ChartDisplay from './components/ChartDisplayOptimized';
 import SavedCharts from './components/SavedCharts';
 import AnalyzePersonality from './components/AnalyzePersonality';
 import AIChat from './components/AIChat';

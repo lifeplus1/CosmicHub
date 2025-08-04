@@ -6,6 +6,16 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5174,
-    host: true
+    host: true,
+    hmr: {
+      port: 5174,
+      host: 'localhost'
+    },
+    watch: {
+      usePolling: true
+    }
+  },
+  optimizeDeps: {
+    include: ['firebase/app', 'firebase/auth', 'firebase/firestore']
   }
 })

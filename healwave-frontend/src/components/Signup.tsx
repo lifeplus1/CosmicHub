@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { logIn } from '../auth';
+import { signUp } from '../auth';
 import { useAuth } from '../contexts/AuthContext';
 
-interface LoginProps {
-  onSwitchToSignup?: () => void;
+interface SignupProps {
+  onSwitchToLogin?: () => void;
   onClose?: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
+const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { user } = useAuth();
@@ -19,7 +20,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
     return (
       <div className="text-center">
         <div className="text-green-400 text-xl mb-4">✅ Already logged in!</div>
-        <p className="text-gray-300 mb-4">Welcome back, {user.email}</p>
+        <p className="text-gray-300 mb-4">Welcome, {user.email}</p>
         <button
           onClick={onClose}
           className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
@@ -33,13 +34,25 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validation
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await logIn(email, password);
+      await signUp(email, password);
       onClose?.();
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed');
+      setError(error instanceof Error ? error.message : 'Signup failed');
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +62,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
     <div className="max-w-md mx-auto">
       <div className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 backdrop-blur-md rounded-2xl p-8 border border-purple-500/20 shadow-2xl">
         <div className="text-center mb-8">
-          <div className="text-4xl mb-4">🎵</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-gray-300">Sign in to access your healing frequencies</p>
+          <div className="text-4xl mb-4">🌟</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Join HealWave</h2>
+          <p className="text-gray-300">Create your account to start your healing journey</p>
         </div>
 
         {error && (
@@ -86,6 +99,23 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
+              className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              placeholder="••••••••"
+            />
+            <p className="text-xs text-gray-400 mt-1">Minimum 6 characters</p>
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-200 mb-2">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
               className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               placeholder="••••••••"
             />
@@ -99,23 +129,29 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
             {isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Signing In...
+                Creating Account...
               </div>
             ) : (
-              'Sign In'
+              'Create Account'
             )}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-gray-300">
-            Don't have an account?{' '}
+            Already have an account?{' '}
             <button
-              onClick={onSwitchToSignup}
+              onClick={onSwitchToLogin}
               className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
             >
-              Sign up here
+              Sign in here
             </button>
+          </p>
+        </div>
+
+        <div className="mt-6 text-center">
+          <p className="text-xs text-gray-400">
+            By creating an account, you agree to our healing frequency guidelines
           </p>
         </div>
       </div>
@@ -123,4 +159,4 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
   );
 };
 
-export default Login;
+export default Signup;
