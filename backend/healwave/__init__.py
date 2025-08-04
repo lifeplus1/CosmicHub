@@ -1,1 +1,1 @@
-# This file makes the astro directory a Python package.
+# This file makes the services directory a Python package.
