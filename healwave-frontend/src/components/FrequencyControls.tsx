@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../contexts/AuthContext";
+import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { savePreset, getPresets } from "../services/api";
 
 const PRESETS = {
@@ -30,7 +30,7 @@ const PRESETS = {
 };
 
 function FrequencyControls() {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [category, setCategory] = useState("custom");
   const [preset, setPreset] = useState("custom");
   const [frequency, setFrequency] = useState(440);

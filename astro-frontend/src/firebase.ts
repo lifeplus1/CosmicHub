@@ -18,9 +18,15 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Auth and Firestore
 export const auth = getAuth(app);
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
-if (import.meta.env.VITE_ENV === 'development') {
-  connectAuthEmulator(auth, 'http://localhost:9099');
-  connectFirestore(db, 'localhost', 8080);
+// Use emulators in development to avoid production costs
+if (import.meta.env.DEV && !auth.app.options.projectId?.includes('demo')) {
+  try {
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+    connectFirestore(db, 'localhost', 8080);
+    console.log('🔥 Firebase emulators connected - zero cost development mode');
+  } catch (error) {
+    console.log('Emulators already connected or not available');
+  }
 }
