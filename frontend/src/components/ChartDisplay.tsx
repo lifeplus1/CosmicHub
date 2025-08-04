@@ -203,7 +203,7 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {chart.houses.map((house, index) => (
+                  {(chart.houses || []).map((house, index) => (
                     <Tr key={index}>
                       <Td borderColor="gold">{house.house}</Td>
                       <Td borderColor="gold">{typeof house.cusp === 'number' && !isNaN(house.cusp) ? house.cusp.toFixed(2) : ''}°</Td>
@@ -257,7 +257,7 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {chart.aspects.map((aspect, index) => (
+                  {(chart.aspects || []).map((aspect, index) => (
                     <Tr key={index}>
                       <Td borderColor="gold">
                         <b>{aspect.aspect}</b>
