@@ -96,7 +96,7 @@ const zodiacSigns = [
 const getZodiacSign = (degree: number) => {
   const sign = Math.floor(degree / 30);
   const deg = degree % 30;
-  return `${deg.toFixed(2)}° ${zodiacSigns[sign]}`;
+  return (typeof deg === 'number' && !isNaN(deg)) ? `${deg.toFixed(2)}° ${zodiacSigns[sign]}` : '';
 };
 
 const getHouseForPlanet = (position: number, houses: HouseData[]) => {
@@ -123,8 +123,7 @@ const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = (
           Natal Chart
         </Heading>
         <Text mb={2} color="deepPurple.800">
-          Latitude: {chart.latitude.toFixed(2)}° | Longitude: {chart.longitude.toFixed(2)}° | Timezone:{" "}
-          {chart.timezone}
+          Latitude: {typeof chart.latitude === 'number' && !isNaN(chart.latitude) ? chart.latitude.toFixed(2) : ''}° | Longitude: {typeof chart.longitude === 'number' && !isNaN(chart.longitude) ? chart.longitude.toFixed(2) : ''}° | Timezone: {chart.timezone}
         </Text>
         <Text mb={2} color="deepPurple.800">Julian Day: {chart.julian_day}</Text>
         <Accordion allowToggle>
@@ -185,7 +184,7 @@ const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = (
                   {chart.houses.map((house, index) => (
                     <Tr key={index}>
                       <Td borderColor="gold">{house.house}</Td>
-                      <Td borderColor="gold">{house.cusp.toFixed(2)}°</Td>
+                      <Td borderColor="gold">{typeof house.cusp === 'number' && !isNaN(house.cusp) ? house.cusp.toFixed(2) : ''}°</Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -211,7 +210,7 @@ const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = (
                   {Object.entries(chart.angles).map(([angle, degree]) => (
                     <Tr key={angle}>
                       <Td borderColor="gold">{planetSymbols[angle] || angle}</Td>
-                      <Td borderColor="gold">{degree.toFixed(2)}°</Td>
+                      <Td borderColor="gold">{typeof degree === 'number' && !isNaN(degree) ? degree.toFixed(2) : ''}°</Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -263,7 +262,7 @@ const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = (
                           )}
                         </Box>
                       </Td>
-                      <Td borderColor="gold">{aspect.orb.toFixed(2)}°</Td>
+                      <Td borderColor="gold">{typeof aspect.orb === 'number' && !isNaN(aspect.orb) ? aspect.orb.toFixed(2) : ''}°</Td>
                     </Tr>
                   ))}
                 </Tbody>
