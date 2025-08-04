@@ -2,6 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { ChakraProvider } from '@chakra-ui/react';
 import ChartDisplay from '../components/ChartDisplay';
+import { AuthProvider } from '../contexts/AuthContext';
 
 interface PlanetData {
   position: number;
@@ -58,9 +59,11 @@ const mockChart: ChartData = {
 describe('ChartDisplay', () => {
   it('renders chart data correctly', () => {
     render(
-      <ChakraProvider>
-        <ChartDisplay chart={mockChart} />
-      </ChakraProvider>
+      <AuthProvider>
+        <ChakraProvider>
+          <ChartDisplay chart={mockChart} />
+        </ChakraProvider>
+      </AuthProvider>
     );
     expect(screen.getByText(/Latitude: 40.71°/)).toBeInTheDocument();
     expect(screen.getByText('0.00° Leo')).toBeInTheDocument();

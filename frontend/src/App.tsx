@@ -11,6 +11,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ChartDisplay from './components/ChartDisplay';
 import SavedCharts from './components/SavedCharts';
+import AnalyzePersonality from './components/AnalyzePersonality';
+import AIChat from './components/AIChat';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -183,6 +185,8 @@ function MainApp() {
           <Route path="/saved-charts" element={user ? <SavedCharts /> : <Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/analyze-personality" element={<AnalyzePersonality />} />
+          <Route path="/chat" element={<AIChat />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/contact" element={<Contact />} />
