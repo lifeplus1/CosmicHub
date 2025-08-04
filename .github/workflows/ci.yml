@@ -84,7 +84,7 @@ jobs:
           VITE_BACKEND_URL: https://astrology-app-0emh.onrender.com
   deploy-frontend:
     needs: test
-    if: github.ref == 'refs/heads/typescript-migration'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -113,7 +113,7 @@ jobs:
           VITE_BACKEND_URL: https://astrology-app-0emh.onrender.com
   deploy-backend:
     needs: test
-    if: github.ref == 'refs/heads/typescript-migration'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
