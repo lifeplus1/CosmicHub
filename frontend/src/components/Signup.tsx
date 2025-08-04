@@ -27,7 +27,7 @@ export default function Signup() {
         created_at: new Date().toISOString(),
       });
       toast({ title: "Account Created", status: "success", duration: 3000, isClosable: true });
-      navigate("/chart");
+      navigate("/");
     } catch (error) {
       toast({ 
         title: "Signup Failed", 
