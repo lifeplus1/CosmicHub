@@ -4,6 +4,10 @@ import os
 import logging
 import firebase_admin
 from firebase_admin import credentials, initialize_app, firestore
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 logger = logging.getLogger(__name__)
 

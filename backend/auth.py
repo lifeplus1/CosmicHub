@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import firebase_admin
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

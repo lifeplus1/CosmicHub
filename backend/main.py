@@ -8,11 +8,11 @@ from pydantic import BaseModel
 import requests
 import uuid
 from dotenv import load_dotenv
-from auth import get_current_user  # Imports Firebase initialization
-from astro.calculations.chart import calculate_chart  # Updated import
-from astro.calculations.personality import get_personality_traits
-from astro.calculations.ephemeris import get_planetary_positions
-from database import save_chart, get_charts
+from .auth import get_current_user  # Imports Firebase initialization
+from .astro.calculations.chart import calculate_chart  # Updated import
+from .astro.calculations.personality import get_personality_traits
+from .astro.calculations.ephemeris import get_planetary_positions
+from .database import save_chart, get_charts
 
 # Load .env file
 load_dotenv()
