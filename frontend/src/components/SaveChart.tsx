@@ -28,7 +28,8 @@ export default function SaveChart() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError(null);
     try {
       const token = await getAuthToken();
@@ -77,47 +78,49 @@ export default function SaveChart() {
       <Heading as="h1" mb={6} textAlign="center" color="gold">
         Save Natal Chart
       </Heading>
-      <VStack spacing={4} align="stretch">
-        <FormControl>
-          <FormLabel color="yellow.200">Year</FormLabel>
-          <Input type="number" name="year" value={formData.year} onChange={handleInputChange} placeholder="e.g., 1990" bg="purple.700" color="white" borderColor="gold" />
-        </FormControl>
-        <FormControl>
-          <FormLabel color="yellow.200">Month</FormLabel>
-          <Input type="number" name="month" value={formData.month} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" />
-        </FormControl>
-        <FormControl>
-          <FormLabel color="yellow.200">Day</FormLabel>
-          <Input type="number" name="day" value={formData.day} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" />
-        </FormControl>
-        <FormControl>
-          <FormLabel color="yellow.200">Hour (24h)</FormLabel>
-          <Input type="number" name="hour" value={formData.hour} onChange={handleInputChange} placeholder="e.g., 12" bg="purple.700" color="white" borderColor="gold" />
-        </FormControl>
-        <FormControl>
-          <FormLabel color="yellow.200">Minute</FormLabel>
-          <Input type="number" name="minute" value={formData.minute} onChange={handleInputChange} placeholder="e.g., 0" bg="purple.700" color="white" borderColor="gold" />
-        </FormControl>
-        <FormControl>
-          <FormLabel color="yellow.200">City</FormLabel>
-          <Input name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g., New York" bg="purple.700" color="white" borderColor="gold" />
-        </FormControl>
-        <FormControl>
-          <FormLabel color="yellow.200">House System</FormLabel>
-          <Select value={houseSystem} onChange={(e) => setHouseSystem(e.target.value)} bg="purple.700" color="white" borderColor="gold">
-            <option value="P" style={{ backgroundColor: "#4B0082" }}>Placidus</option>
-            <option value="E" style={{ backgroundColor: "#4B0082" }}>Equal House</option>
-          </Select>
-        </FormControl>
-        <Button
-          colorScheme="yellow"
-          onClick={handleSubmit}
-          isDisabled={!isFormValid()}
-        >
-          Save Chart
-        </Button>
-        {error && <Text color="red.300">{error}</Text>}
-      </VStack>
+      <form onSubmit={handleSubmit}>
+        <VStack spacing={4} align="stretch">
+          <FormControl isRequired>
+            <FormLabel color="yellow.200">Year</FormLabel>
+            <Input type="number" name="year" value={formData.year} onChange={handleInputChange} placeholder="e.g., 1990" bg="purple.700" color="white" borderColor="gold" aria-required="true" />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel color="yellow.200">Month</FormLabel>
+            <Input type="number" name="month" value={formData.month} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" aria-required="true" />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel color="yellow.200">Day</FormLabel>
+            <Input type="number" name="day" value={formData.day} onChange={handleInputChange} placeholder="e.g., 1" bg="purple.700" color="white" borderColor="gold" aria-required="true" />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel color="yellow.200">Hour (24h)</FormLabel>
+            <Input type="number" name="hour" value={formData.hour} onChange={handleInputChange} placeholder="e.g., 12" bg="purple.700" color="white" borderColor="gold" aria-required="true" />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel color="yellow.200">Minute</FormLabel>
+            <Input type="number" name="minute" value={formData.minute} onChange={handleInputChange} placeholder="e.g., 0" bg="purple.700" color="white" borderColor="gold" aria-required="true" />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel color="yellow.200">City</FormLabel>
+            <Input name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g., New York" bg="purple.700" color="white" borderColor="gold" aria-required="true" />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel color="yellow.200">House System</FormLabel>
+            <Select value={houseSystem} onChange={(e) => setHouseSystem(e.target.value)} bg="purple.700" color="white" borderColor="gold" aria-required="true">
+              <option value="P" style={{ backgroundColor: "#4B0082" }}>Placidus</option>
+              <option value="E" style={{ backgroundColor: "#4B0082" }}>Equal House</option>
+            </Select>
+          </FormControl>
+          <Button
+            colorScheme="yellow"
+            type="submit"
+            isDisabled={!isFormValid()}
+          >
+            Save Chart
+          </Button>
+          {error && <Text color="red.300">{error}</Text>}
+        </VStack>
+      </form>
     </Box>
   );
 }
