@@ -46,7 +46,7 @@ interface ChartData {
   longitude: number;
   timezone: string;
   julian_day: number;
-  planets: Record<string, PlanetData>;
+  planets?: Record<string, PlanetData>;
   houses: HouseData[];
   angles: Record<string, number>;
   aspects: AspectData[];
@@ -112,10 +112,24 @@ const getHouseForPlanet = (position: number, houses: HouseData[]) => {
   return 1;
 };
 
-const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = ({ chart, onSaveChart }) => {
+const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void }> = ({ chart, onSaveChart }) => {
   const { user } = useAuth();
   const toast = useToast();
-  if (!chart) return null;
+
+  // Early return if chart is null or undefined
+  if (!chart) {
+    return (
+      <Card mt={4} bg="rgba(255,255,255,0.92)" boxShadow="0 4px 32px 0 rgba(36,0,70,0.12)">
+        <CardBody fontFamily="Quicksand, sans-serif" color="deepPurple.900">
+          <Text color="red.500">No chart data available</Text>
+        </CardBody>
+      </Card>
+    );
+  }
+
+  // Ensure planets is an object, even if empty
+  const planets = chart.planets ?? {};
+
   return (
     <Card mt={4} bg="rgba(255,255,255,0.92)" boxShadow="0 4px 32px 0 rgba(36,0,70,0.12)">
       <CardBody fontFamily="Quicksand, sans-serif" color="deepPurple.900">
@@ -145,22 +159,30 @@ const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = (
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {Object.entries(chart.planets || {}).map(([point, data]) => (
-                    <Tr key={point}>
-                      <Td borderColor="gold">
-                        <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
+                  {Object.entries(planets).length > 0 ? (
+                    Object.entries(planets).map(([point, data]) => (
+                      <Tr key={point}>
+                        <Td borderColor="gold">
+                          <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
+                        </Td>
+                        <Td borderColor="gold">
+                          <Box display="flex" alignItems="center">
+                            <Text as="span" fontWeight="bold" color="deepPurple.700">{getZodiacSign(data.position)}</Text>
+                          </Box>
+                        </Td>
+                        <Td borderColor="gold">
+                          <Text as="span" color="yellow.200">{getHouseForPlanet(data.position, chart.houses)}</Text>
+                        </Td>
+                        <Td borderColor="gold">{data.retrograde ? "℞" : "—"}</Td>
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={4} textAlign="center">
+                        <Text color="red.500">No planet data available</Text>
                       </Td>
-                      <Td borderColor="gold">
-                        <Box display="flex" alignItems="center">
-                          <Text as="span" fontWeight="bold" color="deepPurple.700">{getZodiacSign(data.position)}</Text>
-                        </Box>
-                      </Td>
-                      <Td borderColor="gold">
-                        <Text as="span" color="yellow.200">{getHouseForPlanet(data.position, chart.houses)}</Text>
-                      </Td>
-                      <Td borderColor="gold">{data.retrograde ? "℞" : "—"}</Td>
                     </Tr>
-                  ))}
+                  )}
                 </Tbody>
               </Table>
             </AccordionPanel>

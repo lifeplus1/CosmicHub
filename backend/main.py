@@ -4,12 +4,12 @@ import os
 import json
 from fastapi import FastAPI, HTTPException, Depends, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import requests
 import uuid
 from dotenv import load_dotenv
 from auth import get_current_user  # Imports Firebase initialization
-from astro_calculations import calculate_chart, get_location, validate_inputs
+from astro.calculations.chart import calculate_chart  # Updated import
 from astro.calculations.personality import get_personality_traits
 from astro.calculations.ephemeris import get_planetary_positions
 from database import save_chart, get_charts
@@ -84,102 +84,28 @@ class BirthData(BaseModel):
     lon: float | None = None
 
 # Example response models
-from typing import Dict, List, Any
-
 class ChartResponse(BaseModel):
-    """Response model for a calculated chart."""
-    chart: Dict[str, Any] = Field(..., description="The calculated astrological chart data.")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "chart": {
-                    "sun": {"sign": "Leo", "degree": 15.2},
-                    "moon": {"sign": "Cancer", "degree": 3.1},
-                    "ascendant": "Virgo",
-                    # ...
-                }
-            }
-        }
+    chart: dict
 
 class UserProfileResponse(BaseModel):
-    """Response model for user profile information."""
-    uid: str = Field(..., description="The user's unique ID.")
-    email: str = Field(..., description="The user's email address.")
-    created_at: int = Field(..., description="Account creation timestamp (ms since epoch).")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "uid": "abc123",
-                "email": "user@example.com",
-                "created_at": 1691000000000
-            }
-        }
+    uid: str
+    email: str
+    created_at: int
 
 class SaveChartResponse(BaseModel):
-    """Response model for saving a chart."""
-    result: Dict[str, Any] = Field(..., description="Result of saving the chart, including chart ID and metadata.")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "result": {
-                    "chart_id": "chart_123",
-                    "status": "success"
-                }
-            }
-        }
+    result: dict
 
 class ChartsListResponse(BaseModel):
-    """Response model for a list of charts."""
-    charts: List[Dict[str, Any]] = Field(..., description="A list of saved charts for the user.")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "charts": [
-                    {"chart_id": "chart_123", "name": "My Natal Chart"},
-                    {"chart_id": "chart_456", "name": "Partner's Chart"}
-                ]
-            }
-        }
+    charts: list
 
 class PersonalityResponse(BaseModel):
-    """Response model for personality analysis."""
-    personality: Dict[str, Any] = Field(..., description="Personality traits and analysis based on the chart.")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "personality": {
-                    "type": "INTJ",
-                    "traits": ["analytical", "independent", "strategic"]
-                }
-            }
-        }
+    personality: dict
 
 class CheckoutSessionResponse(BaseModel):
-    """Response model for Stripe checkout session creation."""
-    id: str = Field(..., description="Stripe checkout session ID.")
-
-    class Config:
-        schema_extra = {
-            "example": {"id": "cs_test_1234567890"}
-        }
+    id: str
 
 class ChatResponse(BaseModel):
-    """Response model for chat endpoint."""
-    response: Dict[str, Any] = Field(..., description="AI chat response data.")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "response": {
-                    "message": "Hello! How can I help you with your chart today?"
-                }
-            }
-        }
+    response: dict
 
 try:
     import stripe
@@ -196,9 +122,14 @@ async def calculate(data: BirthData, house_system: str = Query("P", enum=["P", "
     request_id = str(uuid.uuid4())
     logger.debug(f"[{request_id}] Received data: {data.dict()}, House System: {house_system}")
     try:
+        # Assuming validate_inputs and get_location are moved to chart.py or imported
+        from astro.calculations.chart import validate_inputs, get_location
         validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
         chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city, house_system)
-        logger.debug(f"[{request_id}] Chart calculated: {chart_data}")
+        if not chart_data.get("planets"):
+            logger.warning(f"[{request_id}] No planets data in chart")
+            chart_data["planets"] = {}
+        logger.debug(f"[{request_id}] Returning chart: {chart_data}")
         return {"chart": chart_data}
     except ValueError as e:
         logger.error(f"[{request_id}] Validation error in /calculate: {str(e)}", exc_info=True)
