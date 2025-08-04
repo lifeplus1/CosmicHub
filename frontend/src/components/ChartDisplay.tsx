@@ -160,7 +160,7 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                 </Thead>
                 <Tbody>
                   {Object.entries(planets).length > 0 ? (
-                    Object.entries(planets).map(([point, data]) => (
+                    Object.entries(planets || {}).map(([point, data]) => (
                       <Tr key={point}>
                         <Td borderColor="gold">
                           <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
