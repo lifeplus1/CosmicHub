@@ -1,4 +1,6 @@
 import React from "react";
+import { useAuth } from '../contexts/AuthContext';
+import { Button, useToast } from '@chakra-ui/react';
 import {
   Accordion,
   AccordionItem,
@@ -110,7 +112,9 @@ const getHouseForPlanet = (position: number, houses: HouseData[]) => {
   return 1;
 };
 
-const ChartDisplay: React.FC<{ chart: ChartData }> = ({ chart }) => {
+const ChartDisplay: React.FC<{ chart: ChartData; onSaveChart?: () => void }> = ({ chart, onSaveChart }) => {
+  const { user } = useAuth();
+  const toast = useToast();
   if (!chart) return null;
   return (
     <Card mt={4} bg="rgba(255,255,255,0.92)" boxShadow="0 4px 32px 0 rgba(36,0,70,0.12)">
@@ -149,7 +153,7 @@ const ChartDisplay: React.FC<{ chart: ChartData }> = ({ chart }) => {
                       </Td>
                       <Td borderColor="gold">
                         <Box display="flex" alignItems="center">
-                          <Text as="span" fontWeight="bold" color="yellow.200">{getZodiacSign(data.position)}</Text>
+                          <Text as="span" fontWeight="bold" color="deepPurple.700">{getZodiacSign(data.position)}</Text>
                         </Box>
                       </Td>
                       <Td borderColor="gold">
@@ -267,6 +271,19 @@ const ChartDisplay: React.FC<{ chart: ChartData }> = ({ chart }) => {
             </AccordionPanel>
           </AccordionItem>
         </Accordion>
+        {user && (
+          <Button
+            mt={6}
+            colorScheme="yellow"
+            size="lg"
+            borderRadius="full"
+            fontWeight="bold"
+            onClick={onSaveChart}
+            alignSelf="center"
+          >
+            Save Chart
+          </Button>
+        )}
       </CardBody>
     </Card>
   );

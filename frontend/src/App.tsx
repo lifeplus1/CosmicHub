@@ -165,7 +165,7 @@ function MainApp() {
                   </Button>
                 </form>
                 {error && <Text color="red.500">{error}</Text>}
-                {chart && <ChartDisplay chart={chart} />}
+                {chart && <ChartDisplay chart={chart} onSaveChart={handleSaveChart} />}
                 {!user && (
                   <Button
                     colorScheme="yellow"
