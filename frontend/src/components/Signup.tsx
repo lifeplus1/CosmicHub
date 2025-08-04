@@ -18,6 +18,7 @@ export default function Signup() {
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
+    console.log("Signup button clicked", { email, password });
     setIsLoading(true);
     try {
       const user = await signUp(email, password);
