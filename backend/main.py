@@ -4,7 +4,7 @@ import os
 import json
 from fastapi import FastAPI, HTTPException, Depends, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import requests
 import uuid
 from dotenv import load_dotenv
@@ -84,28 +84,102 @@ class BirthData(BaseModel):
     lon: float | None = None
 
 # Example response models
+from typing import Dict, List, Any
+
 class ChartResponse(BaseModel):
-    chart: dict
+    """Response model for a calculated chart."""
+    chart: Dict[str, Any] = Field(..., description="The calculated astrological chart data.")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "chart": {
+                    "sun": {"sign": "Leo", "degree": 15.2},
+                    "moon": {"sign": "Cancer", "degree": 3.1},
+                    "ascendant": "Virgo",
+                    # ...
+                }
+            }
+        }
 
 class UserProfileResponse(BaseModel):
-    uid: str
-    email: str
-    created_at: int
+    """Response model for user profile information."""
+    uid: str = Field(..., description="The user's unique ID.")
+    email: str = Field(..., description="The user's email address.")
+    created_at: int = Field(..., description="Account creation timestamp (ms since epoch).")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "uid": "abc123",
+                "email": "user@example.com",
+                "created_at": 1691000000000
+            }
+        }
 
 class SaveChartResponse(BaseModel):
-    result: dict
+    """Response model for saving a chart."""
+    result: Dict[str, Any] = Field(..., description="Result of saving the chart, including chart ID and metadata.")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "result": {
+                    "chart_id": "chart_123",
+                    "status": "success"
+                }
+            }
+        }
 
 class ChartsListResponse(BaseModel):
-    charts: list
+    """Response model for a list of charts."""
+    charts: List[Dict[str, Any]] = Field(..., description="A list of saved charts for the user.")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "charts": [
+                    {"chart_id": "chart_123", "name": "My Natal Chart"},
+                    {"chart_id": "chart_456", "name": "Partner's Chart"}
+                ]
+            }
+        }
 
 class PersonalityResponse(BaseModel):
-    personality: dict
+    """Response model for personality analysis."""
+    personality: Dict[str, Any] = Field(..., description="Personality traits and analysis based on the chart.")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "personality": {
+                    "type": "INTJ",
+                    "traits": ["analytical", "independent", "strategic"]
+                }
+            }
+        }
 
 class CheckoutSessionResponse(BaseModel):
-    id: str
+    """Response model for Stripe checkout session creation."""
+    id: str = Field(..., description="Stripe checkout session ID.")
+
+    class Config:
+        schema_extra = {
+            "example": {"id": "cs_test_1234567890"}
+        }
 
 class ChatResponse(BaseModel):
-    response: dict
+    """Response model for chat endpoint."""
+    response: Dict[str, Any] = Field(..., description="AI chat response data.")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "response": {
+                    "message": "Hello! How can I help you with your chart today?"
+                }
+            }
+        }
 
 try:
     import stripe
