@@ -1,24 +1,31 @@
-# backend/database.py
-from firebase_admin import firestore
-import logging
+# Overwrite database.py with corrected Firebase initialization
+import os
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
+# Load Firebase credentials from FIREBASE_CREDENTIALS as a single JSON string
+import json
+cred_json = os.getenv("FIREBASE_CREDENTIALS")
+if not cred_json:
+    raise Exception("FIREBASE_CREDENTIALS environment variable not set")
+cred_dict = json.loads(cred_json)
+
+# Initialize Firebase only if not already initialized
+if not firebase_admin._apps:
+    cred = credentials.Certificate(cred_dict)
+    firebase_admin.initialize_app(cred)
+
+# Initialize Firestore client
 db = firestore.client()
 
-def save_user_profile(user_id: str, profile: dict):
-    try:
-        db.collection('users').document(user_id).set(profile, merge=True)
-        logger.info(f'Saved profile for user {user_id}')
-    except Exception as e:
-        logger.error(f'Failed to save profile for user {user_id}: {str(e)}')
-        raise
-
+# Example function to save chart data
 def save_chart(user_id: str, chart_data: dict):
-    try:
-        db.collection('users').document(user_id).collection('charts').add(chart_data)
-        logger.info(f'Saved chart for user {user_id}')
-    except Exception as e:
-        logger.error(f'Failed to save chart for user {user_id}: {str(e)}')
-        raise
+    doc_ref = db.collection("users").document(user_id).collection("charts").document()
+    doc_ref.set(chart_data)
+    return doc_ref.id
+
+# Example function to retrieve charts
+def get_charts(user_id: str):
+    charts_ref = db.collection("users").document(user_id).collection("charts").stream()
+    return [chart.to_dict() for chart in charts_ref]

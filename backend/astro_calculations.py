@@ -5,9 +5,9 @@ from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from functools import lru_cache
-from astro.ephemeris import init_ephemeris, get_planetary_positions
-from astro.house_systems import calculate_houses
-from astro.aspects import calculate_aspects
+from astro.calculations.ephemeris import init_ephemeris, get_planetary_positions
+from astro.calculations.house_systems import calculate_houses
+from astro.calculations.aspects import calculate_aspects
 import swisseph as swe
 
 logger = logging.getLogger(__name__)

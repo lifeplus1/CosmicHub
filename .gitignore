@@ -60,4 +60,4 @@ backend/venv/
 backend/__pycache__/
 backend/.env
 backend/logs/
-backend/functions
+backend/functionsbackend/firebase-adminsdk.json

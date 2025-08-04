@@ -10,8 +10,8 @@ import requests
 from dotenv import load_dotenv
 from auth import get_current_user  # Imports Firebase initialization
 from astro_calculations import calculate_chart, get_location, validate_inputs
-from astro.personality import get_personality_traits
-from astro.ephemeris import get_planetary_positions
+from astro.calculations.personality import get_personality_traits
+from astro.calculations.ephemeris import get_planetary_positions
 from database import save_chart, get_charts
 
 # Load .env file
