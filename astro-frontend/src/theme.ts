@@ -3,8 +3,8 @@ import { extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
   fonts: {
-    heading: "'Cormorant Garamond', serif",
-    body: "'Quicksand', sans-serif",
+    heading: "'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    body: "'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   colors: {
     gold: {
@@ -38,7 +38,7 @@ const theme = extendTheme({
       body: {
         bg: 'linear-gradient(135deg, #240046 0%, #5a189a 100%)',
         color: 'gold.100',
-        fontFamily: 'Quicksand, sans-serif',
+        fontFamily: "'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         minHeight: '100vh',
         backgroundAttachment: 'fixed',
         backgroundRepeat: 'no-repeat',
