@@ -94,15 +94,32 @@ const zodiacSigns = [
 ];
 
 const getZodiacSign = (degree: number) => {
+  if (typeof degree !== 'number' || isNaN(degree)) {
+    return 'N/A';
+  }
   const sign = Math.floor(degree / 30);
   const deg = degree % 30;
-  return (typeof deg === 'number' && !isNaN(deg)) ? `${deg.toFixed(2)}° ${zodiacSigns[sign]}` : '';
+  const signIndex = sign % 12; // Ensure we stay within array bounds
+  return `${deg.toFixed(2)}° ${zodiacSigns[signIndex] || 'Unknown'}`;
 };
 
 const getHouseForPlanet = (position: number, houses: HouseData[]) => {
+  if (typeof position !== 'number' || isNaN(position) || !houses || houses.length === 0) {
+    return 1; // Default to first house
+  }
+  
   for (let i = 0; i < houses.length; i++) {
-    const start = houses[i].cusp;
-    const end = houses[(i + 1) % houses.length].cusp;
+    const currentHouse = houses[i];
+    const nextHouse = houses[(i + 1) % houses.length];
+    
+    if (!currentHouse || typeof currentHouse.cusp !== 'number' || 
+        !nextHouse || typeof nextHouse.cusp !== 'number') {
+      continue;
+    }
+    
+    const start = currentHouse.cusp;
+    const end = nextHouse.cusp;
+    
     if (start < end) {
       if (position >= start && position < end) return i + 1;
     } else {
@@ -160,20 +177,25 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                 </Thead>
                 <Tbody>
                   {Object.entries(planets).length > 0 ? (
-                    Object.entries(planets || {}).map(([point, data]) => (
+                    Object.entries(planets).map(([point, data]) => (
                       <Tr key={point}>
                         <Td borderColor="gold">
                           <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
                         </Td>
                         <Td borderColor="gold">
                           <Box display="flex" alignItems="center">
-                            <Text as="span" fontWeight="bold" color="deepPurple.700">{getZodiacSign(data.position)}</Text>
+                            <Text as="span" fontWeight="bold" color="deepPurple.700">
+                              {data && typeof data.position === 'number' ? getZodiacSign(data.position) : 'N/A'}
+                            </Text>
                           </Box>
                         </Td>
                         <Td borderColor="gold">
-                          <Text as="span" color="yellow.200">{getHouseForPlanet(data.position, chart.houses)}</Text>
+                          <Text as="span" color="yellow.200">
+                            {data && typeof data.position === 'number' && chart.houses ? 
+                              getHouseForPlanet(data.position, chart.houses) : 'N/A'}
+                          </Text>
                         </Td>
-                        <Td borderColor="gold">{data.retrograde ? "℞" : "—"}</Td>
+                        <Td borderColor="gold">{data && data.retrograde ? "℞" : "—"}</Td>
                       </Tr>
                     ))
                   ) : (
@@ -203,12 +225,23 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {(chart.houses || []).map((house, index) => (
-                    <Tr key={index}>
-                      <Td borderColor="gold">{house.house}</Td>
-                      <Td borderColor="gold">{typeof house.cusp === 'number' && !isNaN(house.cusp) ? house.cusp.toFixed(2) : ''}°</Td>
+                  {(chart.houses && Array.isArray(chart.houses) && chart.houses.length > 0) ? (
+                    chart.houses.map((house, index) => (
+                      <Tr key={index}>
+                        <Td borderColor="gold">{house && house.house ? house.house : index + 1}</Td>
+                        <Td borderColor="gold">
+                          {house && typeof house.cusp === 'number' && !isNaN(house.cusp) ? 
+                            `${house.cusp.toFixed(2)}°` : 'N/A'}
+                        </Td>
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={2} borderColor="gold" textAlign="center" color="gray.500">
+                        No house data available
+                      </Td>
                     </Tr>
-                  ))}
+                  )}
                 </Tbody>
               </Table>
             </AccordionPanel>
@@ -257,36 +290,49 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {(chart.aspects || []).map((aspect, index) => (
-                    <Tr key={index}>
-                      <Td borderColor="gold">
-                        <b>{aspect.aspect}</b>
+                  {(chart.aspects && Array.isArray(chart.aspects) && chart.aspects.length > 0) ? (
+                    chart.aspects.map((aspect, index) => (
+                      <Tr key={index}>
+                        <Td borderColor="gold">
+                          <b>{aspect && aspect.aspect ? aspect.aspect : 'Unknown'}</b>
+                        </Td>
+                        <Td borderColor="gold">
+                          <Box>
+                            <b>{aspect && aspect.point1 ? (planetSymbols[aspect.point1] || aspect.point1) : 'Unknown'}</b>{' '}
+                            {aspect && aspect.point1 ? (aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)) : ''}
+                            {aspect && aspect.point1_sign && (
+                              <Text as="span" color="yellow.200" ml={2}>{aspect.point1_sign}</Text>
+                            )}
+                            {aspect && aspect.point1_house && (
+                              <Text as="span" color="teal.200" ml={2}>House {aspect.point1_house}</Text>
+                            )}
+                          </Box>
+                        </Td>
+                        <Td borderColor="gold">
+                          <Box>
+                            <b>{aspect && aspect.point2 ? (planetSymbols[aspect.point2] || aspect.point2) : 'Unknown'}</b>{' '}
+                            {aspect && aspect.point2 ? (aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)) : ''}
+                            {aspect && aspect.point2_sign && (
+                              <Text as="span" color="yellow.200" ml={2}>{aspect.point2_sign}</Text>
+                            )}
+                            {aspect && aspect.point2_house && (
+                              <Text as="span" color="teal.200" ml={2}>House {aspect.point2_house}</Text>
+                            )}
+                          </Box>
+                        </Td>
+                        <Td borderColor="gold">
+                          {aspect && typeof aspect.orb === 'number' && !isNaN(aspect.orb) ? 
+                            `${aspect.orb.toFixed(2)}°` : 'N/A'}
+                        </Td>
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={4} borderColor="gold" textAlign="center" color="gray.500">
+                        No aspect data available
                       </Td>
-                      <Td borderColor="gold">
-                        <Box>
-                          <b>{planetSymbols[aspect.point1] || aspect.point1}</b> {aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)}
-                          {aspect.point1_sign && (
-                            <Text as="span" color="yellow.200" ml={2}>{aspect.point1_sign}</Text>
-                          )}
-                          {aspect.point1_house && (
-                            <Text as="span" color="teal.200" ml={2}>House {aspect.point1_house}</Text>
-                          )}
-                        </Box>
-                      </Td>
-                      <Td borderColor="gold">
-                        <Box>
-                          <b>{planetSymbols[aspect.point2] || aspect.point2}</b> {aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)}
-                          {aspect.point2_sign && (
-                            <Text as="span" color="yellow.200" ml={2}>{aspect.point2_sign}</Text>
-                          )}
-                          {aspect.point2_house && (
-                            <Text as="span" color="teal.200" ml={2}>House {aspect.point2_house}</Text>
-                          )}
-                        </Box>
-                      </Td>
-                      <Td borderColor="gold">{typeof aspect.orb === 'number' && !isNaN(aspect.orb) ? aspect.orb.toFixed(2) : ''}°</Td>
                     </Tr>
-                  ))}
+                  )}
                 </Tbody>
               </Table>
             </AccordionPanel>
