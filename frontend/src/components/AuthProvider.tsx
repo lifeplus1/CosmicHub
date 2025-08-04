@@ -18,13 +18,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      if (!user) navigate("/login");
-    });
-    return () => unsubscribe();
-  }, [navigate]);
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    setUser(user);
+    setLoading(false);
+    if (!user && window.location.pathname !== "/signup") {
+      navigate("/login");
+    }
+  });
+  return () => unsubscribe();
+}, [navigate]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
