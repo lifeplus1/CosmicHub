@@ -113,16 +113,16 @@ const getHouseForPlanet = (position: number, houses: HouseData[]) => {
 const ChartDisplay: React.FC<{ chart: ChartData }> = ({ chart }) => {
   if (!chart) return null;
   return (
-    <Card mt={4}>
-      <CardBody>
-        <Heading size="md" mb={2}>
+    <Card mt={4} bg="rgba(255,255,255,0.92)" boxShadow="0 4px 32px 0 rgba(36,0,70,0.12)">
+      <CardBody fontFamily="Quicksand, sans-serif" color="deepPurple.900">
+        <Heading size="md" mb={2} color="deepPurple.700" fontFamily="Cormorant Garamond, serif">
           Natal Chart
         </Heading>
-        <Text mb={2}>
+        <Text mb={2} color="deepPurple.800">
           Latitude: {chart.latitude.toFixed(2)}° | Longitude: {chart.longitude.toFixed(2)}° | Timezone:{" "}
           {chart.timezone}
         </Text>
-        <Text mb={2}>Julian Day: {chart.julian_day}</Text>
+        <Text mb={2} color="deepPurple.800">Julian Day: {chart.julian_day}</Text>
         <Accordion allowToggle>
           <AccordionItem>
             <AccordionButton>
