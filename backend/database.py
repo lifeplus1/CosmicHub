@@ -5,6 +5,7 @@ import logging
 import firebase_admin
 from firebase_admin import credentials, initialize_app, firestore
 from dotenv import load_dotenv
+from typing import List, Dict, Any, Optional
 
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -14,11 +15,15 @@ logger = logging.getLogger(__name__)
 # Initialize Firebase only if not already initialized
 try:
     if not firebase_admin._apps:
+        private_key = os.getenv("FIREBASE_PRIVATE_KEY")
+        if not private_key:
+            raise ValueError("FIREBASE_PRIVATE_KEY environment variable is not set")
+        
         cred = credentials.Certificate({
             "type": "service_account",
             "project_id": os.getenv("FIREBASE_PROJECT_ID"),
             "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-            "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+            "private_key": private_key.replace("\\n", "\n"),
             "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
             "client_id": os.getenv("FIREBASE_CLIENT_ID"),
             "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
@@ -33,7 +38,7 @@ except Exception as e:
     logger.error(f"Error initializing Firebase: {str(e)}", exc_info=True)
     raise Exception(f"Failed to initialize Firebase: {str(e)}")
 
-def save_chart(user_id: str, chart_type: str, birth_data: dict, chart_data: dict):
+def save_chart(user_id: str, chart_type: str, birth_data: Dict[str, Any], chart_data: Dict[str, Any]) -> Dict[str, Any]:
     try:
         doc_ref = db.collection("users").document(user_id).collection("charts").document()
         doc_ref.set({
@@ -42,16 +47,20 @@ def save_chart(user_id: str, chart_type: str, birth_data: dict, chart_data: dict
             "chart_data": chart_data,
             "created_at": firestore.SERVER_TIMESTAMP
         })
-        logger.debug(f"Saved chart for user {user_id}: {doc_ref.id}")
-        return {"id": doc_ref.id, "chart_type": chart_type, "birth_data": birth_data, "chart_data": chart_data}
+        chart_id = doc_ref.id
+        logger.debug(f"Saved chart for user {user_id}: {chart_id}")
+        return {"id": chart_id, "chart_type": chart_type, "birth_data": birth_data, "chart_data": chart_data}
     except Exception as e:
         logger.error(f"Error saving chart for user {user_id}: {str(e)}", exc_info=True)
         raise
-
-def get_charts(user_id: str):
+def get_charts(user_id: str) -> List[Dict[str, Any]]:
     try:
         charts_ref = db.collection("users").document(user_id).collection("charts").stream()
-        charts = [chart.to_dict() for chart in charts_ref]
+        charts = []
+        for chart in charts_ref:
+            data = chart.to_dict()
+            data["id"] = chart.id  # Ensure each dict has a known structure with an 'id'
+            charts.append(data)
         logger.debug(f"Retrieved {len(charts)} charts for user {user_id}")
         return charts
     except Exception as e:

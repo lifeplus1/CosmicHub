@@ -9,4 +9,5 @@ stripe
 requests
 pytz
 pytest
+reportlab
 

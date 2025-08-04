@@ -36,7 +36,7 @@ const getAuthHeaders = async () => {
 export const fetchChart = async (data: any) => {
   try {
     const headers = await getAuthHeaders();
-    return axios.post(`${API_URL}/api/chart`, data, { headers });
+    return axios.post(`${API_URL}/calculate-multi-system`, data, { headers });
   } catch (error) {
     console.error('Error fetching chart:', error);
     throw error;
@@ -49,6 +49,16 @@ export const fetchPersonalityAnalysis = async (userId: string) => {
     return axios.get(`${API_URL}/api/analyze/personality/${userId}`, { headers });
   } catch (error) {
     console.error('Error fetching personality analysis:', error);
+    throw error;
+  }
+};
+
+export const fetchNumerology = async (data: any) => {
+  try {
+    const headers = await getAuthHeaders();
+    return axios.post(`${API_URL}/calculate-numerology`, data, { headers });
+  } catch (error) {
+    console.error('Error fetching numerology:', error);
     throw error;
   }
 };

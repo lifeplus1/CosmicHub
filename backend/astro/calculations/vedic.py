@@ -1,7 +1,22 @@
 # backend/astro/calculations/vedic.py
 import swisseph as swe
 import logging
-from typing import Dict, List, Any
+from typing import Dict, Any, Final, Tuple, List
+
+# Type-safe constants for swisseph bodies
+SUN: Final[int] = 0
+MOON: Final[int] = 1
+MERCURY: Final[int] = 2
+VENUS: Final[int] = 3
+MARS: Final[int] = 4
+JUPITER: Final[int] = 5
+SATURN: Final[int] = 6
+MEAN_NODE: Final[int] = 10
+
+# Type-safe constants for swisseph flags
+FLG_SWIEPH: Final[int] = 2
+FLG_SPEED: Final[int] = 256
+SIDM_LAHIRI: Final[int] = 1
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +60,17 @@ def get_ayanamsa(julian_day: float) -> float:
     """Calculate the ayanamsa (precession correction) for Vedic astrology"""
     try:
         # Using Lahiri ayanamsa (most commonly used)
-        swe.set_sid_mode(swe.SIDM_LAHIRI)
-        ayanamsa = swe.get_ayanamsa_ut(julian_day)
-        logger.debug(f"Ayanamsa for JD {julian_day}: {ayanamsa}")
-        return ayanamsa
+        set_sidmode = getattr(swe, 'set_sidmode', None)
+        get_ayanamsa_ut = getattr(swe, 'get_ayanamsa_ut', None)
+        
+        if set_sidmode and get_ayanamsa_ut:
+            set_sidmode(SIDM_LAHIRI)
+            ayanamsa: float = get_ayanamsa_ut(julian_day)
+            logger.debug(f"Ayanamsa for JD {julian_day}: {ayanamsa}")
+            return ayanamsa
+        else:
+            logger.warning("Swiss Ephemeris functions not available")
+            return 24.0  # Default approximation
     except Exception as e:
         logger.error(f"Error calculating ayanamsa: {str(e)}")
         return 24.0  # Default approximation
@@ -85,32 +107,38 @@ def calculate_vedic_planets(julian_day: float) -> Dict[str, Any]:
     """Calculate Vedic planetary positions with nakshatras"""
     try:
         ayanamsa = get_ayanamsa(julian_day)
+        calc_ut = getattr(swe, 'calc_ut', None)
         
-        planets = {
-            "sun": swe.SUN,
-            "moon": swe.MOON,
-            "mercury": swe.MERCURY,
-            "venus": swe.VENUS,
-            "mars": swe.MARS,
-            "jupiter": swe.JUPITER,
-            "saturn": swe.SATURN,
-            "rahu": swe.MEAN_NODE,  # North Node (Rahu)
+        if not calc_ut:
+            logger.error("Swiss Ephemeris calc_ut function not available")
+            return {"ayanamsa": 0, "planets": {}}
+        
+        planets: Dict[str, int] = {
+            "sun": SUN,
+            "moon": MOON,
+            "mercury": MERCURY,
+            "venus": VENUS,
+            "mars": MARS,
+            "jupiter": JUPITER,
+            "saturn": SATURN,
+            "rahu": MEAN_NODE,  # North Node (Rahu)
             "ketu": -1,  # Will calculate as South Node (180° from Rahu)
         }
         
-        vedic_positions = {}
+        vedic_positions: Dict[str, Dict[str, Any]] = {}
         
         for name, body in planets.items():
             if name == "ketu":
                 # Calculate Ketu as opposite of Rahu
-                rahu_pos = vedic_positions.get("rahu", {}).get("tropical_position", 0)
-                tropical_pos = (rahu_pos + 180) % 360
+                rahu_data = vedic_positions.get("rahu", {})
+                rahu_pos = float(rahu_data.get("tropical_position", 0))
+                tropical_pos: float = (rahu_pos + 180) % 360
             else:
-                pos = swe.calc_ut(julian_day, body, swe.FLG_SWIEPH | swe.FLG_SPEED)
+                pos = calc_ut(julian_day, body, FLG_SWIEPH | FLG_SPEED)
                 if pos[0][0] < 0:
                     logger.error(f"Error calculating {name}: {pos[0][0]}")
                     continue
-                tropical_pos = pos[0][0]
+                tropical_pos: float = float(pos[0][0])
             
             vedic_positions[name] = {
                 "tropical_position": tropical_pos,
@@ -132,28 +160,34 @@ def calculate_vedic_houses(julian_day: float, lat: float, lon: float) -> Dict[st
     """Calculate Vedic house cusps (sidereal)"""
     try:
         ayanamsa = get_ayanamsa(julian_day)
+        houses_ex = getattr(swe, 'houses_ex', None)
+        
+        if not houses_ex:
+            logger.error("Swiss Ephemeris houses_ex function not available")
+            return {"houses": [], "angles": {}}
         
         # Calculate tropical houses first
-        houses = swe.houses_ex(julian_day, lat, lon, b'P')  # Placidus system
-        house_cusps = houses[0]
-        ascendant = houses[1][0]
-        mc = houses[1][1]
+        houses: Tuple[List[float], List[float]] = houses_ex(julian_day, lat, lon, b'P')  # Placidus system
+        house_cusps: List[float] = houses[0]
+        ascendant: float = houses[1][0]
+        mc: float = houses[1][1]
         
         # Convert to sidereal
-        vedic_houses = []
+        vedic_houses: List[Dict[str, Any]] = []
         for i, cusp in enumerate(house_cusps):
-            sidereal_cusp = (cusp - ayanamsa) % 360
+            cusp_float: float = float(cusp)
+            sidereal_cusp: float = (cusp_float - ayanamsa) % 360
             vedic_houses.append({
                 "house": i + 1,
                 "cusp": sidereal_cusp,
-                "vedic_sign": get_vedic_sign(cusp, ayanamsa)
+                "vedic_sign": get_vedic_sign(cusp_float, ayanamsa)
             })
         
-        vedic_angles = {
-            "ascendant": (ascendant - ayanamsa) % 360,
-            "mc": (mc - ayanamsa) % 360,
-            "descendant": ((ascendant + 180) - ayanamsa) % 360,
-            "ic": ((mc + 180) - ayanamsa) % 360
+        vedic_angles: Dict[str, float] = {
+            "ascendant": (float(ascendant) - ayanamsa) % 360,
+            "mc": (float(mc) - ayanamsa) % 360,
+            "descendant": ((float(ascendant) + 180) - ayanamsa) % 360,
+            "ic": ((float(mc) + 180) - ayanamsa) % 360
         }
         
         return {

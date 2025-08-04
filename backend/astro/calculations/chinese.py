@@ -1,7 +1,6 @@
 # backend/astro/calculations/chinese.py
 import logging
-from datetime import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Dict, Any, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +14,7 @@ CHINESE_ANIMALS = [
 CHINESE_ELEMENTS = ["Wood", "Fire", "Earth", "Metal", "Water"]
 
 # Chinese zodiac traits
-ANIMAL_TRAITS = {
+ANIMAL_TRAITS: Dict[str, Dict[str, Any]] = {
     "Rat": {"traits": "Intelligent, adaptable, quick-witted", "lucky_numbers": [2, 3], "element_years": "Yang Water"},
     "Ox": {"traits": "Reliable, patient, honest", "lucky_numbers": [1, 9], "element_years": "Yin Earth"},
     "Tiger": {"traits": "Brave, confident, competitive", "lucky_numbers": [1, 3, 4], "element_years": "Yang Wood"},
@@ -178,7 +177,7 @@ def calculate_chinese_astrology(year: int, month: int, day: int, hour: int) -> D
         hour_data = get_chinese_hour_animal(hour)
         
         # Get traits and lucky numbers
-        year_traits = ANIMAL_TRAITS.get(year_animal, {})
+        year_traits: Dict[str, Any] = ANIMAL_TRAITS.get(year_animal, {})
         
         # Five elements analysis
         elements_analysis = get_chinese_five_elements_analysis(year_element, hour)

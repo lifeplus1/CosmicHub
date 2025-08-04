@@ -1,6 +1,7 @@
 import React, { memo, useMemo, useCallback } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import { Button, useToast } from '@chakra-ui/react';
+import type { ChartData } from '../types';
 import {
   Accordion,
   AccordionItem,
@@ -28,41 +29,22 @@ import {
   AlertDescription,
 } from "@chakra-ui/react";
 
-interface PlanetData {
-  position: number;
-  retrograde: boolean;
-}
-
-interface HouseData {
-  house: number;
-  cusp: number;
-}
-
-interface AspectData {
-  point1: string;
-  point2: string;
-  aspect: string;
-  orb: number;
-  point1_sign?: string;
-  point2_sign?: string;
-  point1_house?: number;
-  point2_house?: number;
-}
-
-interface ChartData {
+interface ExtendedChartData extends ChartData {
   latitude: number;
   longitude: number;
   timezone: string;
   julian_day: number;
-  planets?: Record<string, PlanetData>;
-  houses: HouseData[];
   angles: Record<string, number>;
-  aspects: AspectData[];
   [key: string]: any;
 }
 
+// Type aliases for component use
+type PlanetData = NonNullable<ChartData['planets']>[string];
+type HouseData = ChartData['houses'][number];
+type AspectData = ChartData['aspects'][number];
+
 interface ChartDisplayProps {
-  chart: ChartData | null;
+  chart: ExtendedChartData | null;
   onSaveChart?: () => void;
   loading?: boolean;
 }

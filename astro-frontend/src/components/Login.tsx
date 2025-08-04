@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, FormControl, FormLabel, Input, VStack, useToast, Icon, Heading, Text } from "@chakra-ui/react";
+import { Box, Button, FormControl, FormLabel, Input, VStack, useToast, Icon, Heading, Text, Divider, Link } from "@chakra-ui/react";
 import { logIn } from "../auth";
 
 export default function Login() {
@@ -30,80 +30,117 @@ export default function Login() {
   };
 
   return (
-    <Box
-      maxW="md"
-      mx="auto"
-      mt={16}
-      p={8}
-      borderRadius="2xl"
-      boxShadow="0 4px 32px 0 rgba(36,0,70,0.25)"
-      bg="rgba(36,0,70,0.92)"
-      style={{
-        backdropFilter: 'blur(8px)',
-        position: 'relative',
-        overflow: 'hidden',
-        animation: 'fadeInUp 0.7s cubic-bezier(.23,1.01,.32,1)'
-      }}
+    <Box 
+      minH="100vh" 
+      pt={8} 
+      pb={20}
+      px={4}
+      background="transparent"
     >
-      <VStack spacing={4} mb={6}>
-        <Icon viewBox="0 0 48 48" boxSize={12} color="gold.300">
-          <circle cx="24" cy="24" r="20" fill="#f8d477" opacity="0.18" />
-          <circle cx="24" cy="24" r="12" fill="#f4b400" />
-          <path d="M24 12v-4M24 40v-4M12 24h-4M40 24h-4M34.14 34.14l2.83 2.83M11.03 11.03l2.83 2.83M34.14 13.86l2.83-2.83M11.03 36.97l2.83-2.83" stroke="#db9e00" strokeWidth="2" strokeLinecap="round" />
-        </Icon>
-        <Heading color="gold.300" fontFamily="Cinzel, serif" letterSpacing="wider" size="lg" textAlign="center">
-          Welcome Back
-        </Heading>
-        <Text color="gold.100" fontSize="md" textAlign="center" fontFamily="Quicksand, sans-serif">
-          Log in to access your personalized astrology insights.
-        </Text>
-      </VStack>
-      <form onSubmit={handleSubmit}>
-        <VStack spacing={5}>
-          <FormControl isRequired>
-            <FormLabel color="yellow.200">Email</FormLabel>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              bg="deepPurple.800"
-              color="gold.100"
-              borderColor="gold.400"
-              aria-required="true"
-              _focus={{ borderColor: 'gold.300', boxShadow: '0 0 0 2px #f4b400' }}
-              _placeholder={{ color: 'gold.200' }}
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel color="yellow.200">Password</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              bg="deepPurple.800"
-              color="gold.100"
-              borderColor="gold.400"
-              aria-required="true"
-              _focus={{ borderColor: 'gold.300', boxShadow: '0 0 0 2px #f4b400' }}
-              _placeholder={{ color: 'gold.200' }}
-            />
-          </FormControl>
-          <Button
-            type="submit"
-            colorScheme="yellow"
-            isLoading={isLoading}
-            size="lg"
-            w="100%"
-            fontWeight="bold"
-            fontFamily="Quicksand, sans-serif"
-            borderRadius="full"
-            boxShadow="0 2px 16px 0 rgba(244,180,0,0.15)"
-            _hover={{ transform: 'scale(1.04)', bg: 'gold.300', color: 'deepPurple.900' }}
-          >
-            Login
-          </Button>
+      <Box
+        maxW="lg"
+        mx="auto"
+        bg="rgba(15, 23, 42, 0.8)"
+        backdropFilter="blur(40px)"
+        borderRadius="32px"
+        border="1px solid"
+        borderColor="whiteAlpha.200"
+        boxShadow="0 32px 120px rgba(0, 0, 0, 0.4)"
+        p={8}
+        position="relative"
+        _before={{
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderRadius: '32px',
+          padding: '2px',
+          background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(168, 85, 247, 0.3))',
+          mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          maskComposite: 'exclude',
+          zIndex: -1,
+        }}
+      >
+        <VStack spacing={6} mb={8}>
+          <Icon viewBox="0 0 48 48" boxSize={12} color="gold.300">
+            <defs>
+              <radialGradient id="loginSunGradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#fbbf24" />
+                <stop offset="70%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#d97706" />
+              </radialGradient>
+            </defs>
+            <circle cx="24" cy="24" r="20" fill="url(#loginSunGradient)" opacity="0.3" />
+            <circle cx="24" cy="24" r="12" fill="url(#loginSunGradient)" />
+            <g stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" opacity="0.8">
+              <path d="M24 8v-4M24 44v-4M8 24h-4M44 24h-4M35.31 35.31l2.83 2.83M9.86 9.86l2.83 2.83M35.31 12.69l2.83-2.83M9.86 38.14l2.83-2.83" />
+            </g>
+          </Icon>
+          <Heading variant="cosmic" size="2xl" textAlign="center">
+            Welcome Back
+          </Heading>
+          <Text variant="stellar" fontSize="lg" textAlign="center">
+            Log in to access your personalized astrology insights.
+          </Text>
         </VStack>
-      </form>
+        
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={6}>
+            <FormControl isRequired>
+              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Email</FormLabel>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                variant="cosmic"
+                size="lg"
+                placeholder="your@email.com"
+              />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Password</FormLabel>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                variant="cosmic"
+                size="lg"
+                placeholder="••••••••"
+              />
+            </FormControl>
+            <Button
+              type="submit"
+              variant="gold"
+              isLoading={isLoading}
+              size="lg"
+              w="100%"
+              mt={4}
+            >
+              Sign In
+            </Button>
+          </VStack>
+          
+          <Divider borderColor="whiteAlpha.300" opacity={0.5} my={8} />
+          
+          <VStack spacing={4}>
+            <Text fontSize="sm" color="whiteAlpha.700" textAlign="center">
+              🧪 For Testing & Development
+            </Text>
+            <Button
+              variant="ethereal"
+              size="md"
+              onClick={() => navigate('/mock-login')}
+            >
+              Quick Mock Login Panel
+            </Button>
+            <Text fontSize="xs" color="whiteAlpha.600" textAlign="center" maxW="sm">
+              Access demo accounts for Free, Premium, and Elite tiers
+            </Text>
+          </VStack>
+        </form>
+      </Box>
     </Box>
   );
 }

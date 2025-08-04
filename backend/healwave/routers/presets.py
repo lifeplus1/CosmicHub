@@ -1,9 +1,8 @@
 # This file makes the astro directory a Python package.
 from fastapi import APIRouter, Depends, HTTPException
-from firebase_admin import firestore
 from ..models.preset import PresetCreate, Preset
 from ...auth import get_current_user
-from ...database import get_db
+from ..database import get_db
 
 router = APIRouter()
 

@@ -24,6 +24,11 @@ wheels/
 .installed.cfg 
 *.egg
 
+# Type stub files
+typings/
+*.pyi
+.mypy_cache/
+
 
 # Environment
 .env

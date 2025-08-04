@@ -19,37 +19,19 @@ import {
   Th,
   Td,
 } from "@chakra-ui/react";
+import type { ChartData } from '../types';
 
-interface PlanetData {
-  position: number;
-  retrograde: boolean;
-}
+// Type aliases for component use
+type PlanetData = NonNullable<ChartData['planets']>[string];
+type HouseData = ChartData['houses'][number];
+type AspectData = ChartData['aspects'][number];
 
-interface HouseData {
-  house: number;
-  cusp: number;
-}
-
-interface AspectData {
-  point1: string;
-  point2: string;
-  aspect: string;
-  orb: number;
-  point1_sign?: string;
-  point2_sign?: string;
-  point1_house?: number;
-  point2_house?: number;
-}
-
-interface ChartData {
+interface ExtendedChartData extends ChartData {
   latitude: number;
   longitude: number;
   timezone: string;
   julian_day: number;
-  planets?: Record<string, PlanetData>;
-  houses: HouseData[];
   angles: Record<string, number>;
-  aspects: AspectData[];
 }
 
 const planetSymbols: Record<string, string> = {
@@ -129,7 +111,7 @@ const getHouseForPlanet = (position: number, houses: HouseData[]) => {
   return 1;
 };
 
-const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void }> = ({ chart, onSaveChart }) => {
+const ChartDisplay: React.FC<{ chart: ExtendedChartData | null; onSaveChart?: () => void }> = ({ chart, onSaveChart }) => {
   const { user } = useAuth();
   const toast = useToast();
 
@@ -190,7 +172,7 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                           </Box>
                         </Td>
                         <Td borderColor="gold">
-                          <Text as="span" color="yellow.200">
+                          <Text as="span" color="gold.200">
                             {data && typeof data.position === 'number' && chart.houses ? 
                               getHouseForPlanet(data.position, chart.houses) : 'N/A'}
                           </Text>
@@ -301,7 +283,7 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                             <b>{aspect && aspect.point1 ? (planetSymbols[aspect.point1] || aspect.point1) : 'Unknown'}</b>{' '}
                             {aspect && aspect.point1 ? (aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)) : ''}
                             {aspect && aspect.point1_sign && (
-                              <Text as="span" color="yellow.200" ml={2}>{aspect.point1_sign}</Text>
+                              <Text as="span" color="gold.200" ml={2}>{aspect.point1_sign}</Text>
                             )}
                             {aspect && aspect.point1_house && (
                               <Text as="span" color="teal.200" ml={2}>House {aspect.point1_house}</Text>
@@ -313,7 +295,7 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
                             <b>{aspect && aspect.point2 ? (planetSymbols[aspect.point2] || aspect.point2) : 'Unknown'}</b>{' '}
                             {aspect && aspect.point2 ? (aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)) : ''}
                             {aspect && aspect.point2_sign && (
-                              <Text as="span" color="yellow.200" ml={2}>{aspect.point2_sign}</Text>
+                              <Text as="span" color="gold.200" ml={2}>{aspect.point2_sign}</Text>
                             )}
                             {aspect && aspect.point2_house && (
                               <Text as="span" color="teal.200" ml={2}>House {aspect.point2_house}</Text>
@@ -341,7 +323,7 @@ const ChartDisplay: React.FC<{ chart: ChartData | null; onSaveChart?: () => void
         {user && (
           <Button
             mt={6}
-            colorScheme="yellow"
+            variant="gold"
             size="lg"
             borderRadius="full"
             fontWeight="bold"

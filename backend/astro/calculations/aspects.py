@@ -1,5 +1,19 @@
-import swisseph as swe
+
+from typing import TypedDict, List, Dict, Any, Optional
 import logging
+
+# TypedDict for aspect data
+class AspectData(TypedDict, total=False):
+    point1: str
+    point2: str
+    aspect: str
+    orb: float
+    point1_position: float
+    point2_position: float
+    point1_sign: str
+    point2_sign: str
+    point1_house: int
+    point2_house: int
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +26,7 @@ def get_zodiac_sign(degree: float) -> str:
     deg = degree % 30
     return f"{deg:.2f}° {signs[sign]}"
 
-def get_house_for_planet(position: float, houses: list) -> int:
+def get_house_for_planet(position: float, houses: List[Dict[str, Any]]) -> int:
     for i in range(len(houses)):
         start = houses[i]["cusp"]
         end = houses[(i + 1) % len(houses)]["cusp"]
@@ -24,10 +38,13 @@ def get_house_for_planet(position: float, houses: list) -> int:
                 return i + 1
     return 1
 
-def calculate_aspects(planets: dict, houses: list = None) -> list:
+def calculate_aspects(
+    planets: Dict[str, Dict[str, Any]],
+    houses: Optional[List[Dict[str, Any]]] = None
+) -> List[AspectData]:
     logger.debug(f"Calculating aspects for planets: {planets}")
     try:
-        aspects = []
+        aspects: List[AspectData] = []
         # Add major and minor aspects
         aspect_types = [
             (0, "Conjunction", 10.0),
@@ -51,7 +68,7 @@ def calculate_aspects(planets: dict, houses: list = None) -> list:
 
                 for aspect_angle, aspect_name, orb in aspect_types:
                     if abs(angle - aspect_angle) <= orb or abs(angle - (360 - aspect_angle)) <= orb:
-                        aspect = {
+                        aspect: AspectData = {
                             "point1": planet1,
                             "point2": planet2,
                             "aspect": aspect_name,

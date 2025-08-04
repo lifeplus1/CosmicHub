@@ -2,7 +2,8 @@ import os
 import logging
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from firebase_admin import auth, credentials, initialize_app
+from firebase_admin import auth, initialize_app  # type: ignore
+import firebase_admin.credentials
 from dotenv import load_dotenv
 import firebase_admin
 
@@ -16,26 +17,40 @@ logger = logging.getLogger(__name__)
 
 # Initialize Firebase Admin SDK using FIREBASE_CREDENTIALS as a single JSON string
 import json
-if not firebase_admin._apps:
+try:
+    firebase_admin.get_app()  # type: ignore
+except ValueError:
     try:
-        cred_dict = {
-            "type": "service_account",
-            "project_id": os.getenv("FIREBASE_PROJECT_ID"),
-            "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-            "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace('\\n', '\n') if os.getenv("FIREBASE_PRIVATE_KEY") else None,
-            "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
-            "client_id": os.getenv("FIREBASE_CLIENT_ID"),
-            "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
-            "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
-            "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_X509_CERT_URL"),
-            "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_X509_CERT_URL"),
-            "universe_domain": os.getenv("FIREBASE_UNIVERSE_DOMAIN"),
-        }
-        missing = [k for k, v in cred_dict.items() if not v]
-        if missing:
-            logger.error(f"Missing Firebase credential fields: {missing}")
-            raise Exception(f"Missing Firebase credential fields: {missing}")
-        cred = credentials.Certificate(cred_dict)
+        # First try to use FIREBASE_CREDENTIALS (JSON string)
+        firebase_creds = os.getenv("FIREBASE_CREDENTIALS")
+        if firebase_creds:
+            cred_dict = json.loads(firebase_creds)
+            cred = firebase_admin.credentials.Certificate(cred_dict)
+        else:
+            # Fallback to individual environment variables
+            # Get private key and handle newline replacement safely
+            private_key = os.getenv("FIREBASE_PRIVATE_KEY")
+            formatted_private_key = private_key.replace('\\n', '\n') if private_key else None
+            
+            cred_dict: dict[str, str | None] = {
+                "type": "service_account",
+                "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+                "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+                "private_key": formatted_private_key,
+                "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+                "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+                "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
+                "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
+                "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_X509_CERT_URL"),
+                "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_X509_CERT_URL"),
+                "universe_domain": os.getenv("FIREBASE_UNIVERSE_DOMAIN"),
+            }
+            missing = [k for k, v in cred_dict.items() if not v]
+            if missing:
+                logger.error(f"Missing Firebase credential fields: {missing}")
+                raise ValueError(f"Missing Firebase credential fields: {missing}")
+            cred = firebase_admin.credentials.Certificate(cred_dict)
+        
         initialize_app(cred)
         logger.info("Firebase Admin SDK initialized successfully")
     except Exception as e:
@@ -56,8 +71,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             )
         
         # Verify the Firebase ID token
-        decoded_token = auth.verify_id_token(token)
-        uid = decoded_token.get('uid')
+        from typing import Any, Dict, Optional
+        decoded_token: Dict[str, Any] = auth.verify_id_token(token)  # type: ignore
+        uid: Optional[str] = decoded_token.get('uid')  # type: ignore
         
         if not uid:
             logger.error("No UID found in decoded token")
@@ -68,7 +84,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             )
         
         logger.info(f"User authenticated: {uid}")
-        return str(uid)
+        return str(uid)  # type: ignore
         
     except auth.ExpiredIdTokenError as e:
         logger.error(f"Firebase ID token expired: {str(e)}")

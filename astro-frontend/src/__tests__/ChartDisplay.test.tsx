@@ -1,49 +1,37 @@
 // frontend/src/components/ChartDisplay.test.tsx
+import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { ChakraProvider } from '@chakra-ui/react';
 import ChartDisplay from '../components/ChartDisplay';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider } from '../components/AuthProvider';
+import type { ChartData } from '../types';
 
-interface PlanetData {
-  position: number;
-  retrograde: boolean;
-}
+// Type aliases for test use
+type PlanetData = NonNullable<ChartData['planets']>[string];
+type HouseData = ChartData['houses'][number];
+type AspectData = ChartData['aspects'][number];
 
-interface HouseData {
-  house: number;
-  cusp: number;
-}
-
-interface AspectData {
-  point1: string;
-  point2: string;
-  aspect: string;
-  orb: number;
-}
-
-interface ChartData {
+interface ExtendedChartData extends ChartData {
   latitude: number;
   longitude: number;
   timezone: string;
   julian_day: number;
-  planets: Record<string, PlanetData>;
-  houses: HouseData[];
   angles: Record<string, number>;
-  aspects: AspectData[];
 }
 
-const mockChart: ChartData = {
+const mockChart: ExtendedChartData = {
   latitude: 40.7128,
   longitude: -74.0060,
   timezone: 'America/New_York',
   julian_day: 2460500.5,
   planets: {
-    sun: { position: 120, retrograde: false },
-    moon: { position: 240, retrograde: true },
+    sun: { position: 120, retrograde: false, house: 1 },
+    moon: { position: 240, retrograde: true, house: 8 },
   },
   houses: [
-    { house: 1, cusp: 0 },
-    { house: 2, cusp: 30 },
+    { house: 1, cusp: 0, sign: 'Aries' },
+    { house: 2, cusp: 30, sign: 'Taurus' },
   ],
   angles: {
     ascendant: 0,

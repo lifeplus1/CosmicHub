@@ -1,12 +1,11 @@
 # backend/astro/calculations/uranian.py
-import swisseph as swe
 import logging
 from typing import Dict, List, Any
 
 logger = logging.getLogger(__name__)
 
 # Uranian planets (transneptunian points)
-URANIAN_PLANETS = {
+URANIAN_PLANETS: Dict[str, Dict[str, Any]] = {
     "cupido": {"symbol": "⚷", "meaning": "Groups, family, art, beauty", "speed": 0.033},
     "hades": {"symbol": "⚸", "meaning": "Decay, medicine, occult, underground", "speed": 0.027},
     "zeus": {"symbol": "⚹", "meaning": "Fire, creativity, machines, guns", "speed": 0.022},
@@ -34,7 +33,7 @@ URANIAN_MIDPOINTS = {
 }
 
 # 90-degree dial interpretations
-DIAL_INTERPRETATIONS = {
+DIAL_INTERPRETATIONS: Dict[float, str] = {
     0: "Conjunction - Unity, concentration, focus",
     22.5: "Semi-octile - Subtle influence, background energy",
     45: "Semi-square - Dynamic tension, friction",
@@ -42,7 +41,7 @@ DIAL_INTERPRETATIONS = {
     90: "Square - Challenge, conflict, action needed"
 }
 
-def calculate_uranian_planets_positions(julian_day: float) -> Dict[str, Any]:
+def calculate_uranian_planets_positions(julian_day: float) -> Dict[str, Dict[str, Any]]:
     """Calculate positions of Uranian/transneptunian planets"""
     try:
         # These are hypothetical planets used in Hamburg School astrology
@@ -77,10 +76,10 @@ def calculate_uranian_planets_positions(julian_day: float) -> Dict[str, Any]:
         logger.error(f"Error calculating Uranian planets: {str(e)}")
         return {}
 
-def calculate_midpoints(planets: Dict[str, Any]) -> Dict[str, Any]:
+def calculate_midpoints(planets: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     """Calculate midpoints between planets"""
     try:
-        midpoints = {}
+        midpoints: Dict[str, Dict[str, Any]] = {}
         
         planet_names = list(planets.keys())
         
@@ -113,7 +112,7 @@ def calculate_midpoints(planets: Dict[str, Any]) -> Dict[str, Any]:
 def calculate_90_degree_dial(planets: Dict[str, Any], uranian_planets: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Calculate 90-degree dial aspects (Hamburg School method)"""
     try:
-        dial_aspects = []
+        dial_aspects: List[Dict[str, Any]] = []
         
         # Combine regular planets and Uranian planets
         all_bodies = {**planets, **uranian_planets}
@@ -170,7 +169,7 @@ def analyze_uranian_patterns(planets: Dict[str, Any], uranian_planets: Dict[str,
                            midpoints: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze Uranian astrological patterns"""
     try:
-        analysis = {
+        analysis: Dict[str, List[str]] = {
             "dominant_themes": [],
             "power_concentrations": [],
             "hidden_influences": [],
@@ -182,7 +181,7 @@ def analyze_uranian_patterns(planets: Dict[str, Any], uranian_planets: Dict[str,
         
         if uranian_positions:
             # Group by 30-degree segments to find concentrations
-            segments = {}
+            segments: Dict[int, int] = {}
             for pos in uranian_positions:
                 segment = int(pos // 30)
                 segments[segment] = segments.get(segment, 0) + 1

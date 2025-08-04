@@ -21,18 +21,26 @@ import Contact from './components/Contact';
 import ChartCalculator from './components/ChartCalculator';
 import NumerologyCalculator from './components/NumerologyCalculator';
 import { AuthProvider } from './contexts/AuthContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
+import PricingPage from './components/PricingPage';
+import { SubscriptionStatus } from './components/SubscriptionStatus';
+import { PremiumFeaturesDashboard } from './components/PremiumFeaturesDashboard';
+import { SynastryTest } from './components/SynastryTest';
+import { PDFExportTest } from './components/PDFExportTest';
+import { TransitAnalysisTest } from './components/TransitAnalysisTest';
+import { AIInterpretationTest } from './components/AIInterpretationTest';
+import { EducationalTooltip } from './components/EducationalTooltip';
+import MockLoginPanel from './components/MockLoginPanel';
+import UserProfile from './components/UserProfile';
 import { getAuthToken } from './auth';
+import type { ChartData } from './types';
 
-interface ChartData {
+interface ExtendedChartData extends ChartData {
   latitude: number;
   longitude: number;
   timezone: string;
   julian_day: number;
-  planets: Record<string, any>;
-  houses: any[];
   angles: Record<string, number>;
-  aspects: any[];
-  [key: string]: any;
 }
 
 function MainApp() {
@@ -42,7 +50,8 @@ function MainApp() {
     time: '',
     city: '',
   });
-  const [chart, setChart] = useState<ChartData | null>(null);
+  const [chart, setChart] = useState<ExtendedChartData | null>(null);
+  const [multiSystemData, setMultiSystemData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -60,7 +69,7 @@ function MainApp() {
     try {
       const [year, month, day] = birthData.date.split('-').map(Number);
       const [hour, minute] = birthData.time.split(':').map(Number);
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/calculate`, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/calculate-multi-system`, {
         year,
         month,
         day,
@@ -68,7 +77,16 @@ function MainApp() {
         minute,
         city: birthData.city,
       });
-      setChart(response.data);
+      // Store the full multi-system response
+      setMultiSystemData(response.data);
+      
+      // Extract western tropical chart data for ChartDisplay
+      const westernChart = response.data.chart?.western_tropical;
+      if (westernChart) {
+        setChart(westernChart);
+      } else {
+        setChart(response.data);
+      }
       toast({ title: 'Chart Calculated', status: 'success', duration: 3000 });
     } catch (error: any) {
       const errorMsg = error.response?.data?.detail || 'Failed to fetch chart data';
@@ -120,73 +138,192 @@ function MainApp() {
   return (
     <>
       <Navbar />
-      <Box p={4}>
+      <Box minH="100vh" pt={8} pb={20} px={4}>
         <Routes>
           <Route
             path="/"
             element={
               <VStack spacing={4}>
                 <Heading color="gold">Astrology Chart Calculator</Heading>
+                
+                {/* Show subscription status for logged in users */}
+                {user && <SubscriptionStatus />}
+                
+                {/* Premium Features Dashboard for testing */}
+                {user && <PremiumFeaturesDashboard />}
+                
                 <form onSubmit={handleSubmit}>
                   <FormControl isRequired>
-                    <FormLabel color="yellow.200">Date of Birth</FormLabel>
+                    <FormLabel color="yellow.200">
+                      Date of Birth
+                      <EducationalTooltip
+                        title="Birth Date Importance"
+                        description="Your birth date determines the positions of all planets in your natal chart, including your Sun sign and the exact degrees of every celestial body."
+                        examples={[
+                          "Determines your Sun sign (zodiac sign)",
+                          "Sets the positions of all planets (Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto)",
+                          "Essential for accurate chart calculation and aspects",
+                          "Affects daily planetary transits and progressions"
+                        ]}
+                      />
+                    </FormLabel>
                     <Input
                       type="date"
                       name="date"
                       value={birthData.date}
                       onChange={handleInputChange}
-                      bg="purple.700"
-                      color="white"
-                      borderColor="gold"
+                      variant="cosmic"
+                      size="lg"
                     />
                   </FormControl>
                   <FormControl isRequired>
-                    <FormLabel color="yellow.200">Time of Birth</FormLabel>
+                    <FormLabel 
+                      color="gold.200" 
+                      fontSize="lg" 
+                      fontWeight="600"
+                      display="flex"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      Time of Birth
+                      <EducationalTooltip
+                        title="Birth Time Accuracy"
+                        description="Birth time determines your Rising sign (Ascendant) and house positions. Even a few minutes can change these important factors."
+                        examples={[
+                          "Determines your Rising sign",
+                          "Sets all house positions",
+                          "Affects Moon sign if born near sign change",
+                          "Critical for timing techniques"
+                        ]}
+                      />
+                    </FormLabel>
                     <Input
                       type="time"
                       name="time"
                       value={birthData.time}
                       onChange={handleInputChange}
-                      bg="purple.700"
-                      color="white"
-                      borderColor="gold"
+                      variant="cosmic"
+                      size="lg"
                     />
                   </FormControl>
                   <FormControl isRequired>
-                    <FormLabel color="yellow.200">City</FormLabel>
+                    <FormLabel 
+                      color="gold.200" 
+                      fontSize="lg" 
+                      fontWeight="600"
+                      display="flex"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      Birth City
+                      <EducationalTooltip
+                        title="Birth Location"
+                        description="Your birth location provides the geographic coordinates and timezone needed for accurate chart calculation."
+                        examples={[
+                          "Determines local timezone",
+                          "Sets geographic coordinates",
+                          "Affects house cusps and angles",
+                          "Use the city where you were actually born"
+                        ]}
+                      />
+                    </FormLabel>
                     <Input
                       type="text"
                       name="city"
                       value={birthData.city}
                       onChange={handleInputChange}
-                      bg="purple.700"
-                      color="white"
-                      borderColor="gold"
+                      placeholder="e.g., New York, London, Tokyo"
+                      variant="cosmic"
+                      size="lg"
                     />
                   </FormControl>
-                  <Button type="submit" colorScheme="teal" isLoading={loading} w="100%">
-                    Calculate Chart
+                  <Button 
+                    type="submit" 
+                    variant="gold"
+                    size="xl"
+                    w="100%"
+                    h="60px"
+                    fontSize="lg"
+                    isLoading={loading}
+                    loadingText="Calculating..."
+                  >
+                    ✨ Calculate Your Cosmic Chart ✨
                   </Button>
                 </form>
-                {error && <Text color="red.500">{error}</Text>}
+                {error && (
+                  <Box
+                    bg="red.900"
+                    color="red.100"
+                    p={4}
+                    borderRadius="16px"
+                    border="1px solid"
+                    borderColor="red.700"
+                    maxW="2xl"
+                    w="100%"
+                  >
+                    <Text fontSize="lg">{error}</Text>
+                  </Box>
+                )}
                 {chart && <ChartDisplay chart={chart} onSaveChart={handleSaveChart} />}
                 {!user && (
+                  <VStack spacing={4} w="100%">
+                    <Button
+                      variant="cosmic"
+                      size="lg"
+                      w="100%"
+                      onClick={() => navigate('/signup')}
+                    >
+                      Sign Up for an Account
+                    </Button>
+                    <Button
+                      colorScheme="purple"
+                      variant="outline"
+                      w="100%"
+                      size="lg"
+                      onClick={() => navigate('/premium')}
+                      borderWidth="2px"
+                      _hover={{
+                        bg: 'purple.600',
+                        color: 'white',
+                        transform: 'translateY(-2px)',
+                        shadow: 'lg'
+                      }}
+                    >
+                      🌟 Go Premium - Unlock Multi-System Analysis 🌟
+                    </Button>
+                  </VStack>
+                )}
+                {user && (
                   <Button
-                    colorScheme="yellow"
-                    variant="solid"
+                    colorScheme="purple"
+                    variant="outline"
                     w="100%"
-                    mt={4}
-                    onClick={() => navigate('/signup')}
+                    size="lg"
+                    onClick={() => navigate('/premium')}
+                    borderWidth="2px"
+                    _hover={{
+                      bg: 'purple.600',
+                      color: 'white',
+                      transform: 'translateY(-2px)',
+                      shadow: 'lg'
+                    }}
                   >
-                    Sign Up for an Account
+                    🌟 Upgrade to Premium 🌟
                   </Button>
                 )}
               </VStack>
             }
           />
           <Route path="/saved-charts" element={user ? <SavedCharts /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={user ? <UserProfile /> : <Navigate to="/login" />} />
           <Route path="/calculator" element={<ChartCalculator />} />
           <Route path="/numerology" element={<NumerologyCalculator />} />
+          <Route path="/premium" element={<PricingPage />} />
+          <Route path="/synastry" element={<SynastryTest />} />
+          <Route path="/pdf-export" element={<PDFExportTest />} />
+          <Route path="/transits" element={<TransitAnalysisTest />} />
+          <Route path="/ai-interpretation" element={<AIInterpretationTest />} />
+          <Route path="/mock-login" element={<MockLoginPanel />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/analyze-personality" element={<AnalyzePersonality />} />
@@ -205,9 +342,11 @@ function MainApp() {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <ChakraProvider theme={theme}>
-        <MainApp />
-      </ChakraProvider>
+      <SubscriptionProvider>
+        <ChakraProvider theme={theme}>
+          <MainApp />
+        </ChakraProvider>
+      </SubscriptionProvider>
     </AuthProvider>
   );
 };

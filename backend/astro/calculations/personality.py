@@ -2,7 +2,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def get_personality_traits(chart: dict) -> dict:
+from typing import Dict, Any
+
+def get_personality_traits(chart: Dict[str, Any]) -> Dict[str, Any]:
     logger.debug(f"Analyzing personality for chart: {chart}")
     try:
         sun_sign = get_sun_sign(chart["planets"]["sun"]["position"])

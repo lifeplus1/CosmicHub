@@ -39,6 +39,7 @@ import {
   ListIcon
 } from '@chakra-ui/react';
 import { StarIcon, InfoIcon } from '@chakra-ui/icons';
+import FeatureGuard from './FeatureGuard';
 
 interface NumerologyData {
   name: string;
@@ -166,12 +167,18 @@ const NumerologyCalculator: React.FC = () => {
 
     setLoading(true);
     try {
+      // Format the birth date as YYYY-MM-DD
+      const birthDate = `${formData.year}-${String(formData.month).padStart(2, '0')}-${String(formData.day).padStart(2, '0')}`;
+      
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/calculate-numerology`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          birth_date: birthDate
+        }),
       });
 
       if (!response.ok) {
@@ -283,49 +290,106 @@ const NumerologyCalculator: React.FC = () => {
 
   const SystemsDisplay: React.FC<{ systems: NumerologyResult['systems'] }> = ({ systems }) => (
     <VStack spacing={6} align="stretch">
-      {Object.entries(systems).map(([systemName, systemData]) => (
-        <Card key={systemName} variant="outline">
-          <CardHeader>
-            <Heading size="md" textTransform="capitalize">{systemName} System</Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack align="start" spacing={4}>
-              <HStack>
-                <Text fontWeight="semibold">Total Value:</Text>
-                <Badge colorScheme="blue">{systemData.total_value}</Badge>
-              </HStack>
-              
-              {'characteristics' in systemData && systemData.characteristics && (
-                <Box>
-                  <Text fontWeight="semibold" mb={2}>Characteristics:</Text>
-                  <List spacing={1}>
-                    {systemData.characteristics.map((char: string, index: number) => (
-                      <ListItem key={index} fontSize="sm">
-                        <ListIcon as={StarIcon} color="yellow.500" />
-                        {char}
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              )}
-              
-              {'meaning' in systemData && systemData.meaning && (
-                <Box>
-                  <Text fontWeight="semibold">Meaning:</Text>
-                  <Text fontSize="sm" color="gray.600">{systemData.meaning}</Text>
-                </Box>
-              )}
-              
-              {'chaldean_number' in systemData && (
+      {Object.entries(systems).map(([systemName, systemData]) => {
+        const isChaldean = systemName === 'chaldean';
+        
+        if (isChaldean) {
+          return (
+            <FeatureGuard 
+              key={systemName}
+              requiredTier="premium"
+              feature="Chaldean Numerology System"
+              upgradeMessage="Unlock the ancient Chaldean numerology system for deeper insights"
+            >
+              <Card variant="outline">
+                <CardHeader>
+                  <Heading size="md" textTransform="capitalize">{systemName} System</Heading>
+                </CardHeader>
+                <CardBody>
+                  <VStack align="start" spacing={4}>
+                    <HStack>
+                      <Text fontWeight="semibold">Total Value:</Text>
+                      <Badge colorScheme="blue">{systemData.total_value}</Badge>
+                    </HStack>
+                    
+                    {'characteristics' in systemData && systemData.characteristics && (
+                      <Box>
+                        <Text fontWeight="semibold" mb={2}>Characteristics:</Text>
+                        <List spacing={1}>
+                          {systemData.characteristics.map((char: string, index: number) => (
+                            <ListItem key={index} fontSize="sm">
+                              <ListIcon as={StarIcon} color="orange.500" />
+                              {char}
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Box>
+                    )}
+                    
+                    {'meaning' in systemData && systemData.meaning && (
+                      <Box>
+                        <Text fontWeight="semibold">Meaning:</Text>
+                        <Text fontSize="sm" color="gray.600">{systemData.meaning}</Text>
+                      </Box>
+                    )}
+                    
+                    {'chaldean_number' in systemData && (
+                      <HStack>
+                        <Text fontWeight="semibold">Chaldean Number:</Text>
+                        <Badge colorScheme="purple">{systemData.chaldean_number}</Badge>
+                      </HStack>
+                    )}
+                  </VStack>
+                </CardBody>
+              </Card>
+            </FeatureGuard>
+          );
+        }
+        
+        return (
+          <Card key={systemName} variant="outline">
+            <CardHeader>
+              <Heading size="md" textTransform="capitalize">{systemName} System</Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack align="start" spacing={4}>
                 <HStack>
-                  <Text fontWeight="semibold">Chaldean Number:</Text>
-                  <Badge colorScheme="purple">{systemData.chaldean_number}</Badge>
+                  <Text fontWeight="semibold">Total Value:</Text>
+                  <Badge colorScheme="blue">{systemData.total_value}</Badge>
                 </HStack>
-              )}
-            </VStack>
-          </CardBody>
-        </Card>
-      ))}
+                
+                {'characteristics' in systemData && systemData.characteristics && (
+                  <Box>
+                    <Text fontWeight="semibold" mb={2}>Characteristics:</Text>
+                    <List spacing={1}>
+                      {systemData.characteristics.map((char: string, index: number) => (
+                        <ListItem key={index} fontSize="sm">
+                          <ListIcon as={StarIcon} color="orange.500" />
+                          {char}
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                )}
+                
+                {'meaning' in systemData && systemData.meaning && (
+                  <Box>
+                    <Text fontWeight="semibold">Meaning:</Text>
+                    <Text fontSize="sm" color="gray.600">{systemData.meaning}</Text>
+                  </Box>
+                )}
+                
+                {'chaldean_number' in systemData && (
+                  <HStack>
+                    <Text fontWeight="semibold">Chaldean Number:</Text>
+                    <Badge colorScheme="purple">{systemData.chaldean_number}</Badge>
+                  </HStack>
+                )}
+              </VStack>
+            </CardBody>
+          </Card>
+        );
+      })}
     </VStack>
   );
 
@@ -367,7 +431,10 @@ const NumerologyCalculator: React.FC = () => {
                       min="1900"
                       max={new Date().getFullYear()}
                       value={formData.year}
-                      onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        setFormData({ ...formData, year: isNaN(value) ? new Date().getFullYear() - 30 : value });
+                      }}
                       bg="gray.50"
                       border="2px"
                       borderColor="gray.200"
@@ -382,7 +449,10 @@ const NumerologyCalculator: React.FC = () => {
                       min="1"
                       max="12"
                       value={formData.month}
-                      onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        setFormData({ ...formData, month: isNaN(value) ? 1 : value });
+                      }}
                       bg="gray.50"
                       border="2px"
                       borderColor="gray.200"
@@ -397,7 +467,10 @@ const NumerologyCalculator: React.FC = () => {
                       min="1"
                       max="31"
                       value={formData.day}
-                      onChange={(e) => setFormData({ ...formData, day: parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        setFormData({ ...formData, day: isNaN(value) ? 1 : value });
+                      }}
                       bg="gray.50"
                       border="2px"
                       borderColor="gray.200"

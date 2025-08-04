@@ -251,7 +251,7 @@ const ChineseChart: React.FC<{ data: any }> = ({ data }) => {
               </HStack>
               <HStack justify="space-between">
                 <Text fontWeight="bold">Hour:</Text>
-                <Badge colorScheme="yellow">{data.hour?.animal}</Badge>
+                <Badge colorScheme="gold">{data.hour?.animal}</Badge>
               </HStack>
             </VStack>
           </SimpleGrid>
