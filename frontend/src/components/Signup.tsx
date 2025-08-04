@@ -6,7 +6,7 @@ import { Box, Button, FormControl, FormLabel, Input, VStack, useToast } from "@c
 
 // If signUp is a named export, ensure it is exported as such in ../auth.ts:
 // export const signUp = async (email: string, password: string) => { ... }
-import { signUp } from "../auth";
+import { signUp, logIn } from "../auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {
@@ -24,6 +24,8 @@ export default function Signup() {
     setIsLoading(true);
     try {
       const user = await signUp(email, password);
+      // Immediately log in after signup to ensure auth context updates
+      await logIn(email, password);
       const db = getFirestore();
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
