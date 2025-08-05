@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ChakraProvider } from '@chakra-ui/react';
+import { MemoryRouter } from 'react-router-dom';
 import ChartDisplay from '../components/ChartDisplay';
 import { AuthProvider } from '../components/AuthProvider';
 import type { ChartData } from '../types';
@@ -47,11 +48,13 @@ const mockChart: ExtendedChartData = {
 describe('ChartDisplay', () => {
   it('renders chart data correctly', () => {
     render(
-      <AuthProvider>
-        <ChakraProvider>
-          <ChartDisplay chart={mockChart} />
-        </ChakraProvider>
-      </AuthProvider>
+      <MemoryRouter>
+        <AuthProvider>
+          <ChakraProvider>
+            <ChartDisplay chart={mockChart} />
+          </ChakraProvider>
+        </AuthProvider>
+      </MemoryRouter>
     );
     expect(screen.getByText(/Latitude: 40.71°/)).toBeInTheDocument();
     expect(screen.getByText('0.00° Leo')).toBeInTheDocument();

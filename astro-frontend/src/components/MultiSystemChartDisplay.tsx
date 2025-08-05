@@ -17,7 +17,11 @@ const planetSymbols = {
   sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂",
   jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇",
   chiron: "⚷", ceres: "⚳", pallas: "⚴", juno: "⚵", vesta: "⚶",
-  rahu: "☊", ketu: "☋"
+  lilith: "⚸", vertex: "Vx", antivertex: "AVx", part_of_fortune: "⊗",
+  rahu: "☊", ketu: "☋",
+  // Uranian transneptunian points
+  cupido: "♇⚷", hades: "♇⚸", zeus: "♇⚹", kronos: "♇⚺", 
+  apollon: "♇⚻", admetos: "♇⚼", vulkanus: "♇⚽", poseidon: "♇⚾"
 };
 
 const aspectSymbols = {
@@ -45,7 +49,7 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
       <Card bg="rgba(255,255,255,0.95)">
         <CardBody>
           <Heading size="md" mb={4} color="purple.700">Western Tropical Chart</Heading>
-          <Text fontSize="sm" color="gray.600" mb={4}>
+          <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             Based on tropical zodiac, solar-focused approach emphasizing personality and life expression
           </Text>
           
@@ -138,7 +142,7 @@ const VedicChart: React.FC<{ data: any }> = ({ data }) => {
       <Card bg="rgba(255,246,223,0.95)">
         <CardBody>
           <Heading size="md" mb={4} color="orange.700">Vedic Sidereal Chart</Heading>
-          <Text fontSize="sm" color="gray.600" mb={4}>
+          <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
           </Text>
 
@@ -228,7 +232,7 @@ const ChineseChart: React.FC<{ data: any }> = ({ data }) => {
       <Card bg="rgba(255,240,240,0.95)">
         <CardBody>
           <Heading size="md" mb={4} color="red.700">Chinese Astrology</Heading>
-          <Text fontSize="sm" color="gray.600" mb={4}>
+          <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
           </Text>
 
@@ -236,7 +240,7 @@ const ChineseChart: React.FC<{ data: any }> = ({ data }) => {
             <Card variant="outline">
               <CardBody textAlign="center">
                 <Heading size="lg" color="red.600">{data.year?.animal}</Heading>
-                <Text fontSize="sm" color="gray.600">{data.year?.element}</Text>
+                <Text fontSize="sm" color="deepPurple.800" fontWeight="medium">{data.year?.element}</Text>
                 <Text fontSize="xs" mt={2}>{data.year?.traits}</Text>
               </CardBody>
             </Card>
@@ -307,7 +311,7 @@ const MayanChart: React.FC<{ data: any }> = ({ data }) => {
       <Card bg="rgba(240,255,240,0.95)">
         <CardBody>
           <Heading size="md" mb={4} color="green.700">Mayan Sacred Calendar</Heading>
-          <Text fontSize="sm" color="gray.600" mb={4}>
+          <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
           </Text>
 
@@ -317,7 +321,7 @@ const MayanChart: React.FC<{ data: any }> = ({ data }) => {
                 <Heading size="lg" color="green.600">
                   {data.day_sign?.symbol} {data.day_sign?.name}
                 </Heading>
-                <Text fontSize="sm" color="gray.600">{data.day_sign?.meaning}</Text>
+                <Text fontSize="sm" color="deepPurple.800" fontWeight="medium">{data.day_sign?.meaning}</Text>
                 <Badge colorScheme="green" mt={2}>{data.day_sign?.color}</Badge>
               </CardBody>
             </Card>
@@ -347,12 +351,12 @@ const MayanChart: React.FC<{ data: any }> = ({ data }) => {
                   <Box>
                     <Text fontWeight="bold" mb={2}>Wavespell Position:</Text>
                     <Text>{data.wavespell?.tone?.name} (Day {data.wavespell?.position}/13)</Text>
-                    <Text fontSize="sm" color="gray.600">{data.wavespell?.description}</Text>
+                    <Text fontSize="sm" color="deepPurple.800" fontWeight="medium">{data.wavespell?.description}</Text>
                   </Box>
                   <Box>
                     <Text fontWeight="bold" mb={2}>Long Count:</Text>
                     <Text fontFamily="mono">{data.long_count?.date}</Text>
-                    <Text fontSize="sm" color="gray.600">Mayan calendar correlation</Text>
+                    <Text fontSize="sm" color="deepPurple.800" fontWeight="medium">Mayan calendar correlation</Text>
                   </Box>
                 </SimpleGrid>
               </AccordionPanel>
@@ -399,7 +403,7 @@ const UranianChart: React.FC<{ data: any }> = ({ data }) => {
       <Card bg="rgba(240,240,255,0.95)">
         <CardBody>
           <Heading size="md" mb={4} color="indigo.700">Uranian Astrology</Heading>
-          <Text fontSize="sm" color="gray.600" mb={4}>
+          <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
           </Text>
 

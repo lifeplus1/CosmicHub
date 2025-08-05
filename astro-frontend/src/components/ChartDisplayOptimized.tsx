@@ -69,7 +69,13 @@ const planetSymbols: Record<string, string> = {
   north_node: "☊",
   south_node: "☋",
   chiron: "⚷",
+  ceres: "⚳",
+  pallas: "⚴",
+  juno: "⚵",
+  vesta: "⚶",
   lilith: "⚸",
+  vertex: "Vx",
+  antivertex: "AVx",
   part_of_fortune: "⊗"
 };
 
@@ -135,7 +141,7 @@ const PlanetRow = memo(({ point, data, houses }: {
           <Text fontSize="xl" color={sign.color}>
             {planetSymbols[point] || "⭐"}
           </Text>
-          <Text fontWeight="bold">
+          <Text fontWeight="bold" color="deepPurple.900">
             {point.charAt(0).toUpperCase() + point.slice(1).replace('_', ' ')}
           </Text>
         </HStack>
@@ -146,17 +152,17 @@ const PlanetRow = memo(({ point, data, houses }: {
             {sign.symbol}
           </Text>
           <VStack spacing={0} align="start">
-            <Text fontWeight="bold" color="deepPurple.700">
+            <Text fontWeight="bold" color="deepPurple.900">
               {sign.name}
             </Text>
-            <Text fontSize="sm" color="gray.600">
+            <Text fontSize="sm" color="deepPurple.800" fontWeight="medium">
               {formatDegree(data.position)}
             </Text>
           </VStack>
         </HStack>
       </Td>
       <Td borderColor="gold">
-        <Badge colorScheme="purple" variant="subtle">
+        <Badge colorScheme="purple" variant="solid" color="white">
           House {house}
         </Badge>
       </Td>
@@ -164,7 +170,7 @@ const PlanetRow = memo(({ point, data, houses }: {
         {data.retrograde ? (
           <Badge colorScheme="red" variant="solid">℞</Badge>
         ) : (
-          <Text color="gray.400">—</Text>
+          <Text color="deepPurple.800" fontWeight="bold">—</Text>
         )}
       </Td>
     </Tr>
@@ -201,8 +207,8 @@ const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
     <Tr>
       <Td borderColor="gold">
         <HStack spacing={2}>
-          <Text>{planetSymbols[aspect.point1] || aspect.point1}</Text>
-          <Text fontWeight="bold">{aspect.point1.replace('_', ' ')}</Text>
+          <Text color="deepPurple.900" fontWeight="bold">{planetSymbols[aspect.point1] || aspect.point1}</Text>
+          <Text fontWeight="bold" color="deepPurple.900">{aspect.point1.replace('_', ' ')}</Text>
         </HStack>
       </Td>
       <Td borderColor="gold">
@@ -217,8 +223,8 @@ const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
       </Td>
       <Td borderColor="gold">
         <HStack spacing={2}>
-          <Text>{planetSymbols[aspect.point2] || aspect.point2}</Text>
-          <Text fontWeight="bold">{aspect.point2.replace('_', ' ')}</Text>
+          <Text color="deepPurple.900" fontWeight="bold">{planetSymbols[aspect.point2] || aspect.point2}</Text>
+          <Text fontWeight="bold" color="deepPurple.900">{aspect.point2.replace('_', ' ')}</Text>
         </HStack>
       </Td>
       <Td borderColor="gold">
@@ -286,7 +292,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
         <CardBody textAlign="center" py={8}>
           <VStack spacing={4}>
             <Spinner size="xl" color="purple.500" thickness="4px" />
-            <Text fontSize="lg" color="gray.600">
+            <Text fontSize="lg" color="deepPurple.800" fontWeight="medium">
               Calculating your natal chart...
             </Text>
           </VStack>
@@ -339,11 +345,11 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
           >
             <VStack spacing={2}>
               <HStack spacing={6} wrap="wrap" justify="center">
-                <Text><strong>Latitude:</strong> {chartInfo?.latitude}°</Text>
-                <Text><strong>Longitude:</strong> {chartInfo?.longitude}°</Text>
-                <Text><strong>Timezone:</strong> {chartInfo?.timezone}</Text>
+                <Text color="deepPurple.900" fontWeight="bold"><strong>Latitude:</strong> {chartInfo?.latitude}°</Text>
+                <Text color="deepPurple.900" fontWeight="bold"><strong>Longitude:</strong> {chartInfo?.longitude}°</Text>
+                <Text color="deepPurple.900" fontWeight="bold"><strong>Timezone:</strong> {chartInfo?.timezone}</Text>
               </HStack>
-              <Text color="gray.600" fontSize="sm">
+              <Text color="deepPurple.800" fontSize="sm" fontWeight="medium">
                 Julian Day: {chartInfo?.julianDay}
               </Text>
             </VStack>
@@ -378,7 +384,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               <Box flex="1" textAlign="left">
                 <HStack spacing={2}>
                   <Text fontSize="xl">🪐</Text>
-                  <Text fontWeight="bold" fontSize="lg">
+                  <Text fontWeight="bold" fontSize="lg" color="deepPurple.900">
                     Planets ({planetEntries.length})
                   </Text>
                 </HStack>
@@ -426,7 +432,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               <Box flex="1" textAlign="left">
                 <HStack spacing={2}>
                   <Text fontSize="xl">🏠</Text>
-                  <Text fontWeight="bold" fontSize="lg">
+                  <Text fontWeight="bold" fontSize="lg" color="deepPurple.900">
                     Houses ({chart.houses?.length || 0})
                   </Text>
                 </HStack>
@@ -448,7 +454,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     return (
                       <Tr key={index}>
                         <Td borderColor="purple.200">
-                          <Badge colorScheme="purple">{house.house}</Badge>
+                          <Badge colorScheme="purple" variant="solid" color="white">{house.house}</Badge>
                         </Td>
                         <Td borderColor="purple.200">
                           <HStack spacing={2}>
@@ -479,7 +485,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               <Box flex="1" textAlign="left">
                 <HStack spacing={2}>
                   <Text fontSize="xl">📐</Text>
-                  <Text fontWeight="bold" fontSize="lg">
+                  <Text fontWeight="bold" fontSize="lg" color="deepPurple.900">
                     Angles ({Object.keys(chart.angles || {}).length})
                   </Text>
                 </HStack>
@@ -537,7 +543,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               <Box flex="1" textAlign="left">
                 <HStack spacing={2}>
                   <Text fontSize="xl">⚹</Text>
-                  <Text fontWeight="bold" fontSize="lg">
+                  <Text fontWeight="bold" fontSize="lg" color="deepPurple.900">
                     Major Aspects ({aspectEntries.length})
                   </Text>
                 </HStack>

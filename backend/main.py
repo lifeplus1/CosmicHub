@@ -51,6 +51,7 @@ from astro.calculations.synastry import calculate_synastry_chart
 from astro.calculations.pdf_export import create_chart_pdf, create_synastry_pdf, create_multi_system_pdf
 from astro.calculations.transits import calculate_transits, calculate_lunar_transits
 from astro.calculations.ai_interpretations import generate_advanced_interpretation
+
 # Load .env file
 load_dotenv()
 

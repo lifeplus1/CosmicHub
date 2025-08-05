@@ -219,7 +219,7 @@ const ChartDisplay: React.FC<{ chart: ExtendedChartData | null; onSaveChart?: ()
                     ))
                   ) : (
                     <Tr>
-                      <Td colSpan={2} borderColor="gold" textAlign="center" color="gray.500">
+                      <Td colSpan={2} borderColor="gold" textAlign="center" color="deepPurple.800" fontWeight="medium">
                         No house data available
                       </Td>
                     </Tr>
