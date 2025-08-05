@@ -5,7 +5,7 @@ import '@testing-library/jest-dom';
 import { ChakraProvider } from '@chakra-ui/react';
 import { MemoryRouter } from 'react-router-dom';
 import ChartDisplay from '../components/ChartDisplay';
-import { AuthProvider } from '../components/AuthProvider';
+import { AuthProvider } from '../contexts/AuthContext';
 import type { ChartData } from '../types';
 
 // Type aliases for test use
