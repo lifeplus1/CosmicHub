@@ -3,6 +3,8 @@ import { useAuth } from './AuthContext';
 import type { UserSubscription } from '../types/subscription';
 import { getUserTier, hasFeatureAccess, COSMICHUB_TIERS } from '../types/subscription';
 
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://astrology-app-0emh.onrender.com';
+
 interface SubscriptionContextType {
   subscription: UserSubscription | null;
   userTier: string;
@@ -89,7 +91,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
       }
 
       // FOR DEVELOPMENT: Fetch user data from backend for real users
-      const response = await fetch('/api/user/subscription', {
+      const response = await fetch(`${API_URL}/user/subscription`, {
         headers: {
           'Authorization': `Bearer ${await user.getIdToken()}`
         }
