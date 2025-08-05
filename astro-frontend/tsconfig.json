@@ -16,7 +16,11 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

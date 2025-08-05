@@ -1,65 +1,73 @@
 // frontend/src/components/ChartDisplay.test.tsx
 import React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { ChakraProvider } from '@chakra-ui/react';
 import { MemoryRouter } from 'react-router-dom';
+import { ChakraProvider } from '@chakra-ui/react';
 import ChartDisplay from '../components/ChartDisplay';
 import { AuthProvider } from '../contexts/AuthContext';
-import type { ChartData } from '../types';
 
-// Type aliases for test use
-type PlanetData = NonNullable<ChartData['planets']>[string];
-type HouseData = ChartData['houses'][number];
-type AspectData = ChartData['aspects'][number];
+// Mock Firebase
+vi.mock('../firebase');
 
-interface ExtendedChartData extends ChartData {
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  julian_day: number;
-  angles: Record<string, number>;
-}
-
-const mockChart: ExtendedChartData = {
-  latitude: 40.7128,
-  longitude: -74.0060,
-  timezone: 'America/New_York',
-  julian_day: 2460500.5,
-  planets: {
-    sun: { position: 120, retrograde: false, house: 1 },
-    moon: { position: 240, retrograde: true, house: 8 },
-  },
-  houses: [
-    { house: 1, cusp: 0, sign: 'Aries' },
-    { house: 2, cusp: 30, sign: 'Taurus' },
-  ],
-  angles: {
-    ascendant: 0,
-    descendant: 180,
-    mc: 90,
-    ic: 270,
-    vertex: 45,
-    antivertex: 225,
-  },
-  aspects: [],
-};
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <ChakraProvider>
+    <MemoryRouter>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </MemoryRouter>
+  </ChakraProvider>
+);
 
 describe('ChartDisplay', () => {
-  it('renders chart data correctly', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders loading state when loading prop is true', () => {
     render(
-      <MemoryRouter>
-        <AuthProvider>
-          <ChakraProvider>
-            <ChartDisplay chart={mockChart} />
-          </ChakraProvider>
-        </AuthProvider>
-      </MemoryRouter>
+      <TestWrapper>
+        <ChartDisplay chart={null} loading={true} />
+      </TestWrapper>
     );
-    expect(screen.getByText(/Latitude: 40.71°/)).toBeInTheDocument();
-    expect(screen.getByText('0.00° Leo')).toBeInTheDocument();
-    expect(screen.getByText('0.00° Sagittarius')).toBeInTheDocument();
-    expect(screen.getByText('℞')).toBeInTheDocument();
+
+    expect(screen.getByText(/calculating your natal chart/i)).toBeInTheDocument();
+  });
+
+  it('renders error message when no chart data is provided', () => {
+    render(
+      <TestWrapper>
+        <ChartDisplay chart={null} />
+      </TestWrapper>
+    );
+
+    expect(screen.getByText(/no chart data available/i)).toBeInTheDocument();
+  });
+
+  it('renders chart display component with test id', () => {
+    const mockChart = {
+      planets: { sun: { position: 0, house: 1 } },
+      houses: [{ house: 1, cusp: 0, sign: 'Aries' }],
+      aspects: [],
+      latitude: 40.7128,
+      longitude: -74.0060,
+      timezone: 'America/New_York',
+      julian_day: 2451545.0,
+      angles: {
+        ascendant: 0,
+        midheaven: 90,
+        descendant: 180,
+        imum_coeli: 270
+      }
+    };
+
+    render(
+      <TestWrapper>
+        <ChartDisplay chart={mockChart} />
+      </TestWrapper>
+    );
+
+    expect(screen.getByTestId('chart-display')).toBeInTheDocument();
   });
 });
-

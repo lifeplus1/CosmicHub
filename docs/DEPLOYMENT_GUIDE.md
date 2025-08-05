@@ -90,15 +90,32 @@ Same as HealWave - use any of the three options above
 
 #### Production Setup:
 ```bash
-# Backend deployment (separate from frontend)
+# Backend deployment options
 cd backend
-pip install -r requirements.txt
 
-# Deploy to:
-# - Railway.app (easiest)
-# - Heroku
-# - Google Cloud Run
-# - AWS Lambda
+# Option 1: Render.com (Recommended for Docker)
+# 1. Connect GitHub repository to Render
+# 2. Create new Web Service with Docker
+# 3. Set environment variables in Render dashboard:
+#    - EPHE_PATH=/app/ephe
+#    - PYTHONPATH=/app/backend
+#    - PORT=8000 (auto-set by Render)
+# 4. Deploy automatically on git push
+
+# Option 2: Railway.app (easiest)
+# 1. Connect GitHub repo
+# 2. Deploy with automatic Docker detection
+# 3. Set environment variables
+
+# Option 3: Heroku
+# Create Procfile: web: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+# Option 4: Google Cloud Run
+# Deploy with: gcloud run deploy --source .
+
+# Option 5: AWS Lambda (requires additional setup)
+pip install mangum
+# Use mangum ASGI adapter
 ```
 
 ## 🛠️ Environment Variables
@@ -122,6 +139,52 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
+```
+
+### Backend Environment (.env.production)
+```env
+# Required for Swiss Ephemeris data location
+EPHE_PATH=/app/ephe
+PYTHONPATH=/app/backend
+PORT=8000
+
+# Firebase Admin SDK (for backend authentication)
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_PRIVATE_KEY_ID=your_private_key_id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour_private_key\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=your_service_account_email
+FIREBASE_CLIENT_ID=your_client_id
+FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
+```
+
+## 🐳 Docker Deployment
+
+### Render.com (Recommended)
+Render.com provides excellent Docker support with automatic deployments:
+
+1. **Connect Repository**: Link your GitHub repository to Render
+2. **Create Web Service**: Select "Docker" as the environment
+3. **Set Environment Variables** in Render dashboard:
+   ```
+   EPHE_PATH=/app/ephe
+   PYTHONPATH=/app/backend
+   PORT=8000 (automatically set by Render)
+   ```
+4. **Deploy**: Automatic deployment on git push
+
+### Docker Environment Alignment
+The multi-stage Dockerfile ensures consistent environment variables:
+- `EPHE_PATH=/app/ephe` - Swiss Ephemeris data location
+- `PYTHONPATH=/app/backend` - Python module path
+- `PORT=8000` - Application port (configurable for cloud platforms)
+
+### Local Docker Testing
+```bash
+# Build and test locally
+cd backend
+docker build -t cosmichub-backend .
+docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 ```
 
 ## 📈 Performance Optimizations Applied

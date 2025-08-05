@@ -1,52 +1,61 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User } from 'firebase/auth';
 import { auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
-  getAuthToken: () => Promise<string | null>;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  // Use the shared auth instance from firebase.ts
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return () => unsubscribe();
-  }, [auth]);
-
-  const getAuthToken = async () => {
-    if (!user) return null;
-    try {
-      // Force refresh the token to ensure it's not expired
-      const token = await user.getIdToken(true);
-      return token;
-    } catch (error) {
-      console.error('Error getting auth token:', error);
-      // If token refresh fails, try to get a cached token
-      try {
-        return await user.getIdToken(false);
-      } catch (fallbackError) {
-        console.error('Error getting cached auth token:', fallbackError);
-        return null;
-      }
-    }
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, getAuthToken }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    const { signInWithEmailAndPassword } = await import('firebase/auth');
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const signUp = async (email: string, password: string) => {
+    const { createUserWithEmailAndPassword } = await import('firebase/auth');
+    await createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  const signOut = async () => {
+    const { signOut: firebaseSignOut } = await import('firebase/auth');
+    await firebaseSignOut(auth);
+  };
+
+  const value = {
+    user,
+    loading,
+    signIn,
+    signUp,
+    signOut
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

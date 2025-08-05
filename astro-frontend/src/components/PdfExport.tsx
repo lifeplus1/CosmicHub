@@ -215,6 +215,7 @@ export const PdfExport: React.FC<PdfExportProps> = ({
                           ...options,
                           reportType: e.target.value as any
                         })}
+                        aria-label="Report Type"
                       >
                         {availableReports.map(report => (
                           <option key={report.value} value={report.value}>

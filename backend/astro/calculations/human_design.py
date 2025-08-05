@@ -139,6 +139,12 @@ AUTHORITIES = {
     "Lunar": "Wait a full lunar cycle (28 days)"
 }
 
+def get_gate_center(gate_number: int) -> str:
+    """Get the center associated with a specific gate number"""
+    if gate_number in GATES:
+        return GATES[gate_number]["center"]
+    return "Unknown"
+
 def calculate_planetary_activations(julian_day: float) -> Dict[str, Dict[str, Any]]:
     """Calculate planetary activations for Human Design"""
     activations = {}

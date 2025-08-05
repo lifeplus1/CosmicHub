@@ -1,7 +1,7 @@
 // firebase.ts
 import { initializeApp } from 'firebase/app';
-import { connectAuthEmulator, getAuth } from 'firebase/auth';
-import { connectFirestoreEmulator as connectFirestore, getFirestore } from 'firebase/firestore';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 
 // Firebase config from VITE env variables
 const firebaseConfig = {
@@ -23,13 +23,22 @@ export const db = getFirestore(app);
 // Use emulators in development only if they're available and we're not in production
 if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
   try {
-    // Only connect to emulators if they're explicitly enabled
+    // Only connect to auth emulator if it's explicitly enabled
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-    connectFirestore(db, 'localhost', 8080);
-    console.log('🔥 Firebase emulators connected - zero cost development mode');
+    console.log('🔥 Firebase Auth emulator connected - zero cost development mode');
   } catch (error) {
-    console.log('Emulators already connected or not available');
+    console.log('Auth emulator already connected or not available');
+  }
+  
+  try {
+    // Connect to Firestore emulator
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    console.log('🔥 Firebase Firestore emulator connected - zero cost development mode');
+  } catch (error) {
+    console.log('Firestore emulator already connected or not available');
   }
 } else {
   console.log('🔥 Using production Firebase services');
 }
+
+export default app;

@@ -9,5 +9,6 @@ stripe
 requests
 pytz
 pytest
+pytest-cov
 reportlab
 

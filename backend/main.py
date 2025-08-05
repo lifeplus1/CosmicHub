@@ -6,10 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 import uuid
-from dotenv import load_dotenv
+
+# Note: load_dotenv() not needed in Docker - environment variables are passed via --env-file
+
 # Temporarily comment out authentication for debugging
 # from auth import get_current_user  # Absolute import for Firebase Auth
-from database import save_chart, get_charts
+from database import save_chart, get_charts, delete_chart_by_id
 
 # Using mock auth function for development - simulating elite user
 def get_current_user() -> str:
@@ -49,13 +51,10 @@ from astro.calculations.chart import validate_inputs, calculate_multi_system_cha
 from astro.calculations.numerology import calculate_numerology
 from astro.calculations.synastry import calculate_synastry_chart
 from astro.calculations.pdf_export import create_chart_pdf, create_synastry_pdf, create_multi_system_pdf
-from astro.calculations.transits import calculate_transits, calculate_lunar_transits
+# from astro.calculations.transits_clean import calculate_transits, calculate_lunar_transits
 from astro.calculations.ai_interpretations import generate_advanced_interpretation
 from astro.calculations.human_design import calculate_human_design
 from astro.calculations.gene_keys import calculate_gene_keys_profile, get_gene_key_details, get_daily_contemplation
-
-# Load .env file
-load_dotenv()
 
 # Configure logging
 log_file = os.getenv("LOG_FILE", "app.log")
@@ -107,6 +106,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:8080",  # New frontend port
         "http://localhost:8081",  # New frontend port
+        "http://localhost:8082",  # New frontend port
+        "http://localhost:8083",  # New frontend port
         "http://localhost:3000",
         "https://astrology-app-pied.vercel.app",  # Astrology frontend
         "https://healwave.yourdomain.com",  # HealWave frontend (update with actual domain)
@@ -275,12 +276,11 @@ async def get_user_subscription(user_id: str = Depends(get_current_user)):
         raise HTTPException(500, f"Error fetching subscription: {str(e)}")
 
 @app.post("/save-chart", response_model=SaveChartResponse)
-async def save_chart_endpoint(data: BirthData, request: Request, user_id: str = Depends(get_current_user)):
-    if request:
-        rate_limiter(request)
+async def save_chart_endpoint(data: BirthData, request: Request, house_system: str = Query("P", enum=["P", "E"]), user_id: str = Depends(get_current_user)):
+    rate_limiter(request)
     request_id = str(uuid.uuid4())
     try:
-        chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
+        chart_data = calculate_chart(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city, house_system)
         chart_data["planets"] = get_planetary_positions(chart_data["julian_day"])
         result = save_chart(user_id, "natal", data.model_dump(), chart_data)
         return {"result": result}
@@ -303,6 +303,23 @@ async def list_charts(request: Request, user_id: str = Depends(get_current_user)
         return {"charts": charts}
     except Exception as e:
         logger.error(f"[{request_id}] Error fetching charts: {str(e)}")
+        raise HTTPException(500, f"Internal server error: {str(e)}")
+
+@app.delete("/charts/{chart_id}")
+async def delete_chart(chart_id: str, request: Request, user_id: str = Depends(get_current_user)):
+    if request:
+        rate_limiter(request)
+    request_id = str(uuid.uuid4())
+    try:
+        success = delete_chart_by_id(user_id, chart_id)
+        if success:
+            return {"success": True, "message": "Chart deleted successfully"}
+        else:
+            raise HTTPException(404, "Chart not found or access denied")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[{request_id}] Error deleting chart: {str(e)}")
         raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @app.post("/analyze-personality", response_model=PersonalityResponse)
@@ -497,9 +514,10 @@ async def export_synastry_pdf(data: SynastryData, request: Request):
         logger.error(f"[{request_id}] Synastry PDF export error: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Synastry PDF export failed: {str(e)}")
 
+"""
 @app.post("/calculate-transits", response_model=TransitResponse)
 async def calculate_transits_endpoint(data: TransitData, request: Request):
-    """Calculate planetary transits for a given period"""
+    # Calculate planetary transits for a given period
     request_id = str(uuid.uuid4())[:8]
     rate_limiter(request)
     
@@ -541,7 +559,7 @@ async def calculate_transits_endpoint(data: TransitData, request: Request):
 
 @app.post("/calculate-lunar-transits", response_model=TransitResponse)
 async def calculate_lunar_transits_endpoint(data: TransitData, request: Request):
-    """Calculate Moon transits for a given period"""
+    # Calculate Moon transits for a given period
     request_id = str(uuid.uuid4())[:8]
     rate_limiter(request)
     
@@ -578,6 +596,7 @@ async def calculate_lunar_transits_endpoint(data: TransitData, request: Request)
     except Exception as e:
         logger.error(f"[{request_id}] Lunar transit calculation error: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Lunar transit calculation failed: {str(e)}")
+"""
 
 @app.post("/ai-interpretation", response_model=AIInterpretationResponse)
 async def generate_ai_interpretation(data: AIInterpretationData, request: Request):

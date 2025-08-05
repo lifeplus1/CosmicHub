@@ -4,7 +4,7 @@ import {
   Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,
   Table, Thead, Tbody, Tr, Th, Td, Badge, VStack, HStack, Divider,
   Alert, AlertIcon, AlertTitle, AlertDescription, SimpleGrid, Stat,
-  StatLabel, StatNumber, StatHelpText, useColorModeValue, Flex
+  StatLabel, StatNumber, StatHelpText, useColorModeValue, Flex, Spinner
 } from '@chakra-ui/react';
 
 interface MultiSystemChartProps {
@@ -45,86 +45,98 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
   if (!data || !data.planets) return <Text>No Western chart data available</Text>;
 
   return (
-    <VStack spacing={4} align="stretch">
-      <Card bg="rgba(255,255,255,0.95)">
-        <CardBody color="gray.800">
-          <Heading size="md" mb={4} color="purple.700">Western Tropical Chart</Heading>
-          <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
+    <VStack spacing={6} align="stretch">
+      <Card className="cosmic-card-premium">
+        <CardBody className="p-6">
+          <Heading size="md" mb={4} className="cosmic-subheading text-purple-300">
+            Western Tropical Chart
+          </Heading>
+          <Text className="cosmic-text text-sm mb-6 opacity-90">
             Based on tropical zodiac, solar-focused approach emphasizing personality and life expression
           </Text>
           
           <Accordion allowToggle>
-            <AccordionItem>
-              <AccordionButton>
+            <AccordionItem className="cosmic-card border-purple-300/30 rounded-lg">
+              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300">
                 <Box flex="1" textAlign="left">
                   <HStack>
-                    <Text fontWeight="bold">Planets & Positions</Text>
-                    <Badge variant="cosmic">{Object.keys(data.planets).length}</Badge>
+                    <Text className="cosmic-subheading mb-0">Planets & Positions</Text>
+                    <Badge className="cosmic-badge-primary">{Object.keys(data.planets).length}</Badge>
                   </HStack>
                 </Box>
                 <AccordionIcon />
               </AccordionButton>
-              <AccordionPanel>
-                <Table size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>Planet</Th>
-                      <Th>Position</Th>
-                      <Th>Retrograde</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {Object.entries(data.planets).map(([planet, info]: [string, any]) => (
-                      <Tr key={planet}>
-                        <Td>
-                          <HStack>
-                            <Text>{planetSymbols[planet as keyof typeof planetSymbols] || '●'}</Text>
-                            <Text fontWeight="medium">{planet.charAt(0).toUpperCase() + planet.slice(1)}</Text>
-                          </HStack>
-                        </Td>
-                        <Td fontFamily="mono">{getZodiacSign(info.position)}</Td>
-                        <Td>{info.retrograde ? "℞" : "—"}</Td>
+              <AccordionPanel className="p-0">
+                <div className="overflow-x-auto">
+                  <Table size="sm" variant="enhanced" className="enhanced-table">
+                    <Thead>
+                      <Tr>
+                        <Th className="min-w-32">Planet</Th>
+                        <Th className="min-w-48">Position</Th>
+                        <Th className="min-w-24">Retrograde</Th>
                       </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
+                    </Thead>
+                    <Tbody>
+                      {Object.entries(data.planets).map(([planet, info]: [string, any]) => (
+                        <Tr key={planet}>
+                          <Td>
+                            <HStack spacing={2}>
+                              <Text className="text-lg">{planetSymbols[planet as keyof typeof planetSymbols] || '●'}</Text>
+                              <Text className="font-semibold text-white capitalize">{planet.replace('_', ' ')}</Text>
+                            </HStack>
+                          </Td>
+                          <Td className="font-mono text-white/90">{getZodiacSign(info.position)}</Td>
+                          <Td className="text-center">
+                            {info.retrograde ? (
+                              <Badge className="cosmic-badge-warning">℞</Badge>
+                            ) : (
+                              <Text className="text-white/60">—</Text>
+                            )}
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </div>
               </AccordionPanel>
             </AccordionItem>
 
-            <AccordionItem>
-              <AccordionButton>
+            <AccordionItem className="cosmic-card border-purple-300/30 rounded-lg mt-4">
+              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300">
                 <Box flex="1" textAlign="left">
                   <HStack>
-                    <Text fontWeight="bold">Aspects</Text>
-                    <Badge colorScheme="blue">{data.aspects?.length || 0}</Badge>
+                    <Text className="cosmic-subheading mb-0">Aspects</Text>
+                    <Badge className="cosmic-badge-secondary">{data.aspects?.length || 0}</Badge>
                   </HStack>
                 </Box>
                 <AccordionIcon />
               </AccordionButton>
-              <AccordionPanel>
-                <Table size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>Aspect</Th>
-                      <Th>Planets</Th>
-                      <Th>Orb</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {(data.aspects || []).slice(0, 10).map((aspect: any, idx: number) => (
-                      <Tr key={idx}>
-                        <Td>
-                          <HStack>
-                            <Text>{aspectSymbols[aspect.aspect as keyof typeof aspectSymbols] || '●'}</Text>
-                            <Text>{aspect.aspect}</Text>
-                          </HStack>
-                        </Td>
-                        <Td>{aspect.point1} - {aspect.point2}</Td>
-                        <Td>{aspect.orb?.toFixed(2)}°</Td>
+              <AccordionPanel className="p-0">
+                <div className="overflow-x-auto">
+                  <Table size="sm" variant="enhanced" className="enhanced-table">
+                    <Thead>
+                      <Tr>
+                        <Th className="min-w-32">Aspect Type</Th>
+                        <Th className="min-w-40">Planets</Th>
+                        <Th className="min-w-24">Orb</Th>
                       </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
+                    </Thead>
+                    <Tbody>
+                      {(data.aspects || []).map((aspect: any, idx: number) => (
+                        <Tr key={idx}>
+                          <Td>
+                            <HStack spacing={2}>
+                              <Text className="text-lg">{aspectSymbols[aspect.aspect as keyof typeof aspectSymbols] || '—'}</Text>
+                              <Text className="font-semibold text-white">{aspect.aspect}</Text>
+                            </HStack>
+                          </Td>
+                          <Td className="text-white/90">{aspect.point1} - {aspect.point2}</Td>
+                          <Td className="text-white/80">{aspect.orb?.toFixed(2)}°</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </div>
               </AccordionPanel>
             </AccordionItem>
           </Accordion>

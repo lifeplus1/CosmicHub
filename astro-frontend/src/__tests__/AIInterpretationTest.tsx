@@ -28,8 +28,8 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { FaBrain, FaRobot, FaMagic, FaLightbulb, FaArrowLeft, FaComments, FaUser, FaQuestionCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import FeatureGuard from './FeatureGuard';
-import { EducationalTooltip } from './EducationalTooltip';
+import FeatureGuard from '../components/FeatureGuard';
+import { EducationalTooltip } from '../components/EducationalTooltip';
 
 export const AIInterpretationTest: React.FC = () => {
   const navigate = useNavigate();
@@ -243,19 +243,27 @@ export const AIInterpretationTest: React.FC = () => {
                 </CardHeader>
                 <CardBody>
                   <VStack spacing={6}>
-                    <Select 
-                      value={analysisType} 
-                      onChange={(e) => setAnalysisType(e.target.value)}
-                      size="lg"
-                      aria-label="Select AI analysis type"
-                    >
-                      <option value="personality">Deep Personality Analysis</option>
-                      <option value="relationships">Relationship Patterns</option>
-                      <option value="career">Career & Life Path</option>
-                      <option value="spiritual">Spiritual Growth</option>
-                      <option value="timing">Current Life Phase</option>
-                      <option value="comprehensive">Comprehensive Reading</option>
-                    </Select>
+                    <Box w="full">
+                      <label id="analysis-type-label" htmlFor="analysis-type-select" style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>
+                        Select AI analysis type
+                      </label>
+                      <Select 
+                        id="analysis-type-select"
+                        aria-labelledby="analysis-type-label"
+                        aria-label="Select AI analysis type"
+                        title="Select AI analysis type"
+                        value={analysisType} 
+                        onChange={(e) => setAnalysisType(e.target.value)}
+                        size="lg"
+                      >
+                        <option value="personality">Deep Personality Analysis</option>
+                        <option value="relationships">Relationship Patterns</option>
+                        <option value="career">Career & Life Path</option>
+                        <option value="spiritual">Spiritual Growth</option>
+                        <option value="timing">Current Life Phase</option>
+                        <option value="comprehensive">Comprehensive Reading</option>
+                      </Select>
+                    </Box>
                     
                     <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
                       Choose the type of AI interpretation you'd like to receive based on your birth chart

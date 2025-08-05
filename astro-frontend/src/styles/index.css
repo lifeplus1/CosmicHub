@@ -1,4 +1,8 @@
-/* Base styles that work with App.css WCAG compliance */
+/* Base styles with Tailwind integration */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   font-family: 'Inter', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.7;
@@ -13,25 +17,88 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Body inherits from Chakra UI theme global styles */
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  /* Colors are managed by Chakra UI theme and App.css */
+/* Base layer customizations */
+@layer base {
+  body {
+    @apply m-0 min-w-80 min-h-screen;
+    /* Colors are managed by Chakra UI theme and App.css */
+  }
+
+  h1 {
+    @apply text-5xl leading-tight;
+    font-family: 'Cinzel', 'Playfair Display', serif;
+  }
+
+  h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-wide;
+    font-family: 'Cinzel', 'Playfair Display', serif;
+  }
 }
 
-/* Typography base styles */
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-  font-family: 'Cinzel', 'Playfair Display', serif;
-}
+/* Component layer for reusable styles */
+@layer components {
+  .cosmic-table {
+    @apply w-full bg-white/5 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 shadow-2xl;
+  }
 
-h2, h3, h4, h5, h6 {
-  font-family: 'Cinzel', 'Playfair Display', serif;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  .cosmic-table th {
+    @apply bg-slate-800/80 text-white font-bold text-sm uppercase tracking-wider border-b border-white/20 py-4 px-6 text-left;
+  }
+
+  .cosmic-table td {
+    @apply text-white/90 border-b border-white/10 py-4 px-6 text-sm font-medium;
+  }
+
+  .cosmic-table tbody tr {
+    @apply transition-colors duration-200 hover:bg-white/8;
+  }
+
+  .cosmic-card {
+    @apply bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl hover:border-white/30 transition-all duration-300;
+  }
+
+  .cosmic-button {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .cosmic-button-primary {
+    @apply cosmic-button bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 focus:ring-purple-500;
+  }
+
+  .cosmic-button-secondary {
+    @apply cosmic-button bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400 focus:ring-amber-500;
+  }
+
+  .cosmic-input {
+    @apply w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200;
+  }
+
+  .responsive-grid {
+    @apply grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  .responsive-stats {
+    @apply grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  .cosmic-text-high-contrast {
+    @apply text-white font-medium;
+    color: #ffffff !important;
+  }
+
+  .cosmic-badge-high-contrast {
+    @apply cosmic-badge;
+    color: #ffffff !important;
+    background: rgba(251, 191, 36, 0.3) !important;
+    border-color: rgba(251, 191, 36, 0.6) !important;
+  }
+
+  /* Override Chakra UI text colors */
+  .chakra-card .chakra-text,
+  .chakra-card p,
+  .chakra-card span {
+    color: #fef7e0 !important;
+  }
 }
 
 /* Focus styles for accessibility */
@@ -62,5 +129,18 @@ h2, h3, h4, h5, h6 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Force high contrast for accessibility */
+@media (prefers-contrast: high) {
+  * {
+    color: #ffffff !important;
+  }
+  
+  .cosmic-text,
+  .chakra-text {
+    color: #ffffff !important;
+    font-weight: 600 !important;
   }
 }

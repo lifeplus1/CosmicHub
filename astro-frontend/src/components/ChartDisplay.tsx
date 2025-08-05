@@ -1,6 +1,7 @@
-import React from "react";
+import React, { memo, useMemo, useCallback } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import { Button, useToast } from '@chakra-ui/react';
+import type { ChartData } from '../types';
 import {
   Accordion,
   AccordionItem,
@@ -18,13 +19,15 @@ import {
   Tr,
   Th,
   Td,
+  VStack,
+  HStack,
+  Badge,
+  Spinner,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from "@chakra-ui/react";
-import type { ChartData } from '../types';
-
-// Type aliases for component use
-type PlanetData = NonNullable<ChartData['planets']>[string];
-type HouseData = ChartData['houses'][number];
-type AspectData = ChartData['aspects'][number];
 
 interface ExtendedChartData extends ChartData {
   latitude: number;
@@ -32,8 +35,21 @@ interface ExtendedChartData extends ChartData {
   timezone: string;
   julian_day: number;
   angles: Record<string, number>;
+  [key: string]: any;
 }
 
+// Type aliases for component use
+type PlanetData = NonNullable<ChartData['planets']>[string];
+type HouseData = ChartData['houses'][number];
+type AspectData = ChartData['aspects'][number];
+
+interface ChartDisplayProps {
+  chart: ExtendedChartData | null;
+  onSaveChart?: () => void;
+  loading?: boolean;
+}
+
+// Enhanced planet symbols with better Unicode support
 const planetSymbols: Record<string, string> = {
   sun: "☉",
   moon: "☽",
@@ -45,63 +61,53 @@ const planetSymbols: Record<string, string> = {
   uranus: "♅",
   neptune: "♆",
   pluto: "♇",
+  ascendant: "AC",
+  midheaven: "MC",
+  mc: "MC",
+  ic: "IC",
+  descendant: "DC",
+  north_node: "☊",
+  south_node: "☋",
   chiron: "⚷",
   ceres: "⚳",
   pallas: "⚴",
   juno: "⚵",
   vesta: "⚶",
-  north_node: "☊",
-  south_node: "☋",
-  ascendant: "Asc",
-  descendant: "Dsc",
-  mc: "MC",
-  ic: "IC",
+  lilith: "⚸",
   vertex: "Vx",
   antivertex: "AVx",
+  part_of_fortune: "⊗"
 };
 
+// Zodiac signs with symbols and colors
 const zodiacSigns = [
-  "Aries",
-  "Taurus",
-  "Gemini",
-  "Cancer",
-  "Leo",
-  "Virgo",
-  "Libra",
-  "Scorpio",
-  "Sagittarius",
-  "Capricorn",
-  "Aquarius",
-  "Pisces",
+  { name: "Aries", symbol: "♈", color: "red.500", element: "Fire" },
+  { name: "Taurus", symbol: "♉", color: "green.500", element: "Earth" },
+  { name: "Gemini", symbol: "♊", color: "yellow.500", element: "Air" },
+  { name: "Cancer", symbol: "♋", color: "blue.500", element: "Water" },
+  { name: "Leo", symbol: "♌", color: "orange.500", element: "Fire" },
+  { name: "Virgo", symbol: "♍", color: "green.600", element: "Earth" },
+  { name: "Libra", symbol: "♎", color: "pink.500", element: "Air" },
+  { name: "Scorpio", symbol: "♏", color: "red.700", element: "Water" },
+  { name: "Sagittarius", symbol: "♐", color: "purple.500", element: "Fire" },
+  { name: "Capricorn", symbol: "♑", color: "gray.600", element: "Earth" },
+  { name: "Aquarius", symbol: "♒", color: "cyan.500", element: "Air" },
+  { name: "Pisces", symbol: "♓", color: "blue.400", element: "Water" }
 ];
 
-const getZodiacSign = (degree: number) => {
-  if (typeof degree !== 'number' || isNaN(degree)) {
-    return 'N/A';
-  }
-  const sign = Math.floor(degree / 30);
-  const deg = degree % 30;
-  const signIndex = sign % 12; // Ensure we stay within array bounds
-  return `${deg.toFixed(2)}° ${zodiacSigns[signIndex] || 'Unknown'}`;
+// Memoized functions for better performance
+const getZodiacSign = (position: number) => {
+  if (typeof position !== 'number' || isNaN(position)) return { name: "Unknown", symbol: "?", color: "gray.500" };
+  const index = Math.floor(position / 30);
+  return zodiacSigns[index] || zodiacSigns[0];
 };
 
-const getHouseForPlanet = (position: number, houses: HouseData[]) => {
-  if (typeof position !== 'number' || isNaN(position) || !houses || houses.length === 0) {
-    return 1; // Default to first house
-  }
+const getHouseForPlanet = (position: number, houses: HouseData[]): number => {
+  if (!houses || houses.length === 0) return 1;
   
   for (let i = 0; i < houses.length; i++) {
-    const currentHouse = houses[i];
-    const nextHouse = houses[(i + 1) % houses.length];
-    
-    if (!currentHouse || typeof currentHouse.cusp !== 'number' || 
-        !nextHouse || typeof nextHouse.cusp !== 'number') {
-      continue;
-    }
-    
-    const start = currentHouse.cusp;
-    const end = nextHouse.cusp;
-    
+    const start = houses[i].cusp;
+    const end = houses[(i + 1) % houses.length].cusp;
     if (start < end) {
       if (position >= start && position < end) return i + 1;
     } else {
@@ -111,235 +117,466 @@ const getHouseForPlanet = (position: number, houses: HouseData[]) => {
   return 1;
 };
 
-const ChartDisplay: React.FC<{ chart: ExtendedChartData | null; onSaveChart?: () => void }> = ({ chart, onSaveChart }) => {
+const formatDegree = (degree: number): string => {
+  if (typeof degree !== 'number' || isNaN(degree)) return "—";
+  const sign = getZodiacSign(degree);
+  const degreeInSign = Math.floor(degree % 30);
+  const minutes = Math.floor((degree % 1) * 60);
+  return `${degreeInSign}°${minutes.toString().padStart(2, '0')}' ${sign.symbol}`;
+};
+
+// Memoized planet row component
+const PlanetRow = memo(({ point, data, houses }: { 
+  point: string; 
+  data: PlanetData; 
+  houses: HouseData[] 
+}) => {
+  const sign = getZodiacSign(data.position);
+  const house = getHouseForPlanet(data.position, houses);
+  
+  return (
+    <Tr>
+      <Td borderColor="gold">
+        <HStack spacing={2}>
+          <Text fontSize="xl" color={sign.color}>
+            {planetSymbols[point] || "⭐"}
+          </Text>
+          <Text fontWeight="bold" color="deepPurple.900">
+            {point.charAt(0).toUpperCase() + point.slice(1).replace('_', ' ')}
+          </Text>
+        </HStack>
+      </Td>
+      <Td borderColor="gold">
+        <HStack spacing={2}>
+          <Text fontSize="lg" color={sign.color}>
+            {sign.symbol}
+          </Text>
+          <VStack spacing={0} align="start">
+            <Text fontWeight="bold" color="deepPurple.900">
+              {sign.name}
+            </Text>
+            <Text fontSize="sm" color="deepPurple.800" fontWeight="medium">
+              {formatDegree(data.position)}
+            </Text>
+          </VStack>
+        </HStack>
+      </Td>
+      <Td>
+        <Badge variant="cosmic" fontSize="sm">
+          House {house}
+        </Badge>
+      </Td>
+      <Td borderColor="gold">
+        {data.retrograde ? (
+          <Badge colorScheme="red" variant="solid">℞</Badge>
+        ) : (
+          <Text color="deepPurple.800" fontWeight="bold">—</Text>
+        )}
+      </Td>
+    </Tr>
+  );
+});
+
+PlanetRow.displayName = 'PlanetRow';
+
+// Memoized aspect row component
+const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
+  const getAspectColor = (aspectType: string) => {
+    switch (aspectType.toLowerCase()) {
+      case 'conjunction': return 'red.500';
+      case 'opposition': return 'blue.500';
+      case 'trine': return 'green.500';
+      case 'square': return 'orange.500';
+      case 'sextile': return 'purple.500';
+      default: return 'gray.500';
+    }
+  };
+
+  const getAspectSymbol = (aspectType: string) => {
+    switch (aspectType.toLowerCase()) {
+      case 'conjunction': return '☌';
+      case 'opposition': return '☍';
+      case 'trine': return '△';
+      case 'square': return '□';
+      case 'sextile': return '⚹';
+      default: return '—';
+    }
+  };
+
+  return (
+    <Tr>
+      <Td>
+        <HStack spacing={2}>
+          <Text color="deepPurple.900" fontWeight="bold">{planetSymbols[aspect.point1] || aspect.point1}</Text>
+          <Text fontWeight="bold" color="deepPurple.900">{aspect.point1.replace('_', ' ')}</Text>
+        </HStack>
+      </Td>
+      <Td>
+        <HStack spacing={2}>
+          <Text fontSize="lg" color={getAspectColor(aspect.aspect)}>
+            {getAspectSymbol(aspect.aspect)}
+          </Text>
+          <Text fontWeight="bold" color={getAspectColor(aspect.aspect)}>
+            {aspect.aspect}
+          </Text>
+        </HStack>
+      </Td>
+      <Td>
+        <HStack spacing={2}>
+          <Text color="deepPurple.900" fontWeight="bold">{planetSymbols[aspect.point2] || aspect.point2}</Text>
+          <Text fontWeight="bold" color="deepPurple.900">{aspect.point2.replace('_', ' ')}</Text>
+        </HStack>
+      </Td>
+      <Td>
+        <Badge 
+          variant={aspect.orb < 2 ? 'solid' : 'cosmic'}
+          colorScheme={aspect.orb < 2 ? 'green' : aspect.orb < 5 ? 'yellow' : undefined}
+        >
+          {aspect.orb.toFixed(2)}°
+        </Badge>
+      </Td>
+    </Tr>
+  );
+});
+
+AspectRow.displayName = 'AspectRow';
+
+const ChartDisplay: React.FC<ChartDisplayProps> = memo(({ 
+  chart, 
+  onSaveChart, 
+  loading = false 
+}) => {
   const { user } = useAuth();
   const toast = useToast();
 
-  // Early return if chart is null or undefined
-  if (!chart) {
+  // Memoized computations
+  const chartInfo = useMemo(() => {
+    if (!chart) return null;
+    
+    return {
+      latitude: typeof chart.latitude === 'number' && !isNaN(chart.latitude) ? chart.latitude.toFixed(4) : 'N/A',
+      longitude: typeof chart.longitude === 'number' && !isNaN(chart.longitude) ? chart.longitude.toFixed(4) : 'N/A',
+      timezone: chart.timezone || 'Unknown',
+      julianDay: chart.julian_day ? chart.julian_day.toFixed(4) : 'N/A'
+    };
+  }, [chart]);
+
+  const planetEntries = useMemo(() => {
+    if (!chart?.planets) return [];
+    return Object.entries(chart.planets).sort(([a], [b]) => {
+      const order = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+      return (order.indexOf(a) !== -1 ? order.indexOf(a) : 999) - (order.indexOf(b) !== -1 ? order.indexOf(b) : 999);
+    });
+  }, [chart?.planets]);
+
+  const aspectEntries = useMemo(() => {
+    if (!chart?.aspects) return [];
+    return chart.aspects.filter(aspect => aspect.orb <= 8); // Only show tight aspects
+  }, [chart?.aspects]);
+
+  const handleSaveChart = useCallback(() => {
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to save your chart',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    onSaveChart?.();
+  }, [user, onSaveChart, toast]);
+
+  // Loading state
+  if (loading) {
     return (
-      <Card mt={4} bg="rgba(255,255,255,0.92)" boxShadow="0 4px 32px 0 rgba(36,0,70,0.12)">
-        <CardBody fontFamily="Quicksand, sans-serif" color="deepPurple.900">
-          <Text color="red.500">No chart data available</Text>
-        </CardBody>
-      </Card>
+      <div className="mt-6 cosmic-card p-8">
+        <div className="text-center space-y-4">
+          <Spinner size="xl" color="purple.500" thickness="4px" />
+          <Text className="text-lg text-white/80 font-medium">
+            Calculating your natal chart...
+          </Text>
+        </div>
+      </div>
     );
   }
 
-  // Ensure planets is an object, even if empty
-  const planets = chart.planets ?? {};
+  // Error state
+  if (!chart) {
+    return (
+      <div className="mt-6 cosmic-card p-6">
+        <Alert status="error" borderRadius="md" className="alert-error">
+          <AlertIcon />
+          <Box>
+            <AlertTitle>No Chart Data Available</AlertTitle>
+            <AlertDescription>
+              Please enter your birth information and calculate your chart.
+            </AlertDescription>
+          </Box>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
-    <Card mt={4} bg="rgba(255,255,255,0.92)" boxShadow="0 4px 32px 0 rgba(36,0,70,0.12)">
-      <CardBody fontFamily="Quicksand, sans-serif" color="deepPurple.900">
-        <Heading size="md" mb={2} color="deepPurple.700" fontFamily="Cormorant Garamond, serif">
-          Natal Chart
-        </Heading>
-        <Text mb={2} color="deepPurple.800" fontWeight="medium">
-          Latitude: {typeof chart.latitude === 'number' && !isNaN(chart.latitude) ? chart.latitude.toFixed(2) : ''}° | Longitude: {typeof chart.longitude === 'number' && !isNaN(chart.longitude) ? chart.longitude.toFixed(2) : ''}° | Timezone: {chart.timezone}
-        </Text>
-        <Text mb={2} color="deepPurple.800" fontWeight="medium">Julian Day: {chart.julian_day}</Text>
-        <Accordion allowToggle>
-          <AccordionItem>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
-                Planets
-              </Box>
-              <AccordionIcon color="deepPurple.800" />
-            </AccordionButton>
-            <AccordionPanel>
-              <Table size="sm" variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th color="deepPurple.800" fontWeight="bold">Planet</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">Sign</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">House</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">Retrograde</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {Object.entries(planets).length > 0 ? (
-                    Object.entries(planets).map(([point, data]) => (
-                      <Tr key={point}>
-                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
-                          <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
-                        </Td>
-                        <Td borderColor="gold">
-                          <Box display="flex" alignItems="center">
-                            <Text as="span" fontWeight="bold" color="deepPurple.900">
-                              {data && typeof data.position === 'number' ? getZodiacSign(data.position) : 'N/A'}
-                            </Text>
-                          </Box>
-                        </Td>
-                        <Td borderColor="gold">
-                          <Text as="span" color="deepPurple.900" fontWeight="bold">
-                            {data && typeof data.position === 'number' && chart.houses ? 
-                              getHouseForPlanet(data.position, chart.houses) : 'N/A'}
-                          </Text>
-                        </Td>
-                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">{data && data.retrograde ? "℞" : "—"}</Td>
+    <div className="mt-6" data-testid="chart-display">
+      <Card className="cosmic-card-premium" borderRadius="2xl">
+        <CardBody className="p-6 lg:p-8">
+          {/* Header Section */}
+          <div className="space-y-6 mb-8">
+            <div className="text-center space-y-4">
+              <Heading 
+                size="lg" 
+                className="cosmic-heading text-center"
+              >
+                🌟 Your Natal Chart
+              </Heading>
+              
+              {/* Chart Information */}
+              <div className="cosmic-card bg-purple-50/10 p-4 lg:p-6 rounded-xl border border-purple-300/30">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap justify-center gap-4 lg:gap-8 text-sm lg:text-base">
+                    <Text className="cosmic-text font-semibold">
+                      <strong>Latitude:</strong> {chartInfo?.latitude}°
+                    </Text>
+                    <Text className="cosmic-text font-semibold">
+                      <strong>Longitude:</strong> {chartInfo?.longitude}°
+                    </Text>
+                    <Text className="cosmic-text font-semibold">
+                      <strong>Timezone:</strong> {chartInfo?.timezone}
+                    </Text>
+                  </div>
+                  <Text className="cosmic-text text-sm text-center opacity-80">
+                    Julian Day: {chartInfo?.julianDay}
+                  </Text>
+                </div>
+              </div>
+
+              {/* Save Chart Button */}
+              {user && onSaveChart && (
+                <div className="flex justify-center">
+                  <Button
+                    className="cosmic-button-secondary"
+                    size="lg"
+                    onClick={handleSaveChart}
+                    leftIcon={<Text>💾</Text>}
+                  >
+                    Save Chart
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Chart Sections */}
+          <Accordion allowMultiple defaultIndex={[0]} className="space-y-6">
+            {/* Planets Section */}
+            <AccordionItem className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
+              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6">
+                <Box flex="1" textAlign="left">
+                  <HStack spacing={3}>
+                    <Text fontSize="2xl">🪐</Text>
+                    <Text className="cosmic-subheading text-lg lg:text-xl mb-0">
+                      Planets ({planetEntries.length})
+                    </Text>
+                  </HStack>
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel className="p-0">
+                {planetEntries.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table size="sm" variant="enhanced" className="enhanced-table">
+                      <Thead>
+                        <Tr>
+                          <Th className="min-w-32">Planet</Th>
+                          <Th className="min-w-40">Sign & Position</Th>
+                          <Th className="min-w-24">House</Th>
+                          <Th className="min-w-20">Motion</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {planetEntries.map(([point, data]) => (
+                          <PlanetRow 
+                            key={point} 
+                            point={point} 
+                            data={data} 
+                            houses={chart.houses}
+                          />
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="p-6">
+                    <Alert status="warning" className="alert-warning">
+                      <AlertIcon />
+                      No planet data available
+                    </Alert>
+                  </div>
+                )}
+              </AccordionPanel>
+            </AccordionItem>
+
+            {/* Houses Section */}
+            <AccordionItem className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
+              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6">
+                <Box flex="1" textAlign="left">
+                  <HStack spacing={3}>
+                    <Text fontSize="2xl">🏠</Text>
+                    <Text className="cosmic-subheading text-lg lg:text-xl mb-0">
+                      Houses ({chart.houses?.length || 0})
+                    </Text>
+                  </HStack>
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel className="p-0">
+                <div className="overflow-x-auto">
+                  <Table size="sm" variant="enhanced" className="enhanced-table">
+                    <Thead>
+                      <Tr>
+                        <Th className="min-w-24">House</Th>
+                        <Th className="min-w-40">Cusp Sign</Th>
+                        <Th className="min-w-32">Degree</Th>
                       </Tr>
-                    ))
-                  ) : (
-                    <Tr>
-                      <Td colSpan={4} textAlign="center">
-                        <Text color="red.500">No planet data available</Text>
-                      </Td>
-                    </Tr>
-                  )}
-                </Tbody>
-              </Table>
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
-                Houses
-              </Box>
-              <AccordionIcon color="deepPurple.800" />
-            </AccordionButton>
-            <AccordionPanel>
-              <Table size="sm" variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th color="deepPurple.800" fontWeight="bold">House</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">Cusp</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {(chart.houses && Array.isArray(chart.houses) && chart.houses.length > 0) ? (
-                    chart.houses.map((house, index) => (
-                      <Tr key={index}>
-                        <Td borderColor="gold" fontWeight="bold" color="deepPurple.900">{house && house.house ? house.house : index + 1}</Td>
-                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
-                          {house && typeof house.cusp === 'number' && !isNaN(house.cusp) ? 
-                            `${house.cusp.toFixed(2)}°` : 'N/A'}
-                        </Td>
+                    </Thead>
+                    <Tbody>
+                      {(chart.houses || []).map((house, index) => {
+                        const sign = getZodiacSign(house.cusp);
+                        return (
+                          <Tr key={index}>
+                            <Td>
+                              <Badge className="cosmic-badge-primary">House {house.house}</Badge>
+                            </Td>
+                            <Td>
+                              <HStack spacing={2}>
+                                <Text fontSize="lg" color={sign.color}>
+                                  {sign.symbol}
+                                </Text>
+                                <Text className="font-semibold text-white">{sign.name}</Text>
+                              </HStack>
+                            </Td>
+                            <Td className="text-white/80 font-mono">
+                              {formatDegree(house.cusp)}
+                            </Td>
+                          </Tr>
+                        );
+                      })}
+                    </Tbody>
+                  </Table>
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+
+            {/* Angles Section */}
+            <AccordionItem className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
+              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6">
+                <Box flex="1" textAlign="left">
+                  <HStack spacing={3}>
+                    <Text fontSize="2xl">📐</Text>
+                    <Text className="cosmic-subheading text-lg lg:text-xl mb-0">
+                      Angles ({Object.keys(chart.angles || {}).length})
+                    </Text>
+                  </HStack>
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel className="p-0">
+                <div className="overflow-x-auto">
+                  <Table size="sm" variant="enhanced" className="enhanced-table">
+                    <Thead>
+                      <Tr>
+                        <Th className="min-w-32">Angle</Th>
+                        <Th className="min-w-32">Sign</Th>
+                        <Th className="min-w-32">Position</Th>
                       </Tr>
-                    ))
-                  ) : (
-                    <Tr>
-                      <Td colSpan={2} borderColor="gold" textAlign="center" color="deepPurple.800" fontWeight="medium">
-                        No house data available
-                      </Td>
-                    </Tr>
-                  )}
-                </Tbody>
-              </Table>
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
-                Angles
-              </Box>
-              <AccordionIcon color="deepPurple.800" />
-            </AccordionButton>
-            <AccordionPanel>
-              <Table size="sm" variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th color="deepPurple.800" fontWeight="bold">Angle</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">Degree</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {Object.entries(chart.angles || {}).map(([angle, degree]) => (
-                    <Tr key={angle}>
-                      <Td borderColor="gold" fontWeight="bold" color="deepPurple.900">{planetSymbols[angle] || angle}</Td>
-                      <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">{typeof degree === 'number' && !isNaN(degree) ? degree.toFixed(2) : ''}°</Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
-                Aspects
-              </Box>
-              <AccordionIcon color="deepPurple.800" />
-            </AccordionButton>
-            <AccordionPanel>
-              <Table size="sm" variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th color="deepPurple.800" fontWeight="bold">Aspect</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">Point 1</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">Point 2</Th>
-                    <Th color="deepPurple.800" fontWeight="bold">Orb</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {(chart.aspects && Array.isArray(chart.aspects) && chart.aspects.length > 0) ? (
-                    chart.aspects.map((aspect, index) => (
-                      <Tr key={index}>
-                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
-                          <b>{aspect && aspect.aspect ? aspect.aspect : 'Unknown'}</b>
-                        </Td>
-                        <Td borderColor="gold">
-                          <Box>
-                            <Text as="span" color="deepPurple.900" fontWeight="bold">
-                              <b>{aspect && aspect.point1 ? (planetSymbols[aspect.point1] || aspect.point1) : 'Unknown'}</b>{' '}
-                              {aspect && aspect.point1 ? (aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)) : ''}
-                            </Text>
-                            {aspect && aspect.point1_sign && (
-                              <Text as="span" color="deepPurple.700" ml={2} fontWeight="bold">{aspect.point1_sign}</Text>
-                            )}
-                            {aspect && aspect.point1_house && (
-                              <Text as="span" color="blue.700" ml={2} fontWeight="bold">House {aspect.point1_house}</Text>
-                            )}
-                          </Box>
-                        </Td>
-                        <Td borderColor="gold">
-                          <Box>
-                            <Text as="span" color="deepPurple.900" fontWeight="bold">
-                              <b>{aspect && aspect.point2 ? (planetSymbols[aspect.point2] || aspect.point2) : 'Unknown'}</b>{' '}
-                              {aspect && aspect.point2 ? (aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)) : ''}
-                            </Text>
-                            {aspect && aspect.point2_sign && (
-                              <Text as="span" color="deepPurple.700" ml={2} fontWeight="bold">{aspect.point2_sign}</Text>
-                            )}
-                            {aspect && aspect.point2_house && (
-                              <Text as="span" color="blue.700" ml={2} fontWeight="bold">House {aspect.point2_house}</Text>
-                            )}
-                          </Box>
-                        </Td>
-                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
-                          {aspect && typeof aspect.orb === 'number' && !isNaN(aspect.orb) ? 
-                            `${aspect.orb.toFixed(2)}°` : 'N/A'}
-                        </Td>
-                      </Tr>
-                    ))
-                  ) : (
-                    <Tr>
-                      <Td colSpan={4} borderColor="gold" textAlign="center" color="gray.500">
-                        No aspect data available
-                      </Td>
-                    </Tr>
-                  )}
-                </Tbody>
-              </Table>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-        {user && (
-          <Button
-            mt={6}
-            variant="gold"
-            size="lg"
-            borderRadius="full"
-            fontWeight="bold"
-            onClick={onSaveChart}
-            alignSelf="center"
-          >
-            Save Chart
-          </Button>
-        )}
-      </CardBody>
-    </Card>
+                    </Thead>
+                    <Tbody>
+                      {Object.entries(chart.angles || {}).map(([angle, degree]) => {
+                        const sign = getZodiacSign(degree);
+                        return (
+                          <Tr key={angle}>
+                            <Td>
+                              <HStack spacing={2}>
+                                <Text fontSize="lg" className="text-amber-400">
+                                  {planetSymbols[angle] || "⭐"}
+                                </Text>
+                                <Text className="font-semibold text-white">
+                                  {angle.toUpperCase().replace('_', ' ')}
+                                </Text>
+                              </HStack>
+                            </Td>
+                            <Td>
+                              <HStack spacing={2}>
+                                <Text fontSize="lg" color={sign.color}>
+                                  {sign.symbol}
+                                </Text>
+                                <Text className="text-white">{sign.name}</Text>
+                              </HStack>
+                            </Td>
+                            <Td className="text-white/80 font-mono">
+                              {formatDegree(degree)}
+                            </Td>
+                          </Tr>
+                        );
+                      })}
+                    </Tbody>
+                  </Table>
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+
+            {/* Aspects Section */}
+            <AccordionItem className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
+              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6">
+                <Box flex="1" textAlign="left">
+                  <HStack spacing={3}>
+                    <Text fontSize="2xl">⚹</Text>
+                    <Text className="cosmic-subheading text-lg lg:text-xl mb-0">
+                      Major Aspects ({aspectEntries.length})
+                    </Text>
+                  </HStack>
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel className="p-0">
+                {aspectEntries.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table size="sm" variant="enhanced" className="enhanced-table">
+                      <Thead>
+                        <Tr>
+                          <Th className="min-w-32">Planet 1</Th>
+                          <Th className="min-w-32">Aspect</Th>
+                          <Th className="min-w-32">Planet 2</Th>
+                          <Th className="min-w-24">Orb</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {aspectEntries.map((aspect, index) => (
+                          <AspectRow key={index} aspect={aspect} />
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="p-6">
+                    <Alert status="info" className="alert-info">
+                      <AlertIcon />
+                      No major aspects found within 8° orb
+                    </Alert>
+                  </div>
+                )}
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
+        </CardBody>
+      </Card>
+    </div>
   );
-};
+});
+
+ChartDisplay.displayName = 'ChartDisplay';
 
 export default ChartDisplay;
