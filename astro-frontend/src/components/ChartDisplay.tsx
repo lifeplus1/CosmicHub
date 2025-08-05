@@ -135,49 +135,49 @@ const ChartDisplay: React.FC<{ chart: ExtendedChartData | null; onSaveChart?: ()
         <Heading size="md" mb={2} color="deepPurple.700" fontFamily="Cormorant Garamond, serif">
           Natal Chart
         </Heading>
-        <Text mb={2} color="deepPurple.800">
+        <Text mb={2} color="deepPurple.800" fontWeight="medium">
           Latitude: {typeof chart.latitude === 'number' && !isNaN(chart.latitude) ? chart.latitude.toFixed(2) : ''}° | Longitude: {typeof chart.longitude === 'number' && !isNaN(chart.longitude) ? chart.longitude.toFixed(2) : ''}° | Timezone: {chart.timezone}
         </Text>
-        <Text mb={2} color="deepPurple.800">Julian Day: {chart.julian_day}</Text>
+        <Text mb={2} color="deepPurple.800" fontWeight="medium">Julian Day: {chart.julian_day}</Text>
         <Accordion allowToggle>
           <AccordionItem>
             <AccordionButton>
-              <Box flex="1" textAlign="left">
+              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
                 Planets
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="deepPurple.800" />
             </AccordionButton>
             <AccordionPanel>
               <Table size="sm" variant="simple">
                 <Thead>
                   <Tr>
-                    <Th>Planet</Th>
-                    <Th>Sign</Th>
-                    <Th>House</Th>
-                    <Th>Retrograde</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Planet</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Sign</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">House</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Retrograde</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {Object.entries(planets).length > 0 ? (
                     Object.entries(planets).map(([point, data]) => (
                       <Tr key={point}>
-                        <Td borderColor="gold">
+                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
                           <b>{planetSymbols[point] || point}</b> {point.charAt(0).toUpperCase() + point.slice(1)}
                         </Td>
                         <Td borderColor="gold">
                           <Box display="flex" alignItems="center">
-                            <Text as="span" fontWeight="bold" color="deepPurple.700">
+                            <Text as="span" fontWeight="bold" color="deepPurple.900">
                               {data && typeof data.position === 'number' ? getZodiacSign(data.position) : 'N/A'}
                             </Text>
                           </Box>
                         </Td>
                         <Td borderColor="gold">
-                          <Text as="span" color="gold.200">
+                          <Text as="span" color="deepPurple.900" fontWeight="bold">
                             {data && typeof data.position === 'number' && chart.houses ? 
                               getHouseForPlanet(data.position, chart.houses) : 'N/A'}
                           </Text>
                         </Td>
-                        <Td borderColor="gold">{data && data.retrograde ? "℞" : "—"}</Td>
+                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">{data && data.retrograde ? "℞" : "—"}</Td>
                       </Tr>
                     ))
                   ) : (
@@ -193,25 +193,25 @@ const ChartDisplay: React.FC<{ chart: ExtendedChartData | null; onSaveChart?: ()
           </AccordionItem>
           <AccordionItem>
             <AccordionButton>
-              <Box flex="1" textAlign="left">
+              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
                 Houses
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="deepPurple.800" />
             </AccordionButton>
             <AccordionPanel>
               <Table size="sm" variant="simple">
                 <Thead>
                   <Tr>
-                    <Th>House</Th>
-                    <Th>Cusp</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">House</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Cusp</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {(chart.houses && Array.isArray(chart.houses) && chart.houses.length > 0) ? (
                     chart.houses.map((house, index) => (
                       <Tr key={index}>
-                        <Td borderColor="gold">{house && house.house ? house.house : index + 1}</Td>
-                        <Td borderColor="gold">
+                        <Td borderColor="gold" fontWeight="bold" color="deepPurple.900">{house && house.house ? house.house : index + 1}</Td>
+                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
                           {house && typeof house.cusp === 'number' && !isNaN(house.cusp) ? 
                             `${house.cusp.toFixed(2)}°` : 'N/A'}
                         </Td>
@@ -230,24 +230,24 @@ const ChartDisplay: React.FC<{ chart: ExtendedChartData | null; onSaveChart?: ()
           </AccordionItem>
           <AccordionItem>
             <AccordionButton>
-              <Box flex="1" textAlign="left">
+              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
                 Angles
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="deepPurple.800" />
             </AccordionButton>
             <AccordionPanel>
               <Table size="sm" variant="simple">
                 <Thead>
                   <Tr>
-                    <Th>Angle</Th>
-                    <Th>Degree</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Angle</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Degree</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {Object.entries(chart.angles || {}).map(([angle, degree]) => (
                     <Tr key={angle}>
-                      <Td borderColor="gold">{planetSymbols[angle] || angle}</Td>
-                      <Td borderColor="gold">{typeof degree === 'number' && !isNaN(degree) ? degree.toFixed(2) : ''}°</Td>
+                      <Td borderColor="gold" fontWeight="bold" color="deepPurple.900">{planetSymbols[angle] || angle}</Td>
+                      <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">{typeof degree === 'number' && !isNaN(degree) ? degree.toFixed(2) : ''}°</Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -256,53 +256,57 @@ const ChartDisplay: React.FC<{ chart: ExtendedChartData | null; onSaveChart?: ()
           </AccordionItem>
           <AccordionItem>
             <AccordionButton>
-              <Box flex="1" textAlign="left">
+              <Box flex="1" textAlign="left" color="deepPurple.900" fontWeight="bold">
                 Aspects
               </Box>
-              <AccordionIcon />
+              <AccordionIcon color="deepPurple.800" />
             </AccordionButton>
             <AccordionPanel>
               <Table size="sm" variant="simple">
                 <Thead>
                   <Tr>
-                    <Th>Aspect</Th>
-                    <Th>Point 1</Th>
-                    <Th>Point 2</Th>
-                    <Th>Orb</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Aspect</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Point 1</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Point 2</Th>
+                    <Th color="deepPurple.800" fontWeight="bold">Orb</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {(chart.aspects && Array.isArray(chart.aspects) && chart.aspects.length > 0) ? (
                     chart.aspects.map((aspect, index) => (
                       <Tr key={index}>
-                        <Td borderColor="gold">
+                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
                           <b>{aspect && aspect.aspect ? aspect.aspect : 'Unknown'}</b>
                         </Td>
                         <Td borderColor="gold">
                           <Box>
-                            <b>{aspect && aspect.point1 ? (planetSymbols[aspect.point1] || aspect.point1) : 'Unknown'}</b>{' '}
-                            {aspect && aspect.point1 ? (aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)) : ''}
+                            <Text as="span" color="deepPurple.900" fontWeight="bold">
+                              <b>{aspect && aspect.point1 ? (planetSymbols[aspect.point1] || aspect.point1) : 'Unknown'}</b>{' '}
+                              {aspect && aspect.point1 ? (aspect.point1.charAt(0).toUpperCase() + aspect.point1.slice(1)) : ''}
+                            </Text>
                             {aspect && aspect.point1_sign && (
-                              <Text as="span" color="gold.200" ml={2}>{aspect.point1_sign}</Text>
+                              <Text as="span" color="deepPurple.700" ml={2} fontWeight="bold">{aspect.point1_sign}</Text>
                             )}
                             {aspect && aspect.point1_house && (
-                              <Text as="span" color="teal.200" ml={2}>House {aspect.point1_house}</Text>
+                              <Text as="span" color="blue.700" ml={2} fontWeight="bold">House {aspect.point1_house}</Text>
                             )}
                           </Box>
                         </Td>
                         <Td borderColor="gold">
                           <Box>
-                            <b>{aspect && aspect.point2 ? (planetSymbols[aspect.point2] || aspect.point2) : 'Unknown'}</b>{' '}
-                            {aspect && aspect.point2 ? (aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)) : ''}
+                            <Text as="span" color="deepPurple.900" fontWeight="bold">
+                              <b>{aspect && aspect.point2 ? (planetSymbols[aspect.point2] || aspect.point2) : 'Unknown'}</b>{' '}
+                              {aspect && aspect.point2 ? (aspect.point2.charAt(0).toUpperCase() + aspect.point2.slice(1)) : ''}
+                            </Text>
                             {aspect && aspect.point2_sign && (
-                              <Text as="span" color="gold.200" ml={2}>{aspect.point2_sign}</Text>
+                              <Text as="span" color="deepPurple.700" ml={2} fontWeight="bold">{aspect.point2_sign}</Text>
                             )}
                             {aspect && aspect.point2_house && (
-                              <Text as="span" color="teal.200" ml={2}>House {aspect.point2_house}</Text>
+                              <Text as="span" color="blue.700" ml={2} fontWeight="bold">House {aspect.point2_house}</Text>
                             )}
                           </Box>
                         </Td>
-                        <Td borderColor="gold">
+                        <Td borderColor="gold" color="deepPurple.900" fontWeight="bold">
                           {aspect && typeof aspect.orb === 'number' && !isNaN(aspect.orb) ? 
                             `${aspect.orb.toFixed(2)}°` : 'N/A'}
                         </Td>

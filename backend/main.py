@@ -102,6 +102,7 @@ app.add_middleware(
         "http://localhost:5177",  # Previous frontend port
         "http://localhost:5174",
         "http://localhost:5173",
+        "http://localhost:8080",  # New frontend port
         "http://localhost:3000",
         "https://astrology-app-pied.vercel.app",  # Astrology frontend
         "https://healwave.yourdomain.com",  # HealWave frontend (update with actual domain)

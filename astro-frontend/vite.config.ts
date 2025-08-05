@@ -10,6 +10,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 2000, // size in KB
   },
   server: {
+    port: 8080,
     proxy: {
       '/api': {
         target: 'https://astrology-app-0emh.onrender.com',

@@ -1,6 +1,6 @@
 import swisseph as swe
 import logging
-from typing import TypedDict, List, Any, Tuple
+from typing import TypedDict, List
 
 logger = logging.getLogger(__name__)
 
