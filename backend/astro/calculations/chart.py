@@ -203,10 +203,10 @@ def calculate_multi_system_chart(year: int, month: int, day: int, hour: int, min
                 "description": "Vedic astrology uses the sidereal zodiac and focuses on karma, dharma, and spiritual evolution"
             },
             "chinese": {
-            "chinese": {
                 **chinese_data,
                 "description": "Chinese astrology calculation not available"
             },
+            "mayan": {
                 **mayan_data,
                 "description": "Mayan astrology using the 260-day sacred calendar (Tzolkin) and Long Count system"
             },
