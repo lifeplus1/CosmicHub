@@ -230,7 +230,7 @@ const NumerologyCalculator: React.FC = () => {
               </HStack>
             </CardHeader>
             <CardBody pt={0}>
-              <Text fontSize="sm" color="gray.600">
+              <Text fontSize="sm" color="whiteAlpha.800">
                 {data.meaning}
               </Text>
             </CardBody>
@@ -329,7 +329,7 @@ const NumerologyCalculator: React.FC = () => {
                     {'meaning' in systemData && systemData.meaning && (
                       <Box>
                         <Text fontWeight="semibold">Meaning:</Text>
-                        <Text fontSize="sm" color="gray.600">{systemData.meaning}</Text>
+                        <Text fontSize="sm" color="whiteAlpha.800">{systemData.meaning}</Text>
                       </Box>
                     )}
                     
@@ -375,7 +375,7 @@ const NumerologyCalculator: React.FC = () => {
                 {'meaning' in systemData && systemData.meaning && (
                   <Box>
                     <Text fontWeight="semibold">Meaning:</Text>
-                    <Text fontSize="sm" color="gray.600">{systemData.meaning}</Text>
+                    <Text fontSize="sm" color="whiteAlpha.800">{systemData.meaning}</Text>
                   </Box>
                 )}
                 
@@ -400,7 +400,7 @@ const NumerologyCalculator: React.FC = () => {
           <Heading size="xl" mb={4} bgGradient="linear(to-r, purple.600, pink.600)" bgClip="text">
             🔢 Numerology Calculator
           </Heading>
-          <Text color="gray.600" maxW="2xl" mx="auto">
+          <Text color="whiteAlpha.800" maxW="2xl" mx="auto">
             Discover the hidden meanings in your name and birth date through the ancient wisdom of numerology.
             Explore Pythagorean and Chaldean systems for comprehensive insights.
           </Text>
@@ -499,7 +499,7 @@ const NumerologyCalculator: React.FC = () => {
         {loading && (
           <Box textAlign="center" py={8}>
             <Spinner size="xl" color="purple.500" thickness="4px" />
-            <Text mt={4} color="gray.600">Calculating your numerological profile...</Text>
+            <Text mt={4} color="whiteAlpha.800">Calculating your numerological profile...</Text>
           </Box>
         )}
 
@@ -537,7 +537,7 @@ const NumerologyCalculator: React.FC = () => {
                     </HStack>
                   </CardHeader>
                   <CardBody>
-                    <Text color="gray.600">{result.personal_year.meaning}</Text>
+                    <Text color="whiteAlpha.800">{result.personal_year.meaning}</Text>
                   </CardBody>
                 </Card>
               </TabPanel>

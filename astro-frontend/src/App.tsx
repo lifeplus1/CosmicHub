@@ -20,6 +20,7 @@ import TermsOfService from './components/TermsOfService';
 import Contact from './components/Contact';
 import ChartCalculator from './components/ChartCalculator';
 import NumerologyCalculator from './components/NumerologyCalculator';
+import HumanDesignGeneKeys from './components/HumanDesignGeneKeys';
 import { AuthProvider } from './contexts/AuthContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import PricingPage from './components/PricingPage';
@@ -318,6 +319,7 @@ function MainApp() {
           <Route path="/profile" element={user ? <UserProfile /> : <Navigate to="/login" />} />
           <Route path="/calculator" element={<ChartCalculator />} />
           <Route path="/numerology" element={<NumerologyCalculator />} />
+          <Route path="/human-design" element={<HumanDesignGeneKeys />} />
           <Route path="/premium" element={<PricingPage />} />
           <Route path="/synastry" element={<SynastryTest />} />
           <Route path="/pdf-export" element={<PDFExportTest />} />

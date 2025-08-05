@@ -169,7 +169,7 @@ export const UserProfile: React.FC = () => {
                       {userTier.toUpperCase()}
                     </Badge>
                   </HStack>
-                  <Text color="gray.600" fontSize="lg">
+                  <Text color="whiteAlpha.800" fontSize="lg">
                     {user.email}
                   </Text>
                   <Text color="gray.500" fontSize="sm">
@@ -383,7 +383,7 @@ export const UserProfile: React.FC = () => {
                         <Box w="full">
                           <HStack justify="space-between" mb={2}>
                             <Text fontWeight="medium">Charts Calculated</Text>
-                            <Text fontSize="sm" color="gray.600">
+                            <Text fontSize="sm" color="whiteAlpha.800">
                               {chartsUsage.current}{chartsUsage.limit > 0 ? ` / ${chartsUsage.limit}` : ' (Unlimited)'}
                             </Text>
                           </HStack>
@@ -402,7 +402,7 @@ export const UserProfile: React.FC = () => {
                         <Box w="full">
                           <HStack justify="space-between" mb={2}>
                             <Text fontWeight="medium">Saved Charts</Text>
-                            <Text fontSize="sm" color="gray.600">
+                            <Text fontSize="sm" color="whiteAlpha.800">
                               {savedUsage.current}{savedUsage.limit > 0 ? ` / ${savedUsage.limit}` : ' (Unlimited)'}
                             </Text>
                           </HStack>
@@ -447,7 +447,7 @@ export const UserProfile: React.FC = () => {
                             </HStack>
                             <List spacing={1}>
                               {tierData.features.slice(0, 3).map((feature, index) => (
-                                <ListItem key={index} fontSize="sm" color="gray.600">
+                                <ListItem key={index} fontSize="sm" color="whiteAlpha.800">
                                   • {feature}
                                 </ListItem>
                               ))}
@@ -471,7 +471,7 @@ export const UserProfile: React.FC = () => {
                       <VStack spacing={4} align="stretch">
                         <HStack justify="space-between">
                           <Text fontWeight="medium">Email Address</Text>
-                          <Text color="gray.600">{user.email}</Text>
+                          <Text color="whiteAlpha.800">{user.email}</Text>
                         </HStack>
                         <HStack justify="space-between">
                           <Text fontWeight="medium">Email Verified</Text>

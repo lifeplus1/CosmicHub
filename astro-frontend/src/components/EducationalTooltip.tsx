@@ -44,7 +44,7 @@ export const EducationalTooltip: React.FC<EducationalTooltipProps> = ({
           </Badge>
         )}
       </HStack>
-      <Text fontSize="xs" color="gray.600">{description}</Text>
+      <Text fontSize="xs" color="whiteAlpha.800">{description}</Text>
       {examples.length > 0 && (
         <VStack spacing={1} align="start" w="full">
           <Text fontSize="xs" fontWeight="bold">Examples:</Text>

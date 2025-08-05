@@ -150,7 +150,7 @@ export const MockLoginPanel: React.FC = () => {
           <Heading size="lg" color="purple.600" mb={2}>
             🧪 Mock Login Panel
           </Heading>
-          <Text color="gray.600" fontSize="sm">
+          <Text color="whiteAlpha.800" fontSize="sm">
             Quick login for testing different subscription tiers
           </Text>
         </Box>
@@ -181,7 +181,7 @@ export const MockLoginPanel: React.FC = () => {
                         <Heading size="md" color={`${getTierColor(mockUser.tier)}.600`}>
                           {mockUser.displayName}
                         </Heading>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color="whiteAlpha.800">
                           {mockUser.description}
                         </Text>
                       </VStack>
@@ -213,7 +213,7 @@ export const MockLoginPanel: React.FC = () => {
                     </Text>
                     <VStack spacing={1} align="start">
                       {mockUser.features.map((feature, index) => (
-                        <Text key={index} fontSize="xs" color="gray.600">
+                        <Text key={index} fontSize="xs" color="whiteAlpha.800">
                           • {feature}
                         </Text>
                       ))}

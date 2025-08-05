@@ -248,7 +248,7 @@ export const AIInterpretation: React.FC<AIInterpretationProps> = ({ chartData })
             <Heading size="xl" mb={4} color="purple.600">
               🧠 AI-Powered Astrological Analysis
             </Heading>
-            <Text fontSize="lg" color="gray.600">
+            <Text fontSize="lg" color="whiteAlpha.800">
               Advanced artificial intelligence interpretation of your birth chart
             </Text>
           </Box>
@@ -610,7 +610,7 @@ export const AIInterpretation: React.FC<AIInterpretationProps> = ({ chartData })
                           <Text fontSize="sm">
                             <strong>Mastery Challenge:</strong> {interpretation.growth_challenges.saturn_lessons.mastery_challenge}
                           </Text>
-                          <Text fontSize="sm" color="gray.600">
+                          <Text fontSize="sm" color="whiteAlpha.800">
                             {interpretation.growth_challenges.saturn_lessons.growth_timeline}
                           </Text>
                         </VStack>
@@ -808,7 +808,7 @@ export const AIInterpretation: React.FC<AIInterpretationProps> = ({ chartData })
                       </CardHeader>
                       <CardBody>
                         <VStack align="start" spacing={3}>
-                          <Text fontSize="sm" color="gray.600">
+                          <Text fontSize="sm" color="whiteAlpha.800">
                             Planets with the most aspects (most important for integration):
                           </Text>
                           <HStack wrap="wrap" spacing={2}>

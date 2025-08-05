@@ -128,6 +128,9 @@ export default function Navbar() {
               <Button variant="ethereal" size="md" onClick={() => navigate('/numerology')}>
                 🔢 Numerology
               </Button>
+              <Button variant="ethereal" size="md" onClick={() => navigate('/human-design')}>
+                🔮 Human Design & Gene Keys
+              </Button>
               <Button variant="ethereal" size="md" onClick={() => openGuide(0)}>
                 📚 Learn
               </Button>
@@ -190,6 +193,9 @@ export default function Navbar() {
               </Button>
               <Button variant="ethereal" size="md" onClick={() => navigate('/numerology')}>
                 🔢 Numerology
+              </Button>
+              <Button variant="ethereal" size="md" onClick={() => navigate('/human-design')}>
+                🔮 Human Design & Gene Keys
               </Button>
               <Button variant="ethereal" size="md" onClick={() => openGuide(0)}>
                 📚 Learn

@@ -137,7 +137,7 @@ export const AIInterpretationTest: React.FC = () => {
                 </Heading>
                 <Icon as={FaBrain} color="cyan.500" boxSize={8} />
               </HStack>
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
+              <Text fontSize="lg" color="whiteAlpha.800" maxW="2xl">
                 Unlock deep astrological insights with advanced AI-powered interpretation and personalized guidance
               </Text>
               <Badge colorScheme="gold" size="lg" px={4} py={2}>
@@ -177,7 +177,7 @@ export const AIInterpretationTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="cyan.600" mb={2}>
                             Analysis Types:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Personality: Core traits & tendencies<br/>
                             • Career: Professional path insights<br/>
                             • Relationships: Compatibility patterns<br/>
@@ -190,7 +190,7 @@ export const AIInterpretationTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="cyan.600" mb={2}>
                             AI Capabilities:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Synthesizes multiple chart factors<br/>
                             • Identifies complex patterns<br/>
                             • Provides nuanced interpretations<br/>
@@ -203,7 +203,7 @@ export const AIInterpretationTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="cyan.600" mb={2}>
                             Best Questions:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • "What does my chart say about...?"<br/>
                             • "How can I work with my..."<br/>
                             • "What timing is best for...?"<br/>
@@ -247,6 +247,7 @@ export const AIInterpretationTest: React.FC = () => {
                       value={analysisType} 
                       onChange={(e) => setAnalysisType(e.target.value)}
                       size="lg"
+                      aria-label="Select AI analysis type"
                     >
                       <option value="personality">Deep Personality Analysis</option>
                       <option value="relationships">Relationship Patterns</option>
@@ -256,7 +257,7 @@ export const AIInterpretationTest: React.FC = () => {
                       <option value="comprehensive">Comprehensive Reading</option>
                     </Select>
                     
-                    <Text fontSize="sm" color="gray.600" textAlign="center">
+                    <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
                       Choose the type of AI interpretation you'd like to receive based on your birth chart
                     </Text>
                   </VStack>
@@ -468,7 +469,7 @@ export const AIInterpretationTest: React.FC = () => {
                       <Text fontWeight="bold">AI Processing Your Chart...</Text>
                     </HStack>
                     <Progress size="lg" colorScheme="cyan" isIndeterminate w="full" />
-                    <Text fontSize="sm" color="gray.600" textAlign="center">
+                    <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
                       Analyzing planetary positions, aspects, and cosmic patterns
                     </Text>
                   </VStack>

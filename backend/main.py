@@ -51,6 +51,8 @@ from astro.calculations.synastry import calculate_synastry_chart
 from astro.calculations.pdf_export import create_chart_pdf, create_synastry_pdf, create_multi_system_pdf
 from astro.calculations.transits import calculate_transits, calculate_lunar_transits
 from astro.calculations.ai_interpretations import generate_advanced_interpretation
+from astro.calculations.human_design import calculate_human_design
+from astro.calculations.gene_keys import calculate_gene_keys_profile, get_gene_key_details, get_daily_contemplation
 
 # Load .env file
 load_dotenv()
@@ -104,6 +106,7 @@ app.add_middleware(
         "http://localhost:5174",
         "http://localhost:5173",
         "http://localhost:8080",  # New frontend port
+        "http://localhost:8081",  # New frontend port
         "http://localhost:3000",
         "https://astrology-app-pied.vercel.app",  # Astrology frontend
         "https://healwave.yourdomain.com",  # HealWave frontend (update with actual domain)
@@ -190,6 +193,18 @@ class AIInterpretationData(BaseModel):
 
 class AIInterpretationResponse(BaseModel):
     interpretation: Dict[str, Any]
+
+class HumanDesignResponse(BaseModel):
+    human_design: Dict[str, Any]
+
+class GeneKeysResponse(BaseModel):
+    gene_keys: Dict[str, Any]
+
+class GeneKeyDetailsResponse(BaseModel):
+    gene_key: Dict[str, Any]
+
+class DailyContemplationResponse(BaseModel):
+    contemplation: Dict[str, Any]
 
 try:
     import stripe
@@ -582,6 +597,115 @@ async def generate_ai_interpretation(data: AIInterpretationData, request: Reques
     except Exception as e:
         logger.error(f"[{request_id}] AI interpretation error: {str(e)}", exc_info=True)
         raise HTTPException(500, f"AI interpretation failed: {str(e)}")
+
+@app.post("/calculate-human-design", response_model=HumanDesignResponse)
+async def calculate_human_design_endpoint(data: BirthData, request: Request):
+    """Calculate complete Human Design chart and analysis"""
+    request_id = str(uuid.uuid4())[:8]
+    rate_limiter(request)
+    
+    try:
+        logger.info(f"[{request_id}] Human Design calculation for: {data.model_dump()}")
+        
+        # Validate inputs
+        validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
+        
+        # Calculate Human Design chart
+        human_design_data = calculate_human_design(
+            data.year, data.month, data.day, data.hour, data.minute, 
+            data.lat or 0.0, data.lon or 0.0, data.timezone or "UTC"
+        )
+        
+        logger.info(f"[{request_id}] Human Design calculation completed successfully")
+        return HumanDesignResponse(human_design=human_design_data)
+        
+    except ValueError as e:
+        logger.error(f"[{request_id}] Validation error in Human Design: {str(e)}", exc_info=True)
+        raise HTTPException(400, f"Invalid input: {str(e)}")
+    except Exception as e:
+        logger.error(f"[{request_id}] Unexpected error in Human Design: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Human Design calculation failed: {str(e)}")
+
+@app.post("/calculate-gene-keys", response_model=GeneKeysResponse)
+async def calculate_gene_keys_endpoint(data: BirthData, request: Request):
+    """Calculate complete Gene Keys profile including all sequences"""
+    request_id = str(uuid.uuid4())[:8]
+    rate_limiter(request)
+    
+    try:
+        logger.info(f"[{request_id}] Gene Keys calculation for: {data.model_dump()}")
+        
+        # Validate inputs
+        validate_inputs(data.year, data.month, data.day, data.hour, data.minute, data.lat, data.lon, data.timezone, data.city)
+        
+        # Calculate Gene Keys profile
+        gene_keys_data = calculate_gene_keys_profile(
+            data.year, data.month, data.day, data.hour, data.minute,
+            data.lat or 0.0, data.lon or 0.0, data.timezone or "UTC"
+        )
+        
+        logger.info(f"[{request_id}] Gene Keys calculation completed successfully")
+        return GeneKeysResponse(gene_keys=gene_keys_data)
+        
+    except ValueError as e:
+        logger.error(f"[{request_id}] Validation error in Gene Keys: {str(e)}", exc_info=True)
+        raise HTTPException(400, f"Invalid input: {str(e)}")
+    except Exception as e:
+        logger.error(f"[{request_id}] Unexpected error in Gene Keys: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Gene Keys calculation failed: {str(e)}")
+
+@app.get("/gene-key/{gene_key_number}", response_model=GeneKeyDetailsResponse)
+async def get_gene_key_details_endpoint(gene_key_number: int, request: Request):
+    """Get detailed information about a specific Gene Key"""
+    request_id = str(uuid.uuid4())[:8]
+    rate_limiter(request)
+    
+    try:
+        logger.info(f"[{request_id}] Gene Key details request for: {gene_key_number}")
+        
+        if gene_key_number < 1 or gene_key_number > 64:
+            raise HTTPException(400, "Gene Key number must be between 1 and 64")
+        
+        # Get Gene Key details
+        gene_key_details = get_gene_key_details(gene_key_number)
+        
+        logger.info(f"[{request_id}] Gene Key details retrieved successfully")
+        return GeneKeyDetailsResponse(gene_key=gene_key_details)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[{request_id}] Error getting Gene Key details: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Failed to get Gene Key details: {str(e)}")
+
+@app.get("/daily-contemplation/{gene_key_number}", response_model=DailyContemplationResponse)
+async def get_daily_contemplation_endpoint(gene_key_number: int, request: Request):
+    """Get daily contemplation guidance for a specific Gene Key"""
+    request_id = str(uuid.uuid4())[:8]
+    rate_limiter(request)
+    
+    try:
+        logger.info(f"[{request_id}] Daily contemplation request for Gene Key: {gene_key_number}")
+        
+        if gene_key_number < 1 or gene_key_number > 64:
+            raise HTTPException(400, "Gene Key number must be between 1 and 64")
+        
+        # Get daily contemplation
+        contemplation = get_daily_contemplation(gene_key_number)
+        
+        logger.info(f"[{request_id}] Daily contemplation retrieved successfully")
+        return DailyContemplationResponse(contemplation=contemplation)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[{request_id}] Error getting daily contemplation: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Failed to get daily contemplation: {str(e)}")
+
+@app.get("/health")
+async def health_check(request: Request):
+    rate_limiter(request)
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     import uvicorn

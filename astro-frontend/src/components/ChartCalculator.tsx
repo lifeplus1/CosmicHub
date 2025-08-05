@@ -163,7 +163,7 @@ export default function ChartCalculator() {
                       <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                         Essential Data Needed:
                       </Text>
-                      <Text fontSize="xs" color="gray.600">
+                      <Text fontSize="xs" color="whiteAlpha.800">
                         • Exact birth date<br/>
                         • Birth time (hour & minute)<br/>
                         • Birth location (city/country)<br/>
@@ -175,7 +175,7 @@ export default function ChartCalculator() {
                       <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                         What You'll Discover:
                       </Text>
-                      <Text fontSize="xs" color="gray.600">
+                      <Text fontSize="xs" color="whiteAlpha.800">
                         • Your Sun, Moon, and Rising signs<br/>
                         • Planetary positions and aspects<br/>
                         • House placements<br/>
@@ -187,7 +187,7 @@ export default function ChartCalculator() {
                       <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                         Multi-System Analysis:
                       </Text>
-                      <Text fontSize="xs" color="gray.600">
+                      <Text fontSize="xs" color="whiteAlpha.800">
                         • Western tropical astrology<br/>
                         • Vedic sidereal system<br/>
                         • Chinese Four Pillars<br/>

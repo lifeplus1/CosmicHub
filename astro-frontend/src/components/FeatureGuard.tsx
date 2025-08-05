@@ -74,7 +74,7 @@ const FeatureGuard: React.FC<FeatureGuardProps> = ({
             <Text fontWeight="semibold" color="purple.600">
               {upgradeMessage || `Upgrade to ${tier.name} to unlock:`}
             </Text>
-            <Text fontSize="sm" color="gray.600">
+            <Text fontSize="sm" color="whiteAlpha.800">
               {feature}
             </Text>
           </VStack>

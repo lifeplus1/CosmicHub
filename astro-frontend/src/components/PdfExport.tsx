@@ -186,7 +186,7 @@ export const PdfExport: React.FC<PdfExportProps> = ({
         </CardHeader>
         <CardBody>
           <VStack spacing={4} align="stretch">
-            <Text color="gray.600">
+            <Text color="whiteAlpha.800">
               Generate professional PDF reports from your astrological data. 
               Premium feature includes detailed interpretations and formatting.
             </Text>

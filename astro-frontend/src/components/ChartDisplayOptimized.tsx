@@ -161,8 +161,8 @@ const PlanetRow = memo(({ point, data, houses }: {
           </VStack>
         </HStack>
       </Td>
-      <Td borderColor="gold">
-        <Badge colorScheme="purple" variant="solid" color="white">
+      <Td>
+        <Badge variant="cosmic" fontSize="sm">
           House {house}
         </Badge>
       </Td>
@@ -205,13 +205,13 @@ const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
 
   return (
     <Tr>
-      <Td borderColor="gold">
+      <Td>
         <HStack spacing={2}>
-          <Text color="deepPurple.900" fontWeight="bold">{planetSymbols[aspect.point1] || aspect.point1}</Text>
-          <Text fontWeight="bold" color="deepPurple.900">{aspect.point1.replace('_', ' ')}</Text>
+          <Text color="whiteAlpha.900" fontWeight="bold">{planetSymbols[aspect.point1] || aspect.point1}</Text>
+          <Text fontWeight="bold" color="whiteAlpha.900">{aspect.point1.replace('_', ' ')}</Text>
         </HStack>
       </Td>
-      <Td borderColor="gold">
+      <Td>
         <HStack spacing={2}>
           <Text fontSize="lg" color={getAspectColor(aspect.aspect)}>
             {getAspectSymbol(aspect.aspect)}
@@ -221,14 +221,17 @@ const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
           </Text>
         </HStack>
       </Td>
-      <Td borderColor="gold">
+      <Td>
         <HStack spacing={2}>
-          <Text color="deepPurple.900" fontWeight="bold">{planetSymbols[aspect.point2] || aspect.point2}</Text>
-          <Text fontWeight="bold" color="deepPurple.900">{aspect.point2.replace('_', ' ')}</Text>
+          <Text color="whiteAlpha.900" fontWeight="bold">{planetSymbols[aspect.point2] || aspect.point2}</Text>
+          <Text fontWeight="bold" color="whiteAlpha.900">{aspect.point2.replace('_', ' ')}</Text>
         </HStack>
       </Td>
-      <Td borderColor="gold">
-        <Badge colorScheme={aspect.orb < 2 ? 'green' : aspect.orb < 5 ? 'yellow' : 'gray'}>
+      <Td>
+        <Badge 
+          variant={aspect.orb < 2 ? 'solid' : 'cosmic'}
+          colorScheme={aspect.orb < 2 ? 'green' : aspect.orb < 5 ? 'yellow' : undefined}
+        >
           {aspect.orb.toFixed(2)}°
         </Badge>
       </Td>
@@ -393,7 +396,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
             </AccordionButton>
             <AccordionPanel pb={4}>
               {planetEntries.length > 0 ? (
-                <Table size="sm" variant="simple">
+                <Table size="sm" variant="cosmic">
                   <Thead>
                     <Tr>
                       <Th>Planet</Th>
@@ -440,7 +443,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              <Table size="sm" variant="simple">
+              <Table size="sm" variant="cosmic">
                 <Thead>
                   <Tr>
                     <Th>House</Th>
@@ -453,18 +456,18 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     const sign = getZodiacSign(house.cusp);
                     return (
                       <Tr key={index}>
-                        <Td borderColor="purple.200">
-                          <Badge colorScheme="purple" variant="solid" color="white">{house.house}</Badge>
+                        <Td>
+                          <Badge variant="cosmic" fontSize="sm">House {house.house}</Badge>
                         </Td>
-                        <Td borderColor="purple.200">
+                        <Td>
                           <HStack spacing={2}>
                             <Text fontSize="lg" color={sign.color}>
                               {sign.symbol}
                             </Text>
-                            <Text fontWeight="bold">{sign.name}</Text>
+                            <Text fontWeight="bold" color="whiteAlpha.900">{sign.name}</Text>
                           </HStack>
                         </Td>
-                        <Td borderColor="purple.200">
+                        <Td color="whiteAlpha.800">
                           {formatDegree(house.cusp)}
                         </Td>
                       </Tr>
@@ -493,7 +496,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel pb={4}>
-              <Table size="sm" variant="simple">
+              <Table size="sm" variant="cosmic">
                 <Thead>
                   <Tr>
                     <Th>Angle</Th>
@@ -506,23 +509,23 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     const sign = getZodiacSign(degree);
                     return (
                       <Tr key={angle}>
-                        <Td borderColor="purple.200">
+                        <Td>
                           <HStack spacing={2}>
                             <Text fontSize="lg">{planetSymbols[angle] || "⭐"}</Text>
-                            <Text fontWeight="bold">
+                            <Text fontWeight="bold" color="whiteAlpha.900">
                               {angle.toUpperCase().replace('_', ' ')}
                             </Text>
                           </HStack>
                         </Td>
-                        <Td borderColor="purple.200">
+                        <Td>
                           <HStack spacing={2}>
                             <Text fontSize="lg" color={sign.color}>
                               {sign.symbol}
                             </Text>
-                            <Text>{sign.name}</Text>
+                            <Text color="whiteAlpha.900">{sign.name}</Text>
                           </HStack>
                         </Td>
-                        <Td borderColor="purple.200">
+                        <Td color="whiteAlpha.800">
                           {formatDegree(degree)}
                         </Td>
                       </Tr>
@@ -552,7 +555,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
             </AccordionButton>
             <AccordionPanel pb={4}>
               {aspectEntries.length > 0 ? (
-                <Table size="sm" variant="simple">
+                <Table size="sm" variant="cosmic">
                   <Thead>
                     <Tr>
                       <Th>Planet 1</Th>

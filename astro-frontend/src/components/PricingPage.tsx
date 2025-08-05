@@ -71,7 +71,7 @@ const PricingPage: React.FC = () => {
           <Heading size="2xl" color="purple.600">
             Unlock Your Cosmic Potential
           </Heading>
-          <Text fontSize="xl" color="gray.600" maxW="2xl">
+          <Text fontSize="xl" color="whiteAlpha.800" maxW="2xl">
             From basic charts to comprehensive cosmic analysis. 
             Choose the plan that aligns with your astrological journey.
           </Text>
@@ -201,7 +201,7 @@ const PricingPage: React.FC = () => {
         </SimpleGrid>
 
         <VStack spacing={4} mt={16} textAlign="center">
-          <Text color="gray.600">
+          <Text color="whiteAlpha.800">
             All plans include our 7-day free trial. Cancel anytime.
           </Text>
           <Text fontSize="sm" color="gray.500">

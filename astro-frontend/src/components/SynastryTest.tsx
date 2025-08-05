@@ -80,7 +80,7 @@ export const SynastryTest: React.FC = () => {
                 </Heading>
                 <Icon as={FaHeart} color="pink.500" boxSize={8} />
               </HStack>
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
+              <Text fontSize="lg" color="whiteAlpha.800" maxW="2xl">
                 Discover the cosmic compatibility between two souls through advanced astrological synastry analysis
               </Text>
               <HStack spacing={4}>
@@ -119,7 +119,7 @@ export const SynastryTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                             Key Aspects to Look For:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Sun-Moon connections (emotional harmony)<br/>
                             • Venus-Mars aspects (romantic attraction)<br/>
                             • Mercury aspects (communication style)<br/>
@@ -131,7 +131,7 @@ export const SynastryTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                             What It Reveals:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Natural compatibility areas<br/>
                             • Potential challenges to work on<br/>
                             • Communication patterns<br/>
@@ -143,7 +143,7 @@ export const SynastryTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                             Remember:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Challenges can strengthen bonds<br/>
                             • Free will shapes relationships<br/>
                             • Synastry shows potential, not fate<br/>
@@ -312,10 +312,10 @@ export const SynastryTest: React.FC = () => {
                       <VStack spacing={4}>
                         <Box textAlign="center">
                           <Text fontSize="4xl" fontWeight="bold" color="purple.500">86%</Text>
-                          <Text color="gray.600">Cosmic Match Score</Text>
+                          <Text color="whiteAlpha.800">Cosmic Match Score</Text>
                         </Box>
                         <Progress value={86} colorScheme="purple" size="lg" borderRadius="full" />
-                        <Text fontSize="sm" textAlign="center" color="gray.600">
+                        <Text fontSize="sm" textAlign="center" color="whiteAlpha.800">
                           Excellent compatibility with strong potential for lasting connection
                         </Text>
                       </VStack>
@@ -387,7 +387,7 @@ export const SynastryTest: React.FC = () => {
                             ]}
                           />
                         </HStack>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color="whiteAlpha.800">
                           Your Venus-Mars connections indicate intense physical and emotional attraction. The fire-water element balance creates both passion and depth.
                         </Text>
                       </Box>
@@ -405,7 +405,7 @@ export const SynastryTest: React.FC = () => {
                             ]}
                           />
                         </HStack>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color="whiteAlpha.800">
                           Mercury aspects suggest you communicate on similar wavelengths, with potential for deep intellectual discussions and mutual understanding.
                         </Text>
                       </Box>
@@ -423,7 +423,7 @@ export const SynastryTest: React.FC = () => {
                             ]}
                           />
                         </HStack>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color="whiteAlpha.800">
                           Jupiter-Saturn connections indicate this relationship has strong foundations for growth and commitment over time.
                         </Text>
                       </Box>
@@ -441,7 +441,7 @@ export const SynastryTest: React.FC = () => {
                             ]}
                           />
                         </HStack>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color="whiteAlpha.800">
                           Focus on balancing independence with togetherness. Your individual Moon signs suggest different emotional needs that can be harmonized with awareness.
                         </Text>
                       </Box>

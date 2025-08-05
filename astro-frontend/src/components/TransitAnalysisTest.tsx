@@ -110,7 +110,7 @@ export const TransitAnalysisTest: React.FC = () => {
                 </Heading>
                 <Icon as={FaClock} color="purple.500" boxSize={8} />
               </HStack>
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
+              <Text fontSize="lg" color="whiteAlpha.800" maxW="2xl">
                 Discover the cosmic timing of your life through precise planetary transit analysis
               </Text>
               <Badge colorScheme="gold" size="lg" px={4} py={2}>
@@ -150,7 +150,7 @@ export const TransitAnalysisTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="purple.600" mb={2}>
                             What Transits Show:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Best times for career moves<br/>
                             • Relationship opportunities<br/>
                             • Creative breakthroughs<br/>
@@ -163,7 +163,7 @@ export const TransitAnalysisTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="purple.600" mb={2}>
                             Transit Types:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Conjunction: New beginnings<br/>
                             • Trine: Easy, beneficial energy<br/>
                             • Square: Challenges & growth<br/>
@@ -176,7 +176,7 @@ export const TransitAnalysisTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="purple.600" mb={2}>
                             Major Transits:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Jupiter: Expansion & luck<br/>
                             • Saturn: Structure & lessons<br/>
                             • Uranus: Change & innovation<br/>
@@ -227,7 +227,7 @@ export const TransitAnalysisTest: React.FC = () => {
                       <option value="2years">Next 2 Years</option>
                     </Select>
                     
-                    <Text fontSize="sm" color="gray.600" textAlign="center">
+                    <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
                       Select your preferred time frame for detailed transit predictions and cosmic timing analysis
                     </Text>
                   </VStack>
@@ -335,7 +335,7 @@ export const TransitAnalysisTest: React.FC = () => {
                                   {transit.energy}
                                 </Badge>
                               </HStack>
-                              <Text fontSize="sm" color="gray.600">{transit.date} • Duration: {transit.duration}</Text>
+                              <Text fontSize="sm" color="whiteAlpha.800">{transit.date} • Duration: {transit.duration}</Text>
                             </VStack>
                             <Badge colorScheme="purple" variant="outline">
                               {transit.impact} Impact
@@ -358,7 +358,7 @@ export const TransitAnalysisTest: React.FC = () => {
                     </CardHeader>
                     <CardBody textAlign="center">
                       <Text fontSize="sm">August 15-17, 2025</Text>
-                      <Text fontSize="xs" color="gray.600">Jupiter Trine Venus</Text>
+                      <Text fontSize="xs" color="whiteAlpha.800">Jupiter Trine Venus</Text>
                     </CardBody>
                   </Card>
 
@@ -369,7 +369,7 @@ export const TransitAnalysisTest: React.FC = () => {
                     </CardHeader>
                     <CardBody textAlign="center">
                       <Text fontSize="sm">September 3-10, 2025</Text>
-                      <Text fontSize="xs" color="gray.600">Saturn Sextile Sun</Text>
+                      <Text fontSize="xs" color="whiteAlpha.800">Saturn Sextile Sun</Text>
                     </CardBody>
                   </Card>
 
@@ -380,7 +380,7 @@ export const TransitAnalysisTest: React.FC = () => {
                     </CardHeader>
                     <CardBody textAlign="center">
                       <Text fontSize="sm">September 18-30, 2025</Text>
-                      <Text fontSize="xs" color="gray.600">Pluto Trine Mercury</Text>
+                      <Text fontSize="xs" color="whiteAlpha.800">Pluto Trine Mercury</Text>
                     </CardBody>
                   </Card>
                 </SimpleGrid>

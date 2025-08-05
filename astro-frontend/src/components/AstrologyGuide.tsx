@@ -208,7 +208,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
-          <Tabs index={activeTab} onChange={setActiveTab} colorScheme="purple">
+          <Tabs index={activeTab} onChange={setActiveTab} variant="enclosed">
             <TabList>
               <Tab>Fundamentals</Tab>
               <Tab>Premium Features</Tab>
@@ -222,7 +222,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                 <VStack spacing={6} align="stretch">
                   <Box textAlign="center">
                     <Heading size="md" mb={2}>Astrology Fundamentals</Heading>
-                    <Text color="gray.600">
+                    <Text color="whiteAlpha.800">
                       Master the building blocks of astrological understanding
                     </Text>
                   </Box>
@@ -235,7 +235,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                             <Icon as={item.icon} color="purple.500" boxSize={6} />
                             <Heading size="sm">{item.title}</Heading>
                           </HStack>
-                          <Text fontSize="sm" color="gray.600" mt={2}>
+                          <Text fontSize="sm" color="whiteAlpha.800" mt={2}>
                             {item.description}
                           </Text>
                         </CardHeader>
@@ -260,7 +260,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                 <VStack spacing={6} align="stretch">
                   <Box textAlign="center">
                     <Heading size="md" mb={2}>Premium Astrology Features</Heading>
-                    <Text color="gray.600">
+                    <Text color="whiteAlpha.800">
                       Advanced tools for deeper astrological insights
                     </Text>
                   </Box>
@@ -274,13 +274,13 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                               <Icon as={feature.icon} color="purple.500" boxSize={6} />
                               <VStack align="start" spacing={0}>
                                 <Heading size="sm">{feature.title}</Heading>
-                                <Text fontSize="sm" color="gray.600">
+                                <Text fontSize="sm" color="whiteAlpha.800">
                                   {feature.description}
                                 </Text>
                               </VStack>
                             </HStack>
                             <Badge 
-                              colorScheme={feature.tier === 'Elite' ? 'gold' : 'purple'}
+                              variant={feature.tier === 'Elite' ? 'gold' : 'cosmic'}
                               size="sm"
                             >
                               {feature.tier === 'Elite' ? '👑' : '🌟'} {feature.tier}
@@ -290,8 +290,8 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                         <CardBody pt={0}>
                           <VStack spacing={4} align="stretch">
                             <Box>
-                              <Text fontSize="sm" fontWeight="bold" mb={2}>How it works:</Text>
-                              <Text fontSize="sm" color="gray.600">
+                              <Text fontSize="sm" fontWeight="bold" mb={2} color="whiteAlpha.900">How it works:</Text>
+                              <Text fontSize="sm" color="whiteAlpha.800">
                                 {feature.howItWorks}
                               </Text>
                             </Box>
@@ -320,7 +320,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                 <VStack spacing={6} align="stretch">
                   <Box textAlign="center">
                     <Heading size="md" mb={2}>House Systems Explained</Heading>
-                    <Text color="gray.600">
+                    <Text color="whiteAlpha.800">
                       Choose the right house system for your astrological practice
                     </Text>
                   </Box>
@@ -332,7 +332,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                           <Box flex="1" textAlign="left">
                             <HStack>
                               <Text fontWeight="bold">{system.name}</Text>
-                              <Text fontSize="sm" color="gray.600">
+                              <Text fontSize="sm" color="whiteAlpha.800">
                                 - {system.description}
                               </Text>
                             </HStack>
@@ -389,7 +389,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = ({
                 <VStack spacing={6} align="stretch">
                   <Box textAlign="center">
                     <Heading size="md" mb={2}>Tips & Best Practices</Heading>
-                    <Text color="gray.600">
+                    <Text color="whiteAlpha.800">
                       Get the most accurate and meaningful results from your charts
                     </Text>
                   </Box>

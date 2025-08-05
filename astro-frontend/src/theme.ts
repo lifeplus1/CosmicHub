@@ -347,6 +347,128 @@ const theme = extendTheme({
         },
       },
     },
+    Badge: {
+      baseStyle: {
+        borderRadius: '8px',
+        fontWeight: '600',
+        fontSize: 'xs',
+        px: 2,
+        py: 1,
+      },
+      variants: {
+        cosmic: {
+          bg: 'rgba(139, 92, 246, 0.2)',
+          color: 'cosmic.300',
+          border: '1px solid',
+          borderColor: 'cosmic.400',
+        },
+        gold: {
+          bg: 'rgba(251, 191, 36, 0.2)',
+          color: 'gold.300',
+          border: '1px solid',
+          borderColor: 'gold.400',
+        },
+        solid: {
+          bg: 'linear-gradient(135deg, gold.600, starlight.600)',
+          color: 'white',
+          border: '1px solid',
+          borderColor: 'gold.400',
+        },
+      },
+    },
+    Table: {
+      variants: {
+        cosmic: {
+          table: {
+            bg: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            border: '1px solid',
+            borderColor: 'whiteAlpha.200',
+          },
+          thead: {
+            bg: 'midnight.700',
+          },
+          th: {
+            color: 'whiteAlpha.900',
+            fontWeight: '600',
+            fontSize: 'sm',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            borderBottom: '1px solid',
+            borderColor: 'whiteAlpha.200',
+            py: 4,
+            px: 6,
+          },
+          td: {
+            color: 'whiteAlpha.800',
+            borderBottom: '1px solid',
+            borderColor: 'whiteAlpha.100',
+            py: 4,
+            px: 6,
+            fontSize: 'sm',
+          },
+          tbody: {
+            tr: {
+              _hover: {
+                bg: 'rgba(255, 255, 255, 0.03)',
+              },
+            },
+          },
+        },
+      },
+      defaultProps: {
+        variant: 'cosmic',
+      },
+    },
+    Tabs: {
+      variants: {
+        cosmic: {
+          tab: {
+            color: 'whiteAlpha.700',
+            borderBottom: '2px solid',
+            borderColor: 'transparent',
+            _selected: {
+              color: 'gold.300',
+              borderColor: 'gold.400',
+              bg: 'rgba(251, 191, 36, 0.1)',
+            },
+            _hover: {
+              color: 'whiteAlpha.900',
+            },
+          },
+          tablist: {
+            borderBottom: '1px solid',
+            borderColor: 'whiteAlpha.300',
+          },
+          tabpanel: {
+            color: 'whiteAlpha.900',
+          },
+        },
+        enclosed: {
+          tab: {
+            color: 'whiteAlpha.700',
+            border: '1px solid',
+            borderColor: 'whiteAlpha.300',
+            borderBottom: 'none',
+            borderTopRadius: 'md',
+            _selected: {
+              color: 'gold.300',
+              borderColor: 'gold.400',
+              borderBottomColor: 'transparent',
+              bg: 'rgba(251, 191, 36, 0.1)',
+            },
+            _hover: {
+              color: 'whiteAlpha.900',
+            },
+          },
+          tablist: {
+            borderBottom: '1px solid',
+            borderColor: 'whiteAlpha.300',
+          },
+        },
+      },
+    },
     Input: {
       variants: {
         cosmic: {

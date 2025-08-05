@@ -112,7 +112,7 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
             <Button variant="ghost" onClick={onClose}>
               Maybe Later
             </Button>
-            <Button colorScheme="purple" onClick={handleUpgrade}>
+            <Button variant="cosmic" onClick={handleUpgrade}>
               Start Free Trial
             </Button>
           </HStack>

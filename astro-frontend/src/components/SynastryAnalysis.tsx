@@ -160,7 +160,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
             <Heading size="xl" mb={4} color="purple.600">
               💕 Relationship Compatibility Analysis
             </Heading>
-            <Text fontSize="lg" color="gray.600">
+            <Text fontSize="lg" color="whiteAlpha.800">
               Synastry Comparison: {person1Name} & {person2Name}
             </Text>
           </Box>
@@ -230,7 +230,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
                                 colorScheme={getCompatibilityColor(score)}
                                 mb={2}
                               />
-                              <Text fontSize="sm" color="gray.600">
+                              <Text fontSize="sm" color="whiteAlpha.800">
                                 {score.toFixed(1)}%
                               </Text>
                             </Box>
@@ -266,7 +266,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
                                     {aspect.aspect}
                                   </Badge>
                                 </HStack>
-                                <Text fontSize="xs" color="gray.600" mb={1}>
+                                <Text fontSize="xs" color="whiteAlpha.800" mb={1}>
                                   Orb: {aspect.orb.toFixed(2)}° | Strength: {aspect.strength}
                                 </Text>
                                 <Text fontSize="sm">
@@ -302,7 +302,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
                                   <Text fontWeight="semibold" fontSize="sm" mb={1}>
                                     {formatPlanetName(overlay.person1_planet)} in {overlay.person2_house}th House
                                   </Text>
-                                  <Text fontSize="sm" color="gray.600">
+                                  <Text fontSize="sm" color="whiteAlpha.800">
                                     {overlay.interpretation}
                                   </Text>
                                 </Box>
@@ -330,7 +330,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
                               {synastryResult.composite_chart.relationship_purpose}
                             </Text>
                             
-                            <Text fontSize="sm" color="gray.600">
+                            <Text fontSize="sm" color="whiteAlpha.800">
                               Composite Sun: {synastryResult.composite_chart.midpoint_sun.toFixed(2)}°
                               <br />
                               Composite Moon: {synastryResult.composite_chart.midpoint_moon.toFixed(2)}°

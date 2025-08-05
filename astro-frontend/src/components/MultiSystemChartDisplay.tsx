@@ -47,7 +47,7 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
   return (
     <VStack spacing={4} align="stretch">
       <Card bg="rgba(255,255,255,0.95)">
-        <CardBody>
+        <CardBody color="gray.800">
           <Heading size="md" mb={4} color="purple.700">Western Tropical Chart</Heading>
           <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             Based on tropical zodiac, solar-focused approach emphasizing personality and life expression
@@ -59,7 +59,7 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
                 <Box flex="1" textAlign="left">
                   <HStack>
                     <Text fontWeight="bold">Planets & Positions</Text>
-                    <Badge colorScheme="purple">{Object.keys(data.planets).length}</Badge>
+                    <Badge variant="cosmic">{Object.keys(data.planets).length}</Badge>
                   </HStack>
                 </Box>
                 <AccordionIcon />
@@ -140,7 +140,7 @@ const VedicChart: React.FC<{ data: any }> = ({ data }) => {
   return (
     <VStack spacing={4} align="stretch">
       <Card bg="rgba(255,246,223,0.95)">
-        <CardBody>
+        <CardBody color="gray.800">
           <Heading size="md" mb={4} color="orange.700">Vedic Sidereal Chart</Heading>
           <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
@@ -230,7 +230,7 @@ const ChineseChart: React.FC<{ data: any }> = ({ data }) => {
   return (
     <VStack spacing={4} align="stretch">
       <Card bg="rgba(255,240,240,0.95)">
-        <CardBody>
+        <CardBody color="gray.800">
           <Heading size="md" mb={4} color="red.700">Chinese Astrology</Heading>
           <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
@@ -309,7 +309,7 @@ const MayanChart: React.FC<{ data: any }> = ({ data }) => {
   return (
     <VStack spacing={4} align="stretch">
       <Card bg="rgba(240,255,240,0.95)">
-        <CardBody>
+        <CardBody color="gray.800">
           <Heading size="md" mb={4} color="green.700">Mayan Sacred Calendar</Heading>
           <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
@@ -401,7 +401,7 @@ const UranianChart: React.FC<{ data: any }> = ({ data }) => {
   return (
     <VStack spacing={4} align="stretch">
       <Card bg="rgba(240,240,255,0.95)">
-        <CardBody>
+        <CardBody color="gray.800">
           <Heading size="md" mb={4} color="indigo.700">Uranian Astrology</Heading>
           <Text fontSize="sm" color="deepPurple.800" mb={4} fontWeight="medium">
             {data.description}
@@ -485,9 +485,9 @@ const SynthesisChart: React.FC<{ data: any }> = ({ data }) => {
   return (
     <VStack spacing={4} align="stretch">
       <Card bg="linear-gradient(135deg, rgba(255,255,255,0.95), rgba(240,255,255,0.95))">
-        <CardBody>
+        <CardBody color="gray.800">
           <Heading size="md" mb={4} color="teal.700">Integrated Analysis</Heading>
-          <Text fontSize="sm" color="gray.600" mb={4}>
+          <Text fontSize="sm" color="whiteAlpha.800" mb={4}>
             Synthesis of insights from all astrological traditions
           </Text>
 
@@ -545,7 +545,7 @@ const SynthesisChart: React.FC<{ data: any }> = ({ data }) => {
                       </Text>
                       <VStack align="stretch" spacing={1}>
                         {(traits || []).map((trait: string, idx: number) => (
-                          <Text key={idx} fontSize="sm" color="gray.600">
+                          <Text key={idx} fontSize="sm" color="whiteAlpha.800">
                             {trait}
                           </Text>
                         ))}
@@ -624,7 +624,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({ chart
         </Card>
 
         {/* Multi-System Tabs */}
-        <Tabs isLazy colorScheme="purple" variant="enclosed">
+        <Tabs isLazy variant="cosmic">
           <TabList flexWrap="wrap">
             <Tab>Western Tropical</Tab>
             <Tab>Vedic Sidereal</Tab>
@@ -659,7 +659,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({ chart
         {/* Footer with methodology */}
         <Card bg={cardBg} variant="outline">
           <CardBody>
-            <Text fontSize="sm" color="gray.600" textAlign="center">
+            <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
               This analysis combines Western tropical astrology, Vedic sidereal calculations, Chinese Four Pillars, 
               Mayan sacred calendar, and Uranian midpoint techniques to provide a comprehensive astrological perspective.
             </Text>

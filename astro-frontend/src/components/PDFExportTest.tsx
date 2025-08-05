@@ -80,7 +80,7 @@ export const PDFExportTest: React.FC = () => {
                 </Heading>
                 <Icon as={FaFilePdf} color="red.500" boxSize={8} />
               </HStack>
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
+              <Text fontSize="lg" color="whiteAlpha.800" maxW="2xl">
                 Generate beautiful, professional-quality PDF reports of your astrological charts
               </Text>
               <Badge colorScheme="purple" size="lg" px={4} py={2}>
@@ -120,7 +120,7 @@ export const PDFExportTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                             Report Styles:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Modern: Clean, minimalist design<br/>
                             • Classical: Traditional astrology layout<br/>
                             • Detailed: Comprehensive analysis<br/>
@@ -132,7 +132,7 @@ export const PDFExportTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                             Professional Uses:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • Client consultations<br/>
                             • Personal study and reference<br/>
                             • Educational materials<br/>
@@ -144,7 +144,7 @@ export const PDFExportTest: React.FC = () => {
                           <Text fontSize="sm" fontWeight="bold" color="blue.600" mb={2}>
                             Quality Features:
                           </Text>
-                          <Text fontSize="xs" color="gray.600">
+                          <Text fontSize="xs" color="whiteAlpha.800">
                             • High-resolution chart wheels<br/>
                             • Detailed interpretations<br/>
                             • Professional formatting<br/>
@@ -275,16 +275,16 @@ export const PDFExportTest: React.FC = () => {
                       
                       <VStack spacing={2} w="full" align="start">
                         <Text fontSize="sm" fontWeight="bold">Report Details:</Text>
-                        <Text fontSize="xs" color="gray.600">
+                        <Text fontSize="xs" color="whiteAlpha.800">
                           • Style: {reportStyle.charAt(0).toUpperCase() + reportStyle.slice(1)}
                         </Text>
-                        <Text fontSize="xs" color="gray.600">
+                        <Text fontSize="xs" color="whiteAlpha.800">
                           • Sections: {selectedSections.length} of {reportSections.length}
                         </Text>
-                        <Text fontSize="xs" color="gray.600">
+                        <Text fontSize="xs" color="whiteAlpha.800">
                           • Interpretations: {includeInterpretations ? 'Included' : 'Not included'}
                         </Text>
-                        <Text fontSize="xs" color="gray.600">
+                        <Text fontSize="xs" color="whiteAlpha.800">
                           • Estimated pages: {Math.max(5, selectedSections.length * 2 + (includeInterpretations ? 5 : 0))}
                         </Text>
                       </VStack>
@@ -312,7 +312,7 @@ export const PDFExportTest: React.FC = () => {
                     <VStack spacing={4}>
                       <Box textAlign="center">
                         <Text fontSize="lg" fontWeight="bold">Birth_Chart_Report.pdf</Text>
-                        <Text fontSize="sm" color="gray.600">Generated on {new Date().toLocaleDateString()}</Text>
+                        <Text fontSize="sm" color="whiteAlpha.800">Generated on {new Date().toLocaleDateString()}</Text>
                       </Box>
                       
                       <Divider />
@@ -390,7 +390,7 @@ export const PDFExportTest: React.FC = () => {
                   <VStack spacing={4}>
                     <Text fontWeight="bold">Generating Your Report...</Text>
                     <Progress size="lg" colorScheme="blue" isIndeterminate w="full" />
-                    <Text fontSize="sm" color="gray.600" textAlign="center">
+                    <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
                       Creating high-quality charts and formatting interpretations
                     </Text>
                   </VStack>

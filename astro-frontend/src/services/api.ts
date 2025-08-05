@@ -62,3 +62,58 @@ export const fetchNumerology = async (data: any) => {
     throw error;
   }
 };
+
+export const calculateHumanDesign = async (data: any) => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.post(`${API_URL}/calculate-human-design`, data, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating Human Design:', error);
+    throw error;
+  }
+};
+
+export const calculateGeneKeys = async (data: any) => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.post(`${API_URL}/calculate-gene-keys`, data, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating Gene Keys:', error);
+    throw error;
+  }
+};
+
+export const getHumanDesignProfile = async (userId: string) => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${API_URL}/human-design/profile/${userId}`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Human Design profile:', error);
+    throw error;
+  }
+};
+
+export const getGeneKeysProfile = async (userId: string) => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${API_URL}/gene-keys/profile/${userId}`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Gene Keys profile:', error);
+    throw error;
+  }
+};
+
+export const getContemplationProgress = async (userId: string) => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${API_URL}/gene-keys/contemplation/${userId}`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching contemplation progress:', error);
+    throw error;
+  }
+};

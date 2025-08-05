@@ -234,7 +234,7 @@ export const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) =
             <Heading size="xl" mb={4} color="blue.600">
               🔮 Transit Analysis
             </Heading>
-            <Text fontSize="lg" color="gray.600">
+            <Text fontSize="lg" color="whiteAlpha.800">
               Discover upcoming planetary influences and timing opportunities
             </Text>
           </Box>
@@ -381,7 +381,7 @@ export const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) =
                 {/* Significant Periods Tab */}
                 <TabPanel>
                   <VStack spacing={4} align="stretch">
-                    <Text color="gray.600">
+                    <Text color="whiteAlpha.800">
                       High-activity periods when multiple planetary influences converge
                     </Text>
                     
@@ -511,7 +511,7 @@ export const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) =
                                           {transit.orb.toFixed(1)}°
                                         </Badge>
                                       </HStack>
-                                      <Text fontSize="xs" color="gray.600">
+                                      <Text fontSize="xs" color="whiteAlpha.800">
                                         {transit.interpretation}
                                       </Text>
                                     </Box>
@@ -535,7 +535,7 @@ export const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) =
                     <CardBody>
                       {lunarTransits ? (
                         <VStack spacing={4} align="stretch">
-                          <Text color="gray.600">{lunarTransits.summary}</Text>
+                          <Text color="whiteAlpha.800">{lunarTransits.summary}</Text>
                           
                           {lunarTransits.moon_transits && lunarTransits.moon_transits.length > 0 ? (
                             <TableContainer>
@@ -570,7 +570,7 @@ export const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) =
                         </VStack>
                       ) : (
                         <VStack spacing={4}>
-                          <Text color="gray.600">
+                          <Text color="whiteAlpha.800">
                             Lunar transits show emotional timing and daily rhythms. Click "Lunar Transits" above to calculate.
                           </Text>
                           {loadingLunar && (
