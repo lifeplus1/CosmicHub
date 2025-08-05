@@ -1,6 +1,6 @@
 import swisseph as swe
 import logging
-from typing import TypedDict, List, Tuple
+from typing import TypedDict, List, Any, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -40,10 +40,12 @@ def calculate_houses(julian_day: float, lat: float, lon: float, system: str = 'P
     try:
         # Calculate houses with extended flags for Vertex
         logger.debug(f"Using house system bytes: {system_bytes}, type: {type(system_bytes)}, length: {len(system_bytes)}")
-        houses_result: Tuple[List[float], List[float]] = swe.houses_ex(julian_day, lat, lon, flags=0, hsys=system_bytes)
-        from typing import cast
-        cusps: List[float] = list(cast(List[float], houses_result[0]))  # House cusps (0-11)
-        ascmc: list[float] = list(houses_result[1])  # Angles: Ascendant (0), MC (1), Vertex (3), etc.
+        houses_result = swe.houses_ex(julian_day, lat, lon, flags=0, hsys=system_bytes)  # type: ignore
+        
+        # Extract cusps and angles with proper type annotations
+        # Swiss Ephemeris returns a tuple of (cusps, ascmc) where both are sequences of floats
+        cusps: List[float] = list(houses_result[0])  # type: ignore  # House cusps (0-11)
+        ascmc: List[float] = list(houses_result[1])  # type: ignore  # Angles: Ascendant (0), MC (1), Vertex (3), etc.
 
         houses_data: List[HouseData] = [{"house": i+1, "cusp": float(cusps[i])} for i in range(12)]
         angles: AnglesData = {
