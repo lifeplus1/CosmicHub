@@ -47,7 +47,7 @@ def calculate_uranian_planets_positions(julian_day: float) -> Dict[str, Dict[str
         # These are hypothetical planets used in Hamburg School astrology
         # Using approximated calculation since not all are in Swiss Ephemeris
         
-        positions = {}
+        positions: Dict[str, Dict[str, Any]] = {}
         
         # Calculate approximate positions based on mean motions
         # Base positions (fictional starting points for demonstration)

@@ -363,7 +363,8 @@ def analyze_career_path(chart_data: Dict[str, Any]) -> Dict[str, Any]:
         career_analysis: Dict[str, Any] = {
             'career_direction': {
                 'mc_sign': mc_sign,
-                'natural_calling': get_career_direction(mc_sign) if mc_sign else "MC not available"
+                'natural_calling': 
+                (mc_sign) if mc_sign else "MC not available"
             },
             'mastery_path': {
                 'saturn_sign': saturn_info['sign'],
@@ -642,6 +643,24 @@ def get_venus_style(sign: str) -> str:
     }
     return venus_styles.get(sign, 'Venus style unknown')
 
+def get_venus_needs(sign: str) -> str:
+    """Get Venus love needs by sign"""
+    venus_needs = {
+        'aries': 'Excitement, independence, direct affection',
+        'taurus': 'Security, sensuality, loyalty',
+        'gemini': 'Mental stimulation, variety, playful communication',
+        'cancer': 'Emotional safety, nurturing, caring bonds',
+        'leo': 'Admiration, romance, creative expression',
+        'virgo': 'Practical support, helpfulness, reliability',
+        'libra': 'Harmony, partnership, beauty',
+        'scorpio': 'Depth, intensity, transformative connection',
+        'sagittarius': 'Freedom, adventure, shared beliefs',
+        'capricorn': 'Commitment, stability, shared goals',
+        'aquarius': 'Friendship, uniqueness, intellectual rapport',
+        'pisces': 'Compassion, spiritual connection, empathy'
+    }
+    return venus_needs.get(sign, 'Venus needs unknown')
+
 def get_mars_style(sign: str) -> str:
     """Get Mars action style by sign"""
     mars_styles = {
@@ -659,6 +678,24 @@ def get_mars_style(sign: str) -> str:
         'pisces': 'Intuitive, compassionate, flowing action'
     }
     return mars_styles.get(sign, 'Mars style unknown')
+
+def get_mars_desires(sign: str) -> str:
+    """Get Mars desire nature by sign"""
+    mars_desires = {
+        'aries': 'Seeks excitement, conquest, and immediate results',
+        'taurus': 'Desires stability, sensual pleasure, and loyalty',
+        'gemini': 'Craves variety, stimulation, and intellectual engagement',
+        'cancer': 'Wants emotional security, protection, and nurturing',
+        'leo': 'Yearns for recognition, creative expression, and admiration',
+        'virgo': 'Desires usefulness, improvement, and practical service',
+        'libra': 'Seeks harmony, partnership, and fairness',
+        'scorpio': 'Craves intensity, transformation, and deep connection',
+        'sagittarius': 'Desires adventure, freedom, and exploration',
+        'capricorn': 'Wants achievement, respect, and structured progress',
+        'aquarius': 'Seeks innovation, independence, and group involvement',
+        'pisces': 'Yearns for compassion, spiritual connection, and inspiration'
+    }
+    return mars_desires.get(sign, 'Mars desires unknown')
 
 def get_saturn_lessons(sign: str, house: int) -> str:
     """Get Saturn mastery lessons"""
@@ -730,5 +767,23 @@ def get_mc_expression(mc_sign: str) -> str:
     essence = SIGN_ENERGIES.get(mc_sign, {}).get('essence', '')
     archetype = SIGN_ENERGIES.get(mc_sign, {}).get('archetype', '')
     return f"Publicly expresses {essence} ({archetype})" if essence and archetype else "MC expression unknown"
+
+def get_career_direction(mc_sign: str) -> str:
+    """Get career direction based on MC sign"""
+    if not mc_sign:
+        return "MC sign not available"
+    essence = SIGN_ENERGIES.get(mc_sign, {}).get('essence', '')
+    archetype = SIGN_ENERGIES.get(mc_sign, {}).get('archetype', '')
+    return f"Career direction: {essence} ({archetype})" if essence and archetype else "Career direction unknown"
+
+def get_tenth_house_focus(planets_in_tenth: List[str]) -> str:
+    """Interpret career focus based on planets in the 10th house"""
+    if not planets_in_tenth:
+        return "No major planets in 10th house; career focus is flexible or depends on other factors."
+    focus_descriptions = []
+    for planet in planets_in_tenth:
+        archetype = PLANET_ARCHETYPES.get(planet, {}).get('essence', planet.capitalize())
+        focus_descriptions.append(f"{planet.capitalize()}: {archetype}")
+    return "Career focus influenced by: " + ", ".join(focus_descriptions)
 
 # More helper functions would continue here for complete interpretation system...

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 // Update the import path if AuthContext is located elsewhere, e.g.:
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from './AuthContext';
 // Or ensure that './AuthContext.tsx' exists and exports useAuth.
 import type { UserSubscription } from '../types/subscription';
 import { getUserTier, hasFeatureAccess, COSMICHUB_TIERS } from '../types/subscription';

@@ -1,10 +1,7 @@
 # backend/astro/calculations/gene_keys.py
 import logging
-from typing import Dict, Any, List, Tuple
-from datetime import datetime, timedelta
-import math
-import swisseph as swe  # type: ignore
-from .human_design import calculate_human_design, GATES
+from typing import Dict, Any
+from .human_design import calculate_human_design
 
 logger = logging.getLogger(__name__)
 
@@ -589,7 +586,7 @@ GENE_KEYS = {
 }
 
 # Gene Keys Sequences
-SEQUENCES = {
+SEQUENCES: Dict[str, Dict[str, Any]] = {
     "activation": {
         "name": "Activation Sequence",
         "description": "Your core wound and gift - the foundation of your transformation",
@@ -622,20 +619,20 @@ def calculate_gene_keys_profile(year: int, month: int, day: int, hour: int, minu
             raise ValueError("Failed to calculate Human Design data for Gene Keys")
         
         # Extract the key gates for Gene Keys sequences
-        conscious = hd_data.get("conscious", {})
-        unconscious = hd_data.get("unconscious", {})
+        conscious: Dict[str, Any] = hd_data.get("conscious", {})
+        unconscious: Dict[str, Any] = hd_data.get("unconscious", {})
         
         # Core Gates
-        sun_gate = conscious.get("sun", {}).get("gate", 1)
-        earth_gate = conscious.get("earth", {}).get("gate", 1)
+        sun_gate: int = conscious.get("sun", {}).get("gate", 1)
+        earth_gate: int = conscious.get("earth", {}).get("gate", 1)
         
         # Calculate the three main sequences
-        activation_sequence = calculate_activation_sequence(conscious, unconscious)
-        venus_sequence = calculate_venus_sequence(conscious, unconscious)
-        pearl_sequence = calculate_pearl_sequence(conscious, unconscious)
+        activation_sequence: Dict[str, Any] = calculate_activation_sequence(conscious, unconscious)
+        venus_sequence: Dict[str, Any] = calculate_venus_sequence(conscious, unconscious)
+        pearl_sequence: Dict[str, Any] = calculate_pearl_sequence(conscious, unconscious)
         
         # Create comprehensive profile
-        profile = {
+        profile: Dict[str, Any] = {
             "life_work": get_gene_key_details(sun_gate),
             "evolution": get_gene_key_details(earth_gate),
             "sequences": {
@@ -774,7 +771,7 @@ def calculate_hologenetic_profile(hd_data: Dict[str, Any]) -> Dict[str, Any]:
                   "mercury", "venus", "mars", "jupiter", "saturn", 
                   "uranus", "neptune", "pluto"]
         
-        hologenetic = {
+        hologenetic: Dict[str, Any] = {
             "conscious": {},
             "unconscious": {},
             "all_gates": set(),

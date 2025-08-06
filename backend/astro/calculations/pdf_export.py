@@ -634,7 +634,16 @@ def create_multi_system_pdf(chart_data: MultiSystemData) -> str:
         
         for system in systems:
             if system in chart_data:
-                system_data: Dict[str, Any] = chart_data[system]  # type: ignore
+                system_data_raw = chart_data[system]  # type: ignore
+                if isinstance(system_data_raw, dict):
+                    system_data: Dict[str, Any] = system_data_raw
+                elif system_data_raw is not None and hasattr(system_data_raw, 'items'):
+                    try:
+                        system_data: Dict[str, Any] = dict(system_data_raw.items())
+                    except Exception:
+                        system_data: Dict[str, Any] = {}
+                else:
+                    system_data: Dict[str, Any] = {}
                 system_name = system_names.get(system, system.title())
                 
                 story.append(Paragraph(system_name, ParagraphStyle(
@@ -646,13 +655,13 @@ def create_multi_system_pdf(chart_data: MultiSystemData) -> str:
                 )))
                 
                 # Add system-specific information
-                if not isinstance(system_data, dict):
-                    try:
-                        system_data = dict(system_data)
-                    except Exception:
-                        system_data = {}
-                desc_val = system_data.get('description', f'{system_name} analysis')
-                description: str = str(desc_val) if desc_val is not None else f'{system_name} analysis'
+                desc_val = system_data.get('description', None)
+                if isinstance(desc_val, str):
+                    description: str = desc_val
+                elif desc_val is not None:
+                    description: str = str(desc_val)
+                else:
+                    description: str = f'{system_name} analysis'
                 story.append(Paragraph(description, styles['Normal']))
                 story.append(Spacer(1, 15))
         

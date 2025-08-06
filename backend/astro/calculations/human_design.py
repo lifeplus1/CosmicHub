@@ -200,17 +200,29 @@ def calculate_design_data(conscious_time: datetime, unconscious_time: datetime) 
         import swisseph as swe  # type: ignore
         
         # Calculate Julian days
-        conscious_jd_result = swe.utc_to_jd(
+        conscious_jd_result = swe.utc_to_jd( # type: ignore
             conscious_time.year, conscious_time.month, conscious_time.day,
             conscious_time.hour, conscious_time.minute, 0, 1
         )  # type: ignore
-        unconscious_jd_result = swe.utc_to_jd(
+        unconscious_jd_result: tuple = swe.utc_to_jd( # type: ignore
             unconscious_time.year, unconscious_time.month, unconscious_time.day,
             unconscious_time.hour, unconscious_time.minute, 0, 1
         )  # type: ignore
         
-        conscious_jd = float(conscious_jd_result[1]) if isinstance(conscious_jd_result[1], (int, float)) else 0.0
-        unconscious_jd = float(unconscious_jd_result[1]) if isinstance(unconscious_jd_result[1], (int, float, str)) and str(unconscious_jd_result[1]).replace('.', '', 1).isdigit() else 0.0
+        conscious_jd_val = conscious_jd_result[1] # type: ignore
+        if isinstance(conscious_jd_val, (int, float)):
+            conscious_jd = float(conscious_jd_val)
+        elif isinstance(conscious_jd_val, str) and conscious_jd_val.replace('.', '', 1).isdigit():
+            conscious_jd = float(conscious_jd_val)
+        else:
+            conscious_jd = 0.0
+        unconscious_jd_val: Any = unconscious_jd_result[1] # type: ignore
+        if isinstance(unconscious_jd_val, (int, float)):
+            unconscious_jd = float(unconscious_jd_val)
+        elif isinstance(unconscious_jd_val, str) and unconscious_jd_val.replace('.', '', 1).isdigit():
+            unconscious_jd = float(unconscious_jd_val)
+        else:
+            unconscious_jd = 0.0
         
         # Get planetary activations
         conscious_activations = calculate_planetary_activations(conscious_jd)
@@ -279,7 +291,7 @@ def determine_type_and_authority(definition: Dict[str, Any]) -> Tuple[str, str]:
 def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze which centers are defined based on planetary activations"""
     try:
-        defined_gates = []
+        defined_gates: list[int] = []
         center_activations: dict[str, list[int]] = {}
         
         # Collect all activated gates
@@ -308,6 +320,8 @@ def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
         logger.error(f"Error analyzing definition: {str(e)}")
         return {"defined_gates": [], "defined_centers": [], "center_activations": {}, "channels": []}
 
+from typing import Any
+
 def calculate_human_design(year: int, month: int, day: int, hour: int, minute: int, 
                           lat: float, lon: float, timezone: str) -> Dict[str, Any]:
     """Calculate complete Human Design chart"""
@@ -333,7 +347,7 @@ def calculate_human_design(year: int, month: int, day: int, hour: int, minute: i
         hd_type, authority = determine_type_and_authority(definition)
         
         # Create comprehensive Human Design data
-        human_design_chart = {
+        human_design_chart: Dict[str, Any] = {
             "birth_info": {
                 "conscious_time": birth_time.isoformat(),
                 "unconscious_time": design_time.isoformat(),
