@@ -9,6 +9,30 @@ export interface BirthData {
   datetime: string;
 }
 
+export interface AspectInterpretation {
+  name: string;
+  description?: string;
+  keywords?: string[];
+  influence?: string;
+  advice?: string;
+  type?: 'harmonious' | 'challenging' | 'neutral' | 'powerful';
+  strength?: number;
+  planets?: string[];
+  icon?: string;
+}
+
+export interface AIInterpretation {
+  core_identity?: AspectInterpretation[];
+  life_purpose?: AspectInterpretation[];
+  relationships?: AspectInterpretation[];
+  career?: AspectInterpretation[];
+  growth?: AspectInterpretation[];
+  spiritual?: AspectInterpretation[];
+  integration?: AspectInterpretation[];
+  summary?: string;
+  action_items?: string[];
+}
+
 export interface ChartData {
   planets: Record<string, {
     position: number;
@@ -32,6 +56,7 @@ export interface ChartData {
     point1_house?: number;
     point2_house?: number;
   }>;
+  interpretation?: AIInterpretation;
 }
 
 export interface TransitData {
