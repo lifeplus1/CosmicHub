@@ -25,7 +25,7 @@ import {
   AlertDialogOverlay
 } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../../shared/AuthContext';
 import ChartDisplay from './ChartDisplay';
 import axios from 'axios';
 import { parseISO, format, isValid } from 'date-fns';

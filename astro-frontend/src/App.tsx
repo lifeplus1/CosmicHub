@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { Box, Button, ChakraProvider, FormControl, FormLabel, Heading, Input, Text, VStack } from '@chakra-ui/react';
 import theme from './theme';
 import axios from 'axios';
-import { useAuth } from './contexts/AuthContext';
+// ...existing code...
 import { useToast } from '@chakra-ui/toast';
 import { getFirestore } from 'firebase/firestore';
 import Navbar from './components/Navbar';
@@ -21,7 +22,7 @@ import Contact from './components/Contact';
 import ChartCalculator from './components/ChartCalculator';
 import NumerologyCalculator from './components/NumerologyCalculator';
 import HumanDesignGeneKeys from './components/HumanDesignGeneKeys';
-import { AuthProvider } from './contexts/AuthContext';
+import AuthProvider, { useAuth } from './contexts/AuthContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import PricingPage from './components/PricingPage';
 import { SubscriptionStatus } from './components/SubscriptionStatus';
@@ -346,7 +347,9 @@ const App: React.FC = () => {
     <AuthProvider>
       <SubscriptionProvider>
         <ChakraProvider theme={theme}>
-          <MainApp />
+          <ErrorBoundary>
+            <MainApp />
+          </ErrorBoundary>
         </ChakraProvider>
       </SubscriptionProvider>
     </AuthProvider>
