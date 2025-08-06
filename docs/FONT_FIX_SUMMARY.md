@@ -10,7 +10,7 @@
 ### 🎯 **Solution Implemented:**
 
 1. **Created Optimized fonts.css**:
-   - Location: `/astro-frontend/public/fonts.css`
+   - Location: `/frontend/astro/public/fonts.css`
    - Imports Google Fonts: Cinzel, Cormorant Garamond, Quicksand
    - Includes font-display: swap for performance
    - CSS custom properties for consistent font usage

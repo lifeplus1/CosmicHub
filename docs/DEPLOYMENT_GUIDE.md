@@ -3,7 +3,7 @@
 ## 🚀 Production Deployment Guide
 
 ### HealWave Therapeutic Frequency Generator
-**Located**: `/healwave-frontend`
+**Located**: `/frontend/healwave`
 **Technology**: React + TypeScript + Vite + Firebase
 **Build Output**: `dist/` folder
 
@@ -29,8 +29,8 @@
 # Install Vercel CLI
 npm i -g vercel
 
-# From healwave-frontend directory
-cd healwave-frontend
+# From frontend/healwave directory
+cd frontend/healwave
 vercel --prod
 
 # Custom domain setup
@@ -39,8 +39,8 @@ vercel --prod --alias healwave.yourapp.com
 
 ##### Option 2: Netlify
 ```bash
-# From healwave-frontend directory  
-cd healwave-frontend
+# From frontend/healwave directory  
+cd frontend/healwave
 npm run build
 
 # Upload dist/ folder to Netlify
@@ -49,15 +49,15 @@ npm run build
 
 ##### Option 3: Firebase Hosting
 ```bash
-# From healwave-frontend directory
-cd healwave-frontend
+# From frontend/healwave directory
+cd frontend/healwave
 npm install -g firebase-tools
 firebase init hosting
 firebase deploy
 ```
 
 ### Astrology Chart Calculator
-**Located**: `/astro-frontend`
+**Located**: `/frontend/astro`
 **Technology**: React + TypeScript + Chakra UI + Firebase
 **Build Output**: `dist/` folder
 

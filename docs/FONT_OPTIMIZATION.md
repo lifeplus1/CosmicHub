@@ -17,7 +17,7 @@ The application was experiencing font loading errors:
 ## ✅ Solution Implemented
 
 ### 1. Updated HTML Font Loading
-**File**: `/astro-frontend/index.html`
+**File**: `/frontend/astro/index.html`
 
 **Before:**
 ```html
@@ -39,7 +39,7 @@ The application was experiencing font loading errors:
 ```
 
 ### 2. Simplified Font CSS
-**File**: `/astro-frontend/public/fonts.css`
+**File**: `/frontend/astro/public/fonts.css`
 
 **Before:**
 ```css
@@ -66,7 +66,7 @@ body {
 ```
 
 ### 3. Updated Theme Configuration
-**File**: `/astro-frontend/src/theme.ts`
+**File**: `/frontend/astro/src/theme.ts`
 
 **Before:**
 ```typescript

@@ -210,7 +210,7 @@ def calculate_design_data(conscious_time: datetime, unconscious_time: datetime) 
         )  # type: ignore
         
         conscious_jd = float(conscious_jd_result[1]) if isinstance(conscious_jd_result[1], (int, float)) else 0.0
-        unconscious_jd = float(unconscious_jd_result[1]) if isinstance(unconscious_jd_result[1], (int, float)) else 0.0
+        unconscious_jd = float(unconscious_jd_result[1]) if isinstance(unconscious_jd_result[1], (int, float, str)) and str(unconscious_jd_result[1]).replace('.', '', 1).isdigit() else 0.0
         
         # Get planetary activations
         conscious_activations = calculate_planetary_activations(conscious_jd)

@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+addopts = "--strict-markers --tb=short"
+
+[tool.flake8]
+max-line-length = 100
+ignore = E203, E266, E501, W503

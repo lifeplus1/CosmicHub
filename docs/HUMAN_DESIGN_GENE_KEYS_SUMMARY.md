@@ -34,12 +34,12 @@ Successfully implemented comprehensive Human Design and Gene Keys functionality 
   - Full error handling and rate limiting
 
 ### Frontend Implementation
-- **HumanDesignChart Component** (`/astro-frontend/src/components/HumanDesignChart.tsx`)
-  - Comprehensive chart display with tabs for different aspects
-  - Centers visualization (defined vs undefined)
-  - Profile information with line descriptions
-  - Incarnation Cross details
-  - Gates and channels display
+ **HumanDesignChart Component** (`/frontend/astro/src/components/HumanDesignChart.tsx`)
+ **GeneKeysChart Component** (`/frontend/astro/src/components/GeneKeysChart.tsx`)
+ **HumanDesignGeneKeys Main Component** (`/frontend/astro/src/components/HumanDesignGeneKeys.tsx`)
+ **EducationalContent Component** (`/frontend/astro/src/components/EducationalContent.tsx`)
+ **Navigation Integration** (`/frontend/astro/src/components/Navbar.tsx`)
+ **API Service Integration** (`/frontend/astro/src/services/api.ts`)
   - Variables (PHS) information
   - Beautiful UI with Chakra UI components
 

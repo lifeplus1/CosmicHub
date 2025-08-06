@@ -56,6 +56,18 @@ function App() {
                 <RadixTooltip.Arrow className="fill-gray-900" />
               </RadixTooltip.Content>
             </RadixTooltip.Root>
+            </div>
+            <RadixTooltip.Root>
+              <RadixTooltip.Trigger asChild>
+                <div className="p-8 border shadow-2xl bg-white/10 backdrop-blur-lg rounded-3xl border-white/20 cursor-help">
+                  <FrequencyControls />
+                </div>
+              </RadixTooltip.Trigger>
+              <RadixTooltip.Content className="px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg">
+                Adjust frequencies and settings for your personalized healing experience.
+                <RadixTooltip.Arrow className="fill-gray-900" />
+              </RadixTooltip.Content>
+            </RadixTooltip.Root>
           </div>
         </main>
         <Footer />

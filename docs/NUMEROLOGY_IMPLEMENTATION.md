@@ -21,7 +21,7 @@ Successfully added a comprehensive **Numerology Calculator** to CosmicHub, provi
   - No authentication required (public feature)
 
 ### Frontend Components
-- **📱 `/astro-frontend/src/components/NumerologyCalculator.tsx`**
+- **📱 `/frontend/astro/src/components/NumerologyCalculator.tsx`**
   - Beautiful React TypeScript component
   - Chakra UI design system integration
   - Tabbed interface with 6 sections:

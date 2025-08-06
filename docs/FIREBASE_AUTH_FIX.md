@@ -12,7 +12,7 @@ The authentication error was occurring due to several issues in the token handli
 
 ### 🎯 **Solutions Implemented:**
 
-#### **1. Fixed Firebase Configuration (astro-frontend/src/firebase.ts)**
+#### **1. Fixed Firebase Configuration (frontend/astro/src/firebase.ts)**
 ```typescript
 // Updated conditional emulator usage
 if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
@@ -24,7 +24,7 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
 }
 ```
 
-#### **2. Enhanced Token Management (astro-frontend/src/contexts/AuthContext.tsx)**
+#### **2. Enhanced Token Management (frontend/astro/src/contexts/AuthContext.tsx)**
 ```typescript
 const getAuthToken = async () => {
   if (!user) return null;
@@ -39,7 +39,7 @@ const getAuthToken = async () => {
 };
 ```
 
-#### **3. Proper API Service Integration (astro-frontend/src/services/api.ts)**
+#### **3. Proper API Service Integration (frontend/astro/src/services/api.ts)**
 ```typescript
 // Helper function to get fresh auth token
 const getAuthToken = async (): Promise<string | null> => {

@@ -1,1 +1,1 @@
-// This file is now empty. Move all API logic using import.meta.env to your frontend, e.g. astro-frontend/src/services/api.ts
+// This file is now empty. Move all API logic using import.meta.env to your frontend, e.g. frontend/astro/src/services/api.ts
