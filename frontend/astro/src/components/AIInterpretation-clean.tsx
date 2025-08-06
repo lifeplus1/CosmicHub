@@ -6,8 +6,6 @@ import { cn, cardVariants, badgeVariants, buttonVariants } from '../shared/utils
 interface AIInterpretationProps {
   chartData: ChartData;
   loading?: boolean;
-  planId?: string;
-  language?: string;
 }
 
 const AIInterpretation: React.FC<AIInterpretationProps> = ({
