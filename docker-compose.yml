@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    command: python startup.py
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env.docker
+    restart: unless-stopped
+
+  astro-frontend:
+    build: ./astro-frontend
+    command: npm run dev
+    volumes:
+      - ./astro-frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+  healwave-frontend:
+    build: ./healwave-frontend
+    command: npm run dev
+    volumes:
+      - ./healwave-frontend:/app
+    ports:
+      - "4000:3000"
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
