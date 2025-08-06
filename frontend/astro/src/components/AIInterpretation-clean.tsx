@@ -44,7 +44,7 @@ const AIInterpretation: React.FC<AIInterpretationProps> = ({
     { id: 'integration', label: 'Integration', icon: '🧩' }
   ];
 
-  const formatAspectName = (aspect: string) => {
+  const formatAspectName = (aspect: string): string => {
     return aspect.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
@@ -99,8 +99,16 @@ const AIInterpretation: React.FC<AIInterpretationProps> = ({
             <span className="text-sm text-slate-400">Strength:</span>
             <div className="w-20 h-2 overflow-hidden rounded-full bg-slate-700">
               <div 
-                className="h-full transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500"
-                style={{ width: `${Math.min(aspect.strength * 10, 100)}%` }}
+                className={cn(
+                  "h-full transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500",
+                  aspect.strength >= 9 ? "w-full" : 
+                  aspect.strength >= 8 ? "w-11/12" :
+                  aspect.strength >= 7 ? "w-5/6" :
+                  aspect.strength >= 6 ? "w-4/6" :
+                  aspect.strength >= 5 ? "w-3/6" :
+                  aspect.strength >= 4 ? "w-2/6" :
+                  aspect.strength >= 3 ? "w-1/6" : "w-1/12"
+                )}
               />
             </div>
             <span className="text-sm font-medium text-white">
@@ -195,8 +203,8 @@ const AIInterpretation: React.FC<AIInterpretationProps> = ({
   return (
     <FeatureGuard 
       feature="ai_interpretation"
-      fallbackTitle="AI Astrological Interpretation"
-      fallbackDescription="Get deep insights into your astrological chart with AI-powered interpretation. Discover your core identity, life purpose, relationships, career guidance, and spiritual path."
+      requiredTier="premium"
+      upgradeMessage="Get deep insights into your astrological chart with AI-powered interpretation. Discover your core identity, life purpose, relationships, career guidance, and spiritual path."
     >
       <div className="w-full space-y-6">
         <div className="space-y-2 text-center">
