@@ -109,11 +109,11 @@ const SavedCharts: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="cosmic-container py-12">
+      <div className="py-12 px-4 max-w-4xl mx-auto">
         <div className="text-center">
-          <Alert status="warning" className="alert-warning max-w-md mx-auto">
+          <Alert status="warning" className="max-w-md mx-auto bg-yellow-100 border-l-4 border-yellow-500">
             <AlertIcon />
-            <Text className="cosmic-text">Please log in to view your charts.</Text>
+            <Text className="text-gray-700 font-medium">Please log in to view your charts.</Text>
           </Alert>
         </div>
       </div>
@@ -122,10 +122,10 @@ const SavedCharts: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="cosmic-container py-12">
+      <div className="py-12 px-4 max-w-4xl mx-auto">
         <div className="text-center space-y-4">
-          <Spinner size="xl" color="cosmic.500" />
-          <Text className="cosmic-text text-lg">Loading your charts...</Text>
+          <Spinner size="xl" color="purple.500" />
+          <Text className="text-lg text-gray-700">Loading your charts...</Text>
         </div>
       </div>
     );
@@ -133,14 +133,14 @@ const SavedCharts: React.FC = () => {
 
   if (error) {
     return (
-      <div className="cosmic-container py-12">
+      <div className="py-12 px-4 max-w-4xl mx-auto">
         <div className="max-w-md mx-auto space-y-4">
-          <Alert status="error" className="alert-error">
+          <Alert status="error" className="bg-red-100 border-l-4 border-red-500">
             <AlertIcon />
-            <Text className="cosmic-text">{error}</Text>
+            <Text className="text-red-700 font-medium">{error}</Text>
           </Alert>
           <div className="text-center">
-            <Button onClick={fetchSavedCharts} className="cosmic-button-primary">
+            <Button onClick={fetchSavedCharts} className="bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700">
               Retry
             </Button>
           </div>
@@ -151,14 +151,14 @@ const SavedCharts: React.FC = () => {
 
   if (selectedChart) {
     return (
-      <div className="cosmic-container">
+      <div className="px-4 max-w-4xl mx-auto">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <Heading className="cosmic-heading text-2xl lg:text-3xl">
+          <Heading className="text-2xl lg:text-3xl font-bold text-gray-900">
             {selectedChart.name || (selectedChart.birth_data?.city ? `${selectedChart.birth_data.city} Chart` : 'Unnamed Chart')}
           </Heading>
           <Button 
             onClick={() => setSelectedChart(null)} 
-            className="cosmic-button-secondary"
+            className="bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300"
             size="md"
           >
             Back to Charts
@@ -195,73 +195,95 @@ const SavedCharts: React.FC = () => {
                 <CardBody className="p-6 relative">
                   <div className="space-y-4">
                     {/* Chart Header */}
+    <div className="px-4 max-w-4xl mx-auto">
+      <div className="py-8">
+        <Heading className="text-center mb-8 lg:mb-12 text-3xl font-bold text-gray-900">
+          Saved Charts
+        </Heading>
+        {charts.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="bg-white shadow rounded-lg max-w-md mx-auto p-8">
+              <Text className="text-lg mb-4 text-gray-700">No charts saved yet.</Text>
+              <Text className="text-sm opacity-80 text-gray-500">
+                Calculate your first chart to get started on your astrological journey!
+              </Text>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {charts.map((chart) => (
+              <Card 
+                key={chart.id} 
+                className="bg-white shadow group cursor-pointer transform transition-all duration-300 hover:scale-105 rounded-lg"
+              >
+                <CardBody className="p-6 relative">
+                  <div className="space-y-4">
+                    {/* Chart Header */}
+    <div className="px-4 max-w-4xl mx-auto">
+      <div className="py-8">
+        <Heading className="text-center mb-8 lg:mb-12 text-3xl font-bold text-gray-900">
+          Saved Charts
+        </Heading>
+        {charts.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="bg-white shadow rounded-lg max-w-md mx-auto p-8">
+              <Text className="text-lg mb-4 text-gray-700">No charts saved yet.</Text>
+              <Text className="text-sm opacity-80 text-gray-500">
+                Calculate your first chart to get started on your astrological journey!
+              </Text>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {charts.map((chart) => (
+              <Card 
+                key={chart.id} 
+                className="bg-white shadow group cursor-pointer transform transition-all duration-300 hover:scale-105 rounded-lg"
+              >
+                <CardBody className="p-6 relative">
+                  <div className="space-y-4">
+                    {/* Chart Header */}
                     <div className="flex justify-between items-start gap-3">
                       <Heading 
                         size="md" 
-                        className="cosmic-subheading text-lg flex-1 line-clamp-2"
-                        noOfLines={2}
+                        className="text-lg flex-1 line-clamp-2 font-semibold text-gray-900"
                       >
                         {chart.name || (chart.birth_data?.city ? `${chart.birth_data.city} Chart` : 'Unnamed Chart')}
                       </Heading>
-                      <IconButton
-                        aria-label="Delete chart"
-                        icon={<DeleteIcon />}
-                        size="sm"
-                        variant="ghost"
-                        colorScheme="red"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeletingChartId(chart.id);
-                          setIsDeleteOpen(true);
-                        }}
-                      />
+                      <Badge className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">{chart.chart_type}</Badge>
                     </div>
-
-                    {/* Chart Details */}
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <Badge className="cosmic-badge-primary text-xs">Date</Badge>
-                        <Text className="cosmic-text text-sm font-medium">
-                          {chart.birth_date ? formatDate(chart.birth_date) : 
-                           chart.birth_data ? `${chart.birth_data.year}-${chart.birth_data.month.toString().padStart(2, '0')}-${chart.birth_data.day.toString().padStart(2, '0')}` : 
-                           'Unknown Date'}
-                        </Text>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Badge className="cosmic-badge-primary text-xs">Time</Badge>
-                        <Text className="cosmic-text text-sm font-medium">
-                          {chart.birth_time || 
-                           (chart.birth_data ? `${chart.birth_data.hour.toString().padStart(2, '0')}:${chart.birth_data.minute.toString().padStart(2, '0')}` : 'Unknown Time')}
-                        </Text>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Badge className="cosmic-badge-primary text-xs">Location</Badge>
-                        <Text 
-                          className="cosmic-text text-sm font-medium truncate flex-1" 
-                          title={chart.birth_location || chart.birth_data?.city || 'Unknown Location'}
-                        >
-                          {chart.birth_location || chart.birth_data?.city || 'Unknown Location'}
-                        </Text>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Badge className="cosmic-badge-secondary text-xs">Saved</Badge>
-                        <Text className="cosmic-text text-sm opacity-80">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Date</Badge>
+                        <Text className="text-sm font-medium text-gray-700">
                           {formatDate(chart.created_at)}
                         </Text>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Time</Badge>
+                        <Text className="text-sm font-medium text-gray-700">
+                          {chart.birth_time || 'Unknown'}
+                        </Text>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Location</Badge>
+                        <Text className="text-sm font-medium truncate flex-1 text-gray-700" >
+                          {chart.birth_location || 'Unknown'}
+                        </Text>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Saved</Badge>
+                        <Text className="text-sm opacity-80 text-gray-500">
+                          {chart.created_at ? formatDate(chart.created_at) : 'Unknown'}
+                        </Text>
+                      </div>
                     </div>
-
-                    {/* View Button */}
                     <Button 
-                      onClick={() => setSelectedChart(chart)} 
-                      className="cosmic-button-primary w-full mt-4"
-                      size="sm"
+                      onClick={() => { setDeletingChartId(chart.id); setIsDeleteOpen(true); }} 
+                      className="bg-red-600 text-white w-full mt-4 rounded shadow hover:bg-red-700"
+                      colorScheme="red"
                     >
-                      View Chart
+                      Delete
                     </Button>
                   </div>
                 </CardBody>
@@ -269,38 +291,26 @@ const SavedCharts: React.FC = () => {
             ))}
           </div>
         )}
-      </div>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={() => setIsDeleteOpen(false)}>
-        <AlertDialogOverlay>
-          <AlertDialogContent className="cosmic-card">
-            <AlertDialogHeader className="cosmic-subheading">Delete Chart</AlertDialogHeader>
-            <AlertDialogBody className="cosmic-text">
+        <AlertDialog
+          isOpen={isDeleteOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsDeleteOpen(false)}
+        >
+          <AlertDialogOverlay />
+          <AlertDialogContent className="bg-white shadow rounded-lg">
+            <AlertDialogHeader className="font-bold text-lg text-gray-900">Delete Chart</AlertDialogHeader>
+            <AlertDialogBody className="text-gray-700">
               Are you sure you want to delete this chart? This action cannot be undone.
             </AlertDialogBody>
             <AlertDialogFooter className="gap-3">
-              <Button 
-                ref={cancelRef} 
-                onClick={() => setIsDeleteOpen(false)}
-                variant="outline"
-                className="cosmic-button"
-              >
+              <Button ref={cancelRef} onClick={() => setIsDeleteOpen(false)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300">
                 Cancel
               </Button>
-              <Button 
-                colorScheme="red" 
-                onClick={onDeleteConfirm}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
+              <Button colorScheme="red" onClick={() => handleDelete(deletingChartId!)} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow">
                 Delete
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+        </AlertDialog>
+      </div>
     </div>
-  );
-};
-
-export default SavedCharts;

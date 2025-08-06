@@ -173,7 +173,7 @@ export default function PricingPage() {
       <VStack spacing={12} align="stretch">
         {/* Header */}
         <VStack spacing={6} textAlign="center">
-          <Heading size="2xl" className="cosmic-heading">
+          <Heading size="2xl" className="text-4xl font-bold text-center text-white">
             Choose Your Cosmic Journey
           </Heading>
           <Text fontSize="xl" color="whiteAlpha.800" maxW="2xl">
@@ -343,14 +343,14 @@ export default function PricingPage() {
           </CardHeader>
           <CardBody overflow="auto">
             <Box overflowX="auto">
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #4A5568' }}>
+                    <th className="p-3 text-left border-b-2 border-gray-700">
                       <Text fontWeight="bold" color="white">Feature</Text>
                     </th>
                     {pricingPlans.map((plan) => (
-                      <th key={plan.tier} style={{ textAlign: 'center', padding: '12px', borderBottom: '2px solid #4A5568' }}>
+                      <th key={plan.tier} className="p-3 text-center border-b-2 border-gray-700">
                         <VStack spacing={1}>
                           <Icon as={plan.icon} color={`${plan.color}.500`} boxSize={5} />
                           <Text fontWeight="bold" color="white" fontSize="sm">{plan.name}</Text>
@@ -361,8 +361,8 @@ export default function PricingPage() {
                 </thead>
                 <tbody>
                   {getAllFeatures().map((feature, index) => (
-                    <tr key={index} style={{ borderBottom: '1px solid #2D3748' }}>
-                      <td style={{ padding: '12px' }}>
+                    <tr key={index} className="border-b border-gray-800">
+                      <td className="p-3">
                         <EducationalTooltip
                           title={feature}
                           description={getFeatureDescription(feature)}
@@ -376,7 +376,7 @@ export default function PricingPage() {
                         </EducationalTooltip>
                       </td>
                       {pricingPlans.map((plan) => (
-                        <td key={plan.tier} style={{ textAlign: 'center', padding: '12px' }}>
+                        <td key={plan.tier} className="p-3 text-center">
                           {isFeatureIncluded(feature, plan.features) ? (
                             <Icon as={FaCheck} color="green.500" boxSize={4} />
                           ) : (

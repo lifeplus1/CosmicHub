@@ -38,13 +38,17 @@ jobs:
           FIREBASE_AUTH_PROVIDER_X509_CERT_URL: ${{ secrets.FIREBASE_AUTH_PROVIDER_X509_CERT_URL }}
           FIREBASE_CLIENT_X509_CERT_URL: ${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
           FIREBASE_UNIVERSE_DOMAIN: ${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
-      - name: Run Backend Tests
+      - name: Run Backend Tests & Coverage
         run: |
           cd backend
-          # Run unit tests (fast)
-          pytest tests/ -m "not slow" --cov=astro --cov-report=xml
+          pytest tests/ --cov=astro --cov-report=xml --cov-report=html
           # Run slow tests separately if needed
           pytest tests/ -m "slow" || true
+      - name: Upload Backend Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-html
+          path: backend/htmlcov/
         env:
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
           FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
@@ -73,10 +77,15 @@ jobs:
           npm list @testing-library/jest-dom @testing-library/react vitest typescript
           ls -la src
           cat src/setupTests.js || echo "src/setupTests.js not found"
-      - name: Run Frontend Tests
+      - name: Run Frontend Tests & Coverage
         run: |
           cd astro-frontend
-          npm run test
+          npm run test -- --coverage
+      - name: Upload Frontend Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-html
+          path: astro-frontend/coverage/
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
