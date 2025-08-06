@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-dotenv
 firebase-admin
 geopy
@@ -11,4 +11,5 @@ pytz
 pytest
 pytest-cov
 reportlab
+websockets
 

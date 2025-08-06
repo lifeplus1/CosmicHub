@@ -118,6 +118,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include API routers
+from api.routers import ai
+app.include_router(ai.router, prefix="/api/v1", tags=["ai"])
+
 class BirthData(BaseModel):
     year: int
     month: int
