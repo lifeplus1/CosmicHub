@@ -1,11 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { ChakraProvider } from '@chakra-ui/react';
 import AIChat from '../components/AIChat';
-import * as authModule from '../../../shared/auth';
+import * as authModule from '../auth';
 import { useAuth } from '../components/AuthProvider';
-import { AuthProvider } from '../shared/AuthContext';
 
 // Mock the auth module
 vi.mock('../auth', () => ({
@@ -25,25 +24,25 @@ vi.mock('axios', () => ({
 }));
 
 import axios from 'axios';
+const mockAxios = axios as any;
+mockAxios.post = vi.fn();
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+  const actual = await vi.importActual('react-router-dom') as any;
   return {
     ...actual,
-    useNavigate: (): (() => void) => mockNavigate,
-    Navigate: ({ to }: { to: string }): JSX.Element => <div data-testid="navigate-to">{to}</div>
+    useNavigate: () => mockNavigate,
+    Navigate: ({ to }: { to: string }) => <div data-testid="navigate-to">{to}</div>
   };
 });
 
 // Helper component to wrap components with providers
-const TestWrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <ChakraProvider>
-    <MemoryRouter>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </MemoryRouter>
+    <BrowserRouter>
+      {children}
+    </BrowserRouter>
   </ChakraProvider>
 );
 
@@ -87,19 +86,7 @@ describe('AIChat Component', () => {
 
   it('renders chat interface when user is authenticated', () => {
     mockUseAuth.mockReturnValue({
-      user: {
-        uid: 'test-user',
-        emailVerified: false,
-        isAnonymous: false,
-        metadata: {},
-        providerData: [],
-        refreshToken: '',
-        tenantId: null,
-        displayName: 'Test User',
-        email: 'test@example.com',
-        phoneNumber: null,
-        photoURL: null
-      },
+      user: { uid: 'test-user' } as any,
       loading: false
     });
 
@@ -116,7 +103,7 @@ describe('AIChat Component', () => {
 
   it('handles message input correctly', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as { uid: string },
+      user: { uid: 'test-user' } as any,
       loading: false
     });
 
@@ -134,17 +121,17 @@ describe('AIChat Component', () => {
 
   it('submits message and displays response', async () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as { uid: string },
+      user: { uid: 'test-user' } as any,
       loading: false
     });
 
     mockGetAuthToken.mockResolvedValue('mock-token');
     mockAxios.post.mockResolvedValue({
-    (axios.default.post as typeof vi.fn).mockResolvedValue({
       data: {
         choices: [{ message: { content: 'Test interpretation' } }]
       }
     });
+
     render(
       <TestWrapper>
         <AIChat />
@@ -158,7 +145,7 @@ describe('AIChat Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect((axios.default.post as typeof vi.fn)).toHaveBeenCalledWith(
+      expect(mockAxios.post).toHaveBeenCalledWith(
         expect.stringContaining('/chat'),
         { text: 'Test question' },
         expect.objectContaining({
@@ -168,16 +155,17 @@ describe('AIChat Component', () => {
         })
       );
     });
+  });
 
   it('handles API error gracefully', async () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as { uid: string },
+      user: { uid: 'test-user' } as any,
       loading: false
     });
 
     mockGetAuthToken.mockResolvedValue('mock-token');
     mockAxios.post.mockRejectedValue(new Error('API Error'));
-    (axios.post as typeof vi.fn).mockRejectedValue(new Error('API Error'));
+
     render(
       <TestWrapper>
         <AIChat />
@@ -191,13 +179,13 @@ describe('AIChat Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-    await waitFor(() => {
-      expect((axios.default.post as typeof vi.fn)).toHaveBeenCalled();
+      expect(mockAxios.post).toHaveBeenCalled();
     });
+  });
 
   it('disables submit button when message is empty', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as { uid: string },
+      user: { uid: 'test-user' } as any,
       loading: false
     });
 
@@ -213,7 +201,7 @@ describe('AIChat Component', () => {
 
   it('enables submit button when message has content', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as { uid: string },
+      user: { uid: 'test-user' } as any,
       loading: false
     });
 
