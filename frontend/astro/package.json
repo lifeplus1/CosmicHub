@@ -9,6 +9,10 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.2.4",
+    "@chakra-ui/react": "^3.24.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@radix-ui/react-tooltip": "^1.2.7",
     "axios": "^1.6.0",
     "date-fns": "^4.1.0",
