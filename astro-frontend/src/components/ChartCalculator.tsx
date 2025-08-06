@@ -25,6 +25,7 @@ import {
 import { FaBook, FaInfoCircle } from "react-icons/fa";
 import ChartDisplay from "./ChartDisplay";
 import { MultiSystemChartDisplay } from "./MultiSystemChartDisplay";
+import type { MultiSystemChartData } from "./MultiSystemChartDisplay";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";
 
@@ -38,7 +39,40 @@ interface FormData {
   multiSystem: boolean;
 }
 
-export default function ChartCalculator() {
+export interface ExtendedChartData {
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  julian_day: number;
+  angles: Record<string, number>;
+  sun?: string;
+  moon?: string;
+  rising?: string;
+  planets: Record<string, {
+    position: number;
+    house: number;
+    retrograde?: boolean;
+    speed?: number;
+  }>;
+  houses: Array<{
+    house: number;
+    cusp: number;
+    sign: string;
+  }>;
+  aspects: Array<{
+    point1: string;
+    point2: string;
+    aspect: string;
+    orb: number;
+    exact: boolean;
+    point1_sign?: string;
+    point2_sign?: string;
+    point1_house?: number;
+    point2_house?: number;
+  }>;
+}
+
+export default function ChartCalculator(): JSX.Element {
   const [formData, setFormData] = useState<FormData>({
     year: "",
     month: "",
@@ -48,23 +82,23 @@ export default function ChartCalculator() {
     city: "",
     multiSystem: false,
   });
-  const [houseSystem, setHouseSystem] = useState("P");
-  const [chart, setChart] = useState<any>(null);
+  const [houseSystem, setHouseSystem] = useState<string>("P"); // Default to Placidus
+  const [chart, setChart] = useState<ExtendedChartData | MultiSystemChartData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const toast = useToast();
   const { isOpen: isGuideOpen, onToggle: toggleGuide } = useDisclosure();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSwitchChange = (checked: boolean) => {
+  const handleSwitchChange = (checked: boolean): void => {
     setFormData((prev) => ({ ...prev, multiSystem: checked }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -93,9 +127,11 @@ export default function ChartCalculator() {
         throw new Error(errorData.detail || "Failed to calculate chart");
       }
 
+      // Parse response JSON
       const data = await response.json();
-      setChart(data.chart);
-      
+
+      // Validate/cast response to ExtendedChartData or MultiSystemChartData
+      setChart(data.chart as ExtendedChartData | MultiSystemChartData);
       toast({
         title: "Chart calculated successfully!",
         description: formData.multiSystem 
@@ -122,6 +158,20 @@ export default function ChartCalculator() {
 
   const isFormValid =
     formData.year && formData.month && formData.day && formData.hour && formData.minute && formData.city;
+  // setHouseSystem is now handled by useState above
+
+  // Type guard for ExtendedChartData
+  function isExtendedChartData(data: ExtendedChartData | MultiSystemChartData | null): data is ExtendedChartData {
+    return !!data && typeof data === "object" &&
+      "latitude" in data &&
+      "longitude" in data &&
+      "timezone" in data &&
+      "julian_day" in data &&
+      "angles" in data &&
+      "planets" in data &&
+      "houses" in data &&
+      "aspects" in data;
+  }
 
   return (
     <Box maxW="1200px" mx="auto" p={4}>
@@ -365,6 +415,7 @@ export default function ChartCalculator() {
                       ]}
                     />
                   </FormLabel>
+
                   <Select 
                     value={houseSystem} 
                     onChange={(e) => setHouseSystem(e.target.value)} 
@@ -427,11 +478,11 @@ export default function ChartCalculator() {
         {/* Chart Display */}
         {chart && (
           <Box>
-            {formData.multiSystem ? (
-              <MultiSystemChartDisplay chartData={chart} isLoading={loading} />
-            ) : (
-              <ChartDisplay chart={chart} />
-            )}
+            {formData.multiSystem
+              ? !isExtendedChartData(chart) && (
+                  <MultiSystemChartDisplay chartData={chart as MultiSystemChartData} isLoading={loading} />
+                )
+              : isExtendedChartData(chart) && <ChartDisplay chart={chart} />}
           </Box>
         )}
       </VStack>

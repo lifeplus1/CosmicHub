@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import {
   Box, Card, CardBody, Heading, Text, Tabs, TabList, TabPanels, Tab, TabPanel,
   Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,
@@ -7,8 +7,155 @@ import {
   StatLabel, StatNumber, StatHelpText, useColorModeValue, Flex, Spinner
 } from '@chakra-ui/react';
 
+export interface MultiSystemChartData {
+  birth_info?: {
+    date?: string;
+    time?: string;
+    location?: {
+      latitude?: number;
+      longitude?: number;
+      timezone?: string;
+    };
+  };
+  western_tropical?: {
+    planets: Record<string, {
+      position: number;
+      retrograde?: boolean;
+    }>;
+    aspects: Array<{
+      point1: string;
+      point2: string;
+      aspect: string;
+      orb: number;
+      exact: boolean;
+      point1_sign?: string;
+      point2_sign?: string;
+      point1_house?: number;
+      point2_house?: number;
+    }>;
+  };
+  vedic_sidereal?: {
+    description?: string;
+    ayanamsa?: number;
+    analysis?: {
+      moon_sign?: string;
+      analysis?: string;
+    };
+    planets?: Record<string, {
+      vedic_sign?: string;
+      nakshatra?: {
+        name?: string;
+        pada?: string;
+      };
+    }>;
+  };
+  chinese?: {
+    description?: string;
+    year?: { animal?: string; element?: string; traits?: string };
+    month?: { animal?: string };
+    day?: { animal?: string };
+    hour?: { animal?: string };
+    four_pillars?: string;
+    elements_analysis?: { analysis?: string };
+    personality_summary?: string;
+  };
+  mayan?: {
+    description?: string;
+    day_sign?: { symbol?: string; name?: string; meaning?: string; color?: string };
+    sacred_number?: { number?: number; meaning?: string };
+    galactic_signature?: string;
+    wavespell?: { tone?: { name?: string }; position?: number; description?: string };
+    long_count?: { date?: string };
+    life_purpose?: string;
+    spiritual_guidance?: string;
+  };
+  uranian?: {
+    description?: string;
+    uranian_planets?: Record<string, { symbol?: string; position?: number; meaning?: string }>;
+    dial_aspects?: Array<{ body1?: string; body2?: string; angle?: number; orb?: number; meaning?: string }>;
+  };
+  synthesis?: {
+    primary_themes?: string[];
+    life_purpose?: string[];
+    personality_integration?: Record<string, string[]>;
+    spiritual_path?: string[];
+  };
+}
+
 interface MultiSystemChartProps {
-  chartData: any;
+  chartData: MultiSystemChartData;
+  birth_info?: {
+    date?: string;
+    time?: string;
+    location?: {
+      latitude?: number;
+      longitude?: number;
+      timezone?: string;
+    };
+  };
+  western_tropical?: {
+    planets: Record<string, {
+      position: number;
+      retrograde?: boolean;
+    }>;
+    aspects: Array<{
+      point1: string;
+      point2: string;
+      aspect: string;
+      orb: number;
+      exact: boolean;
+      point1_sign?: string;
+      point2_sign?: string;
+      point1_house?: number;
+      point2_house?: number;
+    }>;
+  };
+  vedic_sidereal?: {
+    description?: string;
+    ayanamsa?: number;
+    analysis?: {
+      moon_sign?: string;
+      analysis?: string;
+    };
+    planets?: Record<string, {
+      vedic_sign?: string;
+      nakshatra?: {
+        name?: string;
+        pada?: string;
+      };
+    }>;
+  };
+  chinese?: {
+    description?: string;
+    year?: { animal?: string; element?: string; traits?: string };
+    month?: { animal?: string };
+    day?: { animal?: string };
+    hour?: { animal?: string };
+    four_pillars?: string;
+    elements_analysis?: { analysis?: string };
+    personality_summary?: string;
+  };
+  mayan?: {
+    description?: string;
+    day_sign?: { symbol?: string; name?: string; meaning?: string; color?: string };
+    sacred_number?: { number?: number; meaning?: string };
+    galactic_signature?: string;
+    wavespell?: { tone?: { name?: string }; position?: number; description?: string };
+    long_count?: { date?: string };
+    life_purpose?: string;
+    spiritual_guidance?: string;
+  };
+  uranian?: {
+    description?: string;
+    uranian_planets?: Record<string, { symbol?: string; position?: number; meaning?: string }>;
+    dial_aspects?: Array<{ body1?: string; body2?: string; angle?: number; orb?: number; meaning?: string }>;
+  };
+  synthesis?: {
+    primary_themes?: string[];
+    life_purpose?: string[];
+    personality_integration?: Record<string, string[]>;
+    spiritual_path?: string[];
+  };
   isLoading?: boolean;
 }
 
@@ -41,26 +188,40 @@ const getZodiacSign = (position: number): string => {
   return `${deg.toFixed(2)}° ${zodiacSigns[signIndex] || 'Unknown'}`;
 };
 
-const WesternChart: React.FC<{ data: any }> = ({ data }) => {
+interface WesternChartData {
+  planets: Record<string, { position: number; retrograde?: boolean }>;
+  aspects: Array<{
+    point1: string;
+    point2: string;
+    aspect: string;
+    orb: number;
+    exact: boolean;
+    point1_sign?: string;
+    point2_sign?: string;
+    point1_house?: number;
+    point2_house?: number;
+  }>;
+}
+const WesternChart: React.FC<{ data?: WesternChartData }> = ({ data }) => {
   if (!data || !data.planets) return <Text>No Western chart data available</Text>;
 
   return (
     <VStack spacing={6} align="stretch">
       <Card className="cosmic-card-premium">
         <CardBody className="p-6">
-          <Heading size="md" mb={4} className="cosmic-subheading text-purple-300">
+          <Heading size="md" mb={4} className="text-purple-300 cosmic-subheading">
             Western Tropical Chart
           </Heading>
-          <Text className="cosmic-text text-sm mb-6 opacity-90">
+          <Text className="mb-6 text-sm cosmic-text opacity-90">
             Based on tropical zodiac, solar-focused approach emphasizing personality and life expression
           </Text>
           
           <Accordion allowToggle>
-            <AccordionItem className="cosmic-card border-purple-300/30 rounded-lg">
-              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300">
+            <AccordionItem className="rounded-lg cosmic-card border-purple-300/30">
+              <AccordionButton className="transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30">
                 <Box flex="1" textAlign="left">
                   <HStack>
-                    <Text className="cosmic-subheading mb-0">Planets & Positions</Text>
+                    <Text className="mb-0 cosmic-subheading">Planets & Positions</Text>
                     <Badge className="cosmic-badge-primary">{Object.keys(data.planets).length}</Badge>
                   </HStack>
                 </Box>
@@ -77,7 +238,7 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {Object.entries(data.planets).map(([planet, info]: [string, any]) => (
+                      {Object.entries(data.planets).map(([planet, info]: [string, { position: number; retrograde?: boolean }]) => (
                         <Tr key={planet}>
                           <Td>
                             <HStack spacing={2}>
@@ -101,11 +262,11 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
               </AccordionPanel>
             </AccordionItem>
 
-            <AccordionItem className="cosmic-card border-purple-300/30 rounded-lg mt-4">
-              <AccordionButton className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300">
+            <AccordionItem className="mt-4 rounded-lg cosmic-card border-purple-300/30">
+              <AccordionButton className="transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30">
                 <Box flex="1" textAlign="left">
                   <HStack>
-                    <Text className="cosmic-subheading mb-0">Aspects</Text>
+                    <Text className="mb-0 cosmic-subheading">Aspects</Text>
                     <Badge className="cosmic-badge-secondary">{data.aspects?.length || 0}</Badge>
                   </HStack>
                 </Box>
@@ -122,7 +283,17 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {(data.aspects || []).map((aspect: any, idx: number) => (
+                      {(data.aspects || []).map((aspect: {
+                        point1: string;
+                        point2: string;
+                        aspect: string;
+                        orb: number;
+                        exact: boolean;
+                        point1_sign?: string;
+                        point2_sign?: string;
+                        point1_house?: number;
+                        point2_house?: number;
+                      }, idx: number) => (
                         <Tr key={idx}>
                           <Td>
                             <HStack spacing={2}>
@@ -146,7 +317,13 @@ const WesternChart: React.FC<{ data: any }> = ({ data }) => {
   );
 };
 
-const VedicChart: React.FC<{ data: any }> = ({ data }) => {
+interface VedicChartData {
+  description?: string;
+  ayanamsa?: number;
+  analysis?: { moon_sign?: string; analysis?: string };
+  planets?: Record<string, { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }>;
+}
+const VedicChart: React.FC<{ data: VedicChartData }> = ({ data }) => {
   if (!data) return <Text>No Vedic chart data available</Text>;
 
   return (
@@ -190,7 +367,7 @@ const VedicChart: React.FC<{ data: any }> = ({ data }) => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {Object.entries(data.planets || {}).map(([planet, info]: [string, any]) => (
+                    {Object.entries(data.planets || {}).map(([planet, info]: [string, { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }]) => (
                       <Tr key={planet}>
                         <Td>
                           <HStack>
@@ -236,7 +413,17 @@ const VedicChart: React.FC<{ data: any }> = ({ data }) => {
   );
 };
 
-const ChineseChart: React.FC<{ data: any }> = ({ data }) => {
+interface ChineseChartData {
+  description?: string;
+  year?: { animal?: string; element?: string; traits?: string };
+  month?: { animal?: string };
+  day?: { animal?: string };
+  hour?: { animal?: string };
+  four_pillars?: string;
+  elements_analysis?: { analysis?: string };
+  personality_summary?: string;
+}
+const ChineseChart: React.FC<{ data: ChineseChartData }> = ({ data }) => {
   if (!data) return <Text>No Chinese astrology data available</Text>;
 
   return (
@@ -315,7 +502,17 @@ const ChineseChart: React.FC<{ data: any }> = ({ data }) => {
   );
 };
 
-const MayanChart: React.FC<{ data: any }> = ({ data }) => {
+interface MayanChartData {
+  description?: string;
+  day_sign?: { symbol?: string; name?: string; meaning?: string; color?: string };
+  sacred_number?: { number?: number; meaning?: string };
+  galactic_signature?: string;
+  wavespell?: { tone?: { name?: string }; position?: number; description?: string };
+  long_count?: { date?: string };
+  life_purpose?: string;
+  spiritual_guidance?: string;
+}
+const MayanChart: React.FC<{ data: MayanChartData }> = ({ data }) => {
   if (!data) return <Text>No Mayan astrology data available</Text>;
 
   return (
@@ -407,7 +604,12 @@ const MayanChart: React.FC<{ data: any }> = ({ data }) => {
   );
 };
 
-const UranianChart: React.FC<{ data: any }> = ({ data }) => {
+interface UranianChartData {
+  description?: string;
+  uranian_planets?: Record<string, { symbol?: string; position?: number; meaning?: string }>;
+  dial_aspects?: Array<{ body1?: string; body2?: string; angle?: number; orb?: number; meaning?: string }>;
+}
+const UranianChart: React.FC<{ data: UranianChartData }> = ({ data }) => {
   if (!data) return <Text>No Uranian astrology data available</Text>;
 
   return (
@@ -437,7 +639,7 @@ const UranianChart: React.FC<{ data: any }> = ({ data }) => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {Object.entries(data.uranian_planets || {}).map(([planet, info]: [string, any]) => (
+                    {Object.entries(data.uranian_planets || {}).map(([planet, info]: [string, { symbol?: string; position?: number; meaning?: string }]) => (
                       <Tr key={planet}>
                         <Td>
                           <HStack>
@@ -472,7 +674,7 @@ const UranianChart: React.FC<{ data: any }> = ({ data }) => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {(data.dial_aspects || []).slice(0, 8).map((aspect: any, idx: number) => (
+                    {(data.dial_aspects || []).slice(0, 8).map((aspect: { body1?: string; body2?: string; angle?: number; orb?: number; meaning?: string }, idx: number) => (
                       <Tr key={idx}>
                         <Td fontSize="sm">{aspect.body1} - {aspect.body2}</Td>
                         <Td>{aspect.angle}°</Td>
@@ -491,7 +693,13 @@ const UranianChart: React.FC<{ data: any }> = ({ data }) => {
   );
 };
 
-const SynthesisChart: React.FC<{ data: any }> = ({ data }) => {
+interface SynthesisChartData {
+  primary_themes?: string[];
+  life_purpose?: string[];
+  personality_integration?: Record<string, string[]>;
+  spiritual_path?: string[];
+}
+const SynthesisChart: React.FC<{ data: SynthesisChartData }> = ({ data }) => {
   if (!data) return <Text>No synthesis data available</Text>;
 
   return (
@@ -550,7 +758,7 @@ const SynthesisChart: React.FC<{ data: any }> = ({ data }) => {
               </AccordionButton>
               <AccordionPanel>
                 <SimpleGrid columns={[1, 2]} spacing={4}>
-                  {Object.entries(data.personality_integration || {}).map(([aspect, traits]: [string, any]) => (
+                  {Object.entries(data.personality_integration || {}).map(([aspect, traits]: [string, string[]]) => (
                     <Box key={aspect}>
                       <Text fontWeight="bold" mb={2} textTransform="capitalize">
                         {aspect.replace('_', ' ')}:
@@ -651,19 +859,19 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({ chart
               <WesternChart data={chartData.western_tropical} />
             </TabPanel>
             <TabPanel p={0} pt={4}>
-              <VedicChart data={chartData.vedic_sidereal} />
+              <VedicChart data={chartData.vedic_sidereal ?? {}} />
             </TabPanel>
             <TabPanel p={0} pt={4}>
-              <ChineseChart data={chartData.chinese} />
+              <ChineseChart data={chartData.chinese ?? {}} />
             </TabPanel>
             <TabPanel p={0} pt={4}>
-              <MayanChart data={chartData.mayan} />
+              <MayanChart data={chartData.mayan ?? {}} />
             </TabPanel>
             <TabPanel p={0} pt={4}>
-              <UranianChart data={chartData.uranian} />
+              <UranianChart data={chartData.uranian ?? {}} />
             </TabPanel>
             <TabPanel p={0} pt={4}>
-              <SynthesisChart data={chartData.synthesis} />
+              <SynthesisChart data={chartData.synthesis ?? {}} />
             </TabPanel>
           </TabPanels>
         </Tabs>

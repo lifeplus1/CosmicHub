@@ -1,0 +1,143 @@
+# .gitlab-ci.yml for CosmicHub monorepo
+# This config runs tests for backend (Python) and both frontends (Vite/React), then deploys if on main branch
+
+stages:
+  - test
+  - deploy
+
+variables:
+  # Node.js and Python versions
+  NODE_VERSION: "20"
+  PYTHON_VERSION: "3.13"
+  # Vercel/Render tokens (set in GitLab CI/CD settings)
+  VERCEL_TOKEN: "$VERCEL_TOKEN"
+  VERCEL_ORG_ID: "$VERCEL_ORG_ID"
+  VERCEL_PROJECT_ID: "$VERCEL_PROJECT_ID"
+  RENDER_SERVICE_ID: "$RENDER_SERVICE_ID"
+  RENDER_API_KEY: "$RENDER_API_KEY"
+  # Firebase/Backend env vars
+  FIREBASE_PROJECT_ID: "$FIREBASE_PROJECT_ID"
+  FIREBASE_PRIVATE_KEY_ID: "$FIREBASE_PRIVATE_KEY_ID"
+  FIREBASE_PRIVATE_KEY: "$FIREBASE_PRIVATE_KEY"
+  FIREBASE_CLIENT_EMAIL: "$FIREBASE_CLIENT_EMAIL"
+  FIREBASE_CLIENT_ID: "$FIREBASE_CLIENT_ID"
+  FIREBASE_AUTH_URI: "$FIREBASE_AUTH_URI"
+  FIREBASE_TOKEN_URI: "$FIREBASE_TOKEN_URI"
+  FIREBASE_AUTH_PROVIDER_X509_CERT_URL: "$FIREBASE_AUTH_PROVIDER_X509_CERT_URL"
+  FIREBASE_CLIENT_X509_CERT_URL: "$FIREBASE_CLIENT_X509_CERT_URL"
+  FIREBASE_UNIVERSE_DOMAIN: "$FIREBASE_UNIVERSE_DOMAIN"
+  FIREBASE_CREDENTIALS: "$FIREBASE_CREDENTIALS"
+  VITE_FIREBASE_API_KEY: "$VITE_FIREBASE_API_KEY"
+  VITE_FIREBASE_AUTH_DOMAIN: "$VITE_FIREBASE_AUTH_DOMAIN"
+  VITE_FIREBASE_PROJECT_ID: "$VITE_FIREBASE_PROJECT_ID"
+  VITE_FIREBASE_STORAGE_BUCKET: "$VITE_FIREBASE_STORAGE_BUCKET"
+  VITE_FIREBASE_MESSAGING_SENDER_ID: "$VITE_FIREBASE_MESSAGING_SENDER_ID"
+  VITE_FIREBASE_APP_ID: "$VITE_FIREBASE_APP_ID"
+  VITE_BACKEND_URL: "https://astrology-app-0emh.onrender.com"
+
+cache:
+  paths:
+    - backend/.venv/
+    - astro-frontend/node_modules/
+    - healwave-frontend/node_modules/
+
+# Test Stage
+.test_template: &test_template
+  image: node:${NODE_VERSION}
+  services:
+    - name: python:${PYTHON_VERSION}
+  before_script:
+    - apt-get update && apt-get install -y python3-pip python3-venv
+    - python3 --version
+    - node --version
+
+# Backend tests
+backend-test:
+  <<: *test_template
+  stage: test
+  script:
+    - cd backend
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pytest tests/ --cov=astro --cov-report=xml --cov-report=html
+    - pytest tests/ -m "slow" || true
+  artifacts:
+    paths:
+      - backend/htmlcov/
+    expire_in: 1 week
+
+# Astro Frontend tests
+astro-frontend-test:
+  <<: *test_template
+  stage: test
+  script:
+    - cd astro-frontend
+    - npm ci
+    - npm run test -- --coverage
+  artifacts:
+    paths:
+      - astro-frontend/coverage/
+    expire_in: 1 week
+
+# HealWave Frontend tests
+healwave-frontend-test:
+  <<: *test_template
+  stage: test
+  script:
+    - cd healwave-frontend
+    - npm ci
+    - npm run test
+  artifacts:
+    paths:
+      - healwave-frontend/coverage/
+    expire_in: 1 week
+
+# Deploy Astro Frontend to Vercel
+astro-frontend-deploy:
+  image: node:${NODE_VERSION}
+  stage: deploy
+  only:
+    - main
+  script:
+    - npm install -g vercel@latest
+    - cd astro-frontend
+    - vercel deploy --prod --token=$VERCEL_TOKEN --yes --scope $VERCEL_ORG_ID
+  environment:
+    name: production
+  dependencies:
+    - astro-frontend-test
+
+# Deploy Backend to Render
+backend-deploy:
+  image: python:${PYTHON_VERSION}
+  stage: deploy
+  only:
+    - main
+  script:
+    - pip install requests
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install -r backend/requirements.txt
+    - |
+      curl -X POST "https://api.render.com/deploy/srv-$RENDER_SERVICE_ID" \
+        -H "Authorization: Bearer $RENDER_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{}'
+  environment:
+    name: production
+  dependencies:
+    - backend-test
+
+# Deploy HealWave Frontend (add your deployment step here if needed)
+# healwave-frontend-deploy:
+#   image: node:${NODE_VERSION}
+#   stage: deploy
+#   only:
+#     - main
+#   script:
+#     - echo "Add deployment steps for HealWave frontend here"
+#   environment:
+#     name: production
+#   dependencies:
+#     - healwave-frontend-test

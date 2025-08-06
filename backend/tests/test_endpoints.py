@@ -1,10 +1,45 @@
+def test_human_design_invalid_data():
+    """Test Human Design endpoint with invalid data (missing fields)"""
+    bad_data = {"year": 1990}  # Missing required fields
+    response = requests.post(f"{BASE_URL}/calculate-human-design", json=bad_data)
+    assert response.status_code != 200, "Expected failure for invalid data"
+
+def test_gene_keys_invalid_data():
+    """Test Gene Keys endpoint with invalid data (missing fields)"""
+    bad_data = {"year": 1990}
+    response = requests.post(f"{BASE_URL}/calculate-gene-keys", json=bad_data)
+    assert response.status_code != 200, "Expected failure for invalid data"
+
+def test_gene_key_details_not_found():
+    """Test Gene Key details endpoint for non-existent gene key"""
+    response = requests.get(f"{BASE_URL}/gene-key/9999")
+    assert response.status_code == 404 or response.status_code == 400, "Should return 404 or 400 for missing gene key"
+
+def test_daily_contemplation_not_found():
+    """Test daily contemplation endpoint for non-existent gene key"""
+    response = requests.get(f"{BASE_URL}/daily-contemplation/9999")
+    assert response.status_code == 404 or response.status_code == 400, "Should return 404 or 400 for missing gene key"
+
+def test_human_design_edge_case():
+    """Test Human Design endpoint with edge case data (leap year, extreme lat/lon)"""
+    edge_data = {
+        "year": 2000,
+        "month": 2,
+        "day": 29,
+        "hour": 23,
+        "minute": 59,
+        "city": "Ushuaia, Argentina",
+        "timezone": "America/Argentina/Ushuaia",
+        "lat": -54.8019,
+        "lon": -68.3030
+    }
+    response = requests.post(f"{BASE_URL}/calculate-human-design", json=edge_data)
+    assert response.status_code == 200, f"Edge case failed: {response.status_code} - {response.text}"
 #!/usr/bin/env python3
 """
 Test script for Human Design and Gene Keys API endpoints
 """
-import json
 import requests
-from datetime import datetime
 
 # Backend URL
 BASE_URL = "http://localhost:8000"
@@ -77,24 +112,4 @@ def test_daily_contemplation():
     except Exception as e:
         assert False, f"❌ Daily contemplation error: {str(e)}"
 
-def main():
-    """Run all tests"""
-    print("🧪 Testing Human Design & Gene Keys API Endpoints")
-    print("=" * 50)
-    
-    results = []
-    results.append(test_human_design())
-    results.append(test_gene_keys())
-    results.append(test_gene_key_details())
-    results.append(test_daily_contemplation())
-    
-    print("\n" + "=" * 50)
-    print(f"🎯 Test Results: {sum(results)}/{len(results)} passed")
-    
-    if all(results):
-        print("🎉 All tests passed! Human Design & Gene Keys backend is working correctly.")
-    else:
-        print("⚠️  Some tests failed. Check the error messages above.")
-
-if __name__ == "__main__":
-    main()
+## Removed main() runner and all() logic; only pytest-compatible test functions remain

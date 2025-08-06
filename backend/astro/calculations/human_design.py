@@ -1,14 +1,18 @@
 # backend/astro/calculations/human_design.py
 import logging
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, Tuple, TypedDict
+class PlanetActivation(TypedDict):
+    gate: int
+    line: int
+    position: float
+    center: str
 from datetime import datetime, timedelta
- 
 import swisseph as swe  # type: ignore
 
 logger = logging.getLogger(__name__)
 
 # I Ching Hexagram Gate Names and Properties
-GATES: Dict[int, Dict[str, str]] = {
+GATES = {
     1: {"name": "The Creative", "center": "G", "type": "Individual", "theme": "Self-Expression"},
     2: {"name": "The Receptive", "center": "G", "type": "Collective", "theme": "Direction"},
     3: {"name": "Difficulty at the Beginning", "center": "Root", "type": "Individual", "theme": "Mutation"},
@@ -76,7 +80,7 @@ GATES: Dict[int, Dict[str, str]] = {
 }
 
 # Energy Centers and their properties
-CENTERS: Dict[str, Dict[str, str]] = {
+CENTERS = {
     "Head": {"type": "Pressure", "theme": "Inspiration", "color": "yellow"},
     "Ajna": {"type": "Awareness", "theme": "Conceptualization", "color": "green"},
     "Throat": {"type": "Motor", "theme": "Manifestation", "color": "brown"},
@@ -89,7 +93,7 @@ CENTERS: Dict[str, Dict[str, str]] = {
 }
 
 # Human Design Types
-TYPES: Dict[str, Dict[str, str]] = {
+TYPES = {
     "Manifestor": {
         "description": "Initiators who are here to make things happen",
         "strategy": "Inform before you act",
@@ -128,7 +132,7 @@ TYPES: Dict[str, Dict[str, str]] = {
 }
 
 # Authorities
-AUTHORITIES: Dict[str, str] = {
+AUTHORITIES = {
     "Emotional": "Wait for emotional clarity before making decisions",
     "Sacral": "Follow your gut response in the moment",
     "Splenic": "Trust your intuitive knowing",
@@ -144,37 +148,36 @@ def get_gate_center(gate_number: int) -> str:
         return GATES[gate_number]["center"]
     return "Unknown"
 
-def calculate_planetary_activations(julian_day: float) -> Dict[str, Dict[str, Any]]:
+def calculate_planetary_activations(julian_day: float) -> dict[str, PlanetActivation]:
     """Calculate planetary activations for Human Design"""
-    activations = {}
+    activations: dict[str, PlanetActivation] = {}
     
     # Planet constants for Swiss Ephemeris
-    # All elements are integer constants from Swiss Ephemeris
-    planets: Dict[str, int] = {
-        'sun': swe.SUN,           # type: ignore
-        'moon': swe.MOON,         # type: ignore
-        'mercury': swe.MERCURY,   # type: ignore
-        'venus': swe.VENUS,       # type: ignore
-        'mars': swe.MARS,         # type: ignore
-        'jupiter': swe.JUPITER,   # type: ignore
-        'saturn': swe.SATURN,     # type: ignore
-        'uranus': swe.URANUS,     # type: ignore
-        'neptune': swe.NEPTUNE,   # type: ignore
-        'pluto': swe.PLUTO,       # type: ignore
-        'north_node': swe.MEAN_NODE # type: ignore
+    planets: dict[str, int] = {
+        'sun': int(getattr(swe, "SUN", 0)),
+        'moon': int(getattr(swe, "MOON", 1)),
+        'mercury': int(getattr(swe, "MERCURY", 2)),
+        'venus': int(getattr(swe, "VENUS", 3)),
+        'mars': int(getattr(swe, "MARS", 4)),
+        'jupiter': int(getattr(swe, "JUPITER", 5)),
+        'saturn': int(getattr(swe, "SATURN", 6)),
+        'uranus': int(getattr(swe, "URANUS", 7)),
+        'neptune': int(getattr(swe, "NEPTUNE", 8)),
+        'pluto': int(getattr(swe, "PLUTO", 9)),
+        'north_node': int(getattr(swe, "MEAN_NODE", 10))
     }
     
     try:
         for planet_name, planet_id in planets.items():
             # Calculate planet position
             result = swe.calc_ut(julian_day, planet_id, swe.FLG_SWIEPH)  # type: ignore
-            position = result[0][0]  # type: ignore # Longitude in degrees
+            position = result[0][0]  # type: ignore  # Longitude in degrees
             
             # Convert to Human Design gate/line
-            gate_position = (position * 64) / 360
-            gate_number = int(gate_position % 64) + 1
-            line_position = ((gate_position % 1) * 6) + 1
-            line_number = int(line_position)
+            gate_position = (position * 64) / 360  # type: ignore
+            gate_number = int(gate_position % 64) + 1  # type: ignore
+            line_position = ((gate_position % 1) * 6) + 1  # type: ignore
+            line_number = int(line_position)  # type: ignore
             
             # Ensure valid ranges
             gate_number = max(1, min(64, gate_number))
@@ -191,7 +194,7 @@ def calculate_planetary_activations(julian_day: float) -> Dict[str, Dict[str, An
     
     return activations
 
-def calculate_design_data(conscious_time: datetime, unconscious_time: datetime) -> Dict[str, Dict[str, Any]]:
+def calculate_design_data(conscious_time: datetime, unconscious_time: datetime) -> Dict[str, Any]:
     """Calculate Human Design data for both conscious and unconscious"""
     try:
         import swisseph as swe  # type: ignore
@@ -200,14 +203,14 @@ def calculate_design_data(conscious_time: datetime, unconscious_time: datetime) 
         conscious_jd_result = swe.utc_to_jd(
             conscious_time.year, conscious_time.month, conscious_time.day,
             conscious_time.hour, conscious_time.minute, 0, 1
-        )
+        )  # type: ignore
         unconscious_jd_result = swe.utc_to_jd(
             unconscious_time.year, unconscious_time.month, unconscious_time.day,
             unconscious_time.hour, unconscious_time.minute, 0, 1
-        )
+        )  # type: ignore
         
-        conscious_jd = float(conscious_jd_result[1])
-        unconscious_jd = float(unconscious_jd_result[1])
+        conscious_jd = float(conscious_jd_result[1]) if isinstance(conscious_jd_result[1], (int, float)) else 0.0
+        unconscious_jd = float(unconscious_jd_result[1]) if isinstance(unconscious_jd_result[1], (int, float)) else 0.0
         
         # Get planetary activations
         conscious_activations = calculate_planetary_activations(conscious_jd)
@@ -276,8 +279,8 @@ def determine_type_and_authority(definition: Dict[str, Any]) -> Tuple[str, str]:
 def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze which centers are defined based on planetary activations"""
     try:
-        defined_gates: List[int] = []
-        center_activations: Dict[str, List[int]] = {}
+        defined_gates = []
+        center_activations: dict[str, list[int]] = {}
         
         # Collect all activated gates
         for planet_data in activations.values():
@@ -290,7 +293,7 @@ def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
                 center_activations[center].append(gate)
         
         # Determine defined centers (need at least one gate)
-        defined_centers = list(center_activations.keys())
+        defined_centers: list[str] = [str(center) for center in center_activations.keys()]
         
         # Simplified channel detection (would need full gate-to-gate mapping)
         channels = []  # This would require a more complex implementation
@@ -305,16 +308,8 @@ def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
         logger.error(f"Error analyzing definition: {str(e)}")
         return {"defined_gates": [], "defined_centers": [], "center_activations": {}, "channels": []}
 
-def calculate_human_design(
-    year: int,
-    month: int,
-    day: int,
-    hour: int,
-    minute: int,
-    lat: float,
-    lon: float,
-    timezone: str
-) -> Dict[str, Any]:
+def calculate_human_design(year: int, month: int, day: int, hour: int, minute: int, 
+                          lat: float, lon: float, timezone: str) -> Dict[str, Any]:
     """Calculate complete Human Design chart"""
     try:
         # Birth time (conscious)
@@ -327,9 +322,9 @@ def calculate_human_design(
         design_data = calculate_design_data(birth_time, design_time)
         
         # Combine conscious and unconscious activations
-        all_activations: Dict[str, Any] = {}
-        all_activations.update(design_data.get("conscious", {}))
-        all_activations.update(design_data.get("unconscious", {}))
+        all_activations: Dict[str, PlanetActivation] = {}
+        all_activations.update(design_data["conscious"])
+        all_activations.update(design_data["unconscious"])
         
         # Analyze definition
         definition = analyze_definition(all_activations)
@@ -338,7 +333,7 @@ def calculate_human_design(
         hd_type, authority = determine_type_and_authority(definition)
         
         # Create comprehensive Human Design data
-        human_design_chart: Dict[str, Any] = {
+        human_design_chart = {
             "birth_info": {
                 "conscious_time": birth_time.isoformat(),
                 "unconscious_time": design_time.isoformat(),
@@ -358,19 +353,12 @@ def calculate_human_design(
             "definition": definition,
             "defined_centers": definition["defined_centers"],
             "undefined_centers": [center for center in CENTERS.keys() if center not in definition["defined_centers"]],
-            "gates": [
-                {
-                    "number": gate,
-                    "name": GATES[gate]["name"] if gate in GATES else "Unknown",
-                    "center": GATES[gate]["center"] if gate in GATES else "Unknown"
-                }
-                for gate in definition.get("defined_gates", [])
-            ],
-            "channels": definition.get("channels", []),
+            "gates": [{"number": gate, "name": GATES.get(gate, {}).get("name", "Unknown"), "center": GATES.get(gate, {}).get("center", "Unknown")} for gate in definition["defined_gates"]],
+            "channels": definition["channels"],
             "centers": {
                 center: {
-                    "defined": center in definition.get("defined_centers", []),
-                    "gates": definition.get("center_activations", {}).get(center, []),
+                    "defined": center in definition["defined_centers"],
+                    "gates": definition["center_activations"].get(center, []),
                     "info": CENTERS.get(center, {})
                 }
                 for center in CENTERS.keys()
@@ -430,12 +418,17 @@ def calculate_incarnation_cross(design_data: Dict[str, Any]) -> Dict[str, Any]:
         unconscious = design_data.get("unconscious", {})
         
         # Get the four gates of the cross
-        sun_personality = int(conscious.get("sun", {}).get("gate", 1))
-        sun_design = int(unconscious.get("sun", {}).get("gate", 1))
-        # Calculate Earth gates (exact opposite)
+        sun_personality = conscious.get("sun", {}).get("gate", 1)
+        earth_personality = conscious.get("earth", {}).get("gate", 1)  # Opposite of sun
+        sun_design = unconscious.get("sun", {}).get("gate", 1)
+        earth_design = unconscious.get("earth", {}).get("gate", 1)
+        
+        # Calculate Earth gates (simplified - should be exact opposite)
         earth_personality = ((sun_personality + 31) % 64) + 1 if sun_personality <= 32 else ((sun_personality - 33) % 64) + 1
         earth_design = ((sun_design + 31) % 64) + 1 if sun_design <= 32 else ((sun_design - 33) % 64) + 1
-        cross_name = f"Right Angle Cross of {GATES[sun_personality]['name']}" if sun_personality in GATES else "Unknown"
+        
+        cross_name = f"Right Angle Cross of {GATES.get(sun_personality, {}).get('name', 'Unknown')}"
+        
         return {
             "name": cross_name,
             "gates": {
@@ -450,7 +443,7 @@ def calculate_incarnation_cross(design_data: Dict[str, Any]) -> Dict[str, Any]:
         logger.error(f"Error calculating incarnation cross: {str(e)}")
         return {"name": "Cross calculation error", "gates": {}, "description": ""}
 
-def calculate_variables(design_data: Dict[str, Any]) -> Dict[str, str]:
+def calculate_variables(design_data: Dict[str, Any]) -> Dict[str, Any]:
     """Calculate the Variables (PHS - Primary Health System)"""
     try:
         # This is a simplified version - full variables require more complex calculations

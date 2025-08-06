@@ -31,7 +31,7 @@ import {
   Flex
 } from '@chakra-ui/react';
 import { FaUser, FaStar, FaKey, FaChartLine, FaBook } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import HumanDesignChart from './HumanDesignChart';
 import GeneKeysChart from './GeneKeysChart';
 import EducationalContent from './EducationalContent';
@@ -65,7 +65,7 @@ const HumanDesignGeneKeys: React.FC = () => {
     timezone: 'America/New_York'
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -73,7 +73,7 @@ const HumanDesignGeneKeys: React.FC = () => {
     }));
   };
 
-  const handleCalculate = () => {
+  const handleCalculate = (): void => {
     // Validate form data
     const requiredFields = ['year', 'month', 'day', 'hour', 'minute', 'city'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
@@ -103,7 +103,7 @@ const HumanDesignGeneKeys: React.FC = () => {
     setShowCalculation(true);
   };
 
-  const handleNewCalculation = () => {
+  const handleNewCalculation = (): void => {
     setBirthData(null);
     setShowCalculation(false);
     setFormData({
@@ -337,6 +337,7 @@ const HumanDesignGeneKeys: React.FC = () => {
                     value={formData.month}
                     onChange={handleInputChange}
                     placeholder="Month"
+                    aria-label="Month"
                   >
                     {Array.from({ length: 12 }, (_, i) => (
                       <option key={i + 1} value={i + 1}>
@@ -409,11 +410,11 @@ const HumanDesignGeneKeys: React.FC = () => {
               </FormControl>
 
               <FormControl>
-                <FormLabel fontSize="sm">Timezone</FormLabel>
                 <Select
                   name="timezone"
                   value={formData.timezone}
                   onChange={handleInputChange}
+                  aria-label="Timezone"
                 >
                   <option value="America/New_York">Eastern Time</option>
                   <option value="America/Chicago">Central Time</option>
