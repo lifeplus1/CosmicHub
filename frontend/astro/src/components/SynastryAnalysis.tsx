@@ -1,37 +1,6 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Text,
-  Card,
-  CardBody,
-  Grid,
-  GridItem,
-  Button,
-  Spinner,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Badge,
-  Alert,
-  AlertIcon,
-  Progress,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-  HStack,
-  Heading,
-  Divider,
-  useColorModeValue,
-  Stack,
-  Container
-} from '@chakra-ui/react';
-import { StarIcon, InfoIcon } from '@chakra-ui/icons';
+import React, { useState, useCallback, useMemo } from 'react';
+import { FaStar, FaInfoCircle, FaChevronDown } from 'react-icons/fa';
+import * as Accordion from '@radix-ui/react-accordion';
 import type { BirthData } from '../types';
 import FeatureGuard from './FeatureGuard';
 
@@ -74,7 +43,7 @@ interface SynastryResult {
   };
 }
 
-export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
+export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
   person1,
   person2,
   person1Name = "Person 1",
@@ -84,15 +53,15 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const cardBg = 'cosmic-blue';
+  const borderColor = 'cosmic-silver/30';
 
-  const calculateSynastry = async () => {
+  const calculateSynastry = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/calculate-synastry', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/calculate-synastry`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,326 +83,320 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [person1, person2]);
 
-  const getCompatibilityColor = (score: number) => {
-    if (score >= 80) return 'green';
-    if (score >= 60) return 'blue';
-    if (score >= 40) return 'yellow';
-    return 'red';
-  };
+  const getCompatibilityColor = useCallback((score: number) => {
+    if (score >= 80) return 'green-500';
+    if (score >= 60) return 'blue-500';
+    if (score >= 40) return 'yellow-500';
+    return 'red-500';
+  }, []);
 
-  const getAspectColor = (aspect: string) => {
+  const getAspectColor = useCallback((aspect: string) => {
     switch (aspect) {
       case 'conjunction':
       case 'trine':
       case 'sextile':
-        return 'green';
+        return 'green-500';
       case 'square':
       case 'opposition':
-        return 'orange';
+        return 'orange-500';
       default:
-        return 'gray';
+        return 'gray-500';
     }
-  };
+  }, []);
 
-  const formatPlanetName = (planet: string) => {
+  const formatPlanetName = useCallback((planet: string) => {
     return planet.charAt(0).toUpperCase() + planet.slice(1);
-  };
+  }, []);
 
-  const renderStars = (score: number) => {
+  const renderStars = useMemo(() => (score: number): JSX.Element[] => {
     const stars = Math.round(score / 20);
-    return Array.from({ length: 5 }, (_, i) => (
-      <StarIcon 
+    return Array.from({ length: 5 }).map((_, i) => (
+      <FaStar 
         key={i} 
-        color={i < stars ? 'yellow.400' : 'gray.300'} 
-        boxSize={5}
+        className={`${i < stars ? 'text-yellow-400' : 'text-gray-300'} text-xl`}
       />
     ));
-  };
+  }, []);
+
+  // Component for progress bars without inline styles
+  const ProgressBar = useCallback(({ score, colorClass }: { score: number; colorClass: string }) => (
+    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+      <div 
+        className={`bg-${colorClass} h-2.5 rounded-full transition-all duration-300`}
+        style={{ width: `${Math.min(Math.max(score, 0), 100)}%` }}
+      />
+    </div>
+  ), []);
 
   return (
     <FeatureGuard requiredTier="premium" feature="synastry">
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={6} align="stretch">
-          <Box textAlign="center">
-            <Heading size="xl" mb={4} color="purple.600">
+      <div className="py-8 mx-auto max-w-7xl">
+        <div className="flex flex-col space-y-6">
+          <div className="text-center">
+            <h2 className="mb-4 text-xl font-bold text-purple-600">
               💕 Relationship Compatibility Analysis
-            </Heading>
-            <Text fontSize="lg" color="whiteAlpha.800">
+            </h2>
+            <p className="text-lg text-white/80">
               Synastry Comparison: {person1Name} & {person2Name}
-            </Text>
-          </Box>
+            </p>
+          </div>
 
-          <Card bg={cardBg} borderColor={borderColor}>
-            <CardBody>
-              <Text mb={4}>
+          <div className={`cosmic-card bg-${cardBg} border border-${borderColor}`}>
+            <div className="p-4">
+              <p className="mb-4 text-cosmic-silver">
                 Synastry compares two birth charts to reveal relationship dynamics, compatibility patterns, 
                 and growth opportunities between partners.
-              </Text>
+              </p>
 
               {!synastryResult && (
-                <Button
-                  colorScheme="purple"
+                <button
+                  className="cosmic-button"
                   onClick={calculateSynastry}
-                  isLoading={loading}
-                  loadingText="Calculating..."
-                  leftIcon={<InfoIcon />}
-                  size="lg"
+                  disabled={loading}
                 >
+                  {loading ? 'Calculating...' : ''}
+                  <FaInfoCircle className="mr-2" />
                   Calculate Compatibility
-                </Button>
+                </button>
               )}
-            </CardBody>
-          </Card>
+            </div>
+          </div>
 
           {error && (
-            <Alert status="error">
-              <AlertIcon />
-              {error}
-            </Alert>
+            <div className="p-4 border border-red-500 rounded-md bg-red-900/50">
+              <div className="flex space-x-4">
+                <span className="text-xl text-red-500">⚠️</span>
+                {error}
+              </div>
+            </div>
           )}
 
           {synastryResult && (
-            <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Overall Compatibility Score */}
-              <GridItem colSpan={{ base: 1, lg: 2 }}>
-                <Card bg={cardBg} borderColor={borderColor}>
-                  <CardBody>
-                    <Heading size="md" mb={4}>Overall Compatibility Score</Heading>
-                    
-                    <HStack spacing={4} mb={4}>
-                      <HStack>
-                        {renderStars(synastryResult.compatibility_analysis.overall_score)}
-                      </HStack>
-                      <Text fontSize="3xl" fontWeight="bold" color={getCompatibilityColor(synastryResult.compatibility_analysis.overall_score)}>
-                        {synastryResult.compatibility_analysis.overall_score}/100
-                      </Text>
-                    </HStack>
-                    
-                    <Text mb={6}>
-                      {synastryResult.compatibility_analysis.interpretation}
-                    </Text>
+              <div className="col-span-1 lg:col-span-2 cosmic-card border border-${borderColor}">
+                <div className="p-4">
+                  <h3 className="mb-4 font-bold text-md text-cosmic-silver">Overall Compatibility Score</h3>
+                  
+                  <div className="flex items-center mb-4 space-x-4">
+                    <div className="flex">
+                      {renderStars(synastryResult.compatibility_analysis.overall_score)}
+                    </div>
+                    <span className={`text-3xl font-bold text-${getCompatibilityColor(synastryResult.compatibility_analysis.overall_score)}`}>
+                      {synastryResult.compatibility_analysis.overall_score}/100
+                    </span>
+                  </div>
+                  
+                  <p className="mb-6 text-cosmic-silver">
+                    {synastryResult.compatibility_analysis.interpretation}
+                  </p>
 
-                    {/* Compatibility Breakdown */}
-                    {synastryResult.compatibility_analysis.breakdown && (
-                      <Box>
-                        <Heading size="sm" mb={4}>Compatibility Areas</Heading>
-                        <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
-                          {Object.entries(synastryResult.compatibility_analysis.breakdown).map(([area, score]) => (
-                            <Box key={area} p={4} borderWidth={1} borderRadius="md">
-                              <Text fontSize="sm" fontWeight="semibold" mb={2}>
-                                {area.charAt(0).toUpperCase() + area.slice(1)}
-                              </Text>
-                              <Progress 
-                                value={score} 
-                                colorScheme={getCompatibilityColor(score)}
-                                mb={2}
-                              />
-                              <Text fontSize="sm" color="whiteAlpha.800">
-                                {score.toFixed(1)}%
-                              </Text>
-                            </Box>
-                          ))}
-                        </Grid>
-                      </Box>
-                    )}
-                  </CardBody>
-                </Card>
-              </GridItem>
+                  {/* Compatibility Breakdown */}
+                  {synastryResult.compatibility_analysis.breakdown && (
+                    <div>
+                      <h4 className="mb-4 text-sm font-bold text-cosmic-silver">Compatibility Areas</h4>
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {Object.entries(synastryResult.compatibility_analysis.breakdown).map(([area, score]) => (
+                          <div key={area} className="p-4 border rounded-md border-cosmic-silver/30">
+                            <p className="mb-2 text-sm font-semibold capitalize text-cosmic-silver">
+                              {area.charAt(0).toUpperCase() + area.slice(1)}
+                            </p>
+                            <ProgressBar score={score} colorClass={getCompatibilityColor(score)} />
+                            <p className="text-sm text-white/80">
+                              {score.toFixed(1)}%
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* Key Relationship Aspects */}
-              <GridItem>
-                <Card bg={cardBg} borderColor={borderColor} h="fit-content">
-                  <CardBody>
-                    <Accordion allowToggle defaultIndex={0}>
-                      <AccordionItem>
-                        <AccordionButton>
-                          <Box flex="1" textAlign="left">
-                            <Heading size="sm">Key Relationship Aspects</Heading>
-                          </Box>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={3} align="stretch">
+              <div>
+                <div className="cosmic-card border border-${borderColor} h-fit">
+                  <div className="p-4">
+                    <Accordion.Root type="single" collapsible defaultValue="0">
+                      <Accordion.Item value="0">
+                        <Accordion.Trigger className="flex justify-between w-full">
+                          <span className="text-sm font-bold">Key Relationship Aspects</span>
+                          <FaChevronDown className="text-cosmic-silver" />
+                        </Accordion.Trigger>
+                        <Accordion.Content className="pb-4">
+                          <div className="flex flex-col space-y-3">
                             {synastryResult.interaspects.slice(0, 8).map((aspect, index) => (
-                              <Box key={index} p={3} borderWidth={1} borderRadius="md">
-                                <HStack justify="space-between" mb={2}>
-                                  <Text fontWeight="semibold" fontSize="sm">
+                              <div key={index} className="p-3 border rounded-md border-cosmic-silver/30">
+                                <div className="flex justify-between mb-2">
+                                  <span className="text-sm font-semibold text-cosmic-silver">
                                     {formatPlanetName(aspect.person1_planet)} {aspect.aspect} {formatPlanetName(aspect.person2_planet)}
-                                  </Text>
-                                  <Badge colorScheme={getAspectColor(aspect.aspect)}>
+                                  </span>
+                                  <span className={`bg-${getAspectColor(aspect.aspect)} text-white px-2 py-1 rounded text-sm`}>
                                     {aspect.aspect}
-                                  </Badge>
-                                </HStack>
-                                <Text fontSize="xs" color="whiteAlpha.800" mb={1}>
+                                  </span>
+                                </div>
+                                <p className="mb-1 text-xs text-white/80">
                                   Orb: {aspect.orb.toFixed(2)}° | Strength: {aspect.strength}
-                                </Text>
-                                <Text fontSize="sm">
+                                </p>
+                                <p className="text-sm text-cosmic-silver">
                                   {aspect.interpretation}
-                                </Text>
-                              </Box>
+                                </p>
+                              </div>
                             ))}
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-                    </Accordion>
-                  </CardBody>
-                </Card>
-              </GridItem>
+                          </div>
+                        </Accordion.Content>
+                      </Accordion.Item>
+                    </Accordion.Root>
+                  </div>
+                </div>
+              </div>
 
               {/* House Overlays & Composite */}
-              <GridItem>
-                <VStack spacing={4} align="stretch">
-                  <Card bg={cardBg} borderColor={borderColor}>
-                    <CardBody>
-                      <Accordion allowToggle>
-                        <AccordionItem>
-                          <AccordionButton>
-                            <Box flex="1" textAlign="left">
-                              <Heading size="sm">House Overlays</Heading>
-                            </Box>
-                            <AccordionIcon />
-                          </AccordionButton>
-                          <AccordionPanel pb={4}>
-                            <VStack spacing={3} align="stretch">
+              <div>
+                <div className="flex flex-col space-y-4">
+                  <div className="cosmic-card border border-${borderColor}">
+                    <div className="p-4">
+                      <Accordion.Root type="single" collapsible>
+                        <Accordion.Item value="0">
+                          <Accordion.Trigger className="flex justify-between w-full">
+                            <span className="text-sm font-bold">House Overlays</span>
+                            <FaChevronDown className="text-cosmic-silver" />
+                          </Accordion.Trigger>
+                          <Accordion.Content className="pb-4">
+                            <div className="flex flex-col space-y-3">
                               {synastryResult.house_overlays.slice(0, 6).map((overlay, index) => (
-                                <Box key={index} p={3} bg="gray.50" borderRadius="md">
-                                  <Text fontWeight="semibold" fontSize="sm" mb={1}>
+                                <div key={index} className="p-3 rounded-md bg-gray-50">
+                                  <p className="mb-1 text-sm font-semibold text-cosmic-silver">
                                     {formatPlanetName(overlay.person1_planet)} in {overlay.person2_house}th House
-                                  </Text>
-                                  <Text fontSize="sm" color="whiteAlpha.800">
+                                  </p>
+                                  <p className="text-sm text-white/80">
                                     {overlay.interpretation}
-                                  </Text>
-                                </Box>
+                                  </p>
+                                </div>
                               ))}
-                            </VStack>
-                          </AccordionPanel>
-                        </AccordionItem>
-                      </Accordion>
-                    </CardBody>
-                  </Card>
+                            </div>
+                          </Accordion.Content>
+                        </Accordion.Item>
+                      </Accordion.Root>
+                    </div>
+                  </div>
 
-                  <Card bg={cardBg} borderColor={borderColor}>
-                    <CardBody>
-                      <Accordion allowToggle>
-                        <AccordionItem>
-                          <AccordionButton>
-                            <Box flex="1" textAlign="left">
-                              <Heading size="sm">Composite Chart</Heading>
-                            </Box>
-                            <AccordionIcon />
-                          </AccordionButton>
-                          <AccordionPanel pb={4}>
-                            <Text fontWeight="semibold" mb={2}>Relationship Purpose:</Text>
-                            <Text mb={4}>
+                  <div className="cosmic-card border border-${borderColor}">
+                    <div className="p-4">
+                      <Accordion.Root type="single" collapsible>
+                        <Accordion.Item value="0">
+                          <Accordion.Trigger className="flex justify-between w-full">
+                            <span className="text-sm font-bold">Composite Chart</span>
+                            <FaChevronDown className="text-cosmic-silver" />
+                          </Accordion.Trigger>
+                          <Accordion.Content className="pb-4">
+                            <p className="mb-2 font-semibold text-cosmic-silver">Relationship Purpose:</p>
+                            <p className="mb-4 text-cosmic-silver">
                               {synastryResult.composite_chart.relationship_purpose}
-                            </Text>
+                            </p>
                             
-                            <Text fontSize="sm" color="whiteAlpha.800">
+                            <p className="text-sm text-white/80">
                               Composite Sun: {synastryResult.composite_chart.midpoint_sun.toFixed(2)}°
                               <br />
                               Composite Moon: {synastryResult.composite_chart.midpoint_moon.toFixed(2)}°
-                            </Text>
-                          </AccordionPanel>
-                        </AccordionItem>
-                      </Accordion>
-                    </CardBody>
-                  </Card>
-                </VStack>
-              </GridItem>
+                            </p>
+                          </Accordion.Content>
+                        </Accordion.Item>
+                      </Accordion.Root>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Relationship Summary */}
-              <GridItem colSpan={{ base: 1, lg: 2 }}>
-                <Card bg={cardBg} borderColor={borderColor}>
-                  <CardBody>
-                    <Heading size="md" mb={4}>Relationship Summary</Heading>
-                    
-                    <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-                      <VStack align="stretch" spacing={4}>
-                        <Box>
-                          <Text fontWeight="semibold" color="green.600" mb={2}>
-                            🌟 Key Themes
-                          </Text>
-                          <Stack direction="row" wrap="wrap" spacing={2}>
-                            {synastryResult.summary.key_themes.map((theme, index) => (
-                              <Badge key={index} colorScheme="green" variant="subtle">
-                                {theme}
-                              </Badge>
-                            ))}
-                          </Stack>
-                        </Box>
+              <div className="col-span-1 lg:col-span-2 cosmic-card border border-${borderColor}">
+                <div className="p-4">
+                  <h3 className="mb-4 font-bold text-md text-cosmic-silver">Relationship Summary</h3>
+                  
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="flex flex-col space-y-4">
+                      <div>
+                        <p className="mb-2 font-semibold text-green-600">
+                          🌟 Key Themes
+                        </p>
+                        <div className="flex flex-wrap space-x-2">
+                          {synastryResult.summary.key_themes.map((theme, index) => (
+                            <span key={index} className="px-2 py-1 text-sm text-green-500 rounded bg-green-500/20">
+                              {theme}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
 
-                        <Box>
-                          <Text fontWeight="semibold" color="blue.600" mb={2}>
-                            💪 Strengths
-                          </Text>
-                          <VStack align="start" spacing={1}>
-                            {synastryResult.summary.strengths.map((strength, index) => (
-                              <Text key={index} fontSize="sm">
-                                • {strength}
-                              </Text>
-                            ))}
-                          </VStack>
-                        </Box>
-                      </VStack>
+                      <div>
+                        <p className="mb-2 font-semibold text-blue-600">
+                          💪 Strengths
+                        </p>
+                        <div className="flex flex-col space-y-1">
+                          {synastryResult.summary.strengths.map((strength, index) => (
+                            <p key={index} className="text-sm text-cosmic-silver">
+                              • {strength}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
 
-                      <VStack align="stretch" spacing={4}>
-                        <Box>
-                          <Text fontWeight="semibold" color="orange.600" mb={2}>
-                            🔄 Growth Areas
-                          </Text>
-                          <VStack align="start" spacing={1}>
-                            {synastryResult.summary.challenges.map((challenge, index) => (
-                              <Text key={index} fontSize="sm">
-                                • {challenge}
-                              </Text>
-                            ))}
-                          </VStack>
-                        </Box>
+                    <div className="flex flex-col space-y-4">
+                      <div>
+                        <p className="mb-2 font-semibold text-orange-600">
+                          🔄 Growth Areas
+                        </p>
+                        <div className="flex flex-col space-y-1">
+                          {synastryResult.summary.challenges.map((challenge, index) => (
+                            <p key={index} className="text-sm text-cosmic-silver">
+                              • {challenge}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
 
-                        <Box>
-                          <Text fontWeight="semibold" color="purple.600" mb={2}>
-                            💡 Relationship Advice
-                          </Text>
-                          <VStack align="start" spacing={1}>
-                            {synastryResult.summary.advice.map((advice, index) => (
-                              <Text key={index} fontSize="sm">
-                                • {advice}
-                              </Text>
-                            ))}
-                          </VStack>
-                        </Box>
-                      </VStack>
-                    </Grid>
-                  </CardBody>
-                </Card>
-              </GridItem>
+                      <div>
+                        <p className="mb-2 font-semibold text-purple-600">
+                          💡 Relationship Advice
+                        </p>
+                        <div className="flex flex-col space-y-1">
+                          {synastryResult.summary.advice.map((advice, index) => (
+                            <p key={index} className="text-sm text-cosmic-silver">
+                              • {advice}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Action Buttons */}
-              <GridItem colSpan={{ base: 1, lg: 2 }}>
-                <HStack spacing={4} justify="center">
-                  <Button
-                    colorScheme="blue"
-                    variant="outline"
+              <div className="col-span-1 lg:col-span-2">
+                <div className="flex justify-center space-x-4">
+                  <button
+                    className="px-4 py-2 text-blue-500 transition-colors border border-blue-500 rounded bg-blue-500/20 hover:bg-blue-500/30"
                     onClick={() => window.location.href = '/transits'}
                   >
                     View Relationship Transits
-                  </Button>
-                  <Button
-                    colorScheme="purple"
-                    variant="outline"
+                  </button>
+                  <button
+                    className="px-4 py-2 text-purple-500 transition-colors border border-purple-500 rounded bg-purple-500/20 hover:bg-purple-500/30"
                     onClick={calculateSynastry}
-                    isLoading={loading}
+                    disabled={loading}
                   >
                     Recalculate
-                  </Button>
-                </HStack>
-              </GridItem>
-            </Grid>
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
-        </VStack>
-      </Container>
+        </div>
+      </div>
     </FeatureGuard>
   );
-};
+});

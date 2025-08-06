@@ -24,8 +24,7 @@ import {
 } from "@chakra-ui/react";
 import { FaBook, FaInfoCircle } from "react-icons/fa";
 import ChartDisplay from "./ChartDisplay";
-import { MultiSystemChartDisplay } from "./MultiSystemChartDisplay";
-import type { MultiSystemChartData } from "./MultiSystemChartDisplay";
+import { MultiSystemChartDisplay, type MultiSystemChartData } from "./MultiSystemChart";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";
 

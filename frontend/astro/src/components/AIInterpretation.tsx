@@ -1,36 +1,8 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  VStack,
-  HStack,
-  Text,
-  Card,
-  CardBody,
-  CardHeader,
-  Heading,
-  Badge,
-  Alert,
-  AlertIcon,
-  Spinner,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Grid,
-  GridItem,
-  useColorModeValue,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Progress,
-  useToast,
-  Divider
-} from '@chakra-ui/react';
-import { InfoIcon, StarIcon } from '@chakra-ui/icons';
+import { useToast } from './ToastProvider';
+import * as Tabs from '@radix-ui/react-tabs';
+import * as Accordion from '@radix-ui/react-accordion';
+import { FaStar, FaInfoCircle } from 'react-icons/fa';
 import FeatureGuard from './FeatureGuard';
 import type { ChartData } from '../types';
 
@@ -176,10 +148,7 @@ export const AIInterpretation: React.FC<AIInterpretationProps> = ({ chartData })
   const [interpretation, setInterpretation] = useState<AIInterpretationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const toast = useToast();
+  const { toast } = useToast();
 
   const generateInterpretation = async () => {
     setLoading(true);
@@ -206,17 +175,16 @@ export const AIInterpretation: React.FC<AIInterpretationProps> = ({ chartData })
 
       toast({
         title: 'AI Interpretation Generated',
-        description: 'Your personalized astrological analysis is ready.',
+        description: 'Your chart analysis is ready!',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      setError(err instanceof Error ? err.message : 'Unknown error');
       toast({
-        title: 'AI Interpretation Failed',
-        description: err instanceof Error ? err.message : 'Unknown error occurred',
+        title: 'Generation Failed',
+        description: err instanceof Error ? err.message : 'Unknown error',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -226,639 +194,448 @@ export const AIInterpretation: React.FC<AIInterpretationProps> = ({ chartData })
     }
   };
 
+  const formatSign = (sign: string) => sign.charAt(0).toUpperCase() + sign.slice(1);
+
   const getElementColor = (element: string) => {
-    switch (element) {
-      case 'fire': return 'red';
-      case 'earth': return 'green';
-      case 'air': return 'blue';
-      case 'water': return 'cyan';
-      default: return 'gray';
+    switch (element.toLowerCase()) {
+      case 'fire': return 'red-500';
+      case 'earth': return 'green-500';
+      case 'air': return 'blue-500';
+      case 'water': return 'cyan-500';
+      default: return 'gray-500';
     }
   };
 
-  const formatSign = (sign: string) => {
-    return sign ? sign.charAt(0).toUpperCase() + sign.slice(1) : 'Unknown';
-  };
+  if (loading) {
+    return (
+      <div className="py-10 text-center">
+        <div className="mx-auto text-4xl text-purple-500 animate-spin">⭐</div>
+        <p className="mt-4 text-cosmic-silver">Generating AI interpretation...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 border border-red-500 rounded-md bg-red-900/50">
+        <div className="flex space-x-4">
+          <span className="text-xl text-red-500">⚠️</span>
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <FeatureGuard requiredTier="elite" feature="ai_interpretation">
-      <Box maxW="container.xl" mx="auto" py={8}>
-        <VStack spacing={6} align="stretch">
-          <Box textAlign="center">
-            <Heading size="xl" mb={4} color="purple.600">
-              🧠 AI-Powered Astrological Analysis
-            </Heading>
-            <Text fontSize="lg" color="whiteAlpha.800">
-              Advanced artificial intelligence interpretation of your birth chart
-            </Text>
-          </Box>
+    <FeatureGuard requiredTier="premium" feature="ai_interpretation">
+      <div className="flex flex-col space-y-6">
+        {!interpretation ? (
+          <button
+            className="cosmic-button"
+            onClick={generateInterpretation}
+            disabled={loading}
+          >
+            {loading ? 'Generating...' : 'Generate AI Interpretation'}
+          </button>
+        ) : (
+          <div className="cosmic-card">
+            <Tabs.Root>
+              <Tabs.List className="flex flex-wrap border-b border-cosmic-silver/30">
+                <Tabs.Trigger value="core" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Core Identity</Tabs.Trigger>
+                <Tabs.Trigger value="purpose" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Life Purpose</Tabs.Trigger>
+                <Tabs.Trigger value="relationships" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Relationships</Tabs.Trigger>
+                <Tabs.Trigger value="career" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Career Path</Tabs.Trigger>
+                <Tabs.Trigger value="challenges" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Growth Challenges</Tabs.Trigger>
+                <Tabs.Trigger value="spiritual" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Spiritual Gifts</Tabs.Trigger>
+                <Tabs.Trigger value="integration" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Integration Themes</Tabs.Trigger>
+              </Tabs.List>
 
-          <Card bg={cardBg} borderColor={borderColor}>
-            <CardBody>
-              <VStack spacing={4} align="stretch">
-                <Text>
-                  Our AI analyzes your complete birth chart to provide deep, personalized insights 
-                  into your personality, life purpose, relationships, and spiritual path.
-                </Text>
+              <Tabs.Content value="core" className="p-4">
+                <div className="flex flex-col space-y-6">
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Sun Identity</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.core_identity.sun_identity.sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.core_identity.sun_identity.house}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">Element</p>
+                        <p className="font-bold">{interpretation.core_identity.sun_identity.element}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">Quality</p>
+                        <p className="font-bold">{interpretation.core_identity.sun_identity.quality}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.core_identity.sun_identity.description}</p>
+                  </div>
 
-                {!interpretation && (
-                  <Button
-                    colorScheme="purple"
-                    size="lg"
-                    onClick={generateInterpretation}
-                    isLoading={loading}
-                    loadingText="Analyzing chart..."
-                    leftIcon={<InfoIcon />}
-                  >
-                    Generate AI Interpretation
-                  </Button>
-                )}
-              </VStack>
-            </CardBody>
-          </Card>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Moon Nature</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.core_identity.moon_nature.sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.core_identity.moon_nature.house}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.core_identity.moon_nature.description}</p>
+                  </div>
 
-          {error && (
-            <Alert status="error">
-              <AlertIcon />
-              {error}
-            </Alert>
-          )}
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Rising Persona</h3>
+                    <p className="font-bold">{formatSign(interpretation.core_identity.rising_persona.sign)}</p>
+                    <p className="mt-2 text-cosmic-silver">{interpretation.core_identity.rising_persona.description}</p>
+                  </div>
 
-          {interpretation && (
-            <Tabs isFitted variant="enclosed" colorScheme="purple">
-              <TabList>
-                <Tab>Core Identity</Tab>
-                <Tab>Life Purpose</Tab>
-                <Tab>Relationships</Tab>
-                <Tab>Career Path</Tab>
-                <Tab>Growth</Tab>
-                <Tab>Spiritual Gifts</Tab>
-                <Tab>Integration</Tab>
-              </TabList>
+                  <div className="p-4 rounded-lg cosmic-card bg-purple-500/20">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Integration Challenge</h3>
+                    <p className="text-cosmic-silver">{interpretation.core_identity.integration_challenge}</p>
+                  </div>
+                </div>
+              </Tabs.Content>
 
-              <TabPanels>
-                {/* Core Identity Tab */}
-                <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    {/* Big Three */}
-                    <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={6}>
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="orange.500">☉ Sun Identity</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Badge colorScheme={getElementColor(interpretation.core_identity.sun_identity.element)}>
-                                {formatSign(interpretation.core_identity.sun_identity.sign)}
-                              </Badge>
-                              <Text fontSize="sm">House {interpretation.core_identity.sun_identity.house}</Text>
-                            </HStack>
-                            <Text fontSize="sm" fontWeight="semibold">
-                              {interpretation.core_identity.sun_identity.archetype}
-                            </Text>
-                            <Text fontSize="sm">
-                              {interpretation.core_identity.sun_identity.description}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
+              <Tabs.Content value="purpose" className="p-4">
+                <div className="flex flex-col space-y-6">
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Soul Purpose</h3>
+                    <p className="font-bold">{formatSign(interpretation.life_purpose.soul_purpose.north_node_sign)}</p>
+                    <p className="mt-2 text-cosmic-silver">{interpretation.life_purpose.soul_purpose.growth_direction}</p>
+                  </div>
 
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="blue.500">☽ Moon Nature</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Badge colorScheme="blue">
-                                {formatSign(interpretation.core_identity.moon_nature.sign)}
-                              </Badge>
-                              <Text fontSize="sm">House {interpretation.core_identity.moon_nature.house}</Text>
-                            </HStack>
-                            <Text fontSize="sm">
-                              {interpretation.core_identity.moon_nature.description}
-                            </Text>
-                            <Box>
-                              <Text fontSize="xs" fontWeight="semibold" color="blue.600">Emotional Needs:</Text>
-                              <Text fontSize="xs">{interpretation.core_identity.moon_nature.needs}</Text>
-                            </Box>
-                          </VStack>
-                        </CardBody>
-                      </Card>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Career Calling</h3>
+                    <p className="font-bold">{formatSign(interpretation.life_purpose.career_calling.mc_sign)}</p>
+                    <p className="mt-2 text-cosmic-silver">{interpretation.life_purpose.career_calling.public_expression}</p>
+                  </div>
 
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="green.500">↗ Rising Persona</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <Badge colorScheme="green">
-                              {formatSign(interpretation.core_identity.rising_persona.sign)}
-                            </Badge>
-                            <Text fontSize="sm">
-                              {interpretation.core_identity.rising_persona.description}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    </Grid>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Creative Purpose</h3>
+                    <p className="text-cosmic-silver">{interpretation.life_purpose.creative_purpose.sun_expression}</p>
+                  </div>
 
-                    {/* Integration Challenge */}
-                    <Card bg={cardBg} borderLeft="4px solid" borderColor="purple.400">
-                      <CardBody>
-                        <Heading size="sm" mb={3} color="purple.600">Integration Challenge</Heading>
-                        <Text>{interpretation.core_identity.integration_challenge}</Text>
-                      </CardBody>
-                    </Card>
-                  </VStack>
-                </TabPanel>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Expansion Path</h3>
+                    <p className="text-cosmic-silver">{interpretation.life_purpose.expansion_path.jupiter_gifts}</p>
+                  </div>
 
-                {/* Life Purpose Tab */}
-                <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">🎯 Soul Purpose</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Text fontWeight="semibold">North Node:</Text>
-                              <Badge colorScheme="purple">
-                                {formatSign(interpretation.life_purpose.soul_purpose.north_node_sign)}
-                              </Badge>
-                            </HStack>
-                            <Text fontSize="sm">
-                              {interpretation.life_purpose.soul_purpose.growth_direction}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
+                  <div className="p-4 rounded-lg cosmic-card bg-purple-500/20">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Life Mission</h3>
+                    <p className="text-cosmic-silver">{interpretation.life_purpose.life_mission}</p>
+                  </div>
+                </div>
+              </Tabs.Content>
 
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">🏢 Career Calling</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Text fontWeight="semibold">Midheaven:</Text>
-                              <Badge colorScheme="orange">
-                                {formatSign(interpretation.life_purpose.career_calling.mc_sign)}
-                              </Badge>
-                            </HStack>
-                            <Text fontSize="sm">
-                              {interpretation.life_purpose.career_calling.public_expression}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    </Grid>
+              <Tabs.Content value="relationships" className="p-4">
+                <div className="flex flex-col space-y-6">
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Love Style</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.relationship_patterns.love_style.venus_sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.relationship_patterns.love_style.venus_house}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.relationship_patterns.love_style.attraction_style}</p>
+                  </div>
 
-                    <Card bg={cardBg}>
-                      <CardHeader>
-                        <Heading size="md">✨ Creative Purpose</Heading>
-                      </CardHeader>
-                      <CardBody>
-                        <Text>{interpretation.life_purpose.creative_purpose.sun_expression}</Text>
-                      </CardBody>
-                    </Card>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Passion Style</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.relationship_patterns.passion_style.mars_sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.relationship_patterns.passion_style.mars_house}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.relationship_patterns.passion_style.action_style}</p>
+                  </div>
 
-                    <Card bg={cardBg}>
-                      <CardHeader>
-                        <Heading size="md">🌟 Expansion Path</Heading>
-                      </CardHeader>
-                      <CardBody>
-                        <Text>{interpretation.life_purpose.expansion_path.jupiter_gifts}</Text>
-                      </CardBody>
-                    </Card>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Partnership Karma</h3>
+                    <p className="font-bold">{formatSign(interpretation.relationship_patterns.partnership_karma.seventh_house_sign)}</p>
+                    <p className="mt-2 text-cosmic-silver">{interpretation.relationship_patterns.partnership_karma.partner_qualities}</p>
+                  </div>
 
-                    <Card bg={cardBg} borderLeft="4px solid" borderColor="gold">
-                      <CardBody>
-                        <Heading size="sm" mb={3} color="orange.600">Life Mission</Heading>
-                        <Text fontWeight="semibold">{interpretation.life_purpose.life_mission}</Text>
-                      </CardBody>
-                    </Card>
-                  </VStack>
-                </TabPanel>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Compatibility Keys</h3>
+                    <div className="flex flex-wrap space-x-2">
+                      {interpretation.relationship_patterns.compatibility_keys.map((key, index) => (
+                        <span key={index} className="px-2 py-1 text-sm rounded bg-cosmic-purple/20 text-cosmic-purple">
+                          {key}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Tabs.Content>
 
-                {/* Relationships Tab */}
-                <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="pink.500">💕 Love Style</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Badge colorScheme="pink">
-                                Venus in {formatSign(interpretation.relationship_patterns.love_style.venus_sign)}
-                              </Badge>
-                              <Text fontSize="sm">House {interpretation.relationship_patterns.love_style.venus_house}</Text>
-                            </HStack>
-                            <Box>
-                              <Text fontSize="sm" fontWeight="semibold" mb={1}>Attraction Style:</Text>
-                              <Text fontSize="sm">{interpretation.relationship_patterns.love_style.attraction_style}</Text>
-                            </Box>
-                            <Box>
-                              <Text fontSize="sm" fontWeight="semibold" mb={1}>Love Needs:</Text>
-                              <Text fontSize="sm">{interpretation.relationship_patterns.love_style.love_needs}</Text>
-                            </Box>
-                          </VStack>
-                        </CardBody>
-                      </Card>
+              <Tabs.Content value="career" className="p-4">
+                <div className="flex flex-col space-y-6">
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Career Direction</h3>
+                    <p className="font-bold">{formatSign(interpretation.career_path.career_direction.mc_sign)}</p>
+                    <p className="mt-2 text-cosmic-silver">{interpretation.career_path.career_direction.natural_calling}</p>
+                  </div>
 
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="red.500">🔥 Passion Style</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Badge colorScheme="red">
-                                Mars in {formatSign(interpretation.relationship_patterns.passion_style.mars_sign)}
-                              </Badge>
-                              <Text fontSize="sm">House {interpretation.relationship_patterns.passion_style.mars_house}</Text>
-                            </HStack>
-                            <Box>
-                              <Text fontSize="sm" fontWeight="semibold" mb={1}>Action Style:</Text>
-                              <Text fontSize="sm">{interpretation.relationship_patterns.passion_style.action_style}</Text>
-                            </Box>
-                            <Box>
-                              <Text fontSize="sm" fontWeight="semibold" mb={1}>Desire Nature:</Text>
-                              <Text fontSize="sm">{interpretation.relationship_patterns.passion_style.desire_nature}</Text>
-                            </Box>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    </Grid>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Mastery Path</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.career_path.mastery_path.saturn_sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.career_path.mastery_path.saturn_house}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.career_path.mastery_path.discipline_area}</p>
+                  </div>
 
-                    <Card bg={cardBg}>
-                      <CardHeader>
-                        <Heading size="md">💫 Partnership Karma</Heading>
-                      </CardHeader>
-                      <CardBody>
-                        <VStack align="start" spacing={3}>
-                          <HStack>
-                            <Text fontWeight="semibold">7th House:</Text>
-                            <Badge colorScheme="purple">
-                              {formatSign(interpretation.relationship_patterns.partnership_karma.seventh_house_sign)}
-                            </Badge>
-                          </HStack>
-                          <Text fontSize="sm">
-                            <strong>Partner Qualities:</strong> {interpretation.relationship_patterns.partnership_karma.partner_qualities}
-                          </Text>
-                          <Text fontSize="sm">
-                            <strong>Relationship Lessons:</strong> {interpretation.relationship_patterns.partnership_karma.relationship_lessons}
-                          </Text>
-                        </VStack>
-                      </CardBody>
-                    </Card>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Leadership Style</h3>
+                    <p className="text-cosmic-silver">{interpretation.career_path.leadership_style.sun_influence}</p>
+                  </div>
 
-                    <Card bg={cardBg}>
-                      <CardHeader>
-                        <Heading size="md">🔑 Compatibility Keys</Heading>
-                      </CardHeader>
-                      <CardBody>
-                        <VStack align="start" spacing={2}>
-                          {interpretation.relationship_patterns.compatibility_keys.map((key, index) => (
-                            <Text key={index} fontSize="sm">• {key}</Text>
+                  <div className="p-4 rounded-lg cosmic-card bg-purple-500/20">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Success Formula</h3>
+                    <p className="text-cosmic-silver">{interpretation.career_path.success_formula}</p>
+                  </div>
+                </div>
+              </Tabs.Content>
+
+              <Tabs.Content value="challenges" className="p-4">
+                <div className="flex flex-col space-y-6">
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Saturn Lessons</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.growth_challenges.saturn_lessons.saturn_sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.growth_challenges.saturn_lessons.saturn_house}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.growth_challenges.saturn_lessons.mastery_challenge}</p>
+                    <p className="mt-2 text-cosmic-silver">{interpretation.growth_challenges.saturn_lessons.growth_timeline}</p>
+                  </div>
+
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Key Challenges</h3>
+                    <Accordion.Root type="single" collapsible>
+                      {interpretation.growth_challenges.key_challenges.map((challenge, index) => (
+                        <Accordion.Item value={index.toString()} key={index}>
+                          <Accordion.Trigger className="flex justify-between w-full">
+                            <span className="font-bold">{challenge.aspect}: {challenge.planets}</span>
+                            <Accordion.Icon />
+                          </Accordion.Trigger>
+                          <Accordion.Content className="pb-4">
+                            <p className="mb-2 text-cosmic-silver">{challenge.challenge}</p>
+                            <p className="text-cosmic-silver">{challenge.growth_opportunity}</p>
+                          </Accordion.Content>
+                        </Accordion.Item>
+                      ))}
+                    </Accordion.Root>
+                  </div>
+
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Integration Work</h3>
+                    <p className="mb-2 text-cosmic-silver">{interpretation.growth_challenges.integration_work.primary_tension}</p>
+                    <div className="flex flex-col space-y-2">
+                      {interpretation.growth_challenges.integration_work.resolution_path.map((path, index) => (
+                        <p key={index} className="text-cosmic-silver">{path}</p>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Empowerment Potential</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="mb-2 font-bold text-cosmic-silver">Hidden Strengths</p>
+                        <div className="flex flex-col space-y-2">
+                          {interpretation.growth_challenges.empowerment_potential.hidden_strengths.map((strength, index) => (
+                            <p key={index} className="text-cosmic-silver">{strength}</p>
                           ))}
-                        </VStack>
-                      </CardBody>
-                    </Card>
-                  </VStack>
-                </TabPanel>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="mb-2 font-bold text-cosmic-silver">Transformation Gifts</p>
+                        <div className="flex flex-col space-y-2">
+                          {interpretation.growth_challenges.empowerment_potential.transformation_gifts.map((gift, index) => (
+                            <p key={index} className="text-cosmic-silver">{gift}</p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Tabs.Content>
 
-                {/* Career Path Tab */}
-                <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">🎯 Career Direction</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <Badge colorScheme="blue">
-                              MC in {formatSign(interpretation.career_path.career_direction.mc_sign)}
-                            </Badge>
-                            <Text fontSize="sm">
-                              {interpretation.career_path.career_direction.natural_calling}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
+              <Tabs.Content value="spiritual" className="p-4">
+                <div className="flex flex-col space-y-6">
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Psychic Abilities</h3>
+                    <p className="font-bold">{formatSign(interpretation.spiritual_gifts.psychic_abilities.twelfth_house_sign)}</p>
+                    <p className="mt-2 text-cosmic-silver">{interpretation.spiritual_gifts.psychic_abilities.intuitive_gifts}</p>
+                    <div className="flex flex-wrap mt-2 space-x-2">
+                      {interpretation.spiritual_gifts.psychic_abilities.spiritual_planets.map((planet, index) => (
+                        <span key={index} className="px-2 py-1 text-sm rounded bg-cosmic-purple/20 text-cosmic-purple">
+                          {planet}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
 
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">🏔️ Mastery Path</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Badge colorScheme="gray">
-                                Saturn in {formatSign(interpretation.career_path.mastery_path.saturn_sign)}
-                              </Badge>
-                              <Text fontSize="sm">House {interpretation.career_path.mastery_path.saturn_house}</Text>
-                            </HStack>
-                            <Text fontSize="sm">
-                              {interpretation.career_path.mastery_path.discipline_area}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    </Grid>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Mystical Nature</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.spiritual_gifts.mystical_nature.neptune_sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.spiritual_gifts.mystical_nature.neptune_house}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.spiritual_gifts.mystical_nature.spiritual_path}</p>
+                  </div>
 
-                    <Card bg={cardBg}>
-                      <CardHeader>
-                        <Heading size="md">👑 Leadership Style</Heading>
-                      </CardHeader>
-                      <CardBody>
-                        <Text>{interpretation.career_path.leadership_style.sun_influence}</Text>
-                      </CardBody>
-                    </Card>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Transformation Power</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-cosmic-silver">Sign</p>
+                        <p className="font-bold">{formatSign(interpretation.spiritual_gifts.transformation_power.pluto_sign)}</p>
+                      </div>
+                      <div>
+                        <p className="text-cosmic-silver">House</p>
+                        <p className="font-bold">{interpretation.spiritual_gifts.transformation_power.pluto_house}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">{interpretation.spiritual_gifts.transformation_power.healing_gifts}</p>
+                  </div>
 
-                    <Card bg={cardBg} borderLeft="4px solid" borderColor="green.400">
-                      <CardBody>
-                        <Heading size="sm" mb={3} color="green.600">Success Formula</Heading>
-                        <Text fontWeight="semibold">{interpretation.career_path.success_formula}</Text>
-                      </CardBody>
-                    </Card>
-                  </VStack>
-                </TabPanel>
+                  <div className="p-4 rounded-lg cosmic-card bg-purple-500/20">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Service Mission</h3>
+                    <p className="text-cosmic-silver">{interpretation.spiritual_gifts.service_mission}</p>
+                  </div>
+                </div>
+              </Tabs.Content>
 
-                {/* Growth Challenges Tab */}
-                <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    <Card bg={cardBg}>
-                      <CardHeader>
-                        <Heading size="md">⏰ Saturn Lessons</Heading>
-                      </CardHeader>
-                      <CardBody>
-                        <VStack align="start" spacing={3}>
-                          <HStack>
-                            <Badge colorScheme="gray">
-                              Saturn in {formatSign(interpretation.growth_challenges.saturn_lessons.saturn_sign)}
-                            </Badge>
-                            <Text fontSize="sm">House {interpretation.growth_challenges.saturn_lessons.saturn_house}</Text>
-                          </HStack>
-                          <Text fontSize="sm">
-                            <strong>Mastery Challenge:</strong> {interpretation.growth_challenges.saturn_lessons.mastery_challenge}
-                          </Text>
-                          <Text fontSize="sm" color="whiteAlpha.800">
-                            {interpretation.growth_challenges.saturn_lessons.growth_timeline}
-                          </Text>
-                        </VStack>
-                      </CardBody>
-                    </Card>
+              <Tabs.Content value="integration" className="p-4">
+                <div className="flex flex-col space-y-6">
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Elemental Balance</h3>
+                    <div className="flex flex-col space-y-4">
+                      {Object.entries(interpretation.integration_themes.elemental_balance.distribution).map(([element, count]) => (
+                        <div key={element}>
+                          <div className="flex justify-between mb-1">
+                            <span className="font-semibold capitalize text-cosmic-silver">{element}</span>
+                            <span className="text-cosmic-silver">{count} planets</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div className={`bg-${getElementColor(element)} h-2.5 rounded-full`} style={{ width: `${(count / 10) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                      <hr className="border-cosmic-silver/30" />
+                      <p className="text-cosmic-silver">
+                        <strong>Dominant:</strong> {formatSign(interpretation.integration_themes.elemental_balance.dominant_element)}
+                      </p>
+                      <p className="text-cosmic-silver">
+                        <strong>Integration Focus:</strong> {interpretation.integration_themes.elemental_balance.integration_focus}
+                      </p>
+                    </div>
+                  </div>
 
-                    {interpretation.growth_challenges.key_challenges && (
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">🎯 Key Challenges</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack spacing={4} align="stretch">
-                            {interpretation.growth_challenges.key_challenges.map((challenge, index) => (
-                              <Box key={index} p={3} borderWidth={1} borderRadius="md">
-                                <HStack justify="space-between" mb={2}>
-                                  <Text fontWeight="semibold" fontSize="sm">
-                                    {challenge.planets} {challenge.aspect}
-                                  </Text>
-                                  <Badge colorScheme="orange">{challenge.aspect}</Badge>
-                                </HStack>
-                                <Text fontSize="sm" mb={2}>{challenge.challenge}</Text>
-                                <Text fontSize="sm" color="green.600">
-                                  <strong>Growth Opportunity:</strong> {challenge.growth_opportunity}
-                                </Text>
-                              </Box>
-                            ))}
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    )}
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Modal Balance</h3>
+                    <div className="flex flex-col space-y-4">
+                      {Object.entries(interpretation.integration_themes.modal_balance.distribution).map(([quality, count]) => (
+                        <div key={quality}>
+                          <div className="flex justify-between mb-1">
+                            <span className="font-semibold capitalize text-cosmic-silver">{quality}</span>
+                            <span className="text-cosmic-silver">{count} planets</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${(count / 10) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                      <hr className="border-cosmic-silver/30" />
+                      <p className="text-cosmic-silver">
+                        <strong>Dominant:</strong> {formatSign(interpretation.integration_themes.modal_balance.dominant_quality)}
+                      </p>
+                      <p className="text-cosmic-silver">
+                        <strong>Integration Need:</strong> {interpretation.integration_themes.modal_balance.integration_need}
+                      </p>
+                    </div>
+                  </div>
 
-                    <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">💪 Hidden Strengths</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={2}>
-                            {interpretation.growth_challenges.empowerment_potential.hidden_strengths.map((strength, index) => (
-                              <Text key={index} fontSize="sm">• {strength}</Text>
-                            ))}
-                          </VStack>
-                        </CardBody>
-                      </Card>
+                  <div className="cosmic-card">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Focal Planets</h3>
+                    <p className="mb-2 text-cosmic-silver">Planets with the most aspects (most important for integration):</p>
+                    <div className="flex flex-wrap space-x-2">
+                      {interpretation.integration_themes.focal_planets.most_aspected.map(([planet, count], index) => (
+                        <span key={index} className="px-2 py-1 text-sm rounded bg-cosmic-purple/20 text-cosmic-purple">
+                          {formatSign(planet)}: {count} aspects
+                        </span>
+                      ))}
+                    </div>
+                    <p className="mt-4 text-cosmic-silver">
+                      <strong>Integration Priority:</strong> {interpretation.integration_themes.focal_planets.integration_priority}
+                    </p>
+                  </div>
 
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">🦋 Transformation Gifts</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={2}>
-                            {interpretation.growth_challenges.empowerment_potential.transformation_gifts.map((gift, index) => (
-                              <Text key={index} fontSize="sm">• {gift}</Text>
-                            ))}
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    </Grid>
-                  </VStack>
-                </TabPanel>
+                  <div className="p-4 rounded-lg cosmic-card bg-purple-500/20">
+                    <h3 className="mb-4 text-lg font-bold text-cosmic-gold">Overall Integration Theme</h3>
+                    <p className="text-cosmic-silver">{interpretation.integration_themes.overall_theme}</p>
+                  </div>
+                </div>
+              </Tabs.Content>
+            </Tabs.Root>
+          </div>
+        )}
 
-                {/* Spiritual Gifts Tab */}
-                <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={6}>
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="purple.500">🔮 Psychic Abilities</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <Badge colorScheme="purple">
-                              12th House: {formatSign(interpretation.spiritual_gifts.psychic_abilities.twelfth_house_sign)}
-                            </Badge>
-                            <Text fontSize="sm">{interpretation.spiritual_gifts.psychic_abilities.intuitive_gifts}</Text>
-                            {interpretation.spiritual_gifts.psychic_abilities.spiritual_planets.length > 0 && (
-                              <Box>
-                                <Text fontSize="sm" fontWeight="semibold" mb={1}>Spiritual Planets:</Text>
-                                <HStack wrap="wrap">
-                                  {interpretation.spiritual_gifts.psychic_abilities.spiritual_planets.map((planet, index) => (
-                                    <Badge key={index} size="sm" colorScheme="purple">{formatSign(planet)}</Badge>
-                                  ))}
-                                </HStack>
-                              </Box>
-                            )}
-                          </VStack>
-                        </CardBody>
-                      </Card>
-
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="teal.500">🌊 Mystical Nature</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Badge colorScheme="teal">
-                                Neptune in {formatSign(interpretation.spiritual_gifts.mystical_nature.neptune_sign)}
-                              </Badge>
-                              <Text fontSize="sm">House {interpretation.spiritual_gifts.mystical_nature.neptune_house}</Text>
-                            </HStack>
-                            <Text fontSize="sm">{interpretation.spiritual_gifts.mystical_nature.spiritual_path}</Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md" color="red.500">⚡ Transformation Power</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="start" spacing={3}>
-                            <HStack>
-                              <Badge colorScheme="red">
-                                Pluto in {formatSign(interpretation.spiritual_gifts.transformation_power.pluto_sign)}
-                              </Badge>
-                              <Text fontSize="sm">House {interpretation.spiritual_gifts.transformation_power.pluto_house}</Text>
-                            </HStack>
-                            <Text fontSize="sm">{interpretation.spiritual_gifts.transformation_power.healing_gifts}</Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    </Grid>
-
-                    <Card bg={cardBg} borderLeft="4px solid" borderColor="purple.400">
-                      <CardBody>
-                        <Heading size="sm" mb={3} color="purple.600">Service Mission</Heading>
-                        <Text fontWeight="semibold">{interpretation.spiritual_gifts.service_mission}</Text>
-                      </CardBody>
-                    </Card>
-                  </VStack>
-                </TabPanel>
-
-                {/* Integration Tab */}
-                <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">🔥 Elemental Balance</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="stretch" spacing={3}>
-                            {Object.entries(interpretation.integration_themes.elemental_balance.distribution).map(([element, count]) => (
-                              <Box key={element}>
-                                <HStack justify="space-between" mb={1}>
-                                  <Badge colorScheme={getElementColor(element)}>{element.toUpperCase()}</Badge>
-                                  <Text fontSize="sm">{count} planets</Text>
-                                </HStack>
-                                <Progress value={(count / 10) * 100} colorScheme={getElementColor(element)} size="sm" />
-                              </Box>
-                            ))}
-                            <Divider />
-                            <Text fontSize="sm">
-                              <strong>Dominant:</strong> {formatSign(interpretation.integration_themes.elemental_balance.dominant_element)}
-                            </Text>
-                            <Text fontSize="sm">
-                              <strong>Integration Focus:</strong> {interpretation.integration_themes.elemental_balance.integration_focus}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-
-                      <Card bg={cardBg}>
-                        <CardHeader>
-                          <Heading size="md">⚡ Modal Balance</Heading>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack align="stretch" spacing={3}>
-                            {Object.entries(interpretation.integration_themes.modal_balance.distribution).map(([quality, count]) => (
-                              <Box key={quality}>
-                                <HStack justify="space-between" mb={1}>
-                                  <Badge colorScheme="blue">{quality.toUpperCase()}</Badge>
-                                  <Text fontSize="sm">{count} planets</Text>
-                                </HStack>
-                                <Progress value={(count / 10) * 100} colorScheme="blue" size="sm" />
-                              </Box>
-                            ))}
-                            <Divider />
-                            <Text fontSize="sm">
-                              <strong>Dominant:</strong> {formatSign(interpretation.integration_themes.modal_balance.dominant_quality)}
-                            </Text>
-                            <Text fontSize="sm">
-                              <strong>Integration Need:</strong> {interpretation.integration_themes.modal_balance.integration_need}
-                            </Text>
-                          </VStack>
-                        </CardBody>
-                      </Card>
-                    </Grid>
-
-                    <Card bg={cardBg}>
-                      <CardHeader>
-                        <Heading size="md">🎯 Focal Planets</Heading>
-                      </CardHeader>
-                      <CardBody>
-                        <VStack align="start" spacing={3}>
-                          <Text fontSize="sm" color="whiteAlpha.800">
-                            Planets with the most aspects (most important for integration):
-                          </Text>
-                          <HStack wrap="wrap" spacing={2}>
-                            {interpretation.integration_themes.focal_planets.most_aspected.map(([planet, count]) => (
-                              <Badge key={planet} colorScheme="purple" p={2}>
-                                {formatSign(planet)}: {count} aspects
-                              </Badge>
-                            ))}
-                          </HStack>
-                          <Text fontSize="sm">
-                            <strong>Integration Priority:</strong> {interpretation.integration_themes.focal_planets.integration_priority}
-                          </Text>
-                        </VStack>
-                      </CardBody>
-                    </Card>
-
-                    <Card bg={cardBg} borderLeft="4px solid" borderColor="gold">
-                      <CardBody>
-                        <Heading size="sm" mb={3} color="orange.600">Overall Integration Theme</Heading>
-                        <Text fontWeight="semibold">{interpretation.integration_themes.overall_theme}</Text>
-                      </CardBody>
-                    </Card>
-                  </VStack>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-          )}
-
-          {/* Action Buttons */}
-          {interpretation && (
-            <HStack spacing={4} justify="center">
-              <Button
-                colorScheme="purple"
-                variant="outline"
-                onClick={generateInterpretation}
-                isLoading={loading}
-              >
-                Regenerate Analysis
-              </Button>
-              <Button
-                colorScheme="blue"
-                variant="outline"
-                onClick={() => window.print()}
-              >
-                Print Report
-              </Button>
-            </HStack>
-          )}
-        </VStack>
-      </Box>
+        {/* Action Buttons */}
+        {interpretation && (
+          <div className="flex justify-center space-x-4">
+            <button
+              className="px-4 py-2 text-purple-500 transition-colors border border-purple-500 rounded bg-purple-500/20 hover:bg-purple-500/30"
+              onClick={generateInterpretation}
+              disabled={loading}
+            >
+              Regenerate Analysis
+            </button>
+            <button
+              className="px-4 py-2 text-blue-500 transition-colors border border-blue-500 rounded bg-blue-500/20 hover:bg-blue-500/30"
+              onClick={() => window.print()}
+            >
+              Print Report
+            </button>
+          </div>
+        )}
+      </div>
     </FeatureGuard>
   );
 };
