@@ -27,75 +27,55 @@ def test_human_design():
     print("Testing Human Design endpoint...")
     try:
         response = requests.post(f"{BASE_URL}/calculate-human-design", json=test_birth_data)
-        if response.status_code == 200:
-            data = response.json()
-            print("✅ Human Design calculation successful!")
-            print(f"Type: {data['human_design']['type']}")
-            print(f"Strategy: {data['human_design']['strategy']}")
-            print(f"Authority: {data['human_design']['authority']}")
-            return True
-        else:
-            print(f"❌ Human Design failed: {response.status_code} - {response.text}")
-            return False
+        assert response.status_code == 200, f"❌ Human Design failed: {response.status_code} - {response.text}"
+        data = response.json()
+        print("✅ Human Design calculation successful!")
+        print(f"Type: {data['human_design']['type']}")
+        print(f"Strategy: {data['human_design']['strategy']}")
+        print(f"Authority: {data['human_design']['authority']}")
     except Exception as e:
-        print(f"❌ Human Design error: {str(e)}")
-        return False
+        assert False, f"❌ Human Design error: {str(e)}"
 
 def test_gene_keys():
     """Test Gene Keys calculation endpoint"""
     print("\nTesting Gene Keys endpoint...")
     try:
         response = requests.post(f"{BASE_URL}/calculate-gene-keys", json=test_birth_data)
-        if response.status_code == 200:
-            data = response.json()
-            print("✅ Gene Keys calculation successful!")
-            print(f"Life's Work: Gene Key {data['gene_keys']['life_work']['number']} - {data['gene_keys']['life_work']['name']}")
-            print(f"Evolution: Gene Key {data['gene_keys']['evolution']['number']} - {data['gene_keys']['evolution']['name']}")
-            return True
-        else:
-            print(f"❌ Gene Keys failed: {response.status_code} - {response.text}")
-            return False
+        assert response.status_code == 200, f"❌ Gene Keys failed: {response.status_code} - {response.text}"
+        data = response.json()
+        print("✅ Gene Keys calculation successful!")
+        print(f"Life's Work: Gene Key {data['gene_keys']['life_work']['number']} - {data['gene_keys']['life_work']['name']}")
+        print(f"Evolution: Gene Key {data['gene_keys']['evolution']['number']} - {data['gene_keys']['evolution']['name']}")
     except Exception as e:
-        print(f"❌ Gene Keys error: {str(e)}")
-        return False
+        assert False, f"❌ Gene Keys error: {str(e)}"
 
 def test_gene_key_details():
     """Test Gene Key details endpoint"""
     print("\nTesting Gene Key details endpoint...")
     try:
         response = requests.get(f"{BASE_URL}/gene-key/1")
-        if response.status_code == 200:
-            data = response.json()
-            print("✅ Gene Key details successful!")
-            print(f"Gene Key 1: {data['gene_key']['name']}")
-            print(f"Shadow: {data['gene_key']['shadow']}")
-            print(f"Gift: {data['gene_key']['gift']}")
-            print(f"Siddhi: {data['gene_key']['siddhi']}")
-            return True
-        else:
-            print(f"❌ Gene Key details failed: {response.status_code} - {response.text}")
-            return False
+        assert response.status_code == 200, f"❌ Gene Key details failed: {response.status_code} - {response.text}"
+        data = response.json()
+        print("✅ Gene Key details successful!")
+        print(f"Gene Key 1: {data['gene_key']['name']}")
+        print(f"Shadow: {data['gene_key']['shadow']}")
+        print(f"Gift: {data['gene_key']['gift']}")
+        print(f"Siddhi: {data['gene_key']['siddhi']}")
     except Exception as e:
-        print(f"❌ Gene Key details error: {str(e)}")
-        return False
+        assert False, f"❌ Gene Key details error: {str(e)}"
 
 def test_daily_contemplation():
     """Test daily contemplation endpoint"""
     print("\nTesting daily contemplation endpoint...")
     try:
         response = requests.get(f"{BASE_URL}/daily-contemplation/1")
-        if response.status_code == 200:
-            data = response.json()
-            print("✅ Daily contemplation successful!")
-            print(f"Contemplation for Gene Key 1:")
-            print(f"Focus: {data['contemplation']['focus']}")
-            return True
-        else:
-            print(f"❌ Daily contemplation failed: {response.status_code} - {response.text}")
-            return False
+        assert response.status_code == 200, f"❌ Daily contemplation failed: {response.status_code} - {response.text}"
+        data = response.json()
+        print("✅ Daily contemplation successful!")
+        print(f"Contemplation for Gene Key 1:")
+        print(f"Focus: {data['contemplation']['focus']}")
     except Exception as e:
-        print(f"❌ Daily contemplation error: {str(e)}")
-        return False
+        assert False, f"❌ Daily contemplation error: {str(e)}"
 
 def main():
     """Run all tests"""

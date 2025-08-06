@@ -1,4 +1,4 @@
-import { createAuthContext } from '../../../shared/AuthContext';
+import { createAuthContext } from './createAuthContext';
 import { auth } from '../firebase';
 
 // Create auth context instance with our firebase auth

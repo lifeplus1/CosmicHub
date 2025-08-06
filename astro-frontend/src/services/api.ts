@@ -4,7 +4,7 @@ import { auth } from '../firebase';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://astrology-app-0emh.onrender.com';
 
 // Helper function to get current auth token
-const getAuthToken = async (): Promise<string | null> => {
+export const getAuthToken = async (): Promise<string | null> => {
   const user = auth.currentUser;
   if (!user) {
     console.error('No authenticated user found');
