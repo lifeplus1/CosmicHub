@@ -1,75 +1,8 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  getIdToken,
-  setPersistence,
-  browserSessionPersistence,
-  type NextOrObserver,
-  type User,
-  type Auth,
-} from "firebase/auth";
+import { createAuthService } from "../../shared/auth";
+import { auth } from "./firebase";
 
-export function createAuthService(auth: Auth) {
-  return {
-    async signUp(email: string, password: string) {
-      try {
-        await setPersistence(auth, browserSessionPersistence);
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        return userCredential.user;
-      } catch (error) {
-        if (typeof error === "object" && error !== null && "code" in error && "message" in error) {
-          const err = error as { code: string; message: string };
-          throw new Error(err.code === "auth/email-already-in-use" ? "Email already in use" : err.message);
-        } else {
-          throw new Error("An unknown error occurred");
-        }
-      }
-    },
+// Create auth service instance with our firebase auth
+const authService = createAuthService(auth);
 
-    async logIn(email: string, password: string) {
-      try {
-        await setPersistence(auth, browserSessionPersistence);
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        return userCredential.user;
-      } catch (error) {
-        if (typeof error === "object" && error !== null && "message" in error) {
-          throw new Error((error as { message: string }).message);
-        } else {
-          throw new Error("An unknown error occurred");
-        }
-      }
-    },
-
-    async logOut() {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        if (typeof error === "object" && error !== null && "message" in error) {
-          throw new Error((error as { message: string }).message);
-        } else {
-          throw new Error("An unknown error occurred");
-        }
-      }
-    },
-
-    async getAuthToken() {
-      try {
-        const user = auth.currentUser;
-        if (!user) throw new Error("No user logged in");
-        return await getIdToken(user, true);
-      } catch (error) {
-        if (typeof error === "object" && error !== null && "message" in error) {
-          throw new Error((error as { message: string }).message);
-        } else {
-          throw new Error("An unknown error occurred");
-        }
-      }
-    },
-
-    onAuthChange(callback: NextOrObserver<User>) {
-      return onAuthStateChanged(auth, callback);
-    }
-  };
-}
+// Export the functions for backward compatibility
+export const { signUp, logIn, logOut, getAuthToken, onAuthChange } = authService;

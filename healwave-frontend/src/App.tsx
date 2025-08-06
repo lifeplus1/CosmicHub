@@ -1,7 +1,7 @@
 import FrequencyControls from "./components/FrequencyControls";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "../../shared/AuthContext";
 import "./styles/App.css";
 
 function App() {
