@@ -6,7 +6,7 @@ import {
   Badge,
   Icon
 } from '@chakra-ui/react';
-import { CheckCircleIcon, StarIcon } from '@chakra-ui/icons';
+// import { CheckCircleIcon, StarIcon } from '@chakra-ui/icons';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { COSMICHUB_TIERS } from '../types/subscription';
 

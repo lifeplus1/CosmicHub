@@ -25,7 +25,7 @@ import {
   ModalCloseButton,
   useDisclosure
 } from '@chakra-ui/react';
-import { DownloadIcon } from '@chakra-ui/icons';
+// import { DownloadIcon } from '@chakra-ui/icons';
 import FeatureGuard from './FeatureGuard';
 import type { ChartData, BirthData } from '../types';
 

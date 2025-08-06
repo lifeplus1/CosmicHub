@@ -38,7 +38,7 @@ import {
   ListItem,
   ListIcon
 } from '@chakra-ui/react';
-import { StarIcon, InfoIcon } from '@chakra-ui/icons';
+// import { StarIcon, InfoIcon } from '@chakra-ui/icons';
 import FeatureGuard from './FeatureGuard';
 
 interface NumerologyData {

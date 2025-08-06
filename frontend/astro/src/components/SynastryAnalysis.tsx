@@ -31,7 +31,7 @@ import {
   Stack,
   Container
 } from '@chakra-ui/react';
-import { StarIcon, InfoIcon } from '@chakra-ui/icons';
+// import { StarIcon, InfoIcon } from '@chakra-ui/icons';
 import type { BirthData } from '../types';
 import FeatureGuard from './FeatureGuard';
 

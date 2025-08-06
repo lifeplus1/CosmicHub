@@ -14,7 +14,7 @@ import {
   Icon,
   useColorModeValue
 } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
+// import { ChevronDownIcon } from '@chakra-ui/icons';
 import { 
   FaUser, 
   FaCrown, 
@@ -29,7 +29,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useNavigate } from 'react-router-dom';
 import { logOut } from '../auth';
-import { useToast } from '@chakra-ui/react';
+// import { useToast } from '@chakra-ui/react';
 
 interface UserMenuProps {
   userInfo?: {

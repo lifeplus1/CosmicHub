@@ -19,7 +19,7 @@ import {
   Alert,
   AlertIcon
 } from '@chakra-ui/react';
-import { CheckIcon } from '@chakra-ui/icons';
+// import { CheckIcon } from '@chakra-ui/icons';
 import { COSMICHUB_TIERS } from '../types/subscription';
 
 interface UpgradePromptProps {

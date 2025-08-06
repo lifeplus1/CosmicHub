@@ -39,7 +39,7 @@ import {
   TabPanel,
   useToast
 } from '@chakra-ui/react';
-import { CalendarIcon, TimeIcon } from '@chakra-ui/icons';
+// import { CalendarIcon, TimeIcon } from '@chakra-ui/icons';
 import FeatureGuard from './FeatureGuard';
 import type { BirthData, TransitData } from '../types';
 

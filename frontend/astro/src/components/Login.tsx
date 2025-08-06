@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, FormControl, FormLabel, Input, VStack, useToast, Icon, Heading, Text, Divider, Link } from "@chakra-ui/react";
+// import { Box, Button, FormControl, FormLabel, Input, VStack, useToast, Icon, Heading, Text, Divider, Link } from "@chakra-ui/react";
 import { logIn } from "../auth";
 
 export default function Login() {
