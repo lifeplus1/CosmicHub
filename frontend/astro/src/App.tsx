@@ -5,7 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 // ...existing code...
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import AuthProvider, { useAuth } from './contexts/AuthContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import type { ChartData } from './types';
 

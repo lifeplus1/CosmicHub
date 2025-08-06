@@ -290,3 +290,4 @@ async def ai_health_check():
         "active_connections": len(manager.active_connections),
         "service": "AI Interpretation WebSocket"
     }
+

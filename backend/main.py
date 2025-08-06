@@ -11,7 +11,26 @@ import uuid
 
 # Temporarily comment out authentication for debugging
 # from auth import get_current_user  # Absolute import for Firebase Auth
-from database import save_chart, get_charts, delete_chart_by_id
+
+# Mock database functions for development
+def save_chart(user_id: str, chart_type: str, birth_data: dict, chart_data: dict):
+    return {"status": "success", "message": "Chart saved (mock)"}
+
+def get_charts(user_id: str):
+    return []
+
+def delete_chart_by_id(user_id: str, chart_id: str):
+    return True
+
+# Try to import real database functions, fallback to mock
+try:
+    from database import save_chart as real_save_chart, get_charts as real_get_charts, delete_chart_by_id as real_delete_chart
+    save_chart = real_save_chart
+    get_charts = real_get_charts  
+    delete_chart_by_id = real_delete_chart
+    print("Using real Firebase database")
+except Exception as e:
+    print(f"Using mock database functions: {str(e)}")
 
 # Using mock auth function for development - simulating elite user
 def get_current_user() -> str:
@@ -95,6 +114,10 @@ def rate_limiter(request: Request) -> None:
 
 app = FastAPI()
 app.add_middleware(SecurityHeadersMiddleware)
+
+# Include API routers
+from api.routers import ai
+app.include_router(ai.router, prefix="/api/v1", tags=["ai"])
 
 # Add CORS middleware
 app.add_middleware(

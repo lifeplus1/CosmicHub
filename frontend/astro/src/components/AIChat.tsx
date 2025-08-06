@@ -244,10 +244,7 @@ export default function AIChat() {
       
       return () => clearInterval(pingInterval);
     }
-  }, [connectionState]);
-
-  if (loading) return <div className="text-center text-white">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  };
 
   return (
     <div style={{
