@@ -158,7 +158,6 @@ describe('AIChat Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-    await waitFor(() => {
       expect((axios.default.post as typeof vi.fn)).toHaveBeenCalledWith(
         expect.stringContaining('/chat'),
         { text: 'Test question' },
@@ -178,7 +177,7 @@ describe('AIChat Component', () => {
 
     mockGetAuthToken.mockResolvedValue('mock-token');
     mockAxios.post.mockRejectedValue(new Error('API Error'));
-    (axios.default.post as typeof vi.fn).mockRejectedValue(new Error('API Error'));
+    (axios.post as typeof vi.fn).mockRejectedValue(new Error('API Error'));
     render(
       <TestWrapper>
         <AIChat />

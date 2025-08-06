@@ -333,7 +333,7 @@ def analyze_relationship_patterns(chart_data: Dict[str, Any]) -> Dict[str, Any]:
                 'partner_qualities': get_partner_qualities(partnership_sign) if partnership_sign else "7th house not available",
                 'relationship_lessons': get_relationship_lessons(partnership_sign) if partnership_sign else None
             },
-            'compatibility_keys': generate_compatibility_insights(venus_info, mars_info, partnership_sign)
+            'compatibility_keys': generate_compatibility_insights(venus_info, mars_info, partnership_sign if partnership_sign is not None else "")
         }
         
         return relationship_analysis # type: ignore
@@ -360,7 +360,7 @@ def analyze_career_path(chart_data: Dict[str, Any]) -> Dict[str, Any]:
         # Any planets in 10th house
         tenth_house_planets = find_planets_in_house(planets, 10)
         
-        career_analysis = { # type: ignore
+        career_analysis: Dict[str, Any] = {
             'career_direction': {
                 'mc_sign': mc_sign,
                 'natural_calling': get_career_direction(mc_sign) if mc_sign else "MC not available"
@@ -704,5 +704,31 @@ def synthesize_life_purpose(sun_info: Dict, jupiter_info: Dict, mc_sign: str) ->
         purpose_elements.append(f"Achieve recognition for {SIGN_ENERGIES.get(mc_sign, {}).get('essence', '')}")
     
     return " | ".join(purpose_elements) if purpose_elements else "Detailed birth data needed for purpose analysis"
+
+def get_north_node_purpose(sign: str) -> str:
+    """Get North Node growth direction by sign"""
+    north_node_purposes = {
+        'aries': 'Develop independence, courage, and self-leadership',
+        'taurus': 'Cultivate stability, self-worth, and material security',
+        'gemini': 'Embrace curiosity, communication, and adaptability',
+        'cancer': 'Nurture emotional connections, family, and intuition',
+        'leo': 'Express creativity, confidence, and authentic selfhood',
+        'virgo': 'Practice service, precision, and practical improvement',
+        'libra': 'Seek harmony, partnership, and balanced relationships',
+        'scorpio': 'Transform through depth, power, and psychological growth',
+        'sagittarius': 'Explore wisdom, freedom, and philosophical truth',
+        'capricorn': 'Achieve discipline, ambition, and responsible leadership',
+        'aquarius': 'Innovate, collaborate, and serve humanity',
+        'pisces': 'Surrender, trust intuition, and embrace spiritual growth'
+    }
+    return north_node_purposes.get(sign, 'North Node purpose unknown')
+
+def get_mc_expression(mc_sign: str) -> str:
+    """Get MC (Midheaven) public expression by sign"""
+    if not mc_sign:
+        return "MC sign not available"
+    essence = SIGN_ENERGIES.get(mc_sign, {}).get('essence', '')
+    archetype = SIGN_ENERGIES.get(mc_sign, {}).get('archetype', '')
+    return f"Publicly expresses {essence} ({archetype})" if essence and archetype else "MC expression unknown"
 
 # More helper functions would continue here for complete interpretation system...
