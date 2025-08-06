@@ -121,6 +121,13 @@ class TestCalculateChart:
         
         assert isinstance(result, dict)
         assert 'planets' in result
+    
+    def test_validate_inputs_valid(self):
+        assert validate_inputs(2000, 5, 15, 12, 30, 40.0, -74.0, "America/New_York", "New York") is True
+
+    def test_validate_inputs_invalid_year(self):
+        with pytest.raises(ValueError):
+            validate_inputs(1800, 5, 15, 12, 30, 40.0, -74.0, "America/New_York", "New York")
 
 
 class TestMultiSystemChart:

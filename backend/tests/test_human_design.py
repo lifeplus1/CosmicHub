@@ -156,3 +156,9 @@ class TestHumanDesignChannels:
         # This would test actual center definition logic
         assert isinstance(active_gates, list)
         assert all(isinstance(gate, int) for gate in active_gates)
+
+
+def test_human_design_basic():
+    result = calculate_human_design(2000, 5, 15, 12, 30, 40.0, -74.0, "America/New_York")
+    assert "type" in result
+    assert "profile" in result

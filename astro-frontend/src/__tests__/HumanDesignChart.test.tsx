@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { ChakraProvider } from '@chakra-ui/react';
 import HumanDesignChart from '../components/HumanDesignChart';
 import { AuthProvider } from '../contexts/AuthContext';
 import * as api from '../services/api';
@@ -14,13 +13,11 @@ vi.mock('../services/api', () => ({
 const mockCalculateHumanDesign = vi.mocked(api.calculateHumanDesign);
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ChakraProvider>
-    <MemoryRouter>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </MemoryRouter>
-  </ChakraProvider>
+  <MemoryRouter>
+    <AuthProvider>
+      {children}
+    </AuthProvider>
+  </MemoryRouter>
 );
 
 const mockBirthData = {

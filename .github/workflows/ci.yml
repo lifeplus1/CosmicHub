@@ -41,8 +41,8 @@ jobs:
       - name: Run Backend Tests
         run: |
           cd backend
-          # Run unit tests (fast)
-          pytest tests/ -m "not slow" --cov=astro --cov-report=xml
+          # Run all unit tests (fast)
+          pytest tests/ --cov=astro --cov-report=xml
           # Run slow tests separately if needed
           pytest tests/ -m "slow" || true
         env:
@@ -73,7 +73,7 @@ jobs:
           npm list @testing-library/jest-dom @testing-library/react vitest typescript
           ls -la src
           cat src/setupTests.js || echo "src/setupTests.js not found"
-      - name: Run Frontend Tests
+      - name: Run Astro Frontend Tests
         run: |
           cd astro-frontend
           npm run test
@@ -85,12 +85,10 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_BACKEND_URL: https://astrology-app-0emh.onrender.com
-      
       - name: Install HealWave Frontend Dependencies
         run: |
           cd healwave-frontend
           npm ci
-      
       - name: Run HealWave Frontend Tests
         run: |
           cd healwave-frontend

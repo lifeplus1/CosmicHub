@@ -37,8 +37,8 @@ import {
   FaInfinity,
   FaQuestionCircle
 } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useAuth } from '../../shared/AuthContext';
+import { useSubscription } from '../../shared/SubscriptionContext';
 import { COSMICHUB_TIERS } from '../types/subscription';
 import { EducationalTooltip } from './EducationalTooltip';
 
