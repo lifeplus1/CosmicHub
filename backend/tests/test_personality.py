@@ -2,7 +2,7 @@
 Tests for astro/calculations/personality.py
 """
 import pytest
-from backend.astro.calculations.personality import (
+from astro.calculations.personality import (
     get_personality_traits,
     get_sun_sign
 )
@@ -63,7 +63,7 @@ class TestPersonalityTraits:
     
     def test_get_personality_traits_invalid_chart(self):
         """Test personality traits with invalid chart data"""
-        invalid_chart = {
+        invalid_chart: dict[str, dict[str, dict[str, float]]] = {
             "planets": {
                 "sun": {}  # Missing position
             }
@@ -74,7 +74,7 @@ class TestPersonalityTraits:
     
     def test_get_personality_traits_missing_sun(self):
         """Test personality traits with missing sun data"""
-        invalid_chart = {
+        invalid_chart: dict[str, dict[str, dict[str, float]]] = {
             "planets": {}  # Missing sun
         }
         
@@ -216,7 +216,9 @@ class TestPersonalityEdgeCases:
             "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
         ]
         
-        actual_signs = set()
+        from typing import Set
+
+        actual_signs: Set[str] = set()
         
         # Test one degree from each sign
         for i in range(12):

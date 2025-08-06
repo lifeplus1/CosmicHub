@@ -2,7 +2,7 @@
 Tests for astro/calculations/numerology.py
 """
 from datetime import datetime
-from backend.astro.calculations.numerology import (
+from astro.calculations.numerology import (
     calculate_numerology,
     NumerologyCalculator,
     PYTHAGOREAN,

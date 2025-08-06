@@ -1,39 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Button,
-  Text,
-  VStack,
-  HStack,
-  Grid,
-  GridItem,
-  Card,
-  CardBody,
-  CardHeader,
-  Heading,
-  Badge,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Spinner,
-  Alert,
-  AlertIcon,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Progress,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  useToast,
-  Tooltip,
-  Divider
-} from '@chakra-ui/react';
+import { useToast } from './ToastProvider';
 import { useAuth } from '../contexts/AuthContext';
 import { calculateHumanDesign } from '../services/api';
 

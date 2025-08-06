@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { ChakraProvider } from '@chakra-ui/react';
 import AIChat from '../components/AIChat';
 import * as authModule from '../auth';
 import { useAuth } from '../components/AuthProvider';
@@ -24,7 +23,7 @@ vi.mock('axios', () => ({
 }));
 
 import axios from 'axios';
-const mockAxios = axios as any;
+const mockAxios = axios as typeof axios;
 mockAxios.post = vi.fn();
 
 const mockNavigate = vi.fn();
@@ -39,11 +38,9 @@ vi.mock('react-router-dom', async () => {
 
 // Helper component to wrap components with providers
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ChakraProvider>
-    <BrowserRouter>
-      {children}
-    </BrowserRouter>
-  </ChakraProvider>
+  <BrowserRouter>
+    {children}
+  </BrowserRouter>
 );
 
 describe('AIChat Component', () => {

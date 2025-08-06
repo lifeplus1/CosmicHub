@@ -60,6 +60,15 @@ Object.defineProperty(import.meta, 'env', {
   }
 });
 
+// Mock useToast hook from Chakra UI
+vi.mock('@chakra-ui/react', async () => {
+  const actual = await vi.importActual('@chakra-ui/react');
+  return {
+    ...actual,
+    useToast: vi.fn(() => vi.fn())
+  };
+});
+
 // Global test utilities
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),

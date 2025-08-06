@@ -1,33 +1,8 @@
 import React, { memo, useMemo, useCallback } from "react";
 import { useAuth } from '../contexts/AuthContext';
-import { Button, useToast } from '@chakra-ui/react';
+import { useToast } from './ToastProvider';
+import * as Accordion from '@radix-ui/react-accordion';
 import type { ChartData } from '../types';
-import {
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Box,
-  Text,
-  Card,
-  CardBody,
-  Heading,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  VStack,
-  HStack,
-  Badge,
-  Spinner,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-} from "@chakra-ui/react";
 
 interface ExtendedChartData extends ChartData {
   latitude: number;

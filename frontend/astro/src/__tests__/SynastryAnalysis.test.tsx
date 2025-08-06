@@ -1,21 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { ChakraProvider } from '@chakra-ui/react';
 import { SynastryAnalysis } from '../components/SynastryAnalysis';
 import { AuthProvider } from '../contexts/AuthContext';
 import { SubscriptionProvider } from '../contexts/SubscriptionContext';
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ChakraProvider>
-    <MemoryRouter>
-      <AuthProvider>
-        <SubscriptionProvider>
-          {children}
-        </SubscriptionProvider>
-      </AuthProvider>
-    </MemoryRouter>
-  </ChakraProvider>
+  <MemoryRouter>
+    <AuthProvider>
+      <SubscriptionProvider>
+        {children}
+      </SubscriptionProvider>
+    </AuthProvider>
+  </MemoryRouter>
 );
 
 describe('SynastryAnalysis Component', () => {
