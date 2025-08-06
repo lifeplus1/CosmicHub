@@ -19,7 +19,7 @@
     "types": ["vitest/globals", "@testing-library/jest-dom"],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../../shared/*"]
     }
   },
   "include": ["src"],
