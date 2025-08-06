@@ -30,8 +30,8 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { FaFilePdf, FaDownload, FaCog, FaPalette, FaArrowLeft, FaCheck, FaQuestionCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import FeatureGuard from './FeatureGuard';
-import { EducationalTooltip } from './EducationalTooltip';
+import FeatureGuard from '../components/FeatureGuard';
+import { EducationalTooltip } from '../components/EducationalTooltip';
 
 export const PDFExportTest: React.FC = () => {
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ export const PDFExportTest: React.FC = () => {
     { id: 'modalities', label: 'Modality Analysis', description: 'Cardinal, Fixed, Mutable balance' }
   ];
 
-  const handleGeneratePDF = () => {
+  const handleGeneratePDF = (): void => {
     setIsGenerating(true);
     // Simulate PDF generation
     setTimeout(() => {
@@ -184,7 +184,12 @@ export const PDFExportTest: React.FC = () => {
                             ]}
                           />
                         </FormLabel>
-                        <Select value={reportStyle} onChange={(e) => setReportStyle(e.target.value)}>
+                        <Select
+                          value={reportStyle}
+                          onChange={(e) => setReportStyle(e.target.value)}
+                          aria-label="Report Style"
+                          title="Report Style"
+                        >
                           <option value="modern">Modern & Minimalist</option>
                           <option value="classical">Classical Astrology</option>
                           <option value="detailed">Detailed Professional</option>

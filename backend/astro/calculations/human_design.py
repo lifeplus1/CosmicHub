@@ -1,10 +1,13 @@
 # backend/astro/calculations/human_design.py
 import logging
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, Tuple, TypedDict
+class PlanetActivation(TypedDict):
+    gate: int
+    line: int
+    position: float
+    center: str
 from datetime import datetime, timedelta
-import math
 import swisseph as swe  # type: ignore
-from .chart import calculate_chart
 
 logger = logging.getLogger(__name__)
 
@@ -145,36 +148,36 @@ def get_gate_center(gate_number: int) -> str:
         return GATES[gate_number]["center"]
     return "Unknown"
 
-def calculate_planetary_activations(julian_day: float) -> Dict[str, Dict[str, Any]]:
+def calculate_planetary_activations(julian_day: float) -> dict[str, PlanetActivation]:
     """Calculate planetary activations for Human Design"""
-    activations = {}
+    activations: dict[str, PlanetActivation] = {}
     
     # Planet constants for Swiss Ephemeris
-    planets = {
-        'sun': swe.SUN,
-        'moon': swe.MOON,
-        'mercury': swe.MERCURY,
-        'venus': swe.VENUS,
-        'mars': swe.MARS,
-        'jupiter': swe.JUPITER,
-        'saturn': swe.SATURN,
-        'uranus': swe.URANUS,
-        'neptune': swe.NEPTUNE,
-        'pluto': swe.PLUTO,
-        'north_node': swe.MEAN_NODE
+    planets: dict[str, int] = {
+        'sun': int(getattr(swe, "SUN", 0)),
+        'moon': int(getattr(swe, "MOON", 1)),
+        'mercury': int(getattr(swe, "MERCURY", 2)),
+        'venus': int(getattr(swe, "VENUS", 3)),
+        'mars': int(getattr(swe, "MARS", 4)),
+        'jupiter': int(getattr(swe, "JUPITER", 5)),
+        'saturn': int(getattr(swe, "SATURN", 6)),
+        'uranus': int(getattr(swe, "URANUS", 7)),
+        'neptune': int(getattr(swe, "NEPTUNE", 8)),
+        'pluto': int(getattr(swe, "PLUTO", 9)),
+        'north_node': int(getattr(swe, "MEAN_NODE", 10))
     }
     
     try:
         for planet_name, planet_id in planets.items():
             # Calculate planet position
-            result = swe.calc_ut(julian_day, planet_id, swe.FLG_SWIEPH)
-            position = result[0][0]  # Longitude in degrees
+            result = swe.calc_ut(julian_day, planet_id, swe.FLG_SWIEPH)  # type: ignore
+            position = result[0][0]  # type: ignore  # Longitude in degrees
             
             # Convert to Human Design gate/line
-            gate_position = (position * 64) / 360
-            gate_number = int(gate_position % 64) + 1
-            line_position = ((gate_position % 1) * 6) + 1
-            line_number = int(line_position)
+            gate_position = (position * 64) / 360  # type: ignore
+            gate_number = int(gate_position % 64) + 1  # type: ignore
+            line_position = ((gate_position % 1) * 6) + 1  # type: ignore
+            line_number = int(line_position)  # type: ignore
             
             # Ensure valid ranges
             gate_number = max(1, min(64, gate_number))
@@ -197,11 +200,11 @@ def calculate_design_data(conscious_time: datetime, unconscious_time: datetime) 
         import swisseph as swe  # type: ignore
         
         # Calculate Julian days
-        conscious_jd_result = swe.utc_to_jd(
+        conscious_jd_result: Tuple[float, float] = swe.utc_to_jd(
             conscious_time.year, conscious_time.month, conscious_time.day,
             conscious_time.hour, conscious_time.minute, 0, 1
         )
-        unconscious_jd_result = swe.utc_to_jd(
+        unconscious_jd_result: Tuple[float, float] = swe.utc_to_jd(
             unconscious_time.year, unconscious_time.month, unconscious_time.day,
             unconscious_time.hour, unconscious_time.minute, 0, 1
         )
@@ -319,7 +322,7 @@ def calculate_human_design(year: int, month: int, day: int, hour: int, minute: i
         design_data = calculate_design_data(birth_time, design_time)
         
         # Combine conscious and unconscious activations
-        all_activations = {}
+        all_activations: Dict[str, PlanetActivation] = {}
         all_activations.update(design_data["conscious"])
         all_activations.update(design_data["unconscious"])
         

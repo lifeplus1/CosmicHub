@@ -30,6 +30,8 @@ import { useNavigate } from 'react-router-dom';
 import { FaBrain, FaRobot, FaMagic, FaLightbulb, FaArrowLeft, FaComments, FaUser, FaQuestionCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import FeatureGuard from '../components/FeatureGuard';
 import { EducationalTooltip } from '../components/EducationalTooltip';
+import * as RadixTooltip from '@radix-ui/react-tooltip';
+import * as RadixDialog from '@radix-ui/react-dialog';
 
 export const AIInterpretationTest: React.FC = () => {
   const navigate = useNavigate();
@@ -96,7 +98,7 @@ export const AIInterpretationTest: React.FC = () => {
     }
   ];
 
-  const handleStartAnalysis = () => {
+  const handleStartAnalysis = (): void => {
     setIsAnalyzing(true);
     // Simulate AI analysis
     setTimeout(() => {
@@ -105,7 +107,7 @@ export const AIInterpretationTest: React.FC = () => {
     }, 3000);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = (): void => {
     if (!userQuestion.trim()) return;
     setIsAnalyzing(true);
     setCurrentResponse('');
@@ -244,25 +246,48 @@ export const AIInterpretationTest: React.FC = () => {
                 <CardBody>
                   <VStack spacing={6}>
                     <Box w="full">
-                      <label id="analysis-type-label" htmlFor="analysis-type-select" style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}>
-                        Select AI analysis type
-                      </label>
-                      <Select 
-                        id="analysis-type-select"
-                        aria-labelledby="analysis-type-label"
-                        aria-label="Select AI analysis type"
-                        title="Select AI analysis type"
-                        value={analysisType} 
-                        onChange={(e) => setAnalysisType(e.target.value)}
-                        size="lg"
-                      >
-                        <option value="personality">Deep Personality Analysis</option>
-                        <option value="relationships">Relationship Patterns</option>
-                        <option value="career">Career & Life Path</option>
-                        <option value="spiritual">Spiritual Growth</option>
-                        <option value="timing">Current Life Phase</option>
-                        <option value="comprehensive">Comprehensive Reading</option>
-                      </Select>
+                      <RadixTooltip.Root>
+                        <RadixTooltip.Trigger asChild>
+                          <label htmlFor="analysis-type-select" className="block mb-1 font-medium cursor-pointer">
+                            Select AI analysis type
+                          </label>
+                        </RadixTooltip.Trigger>
+                        <RadixTooltip.Content className="bg-gray-900 text-white px-3 py-2 rounded shadow-lg text-xs">
+                          Choose the type of AI interpretation you'd like to receive based on your birth chart
+                          <RadixTooltip.Arrow className="fill-gray-900" />
+                        </RadixTooltip.Content>
+                      </RadixTooltip.Root>
+                      <RadixDialog.Root>
+                        <RadixDialog.Trigger asChild>
+                          <button className="w-full border border-gray-300 rounded-lg px-4 py-2 text-left bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            {((): string => {
+                              switch (analysisType) {
+                                case 'personality': return 'Deep Personality Analysis';
+                                case 'relationships': return 'Relationship Patterns';
+                                case 'career': return 'Career & Life Path';
+                                case 'spiritual': return 'Spiritual Growth';
+                                case 'timing': return 'Current Life Phase';
+                                case 'comprehensive': return 'Comprehensive Reading';
+                                default: return 'Select AI analysis type';
+                              }
+                            })()}
+                          </button>
+                        </RadixDialog.Trigger>
+                        <RadixDialog.Content className="bg-white rounded-lg shadow-xl p-6 w-80 mx-auto mt-4">
+                          <RadixDialog.Title className="font-semibold mb-2">Choose AI Analysis Type</RadixDialog.Title>
+                          <ul className="space-y-2">
+                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('personality')}>Deep Personality Analysis</button></li>
+                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('relationships')}>Relationship Patterns</button></li>
+                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('career')}>Career & Life Path</button></li>
+                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('spiritual')}>Spiritual Growth</button></li>
+                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('timing')}>Current Life Phase</button></li>
+                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('comprehensive')}>Comprehensive Reading</button></li>
+                          </ul>
+                          <RadixDialog.Close asChild>
+                            <button className="mt-4 w-full py-2 rounded bg-cyan-500 text-white font-semibold">Close</button>
+                          </RadixDialog.Close>
+                        </RadixDialog.Content>
+                      </RadixDialog.Root>
                     </Box>
                     
                     <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
