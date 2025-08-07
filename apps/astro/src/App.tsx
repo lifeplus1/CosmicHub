@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@cosmichub/auth';
 import { useCrossAppStore } from '@cosmichub/integrations';
@@ -7,20 +7,21 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
-import Dashboard from './pages/Dashboard';
-import ChartCalculation from './pages/ChartCalculation';
-import Profile from './pages/Profile';
-import type { ChartData } from './types';
 
-interface ExtendedChartData extends ChartData {
+const Dashboard = lazy(() => import('./pages/Dashboard')); // Lazy load for performance
+const ChartCalculation = lazy(() => import('./pages/ChartCalculation'));
+const Profile = lazy(() => import('./pages/Profile'));
+
+interface ExtendedChartData {
   latitude: number;
   longitude: number;
   timezone: string;
   julian_day: number;
   angles: Record<string, number>;
+  // Extend from ChartData if defined elsewhere
 }
 
-function MainApp(): JSX.Element {
+const MainApp: React.FC = React.memo(() => {
   const { addNotification } = useCrossAppStore();
   const config = getAppConfig('astro');
 
@@ -31,7 +32,7 @@ function MainApp(): JSX.Element {
         id: 'astro-init',
         message: 'Astrology app initialized with Healwave integration',
         type: 'info',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
   }, [addNotification]);
@@ -40,25 +41,27 @@ function MainApp(): JSX.Element {
     <Router>
       <div className="min-h-screen bg-cosmic-dark text-cosmic-silver">
         <Navbar />
-        <main className="container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/chart" element={<ChartCalculation />} />
-            <Route path="/profile" element={<Profile />} />
-          </Routes>
+        <main className="container px-4 py-8 mx-auto">
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/chart" element={<ChartCalculation />} />
+              <Route path="/profile" element={<Profile />} />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
         
         {/* Debug info in development */}
         {config.environment === 'development' && (
-          <div className="fixed bottom-4 right-4 bg-cosmic-purple p-2 rounded text-xs">
+          <div className="fixed p-2 text-xs rounded bottom-4 right-4 bg-cosmic-purple" aria-hidden="true">
             App: {config.app} | Env: {config.environment} | Version: {config.version}
           </div>
         )}
       </div>
     </Router>
   );
-}
+});
 
 const App: React.FC = () => (
   <AuthProvider appName="astro">
@@ -71,3 +74,6 @@ const App: React.FC = () => (
 );
 
 export default App;
+
+// Suggested Vitest test: 
+// test('renders with auth', () => { ... });

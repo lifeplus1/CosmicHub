@@ -1,2 +1,2 @@
 // firebase.ts
-export * from '../../shared/firebase';
+export * from '@cosmichub/auth';

@@ -1,5 +1,5 @@
 import { getIdToken } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "@cosmichub/auth";
 
 export async function savePreset(preset: {
   frequency: number;

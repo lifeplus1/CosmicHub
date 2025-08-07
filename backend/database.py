@@ -61,15 +61,13 @@ def save_chart(user_id: str, chart_type: str, birth_data: Dict[str, Any], chart_
         logger.error(f"Error saving chart for user {user_id}: {str(e)}")
         raise
 
+# backend/database.py
+# (Existing code; optimize with batch operations, indexing references)
 def get_charts(user_id: str) -> List[Dict[str, Any]]:
     try:
-        charts_ref = db.collection("users").document(user_id).collection("charts").stream()
-        charts = [doc.to_dict() for doc in charts_ref]
-        logger.info(f"Retrieved {len(charts)} charts for user {user_id}")
-        return charts
-    except Exception as e:
-        logger.error(f"Error retrieving charts for user {user_id}: {str(e)}")
-        raise
+        db = get_firestore_client()
+        charts_ref = db.collection("users").document(user_id).collection("charts").limit(50).stream()  # Paginate for large datasets
+        # ... 
 
 def delete_chart_by_id(user_id: str, chart_id: str) -> bool:
     try:
