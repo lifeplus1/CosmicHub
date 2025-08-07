@@ -1,9 +1,11 @@
 """
 Tests for astro/calculations/human_design.py
 """
-from astro.calculations.human_design import (
+import pytest
+from backend.astro.calculations.human_design import (
     calculate_human_design,
     calculate_planetary_activations,
+    determine_type_and_authority,
     analyze_definition,
     GATES
 )
@@ -59,7 +61,7 @@ class TestHumanDesignCalculation:
     
     def test_analyze_definition(self):
         """Test definition analysis"""
-        mock_activations: dict[str, dict[str, int | str]] = {
+        mock_activations = {
             'sun': {'gate': 1, 'center': 'G'},
             'moon': {'gate': 8, 'center': 'G'},
             'mercury': {'gate': 13, 'center': 'G'},

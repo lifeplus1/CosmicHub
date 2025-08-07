@@ -1,22 +1,9 @@
-import React from 'react';
-import {
-  Box,
-  VStack,
-  HStack,
-  Button,
-  Heading,
-  Text,
-  Card,
-  CardBody,
-  Badge,
-  useToast,
-  Divider,
-  Icon
-} from '@chakra-ui/react';
-import { FaUser, FaStar, FaCrown, FaSignInAlt } from 'react-icons/fa';
+import React, { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from './ToastProvider';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
-import { useNavigate } from 'react-router-dom';
+import { FaUser, FaStar, FaCrown, FaSignInAlt } from 'react-icons/fa';
 
 interface MockUser {
   email: string;
@@ -71,13 +58,12 @@ const mockUsers: MockUser[] = [
   }
 ];
 
-export const MockLoginPanel: React.FC = () => {
-  const toast = useToast();
+const MockLoginPanel: React.FC = React.memo(() => {
+  const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleMockLogin = async (mockUser: MockUser) => {
+  const handleMockLogin = useCallback(async (mockUser: MockUser) => {
     try {
-      // Try to sign in first
       await signInWithEmailAndPassword(auth, mockUser.email, mockUser.password);
       
       toast({
@@ -88,161 +74,112 @@ export const MockLoginPanel: React.FC = () => {
         isClosable: true,
       });
       
-      navigate('/');
-    } catch (signInError: any) {
-      // If sign in fails, try to create the account
-      if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential') {
+      navigate('/chart');
+    } catch (error) {
+      if (error instanceof Error && error.code === 'auth/user-not-found') {
         try {
           await createUserWithEmailAndPassword(auth, mockUser.email, mockUser.password);
-          
           toast({
-            title: `Created and logged in as ${mockUser.displayName}`,
-            description: `You now have ${mockUser.tier} tier access`,
+            title: 'Mock Account Created',
+            description: `Created and logged in as ${mockUser.displayName}`,
             status: 'success',
             duration: 3000,
             isClosable: true,
           });
-          
-          navigate('/');
-        } catch (createError: any) {
+          navigate('/chart');
+        } catch (createError) {
           toast({
-            title: 'Login Failed',
-            description: `Failed to create mock user: ${createError.message}`,
+            title: 'Error',
+            description: 'Failed to create mock account',
             status: 'error',
-            duration: 5000,
+            duration: 3000,
             isClosable: true,
           });
         }
       } else {
         toast({
-          title: 'Login Failed',
-          description: `Sign in error: ${signInError.message}`,
+          title: 'Error',
+          description: 'Failed to log in with mock account',
           status: 'error',
-          duration: 5000,
+          duration: 3000,
           isClosable: true,
         });
       }
     }
-  };
+  }, [navigate, toast]);
 
-  const getTierIcon = (tier: string) => {
+  const getTierColor = (tier: MockUser['tier']) => {
     switch (tier) {
-      case 'free': return FaUser;
-      case 'premium': return FaStar;
-      case 'elite': return FaCrown;
-      default: return FaUser;
-    }
-  };
-
-  const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'free': return 'gray';
-      case 'premium': return 'purple';
-      case 'elite': return 'gold';
-      default: return 'gray';
+      case 'free': return 'gray-500';
+      case 'premium': return 'purple-500';
+      case 'elite': return 'orange-500';
+      default: return 'gray-500';
     }
   };
 
   return (
-    <Box maxW="4xl" mx="auto" p={6}>
-      <VStack spacing={6} align="stretch">
-        <Box textAlign="center">
-          <Heading size="lg" color="purple.600" mb={2}>
-            🧪 Mock Login Panel
-          </Heading>
-          <Text color="whiteAlpha.800" fontSize="sm">
-            Quick login for testing different subscription tiers
-          </Text>
-        </Box>
+    <div className="max-w-3xl p-6 mx-auto">
+      <div className="flex flex-col space-y-6">
+        <div className="space-y-2 text-center">
+          <h2 className="text-2xl font-bold text-cosmic-gold">Mock Login Panel</h2>
+          <p className="text-cosmic-silver">Use demo accounts for testing different tiers</p>
+        </div>
 
-        <Divider />
-
-        <VStack spacing={4} align="stretch">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {mockUsers.map((mockUser) => (
-            <Card
-              key={mockUser.email}
-              variant="outline"
-              borderColor={`${getTierColor(mockUser.tier)}.200`}
-              _hover={{
-                borderColor: `${getTierColor(mockUser.tier)}.400`,
-                shadow: 'md'
-              }}
-            >
-              <CardBody>
-                <VStack spacing={4} align="stretch">
-                  <HStack justify="space-between" align="center">
-                    <HStack spacing={3}>
-                      <Icon 
-                        as={getTierIcon(mockUser.tier)} 
-                        color={`${getTierColor(mockUser.tier)}.500`} 
-                        boxSize={6} 
-                      />
-                      <VStack align="start" spacing={1}>
-                        <Heading size="md" color={`${getTierColor(mockUser.tier)}.600`}>
-                          {mockUser.displayName}
-                        </Heading>
-                        <Text fontSize="sm" color="whiteAlpha.800">
-                          {mockUser.description}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                    
-                    <VStack spacing={2} align="end">
-                      <Badge 
-                        colorScheme={getTierColor(mockUser.tier)} 
-                        variant="solid"
-                        textTransform="uppercase"
-                        fontSize="xs"
-                      >
-                        {mockUser.tier}
-                      </Badge>
-                      <Button
-                        size="sm"
-                        colorScheme={getTierColor(mockUser.tier)}
-                        leftIcon={<Icon as={FaSignInAlt} />}
-                        onClick={() => handleMockLogin(mockUser)}
-                      >
-                        Login
-                      </Button>
-                    </VStack>
-                  </HStack>
+            <div key={mockUser.email} className="cosmic-card">
+              <div className="p-4">
+                <div className="flex items-start justify-between space-x-4">
+                  <div className="flex flex-col flex-1 space-y-2">
+                    <h3 className="font-bold text-md text-cosmic-gold">{mockUser.displayName}</h3>
+                    <p className="text-sm text-cosmic-silver">{mockUser.description}</p>
+                  </div>
+                  <div className="flex flex-col items-end space-y-2">
+                    <span className={`bg-${getTierColor(mockUser.tier)}/20 text-${getTierColor(mockUser.tier)} px-2 py-1 rounded text-xs`}>
+                      {mockUser.tier}
+                    </span>
+                    <button
+                      className="cosmic-button"
+                      onClick={() => handleMockLogin(mockUser)}
+                      aria-label={`Login as ${mockUser.displayName}`}
+                    >
+                      <FaSignInAlt className="mr-2" />
+                      Login
+                    </button>
+                  </div>
+                </div>
 
-                  <Box>
-                    <Text fontSize="sm" fontWeight="semibold" color="gray.700" mb={2}>
-                      Available Features:
-                    </Text>
-                    <VStack spacing={1} align="start">
-                      {mockUser.features.map((feature, index) => (
-                        <Text key={index} fontSize="xs" color="whiteAlpha.800">
-                          • {feature}
-                        </Text>
-                      ))}
-                    </VStack>
-                  </Box>
+                <div className="mt-4">
+                  <p className="mb-2 text-sm font-bold text-cosmic-silver">Available Features:</p>
+                  <div className="flex flex-col space-y-1">
+                    {mockUser.features.map((feature, index) => (
+                      <p key={index} className="text-xs text-cosmic-silver/80">• {feature}</p>
+                    ))}
+                  </div>
+                </div>
 
-                  <Box bg="gray.50" p={3} borderRadius="md">
-                    <Text fontSize="xs" color="gray.500">
-                      <strong>Email:</strong> {mockUser.email} <br />
-                      <strong>Password:</strong> {mockUser.password}
-                    </Text>
-                  </Box>
-                </VStack>
-              </CardBody>
-            </Card>
+                <div className="p-3 mt-4 rounded-md bg-gray-50/30">
+                  <p className="text-xs text-cosmic-silver/60">
+                    <strong>Email:</strong> {mockUser.email} <br />
+                    <strong>Password:</strong> {mockUser.password}
+                  </p>
+                </div>
+              </div>
+            </div>
           ))}
-        </VStack>
+        </div>
 
-        <Divider />
+        <hr className="my-6 border-cosmic-silver/30" />
 
-        <Box textAlign="center">
-          <Text fontSize="xs" color="gray.500">
-            These are mock accounts for testing purposes only. 
-            In production, subscription tiers would be managed through Stripe integration.
-          </Text>
-        </Box>
-      </VStack>
-    </Box>
+        <p className="text-sm text-center text-cosmic-silver/60">
+          These are mock accounts for testing purposes only. 
+          In production, subscription tiers would be managed through Stripe integration.
+        </p>
+      </div>
+    </div>
   );
-};
+});
+
+MockLoginPanel.displayName = 'MockLoginPanel';
 
 export default MockLoginPanel;

@@ -1,97 +1,58 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Container,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Button,
-  Badge,
-  Card,
-  CardBody,
-  SimpleGrid,
-  Switch,
-  List,
-  ListItem,
-  ListIcon,
-  Icon,
-  useColorModeValue,
-  useToast
-} from '@chakra-ui/react';
-import { CheckIcon, StarIcon } from '@chakra-ui/icons';
 import { HEALWAVE_TIERS, calculateYearlySavings } from '../types/subscription';
 import { useAuth } from '../contexts/AuthContext';
+import * as SwitchPrimitive from '@radix-ui/react-switch';
 
 const PricingPage: React.FC = () => {
   const [isYearly, setIsYearly] = useState(false);
   const { user } = useAuth();
-  const toast = useToast();
-  
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-  const cardBg = useColorModeValue('white', 'gray.800');
 
   const handleSubscribe = async (tierSlug: string) => {
     if (!user) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to subscribe to HealWave Pro',
-        status: 'warning',
-        duration: 3000,
-        isClosable: true,
-      });
+      alert('Please sign in to subscribe to HealWave Pro');
       return;
     }
 
     if (tierSlug === 'free') {
-      toast({
-        title: 'Already on Free Plan',
-        description: 'You are already using the free tier!',
-        status: 'info',
-        duration: 3000,
-        isClosable: true,
-      });
+      alert('You are already using the free tier!');
       return;
     }
 
-    // TODO: Integrate with Stripe Checkout
-    toast({
-      title: 'Coming Soon',
-      description: 'Subscription system will be available soon!',
-      status: 'info',
-      duration: 3000,
-      isClosable: true,
-    });
+    alert('Subscription system will be available soon!');
   };
 
   return (
-    <Box bg={bgColor} py={16}>
-      <Container maxW="7xl">
-        <VStack spacing={8} textAlign="center" mb={12}>
-          <Heading size="2xl" color="purple.600">
+    <div className="py-16 bg-gray-50 dark:bg-gray-900">
+      <div className="container px-4 mx-auto max-w-7xl">
+        <div className="flex flex-col items-center mb-12 space-y-8 text-center">
+          <h2 className="text-3xl font-bold text-purple-600">
             Choose Your HealWave Plan
-          </Heading>
-          <Text fontSize="xl" color="gray.600" maxW="2xl">
+          </h2>
+          <p className="max-w-2xl text-xl text-gray-600">
             Unlock your mind's potential with therapeutic binaural beats. 
             Start free, upgrade for advanced features.
-          </Text>
+          </p>
           
-          <HStack spacing={4} align="center">
-            <Text fontWeight="semibold">Monthly</Text>
-            <Switch
-              isChecked={isYearly}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIsYearly(e.target.checked)}
-              colorScheme="purple"
-              size="lg"
-            />
-            <Text fontWeight="semibold">Yearly</Text>
-            <Badge colorScheme="green" variant="solid" px={2} py={1}>
+          <div className="flex items-center space-x-4">
+            <span className="font-semibold">Monthly</span>
+            <SwitchPrimitive.Root
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+              className="w-11 h-6 bg-gray-200 rounded-full relative data-[state=checked]:bg-purple-600 outline-none cursor-pointer transition-colors"
+              aria-label="Toggle yearly billing"
+            >
+              <SwitchPrimitive.Thumb
+                className="block w-5 h-5 bg-white rounded-full shadow-md transform translate-x-0.5 data-[state=checked]:translate-x-5.5 transition-transform"
+              />
+            </SwitchPrimitive.Root>
+            <span className="font-semibold">Yearly</span>
+            <span className="px-2 py-1 text-sm font-medium text-white bg-green-500 rounded-md">
               Save up to 33%
-            </Badge>
-          </HStack>
-        </VStack>
+            </span>
+          </div>
+        </div>
 
-        <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={8}>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {Object.entries(HEALWAVE_TIERS).map(([tierSlug, tier]) => {
             const price = isYearly ? tier.price.yearly : tier.price.monthly;
             const yearlyPrice = tier.price.yearly;
@@ -100,95 +61,78 @@ const PricingPage: React.FC = () => {
             const isPopular = tierSlug === 'premium';
 
             return (
-              <Card
+              <div
                 key={tierSlug}
-                bg={cardBg}
-                shadow="lg"
-                borderWidth={isPopular ? 3 : 1}
-                borderColor={isPopular ? 'purple.500' : 'gray.200'}
-                position="relative"
-                transform={isPopular ? 'scale(1.05)' : 'scale(1)'}
-                transition="all 0.3s"
+                className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg border ${isPopular ? 'border-purple-500 border-4' : 'border-gray-200'} relative transition-all duration-300 ${isPopular ? 'scale-105' : 'scale-100'}`}
               >
                 {isPopular && (
-                  <Badge
-                    position="absolute"
-                    top="-10px"
-                    left="50%"
-                    transform="translateX(-50%)"
-                    colorScheme="purple"
-                    variant="solid"
-                    px={4}
-                    py={1}
-                    borderRadius="full"
-                  >
-                    <Icon as={StarIcon} mr={1} />
-                    Most Popular
-                  </Badge>
+                  <span className="absolute flex items-center px-4 py-1 space-x-1 text-sm font-medium text-white transform -translate-x-1/2 bg-purple-500 rounded-full -top-3 left-1/2">
+                    <span>★</span>
+                    <span>Most Popular</span>
+                  </span>
                 )}
 
-                <CardBody p={8}>
-                  <VStack spacing={6} align="stretch">
-                    <VStack spacing={2} textAlign="center">
-                      <Heading size="lg" color={isPopular ? 'purple.600' : 'gray.700'}>
-                        {tier.name}
-                      </Heading>
-                      
-                      <HStack justify="center" align="baseline">
-                        <Text fontSize="4xl" fontWeight="bold" color={isPopular ? 'purple.600' : 'gray.900'}>
-                          ${price}
-                        </Text>
-                        <Text color="gray.500">
-                          {tierSlug === 'free' ? '' : `/${isYearly ? 'year' : 'month'}`}
-                        </Text>
-                      </HStack>
-
-                      {isYearly && tierSlug !== 'free' && savings > 0 && (
-                        <Text color="green.500" fontSize="sm" fontWeight="semibold">
-                          Save {savings}% yearly
-                        </Text>
+                <div className="flex flex-col items-center p-8 space-y-6">
+                  <div className="space-y-2 text-center">
+                    <h3 className={`text-xl font-bold ${isPopular ? 'text-purple-600' : 'text-gray-700 dark:text-gray-300'}`}>
+                      {tier.name}
+                    </h3>
+                    
+                    <div className="flex items-baseline justify-center">
+                      <span className={`text-4xl font-bold ${isPopular ? 'text-purple-600' : 'text-gray-900 dark:text-white'}`}>
+                        ${price}
+                      </span>
+                      {tierSlug !== 'free' && (
+                        <span className="ml-1 text-gray-500">
+                          /{isYearly ? 'year' : 'month'}
+                        </span>
                       )}
-                    </VStack>
+                    </div>
 
-                    <List spacing={3}>
-                      {tier.features.map((feature, index) => (
-                        <ListItem key={index} display="flex" alignItems="center">
-                          <ListIcon as={CheckIcon} color="green.500" />
-                          <Text fontSize="sm">{feature}</Text>
-                        </ListItem>
-                      ))}
-                    </List>
+                    {isYearly && tierSlug !== 'free' && savings > 0 && (
+                      <p className="text-sm font-semibold text-green-500">
+                        Save {savings}% yearly
+                      </p>
+                    )}
+                  </div>
 
-                    <Button
-                      size="lg"
-                      colorScheme={tierSlug === 'free' ? 'gray' : 'purple'}
-                      variant={tierSlug === 'free' ? 'outline' : 'solid'}
-                      onClick={() => handleSubscribe(tierSlug)}
-                      disabled={tierSlug === 'free'}
-                      _hover={{
-                        transform: tierSlug !== 'free' ? 'translateY(-2px)' : 'none',
-                        shadow: tierSlug !== 'free' ? 'lg' : 'none'
-                      }}
-                    >
-                      {tierSlug === 'free' ? 'Current Plan' : `Start ${tier.name}`}
-                    </Button>
-                  </VStack>
-                </CardBody>
-              </Card>
+                  <ul className="w-full space-y-3">
+                    {tier.features.map((feature, index) => (
+                      <li key={index} className="flex items-center">
+                        <span className="mr-2 text-green-500">✓</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    onClick={() => handleSubscribe(tierSlug)}
+                    disabled={tierSlug === 'free'}
+                    className={`w-full py-3 px-4 rounded-lg font-semibold text-lg transition-all duration-200 ${
+                      tierSlug === 'free'
+                        ? 'border border-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg'
+                    }`}
+                    aria-label={`Subscribe to ${tier.name} plan`}
+                  >
+                    {tierSlug === 'free' ? 'Current Plan' : `Start ${tier.name}`}
+                  </button>
+                </div>
+              </div>
             );
           })}
-        </SimpleGrid>
+        </div>
 
-        <VStack spacing={4} mt={16} textAlign="center">
-          <Text color="gray.600">
+        <div className="flex flex-col items-center mt-16 space-y-4 text-center">
+          <p className="text-gray-600">
             All plans include our 7-day free trial. Cancel anytime.
-          </Text>
-          <Text fontSize="sm" color="gray.500">
+          </p>
+          <p className="text-sm text-gray-500">
             Prices in USD. Auto-renewal can be turned off at any time.
-          </Text>
-        </VStack>
-      </Container>
-    </Box>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -38,13 +38,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
     }
   };
 
-  const getTierColorClasses = (tier: string): {
-    border: string;
-    bg: string;
-    text: string;
-    button: string;
-    badge: string;
-  } => {
+  const getTierColorClasses = (tier: string) => {
     switch (tier) {
       case 'premium': return {
         border: 'border-purple-400',
@@ -70,13 +64,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
     }
   };
 
-  const getFeatureDetails = (feature: string): {
-    icon: string;
-    title: string;
-    description: string;
-    benefits: string[];
-    examples: string[];
-  } => {
+  const getFeatureDetails = (feature: string) => {
     const featureMap: Record<string, {
       icon: string;
       title: string;
@@ -170,7 +158,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
   const featureDetails = getFeatureDetails(feature);
   const colors = getTierColorClasses(requiredTier);
 
-  const handleUpgrade = (): void => {
+  const handleUpgrade = () => {
     if (!user) {
       navigate('/login');
       return;
@@ -178,7 +166,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
     navigate('/premium');
   };
 
-  const UpgradeCard = (): JSX.Element => (
+  const UpgradeCard = () => (
     <div className={`cosmic-card ${colors.border} border-2 rounded-2xl relative overflow-hidden`}>
       {/* Premium Badge */}
       <div className={`absolute top-4 right-4 ${colors.badge} text-white px-3 py-1 rounded-full text-sm font-bold flex items-center space-x-1`}>

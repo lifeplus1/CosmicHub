@@ -89,7 +89,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
         </div>
       </div>
 
-      {/* Enhanced Progress Ring with better performance */}
       <div className="flex justify-center">
         <div className="relative w-24 h-24">
           <svg 
@@ -97,7 +96,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
             viewBox="0 0 100 100"
             aria-hidden="true"
           >
-            {/* Background circle */}
             <circle
               cx="50"
               cy="50"
@@ -106,7 +104,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
               strokeWidth="8"
               fill="none"
             />
-            {/* Progress circle with smooth animation */}
             <circle
               cx="50"
               cy="50"
@@ -120,9 +117,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
               className={`transition-all duration-1000 ease-linear ${
                 isRunning ? 'animate-pulse' : ''
               }`}
-              style={{
-                filter: isRunning ? 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))' : 'none'
-              }}
             />
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -133,7 +127,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
             </defs>
           </svg>
           
-          {/* Center content with better contrast */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <div className="text-lg font-bold text-white drop-shadow-lg">
@@ -144,7 +137,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
         </div>
       </div>
 
-      {/* Enhanced status indicator */}
       <div className="flex justify-center">
         <div 
           className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
@@ -161,7 +153,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
         </div>
       </div>
 
-      {/* Progress bar alternative for better accessibility */}
       <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
         <div 
           className={`h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 transition-all duration-1000 ease-linear ${
@@ -176,7 +167,6 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
         />
       </div>
 
-      {/* Additional timing info */}
       {isRunning && (
         <div className="text-center text-xs text-white/60">
           <p>Time elapsed: {formatTime((duration * 60) - timeRemaining)}</p>

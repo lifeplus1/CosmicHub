@@ -41,11 +41,11 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
   if (user) {
     return (
       <div className="text-center">
-        <div className="text-green-400 text-xl mb-4">✅ Already logged in!</div>
-        <p className="text-gray-300 mb-4">Welcome, {user.email}</p>
+        <div className="mb-4 text-xl text-green-400">✅ Already logged in!</div>
+        <p className="mb-4 text-gray-300">Welcome, {user.email}</p>
         <button
           onClick={onClose}
-          className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+          className="px-6 py-2 text-white transition-colors bg-purple-500 rounded-lg hover:bg-purple-600"
         >
           Continue
         </button>
@@ -154,114 +154,106 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
 
   return (
     <div className="max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
-      <div className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 backdrop-blur-md rounded-2xl p-8 border border-purple-500/20 shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-4">🌟</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Join HealWave</h2>
-          <p className="text-gray-300">Create your personalized healing frequency profile</p>
+      <div className="p-8 border shadow-2xl bg-gradient-to-br from-purple-900/50 to-blue-900/50 backdrop-blur-md rounded-2xl border-purple-500/20">
+        <div className="mb-8 text-center">
+          <div className="mb-4 text-4xl">🎵</div>
+          <h2 className="mb-2 text-2xl font-bold text-white">Join HealWave</h2>
+          <p className="text-gray-300">Create your account for personalized sound healing</p>
         </div>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-6">
-            <p className="text-red-200 text-sm">{error}</p>
+          <div className="p-3 mb-6 border rounded-lg bg-red-500/20 border-red-500/50">
+            <p className="text-sm text-red-200">{error}</p>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Personal Information Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-purple-200 border-b border-purple-500/30 pb-2">
-              Personal Information
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-200 mb-2">
-                  First Name *
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="John"
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-200 mb-2">
-                  Last Name *
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-
+          {/* Account Details */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
-                Email Address *
+              <label htmlFor="firstName" className="block mb-2 text-sm font-medium text-gray-200">
+                First Name *
               </label>
               <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                id="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                placeholder="your@email.com"
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Your first name"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
-                  Password *
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-200 mb-2">
-                  Confirm Password *
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div>
+              <label htmlFor="lastName" className="block mb-2 text-sm font-medium text-gray-200">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Your last name"
+              />
             </div>
           </div>
 
-          {/* Personal Details Section */}
+          <div>
+            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-200">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-200">
+                Password *
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-gray-200">
+                Confirm Password *
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          {/* Personal Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-purple-200 border-b border-purple-500/30 pb-2">
-              Additional Details
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-lg font-semibold text-white">Personal Information</h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="dateOfBirth" className="block mb-2 text-sm font-medium text-gray-200">
                   Date of Birth
                 </label>
                 <input
@@ -269,11 +261,12 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   id="dateOfBirth"
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
+
               <div>
-                <label htmlFor="occupation" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="occupation" className="block mb-2 text-sm font-medium text-gray-200">
                   Occupation
                 </label>
                 <input
@@ -281,58 +274,35 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   id="occupation"
                   value={occupation}
                   onChange={(e) => setOccupation(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="e.g., Teacher, Engineer, Artist"
+                  className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Your profession"
                 />
               </div>
             </div>
           </div>
 
-          {/* Wellness & Experience Section */}
+          {/* Healing Preferences */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-purple-200 border-b border-purple-500/30 pb-2">
-              Wellness Background
-            </h3>
-            
+            <h3 className="text-lg font-semibold text-white">Healing Preferences</h3>
             <div>
-              <label htmlFor="experienceLevel" className="block text-sm font-medium text-gray-200 mb-2">
+              <label htmlFor="experienceLevel" className="block mb-2 text-sm font-medium text-gray-200">
                 Experience with Sound Healing
               </label>
               <select
                 id="experienceLevel"
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <option value="">Select your experience level</option>
-                <option value="beginner">Beginner - New to sound healing</option>
-                <option value="some-experience">Some Experience - Tried a few times</option>
-                <option value="regular-practice">Regular Practice - Part of my routine</option>
-                <option value="advanced">Advanced - Deep understanding and practice</option>
+                <option value="">Select level...</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="meditationExperience" className="block text-sm font-medium text-gray-200 mb-2">
-                Meditation Experience
-              </label>
-              <select
-                id="meditationExperience"
-                value={meditationExperience}
-                onChange={(e) => setMeditationExperience(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-              >
-                <option value="">Select your meditation experience</option>
-                <option value="none">No experience</option>
-                <option value="beginner">Beginner (0-6 months)</option>
-                <option value="intermediate">Intermediate (6 months - 2 years)</option>
-                <option value="experienced">Experienced (2+ years)</option>
-                <option value="expert">Expert/Teacher level</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="primaryGoals" className="block text-sm font-medium text-gray-200 mb-2">
+              <label htmlFor="primaryGoals" className="block mb-2 text-sm font-medium text-gray-200">
                 Primary Wellness Goals
               </label>
               <textarea
@@ -340,61 +310,64 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 value={primaryGoals}
                 onChange={(e) => setPrimaryGoals(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-                placeholder="e.g., Stress relief, better sleep, focus enhancement, pain management, spiritual growth..."
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="e.g., Reduce stress, improve sleep..."
               />
             </div>
 
             <div>
-              <label htmlFor="preferredSessionLength" className="block text-sm font-medium text-gray-200 mb-2">
-                Preferred Session Length
-              </label>
-              <select
-                id="preferredSessionLength"
-                value={preferredSessionLength}
-                onChange={(e) => setPreferredSessionLength(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-              >
-                <option value="">Select preferred session length</option>
-                <option value="5-10">5-10 minutes (Quick sessions)</option>
-                <option value="10-20">10-20 minutes (Standard sessions)</option>
-                <option value="20-30">20-30 minutes (Extended sessions)</option>
-                <option value="30+">30+ minutes (Deep sessions)</option>
-                <option value="flexible">Flexible - varies by need</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Health Information Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-purple-200 border-b border-purple-500/30 pb-2">
-              Health & Safety (Optional)
-            </h3>
-            
-            <div>
-              <label htmlFor="healthConditions" className="block text-sm font-medium text-gray-200 mb-2">
+              <label htmlFor="healthConditions" className="block mb-2 text-sm font-medium text-gray-200">
                 Relevant Health Conditions
               </label>
               <textarea
                 id="healthConditions"
                 value={healthConditions}
                 onChange={(e) => setHealthConditions(e.target.value)}
-                rows={2}
-                className="w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-                placeholder="Any hearing sensitivity, epilepsy, or other conditions we should know about (optional, helps us provide safer recommendations)"
+                rows={3}
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Any conditions we should be aware of (optional)"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                This information helps us provide appropriate frequency recommendations
-              </p>
+            </div>
+
+            <div>
+              <label htmlFor="meditationExperience" className="block mb-2 text-sm font-medium text-gray-200">
+                Meditation Experience
+              </label>
+              <select
+                id="meditationExperience"
+                value={meditationExperience}
+                onChange={(e) => setMeditationExperience(e.target.value)}
+                className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">Select...</option>
+                <option value="none">None</option>
+                <option value="occasional">Occasional</option>
+                <option value="regular">Regular</option>
+                <option value="daily">Daily Practice</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="preferredSessionLength" className="block mb-2 text-sm font-medium text-gray-200">
+                Preferred Session Length
+              </label>
+              <select
+                id="preferredSessionLength"
+                value={preferredSessionLength}
+                onChange={(e) => setPreferredSessionLength(e.target.value)}
+                className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">Select...</option>
+                <option value="short">Short (5-15 min)</option>
+                <option value="medium">Medium (15-30 min)</option>
+                <option value="long">Long (30+ min)</option>
+              </select>
             </div>
           </div>
 
           {/* Notification Preferences */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-purple-200 border-b border-purple-500/30 pb-2">
-              Notification Preferences
-            </h3>
-            
+            <h3 className="text-lg font-semibold text-white">Notification Preferences</h3>
             <div className="space-y-3">
               <label className="flex items-center space-x-3">
                 <input
@@ -404,7 +377,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     ...prev,
                     sessionReminders: e.target.checked
                   }))}
-                  className="w-4 h-4 text-purple-500 bg-white/10 border-purple-500/30 rounded focus:ring-purple-500 focus:ring-2"
+                  className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-gray-200">Daily session reminders</span>
               </label>
@@ -417,7 +390,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     ...prev,
                     weeklyProgress: e.target.checked
                   }))}
-                  className="w-4 h-4 text-purple-500 bg-white/10 border-purple-500/30 rounded focus:ring-purple-500 focus:ring-2"
+                  className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-gray-200">Weekly progress reports</span>
               </label>
@@ -430,7 +403,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     ...prev,
                     newFrequencies: e.target.checked
                   }))}
-                  className="w-4 h-4 text-purple-500 bg-white/10 border-purple-500/30 rounded focus:ring-purple-500 focus:ring-2"
+                  className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-gray-200">New frequency releases</span>
               </label>
@@ -443,7 +416,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     ...prev,
                     healthTips: e.target.checked
                   }))}
-                  className="w-4 h-4 text-purple-500 bg-white/10 border-purple-500/30 rounded focus:ring-purple-500 focus:ring-2"
+                  className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-gray-200">Wellness tips and insights</span>
               </label>
@@ -459,7 +432,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   checked={healthDisclaimer}
                   onChange={(e) => setHealthDisclaimer(e.target.checked)}
                   required
-                  className="w-4 h-4 text-purple-500 bg-white/10 border-purple-500/30 rounded focus:ring-purple-500 focus:ring-2 mt-1"
+                  className="w-4 h-4 mt-1 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-sm text-gray-200">
                   I understand that sound healing frequencies are for wellness purposes only and not a substitute for medical treatment. I will consult healthcare professionals for medical concerns. *
@@ -472,7 +445,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   checked={privacyConsent}
                   onChange={(e) => setPrivacyConsent(e.target.checked)}
                   required
-                  className="w-4 h-4 text-purple-500 bg-white/10 border-purple-500/30 rounded focus:ring-purple-500 focus:ring-2 mt-1"
+                  className="w-4 h-4 mt-1 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-sm text-gray-200">
                   I agree to the <span className="text-purple-300 underline cursor-pointer">Privacy Policy</span> and <span className="text-purple-300 underline cursor-pointer">Terms of Service</span> *
@@ -488,7 +461,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                <div className="w-5 h-5 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
                 Creating Your Healing Account...
               </div>
             ) : (
@@ -502,7 +475,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
             Already have an account?{' '}
             <button
               onClick={onSwitchToLogin}
-              className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+              className="font-medium text-purple-400 transition-colors hover:text-purple-300"
             >
               Sign in here
             </button>

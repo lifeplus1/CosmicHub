@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { FaStar, FaInfoCircle, FaChevronDown } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaStar, FaInfoCircle } from 'react-icons/fa';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { BirthData } from '../types';
 import FeatureGuard from './FeatureGuard';
@@ -43,7 +43,7 @@ interface SynastryResult {
   };
 }
 
-export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
+export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
   person1,
   person2,
   person1Name = "Person 1",
@@ -56,12 +56,12 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
   const cardBg = 'cosmic-blue';
   const borderColor = 'cosmic-silver/30';
 
-  const calculateSynastry = useCallback(async () => {
+  const calculateSynastry = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/calculate-synastry`, {
+      const response = await fetch('/api/calculate-synastry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,16 +83,16 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
     } finally {
       setLoading(false);
     }
-  }, [person1, person2]);
+  };
 
-  const getCompatibilityColor = useCallback((score: number) => {
+  const getCompatibilityColor = (score: number) => {
     if (score >= 80) return 'green-500';
     if (score >= 60) return 'blue-500';
     if (score >= 40) return 'yellow-500';
     return 'red-500';
-  }, []);
+  };
 
-  const getAspectColor = useCallback((aspect: string) => {
+  const getAspectColor = (aspect: string) => {
     switch (aspect) {
       case 'conjunction':
       case 'trine':
@@ -104,13 +104,13 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
       default:
         return 'gray-500';
     }
-  }, []);
+  };
 
-  const formatPlanetName = useCallback((planet: string) => {
+  const formatPlanetName = (planet: string) => {
     return planet.charAt(0).toUpperCase() + planet.slice(1);
-  }, []);
+  };
 
-  const renderStars = useMemo(() => (score: number): JSX.Element[] => {
+  const renderStars = (score: number) => {
     const stars = Math.round(score / 20);
     return Array.from({ length: 5 }).map((_, i) => (
       <FaStar 
@@ -118,17 +118,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
         className={`${i < stars ? 'text-yellow-400' : 'text-gray-300'} text-xl`}
       />
     ));
-  }, []);
-
-  // Component for progress bars without inline styles
-  const ProgressBar = useCallback(({ score, colorClass }: { score: number; colorClass: string }) => (
-    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-      <div 
-        className={`bg-${colorClass} h-2.5 rounded-full transition-all duration-300`}
-        style={{ width: `${Math.min(Math.max(score, 0), 100)}%` }}
-      />
-    </div>
-  ), []);
+  };
 
   return (
     <FeatureGuard requiredTier="premium" feature="synastry">
@@ -203,7 +193,9 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
                             <p className="mb-2 text-sm font-semibold capitalize text-cosmic-silver">
                               {area.charAt(0).toUpperCase() + area.slice(1)}
                             </p>
-                            <ProgressBar score={score} colorClass={getCompatibilityColor(score)} />
+                            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                              <div className={`bg-${getCompatibilityColor(score)} h-2.5 rounded-full`} style={{ width: `${score}%` }}></div>
+                            </div>
                             <p className="text-sm text-white/80">
                               {score.toFixed(1)}%
                             </p>
@@ -223,7 +215,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
                       <Accordion.Item value="0">
                         <Accordion.Trigger className="flex justify-between w-full">
                           <span className="text-sm font-bold">Key Relationship Aspects</span>
-                          <FaChevronDown className="text-cosmic-silver" />
+                          <Accordion.Icon />
                         </Accordion.Trigger>
                         <Accordion.Content className="pb-4">
                           <div className="flex flex-col space-y-3">
@@ -262,7 +254,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
                         <Accordion.Item value="0">
                           <Accordion.Trigger className="flex justify-between w-full">
                             <span className="text-sm font-bold">House Overlays</span>
-                            <FaChevronDown className="text-cosmic-silver" />
+                            <Accordion.Icon />
                           </Accordion.Trigger>
                           <Accordion.Content className="pb-4">
                             <div className="flex flex-col space-y-3">
@@ -289,7 +281,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
                         <Accordion.Item value="0">
                           <Accordion.Trigger className="flex justify-between w-full">
                             <span className="text-sm font-bold">Composite Chart</span>
-                            <FaChevronDown className="text-cosmic-silver" />
+                            <Accordion.Icon />
                           </Accordion.Trigger>
                           <Accordion.Content className="pb-4">
                             <p className="mb-2 font-semibold text-cosmic-silver">Relationship Purpose:</p>
@@ -399,4 +391,4 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
       </div>
     </FeatureGuard>
   );
-});
+};

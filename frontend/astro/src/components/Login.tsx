@@ -1,146 +1,107 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Button, FormControl, FormLabel, Input, VStack, useToast, Icon, Heading, Text, Divider, Link } from "@chakra-ui/react";
-import { logIn } from "../auth";
+import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from './ToastProvider';
+import { logIn } from '../auth';
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Login: React.FC = React.memo(() => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const toast = useToast();
+  const { toast } = useToast();
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       await logIn(email, password);
-      toast({ title: "Logged In", status: "success", duration: 3000, isClosable: true });
-      navigate("/chart");
-    } catch (error) {
-      toast({ 
-        title: "Login Failed", 
-        description: error instanceof Error ? error.message : "An unknown error occurred", 
-        status: "error", 
-        duration: 3000, 
-        isClosable: true 
+      toast({
+        title: 'Logged In',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
       });
+      navigate('/chart');
+    } catch (error) {
+      toast({
+        title: 'Login Failed',
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  };
+  }, [email, password, navigate, toast]);
 
   return (
-    <Box 
-      minH="100vh" 
-      pt={8} 
-      pb={20}
-      px={4}
-      background="transparent"
-    >
-      <Box
-        maxW="lg"
-        mx="auto"
-        bg="rgba(15, 23, 42, 0.8)"
-        backdropFilter="blur(40px)"
-        borderRadius="32px"
-        border="1px solid"
-        borderColor="whiteAlpha.200"
-        boxShadow="0 32px 120px rgba(0, 0, 0, 0.4)"
-        p={8}
-        position="relative"
-        _before={{
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          borderRadius: '32px',
-          padding: '2px',
-          background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(168, 85, 247, 0.3))',
-          mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-          maskComposite: 'exclude',
-          zIndex: -1,
-        }}
-      >
-        <VStack spacing={6} mb={8}>
-          <Icon viewBox="0 0 48 48" boxSize={12} color="gold.300">
-            <defs>
-              <radialGradient id="loginSunGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#fbbf24" />
-                <stop offset="70%" stopColor="#f59e0b" />
-                <stop offset="100%" stopColor="#d97706" />
-              </radialGradient>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="url(#loginSunGradient)" opacity="0.3" />
-            <circle cx="24" cy="24" r="12" fill="url(#loginSunGradient)" />
-            <g stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" opacity="0.8">
-              <path d="M24 8v-4M24 44v-4M8 24h-4M44 24h-4M35.31 35.31l2.83 2.83M9.86 9.86l2.83 2.83M35.31 12.69l2.83-2.83M9.86 38.14l2.83-2.83" />
-            </g>
-          </Icon>
-          <Heading variant="cosmic" size="2xl" textAlign="center">
-            Welcome Back
-          </Heading>
-          <Text variant="stellar" fontSize="lg" textAlign="center">
-            Log in to access your personalized astrology insights.
-          </Text>
-        </VStack>
-        
-        <form onSubmit={handleSubmit}>
-          <VStack spacing={6}>
-            <FormControl isRequired>
-              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Email</FormLabel>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                variant="cosmic"
-                size="lg"
-                placeholder="your@email.com"
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Password</FormLabel>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                variant="cosmic"
-                size="lg"
-                placeholder="••••••••"
-              />
-            </FormControl>
-            <Button
-              type="submit"
-              variant="gold"
-              isLoading={isLoading}
-              size="lg"
-              w="100%"
-              mt={4}
-            >
-              Sign In
-            </Button>
-          </VStack>
-          
-          <Divider borderColor="whiteAlpha.300" opacity={0.5} my={8} />
-          
-          <VStack spacing={4}>
-            <Text fontSize="sm" color="whiteAlpha.700" textAlign="center">
-              🧪 For Testing & Development
-            </Text>
-            <Button
-              variant="ethereal"
-              size="md"
+    <div className="min-h-screen px-4 py-8 bg-gray-50">
+      <div className="max-w-lg p-8 mx-auto border shadow-2xl bg-cosmic-dark/80 backdrop-blur-xl border-cosmic-silver/20 rounded-3xl">
+        <div className="flex flex-col space-y-6">
+          <div className="space-y-4 text-center">
+            <h2 className="text-3xl font-bold text-cosmic-gold font-cinzel">Sign In</h2>
+            <p className="text-lg text-cosmic-silver">Log in to access your personalized astrology insights.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} aria-label="Login Form">
+            <div className="flex flex-col space-y-6">
+              <div>
+                <label htmlFor="email" className="block mb-2 text-cosmic-gold">Email <span aria-hidden="true">*</span></label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="cosmic-input"
+                  aria-required="true"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block mb-2 text-cosmic-gold">Password <span aria-hidden="true">*</span></label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="cosmic-input"
+                  aria-required="true"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full cosmic-button"
+                disabled={isLoading}
+                aria-disabled={isLoading}
+              >
+                Sign In
+              </button>
+            </div>
+          </form>
+
+          <hr className="my-8 border-cosmic-silver/30" />
+
+          <div className="flex flex-col space-y-4 text-center">
+            <p className="text-sm text-cosmic-silver">🧪 For Testing & Development</p>
+            <button
+              className="w-full mx-auto cosmic-button sm:w-auto"
               onClick={() => navigate('/mock-login')}
+              aria-label="Quick Mock Login"
             >
               Quick Mock Login Panel
-            </Button>
-            <Text fontSize="xs" color="whiteAlpha.600" textAlign="center" maxW="sm">
+            </button>
+            <p className="max-w-sm mx-auto text-xs text-cosmic-silver/60">
               Access demo accounts for Free, Premium, and Elite tiers
-            </Text>
-          </VStack>
-        </form>
-      </Box>
-    </Box>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
+});
+
+Login.displayName = 'Login';
+
+export default Login;

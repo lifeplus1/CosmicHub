@@ -1,61 +1,19 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Container,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Badge,
-  List,
-  ListItem,
-  ListIcon,
-  SimpleGrid,
-  useColorModeValue,
-  Alert,
-  AlertIcon,
-  Switch,
-  Divider,
-  Icon,
-  Flex,
-  useToast
-} from '@chakra-ui/react';
-import { 
-  FaCheck, 
-  FaTimes, 
-  FaStar, 
-  FaCrown, 
-  FaUser,
-  FaChartLine,
-  FaUsers,
-  FaBrain,
-  FaMagic,
-  FaInfinity,
-  FaQuestionCircle
-} from 'react-icons/fa';
-
-import { useAuth } from '../shared/AuthContext';
+import React, { useState, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
+import { useToast } from './ToastProvider';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle } from 'react-icons/fa';
 import { COSMICHUB_TIERS } from '../types/subscription';
-import { EducationalTooltip } from './EducationalTooltip';
-import '../../styles/PricingPage.css';
 
-export default function PricingPage() {
+const PricingPage: React.FC = React.memo(() => {
   const { user } = useAuth();
   const { userTier } = useSubscription();
-  // TODO: If createCheckoutSession is needed, ensure it is exported from SubscriptionContext
+  const { toast } = useToast();
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
-  const toast = useToast();
 
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-
-  const handleUpgrade = async (tier: 'premium' | 'elite'): Promise<void> => {
+  const handleUpgrade = useCallback(async (tier: 'premium' | 'elite') => {
     if (!user) {
       toast({
         title: 'Authentication Required',
@@ -68,7 +26,6 @@ export default function PricingPage() {
     }
 
     setLoading(tier);
-    // TODO: Implement checkout logic here or ensure createCheckoutSession is available from context
     setTimeout(() => {
       toast({
         title: 'Upgrade Initiated',
@@ -79,440 +36,105 @@ export default function PricingPage() {
       });
       setLoading(null);
     }, 1000);
-  };
+  }, [user, toast]);
 
-  const getTierIcon = (tier: string): typeof FaUser | typeof FaStar | typeof FaCrown => {
+  const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS): JSX.Element => {
     switch (tier) {
-      case 'free': return FaUser;
-      case 'premium': return FaStar;
-      case 'elite': return FaCrown;
-      default: return FaUser;
+      case 'free': return <FaUser className="text-gray-500" />;
+      case 'premium': return <FaStar className="text-purple-500" />;
+      case 'elite': return <FaCrown className="text-orange-500" />;
+      default: return <FaUser className="text-gray-500" />;
     }
   };
 
-  const getTierColor = (tier: string): string => {
+  const getTierColor = (tier: keyof typeof COSMICHUB_TIERS): string => {
     switch (tier) {
-      case 'free': return 'gray';
-      case 'premium': return 'purple';
-      case 'elite': return 'gold';
-      default: return 'gray';
+      case 'free': return 'gray-500';
+      case 'premium': return 'purple-500';
+      case 'elite': return 'orange-500';
+      default: return 'gray-500';
     }
   };
 
-  const pricingPlans = [
-    {
-      tier: 'free',
-      name: 'Free Explorer',
-      price: { monthly: 0, yearly: 0 },
-      icon: FaUser,
-      color: 'gray',
-      description: 'Perfect for beginners exploring astrology',
-      features: [
-        { name: 'Basic birth chart calculation', included: true, icon: FaChartLine },
-        { name: 'Western tropical astrology', included: true, icon: FaCheck },
-        { name: '3 charts per month', included: true, icon: FaChartLine },
-        { name: '5 saved charts', included: true, icon: FaCheck },
-        { name: 'Basic planet positions', included: true, icon: FaCheck },
-        { name: 'House placements', included: true, icon: FaCheck },
-        { name: 'Multi-system analysis', included: false, icon: FaTimes },
-        { name: 'Synastry compatibility', included: false, icon: FaTimes },
-        { name: 'AI interpretations', included: false, icon: FaTimes },
-        { name: 'Transit analysis', included: false, icon: FaTimes }
-      ],
-      cta: 'Current Plan',
-      popular: false
-    },
-    {
-      tier: 'premium',
-      name: 'Cosmic Seeker',
-      price: { monthly: 14.99, yearly: 149.99 },
-      icon: FaStar,
-      color: 'purple',
-      description: 'Advanced tools for serious astrology enthusiasts',
-      features: [
-        { name: 'Everything in Free', included: true, icon: FaCheck },
-        { name: 'Unlimited chart calculations', included: true, icon: FaInfinity },
-        { name: 'Unlimited chart storage', included: true, icon: FaInfinity },
-        { name: 'Multi-system analysis', included: true, icon: FaMagic },
-        { name: 'Vedic sidereal charts', included: true, icon: FaCheck },
-        { name: 'Chinese astrology', included: true, icon: FaCheck },
-        { name: 'Synastry compatibility', included: true, icon: FaUsers },
-        { name: 'PDF export', included: true, icon: FaCheck },
-        { name: 'AI interpretations', included: false, icon: FaTimes },
-        { name: 'Transit predictions', included: false, icon: FaTimes }
-      ],
-      cta: 'Upgrade to Premium',
-      popular: true
-    },
-    {
-      tier: 'elite',
-      name: 'Cosmic Master',
-      price: { monthly: 29.99, yearly: 299.99 },
-      icon: FaCrown,
-      color: 'gold',
-      description: 'Complete astrological mastery suite',
-      features: [
-        { name: 'Everything in Premium', included: true, icon: FaCheck },
-        { name: 'AI-powered interpretations', included: true, icon: FaBrain },
-        { name: 'Advanced transit analysis', included: true, icon: FaChartLine },
-        { name: 'Predictive timing', included: true, icon: FaMagic },
-        { name: 'Uranian astrology', included: true, icon: FaCheck },
-        { name: 'Mayan calendar', included: true, icon: FaCheck },
-        { name: 'Priority support', included: true, icon: FaCheck },
-        { name: 'Beta feature access', included: true, icon: FaCheck },
-        { name: 'Custom AI questions', included: true, icon: FaBrain },
-        { name: 'Professional reports', included: true, icon: FaCheck }
-      ],
-      cta: 'Upgrade to Elite',
-      popular: false
+  const getFeatureIcon = (feature: string): JSX.Element => {
+    switch (feature) {
+      case 'Basic birth chart calculation': return <FaChartLine className="text-blue-500" />;
+      case 'Western tropical astrology': return <FaUsers className="text-green-500" />;
+      case 'Multi-system analysis': return <FaBrain className="text-purple-500" />;
+      case 'Vedic sidereal charts': return <FaMagic className="text-orange-500" />;
+      case 'Chinese astrology': return <FaInfinity className="text-red-500" />;
+      case 'Mayan calendar': return <FaStar className="text-yellow-500" />;
+      case 'Uranian astrology': return <FaCrown className="text-gold-500" />;
+      case 'Synastry compatibility': return <FaHeart className="text-pink-500" />;
+      case 'AI interpretations': return <FaBrain className="text-indigo-500" />;
+      case 'Transit analysis': return <FaCalendarAlt className="text-cyan-500" />;
+      case 'PDF export': return <FaFilePdf className="text-red-500" />;
+      case 'Unlimited calculations': return <FaInfinity className="text-green-500" />;
+      case 'Unlimited storage': return <FaSave className="text-blue-500" />;
+      case 'Priority support': return <FaSupport className="text-purple-500" />;
+      default: return <FaQuestionCircle className="text-gray-500" />;
     }
-  ];
-
-  return (
-    <Container maxW="7xl" py={12}>
-      <VStack spacing={12} align="stretch">
-        {/* Header */}
-        <VStack spacing={6} textAlign="center">
-          <Heading size="2xl" className="text-4xl font-bold text-center text-white">
-            Choose Your Cosmic Journey
-          </Heading>
-          <Text fontSize="xl" color="whiteAlpha.800" maxW="2xl">
-            Unlock the full potential of astrological wisdom with our comprehensive plans
-          </Text>
-          
-          {/* Annual Toggle */}
-          <HStack spacing={4} p={4} bg="whiteAlpha.100" borderRadius="xl">
-            <Text color="whiteAlpha.800">Monthly</Text>
-            <EducationalTooltip
-              title="Annual Savings"
-              description="Save 17% with annual billing - equivalent to getting 2 months free!"
-              examples={[
-                "Premium: Save $30/year",
-                "Elite: Save $60/year",
-                "Lock in current pricing",
-                "Cancel anytime"
-              ]}
-            >
-              <Switch
-                colorScheme="gold"
-                size="lg"
-                isChecked={isAnnual}
-                onChange={(e) => setIsAnnual(e.target.checked)}
-              />
-            </EducationalTooltip>
-            <Text color="whiteAlpha.800">Annual</Text>
-            <Badge colorScheme="green" variant="solid">Save 17%</Badge>
-          </HStack>
-
-          {user && (
-            <Alert status="info" borderRadius="xl" maxW="md">
-              <AlertIcon />
-              <VStack align="start" spacing={0}>
-                <Text fontWeight="bold">Current Plan: {COSMICHUB_TIERS[userTier]?.name}</Text>
-                <Text fontSize="sm">You can upgrade anytime to unlock more features</Text>
-              </VStack>
-            </Alert>
-          )}
-        </VStack>
-
-        {/* Pricing Cards */}
-        <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={8}>
-          {pricingPlans.map((plan) => (
-            <Card
-              key={plan.tier}
-              bg={cardBg}
-              borderColor={plan.popular ? `${plan.color}.400` : borderColor}
-              borderWidth={plan.popular ? 2 : 1}
-              borderRadius="2xl"
-              position="relative"
-              transform={plan.popular ? 'scale(1.05)' : 'none'}
-              shadow={plan.popular ? '2xl' : 'lg'}
-              _hover={{
-                transform: plan.popular ? 'scale(1.06)' : 'scale(1.02)',
-                shadow: '2xl'
-              }}
-              transition="all 0.3s"
-            >
-              {plan.popular && (
-                <Badge
-                  position="absolute"
-                  top="-10px"
-                  left="50%"
-                  transform="translateX(-50%)"
-                  colorScheme={plan.color}
-                  px={4}
-                  py={1}
-                  borderRadius="full"
-                  fontSize="sm"
-                  fontWeight="bold"
-                >
-                  Most Popular
-                </Badge>
-              )}
-
-              <CardHeader textAlign="center" pt={plan.popular ? 8 : 6}>
-                <VStack spacing={3}>
-                  <Icon
-                    as={plan.icon}
-                    boxSize={12}
-                    color={`${plan.color}.500`}
-                  />
-                  <Heading size="lg" color={`${plan.color}.600`}>
-                    {plan.name}
-                  </Heading>
-                  <Text color="whiteAlpha.800" fontSize="sm">
-                    {plan.description}
-                  </Text>
-                  <VStack spacing={1}>
-                    <HStack align="baseline">
-                      <Text fontSize="4xl" fontWeight="bold" color="white">
-                        ${isAnnual ? plan.price.yearly : plan.price.monthly}
-                      </Text>
-                      <Text color="whiteAlpha.600">
-                        {plan.price.monthly === 0 ? '' : isAnnual ? '/year' : '/month'}
-                      </Text>
-                    </HStack>
-                    {isAnnual && plan.price.monthly > 0 && (
-                      <Text fontSize="sm" color="green.400">
-                        ${(plan.price.monthly * 12 - plan.price.yearly).toFixed(2)} savings vs monthly
-                      </Text>
-                    )}
-                  </VStack>
-                </VStack>
-              </CardHeader>
-
-              <CardBody>
-                <VStack spacing={6}>
-                  <List spacing={3} w="full">
-                    {plan.features.map((feature, index) => (
-                      <ListItem key={index} display="flex" alignItems="center" gap={3}>
-                        <EducationalTooltip
-                          title={feature.name}
-                          description={getFeatureDescription(feature.name)}
-                          examples={getFeatureExamples(feature.name)}
-                          tier={getFeatureTier(feature.name)}
-                        >
-                          <HStack spacing={3} flex={1}>
-                            <ListIcon
-                              as={feature.icon}
-                              color={feature.included ? 'green.500' : 'red.500'}
-                              boxSize={4}
-                            />
-                            <Text
-                              fontSize="sm"
-                              color={feature.included ? 'white' : 'whiteAlpha.600'}
-                              textDecoration={feature.included ? 'none' : 'line-through'}
-                            >
-                              {feature.name}
-                            </Text>
-                            <Icon as={FaQuestionCircle} boxSize={3} color="whiteAlpha.600" />
-                          </HStack>
-                        </EducationalTooltip>
-                      </ListItem>
-                    ))}
-                  </List>
-
-                  <Divider borderColor="whiteAlpha.300" />
-
-                  <Button
-                    colorScheme={plan.color}
-                    size="lg"
-                    w="full"
-                    isDisabled={userTier === plan.tier || (userTier === 'elite')}
-                    isLoading={loading === plan.tier}
-                    loadingText="Processing..."
-                    onClick={() => plan.tier !== 'free' && handleUpgrade(plan.tier as 'premium' | 'elite')}
-                    variant={plan.tier === 'free' ? 'outline' : 'solid'}
-                  >
-                    {userTier === plan.tier ? 'Current Plan' : 
-                     userTier === 'elite' ? 'You have Elite' :
-                     plan.cta}
-                  </Button>
-                </VStack>
-              </CardBody>
-            </Card>
-          ))}
-        </SimpleGrid>
-
-        {/* Feature Comparison */}
-        <Card bg={cardBg} borderRadius="2xl" overflow="hidden">
-          <CardHeader>
-            <Heading size="lg" textAlign="center">
-              Detailed Feature Comparison
-            </Heading>
-          </CardHeader>
-          <CardBody overflow="auto">
-            <Box overflowX="auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th className="p-3 text-left border-b-2 border-gray-700">
-                      <Text fontWeight="bold" color="white">Feature</Text>
-                    </th>
-                    {pricingPlans.map((plan) => (
-                      <th key={plan.tier} className="p-3 text-center border-b-2 border-gray-700">
-                        <VStack spacing={1}>
-                          <Icon as={plan.icon} color={`${plan.color}.500`} boxSize={5} />
-                          <Text fontWeight="bold" color="white" fontSize="sm">{plan.name}</Text>
-                        </VStack>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {getAllFeatures().map((feature, index) => (
-                    <tr key={index} className="border-b border-gray-800">
-                      <td className="p-3">
-                        <EducationalTooltip
-                          title={feature}
-                          description={getFeatureDescription(feature)}
-                          examples={getFeatureExamples(feature)}
-                          tier={getFeatureTier(feature)}
-                        >
-                          <HStack spacing={2}>
-                            <Text color="white" fontSize="sm">{feature}</Text>
-                            <Icon as={FaQuestionCircle} boxSize={3} color="whiteAlpha.600" />
-                          </HStack>
-                        </EducationalTooltip>
-                      </td>
-                      {pricingPlans.map((plan) => (
-                        <td key={plan.tier} className="p-3 text-center">
-                          {isFeatureIncluded(feature, plan.features) ? (
-                            <Icon as={FaCheck} color="green.500" boxSize={4} />
-                          ) : (
-                            <Icon as={FaTimes} color="red.500" boxSize={4} />
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Box>
-          </CardBody>
-        </Card>
-
-        {/* FAQ Section */}
-        <VStack spacing={6}>
-          <Heading size="lg" textAlign="center">
-            Frequently Asked Questions
-          </Heading>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full">
-            <Card bg={cardBg} borderRadius="xl">
-              <CardBody>
-                <VStack align="start" spacing={3}>
-                  <Text fontWeight="bold" color="white">Can I change plans anytime?</Text>
-                  <Text fontSize="sm" color="whiteAlpha.800">
-                    Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately for upgrades, or at the next billing cycle for downgrades.
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            <Card bg={cardBg} borderRadius="xl">
-              <CardBody>
-                <VStack align="start" spacing={3}>
-                  <Text fontWeight="bold" color="white">What payment methods do you accept?</Text>
-                  <Text fontSize="sm" color="whiteAlpha.800">
-                    We accept all major credit cards, PayPal, and other secure payment methods through Stripe.
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            <Card bg={cardBg} borderRadius="xl">
-              <CardBody>
-                <VStack align="start" spacing={3}>
-                  <Text fontWeight="bold" color="white">Is my data secure?</Text>
-                  <Text fontSize="sm" color="whiteAlpha.800">
-                    Absolutely. We use enterprise-grade encryption and never share your personal information. Your charts and data remain private and secure.
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            <Card bg={cardBg} borderRadius="xl">
-              <CardBody>
-                <VStack align="start" spacing={3}>
-                  <Text fontWeight="bold" color="white">Do you offer refunds?</Text>
-                  <Text fontSize="sm" color="whiteAlpha.800">
-                    Yes, we offer a 30-day money-back guarantee for all paid plans. Contact support if you're not satisfied.
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-        </VStack>
-      </VStack>
-    </Container>
-  );
-}
-
-// Helper functions for educational tooltips
-function getFeatureDescription(feature: string): string {
-  const descriptions: Record<string, string> = {
-    'Basic birth chart calculation': 'Generate accurate natal charts using your exact birth time, date, and location.',
-    'Western tropical astrology': 'Traditional zodiac system based on the seasons and commonly used in the West.',
-    'Multi-system analysis': 'Compare insights from Western, Vedic, Chinese, Mayan, and Uranian astrological systems.',
-    'Synastry compatibility': 'Analyze relationship compatibility by comparing two birth charts.',
-    'AI interpretations': 'Advanced artificial intelligence provides personalized chart interpretations and insights.',
-    'Transit analysis': 'Track current planetary movements and their effects on your natal chart.',
-    'Vedic sidereal charts': 'Traditional Indian astrology system based on the actual star positions.',
-    'Chinese astrology': 'Ancient Four Pillars system analyzing year, month, day, and hour animals.',
-    'Uranian astrology': 'Advanced midpoint technique using transneptunian points for precise timing.',
-    'Mayan calendar': 'Sacred calendar system revealing your galactic signature and spiritual purpose.',
-    'PDF export': 'Download professional-quality chart reports and interpretations.',
-    'Priority support': 'Get faster responses and dedicated assistance from our expert team.'
   };
-  return descriptions[feature] || 'Advanced astrological feature for deeper insights.';
-}
 
-function getFeatureExamples(feature: string): string[] {
-  const examples: Record<string, string[]> = {
-    'AI interpretations': [
-      'Personality analysis based on planetary patterns',
-      'Life purpose guidance from chart synthesis',
-      'Relationship compatibility insights',
-      'Career path recommendations'
-    ],
-    'Multi-system analysis': [
-      'Western tropical chart for personality',
-      'Vedic sidereal for karmic patterns',
-      'Chinese Four Pillars for life cycles',
-      'Mayan calendar for spiritual purpose'
-    ],
-    'Synastry compatibility': [
-      'Romantic partnership analysis',
-      'Friendship compatibility',
-      'Family relationship dynamics',
-      'Business partnership potential'
-    ],
-    'Transit analysis': [
-      'Current life phase timing',
-      'Opportunity windows',
-      'Challenge periods',
-      'Growth cycles'
-    ]
+  const getFeatureDescription = (feature: string): string => {
+    const descriptions: Record<string, string> = {
+      'AI interpretations': 'Intelligent chart analysis powered by advanced AI models.',
+      'Transit analysis': 'Detailed forecasts of upcoming planetary influences and timing.',
+      'Multi-system analysis': 'Integrated Western, Vedic, Chinese, Mayan, and Uranian astrology.',
+      'Synastry compatibility': 'In-depth relationship analysis between multiple charts.',
+      'Vedic sidereal charts': 'Traditional Indian astrology with sidereal zodiac.',
+      'Chinese astrology': 'Four Pillars and Zi Wei Dou Shu systems.',
+      'Mayan calendar': 'Tzolk\'in and Haab cycles for spiritual timing.',
+      'Uranian astrology': 'Midpoint and transneptunian planet analysis.'
+    };
+    return descriptions[feature] || 'Advanced astrological feature for deeper insights.';
   };
-  return examples[feature] || [];
-}
 
-function getFeatureTier(feature: string): 'free' | 'premium' | 'elite' | undefined {
-  const tiers: Record<string, 'free' | 'premium' | 'elite'> = {
-    'AI interpretations': 'elite',
-    'Transit analysis': 'elite',
-    'Multi-system analysis': 'premium',
-    'Synastry compatibility': 'premium',
-    'Vedic sidereal charts': 'premium',
-    'Chinese astrology': 'premium',
-    'Uranian astrology': 'elite',
-    'Mayan calendar': 'premium'
+  const getFeatureExamples = (feature: string): string[] => {
+    const examples: Record<string, string[]> = {
+      'AI interpretations': [
+        'Personality analysis based on planetary patterns',
+        'Life purpose guidance from chart synthesis',
+        'Relationship compatibility insights',
+        'Career path recommendations'
+      ],
+      'Transit analysis': [
+        'Current life phase timing',
+        'Opportunity windows',
+        'Challenge periods',
+        'Growth cycles'
+      ],
+      'Multi-system analysis': [
+        'Western tropical chart for personality',
+        'Vedic sidereal for karmic patterns',
+        'Chinese Four Pillars for life cycles',
+        'Mayan calendar for spiritual purpose'
+      ],
+      'Synastry compatibility': [
+        'Romantic partnership analysis',
+        'Friendship compatibility',
+        'Family relationship dynamics',
+        'Business partnership potential'
+      ]
+    };
+    return examples[feature] || [];
   };
-  return tiers[feature];
-}
 
-function getAllFeatures(): string[] {
-  return [
+  const getFeatureTier = (feature: string): 'free' | 'premium' | 'elite' | undefined => {
+    const tiers: Record<string, 'free' | 'premium' | 'elite'> = {
+      'AI interpretations': 'elite',
+      'Transit analysis': 'elite',
+      'Multi-system analysis': 'premium',
+      'Synastry compatibility': 'premium',
+      'Vedic sidereal charts': 'premium',
+      'Chinese astrology': 'premium',
+      'Uranian astrology': 'elite',
+      'Mayan calendar': 'premium'
+    };
+    return tiers[feature];
+  };
+
+  const getAllFeatures = (): string[] => [
     'Basic birth chart calculation',
     'Western tropical astrology',
     'Multi-system analysis',
@@ -528,8 +150,161 @@ function getAllFeatures(): string[] {
     'Unlimited storage',
     'Priority support'
   ];
-}
 
-function isFeatureIncluded(feature: string, planFeatures: { name: string; included: boolean }[]): boolean {
-  return planFeatures.some(f => f.name === feature && f.included);
-}
+  const isFeatureIncluded = (feature: string, planFeatures: { name: string; included: boolean }[]): boolean => {
+    return planFeatures.some(f => f.name === feature && f.included);
+  };
+
+  return (
+    <div className="min-h-screen px-4 py-12 bg-gray-50">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-12 space-y-4 text-center">
+          <h2 className="text-4xl font-bold text-cosmic-gold font-cinzel">Pricing Plans</h2>
+          <p className="max-w-2xl mx-auto text-lg text-cosmic-silver">
+            Choose the perfect plan to unlock the cosmos. All plans include core astrology features, with premium tiers adding advanced analysis and unlimited access.
+          </p>
+        </div>
+
+        <div className="flex justify-center mb-8">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isAnnual}
+              onChange={(e) => setIsAnnual(e.target.checked)}
+              className="w-5 h-5 text-purple-500 rounded"
+            />
+            <span className="font-medium text-cosmic-silver">Annual Billing</span>
+            <span className="px-2 py-1 text-sm text-green-500 rounded bg-green-500/20">Save 20%</span>
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          {Object.entries(COSMICHUB_TIERS).map(([tierKey, tier]) => (
+            <div key={tierKey} className={`cosmic-card ${tierKey === userTier ? 'border-2 border-purple-500 shadow-lg' : ''}`}>
+              <div className="p-6">
+                <div className="flex items-center mb-4 space-x-3">
+                  {getTierIcon(tierKey as keyof typeof COSMICHUB_TIERS)}
+                  <h3 className="text-2xl font-bold text-cosmic-gold">{tier.name}</h3>
+                </div>
+                <p className="mb-6 text-sm text-cosmic-silver">{tier.description}</p>
+                <div className="flex items-baseline mb-6 space-x-2">
+                  <span className="text-3xl font-bold text-cosmic-gold">${isAnnual ? tier.price.annual : tier.price.monthly}</span>
+                  <span className="text-sm text-cosmic-silver/80">/{isAnnual ? 'year' : 'month'}</span>
+                </div>
+                <ul className="mb-6 space-y-4">
+                  {tier.features.map((feature, index) => (
+                    <li key={index} className="flex items-start space-x-3">
+                      <FaCheck className="mt-1 text-green-500" />
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm text-cosmic-silver">{feature}</p>
+                        <div className="flex items-center space-x-2">
+                          <span className={`bg-${getTierColor(feature)}/20 text-${getTierColor(feature)} px-2 py-1 rounded text-xs`}>
+                            {getFeatureTier(feature)}
+                          </span>
+                          <Tooltip.Root>
+                            <Tooltip.Trigger asChild>
+                              <button className="text-cosmic-purple hover:text-cosmic-purple/80" aria-label="Feature Information">
+                                <FaQuestionCircle />
+                              </button>
+                            </Tooltip.Trigger>
+                            <Tooltip.Portal>
+                              <Tooltip.Content className="bg-cosmic-blue/80 backdrop-blur-md border border-cosmic-silver/20 rounded-md shadow-lg p-2 text-cosmic-silver max-w-[300px]" side="top">
+                                <p className="mb-2 font-bold">{feature}</p>
+                                <p className="mb-2 text-sm">{getFeatureDescription(feature)}</p>
+                                <div className="flex flex-col space-y-1">
+                                  {getFeatureExamples(feature).map((example, i) => (
+                                    <p key={i} className="text-xs text-cosmic-silver/80">• {example}</p>
+                                  ))}
+                                </div>
+                                <Tooltip.Arrow className="fill-cosmic-blue/80" />
+                              </Tooltip.Content>
+                            </Tooltip.Portal>
+                          </Tooltip.Root>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  className="w-full cosmic-button"
+                  disabled={loading === tierKey || tierKey === userTier}
+                  onClick={() => handleUpgrade(tierKey as 'premium' | 'elite')}
+                  aria-label={tierKey === userTier ? 'Current Plan' : 'Select Plan'}
+                >
+                  {tierKey === userTier ? 'Current Plan' : tier.price.monthly === 0 ? 'Free' : 'Subscribe Now'}
+                </button>
+                {tier.price.monthly === 0 && (
+                  <p className="mt-2 text-xs text-center text-cosmic-silver/80">Always free</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <hr className="my-12 border-cosmic-silver/30" />
+
+        <div className="space-y-4 text-center">
+          <h2 className="text-2xl font-bold text-cosmic-gold">Feature Comparison</h2>
+          <p className="text-sm text-cosmic-silver">Hover over features for more details</p>
+        </div>
+
+        <div className="mt-8 overflow-x-auto">
+          <table className="w-full table-auto">
+            <thead>
+              <tr>
+                <th className="px-4 py-3 font-semibold text-left text-cosmic-silver">Feature</th>
+                <th className="px-4 py-3 font-semibold text-center text-cosmic-silver">Free</th>
+                <th className="px-4 py-3 font-semibold text-center text-cosmic-silver">Premium</th>
+                <th className="px-4 py-3 font-semibold text-center text-cosmic-silver">Elite</th>
+              </tr>
+            </thead>
+            <tbody>
+              {getAllFeatures().map((feature) => (
+                <tr key={feature} className="border-b border-cosmic-silver/20">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center space-x-2">
+                      {getFeatureIcon(feature)}
+                      <span className="text-cosmic-silver">{feature}</span>
+                      <Tooltip.Root>
+                        <Tooltip.Trigger asChild>
+                          <button className="text-cosmic-purple hover:text-cosmic-purple/80" aria-label="Feature Information">
+                            <FaQuestionCircle />
+                          </button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Portal>
+                          <Tooltip.Content className="bg-cosmic-blue/80 backdrop-blur-md border border-cosmic-silver/20 rounded-md shadow-lg p-2 text-cosmic-silver max-w-[300px]" side="top">
+                            <p className="mb-2 font-bold">{feature}</p>
+                            <p className="mb-2 text-sm">{getFeatureDescription(feature)}</p>
+                            <div className="flex flex-col space-y-1">
+                              {getFeatureExamples(feature).map((example, i) => (
+                                <p key={i} className="text-xs text-cosmic-silver/80">• {example}</p>
+                              ))}
+                            </div>
+                            <Tooltip.Arrow className="fill-cosmic-blue/80" />
+                          </Tooltip.Content>
+                        </Tooltip.Portal>
+                      </Tooltip.Root>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {isFeatureIncluded(feature, COSMICHUB_TIERS.free.features) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {isFeatureIncluded(feature, COSMICHUB_TIERS.premium.features) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {isFeatureIncluded(feature, COSMICHUB_TIERS.elite.features) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+PricingPage.displayName = 'PricingPage';
+
+export default PricingPage;

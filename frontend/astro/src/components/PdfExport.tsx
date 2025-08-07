@@ -1,31 +1,7 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  VStack,
-  HStack,
-  Text,
-  Select,
-  FormControl,
-  FormLabel,
-  Alert,
-  AlertIcon,
-  Spinner,
-  Card,
-  CardBody,
-  CardHeader,
-  Heading,
-  useToast,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure
-} from '@chakra-ui/react';
-import { DownloadIcon } from '@chakra-ui/icons';
+import React, { useState, useCallback } from 'react';
+import { useToast } from './ToastProvider';
+import * as Dialog from '@radix-ui/react-dialog';
+import { FaDownload } from 'react-icons/fa';
 import FeatureGuard from './FeatureGuard';
 import type { ChartData, BirthData } from '../types';
 
@@ -43,12 +19,7 @@ interface ExportOptions {
   includeTransits: boolean;
 }
 
-export const PdfExport: React.FC<PdfExportProps> = ({
-  chartData,
-  birthInfo,
-  synastryData,
-  multiSystemData
-}) => {
+const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, synastryData, multiSystemData }) => {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<ExportOptions>({
     reportType: 'standard',
@@ -56,11 +27,18 @@ export const PdfExport: React.FC<PdfExportProps> = ({
     includeAspects: true,
     includeTransits: false
   });
-  
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
 
-  const exportToPdf = async () => {
+  const handleOptionChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setOptions((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    }));
+  }, []);
+
+  const exportToPdf = useCallback(async () => {
     setLoading(true);
 
     try {
@@ -116,220 +94,178 @@ export const PdfExport: React.FC<PdfExportProps> = ({
         throw new Error('Failed to generate PDF');
       }
 
-      const result = await response.json();
-      
-      // Create download link
-      const linkSource = `data:application/pdf;base64,${result.pdf_base64}`;
-      const downloadLink = document.createElement('a');
-      downloadLink.href = linkSource;
-      downloadLink.download = result.filename || 'astrology_report.pdf';
-      downloadLink.click();
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `cosmic_hub_${options.reportType}_report.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
       toast({
-        title: 'PDF Generated Successfully',
-        description: 'Your astrological report has been downloaded.',
+        title: 'PDF Generated',
+        description: 'Your report is downloading.',
         status: 'success',
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
-
-      onClose();
-
-    } catch (error) {
-      console.error('PDF Export Error:', error);
+    } catch (err) {
       toast({
-        title: 'PDF Export Failed',
-        description: error instanceof Error ? error.message : 'An unknown error occurred',
+        title: 'PDF Generation Failed',
+        description: err instanceof Error ? err.message : 'Unknown error occurred',
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
     } finally {
       setLoading(false);
+      setIsOpen(false);
     }
-  };
-
-  const getAvailableReports = () => {
-    const reports = [];
-    
-    if (chartData) {
-      reports.push({ value: 'standard', label: 'Standard Chart Report' });
-    }
-    
-    if (synastryData) {
-      reports.push({ value: 'synastry', label: 'Synastry Compatibility Report' });
-    }
-    
-    if (multiSystemData) {
-      reports.push({ value: 'multi_system', label: 'Multi-System Analysis Report' });
-    }
-
-    return reports;
-  };
-
-  const availableReports = getAvailableReports();
-
-  if (availableReports.length === 0) {
-    return (
-      <Alert status="info">
-        <AlertIcon />
-        No chart data available for PDF export. Calculate a chart first.
-      </Alert>
-    );
-  }
+  }, [options, chartData, birthInfo, synastryData, multiSystemData, toast]);
 
   return (
     <FeatureGuard requiredTier="premium" feature="pdf_export">
-      <Card>
-        <CardHeader>
-          <Heading size="md">📄 PDF Export</Heading>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={4} align="stretch">
-            <Text color="whiteAlpha.800">
-              Generate professional PDF reports from your astrological data. 
-              Premium feature includes detailed interpretations and formatting.
-            </Text>
+      <div className="cosmic-card">
+        <div className="p-6">
+          <h2 className="mb-4 text-xl font-bold text-cosmic-gold">Export to PDF</h2>
+          <p className="mb-6 text-cosmic-silver">Download a professional PDF report of your chart analysis.</p>
+          <button
+            className="w-full cosmic-button"
+            onClick={() => setIsOpen(true)}
+            disabled={loading}
+            aria-label="Open PDF Export Options"
+          >
+            <FaDownload className="mr-2" />
+            Export Chart to PDF
+          </button>
+        </div>
+      </div>
 
-            <Button
-              leftIcon={<DownloadIcon />}
-              colorScheme="purple"
-              onClick={onOpen}
-              isDisabled={availableReports.length === 0}
-            >
-              Export PDF Report
-            </Button>
+      <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+          <Dialog.Content className="fixed w-full max-w-lg p-6 transform -translate-x-1/2 -translate-y-1/2 border rounded-lg top-1/2 left-1/2 bg-cosmic-blue/80 backdrop-blur-md border-cosmic-silver/20">
+            <div className="flex items-center justify-between mb-4">
+              <Dialog.Title className="text-lg font-bold text-cosmic-gold">PDF Export Options</Dialog.Title>
+              <Dialog.Close asChild>
+                <button className="text-cosmic-silver hover:text-cosmic-gold" aria-label="Close">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </Dialog.Close>
+            </div>
 
-            <Modal isOpen={isOpen} onClose={onClose} size="lg">
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>Export PDF Report</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                  <VStack spacing={6} align="stretch">
-                    <FormControl>
-                      <FormLabel>Report Type</FormLabel>
-                      <Select
-                        value={options.reportType}
-                        onChange={(e) => setOptions({
-                          ...options,
-                          reportType: e.target.value as any
-                        })}
-                        aria-label="Report Type"
-                      >
-                        {availableReports.map(report => (
-                          <option key={report.value} value={report.value}>
-                            {report.label}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
+            <div className="flex flex-col space-y-6">
+              <div>
+                <label htmlFor="reportType" className="block mb-2 text-cosmic-gold">Report Type</label>
+                <select
+                  id="reportType"
+                  name="reportType"
+                  value={options.reportType}
+                  onChange={handleOptionChange}
+                  className="cosmic-input"
+                  aria-label="Report Type"
+                >
+                  <option value="standard">Standard Chart Report</option>
+                  <option value="synastry">Synastry Report</option>
+                  <option value="multi_system">Multi-System Report</option>
+                </select>
+              </div>
 
-                    <Box>
-                      <Text fontWeight="semibold" mb={3}>Report Options</Text>
-                      <VStack spacing={3} align="start">
-                        <Box>
-                          <input
-                            type="checkbox"
-                            id="includeInterpretation"
-                            checked={options.includeInterpretation}
-                            onChange={(e) => setOptions({
-                              ...options,
-                              includeInterpretation: e.target.checked
-                            })}
-                          />
-                          <Text as="label" htmlFor="includeInterpretation" ml={2}>
-                            Include Astrological Interpretations
-                          </Text>
-                        </Box>
+              <div className="flex flex-col space-y-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="includeInterpretation"
+                    checked={options.includeInterpretation}
+                    onChange={handleOptionChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                  />
+                  <span className="text-cosmic-silver">Include AI Interpretation (Elite Feature)</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="includeAspects"
+                    checked={options.includeAspects}
+                    onChange={handleOptionChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                  />
+                  <span className="text-cosmic-silver">Include Detailed Aspects</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="includeTransits"
+                    checked={options.includeTransits}
+                    onChange={handleOptionChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                  />
+                  <span className="text-cosmic-silver">Include Current Transits (Elite Feature)</span>
+                </label>
+              </div>
 
-                        <Box>
-                          <input
-                            type="checkbox"
-                            id="includeAspects"
-                            checked={options.includeAspects}
-                            onChange={(e) => setOptions({
-                              ...options,
-                              includeAspects: e.target.checked
-                            })}
-                          />
-                          <Text as="label" htmlFor="includeAspects" ml={2}>
-                            Include Aspect Details
-                          </Text>
-                        </Box>
-
-                        <Box>
-                          <input
-                            type="checkbox"
-                            id="includeTransits"
-                            checked={options.includeTransits}
-                            onChange={(e) => setOptions({
-                              ...options,
-                              includeTransits: e.target.checked
-                            })}
-                          />
-                          <Text as="label" htmlFor="includeTransits" ml={2}>
-                            Include Current Transits (Elite Feature)
-                          </Text>
-                        </Box>
-                      </VStack>
-                    </Box>
-
-                    <Box p={4} bg="blue.50" borderRadius="md">
-                      <Text fontSize="sm" color="blue.700">
-                        <strong>What's Included:</strong>
+              <div className="flex p-4 space-x-4 border border-blue-500 rounded-md bg-blue-900/50">
+                <span className="text-xl text-blue-500">ℹ️</span>
+                <div className="flex flex-col space-y-2">
+                  <p className="font-bold text-cosmic-silver">What's Included:</p>
+                  <p className="text-sm text-cosmic-silver">
+                    • Professional formatting with planetary positions<br />
+                    • House cusp details and sign placements<br />
+                    • Major aspect calculations with orbs
+                    {options.includeInterpretation && (
+                      <>
                         <br />
-                        • Professional formatting with planetary positions
-                        • House cusp details and sign placements
-                        • Major aspect calculations with orbs
-                        {options.includeInterpretation && (
-                          <>
-                            <br />
-                            • AI-powered astrological interpretations
-                          </>
-                        )}
-                        {options.reportType === 'synastry' && (
-                          <>
-                            <br />
-                            • Relationship compatibility analysis
-                            <br />
-                            • House overlays and composite insights
-                          </>
-                        )}
-                        {options.reportType === 'multi_system' && (
-                          <>
-                            <br />
-                            • Western, Vedic, Chinese, and Mayan systems
-                            <br />
-                            • Integrated cross-system analysis
-                          </>
-                        )}
-                      </Text>
-                    </Box>
-                  </VStack>
-                </ModalBody>
+                        • AI-powered astrological interpretations
+                      </>
+                    )}
+                    {options.reportType === 'synastry' && (
+                      <>
+                        <br />
+                        • Relationship compatibility analysis<br />
+                        • House overlays and composite insights
+                      </>
+                    )}
+                    {options.reportType === 'multi_system' && (
+                      <>
+                        <br />
+                        • Western, Vedic, Chinese, and Mayan systems<br />
+                        • Integrated cross-system analysis
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-                <ModalFooter>
-                  <HStack spacing={3}>
-                    <Button variant="ghost" onClick={onClose}>
-                      Cancel
-                    </Button>
-                    <Button
-                      colorScheme="purple"
-                      onClick={exportToPdf}
-                      isLoading={loading}
-                      loadingText="Generating PDF..."
-                      leftIcon={loading ? <Spinner size="sm" /> : <DownloadIcon />}
-                    >
-                      Generate & Download
-                    </Button>
-                  </HStack>
-                </ModalFooter>
-              </ModalContent>
-            </Modal>
-          </VStack>
-        </CardBody>
-      </Card>
+            <div className="flex mt-6 space-x-3">
+              <button
+                className="flex-1 bg-transparent border cosmic-button border-cosmic-silver text-cosmic-silver hover:bg-cosmic-silver/10"
+                onClick={() => setIsOpen(false)}
+                aria-label="Cancel"
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 cosmic-button"
+                onClick={exportToPdf}
+                disabled={loading}
+                aria-disabled={loading}
+              >
+                <FaDownload className="mr-2" />
+                {loading ? 'Generating...' : 'Generate & Download'}
+              </button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </div>
     </FeatureGuard>
   );
-};
+});
+
+PdfExport.displayName = 'PdfExport';
+
+export default PdfExport;

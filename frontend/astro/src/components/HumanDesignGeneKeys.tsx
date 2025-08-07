@@ -1,40 +1,12 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  VStack,
-  HStack,
-  Grid,
-  GridItem,
-  Card,
-  CardBody,
-  CardHeader,
-  Heading,
-  Text,
-  Badge,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  useToast,
-  Container,
-  Alert,
-  AlertIcon,
-  Divider,
-  SimpleGrid,
-  Icon,
-  Flex
-} from '@chakra-ui/react';
-import { FaUser, FaStar, FaKey, FaChartLine, FaBook } from 'react-icons/fa';
-import { useAuth } from '../../contexts/AuthContext';
-import HumanDesignChart from './HumanDesignChart';
-import GeneKeysChart from './GeneKeysChart';
-import EducationalContent from './EducationalContent';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
+import * as Tabs from '@radix-ui/react-tabs';
+import { FaUser, FaStar, FaKey, FaChartLine } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from './ToastProvider';
+
+const HumanDesignChart = lazy(() => import('./HumanDesignChart'));
+const GeneKeysChart = lazy(() => import('./GeneKeysChart'));
+const EducationalContent = lazy(() => import('./EducationalContent'));
 
 interface BirthData {
   year: number;
@@ -48,14 +20,20 @@ interface BirthData {
   lon?: number;
 }
 
-const HumanDesignGeneKeys: React.FC = () => {
+interface FormData {
+  year: string;
+  month: string;
+  day: string;
+  hour: string;
+  minute: string;
+  city: string;
+  timezone: string;
+}
+
+const HumanDesignGeneKeys: React.FC = React.memo(() => {
   const [birthData, setBirthData] = useState<BirthData | null>(null);
   const [showCalculation, setShowCalculation] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  const { user } = useAuth();
-  const toast = useToast();
-
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     year: '',
     month: '',
     day: '',
@@ -64,25 +42,23 @@ const HumanDesignGeneKeys: React.FC = () => {
     city: '',
     timezone: 'America/New_York'
   });
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
 
-  const handleCalculate = (): void => {
-    // Validate form data
+  const handleCalculate = useCallback(() => {
     const requiredFields = ['year', 'month', 'day', 'hour', 'minute', 'city'];
-    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    const missingFields = requiredFields.filter(field => !formData[field as keyof FormData].trim());
     
     if (missingFields.length > 0) {
       toast({
-        title: "Missing Information",
+        title: 'Missing Information',
         description: `Please fill in: ${missingFields.join(', ')}`,
-        status: "warning",
+        status: 'warning',
         duration: 3000,
         isClosable: true,
       });
@@ -101,9 +77,9 @@ const HumanDesignGeneKeys: React.FC = () => {
 
     setBirthData(data);
     setShowCalculation(true);
-  };
+  }, [formData, toast]);
 
-  const handleNewCalculation = (): void => {
+  const handleNewCalculation = useCallback(() => {
     setBirthData(null);
     setShowCalculation(false);
     setFormData({
@@ -115,240 +91,126 @@ const HumanDesignGeneKeys: React.FC = () => {
       city: '',
       timezone: 'America/New_York'
     });
-  };
+  }, []);
 
   if (!user) {
     return (
-      <Container centerContent py={10}>
-        <Alert status="warning" borderRadius="md">
-          <AlertIcon />
-          Please log in to access Human Design and Gene Keys calculations.
-        </Alert>
-      </Container>
+      <div className="py-10 text-center">
+        <div className="flex max-w-2xl p-4 mx-auto space-x-4 border border-yellow-500 rounded-md bg-yellow-900/50">
+          <span className="text-xl text-yellow-500">⚠️</span>
+          <p className="text-cosmic-silver">Please log in to access Human Design and Gene Keys calculations.</p>
+        </div>
+      </div>
     );
   }
 
   if (showCalculation && birthData) {
     return (
-      <Box minH="100vh" bg="gray.50">
-        {/* Header */}
-        <Box bg="gradient-to-r" bgGradient="linear(to-r, purple.600, pink.600)" color="white" py={6}>
-          <Container maxW="7xl">
-            <Flex justify="space-between" align="center">
-              <VStack align="start" spacing={2}>
-                <Heading size="lg">Human Design & Gene Keys</Heading>
-                <Text>Your complete genetic blueprint and consciousness codes</Text>
-              </VStack>
-              <Button 
-                colorScheme="whiteAlpha" 
-                variant="outline" 
+      <div className="min-h-screen bg-gray-50">
+        <div className="py-6 bg-gradient-to-r from-purple-600 to-pink-600 text-cosmic-silver">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col space-y-2">
+                <h2 className="text-2xl font-bold">Human Design & Gene Keys</h2>
+                <p>Your complete genetic blueprint and consciousness codes</p>
+              </div>
+              <button
+                className="px-4 py-2 transition-colors border rounded bg-white/20 border-white/50 text-cosmic-silver hover:bg-white/30"
                 onClick={handleNewCalculation}
+                aria-label="Start New Calculation"
               >
                 New Calculation
-              </Button>
-            </Flex>
-          </Container>
-        </Box>
+              </button>
+            </div>
+          </div>
+        </div>
 
-        {/* Birth Data Summary */}
-        <Container maxW="7xl" py={4}>
-          <Card mb={6}>
-            <CardBody>
-              <HStack justify="space-between">
-                <HStack spacing={4}>
-                  <Icon as={FaUser} color="gold.400" />
-                  <Text fontWeight="bold">
-                    {formData.city} • {formData.month}/{formData.day}/{formData.year} • {formData.hour}:{formData.minute.toString().padStart(2, '0')}
-                  </Text>
-                </HStack>
-                <Badge variant="gold">
-                  {formData.timezone}
-                </Badge>
-              </HStack>
-            </CardBody>
-          </Card>
-        </Container>
+        <div className="py-4 mx-auto max-w-7xl">
+          <div className="mb-6 cosmic-card">
+            <div className="p-4">
+              <div className="flex justify-between">
+                <div className="flex items-center space-x-4">
+                  <FaUser className="text-gold-400" />
+                  <p className="font-bold text-cosmic-silver">
+                    {formData.city} • {formData.month}/{formData.day}/{formData.year} • {formData.hour}:{formData.minute.padStart(2, '0')} {formData.timezone}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        {/* Main Content */}
-        <Container maxW="7xl" pb={10}>
-          <Tabs index={activeTab} onChange={setActiveTab} variant="enclosed">
-            <TabList>
-              <Tab>
-                <HStack spacing={2}>
-                  <Icon as={FaChartLine} />
-                  <Text>Human Design</Text>
-                </HStack>
-              </Tab>
-              <Tab>
-                <HStack spacing={2}>
-                  <Icon as={FaKey} />
-                  <Text>Gene Keys</Text>
-                </HStack>
-              </Tab>
-              <Tab>
-                <HStack spacing={2}>
-                  <Icon as={FaStar} />
-                  <Text>Integration</Text>
-                </HStack>
-              </Tab>
-              <Tab>
-                <HStack spacing={2}>
-                  <Icon as={FaBook} />
-                  <Text>Learn</Text>
-                </HStack>
-              </Tab>
-            </TabList>
+          <Tabs.Root defaultValue="human-design">
+            <Tabs.List className="flex border-b border-cosmic-silver/30">
+              <Tabs.Trigger value="human-design" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">
+                <div className="flex items-center space-x-2">
+                  <FaChartLine />
+                  <span>Human Design</span>
+                </div>
+              </Tabs.Trigger>
+              <Tabs.Trigger value="gene-keys" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">
+                <div className="flex items-center space-x-2">
+                  <FaKey />
+                  <span>Gene Keys</span>
+                </div>
+              </Tabs.Trigger>
+              <Tabs.Trigger value="learn" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">
+                <div className="flex items-center space-x-2">
+                  <FaStar />
+                  <span>Learn More</span>
+                </div>
+              </Tabs.Trigger>
+            </Tabs.List>
 
-            <TabPanels>
-              <TabPanel p={0} pt={6}>
+            <Tabs.Content value="human-design" className="pt-4">
+              <Suspense fallback={<div className="mx-auto text-4xl text-purple-500 animate-spin">⭐</div>}>
                 <HumanDesignChart birthData={birthData} />
-              </TabPanel>
-              
-              <TabPanel p={0} pt={6}>
+              </Suspense>
+            </Tabs.Content>
+            <Tabs.Content value="gene-keys" className="pt-4">
+              <Suspense fallback={<div className="mx-auto text-4xl text-purple-500 animate-spin">⭐</div>}>
                 <GeneKeysChart birthData={birthData} />
-              </TabPanel>
-              
-              <TabPanel p={0} pt={6}>
-                <VStack spacing={6}>
-                  <Card w="full">
-                    <CardHeader>
-                      <Heading size="lg" textAlign="center">Integration & Synthesis</Heading>
-                      <Text textAlign="center" color="whiteAlpha.800">
-                        How Human Design and Gene Keys work together
-                      </Text>
-                    </CardHeader>
-                    <CardBody>
-                      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-                        <Box>
-                          <Heading size="md" mb={3} color="blue.600">Human Design Focus</Heading>
-                          <VStack align="start" spacing={2}>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Strategy & Authority for decision-making</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Energy centers and how you process life</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Gates and channels for specific traits</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Profile lines for life purpose expression</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Variables for health and environment</Text>
-                          </VStack>
-                        </Box>
-                        
-                        <Box>
-                          <Heading size="md" mb={3} color="gold.300">Gene Keys Focus</Heading>
-                          <VStack align="start" spacing={2}>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Shadow to Gift to Siddhi transformation</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Contemplation practice for self-awareness</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Three sequences for different intelligence types</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Core quartet for life purpose and radiance</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">• Integration path for consciousness evolution</Text>
-                          </VStack>
-                        </Box>
-                      </SimpleGrid>
-                      
-                      <Divider my={6} />
-                      
-                      <Box textAlign="center">
-                        <Heading size="md" mb={4}>Synthesis Approach</Heading>
-                        <Text fontSize="lg" mb={4}>
-                          Use Human Design as your practical operating manual and Gene Keys as your 
-                          contemplative spiritual practice. They are complementary systems that can 
-                          deepen your self-understanding and evolutionary journey.
-                        </Text>
-                        
-                        <Alert status="info" textAlign="left">
-                          <AlertIcon />
-                          <VStack align="start" spacing={2}>
-                            <Text fontWeight="bold">Recommended Practice:</Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">
-                              1. Start with your Human Design strategy and authority for daily decisions
-                            </Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">
-                              2. Use Gene Keys contemplation to transform unconscious patterns
-                            </Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">
-                              3. Notice how your defined/undefined centers relate to your Gene Key shadows
-                            </Text>
-                            <Text fontSize="sm" color="whiteAlpha.900">
-                              4. Allow both systems to guide your unique path of awakening
-                            </Text>
-                          </VStack>
-                        </Alert>
-                      </Box>
-                    </CardBody>
-                  </Card>
-                </VStack>
-              </TabPanel>
-              
-              <TabPanel p={0} pt={6}>
+              </Suspense>
+            </Tabs.Content>
+            <Tabs.Content value="learn" className="pt-4">
+              <Suspense fallback={<div className="mx-auto text-4xl text-purple-500 animate-spin">⭐</div>}>
                 <EducationalContent />
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        </Container>
-      </Box>
+              </Suspense>
+            </Tabs.Content>
+          </Tabs.Root>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container maxW="2xl" py={10}>
-      <VStack spacing={8}>
-        {/* Header */}
-        <VStack spacing={4} textAlign="center">
-          <Heading size="xl" variant="cosmic">
-            Human Design & Gene Keys
-          </Heading>
-          <Text fontSize="lg" color="whiteAlpha.800">
-            Discover your genetic blueprint and consciousness codes
-          </Text>
-          <SimpleGrid columns={2} spacing={4} w="full">
-            <Card>
-              <CardBody textAlign="center">
-                <Icon as={FaChartLine} size="2rem" color="blue.500" mb={2} />
-                <Heading size="sm" mb={2}>Human Design</Heading>
-                <Text fontSize="sm" color="whiteAlpha.800">
-                  Your energy type, strategy, authority, and life purpose
-                </Text>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody textAlign="center">
-                <Icon as={FaKey} size="2rem" color="gold.400" mb={2} />
-                <Heading size="sm" mb={2}>Gene Keys</Heading>
-                <Text fontSize="sm" color="whiteAlpha.800">
-                  Shadow to Gift to Siddhi - your path to higher consciousness
-                </Text>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-        </VStack>
-
-        {/* Birth Data Form */}
-        <Card w="full">
-          <CardHeader>
-            <Heading size="md">Enter Your Birth Information</Heading>
-            <Text fontSize="sm" color="whiteAlpha.800">
-              Accurate birth time is essential for precise calculations
-            </Text>
-          </CardHeader>
-          <CardBody>
-            <VStack spacing={4}>
-              <Grid templateColumns="repeat(3, 1fr)" gap={4} w="full">
-                <FormControl>
-                  <FormLabel fontSize="sm">Month</FormLabel>
-                  <Select
+    <div className="max-w-2xl py-10 mx-auto">
+      <div className="cosmic-card">
+        <div className="p-6">
+          <h2 className="mb-6 text-2xl font-bold text-center text-cosmic-gold">Enter Your Birth Information</h2>
+          <form aria-label="Human Design & Gene Keys Form">
+            <div className="flex flex-col space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="month" className="block mb-2 text-cosmic-gold">Month <span aria-hidden="true">*</span></label>
+                  <select
+                    id="month"
                     name="month"
                     value={formData.month}
                     onChange={handleInputChange}
-                    placeholder="Month"
-                    aria-label="Month"
+                    className="cosmic-input"
+                    aria-required="true"
                   >
                     {Array.from({ length: 12 }, (_, i) => (
                       <option key={i + 1} value={i + 1}>
-                        {new Date(2000, i, 1).toLocaleDateString('en', { month: 'long' })}
+                        {new Date(0, i).toLocaleString('en', { month: 'long' })}
                       </option>
                     ))}
-                  </Select>
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="sm">Day</FormLabel>
-                  <Input
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="day" className="block mb-2 text-cosmic-gold">Day <span aria-hidden="true">*</span></label>
+                  <input
+                    id="day"
                     name="day"
                     type="number"
                     min="1"
@@ -356,11 +218,14 @@ const HumanDesignGeneKeys: React.FC = () => {
                     value={formData.day}
                     onChange={handleInputChange}
                     placeholder="Day"
+                    className="cosmic-input"
+                    aria-required="true"
                   />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="sm">Year</FormLabel>
-                  <Input
+                </div>
+                <div>
+                  <label htmlFor="year" className="block mb-2 text-cosmic-gold">Year <span aria-hidden="true">*</span></label>
+                  <input
+                    id="year"
                     name="year"
                     type="number"
                     min="1900"
@@ -368,14 +233,16 @@ const HumanDesignGeneKeys: React.FC = () => {
                     value={formData.year}
                     onChange={handleInputChange}
                     placeholder="Year"
+                    className="cosmic-input"
+                    aria-required="true"
                   />
-                </FormControl>
-              </Grid>
-
-              <Grid templateColumns="repeat(2, 1fr)" gap={4} w="full">
-                <FormControl>
-                  <FormLabel fontSize="sm">Hour (24h)</FormLabel>
-                  <Input
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="hour" className="block mb-2 text-cosmic-gold">Hour (24h) <span aria-hidden="true">*</span></label>
+                  <input
+                    id="hour"
                     name="hour"
                     type="number"
                     min="0"
@@ -383,11 +250,14 @@ const HumanDesignGeneKeys: React.FC = () => {
                     value={formData.hour}
                     onChange={handleInputChange}
                     placeholder="Hour"
+                    className="cosmic-input"
+                    aria-required="true"
                   />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="sm">Minute</FormLabel>
-                  <Input
+                </div>
+                <div>
+                  <label htmlFor="minute" className="block mb-2 text-cosmic-gold">Minute <span aria-hidden="true">*</span></label>
+                  <input
+                    id="minute"
                     name="minute"
                     type="number"
                     min="0"
@@ -395,25 +265,32 @@ const HumanDesignGeneKeys: React.FC = () => {
                     value={formData.minute}
                     onChange={handleInputChange}
                     placeholder="Minute"
+                    className="cosmic-input"
+                    aria-required="true"
                   />
-                </FormControl>
-              </Grid>
-
-              <FormControl>
-                <FormLabel fontSize="sm">Birth City</FormLabel>
-                <Input
+                </div>
+              </div>
+              <div>
+                <label htmlFor="city" className="block mb-2 text-cosmic-gold">Birth City <span aria-hidden="true">*</span></label>
+                <input
+                  id="city"
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
                   placeholder="City, State/Country"
+                  className="cosmic-input"
+                  aria-required="true"
                 />
-              </FormControl>
-
-              <FormControl>
-                <Select
+              </div>
+              <div>
+                <label htmlFor="timezone" className="block mb-2 text-cosmic-gold">Timezone <span aria-hidden="true">*</span></label>
+                <select
+                  id="timezone"
                   name="timezone"
                   value={formData.timezone}
                   onChange={handleInputChange}
+                  className="cosmic-input"
+                  aria-required="true"
                   aria-label="Timezone"
                 >
                   <option value="America/New_York">Eastern Time</option>
@@ -424,36 +301,35 @@ const HumanDesignGeneKeys: React.FC = () => {
                   <option value="Europe/Paris">Central European Time</option>
                   <option value="Asia/Tokyo">Japan Standard Time</option>
                   <option value="Australia/Sydney">Australian Eastern Time</option>
-                </Select>
-              </FormControl>
-
-              <Button
-                variant="cosmic"
-                size="lg"
-                w="full"
+                </select>
+              </div>
+              <button
+                className="w-full cosmic-button"
                 onClick={handleCalculate}
+                aria-label="Calculate Human Design & Gene Keys"
               >
                 Calculate Human Design & Gene Keys
-              </Button>
-            </VStack>
-          </CardBody>
-        </Card>
+              </button>
+            </div>
+          </form>
 
-        {/* Educational Info */}
-        <Alert status="info" borderRadius="md">
-          <AlertIcon />
-          <VStack align="start" spacing={1}>
-            <Text fontWeight="bold" fontSize="sm">Why both systems?</Text>
-            <Text fontSize="sm">
-              Human Design provides your mechanical operating instructions, while Gene Keys offers 
-              the contemplative path for consciousness evolution. Together, they create a complete 
-              map for living your authentic purpose.
-            </Text>
-          </VStack>
-        </Alert>
-      </VStack>
-    </Container>
+          <div className="flex p-4 mt-6 space-x-4 border border-blue-500 rounded-md bg-blue-900/50">
+            <span className="text-xl text-blue-500">ℹ️</span>
+            <div className="flex flex-col space-y-2">
+              <p className="text-sm font-bold text-cosmic-silver">Why both systems?</p>
+              <p className="text-sm text-cosmic-silver">
+                Human Design provides your mechanical operating instructions, while Gene Keys offers 
+                the contemplative path for consciousness evolution. Together, they create a complete 
+                map for living your authentic purpose.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-};
+});
+
+HumanDesignGeneKeys.displayName = 'HumanDesignGeneKeys';
 
 export default HumanDesignGeneKeys;

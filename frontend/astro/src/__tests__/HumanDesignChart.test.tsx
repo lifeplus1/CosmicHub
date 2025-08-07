@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HumanDesignChart from '../components/HumanDesignChart';
 import { AuthProvider } from '../contexts/AuthContext';
-import { ToastProvider } from '../components/ToastProvider';
 import * as api from '../services/api';
 
 // Mock the API
@@ -13,12 +12,10 @@ vi.mock('../services/api', () => ({
 
 const mockCalculateHumanDesign = vi.mocked(api.calculateHumanDesign);
 
-const TestWrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter>
     <AuthProvider>
-      <ToastProvider>
-        {children}
-      </ToastProvider>
+      {children}
     </AuthProvider>
   </MemoryRouter>
 );

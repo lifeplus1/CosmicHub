@@ -1,32 +1,15 @@
 import React from 'react';
-import {
-  Box,
-  HStack,
-  Text,
-  Badge,
-  Icon
-} from '@chakra-ui/react';
-import { CheckCircleIcon, StarIcon } from '@chakra-ui/icons';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { COSMICHUB_TIERS } from '../types/subscription';
 
-export const SubscriptionStatus: React.FC = () => {
+export const SubscriptionStatus: React.FC = React.memo(() => {
   const { userTier, isLoading } = useSubscription();
 
   if (isLoading) {
     return (
-      <Box
-        bg="rgba(15, 23, 42, 0.8)"
-        borderRadius="12px"
-        px={4}
-        py={2}
-        border="1px solid"
-        borderColor="whiteAlpha.300"
-        backdropFilter="blur(20px)"
-        maxW="320px"
-      >
-        <Text fontSize="sm" color="whiteAlpha.800">Loading subscription...</Text>
-      </Box>
+      <div className="bg-cosmic-blue/30 rounded-xl px-4 py-2 border border-cosmic-silver/20 max-w-[320px]">
+        <p className="text-sm text-cosmic-silver">Loading subscription...</p>
+      </div>
     );
   }
 
@@ -35,36 +18,20 @@ export const SubscriptionStatus: React.FC = () => {
   const isPremium = userTier === 'premium';
 
   return (
-    <Box
-      bg="rgba(15, 23, 42, 0.8)"
-      borderRadius="12px"
-      px={4}
-      py={2}
-      border="1px solid"
-      borderColor="whiteAlpha.300"
-      backdropFilter="blur(20px)"
-      maxW="320px"
-    >
-      <HStack spacing={3} justify="space-between">
-        <HStack spacing={2}>
-          <Icon 
-            as={isElite ? StarIcon : CheckCircleIcon} 
-            color={isElite ? "gold.400" : isPremium ? "cosmic.400" : "whiteAlpha.600"}
-            boxSize={4}
-          />
-          <Text fontSize="sm" color="white" fontWeight="600">
-            {tierInfo.name}
-          </Text>
-        </HStack>
-        <Badge 
-          variant={isElite ? 'gold' : isPremium ? 'cosmic' : 'ethereal'}
-          fontSize="xs"
-          px={2}
-          py={1}
-        >
+    <div className="bg-cosmic-blue/30 rounded-xl px-4 py-2 border border-cosmic-silver/20 max-w-[320px]">
+      <div className="flex items-center justify-between space-x-3">
+        <div className="flex items-center space-x-2">
+          {isElite ? <FaStar className="text-gold-400" /> : <FaCheck className="text-cosmic-purple" />}
+          <p className="text-sm font-semibold text-cosmic-silver">{tierInfo.name}</p>
+        </div>
+        <span className="px-2 py-1 text-xs uppercase rounded bg-cosmic-purple/20 text-cosmic-purple">
           {userTier.toUpperCase()}
-        </Badge>
-      </HStack>
-    </Box>
+        </span>
+      </div>
+    </div>
   );
-};
+});
+
+SubscriptionStatus.displayName = 'SubscriptionStatus';
+
+export default SubscriptionStatus;

@@ -1,47 +1,15 @@
-import React from 'react';
-import {
-  Box,
-  Flex,
-  HStack,
-  Link,
-  IconButton,
-  Button,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuDivider,
-  useDisclosure,
-  useColorModeValue,
-  Stack,
-  Avatar,
-  Text,
-  Badge,
-  Icon,
-  Tooltip
-} from '@chakra-ui/react';
-import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
-import { 
-  FaHome, 
-  FaCalculator, 
-  FaUsers, 
-  FaStar, 
-  FaCrown, 
-  FaUser,
-  FaChartLine,
-  FaBook,
-  FaMagic,
-  FaBrain
-} from 'react-icons/fa';
+import React, { useCallback, useState } from 'react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { EducationalTooltip } from './EducationalTooltip';
 
-const NavLink = ({ children, to, icon, tooltip, tier }: {
+interface NavLinkProps {
   children: React.ReactNode;
   to: string;
-  icon?: any;
+  icon?: React.ElementType;
   tooltip?: {
     title: string;
     description: string;
@@ -49,348 +17,166 @@ const NavLink = ({ children, to, icon, tooltip, tier }: {
     tier?: 'free' | 'premium' | 'elite';
   };
   tier?: 'free' | 'premium' | 'elite';
-}) => (
+}
+
+const NavLink: React.FC<NavLinkProps> = React.memo(({ children, to, icon: Icon, tooltip, tier }) => (
   <EducationalTooltip
     title={tooltip?.title || ''}
     description={tooltip?.description || ''}
     examples={tooltip?.examples}
     tier={tooltip?.tier || tier}
   >
-    <Link
-      as={RouterLink}
-      to={to}
-      px={2}
-      py={1}
-      rounded={'md'}
-      _hover={{
-        textDecoration: 'none',
-        bg: useColorModeValue('gray.200', 'gray.700'),
+    <a
+      href={to}
+      className="flex items-center gap-2 px-2 py-1 font-medium transition-colors rounded-md text-cosmic-silver hover:bg-cosmic-purple/20"
+      onClick={(e) => {
+        e.preventDefault();
+        window.location.href = to; // RouterLink equivalent for <a>
       }}
-      color="white"
-      fontWeight="medium"
-      display="flex"
-      alignItems="center"
-      gap={2}
     >
-      {icon && <Icon as={icon} boxSize={4} />}
+      {Icon && <Icon className="w-4 h-4 text-cosmic-silver" />}
       {children}
       {tier && tier !== 'free' && (
-        <Badge size="xs" colorScheme={tier === 'elite' ? 'gold' : 'purple'}>
+        <span className={`bg-${tier === 'elite' ? 'gold-500' : 'purple-500'}/20 text-${tier === 'elite' ? 'gold-500' : 'purple-500'} px-2 py-1 rounded text-xs`}>
           {tier === 'elite' ? '👑' : '🌟'}
-        </Badge>
+        </span>
       )}
-    </Link>
+    </a>
   </EducationalTooltip>
-);
+));
 
-export default function Navbar() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+NavLink.displayName = 'NavLink';
+
+const Navbar: React.FC = React.memo(() => {
   const { user, signOut } = useAuth();
   const { userTier } = useSubscription();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await signOut();
       navigate('/');
     } catch (error) {
       console.error('Sign out error:', error);
     }
-  };
+  }, [navigate, signOut]);
 
   const getTierIcon = (tier: string) => {
     switch (tier) {
-      case 'elite': return FaCrown;
-      case 'premium': return FaStar;
-      default: return FaUser;
-    }
-  };
-
-  const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'elite': return 'gold';
-      case 'premium': return 'purple';
-      default: return 'gray';
+      case 'elite': return <FaCrown className="text-gold-500" />;
+      case 'premium': return <FaStar className="text-purple-500" />;
+      default: return <FaUser className="text-gray-500" />;
     }
   };
 
   return (
-    <>
-      <Box 
-        bg="rgba(15, 23, 42, 0.95)" 
-        backdropFilter="blur(20px)"
-        px={4} 
-        position="fixed" 
-        top={0} 
-        left={0} 
-        right={0} 
-        zIndex={1000}
-        borderBottom="1px solid"
-        borderColor="whiteAlpha.200"
-        boxShadow="0 4px 32px rgba(0, 0, 0, 0.3)"
-      >
-        <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-          <IconButton
-            size={'md'}
-            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-            aria-label={'Open Menu'}
-            display={{ md: 'none' }}
-            onClick={isOpen ? onClose : onOpen}
-            bg="transparent"
-            color="white"
-            _hover={{ bg: 'whiteAlpha.200' }}
-          />
-          
-          <HStack spacing={8} alignItems={'center'}>
-            <EducationalTooltip
-              title="CosmicHub"
-              description="Your comprehensive platform for astrological analysis, birth charts, and cosmic insights."
-              examples={[
-                "Calculate Western and Vedic birth charts",
-                "Explore Human Design and Gene Keys",
-                "Access AI-powered interpretations",
-                "Save and organize your charts"
-              ]}
-            >
-              <Link
-                as={RouterLink}
-                to="/"
-                fontSize="xl"
-                fontWeight="bold"
-                color="gold.300"
-                _hover={{ color: 'gold.200' }}
-                textDecoration="none"
-              >
-                🌟 CosmicHub
-              </Link>
-            </EducationalTooltip>
-            
-            <HStack as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
-              <NavLink 
-                to="/" 
-                icon={FaHome}
-                tooltip={{
-                  title: "Home Dashboard",
-                  description: "Your main dashboard for calculating birth charts and accessing all features.",
-                  examples: [
-                    "Calculate natal charts instantly",
-                    "View subscription status",
-                    "Access premium features",
-                    "Quick chart generation"
-                  ]
-                }}
-              >
-                Home
-              </NavLink>
-              
-              <NavLink 
-                to="/calculator" 
-                icon={FaCalculator}
-                tooltip={{
-                  title: "Advanced Chart Calculator",
-                  description: "Professional-grade chart calculation with multiple house systems and detailed analysis options.",
-                  examples: [
-                    "Placidus, Equal House, Whole Sign systems",
-                    "Precise timing and location handling",
-                    "Multi-system analysis available",
-                    "Professional accuracy standards"
-                  ]
-                }}
-              >
-                Calculator
-              </NavLink>
-              
-              <NavLink 
-                to="/numerology" 
-                icon={FaChartLine}
-                tooltip={{
-                  title: "Numerology Analysis",
-                  description: "Discover your numerological patterns and life path numbers based on your birth data.",
-                  examples: [
-                    "Life Path Number calculation",
-                    "Expression and Soul numbers",
-                    "Personal year cycles",
-                    "Compatibility analysis"
-                  ]
-                }}
-              >
-                Numerology
-              </NavLink>
-              
-              <NavLink 
-                to="/human-design" 
-                icon={FaBook}
-                tooltip={{
-                  title: "Human Design & Gene Keys",
-                  description: "Explore your unique Human Design chart and Gene Keys profile for self-discovery.",
-                  examples: [
-                    "Discover your energy type",
-                    "Understand your authority",
-                    "Explore defined/undefined centers",
-                    "Gene Keys contemplation"
-                  ]
-                }}
-              >
-                Human Design
-              </NavLink>
+    <nav className="border-b bg-cosmic-dark/80 backdrop-blur-md border-cosmic-silver/20">
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <a href="/" className="text-2xl font-bold text-cosmic-gold font-cinzel">Cosmic Hub</a>
+          </div>
 
-              {user && (
-                <>
-                  <NavLink 
-                    to="/synastry" 
-                    icon={FaUsers}
-                    tier="premium"
-                    tooltip={{
-                      title: "Synastry Analysis",
-                      description: "Compare birth charts to understand relationship dynamics and compatibility patterns.",
-                      examples: [
-                        "Romantic compatibility analysis",
-                        "Friendship and family dynamics",
-                        "Business partnership insights",
-                        "Aspect grid comparisons"
-                      ],
-                      tier: "premium"
-                    }}
-                  >
-                    Synastry
-                  </NavLink>
-                  
-                  <NavLink 
-                    to="/ai-interpretation" 
-                    icon={FaBrain}
-                    tier="elite"
-                    tooltip={{
-                      title: "AI Astrological Analysis",
-                      description: "Advanced AI-powered interpretation that synthesizes complex astrological patterns into personalized insights.",
-                      examples: [
-                        "Deep personality analysis",
-                        "Life purpose guidance",
-                        "Relationship pattern insights",
-                        "Custom question answering"
-                      ],
-                      tier: "elite"
-                    }}
-                  >
-                    AI Analysis
-                  </NavLink>
-                </>
-              )}
-            </HStack>
-          </HStack>
-
-          <Flex alignItems={'center'}>
-            {user ? (
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  rounded={'full'}
-                  variant={'link'}
-                  cursor={'pointer'}
-                  minW={0}
-                  _hover={{ transform: 'scale(1.05)' }}
-                  transition="all 0.2s"
-                >
-                  <HStack spacing={2}>
-                    <Avatar
-                      size={'sm'}
-                      src={user.photoURL || ''}
-                      name={user.displayName || user.email || 'User'}
-                      bg={`${getTierColor(userTier)}.500`}
-                      color="white"
-                    />
-                    <Badge
-                      size="sm"
-                      colorScheme={getTierColor(userTier)}
-                      variant="solid"
-                      display={{ base: 'none', md: 'flex' }}
-                      alignItems="center"
-                      gap={1}
-                    >
-                      <Icon as={getTierIcon(userTier)} boxSize={3} />
-                      {userTier.toUpperCase()}
-                    </Badge>
-                  </HStack>
-                </MenuButton>
-                <MenuList
-                  bg="rgba(15, 23, 42, 0.95)"
-                  backdropFilter="blur(20px)"
-                  borderColor="whiteAlpha.200"
-                  borderWidth={1}
-                >
-                  <MenuItem 
-                    as={RouterLink}
-                    to="/profile"
-                    _hover={{ bg: 'whiteAlpha.100' }}
-                    color="white"
-                    icon={<Icon as={FaUser} />}
-                  >
-                    Profile & Settings
-                  </MenuItem>
-                  <MenuItem 
-                    as={RouterLink}
-                    to="/saved-charts"
-                    _hover={{ bg: 'whiteAlpha.100' }}
-                    color="white"
-                    icon={<Icon as={FaChartLine} />}
-                  >
-                    Saved Charts
-                  </MenuItem>
-                  <MenuItem 
-                    as={RouterLink}
-                    to="/premium"
-                    _hover={{ bg: 'whiteAlpha.100' }}
-                    color="white"
-                    icon={<Icon as={FaMagic} />}
-                  >
-                    Upgrade Plan
-                  </MenuItem>
-                  <MenuDivider borderColor="whiteAlpha.200" />
-                  <MenuItem 
-                    onClick={handleSignOut}
-                    _hover={{ bg: 'red.600' }}
-                    color="white"
-                  >
-                    Sign Out
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            ) : (
-              <HStack spacing={2}>
-                <EducationalTooltip
-                  title="Sign In"
-                  description="Access your saved charts, premium features, and personalized astrological insights."
-                >
-                  <Button 
-                    as={RouterLink}
-                    to="/login"
-                    variant="outline"
-                    colorScheme="gold"
-                    size="sm"
-                  >
-                    Sign In
-                  </Button>
-                </EducationalTooltip>
-                <EducationalTooltip
-                  title="Create Account"
-                  description="Join CosmicHub to save charts, access premium features, and unlock your full astrological potential."
-                >
-                  <Button 
-                    as={RouterLink}
-                    to="/signup"
-                    variant="gold"
-                    size="sm"
-                  >
-                    Sign Up
-                  </Button>
-                </EducationalTooltip>
-              </HStack>
+          <div className="items-center hidden space-x-4 md:flex">
+            <NavLink to="/" icon={FaHome} tooltip={{ title: 'Home', description: 'Return to the main dashboard.' }}>
+              Home
+            </NavLink>
+            <NavLink to="/calculator" icon={FaCalculator} tooltip={{ title: 'Calculator', description: 'Calculate your natal chart or other astrological systems.' }}>
+              Calculator
+            </NavLink>
+            <NavLink to="/numerology" icon={FaChartLine} tooltip={{ title: 'Numerology', description: 'Explore your numerology profile based on your birth data.' }}>
+              Numerology
+            </NavLink>
+            <NavLink to="/human-design" icon={FaBook} tooltip={{ title: 'Human Design', description: 'Discover your Human Design chart and energy type.' }}>
+              Human Design
+            </NavLink>
+            {user && (
+              <>
+                <NavLink to="/synastry" icon={FaUsers} tier="premium" tooltip={{ title: 'Synastry', description: 'Analyze relationship compatibility.', tier: 'premium' }}>
+                  Synastry
+                </NavLink>
+                <NavLink to="/ai-interpretation" icon={FaBrain} tier="elite" tooltip={{ title: 'AI Analysis', description: 'Get AI-powered chart interpretations.', tier: 'elite' }}>
+                  AI Analysis
+                </NavLink>
+                <NavLink to="/saved-charts" icon={FaChartLine} tooltip={{ title: 'Saved Charts', description: 'View your saved astrological charts.' }}>
+                  Saved Charts
+                </NavLink>
+                <NavLink to="/profile" icon={FaUser} tooltip={{ title: 'Profile', description: 'Manage your account and subscription.' }}>
+                  Profile
+                </NavLink>
+              </>
             )}
-          </Flex>
-        </Flex>
+          </div>
 
-        {isOpen ? (
-          <Box pb={4} display={{ md: 'none' }}>
-            <Stack as={'nav'} spacing={4}>
+          <div className="items-center hidden space-x-4 md:flex">
+            {user ? (
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button className="flex items-center p-2 space-x-2 transition-colors rounded-full bg-cosmic-blue/30 hover:bg-cosmic-blue/50" aria-label="User Menu">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cosmic-silver/30">
+                      {getTierIcon(userTier)}
+                    </div>
+                    <span className="text-sm font-medium text-cosmic-silver">{user.email}</span>
+                    <svg className="w-4 h-4 text-cosmic-silver" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </DropdownMenu.Trigger>
+
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content className="bg-cosmic-blue/80 backdrop-blur-md border border-cosmic-silver/20 rounded-lg shadow-lg p-2 min-w-[200px]" sideOffset={5}>
+                    <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded cursor-pointer hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/profile')}>
+                      <FaUser />
+                      <span>Profile</span>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded cursor-pointer hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/saved-charts')}>
+                      <FaChartLine />
+                      <span>Saved Charts</span>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Separator className="h-px my-1 bg-cosmic-silver/20" />
+                    <DropdownMenu.Item className="flex items-center p-2 space-x-2 text-red-500 rounded cursor-pointer hover:bg-red-50 focus:outline-none focus:bg-red-50" onSelect={handleSignOut}>
+                      <FaSignOutAlt />
+                      <span>Sign Out</span>
+                    </DropdownMenu.Item>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <NavLink to="/login" tooltip={{ title: 'Sign In', description: 'Access your saved charts, premium features, and personalized astrological insights.' }}>
+                  Sign In
+                </NavLink>
+                <NavLink to="/signup" tooltip={{ title: 'Create Account', description: 'Join CosmicHub to save charts, access premium features, and unlock your full astrological potential.' }}>
+                  Sign Up
+                </NavLink>
+              </div>
+            )}
+          </div>
+
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-md text-cosmic-silver hover:bg-cosmic-purple/20"
+              aria-label={isMobileMenuOpen ? 'Close Menu' : 'Open Menu'}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {isMobileMenuOpen && (
+          <div className="pb-4 md:hidden">
+            <nav className="flex flex-col space-y-4">
               <NavLink to="/" icon={FaHome}>Home</NavLink>
               <NavLink to="/calculator" icon={FaCalculator}>Calculator</NavLink>
               <NavLink to="/numerology" icon={FaChartLine}>Numerology</NavLink>
@@ -401,6 +187,14 @@ export default function Navbar() {
                   <NavLink to="/ai-interpretation" icon={FaBrain} tier="elite">AI Analysis</NavLink>
                   <NavLink to="/saved-charts" icon={FaChartLine}>Saved Charts</NavLink>
                   <NavLink to="/profile" icon={FaUser}>Profile</NavLink>
+                  <button
+                    className="flex items-center gap-2 px-2 py-1 text-red-500 rounded-md hover:bg-red-50"
+                    onClick={handleSignOut}
+                    aria-label="Sign Out"
+                  >
+                    <FaSignOutAlt />
+                    Sign Out
+                  </button>
                 </>
               )}
               {!user && (
@@ -409,10 +203,14 @@ export default function Navbar() {
                   <NavLink to="/signup">Sign Up</NavLink>
                 </>
               )}
-            </Stack>
-          </Box>
-        ) : null}
-      </Box>
-    </>
+            </nav>
+          </div>
+        )}
+      </div>
+    </nav>
   );
-}
+});
+
+Navbar.displayName = 'Navbar';
+
+export default Navbar;

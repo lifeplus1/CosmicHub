@@ -1,24 +1,12 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { MultiSystemChartData } from './types';
-
-// Lazy load chart components for optimal performance
-const WesternChart = React.lazy(() => import('./WesternChart'));
-const VedicChart = React.lazy(() => import('./VedicChart'));
-const ChineseChart = React.lazy(() => import('./ChineseChart'));
-const MayanChart = React.lazy(() => import('./MayanChart'));
-const UranianChart = React.lazy(() => import('./UranianChart'));
-const SynthesisChart = React.lazy(() => import('./SynthesisChart'));
-
-// Loading fallback component for lazy-loaded charts
-const ChartLoadingFallback: React.FC = () => (
-  <div className="cosmic-card p-6">
-    <div className="flex items-center justify-center space-x-3">
-      <div className="animate-spin text-cosmic-purple text-2xl">⭐</div>
-      <p className="text-cosmic-silver">Loading chart...</p>
-    </div>
-  </div>
-);
+import WesternChart from './WesternChart';
+import VedicChart from './VedicChart';
+import ChineseChart from './ChineseChart';
+import MayanChart from './MayanChart';
+import UranianChart from './UranianChart';
+import SynthesisChart from './SynthesisChart';
 
 interface MultiSystemChartProps {
   chartData: MultiSystemChartData;
@@ -82,36 +70,12 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({ chart
             <Tabs.Trigger value="synthesis" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple">Synthesis</Tabs.Trigger>
           </Tabs.List>
 
-          <Tabs.Content value="western" className="pt-4">
-            <Suspense fallback={<ChartLoadingFallback />}>
-              <WesternChart data={chartData.western_tropical} />
-            </Suspense>
-          </Tabs.Content>
-          <Tabs.Content value="vedic" className="pt-4">
-            <Suspense fallback={<ChartLoadingFallback />}>
-              <VedicChart data={chartData.vedic_sidereal ?? {}} />
-            </Suspense>
-          </Tabs.Content>
-          <Tabs.Content value="chinese" className="pt-4">
-            <Suspense fallback={<ChartLoadingFallback />}>
-              <ChineseChart data={chartData.chinese ?? {}} />
-            </Suspense>
-          </Tabs.Content>
-          <Tabs.Content value="mayan" className="pt-4">
-            <Suspense fallback={<ChartLoadingFallback />}>
-              <MayanChart data={chartData.mayan ?? {}} />
-            </Suspense>
-          </Tabs.Content>
-          <Tabs.Content value="uranian" className="pt-4">
-            <Suspense fallback={<ChartLoadingFallback />}>
-              <UranianChart data={chartData.uranian ?? {}} />
-            </Suspense>
-          </Tabs.Content>
-          <Tabs.Content value="synthesis" className="pt-4">
-            <Suspense fallback={<ChartLoadingFallback />}>
-              <SynthesisChart data={chartData.synthesis ?? {}} />
-            </Suspense>
-          </Tabs.Content>
+          <Tabs.Content value="western" className="pt-4"><WesternChart data={chartData.western_tropical} /></Tabs.Content>
+          <Tabs.Content value="vedic" className="pt-4"><VedicChart data={chartData.vedic_sidereal ?? {}} /></Tabs.Content>
+          <Tabs.Content value="chinese" className="pt-4"><ChineseChart data={chartData.chinese ?? {}} /></Tabs.Content>
+          <Tabs.Content value="mayan" className="pt-4"><MayanChart data={chartData.mayan ?? {}} /></Tabs.Content>
+          <Tabs.Content value="uranian" className="pt-4"><UranianChart data={chartData.uranian ?? {}} /></Tabs.Content>
+          <Tabs.Content value="synthesis" className="pt-4"><SynthesisChart data={chartData.synthesis ?? {}} /></Tabs.Content>
         </Tabs.Root>
 
         {/* Footer with methodology */}

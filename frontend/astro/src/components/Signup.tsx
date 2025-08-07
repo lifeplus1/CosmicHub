@@ -1,65 +1,78 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  Box, 
-  Button, 
-  FormControl, 
-  FormLabel, 
-  Input, 
-  VStack, 
-  useToast, 
-  Icon, 
-  Heading, 
-  Text,
-  Select,
-  Textarea,
-  HStack,
-  FormHelperText,
-  Checkbox
-} from "@chakra-ui/react";
-import { signUp } from "../auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from './ToastProvider';
+import { signUp } from '../auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
-export default function Signup() {
-  console.log("Signup component mounted");
-  
-  // Basic account fields
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  
-  // User profile fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [timeOfBirth, setTimeOfBirth] = useState("");
-  const [placeOfBirth, setPlaceOfBirth] = useState("");
-  const [timezone, setTimezone] = useState("");
-  const [astrologicalExperience, setAstrologicalExperience] = useState("");
-  const [interests, setInterests] = useState("");
-  const [notificationPreferences, setNotificationPreferences] = useState({
-    dailyHoroscope: false,
-    monthlyForecast: false,
-    compatibilityInsights: false,
-    newFeatures: false
+interface FormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  timeOfBirth: string;
+  placeOfBirth: string;
+  timezone: string;
+  astrologicalExperience: string;
+  interests: string;
+  notificationPreferences: {
+    dailyHoroscope: boolean;
+    monthlyForecast: boolean;
+    compatibilityInsights: boolean;
+    newFeatures: boolean;
+  };
+  privacyConsent: boolean;
+}
+
+const Signup: React.FC = React.memo(() => {
+  const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    dateOfBirth: '',
+    timeOfBirth: '',
+    placeOfBirth: '',
+    timezone: '',
+    astrologicalExperience: '',
+    interests: '',
+    notificationPreferences: {
+      dailyHoroscope: false,
+      monthlyForecast: false,
+      compatibilityInsights: false,
+      newFeatures: false,
+    },
+    privacyConsent: false,
   });
-  const [privacyConsent, setPrivacyConsent] = useState(false);
-  
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const toast = useToast();
+  const { toast } = useToast();
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      notificationPreferences: { ...prev.notificationPreferences, [name]: checked },
+      privacyConsent: name === 'privacyConsent' ? checked : prev.privacyConsent,
+    }));
+  }, []);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted", { email, firstName, lastName });
     setIsLoading(true);
 
-    // Enhanced input validation
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        status: "error",
+        title: 'Invalid Email',
+        description: 'Please enter a valid email address',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -67,11 +80,11 @@ export default function Signup() {
       return;
     }
 
-    if (password.length < 6) {
+    if (formData.password.length < 6) {
       toast({
-        title: "Invalid Password",
-        description: "Password must be at least 6 characters",
-        status: "error",
+        title: 'Invalid Password',
+        description: 'Password must be at least 6 characters',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -79,11 +92,11 @@ export default function Signup() {
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match",
-        status: "error",
+        title: 'Password Mismatch',
+        description: 'Passwords do not match',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -91,23 +104,11 @@ export default function Signup() {
       return;
     }
 
-    if (!firstName.trim() || !lastName.trim()) {
+    if (!formData.privacyConsent) {
       toast({
-        title: "Name Required",
-        description: "Please enter your first and last name",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    if (!privacyConsent) {
-      toast({
-        title: "Privacy Consent Required",
-        description: "Please accept the Privacy Policy and Terms of Service",
-        status: "error",
+        title: 'Consent Required',
+        description: 'You must agree to the Privacy Policy and Terms of Service',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -116,330 +117,281 @@ export default function Signup() {
     }
 
     try {
-      console.log("Attempting to sign up user...");
-      const userCredential = await signUp(email, password);
-      console.log("User signed up successfully:", userCredential);
-      
-      // Save additional user profile data to Firestore
+      const userCredential = await signUp(formData.email, formData.password);
       const db = getFirestore();
-      const userDocRef = doc(db, 'users', userCredential.uid);
-      
-      const userProfileData = {
-        email: userCredential.email,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        dateOfBirth: dateOfBirth || null,
-        timeOfBirth: timeOfBirth || null,
-        placeOfBirth: placeOfBirth.trim() || null,
-        timezone: timezone || null,
-        astrologicalExperience: astrologicalExperience || null,
-        interests: interests.trim() || null,
-        notificationPreferences,
-        createdAt: new Date().toISOString(),
-        profileCompleteness: calculateProfileCompleteness()
-      };
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dateOfBirth: formData.dateOfBirth,
+        timeOfBirth: formData.timeOfBirth,
+        placeOfBirth: formData.placeOfBirth,
+        timezone: formData.timezone,
+        astrologicalExperience: formData.astrologicalExperience,
+        interests: formData.interests,
+        notificationPreferences: formData.notificationPreferences,
+        createdAt: new Date(),
+      });
 
-      console.log("Saving user profile data:", userProfileData);
-      await setDoc(userDocRef, userProfileData);
-      
       toast({
-        title: "Welcome to Cosmic Hub!",
-        description: "Your account has been created successfully.",
-        status: "success",
-        duration: 5000,
+        title: 'Account Created',
+        description: 'Welcome to Cosmic Hub!',
+        status: 'success',
+        duration: 3000,
         isClosable: true,
       });
-      
-      console.log("Navigating to home page...");
-      navigate("/");
-      
-    } catch (error: any) {
-      console.error("Signup error:", error);
-      let errorMessage = "An error occurred during signup";
-      
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "An account with this email already exists";
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = "Password is too weak";
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = "Invalid email address";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+      navigate('/chart');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
       toast({
-        title: "Signup Failed",
+        title: 'Signup Failed',
         description: errorMessage,
-        status: "error",
-        duration: 5000,
+        status: 'error',
+        duration: 3000,
         isClosable: true,
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const calculateProfileCompleteness = () => {
-    let completedFields = 0;
-    const totalOptionalFields = 6; // dateOfBirth, timeOfBirth, placeOfBirth, timezone, experience, interests
-    
-    if (dateOfBirth) completedFields++;
-    if (timeOfBirth) completedFields++;
-    if (placeOfBirth.trim()) completedFields++;
-    if (timezone) completedFields++;
-    if (astrologicalExperience) completedFields++;
-    if (interests.trim()) completedFields++;
-    
-    return Math.round((completedFields / totalOptionalFields) * 100);
-  };
+  }, [formData, navigate, toast]);
 
   return (
-    <Box 
-      minH="100vh" 
-      pt={8} 
-      pb={20}
-      px={4}
-      background="transparent"
-    >
-      <Box
-        maxW="2xl"
-        mx="auto"
-        bg="rgba(15, 23, 42, 0.8)"
-        backdropFilter="blur(40px)"
-        borderRadius="32px"
-        border="1px solid"
-        borderColor="whiteAlpha.200"
-        boxShadow="0 32px 120px rgba(0, 0, 0, 0.4)"
-        p={8}
-        position="relative"
-        _before={{
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          borderRadius: '32px',
-          padding: '2px',
-          background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(168, 85, 247, 0.3))',
-          mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-          maskComposite: 'exclude',
-          zIndex: -1,
-        }}
-      >
-        <VStack spacing={6} mb={8}>
-          <Icon viewBox="0 0 48 48" boxSize={12} color="gold.300">
-            <defs>
-              <radialGradient id="signupSunGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#fbbf24" />
-                <stop offset="70%" stopColor="#f59e0b" />
-                <stop offset="100%" stopColor="#d97706" />
-              </radialGradient>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="url(#signupSunGradient)" opacity="0.3" />
-            <circle cx="24" cy="24" r="12" fill="url(#signupSunGradient)" />
-            <g stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" opacity="0.8">
-              <path d="M24 8v-4M24 44v-4M8 24h-4M44 24h-4M35.31 35.31l2.83 2.83M9.86 9.86l2.83 2.83M35.31 12.69l2.83-2.83M9.86 38.14l2.83-2.83" />
-            </g>
-          </Icon>
-          <Heading variant="cosmic" size="2xl" textAlign="center">
-            Create Your Cosmic Account
-          </Heading>
-          <Text variant="stellar" fontSize="lg" textAlign="center">
-            Join to unlock personalized astrology insights and save your charts.
-          </Text>
-        </VStack>
+    <div className="min-h-screen px-4 py-8 bg-gray-50">
+      <div className="max-w-lg p-8 mx-auto border shadow-2xl bg-cosmic-dark/80 backdrop-blur-xl border-cosmic-silver/20 rounded-3xl">
+        <div className="flex flex-col space-y-6">
+          <h2 className="text-3xl font-bold text-center text-cosmic-gold font-cinzel">Join Cosmic Hub</h2>
+          <p className="text-lg text-center text-cosmic-silver">Create your account to unlock personalized astrology insights.</p>
 
-        <form onSubmit={handleSubmit}>
-          <VStack spacing={6}>
-            {/* Basic Account Information */}
-            <Text color="gold.300" fontSize="xl" fontWeight="bold" alignSelf="flex-start">
-              Account Information
-            </Text>
-            
-            <HStack spacing={4} w="100%">
-              <FormControl isRequired>
-                <FormLabel color="gold.200" fontSize="md" fontWeight="600">First Name</FormLabel>
-                <Input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  variant="cosmic"
-                  size="lg"
-                  placeholder="John"
+          <form onSubmit={handleSubmit} aria-label="Signup Form">
+            <div className="flex flex-col space-y-6">
+              <div>
+                <label htmlFor="email" className="block mb-2 text-cosmic-gold">Email <span aria-hidden="true">*</span></label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="your@email.com"
+                  className="cosmic-input"
+                  aria-required="true"
                 />
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel color="gold.200" fontSize="md" fontWeight="600">Last Name</FormLabel>
-                <Input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  variant="cosmic"
-                  size="lg"
-                  placeholder="Doe"
-                />
-              </FormControl>
-            </HStack>
-
-            <FormControl isRequired>
-              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Email</FormLabel>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                variant="cosmic"
-                size="lg"
-                placeholder="your@email.com"
-              />
-            </FormControl>
-
-            <HStack spacing={4} w="100%">
-              <FormControl isRequired>
-                <FormLabel color="gold.200" fontSize="md" fontWeight="600">Password</FormLabel>
-                <Input
+              </div>
+              <div>
+                <label htmlFor="password" className="block mb-2 text-cosmic-gold">Password <span aria-hidden="true">*</span></label>
+                <input
+                  id="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  variant="cosmic"
-                  size="lg"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   placeholder="••••••••"
+                  className="cosmic-input"
+                  aria-required="true"
                 />
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel color="gold.200" fontSize="md" fontWeight="600">Confirm Password</FormLabel>
-                <Input
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="block mb-2 text-cosmic-gold">Confirm Password <span aria-hidden="true">*</span></label>
+                <input
+                  id="confirmPassword"
                   type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  variant="cosmic"
-                  size="lg"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
                   placeholder="••••••••"
+                  className="cosmic-input"
+                  aria-required="true"
                 />
-              </FormControl>
-            </HStack>
-
-            {/* Birth Information */}
-            <Text color="gold.300" fontSize="xl" fontWeight="bold" alignSelf="flex-start" mt={4}>
-              Birth Information
-            </Text>
-            
-            <FormControl>
-              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Date of Birth</FormLabel>
-              <Input
-                type="date"
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                variant="cosmic"
-                size="lg"
-              />
-            </FormControl>
-
-            <HStack spacing={4} w="100%">
-              <FormControl>
-                <FormLabel color="gold.200" fontSize="md" fontWeight="600">Time of Birth</FormLabel>
-                <Input
-                  type="time"
-                  value={timeOfBirth}
-                  onChange={(e) => setTimeOfBirth(e.target.value)}
-                  variant="cosmic"
-                  size="lg"
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block mb-2 text-cosmic-gold">First Name</label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="First Name"
+                    className="cosmic-input"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block mb-2 text-cosmic-gold">Last Name</label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Last Name"
+                    className="cosmic-input"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="dateOfBirth" className="block mb-2 text-cosmic-gold">Date of Birth</label>
+                  <input
+                    id="dateOfBirth"
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                    className="cosmic-input"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="timeOfBirth" className="block mb-2 text-cosmic-gold">Time of Birth</label>
+                  <input
+                    id="timeOfBirth"
+                    type="time"
+                    name="timeOfBirth"
+                    value={formData.timeOfBirth}
+                    onChange={handleInputChange}
+                    className="cosmic-input"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="placeOfBirth" className="block mb-2 text-cosmic-gold">Place of Birth</label>
+                <input
+                  id="placeOfBirth"
+                  type="text"
+                  name="placeOfBirth"
+                  value={formData.placeOfBirth}
+                  onChange={handleInputChange}
+                  placeholder="City, State/Country"
+                  className="cosmic-input"
                 />
-                <FormHelperText color="whiteAlpha.700">Optional, for accurate Rising sign</FormHelperText>
-              </FormControl>
-              <FormControl>
-                <FormLabel color="gold.200" fontSize="md" fontWeight="600">Timezone</FormLabel>
-                <Select
-                  value={timezone}
-                  onChange={(e) => setTimezone(e.target.value)}
-                  variant="cosmic"
-                  size="lg"
-                  placeholder="Select timezone"
+              </div>
+              <div>
+                <label htmlFor="timezone" className="block mb-2 text-cosmic-gold">Timezone</label>
+                <select
+                  id="timezone"
+                  name="timezone"
+                  value={formData.timezone}
+                  onChange={handleInputChange}
+                  className="cosmic-input"
+                  aria-label="Timezone"
                 >
-                  <option value="UTC-8">UTC-8 (PST)</option>
-                  <option value="UTC-7">UTC-7 (MST)</option>
-                  <option value="UTC-6">UTC-6 (CST)</option>
-                  <option value="UTC-5">UTC-5 (EST)</option>
-                  <option value="UTC+0">UTC+0 (GMT)</option>
-                  <option value="UTC+1">UTC+1 (CET)</option>
-                  <option value="UTC+9">UTC+9 (JST)</option>
-                </Select>
-              </FormControl>
-            </HStack>
-
-            <FormControl>
-              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Place of Birth</FormLabel>
-              <Input
-                type="text"
-                value={placeOfBirth}
-                onChange={(e) => setPlaceOfBirth(e.target.value)}
-                variant="cosmic"
-                size="lg"
-                placeholder="City, Country"
-              />
-              <FormHelperText color="whiteAlpha.700">For accurate chart calculations</FormHelperText>
-            </FormControl>
-
-            {/* Preferences */}
-            <Text color="gold.300" fontSize="xl" fontWeight="bold" alignSelf="flex-start" mt={4}>
-              Preferences
-            </Text>
-
-            <FormControl>
-              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Astrological Experience</FormLabel>
-              <Select
-                value={astrologicalExperience}
-                onChange={(e) => setAstrologicalExperience(e.target.value)}
-                variant="cosmic"
-                size="lg"
-                placeholder="Select your experience level"
+                  <option value="">Select Timezone</option>
+                  <option value="America/New_York">Eastern Time</option>
+                  <option value="America/Chicago">Central Time</option>
+                  <option value="America/Denver">Mountain Time</option>
+                  <option value="America/Los_Angeles">Pacific Time</option>
+                  <option value="Europe/London">GMT</option>
+                  <option value="Europe/Paris">Central European Time</option>
+                  <option value="Asia/Tokyo">Japan Standard Time</option>
+                  <option value="Australia/Sydney">Australian Eastern Time</option>
+                </select>
+              </div>
+              <h3 className="mt-4 text-xl font-bold text-cosmic-gold">Preferences</h3>
+              <div>
+                <label htmlFor="astrologicalExperience" className="block mb-2 text-cosmic-gold">Astrological Experience</label>
+                <select
+                  id="astrologicalExperience"
+                  name="astrologicalExperience"
+                  value={formData.astrologicalExperience}
+                  onChange={handleInputChange}
+                  className="cosmic-input"
+                  aria-label="Astrological Experience Level"
+                >
+                  <option value="">Select your experience level</option>
+                  <option value="beginner">Beginner - New to astrology</option>
+                  <option value="intermediate">Intermediate - Some knowledge</option>
+                  <option value="advanced">Advanced - Deep understanding</option>
+                  <option value="professional">Professional - Practicing astrologer</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="interests" className="block mb-2 text-cosmic-gold">Areas of Interest</label>
+                <textarea
+                  id="interests"
+                  name="interests"
+                  value={formData.interests}
+                  onChange={handleInputChange}
+                  placeholder="What aspects of astrology interest you most?"
+                  className="cosmic-input"
+                  rows={3}
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <label className="font-semibold text-cosmic-gold">Notification Preferences</label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="dailyHoroscope"
+                    checked={formData.notificationPreferences.dailyHoroscope}
+                    onChange={handleCheckboxChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                  />
+                  <span className="text-cosmic-silver">Daily Horoscope</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="monthlyForecast"
+                    checked={formData.notificationPreferences.monthlyForecast}
+                    onChange={handleCheckboxChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                  />
+                  <span className="text-cosmic-silver">Monthly Forecast</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="compatibilityInsights"
+                    checked={formData.notificationPreferences.compatibilityInsights}
+                    onChange={handleCheckboxChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                  />
+                  <span className="text-cosmic-silver">Compatibility Insights</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="newFeatures"
+                    checked={formData.notificationPreferences.newFeatures}
+                    onChange={handleCheckboxChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                  />
+                  <span className="text-cosmic-silver">New Features</span>
+                </label>
+              </div>
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="privacyConsent"
+                    checked={formData.privacyConsent}
+                    onChange={handleCheckboxChange}
+                    className="w-4 h-4 text-purple-500 rounded"
+                    aria-required="true"
+                  />
+                  <span className="text-sm text-cosmic-silver">
+                    I agree to the{' '}
+                    <a href="/privacy-policy" className="underline text-cosmic-gold hover:text-cosmic-gold/80">Privacy Policy</a>{' '}
+                    and{' '}
+                    <a href="/terms-of-service" className="underline text-cosmic-gold hover:text-cosmic-gold/80">Terms of Service</a>
+                  </span>
+                </label>
+              </div>
+              <button
+                type="submit"
+                className="w-full mt-6 cosmic-button"
+                disabled={isLoading}
+                aria-disabled={isLoading}
               >
-                <option value="beginner">Beginner - New to astrology</option>
-                <option value="intermediate">Intermediate - Some knowledge</option>
-                <option value="advanced">Advanced - Deep understanding</option>
-                <option value="professional">Professional - Practicing astrologer</option>
-              </Select>
-            </FormControl>
-
-            <FormControl>
-              <FormLabel color="gold.200" fontSize="md" fontWeight="600">Areas of Interest</FormLabel>
-              <Textarea
-                value={interests}
-                onChange={(e) => setInterests(e.target.value)}
-                variant="cosmic"
-                size="lg"
-                placeholder="What aspects of astrology interest you most?"
-                rows={3}
-              />
-            </FormControl>
-
-            {/* Privacy Consent */}
-            <FormControl isRequired mt={4}>
-              <Checkbox
-                isChecked={privacyConsent}
-                onChange={(e) => setPrivacyConsent(e.target.checked)}
-                variant="cosmic"
-              >
-                <Text color="whiteAlpha.900" fontSize="sm">
-                  I agree to the <Text as="span" color="gold.300" textDecoration="underline">Privacy Policy</Text> and 
-                  <Text as="span" color="gold.300" textDecoration="underline"> Terms of Service</Text>
-                </Text>
-              </Checkbox>
-            </FormControl>
-
-            <Button
-              type="submit"
-              variant="gold"
-              isLoading={isLoading}
-              size="lg"
-              w="100%"
-              mt={6}
-            >
-              Create Cosmic Account
-            </Button>
-          </VStack>
-        </form>
-      </Box>
-    </Box>
+                Create Cosmic Account
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
-}
+});
+
+Signup.displayName = 'Signup';
+
+export default Signup;

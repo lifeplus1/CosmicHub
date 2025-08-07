@@ -1,16 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../contexts/AuthContext';
-import { ToastProvider } from '../components/ToastProvider';
 import HumanDesignChart from '../components/HumanDesignChart';
 
-const TestWrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter>
     <AuthProvider>
-      <ToastProvider>
-        {children}
-      </ToastProvider>
+      {children}
     </AuthProvider>
   </MemoryRouter>
 );

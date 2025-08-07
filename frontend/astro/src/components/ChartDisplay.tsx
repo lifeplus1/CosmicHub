@@ -2,7 +2,6 @@ import React, { memo, useMemo, useCallback } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from './ToastProvider';
 import * as Accordion from '@radix-ui/react-accordion';
-import * as Tooltip from '@radix-ui/react-tooltip';
 import type { ChartData } from '../types';
 
 interface ExtendedChartData extends ChartData {
@@ -11,7 +10,7 @@ interface ExtendedChartData extends ChartData {
   timezone: string;
   julian_day: number;
   angles: Record<string, number>;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 // Type aliases for component use
@@ -72,8 +71,8 @@ const zodiacSigns = [
 ];
 
 // Memoized functions for better performance
-const getZodiacSign = (position: number): { name: string; symbol: string; color: string; element: string } => {
-  if (typeof position !== 'number' || isNaN(position)) return { name: "Unknown", symbol: "?", color: "gray-500", element: "Unknown" };
+const getZodiacSign = (position: number) => {
+  if (typeof position !== 'number' || isNaN(position)) return { name: "Unknown", symbol: "?", color: "gray-500" };
   const index = Math.floor(position / 30);
   return zodiacSigns[index] || zodiacSigns[0];
 };
@@ -101,42 +100,6 @@ const formatDegree = (degree: number): string => {
   return `${degreeInSign}°${minutes.toString().padStart(2, '0')}' ${sign.symbol}`;
 };
 
-const getSignDescription = (signName: string): string => {
-  const descriptions: Record<string, string> = {
-    "Aries": "Bold, pioneering, and energetic. Natural leaders who initiate action and embrace new challenges.",
-    "Taurus": "Stable, practical, and sensual. Values security, comfort, and the finer things in life.",
-    "Gemini": "Curious, adaptable, and communicative. Quick-thinking and enjoys variety and mental stimulation.",
-    "Cancer": "Nurturing, intuitive, and protective. Deeply emotional with strong connections to home and family.",
-    "Leo": "Confident, creative, and dramatic. Natural performers who enjoy being in the spotlight and inspiring others.",
-    "Virgo": "Analytical, helpful, and perfectionist. Detail-oriented with a desire to improve and serve others.",
-    "Libra": "Harmonious, diplomatic, and artistic. Seeks balance, beauty, and fair partnerships in all areas of life.",
-    "Scorpio": "Intense, transformative, and mysterious. Deep emotional nature with powerful intuition and magnetic presence.",
-    "Sagittarius": "Adventurous, philosophical, and optimistic. Loves freedom, travel, and exploring new ideas and cultures.",
-    "Capricorn": "Ambitious, disciplined, and practical. Goal-oriented with strong work ethic and respect for tradition.",
-    "Aquarius": "Independent, innovative, and humanitarian. Forward-thinking with unique perspectives and social consciousness.",
-    "Pisces": "Compassionate, imaginative, and spiritual. Highly intuitive with deep empathy and artistic sensibilities."
-  };
-  return descriptions[signName] || `${signName} brings its unique energetic qualities to this planetary placement.`;
-};
-
-const getHouseDescription = (houseNumber: number): string => {
-  const descriptions: Record<number, string> = {
-    1: "Identity & Self - Your personality, appearance, and how you approach life. Your natural instincts and first impressions.",
-    2: "Values & Resources - Your money, possessions, self-worth, and personal values. What you value and how you earn.",
-    3: "Communication & Learning - Your communication style, siblings, short trips, and everyday learning. Local environment.",
-    4: "Home & Family - Your roots, family, home, and emotional foundation. Your private life and sense of security.",
-    5: "Creativity & Romance - Your creative expression, children, romance, and fun. What brings you joy and self-expression.",
-    6: "Health & Service - Your daily routines, work, health, and service to others. Your approach to wellness and duty.",
-    7: "Partnerships & Marriage - Your close relationships, marriage, and business partnerships. How you relate to others.",
-    8: "Transformation & Shared Resources - Death, rebirth, shared money, and psychological transformation. Deep change.",
-    9: "Philosophy & Higher Learning - Your beliefs, higher education, long-distance travel, and spiritual quest for meaning.",
-    10: "Career & Reputation - Your public image, career, status, and life direction. Your professional identity and goals.",
-    11: "Friends & Groups - Your friendships, social groups, hopes, and dreams. Your place in the collective and aspirations.",
-    12: "Spirituality & Subconscious - Your spiritual life, hidden enemies, subconscious patterns, and connection to the divine."
-  };
-  return descriptions[houseNumber] || `House ${houseNumber} represents a specific area of life experience in astrology.`;
-};
-
 // Memoized planet row component
 const PlanetRow = memo(({ point, data, houses }: { 
   point: string; 
@@ -146,107 +109,31 @@ const PlanetRow = memo(({ point, data, houses }: {
   const sign = getZodiacSign(data.position);
   const house = getHouseForPlanet(data.position, houses);
   
-  const getPlanetDescription = (planetName: string): string => {
-    const descriptions: Record<string, string> = {
-      sun: "Your core identity, ego, and life purpose. Represents your essential self and vitality.",
-      moon: "Your emotions, instincts, and subconscious patterns. How you feel and react emotionally.",
-      mercury: "Communication, thinking, and learning style. How you process and share information.",
-      venus: "Love, beauty, values, and relationships. What you find attractive and how you express affection.",
-      mars: "Action, desire, and energy. Your drive, ambition, and how you pursue goals.",
-      jupiter: "Growth, wisdom, and expansion. Your beliefs, optimism, and areas of natural luck.",
-      saturn: "Structure, discipline, and life lessons. Your responsibilities and areas of growth through challenge.",
-      uranus: "Innovation, rebellion, and sudden change. Your unique qualities and need for freedom.",
-      neptune: "Dreams, spirituality, and illusion. Your imagination, intuition, and connection to the divine.",
-      pluto: "Transformation, power, and regeneration. Deep psychological patterns and areas of rebirth.",
-      north_node: "Your soul's purpose and karmic direction. The qualities you're developing in this lifetime.",
-      south_node: "Past-life talents and karmic patterns. Natural abilities you're already comfortable with.",
-      chiron: "The wounded healer. Areas of deep healing and where you can help others through your experience.",
-      ascendant: "Your rising sign and how others perceive you. Your approach to life and first impressions.",
-      midheaven: "Your public image and career direction. Your reputation and life goals.",
-      ic: "Your roots and foundation. Family background and emotional security needs.",
-      descendant: "Your approach to partnerships and what you seek in others."
-    };
-    return descriptions[planetName.toLowerCase()] || `${planetName} represents specific astrological influences in your chart.`;
-  };
-  
   return (
     <tr>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
-        <Tooltip.Provider>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <div className="flex items-center space-x-2 cursor-help">
-                <span className={`text-xl text-${sign.color}`}>{planetSymbols[point] || "⭐"}</span>
-                <span className="font-bold text-cosmic-silver">{point.charAt(0).toUpperCase() + point.slice(1).replace('_', ' ')}</span>
-              </div>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                className="cosmic-card max-w-xs p-3 text-sm text-cosmic-silver border border-cosmic-gold/30 rounded-lg shadow-lg z-50"
-                sideOffset={5}
-              >
-                {getPlanetDescription(point)}
-                <Tooltip.Arrow className="fill-cosmic-dark" />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
-        </Tooltip.Provider>
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
+        <div className="flex items-center space-x-2">
+          <span className={`text-xl text-${sign.color}`}>{planetSymbols[point] || "⭐"}</span>
+          <span className="font-bold text-cosmic-silver">{point.charAt(0).toUpperCase() + point.slice(1).replace('_', ' ')}</span>
+        </div>
       </td>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
-        <Tooltip.Provider>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <div className="flex items-center space-x-2 cursor-help">
-                <span className={`text-lg text-${sign.color}`}>{sign.symbol}</span>
-                <div className="flex flex-col">
-                  <span className="font-bold text-cosmic-silver">{sign.name}</span>
-                  <span className="text-sm text-cosmic-silver/80 font-medium">{formatDegree(data.position)}</span>
-                </div>
-              </div>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                className="cosmic-card max-w-xs p-3 text-sm text-cosmic-silver border border-cosmic-gold/30 rounded-lg shadow-lg z-50"
-                sideOffset={5}
-              >
-                <div className="space-y-1">
-                  <div className="font-bold text-cosmic-gold">{sign.name} ({sign.element} Sign)</div>
-                  <div>{getSignDescription(sign.name)}</div>
-                </div>
-                <Tooltip.Arrow className="fill-cosmic-dark" />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
-        </Tooltip.Provider>
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
+        <div className="flex items-center space-x-2">
+          <span className={`text-lg text-${sign.color}`}>{sign.symbol}</span>
+          <div className="flex flex-col">
+            <span className="font-bold text-cosmic-silver">{sign.name}</span>
+            <span className="text-sm font-medium text-cosmic-silver/80">{formatDegree(data.position)}</span>
+          </div>
+        </div>
       </td>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
-        <Tooltip.Provider>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <span className="bg-cosmic-purple/20 text-cosmic-purple px-2 py-1 rounded text-sm cursor-help">
-                House {house}
-              </span>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                className="cosmic-card max-w-xs p-3 text-sm text-cosmic-silver border border-cosmic-gold/30 rounded-lg shadow-lg z-50"
-                sideOffset={5}
-              >
-                <div className="space-y-1">
-                  <div className="font-bold text-cosmic-gold">House {house}</div>
-                  <div>{getHouseDescription(house)}</div>
-                </div>
-                <Tooltip.Arrow className="fill-cosmic-dark" />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
-        </Tooltip.Provider>
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
+        <span className="px-2 py-1 text-sm rounded bg-cosmic-purple/20 text-cosmic-purple">House {house}</span>
       </td>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
         {data.retrograde ? (
-          <span className="bg-red-500 text-white px-2 py-1 rounded text-sm">℞</span>
+          <span className="px-2 py-1 text-sm text-white bg-red-500 rounded">℞</span>
         ) : (
-          <span className="text-cosmic-silver/80 font-bold">—</span>
+          <span className="font-bold text-cosmic-silver/80">—</span>
         )}
       </td>
     </tr>
@@ -257,7 +144,7 @@ PlanetRow.displayName = 'PlanetRow';
 
 // Memoized aspect row component
 const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
-  const getAspectColor = (aspectType: string): string => {
+  const getAspectColor = (aspectType: string) => {
     switch (aspectType.toLowerCase()) {
       case 'conjunction': return 'red-500';
       case 'opposition': return 'blue-500';
@@ -268,7 +155,7 @@ const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
     }
   };
 
-  const getAspectSymbol = (aspectType: string): string => {
+  const getAspectSymbol = (aspectType: string) => {
     switch (aspectType.toLowerCase()) {
       case 'conjunction': return '☌';
       case 'opposition': return '☍';
@@ -279,61 +166,29 @@ const AspectRow = memo(({ aspect }: { aspect: AspectData }) => {
     }
   };
 
-  const getAspectDescription = (aspectType: string): string => {
-    const descriptions: Record<string, string> = {
-      conjunction: "Union and blending of planetary energies. Intensifies and combines the qualities of both planets.",
-      opposition: "Tension and balance between opposing forces. Creates awareness through contrast and the need for integration.",
-      trine: "Harmonious flow of energy. Natural talents and easy expression of planetary qualities working together.",
-      square: "Dynamic tension and challenge. Creates motivation for growth through overcoming obstacles and friction.",
-      sextile: "Opportunity and cooperation. Supportive energy that can be activated through conscious effort and awareness.",
-      semisquare: "Minor tension aspect creating mild friction that motivates action and adjustment.",
-      sesquiquadrate: "Minor challenging aspect that creates restlessness and the need for refinement.",
-      quincunx: "Adjustment aspect requiring adaptation and flexibility to integrate different energies."
-    };
-    return descriptions[aspectType.toLowerCase()] || `${aspectType} represents a specific angular relationship between planets.`;
-  };
-
   const aspectColor = getAspectColor(aspect.aspect);
 
   return (
     <tr>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
         <div className="flex items-center space-x-2">
-          <span className="text-cosmic-silver font-bold">{planetSymbols[aspect.point1] || aspect.point1}</span>
+          <span className="font-bold text-cosmic-silver">{planetSymbols[aspect.point1] || aspect.point1}</span>
           <span className="font-bold text-cosmic-silver">{aspect.point1.replace('_', ' ')}</span>
         </div>
       </td>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
-        <Tooltip.Provider>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <div className="flex items-center space-x-2 cursor-help">
-                <span className={`text-lg text-${aspectColor}`}>{getAspectSymbol(aspect.aspect)}</span>
-                <span className={`font-bold text-${aspectColor}`}>{aspect.aspect}</span>
-              </div>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                className="cosmic-card max-w-xs p-3 text-sm text-cosmic-silver border border-cosmic-gold/30 rounded-lg shadow-lg z-50"
-                sideOffset={5}
-              >
-                <div className="space-y-1">
-                  <div className="font-bold text-cosmic-gold">{aspect.aspect}</div>
-                  <div>{getAspectDescription(aspect.aspect)}</div>
-                </div>
-                <Tooltip.Arrow className="fill-cosmic-dark" />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
-        </Tooltip.Provider>
-      </td>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
         <div className="flex items-center space-x-2">
-          <span className="text-cosmic-silver font-bold">{planetSymbols[aspect.point2] || aspect.point2}</span>
+          <span className={`text-lg text-${aspectColor}`}>{getAspectSymbol(aspect.aspect)}</span>
+          <span className={`font-bold text-${aspectColor}`}>{aspect.aspect}</span>
+        </div>
+      </td>
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
+        <div className="flex items-center space-x-2">
+          <span className="font-bold text-cosmic-silver">{planetSymbols[aspect.point2] || aspect.point2}</span>
           <span className="font-bold text-cosmic-silver">{aspect.point2.replace('_', ' ')}</span>
         </div>
       </td>
-      <td className="border-b border-cosmic-gold/20 py-2 px-4">
+      <td className="px-4 py-2 border-b border-cosmic-gold/20">
         <span 
           className={`${
             aspect.orb < 2 ? 'bg-green-500 text-white' : 'bg-cosmic-purple/20 text-cosmic-purple'
@@ -388,6 +243,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
         description: 'Please log in to save your chart',
         status: 'warning',
         duration: 3000,
+        isClosable: true,
       });
       return;
     }
@@ -397,10 +253,10 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
   // Loading state
   if (loading) {
     return (
-      <div className="mt-6 cosmic-card p-8">
-        <div className="text-center space-y-4">
-          <div className="animate-spin text-purple-500 text-4xl mx-auto">⭐</div>
-          <p className="text-lg text-white/80 font-medium">Calculating your natal chart...</p>
+      <div className="p-8 mt-6 cosmic-card">
+        <div className="space-y-4 text-center">
+          <div className="mx-auto text-4xl text-purple-500 animate-spin">⭐</div>
+          <p className="text-lg font-medium text-white/80">Calculating your natal chart...</p>
         </div>
       </div>
     );
@@ -409,9 +265,9 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
   // Error state
   if (!chart) {
     return (
-      <div className="mt-6 cosmic-card p-6">
-        <div className="bg-red-900/50 border border-red-500 p-4 rounded-md flex space-x-4">
-          <span className="text-red-500 text-xl">⚠️</span>
+      <div className="p-6 mt-6 cosmic-card">
+        <div className="flex p-4 space-x-4 border border-red-500 rounded-md bg-red-900/50">
+          <span className="text-xl text-red-500">⚠️</span>
           <div>
             <h3 className="font-bold text-white">No Chart Data Available</h3>
             <p className="text-white/80">Please enter your birth information and calculate your chart.</p>
@@ -426,27 +282,27 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
       <div className="cosmic-card rounded-2xl">
         <div className="p-6 lg:p-8">
           {/* Header Section */}
-          <div className="space-y-6 mb-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-lg font-bold text-cosmic-gold text-center">
+          <div className="mb-8 space-y-6">
+            <div className="space-y-4 text-center">
+              <h2 className="text-lg font-bold text-center text-cosmic-gold">
                 🌟 Your Natal Chart
               </h2>
               
               {/* Chart Information */}
-              <div className="cosmic-card bg-purple-50/10 p-4 lg:p-6 rounded-xl border border-purple-300/30">
+              <div className="p-4 border cosmic-card bg-purple-50/10 lg:p-6 rounded-xl border-purple-300/30">
                 <div className="space-y-3">
-                  <div className="flex flex-wrap justify-center gap-4 lg:gap-8 text-sm lg:text-base">
-                    <p className="text-cosmic-silver font-semibold">
+                  <div className="flex flex-wrap justify-center gap-4 text-sm lg:gap-8 lg:text-base">
+                    <p className="font-semibold text-cosmic-silver">
                       <strong>Latitude:</strong> {chartInfo?.latitude}°
                     </p>
-                    <p className="text-cosmic-silver font-semibold">
+                    <p className="font-semibold text-cosmic-silver">
                       <strong>Longitude:</strong> {chartInfo?.longitude}°
                     </p>
-                    <p className="text-cosmic-silver font-semibold">
+                    <p className="font-semibold text-cosmic-silver">
                       <strong>Timezone:</strong> {chartInfo?.timezone}
                     </p>
                   </div>
-                  <p className="text-cosmic-silver text-sm text-center opacity-80">
+                  <p className="text-sm text-center text-cosmic-silver opacity-80">
                     Julian Day: {chartInfo?.julianDay}
                   </p>
                 </div>
@@ -456,7 +312,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               {user && onSaveChart && (
                 <div className="flex justify-center">
                   <button
-                    className="cosmic-button text-lg"
+                    className="text-lg cosmic-button"
                     onClick={handleSaveChart}
                   >
                     💾 Save Chart
@@ -469,15 +325,15 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
           {/* Chart Sections */}
           <Accordion.Root className="space-y-6" type="multiple" defaultValue={['0']}>
             {/* Planets Section */}
-            <Accordion.Item value="0" className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
-              <Accordion.Trigger className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6 w-full flex justify-between items-center">
+            <Accordion.Item value="0" className="overflow-hidden cosmic-card border-purple-300/30 rounded-xl">
+              <Accordion.Trigger className="flex justify-between w-full p-4 transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30 lg:p-6">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">🪐</span>
-                  <span className="text-lg lg:text-xl font-bold text-cosmic-silver mb-0">
+                  <span className="mb-0 text-lg font-bold lg:text-xl text-cosmic-silver">
                     Planets ({planetEntries.length})
                   </span>
                 </div>
-                <span className="text-cosmic-silver text-xl">▼</span>
+                <Accordion.Icon />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 {planetEntries.length > 0 ? (
@@ -485,10 +341,10 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     <table className="w-full table-auto">
                       <thead>
                         <tr>
-                          <th className="min-w-32 py-2 px-4 text-left">Planet</th>
-                          <th className="min-w-40 py-2 px-4 text-left">Sign & Position</th>
-                          <th className="min-w-24 py-2 px-4 text-left">House</th>
-                          <th className="min-w-20 py-2 px-4 text-left">Motion</th>
+                          <th className="px-4 py-2 text-left min-w-32">Planet</th>
+                          <th className="px-4 py-2 text-left min-w-40">Sign & Position</th>
+                          <th className="px-4 py-2 text-left min-w-24">House</th>
+                          <th className="px-4 py-2 text-left min-w-20">Motion</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -505,8 +361,8 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                   </div>
                 ) : (
                   <div className="p-6">
-                    <div className="bg-yellow-900/50 border border-yellow-500 p-4 rounded-md flex space-x-4">
-                      <span className="text-yellow-500 text-xl">⚠️</span>
+                    <div className="flex p-4 space-x-4 border border-yellow-500 rounded-md bg-yellow-900/50">
+                      <span className="text-xl text-yellow-500">⚠️</span>
                       <p className="text-white/80">No planet data available</p>
                     </div>
                   </div>
@@ -515,24 +371,24 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
             </Accordion.Item>
 
             {/* Houses Section */}
-            <Accordion.Item value="1" className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
-              <Accordion.Trigger className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6 w-full flex justify-between items-center">
+            <Accordion.Item value="1" className="overflow-hidden cosmic-card border-purple-300/30 rounded-xl">
+              <Accordion.Trigger className="flex justify-between w-full p-4 transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30 lg:p-6">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">🏠</span>
-                  <span className="text-lg lg:text-xl font-bold text-cosmic-silver mb-0">
+                  <span className="mb-0 text-lg font-bold lg:text-xl text-cosmic-silver">
                     Houses ({chart.houses?.length || 0})
                   </span>
                 </div>
-                <span className="text-cosmic-silver text-xl">▼</span>
+                <Accordion.Icon />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full table-auto">
                     <thead>
                       <tr>
-                        <th className="min-w-24 py-2 px-4 text-left">House</th>
-                        <th className="min-w-40 py-2 px-4 text-left">Cusp Sign</th>
-                        <th className="min-w-32 py-2 px-4 text-left">Degree</th>
+                        <th className="px-4 py-2 text-left min-w-24">House</th>
+                        <th className="px-4 py-2 text-left min-w-40">Cusp Sign</th>
+                        <th className="px-4 py-2 text-left min-w-32">Degree</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -540,16 +396,16 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                         const sign = getZodiacSign(house.cusp);
                         return (
                           <tr key={index}>
-                            <td className="border-b border-cosmic-gold/20 py-2 px-4">
-                              <span className="bg-cosmic-purple text-white px-2 py-1 rounded text-sm">House {house.house}</span>
+                            <td className="px-4 py-2 border-b border-cosmic-gold/20">
+                              <span className="px-2 py-1 text-sm text-white rounded bg-cosmic-purple">House {house.house}</span>
                             </td>
-                            <td className="border-b border-cosmic-gold/20 py-2 px-4">
+                            <td className="px-4 py-2 border-b border-cosmic-gold/20">
                               <div className="flex items-center space-x-2">
                                 <span className={`text-lg text-${sign.color}`}>{sign.symbol}</span>
                                 <span className="font-semibold text-white">{sign.name}</span>
                               </div>
                             </td>
-                            <td className="border-b border-cosmic-gold/20 py-2 px-4 text-white/80 font-mono">
+                            <td className="px-4 py-2 font-mono border-b border-cosmic-gold/20 text-white/80">
                               {formatDegree(house.cusp)}
                             </td>
                           </tr>
@@ -562,24 +418,24 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
             </Accordion.Item>
 
             {/* Angles Section */}
-            <Accordion.Item value="2" className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
-              <Accordion.Trigger className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6 w-full flex justify-between items-center">
+            <Accordion.Item value="2" className="overflow-hidden cosmic-card border-purple-300/30 rounded-xl">
+              <Accordion.Trigger className="flex justify-between w-full p-4 transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30 lg:p-6">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">📐</span>
-                  <span className="text-lg lg:text-xl font-bold text-cosmic-silver mb-0">
+                  <span className="mb-0 text-lg font-bold lg:text-xl text-cosmic-silver">
                     Angles ({Object.keys(chart.angles || {}).length})
                   </span>
                 </div>
-                <span className="text-cosmic-silver text-xl">▼</span>
+                <Accordion.Icon />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full table-auto">
                     <thead>
                       <tr>
-                        <th className="min-w-32 py-2 px-4 text-left">Angle</th>
-                        <th className="min-w-32 py-2 px-4 text-left">Sign</th>
-                        <th className="min-w-32 py-2 px-4 text-left">Position</th>
+                        <th className="px-4 py-2 text-left min-w-32">Angle</th>
+                        <th className="px-4 py-2 text-left min-w-32">Sign</th>
+                        <th className="px-4 py-2 text-left min-w-32">Position</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -587,7 +443,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                         const sign = getZodiacSign(degree);
                         return (
                           <tr key={angle}>
-                            <td className="border-b border-cosmic-gold/20 py-2 px-4">
+                            <td className="px-4 py-2 border-b border-cosmic-gold/20">
                               <div className="flex items-center space-x-2">
                                 <span className="text-lg text-amber-400">
                                   {planetSymbols[angle] || "⭐"}
@@ -597,7 +453,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                                 </span>
                               </div>
                             </td>
-                            <td className="border-b border-cosmic-gold/20 py-2 px-4">
+                            <td className="px-4 py-2 border-b border-cosmic-gold/20">
                               <div className="flex items-center space-x-2">
                                 <span className={`text-lg text-${sign.color}`}>
                                   {sign.symbol}
@@ -605,7 +461,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                                 <span className="text-white">{sign.name}</span>
                               </div>
                             </td>
-                            <td className="border-b border-cosmic-gold/20 py-2 px-4 text-white/80 font-mono">
+                            <td className="px-4 py-2 font-mono border-b border-cosmic-gold/20 text-white/80">
                               {formatDegree(degree)}
                             </td>
                           </tr>
@@ -618,15 +474,15 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
             </Accordion.Item>
 
             {/* Aspects Section */}
-            <Accordion.Item value="3" className="cosmic-card border-purple-300/30 rounded-xl overflow-hidden">
-              <Accordion.Trigger className="bg-purple-500/20 hover:bg-purple-500/30 transition-colors duration-300 p-4 lg:p-6 w-full flex justify-between items-center">
+            <Accordion.Item value="3" className="overflow-hidden cosmic-card border-purple-300/30 rounded-xl">
+              <Accordion.Trigger className="flex justify-between w-full p-4 transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30 lg:p-6">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">⚹</span>
-                  <span className="text-lg lg:text-xl font-bold text-cosmic-silver mb-0">
+                  <span className="mb-0 text-lg font-bold lg:text-xl text-cosmic-silver">
                     Major Aspects ({aspectEntries.length})
                   </span>
                 </div>
-                <span className="text-cosmic-silver text-xl">▼</span>
+                <Accordion.Icon />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 {aspectEntries.length > 0 ? (
@@ -634,10 +490,10 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     <table className="w-full table-auto">
                       <thead>
                         <tr>
-                          <th className="min-w-32 py-2 px-4 text-left">Planet 1</th>
-                          <th className="min-w-32 py-2 px-4 text-left">Aspect</th>
-                          <th className="min-w-32 py-2 px-4 text-left">Planet 2</th>
-                          <th className="min-w-24 py-2 px-4 text-left">Orb</th>
+                          <th className="px-4 py-2 text-left min-w-32">Planet 1</th>
+                          <th className="px-4 py-2 text-left min-w-32">Aspect</th>
+                          <th className="px-4 py-2 text-left min-w-32">Planet 2</th>
+                          <th className="px-4 py-2 text-left min-w-24">Orb</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -649,8 +505,8 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                   </div>
                 ) : (
                   <div className="p-6">
-                    <div className="bg-blue-900/50 border border-blue-500 p-4 rounded-md flex space-x-4">
-                      <span className="text-blue-500 text-xl">ℹ️</span>
+                    <div className="flex p-4 space-x-4 border border-blue-500 rounded-md bg-blue-900/50">
+                      <span className="text-xl text-blue-500">ℹ️</span>
                       <p className="text-white/80">No major aspects found within 8° orb</p>
                     </div>
                   </div>

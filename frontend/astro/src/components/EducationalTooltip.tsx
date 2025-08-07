@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  Tooltip,
-  Box,
-  Icon,
-  VStack,
-  Text,
-  HStack,
-  Badge,
-  useColorModeValue
-} from '@chakra-ui/react';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { FaQuestionCircle, FaInfoCircle } from 'react-icons/fa';
 
 interface EducationalTooltipProps {
@@ -20,7 +11,7 @@ interface EducationalTooltipProps {
   placement?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-export const EducationalTooltip: React.FC<EducationalTooltipProps> = ({
+export const EducationalTooltip: React.FC<EducationalTooltipProps> = React.memo(({
   title,
   description,
   examples = [],
@@ -28,61 +19,78 @@ export const EducationalTooltip: React.FC<EducationalTooltipProps> = ({
   children,
   placement = 'top'
 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const getTierColor = (tier?: 'free' | 'premium' | 'elite') => {
+    switch (tier) {
+      case 'elite': return 'gold-500';
+      case 'premium': return 'purple-500';
+      case 'free': return 'gray-500';
+      default: return 'gray-500';
+    }
+  };
 
   const tooltipContent = (
-    <VStack spacing={2} align="start" maxW="300px" p={2}>
-      <HStack justify="space-between" w="full">
-        <Text fontWeight="bold" fontSize="sm">{title}</Text>
+    <div className="flex flex-col space-y-2 max-w-[300px] p-2">
+      <div className="flex justify-between w-full">
+        <p className="text-sm font-bold text-cosmic-silver">{title}</p>
         {tier && (
-          <Badge 
-            size="xs" 
-            colorScheme={tier === 'elite' ? 'gold' : tier === 'premium' ? 'purple' : 'gray'}
-          >
+          <span className={`bg-${getTierColor(tier)}/20 text-${getTierColor(tier)} px-2 py-1 rounded text-xs`}>
             {tier === 'elite' ? '👑' : tier === 'premium' ? '🌟' : '📖'} {tier}
-          </Badge>
+          </span>
         )}
-      </HStack>
-      <Text fontSize="xs" color="whiteAlpha.800">{description}</Text>
+      </div>
+      <p className="text-xs text-cosmic-silver/80">{description}</p>
       {examples.length > 0 && (
-        <VStack spacing={1} align="start" w="full">
-          <Text fontSize="xs" fontWeight="bold">Examples:</Text>
+        <div className="flex flex-col space-y-1">
+          <p className="text-xs font-bold">Examples:</p>
           {examples.map((example, index) => (
-            <Text key={index} fontSize="xs" color="gray.500">
-              • {example}
-            </Text>
+            <p key={index} className="text-xs text-cosmic-silver/60">• {example}</p>
           ))}
-        </VStack>
+        </div>
       )}
-    </VStack>
+    </div>
   );
 
   return (
-    <Tooltip
-      label={tooltipContent}
-      placement={placement}
-      bg={bgColor}
-      color="inherit"
-      borderColor={borderColor}
-      borderWidth={1}
-      borderRadius="md"
-      shadow="lg"
-      hasArrow
-    >
-      {children || (
-        <Box display="inline-block" cursor="help">
-          <Icon as={FaQuestionCircle} color="gray.400" boxSize={3} />
-        </Box>
-      )}
-    </Tooltip>
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        {children || (
+          <div className="inline-block cursor-help">
+            <FaQuestionCircle className="text-sm text-gray-400" />
+          </div>
+        )}
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          side={placement}
+          className="p-2 border rounded-md shadow-lg bg-cosmic-blue/80 backdrop-blur-md border-cosmic-silver/20 text-cosmic-silver"
+        >
+          {tooltipContent}
+          <Tooltip.Arrow className="fill-cosmic-blue/80" />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
   );
-};
+});
 
-export const InfoIcon: React.FC<{ tooltip: string }> = ({ tooltip }) => (
-  <Tooltip label={tooltip} placement="top">
-    <Box display="inline-block" cursor="help" ml={1}>
-      <Icon as={FaInfoCircle} color="blue.400" boxSize={3} />
-    </Box>
-  </Tooltip>
-);
+EducationalTooltip.displayName = 'EducationalTooltip';
+
+export const InfoIcon: React.FC<{ tooltip: string }> = React.memo(({ tooltip }) => (
+  <Tooltip.Root>
+    <Tooltip.Trigger asChild>
+      <div className="inline-block ml-1 cursor-help">
+        <FaInfoCircle className="text-sm text-blue-400" />
+      </div>
+    </Tooltip.Trigger>
+    <Tooltip.Portal>
+      <Tooltip.Content
+        side="top"
+        className="bg-cosmic-blue/80 backdrop-blur-md border border-cosmic-silver/20 rounded-md shadow-lg p-2 text-cosmic-silver max-w-[300px]"
+      >
+        <p className="text-sm">{tooltip}</p>
+        <Tooltip.Arrow className="fill-cosmic-blue/80" />
+      </Tooltip.Content>
+    </Tooltip.Portal>
+  </Tooltip.Root>
+));
+
+InfoIcon.displayName = 'InfoIcon';

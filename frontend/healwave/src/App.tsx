@@ -1,79 +1,56 @@
-import FrequencyControls from "./components/FrequencyControls";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import { AuthProvider } from "./contexts/AuthContext";
-import * as RadixTooltip from '@radix-ui/react-tooltip';
-import "./styles/App.css";
+import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-function App() {
+const Subscribe: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      alert('Please sign in to subscribe to HealWave Pro');
+      navigate('/login');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // TODO: Integrate with Stripe Checkout
+      alert('Subscription system will be available soon!');
+    } catch (error) {
+      console.error('Subscription error:', error);
+      alert('An error occurred. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthProvider>
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-teal-800">
-        <Navbar />
-        <main className="flex items-center justify-center flex-1 px-4 py-8">
-          <div className="w-full max-w-4xl">
-            <div className="mb-12 text-center">
-              <RadixTooltip.Root>
-                <RadixTooltip.Trigger asChild>
-                  <h1 className="mb-4 text-5xl font-bold tracking-wide text-white cursor-help">
-                    <span className="text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text">
-                      HealWave
-                    </span>
-                  </h1>
-                </RadixTooltip.Trigger>
-                <RadixTooltip.Content className="px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg">
-                  HealWave: Therapeutic Frequency Generator for healing, meditation, and wellness
-                  <RadixTooltip.Arrow className="fill-gray-900" />
-                </RadixTooltip.Content>
-              </RadixTooltip.Root>
-              <RadixTooltip.Root>
-                <RadixTooltip.Trigger asChild>
-                  <p className="mb-2 text-xl text-gray-300 cursor-help">Therapeutic Frequency Generator</p>
-                </RadixTooltip.Trigger>
-                <RadixTooltip.Content className="px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg">
-                  This app generates binaural beats for healing, meditation, and wellness.
-                  <RadixTooltip.Arrow className="fill-gray-900" />
-                </RadixTooltip.Content>
-              </RadixTooltip.Root>
-              <RadixTooltip.Root>
-                <RadixTooltip.Trigger asChild>
-                  <p className="text-gray-400 cursor-help">Binaural beats for healing, meditation, and wellness</p>
-                </RadixTooltip.Trigger>
-                <RadixTooltip.Content className="px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg">
-                  Learn more about binaural beats and their therapeutic benefits.
-                  <RadixTooltip.Arrow className="fill-gray-900" />
-                </RadixTooltip.Content>
-              </RadixTooltip.Root>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-teal-800 px-4 py-8">
+      <div className="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-3xl border border-white/20 shadow-2xl p-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-white mb-2">Subscribe to HealWave Pro</h2>
+          <p className="text-gray-300">Unlock premium features for an enhanced healing experience.</p>
+        </div>
+        <button
+          onClick={handleSubscribe}
+          disabled={isLoading}
+          className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none"
+          aria-label="Subscribe to HealWave Pro"
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+              Processing...
             </div>
-            <RadixTooltip.Root>
-              <RadixTooltip.Trigger asChild>
-                <div className="p-8 border shadow-2xl bg-white/10 backdrop-blur-lg rounded-3xl border-white/20 cursor-help">
-                  <FrequencyControls />
-                </div>
-              </RadixTooltip.Trigger>
-              <RadixTooltip.Content className="px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg">
-                Adjust frequencies and settings for your personalized healing experience.
-                <RadixTooltip.Arrow className="fill-gray-900" />
-              </RadixTooltip.Content>
-            </RadixTooltip.Root>
-            </div>
-            <RadixTooltip.Root>
-              <RadixTooltip.Trigger asChild>
-                <div className="p-8 border shadow-2xl bg-white/10 backdrop-blur-lg rounded-3xl border-white/20 cursor-help">
-                  <FrequencyControls />
-                </div>
-              </RadixTooltip.Trigger>
-              <RadixTooltip.Content className="px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg">
-                Adjust frequencies and settings for your personalized healing experience.
-                <RadixTooltip.Arrow className="fill-gray-900" />
-              </RadixTooltip.Content>
-            </RadixTooltip.Root>
-          </div>
-        </main>
-        <Footer />
+          ) : (
+            'Subscribe Now'
+          )}
+        </button>
       </div>
-    </AuthProvider>
+    </div>
   );
-}
+};
 
-export default App;
+export default Subscribe;

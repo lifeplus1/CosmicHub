@@ -23,7 +23,7 @@ vi.mock('axios', () => ({
 }));
 
 import axios from 'axios';
-const mockAxios = axios as typeof axios;
+const mockAxios = axios as any;
 mockAxios.post = vi.fn();
 
 const mockNavigate = vi.fn();
