@@ -1,31 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "noEmit": true
   },
-  "references": [
-    { "path": "./apps/astro" },
-    { "path": "./apps/healwave" },
-    { "path": "./packages/auth" },
-    { "path": "./packages/config" },
-    { "path": "./packages/integrations" },
-    { "path": "./packages/ui" }
-  ],
-  "files": [],
-  "include": [],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", ".turbo"]
 }

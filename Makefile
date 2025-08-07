@@ -1,15 +1,15 @@
 test:
-	cd frontend/astro && npm run test
-	cd frontend/healwave && npm run test
+	cd apps/astro && npm run test
+	cd apps/healwave && npm run test
 	cd backend && pytest
 
 lint:
-	npx eslint frontend/astro/src frontend/healwave/src
+	npx eslint apps/astro/src apps/healwave/src
 	cd backend && flake8 .
 
 build:
-	cd frontend/astro && npm run build
-	cd frontend/healwave && npm run build
+	cd apps/astro && npm run build
+	cd apps/healwave && npm run build
 
 format:
-	npx prettier --write frontend/astro/src frontend/healwave/src
+	npx prettier --write apps/astro/src apps/healwave/src

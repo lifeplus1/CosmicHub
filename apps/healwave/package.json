@@ -11,7 +11,11 @@
     "test": "vitest"
   },
   "dependencies": {
-  
+    "@cosmichub/auth": "*",
+    "@cosmichub/config": "*",
+    "@cosmichub/frequency": "*",
+    "@cosmichub/integrations": "*",
+    "@cosmichub/ui": "*",
     "@radix-ui/react-tooltip": "^1.2.7",
     "firebase": "^10.12.2",
     "react": "^18.3.1",

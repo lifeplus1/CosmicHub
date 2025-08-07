@@ -10,22 +10,22 @@ services:
       - ./backend/.env.docker
     restart: unless-stopped
 
-  frontend-astro:
-    build: ./frontend/astro
+  astro-app:
+    build: ./apps/astro
     command: npm run dev
     volumes:
-      - ./frontend/astro:/app
+      - ./apps/astro:/app
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
     restart: unless-stopped
 
-  frontend-healwave:
-    build: ./frontend/healwave
+  healwave-app:
+    build: ./apps/healwave
     command: npm run dev
     volumes:
-      - ./frontend/healwave:/app
+      - ./apps/healwave:/app
     ports:
       - "4000:3000"
     environment:

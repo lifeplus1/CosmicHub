@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Card } from '@cosmichub/ui';
+import Card from '@cosmichub/ui/Card';
 
 interface AudioPlayerProps {
   frequency: number;

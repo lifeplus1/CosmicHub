@@ -4,6 +4,10 @@ export { Modal } from "./components/Modal";
 export { Loading } from "./components/Loading";
 export { Input } from "./components/Input";
 export { Badge } from "./components/Badge";
+export { Alert } from "./components/Alert";
+export { Spinner } from "./components/Spinner";
+export { Tooltip } from "./components/Tooltip";
+export { Dropdown } from "./components/Dropdown";
 
 export type { ButtonProps } from "./components/Button";
 export type { CardProps } from "./components/Card";
@@ -11,3 +15,7 @@ export type { ModalProps } from "./components/Modal";
 export type { LoadingProps } from "./components/Loading";
 export type { InputProps } from "./components/Input";
 export type { BadgeProps } from "./components/Badge";
+export type { AlertProps } from "./components/Alert";
+export type { SpinnerProps } from "./components/Spinner";
+export type { TooltipProps } from "./components/Tooltip";
+export type { DropdownProps, DropdownOption } from "./components/Dropdown";
