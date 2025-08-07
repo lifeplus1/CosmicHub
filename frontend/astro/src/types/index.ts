@@ -10,6 +10,7 @@ export interface BirthData {
 }
 
 export interface ChartData {
+  interpretation: any;
   planets: Record<string, {
     position: number;
     house: number;

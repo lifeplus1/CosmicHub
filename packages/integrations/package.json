@@ -1,0 +1,26 @@
+{
+  "name": "@cosmichub/integrations",
+  "version": "1.0.0",
+  "description": "Cross-app integrations for CosmicHub applications",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zustand": "^4.4.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^19.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}

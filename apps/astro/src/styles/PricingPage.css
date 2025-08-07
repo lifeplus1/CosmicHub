@@ -1,0 +1,18 @@
+.pricing-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.pricing-table th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 2px solid #4A5568;
+}
+.pricing-table td {
+  padding: 12px;
+}
+.pricing-table thead th {
+  text-align: center;
+}
+.pricing-table tbody tr {
+  border-bottom: 1px solid #2D3748;
+}
