@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@cosmichub/auth';
-import { useCrossAppStore, CrossAppBridge } from '@cosmichub/integrations';
-import { getAppConfig, isFeatureEnabled, PLANETARY_FREQUENCIES } from '@cosmichub/config';
+import { useCrossAppStore } from '@cosmichub/integrations';
+import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
 import { Button } from '@cosmichub/ui';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
@@ -12,50 +12,43 @@ import Presets from './pages/Presets';
 import Profile from './pages/Profile';
 
 function MainApp(): JSX.Element {
-  const { astroData, addNotification } = useCrossAppStore();
+  const { addNotification } = useCrossAppStore();
   const config = getAppConfig('healwave');
 
-  // Handle astrology data integration
   React.useEffect(() => {
-    if (astroData && isFeatureEnabled('astroIntegration', 'healwave')) {
+    if (isFeatureEnabled('crossAppIntegration')) {
       addNotification({
-        id: 'astro-integration',
-        message: 'Astrology data received - frequencies updated',
-        type: 'success',
+        id: 'healwave-init',
+        message: 'Healwave app initialized with cross-app integration',
+        type: 'info',
         timestamp: Date.now()
       });
     }
-  }, [astroData, addNotification]);
+  }, [addNotification]);
 
   const handleOpenAstroApp = () => {
-    CrossAppBridge.sendMessage('astro', {
-      type: 'OPEN_CHART_CALCULATOR',
-      payload: { returnTo: 'healwave' }
-    });
+    window.open('/astro', '_blank');
   };
 
   return (
     <Router>
-      <div className="min-h-screen bg-cosmic-dark text-cosmic-silver">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
         <Navbar />
         <main className="container mx-auto px-4 py-8">
-          {/* Cross-app integration banner */}
-          {isFeatureEnabled('astroIntegration', 'healwave') && (
-            <div className="mb-6 p-4 bg-cosmic-purple/20 rounded-lg border border-cosmic-purple/30">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">
-                Astrological Frequency Healing
-              </h3>
-              <p className="text-sm text-cosmic-silver/80 mb-3">
-                Generate healing frequencies based on your birth chart data.
-              </p>
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4">Healwave Frequency Generator</h1>
+            <p className="text-xl text-blue-200">
+              Therapeutic sound frequencies for healing and wellness
+            </p>
+            <div className="mt-4">
               <Button
                 onClick={handleOpenAstroApp}
                 className="bg-cosmic-gold text-cosmic-dark hover:bg-cosmic-gold/90"
               >
-                Calculate Birth Chart
+                Open Astrology App
               </Button>
             </div>
-          )}
+          </div>
 
           <Routes>
             <Route path="/" element={<FrequencyGenerator />} />
@@ -65,11 +58,9 @@ function MainApp(): JSX.Element {
         </main>
         <Footer />
         
-        {/* Debug info in development */}
         {config.environment === 'development' && (
-          <div className="fixed bottom-4 right-4 bg-cosmic-purple p-2 rounded text-xs">
-            App: {config.app} | Env: {config.environment}
-            {astroData && <div>Astro Data: Connected</div>}
+          <div className="fixed bottom-4 right-4 bg-purple-600 p-2 rounded text-xs">
+            App: {config.app} | Env: {config.environment} | Version: {config.version}
           </div>
         )}
       </div>
@@ -78,7 +69,7 @@ function MainApp(): JSX.Element {
 }
 
 const App: React.FC = () => (
-  <AuthProvider appName="healwave">
+  <AuthProvider>
     <ErrorBoundary>
       <MainApp />
     </ErrorBoundary>
