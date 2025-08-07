@@ -2,7 +2,7 @@
 Tests for astro/calculations/chart.py
 """
 import pytest
-from backend.astro.calculations.chart import (
+from astro.calculations.chart import (
     validate_inputs,
     calculate_chart,
     calculate_multi_system_chart,
