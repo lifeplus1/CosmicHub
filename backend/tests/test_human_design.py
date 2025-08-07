@@ -2,7 +2,7 @@
 Tests for astro/calculations/human_design.py
 """
 import pytest
-from backend.astro.calculations.human_design import (
+from astro.calculations.human_design import (
     calculate_human_design,
     calculate_planetary_activations,
     determine_type_and_authority,

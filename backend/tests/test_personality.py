@@ -2,7 +2,7 @@
 Tests for astro/calculations/personality.py
 """
 import pytest
-from backend.astro.calculations.personality import (
+from astro.calculations.personality import (
     get_personality_traits,
     get_sun_sign
 )
