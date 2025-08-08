@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 // Update the import path if AuthContext is located elsewhere, e.g.:
-import { useAuth } from './AuthContext';
+import { useAuth } from '@cosmichub/auth';
 // Or ensure that './AuthContext.tsx' exists and exports useAuth.
 import type { UserSubscription } from '../types/subscription';
 import { getUserTier, hasFeatureAccess, COSMICHUB_TIERS } from '../types/subscription';
+import { upgradeEventManager } from '../utils/upgradeEvents';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://astrology-app-0emh.onrender.com';
 
@@ -158,9 +159,8 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
   };
 
   const upgradeRequired = (feature: string) => {
-    // Show upgrade notification
-    console.log(`Upgrade to CosmicHub Pro required for: ${feature}`);
-    // TODO: Show upgrade modal or redirect to pricing page
+    // Trigger upgrade modal via event system
+    upgradeEventManager.triggerUpgradeRequired(feature);
   };
 
   useEffect(() => {

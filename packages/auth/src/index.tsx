@@ -85,8 +85,31 @@ export const useAuth = (): AuthState => {
   return { user, loading, signOut };
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AuthProviderProps {
+  children: React.ReactNode;
+  appName?: string; // allow passing for context / logging though unused now
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  // Placeholder: could add appName-based logic later
   return <>{children}</>;
+};
+
+// Auth action functions expected by apps
+export const logIn = async (email: string, password: string): Promise<User> => {
+  const { signInWithEmailAndPassword } = await import('firebase/auth');
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  return userCredential.user;
+};
+
+export const signUp = async (email: string, password: string): Promise<User> => {
+  const { createUserWithEmailAndPassword } = await import('firebase/auth');
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  return userCredential.user;
+};
+
+export const logOut = async (): Promise<void> => { 
+  await auth.signOut(); 
 };
 
 export * from 'firebase/auth';

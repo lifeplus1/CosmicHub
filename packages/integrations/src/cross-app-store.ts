@@ -83,23 +83,11 @@ class CrossAppStore extends EventEmitter {
 
   // Sync chart data from astro to healwave
   syncChartToHealwave(chartData: any): void {
-    const event: CrossAppEvent = {
-      type: 'chart:sync',
-      payload: chartData,
-      source: 'astro',
-      timestamp: Date.now()
-    };
     this.broadcastEvent('chart:sync', chartData);
   }
 
   // Sync frequency settings from healwave to astro
   syncFrequenciesToAstro(frequencies: number[]): void {
-    const event: CrossAppEvent = {
-      type: 'frequencies:sync',
-      payload: frequencies,
-      source: 'healwave',
-      timestamp: Date.now()
-    };
     this.broadcastEvent('frequencies:sync', frequencies);
   }
 

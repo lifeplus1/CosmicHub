@@ -69,7 +69,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         aria-haspopup="listbox"
-        aria-expanded={isOpen}
+        aria-expanded={isOpen ? 'true' : 'false'}
         aria-labelledby="dropdown-label"
       >
         <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
@@ -88,18 +88,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
             role="listbox"
             className="py-1 overflow-auto max-h-60"
             aria-labelledby="dropdown-label"
+            aria-label="Dropdown options"
           >
             {options.map((option) => (
               <li
                 key={option.value}
                 role="option"
-                aria-selected={option.value === selectedValue}
-                className={`
-                  px-4 py-2 cursor-pointer select-none
-                  ${option.disabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-900 hover:bg-blue-50'}
-                  ${option.value === selectedValue ? 'bg-blue-100 text-blue-900' : ''}
-                `}
-                onClick={() => !option.disabled && handleSelect(option.value)}
+                aria-selected={selectedOption?.value === option.value ? 'true' : 'false'}
+                className={`px-4 py-2 text-sm cursor-pointer transition-colors ${
+                  selectedOption?.value === option.value
+                    ? 'bg-blue-100 text-blue-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                onClick={() => handleSelect(option.value)}
               >
                 {option.label}
               </li>

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import axios from 'axios';
 import { getAuthToken } from '../services/api';
@@ -193,7 +193,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
             type="submit"
             className="cosmic-button"
             disabled={!isFormValid()}
-            aria-disabled={!isFormValid()}
+            aria-disabled={!isFormValid() ? 'true' : 'false'}
           >
             Analyze Personality
           </button>

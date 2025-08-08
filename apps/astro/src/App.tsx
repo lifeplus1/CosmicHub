@@ -7,10 +7,14 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
+import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
+import { UpgradeModalManager } from './components/UpgradeModalManager';
 
 const Dashboard = lazy(() => import('./pages/Dashboard')); // Lazy load for performance
 const ChartCalculation = lazy(() => import('./pages/ChartCalculation'));
 const Profile = lazy(() => import('./pages/Profile'));
+const UpgradeModalDemo = lazy(() => import('./components/UpgradeModalDemo'));
+const PerformanceMonitoring = lazy(() => import('./pages/PerformanceMonitoring'));
 
 interface ExtendedChartData {
   latitude: number;
@@ -47,6 +51,8 @@ const MainApp: React.FC = React.memo(() => {
               <Route path="/" element={<Dashboard />} />
               <Route path="/chart" element={<ChartCalculation />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/upgrade-demo" element={<UpgradeModalDemo />} />
+              <Route path="/performance" element={<PerformanceMonitoring />} />
             </Routes>
           </Suspense>
         </main>
@@ -66,9 +72,12 @@ const MainApp: React.FC = React.memo(() => {
 const App: React.FC = () => (
   <AuthProvider appName="astro">
     <SubscriptionProvider>
-      <ErrorBoundary>
-        <MainApp />
-      </ErrorBoundary>
+      <UpgradeModalProvider>
+        <ErrorBoundary>
+          <MainApp />
+          <UpgradeModalManager />
+        </ErrorBoundary>
+      </UpgradeModalProvider>
     </SubscriptionProvider>
   </AuthProvider>
 );

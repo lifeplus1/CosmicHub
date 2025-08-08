@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useId } from 'react';
 import { Button, Card } from '@cosmichub/ui';
 
 interface FrequencyControlsProps {
@@ -19,6 +19,8 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
   duration
 }) => {
   const [customFrequency, setCustomFrequency] = useState(currentFrequency);
+  const radioGroupRef = useRef<HTMLDivElement | null>(null);
+  const groupLabelId = useId();
 
   const presetFrequencies = [
     { name: '396 Hz - Root Chakra', value: 396 },
@@ -44,22 +46,52 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
       <Card title="Frequency Selection" className="bg-cosmic-dark/50">
         <div className="space-y-4">
           <div>
-            <label className="block text-cosmic-silver mb-2">Preset Frequencies</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {presetFrequencies.map((preset) => (
-                <button
-                  key={preset.value}
-                  onClick={() => handlePresetSelect(preset.value)}
-                  className={`p-3 rounded text-left transition-colors ${
-                    currentFrequency === preset.value
-                      ? 'bg-cosmic-purple text-white'
-                      : 'bg-cosmic-dark border border-cosmic-purple text-cosmic-silver hover:bg-cosmic-purple/20'
-                  }`}
-                  aria-pressed={currentFrequency === preset.value}
-                >
-                  {preset.name}
-                </button>
-              ))}
+            <label id={groupLabelId} className="block text-cosmic-silver mb-2">Preset Frequencies</label>
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+              role="radiogroup"
+              aria-labelledby={groupLabelId}
+              ref={radioGroupRef}
+              onKeyDown={useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+                const keys = ['ArrowRight','ArrowDown','ArrowLeft','ArrowUp','Home','End'];
+                if (!keys.includes(e.key)) return;
+                e.preventDefault();
+                const buttons = radioGroupRef.current?.querySelectorAll<HTMLButtonElement>('button[role="radio"]');
+                if (!buttons || buttons.length === 0) return;
+                const idx = presetFrequencies.findIndex(p => p.value === currentFrequency);
+                const currentIndex = idx >= 0 ? idx : 0;
+                let nextIndex = currentIndex;
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextIndex = (currentIndex + 1) % buttons.length;
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+                if (e.key === 'Home') nextIndex = 0;
+                if (e.key === 'End') nextIndex = buttons.length - 1;
+                const nextPreset = presetFrequencies[nextIndex];
+                if (nextPreset) {
+                  handlePresetSelect(nextPreset.value);
+                  buttons[nextIndex].focus();
+                }
+              }, [currentFrequency, presetFrequencies, handlePresetSelect])}
+            >
+              {presetFrequencies.map((preset) => {
+                const selected = currentFrequency === preset.value;
+                return (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => handlePresetSelect(preset.value)}
+                    className={`p-3 rounded text-left transition-colors ${
+                      selected
+                        ? 'bg-cosmic-purple text-white'
+                        : 'bg-cosmic-dark border border-cosmic-purple text-cosmic-silver hover:bg-cosmic-purple/20'
+                    }`}
+                    role="radio"
+                    aria-checked={selected ? 'true' : 'false'}
+                    tabIndex={selected ? 0 : -1}
+                  >
+                    {preset.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

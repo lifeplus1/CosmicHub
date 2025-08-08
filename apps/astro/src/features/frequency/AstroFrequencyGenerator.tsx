@@ -124,45 +124,54 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
       {/* Preset Selection with Astrology Context */}
       <div className="mb-6">
         <TooltipProvider>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {astroEnhancedPresets.map((preset) => (
-              <Tooltip.Root key={preset.id}>
-                <Tooltip.Trigger asChild>
-                  <button
-                    onClick={() => setSelectedPreset(preset)}
-                    className={`p-4 rounded-lg border text-left transition-colors ${
-                      selectedPreset?.id === preset.id
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    aria-pressed={selectedPreset?.id === preset.id}
-                    aria-label={`Select ${preset.name} preset`}
-                  >
-                    <div className="font-medium">{preset.name}</div>
-                    <div className="text-sm text-gray-600">{preset.baseFrequency} Hz</div>
-                    <div className="mt-1 text-xs text-gray-500">{preset.description}</div>
-                    
-                    {/* Astrology Enhancement Info */}
-                    {preset.astrologyData && (
-                      <div className="p-2 mt-2 text-xs bg-purple-100 rounded">
-                        <div className="text-purple-700">
-                          🌙 {preset.astrologyData.planetaryAlignment}
+          <div
+            className="grid grid-cols-1 gap-4 md:grid-cols-2"
+            role="radiogroup"
+            aria-label="Astrology frequency presets"
+          >
+            {astroEnhancedPresets.map((preset) => {
+              const isSelected = selectedPreset?.id === preset.id;
+              return (
+                <Tooltip.Root key={preset.id}>
+                  <Tooltip.Trigger asChild>
+                    <button
+                      onClick={() => setSelectedPreset(preset)}
+                      className={`p-4 rounded-lg border text-left transition-colors ${
+                        isSelected
+                          ? 'border-purple-500 bg-purple-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      role="radio"
+                      aria-checked={isSelected ? 'true' : 'false'}
+                      aria-label={`${preset.name} preset (${preset.baseFrequency} Hz)`}
+                      tabIndex={isSelected ? 0 : -1}
+                    >
+                      <div className="font-medium">{preset.name}</div>
+                      <div className="text-sm text-gray-600">{preset.baseFrequency} Hz</div>
+                      <div className="mt-1 text-xs text-gray-500">{preset.description}</div>
+                      
+                      {/* Astrology Enhancement Info */}
+                      {preset.astrologyData && (
+                        <div className="p-2 mt-2 text-xs bg-purple-100 rounded">
+                          <div className="text-purple-700">
+                            🌙 {preset.astrologyData.planetaryAlignment}
+                          </div>
+                          <div className="text-purple-600">
+                            {preset.astrologyData.transitInfluence}
+                          </div>
                         </div>
-                        <div className="text-purple-600">
-                          {preset.astrologyData.transitInfluence}
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                </Tooltip.Trigger>
-                <Tooltip.Portal>
-                  <Tooltip.Content className="p-2 bg-white border rounded shadow">Premium: Integrate with HealWave for more</Tooltip.Content>
-                </Tooltip.Portal>
-              </Tooltip.Root>
-            ))}
-        </TooltipProvider>
-      </div>
-      </div>
+                      )}
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content className="p-2 bg-white border rounded shadow">Premium: Integrate with HealWave for more</Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              );
+            })}
+            </div>
+          </TooltipProvider>
+        </div>
 
       {/* Enhanced Controls with Astrology Features */}
       {selectedPreset && (
@@ -225,7 +234,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
               onClick={handlePlay}
               disabled={isPlaying}
               className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
-              aria-disabled={isPlaying}
+              aria-disabled={isPlaying ? 'true' : 'false'}
             >
               {isPlaying ? '🎵 Playing...' : '▶️ Start Astro Session'}
             </button>
@@ -234,7 +243,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
               onClick={handleStop}
               disabled={!isPlaying}
               className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
-              aria-disabled={!isPlaying}
+              aria-disabled={!isPlaying ? 'true' : 'false'}
             >
               ⏹️ Stop
             </button>

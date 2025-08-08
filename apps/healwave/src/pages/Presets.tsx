@@ -9,9 +9,11 @@ const Presets: React.FC = () => {
     fadeIn: 3,
     fadeOut: 3
   });
+  const [currentPreset, setCurrentPreset] = useState<FrequencyPreset | null>(null);
 
   const handleSelectPreset = (preset: FrequencyPreset): void => {
     console.log('Selected preset:', preset);
+    setCurrentPreset(preset);
   };
 
   return (
@@ -20,6 +22,7 @@ const Presets: React.FC = () => {
       <PresetSelector 
         onSelectPreset={handleSelectPreset}
         currentSettings={currentSettings}
+        currentPreset={currentPreset}
       />
     </div>
   );

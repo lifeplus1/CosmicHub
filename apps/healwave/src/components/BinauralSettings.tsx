@@ -72,9 +72,8 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
     if (value < 0 || value > 100) return; // Type guard for range
     const newSettings: AudioSettings = { ...currentSettings, volume: value };
     onSettingsChange(newSettings);
-    if (audioEngine.getIsPlaying()) {
-      audioEngine.setVolume(value).catch((error: unknown) => console.error('Volume set failed:', error));
-    }
+  // Optimistically set volume on engine (no playing state guard available)
+  audioEngine.setVolume(value).catch((error: unknown) => console.error('Volume set failed:', error));
   }, [currentSettings, onSettingsChange, audioEngine]);
 
   const handleDurationChange = useCallback((value: number): void => {
@@ -108,9 +107,12 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">🎵 Binaural Settings</h3>
         <button
+          type="button"
           onClick={() => setAdvancedMode((prev) => !prev)}
           className="text-sm font-medium text-blue-600 hover:text-blue-700"
-          aria-pressed={advancedMode}
+          aria-pressed={advancedMode ? 'true' : 'false'}
+          aria-expanded={advancedMode ? 'true' : 'false'}
+          aria-controls="binaural-advanced-section"
         >
           {advancedMode ? 'Simple Mode' : 'Advanced Mode'}
         </button>
@@ -177,7 +179,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
 
       {/* Advanced Settings - Lazy load if complex, but inline for simplicity */}
       {advancedMode && (
-        <div className="pt-4 space-y-4 border-t border-gray-200">
+        <div id="binaural-advanced-section" className="pt-4 space-y-4 border-t border-gray-200">
           <h4 className="font-medium text-gray-900">🔧 Advanced Controls</h4>
           
           {/* Fade Settings */}
@@ -320,7 +322,9 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
 
             {/* Quick Range Buttons */}
             <div className="grid grid-cols-5 gap-2">
-              {Object.entries(binauralRanges).filter(([key]) => key !== 'custom').map(([key, range]: [BinauralRangeKey, BinauralRange]) => (
+              {(Object.entries(binauralRanges) as [BinauralRangeKey, BinauralRange][])
+                .filter(([key]) => key !== 'custom')
+                .map(([key, range]) => (
                 <button
                   key={key}
                   onClick={() => setBinauralBeat((range.min + range.max) / 2)}

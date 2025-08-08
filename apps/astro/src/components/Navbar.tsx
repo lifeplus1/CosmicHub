@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, logOut } from '@cosmichub/auth';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { EducationalTooltip } from './EducationalTooltip';
 
@@ -48,19 +48,19 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({ children, to, icon: Icon, 
 NavLink.displayName = 'NavLink';
 
 const Navbar: React.FC = React.memo(() => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { userTier } = useSubscription();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = useCallback(async () => {
     try {
-      await signOut();
+      await logOut();
       navigate('/');
     } catch (error) {
       console.error('Sign out error:', error);
     }
-  }, [navigate, signOut]);
+  }, [navigate]);
 
   const getTierIcon = (tier: string) => {
     switch (tier) {
@@ -159,7 +159,7 @@ const Navbar: React.FC = React.memo(() => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 rounded-md text-cosmic-silver hover:bg-cosmic-purple/20"
               aria-label={isMobileMenuOpen ? 'Close Menu' : 'Open Menu'}
-              aria-expanded={isMobileMenuOpen}
+              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
             >
               {isMobileMenuOpen ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

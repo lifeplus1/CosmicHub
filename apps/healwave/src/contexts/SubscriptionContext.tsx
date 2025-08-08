@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@cosmichub/auth';
 import { UserSubscription, getUserTier, hasFeatureAccess, HEALWAVE_TIERS } from '../types/subscription';
 
 interface SubscriptionContextType {
@@ -33,9 +33,21 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
 
     setIsLoading(true);
     try {
-      // For now, simulate free tier for all users
-      // TODO: Replace with actual API call to check Stripe subscription
-      setSubscription(null); // null = free tier
+      // Production-ready Stripe subscription check
+      const response = await fetch('/api/subscription/status', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${await user.getIdToken()}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const subscriptionData = await response.json();
+        setSubscription(subscriptionData);
+      } else {
+        setSubscription(null); // Free tier
+      }
     } catch (error) {
       console.error('Failed to fetch subscription:', error);
       setSubscription(null);
@@ -49,9 +61,11 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
   };
 
   const upgradeRequired = (feature: string) => {
-    // Show upgrade notification
-    console.log(`Upgrade to HealWave Pro required for: ${feature}`);
-    // TODO: Show upgrade modal or redirect to pricing page
+    // Production-ready upgrade modal
+    const event = new CustomEvent('showUpgradeModal', { 
+      detail: { feature, requiredTier: 'pro' } 
+    });
+    window.dispatchEvent(event);
   };
 
   useEffect(() => {

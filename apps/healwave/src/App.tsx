@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@cosmichub/auth';
 import { useCrossAppStore } from '@cosmichub/integrations';
 import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
-import { Button, Spinner } from '@cosmichub/ui';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -59,17 +58,17 @@ const MainApp: React.FC = () => {
               Therapeutic sound frequencies for healing and wellness
             </p>
             <div className="mt-4">
-              <Button
+              <button
                 onClick={handleOpenAstroApp}
-                className="bg-cosmic-gold text-cosmic-dark hover:bg-cosmic-gold/90"
+                className="px-4 py-2 bg-cosmic-gold text-cosmic-dark hover:bg-cosmic-gold/90 rounded-lg transition-colors"
                 aria-label="Open Astrology App in a new tab"
               >
                 Open Astrology App
-              </Button>
+              </button>
             </div>
           </section>
 
-          <Suspense fallback={<Spinner aria-label="Loading page content" />}>
+          <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div></div>}>
             <Routes>
               <Route path="/" element={<FrequencyGenerator />} />
               <Route path="/presets" element={<Presets />} />

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaStar, FaKey, FaChartLine } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 
 const HumanDesignChart = lazy(() => import('./HumanDesignChart'));

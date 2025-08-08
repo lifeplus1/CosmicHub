@@ -29,10 +29,15 @@ typings/
 *.pyi
 .mypy_cache/
 
+# TypeScript build info
+*.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # Environment
 .env
 *.env
+.env.*
+!.env.example
 
 # Logs
 *.log

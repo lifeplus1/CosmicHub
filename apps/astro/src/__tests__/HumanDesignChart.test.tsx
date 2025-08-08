@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HumanDesignChart from '../components/HumanDesignChart';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider } from '@cosmichub/auth';
 import * as api from '../services/api';
 
 // Mock the API

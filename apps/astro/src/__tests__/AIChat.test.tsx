@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import AIChat from '../components/AIChat';
 import * as authModule from '../auth';
-import { useAuth } from '../components/AuthProvider';
+import { useAuth } from '@cosmichub/auth';
 
 // Mock the auth module
 vi.mock('../auth', () => ({
@@ -11,7 +11,7 @@ vi.mock('../auth', () => ({
 }));
 
 // Mock the AuthProvider
-vi.mock('../components/AuthProvider', () => ({
+vi.mock('@cosmichub/auth', () => ({
   useAuth: vi.fn()
 }));
 

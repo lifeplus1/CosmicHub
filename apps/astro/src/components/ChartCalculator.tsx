@@ -148,7 +148,7 @@ const ChartCalculator: React.FC = () => {
           <button
             onClick={() => setIsGuideOpen(!isGuideOpen)}
             className="w-full flex items-center justify-between text-white font-semibold"
-            aria-expanded={isGuideOpen}
+            aria-expanded={isGuideOpen ? 'true' : 'false'}
             aria-controls="guide-content"
           >
             <div className="flex items-center space-x-2">
@@ -311,6 +311,7 @@ const ChartCalculator: React.FC = () => {
               <select
                 value={houseSystem}
                 onChange={handleSelectChange}
+                aria-label="House System Selection"
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
               >
                 <option value="P">Placidus (Most Popular)</option>

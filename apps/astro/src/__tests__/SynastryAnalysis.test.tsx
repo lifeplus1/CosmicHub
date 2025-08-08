@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { SynastryAnalysis } from '../components/SynastryAnalysis';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider } from '@cosmichub/auth';
 import { SubscriptionProvider } from '../contexts/SubscriptionContext';
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (

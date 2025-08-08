@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastProvider';
-import { signUp } from '../auth';
+import { signUp } from '@cosmichub/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 interface FormData {
@@ -380,7 +380,7 @@ const Signup: React.FC = React.memo(() => {
                 type="submit"
                 className="w-full mt-6 cosmic-button"
                 disabled={isLoading}
-                aria-disabled={isLoading}
+                aria-disabled={isLoading ? 'true' : 'false'}
               >
                 Create Cosmic Account
               </button>

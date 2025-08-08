@@ -54,5 +54,6 @@
     { "path": "./packages/ui" },
     { "path": "./apps/astro" },
     { "path": "./apps/healwave" }
-  ]
+  ],
+  "files": []
 }

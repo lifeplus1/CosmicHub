@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '@cosmichub/auth';
-import { Button, Card } from '@cosmichub/ui';
 import { isFeatureEnabled } from '@cosmichub/config';
 
 const Dashboard: React.FC = () => {
@@ -26,43 +25,52 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card title="Birth Chart" className="hover:bg-cosmic-purple/10 transition-colors">
+        <div className="hover:bg-cosmic-purple/10 transition-colors"><h3 className="mb-4 text-lg font-semibold">Birth Chart</h3>
           <p className="text-cosmic-silver mb-4">
             Generate your personalized astrological birth chart
           </p>
-          <Button onClick={() => window.location.href = '/chart'}>
+          <button 
+            onClick={() => window.location.href = '/chart'}
+            className="px-4 py-2 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white rounded-lg transition-colors"
+          >
             Create Chart
-          </Button>
-        </Card>
+          </button>
+        </div>
 
         {isFeatureEnabled('healwave') && (
-          <Card title="Healwave Integration" className="hover:bg-cosmic-purple/10 transition-colors">
+          <div className="hover:bg-cosmic-purple/10 transition-colors"><h3 className="mb-4 text-lg font-semibold">Healwave Integration</h3>
             <p className="text-cosmic-silver mb-4">
               Access personalized healing frequencies based on your chart
             </p>
-            <Button onClick={() => window.location.href = '/healwave'}>
+            <button 
+              onClick={() => window.location.href = '/healwave'}
+              className="px-4 py-2 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white rounded-lg transition-colors"
+            >
               Explore Healwave
-            </Button>
-          </Card>
+            </button>
+          </div>
         )}
 
-        <Card title="Your Profile" className="hover:bg-cosmic-purple/10 transition-colors">
+        <div className="hover:bg-cosmic-purple/10 transition-colors"><h3 className="mb-4 text-lg font-semibold">Your Profile</h3>
           <p className="text-cosmic-silver mb-4">
             Manage your account and preferences
           </p>
-          <Button onClick={() => window.location.href = '/profile'}>
+          <button 
+            onClick={() => window.location.href = '/profile'}
+            className="px-4 py-2 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white rounded-lg transition-colors"
+          >
             View Profile
-          </Button>
-        </Card>
+          </button>
+        </div>
       </div>
 
       {user && (
         <div className="mt-8">
-          <Card title="Recent Activity" className="bg-cosmic-dark/50">
+          <div className="bg-cosmic-dark/50"><h3 className="mb-4 text-lg font-semibold">Recent Activity</h3>
             <p className="text-cosmic-silver">
               Your recent charts and sessions will appear here.
             </p>
-          </Card>
+          </div>
         </div>
       )}
     </div>

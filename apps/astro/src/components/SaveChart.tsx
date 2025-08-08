@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Heading, FormControl, FormLabel, Input, Select, Button, VStack, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@cosmichub/auth";
 
 export default function SaveChart() {
   const { user, getAuthToken } = useAuth();

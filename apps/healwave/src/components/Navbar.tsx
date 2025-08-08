@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { logOut } from '../auth';
+import { useAuth, logOut } from '@cosmichub/auth';
 import Login from './Login';
 import Signup from './Signup';
 

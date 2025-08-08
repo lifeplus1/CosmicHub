@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useToast } from './ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';

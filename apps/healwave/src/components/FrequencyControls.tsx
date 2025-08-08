@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@cosmichub/auth";
 import { savePreset, getPresets } from "../services/api";
 import AudioPlayer from "./AudioPlayer";
 import DurationTimer from "./DurationTimer";
@@ -110,7 +110,21 @@ const FrequencyControls = () => {
   const handleSavePreset = async () => {
     if (!presetName.trim()) return;
     try {
-      await savePreset({ name: presetName, frequency, binaural, duration });
+      const preset = {
+        id: `custom-${Date.now()}`,
+        name: presetName,
+        category: 'custom' as const,
+        baseFrequency: frequency,
+        binauralBeat: binaural,
+        description: `Custom preset saved on ${new Date().toLocaleDateString()}`,
+        benefits: ['Custom healing frequency'],
+        metadata: { 
+          duration: duration,
+          volume: volume,
+          createdAt: new Date().toISOString()
+        }
+      };
+      await savePreset(preset);
       setPresetName('');
       setShowPresets(false);
     } catch (error) {

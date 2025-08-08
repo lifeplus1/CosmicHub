@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { signUp } from '../auth';
-import { useAuth } from '../contexts/AuthContext';
+import { signUp, useAuth } from '@cosmichub/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 interface SignupProps {

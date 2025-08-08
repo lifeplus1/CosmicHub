@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastProvider';
-import { logIn } from '../auth';
+import { logIn } from '@cosmichub/auth';
 
 const Login: React.FC = React.memo(() => {
   const [email, setEmail] = useState('');
@@ -74,7 +74,7 @@ const Login: React.FC = React.memo(() => {
                 type="submit"
                 className="w-full cosmic-button"
                 disabled={isLoading}
-                aria-disabled={isLoading}
+                aria-disabled={isLoading ? 'true' : 'false'}
               >
                 Sign In
               </button>

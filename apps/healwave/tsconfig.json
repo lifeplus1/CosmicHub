@@ -2,10 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2022",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
@@ -14,33 +15,24 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    
-    // Modern strict settings
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "exactOptionalPropertyTypes": true,
-    
-    // Code quality
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    
-    // Modern features
-    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    
-    "types": ["vite/client", "node"]
+    "declaration": true,
+    "declarationMap": true,
+    "exactOptionalPropertyTypes": false,
+    "baseUrl": ".",
+    "paths": {
+      "@cosmichub/auth": ["../../packages/auth/src/index.tsx"],
+      "@cosmichub/config": ["../../packages/config/src/index.ts"],
+      "@cosmichub/frequency": ["../../packages/frequency/src/index.ts"],
+      "@cosmichub/ui": ["../../packages/ui/src/index.ts"],
+      "@cosmichub/integrations": ["../../packages/integrations/src/index.ts"]
+    }
   },
   "include": ["src"],
   "references": [

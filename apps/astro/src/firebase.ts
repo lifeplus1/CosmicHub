@@ -1,8 +1,3 @@
-// firebase.ts
-export * from '../../../shared/firebase';
-console.log('🔥 Using production Firebase services');
-
-// Import the 'app' instance from shared/firebase
-import { app } from '../../../shared/firebase';
-
-export default app;
+// firebase.ts - Consolidated Firebase configuration
+export * from '../../../packages/config/src/firebase';
+console.log('🔥 Using optimized Firebase configuration from packages/config');

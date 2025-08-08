@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useCallback } from "react";
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { ChartData } from '../types';

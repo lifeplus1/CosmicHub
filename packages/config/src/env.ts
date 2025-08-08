@@ -9,13 +9,13 @@ export type Environment = 'development' | 'staging' | 'production';
 export interface EnvConfig {
   NODE_ENV: Environment;
   NEXT_PUBLIC_API_URL: string;
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: string;
-  NEXT_PUBLIC_FIREBASE_API_KEY: string;
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: string;
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: string;
-  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: string;
-  NEXT_PUBLIC_FIREBASE_APP_ID: string;
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID?: string;
+  NEXT_PUBLIC_FIREBASE_API_KEY?: string;
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN?: string;
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?: string;
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID?: string;
+  NEXT_PUBLIC_FIREBASE_APP_ID?: string;
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?: string;
   NEXT_PUBLIC_APP_URL: string;
 }
 
@@ -105,7 +105,7 @@ export const validateEnv = (): { isValid: boolean; missing: string[]; errors: st
 export const getEnvConfig = (): Partial<EnvConfig> => {
   const env = getCurrentEnvironment();
   
-  const baseConfig: Partial<EnvConfig> = {
+  const baseConfig = {
     NODE_ENV: env,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (
       env === 'production' 
@@ -121,13 +121,13 @@ export const getEnvConfig = (): Partial<EnvConfig> => {
         ? 'https://staging.cosmichub.app'
         : 'http://localhost:3000'
     ),
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    ...(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID && { NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID }),
+    ...(process.env.NEXT_PUBLIC_FIREBASE_API_KEY && { NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY }),
+    ...(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN && { NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }),
+    ...(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET && { NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }),
+    ...(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID && { NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }),
+    ...(process.env.NEXT_PUBLIC_FIREBASE_APP_ID && { NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID }),
+    ...(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && { NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY })
   };
 
   return baseConfig;

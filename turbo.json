@@ -1,26 +1,72 @@
 {
-  "extends": ["//"],
+  "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "env": ["NODE_ENV"],
+      "outputLogs": "new-only"
+    },
+    "build:packages": {
+      "dependsOn": [],
+      "outputs": ["dist/**"],
+      "cache": true,
+      "env": ["NODE_ENV"],
+      "outputLogs": "new-only"
+    },
+    "build:apps": {
+      "dependsOn": [],
+      "outputs": ["dist/**"],
+      "cache": true,
+      "env": ["NODE_ENV", "VITE_*"],
+      "outputLogs": "new-only"
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["NODE_ENV", "PORT", "VITE_*"],
+      "outputLogs": "new-only"
+    },
+    "dev-frontend": {
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV", "PORT", "VITE_*"],
+      "outputLogs": "new-only"
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": ["^build:packages"],
+      "outputs": ["coverage/**", "test-results/**"],
+      "env": ["NODE_ENV"],
+      "outputLogs": "new-only"
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "outputs": [".eslintcache"],
+      "env": ["NODE_ENV"],
+      "outputLogs": "errors-only"
     },
     "type-check": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build:packages"],
+      "outputs": [".tsbuildinfo"],
+      "env": ["NODE_ENV"],
+      "outputLogs": "errors-only"
     },
     "clean": {
-      "cache": false
+      "cache": false,
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "preview": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": ["NODE_ENV", "PORT"],
+      "outputLogs": "new-only"
     }
-  }
+  },
+  "globalEnv": ["NODE_ENV"],
+  "globalDependencies": [
+    "package.json",
+    "turbo.json",
+    "tsconfig*.json",
+    ".env*"
+  ]
 }

@@ -77,3 +77,22 @@ export const isFeatureEnabled = (feature: Feature): boolean => {
 export { config };
 
 export * from './types';
+export * from './performance';
+export { 
+  usePerformance, 
+  useOperationTracking, 
+  usePagePerformance, 
+  useRealTimePerformance,
+  withPerformanceTracking 
+} from './hooks';
+export * from './react-performance';
+export * from './lazy-loading';
+export * from './component-architecture';
+export * from './enhanced-testing';
+export * from './accessibility-testing';
+
+// Phase 4: Advanced optimization exports
+export * from './bundle-optimization';
+export * from './caching-service-worker';
+export * from './performance-monitoring';
+export * from './production-deployment';

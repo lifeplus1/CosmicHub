@@ -260,7 +260,7 @@ export class ApiClient {
         const response = await fetch(this.buildUrl(endpoint), {
           method: 'POST',
           headers: this.buildHeaders(options),
-          body: data ? JSON.stringify(data) : undefined,
+          body: data ? JSON.stringify(data) : null,
           signal: options?.signal || controller.signal
         });
         
@@ -280,7 +280,7 @@ export class ApiClient {
         const response = await fetch(this.buildUrl(endpoint), {
           method: 'PUT',
           headers: this.buildHeaders(options),
-          body: data ? JSON.stringify(data) : undefined,
+          body: data ? JSON.stringify(data) : null,
           signal: options?.signal || controller.signal
         });
         

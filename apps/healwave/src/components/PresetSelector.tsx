@@ -1,90 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../shared/AuthContext';
-import { savePreset, getUserPresets, deletePreset } from '../services/api';
-
-interface Preset {
-  id: string;
-  name: string;
-  leftFreq: number;
-  rightFreq: number;
-  volume: number;
-  duration: number;
-  description?: string;
-  createdAt: string;
-}
+import { useAuth } from '@cosmichub/auth';
+import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
+import { savePreset, getPresets, getUserPresets, deletePreset } from '../services/api';
 
 interface PresetSelectorProps {
-  onSelectPreset: (preset: Preset) => void;
-  currentSettings: {
-    leftFreq: number;
-    rightFreq: number;
-    volume: number;
-    duration: number;
-  };
+  onSelectPreset: (preset: FrequencyPreset) => void;
+  currentSettings: AudioSettings;
+  currentPreset?: FrequencyPreset | null;
 }
 
 const PresetSelector: React.FC<PresetSelectorProps> = ({
   onSelectPreset,
-  currentSettings
+  currentSettings,
+  currentPreset
 }) => {
   const { user } = useAuth();
-  const [presets, setPresets] = useState<Preset[]>([]);
+  const [presets, setPresets] = useState<FrequencyPreset[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
   const [newPresetDescription, setNewPresetDescription] = useState('');
 
   // Built-in presets
-  const builtInPresets: Preset[] = [
+  const builtInPresets: FrequencyPreset[] = [
     {
       id: 'relaxation',
       name: 'Deep Relaxation',
-      leftFreq: 40,
-      rightFreq: 44,
-      volume: 0.7,
-      duration: 1800, // 30 minutes
-      description: 'Promote deep relaxation and stress relief',
-      createdAt: ''
+      category: 'brainwave',
+      baseFrequency: 40,
+      binauralBeat: 4,
+      description: 'Promote deep relaxation and stress relief'
     },
     {
       id: 'focus',
       name: 'Enhanced Focus',
-      leftFreq: 40,
-      rightFreq: 50,
-      volume: 0.6,
-      duration: 2400, // 40 minutes
-      description: 'Improve concentration and mental clarity',
-      createdAt: ''
+      category: 'brainwave',
+      baseFrequency: 40,
+      binauralBeat: 10,
+      description: 'Improve concentration and mental clarity'
     },
     {
       id: 'meditation',
       name: 'Meditation',
-      leftFreq: 30,
-      rightFreq: 36,
-      volume: 0.5,
-      duration: 1200, // 20 minutes
-      description: 'Support deep meditative states',
-      createdAt: ''
+      category: 'brainwave',
+      baseFrequency: 30,
+      binauralBeat: 6,
+      description: 'Support deep meditative states'
     },
     {
       id: 'sleep',
       name: 'Sleep Induction',
-      leftFreq: 20,
-      rightFreq: 24,
-      volume: 0.4,
-      duration: 3600, // 60 minutes
-      description: 'Promote restful sleep',
-      createdAt: ''
+      category: 'brainwave',
+      baseFrequency: 20,
+      binauralBeat: 4,
+      description: 'Promote restful sleep'
     },
     {
       id: 'creativity',
       name: 'Creative Flow',
-      leftFreq: 60,
-      rightFreq: 68,
-      volume: 0.6,
-      duration: 1800, // 30 minutes
-      description: 'Enhance creative thinking',
-      createdAt: ''
+      category: 'brainwave',
+      baseFrequency: 60,
+      binauralBeat: 8,
+      description: 'Enhance creative thinking'
     }
   ];
 
@@ -111,13 +88,19 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
 
     try {
       setLoading(true);
-      const preset = {
+      const preset: any = {
+        id: `user-${Date.now()}`,
         name: newPresetName.trim(),
-        leftFreq: currentSettings.leftFreq,
-        rightFreq: currentSettings.rightFreq,
-        volume: currentSettings.volume,
-        duration: currentSettings.duration,
-        description: newPresetDescription.trim() || undefined
+        category: 'custom',
+        baseFrequency: currentPreset?.baseFrequency || 40,
+        binauralBeat: currentPreset?.binauralBeat || 0,
+        description: newPresetDescription.trim() || undefined,
+        metadata: {
+          volume: currentSettings.volume,
+          duration: currentSettings.duration,
+          fadeIn: currentSettings.fadeIn,
+          fadeOut: currentSettings.fadeOut
+        }
       };
 
       const savedPreset = await savePreset(preset);
@@ -150,13 +133,13 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
     }
   };
 
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
     if (hours > 0) {
-      return `${hours}h ${minutes}m`;
+      return `${hours}h ${remainingMinutes}m`;
     }
-    return `${minutes}m`;
+    return `${remainingMinutes}m`;
   };
 
   return (
@@ -189,8 +172,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
                   <h5 className="font-medium text-gray-900">{preset.name}</h5>
                   <p className="mt-1 text-sm text-gray-600">{preset.description}</p>
                   <div className="mt-2 text-xs text-gray-500">
-                    Left: {preset.leftFreq}Hz | Right: {preset.rightFreq}Hz | 
-                    Duration: {formatDuration(preset.duration)}
+                    Base: {preset.baseFrequency}Hz | Beat: {preset.binauralBeat}Hz
                   </div>
                 </div>
               </div>
@@ -226,8 +208,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
                         <p className="mt-1 text-sm text-gray-600">{preset.description}</p>
                       )}
                       <div className="mt-2 text-xs text-gray-500">
-                        Left: {preset.leftFreq}Hz | Right: {preset.rightFreq}Hz | 
-                        Duration: {formatDuration(preset.duration)}
+                        Base: {preset.baseFrequency}Hz | Beat: {preset.binauralBeat}Hz
                       </div>
                     </div>
                     <button
@@ -291,9 +272,18 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
             <div className="p-3 mb-4 rounded-lg bg-gray-50">
               <h4 className="mb-2 text-sm font-medium text-gray-700">Current Settings:</h4>
               <div className="text-sm text-gray-600">
-                <div>Left Frequency: {currentSettings.leftFreq}Hz</div>
-                <div>Right Frequency: {currentSettings.rightFreq}Hz</div>
-                <div>Volume: {Math.round(currentSettings.volume * 100)}%</div>
+                {currentPreset ? (
+                  <>
+                    <div>Preset: {currentPreset.name}</div>
+                    <div>Base Frequency: {currentPreset.baseFrequency}Hz</div>
+                    {currentPreset.binauralBeat && (
+                      <div>Binaural Beat: {currentPreset.binauralBeat}Hz</div>
+                    )}
+                  </>
+                ) : (
+                  <div>No preset selected</div>
+                )}
+                <div>Volume: {Math.round(currentSettings.volume)}%</div>
                 <div>Duration: {formatDuration(currentSettings.duration)}</div>
               </div>
             </div>

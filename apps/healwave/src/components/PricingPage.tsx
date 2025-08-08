@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { HEALWAVE_TIERS, calculateYearlySavings } from '../types/subscription';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@cosmichub/auth';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 
 const PricingPage: React.FC = () => {
