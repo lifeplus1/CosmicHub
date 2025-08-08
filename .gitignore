@@ -33,6 +33,9 @@ typings/
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 
+# Turbo
+.turbo/
+
 # Environment
 .env
 *.env
