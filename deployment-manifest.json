@@ -1,0 +1,30 @@
+{
+  "deploymentId": "20250807_235948",
+  "timestamp": "2025-08-08T03:59:48Z",
+  "version": "1.0.0",
+  "environment": "production",
+  "applications": {
+    "astro": {
+      "name": "CosmicHub Astrology",
+      "path": "apps/astro/dist",
+      "url": "https://astro.cosmichub.io",
+      "built": true
+    },
+    "healwave": {
+      "name": "CosmicHub Healwave",
+      "path": "apps/healwave/dist",
+      "url": "https://healwave.cosmichub.io",
+      "built": true
+    }
+  },
+  "assets": {
+    "static": "dist/assets",
+    "cdn": "https://cdn.cosmichub.io"
+  },
+  "deployment": {
+    "status": "ready",
+    "buildTime": "1754625588",
+    "deployer": "Chris",
+    "commit": "6abe487"
+  }
+}

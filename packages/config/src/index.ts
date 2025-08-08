@@ -88,8 +88,9 @@ export {
 export * from './react-performance';
 export * from './lazy-loading';
 export * from './component-architecture';
-export * from './enhanced-testing';
-export * from './accessibility-testing';
+// Temporarily disabled for production build
+// export * from './enhanced-testing';
+// export * from './accessibility-testing';
 
 // Phase 4: Advanced optimization exports
 export * from './bundle-optimization';

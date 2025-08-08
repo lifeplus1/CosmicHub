@@ -92,13 +92,14 @@ export interface CardHeaderProps<T extends React.ElementType = 'div'>
 export const CardHeader = <T extends React.ElementType = 'div'>(
   props: CardHeaderProps<T>
 ) => {
-  const { as, title, subtitle, actions, children, className = '', ...otherProps } = props;
+  const { as, title, subtitle, actions, ...otherProps } = props;
+  const { children, className = '', ...restProps } = otherProps as any;
   const Component = as || 'div';
 
   return (
     <Component
       className={`card__header ${className}`}
-      {...otherProps}
+      {...restProps}
     >
       {(title || subtitle) && (
         <div className="card__header-content">

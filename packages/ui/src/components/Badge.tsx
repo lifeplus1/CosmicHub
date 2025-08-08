@@ -4,12 +4,14 @@ export interface BadgeProps {
   children: React.ReactNode;
   variant?: "primary" | "secondary" | "success" | "warning" | "error";
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 export const Badge: React.FC<BadgeProps> = ({ 
   children, 
   variant = "primary", 
-  size = "md" 
+  size = "md",
+  className = ""
 }) => {
   const baseClasses = "inline-flex items-center font-medium rounded-full";
   
@@ -28,7 +30,7 @@ export const Badge: React.FC<BadgeProps> = ({
   };
   
   return (
-    <span className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]}`}>
+    <span className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}>
       {children}
     </span>
   );

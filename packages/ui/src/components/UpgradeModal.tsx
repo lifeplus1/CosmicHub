@@ -140,7 +140,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
                   )}
 
                   {/* Popular badge */}
-                  {tier.popular && (
+                  {'popular' in tier && tier.popular && (
                     <div className="absolute -top-3 right-4">
                       <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                         Most Popular

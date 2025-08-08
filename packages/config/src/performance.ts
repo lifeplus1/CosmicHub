@@ -4,6 +4,8 @@
  * Enhanced with React hooks integration and comprehensive analytics
  */
 
+import React, { useState, useEffect, useCallback } from 'react';
+
 export interface PerformanceMetric {
   name: string;
   value: number;
@@ -438,3 +440,109 @@ class PerformanceMonitor {
 
 // Export singleton instance
 export const performanceMonitor = new PerformanceMonitor();
+
+// React Hooks for Performance Monitoring
+
+export interface PerformanceReport {
+  webVitals: Record<string, WebVitalsMetric>;
+  componentMetrics: any[];
+  operationMetrics: any[];
+  memoryUsage: { used: number; total: number; };
+  timestamp: number;
+}
+
+export const useRealTimePerformance = (): PerformanceReport => {
+  const [report, setReport] = useState<PerformanceReport>({
+    webVitals: {},
+    componentMetrics: [],
+    operationMetrics: [],
+    memoryUsage: { used: 0, total: 0 },
+    timestamp: Date.now()
+  });
+
+  useEffect(() => {
+    const updateReport = () => {
+      const webVitals = performanceMonitor.getWebVitals();
+      const memoryInfo = (performance as any).memory || { usedJSHeapSize: 0, totalJSHeapSize: 0 };
+      
+      setReport({
+        webVitals,
+        componentMetrics: [],
+        operationMetrics: [],
+        memoryUsage: {
+          used: memoryInfo.usedJSHeapSize || 0,
+          total: memoryInfo.totalJSHeapSize || 0
+        },
+        timestamp: Date.now()
+      });
+    };
+
+    updateReport();
+    const interval = setInterval(updateReport, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return report;
+};
+
+export const usePerformance = () => {
+  return {
+    monitor: performanceMonitor,
+    trackMetric: useCallback((name: string, value: number) => {
+      performanceMonitor.trackMetric(name, value);
+    }, [])
+  };
+};
+
+export const useOperationTracking = (operationName: string) => {
+  return useCallback(async <T>(operation: () => Promise<T> | T): Promise<T> => {
+    const start = performance.now();
+    try {
+      const result = await operation();
+      const duration = performance.now() - start;
+      performanceMonitor.trackMetric(operationName, duration);
+      return result;
+    } catch (error) {
+      const duration = performance.now() - start;
+      performanceMonitor.trackMetric(`${operationName}_error`, duration);
+      throw error;
+    }
+  }, [operationName]);
+};
+
+export const usePagePerformance = () => {
+  const [metrics, setMetrics] = useState({});
+  
+  useEffect(() => {
+    const updateMetrics = () => {
+      setMetrics(performanceMonitor.getWebVitals());
+    };
+    
+    updateMetrics();
+    const interval = setInterval(updateMetrics, 2000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  return metrics;
+};
+
+export const withPerformanceTracking = <P extends Record<string, any>>(
+  Component: React.ComponentType<P>,
+  componentName?: string
+) => {
+  return React.forwardRef<any, P>((props, ref) => {
+    const displayName = componentName || Component.displayName || Component.name || 'Component';
+    
+    React.useEffect(() => {
+      const startTime = performance.now();
+      
+      return () => {
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        performanceMonitor.trackMetric(`component_${displayName}`, duration);
+      };
+    });
+
+    return React.createElement(Component, { ...props, ref });
+  });
+};

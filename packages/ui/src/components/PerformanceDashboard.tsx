@@ -7,7 +7,7 @@ import {
 import { Card } from './Card';
 import { Badge } from './Badge';
 
-interface PerformanceDashboardProps {
+export interface PerformanceDashboardProps {
   className?: string;
   showDetailedMetrics?: boolean;
 }
@@ -252,7 +252,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             <Card className="p-6">
               <h3 className="text-xl font-bold text-cosmic-dark mb-4">Component Performance</h3>
               <div className="space-y-3">
-                {report.componentMetrics.slice(-10).map((metric, index) => (
+                {report.componentMetrics.slice(-10).map((metric: any, index: number) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                     <div>
                       <span className="font-medium">{metric.componentName}</span>
@@ -272,7 +272,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             <Card className="p-6">
               <h3 className="text-xl font-bold text-cosmic-dark mb-4">Operation Performance</h3>
               <div className="space-y-3">
-                {report.operationMetrics.slice(-10).map((metric, index) => (
+                {report.operationMetrics.slice(-10).map((metric: any, index: number) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                     <div>
                       <span className="font-medium">{metric.operationName}</span>
