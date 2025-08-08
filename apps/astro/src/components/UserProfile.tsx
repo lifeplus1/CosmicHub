@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaCrown, FaStar, FaCalendarAlt, FaChartLine, FaSave, FaCreditCard, FaCheck, FaTimes, FaArrowUp, FaHistory, FaCog } from 'react-icons/fa';

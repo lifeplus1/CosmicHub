@@ -49,7 +49,7 @@ export const PerformanceMonitoring: React.FC = () => {
 
   // Log component performance in development
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('🎯 PerformanceMonitoring Component Stats:', {
         renderTime: renderTime ? `${renderTime.toFixed(2)}ms` : 'Not measured',
         mountTime: mountTime ? `${mountTime.toFixed(2)}ms` : 'Not measured'

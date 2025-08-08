@@ -2,15 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ToastProvider } from '../components/ToastProvider';
-import { AuthProvider } from '@cosmichub/auth';
-import { SubscriptionProvider } from '../contexts/SubscriptionContext';
+import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 import MultiSystemChart from '../components/MultiSystemChart';
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <ToastProvider>
     <MemoryRouter>
       <AuthProvider>
-        <SubscriptionProvider>
+        <SubscriptionProvider appType="astro">
           {children}
         </SubscriptionProvider>
       </AuthProvider>
@@ -64,7 +63,7 @@ describe('MultiSystemChart Component', () => {
     );
 
     // Basic test that component renders without crashing
-    expect(document.body).toBeInTheDocument();
+  expect(document.body).to.exist;
   });
 
   it('displays both Western and Vedic chart systems', () => {
@@ -75,7 +74,7 @@ describe('MultiSystemChart Component', () => {
     );
 
     // Check for system indicators
-    expect(document.body).toBeInTheDocument();
+  expect(document.body).to.exist;
   });
 
   it('handles loading state correctly', () => {
@@ -85,6 +84,6 @@ describe('MultiSystemChart Component', () => {
       </TestWrapper>
     );
 
-    expect(document.body).toBeInTheDocument();
+  expect(document.body).to.exist;
   });
 });

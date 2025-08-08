@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { UpgradeModal } from '@cosmichub/ui';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 import { upgradeEventManager } from '../utils/upgradeEvents';
 
 /**

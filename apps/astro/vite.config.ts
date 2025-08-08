@@ -40,7 +40,7 @@ export default defineConfig({
   },
   
   server: {
-    port: 3001, // Different port from HealWave
+    port: 5174, // Swapped: astro now on 5174
     host: true,
     cors: true,
     proxy: {
@@ -53,7 +53,7 @@ export default defineConfig({
   },
   
   preview: {
-    port: 3001,
+    port: 5174,
     host: true,
   },
   

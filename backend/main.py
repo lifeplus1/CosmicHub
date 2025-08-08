@@ -4,16 +4,16 @@ import os
 from typing import Optional, Dict, Any, List
 from fastapi import FastAPI, HTTPException, Depends, Query, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, FieldValidationInfo
 import requests
 import uuid
 import asyncio
 from datetime import datetime
 from functools import lru_cache
 
-# Temporarily comment out authentication for debugging
-from .auth import get_current_user  # Relative import
-from .database import save_chart, get_charts, delete_chart_by_id, get_firestore_client
+# Local imports (backend directory is container WORKDIR and on PYTHONPATH)
+from auth import get_current_user  # pragma: no cover (import side effects)
+from database import save_chart, get_charts, delete_chart_by_id, get_firestore_client  # noqa: F401
 
 # Mock user profile for elite user with Pydantic
 class UserProfile(BaseModel):
@@ -64,6 +64,9 @@ from astro.calculations.gene_keys import calculate_gene_keys_profile, get_gene_k
 # Configure logging with rotation for large datasets
 from logging.handlers import RotatingFileHandler
 log_file = os.getenv("LOG_FILE", "app.log")
+# Ensure directory exists
+log_dir = os.path.dirname(log_file) or "."
+os.makedirs(log_dir, exist_ok=True)
 handler = RotatingFileHandler(log_file, maxBytes=10**6, backupCount=5)
 logging.basicConfig(level=logging.DEBUG, handlers=[handler], format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -85,13 +88,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 # Redis-based rate limiter for scalability (fallback to in-memory if Redis not available)
-try:
-    import redis
-    redis_client = redis.Redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
-except ImportError:
+from typing import Any as _Any, Any
+import time
+try:  # Optional redis dependency
+    import redis  # type: ignore
+    redis_client: _Any | None = redis.Redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))  # type: ignore[attr-defined]
+except Exception:  # pragma: no cover - fallback path
     redis_client = None
     from collections import defaultdict
-    import time
     rate_limit_store: Dict[tuple[str, str], List[float]] = defaultdict(list)
 
 RATE_LIMIT = 60  # requests
@@ -102,9 +106,10 @@ async def rate_limiter(request: Request) -> None:
     endpoint = request.url.path
     key = f"rate:{ip}:{endpoint}"
     if redis_client:
-        count = await redis_client.incr(key)
+        # redis-py client calls are synchronous; execute directly
+        count = redis_client.incr(key)
         if count == 1:
-            await redis_client.expire(key, RATE_PERIOD)
+            redis_client.expire(key, RATE_PERIOD)
         if count > RATE_LIMIT:
             raise HTTPException(429, "Too Many Requests")
     else:
@@ -115,7 +120,16 @@ async def rate_limiter(request: Request) -> None:
             raise HTTPException(429, "Too Many Requests")
         rate_limit_store[(ip, endpoint)].append(now)
 
-app = FastAPI()
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # suppress benign CancelledError on shutdown
+    try:
+        yield
+    except Exception as e:  # log unexpected lifespan errors
+        logger.warning(f"Lifespan exception: {e}")
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(SecurityHeadersMiddleware)
 
 # Add CORS middleware with strict origins
@@ -138,18 +152,27 @@ class BirthData(BaseModel):
     lat: Optional[float] = None
     lon: Optional[float] = None
 
-    @validator('day')
-    def validate_day(cls, v, values):
-        month = values.get('month')
-        year = values.get('year')
-        if month in [4, 6, 9, 11] and v > 30:
-            raise ValueError('Invalid day for month')
-        if month == 2:
-            if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) and v > 29:
-                raise ValueError('Invalid day for February in leap year')
-            elif v > 28:
-                raise ValueError('Invalid day for February')
+    @field_validator('day')
+    @classmethod
+    def validate_day(cls, v: int, info: FieldValidationInfo):  # type: ignore[override]
+        raw = getattr(info, 'data', {})  # type: ignore[attr-defined]
+        if isinstance(raw, dict):
+            month = raw.get('month')
+            year = raw.get('year')
+            if isinstance(month, int) and isinstance(year, int):
+                if month in [4, 6, 9, 11] and v > 30:
+                    raise ValueError('Invalid day for month')
+                if month == 2:
+                    leap = (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0))
+                    if (leap and v > 29) or (not leap and v > 28):
+                        raise ValueError('Invalid day for February')
         return v
+
+class ChartResponse(BaseModel):
+    planets: Dict[str, Any]
+    houses: Dict[str, Any]
+    aspects: List[Any]
+    systems: Optional[Dict[str, Any]] = None
 
 # Other models with strict validation...
 
@@ -159,10 +182,33 @@ class BirthData(BaseModel):
 @app.post("/calculate", response_model=ChartResponse)
 async def calculate(data: BirthData, request: Request, background_tasks: BackgroundTasks, house_system: str = Query("P", enum=["P", "E"])):
     await rate_limiter(request)
-    # ... (add async/await where possible for performance)
+    chart = calculate_chart(
+        year=data.year,
+        month=data.month,
+        day=data.day,
+        hour=data.hour,
+        minute=data.minute,
+        lat=data.lat,
+        lon=data.lon,
+        city=data.city,
+        timezone=data.timezone or "UTC"
+    )
+    # Provide multi-system expansion in background if desired
+    background_tasks.add_task(lambda: None)  # placeholder for future async tasks
+    return ChartResponse(
+        planets=chart.get('planets', {}),
+        houses=chart.get('houses', {}),
+        aspects=chart.get('aspects', []),
+        systems=chart.get('systems') if 'systems' in chart else None
+    )
+
+@app.get("/health")
+async def root_health():
+    return {"status": "ok"}
 
 # Structure cleanup suggestion: Move routers to separate files and import here for modularity.
-from .api.routers import ai, presets, subscriptions
+# Import API routers (local path)
+from api.routers import ai, presets, subscriptions
 app.include_router(ai.router)
 app.include_router(presets.router)
 app.include_router(subscriptions.router)

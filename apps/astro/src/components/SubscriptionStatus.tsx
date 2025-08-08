@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 import { COSMICHUB_TIERS } from '../types/subscription';
 
 export const SubscriptionStatus: React.FC = React.memo(() => {

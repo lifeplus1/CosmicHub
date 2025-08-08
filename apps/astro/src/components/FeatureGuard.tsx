@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useAuth } from '@cosmichub/auth';
+import { useSubscription } from '@cosmichub/auth';
 import { EducationalTooltip } from './EducationalTooltip';
 
 interface FeatureGuardProps {

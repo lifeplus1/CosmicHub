@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 
 export interface UseUpgradeModalReturn {
   isUpgradeModalOpen: boolean;

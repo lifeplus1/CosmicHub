@@ -1,5 +1,27 @@
 import { useState, useCallback } from 'react';
 
+// Subscription-related types
+export interface UserSubscription {
+  tier: 'free' | 'premium' | 'elite';
+  status: 'active' | 'canceled' | 'past_due' | 'incomplete';
+  currentPeriodEnd: Date;
+  customerId?: string;
+  subscriptionId?: string;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  tier: 'free' | 'premium' | 'elite';
+  price: number;
+  features: string[];
+  limits: {
+    chartsPerMonth?: number;
+    chartStorage?: number;
+    [key: string]: any;
+  };
+}
+
 export interface AstrologyChart {
   id: string;
   userId: string;

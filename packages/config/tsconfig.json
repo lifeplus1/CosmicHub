@@ -7,10 +7,10 @@
     "declaration": true,
     "declarationMap": true,
     "noEmit": false,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "jsx": "react-jsx",
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/index.ts", "src/minimal-exports.ts", "src/performance.ts", "src/lazy-loading.ts"],
   "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
 }

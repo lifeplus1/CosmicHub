@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "@cosmichub/auth";
 import { getAuthToken } from "../services/api";
+import { useToast } from "./ToastProvider";
 
 interface ChatResponse {
   choices: { message: { content: string } }[];

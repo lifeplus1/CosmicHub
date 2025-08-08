@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 import { Button } from '@cosmichub/ui';
 
 /**

@@ -307,7 +307,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
         let module;
         switch (chartType) {
           case 'astrology':
-            module = await import('@cosmichub/ui/lazy-components');
+            module = await import('./lazy-components');
             break;
           default:
             // Fallback chart component

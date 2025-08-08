@@ -2,6 +2,7 @@ import React, { memo, useMemo, useCallback } from "react";
 import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import * as Accordion from '@radix-ui/react-accordion';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import type { ChartData } from '../types';
 
 interface ExtendedChartData extends ChartData {
@@ -236,6 +237,11 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
     return chart.aspects.filter(aspect => aspect.orb <= 8); // Only show tight aspects
   }, [chart?.aspects]);
 
+  const houseEntries = useMemo(() => {
+    if (!chart?.houses) return [];
+    return chart.houses;
+  }, [chart?.houses]);
+
   const handleSaveChart = useCallback(() => {
     if (!user) {
       toast({
@@ -333,7 +339,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     Planets ({planetEntries.length})
                   </span>
                 </div>
-                <Accordion.Icon />
+                <ChevronDownIcon className="h-4 w-4" />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 {planetEntries.length > 0 ? (
@@ -375,11 +381,11 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               <Accordion.Trigger className="flex justify-between w-full p-4 transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30 lg:p-6">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">🏠</span>
-                  <span className="mb-0 text-lg font-bold lg:text-xl text-cosmic-silver">
-                    Houses ({chart.houses?.length || 0})
+                                    <span className="mb-0 text-lg font-bold lg:text-xl text-cosmic-silver">
+                    Houses ({houseEntries.length})
                   </span>
                 </div>
-                <Accordion.Icon />
+                <ChevronDownIcon className="h-4 w-4" />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 <div className="overflow-x-auto">
@@ -426,7 +432,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     Angles ({Object.keys(chart.angles || {}).length})
                   </span>
                 </div>
-                <Accordion.Icon />
+                <ChevronDownIcon className="w-5 h-5 transition-transform duration-300 group-radix-state-open:rotate-180" />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 <div className="overflow-x-auto">
@@ -482,7 +488,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
                     Major Aspects ({aspectEntries.length})
                   </span>
                 </div>
-                <Accordion.Icon />
+                <ChevronDownIcon className="w-5 h-5 transition-transform duration-300 group-radix-state-open:rotate-180" />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 {aspectEntries.length > 0 ? (

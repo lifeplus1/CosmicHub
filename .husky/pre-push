@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+printf "\nRunning env validation before push...\n"
+npm run validate-env || exit 1
+
+printf "\nRunning type-check...\n"
+npm run type-check || exit 1
+
+printf "\nRunning tests...\n"
+npm test || exit 1
+
+printf "\nAll pre-push checks passed.\n"

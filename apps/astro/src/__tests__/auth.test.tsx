@@ -21,6 +21,6 @@ describe('Auth functionality', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Test Component')).toBeInTheDocument();
+  expect(screen.getByText('Test Component')).to.exist;
   });
 });

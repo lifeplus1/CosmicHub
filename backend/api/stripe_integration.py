@@ -6,13 +6,12 @@ Handles subscription management, payments, and webhook validation
 import os
 import stripe
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
-from fastapi import FastAPI, HTTPException, Request, Depends
+from datetime import datetime
+from typing import Dict, Any, Optional, TypedDict, List
+from fastapi import HTTPException, Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth
-import firebase_admin
-from ..database import get_firestore_client
+from backend.database import get_firestore_client
 
 # Configure Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -22,7 +21,13 @@ logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 # Subscription tiers and pricing
-SUBSCRIPTION_PLANS = {
+class SubscriptionPlanData(TypedDict, total=True):
+    price_id: Optional[str]
+    features: List[str]
+    name: str
+    price: float
+
+SUBSCRIPTION_PLANS: Dict[str, SubscriptionPlanData] = {
     "healwave_pro": {
         "price_id": os.getenv("STRIPE_HEALWAVE_PRO_PRICE_ID"),
         "features": ["unlimited_sessions", "premium_frequencies", "advanced_analytics"],

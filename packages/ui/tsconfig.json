@@ -1,16 +1,17 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-  "composite": true,
+    "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
     "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
     "noEmit": false,
-  "emitDeclarationOnly": false,
+    "emitDeclarationOnly": false,
     "jsx": "react-jsx",
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/index.ts", "src/minimal-exports.ts"],
   "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
 }

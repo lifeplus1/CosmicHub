@@ -38,6 +38,8 @@ tsconfig.tsbuildinfo
 *.env
 .env.*
 !.env.example
+!.env.production        # keep public production template (sanitized)
+.env.production.server  # server-only secrets (never commit if generated locally)
 
 # Logs
 *.log

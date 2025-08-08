@@ -1,12 +1,13 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@cosmichub/auth';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 import { useCrossAppStore } from '@cosmichub/integrations';
 import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { SubscriptionProvider } from './contexts/SubscriptionContext';
+import { CosmicLoading } from './components/CosmicLoading';
 import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
 import { UpgradeModalManager } from './components/UpgradeModalManager';
 
@@ -42,11 +43,11 @@ const MainApp: React.FC = React.memo(() => {
   }, [addNotification]);
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen bg-cosmic-dark text-cosmic-silver">
         <Navbar />
         <main className="container px-4 py-8 mx-auto">
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<CosmicLoading size="lg" message="Loading cosmic insights..." />}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/chart" element={<ChartCalculation />} />
@@ -70,16 +71,18 @@ const MainApp: React.FC = React.memo(() => {
 });
 
 const App: React.FC = () => (
-  <AuthProvider appName="astro">
-    <SubscriptionProvider>
-      <UpgradeModalProvider>
-        <ErrorBoundary>
-          <MainApp />
-          <UpgradeModalManager />
-        </ErrorBoundary>
-      </UpgradeModalProvider>
-    </SubscriptionProvider>
-  </AuthProvider>
+  <Tooltip.Provider>
+    <AuthProvider appName="astro">
+      <SubscriptionProvider appType="astro">
+        <UpgradeModalProvider>
+          <ErrorBoundary>
+            <MainApp />
+            <UpgradeModalManager />
+          </ErrorBoundary>
+        </UpgradeModalProvider>
+      </SubscriptionProvider>
+    </AuthProvider>
+  </Tooltip.Provider>
 );
 
 export default App;

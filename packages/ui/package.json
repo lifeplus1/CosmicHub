@@ -2,13 +2,13 @@
   "name": "@cosmichub/ui",
   "version": "1.0.0",
   "description": "Shared UI components for CosmicHub applications",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "echo 'Skipping UI build - apps use direct TypeScript imports'", 
-    "build:packages": "tsc",
-    "dev": "tsc --watch",
-    "clean": "rm -rf dist"
+    "build": "tsc -b .",
+    "build:packages": "tsc -b .",
+    "dev": "tsc -b . --watch",
+    "clean": "rm -rf dist node_modules/.tmp"
   },
   "peerDependencies": {
     "react": "^18.0.0",

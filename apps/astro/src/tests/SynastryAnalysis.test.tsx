@@ -1,8 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { AuthProvider } from '../contexts/AuthContext';
-import { SubscriptionProvider } from '../contexts/SubscriptionContext';
+import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 import { SynastryAnalysis } from '../components/SynastryAnalysis';
 import * as api from '../services/api';
 
@@ -11,7 +10,7 @@ vi.mock('../services/api');
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter>
     <AuthProvider>
-      <SubscriptionProvider>
+      <SubscriptionProvider appType="astro">
         {children}
       </SubscriptionProvider>
     </AuthProvider>

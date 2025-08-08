@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text, Flex, Badge, Button, useColorModeValue } from '@chakra-ui/react';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 
 export const PremiumFeaturesDashboard: React.FC = () => {

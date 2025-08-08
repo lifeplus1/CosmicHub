@@ -11,10 +11,16 @@ services:
     restart: unless-stopped
 
   astro-app:
-    build: ./apps/astro
-    command: npm run dev
+    build:
+      context: .
+      dockerfile: Dockerfile.astro
+      target: development
     volumes:
-      - ./apps/astro:/app
+      - ./apps/astro:/app/apps/astro
+      - ./packages:/app/packages
+      - ./shared:/app/shared
+      - /app/node_modules
+      - /app/apps/astro/node_modules
     ports:
       - "3000:3000"
     environment:
@@ -22,10 +28,16 @@ services:
     restart: unless-stopped
 
   healwave-app:
-    build: ./apps/healwave
-    command: npm run dev
+    build:
+      context: .
+      dockerfile: Dockerfile.healwave
+      target: development
     volumes:
-      - ./apps/healwave:/app
+      - ./apps/healwave:/app/apps/healwave
+      - ./packages:/app/packages
+      - ./shared:/app/shared
+      - /app/node_modules
+      - /app/apps/healwave/node_modules
     ports:
       - "4000:3000"
     environment:

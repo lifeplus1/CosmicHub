@@ -63,7 +63,7 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+  expect(screen.getByText('Loading...')).to.exist;
   });
 
   it('redirects to login when user is not authenticated', () => {
@@ -93,9 +93,9 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('AI Astrology Chat')).toBeInTheDocument();
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
+  expect(screen.getByText('AI Astrology Chat')).to.exist;
+  expect(screen.getByRole('textbox')).to.exist;
+  expect(screen.getByRole('button', { name: /send/i })).to.exist;
   });
 
   it('handles message input correctly', () => {

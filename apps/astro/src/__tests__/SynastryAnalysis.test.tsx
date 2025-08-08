@@ -2,13 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { SynastryAnalysis } from '../components/SynastryAnalysis';
-import { AuthProvider } from '@cosmichub/auth';
-import { SubscriptionProvider } from '../contexts/SubscriptionContext';
+import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter>
     <AuthProvider>
-      <SubscriptionProvider>
+      <SubscriptionProvider appType="astro">
         {children}
       </SubscriptionProvider>
     </AuthProvider>
@@ -50,6 +49,6 @@ describe('SynastryAnalysis Component', () => {
     );
 
     // Basic test that component renders without crashing
-    expect(document.body).toBeInTheDocument();
+  expect(document.body).to.exist;
   });
 });

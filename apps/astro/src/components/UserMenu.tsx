@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { FaUser, FaCrown, FaStar, FaCog, FaSignOutAlt, FaChartLine, FaSave, FaCreditCard } from 'react-icons/fa';
 import { useAuth, logOut } from '@cosmichub/auth';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastProvider';
 import type { COSMICHUB_TIERS } from '../types/subscription';

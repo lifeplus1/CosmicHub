@@ -33,12 +33,9 @@
       "@cosmichub/ui": ["./packages/ui/src"]
     }
   },
-  "include": [
-    "src/**/*",
-    "apps/**/*",
-    "packages/**/*",
-    "shared/**/*"
-  ],
+  // Root acts as solution tsconfig only; actual source compilation handled by per-package/app tsconfigs
+  // No include to avoid pulling in test/experimental files that cause build noise
+  "include": [],
   "exclude": [
     "node_modules",
     "dist",
@@ -51,9 +48,7 @@
     { "path": "./packages/config" },
     { "path": "./packages/frequency" },
     { "path": "./packages/integrations" },
-    { "path": "./packages/ui" },
-    { "path": "./apps/astro" },
-    { "path": "./apps/healwave" }
+    { "path": "./packages/ui" }
   ],
   "files": []
 }

@@ -6,7 +6,7 @@ Production-ready subscription management endpoints
 from fastapi import APIRouter, HTTPException, Request, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Literal, List
 import logging
 
 from ..stripe_integration import (
@@ -15,6 +15,12 @@ from ..stripe_integration import (
     handle_stripe_webhook,
     verify_firebase_token,
     SUBSCRIPTION_PLANS
+)
+from ..utils.typing_helpers import (
+    get_stripe_account,
+    cancel_stripe_subscription,
+    reactivate_stripe_subscription,
+    update_subscription_cancel_flag
 )
 
 logger = logging.getLogger(__name__)
@@ -37,6 +43,21 @@ class SubscriptionStatusResponse(BaseModel):
     features: list[str]
     expires_at: Optional[str]
     stripe_subscription_id: Optional[str]
+
+class StripeHealthResponse(BaseModel):
+    status: Literal["healthy", "unhealthy"]
+    stripe_connected: bool
+    available_plans: Optional[int] = None
+    error: Optional[str] = None
+
+class SubscriptionPlan(BaseModel):
+    name: str
+    price: float
+    features: List[str]
+
+class SubscriptionPlansResponse(BaseModel):
+    plans: Dict[str, SubscriptionPlan]
+    currency: str
 
 @router.post("/create-checkout-session", response_model=CheckoutSessionResponse)
 async def create_checkout_session(
@@ -75,23 +96,19 @@ async def get_subscription_status(user_id: str = Depends(verify_firebase_token))
         logger.error(f"Unexpected error getting subscription status: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@router.get("/plans")
-async def get_subscription_plans():
+@router.get("/plans", response_model=SubscriptionPlansResponse)
+async def get_subscription_plans() -> SubscriptionPlansResponse:
     """Get available subscription plans"""
     try:
         # Return sanitized plan information (no price IDs for security)
-        sanitized_plans = {}
+        sanitized_plans: Dict[str, SubscriptionPlan] = {}
         for plan_id, plan_data in SUBSCRIPTION_PLANS.items():
-            sanitized_plans[plan_id] = {
-                "name": plan_data["name"],
-                "price": plan_data["price"],
-                "features": plan_data["features"]
-            }
-        
-        return {
-            "plans": sanitized_plans,
-            "currency": "USD"
-        }
+            sanitized_plans[plan_id] = SubscriptionPlan(
+                name=plan_data["name"],
+                price=plan_data["price"],
+                features=plan_data["features"],
+            )
+        return SubscriptionPlansResponse(plans=sanitized_plans, currency="USD")
         
     except Exception as e:
         logger.error(f"Error retrieving subscription plans: {str(e)}")
@@ -116,32 +133,19 @@ async def stripe_webhook_handler(request: Request, background_tasks: BackgroundT
 async def cancel_subscription(user_id: str = Depends(verify_firebase_token)):
     """Cancel user's active subscription"""
     try:
-        import stripe
-        from ..database import get_firestore_client
-        from datetime import datetime
-        
         # Get user's subscription
         status = await get_user_subscription_status(user_id)
-        
+
         if status["status"] != "active" or not status.get("stripe_subscription_id"):
             raise HTTPException(status_code=400, detail="No active subscription found")
-        
-        # Cancel in Stripe
-        stripe.Subscription.modify(
-            status["stripe_subscription_id"],
-            cancel_at_period_end=True
-        )
-        
-        # Update local status
-        db_client = get_firestore_client()
-        db_client.collection("subscriptions").document(user_id).update({
-            "cancel_at_period_end": True,
-            "updated_at": datetime.now().isoformat()
-        })
-        
+
+        # Cancel in Stripe & update local status via helpers
+        cancel_stripe_subscription(status["stripe_subscription_id"])
+        update_subscription_cancel_flag(user_id, True)
+
         logger.info(f"Subscription cancelled for user {user_id}")
         return {"status": "cancelled", "message": "Subscription will end at the end of current billing period"}
-        
+    
     except HTTPException:
         raise
     except Exception as e:
@@ -152,32 +156,19 @@ async def cancel_subscription(user_id: str = Depends(verify_firebase_token)):
 async def reactivate_subscription(user_id: str = Depends(verify_firebase_token)):
     """Reactivate a cancelled subscription before period end"""
     try:
-        import stripe
-        from ..database import get_firestore_client
-        from datetime import datetime
-        
         # Get user's subscription
         status = await get_user_subscription_status(user_id)
-        
+
         if not status.get("stripe_subscription_id"):
             raise HTTPException(status_code=400, detail="No subscription found")
-        
-        # Reactivate in Stripe
-        stripe.Subscription.modify(
-            status["stripe_subscription_id"],
-            cancel_at_period_end=False
-        )
-        
-        # Update local status
-        db_client = get_firestore_client()
-        db_client.collection("subscriptions").document(user_id).update({
-            "cancel_at_period_end": False,
-            "updated_at": datetime.now().isoformat()
-        })
-        
+
+        # Reactivate in Stripe & update local status via helpers
+        reactivate_stripe_subscription(status["stripe_subscription_id"])
+        update_subscription_cancel_flag(user_id, False)
+
         logger.info(f"Subscription reactivated for user {user_id}")
         return {"status": "reactivated", "message": "Subscription has been reactivated"}
-        
+    
     except HTTPException:
         raise
     except Exception as e:
@@ -185,25 +176,23 @@ async def reactivate_subscription(user_id: str = Depends(verify_firebase_token))
         raise HTTPException(status_code=500, detail="Failed to reactivate subscription")
 
 # Health check endpoint
-@router.get("/health")
-async def health_check():
+@router.get("/health", response_model=StripeHealthResponse)
+async def health_check() -> StripeHealthResponse:
     """Health check for Stripe integration"""
     try:
-        import stripe
-        
         # Test Stripe connection
-        stripe.Account.retrieve()
-        
-        return {
-            "status": "healthy",
-            "stripe_connected": True,
-            "available_plans": len(SUBSCRIPTION_PLANS)
-        }
-        
+        get_stripe_account()
+
+        return StripeHealthResponse(
+            status="healthy",
+            stripe_connected=True,
+            available_plans=len(SUBSCRIPTION_PLANS)
+        )
+    
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
-        return {
-            "status": "unhealthy",
-            "stripe_connected": False,
-            "error": "Stripe connection failed"
-        }
+        return StripeHealthResponse(
+            status="unhealthy",
+            stripe_connected=False,
+            error="Stripe connection failed"
+        )

@@ -31,11 +31,11 @@ export default defineConfig(({ command, mode }) => {
 
     // Development server configuration
     server: {
-      port: 5174,
+      port: 3001,
       host: true,
       open: false, // Don't auto-open browser
       hmr: {
-        port: 5174,
+        port: 3001,
         host: 'localhost',
       },
       watch: {

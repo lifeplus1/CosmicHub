@@ -3,43 +3,51 @@ import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, Auth, User } from 'firebase/auth';
 
 interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
+  apiKey: string | undefined;
+  authDomain: string | undefined;
+  projectId: string | undefined;
+  storageBucket: string | undefined;
+  messagingSenderId: string | undefined;
+  appId: string | undefined;
 }
 
+// Support Vite (browser / vitest) via import.meta.env, fallback to process.env for other Node contexts
+const envAny: any = (typeof import.meta !== 'undefined' && (import.meta as any)?.env)
+  ? (import.meta as any).env
+  : (process?.env || {});
 const firebaseConfig: FirebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY ?? '',
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN ?? '',
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID ?? '',
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET ?? '',
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? '',
-  appId: process.env.VITE_FIREBASE_APP_ID ?? ''
+  apiKey: envAny.VITE_FIREBASE_API_KEY,
+  authDomain: envAny.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: envAny.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: envAny.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: envAny.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: envAny.VITE_FIREBASE_APP_ID,
 };
 
-// Validate Firebase config
-const isValidFirebaseConfig = (config: FirebaseConfig): boolean => {
-  return Object.values(config).every(value => value !== '');
-};
-
-let app: FirebaseApp;
+let app: FirebaseApp | undefined;
 try {
-  if (!isValidFirebaseConfig(firebaseConfig)) {
-    throw new Error('Invalid Firebase configuration');
+  // Only require apiKey + appId + projectId (minimal) to attempt init; warn instead of throw
+  if (!firebaseConfig.apiKey || !firebaseConfig.appId || !firebaseConfig.projectId) {
+    console.warn('[auth] Firebase config incomplete; authentication features disabled until env vars provided.');
+    // Skip initialization; app will remain undefined
+    app = undefined;
+  } else {
+    app = initializeApp(firebaseConfig as any);
   }
-  app = initializeApp(firebaseConfig);
 } catch (error) {
-  console.error('Failed to initialize Firebase:', error);
-  throw error;
+  console.error('[auth] Firebase initialization failed:', error);
+  app = undefined;
 }
 
-export const auth: Auth = getAuth(app);
+// Export auth if initialized; otherwise create a lazy getter that throws on use
+export const auth: Auth = app ? getAuth(app) : (new Proxy({} as Auth, {
+  get() {
+    throw new Error('Firebase auth not initialized due to incomplete configuration');
+  }
+}) as Auth);
 
 // Connect to emulator in development
-if (process.env.NODE_ENV === 'development') {
+if (envAny.DEV || (envAny.NODE_ENV || envAny.MODE) === 'development') {
   try {
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
   } catch (error) {
@@ -111,5 +119,8 @@ export const signUp = async (email: string, password: string): Promise<User> => 
 export const logOut = async (): Promise<void> => { 
   await auth.signOut(); 
 };
+
+// Export consolidated subscription provider
+export { SubscriptionProvider, useSubscription } from './SubscriptionProvider';
 
 export * from 'firebase/auth';

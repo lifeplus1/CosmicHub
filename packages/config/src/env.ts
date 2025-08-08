@@ -104,10 +104,11 @@ export const validateEnv = (): { isValid: boolean; missing: string[]; errors: st
 // Get environment configuration with defaults
 export const getEnvConfig = (): Partial<EnvConfig> => {
   const env = getCurrentEnvironment();
-  
+  // Prefer Vite-style variables (VITE_API_URL) if present, fallback to legacy NEXT_PUBLIC_API_URL
+  const publicApiUrl = process.env.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL;
   const baseConfig = {
     NODE_ENV: env,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (
+    NEXT_PUBLIC_API_URL: publicApiUrl || (
       env === 'production' 
         ? 'https://api.cosmichub.app'
         : env === 'staging'

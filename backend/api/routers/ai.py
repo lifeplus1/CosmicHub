@@ -2,17 +2,14 @@
 AI-powered astrological interpretation endpoints
 """
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from typing import List, Dict, Any, Optional
-import asyncio
-import json
+from typing import Dict, Any
 from datetime import datetime
 
-from ...auth import get_current_user
-from ...database import get_firestore_client
+from auth import get_current_user
+from database import get_firestore_client
 from ..models.ai import (
     InterpretationRequest,
     InterpretationResponse,
-    InterpretationSection,
     AIAnalysisRequest,
     AIAnalysisResponse
 )

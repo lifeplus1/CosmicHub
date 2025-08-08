@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle } from 'react-icons/fa';

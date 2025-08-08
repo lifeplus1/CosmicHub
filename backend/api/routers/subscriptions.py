@@ -1,9 +1,9 @@
 # backend/api/routers/subscriptions.py
 from fastapi import APIRouter, Depends, HTTPException, Request
 from typing import Any, Dict
-from ...models.subscription import CheckoutSession
-from ...services.stripe_service import create_stripe_session
-from ....auth import get_current_user
+from api.models.subscription import CheckoutSession
+from api.services.stripe_service import create_stripe_session  # type: ignore  # if dynamic
+from auth import get_current_user
 
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 

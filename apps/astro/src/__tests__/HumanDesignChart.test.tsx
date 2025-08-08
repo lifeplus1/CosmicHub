@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import HumanDesignChart from '../components/HumanDesignChart';
+import { HumanDesignChart } from '../components/HumanDesignChart';
 import { AuthProvider } from '@cosmichub/auth';
 import * as api from '../services/api';
 
@@ -54,7 +54,7 @@ describe('HumanDesignChart Component', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText(/enter your birth information/i)).toBeInTheDocument();
+  expect(screen.getByText(/enter your birth information/i)).to.exist;
   });
 
   it('renders with birth data props', () => {
@@ -65,7 +65,7 @@ describe('HumanDesignChart Component', () => {
     );
 
     // When birth data is provided, component automatically starts calculating
-    expect(screen.getByText(/calculating your human design chart/i)).toBeInTheDocument();
+  expect(screen.getByText(/calculating your human design chart/i)).to.exist;
   });
 
   it('renders calculate button when onCalculate prop is provided', () => {
@@ -77,7 +77,7 @@ describe('HumanDesignChart Component', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByRole('button', { name: /calculate human design/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /calculate human design/i })).to.exist;
   });
 
   it('calls onCalculate when button is clicked', () => {

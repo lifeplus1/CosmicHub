@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 
 export interface DropdownOption {
   value: string;
@@ -10,6 +10,7 @@ export interface DropdownProps {
   options: DropdownOption[];
   value?: string;
   placeholder?: string;
+  label?: string; // Accessible label (falls back to placeholder)
   onChange?: (value: string) => void;
   disabled?: boolean;
   className?: string;
@@ -19,10 +20,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
   options,
   value,
   placeholder = 'Select an option',
+  label,
   onChange,
   disabled = false,
   className = ''
 }) => {
+  const reactId = useId();
+  const labelId = `${reactId}-label`;
+  const listboxId = `${reactId}-listbox`;
   const [isOpen, setIsOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value || '');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,6 +62,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <div ref={dropdownRef} className={`relative inline-block w-full ${className}`}>
+      {/* Accessible label (visually hidden if not explicitly provided) */}
+      <span id={labelId} className="sr-only">
+        {label || placeholder}
+      </span>
       <button
         type="button"
         className={`
@@ -68,9 +77,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen ? 'true' : 'false'}
-        aria-labelledby="dropdown-label"
+  aria-haspopup="listbox"
+  aria-expanded={isOpen ? 'true' : 'false' /* linter expects literal true/false strings */}
+  aria-labelledby={labelId}
+  aria-controls={listboxId}
+  {...(disabled ? { 'aria-disabled': 'true' } : {})}
       >
         <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -86,25 +97,32 @@ export const Dropdown: React.FC<DropdownProps> = ({
         <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
           <ul
             role="listbox"
+            id={listboxId}
             className="py-1 overflow-auto max-h-60"
-            aria-labelledby="dropdown-label"
+            aria-labelledby={labelId}
             aria-label="Dropdown options"
           >
-            {options.map((option) => (
-              <li
-                key={option.value}
-                role="option"
-                aria-selected={selectedOption?.value === option.value ? 'true' : 'false'}
-                className={`px-4 py-2 text-sm cursor-pointer transition-colors ${
-                  selectedOption?.value === option.value
-                    ? 'bg-blue-100 text-blue-900'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                onClick={() => handleSelect(option.value)}
-              >
-                {option.label}
-              </li>
-            ))}
+            {options.map((option) => {
+              const selected = selectedOption?.value === option.value;
+              const disabledOpt = option.disabled;
+              return (
+                <li
+                  key={option.value}
+                  id={`${listboxId}-opt-${option.value}`}
+                  role="option"
+                  aria-selected={selected ? 'true' : 'false' /* enforce string literal */}
+                  {...(disabledOpt ? { 'aria-disabled': 'true' } : {})}
+                  className={`px-4 py-2 text-sm transition-colors ${
+                    disabledOpt
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'cursor-pointer ' + (selected ? 'bg-blue-100 text-blue-900' : 'text-gray-700 hover:bg-gray-100')
+                  }`}
+                  onClick={() => !disabledOpt && handleSelect(option.value)}
+                >
+                  {option.label}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

@@ -59,7 +59,14 @@ Use the Makefile for common tasks:
 - `make format` — format frontend code
 
 ## Environment Variables
-See `docs/ENVIRONMENT.md` for all required secrets and environment variables.
+Environment strategy: strict separation of public (VITE_*) and server-only variables.
+Docs: `docs/ENVIRONMENT.md`
+
+Validation commands:
+
+- `npm run validate-env` (rules & leakage)
+- `npm run validate-env-schema` (JSON schema enforcement)
 
 ## CI/CD
+
 Use `.gitlab-ci.yml` for GitLab or `.github/workflows/ci.yml` for GitHub Actions. Only one should be active.

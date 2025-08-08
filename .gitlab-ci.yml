@@ -1,147 +1,143 @@
-# .gitlab-ci.yml for CosmicHub monorepo
-# This config runs tests for backend (Python) and both frontends (Vite/React), then deploys if on main branch
+#############################################################
+# GitLab CI/CD for CosmicHub (budget-friendly monorepo)     #
+# Focus: Env validation, type-check, lint, tests, build.    #
+# Backend Python tests retained; frontends via turbo.       #
+#############################################################
 
 stages:
+  - validate
+  - typecheck
+  - lint
   - test
-  - deploy
+  - build
 
 variables:
-  # Node.js and Python versions
   NODE_VERSION: "20"
   PYTHON_VERSION: "3.13"
-  # Vercel/Render tokens (set in GitLab CI/CD settings)
-  VERCEL_TOKEN: "$VERCEL_TOKEN"
-  VERCEL_ORG_ID: "$VERCEL_ORG_ID"
-  VERCEL_PROJECT_ID: "$VERCEL_PROJECT_ID"
-  RENDER_SERVICE_ID: "$RENDER_SERVICE_ID"
-  RENDER_API_KEY: "$RENDER_API_KEY"
-  # Firebase/Backend env vars
-  FIREBASE_PROJECT_ID: "$FIREBASE_PROJECT_ID"
-  FIREBASE_PRIVATE_KEY_ID: "$FIREBASE_PRIVATE_KEY_ID"
-  FIREBASE_PRIVATE_KEY: "$FIREBASE_PRIVATE_KEY"
-  FIREBASE_CLIENT_EMAIL: "$FIREBASE_CLIENT_EMAIL"
-  FIREBASE_CLIENT_ID: "$FIREBASE_CLIENT_ID"
-  FIREBASE_AUTH_URI: "$FIREBASE_AUTH_URI"
-  FIREBASE_TOKEN_URI: "$FIREBASE_TOKEN_URI"
-  FIREBASE_AUTH_PROVIDER_X509_CERT_URL: "$FIREBASE_AUTH_PROVIDER_X509_CERT_URL"
-  FIREBASE_CLIENT_X509_CERT_URL: "$FIREBASE_CLIENT_X509_CERT_URL"
-  FIREBASE_UNIVERSE_DOMAIN: "$FIREBASE_UNIVERSE_DOMAIN"
-  FIREBASE_CREDENTIALS: "$FIREBASE_CREDENTIALS"
-  VITE_FIREBASE_API_KEY: "$VITE_FIREBASE_API_KEY"
-  VITE_FIREBASE_AUTH_DOMAIN: "$VITE_FIREBASE_AUTH_DOMAIN"
-  VITE_FIREBASE_PROJECT_ID: "$VITE_FIREBASE_PROJECT_ID"
-  VITE_FIREBASE_STORAGE_BUCKET: "$VITE_FIREBASE_STORAGE_BUCKET"
-  VITE_FIREBASE_MESSAGING_SENDER_ID: "$VITE_FIREBASE_MESSAGING_SENDER_ID"
-  VITE_FIREBASE_APP_ID: "$VITE_FIREBASE_APP_ID"
-  VITE_BACKEND_URL: "https://astrology-app-0emh.onrender.com"
-  API_KEY: "$API_KEY"
-  LOG_FILE: "logs/app.log"
-  PORT: "8000"
-  EPHE_PATH: "/app/ephe"
+  NODE_ENV: production
+  TURBO_TELEMETRY_DISABLED: "1"
+  # Public build fallbacks (override with protected CI/CD variables)
+  VITE_API_URL: ${VITE_API_URL:-https://api.example.com}
+  VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-placeholder}
+  VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-placeholder}
+  VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-1:000:web:placeholder}
 
 cache:
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
+    - node_modules/
+    - .npm/
+    - .turbo/cache
     - backend/.venv/
-    - frontend/astro/node_modules/
-    - frontend/healwave/node_modules/
+  policy: pull-push
 
-# Test Stage
-.test_template: &test_template
+.node_template: &node_template
   image: node:${NODE_VERSION}
-  services:
-    - name: python:${PYTHON_VERSION}
   before_script:
-    - apt-get update && apt-get install -y python3-pip python3-venv
-    - python3 --version
-    - node --version
+    - node -v
+    - npm -v
+    - npm ci --cache .npm --prefer-offline
 
-# Backend tests
-backend-test:
-  <<: *test_template
-  stage: test
-  script:
-    - cd backend
-    - python3 -m venv .venv
-    - source .venv/bin/activate
+.python_setup: &python_setup
+  before_script:
+    - python3 -V || apt-get update && apt-get install -y python3 python3-venv python3-pip
+    - python3 -m venv backend/.venv
+    - source backend/.venv/bin/activate
     - pip install --upgrade pip
-    - pip install -r requirements.txt
-    - pytest tests/ --cov=astro --cov-report=xml --cov-report=html
-    - pytest tests/ -m "slow" || true
-  artifacts:
-    paths:
-      - backend/htmlcov/
-    expire_in: 1 week
+    - pip install -r backend/requirements.txt
 
-# Astro Frontend tests
-frontend-astro-test:
-  <<: *test_template
-  stage: test
+validate_env:
+  <<: *node_template
+  stage: validate
   script:
-    - cd frontend/astro
-    - npm ci
-    - npm run test -- --coverage
+    - npm run validate-env
   artifacts:
-    paths:
-      - frontend/astro/coverage/
+    when: always
     expire_in: 1 week
+    paths:
+      - app.log
 
-# HealWave Frontend tests
-frontend-healwave-test:
-  <<: *test_template
-  stage: test
+validate_env_schema:
+  <<: *node_template
+  stage: validate
+  needs: ["validate_env"]
   script:
-    - cd frontend/healwave
-    - npm ci
-    - npm run test
+    - npm run validate-env-schema
+
+secret_scan:
+  image: zricethezav/gitleaks:latest
+  stage: validate
+  script:
+    - gitleaks detect --verbose --no-git --source=. --report-format=json --report-path=gitleaks-report.json || true
+    - if [ -s gitleaks-report.json ]; then echo "Secrets detected!" && cat gitleaks-report.json && exit 1; fi
+    - echo "No secrets detected"
   artifacts:
-    paths:
-      - frontend/healwave/coverage/
+    when: always
     expire_in: 1 week
+    paths:
+      - gitleaks-report.json
+  allow_failure: false
 
-# Deploy Astro Frontend to Vercel
-frontend-astro-deploy:
-  image: node:${NODE_VERSION}
-  stage: deploy
-  only:
-    - main
+type_check:
+  <<: *node_template
+  stage: typecheck
+  needs: ["validate_env"]
   script:
-    - npm install -g vercel@latest
-    - cd frontend/astro
-    - vercel deploy --prod --token=$VERCEL_TOKEN --yes --scope $VERCEL_ORG_ID
-  environment:
-    name: production
-  dependencies:
-    - frontend-astro-test
+    - npm run type-check
 
-# Deploy Backend to Render
-backend-deploy:
+lint:
+  <<: *node_template
+  stage: lint
+  needs: ["validate_env"]
+  script:
+    - npm run lint
+
+backend_tests:
   image: python:${PYTHON_VERSION}
-  stage: deploy
-  only:
-    - main
+  stage: test
+  needs: ["type_check","lint"]
+  before_script:
+    - python --version
+    - pip install --upgrade pip
+    - pip install -r backend/requirements.txt
   script:
-    - pip install requests
-    - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r backend/requirements.txt
-    - |
-      curl -X POST "https://api.render.com/deploy/srv-$RENDER_SERVICE_ID" \
-        -H "Authorization: Bearer $RENDER_API_KEY" \
-        -H "Content-Type: application/json" \
-        -d '{}'
-  environment:
-    name: production
-  dependencies:
-    - backend-test
+    - pytest backend/tests -q
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - backend/.pytest_cache
 
-# Deploy HealWave Frontend (add your deployment step here if needed)
-# frontend-healwave-deploy:
-#   image: node:${NODE_VERSION}
-#   stage: deploy
-#   only:
-#     - main
-#   script:
-#     - echo "Add deployment steps for HealWave frontend here"
-#   environment:
-#     name: production
-#   dependencies:
-#     - frontend-healwave-test
+frontend_tests:
+  <<: *node_template
+  stage: test
+  needs: ["type_check","lint"]
+  script:
+    - npm run test:coverage -- --ci --reporter=default
+    - npm run coverage:report
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - apps/astro/coverage
+      - apps/healwave/coverage
+      - coverage/
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+
+build_all:
+  <<: *node_template
+  stage: build
+  needs: ["backend_tests","frontend_tests"]
+  script:
+    - npm run build
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - apps/**/dist
+      - packages/**/dist
+      - backend
+
+# Optional deploy stage can be appended here referencing build artifacts
