@@ -35,7 +35,7 @@
     },
     "test": {
       "dependsOn": ["^build:packages"],
-      "outputs": ["coverage/**", "test-results/**"],
+  "outputs": [],
       "env": ["NODE_ENV"],
       "outputLogs": "new-only"
     },
@@ -46,7 +46,7 @@
     },
     "type-check": {
       "dependsOn": ["^build:packages"],
-      "outputs": [".tsbuildinfo"],
+  "outputs": [],
       "env": ["NODE_ENV"],
       "outputLogs": "errors-only"
     },

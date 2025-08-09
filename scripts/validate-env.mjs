@@ -8,6 +8,8 @@ import path from 'path';
 const envFile = ['.env.local', '.env', '.env.production']
   .map(f => path.resolve(process.cwd(), f))
   .find(p => fs.existsSync(p));
+// Track which keys were loaded from the file so we don't warn on globally-set shell vars
+const loadedFromFile = new Set();
 if (envFile) {
   const lines = fs.readFileSync(envFile, 'utf8').split(/\r?\n/);
   for (const line of lines) {
@@ -16,7 +18,8 @@ if (envFile) {
     if (idx === -1) continue;
     const key = line.slice(0, idx).trim();
     const val = line.slice(idx + 1).trim();
-    if (process.env[key] === undefined) process.env[key] = val;
+  if (process.env[key] === undefined) process.env[key] = val;
+  loadedFromFile.add(key);
   }
 }
 
@@ -38,9 +41,9 @@ const serverOnly = ['DATABASE_URL','REDIS_URL','SMTP_PASS','GOOGLE_CLIENT_SECRET
 const errors = [];
 const warnings = [];
 
-// Detect server-only file presence (informational)
+// Detect server-only file presence (informational only; do not warn)
 if (fs.existsSync(path.resolve(process.cwd(), '.env.production.server'))) {
-  warnings.push('.env.production.server detected (expected). Ensure it is excluded from frontend build contexts.');
+  console.log('\nℹ️  .env.production.server detected (expected). Ensure it is excluded from frontend build contexts.');
 }
 
 // 1. Required public vars
@@ -87,9 +90,9 @@ if (process.env.VITE_FIREBASE_API_KEY && process.env.VITE_FIREBASE_API_KEY.lengt
   warnings.push('VITE_FIREBASE_API_KEY appears unusually short');
 }
 
-// 6. Disallow API_URL leakage in client env
-if (process.env.API_URL) {
-  warnings.push('API_URL detected in client env; remove (backend should source separately)');
+// 6. Disallow API_URL leakage in client env, but only if it came from the loaded .env file
+if (loadedFromFile.has('API_URL')) {
+  warnings.push('API_URL found in .env; move to server-only env (e.g., .env.production.server) and remove from client env');
 }
 
 // 7. Unexpected non-prefixed public-style variables
