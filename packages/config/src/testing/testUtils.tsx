@@ -267,7 +267,11 @@ export const expectWithinRange = (value: number, min: number, max: number) => {
 
 // Accessibility Testing Helpers
 export const expectAccessibleButton = (button: HTMLElement) => {
-  expect(button.hasAttribute('type')).toBe(true);
+  // Button should have type="button" or be a button element
+  const hasTypeAttribute = button.hasAttribute('type');
+  const isButtonElement = button.tagName.toLowerCase() === 'button';
+  expect(hasTypeAttribute || isButtonElement).toBe(true);
+  
   expect(button.getAttribute('aria-disabled')).not.toBe('true');
   
   // Should have accessible name

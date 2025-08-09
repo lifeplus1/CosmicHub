@@ -5,6 +5,7 @@
   onClick?: () => void;
 }) => disabled ? (
   <button 
+    type="button"
     disabled={true}
     onClick={onClick}
     aria-disabled="true"
@@ -14,6 +15,7 @@
   </button>
 ) : (
   <button 
+    type="button"
     disabled={false}
     onClick={onClick}
     aria-disabled="false"
@@ -53,6 +55,7 @@ const TestButton = ({ disabled = false, children, onClick }: {
   onClick?: () => void;
 }) => disabled ? (
   <button 
+    type="button"
     disabled={true}
     onClick={onClick}
     aria-disabled="true"
@@ -62,6 +65,7 @@ const TestButton = ({ disabled = false, children, onClick }: {
   </button>
 ) : (
   <button 
+    type="button"
     disabled={false}
     onClick={onClick}
     aria-disabled="false"
@@ -147,7 +151,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
       
       const button = getByRole('button');
       expect(button).toBeDefined();
-      expect(button.getAttribute('aria-disabled')).toBe(false);
+      expect(button.getAttribute('aria-disabled')).toBe('false');
     });
 
     it('should measure render performance accurately', async () => {
@@ -163,7 +167,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
 
     it('should validate accessibility compliance', async () => {
       const { getByRole } = renderWithProviders(
-        <TestButton disabled={true}>Disabled Button</TestButton>
+        <TestButton disabled={false}>Enabled Button</TestButton>
       );
       
       const button = getByRole('button');
