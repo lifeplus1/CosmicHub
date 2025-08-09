@@ -55,17 +55,17 @@
 ## **📊 Performance Improvements**
 
 ### **Bundle Size Optimization**
-```
+```text
 Before Optimization: ~800KB initial bundle
 After Optimization:  ~180KB initial bundle (-77%)
-```
+```text
 
 ### **Loading Performance**
-```
+```text
 Time to Interactive: 3.5s → 1.2s (-66%)
 Largest Contentful Paint: 2.8s → 1.1s (-61%)
 First Contentful Paint: Improved by ~40%
-```
+```text
 
 ### **User Experience**
 - ✅ Faster initial page loads
@@ -89,7 +89,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
     timeout?: number;
   }
 )
-```
+```text
 
 ### **Route-Based Splitting**
 ```typescript
@@ -101,7 +101,7 @@ export const lazyLoadRoute = (
   preload: false,
   timeout: 15000
 });
-```
+```text
 
 ### **Smart Preloading**
 ```typescript
@@ -110,7 +110,7 @@ preloader.preloadOnHover(element, importFn, 'ComponentName', 200);
 
 // Intersection-based preloading  
 preloader.preloadOnIntersection(element, importFn, 'ComponentName');
-```
+```text
 
 ---
 
@@ -124,7 +124,7 @@ performanceMonitor.recordMetric('ComponentLazyLoad', loadTime, {
   success: true,
   trigger: 'user-interaction'
 });
-```
+```text
 
 ### **Key Metrics Monitored**
 - ✅ Component load times

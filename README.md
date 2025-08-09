@@ -4,7 +4,7 @@ A high-performance monorepo for astrology and healing frequency applications wit
 
 ## 🏗️ Architecture
 
-```
+```text
 CosmicHub/
 ├── apps/
 │   ├── astro/           # Astrology app with chart generation
@@ -22,6 +22,7 @@ CosmicHub/
 ## ⚡ Optimized Build System
 
 ### Quick Start
+
 ```bash
 # Fast development build (~2 seconds)
 npm run build:fast

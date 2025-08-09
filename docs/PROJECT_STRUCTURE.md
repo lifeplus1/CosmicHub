@@ -8,7 +8,7 @@
 
 ## 📁 **Current Optimized Structure**
 
-```
+```text
 CosmicHub/
 ├── apps/                           # 🎯 STANDALONE APPLICATIONS
 │   ├── astro/                      # ⭐ Astrology App (cosmichub.com)
@@ -51,7 +51,7 @@ CosmicHub/
 │   └── main.py
 │
 └── shared/                         # 📦 Legacy shared files (being migrated to packages/)
-```
+```text
 
 ---
 
@@ -67,7 +67,7 @@ npm run preview
 
 # Deploy to healwave.com
 vercel deploy --prod
-```
+```text
 
 ### **2. Standalone User Experience**
 - **URL**: `healwave.com` (completely separate domain)
@@ -90,7 +90,7 @@ function HealWaveApp() {
     </AuthProvider>
   );
 }
-```
+```text
 
 ---
 
@@ -111,7 +111,7 @@ function AstroFrequencyGenerator({ chartData, transits }) {
   // 🎵 Use same AudioEngine as HealWave, but with astrology context
   return <EnhancedFrequencyInterface />;
 }
-```
+```text
 
 ### **2. Astrology-Specific Features**
 - **Transit-based frequency recommendations**
@@ -132,7 +132,7 @@ function AstroFrequencyGenerator({ chartData, transits }) {
 
 // ✅ AFTER: Shared package
 // packages/frequency/src/index.ts  (single source of truth)
-```
+```text
 
 ### **2. Consistent Authentication**
 ```typescript
@@ -142,7 +142,7 @@ import { AuthProvider, useAuth } from '@cosmichub/auth';
 // HealWave: healwave.com/login
 // Astro: cosmichub.com/login
 // Same underlying auth, different UX contexts
-```
+```text
 
 ### **3. Cross-App Premium Features**
 ```typescript
@@ -151,7 +151,7 @@ export const useCrossAppSubscription = () => {
   // Premium features work across both apps
   // But each app can be used independently
 };
-```
+```text
 
 ---
 
@@ -165,7 +165,7 @@ export const useCrossAppSubscription = () => {
   "buildCommand": "cd apps/healwave && npm run build",
   "outputDirectory": "apps/healwave/dist"
 }
-```
+```text
 
 ### **Astrology Deployment** (cosmichub.com)
 ```yaml
@@ -175,7 +175,7 @@ export const useCrossAppSubscription = () => {
   "buildCommand": "cd apps/astro && npm run build", 
   "outputDirectory": "apps/astro/dist"
 }
-```
+```text
 
 ### **Backend Deployment** (astrology-app-0emh.onrender.com)
 ```yaml
@@ -184,7 +184,7 @@ services:
   - healthwave endpoints: /api/presets, /api/frequencies
   - astrology endpoints: /api/charts, /api/transits
   - shared endpoints: /api/auth, /api/subscriptions
-```
+```text
 
 ---
 

@@ -17,7 +17,7 @@ Successfully optimized the GeneKeysChart component followin### Design System Int
 - Inline styles and complex conditional rendering
 
 ### After: Modular Tab-Based Architecture
-```
+```text
 GeneKeysChart/
 ├── GeneKeysChart.tsx          # Main coordinator component
 ├── types.ts                   # Centralized TypeScript definitions
@@ -29,7 +29,7 @@ GeneKeysChart/
 ├── PearlSequenceTab.tsx       # SQ sequence tab (Pearl Sequence)
 ├── HologenicProfileTab.tsx    # Consciousness blueprint
 └── GeneKeysChart.test.tsx     # Comprehensive test suite
-```
+```text
 
 ## 📊 Component Breakdown
 
@@ -116,7 +116,7 @@ const GeneKeysChart = React.memo(({ birthData, onCalculate }) => {
 const CoreQuartetTab = React.memo(({ geneKeysData, onKeySelect }) => {
   // Optimized rendering logic
 });
-```
+```text
 
 ### Code Splitting Benefits
 - Reduced initial bundle size
@@ -149,7 +149,7 @@ describe('GeneKeysChart', () => {
   it('handles large datasets efficiently');
   it('supports accessibility features');
 });
-```
+```text
 
 ### Performance Testing
 - Rendering time benchmarks
@@ -183,7 +183,7 @@ describe('GeneKeysChart', () => {
 // Clean imports for consumers
 import { GeneKeysChart, CoreQuartetTab } from './GeneKeysChart';
 import type { GeneKeysData, GeneKey } from './GeneKeysChart';
-```
+```text
 
 ## 📈 Measurable Improvements
 

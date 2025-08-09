@@ -67,7 +67,7 @@ npm run build
 
 ## File Structure
 
-```
+```text
 CosmicHub/
 ├── apps/
 │   ├── astro/           # Vite + TypeScript paths
@@ -78,7 +78,6 @@ CosmicHub/
 │   ├── frequency/       # Source-first, optional dist
 │   ├── integrations/    # Source-first, optional dist
 │   └── ui/              # Source-first, optional dist
-└── turbo.json           # Optimized build pipeline
 ```
 
 ## Key Optimizations

@@ -36,7 +36,7 @@ Successfully completed the modular refactoring of the MultiSystemChart component
 
 ## 📁 Final Structure
 
-```
+```text
 components/MultiSystemChart/
 ├── index.ts                      # Barrel exports
 ├── types.ts                      # TypeScript interfaces
@@ -48,7 +48,7 @@ components/MultiSystemChart/
 ├── MayanChart.tsx               # Mayan astrology component
 ├── UranianChart.tsx             # Uranian astrology component
 └── SynthesisChart.tsx           # Synthesis analysis component
-```
+```text
 
 ## 🚀 Performance Improvements
 
@@ -83,7 +83,7 @@ const VedicChart = React.lazy(() => import('./VedicChart'));
 <Suspense fallback={<ChartLoadingFallback />}>
   <WesternChart data={chartData.western_tropical} />
 </Suspense>
-```
+```text
 
 ### Barrel Export Pattern
 ```typescript
@@ -92,7 +92,7 @@ import {
   MultiSystemChartDisplay, 
   type MultiSystemChartData 
 } from "./MultiSystemChart";
-```
+```text
 
 ### Type Safety
 - All components maintain strict TypeScript typing

@@ -35,7 +35,7 @@ vercel --prod
 
 # Custom domain setup
 vercel --prod --alias healwave.yourapp.com
-```
+```text
 
 ##### Option 2: Netlify
 ```bash
@@ -45,7 +45,7 @@ npm run build
 
 # Upload dist/ folder to Netlify
 # Or connect GitHub repo for auto-deployment
-```
+```text
 
 ##### Option 3: Firebase Hosting
 ```bash
@@ -54,7 +54,7 @@ cd frontend/healwave
 npm install -g firebase-tools
 firebase init hosting
 firebase deploy
-```
+```text
 
 ### Astrology Chart Calculator
 **Located**: `/frontend/astro`
@@ -116,7 +116,7 @@ cd backend
 # Option 5: AWS Lambda (requires additional setup)
 pip install mangum
 # Use mangum ASGI adapter
-```
+```text
 
 ## 🛠️ Environment Variables
 
@@ -128,7 +128,7 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
-```
+```text
 
 ### Astrology Frontend (.env.production)
 ```env
@@ -139,7 +139,7 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
-```
+```text
 
 ### Backend Environment (.env.production)
 ```env
@@ -156,7 +156,7 @@ FIREBASE_CLIENT_EMAIL=your_service_account_email
 FIREBASE_CLIENT_ID=your_client_id
 FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
 FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
-```
+```text
 
 ## 🐳 Docker Deployment
 
@@ -166,11 +166,12 @@ Render.com provides excellent Docker support with automatic deployments:
 1. **Connect Repository**: Link your GitHub repository to Render
 2. **Create Web Service**: Select "Docker" as the environment
 3. **Set Environment Variables** in Render dashboard:
-   ```
+   ```env
    EPHE_PATH=/app/ephe
    PYTHONPATH=/app/backend
    PORT=8000 (automatically set by Render)
    ```
+
 4. **Deploy**: Automatic deployment on git push
 
 ### Docker Environment Alignment
@@ -185,7 +186,7 @@ The multi-stage Dockerfile ensures consistent environment variables:
 cd backend
 docker build -t cosmichub-backend .
 docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
-```
+```text
 
 ## 📈 Performance Optimizations Applied
 

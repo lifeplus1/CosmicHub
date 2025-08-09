@@ -83,15 +83,15 @@ CosmicHub now supports **5 major astrology systems** in a single, integrated ana
 ### API Endpoints
 
 #### Multi-System Calculation
-```
+```text
 POST /calculate-multi-system
-```
+```text
 Returns comprehensive chart with all 5 systems plus synthesis
 
 #### Traditional Calculation  
-```
+```text
 POST /calculate
-```
+```text
 Returns standard Western tropical chart
 
 ### Data Structure
@@ -106,7 +106,7 @@ interface MultiSystemChart {
   uranian: UranianChart;
   synthesis: SynthesisAnalysis;
 }
-```
+```text
 
 ### Performance Optimizations
 

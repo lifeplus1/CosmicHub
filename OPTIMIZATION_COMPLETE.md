@@ -46,7 +46,7 @@ Successfully implemented comprehensive production-grade improvements to the Cosm
 
 ## 🏗️ Architecture Achieved
 
-```
+```text
 CosmicHub/
 ├── apps/
 │   ├── astro/           # ✅ Main astrology application
@@ -57,7 +57,7 @@ CosmicHub/
 │   ├── integrations/    # ✅ Cross-app utilities
 │   └── ui/              # ✅ Component library
 └── backend/             # ✅ Python FastAPI server
-```
+```text
 
 ## 🔧 Technical Stack
 - **Frontend**: React 18, TypeScript, Vite, TailwindCSS
@@ -122,7 +122,7 @@ npm run test
 
 # Lint code
 npm run lint
-```
+```text
 
 The monorepo is now production-ready with a solid foundation for scalable development.
 
@@ -205,7 +205,7 @@ The monorepo optimization is **COMPLETE** with a solid, production-ready foundat
 - **Component Count**: 10 production-ready UI components
 
 ### 🎯 ARCHITECTURE ACHIEVED
-```
+```text
 CosmicHub/ (Production-Ready Monorepo)
 ├── apps/
 │   ├── astro/           ✅ Main app running on :8080
@@ -216,7 +216,7 @@ CosmicHub/ (Production-Ready Monorepo)
 │   ├── integrations/    ✅ Cross-app utilities
 │   └── ui/              ✅ 10-component design system
 └── backend/             ✅ Python FastAPI server
-```
+```text
 
 ## 🏆 OPTIMIZATION COMPLETE!
 

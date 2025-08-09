@@ -17,13 +17,13 @@
 ## 🏗️ **Modular Architecture**
 
 ### Created Separate Files:
-```
+```text
 components/SynastryAnalysis/
 ├── index.ts                    # Barrel exports
 ├── types.ts                    # TypeScript interfaces  
 ├── SynastryComponents.tsx      # Sub-components
 └── SynastryAnalysis.tsx        # Main component
-```
+```text
 
 ### Component Breakdown:
 - **ProgressBar**: Reusable progress indicator
@@ -46,7 +46,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
 }) => {
   // Component logic
 });
-```
+```text
 
 ### useCallback for Functions:
 ```typescript
@@ -57,7 +57,7 @@ const calculateSynastry = useCallback(async () => {
 const getCompatibilityColor = useCallback((score: number) => {
   // Color logic
 }, []);
-```
+```text
 
 ### Memoized Sub-components:
 All sub-components use `React.memo` to prevent unnecessary re-renders.
@@ -68,19 +68,19 @@ All sub-components use `React.memo` to prevent unnecessary re-renders.
 ```typescript
 // Before: '/api/calculate-synastry'
 // After: `${import.meta.env.VITE_BACKEND_URL}/calculate-synastry`
-```
+```text
 
 ### ✅ Removed Inline Styles:
 ```typescript
 // Before: style={{ width: `${score}%` }}
 // After: Custom ProgressBar component with proper CSS classes
-```
+```text
 
 ### ✅ Fixed Accordion Icons:
 ```typescript
 // Before: <Accordion.Icon />
 // After: <FaChevronDown className="text-cosmic-silver" />
-```
+```text
 
 ### ✅ Improved CSS Class Handling:
 Removed problematic template literal interpolations in CSS classes.
@@ -113,28 +113,28 @@ Removed problematic template literal interpolations in CSS classes.
 ## 📊 **Before vs After Comparison**
 
 ### File Structure:
-```
+```text
 Before: 1 file (400+ lines)
 After:  4 files (modular, ~100-150 lines each)
-```
+```text
 
 ### Performance Optimizations:
-```
+```text
 Before: 0 memoization, direct function calls
 After:  React.memo + useCallback + useMemo
-```
+```text
 
 ### Maintainability Score:
-```
+```text
 Before: ❌ Monolithic, hard to modify
 After:  ✅ Modular, easy to maintain
-```
+```text
 
 ### Type Safety:
-```
+```text
 Before: ❌ Basic types, some any usage
 After:  ✅ Comprehensive type definitions
-```
+```text
 
 ## 🚀 **Production Ready Features**
 
@@ -152,7 +152,7 @@ After:  ✅ Comprehensive type definitions
 ### Clean Import:
 ```typescript
 import { SynastryAnalysis } from './components/SynastryAnalysis';
-```
+```text
 
 ### Component Usage:
 ```typescript
@@ -162,6 +162,6 @@ import { SynastryAnalysis } from './components/SynastryAnalysis';
   person1Name="Alice"
   person2Name="Bob"
 />
-```
+```text
 
 The SynastryAnalysis component is now fully optimized, modular, and production-ready with significant performance improvements while maintaining all existing functionality!

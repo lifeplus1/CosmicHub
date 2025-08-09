@@ -3,10 +3,10 @@
 ## 🚨 Problem Identified
 
 The application was experiencing font loading errors:
-```
+```text
 6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o58a-xDwxUD2GFw.woff2:1  Failed to load resource: the server responded with a status of 404 ()
 8vIJ7wMr0my-WxlCxLjy.woff2:1  Failed to load resource: the server responded with a status of 404 ()
-```
+```text
 
 ## 🔧 Root Cause Analysis
 
@@ -23,7 +23,7 @@ The application was experiencing font loading errors:
 ```html
 <link rel="stylesheet" href="/fonts.css" />
 <!-- Missing proper Google Fonts preconnect and loading -->
-```
+```text
 
 **After:**
 ```html
@@ -36,7 +36,7 @@ The application was experiencing font loading errors:
 
 <!-- Load local font styles -->
 <link rel="stylesheet" href="/fonts.css" />
-```
+```text
 
 ### 2. Simplified Font CSS
 **File**: `/frontend/astro/public/fonts.css`
@@ -49,7 +49,7 @@ The application was experiencing font loading errors:
   font-family: 'Quicksand';
   src: url('https://fonts.gstatic.com/s/quicksand/v30/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o58a-xDwxUD2GFw.woff2') format('woff2');
 }
-```
+```text
 
 **After:**
 ```css
@@ -63,7 +63,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
-```
+```text
 
 ### 3. Updated Theme Configuration
 **File**: `/frontend/astro/src/theme.ts`
@@ -74,7 +74,7 @@ fonts: {
   heading: "'Cormorant Garamond', serif",
   body: "'Quicksand', sans-serif",
 },
-```
+```text
 
 **After:**
 ```typescript
@@ -82,7 +82,7 @@ fonts: {
   heading: "'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   body: "'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 },
-```
+```text
 
 ## 🎯 Benefits of the Solution
 
