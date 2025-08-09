@@ -7,6 +7,7 @@ printf "\nRunning type-check...\n"
 npm run type-check || exit 1
 
 printf "\nRunning tests...\n"
-npm test || exit 1
+# Force non-watch mode for Vitest across workspaces
+CI=1 npm test || exit 1
 
 printf "\nAll pre-push checks passed.\n"
