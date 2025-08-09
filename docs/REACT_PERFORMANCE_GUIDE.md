@@ -88,6 +88,7 @@ import(/* webpackChunkName: "[request]" */ './Component');
 **File**: `packages/config/src/lazy-loading.tsx`
 
 Key features:
+
 - Performance tracking for all lazy loads
 - Timeout handling to prevent hanging
 - Error boundaries with retry functionality
@@ -96,11 +97,13 @@ Key features:
 
 ### Route Configuration
 
-**Files**: 
+**Files**:
+
 - `apps/astro/src/routes/lazy-routes.tsx`
 - `apps/healwave/src/routes/lazy-routes.tsx`
 
 Features:
+
 - Error boundaries for each route
 - Selective preloading for critical routes
 - Performance monitoring integration
@@ -111,6 +114,7 @@ Features:
 **File**: `packages/ui/src/components/lazy-components.tsx`
 
 Features:
+
 - Dynamic component loading system
 - Component registry for runtime loading
 - Smart preloading hooks
