@@ -78,9 +78,9 @@ const MainApp: React.FC = React.memo(() => {
         <Footer />
         
         {/* Debug info in development */}
-        {config.environment === 'development' && (
+        {config.app.environment === 'development' && (
           <div className="fixed p-2 text-xs rounded bottom-4 right-4 bg-cosmic-purple" aria-hidden="true">
-            App: {config.app} | Env: {config.environment} | Version: {config.version}
+            App: {config.app.name} | Env: {config.app.environment} | Version: {config.app.version}
           </div>
         )}
       </div>

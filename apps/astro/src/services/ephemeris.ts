@@ -69,7 +69,7 @@ export const useSupportedPlanets = () => {
     queryKey: ephemerisKeys.planets(),
     queryFn: () => client.getSupportedPlanets(),
     staleTime: 24 * 60 * 60 * 1000, // 24 hours - rarely changes
-    cacheTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
   });
 };
 
@@ -94,7 +94,7 @@ export const usePlanetaryPosition = (
     },
     enabled: !!(julianDay && options?.enabled !== false),
     staleTime: 60 * 60 * 1000, // 1 hour
-    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
   });
 };
 
@@ -135,7 +135,7 @@ export const useAllPlanetaryPositions = (
     },
     enabled: !!(julianDay && options?.enabled !== false),
     staleTime: 60 * 60 * 1000, // 1 hour
-    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
   });
 };
 
@@ -181,7 +181,7 @@ export const usePrefetchPlanetaryPositions = () => {
   const prefetchPositions = async (
     startDate: Date,
     endDate: Date,
-    planets: PlanetName[] = SUPPORTED_PLANETS
+    planets: PlanetName[] = [...SUPPORTED_PLANETS]
   ) => {
     const dates: Date[] = [];
     const currentDate = new Date(startDate);

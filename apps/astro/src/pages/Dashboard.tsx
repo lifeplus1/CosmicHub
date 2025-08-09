@@ -46,7 +46,7 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {isFeatureEnabled('healwave') && (
+        {isFeatureEnabled('healwaveIntegration') && (
           <div className="group bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-6 hover:border-cosmic-gold/50 hover:bg-cosmic-gold/5 transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-gold/25">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-cosmic-gold/20 rounded-lg flex items-center justify-center mr-4">

@@ -262,3 +262,5 @@ export const SubscriptionSuccessPage: React.FC = () => {
     </div>
   );
 };
+
+export default SubscriptionSuccessPage;

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { usePerformance, usePagePerformance, useOperationTracking } from '@cosmichub/config';
+// TODO: Implement performance monitoring hooks
+// import { usePerformance, usePagePerformance, useOperationTracking } from '@cosmichub/config';
+import { useEphemerisPerformanceMetrics } from '../services/ephemeris-performance';
+import { EphemerisPerformanceDashboard } from '../components/EphemerisPerformanceDashboard';
 
 /**
  * Performance monitoring demo and dashboard page
@@ -7,19 +10,16 @@ import { usePerformance, usePagePerformance, useOperationTracking } from '@cosmi
 
 export default function PerformanceMonitoring() {
   const [performanceData, setPerformanceData] = useState<any>({});
+  const { metrics } = useEphemerisPerformanceMetrics();
 
-  // Track this page's performance
-  usePagePerformance();
-  
-  // Track this component's performance
-  const { startOperation, endOperation, metrics } = usePerformance();
-
-  // Track expensive operations
-  const { trackOperation } = useOperationTracking();
+  // Mock implementations for missing hooks
+  const mockStartOperation = () => console.log('Starting operation...');
+  const mockEndOperation = () => console.log('Ending operation...');
+  const mockTrackOperation = () => console.log('Tracking operation...');
 
   // Simulate some expensive operations for demo
   const simulateExpensiveOperation = async () => {
-    startOperation();
+    mockStartOperation();
     
     try {
       // Simulate API call or heavy computation
@@ -31,16 +31,16 @@ export default function PerformanceMonitoring() {
         Math.random() * Math.random();
       }
     } finally {
-      endOperation();
+      mockEndOperation();
     }
   };
 
   const quickOperation = async () => {
-    startOperation();
+    mockStartOperation();
     try {
       await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
     } finally {
-      endOperation();
+      mockEndOperation();
     }
   };
 
