@@ -27,7 +27,7 @@ interface Notification {
 
 const MainApp: React.FC = () => {
   const { addNotification } = useCrossAppStore();
-  const config = getAppConfig('healwave') as AppConfig;
+  const config = getAppConfig('healwave');
 
   // Memoize handleOpenAstroApp to prevent unnecessary re-renders
   const handleOpenAstroApp = useCallback(() => {
@@ -78,13 +78,13 @@ const MainApp: React.FC = () => {
         </main>
         <Footer />
 
-        {config.environment === 'development' && (
+        {config.app.environment === 'development' && (
           <div
             className="fixed p-2 text-xs bg-purple-600 rounded bottom-4 right-4"
             aria-live="polite"
             role="status"
           >
-            App: {config.app} | Env: {config.environment} | Version: {config.version}
+            App: {config.app.name} | Env: {config.app.environment} | Version: {config.app.version}
           </div>
         )}
       </div>

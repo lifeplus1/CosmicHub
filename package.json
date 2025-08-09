@@ -19,7 +19,8 @@
     "type-check": "turbo type-check",
     "clean": "turbo clean",
     "validate-env": "node scripts/validate-env.mjs",
-    "validate-env-schema": "node scripts/validate-env-schema.mjs"
+    "validate-env-schema": "node scripts/validate-env-schema.mjs",
+    "cleanup": "bash scripts/cleanup-project.sh"
   },
   "workspaces": [
     "apps/*",

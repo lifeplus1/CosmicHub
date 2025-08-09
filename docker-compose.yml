@@ -1,6 +1,46 @@
 services:
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ephemeris-server:
+    build:
+      context: ./ephemeris_server
+      cache_from:
+        - cosmichub/ephemeris:latest
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/ephe:/app/ephe:ro
+    environment:
+      - EPHE_PATH=/app/ephe
+      - API_KEY=${API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - CACHE_TTL=3600
+      - MAX_BATCH_SIZE=50
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      cache_from:
+        - cosmichub/backend:latest
     command: python startup.py
     volumes:
       - ./backend:/app
@@ -8,41 +48,74 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env.docker
+    environment:
+      - EPHEMERIS_SERVER_URL=http://ephemeris-server:8001
+    depends_on:
+      - ephemeris-server
+      - redis
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   astro-app:
     build:
       context: .
       dockerfile: Dockerfile.astro
       target: development
+      cache_from:
+        - cosmichub/astro:latest
+        - cosmichub/astro:deps
+        - cosmichub/astro:builder
     volumes:
       - ./apps/astro:/app/apps/astro
       - ./packages:/app/packages
       - ./shared:/app/shared
-      - /app/node_modules
-      - /app/apps/astro/node_modules
+      # Use named volumes for node_modules to improve performance
+      - astro_node_modules:/app/node_modules
+      - astro_app_node_modules:/app/apps/astro/node_modules
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - VITE_CONFIG_FILE=vite.config.js
     restart: unless-stopped
+    depends_on:
+      - backend
 
   healwave-app:
     build:
       context: .
       dockerfile: Dockerfile.healwave
       target: development
+      cache_from:
+        - cosmichub/healwave:latest
+        - cosmichub/healwave:deps
+        - cosmichub/healwave:builder
     volumes:
       - ./apps/healwave:/app/apps/healwave
       - ./packages:/app/packages
       - ./shared:/app/shared
-      - /app/node_modules
-      - /app/apps/healwave/node_modules
+      # Use named volumes for node_modules to improve performance
+      - healwave_node_modules:/app/node_modules
+      - healwave_app_node_modules:/app/apps/healwave/node_modules
     ports:
       - "4000:3000"
     environment:
       - NODE_ENV=development
     restart: unless-stopped
+    depends_on:
+      - backend
+
+# Named volumes for better performance
+volumes:
+  astro_node_modules:
+  astro_app_node_modules:
+  healwave_node_modules:
+  healwave_app_node_modules:
+  redis_data:
 
 networks:
   default:

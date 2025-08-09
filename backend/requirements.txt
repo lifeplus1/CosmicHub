@@ -5,11 +5,11 @@ pydantic-settings
 firebase-admin
 geopy
 timezonefinder
-pyswisseph==2.10.3.2
 stripe
 requests
 pytz
 pytest
 pytest-cov
 reportlab
-
+httpx
+redis

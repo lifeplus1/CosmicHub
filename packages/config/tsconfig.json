@@ -13,15 +13,19 @@
     "rootDir": "./src"
   },
   "include": [
-    "src/index.ts", 
-    "src/minimal-exports.ts", 
-    "src/performance.ts", 
-    "src/lazy-loading.tsx", 
-    "src/enhanced-testing.tsx", 
-    "src/accessibility-testing.tsx", 
-    "src/component-library.tsx",
-    "src/react-performance.tsx",
-    "src/hooks.tsx"
+    "src/index.ts",
+    "src/config.ts",
+    "src/env.ts", 
+    "src/lazy-loading.tsx",
+    "src/performance.ts",
+    "src/vite-env.d.ts"
   ],
-  "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
+  "exclude": [
+    "dist", 
+    "node_modules", 
+    "**/*.test.*", 
+    "**/*.spec.*",
+    "src/optimization/**",
+    "src/testing/**"
+  ]
 }

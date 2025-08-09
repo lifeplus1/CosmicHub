@@ -21,6 +21,13 @@
       "env": ["NODE_ENV", "VITE_*"],
       "outputLogs": "new-only"
     },
+    "build:ephemeris": {
+      "dependsOn": [],
+      "outputs": ["requirements.txt"],
+      "cache": true,
+      "env": ["EPHE_PATH", "API_KEY"],
+      "outputLogs": "new-only"
+    },
     "dev": {
       "cache": false,
       "persistent": true,
@@ -35,8 +42,15 @@
     },
     "test": {
       "dependsOn": ["^build:packages"],
-  "outputs": [],
+      "outputs": [],
       "env": ["NODE_ENV"],
+      "outputLogs": "new-only"
+    },
+    "test:ephemeris": {
+      "dependsOn": [],
+      "outputs": ["htmlcov/**", ".coverage"],
+      "cache": true,
+      "env": ["NODE_ENV", "EPHE_PATH"],
       "outputLogs": "new-only"
     },
     "lint": {
@@ -46,7 +60,7 @@
     },
     "type-check": {
       "dependsOn": ["^build:packages"],
-  "outputs": [],
+      "outputs": [],
       "env": ["NODE_ENV"],
       "outputLogs": "errors-only"
     },

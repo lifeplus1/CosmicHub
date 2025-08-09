@@ -1,20 +1,61 @@
+# Dependencies and build artifacts
 node_modules
 **/node_modules
 .dist
 **/dist
 apps/*/dist
 packages/*/dist
+
+# Version control and build files
 .git
 .gitignore
-logs
-*.log
 Dockerfile*
+docker-compose*.yml
+
+# Logs and temp files
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
+.vscode/
+.idea/
+
+# Documentation
 README.md
 *.md
+docs/
+
+# Testing files
 __pycache__
 *.pyc
 .pytest_cache
 backend/tests
+**/*.test.*
+**/*.spec.*
+__tests__/
+coverage/
+.nyc_output/
+
+# Build caches and artifacts
 *.tgz
 *.cache
+.turbo/
+.astro/
+tsconfig.tsbuildinfo
+
+# Environment files (except docker-specific)
+.env*
+!.env.docker
+!.env.production.server
+
+# OS and IDE files
 .DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~

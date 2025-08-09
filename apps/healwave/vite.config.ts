@@ -31,11 +31,11 @@ export default defineConfig(({ command, mode }) => {
 
     // Development server configuration
     server: {
-      port: 3001,
+      port: 3000, // Changed from 3001 to match Docker mapping
       host: true,
       open: false, // Don't auto-open browser
       hmr: {
-        port: 3001,
+        port: 3000, // Changed from 3001 to match Docker mapping
         host: 'localhost',
       },
       watch: {

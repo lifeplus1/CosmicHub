@@ -208,10 +208,11 @@ async def root_health():
 
 # Structure cleanup suggestion: Move routers to separate files and import here for modularity.
 # Import API routers (local path)
-from api.routers import ai, presets, subscriptions
+from api.routers import ai, presets, subscriptions, ephemeris
 app.include_router(ai.router)
 app.include_router(presets.router)
 app.include_router(subscriptions.router)
+app.include_router(ephemeris.router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn

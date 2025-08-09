@@ -30,6 +30,7 @@ export interface AppConfig {
     transits: boolean;
     multiSystem: boolean;
     healwaveIntegration: boolean;
+    crossAppIntegration: boolean;
   };
   subscription: {
     plans: Record<string, SubscriptionPlan>;
@@ -87,7 +88,8 @@ export const defaultConfig: AppConfig = {
     numerology: true,
     transits: true,
     multiSystem: true,
-    healwaveIntegration: true
+    healwaveIntegration: true,
+    crossAppIntegration: true
   },
   subscription: {
     plans: {
@@ -233,6 +235,17 @@ export const validateConfig = (config: AppConfig): boolean => {
 // Feature flags
 export const isFeatureEnabled = (feature: keyof AppConfig['features']): boolean => {
   return config.features[feature] || false;
+};
+
+// App configuration helper
+export const getAppConfig = (appName: string) => {
+  return {
+    ...config,
+    app: {
+      ...config.app,
+      name: appName
+    }
+  };
 };
 
 // Subscription helpers

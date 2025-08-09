@@ -1,5 +1,11 @@
 /**
- * Configuration exports with lazy-loading support
+ * Configuration exports for CosmicHub monorepo
+ * Essential exports only to avoid complex type errors
  */
 
-export * from './minimal-exports';
+// Core configuration
+export * from './config';
+export * from './env';
+
+// Lazy loading (working module)
+export * from './lazy-loading';
