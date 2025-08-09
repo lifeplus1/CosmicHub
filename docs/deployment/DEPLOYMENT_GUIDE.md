@@ -3,11 +3,13 @@
 ## 🚀 Production Deployment Guide
 
 ### HealWave Therapeutic Frequency Generator
+
 **Located**: `/frontend/healwave`
 **Technology**: React + TypeScript + Vite + Firebase
 **Build Output**: `dist/` folder
 
 #### Features Implemented:
+
 ✅ **Audio Engine**: Web Audio API with binaural beats
 ✅ **Timer System**: Duration-based sessions with progress tracking  
 ✅ **Authentication**: Firebase Auth with modal login/signup
@@ -25,31 +27,43 @@
 #### Deployment Options:
 
 ##### Option 1: Vercel (Recommended)
+
 ```bash
+
 # Install Vercel CLI
+
 npm i -g vercel
 
 # From frontend/healwave directory
+
 cd frontend/healwave
 vercel --prod
 
 # Custom domain setup
+
 vercel --prod --alias healwave.yourapp.com
 ```text
 
 ##### Option 2: Netlify
+
 ```bash
+
 # From frontend/healwave directory  
+
 cd frontend/healwave
 npm run build
 
 # Upload dist/ folder to Netlify
 # Or connect GitHub repo for auto-deployment
+
 ```text
 
 ##### Option 3: Firebase Hosting
+
 ```bash
+
 # From frontend/healwave directory
+
 cd frontend/healwave
 npm install -g firebase-tools
 firebase init hosting
@@ -57,11 +71,13 @@ firebase deploy
 ```text
 
 ### Astrology Chart Calculator
+
 **Located**: `/frontend/astro`
 **Technology**: React + TypeScript + Chakra UI + Firebase
 **Build Output**: `dist/` folder
 
 #### Features Implemented:
+
 ✅ **Chart Calculation**: Birth chart generation with ephemeris data
 ✅ **Multi-System Integration**: 5 astrology systems in one analysis
 ✅ **Optimized Display**: Memoized components for performance
@@ -81,29 +97,38 @@ firebase deploy
 ✅ **Usage Analytics**: Track conversions, limits, and upgrade opportunities
 
 #### Deployment Steps:
+
 Same as HealWave - use any of the three options above
 
 ### Backend Services
+
 **Located**: `/backend`
 **Technology**: Python + FastAPI + Firebase
 **Requirements**: Python 3.11+, Swiss Ephemeris data
 
 #### Production Setup:
+
 ```bash
+
 # Backend deployment options
+
 cd backend
 
 # Option 1: Render.com (Recommended for Docker)
 # 1. Connect GitHub repository to Render
+
 # 2. Create new Web Service with Docker
 # 3. Set environment variables in Render dashboard:
+
 #    - EPHE_PATH=/app/ephe
 #    - PYTHONPATH=/app/backend
+
 #    - PORT=8000 (auto-set by Render)
 # 4. Deploy automatically on git push
 
 # Option 2: Railway.app (easiest)
 # 1. Connect GitHub repo
+
 # 2. Deploy with automatic Docker detection
 # 3. Set environment variables
 
@@ -114,13 +139,17 @@ cd backend
 # Deploy with: gcloud run deploy --source .
 
 # Option 5: AWS Lambda (requires additional setup)
+
 pip install mangum
+
 # Use mangum ASGI adapter
+
 ```text
 
 ## 🛠️ Environment Variables
 
 ### HealWave Frontend (.env.production)
+
 ```env
 VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_domain
@@ -131,6 +160,7 @@ VITE_FIREBASE_APP_ID=your_app_id
 ```text
 
 ### Astrology Frontend (.env.production)
+
 ```env
 VITE_BACKEND_URL=https://your-backend-api.com
 VITE_FIREBASE_API_KEY=your_api_key
@@ -142,13 +172,17 @@ VITE_FIREBASE_APP_ID=your_app_id
 ```text
 
 ### Backend Environment (.env.production)
+
 ```env
+
 # Required for Swiss Ephemeris data location
+
 EPHE_PATH=/app/ephe
 PYTHONPATH=/app/backend
 PORT=8000
 
 # Firebase Admin SDK (for backend authentication)
+
 FIREBASE_PROJECT_ID=your_project_id
 FIREBASE_PRIVATE_KEY_ID=your_private_key_id
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour_private_key\n-----END PRIVATE KEY-----\n"
@@ -161,11 +195,13 @@ FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
 ## 🐳 Docker Deployment
 
 ### Render.com (Recommended)
+
 Render.com provides excellent Docker support with automatic deployments:
 
 1. **Connect Repository**: Link your GitHub repository to Render
 2. **Create Web Service**: Select "Docker" as the environment
 3. **Set Environment Variables** in Render dashboard:
+
    ```env
    EPHE_PATH=/app/ephe
    PYTHONPATH=/app/backend
@@ -175,14 +211,19 @@ Render.com provides excellent Docker support with automatic deployments:
 4. **Deploy**: Automatic deployment on git push
 
 ### Docker Environment Alignment
+
 The multi-stage Dockerfile ensures consistent environment variables:
+
 - `EPHE_PATH=/app/ephe` - Swiss Ephemeris data location
 - `PYTHONPATH=/app/backend` - Python module path
 - `PORT=8000` - Application port (configurable for cloud platforms)
 
 ### Local Docker Testing
+
 ```bash
+
 # Build and test locally
+
 cd backend
 docker build -t cosmichub-backend .
 docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
@@ -191,6 +232,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 ## 📈 Performance Optimizations Applied
 
 ### HealWave Optimizations:
+
 - **React.memo()** on AudioPlayer and DurationTimer
 - **useCallback()** for audio functions to prevent re-renders
 - **useMemo()** for expensive frequency calculations
@@ -200,6 +242,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 - **Responsive design** improvements
 
 ### Astrology Optimizations:
+
 - **Memoized components** for planet/aspect rows
 - **Lazy loading** of chart sections with Accordion
 - **Optimized zodiac calculations** with cached sign data
@@ -216,6 +259,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 ## 🎯 Next Development Steps
 
 ### Immediate Priorities:
+
 1. **Stripe Integration**: Complete payment processing and subscription management
 2. **A/B Testing**: Optimize pricing, trial lengths, and conversion funnels  
 3. **Custom Domains**: Set up healwave.com and cosmichub.com
@@ -224,6 +268,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 6. **Error Monitoring**: Add Sentry for production error tracking
 
 ### Feature Enhancements:
+
 1. **HealWave**:
    - Preset sharing between users
    - Audio export functionality
@@ -243,6 +288,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
    - Relationship compatibility analysis
 
 ### Performance Monitoring:
+
 - **Lighthouse scores**: Aim for 90+ in all categories
 - **Core Web Vitals**: Monitor LCP, FID, CLS
 - **Bundle analysis**: Keep JavaScript bundles under 500KB
@@ -259,6 +305,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 ## 📊 Success Metrics
 
 ### HealWave KPIs:
+
 - User session duration (target: 10+ minutes)
 - Frequency usage patterns
 - Authentication conversion rate
@@ -267,6 +314,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 - **Retention**: <5% monthly churn, $120+ LTV
 
 ### Astrology KPIs:
+
 - Chart calculation success rate (target: 99%+)
 - User retention (target: 30% weekly)
 - Chart save/share rates
@@ -275,6 +323,7 @@ docker run -p 8000:8000 -e EPHE_PATH=/app/ephe cosmichub-backend
 - **Usage Limits**: Track monthly chart calculations and storage limits
 
 ### Combined Platform Revenue:
+
 - **Total Target**: $119.5K MRR ($1.4M ARR)
 - **Break-even**: ~2,000 premium subscribers
 - **Profit Margin**: 85%+ (SaaS economics)

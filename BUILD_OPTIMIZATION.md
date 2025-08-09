@@ -7,25 +7,31 @@ The CosmicHub monorepo uses an optimized Turbo build system that supports both f
 ## Build Strategies
 
 ### 1. Fast Build (Recommended for Development)
+
 ```bash
 npm run build:fast
 ```
+
 - **Speed**: ~2.5 seconds
 - **Strategy**: Direct TypeScript imports, skips package compilation
 - **Use Case**: Development, CI/CD, most production deployments
 
 ### 2. Full Package Build (For External Distribution)
+
 ```bash
 npm run build:packages
 ```
+
 - **Speed**: ~1.5 seconds
 - **Strategy**: Compiles packages to `dist/` for external consumers
 - **Use Case**: Publishing packages to npm, external library distribution
 
 ### 3. Complete Build (Legacy)
+
 ```bash
 npm run build
 ```
+
 - **Speed**: ~2.5 seconds  
 - **Strategy**: Skips package compilation but builds apps
 - **Use Case**: Backward compatibility
@@ -33,11 +39,13 @@ npm run build
 ## Architecture
 
 ### Hybrid Import Strategy
+
 - **Apps (astro, healwave)**: Use direct TypeScript imports via Vite aliases
 - **Packages**: Can optionally compile to `dist/` for external use
 - **TypeScript**: Path mapping resolves to source files directly
 
 ### Turbo Configuration
+
 ```json
 {
   "build:apps": {
@@ -56,11 +64,13 @@ npm run build
 ## Performance Benefits
 
 ### Before Optimization
+
 - **Build Time**: ~15-20 seconds
 - **Dependencies**: Complex TypeScript project references
 - **Failures**: Package compilation errors blocked app builds
 
 ### After Optimization  
+
 - **Build Time**: ~2.5 seconds (83% improvement)
 - **Dependencies**: Apps build independently
 - **Reliability**: Apps never blocked by package compilation issues

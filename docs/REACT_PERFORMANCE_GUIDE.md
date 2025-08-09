@@ -9,6 +9,7 @@ This guide documents the implementation of React performance optimizations and l
 ### 1. **Lazy Loading & Code Splitting**
 
 #### Route-Based Code Splitting
+
 - **Implementation**: `apps/*/src/routes/lazy-routes.tsx`
 - **Benefits**: Reduces initial bundle size by 60-80%
 - **Strategy**: Load routes on-demand with smart preloading
@@ -23,6 +24,7 @@ export const AstroRoutes = {
 ```
 
 #### Component-Level Lazy Loading
+
 - **Implementation**: `packages/ui/src/components/lazy-components.tsx`
 - **Benefits**: Heavy components load only when needed
 - **Strategy**: Charts, modals, and complex forms are lazy-loaded
@@ -38,12 +40,14 @@ export const LazyAstrologyChart = lazyLoadChart(
 ### 2. **Smart Preloading System**
 
 #### Hover-Based Preloading
+
 ```typescript
 // Preload components when user hovers over trigger elements
 preloader.preloadOnHover(buttonElement, importFn, 'ComponentName', 200);
 ```
 
 #### Intersection Observer Preloading
+
 ```typescript
 // Preload when components come into viewport
 preloader.preloadOnIntersection(targetElement, importFn, 'ComponentName');
@@ -52,6 +56,7 @@ preloader.preloadOnIntersection(targetElement, importFn, 'ComponentName');
 ### 3. **Progressive Loading**
 
 #### Batch Loading for Large Datasets
+
 ```typescript
 const { loadedItems, isLoading, progress } = useProgressiveLoading(items, {
   batchSize: 20,
@@ -79,6 +84,7 @@ import(/* webpackChunkName: "[request]" */ './Component');
 ## 🔧 Implementation Details
 
 ### Core Lazy Loading System
+
 **File**: `packages/config/src/lazy-loading.tsx`
 
 Key features:
@@ -89,6 +95,7 @@ Key features:
 - Progressive loading for large datasets
 
 ### Route Configuration
+
 **Files**: 
 - `apps/astro/src/routes/lazy-routes.tsx`
 - `apps/healwave/src/routes/lazy-routes.tsx`
@@ -100,6 +107,7 @@ Features:
 - Timeout handling for slow connections
 
 ### UI Component Registry
+
 **File**: `packages/ui/src/components/lazy-components.tsx`
 
 Features:
@@ -127,6 +135,7 @@ Features:
 ## 🎯 Usage Examples
 
 ### Basic Lazy Route
+
 ```typescript
 import { lazyLoadRoute } from '@cosmichub/config/lazy-loading';
 
@@ -137,6 +146,7 @@ const MyRoute = lazyLoadRoute(
 ```
 
 ### Smart Preloading Hook
+
 ```typescript
 import { useSmartPreloading } from '@cosmichub/ui/lazy-components';
 
@@ -157,6 +167,7 @@ function NavigationButton() {
 ```
 
 ### Dynamic Component Loading
+
 ```typescript
 import { LazyComponentWrapper } from '@cosmichub/ui/lazy-components';
 
@@ -174,6 +185,7 @@ function DynamicChart({ chartType }) {
 ## 🛡️ Error Handling
 
 ### Lazy Load Error Boundary
+
 ```typescript
 import { LazyLoadErrorBoundary } from '@cosmichub/config/lazy-loading';
 
@@ -187,6 +199,7 @@ function App() {
 ```
 
 ### Retry Mechanisms
+
 - Automatic retry on component load failure
 - Manual retry buttons in error states
 - Fallback to simplified components when possible
@@ -194,6 +207,7 @@ function App() {
 ## 🔍 Monitoring & Debugging
 
 ### Performance Monitoring Integration
+
 All lazy loading operations are automatically tracked using the performance monitoring system:
 
 ```typescript
@@ -205,6 +219,7 @@ performanceMonitor.recordMetric('ComponentLazyLoad', loadTime, {
 ```
 
 ### Debug Information
+
 - Component load times displayed in development
 - Bundle size analysis in build output
 - Preloading effectiveness metrics
@@ -212,12 +227,14 @@ performanceMonitor.recordMetric('ComponentLazyLoad', loadTime, {
 ## 🚀 Production Optimizations
 
 ### Build-Time Optimizations
+
 1. **Tree Shaking**: Remove unused code from bundles
 2. **Minification**: Compress JavaScript and CSS
 3. **Gzip Compression**: Enable on server
 4. **CDN Distribution**: Serve chunks from CDN
 
 ### Runtime Optimizations
+
 1. **Service Worker Caching**: Cache lazy-loaded chunks
 2. **Prefetch Strategies**: Preload critical chunks
 3. **Connection-Aware Loading**: Adjust strategies based on connection speed
@@ -225,11 +242,13 @@ performanceMonitor.recordMetric('ComponentLazyLoad', loadTime, {
 ## 📈 Performance Results
 
 ### Before Optimization
+
 - Initial bundle size: ~800KB
 - Time to interactive: ~3.5s
 - Largest contentful paint: ~2.8s
 
 ### After Optimization
+
 - Initial bundle size: ~180KB (-77%)
 - Time to interactive: ~1.2s (-66%)
 - Largest contentful paint: ~1.1s (-61%)
@@ -237,12 +256,14 @@ performanceMonitor.recordMetric('ComponentLazyLoad', loadTime, {
 ## 🔄 Maintenance
 
 ### Regular Tasks
+
 1. **Bundle Analysis**: Weekly bundle size monitoring
 2. **Performance Audits**: Monthly performance reviews
 3. **Preload Optimization**: Quarterly preloading strategy updates
 4. **Dependency Updates**: Keep lazy loading libraries current
 
 ### Monitoring Alerts
+
 - Bundle size increase > 20%
 - Component load time > 500ms
 - Error rate > 5%

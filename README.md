@@ -24,18 +24,23 @@ CosmicHub/
 ### Quick Start
 
 ```bash
+
 # Fast development build (~2 seconds)
+
 npm run build:fast
 
 # Development mode with hot reload  
+
 npm run dev
 
 # Individual app development
+
 npm run dev --workspace=apps/astro
 npm run dev --workspace=apps/healwave
 ```
 
 ### Build Commands
+
 | Command | Purpose | Speed | Use Case |
 |---------|---------|-------|----------|
 | `npm run build:fast` | **Recommended** - Fast app builds | ~2s | Development, CI/CD |
@@ -44,6 +49,7 @@ npm run dev --workspace=apps/healwave
 | `npm run build` | Legacy full build | ~2s | Backward compatibility |
 
 ### Performance
+
 - **83% faster builds** (20s → 2s)
 - **Direct TypeScript imports** - no compilation step needed
 - **Independent builds** - apps never blocked by package issues
@@ -54,12 +60,14 @@ See `BUILD_OPTIMIZATION.md` for detailed technical information.
 ## 🛠️ Development
 
 Use the Makefile for common tasks:
+
 - `make test` — run all tests
 - `make lint` — run all linters
 - `make build` — build all frontends
 - `make format` — format frontend code
 
 ## Environment Variables
+
 Environment strategy: strict separation of public (VITE_*) and server-only variables.
 Docs: `docs/ENVIRONMENT.md`
 

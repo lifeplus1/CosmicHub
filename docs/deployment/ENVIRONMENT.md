@@ -3,6 +3,7 @@
 Document all required secrets and environment variables for backend and frontend deployment here.
 
 ## Backend
+
 - FIREBASE_PROJECT_ID
 - FIREBASE_PRIVATE_KEY_ID
 - FIREBASE_PRIVATE_KEY
@@ -20,6 +21,7 @@ Document all required secrets and environment variables for backend and frontend
 - EPHE_PATH
 
 ## Frontend
+
 - VITE_FIREBASE_API_KEY
 - VITE_FIREBASE_AUTH_DOMAIN
 - VITE_FIREBASE_PROJECT_ID

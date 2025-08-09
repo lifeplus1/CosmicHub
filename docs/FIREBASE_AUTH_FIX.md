@@ -3,6 +3,7 @@
 ## ✅ **Issue Resolved: "ERROR:auth:Invalid Firebase ID token"**
 
 ### 🐛 **Root Cause Analysis:**
+
 The authentication error was occurring due to several issues in the token handling flow:
 
 1. **Frontend/Backend Mismatch**: Frontend was using Firebase emulators while backend expected production tokens
@@ -13,6 +14,7 @@ The authentication error was occurring due to several issues in the token handli
 ### 🎯 **Solutions Implemented:**
 
 #### **1. Fixed Firebase Configuration (frontend/astro/src/firebase.ts)**
+
 ```typescript
 // Updated conditional emulator usage
 if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
@@ -25,6 +27,7 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
 ```
 
 #### **2. Enhanced Token Management (frontend/astro/src/contexts/AuthContext.tsx)**
+
 ```typescript
 const getAuthToken = async () => {
   if (!user) return null;
@@ -40,6 +43,7 @@ const getAuthToken = async () => {
 ```
 
 #### **3. Proper API Service Integration (frontend/astro/src/services/api.ts)**
+
 ```typescript
 // Helper function to get fresh auth token
 const getAuthToken = async (): Promise<string | null> => {
@@ -68,8 +72,10 @@ const getAuthHeaders = async () => {
 ```
 
 #### **4. Improved Backend Error Handling (backend/auth.py)**
+
 ```python
 # Enhanced exception handling with specific error types
+
 except auth.ExpiredIdTokenError as e:
     logger.error(f"Firebase ID token expired: {str(e)}")
     raise HTTPException(
@@ -102,12 +108,14 @@ except auth.RevokedIdTokenError as e:
 - ✅ **Consistent Firebase configuration** across environments
 
 ### 🧪 **Testing Results:**
+
 - ✅ **3/3 tests passing** with production Firebase configuration
 - ✅ **Production build successful** with optimized bundle
 - ✅ **No console errors** during authentication flow
 - ✅ **Proper token refresh** mechanism validated
 
 ### 🔧 **Environment Configuration:**
+
 To use emulators in development (optional), add to `.env`:
 ```env
 VITE_USE_EMULATOR=true

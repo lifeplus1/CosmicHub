@@ -9,6 +9,7 @@ The mock login system provides three predefined user accounts with different sub
 ## Mock User Accounts
 
 ### 1. Free Tier User
+
 - **Email:** `free@cosmichub.test`
 - **Password:** `demo123`
 - **Tier:** Free
@@ -22,6 +23,7 @@ The mock login system provides three predefined user accounts with different sub
   - Saved charts: 1/3
 
 ### 2. Premium Tier User
+
 - **Email:** `premium@cosmichub.test`
 - **Password:** `demo123`
 - **Tier:** Premium
@@ -36,6 +38,7 @@ The mock login system provides three predefined user accounts with different sub
   - Saved charts: 25 (unlimited)
 
 ### 3. Elite Tier User
+
 - **Email:** `elite@cosmichub.test`
 - **Password:** `demo123`
 - **Tier:** Elite
@@ -52,34 +55,40 @@ The mock login system provides three predefined user accounts with different sub
 ## How to Access Mock Logins
 
 ### Method 1: Mock Login Panel
+
 1. Visit `/mock-login` directly in your browser
 2. Click the "Login" button for any tier you want to test
 3. You'll be automatically logged in and redirected to the home page
 
 ### Method 2: Via Login Page
+
 1. Go to the regular login page (`/login`)
 2. Look for the "🧪 For Testing" section at the bottom
 3. Click on "Quick Mock Login Panel"
 4. Select the tier you want to test
 
 ### Method 3: Development Button (Development Mode Only)
+
 - When running in development mode, a small "🧪 Mock" button appears in the navbar
 - Click it to access the mock login panel
 
 ## Testing Different Features
 
 ### Free Tier Testing
+
 - Test basic chart calculation
 - Verify usage limits are enforced
 - Check that premium features are locked with upgrade prompts
 
 ### Premium Tier Testing
+
 - Test multi-system analysis toggle
 - Verify synastry analysis works
 - Test PDF export functionality
 - Check that Elite features show upgrade prompts
 
 ### Elite Tier Testing
+
 - Test AI interpretation features
 - Verify transit analysis works
 - Check that all features are accessible
