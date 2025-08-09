@@ -1,5 +1,4 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
 
 printf "\nRunning env validation before push...\n"
 npm run validate-env || exit 1
