@@ -33,7 +33,6 @@ COPY shared/ shared/
 COPY apps/astro/ apps/astro/
 
 # Build only essential packages
-RUN npm run build --workspace=@cosmichub/integrations \
 RUN --mount=type=cache,target=/root/.cache/turbo npm run build --workspace=@cosmichub/integrations \
 	&& npm run build --workspace=@cosmichub/auth \
 	&& npm run build --workspace=@cosmichub/config \
@@ -42,6 +41,8 @@ RUN --mount=type=cache,target=/root/.cache/turbo npm run build --workspace=@cosm
 FROM base AS development
 WORKDIR /app/apps/astro
 EXPOSE 3000
+# Use the simplified JS config in containers
+ENV VITE_CONFIG_FILE=vite.config.js
 CMD ["npm", "run", "dev"]
 
 FROM base AS build
