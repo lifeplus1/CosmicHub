@@ -182,7 +182,7 @@ export function useProgressiveLoading<T>(
 }
 
 // Bundle splitting utilities
-export const BundleSplitter = {
+export const BundleSplitter: Record<string, () => Promise<any>> = {
   // Vendor libraries (should be loaded first)
   loadVendorBundle: () => import('react').then(() => import('react-dom')),
   

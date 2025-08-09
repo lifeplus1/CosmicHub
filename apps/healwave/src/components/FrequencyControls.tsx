@@ -138,10 +138,11 @@ const FrequencyControls = () => {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-white/90">
+          <label htmlFor="session-duration" className="block text-sm font-medium text-white/90">
             Session Duration (minutes)
           </label>
           <select
+            id="session-duration"
             value={duration}
             onChange={(e) => setDuration(parseInt(e.target.value))}
             className="w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"

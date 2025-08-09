@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React, { useState } from 'react';
 import { FaStar, FaInfoCircle } from 'react-icons/fa';
 import * as Accordion from '@radix-ui/react-accordion';
@@ -215,7 +216,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
                       <Accordion.Item value="0">
                         <Accordion.Trigger className="flex justify-between w-full">
                           <span className="text-sm font-bold">Key Relationship Aspects</span>
-                          <Accordion.Icon />
+                          <ChevronDownIcon />
                         </Accordion.Trigger>
                         <Accordion.Content className="pb-4">
                           <div className="flex flex-col space-y-3">
@@ -254,7 +255,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
                         <Accordion.Item value="0">
                           <Accordion.Trigger className="flex justify-between w-full">
                             <span className="text-sm font-bold">House Overlays</span>
-                            <Accordion.Icon />
+                            <ChevronDownIcon />
                           </Accordion.Trigger>
                           <Accordion.Content className="pb-4">
                             <div className="flex flex-col space-y-3">
@@ -281,7 +282,7 @@ export const SynastryAnalysis: React.FC<SynastryAnalysisProps> = ({
                         <Accordion.Item value="0">
                           <Accordion.Trigger className="flex justify-between w-full">
                             <span className="text-sm font-bold">Composite Chart</span>
-                            <Accordion.Icon />
+                            <ChevronDownIcon />
                           </Accordion.Trigger>
                           <Accordion.Content className="pb-4">
                             <p className="mb-2 font-semibold text-cosmic-silver">Relationship Purpose:</p>

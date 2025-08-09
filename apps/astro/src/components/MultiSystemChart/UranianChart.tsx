@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { UranianChartData } from './types';
@@ -22,7 +23,7 @@ const UranianChart: React.FC<Props> = ({ data }) => {
             <Accordion.Item value="0">
               <Accordion.Trigger className="flex justify-between w-full">
                 <span className="font-bold">Transneptunian Points</span>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="pb-4">
                 <table className="w-full text-sm table-auto">
@@ -54,7 +55,7 @@ const UranianChart: React.FC<Props> = ({ data }) => {
             <Accordion.Item value="1">
               <Accordion.Trigger className="flex justify-between w-full">
                 <span className="font-bold">90° Dial Aspects</span>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="pb-4">
                 <table className="w-full text-sm table-auto">

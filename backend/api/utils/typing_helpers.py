@@ -14,13 +14,13 @@ def update_subscription_doc(user_id: str, field_updates: Mapping[str, Any]) -> N
     Hides dynamic Firestore update() return type behind a None return for type safety.
     """
     db = get_firestore_client()
-    db.collection("subscriptions").document(user_id).update(dict(field_updates))
+    db.collection("subscriptions").document(user_id).update(dict(field_updates)) # type: ignore
 
 
 def get_stripe_account() -> dict[str, Any] | Any:
     """Retrieve Stripe account object (typed as dict|Any to suppress unknown)."""
     import stripe  # local import to avoid mandatory dependency at import time
-    return stripe.Account.retrieve()
+    return stripe.Account.retrieve() # type: ignore
 
 
 def cancel_stripe_subscription(subscription_id: str) -> None:

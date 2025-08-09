@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import ChallengeCard from './ChallengeCard';
@@ -17,7 +18,7 @@ const CyclesTab: React.FC<CyclesTabProps> = ({ challengeNumbers, pinnacleNumbers
       <Accordion.Item value="challenges">
         <Accordion.Trigger className="flex justify-between w-full">
           <span className="font-bold">Challenge Numbers</span>
-          <Accordion.Icon />
+          <ChevronDownIcon />
         </Accordion.Trigger>
         <Accordion.Content className="pb-4">
           <div className="grid grid-cols-2 gap-4">
@@ -31,7 +32,7 @@ const CyclesTab: React.FC<CyclesTabProps> = ({ challengeNumbers, pinnacleNumbers
       <Accordion.Item value="pinnacles">
         <Accordion.Trigger className="flex justify-between w-full">
           <span className="font-bold">Pinnacle Numbers</span>
-          <Accordion.Icon />
+          <ChevronDownIcon />
         </Accordion.Trigger>
         <Accordion.Content className="pb-4">
           <div className="grid grid-cols-2 gap-4">

@@ -1,0 +1,38 @@
+/* Test-specific styles for EnhancedCard test suite */
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+.test-result {
+  display: none;
+}
+
+.test-result.show {
+  display: block;
+}
+
+/* Performance testing styles */
+.large-content {
+  white-space: pre;
+}
+
+/* Integration test styles */
+.scenario-container {
+  position: relative;
+}
+
+.test-indicator {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  background-color: #10b981;
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+}

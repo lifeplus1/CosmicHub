@@ -164,6 +164,7 @@ export function useSmartPreloading() {
         componentName
       );
     }
+    return undefined;
   }, [preloader]);
 
   const preloadOnIntersection = React.useCallback((
@@ -178,6 +179,7 @@ export function useSmartPreloading() {
         componentName
       );
     }
+    return undefined;
   }, [preloader]);
 
   return { preloadOnHover, preloadOnIntersection };

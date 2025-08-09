@@ -49,6 +49,6 @@ describe('SynastryAnalysis Component', () => {
     );
 
     // Basic test that component renders without crashing
-  expect(document.body).to.exist;
+    expect(document.body).toBeInTheDocument();
   });
 });

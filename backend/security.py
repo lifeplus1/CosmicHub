@@ -5,11 +5,17 @@ Implements rate limiting, input validation, and security headers
 
 import time
 import hashlib
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union, TypedDict
 from collections import defaultdict, deque
 from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 import re
+
+class LocationData(TypedDict):
+    """Type definition for location data"""
+    lat: Union[str, int, float]
+    lng: Union[str, int, float] 
+    name: str
 
 class RateLimiter:
     """
@@ -77,7 +83,7 @@ class InputValidator:
                 detail="Invalid time format. Use HH:MM"
             )
         
-        # Validate location
+        # Validate location with type casting
         location = birth_data['location']
         if not isinstance(location, dict):
             raise HTTPException(
@@ -93,11 +99,34 @@ class InputValidator:
                     detail=f"Missing required location field: {field}"
                 )
         
-        # Validate coordinates
+        # Validate coordinates with proper type checking
         try:
-            lat = float(location['lat'])
-            lng = float(location['lng'])
+            # Extract values with runtime type validation
+            lat_value = location['lat']  # type: ignore[misc]
+            lng_value = location['lng']  # type: ignore[misc]
             
+            if lat_value is None or lng_value is None:
+                raise ValueError("Coordinates cannot be None")
+            
+            # Type guard and conversion for latitude
+            lat: float
+            if isinstance(lat_value, (int, float)):
+                lat = float(lat_value)
+            elif isinstance(lat_value, str):
+                lat = float(lat_value)  # May raise ValueError if invalid
+            else:
+                raise ValueError(f"Invalid latitude type: {type(lat_value).__name__}")  # type: ignore[misc]
+            
+            # Type guard and conversion for longitude  
+            lng: float
+            if isinstance(lng_value, (int, float)):
+                lng = float(lng_value)
+            elif isinstance(lng_value, str):
+                lng = float(lng_value)  # May raise ValueError if invalid
+            else:
+                raise ValueError(f"Invalid longitude type: {type(lng_value).__name__}")  # type: ignore[misc]
+            
+            # Range validation
             if not (-90 <= lat <= 90):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -116,8 +145,13 @@ class InputValidator:
                 detail="Latitude and longitude must be valid numbers"
             )
         
-        # Sanitize location name
-        location['name'] = str(location['name']).strip()[:100]  # Limit length
+        # Sanitize location name with type safety
+        name_value = location['name']  # type: ignore[misc]
+        if isinstance(name_value, str):
+            location['name'] = name_value.strip()[:100]
+        else:
+            # Convert non-string to string first
+            location['name'] = str(name_value).strip()[:100]  # type: ignore[misc]
         
         return birth_data
     

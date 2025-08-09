@@ -11,6 +11,7 @@ import {
   withPerformanceTracking,
   type PolymorphicComponentProps
 } from '@cosmichub/config/component-architecture';
+import styles from './EnhancedCard.module.css';
 
 // Base card props
 export interface CardProps {
@@ -21,6 +22,8 @@ export interface CardProps {
   loading?: boolean;
   className?: string;
   children?: React.ReactNode;
+  onClick?: () => void;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
   'data-testid'?: string;
 }
 
@@ -52,15 +55,33 @@ const BaseCard = forwardRef<HTMLDivElement, CardProps>(({
     className
   ].filter(Boolean).join(' ');
 
-  return (
+  return disabled ? (
     <PolymorphicCard
       ref={ref}
       className={cardClasses}
       data-testid={testId}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable && !disabled ? 0 : undefined}
-      aria-disabled={disabled}
-      aria-busy={loading}
+      aria-disabled="true"
+      aria-busy={loading ? 'true' : 'false'}
+      {...props}
+    >
+      {loading && (
+        <div className="card__loading-overlay" aria-hidden="true">
+          <div className="card__spinner" />
+        </div>
+      )}
+      {children}
+    </PolymorphicCard>
+  ) : (
+    <PolymorphicCard
+      ref={ref}
+      className={cardClasses}
+      data-testid={testId}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable && !disabled ? 0 : undefined}
+      aria-disabled="false"
+      aria-busy={loading ? 'true' : 'false'}
       {...props}
     >
       {loading && (
@@ -79,27 +100,27 @@ BaseCard.displayName = 'BaseCard';
 export const Card = createCompoundComponent(
   withPerformanceTracking(BaseCard, 'Card'),
   'Card'
-);
+) as any;
 
-// Polymorphic card header
-export interface CardHeaderProps<T extends React.ElementType = 'div'> 
-  extends PolymorphicComponentProps<T> {
+// Card header with essential props
+export interface CardHeaderProps {
   title?: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
 }
 
-export const CardHeader = <T extends React.ElementType = 'div'>(
-  props: CardHeaderProps<T>
-) => {
-  const { as, title, subtitle, actions, ...otherProps } = props;
-  const { children, className = '', ...restProps } = otherProps as any;
-  const Component = as || 'div';
-
+export const CardHeader: React.FC<CardHeaderProps> = ({
+  title,
+  subtitle,
+  actions,
+  children,
+  className = ''
+}) => {
   return (
-    <Component
+    <div
       className={`card__header ${className}`}
-      {...restProps}
     >
       {(title || subtitle) && (
         <div className="card__header-content">
@@ -121,7 +142,7 @@ export const CardHeader = <T extends React.ElementType = 'div'>(
           {actions}
         </div>
       )}
-    </Component>
+    </div>
   );
 };
 
@@ -145,18 +166,17 @@ export const CardBody: React.FC<CardBodyProps> = ({
     'card__body',
     `card__body--padding-${padding}`,
     scrollable && 'card__body--scrollable',
+    scrollable && styles.bodyScrollable,
+    maxHeight && styles.bodyWithMaxHeight,
     className
   ].filter(Boolean).join(' ');
 
-  const bodyStyle: React.CSSProperties = {
-    ...(maxHeight && { maxHeight }),
-    ...(scrollable && { overflowY: 'auto' })
-  };
+  const bodyStyle = maxHeight ? { '--card-body-max-height': maxHeight } as React.CSSProperties : undefined;
 
   return (
     <div 
       className={bodyClasses}
-      style={bodyStyle}
+      {...(bodyStyle && { style: bodyStyle })}
       data-testid="card-body"
     >
       {children}

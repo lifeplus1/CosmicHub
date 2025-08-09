@@ -1,6 +1,6 @@
-export { default as TransitAnalysis } from './components/TransitAnalysis';
-export { default as TransitTabs } from './components/TransitTabs';
-export { default as DateRangeForm } from './components/DateRangeForm';
-export { default as TabLoader } from './components/TabLoader';
-export * from './components/useTransitAnalysis';
-export * from './components/types';
+export { default as TransitAnalysis } from './TransitAnalysis';
+export { default as TransitTabs } from './TransitsTab';
+export { default as DateRangeForm } from './DateRangeForm';
+export { TabLoader } from './TabLoader';
+export { useTransitAnalysis } from './useTransitAnalysis';
+export * from './types';

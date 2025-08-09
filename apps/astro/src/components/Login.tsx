@@ -17,6 +17,7 @@ const Login: React.FC = React.memo(() => {
       await logIn(email, password);
       toast({
         title: 'Logged In',
+        description: 'Successfully logged into your account',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -74,7 +75,6 @@ const Login: React.FC = React.memo(() => {
                 type="submit"
                 className="w-full cosmic-button"
                 disabled={isLoading}
-                aria-disabled={isLoading ? 'true' : 'false'}
               >
                 Sign In
               </button>

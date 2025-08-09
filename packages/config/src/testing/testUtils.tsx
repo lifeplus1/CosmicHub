@@ -6,10 +6,42 @@
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { ReactElement, ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { AuthProvider } from '@cosmichub/auth';
-import { SubscriptionProvider } from '../contexts/SubscriptionContext';
-import { UpgradeModalProvider } from '../contexts/UpgradeModalContext';
 import { vi, expect } from 'vitest';
+
+// Mock Auth Provider and Context for testing
+interface MockAuthUser {
+  uid: string;
+  email: string;
+  tier?: 'Free' | 'Basic' | 'Pro' | 'Enterprise';
+}
+
+const MockAuthProvider: React.FC<{ children: ReactNode; appName?: string }> = ({ children }) => {
+  return <>{children}</>;
+};
+
+// Mock Subscription Context
+interface MockSubscriptionState {
+  subscription: {
+    tier: string;
+    status: string;
+    currentPeriodEnd: Date;
+  };
+  userTier: string;
+  isLoading: boolean;
+  hasFeature: (requiredTier: string) => boolean;
+  upgradeRequired: () => void;
+  refreshSubscription: () => void;
+  checkUsageLimit: () => { allowed: boolean; current: number; limit: number };
+}
+
+const MockSubscriptionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};
+
+// Mock Upgrade Modal Context
+const MockUpgradeModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};
 
 // Enhanced Test Wrapper with all required providers
 interface TestWrapperProps {
@@ -45,13 +77,13 @@ export const TestWrapper: React.FC<TestWrapperProps> = ({
 
   return (
     <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
-      <AuthProvider appName="test">
-        <SubscriptionProvider>
-          <UpgradeModalProvider>
+      <MockAuthProvider appName="test">
+        <MockSubscriptionProvider>
+          <MockUpgradeModalProvider>
             {children}
-          </UpgradeModalProvider>
-        </SubscriptionProvider>
-      </AuthProvider>
+          </MockUpgradeModalProvider>
+        </MockSubscriptionProvider>
+      </MockAuthProvider>
     </MemoryRouter>
   );
 };
@@ -88,37 +120,53 @@ export const renderWithProviders = (
 
 // Mock Data Factory
 export const createMockBirthData = (overrides = {}) => ({
+  dateTime: '1990-05-15T14:30:00Z',
+  location: {
+    latitude: 40.7128,
+    longitude: -74.0060,
+    city: 'New York',
+    country: 'USA'
+  },
+  timezone: 'America/New_York',
   year: 1990,
   month: 5,
   day: 15,
   hour: 14,
   minute: 30,
-  city: 'New York',
-  country: 'USA',
-  latitude: 40.7128,
-  longitude: -74.0060,
-  timezone: 'America/New_York',
-  datetime: '1990-05-15T14:30:00-05:00',
   ...overrides
 });
 
 export const createMockChartData = (overrides = {}) => ({
-  planets: {
-    sun: { position: 0, house: 1, sign: 'Aries' },
-    moon: { position: 90, house: 4, sign: 'Cancer' },
-    mercury: { position: 15, house: 1, sign: 'Aries' },
-    venus: { position: 45, house: 2, sign: 'Taurus' },
-    mars: { position: 120, house: 5, sign: 'Leo' }
-  },
+  planets: [
+    { name: 'Sun', longitude: 24.5, sign: 'Aries', house: 1 },
+    { name: 'Moon', longitude: 120.3, sign: 'Cancer', house: 4 },
+    { name: 'Mercury', longitude: 15.7, sign: 'Aries', house: 1 },
+    { name: 'Venus', longitude: 45.2, sign: 'Taurus', house: 2 },
+    { name: 'Mars', longitude: 180.9, sign: 'Libra', house: 7 },
+    { name: 'Jupiter', longitude: 210.4, sign: 'Scorpio', house: 8 },
+    { name: 'Saturn', longitude: 300.1, sign: 'Aquarius', house: 11 },
+    { name: 'Uranus', longitude: 270.8, sign: 'Capricorn', house: 10 },
+    { name: 'Neptune', longitude: 330.6, sign: 'Pisces', house: 12 },
+    { name: 'Pluto', longitude: 240.3, sign: 'Sagittarius', house: 9 }
+  ],
   houses: [
-    { house: 1, cusp: 0, sign: 'Aries' },
-    { house: 2, cusp: 30, sign: 'Taurus' },
-    { house: 3, cusp: 60, sign: 'Gemini' },
-    { house: 4, cusp: 90, sign: 'Cancer' }
+    { number: 1, cusp: 0, sign: 'Aries' },
+    { number: 2, cusp: 30, sign: 'Taurus' },
+    { number: 3, cusp: 60, sign: 'Gemini' },
+    { number: 4, cusp: 90, sign: 'Cancer' },
+    { number: 5, cusp: 120, sign: 'Leo' },
+    { number: 6, cusp: 150, sign: 'Virgo' },
+    { number: 7, cusp: 180, sign: 'Libra' },
+    { number: 8, cusp: 210, sign: 'Scorpio' },
+    { number: 9, cusp: 240, sign: 'Sagittarius' },
+    { number: 10, cusp: 270, sign: 'Capricorn' },
+    { number: 11, cusp: 300, sign: 'Aquarius' },
+    { number: 12, cusp: 330, sign: 'Pisces' }
   ],
   aspects: [
-    { planet1: 'sun', planet2: 'moon', aspect: 'square', angle: 90, orb: 2 },
-    { planet1: 'venus', planet2: 'mars', aspect: 'trine', angle: 120, orb: 3 }
+    { planet1: 'Sun', planet2: 'Moon', type: 'square', orb: 2.1, applying: true },
+    { planet1: 'Venus', planet2: 'Mars', type: 'trine', orb: 1.8, applying: false },
+    { planet1: 'Mercury', planet2: 'Jupiter', type: 'sextile', orb: 3.2, applying: true }
   ],
   latitude: 40.7128,
   longitude: -74.0060,
@@ -206,16 +254,21 @@ export const measureRenderTime = async (renderFn: () => void): Promise<number> =
   return performance.now() - start;
 };
 
-export const expectFastRender = async (renderFn: () => void, maxTime = 16) => {
-  const renderTime = await measureRenderTime(renderFn);
+export const expectFastRender = (renderTime: number, maxTime = 16) => {
   expect(renderTime).toBeLessThan(maxTime);
   return renderTime;
 };
 
+// Range Testing Utilities
+export const expectWithinRange = (value: number, min: number, max: number) => {
+  expect(value).toBeGreaterThanOrEqual(min);
+  expect(value).toBeLessThanOrEqual(max);
+};
+
 // Accessibility Testing Helpers
 export const expectAccessibleButton = (button: HTMLElement) => {
-  expect(button).toHaveAttribute('type');
-  expect(button).not.toHaveAttribute('aria-disabled', 'true');
+  expect(button.hasAttribute('type')).toBe(true);
+  expect(button.getAttribute('aria-disabled')).not.toBe('true');
   
   // Should have accessible name
   const accessibleName = button.getAttribute('aria-label') || 
@@ -225,9 +278,9 @@ export const expectAccessibleButton = (button: HTMLElement) => {
 };
 
 export const expectAccessibleModal = (modal: HTMLElement) => {
-  expect(modal).toHaveAttribute('role', 'dialog');
-  expect(modal).toHaveAttribute('aria-modal', 'true');
-  expect(modal).toHaveAttribute('aria-labelledby');
+  expect(modal.getAttribute('role')).toBe('dialog');
+  expect(modal.getAttribute('aria-modal')).toBe('true');
+  expect(modal.hasAttribute('aria-labelledby')).toBe(true);
 };
 
 export const expectAccessibleForm = (form: HTMLElement) => {
@@ -292,7 +345,8 @@ export const mockLocalStorage = () => {
 
 // Network Testing Utilities
 export const mockFetch = (responses: Array<{ url: string; response: any; delay?: number }>) => {
-  const fetchMock = vi.fn(async (url: string) => {
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = input.toString();
     const config = responses.find(r => url.includes(r.url));
     if (!config) {
       throw new Error(`No mock response configured for ${url}`);
@@ -302,15 +356,16 @@ export const mockFetch = (responses: Array<{ url: string; response: any; delay?:
       await new Promise(resolve => setTimeout(resolve, config.delay));
     }
     
-    return {
-      ok: true,
+    return new Response(JSON.stringify(config.response), {
       status: 200,
-      json: async () => config.response,
-      text: async () => JSON.stringify(config.response)
-    };
+      statusText: 'OK',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   });
   
-  global.fetch = fetchMock;
+  global.fetch = fetchMock as any;
   return fetchMock;
 };
 
@@ -402,5 +457,4 @@ const generateTestRecommendations = (metadata: TestSuiteMetadata): string[] => {
 
 // Export all utilities
 export * from '@testing-library/react';
-export * from '@testing-library/jest-dom';
 export { vi, expect } from 'vitest';

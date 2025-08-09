@@ -1,11 +1,11 @@
 import React, { Suspense } from 'react';
 import FeatureGuard from '../FeatureGuard';
-import TransitTabs from './transit-analysis/TransitTabs';
-import { TabLoader } from './transit-analysis/TabLoader';
-import { useTransitAnalysis } from './transit-analysis/useTransitAnalysis';
+import TransitTabs from './TransitsTab';  // Note: TransitTabs component is in TransitsTab.tsx file
+import { TabLoader } from './TabLoader';
+import { useTransitAnalysis } from './useTransitAnalysis';
 import type { BirthData } from '../../types';
 
-interface TransitAnalysisProps {
+export interface TransitAnalysisProps {
   birthData: BirthData;
 }
 
@@ -13,7 +13,7 @@ const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) => {
   const { activeTab, setActiveTab, transitResults, lunarTransits, loading, loadingLunar, dateRange, setDateRange, calculateTransits, calculateLunarTransits } = useTransitAnalysis(birthData);
 
   return (
-    <FeatureGuard feature="transitAnalysis">
+    <FeatureGuard feature="transitAnalysis" requiredTier="premium">
       <div className="max-w-6xl p-6 mx-auto">
         <div className="mb-8">
           <h1 className="mb-4 text-3xl font-bold text-cosmic-gold">Transit Analysis</h1>

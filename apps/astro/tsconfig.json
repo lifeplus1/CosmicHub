@@ -24,9 +24,18 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@cosmichub/auth": ["../../packages/auth/src"],
+      "@cosmichub/config": ["../../packages/config/src"],
+      "@cosmichub/frequency": ["../../packages/frequency/src"],
+      "@cosmichub/integrations": ["../../packages/integrations/src"],
+      "@cosmichub/ui": ["../../packages/ui/src"]
+    }
   },
-  "include": ["src", "types"],
+  "include": ["src", "types", "src/**/*"],
   "references": [
     { "path": "../../packages/auth" },
     { "path": "../../packages/config" },

@@ -16,7 +16,7 @@ const dropdownCode = `const Dropdown = ({ options }) => {
 
   return (
     <div>
-      <button aria-expanded={isOpen}>
+      <button aria-expanded={isOpen ? 'true' : 'false'}>
         Select
       </button>
       {isOpen && (

@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { SynthesisChartData } from './types';
@@ -22,7 +23,7 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
             <Accordion.Item value="themes">
               <Accordion.Trigger className="flex justify-between w-full">
                 <span className="font-bold">Primary Themes</span>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="pb-4">
                 <div className="flex flex-col space-y-2">
@@ -38,7 +39,7 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
             <Accordion.Item value="purpose">
               <Accordion.Trigger className="flex justify-between w-full">
                 <span className="font-bold">Life Purpose Integration</span>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="pb-4">
                 <div className="flex flex-col space-y-3">
@@ -55,7 +56,7 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
             <Accordion.Item value="personality">
               <Accordion.Trigger className="flex justify-between w-full">
                 <span className="font-bold">Personality Integration</span>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="pb-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -80,7 +81,7 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
             <Accordion.Item value="path">
               <Accordion.Trigger className="flex justify-between w-full">
                 <span className="font-bold">Spiritual Path</span>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="pb-4">
                 <div className="flex flex-col space-y-3">

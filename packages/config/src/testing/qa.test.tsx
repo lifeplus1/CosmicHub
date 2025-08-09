@@ -16,11 +16,20 @@ const MockButton = ({ children, variant = 'primary', disabled = false, loading =
   loading?: boolean;
 }) => {
   const isDisabled = disabled || loading;
-  return (
+  return isDisabled ? (
     <button 
       className={`btn btn-${variant}`}
-      disabled={isDisabled}
-      aria-disabled={isDisabled ? 'true' : 'false'}
+      disabled={true}
+      aria-disabled="true"
+      aria-label={typeof children === 'string' ? children : 'Button'}
+    >
+      {loading ? 'Loading...' : children}
+    </button>
+  ) : (
+    <button 
+      className={`btn btn-${variant}`}
+      disabled={false}
+      aria-disabled="false"
       aria-label={typeof children === 'string' ? children : 'Button'}
     >
       {loading ? 'Loading...' : children}
@@ -63,30 +72,59 @@ const MockDropdown = ({ options = [], multiple = false, disabled = false }: {
   
   return (
     <div className="dropdown">
-      <button
-        role="combobox"
-        aria-expanded={isOpen ? 'true' : 'false'}
-        aria-haspopup="listbox"
-        aria-controls={listboxId}
-        aria-label="Select option"
-        disabled={disabled}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        Select option
-      </button>
-      {isOpen && (
-        <ul 
-          id={listboxId}
-          role="listbox" 
-          aria-multiselectable={multiple ? 'true' : 'false'}
-          aria-label="Options list"
+      {isOpen ? (
+        <button
+          role="combobox"
+          aria-expanded="true"
+          aria-haspopup="listbox"
+          aria-controls={listboxId}
+          aria-label="Select option"
+          disabled={disabled}
+          onClick={() => setIsOpen(!isOpen)}
         >
-          {options.map((option, index) => (
-            <li key={index} role="option" aria-selected="false">
-              {option.label}
-            </li>
-          ))}
-        </ul>
+          Select option
+        </button>
+      ) : (
+        <button
+          role="combobox"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          aria-controls={listboxId}
+          aria-label="Select option"
+          disabled={disabled}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          Select option
+        </button>
+      )}
+      {isOpen && (
+        multiple ? (
+          <ul 
+            id={listboxId}
+            role="listbox" 
+            aria-multiselectable="true"
+            aria-label="Options list"
+          >
+            {options.map((option, index) => (
+              <li key={index} role="option" aria-selected="false">
+                {option.label}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul 
+            id={listboxId}
+            role="listbox" 
+            aria-multiselectable="false"
+            aria-label="Options list"
+          >
+            {options.map((option, index) => (
+              <li key={index} role="option" aria-selected="false">
+                {option.label}
+              </li>
+            ))}
+          </ul>
+        )
       )}
     </div>
   );

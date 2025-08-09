@@ -131,24 +131,23 @@ const ChartCalculator: React.FC = () => {
     formData.hour && formData.minute && formData.city;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container px-4 py-8 mx-auto">
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-2">Birth Chart Calculator</h2>
-          <p className="text-gray-300 mb-4">Enter your birth details for accurate astrological insights</p>
-          <div className="inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm text-cyan-300 border border-cyan-500/30">
+          <h2 className="mb-2 text-3xl font-bold text-white">Birth Chart Calculator</h2>
+          <p className="mb-4 text-gray-300">Enter your birth details for accurate astrological insights</p>
+          <div className="inline-flex items-center px-4 py-2 text-sm border rounded-full bg-white/10 text-cyan-300 border-cyan-500/30">
             <FaInfoCircle className="mr-2" />
             Pro Tip: Use exact birth time for precise calculations
           </div>
         </div>
 
         {/* Guide Section */}
-        <div className="bg-white/5 backdrop-blur-md rounded-xl border border-white/10 p-6">
+        <div className="p-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10">
           <button
             onClick={() => setIsGuideOpen(!isGuideOpen)}
-            className="w-full flex items-center justify-between text-white font-semibold"
-            aria-expanded={isGuideOpen ? 'true' : 'false'}
+            className="flex items-center justify-between w-full font-semibold text-white"
             aria-controls="guide-content"
           >
             <div className="flex items-center space-x-2">
@@ -163,7 +162,7 @@ const ChartCalculator: React.FC = () => {
               <p>Your natal chart is a snapshot of the sky at your birth moment, revealing personality, strengths, and life path.</p>
               <div className="space-y-2">
                 <h4 className="font-semibold text-white">Key Components:</h4>
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="pl-5 space-y-1 list-disc">
                   <li><strong>Planets:</strong> Core energies and drives</li>
                   <li><strong>Signs:</strong> How energies express</li>
                   <li><strong>Houses:</strong> Life areas affected</li>
@@ -172,7 +171,7 @@ const ChartCalculator: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <h4 className="font-semibold text-white">Multi-System Mode (Premium):</h4>
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="pl-5 space-y-1 list-disc">
                   <li>Western Tropical: Modern psychological</li>
                   <li>Vedic Sidereal: Ancient Indian wisdom</li>
                   <li>Chinese: Elemental cycles</li>
@@ -186,10 +185,10 @@ const ChartCalculator: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-md rounded-xl border border-white/10 p-6 space-y-6">
-          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10">
+          <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gold-200 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Year *
                 <EducationalTooltip
                   title="Birth Year in Astrology"
@@ -202,13 +201,13 @@ const ChartCalculator: React.FC = () => {
                 value={formData.year}
                 onChange={handleInputChange}
                 placeholder="e.g., 1990"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gold-200 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Month *
                 <EducationalTooltip
                   title="Birth Month Significance"
@@ -223,13 +222,13 @@ const ChartCalculator: React.FC = () => {
                 placeholder="1-12"
                 min="1"
                 max="12"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gold-200 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Day *
                 <EducationalTooltip
                   title="Birth Day Nuances"
@@ -244,16 +243,16 @@ const ChartCalculator: React.FC = () => {
                 placeholder="1-31"
                 min="1"
                 max="31"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
               />
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+          <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gold-200 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Hour (24h) *
                 <EducationalTooltip
                   title="Birth Time Precision"
@@ -268,13 +267,13 @@ const ChartCalculator: React.FC = () => {
                 placeholder="0-23"
                 min="0"
                 max="23"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gold-200 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Minute *
                 <EducationalTooltip
                   title="Minute Accuracy"
@@ -289,13 +288,13 @@ const ChartCalculator: React.FC = () => {
                 placeholder="0-59"
                 min="0"
                 max="59"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gold-200 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gold-200">
                 House System
                 <EducationalTooltip
                   title="House Systems Explained"
@@ -312,7 +311,7 @@ const ChartCalculator: React.FC = () => {
                 value={houseSystem}
                 onChange={handleSelectChange}
                 aria-label="House System Selection"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
               >
                 <option value="P">Placidus (Most Popular)</option>
                 <option value="E">Equal House</option>
@@ -323,7 +322,7 @@ const ChartCalculator: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gold-200 mb-2">
+            <label className="block mb-2 text-sm font-medium text-gold-200">
               Birth Location *
               <EducationalTooltip
                 title="Birth Location Importance"
@@ -341,14 +340,14 @@ const ChartCalculator: React.FC = () => {
               value={formData.city}
               onChange={handleInputChange}
               placeholder="e.g., New York, NY, USA"
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
               required
               aria-required="true"
             />
           </div>
 
           <div className="flex items-center space-x-4">
-            <FeatureGuard feature="multi-system">
+            <FeatureGuard feature="multi-system" requiredTier="premium">
               <SwitchPrimitive.Root
                 checked={formData.multiSystem}
                 onCheckedChange={handleSwitchChange}
@@ -360,20 +359,20 @@ const ChartCalculator: React.FC = () => {
                 />
               </SwitchPrimitive.Root>
             </FeatureGuard>
-            <span className="text-white font-medium">
+            <span className="font-medium text-white">
               Enable Multi-System Analysis
-              <span className="ml-2 px-2 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs">Premium</span>
+              <span className="px-2 py-1 ml-2 text-xs text-purple-300 rounded-full bg-purple-500/20">Premium</span>
             </span>
           </div>
 
           {error && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-200 text-sm">
+            <div className="p-3 text-sm text-red-200 border rounded-lg bg-red-500/20 border-red-500/50">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3 text-green-200 text-sm">
+            <div className="p-3 text-sm text-green-200 border rounded-lg bg-green-500/20 border-green-500/50">
               {success}
             </div>
           )}
@@ -385,7 +384,7 @@ const ChartCalculator: React.FC = () => {
           >
             {loading ? (
               <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                <div className="w-5 h-5 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
                 {formData.multiSystem ? "Calculating Multi-System Chart..." : "Calculating Chart..."}
               </div>
             ) : (
@@ -399,7 +398,7 @@ const ChartCalculator: React.FC = () => {
           <div>
             {formData.multiSystem
               ? !isExtendedChartData(chart) && (
-                  <MultiSystemChartDisplay chartData={chart as MultiSystemChartData} isLoading={loading} />
+                  <MultiSystemChartDisplay data={chart as MultiSystemChartData} />
                 )
               : isExtendedChartData(chart) && <ChartDisplay chart={chart} />}
           </div>

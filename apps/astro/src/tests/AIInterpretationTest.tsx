@@ -1,37 +1,8 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Select,
-  Textarea,
-  SimpleGrid,
-  Badge,
-  Icon,
-  Progress,
-  Divider,
-  useColorModeValue,
-  Container,
-  Alert,
-  AlertIcon,
-  Flex,
-  Avatar,
-  Spinner,
-  Collapse,
-  useDisclosure
-} from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { FaBrain, FaRobot, FaMagic, FaLightbulb, FaArrowLeft, FaComments, FaUser, FaQuestionCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import FeatureGuard from '../components/FeatureGuard';
-import { EducationalTooltip } from '../components/EducationalTooltip';
-import * as RadixTooltip from '@radix-ui/react-tooltip';
-import * as RadixDialog from '@radix-ui/react-dialog';
+import styles from './AIInterpretationTest.module.css';
 
 export const AIInterpretationTest: React.FC = () => {
   const navigate = useNavigate();
@@ -40,478 +11,197 @@ export const AIInterpretationTest: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [currentResponse, setCurrentResponse] = useState('');
-  const { isOpen: isGuideOpen, onToggle: onGuideToggle } = useDisclosure();
-  
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const bgGradient = useColorModeValue(
-    'linear(to-br, cyan.50, blue.50, purple.50)',
-    'linear(to-br, gray.900, blue.900, purple.900)'
-  );
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   const aiInsights = [
     {
       category: 'Core Personality',
-      insight: 'Your Sagittarius Sun combined with Pisces Moon creates a fascinating blend of philosophical exploration and emotional depth. You possess an innate wisdom that draws others to seek your guidance.',
+      insight: 'Your Sagittarius Sun combined with Pisces Moon creates a fascinating blend of philosophical exploration and emotional depth.',
       confidence: 94,
       color: 'blue'
     },
     {
-      category: 'Relationship Patterns',
-      insight: 'With Venus in Scorpio, you experience love intensely and transformatively. Your relationships tend to be profound, life-changing experiences rather than casual connections.',
+      category: 'Relationship Patterns', 
+      insight: 'With Venus in Scorpio, you experience love intensely and transformatively.',
       confidence: 89,
       color: 'pink'
-    },
-    {
-      category: 'Career Path',
-      insight: 'Mars in Capricorn suggests natural leadership abilities and a methodical approach to achieving goals. You excel in roles requiring long-term planning and structured execution.',
-      confidence: 92,
-      color: 'green'
-    },
-    {
-      category: 'Life Purpose',
-      insight: 'Your North Node in Gemini indicates a lifetime journey toward improving communication, learning diverse skills, and sharing knowledge with others in meaningful ways.',
-      confidence: 87,
-      color: 'purple'
     }
   ];
 
-  const conversationHistory = [
-    {
-      type: 'user',
-      message: 'Can you explain the significance of my Saturn return?',
-      timestamp: '2:34 PM'
-    },
-    {
-      type: 'ai',
-      message: 'Your Saturn return, occurring around age 29-30, represents a cosmic coming-of-age. Saturn in your chart shows where you need to develop discipline and maturity. For you, with Saturn in Aquarius, this period will focus on balancing your individuality with social responsibility and finding your unique contribution to collective progress.',
-      timestamp: '2:35 PM'
-    },
-    {
-      type: 'user',
-      message: 'What about my career prospects this year?',
-      timestamp: '2:37 PM'
-    },
-    {
-      type: 'ai',
-      message: 'With Jupiter transiting your 10th house of career, this is an exceptionally favorable year for professional growth. Your Mars in Capricorn gives you the persistence to capitalize on opportunities. I recommend focusing on leadership roles or starting that project you\'ve been planning - the cosmic timing is perfect.',
-      timestamp: '2:38 PM'
-    }
-  ];
-
-  const handleStartAnalysis = (): void => {
+  const handleAnalyze = async () => {
     setIsAnalyzing(true);
+    setAnalysisComplete(false);
+    
     // Simulate AI analysis
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setAnalysisComplete(true);
-    }, 3000);
-  };
-
-  const handleSendMessage = (): void => {
-    if (!userQuestion.trim()) return;
-    setIsAnalyzing(true);
-    setCurrentResponse('');
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Simulate typing response
-    const responses = [
-      "That's a fascinating question about your astrological profile. Based on your chart configuration...",
-      "Your planetary aspects suggest unique patterns that illuminate this area of your life...",
-      "The cosmic influences in your birth chart reveal important insights about this topic..."
-    ];
-    
-    setTimeout(() => {
-      setCurrentResponse(responses[Math.floor(Math.random() * responses.length)]);
-      setIsAnalyzing(false);
-    }, 2000);
+    setCurrentResponse('AI analysis complete! Your chart shows strong intuitive abilities...');
+    setIsAnalyzing(false);
+    setAnalysisComplete(true);
   };
 
   return (
-    <FeatureGuard feature="ai_interpretation" requiredTier="elite">
-      <Box minH="100vh" bg={bgGradient}>
-        <Container maxW="6xl" py={8}>
-          <VStack spacing={8} align="stretch">
-            {/* Header Section */}
-            <VStack spacing={4} textAlign="center">
-              <HStack spacing={3}>
-                <Icon as={FaBrain} color="cyan.500" boxSize={8} />
-                <Heading size="xl" bgGradient="linear(to-r, cyan.400, blue.500, purple.500)" bgClip="text">
-                  AI Astrological Interpretation
-                </Heading>
-                <Icon as={FaBrain} color="cyan.500" boxSize={8} />
-              </HStack>
-              <Text fontSize="lg" color="whiteAlpha.800" maxW="2xl">
-                Unlock deep astrological insights with advanced AI-powered interpretation and personalized guidance
-              </Text>
-              <Badge colorScheme="gold" size="lg" px={4} py={2}>
-                👑 Elite Feature Active
-              </Badge>
-            </VStack>
+    <FeatureGuard feature="aiInterpretation" requiredTier="premium">
+      <div className={styles.container}>
+        <div className={styles['content-wrapper']}>
+          <div className={styles['main-content']}>
+            {/* Header */}
+            <div className={styles.header}>
+              <div className={styles['header-title']}>
+                <FaBrain className={styles['brain-icon']} />
+                <h1 className={styles.title}>
+                  AI Chart Interpretation
+                </h1>
+                <FaBrain className={styles['brain-icon']} />
+              </div>
+              <p className={styles.subtitle}>
+                Experience the future of astrology with our advanced AI that understands the deepest layers of your cosmic blueprint.
+              </p>
+              <div className={styles['ai-badge']}>
+                🤖 Powered by Advanced AI
+              </div>
+            </div>
 
-            {/* Educational Guide */}
-            <Box>
-              <Button
-                onClick={onGuideToggle}
-                variant="outline"
-                colorScheme="cyan"
-                size="sm"
-                leftIcon={<Icon as={FaQuestionCircle} />}
-                rightIcon={<Icon as={isGuideOpen ? FaChevronUp : FaChevronDown} />}
+            {/* Guide Toggle */}
+            <div className={styles['guide-toggle']}>
+              <button
+                onClick={() => setIsGuideOpen(!isGuideOpen)}
+                className={styles['guide-button']}
               >
-                AI Interpretation Guide
-              </Button>
-              
-              <Collapse in={isGuideOpen} animateOpacity>
-                <Card mt={4} bg="cyan.50" borderColor="cyan.200" borderWidth={1}>
-                  <CardHeader pb={2}>
-                    <Heading size="sm" color="cyan.700">
-                      Advanced AI Astrological Analysis
-                    </Heading>
-                  </CardHeader>
-                  <CardBody pt={0}>
-                    <VStack spacing={4} align="stretch">
-                      <Text fontSize="sm" color="cyan.700">
-                        Our AI combines traditional astrological wisdom with modern analytical capabilities 
-                        to provide personalized insights tailored to your unique chart patterns.
-                      </Text>
-                      
-                      <HStack spacing={6} align="start">
-                        <Box>
-                          <Text fontSize="sm" fontWeight="bold" color="cyan.600" mb={2}>
-                            Analysis Types:
-                          </Text>
-                          <Text fontSize="xs" color="whiteAlpha.800">
-                            • Personality: Core traits & tendencies<br/>
-                            • Career: Professional path insights<br/>
-                            • Relationships: Compatibility patterns<br/>
-                            • Life Purpose: Soul mission guidance<br/>
-                            • Custom: Ask specific questions
-                          </Text>
-                        </Box>
-                        
-                        <Box>
-                          <Text fontSize="sm" fontWeight="bold" color="cyan.600" mb={2}>
-                            AI Capabilities:
-                          </Text>
-                          <Text fontSize="xs" color="whiteAlpha.800">
-                            • Synthesizes multiple chart factors<br/>
-                            • Identifies complex patterns<br/>
-                            • Provides nuanced interpretations<br/>
-                            • Offers practical guidance<br/>
-                            • Answers follow-up questions
-                          </Text>
-                        </Box>
-                        
-                        <Box>
-                          <Text fontSize="sm" fontWeight="bold" color="cyan.600" mb={2}>
-                            Best Questions:
-                          </Text>
-                          <Text fontSize="xs" color="whiteAlpha.800">
-                            • "What does my chart say about...?"<br/>
-                            • "How can I work with my..."<br/>
-                            • "What timing is best for...?"<br/>
-                            • "Help me understand my..."<br/>
-                            • "What should I focus on...?"
-                          </Text>
-                        </Box>
-                      </HStack>
-                    </VStack>
-                  </CardBody>
-                </Card>
-              </Collapse>
-            </Box>
+                <FaQuestionCircle />
+                <span>How AI Interpretation Works</span>
+                {isGuideOpen ? <FaChevronUp /> : <FaChevronDown />}
+              </button>
+            </div>
 
-            {!analysisComplete ? (
-              /* Configuration */
-              <Card bg={cardBg} shadow="xl" maxW="2xl" mx="auto">
-                <CardHeader bg="cyan.50" roundedTop="md" textAlign="center">
-                  <HStack justify="center">
-                    <Icon as={FaRobot} color="cyan.500" />
-                    <Heading size="md" color="cyan.600">
-                      AI Analysis Type
-                      <EducationalTooltip
-                        title="AI Analysis Types"
-                        description="Our AI can focus on different aspects of your chart to provide specialized insights tailored to your interests."
-                        examples={[
-                          "Personality: Core traits, strengths, and patterns",
-                          "Relationships: Love style and compatibility",
-                          "Career: Professional strengths and path",
-                          "Spiritual: Soul purpose and growth areas",
-                          "Timing: Current life phase and opportunities"
-                        ]}
-                        tier="elite"
-                      />
-                    </Heading>
-                  </HStack>
-                </CardHeader>
-                <CardBody>
-                  <VStack spacing={6}>
-                    <Box w="full">
-                      <RadixTooltip.Root>
-                        <RadixTooltip.Trigger asChild>
-                          <label htmlFor="analysis-type-select" className="block mb-1 font-medium cursor-pointer">
-                            Select AI analysis type
-                          </label>
-                        </RadixTooltip.Trigger>
-                        <RadixTooltip.Content className="bg-gray-900 text-white px-3 py-2 rounded shadow-lg text-xs">
-                          Choose the type of AI interpretation you'd like to receive based on your birth chart
-                          <RadixTooltip.Arrow className="fill-gray-900" />
-                        </RadixTooltip.Content>
-                      </RadixTooltip.Root>
-                      <RadixDialog.Root>
-                        <RadixDialog.Trigger asChild>
-                          <button className="w-full border border-gray-300 rounded-lg px-4 py-2 text-left bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                            {((): string => {
-                              switch (analysisType) {
-                                case 'personality': return 'Deep Personality Analysis';
-                                case 'relationships': return 'Relationship Patterns';
-                                case 'career': return 'Career & Life Path';
-                                case 'spiritual': return 'Spiritual Growth';
-                                case 'timing': return 'Current Life Phase';
-                                case 'comprehensive': return 'Comprehensive Reading';
-                                default: return 'Select AI analysis type';
-                              }
-                            })()}
-                          </button>
-                        </RadixDialog.Trigger>
-                        <RadixDialog.Content className="bg-white rounded-lg shadow-xl p-6 w-80 mx-auto mt-4">
-                          <RadixDialog.Title className="font-semibold mb-2">Choose AI Analysis Type</RadixDialog.Title>
-                          <ul className="space-y-2">
-                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('personality')}>Deep Personality Analysis</button></li>
-                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('relationships')}>Relationship Patterns</button></li>
-                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('career')}>Career & Life Path</button></li>
-                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('spiritual')}>Spiritual Growth</button></li>
-                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('timing')}>Current Life Phase</button></li>
-                            <li><button className="w-full text-left px-3 py-2 rounded hover:bg-cyan-50" onClick={() => setAnalysisType('comprehensive')}>Comprehensive Reading</button></li>
-                          </ul>
-                          <RadixDialog.Close asChild>
-                            <button className="mt-4 w-full py-2 rounded bg-cyan-500 text-white font-semibold">Close</button>
-                          </RadixDialog.Close>
-                        </RadixDialog.Content>
-                      </RadixDialog.Root>
-                    </Box>
-                    
-                    <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
-                      Choose the type of AI interpretation you'd like to receive based on your birth chart
-                    </Text>
-                  </VStack>
-                </CardBody>
-              </Card>
-            ) : (
-              /* Analysis Results */
-              <VStack spacing={6}>
-                <Alert status="success" borderRadius="lg">
-                  <AlertIcon />
-                  <VStack align="start" spacing={1}>
-                    <Text fontWeight="bold">AI Analysis Complete!</Text>
-                    <Text fontSize="sm">Advanced insights generated based on your unique astrological signature</Text>
-                  </VStack>
-                </Alert>
-
-                <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6} w="full">
-                  {/* AI Insights */}
-                  <Card bg={cardBg} shadow="lg">
-                    <CardHeader>
-                      <HStack>
-                        <Icon as={FaLightbulb} color="yellow.500" />
-                        <Heading size="md">AI Insights</Heading>
-                      </HStack>
-                    </CardHeader>
-                    <CardBody>
-                      <VStack spacing={4} align="stretch">
-                        {aiInsights.map((insight, index) => (
-                          <Box key={index}>
-                            <HStack justify="space-between" mb={2}>
-                              <Text fontSize="sm" fontWeight="bold" color={`${insight.color}.600`}>
-                                {insight.category}
-                              </Text>
-                              <Badge colorScheme={insight.color} size="sm">
-                                {insight.confidence}% confidence
-                              </Badge>
-                            </HStack>
-                            <Text fontSize="sm" mb={2}>{insight.insight}</Text>
-                            <Progress 
-                              value={insight.confidence} 
-                              size="xs" 
-                              colorScheme={insight.color}
-                              borderRadius="full"
-                            />
-                            {index < aiInsights.length - 1 && <Divider mt={3} />}
-                          </Box>
-                        ))}
-                      </VStack>
-                    </CardBody>
-                  </Card>
-
-                  {/* AI Chat Interface */}
-                  <Card bg={cardBg} shadow="lg">
-                    <CardHeader>
-                      <HStack>
-                        <Icon as={FaComments} color="blue.500" />
-                        <Heading size="md">AI Chat</Heading>
-                      </HStack>
-                    </CardHeader>
-                    <CardBody>
-                      <VStack spacing={4} align="stretch" h="400px">
-                        <Box flex={1} overflowY="auto" bg="gray.50" p={3} borderRadius="md">
-                          <VStack spacing={3} align="stretch">
-                            {conversationHistory.map((msg, index) => (
-                              <Flex key={index} justify={msg.type === 'user' ? 'flex-end' : 'flex-start'}>
-                                <Flex 
-                                  maxW="80%" 
-                                  bg={msg.type === 'user' ? 'blue.500' : 'white'} 
-                                  color={msg.type === 'user' ? 'white' : 'gray.800'}
-                                  p={3} 
-                                  borderRadius="lg"
-                                  shadow="sm"
-                                  align="start"
-                                  gap={2}
-                                >
-                                  {msg.type === 'ai' && (
-                                    <Avatar size="xs" bg="cyan.500" icon={<FaRobot />} />
-                                  )}
-                                  <Box>
-                                    <Text fontSize="sm">{msg.message}</Text>
-                                    <Text fontSize="xs" opacity={0.7} mt={1}>
-                                      {msg.timestamp}
-                                    </Text>
-                                  </Box>
-                                  {msg.type === 'user' && (
-                                    <Avatar size="xs" bg="blue.500" icon={<FaUser />} />
-                                  )}
-                                </Flex>
-                              </Flex>
-                            ))}
-                            {isAnalyzing && (
-                              <Flex justify="flex-start">
-                                <Flex bg="white" p={3} borderRadius="lg" shadow="sm" align="center" gap={2}>
-                                  <Avatar size="xs" bg="cyan.500" icon={<FaRobot />} />
-                                  <Spinner size="sm" color="cyan.500" />
-                                  <Text fontSize="sm" color="gray.500">AI is thinking...</Text>
-                                </Flex>
-                              </Flex>
-                            )}
-                            {currentResponse && (
-                              <Flex justify="flex-start">
-                                <Flex bg="white" p={3} borderRadius="lg" shadow="sm" align="start" gap={2} maxW="80%">
-                                  <Avatar size="xs" bg="cyan.500" icon={<FaRobot />} />
-                                  <Text fontSize="sm">{currentResponse}</Text>
-                                </Flex>
-                              </Flex>
-                            )}
-                          </VStack>
-                        </Box>
-                        <HStack>
-                          <Textarea
-                            placeholder="Ask the AI about your chart..."
-                            size="sm"
-                            value={userQuestion}
-                            onChange={(e) => setUserQuestion(e.target.value)}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSendMessage();
-                              }
-                            }}
-                          />
-                          <Button 
-                            colorScheme="blue" 
-                            size="sm"
-                            onClick={handleSendMessage}
-                            isLoading={isAnalyzing}
-                            isDisabled={!userQuestion.trim()}
-                          >
-                            Send
-                          </Button>
-                        </HStack>
-                      </VStack>
-                    </CardBody>
-                  </Card>
-                </SimpleGrid>
-
-                {/* Key Recommendations */}
-                <Card bg={cardBg} shadow="lg" w="full">
-                  <CardHeader>
-                    <HStack>
-                      <Icon as={FaMagic} color="purple.500" />
-                      <Heading size="md">AI Recommendations</Heading>
-                    </HStack>
-                  </CardHeader>
-                  <CardBody>
-                    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                      <Box bg="green.50" p={4} borderRadius="md" borderColor="green.200" borderWidth={1}>
-                        <Text fontWeight="bold" color="green.700" mb={2}>🌱 Growth Focus</Text>
-                        <Text fontSize="sm">Develop your communication skills through writing or teaching. Your Mercury-Jupiter trine suggests natural teaching abilities.</Text>
-                      </Box>
-                      <Box bg="blue.50" p={4} borderRadius="md" borderColor="blue.200" borderWidth={1}>
-                        <Text fontWeight="bold" color="blue.700" mb={2}>🎯 Career Direction</Text>
-                        <Text fontSize="sm">Leadership roles in innovative fields suit your Mars-Uranus aspect. Consider technology or social reform sectors.</Text>
-                      </Box>
-                      <Box bg="purple.50" p={4} borderRadius="md" borderColor="purple.200" borderWidth={1}>
-                        <Text fontWeight="bold" color="purple.700" mb={2}>💫 Spiritual Path</Text>
-                        <Text fontSize="sm">Your Neptune-Moon connection suggests strong intuitive abilities. Meditation and creative expression will enhance this gift.</Text>
-                      </Box>
-                    </SimpleGrid>
-                  </CardBody>
-                </Card>
-              </VStack>
+            {/* Collapsible Guide */}
+            {isGuideOpen && (
+              <div className={styles['guide-panel']}>
+                <h3 className={styles['guide-title']}>
+                  Understanding AI Chart Interpretation
+                </h3>
+                <div className={styles['guide-content']}>
+                  <p>
+                    Our AI system analyzes your birth chart using advanced algorithms that consider:
+                  </p>
+                  <ul className={styles['guide-list']}>
+                    <li>Planetary positions and their meanings</li>
+                    <li>House placements and their significance</li>
+                    <li>Aspect patterns between celestial bodies</li>
+                    <li>Traditional and modern astrological wisdom</li>
+                  </ul>
+                </div>
+              </div>
             )}
 
-            {/* Action Buttons */}
-            <HStack spacing={4} justify="center">
-              <Button 
-                leftIcon={<FaArrowLeft />}
-                onClick={() => navigate('/')} 
-                variant="outline"
-                colorScheme="gray"
-              >
-                Back to Dashboard
-              </Button>
-              {!analysisComplete && (
-                <Button 
-                  colorScheme="cyan" 
-                  size="lg"
-                  onClick={handleStartAnalysis}
-                  leftIcon={<FaBrain />}
-                  isLoading={isAnalyzing}
-                  loadingText="AI Analyzing..."
-                >
-                  Generate AI Insights
-                </Button>
-              )}
-              {analysisComplete && (
-                <Button 
-                  colorScheme="purple" 
-                  onClick={() => {
-                    setAnalysisComplete(false);
-                    setIsAnalyzing(false);
-                    setCurrentResponse('');
-                    setUserQuestion('');
+            {/* Analysis Type Selection */}
+            <div className={styles['analysis-card']}>
+              <h3 className={styles['analysis-title']}>Choose Analysis Type</h3>
+              <div className={styles['analysis-grid']}>
+                {['personality', 'relationships', 'career', 'spiritual'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setAnalysisType(type)}
+                    className={`${styles['analysis-option']} ${
+                      analysisType === type ? styles['analysis-option-active'] : ''
+                    }`}
+                  >
+                    <div className={styles['analysis-option-content']}>
+                      <div className={styles['analysis-emoji']}>
+                        {type === 'personality' && '👤'}
+                        {type === 'relationships' && '💕'}
+                        {type === 'career' && '💼'}
+                        {type === 'spiritual' && '🔮'}
+                      </div>
+                      <div className={styles['analysis-label']}>{type}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Question Input */}
+            <div className={styles['question-card']}>
+              <h3 className={styles['question-title']}>Ask AI About Your Chart</h3>
+              <div className={styles['question-form']}>
+                <textarea
+                  value={userQuestion}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUserQuestion(e.target.value)}
+                  onKeyPress={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleAnalyze();
+                    }
                   }}
+                  placeholder="Ask anything about your chart... (e.g., 'What does my Mars in Scorpio mean for my career?')"
+                  className={styles['question-textarea']}
+                />
+                <button
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || !userQuestion.trim()}
+                  className={styles['analyze-button']}
                 >
-                  New Analysis
-                </Button>
-              )}
-            </HStack>
+                  {isAnalyzing ? (
+                    <div className={styles['analyze-button-content']}>
+                      <div className={styles['loading-spinner']}></div>
+                      <span>AI Analyzing...</span>
+                    </div>
+                  ) : (
+                    <div className={styles['analyze-button-content']}>
+                      <FaRobot />
+                      <span>Get AI Interpretation</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
 
-            {isAnalyzing && !analysisComplete && (
-              <Card bg={cardBg} shadow="lg" maxW="md" mx="auto">
-                <CardBody>
-                  <VStack spacing={4}>
-                    <HStack>
-                      <Spinner color="cyan.500" />
-                      <Text fontWeight="bold">AI Processing Your Chart...</Text>
-                    </HStack>
-                    <Progress size="lg" colorScheme="cyan" isIndeterminate w="full" />
-                    <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
-                      Analyzing planetary positions, aspects, and cosmic patterns
-                    </Text>
-                  </VStack>
-                </CardBody>
-              </Card>
+            {/* AI Response */}
+            {(analysisComplete || currentResponse) && (
+              <div className={styles['ai-response']}>
+                <div className={styles['ai-response-header']}>
+                  <FaRobot className={styles['ai-response-icon']} />
+                  <div className={styles['ai-response-content']}>
+                    <h4 className={styles['ai-response-title']}>AI Interpretation</h4>
+                    <p className={styles['ai-response-text']}>{currentResponse}</p>
+                  </div>
+                </div>
+              </div>
             )}
-          </VStack>
-        </Container>
-      </Box>
+
+            {/* Sample Insights */}
+            <div className={styles['insights-grid']}>
+              {aiInsights.map((insight, index) => (
+                <div key={index} className={styles['insight-card']}>
+                  <div className={styles['insight-header']}>
+                    <h4 className={styles['insight-category']}>{insight.category}</h4>
+                    <div className={styles['insight-confidence']}>{insight.confidence}% confidence</div>
+                  </div>
+                  <p className={styles['insight-text']}>{insight.insight}</p>
+                  <div className={styles['confidence-bar-container']}>
+                    <div 
+                      className={`${styles['confidence-bar']} ${styles[`confidence-bar-${insight.color}`]} ${styles[`confidence-${insight.confidence}`]}`}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Back Button */}
+            <div className={styles['back-button-container']}>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className={styles['back-button']}
+              >
+                <FaArrowLeft />
+                <span>Back to Dashboard</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </FeatureGuard>
   );
 };
+
+export default AIInterpretationTest;

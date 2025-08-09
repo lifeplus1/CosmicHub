@@ -9,8 +9,19 @@
     "noEmit": false,
     "emitDeclarationOnly": false,
     "jsx": "react-jsx",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "rootDir": "./src"
   },
-  "include": ["src/index.ts", "src/minimal-exports.ts", "src/performance.ts", "src/lazy-loading.ts"],
+  "include": [
+    "src/index.ts", 
+    "src/minimal-exports.ts", 
+    "src/performance.ts", 
+    "src/lazy-loading.tsx", 
+    "src/enhanced-testing.tsx", 
+    "src/accessibility-testing.tsx", 
+    "src/component-library.tsx",
+    "src/react-performance.tsx",
+    "src/hooks.tsx"
+  ],
   "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
 }

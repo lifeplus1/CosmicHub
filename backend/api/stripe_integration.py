@@ -52,8 +52,11 @@ async def verify_firebase_token(credentials: HTTPAuthorizationCredentials = Depe
     """Verify Firebase ID token and return user ID"""
     try:
         token = credentials.credentials
-        decoded_token = auth.verify_id_token(token)
-        return decoded_token['uid']
+        decoded_token: Dict[str, Any] = auth.verify_id_token(token)
+        uid = decoded_token.get('uid')
+        if not uid or not isinstance(uid, str):
+            raise ValueError("Invalid token: missing or invalid uid")
+        return uid
     except Exception as e:
         logger.error(f"Token verification failed: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid authentication token")
@@ -70,13 +73,19 @@ async def create_stripe_checkout_session(user_id: str, plan_id: str, success_url
         db_client = get_firestore_client()
         user_doc = db_client.collection("users").document(user_id).get()
         
-        if user_doc.exists and user_doc.to_dict().get("stripe_customer_id"):
-            customer_id = user_doc.to_dict()["stripe_customer_id"]
-        else:
+        customer_id = None
+        if user_doc.exists:
+            user_dict = user_doc.to_dict()
+            if user_dict and user_dict.get("stripe_customer_id"):
+                customer_id = user_dict["stripe_customer_id"]
+        
+        if not customer_id:
             # Create new Stripe customer
             user_data = user_doc.to_dict() if user_doc.exists else {}
+            if user_data is None:
+                user_data = {}
             customer = stripe.Customer.create(
-                email=user_data.get("email"),
+                email=user_data.get("email") or "",
                 metadata={"firebase_uid": user_id}
             )
             customer_id = customer.id
@@ -131,6 +140,15 @@ async def get_user_subscription_status(user_id: str) -> Dict[str, Any]:
             }
         
         subscription_data = subscription_doc.to_dict()
+        
+        # Ensure subscription_data is not None
+        if subscription_data is None:
+            return {
+                "status": "inactive",
+                "tier": "free",
+                "features": [],
+                "expires_at": None
+            }
         
         # Verify with Stripe if subscription is still active
         if subscription_data.get("stripe_subscription_id"):
@@ -210,7 +228,7 @@ async def handle_stripe_webhook(request: Request) -> Dict[str, str]:
         logger.error(f"Webhook processing failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Webhook processing failed")
 
-async def handle_subscription_created(subscription: Dict[str, Any], db_client) -> None:
+async def handle_subscription_created(subscription: Dict[str, Any], db_client: Any) -> None:
     """Handle new subscription creation"""
     try:
         customer_id = subscription['customer']
@@ -256,7 +274,7 @@ async def handle_subscription_created(subscription: Dict[str, Any], db_client) -
     except Exception as e:
         logger.error(f"Failed to handle subscription creation: {str(e)}")
 
-async def handle_subscription_updated(subscription: Dict[str, Any], db_client) -> None:
+async def handle_subscription_updated(subscription: Dict[str, Any], db_client: Any) -> None:
     """Handle subscription updates"""
     try:
         customer_id = subscription['customer']
@@ -279,7 +297,7 @@ async def handle_subscription_updated(subscription: Dict[str, Any], db_client) -
     except Exception as e:
         logger.error(f"Failed to handle subscription update: {str(e)}")
 
-async def handle_subscription_cancelled(subscription: Dict[str, Any], db_client) -> None:
+async def handle_subscription_cancelled(subscription: Dict[str, Any], db_client: Any) -> None:
     """Handle subscription cancellation"""
     try:
         customer_id = subscription['customer']
@@ -309,11 +327,11 @@ async def handle_subscription_cancelled(subscription: Dict[str, Any], db_client)
     except Exception as e:
         logger.error(f"Failed to handle subscription cancellation: {str(e)}")
 
-async def handle_payment_succeeded(invoice: Dict[str, Any], db_client) -> None:
+async def handle_payment_succeeded(invoice: Dict[str, Any], db_client: Any) -> None:
     """Handle successful payment"""
     logger.info(f"Payment succeeded for subscription {invoice.get('subscription')}")
 
-async def handle_payment_failed(invoice: Dict[str, Any], db_client) -> None:
+async def handle_payment_failed(invoice: Dict[str, Any], db_client: Any) -> None:
     """Handle failed payment"""
     logger.warning(f"Payment failed for subscription {invoice.get('subscription')}")
 

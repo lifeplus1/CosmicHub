@@ -1,0 +1,441 @@
+/* UserProfile Component Styles */
+
+.user-profile-container {
+  max-width: 64rem;
+  padding: 2rem 0;
+  margin: 0 auto;
+}
+
+.user-profile-card {
+  @apply cosmic-card;
+  padding: 1.5rem;
+}
+
+.user-profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .user-profile-header {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background-color: rgba(26, 32, 44, 0.3);
+}
+
+.user-info {
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .user-info {
+    text-align: left;
+  }
+}
+
+.user-email {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f6ad55;
+}
+
+.user-tier-badge {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  gap: 0.5rem;
+}
+
+.tier-label {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tier-free {
+  background-color: rgba(107, 114, 128, 0.2);
+  color: #9ca3af;
+}
+
+.tier-premium {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: #a855f7;
+}
+
+.tier-elite {
+  background-color: rgba(246, 173, 85, 0.2);
+  color: #f6ad55;
+}
+
+/* Progress Bar Styles */
+.progress-container {
+  width: 100%;
+  height: 0.625rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-bar[data-percentage="0"] { width: 0%; }
+.progress-bar[data-percentage="1"] { width: 1%; }
+.progress-bar[data-percentage="2"] { width: 2%; }
+.progress-bar[data-percentage="3"] { width: 3%; }
+.progress-bar[data-percentage="4"] { width: 4%; }
+.progress-bar[data-percentage="5"] { width: 5%; }
+.progress-bar[data-percentage="6"] { width: 6%; }
+.progress-bar[data-percentage="7"] { width: 7%; }
+.progress-bar[data-percentage="8"] { width: 8%; }
+.progress-bar[data-percentage="9"] { width: 9%; }
+.progress-bar[data-percentage="10"] { width: 10%; }
+.progress-bar[data-percentage="11"] { width: 11%; }
+.progress-bar[data-percentage="12"] { width: 12%; }
+.progress-bar[data-percentage="13"] { width: 13%; }
+.progress-bar[data-percentage="14"] { width: 14%; }
+.progress-bar[data-percentage="15"] { width: 15%; }
+.progress-bar[data-percentage="16"] { width: 16%; }
+.progress-bar[data-percentage="17"] { width: 17%; }
+.progress-bar[data-percentage="18"] { width: 18%; }
+.progress-bar[data-percentage="19"] { width: 19%; }
+.progress-bar[data-percentage="20"] { width: 20%; }
+.progress-bar[data-percentage="21"] { width: 21%; }
+.progress-bar[data-percentage="22"] { width: 22%; }
+.progress-bar[data-percentage="23"] { width: 23%; }
+.progress-bar[data-percentage="24"] { width: 24%; }
+.progress-bar[data-percentage="25"] { width: 25%; }
+.progress-bar[data-percentage="26"] { width: 26%; }
+.progress-bar[data-percentage="27"] { width: 27%; }
+.progress-bar[data-percentage="28"] { width: 28%; }
+.progress-bar[data-percentage="29"] { width: 29%; }
+.progress-bar[data-percentage="30"] { width: 30%; }
+.progress-bar[data-percentage="31"] { width: 31%; }
+.progress-bar[data-percentage="32"] { width: 32%; }
+.progress-bar[data-percentage="33"] { width: 33%; }
+.progress-bar[data-percentage="34"] { width: 34%; }
+.progress-bar[data-percentage="35"] { width: 35%; }
+.progress-bar[data-percentage="36"] { width: 36%; }
+.progress-bar[data-percentage="37"] { width: 37%; }
+.progress-bar[data-percentage="38"] { width: 38%; }
+.progress-bar[data-percentage="39"] { width: 39%; }
+.progress-bar[data-percentage="40"] { width: 40%; }
+.progress-bar[data-percentage="41"] { width: 41%; }
+.progress-bar[data-percentage="42"] { width: 42%; }
+.progress-bar[data-percentage="43"] { width: 43%; }
+.progress-bar[data-percentage="44"] { width: 44%; }
+.progress-bar[data-percentage="45"] { width: 45%; }
+.progress-bar[data-percentage="46"] { width: 46%; }
+.progress-bar[data-percentage="47"] { width: 47%; }
+.progress-bar[data-percentage="48"] { width: 48%; }
+.progress-bar[data-percentage="49"] { width: 49%; }
+.progress-bar[data-percentage="50"] { width: 50%; }
+.progress-bar[data-percentage="51"] { width: 51%; }
+.progress-bar[data-percentage="52"] { width: 52%; }
+.progress-bar[data-percentage="53"] { width: 53%; }
+.progress-bar[data-percentage="54"] { width: 54%; }
+.progress-bar[data-percentage="55"] { width: 55%; }
+.progress-bar[data-percentage="56"] { width: 56%; }
+.progress-bar[data-percentage="57"] { width: 57%; }
+.progress-bar[data-percentage="58"] { width: 58%; }
+.progress-bar[data-percentage="59"] { width: 59%; }
+.progress-bar[data-percentage="60"] { width: 60%; }
+.progress-bar[data-percentage="61"] { width: 61%; }
+.progress-bar[data-percentage="62"] { width: 62%; }
+.progress-bar[data-percentage="63"] { width: 63%; }
+.progress-bar[data-percentage="64"] { width: 64%; }
+.progress-bar[data-percentage="65"] { width: 65%; }
+.progress-bar[data-percentage="66"] { width: 66%; }
+.progress-bar[data-percentage="67"] { width: 67%; }
+.progress-bar[data-percentage="68"] { width: 68%; }
+.progress-bar[data-percentage="69"] { width: 69%; }
+.progress-bar[data-percentage="70"] { width: 70%; }
+.progress-bar[data-percentage="71"] { width: 71%; }
+.progress-bar[data-percentage="72"] { width: 72%; }
+.progress-bar[data-percentage="73"] { width: 73%; }
+.progress-bar[data-percentage="74"] { width: 74%; }
+.progress-bar[data-percentage="75"] { width: 75%; }
+.progress-bar[data-percentage="76"] { width: 76%; }
+.progress-bar[data-percentage="77"] { width: 77%; }
+.progress-bar[data-percentage="78"] { width: 78%; }
+.progress-bar[data-percentage="79"] { width: 79%; }
+.progress-bar[data-percentage="80"] { width: 80%; }
+.progress-bar[data-percentage="81"] { width: 81%; }
+.progress-bar[data-percentage="82"] { width: 82%; }
+.progress-bar[data-percentage="83"] { width: 83%; }
+.progress-bar[data-percentage="84"] { width: 84%; }
+.progress-bar[data-percentage="85"] { width: 85%; }
+.progress-bar[data-percentage="86"] { width: 86%; }
+.progress-bar[data-percentage="87"] { width: 87%; }
+.progress-bar[data-percentage="88"] { width: 88%; }
+.progress-bar[data-percentage="89"] { width: 89%; }
+.progress-bar[data-percentage="90"] { width: 90%; }
+.progress-bar[data-percentage="91"] { width: 91%; }
+.progress-bar[data-percentage="92"] { width: 92%; }
+.progress-bar[data-percentage="93"] { width: 93%; }
+.progress-bar[data-percentage="94"] { width: 94%; }
+.progress-bar[data-percentage="95"] { width: 95%; }
+.progress-bar[data-percentage="96"] { width: 96%; }
+.progress-bar[data-percentage="97"] { width: 97%; }
+.progress-bar[data-percentage="98"] { width: 98%; }
+.progress-bar[data-percentage="99"] { width: 99%; }
+.progress-bar[data-percentage="100"] { width: 100%; }
+
+.progress-bar-purple {
+  background-color: #a855f7;
+}
+
+.progress-bar-blue {
+  background-color: #3b82f6;
+}
+
+/* Usage Card Styles */
+.usage-card {
+  @apply cosmic-card;
+  padding: 1rem;
+}
+
+.usage-header {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #f6ad55;
+  margin-bottom: 1rem;
+}
+
+.usage-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.usage-label {
+  color: #e2e8f0;
+}
+
+.usage-value {
+  font-weight: bold;
+}
+
+.usage-warning {
+  display: flex;
+  padding: 1rem;
+  margin-top: 1rem;
+  gap: 1rem;
+  border: 1px solid #eab308;
+  border-radius: 0.375rem;
+  background-color: rgba(133, 77, 14, 0.5);
+}
+
+.warning-icon {
+  font-size: 1.25rem;
+  color: #eab308;
+}
+
+.warning-text {
+  color: #e2e8f0;
+}
+
+/* Tab Content Styles */
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .overview-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.stat-item {
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .stat-item {
+    text-align: left;
+  }
+}
+
+.stat-label {
+  color: #e2e8f0;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Account Info Styles */
+.account-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-label {
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.account-value {
+  color: #e2e8f0;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.status-verified {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.status-unverified {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.status-disabled {
+  background-color: rgba(107, 114, 128, 0.2);
+  color: #9ca3af;
+}
+
+.status-enabled {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+/* Loading Styles */
+.profile-loading {
+  padding: 2.5rem 0;
+  text-align: center;
+}
+
+.loading-spinner {
+  margin: 0 auto;
+  font-size: 2.25rem;
+  color: #a855f7;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  color: #e2e8f0;
+}
+
+/* Activity List Styles */
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activity-icon {
+  color: #3b82f6;
+}
+
+.activity-text {
+  color: #e2e8f0;
+}
+
+/* Subscription Details Styles */
+.subscription-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .subscription-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.subscription-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.subscription-label {
+  color: #e2e8f0;
+}
+
+.subscription-value {
+  font-weight: bold;
+  color: #f6ad55;
+}
+
+.subscription-description {
+  font-size: 0.875rem;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.billing-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-price {
+  font-weight: bold;
+}
+
+.billing-next {
+  font-size: 0.875rem;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+/* Button Styles */
+.upgrade-button {
+  @apply cosmic-button;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .upgrade-button {
+    width: auto;
+  }
+}
+
+.manage-button {
+  @apply cosmic-button;
+  width: auto;
+}

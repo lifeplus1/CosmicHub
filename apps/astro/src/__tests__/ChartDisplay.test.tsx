@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import ChartDisplay from '../components/ChartDisplay';
@@ -28,7 +28,7 @@ describe('ChartDisplay', () => {
       </TestWrapper>
     );
 
-  expect(screen.getByText(/calculating your natal chart/i)).to.exist;
+    expect(screen.getByText(/calculating your natal chart/i)).toBeInTheDocument();
   });
 
   it('renders error message when no chart data is provided', () => {
@@ -38,7 +38,7 @@ describe('ChartDisplay', () => {
       </TestWrapper>
     );
 
-  expect(screen.getByText(/no chart data available/i)).to.exist;
+    expect(screen.getByText(/no chart data available/i)).toBeInTheDocument();
   });
 
   it('renders chart display component with test id', () => {
@@ -64,6 +64,6 @@ describe('ChartDisplay', () => {
       </TestWrapper>
     );
 
-  expect(screen.getByTestId('chart-display')).to.exist;
+    expect(screen.getByTestId('chart-display')).toBeInTheDocument();
   });
 });

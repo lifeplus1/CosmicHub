@@ -121,6 +121,6 @@ export const logOut = async (): Promise<void> => {
 };
 
 // Export consolidated subscription provider
-export { SubscriptionProvider, useSubscription } from './SubscriptionProvider';
+export { SubscriptionProvider, useSubscription, type SubscriptionState } from './SubscriptionProvider';
 
 export * from 'firebase/auth';

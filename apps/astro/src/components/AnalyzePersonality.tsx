@@ -29,18 +29,18 @@ const AnalyzePersonality: React.FC = React.memo(() => {
     minute: '',
     city: '',
   });
-  const [houseSystem, setHouseSystem] = useState<'P' | 'E'>('P');
+  const [houseSystem, _setHouseSystem] = useState<'P' | 'E'>('P');
   const [result, setResult] = useState<PersonalityResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError(null);
     try {
@@ -63,13 +63,14 @@ const AnalyzePersonality: React.FC = React.memo(() => {
       setResult(response.data);
       toast({
         title: 'Personality Analyzed',
+        description: 'Your personality analysis is complete.',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
     } catch (error) {
       const err = error as { response?: { data?: { detail?: string } } };
-      const errorMessage = err.response?.data?.detail || 'Failed to analyze personality';
+      const errorMessage = err.response?.data?.detail ?? 'Failed to analyze personality';
       setError(errorMessage);
       toast({
         title: 'Error',
@@ -80,6 +81,12 @@ const AnalyzePersonality: React.FC = React.memo(() => {
       });
     }
   }, [formData, toast]);
+
+  const onFormSubmit = useCallback((e: React.FormEvent): void => {
+    handleSubmit(e).catch((error) => {
+      console.error('Form submission error:', error);
+    });
+  }, [handleSubmit]);
 
   const isFormValid = useCallback(() => {
     return Object.values(formData).every((value) => value.trim()) && houseSystem;
@@ -96,7 +103,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
   return (
     <div className="max-w-xl p-4 mx-auto border rounded-lg shadow-2xl bg-cosmic-dark/80 backdrop-blur-xl border-cosmic-silver/20 text-cosmic-silver">
       <h1 className="mb-6 text-2xl font-bold text-center text-cosmic-gold">Personality Analysis</h1>
-      <form onSubmit={handleSubmit} aria-label="Personality Analysis Form">
+      <form onSubmit={onFormSubmit} aria-label="Personality Analysis Form">
         <div className="flex flex-col space-y-4">
           <div>
             <label htmlFor="year" className="block mb-2 text-cosmic-gold">Year <span aria-hidden="true">*</span></label>
@@ -193,7 +200,6 @@ const AnalyzePersonality: React.FC = React.memo(() => {
             type="submit"
             className="cosmic-button"
             disabled={!isFormValid()}
-            aria-disabled={!isFormValid() ? 'true' : 'false'}
           >
             Analyze Personality
           </button>

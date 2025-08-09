@@ -3,85 +3,105 @@
  * Implements route-based code splitting for optimal loading performance
  */
 
-import { lazyLoadRoute, LazyLoadErrorBoundary } from '@cosmichub/config/lazy-loading';
+import { lazyLoadRoute, LazyLoadErrorBoundary } from '@cosmichub/config';
 
 // Main page routes with lazy loading
 export const AstroRoutes = {
   // Dashboard route
   Dashboard: lazyLoadRoute(
-    () => import('../pages/DashboardPage'),
+    () => import('../pages/Dashboard'),
     'AstroDashboard'
   ),
 
   // Chart generation routes
   BirthChart: lazyLoadRoute(
-    () => import('../pages/BirthChartPage'),
+    () => import('../pages/ChartCalculation'),
     'BirthChart'
   ),
 
   SynastryChart: lazyLoadRoute(
-    () => import('../pages/SynastryChartPage'),
+    () => import('../pages/Synastry'),
     'SynastryChart'
   ),
 
   TransitChart: lazyLoadRoute(
-    () => import('../pages/TransitChartPage'),
+    () => import('../pages/ChartCalculation'),
     'TransitChart'
   ),
 
   // Advanced features
   GeneKeys: lazyLoadRoute(
-    () => import('../pages/GeneKeysPage'),
+    () => import('../pages/HumanDesign'),
     'GeneKeys'
   ),
 
   PearlSequence: lazyLoadRoute(
-    () => import('../pages/PearlSequencePage'),
+    () => import('../pages/HumanDesign'),
     'PearlSequence'
   ),
 
   // Analysis features
   AspectAnalysis: lazyLoadRoute(
-    () => import('../pages/AspectAnalysisPage'),
+    () => import('../pages/AIInterpretation'),
     'AspectAnalysis'
   ),
 
   TransitAnalysis: lazyLoadRoute(
-    () => import('../pages/TransitAnalysisPage'),
+    () => import('../pages/AIInterpretation'),
     'TransitAnalysis'
   ),
 
   // User management
   Profile: lazyLoadRoute(
-    () => import('../pages/ProfilePage'),
+    () => import('../pages/Profile'),
     'Profile'
   ),
 
   Settings: lazyLoadRoute(
-    () => import('../pages/SettingsPage'),
+    () => import('../pages/Profile'),
     'Settings'
   ),
 
   // Authentication
   Login: lazyLoadRoute(
-    () => import('../pages/LoginPage'),
+    () => import('../pages/Login'),
     'Login'
   ),
 
   Register: lazyLoadRoute(
-    () => import('../pages/RegisterPage'),
+    () => import('../pages/SignUp'),
     'Register'
   ),
 
-  // Help and documentation
-  Help: lazyLoadRoute(
-    () => import('../pages/HelpPage'),
-    'Help'
+  // Additional pages
+  Calculator: lazyLoadRoute(
+    () => import('../pages/Calculator'),
+    'Calculator'
   ),
 
-  About: lazyLoadRoute(
-    () => import('../pages/AboutPage'),
-    'About'
+  Numerology: lazyLoadRoute(
+    () => import('../pages/Numerology'),
+    'Numerology'
+  ),
+
+  SavedCharts: lazyLoadRoute(
+    () => import('../pages/SavedCharts'),
+    'SavedCharts'
+  ),
+
+  SubscriptionSuccess: lazyLoadRoute(
+    () => import('../pages/SubscriptionSuccessPage'),
+    'SubscriptionSuccess'
+  ),
+
+  SubscriptionCancelled: lazyLoadRoute(
+    () => import('../pages/SubscriptionCancelledPage'),
+    'SubscriptionCancelled'
+  ),
+
+  PerformanceMonitoring: lazyLoadRoute(
+    () => import('../pages/PerformanceMonitoring'),
+    'PerformanceMonitoring'
   )
 };
 
@@ -157,13 +177,33 @@ export const astroRouteConfig = [
     preload: false
   },
   {
-    path: '/help',
-    component: withErrorBoundary(AstroRoutes.Help),
+    path: '/calculator',
+    component: withErrorBoundary(AstroRoutes.Calculator),
     preload: false
   },
   {
-    path: '/about',
-    component: withErrorBoundary(AstroRoutes.About),
+    path: '/numerology',
+    component: withErrorBoundary(AstroRoutes.Numerology),
+    preload: false
+  },
+  {
+    path: '/saved-charts',
+    component: withErrorBoundary(AstroRoutes.SavedCharts),
+    preload: false
+  },
+  {
+    path: '/subscription-success',
+    component: withErrorBoundary(AstroRoutes.SubscriptionSuccess),
+    preload: false
+  },
+  {
+    path: '/subscription-cancelled',
+    component: withErrorBoundary(AstroRoutes.SubscriptionCancelled),
+    preload: false
+  },
+  {
+    path: '/performance',
+    component: withErrorBoundary(AstroRoutes.PerformanceMonitoring),
     preload: false
   }
 ];

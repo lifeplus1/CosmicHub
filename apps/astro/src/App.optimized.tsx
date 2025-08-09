@@ -4,43 +4,47 @@
 
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '../shared/AuthContext';
-import { SubscriptionProvider } from '../shared/SubscriptionContext';
-import LoadingSpinner from './components/LoadingSpinner/LoadingSpinner';
-import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
-import { reportPerformance } from '@cosmichub/config/performance';
+import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
+import { CosmicLoading } from './components/CosmicLoading';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load main routes for optimal performance
-const HomePage = React.lazy(() => import('./pages/HomePage'));
-const ChartPage = React.lazy(() => import('./pages/ChartPage'));
-const SynastryPage = React.lazy(() => import('./pages/SynastryPage'));
-const GeneKeysPage = React.lazy(() => import('./pages/GeneKeysPage'));
-const NumerologyPage = React.lazy(() => import('./pages/NumerologyPage'));
-const TransitPage = React.lazy(() => import('./pages/TransitPage'));
-const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
-const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const ChartCalculation = React.lazy(() => import('./pages/ChartCalculation'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const Calculator = React.lazy(() => import('./pages/Calculator'));
+const Numerology = React.lazy(() => import('./pages/Numerology'));
+const HumanDesign = React.lazy(() => import('./pages/HumanDesign'));
+const Synastry = React.lazy(() => import('./pages/Synastry'));
+const AIInterpretation = React.lazy(() => import('./pages/AIInterpretation'));
+
+// Performance monitoring utilities
+const reportPerformance = (metric: string, value: number) => {
+  console.log(`Performance metric ${metric}: ${value}ms`);
+};
+
+// Performance observer for monitoring
+const performanceObserver = new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    if (entry.entryType === 'largest-contentful-paint') {
+      reportPerformance('LCP', entry.startTime);
+    } else if (entry.entryType === 'first-input') {
+      const fidEntry = entry as any; // Type assertion for first-input entry
+      reportPerformance('FID', fidEntry.processingStart - fidEntry.startTime);
+    } else if (entry.entryType === 'layout-shift') {
+      const clsEntry = entry as any; // Type assertion for layout-shift entry
+      reportPerformance('CLS', clsEntry.value);
+    }
+  }
+});
 
 // Performance monitoring component
 const AppPerformanceMonitor: React.FC = () => {
   useEffect(() => {
-    // Monitor Core Web Vitals
-    const observer = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry) => {
-        if (entry.entryType === 'largest-contentful-paint') {
-          reportPerformance('LCP', entry.startTime);
-        }
-        if (entry.entryType === 'first-input') {
-          reportPerformance('FID', entry.processingStart - entry.startTime);
-        }
-        if (entry.entryType === 'layout-shift') {
-          reportPerformance('CLS', entry.value);
-        }
-      });
-    });
+    // Initialize performance monitoring
+    performanceObserver.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
 
-    observer.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
-
-    return () => observer.disconnect();
+    return () => performanceObserver.disconnect();
   }, []);
 
   return null;
@@ -50,24 +54,24 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <SubscriptionProvider>
+        <SubscriptionProvider appType="astro">
           <Router>
             <AppPerformanceMonitor />
             <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900">
               <Suspense fallback={
                 <div className="flex items-center justify-center min-h-screen">
-                  <LoadingSpinner size="lg" />
+                  <CosmicLoading />
                 </div>
               }>
                 <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/chart" element={<ChartPage />} />
-                  <Route path="/synastry" element={<SynastryPage />} />
-                  <Route path="/gene-keys" element={<GeneKeysPage />} />
-                  <Route path="/numerology" element={<NumerologyPage />} />
-                  <Route path="/transits" element={<TransitPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/chart" element={<ChartCalculation />} />
+                  <Route path="/synastry" element={<Synastry />} />
+                  <Route path="/human-design" element={<HumanDesign />} />
+                  <Route path="/numerology" element={<Numerology />} />
+                  <Route path="/calculator" element={<Calculator />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/ai-interpretation" element={<AIInterpretation />} />
                 </Routes>
               </Suspense>
             </div>

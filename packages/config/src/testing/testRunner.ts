@@ -312,7 +312,7 @@ class TestSuiteRunner {
       testSuccessScore * weights.testSuccess
     );
 
-    const grade = score >= 90 ? 'A' : 
+    const grade: 'A' | 'B' | 'C' | 'D' | 'F' = score >= 90 ? 'A' : 
                   score >= 80 ? 'B' : 
                   score >= 70 ? 'C' : 
                   score >= 60 ? 'D' : 'F';
@@ -418,23 +418,23 @@ class TestSuiteRunner {
 
 // Pre-configured runners for different environments
 export const createDevelopmentRunner = () => new TestSuiteRunner({
-  coverage: { threshold: 70 },
-  performance: { maxRenderTime: 32 },
-  accessibility: { level: 'AA' },
-  reports: { generateHtml: true, generateJson: false }
+  coverage: { threshold: 70, exclude: ['**/*.test.*', '**/*.spec.*'] },
+  performance: { maxRenderTime: 32, maxMountTime: 50 },
+  accessibility: { level: 'AA', checkContrast: true },
+  reports: { generateHtml: true, generateJson: false, uploadResults: false }
 });
 
 export const createCIRunner = () => new TestSuiteRunner({
-  coverage: { threshold: 80 },
-  performance: { maxRenderTime: 16 },
-  accessibility: { level: 'AA' },
+  coverage: { threshold: 80, exclude: ['**/*.test.*', '**/*.spec.*', '**/stories/**'] },
+  performance: { maxRenderTime: 16, maxMountTime: 25 },
+  accessibility: { level: 'AA', checkContrast: true },
   reports: { generateHtml: false, generateJson: true, uploadResults: true }
 });
 
 export const createProductionRunner = () => new TestSuiteRunner({
-  coverage: { threshold: 90 },
-  performance: { maxRenderTime: 10 },
-  accessibility: { level: 'AAA' },
+  coverage: { threshold: 90, exclude: ['**/*.test.*', '**/*.spec.*'] },
+  performance: { maxRenderTime: 10, maxMountTime: 15 },
+  accessibility: { level: 'AAA', checkContrast: true },
   reports: { generateHtml: true, generateJson: true, uploadResults: true }
 });
 

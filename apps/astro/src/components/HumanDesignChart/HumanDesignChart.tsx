@@ -1,8 +1,7 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo, Suspense } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useToast } from '../ToastProvider';
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import axios from 'axios';
 import { FaExpand, FaCompress } from 'react-icons/fa';
 import type { ChartData } from '../../types';

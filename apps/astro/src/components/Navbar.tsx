@@ -49,7 +49,7 @@ NavLink.displayName = 'NavLink';
 
 const Navbar: React.FC = React.memo(() => {
   const { user } = useAuth();
-  const { userTier } = useSubscription();
+  const { tier: userTier } = useSubscription();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -159,7 +159,6 @@ const Navbar: React.FC = React.memo(() => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 rounded-md text-cosmic-silver hover:bg-cosmic-purple/20"
               aria-label={isMobileMenuOpen ? 'Close Menu' : 'Open Menu'}
-              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
             >
               {isMobileMenuOpen ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

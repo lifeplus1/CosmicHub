@@ -12,6 +12,6 @@
     "jsx": "react-jsx",
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/index.ts", "src/minimal-exports.ts"],
-  "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
 }

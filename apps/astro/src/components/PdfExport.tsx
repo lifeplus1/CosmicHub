@@ -252,7 +252,6 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
                 className="flex-1 cosmic-button"
                 onClick={exportToPdf}
                 disabled={loading}
-                aria-disabled={loading ? 'true' : 'false'}
               >
                 <FaDownload className="mr-2" />
                 {loading ? 'Generating...' : 'Generate & Download'}

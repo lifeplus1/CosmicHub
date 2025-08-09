@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Aspect } from './types';
 
@@ -22,7 +23,7 @@ const AspectsTab: React.FC = React.memo(() => {
                 <p className="text-xl text-gold-400">{aspect.symbol}</p>
                 <h4 className="font-bold text-md text-gold-300">{aspect.name} ({aspect.degree}°)</h4>
               </div>
-              <Accordion.Icon className="text-gold-400" />
+              <ChevronDownIcon className="text-gold-400" />
             </Accordion.Trigger>
             <Accordion.Content className="p-4">
               <div className="flex flex-col space-y-2">

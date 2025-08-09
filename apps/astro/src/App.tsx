@@ -17,6 +17,16 @@ const Profile = lazy(() => import('./pages/Profile'));
 const UpgradeModalDemo = lazy(() => import('./components/UpgradeModalDemo'));
 const PerformanceMonitoring = lazy(() => import('./pages/PerformanceMonitoring'));
 
+// Placeholder components for missing pages
+const Calculator = lazy(() => import('./pages/Calculator'));
+const Numerology = lazy(() => import('./pages/Numerology'));
+const HumanDesign = lazy(() => import('./pages/HumanDesign'));
+const Synastry = lazy(() => import('./pages/Synastry'));
+const AIInterpretation = lazy(() => import('./pages/AIInterpretation'));
+const SavedCharts = lazy(() => import('./pages/SavedCharts'));
+const Login = lazy(() => import('./pages/Login'));
+const SignUp = lazy(() => import('./pages/SignUp'));
+
 interface ExtendedChartData {
   latitude: number;
   longitude: number;
@@ -32,7 +42,7 @@ const MainApp: React.FC = React.memo(() => {
 
   React.useEffect(() => {
     // Initialize cross-app integration if enabled
-    if (isFeatureEnabled('crossAppIntegration', 'astro')) {
+    if (isFeatureEnabled('crossAppIntegration')) {
       addNotification({
         id: 'astro-init',
         message: 'Astrology app initialized with Healwave integration',
@@ -51,6 +61,14 @@ const MainApp: React.FC = React.memo(() => {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/chart" element={<ChartCalculation />} />
+              <Route path="/calculator" element={<Calculator />} />
+              <Route path="/numerology" element={<Numerology />} />
+              <Route path="/human-design" element={<HumanDesign />} />
+              <Route path="/synastry" element={<Synastry />} />
+              <Route path="/ai-interpretation" element={<AIInterpretation />} />
+              <Route path="/saved-charts" element={<SavedCharts />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/upgrade-demo" element={<UpgradeModalDemo />} />
               <Route path="/performance" element={<PerformanceMonitoring />} />

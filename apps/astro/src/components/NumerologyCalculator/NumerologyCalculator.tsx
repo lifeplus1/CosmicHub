@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React, { useState } from 'react';
 import { useToast } from '../ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -332,7 +333,7 @@ const NumerologyCalculator: React.FC = () => {
                 <Accordion.Item value="challenges">
                   <Accordion.Trigger className="flex justify-between w-full">
                     <span className="font-bold">Challenge Numbers</span>
-                    <Accordion.Icon />
+                    <ChevronDownIcon />
                   </Accordion.Trigger>
                   <Accordion.Content className="pb-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -363,7 +364,7 @@ const NumerologyCalculator: React.FC = () => {
                 <Accordion.Item value="pinnacles">
                   <Accordion.Trigger className="flex justify-between w-full">
                     <span className="font-bold">Pinnacle Numbers</span>
-                    <Accordion.Icon />
+                    <ChevronDownIcon />
                   </Accordion.Trigger>
                   <Accordion.Content className="pb-4">
                     <div className="grid grid-cols-2 gap-4">

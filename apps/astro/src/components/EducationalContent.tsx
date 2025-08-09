@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { FaChartLine, FaKey, FaDna, FaHeart, FaBrain, FaCompass, FaStar } from 'react-icons/fa';
@@ -24,7 +25,7 @@ const EducationalContent: React.FC = React.memo(() => {
               <Accordion.Item value="what-is" className="border-b border-cosmic-silver/20">
                 <Accordion.Trigger className="flex justify-between w-full p-4 hover:bg-cosmic-purple/10">
                   <h4 className="text-lg font-bold text-cosmic-silver">What is Human Design?</h4>
-                  <Accordion.Icon />
+                  <ChevronDownIcon />
                 </Accordion.Trigger>
                 <Accordion.Content className="p-4">
                   <div className="flex flex-col space-y-4">
@@ -60,7 +61,7 @@ const EducationalContent: React.FC = React.memo(() => {
               <Accordion.Item value="types" className="border-b border-cosmic-silver/20">
                 <Accordion.Trigger className="flex justify-between w-full p-4 hover:bg-cosmic-purple/10">
                   <h4 className="text-lg font-bold text-cosmic-silver">The Five Types</h4>
-                  <Accordion.Icon />
+                  <ChevronDownIcon />
                 </Accordion.Trigger>
                 <Accordion.Content className="p-4">
                   <div className="grid grid-cols-1 gap-4">

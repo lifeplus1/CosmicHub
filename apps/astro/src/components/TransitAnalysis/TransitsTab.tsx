@@ -1,10 +1,63 @@
 import React from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { FaCalendarAlt, FaClock } from 'react-icons/fa';
-import TransitsTab from './TransitsTab';
-import LunarCyclesTab from './LunarCyclesTab';
 import DateRangeForm from './DateRangeForm';
 import type { TransitResult, LunarTransitResult, DateRange } from './types';
+
+// Placeholder components
+const TransitsTabContent: React.FC<{
+  transitResults: TransitResult | null;
+  loading: boolean;
+  dateRange: DateRange;
+  onCalculateTransits: () => void;
+}> = ({ transitResults, loading, dateRange, onCalculateTransits }) => (
+  <div className="cosmic-card">
+    <div className="p-6">
+      <h3 className="mb-4 text-lg font-semibold text-cosmic-gold">Planet Transits</h3>
+      <button
+        onClick={onCalculateTransits}
+        disabled={loading}
+        className="mb-4 cosmic-button"
+      >
+        {loading ? 'Calculating...' : 'Calculate Transits'}
+      </button>
+      {transitResults && (
+        <div className="space-y-2">
+          <p className="text-cosmic-silver">Planet: {transitResults.planet}</p>
+          <p className="text-cosmic-silver">Aspect: {transitResults.aspect}</p>
+          <p className="text-cosmic-silver">Date: {transitResults.date}</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const LunarCyclesTabContent: React.FC<{
+  lunarTransits: LunarTransitResult | null;
+  loadingLunar: boolean;
+  dateRange: DateRange;
+  onCalculateLunar: () => void;
+}> = ({ lunarTransits, loadingLunar, dateRange, onCalculateLunar }) => (
+  <div className="cosmic-card">
+    <div className="p-6">
+      <h3 className="mb-4 text-lg font-semibold text-cosmic-gold">Lunar Cycles</h3>
+      <button
+        onClick={onCalculateLunar}
+        disabled={loadingLunar}
+        className="mb-4 cosmic-button"
+      >
+        {loadingLunar ? 'Calculating...' : 'Calculate Lunar Cycles'}
+      </button>
+      {lunarTransits && (
+        <div className="space-y-2">
+          <p className="text-cosmic-silver">Phase: {lunarTransits.phase}</p>
+          <p className="text-cosmic-silver">Energy: {lunarTransits.energy}</p>
+          <p className="text-cosmic-silver">Date: {lunarTransits.date}</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 interface TransitTabsProps {
   activeTab: string;
@@ -53,7 +106,7 @@ const TransitTabs: React.FC<TransitTabsProps> = ({
       </Tabs.List>
       <DateRangeForm dateRange={dateRange} setDateRange={setDateRange} />
       <Tabs.Content value="transits" className="focus:outline-none">
-        <TransitsTab
+        <TransitsTabContent
           transitResults={transitResults}
           loading={loading}
           dateRange={dateRange}
@@ -61,7 +114,7 @@ const TransitTabs: React.FC<TransitTabsProps> = ({
         />
       </Tabs.Content>
       <Tabs.Content value="lunar" className="focus:outline-none">
-        <LunarCyclesTab
+        <LunarCyclesTabContent
           lunarTransits={lunarTransits}
           loadingLunar={loadingLunar}
           dateRange={dateRange}

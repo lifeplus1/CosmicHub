@@ -19,7 +19,7 @@ type PlanetData = NonNullable<ChartData['planets']>[string];
 type HouseData = ChartData['houses'][number];
 type AspectData = ChartData['aspects'][number];
 
-interface ChartDisplayProps {
+export interface ChartDisplayProps {
   chart: ExtendedChartData | null;
   onSaveChart?: () => void;
   loading?: boolean;

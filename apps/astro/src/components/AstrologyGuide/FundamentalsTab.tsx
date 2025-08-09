@@ -1,5 +1,6 @@
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { FaSun, FaStar, FaGlobe, FaMoon, FaClock, FaLightbulb } from 'react-icons/fa';
 import { Fundamental } from './types';
 
@@ -94,7 +95,7 @@ const FundamentalsTab: React.FC = React.memo(() => {
                 <Accordion.Item value={index.toString()}>
                   <Accordion.Trigger className="flex justify-between w-full p-2 rounded hover:bg-cosmic-purple/10">
                     <span className="text-sm font-medium text-gold-400">Learn More</span>
-                    <Accordion.Icon className="text-gold-400" />
+                    <ChevronDownIcon className="text-gold-400" />
                   </Accordion.Trigger>
                   <Accordion.Content className="p-4 pt-0">
                     <ul className="space-y-3">

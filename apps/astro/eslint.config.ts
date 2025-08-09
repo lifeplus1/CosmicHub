@@ -1,9 +1,9 @@
 import js from '@eslint/js';
 import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
+import * as reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import parser from '@typescript-eslint/parser';
+import * as tseslint from '@typescript-eslint/eslint-plugin';
+import tseslintParser from '@typescript-eslint/parser';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 export default [
@@ -17,7 +17,7 @@ export default [
       ecmaVersion: 2020,
       sourceType: 'module',
       globals: { ...globals.browser, ...globals.es2020 },
-      parser,
+      parser: tseslintParser,
       parserOptions: {
         ecmaFeatures: { jsx: true },
         project: './tsconfig.json',

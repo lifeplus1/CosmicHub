@@ -50,10 +50,8 @@ const HealwavePage: React.FC = () => {
           />
           
           <DurationTimer
-            timeRemaining={timeRemaining}
-            totalDuration={duration * 60}
-            formatTime={formatTime}
-            isActive={isPlaying}
+            duration={timeRemaining}
+            isRunning={isPlaying}
           />
         </div>
       </div>

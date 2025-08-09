@@ -4,7 +4,7 @@ import { useAuth } from './index';
 // Re-export types from integrations package
 export type { UserSubscription, SubscriptionPlan } from '@cosmichub/integrations';
 
-interface SubscriptionContextType {
+export interface SubscriptionState {
   subscription: any | null;
   userTier: string;
   isLoading: boolean;
@@ -13,6 +13,8 @@ interface SubscriptionContextType {
   refreshSubscription: () => Promise<void>;
   checkUsageLimit?: (limitType: string) => { allowed: boolean; current: number; limit: number };
 }
+
+interface SubscriptionContextType extends SubscriptionState {}
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
@@ -178,7 +180,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   );
 };
 
-export const useSubscription = (): SubscriptionContextType => {
+export const useSubscription = (): SubscriptionState => {
   const context = useContext(SubscriptionContext);
   if (context === undefined) {
     throw new Error('useSubscription must be used within a SubscriptionProvider');

@@ -8,7 +8,7 @@ import { screen, within } from '@testing-library/react';
 
 // WCAG Guidelines implementation
 export interface AccessibilityStandards {
-  level: 'A' | 'AA' | 'AAA';
+  level: 'AA' | 'AAA';
   guidelines: {
     perceivable: boolean;
     operable: boolean;
@@ -65,7 +65,7 @@ const WCAG_STANDARDS: Record<string, AccessibilityStandards> = {
 // Accessibility audit result interface
 export interface AccessibilityAuditResult {
   passed: boolean;
-  level: 'A' | 'AA' | 'AAA';
+  level: 'AA' | 'AAA';
   score: number; // 0-100
   violations: AccessibilityViolation[];
   warnings: AccessibilityWarning[];
@@ -367,7 +367,7 @@ export class ARIAAnalyzer {
 
     return {
       hasLandmarks: foundLandmarks.length > 0,
-      landmarks: [...new Set(foundLandmarks)],
+      landmarks: Array.from(new Set(foundLandmarks)),
       missing
     };
   }
@@ -471,7 +471,7 @@ export class AccessibilityAuditor {
       score,
       violations,
       warnings,
-      recommendations: [...new Set(recommendations)],
+      recommendations: Array.from(new Set(recommendations)),
       summary: {
         totalTests,
         passedTests,

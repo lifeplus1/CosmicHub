@@ -1,46 +1,14 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Select,
-  SimpleGrid,
-  Badge,
-  Icon,
-  Progress,
-  Divider,
-  useColorModeValue,
-  Container,
-  Alert,
-  AlertIcon,
-  Stack,
-  Circle,
-  Flex,
-  Collapse,
-  useDisclosure
-} from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { FaClock, FaCalendarAlt, FaRocket, FaHeart, FaArrowLeft, FaMoon, FaSun, FaQuestionCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import FeatureGuard from './FeatureGuard';
-import { EducationalTooltip } from './EducationalTooltip';
+import FeatureGuard from '../components/FeatureGuard';
+import styles from './TransitAnalysisTest.module.css';
 
 export const TransitAnalysisTest: React.FC = () => {
   const navigate = useNavigate();
   const [timeFrame, setTimeFrame] = useState('6months');
   const [analysisStarted, setAnalysisStarted] = useState(false);
-  const { isOpen: isGuideOpen, onToggle: onGuideToggle } = useDisclosure();
-  
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const bgGradient = useColorModeValue(
-    'linear(to-br, indigo.50, purple.50, pink.50)',
-    'linear(to-br, gray.900, indigo.900, purple.900)'
-  );
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   const upcomingTransits = [
     {
@@ -98,326 +66,318 @@ export const TransitAnalysisTest: React.FC = () => {
 
   return (
     <FeatureGuard feature="transit_analysis" requiredTier="elite">
-      <Box minH="100vh" bg={bgGradient}>
-        <Container maxW="6xl" py={8}>
-          <VStack spacing={8} align="stretch">
+      <div className={styles.container}>
+        <div className={styles['content-wrapper']}>
+          <div className={styles['main-content']}>
             {/* Header Section */}
-            <VStack spacing={4} textAlign="center">
-              <HStack spacing={3}>
-                <Icon as={FaClock} color="purple.500" boxSize={8} />
-                <Heading size="xl" bgGradient="linear(to-r, indigo.400, purple.500, pink.400)" bgClip="text">
+            <div className={styles.header}>
+              <div className={styles['header-title']}>
+                <FaClock className={styles['clock-icon']} />
+                <h1 className={styles.title}>
                   Transit Analysis & Predictions
-                </Heading>
-                <Icon as={FaClock} color="purple.500" boxSize={8} />
-              </HStack>
-              <Text fontSize="lg" color="whiteAlpha.800" maxW="2xl">
+                </h1>
+                <FaClock className={styles['clock-icon']} />
+              </div>
+              <p className={styles.subtitle}>
                 Discover the cosmic timing of your life through precise planetary transit analysis
-              </Text>
-              <Badge colorScheme="gold" size="lg" px={4} py={2}>
+              </p>
+              <div className={styles['elite-badge']}>
                 👑 Elite Feature Active
-              </Badge>
-            </VStack>
+              </div>
+            </div>
 
             {/* Educational Guide */}
-            <Box>
-              <Button
-                onClick={onGuideToggle}
-                variant="outline"
-                colorScheme="purple"
-                size="sm"
-                leftIcon={<Icon as={FaQuestionCircle} />}
-                rightIcon={<Icon as={isGuideOpen ? FaChevronUp : FaChevronDown} />}
+            <div>
+              <button
+                onClick={() => setIsGuideOpen(!isGuideOpen)}
+                className={styles['guide-button']}
               >
-                Transit Analysis Guide
-              </Button>
+                <FaQuestionCircle />
+                <span>Transit Analysis Guide</span>
+                {isGuideOpen ? <FaChevronUp /> : <FaChevronDown />}
+              </button>
               
-              <Collapse in={isGuideOpen} animateOpacity>
-                <Card mt={4} bg="purple.50" borderColor="purple.200" borderWidth={1}>
-                  <CardHeader pb={2}>
-                    <Heading size="sm" color="purple.700">
-                      Understanding Planetary Transits
-                    </Heading>
-                  </CardHeader>
-                  <CardBody pt={0}>
-                    <VStack spacing={4} align="stretch">
-                      <Text fontSize="sm" color="purple.700">
-                        Transits reveal the cosmic weather of your life. By tracking current planetary positions 
-                        relative to your birth chart, we can predict optimal timing for important decisions.
-                      </Text>
+              {isGuideOpen && (
+                <div className={styles['guide-panel']}>
+                  <h3 className={styles['guide-title']}>
+                    Understanding Planetary Transits
+                  </h3>
+                  <div className={styles['guide-content']}>
+                    <p className={styles['guide-intro']}>
+                      Transits reveal the cosmic weather of your life. By tracking current planetary positions 
+                      relative to your birth chart, we can predict optimal timing for important decisions.
+                    </p>
+                    
+                    <div className={styles['guide-grid']}>
+                      <div>
+                        <p className={styles['guide-section-title']}>
+                          What Transits Show:
+                        </p>
+                        <div className={styles['guide-list']}>
+                          <div>• Best times for career moves</div>
+                          <div>• Relationship opportunities</div>
+                          <div>• Creative breakthroughs</div>
+                          <div>• Financial decisions</div>
+                          <div>• Personal growth periods</div>
+                        </div>
+                      </div>
                       
-                      <HStack spacing={6} align="start">
-                        <Box>
-                          <Text fontSize="sm" fontWeight="bold" color="purple.600" mb={2}>
-                            What Transits Show:
-                          </Text>
-                          <Text fontSize="xs" color="whiteAlpha.800">
-                            • Best times for career moves<br/>
-                            • Relationship opportunities<br/>
-                            • Creative breakthroughs<br/>
-                            • Financial decisions<br/>
-                            • Personal growth periods
-                          </Text>
-                        </Box>
-                        
-                        <Box>
-                          <Text fontSize="sm" fontWeight="bold" color="purple.600" mb={2}>
-                            Transit Types:
-                          </Text>
-                          <Text fontSize="xs" color="whiteAlpha.800">
-                            • Conjunction: New beginnings<br/>
-                            • Trine: Easy, beneficial energy<br/>
-                            • Square: Challenges & growth<br/>
-                            • Opposition: Balance & awareness<br/>
-                            • Sextile: Opportunities
-                          </Text>
-                        </Box>
-                        
-                        <Box>
-                          <Text fontSize="sm" fontWeight="bold" color="purple.600" mb={2}>
-                            Major Transits:
-                          </Text>
-                          <Text fontSize="xs" color="whiteAlpha.800">
-                            • Jupiter: Expansion & luck<br/>
-                            • Saturn: Structure & lessons<br/>
-                            • Uranus: Change & innovation<br/>
-                            • Neptune: Spirituality & dreams<br/>
-                            • Pluto: Transformation & power
-                          </Text>
-                        </Box>
-                      </HStack>
-                    </VStack>
-                  </CardBody>
-                </Card>
-              </Collapse>
-            </Box>
+                      <div>
+                        <p className={styles['guide-section-title']}>
+                          Transit Types:
+                        </p>
+                        <div className={styles['guide-list']}>
+                          <div>• Conjunction: New beginnings</div>
+                          <div>• Trine: Easy, beneficial energy</div>
+                          <div>• Square: Challenges & growth</div>
+                          <div>• Opposition: Balance & awareness</div>
+                          <div>• Sextile: Opportunities</div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className={styles['guide-section-title']}>
+                          Major Transits:
+                        </p>
+                        <div className={styles['guide-list']}>
+                          <div>• Jupiter: Expansion & luck</div>
+                          <div>• Saturn: Structure & lessons</div>
+                          <div>• Uranus: Change & innovation</div>
+                          <div>• Neptune: Spirituality & dreams</div>
+                          <div>• Pluto: Transformation & power</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {!analysisStarted ? (
               /* Configuration */
-              <Card bg={cardBg} shadow="xl" maxW="2xl" mx="auto">
-                <CardHeader bg="purple.50" roundedTop="md" textAlign="center">
-                  <HStack justify="center">
-                    <Icon as={FaCalendarAlt} color="purple.500" />
-                    <Heading size="md" color="purple.600">
+              <div className={styles['config-container']}>
+                <div className={styles['config-header']}>
+                  <div className={styles['config-header-content']}>
+                    <FaCalendarAlt className={styles['config-header-icon']} />
+                    <h3 className={styles['config-header-title']}>
                       Analysis Time Frame
-                      <EducationalTooltip
-                        title="Choosing Your Time Frame"
-                        description="Different time frames reveal different types of influences. Short periods show immediate opportunities, while longer periods reveal major life themes."
-                        examples={[
-                          "1 Month: Daily decisions & quick opportunities",
-                          "3 Months: Project planning & seasonal shifts",
-                          "6 Months: Major goals & relationship timing",
-                          "1 Year: Life direction & career planning"
-                        ]}
-                        tier="elite"
-                      />
-                    </Heading>
-                  </HStack>
-                </CardHeader>
-                <CardBody>
-                  <VStack spacing={6}>
-                    <Select 
-                      value={timeFrame} 
-                      onChange={(e) => setTimeFrame(e.target.value)}
-                      size="lg"
-                    >
-                      <option value="1month">Next 1 Month</option>
-                      <option value="3months">Next 3 Months</option>
-                      <option value="6months">Next 6 Months</option>
-                      <option value="1year">Next Year</option>
-                      <option value="2years">Next 2 Years</option>
-                    </Select>
+                    </h3>
+                  </div>
+                </div>
+                <div className={styles['config-body']}>
+                  <div className={styles['config-form']}>
+                    <div>
+                      <label htmlFor="timeframe-select" className={styles['timeframe-label']}>
+                        Analysis Time Frame
+                      </label>
+                      <select 
+                        id="timeframe-select"
+                        value={timeFrame} 
+                        onChange={(e) => setTimeFrame(e.target.value)}
+                        className={styles['timeframe-select']}
+                      >
+                        <option value="1month">Next 1 Month</option>
+                        <option value="3months">Next 3 Months</option>
+                        <option value="6months">Next 6 Months</option>
+                        <option value="1year">Next Year</option>
+                        <option value="2years">Next 2 Years</option>
+                      </select>
+                    </div>
                     
-                    <Text fontSize="sm" color="whiteAlpha.800" textAlign="center">
+                    <p className={styles['config-description']}>
                       Select your preferred time frame for detailed transit predictions and cosmic timing analysis
-                    </Text>
-                  </VStack>
-                </CardBody>
-              </Card>
+                    </p>
+                  </div>
+                </div>
+              </div>
             ) : (
               /* Analysis Results */
-              <VStack spacing={6}>
-                <Alert status="success" borderRadius="lg">
-                  <AlertIcon />
-                  <VStack align="start" spacing={1}>
-                    <Text fontWeight="bold">Transit Analysis Complete!</Text>
-                    <Text fontSize="sm">Your cosmic timing report for the next {timeFrame.replace(/\d+/, (match) => match + ' ')} is ready</Text>
-                  </VStack>
-                </Alert>
+              <div className={styles['main-content']}>
+                <div className={styles['success-message']}>
+                  <div className={styles['success-icon-container']}>
+                    <FaRocket className={styles['success-icon']} />
+                  </div>
+                  <div>
+                    <p className={styles['success-title']}>Transit Analysis Complete!</p>
+                    <p className={styles['success-description']}>Your cosmic timing report for the next {timeFrame.replace(/\d+/, (match) => match + ' ')} is ready</p>
+                  </div>
+                </div>
 
-                <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6} w="full">
+                <div className={styles['results-grid']}>
                   {/* Current Active Transits */}
-                  <Card bg={cardBg} shadow="lg">
-                    <CardHeader>
-                      <HStack>
-                        <Icon as={FaRocket} color="orange.500" />
-                        <Heading size="md">Active Transits</Heading>
-                      </HStack>
-                    </CardHeader>
-                    <CardBody>
-                      <VStack spacing={4} align="stretch">
+                  <div className={styles.card}>
+                    <div className={styles['card-header']}>
+                      <div className={styles['card-header-content']}>
+                        <FaRocket className="text-orange-500" />
+                        <h3 className={styles['card-title']}>Active Transits</h3>
+                      </div>
+                    </div>
+                    <div className={styles['card-body']}>
+                      <div className={styles['card-content']}>
                         {currentTransits.map((transit, index) => (
-                          <Box key={index}>
-                            <HStack justify="space-between" mb={2}>
-                              <VStack align="start" spacing={0}>
-                                <Text fontSize="sm" fontWeight="bold">
+                          <div key={index}>
+                            <div className={styles['transit-item']}>
+                              <div className={styles['transit-info']}>
+                                <p className={styles['transit-title']}>
                                   {transit.planet} {transit.aspect} {transit.natal}
-                                </Text>
-                                <Text fontSize="xs" color="gray.500">
+                                </p>
+                                <p className={styles['transit-intensity']}>
                                   Current intensity: {transit.intensity}%
-                                </Text>
-                              </VStack>
-                              <Circle 
-                                size="40px" 
-                                bg={transit.intensity > 80 ? 'red.100' : transit.intensity > 60 ? 'orange.100' : 'green.100'}
-                                color={transit.intensity > 80 ? 'red.600' : transit.intensity > 60 ? 'orange.600' : 'green.600'}
-                                fontSize="xs"
-                                fontWeight="bold"
-                              >
+                                </p>
+                              </div>
+                              <div className={`${styles['intensity-badge']} ${
+                                transit.intensity > 80 ? styles['intensity-high'] : 
+                                transit.intensity > 60 ? styles['intensity-medium'] : 
+                                styles['intensity-low']
+                              }`}>
                                 {transit.intensity}%
-                              </Circle>
-                            </HStack>
-                            <Progress 
-                              value={transit.intensity} 
-                              size="sm" 
-                              colorScheme={transit.intensity > 80 ? 'red' : transit.intensity > 60 ? 'orange' : 'green'}
-                              borderRadius="full"
-                            />
-                          </Box>
+                              </div>
+                            </div>
+                            <div className={styles['progress-bar-container']}>
+                              <div 
+                                className={`${styles['progress-bar']} ${
+                                  transit.intensity > 80 ? styles['progress-bar-high'] : 
+                                  transit.intensity > 60 ? styles['progress-bar-medium'] : 
+                                  styles['progress-bar-low']
+                                } ${styles[`progress-${transit.intensity}`]}`}
+                              />
+                            </div>
+                          </div>
                         ))}
-                      </VStack>
-                    </CardBody>
-                  </Card>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Transit Timeline */}
-                  <Card bg={cardBg} shadow="lg">
-                    <CardHeader>
-                      <HStack>
-                        <Icon as={FaCalendarAlt} color="blue.500" />
-                        <Heading size="md">Upcoming Timeline</Heading>
-                      </HStack>
-                    </CardHeader>
-                    <CardBody>
-                      <VStack spacing={4} align="stretch">
+                  <div className={styles.card}>
+                    <div className={styles['card-header']}>
+                      <div className={styles['card-header-content']}>
+                        <FaCalendarAlt className="text-blue-500" />
+                        <h3 className={styles['card-title']}>Upcoming Timeline</h3>
+                      </div>
+                    </div>
+                    <div className={styles['card-body']}>
+                      <div className={styles['card-content']}>
                         {upcomingTransits.slice(0, 3).map((transit, index) => (
-                          <Flex key={index} align="center" gap={3}>
-                            <Circle size="30px" bg={`${transit.color}.100`} color={`${transit.color}.600`}>
-                              <Icon as={transit.icon} size="sm" />
-                            </Circle>
-                            <Box flex={1}>
-                              <Text fontSize="xs" color="gray.500">{transit.date}</Text>
-                              <Text fontSize="sm" fontWeight="medium">{transit.transit}</Text>
-                              <Badge size="sm" colorScheme={transit.color}>
+                          <div key={index} className={styles['timeline-item']}>
+                            <div className={`${styles['timeline-icon']} ${styles[`timeline-icon-${transit.color}`]}`}>
+                              <transit.icon className={styles['timeline-icon-sm']} />
+                            </div>
+                            <div className={styles['timeline-content']}>
+                              <p className={styles['timeline-date']}>{transit.date}</p>
+                              <p className={styles['timeline-title']}>{transit.transit}</p>
+                              <div className={`${styles['timeline-impact']} ${styles[`impact-${transit.color}`]}`}>
                                 {transit.impact} Impact
-                              </Badge>
-                            </Box>
-                          </Flex>
+                              </div>
+                            </div>
+                          </div>
                         ))}
-                      </VStack>
-                    </CardBody>
-                  </Card>
-                </SimpleGrid>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Detailed Transit Insights */}
-                <Card bg={cardBg} shadow="lg" w="full">
-                  <CardHeader>
-                    <Heading size="md">Detailed Transit Insights</Heading>
-                  </CardHeader>
-                  <CardBody>
-                    <Stack spacing={4}>
+                <div className={styles.card}>
+                  <div className={styles['card-header']}>
+                    <h3 className={styles['card-title']}>Detailed Transit Insights</h3>
+                  </div>
+                  <div className={styles['card-body']}>
+                    <div className={styles['card-content']}>
                       {upcomingTransits.map((transit, index) => (
-                        <Box key={index}>
-                          <HStack justify="space-between" mb={2}>
-                            <VStack align="start" spacing={1}>
-                              <HStack>
-                                <Icon as={transit.icon} color={`${transit.color}.500`} />
-                                <Text fontWeight="bold">{transit.transit}</Text>
-                                <Badge colorScheme={transit.color} size="sm">
+                        <div key={index}>
+                          <div className={styles['insight-header']}>
+                            <div className={styles['insight-title-section']}>
+                              <div className={styles['insight-title-row']}>
+                                <transit.icon className={styles[`insight-icon-${transit.color}`]} />
+                                <p className={styles['insight-title']}>{transit.transit}</p>
+                                <div className={`${styles['insight-energy']} ${styles[`energy-${transit.energy}`]}`}>
                                   {transit.energy}
-                                </Badge>
-                              </HStack>
-                              <Text fontSize="sm" color="whiteAlpha.800">{transit.date} • Duration: {transit.duration}</Text>
-                            </VStack>
-                            <Badge colorScheme="purple" variant="outline">
+                                </div>
+                              </div>
+                              <p className={styles['insight-date']}>{transit.date} • Duration: {transit.duration}</p>
+                            </div>
+                            <div className={styles['insight-impact']}>
                               {transit.impact} Impact
-                            </Badge>
-                          </HStack>
-                          <Text fontSize="sm" mb={2}>{transit.description}</Text>
-                          {index < upcomingTransits.length - 1 && <Divider />}
-                        </Box>
+                            </div>
+                          </div>
+                          <p className={styles['insight-description']}>{transit.description}</p>
+                          {index < upcomingTransits.length - 1 && <hr className={styles['insight-divider']} />}
+                        </div>
                       ))}
-                    </Stack>
-                  </CardBody>
-                </Card>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Best Days Recommendations */}
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} w="full">
-                  <Card bg="green.50" borderColor="green.200" borderWidth={2}>
-                    <CardHeader textAlign="center">
-                      <Icon as={FaHeart} color="green.500" boxSize={6} />
-                      <Text fontWeight="bold" color="green.700">Best for Love</Text>
-                    </CardHeader>
-                    <CardBody textAlign="center">
-                      <Text fontSize="sm">August 15-17, 2025</Text>
-                      <Text fontSize="xs" color="whiteAlpha.800">Jupiter Trine Venus</Text>
-                    </CardBody>
-                  </Card>
+                <div className={styles['recommendations-grid']}>
+                  <div className={`${styles['recommendation-card']} ${styles['recommendation-card-green']}`}>
+                    <div className={styles['recommendation-header']}>
+                      <FaHeart className={`${styles['recommendation-icon']} ${styles['recommendation-icon-green']}`} />
+                      <p className={`${styles['recommendation-title']} ${styles['recommendation-title-green']}`}>Best for Love</p>
+                    </div>
+                    <div className={styles['recommendation-body']}>
+                      <p className={styles['recommendation-date']}>August 15-17, 2025</p>
+                      <p className={styles['recommendation-transit']}>Jupiter Trine Venus</p>
+                    </div>
+                  </div>
 
-                  <Card bg="blue.50" borderColor="blue.200" borderWidth={2}>
-                    <CardHeader textAlign="center">
-                      <Icon as={FaRocket} color="blue.500" boxSize={6} />
-                      <Text fontWeight="bold" color="blue.700">Best for Career</Text>
-                    </CardHeader>
-                    <CardBody textAlign="center">
-                      <Text fontSize="sm">September 3-10, 2025</Text>
-                      <Text fontSize="xs" color="whiteAlpha.800">Saturn Sextile Sun</Text>
-                    </CardBody>
-                  </Card>
+                  <div className={`${styles['recommendation-card']} ${styles['recommendation-card-blue']}`}>
+                    <div className={styles['recommendation-header']}>
+                      <FaRocket className={`${styles['recommendation-icon']} ${styles['recommendation-icon-blue']}`} />
+                      <p className={`${styles['recommendation-title']} ${styles['recommendation-title-blue']}`}>Best for Career</p>
+                    </div>
+                    <div className={styles['recommendation-body']}>
+                      <p className={styles['recommendation-date']}>September 3-10, 2025</p>
+                      <p className={styles['recommendation-transit']}>Saturn Sextile Sun</p>
+                    </div>
+                  </div>
 
-                  <Card bg="purple.50" borderColor="purple.200" borderWidth={2}>
-                    <CardHeader textAlign="center">
-                      <Icon as={FaClock} color="purple.500" boxSize={6} />
-                      <Text fontWeight="bold" color="purple.700">Transformation</Text>
-                    </CardHeader>
-                    <CardBody textAlign="center">
-                      <Text fontSize="sm">September 18-30, 2025</Text>
-                      <Text fontSize="xs" color="whiteAlpha.800">Pluto Trine Mercury</Text>
-                    </CardBody>
-                  </Card>
-                </SimpleGrid>
-              </VStack>
+                  <div className={`${styles['recommendation-card']} ${styles['recommendation-card-purple']}`}>
+                    <div className={styles['recommendation-header']}>
+                      <FaClock className={`${styles['recommendation-icon']} ${styles['recommendation-icon-purple']}`} />
+                      <p className={`${styles['recommendation-title']} ${styles['recommendation-title-purple']}`}>Transformation</p>
+                    </div>
+                    <div className={styles['recommendation-body']}>
+                      <p className={styles['recommendation-date']}>September 18-30, 2025</p>
+                      <p className={styles['recommendation-transit']}>Pluto Trine Mercury</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Action Buttons */}
-            <HStack spacing={4} justify="center">
-              <Button 
-                leftIcon={<FaArrowLeft />}
+            <div className={styles['action-buttons']}>
+              <button 
                 onClick={() => navigate('/')} 
-                variant="outline"
-                colorScheme="gray"
+                className={styles['back-button']}
               >
-                Back to Dashboard
-              </Button>
+                <FaArrowLeft />
+                <span>Back to Dashboard</span>
+              </button>
               {!analysisStarted ? (
-                <Button 
-                  colorScheme="purple" 
-                  size="lg"
+                <button 
                   onClick={handleStartAnalysis}
-                  leftIcon={<FaClock />}
+                  className={styles['analyze-button']}
                 >
-                  Analyze Transits
-                </Button>
+                  <FaClock />
+                  <span>Analyze Transits</span>
+                </button>
               ) : (
-                <Button 
-                  colorScheme="indigo" 
+                <button 
                   onClick={() => setAnalysisStarted(false)}
+                  className={styles['new-analysis-button']}
                 >
                   New Analysis
-                </Button>
+                </button>
               )}
-            </HStack>
-          </VStack>
-        </Container>
-      </Box>
+            </div>
+          </div>
+        </div>
+      </div>
     </FeatureGuard>
   );
 };
+
+export default TransitAnalysisTest;

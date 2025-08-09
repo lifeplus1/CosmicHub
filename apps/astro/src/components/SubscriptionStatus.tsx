@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSubscription } from '@cosmichub/auth';
+import { FaStar, FaCheck } from 'react-icons/fa';
 import { COSMICHUB_TIERS } from '../types/subscription';
 
 export const SubscriptionStatus: React.FC = React.memo(() => {

@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle, Crown, ArrowRight, Home, CreditCard } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
+import { FaCheckCircle, FaCrown, FaArrowRight, FaHome, FaCreditCard, FaSpinner } from 'react-icons/fa';
+import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '@cosmichub/auth';
-import { toast } from 'sonner';
+import { useToast } from '../components/ToastProvider';
 
 interface SubscriptionDetails {
   tier: string;
@@ -18,11 +15,13 @@ interface SubscriptionDetails {
 export const SubscriptionSuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const { refreshSubscription } = useSubscription();
+  const subscriptionData = useSubscription() as any; // Type assertion for compatibility
+  const { toast } = useToast();
   const [subscriptionDetails, setSubscriptionDetails] = useState<SubscriptionDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   const sessionId = searchParams.get('session_id');
+  const refreshSubscription = subscriptionData.refreshSubscription || (() => Promise.resolve());
 
   useEffect(() => {
     if (user && sessionId) {
@@ -51,13 +50,25 @@ export const SubscriptionSuccessPage: React.FC = () => {
         // Refresh the subscription context
         await refreshSubscription();
         
-        toast.success('Subscription activated successfully!');
+        toast({
+          title: 'Success',
+          description: 'Subscription activated successfully!',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
         throw new Error('Failed to verify subscription');
       }
     } catch (error) {
       console.error('Subscription verification failed:', error);
-      toast.error('Unable to verify subscription. Please contact support if issues persist.');
+      toast({
+        title: 'Error', 
+        description: 'Unable to verify subscription. Please contact support if issues persist.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -83,9 +94,9 @@ export const SubscriptionSuccessPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <FaSpinner className="w-12 h-12 mx-auto mb-4 text-green-500 animate-spin" />
           <p className="text-gray-600">Verifying your subscription...</p>
         </div>
       </div>
@@ -94,37 +105,38 @@ export const SubscriptionSuccessPage: React.FC = () => {
 
   if (!sessionId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4">
-          <CardHeader className="text-center">
-            <CardTitle className="text-red-600">Invalid Access</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
+        <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-lg">
+          <div className="text-center">
+            <h2 className="mb-4 text-xl font-bold text-red-600">Invalid Access</h2>
+          </div>
+          <div className="space-y-4 text-center">
             <p className="text-gray-600">
               This page can only be accessed after a successful subscription purchase.
             </p>
-            <Button asChild>
-              <Link to="/pricing">
-                <CreditCard className="w-4 h-4 mr-2" />
-                View Pricing Plans
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+            <Link
+              to="/pricing"
+              className="inline-flex items-center justify-center w-full px-4 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              <FaCreditCard className="w-4 h-4 mr-2" />
+              View Pricing Plans
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container px-4 py-12 mx-auto">
         <div className="max-w-2xl mx-auto">
           {/* Success Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-green-100 rounded-full">
+              <FaCheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">
               Welcome to the Cosmic Family! 🌟
             </h1>
             <p className="text-lg text-gray-600">
@@ -134,33 +146,31 @@ export const SubscriptionSuccessPage: React.FC = () => {
 
           {/* Subscription Details Card */}
           {subscriptionDetails && (
-            <Card className="mb-8 border-2 border-green-200">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
+            <div className="mb-8 bg-white border-2 border-green-200 rounded-lg shadow-lg">
+              <div className="p-6 text-white rounded-t-lg bg-gradient-to-r from-green-500 to-blue-500">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Crown className="w-6 h-6" />
-                    <CardTitle className="text-xl">
+                    <FaCrown className="w-6 h-6" />
+                    <h2 className="text-xl font-bold">
                       {getTierDisplayName(subscriptionDetails.tier)}
-                    </CardTitle>
+                    </h2>
                   </div>
-                  <Badge 
-                    className={`${getTierColor(subscriptionDetails.tier)} text-white`}
-                  >
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${getTierColor(subscriptionDetails.tier)} text-white`}>
                     Active
-                  </Badge>
+                  </span>
                 </div>
-              </CardHeader>
+              </div>
               
-              <CardContent className="pt-6">
+              <div className="p-6 pt-6">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-3">
+                    <h3 className="mb-3 font-semibold text-gray-900">
                       Your Premium Features:
                     </h3>
                     <ul className="grid gap-2 sm:grid-cols-2">
                       {subscriptionDetails.features.map((feature, index) => (
                         <li key={index} className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                          <FaCheckCircle className="flex-shrink-0 w-4 h-4 text-green-500" />
                           <span className="text-sm text-gray-700">{feature}</span>
                         </li>
                       ))}
@@ -180,63 +190,67 @@ export const SubscriptionSuccessPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Next Steps */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ArrowRight className="w-5 h-5 text-blue-500" />
+          <div className="p-6 mb-8 bg-white rounded-lg shadow-lg">
+            <div className="mb-4">
+              <h2 className="flex items-center gap-2 text-xl font-bold">
+                <FaArrowRight className="w-5 h-5 text-blue-500" />
                 What's Next?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </h2>
+            </div>
+            <div className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <Button asChild variant="default" className="h-auto p-4">
-                  <Link to="/" className="flex flex-col items-center gap-2">
-                    <Home className="w-6 h-6" />
-                    <span className="font-semibold">Explore Your Dashboard</span>
-                    <span className="text-xs opacity-80">Start using your premium features</span>
-                  </Link>
-                </Button>
+                <Link
+                  to="/"
+                  className="flex flex-col items-center h-auto gap-2 p-4 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+                >
+                  <FaHome className="w-6 h-6" />
+                  <span className="font-semibold">Explore Your Dashboard</span>
+                  <span className="text-xs opacity-80">Start using your premium features</span>
+                </Link>
                 
-                <Button asChild variant="outline" className="h-auto p-4">
-                  <Link to="/account/subscription" className="flex flex-col items-center gap-2">
-                    <CreditCard className="w-6 h-6" />
-                    <span className="font-semibold">Manage Subscription</span>
-                    <span className="text-xs opacity-80">Update billing & preferences</span>
-                  </Link>
-                </Button>
+                <Link
+                  to="/account/subscription"
+                  className="flex flex-col items-center h-auto gap-2 p-4 font-semibold text-gray-900 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  <FaCreditCard className="w-6 h-6" />
+                  <span className="font-semibold">Manage Subscription</span>
+                  <span className="text-xs opacity-80">Update billing & preferences</span>
+                </Link>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Support Information */}
-          <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
-            <h3 className="font-semibold text-gray-900 mb-2">
+          <div className="p-6 text-center bg-white border rounded-lg shadow-sm">
+            <h3 className="mb-2 font-semibold text-gray-900">
               Need Help Getting Started?
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="mb-4 text-gray-600">
               Our support team is here to help you make the most of your subscription.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/help">
-                  View Help Center
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <a href="mailto:support@cosmichub.app">
-                  Contact Support
-                </a>
-              </Button>
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+              <Link
+                to="/help"
+                className="px-4 py-2 font-medium text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                View Help Center
+              </Link>
+              <a
+                href="mailto:support@cosmichub.app"
+                className="px-4 py-2 font-medium text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Contact Support
+              </a>
             </div>
           </div>
 
           {/* Footer Note */}
-          <div className="text-center mt-8">
+          <div className="mt-8 text-center">
             <p className="text-sm text-gray-500">
               You will receive a confirmation email with your subscription details shortly.
               <br />

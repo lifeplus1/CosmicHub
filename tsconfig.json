@@ -24,6 +24,7 @@
     "isolatedModules": true,
     "allowJs": false,
     "baseUrl": ".",
+    "composite": true,
     "paths": {
       "@/*": ["./src/*"],
       "@cosmichub/auth": ["./packages/auth/src"],

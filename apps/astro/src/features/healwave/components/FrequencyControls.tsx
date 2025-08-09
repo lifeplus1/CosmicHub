@@ -43,12 +43,13 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card title="Frequency Selection" className="bg-cosmic-dark/50">
+      <Card className="bg-cosmic-dark/50">
         <div className="space-y-4">
+          <h3 className="mb-4 text-lg font-semibold text-cosmic-gold">Frequency Selection</h3>
           <div>
-            <label id={groupLabelId} className="block text-cosmic-silver mb-2">Preset Frequencies</label>
+            <label id={groupLabelId} className="block mb-2 text-cosmic-silver">Preset Frequencies</label>
             <div
-              className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+              className="grid grid-cols-1 gap-2 sm:grid-cols-2"
               role="radiogroup"
               aria-labelledby={groupLabelId}
               ref={radioGroupRef}
@@ -74,19 +75,27 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
             >
               {presetFrequencies.map((preset) => {
                 const selected = currentFrequency === preset.value;
-                return (
+                return selected ? (
                   <button
                     key={preset.value}
                     type="button"
                     onClick={() => handlePresetSelect(preset.value)}
-                    className={`p-3 rounded text-left transition-colors ${
-                      selected
-                        ? 'bg-cosmic-purple text-white'
-                        : 'bg-cosmic-dark border border-cosmic-purple text-cosmic-silver hover:bg-cosmic-purple/20'
-                    }`}
+                    className="p-3 rounded text-left transition-colors bg-cosmic-purple text-white"
                     role="radio"
-                    aria-checked={selected ? 'true' : 'false'}
-                    tabIndex={selected ? 0 : -1}
+                    aria-checked="true"
+                    tabIndex={0}
+                  >
+                    {preset.name}
+                  </button>
+                ) : (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => handlePresetSelect(preset.value)}
+                    className="p-3 rounded text-left transition-colors bg-cosmic-dark border border-cosmic-purple text-cosmic-silver hover:bg-cosmic-purple/20"
+                    role="radio"
+                    aria-checked="false"
+                    tabIndex={-1}
                   >
                     {preset.name}
                   </button>
@@ -96,7 +105,7 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
           </div>
 
           <div>
-            <label htmlFor="custom-frequency" className="block text-cosmic-silver mb-2">
+            <label htmlFor="custom-frequency" className="block mb-2 text-cosmic-silver">
               Custom Frequency (Hz)
             </label>
             <div className="flex gap-2">
@@ -107,24 +116,25 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
                 max="20000"
                 value={customFrequency}
                 onChange={(e) => setCustomFrequency(Number(e.target.value))}
-                className="flex-1 p-3 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
+                className="flex-1 p-3 border rounded bg-cosmic-dark border-cosmic-purple text-cosmic-silver"
                 aria-describedby="frequency-help"
               />
               <Button onClick={handleCustomFrequencySubmit}>
                 Apply
               </Button>
             </div>
-            <p id="frequency-help" className="text-sm text-cosmic-silver mt-1">
+            <p id="frequency-help" className="mt-1 text-sm text-cosmic-silver">
               Enter a frequency between 20 Hz and 20,000 Hz
             </p>
           </div>
         </div>
       </Card>
 
-      <Card title="Duration & Controls" className="bg-cosmic-dark/50">
+      <Card className="bg-cosmic-dark/50">
         <div className="space-y-4">
+          <h3 className="mb-4 text-lg font-semibold text-cosmic-gold">Duration & Controls</h3>
           <div>
-            <label htmlFor="duration" className="block text-cosmic-silver mb-2">
+            <label htmlFor="duration" className="block mb-2 text-cosmic-silver">
               Duration (minutes)
             </label>
             <input
@@ -134,7 +144,7 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
               max="60"
               value={duration}
               onChange={(e) => onDurationChange(Number(e.target.value))}
-              className="w-full p-3 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
+              className="w-full p-3 border rounded bg-cosmic-dark border-cosmic-purple text-cosmic-silver"
             />
           </div>
 
@@ -142,7 +152,6 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
             <Button
               onClick={onPlayPause}
               variant={isPlaying ? "secondary" : "primary"}
-              className="w-full sm:w-auto"
             >
               {isPlaying ? 'Pause Session' : 'Start Session'}
             </Button>

@@ -5,7 +5,9 @@ import { useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaCrown, FaStar, FaCalendarAlt, FaChartLine, FaSave, FaCreditCard, FaCheck, FaTimes, FaArrowUp, FaHistory, FaCog } from 'react-icons/fa';
-import type { COSMICHUB_TIERS } from '../types/subscription';
+import { COSMICHUB_TIERS } from '../types/subscription';
+import ProgressBar from './ProgressBar';
+import './UserProfile.module.css';
 
 interface UserStats {
   totalCharts: number;
@@ -17,9 +19,12 @@ interface UserStats {
 
 const UserProfile: React.FC = React.memo(() => {
   const { user } = useAuth();
-  const { subscription, userTier, isLoading, checkUsageLimit } = useSubscription();
+  const subscriptionData = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Type assertion for compatibility with existing code
+  const { subscription, userTier, isLoading, checkUsageLimit } = subscriptionData as any;
 
   const [userStats, setUserStats] = useState<UserStats>({
     totalCharts: 0,
@@ -30,7 +35,7 @@ const UserProfile: React.FC = React.memo(() => {
   });
 
   const loadUserStats = useCallback(async () => {
-    if (user) {
+    if (user && checkUsageLimit) {
       const chartsUsage = checkUsageLimit('chartsPerMonth');
       const savedUsage = checkUsageLimit('chartStorage');
       setUserStats({
@@ -69,9 +74,9 @@ const UserProfile: React.FC = React.memo(() => {
     navigate('/premium');
   }, [navigate]);
 
-  const currentTier = COSMICHUB_TIERS[userTier];
-  const chartsUsage = checkUsageLimit('chartsPerMonth');
-  const savedUsage = checkUsageLimit('chartStorage');
+  const currentTier = COSMICHUB_TIERS[userTier as keyof typeof COSMICHUB_TIERS];
+  const chartsUsage = checkUsageLimit ? checkUsageLimit('chartsPerMonth') : { current: 0, limit: 0 };
+  const savedUsage = checkUsageLimit ? checkUsageLimit('chartStorage') : { current: 0, limit: 0 };
 
   if (isLoading || !user) {
     return (
@@ -129,7 +134,7 @@ const UserProfile: React.FC = React.memo(() => {
                         <p className="text-cosmic-silver">Billing</p>
                         <p className="font-bold">{currentTier.price.monthly > 0 ? `$${currentTier.price.monthly}/month` : 'Free'}</p>
                         {currentTier.price.monthly > 0 && (
-                          <p className="text-sm text-cosmic-silver/80">Next billing: {new Date(subscription?.nextBillingDate || Date.now()).toLocaleDateString()}</p>
+                          <p className="text-sm text-cosmic-silver/80">Next billing: {new Date(subscription?.currentPeriodEnd || Date.now()).toLocaleDateString()}</p>
                         )}
                       </div>
                     </div>
@@ -200,12 +205,10 @@ const UserProfile: React.FC = React.memo(() => {
                       <p className="text-cosmic-silver">Charts This Month</p>
                       <p className="font-bold">{chartsUsage.current} / {chartsUsage.limit}</p>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-purple-500 h-2.5 rounded-full"
-                        style={{ width: `${(chartsUsage.current / chartsUsage.limit) * 100}%` }}
-                      />
-                    </div>
+                    <ProgressBar 
+                      percentage={(chartsUsage.current / Math.max(chartsUsage.limit, 1)) * 100}
+                      color="purple"
+                    />
                     {chartsUsage.current >= chartsUsage.limit && (
                       <div className="flex p-4 mt-4 space-x-4 border border-yellow-500 rounded-md bg-yellow-900/50">
                         <span className="text-xl text-yellow-500">⚠️</span>
@@ -222,12 +225,10 @@ const UserProfile: React.FC = React.memo(() => {
                       <p className="text-cosmic-silver">Saved Charts</p>
                       <p className="font-bold">{savedUsage.current} / {savedUsage.limit}</p>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-blue-500 h-2.5 rounded-full"
-                        style={{ width: `${(savedUsage.current / savedUsage.limit) * 100}%` }}
-                      />
-                    </div>
+                    <ProgressBar 
+                      percentage={(savedUsage.current / Math.max(savedUsage.limit, 1)) * 100}
+                      color="blue"
+                    />
                     {savedUsage.current >= savedUsage.limit && (
                       <div className="flex p-4 mt-4 space-x-4 border border-yellow-500 rounded-md bg-yellow-900/50">
                         <span className="text-xl text-yellow-500">⚠️</span>

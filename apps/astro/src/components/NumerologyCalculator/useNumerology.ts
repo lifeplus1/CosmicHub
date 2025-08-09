@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useToast } from '../../ToastProvider';
-import { API_URL } from '../../services/api';
+import { useToast } from '../ToastProvider';
 import type { NumerologyData, NumerologyResult } from './types';
 
 export const useNumerology = () => {
@@ -12,19 +11,22 @@ export const useNumerology = () => {
   });
   const [result, setResult] = useState<NumerologyResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      showToast('Please enter your full name', 'error');
+      toast({
+        description: 'Please enter your full name',
+        status: 'error'
+      });
       return;
     }
 
     setLoading(true);
     try {
       const birthDate = `${formData.year}-${String(formData.month).padStart(2, '0')}-${String(formData.day).padStart(2, '0')}`;
-      const response = await fetch(`${API_URL}/calculate-numerology`, {
+      const response = await fetch('/api/calculate-numerology', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,9 +44,15 @@ export const useNumerology = () => {
 
       const data = await response.json();
       setResult(data.numerology);
-      showToast('Numerology Calculated', 'success');
+      toast({
+        description: 'Numerology Calculated',
+        status: 'success'
+      });
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Unknown error', 'error');
+      toast({
+        description: err instanceof Error ? err.message : 'Unknown error',
+        status: 'error'
+      });
     } finally {
       setLoading(false);
     }

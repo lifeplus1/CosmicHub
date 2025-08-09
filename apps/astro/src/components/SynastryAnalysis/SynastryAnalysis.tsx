@@ -175,3 +175,5 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
 });
 
 SynastryAnalysis.displayName = 'SynastryAnalysis';
+
+export default SynastryAnalysis;

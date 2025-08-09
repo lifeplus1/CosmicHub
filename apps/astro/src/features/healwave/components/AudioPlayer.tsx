@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Card from '@cosmichub/ui/Card';
+import { Card } from '@cosmichub/ui';
+import styles from './AudioPlayer.module.css';
 
 interface AudioPlayerProps {
   frequency: number;
@@ -96,35 +97,33 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   return (
     <Card title="Audio Player" className="bg-cosmic-dark/50">
-      <div className="space-y-4">
+      <div className={styles['player-container']}>
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4">
-            <div className={`w-full h-full rounded-full border-4 transition-colors ${
-              isPlaying 
-                ? 'border-cosmic-gold animate-pulse bg-cosmic-gold/20' 
-                : 'border-cosmic-purple bg-cosmic-purple/20'
-            }`}>
-              <div className="w-full h-full flex items-center justify-center">
-                {isPlaying ? (
-                  <div className="flex space-x-1">
-                    <div className="w-1 h-6 bg-cosmic-gold animate-pulse"></div>
-                    <div className="w-1 h-4 bg-cosmic-gold animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-1 h-6 bg-cosmic-gold animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                  </div>
-                ) : (
-                  <div className="w-0 h-0 border-l-4 border-l-cosmic-purple border-y-4 border-y-transparent ml-1"></div>
-                )}
-              </div>
+          <div className={`${styles['audio-circle']} ${
+            isPlaying 
+              ? styles['audio-circle-playing'] 
+              : styles['audio-circle-stopped']
+          }`}>
+            <div className={styles['circle-content']}>
+              {isPlaying ? (
+                <div className={styles['audio-bars']}>
+                  <div className={`${styles['audio-bar']} ${styles['audio-bar-1']}`}></div>
+                  <div className={`${styles['audio-bar']} ${styles['audio-bar-2']}`}></div>
+                  <div className={`${styles['audio-bar']} ${styles['audio-bar-3']}`}></div>
+                </div>
+              ) : (
+                <div className={styles['play-button']}></div>
+              )}
             </div>
           </div>
           
-          <p className="text-cosmic-silver">
+          <p className={styles['status-text']}>
             {isPlaying ? 'Playing' : 'Stopped'} - {frequency} Hz
           </p>
         </div>
 
-        <div>
-          <label htmlFor="volume" className="block text-cosmic-silver mb-2">
+        <div className={styles['volume-section']}>
+          <label htmlFor="volume" className={styles['volume-label']}>
             Volume: {volume}%
           </label>
           <input
@@ -134,7 +133,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
             max="100"
             value={volume}
             onChange={(e) => onVolumeChange(Number(e.target.value))}
-            className="w-full accent-cosmic-purple"
+            className={styles['volume-slider']}
             aria-label="Volume control"
           />
         </div>

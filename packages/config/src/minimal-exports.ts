@@ -80,4 +80,13 @@ export const LazyLoadErrorBoundary: React.FC<{ children: React.ReactNode }> = ({
   return React.createElement('div', null, children);
 };
 
+// Re-export enhanced testing utilities
+export * from './enhanced-testing';
+
+// Re-export accessibility testing utilities
+export * from './accessibility-testing';
+
+// Re-export component architecture utilities
+export * from './component-library';
+
 export { config };

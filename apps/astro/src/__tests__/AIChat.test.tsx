@@ -2,60 +2,75 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import AIChat from '../components/AIChat';
-import * as authModule from '../auth';
-import { useAuth } from '@cosmichub/auth';
+import * as apiModule from '../services/api';
+import axios, { AxiosResponse } from 'axios';
 
-// Mock the auth module
-vi.mock('../auth', () => ({
-  getAuthToken: vi.fn()
+// Define types for mocks
+interface AuthUser {
+  uid: string;
+}
+
+interface AuthContext {
+  user: AuthUser | null;
+  loading: boolean;
+}
+
+// Create a mock function that we can control in tests
+const mockUseAuth = vi.hoisted(() => vi.fn());
+
+// Mock the api module
+vi.mock('../services/api', () => ({
+  getAuthToken: vi.fn(),
 }));
 
-// Mock the AuthProvider
+// Mock the auth package with our controllable mock
 vi.mock('@cosmichub/auth', () => ({
-  useAuth: vi.fn()
+  useAuth: mockUseAuth,
+}));
+
+// Mock the ToastProvider
+vi.mock('../components/ToastProvider', () => ({
+  useToast: vi.fn(() => ({
+    toast: vi.fn(),
+  })),
 }));
 
 // Mock axios for API calls
-vi.mock('axios', () => ({
-  default: {
-    post: vi.fn()
-  }
-}));
+vi.mock('axios');
 
-import axios from 'axios';
-const mockAxios = axios as any;
-mockAxios.post = vi.fn();
-
-const mockNavigate = vi.fn();
+// Mock react-router-dom
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom') as any;
+  const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
-    Navigate: ({ to }: { to: string }) => <div data-testid="navigate-to">{to}</div>
+    useNavigate: vi.fn(),
+    Navigate: ({ to }: { to: string }) => <div data-testid="navigate-to">{to}</div>,
   };
 });
 
 // Helper component to wrap components with providers
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <BrowserRouter>
-    {children}
-  </BrowserRouter>
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <BrowserRouter>{children}</BrowserRouter>
 );
 
 describe('AIChat Component', () => {
-  const mockUseAuth = vi.mocked(useAuth);
-  const mockGetAuthToken = vi.mocked(authModule.getAuthToken);
+  const mockGetAuthToken = vi.mocked(apiModule.getAuthToken);
+  const mockAxios = vi.mocked(axios);
+  const mockAxiosPost = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetAuthToken.mockReset();
+    mockAxiosPost.mockReset();
+    mockAxios.post = mockAxiosPost;
+    mockUseAuth.mockReset();
   });
 
   it('renders loading state when auth is loading', () => {
     mockUseAuth.mockReturnValue({
       user: null,
-      loading: true
-    });
+      loading: true,
+    } as AuthContext);
 
     render(
       <TestWrapper>
@@ -63,14 +78,14 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-  expect(screen.getByText('Loading...')).to.exist;
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('redirects to login when user is not authenticated', () => {
     mockUseAuth.mockReturnValue({
       user: null,
-      loading: false
-    });
+      loading: false,
+    } as AuthContext);
 
     render(
       <TestWrapper>
@@ -83,9 +98,9 @@ describe('AIChat Component', () => {
 
   it('renders chat interface when user is authenticated', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as any,
-      loading: false
-    });
+      user: { uid: 'test-user' },
+      loading: false,
+    } as AuthContext);
 
     render(
       <TestWrapper>
@@ -93,16 +108,16 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-  expect(screen.getByText('AI Astrology Chat')).to.exist;
-  expect(screen.getByRole('textbox')).to.exist;
-  expect(screen.getByRole('button', { name: /send/i })).to.exist;
+    expect(screen.getByText('AI Astrology Chat')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
   });
 
   it('handles message input correctly', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as any,
-      loading: false
-    });
+      user: { uid: 'test-user' },
+      loading: false,
+    } as AuthContext);
 
     render(
       <TestWrapper>
@@ -110,7 +125,7 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
     fireEvent.change(textarea, { target: { value: 'Test message' } });
 
     expect(textarea).toHaveValue('Test message');
@@ -118,16 +133,16 @@ describe('AIChat Component', () => {
 
   it('submits message and displays response', async () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as any,
-      loading: false
-    });
+      user: { uid: 'test-user' },
+      loading: false,
+    } as AuthContext);
 
     mockGetAuthToken.mockResolvedValue('mock-token');
-    mockAxios.post.mockResolvedValue({
+    mockAxiosPost.mockResolvedValue({
       data: {
-        choices: [{ message: { content: 'Test interpretation' } }]
-      }
-    });
+        choices: [{ message: { content: 'Test interpretation' } }],
+      },
+    } as AxiosResponse);
 
     render(
       <TestWrapper>
@@ -135,20 +150,20 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
     const submitButton = screen.getByRole('button', { name: /send/i });
 
     fireEvent.change(textarea, { target: { value: 'Test question' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAxios.post).toHaveBeenCalledWith(
+      expect(mockAxiosPost).toHaveBeenCalledWith(
         expect.stringContaining('/chat'),
         { text: 'Test question' },
         expect.objectContaining({
           headers: expect.objectContaining({
-            Authorization: 'Bearer mock-token'
-          })
+            Authorization: 'Bearer mock-token',
+          }),
         })
       );
     });
@@ -156,12 +171,12 @@ describe('AIChat Component', () => {
 
   it('handles API error gracefully', async () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as any,
-      loading: false
-    });
+      user: { uid: 'test-user' },
+      loading: false,
+    } as AuthContext);
 
     mockGetAuthToken.mockResolvedValue('mock-token');
-    mockAxios.post.mockRejectedValue(new Error('API Error'));
+    mockAxiosPost.mockRejectedValue(new Error('API Error'));
 
     render(
       <TestWrapper>
@@ -169,22 +184,22 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
     const submitButton = screen.getByRole('button', { name: /send/i });
 
     fireEvent.change(textarea, { target: { value: 'Test question' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAxios.post).toHaveBeenCalled();
+      expect(mockAxiosPost).toHaveBeenCalled();
     });
   });
 
   it('disables submit button when message is empty', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as any,
-      loading: false
-    });
+      user: { uid: 'test-user' },
+      loading: false,
+    } as AuthContext);
 
     render(
       <TestWrapper>
@@ -198,9 +213,9 @@ describe('AIChat Component', () => {
 
   it('enables submit button when message has content', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user' } as any,
-      loading: false
-    });
+      user: { uid: 'test-user' },
+      loading: false,
+    } as AuthContext);
 
     render(
       <TestWrapper>
@@ -208,7 +223,7 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
     const submitButton = screen.getByRole('button', { name: /send/i });
 
     fireEvent.change(textarea, { target: { value: 'Test message' } });

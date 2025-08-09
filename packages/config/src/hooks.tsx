@@ -13,6 +13,7 @@ export interface UsePerformanceOptions {
 export interface PerformanceHookReturn {
   startTiming: (label: string) => () => void;
   recordInteraction: (action: string, duration?: number) => void;
+  trackRender: () => () => void;
   renderTime: number | null;
   mountTime: number | null;
 }
@@ -106,9 +107,25 @@ export const usePerformance = (
     });
   }, [componentName, trackInteractions]);
 
+  // Utility for tracking render cycles manually
+  const trackRenderManually = useCallback(() => {
+    const startTime = performance.now();
+    return () => {
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      performanceMonitor.recordComponentMetric(componentName, duration, {
+        type: 'custom'
+      });
+      
+      return duration;
+    };
+  }, [componentName]);
+
   return {
     startTiming,
     recordInteraction,
+    trackRender: trackRenderManually,
     renderTime,
     mountTime
   };
@@ -213,6 +230,35 @@ export const usePagePerformance = (pageName: string) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [pageName]);
+};
+
+/**
+ * Hook for monitoring memory usage
+ */
+export const useMemoryTracking = (componentName: string) => {
+  const [memoryUsage, setMemoryUsage] = useState<number | null>(null);
+
+  useEffect(() => {
+    const checkMemory = () => {
+      if ('memory' in performance) {
+        const memInfo = (performance as any).memory;
+        const usage = memInfo.usedJSHeapSize;
+        setMemoryUsage(usage);
+        
+        performanceMonitor.recordComponentMetric(componentName, usage, {
+          type: 'custom',
+          label: 'memory-usage'
+        });
+      }
+    };
+
+    checkMemory();
+    const interval = setInterval(checkMemory, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [componentName]);
+
+  return memoryUsage;
 };
 
 /**

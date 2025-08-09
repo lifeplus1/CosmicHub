@@ -1,6 +1,5 @@
 import { vi } from 'vitest';
-// Vitest-specific setup that automatically extends expect with jest-dom matchers
-import { vi } from 'vitest';
+import '@testing-library/jest-dom';
 
 // Test setup with comprehensive mocking for external dependencies
 
@@ -28,15 +27,40 @@ vi.mock('firebase/firestore', () => ({
   disableNetwork: vi.fn(() => Promise.resolve()),
 }));
 
+// Mock Auth package with useAuth hook
+vi.mock('@cosmichub/auth', () => ({
+  useAuth: vi.fn(() => ({
+    user: null,
+    loading: false,
+    signOut: vi.fn(),
+  })),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  SubscriptionProvider: ({ children }: { children: React.ReactNode }) => children,
+  useSubscription: vi.fn(() => ({
+    plan: 'free',
+    userTier: 'free',
+    loading: false,
+    usage: { daily: 0, monthly: 0 },
+    hasFeature: vi.fn(() => false), // Mock hasFeature function
+  })),
+  logIn: vi.fn(),
+  signUp: vi.fn(),
+  logOut: vi.fn(),
+}));
+
 // Mock ToastProvider and useToast hook
 vi.mock('./components/ToastProvider', () => ({
-  useToast: vi.fn(() => vi.fn()),
+  useToast: vi.fn(() => ({
+    toast: vi.fn(),
+  })),
   ToastProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock UI components that may be missing
 vi.mock('@cosmichub/ui', () => ({
-  useToast: vi.fn(() => vi.fn()),
+  useToast: vi.fn(() => ({
+    toast: vi.fn(),
+  })),
 }));
 
 // Mock integrations package
@@ -46,6 +70,12 @@ vi.mock('@cosmichub/integrations', () => ({
     notifications: [],
     clearNotifications: vi.fn(),
   })),
+  subscriptionManager: {
+    checkLimits: vi.fn(() => Promise.resolve({ allowed: true })),
+    getCurrentPlan: vi.fn(() => 'free'),
+    getUsage: vi.fn(() => ({ daily: 0, monthly: 0 })),
+    checkFeatureAccess: vi.fn(() => ({ canAccess: true, isLimited: false })),
+  },
   API_ENDPOINTS: {
     astrology: '/api/astrology',
     healwave: '/api/healwave',

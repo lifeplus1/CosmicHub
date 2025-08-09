@@ -3,7 +3,6 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '@cosmichub/auth';
-import { EducationalTooltip } from './EducationalTooltip';
 
 interface FeatureGuardProps {
   children: React.ReactNode;
@@ -26,7 +25,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // If user has access, render children normally
-  if (hasFeature(requiredTier)) {
+  if (hasFeature(feature)) {
     return <>{children}</>;
   }
 
@@ -174,17 +173,17 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
         <span>{requiredTier.toUpperCase()}</span>
       </div>
 
-      <div className="pt-8 p-6">
-        <div className="flex flex-col items-center space-y-4 mb-6">
+      <div className="p-6 pt-8">
+        <div className="flex flex-col items-center mb-6 space-y-4">
           <div className={`${colors.bg} p-4 rounded-full`}>
             <span className="text-4xl">{featureDetails.icon}</span>
           </div>
           
-          <div className="text-center space-y-2">
+          <div className="space-y-2 text-center">
             <h3 className={`text-xl font-bold ${colors.text}`}>
               {featureDetails.title}
             </h3>
-            <p className="text-cosmic-silver text-base">
+            <p className="text-base text-cosmic-silver">
               {featureDetails.description}
             </p>
           </div>
@@ -193,13 +192,13 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
         <div className="space-y-6">
           {/* Benefits List */}
           <div>
-            <p className="font-bold mb-3 text-white">
+            <p className="mb-3 font-bold text-white">
               What you'll unlock:
             </p>
             <ul className="space-y-2">
               {featureDetails.benefits.map((benefit, index) => (
-                <li key={index} className="text-sm flex items-start space-x-2">
-                  <span className="text-green-500 mt-1">✓</span>
+                <li key={index} className="flex items-start space-x-2 text-sm">
+                  <span className="mt-1 text-green-500">✓</span>
                   <span className="text-cosmic-silver">{benefit}</span>
                 </li>
               ))}
@@ -208,10 +207,10 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
 
           {/* Current Tier Info */}
           {user && (
-            <div className="bg-blue-900/50 border border-blue-500 p-3 rounded-md flex space-x-3">
-              <span className="text-blue-500 text-xl">ℹ️</span>
+            <div className="flex p-3 space-x-3 border border-blue-500 rounded-md bg-blue-900/50">
+              <span className="text-xl text-blue-500">ℹ️</span>
               <div className="flex flex-col space-y-0">
-                <p className="font-bold text-sm text-white">
+                <p className="text-sm font-bold text-white">
                   Current plan: {userTier.charAt(0).toUpperCase() + userTier.slice(1)}
                 </p>
                 <p className="text-xs text-white/80">
@@ -241,8 +240,8 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
           </div>
 
           {/* Pricing Info */}
-          <div className="bg-white/10 p-4 rounded-md text-center">
-            <p className="text-sm text-cosmic-silver mb-2">
+          <div className="p-4 text-center rounded-md bg-white/10">
+            <p className="mb-2 text-sm text-cosmic-silver">
               {requiredTier === 'premium' ? 'Starting at $14.99/month' : 'Starting at $29.99/month'}
             </p>
             <p className="text-xs text-cosmic-silver/60">
@@ -259,12 +258,12 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
       {showPreview ? (
         <div className="relative">
           {/* Blurred Preview */}
-          <div className="blur-lg opacity-30 pointer-events-none relative">
+          <div className="relative pointer-events-none blur-lg opacity-30">
             {children}
           </div>
           
           {/* Overlay */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-11/12 max-w-md">
+          <div className="absolute z-10 w-11/12 max-w-md transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
             <UpgradeCard />
           </div>
         </div>
@@ -275,9 +274,9 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
       {/* Feature Details Modal */}
       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
           <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-cosmic-dark border border-cosmic-gold/30 rounded-xl p-6 w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto z-50">
-            <Dialog.Title className="flex items-center space-x-3 mb-4">
+            <Dialog.Title className="flex items-center mb-4 space-x-3">
               <span className="text-2xl">{featureDetails.icon}</span>
               <h2 className="text-xl font-bold text-white">{featureDetails.title}</h2>
             </Dialog.Title>
@@ -288,13 +287,13 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
               </p>
 
               <div>
-                <h3 className="font-bold mb-3 text-white">
+                <h3 className="mb-3 font-bold text-white">
                   Key Benefits:
                 </h3>
                 <ul className="space-y-2">
                   {featureDetails.benefits.map((benefit, index) => (
-                    <li key={index} className="text-sm flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">✓</span>
+                    <li key={index} className="flex items-start space-x-2 text-sm">
+                      <span className="mt-1 text-green-500">✓</span>
                       <span className="text-cosmic-silver">{benefit}</span>
                     </li>
                   ))}
@@ -302,12 +301,12 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
               </div>
 
               <div>
-                <h3 className="font-bold mb-3 text-white">
+                <h3 className="mb-3 font-bold text-white">
                   Examples:
                 </h3>
                 <ul className="space-y-2">
                   {featureDetails.examples.map((example, index) => (
-                    <li key={index} className="text-sm flex items-start space-x-2">
+                    <li key={index} className="flex items-start space-x-2 text-sm">
                       <span className={colors.text}>⭐</span>
                       <span className="text-cosmic-silver">{example}</span>
                     </li>
@@ -315,10 +314,10 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
                 </ul>
               </div>
 
-              <div className="bg-blue-900/50 border border-blue-500 p-4 rounded-md flex space-x-3">
-                <span className="text-blue-500 text-xl">ℹ️</span>
+              <div className="flex p-4 space-x-3 border border-blue-500 rounded-md bg-blue-900/50">
+                <span className="text-xl text-blue-500">ℹ️</span>
                 <div>
-                  <h4 className="font-bold text-sm text-white">
+                  <h4 className="text-sm font-bold text-white">
                     Requires {requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)} Plan
                   </h4>
                   <p className="text-xs text-white/80">
@@ -340,14 +339,14 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
                 <span>Upgrade Now</span>
               </button>
               <button 
-                className="text-cosmic-silver hover:text-white transition-colors w-full py-2"
+                className="w-full py-2 transition-colors text-cosmic-silver hover:text-white"
                 onClick={() => setIsModalOpen(false)}
               >
                 Maybe Later
               </button>
             </div>
 
-            <Dialog.Close className="absolute top-4 right-4 text-cosmic-silver hover:text-white transition-colors">
+            <Dialog.Close className="absolute transition-colors top-4 right-4 text-cosmic-silver hover:text-white">
               ✕
             </Dialog.Close>
           </Dialog.Content>

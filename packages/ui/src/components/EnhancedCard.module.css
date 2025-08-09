@@ -1,0 +1,30 @@
+/* Enhanced Card Component Styles */
+
+/* Card Container */
+.card {
+  /* Base card styles if any were defined in CardContainer */
+}
+
+/* Card Header */
+.header {
+  /* Base header styles if any were defined in CardHeader */
+}
+
+/* Card Body */
+.body {
+  /* Base body styles */
+}
+
+.bodyScrollable {
+  overflow-y: auto;
+}
+
+/* Body with dynamic max height will use CSS custom property */
+.bodyWithMaxHeight {
+  max-height: var(--card-body-max-height);
+}
+
+/* Card Footer */
+.footer {
+  /* Base footer styles if any were defined in CardFooter */
+}

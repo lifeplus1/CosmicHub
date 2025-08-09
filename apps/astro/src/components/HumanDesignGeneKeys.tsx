@@ -4,7 +4,7 @@ import { FaUser, FaStar, FaKey, FaChartLine } from 'react-icons/fa';
 import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 
-const HumanDesignChart = lazy(() => import('./HumanDesignChart'));
+const HumanDesignChart = lazy(() => import('./HumanDesignChart/HumanDesignChart'));
 const GeneKeysChart = lazy(() => import('./GeneKeysChart'));
 const EducationalContent = lazy(() => import('./EducationalContent'));
 

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastProvider';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth } from '@cosmichub/config/firebase';
 import { FaUser, FaStar, FaCrown, FaSignInAlt } from 'react-icons/fa';
 
 interface MockUser {
@@ -76,7 +76,7 @@ const MockLoginPanel: React.FC = React.memo(() => {
       
       navigate('/chart');
     } catch (error) {
-      if (error instanceof Error && error.code === 'auth/user-not-found') {
+      if (error instanceof Error && (error as any).code === 'auth/user-not-found') {
         try {
           await createUserWithEmailAndPassword(auth, mockUser.email, mockUser.password);
           toast({

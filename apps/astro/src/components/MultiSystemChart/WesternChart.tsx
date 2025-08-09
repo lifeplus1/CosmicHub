@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { WesternChartData } from './types';
@@ -28,7 +29,7 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                   <span className="mb-0 font-bold">Planets & Positions</span>
                   <span className="px-2 py-1 text-sm text-white rounded bg-cosmic-purple">{Object.keys(data.planets).length}</span>
                 </div>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 <div className="overflow-x-auto">
@@ -71,7 +72,7 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                   <span className="mb-0 font-bold">Aspects</span>
                   <span className="px-2 py-1 text-sm rounded bg-cosmic-purple/20 text-cosmic-purple">{data.aspects?.length || 0}</span>
                 </div>
-                <Accordion.Icon />
+                <ChevronDownIcon />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 <div className="overflow-x-auto">

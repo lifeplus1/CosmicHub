@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box, Text, Flex, Badge, Button, useColorModeValue } from '@chakra-ui/react';
 import { useSubscription } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,39 +9,24 @@ export const PremiumFeaturesDashboard: React.FC = () => {
   if (userTier === 'elite') return null; // Elite users don't need to see this
 
   return (
-    <Flex
-      direction="row"
-      align="center"
-      justify="space-between"
-      bg="rgba(168, 85, 247, 0.1)"
-      backdropFilter="blur(20px)"
-      border="1px solid"
-      borderColor="cosmic.400"
-      borderRadius="16px"
-      p={4}
-      maxW="2xl"
-      w="100%"
-      mx="auto"
-      mb={4}
-    >
-      <Flex align="center" gap={3}>
-        <Text fontSize="sm" color="whiteAlpha.800" fontWeight="500">
+    <div className="flex flex-row items-center justify-between bg-purple-500/10 backdrop-blur-xl border border-purple-400 rounded-2xl p-4 max-w-2xl w-full mx-auto mb-4">
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-white/80 font-medium">
           {userTier === 'premium' ? '🌟 Premium User' : '✨ Unlock Premium'}
-        </Text>
-        <Badge variant="cosmic" fontSize="xs">
+        </span>
+        <span className="text-xs bg-purple-500 text-white px-2 py-1 rounded-full">
           {userTier === 'premium' ? 'Active' : 'Available'}
-        </Badge>
-      </Flex>
+        </span>
+      </div>
       
       {userTier !== 'premium' && (
-        <Button
-          variant="cosmic"
-          size="sm"
+        <button
+          className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-lg transition-colors"
           onClick={() => navigate('/premium')}
         >
           Upgrade
-        </Button>
+        </button>
       )}
-    </Flex>
+    </div>
   );
 };

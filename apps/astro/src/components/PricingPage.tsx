@@ -3,12 +3,12 @@ import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle, FaHeart, FaCalendarAlt, FaFilePdf, FaSave, FaHeadset } from 'react-icons/fa';
 import { COSMICHUB_TIERS } from '../types/subscription';
 
 const PricingPage: React.FC = React.memo(() => {
   const { user } = useAuth();
-  const { userTier } = useSubscription();
+  const { tier: userTier } = useSubscription();
   const { toast } = useToast();
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
@@ -71,7 +71,7 @@ const PricingPage: React.FC = React.memo(() => {
       case 'PDF export': return <FaFilePdf className="text-red-500" />;
       case 'Unlimited calculations': return <FaInfinity className="text-green-500" />;
       case 'Unlimited storage': return <FaSave className="text-blue-500" />;
-      case 'Priority support': return <FaSupport className="text-purple-500" />;
+      case 'Priority support': return <FaHeadset className="text-purple-500" />;
       default: return <FaQuestionCircle className="text-gray-500" />;
     }
   };
@@ -151,8 +151,8 @@ const PricingPage: React.FC = React.memo(() => {
     'Priority support'
   ];
 
-  const isFeatureIncluded = (feature: string, planFeatures: { name: string; included: boolean }[]): boolean => {
-    return planFeatures.some(f => f.name === feature && f.included);
+  const isFeatureIncluded = (feature: string, planFeatures: string[]): boolean => {
+    return planFeatures.includes(feature);
   };
 
   return (
@@ -188,7 +188,7 @@ const PricingPage: React.FC = React.memo(() => {
                 </div>
                 <p className="mb-6 text-sm text-cosmic-silver">{tier.description}</p>
                 <div className="flex items-baseline mb-6 space-x-2">
-                  <span className="text-3xl font-bold text-cosmic-gold">${isAnnual ? tier.price.annual : tier.price.monthly}</span>
+                  <span className="text-3xl font-bold text-cosmic-gold">${isAnnual ? tier.price.yearly : tier.price.monthly}</span>
                   <span className="text-sm text-cosmic-silver/80">/{isAnnual ? 'year' : 'month'}</span>
                 </div>
                 <ul className="mb-6 space-y-4">

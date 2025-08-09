@@ -106,16 +106,29 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
     <div className="p-6 space-y-6 bg-white border border-gray-200 rounded-lg" role="region" aria-label="Binaural Settings">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">🎵 Binaural Settings</h3>
-        <button
-          type="button"
-          onClick={() => setAdvancedMode((prev) => !prev)}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700"
-          aria-pressed={advancedMode ? 'true' : 'false'}
-          aria-expanded={advancedMode ? 'true' : 'false'}
-          aria-controls="binaural-advanced-section"
-        >
-          {advancedMode ? 'Simple Mode' : 'Advanced Mode'}
-        </button>
+        {advancedMode ? (
+          <button
+            type="button"
+            onClick={() => setAdvancedMode((prev) => !prev)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-700"
+            aria-pressed="true"
+            aria-expanded="true"
+            aria-controls="binaural-advanced-section"
+          >
+            Simple Mode
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAdvancedMode((prev) => !prev)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-700"
+            aria-pressed="false"
+            aria-expanded="false"
+            aria-controls="binaural-advanced-section"
+          >
+            Advanced Mode
+          </button>
+        )}
       </div>
 
       {/* Basic Settings */}

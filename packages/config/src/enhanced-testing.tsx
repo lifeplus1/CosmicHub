@@ -5,10 +5,91 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+// import userEvent from '@testing-library/user-event';
 import { vi, expect, describe, it, beforeEach, afterEach } from 'vitest';
-import { performanceMonitor } from './performance';
-import { ComponentPerformanceAnalyzer } from './component-architecture';
+// import { performanceMonitor } from './performance';
+// import { ComponentPerformanceAnalyzer } from './component-architecture';
+
+// Mock userEvent for testing framework independence
+const mockUserEvent = {
+  setup: () => ({
+    click: async (element: Element) => {
+      fireEvent.click(element);
+    },
+    type: async (element: Element, text: string) => {
+      fireEvent.change(element, { target: { value: text } });
+    },
+    hover: async (element: Element) => {
+      fireEvent.mouseEnter(element);
+    },
+    unhover: async (element: Element) => {
+      fireEvent.mouseLeave(element);
+    },
+    keyboard: async (keys: string) => {
+      // Mock keyboard interactions
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: keys }));
+    },
+    tab: async () => {
+      // Mock tab navigation
+      const focusableElements = document.querySelectorAll(
+        'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
+      );
+      const currentFocus = document.activeElement;
+      const currentIndex = Array.from(focusableElements).indexOf(currentFocus as Element);
+      const nextIndex = (currentIndex + 1) % focusableElements.length;
+      if (focusableElements[nextIndex]) {
+        (focusableElements[nextIndex] as HTMLElement).focus();
+      }
+    }
+  })
+};
+
+const userEvent = mockUserEvent;
+
+// Mock ComponentPerformanceAnalyzer for testing
+class MockComponentPerformanceAnalyzer {
+  private static instance: MockComponentPerformanceAnalyzer;
+  private performanceData = new Map<string, Array<{
+    metric: string;
+    value: number;
+    timestamp: number;
+  }>>();
+
+  static getInstance(): MockComponentPerformanceAnalyzer {
+    if (!MockComponentPerformanceAnalyzer.instance) {
+      MockComponentPerformanceAnalyzer.instance = new MockComponentPerformanceAnalyzer();
+    }
+    return MockComponentPerformanceAnalyzer.instance;
+  }
+
+  recordComponentMetric(componentName: string, metric: string, value: number) {
+    if (!this.performanceData.has(componentName)) {
+      this.performanceData.set(componentName, []);
+    }
+    this.performanceData.get(componentName)!.push({
+      metric,
+      value,
+      timestamp: Date.now()
+    });
+  }
+
+  getComponentAnalysis(componentName: string) {
+    return this.performanceData.get(componentName) || [];
+  }
+
+  generateRecommendations(componentName: string): string[] {
+    const data = this.performanceData.get(componentName) || [];
+    const recommendations: string[] = [];
+    
+    data.forEach(entry => {
+      if (entry.metric === 'TestRenderTime' && entry.value > 16) {
+        recommendations.push(`Consider optimizing ${componentName} render time (${entry.value.toFixed(2)}ms)`);
+      }
+    });
+    
+    return recommendations;
+  }
+}
 
 // Enhanced test utilities
 export interface TestConfig {
@@ -197,21 +278,21 @@ export function renderWithEnhancements(
 }
 
 // Component test suite generator
-export interface ComponentTestSuite<T = {}> {
+export interface ComponentTestSuite<T extends Record<string, any> = Record<string, any>> {
   component: React.ComponentType<T>;
   name: string;
-  defaultProps?: Partial<T>;
+  defaultProps: T;
   variants?: Array<{ name: string; props: Partial<T> }>;
   interactions?: Array<{ name: string; test: (rendered: any) => Promise<void> }>;
   customTests?: Array<{ name: string; test: () => Promise<void> }>;
 }
 
-export function createComponentTestSuite<T extends object>(suite: ComponentTestSuite<T>) {
+export function createComponentTestSuite<T extends Record<string, any> = Record<string, any>>(suite: ComponentTestSuite<T>) {
   describe(suite.name, () => {
-    let performanceAnalyzer: ComponentPerformanceAnalyzer;
+    let performanceAnalyzer: MockComponentPerformanceAnalyzer;
 
     beforeEach(() => {
-      performanceAnalyzer = ComponentPerformanceAnalyzer.getInstance();
+      performanceAnalyzer = MockComponentPerformanceAnalyzer.getInstance();
       vi.clearAllMocks();
     });
 
@@ -221,16 +302,16 @@ export function createComponentTestSuite<T extends object>(suite: ComponentTestS
 
     // Basic rendering test
     it('renders without crashing', async () => {
-      const props = suite.defaultProps || {} as T;
-      const rendered = renderWithEnhancements(<suite.component {...props} />);
+      const props = suite.defaultProps;
+      const rendered = renderWithEnhancements(React.createElement(suite.component, props));
       
-      expect(rendered.container).toBeInTheDocument();
+      expect(rendered.container.firstChild).toBeTruthy();
     });
 
     // Performance test
     it('renders within performance budget', async () => {
-      const props = suite.defaultProps || {} as T;
-      const rendered = renderWithEnhancements(<suite.component {...props} />, {
+      const props = suite.defaultProps;
+      const rendered = renderWithEnhancements(React.createElement(suite.component, props), {
         config: { performance: true }
       });
 
@@ -243,8 +324,8 @@ export function createComponentTestSuite<T extends object>(suite: ComponentTestS
 
     // Accessibility test
     it('meets accessibility standards', async () => {
-      const props = suite.defaultProps || {} as T;
-      const rendered = renderWithEnhancements(<suite.component {...props} />, {
+      const props = suite.defaultProps;
+      const rendered = renderWithEnhancements(React.createElement(suite.component, props), {
         config: { accessibility: true }
       });
 
@@ -262,9 +343,9 @@ export function createComponentTestSuite<T extends object>(suite: ComponentTestS
       suite.variants.forEach(variant => {
         it(`renders ${variant.name} variant correctly`, async () => {
           const props = { ...suite.defaultProps, ...variant.props } as T;
-          const rendered = renderWithEnhancements(<suite.component {...props} />);
+          const rendered = renderWithEnhancements(React.createElement(suite.component, props));
           
-          expect(rendered.container).toBeInTheDocument();
+          expect(rendered.container.firstChild).toBeTruthy();
           
           // Take snapshot for visual regression testing
           expect(rendered.container.firstChild).toMatchSnapshot(`${suite.name}-${variant.name}`);
@@ -276,8 +357,8 @@ export function createComponentTestSuite<T extends object>(suite: ComponentTestS
     if (suite.interactions) {
       suite.interactions.forEach(interaction => {
         it(`handles ${interaction.name} interaction`, async () => {
-          const props = suite.defaultProps || {} as T;
-          const rendered = renderWithEnhancements(<suite.component {...props} />, {
+          const props = suite.defaultProps;
+          const rendered = renderWithEnhancements(React.createElement(suite.component, props), {
             config: { interactions: true }
           });
 
@@ -330,7 +411,7 @@ export function createComponentTestSuite<T extends object>(suite: ComponentTestS
 }
 
 // Hook testing utilities
-export function renderHook<T, P>(
+export function renderHook<T, P = {}>(
   hook: (props: P) => T,
   options: {
     initialProps?: P;
@@ -338,7 +419,7 @@ export function renderHook<T, P>(
   } = {}
 ) {
   const { initialProps, mockProviders = [] } = options;
-  let result: { current: T };
+  let result: { current: T } = { current: undefined as any };
   let rerender: (newProps?: P) => void;
 
   function TestComponent(props: P) {
@@ -347,22 +428,32 @@ export function renderHook<T, P>(
   }
 
   const renderResult = renderWithEnhancements(
-    <TestComponent {...(initialProps as P)} />,
+    <TestComponent {...(initialProps || {} as any)} />,
     { mockProviders }
   );
 
   rerender = (newProps?: P) => {
     renderResult.rerender(
       <TestWrapper mockProviders={mockProviders}>
-        <TestComponent {...(newProps || initialProps) as P} />
+        <TestComponent {...(newProps || initialProps || {} as any)} />
       </TestWrapper>
     );
   };
 
   return {
-    result: result!,
+    result,
     rerender,
     unmount: renderResult.unmount
+  };
+}
+
+export interface PerformanceReport {
+  [metricName: string]: {
+    count: number;
+    average: number;
+    min: number;
+    max: number;
+    median: number;
   };
 }
 
@@ -382,6 +473,21 @@ export class PerformanceTestRunner {
     });
 
     return result;
+  }
+
+  async measureAsyncTime<T>(name: string, fn: () => Promise<T>): Promise<number> {
+    const startTime = performance.now();
+    await fn();
+    const endTime = performance.now();
+    
+    const timeElapsed = endTime - startTime;
+    this.metrics.push({
+      name,
+      value: timeElapsed,
+      timestamp: startTime
+    });
+
+    return timeElapsed;
   }
 
   measure<T>(name: string, fn: () => T): T {
@@ -414,7 +520,7 @@ export class PerformanceTestRunner {
     this.metrics = [];
   }
 
-  generateReport() {
+  generateReport(): PerformanceReport {
     const metricsByName: Record<string, number[]> = {};
     
     this.metrics.forEach(metric => {
@@ -424,7 +530,7 @@ export class PerformanceTestRunner {
       metricsByName[metric.name].push(metric.value);
     });
 
-    const report: Record<string, any> = {};
+    const report: PerformanceReport = {};
 
     Object.entries(metricsByName).forEach(([name, values]) => {
       report[name] = {

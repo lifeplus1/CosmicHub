@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { FaCheck } from 'react-icons/fa';
-import type { COSMICHUB_TIERS } from '../types/subscription';
+import { COSMICHUB_TIERS } from '../types/subscription';
 
 interface UpgradePromptProps {
   isOpen: boolean;

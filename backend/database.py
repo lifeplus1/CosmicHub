@@ -3,9 +3,9 @@ import os
 import logging
 from datetime import datetime, timedelta
 import firebase_admin
-from firebase_admin import credentials, initialize_app, firestore
+from firebase_admin import credentials, initialize_app, firestore # type: ignore
 from dotenv import load_dotenv
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union, cast
 from functools import lru_cache
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -15,9 +15,20 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 logger = logging.getLogger(__name__)
 
+# Type aliases for better type safety
+ChartData = Dict[str, Any]
+BirthData = Dict[str, Any]
+UserStats = Dict[str, Any]
+
 # Initialize Firebase with performance optimizations
 try:
-    if not firebase_admin._apps:
+    # Check if Firebase is already initialized using the proper public API
+    try:
+        # Try to get the default app to see if it's already initialized
+        firebase_admin.get_app()
+        logger.info("Firebase app already initialized")
+    except ValueError:
+        # App doesn't exist, so initialize it
         private_key = os.getenv("FIREBASE_PRIVATE_KEY")
         if not private_key:
             raise ValueError("FIREBASE_PRIVATE_KEY not set")
@@ -35,6 +46,8 @@ try:
             "universe_domain": os.getenv("FIREBASE_UNIVERSE_DOMAIN")
         })
         initialize_app(cred)
+        logger.info("Firebase app initialized successfully")
+    
     db = firestore.client()
 except Exception as e:
     logger.error(f"Firebase initialization failed: {str(e)}")
@@ -48,16 +61,16 @@ def get_firestore_client():
     """Cached Firestore client for performance"""
     return db
 
-def save_chart(user_id: str, chart_type: str, birth_data: Dict[str, Any], chart_data: Dict[str, Any]) -> Dict[str, Any]:
+def save_chart(user_id: str, chart_type: str, birth_data: BirthData, chart_data: ChartData) -> ChartData:
     """Optimized chart saving with validation"""
     try:
         db_client = get_firestore_client()
         doc_ref = db_client.collection("users").document(user_id).collection("charts").document()
-        chart_id = doc_ref.id
+        chart_id: str = cast(str, doc_ref.id)  # Type assertion for Firebase ID
         birth_date = f"{birth_data['year']}-{birth_data['month']:02d}-{birth_data['day']:02d}"
         birth_time = f"{birth_data['hour']:02d}:{birth_data['minute']:02d}"
         
-        chart_data_to_save = {
+        chart_data_to_save: ChartData = {
             "id": chart_id,
             "name": birth_data.get('city', 'Chart') + f" {birth_date}",
             "birth_date": birth_date,
@@ -69,32 +82,32 @@ def save_chart(user_id: str, chart_type: str, birth_data: Dict[str, Any], chart_
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat()
         }
-        doc_ref.set(chart_data_to_save)
+        doc_ref.set(chart_data_to_save)  # type: ignore
         logger.info(f"Saved chart {chart_id} for user {user_id}")
         return chart_data_to_save
     except Exception as e:
         logger.error(f"Error saving chart for user {user_id}: {str(e)}")
         raise
 
-def get_charts(user_id: str, limit: int = 50, start_after: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_charts(user_id: str, limit: int = 50, start_after: Optional[str] = None) -> List[ChartData]:
     """Optimized chart retrieval with pagination and caching"""
     try:
         db_client = get_firestore_client()
         query = db_client.collection("users").document(user_id).collection("charts")\
             .order_by("created_at", direction=firestore.Query.DESCENDING)\
-            .limit(limit)
+            .limit(limit)  # type: ignore
         
         if start_after:
             # For pagination: start after the last document from previous page
             last_doc = db_client.collection("users").document(user_id)\
-                .collection("charts").document(start_after).get()
-            if last_doc.exists:
-                query = query.start_after(last_doc)
+                .collection("charts").document(start_after).get()  # type: ignore
+            if last_doc.exists:  # type: ignore
+                query = query.start_after(last_doc)  # type: ignore
         
-        charts = []
-        for doc in query.stream():
-            chart_data = doc.to_dict()
-            chart_data['id'] = doc.id  # Ensure ID is included
+        charts: List[ChartData] = []
+        for doc in query.stream():  # type: ignore
+            chart_data: ChartData = cast(ChartData, doc.to_dict())  # type: ignore
+            chart_data['id'] = cast(str, doc.id)  # Ensure ID is included  # type: ignore
             charts.append(chart_data)
         
         logger.info(f"Retrieved {len(charts)} charts for user {user_id}")
@@ -148,21 +161,21 @@ def batch_save_charts(user_id: str, charts_data: List[Dict[str, Any]]) -> List[s
         logger.error(f"Error batch saving charts for user {user_id}: {str(e)}")
         raise
 
-def get_user_stats(user_id: str) -> Dict[str, Any]:
+def get_user_stats(user_id: str) -> UserStats:
     """Performance: Aggregated user statistics with caching"""
     try:
         db_client = get_firestore_client()
         
         # Get chart count
         charts_ref = db_client.collection("users").document(user_id).collection("charts")
-        chart_count = len(list(charts_ref.stream()))
+        chart_count = len(list(charts_ref.stream()))  # type: ignore
         
         # Get recent activity (last 30 days)
         thirty_days_ago = datetime.now() - timedelta(days=30)
-        recent_charts = charts_ref.where("created_at", ">=", thirty_days_ago.isoformat()).stream()
+        recent_charts = charts_ref.where("created_at", ">=", thirty_days_ago.isoformat()).stream()  # type: ignore
         recent_count = len(list(recent_charts))
         
-        stats = {
+        stats: UserStats = {
             "user_id": user_id,
             "total_charts": chart_count,
             "recent_charts": recent_count,
@@ -170,7 +183,7 @@ def get_user_stats(user_id: str) -> Dict[str, Any]:
         }
         
         # Cache stats in user document
-        db_client.collection("users").document(user_id).set({
+        db_client.collection("users").document(user_id).set({  # type: ignore
             "stats": stats,
             "stats_updated": datetime.now().isoformat()
         }, merge=True)
@@ -181,11 +194,11 @@ def get_user_stats(user_id: str) -> Dict[str, Any]:
         logger.error(f"Error getting stats for user {user_id}: {str(e)}")
         return {"user_id": user_id, "total_charts": 0, "recent_charts": 0}
 
-async def async_get_multiple_charts(user_ids: List[str]) -> Dict[str, List[Dict[str, Any]]]:
+async def async_get_multiple_charts(user_ids: List[str]) -> Dict[str, List[ChartData]]:
     """Performance: Async batch retrieval for multiple users"""
     loop = asyncio.get_event_loop()
     
-    async def get_user_charts(user_id: str) -> tuple[str, List[Dict[str, Any]]]:
+    async def get_user_charts(user_id: str) -> tuple[str, List[ChartData]]:
         charts = await loop.run_in_executor(executor, get_charts, user_id)
         return user_id, charts
     

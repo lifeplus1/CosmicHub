@@ -12,9 +12,21 @@ import {
 } from './hooks';
 
 // Mock components for demo purposes - these would be real components in your app
-const HeavyChart = lazy(() => Promise.resolve({ default: () => <div>Heavy Chart Component</div> }));
-const DataVisualization = lazy(() => Promise.resolve({ default: () => <div>Data Visualization Component</div> }));
-const ComplexCalculator = lazy(() => Promise.resolve({ default: () => <div>Complex Calculator Component</div> }));
+const HeavyChart = lazy(() => Promise.resolve({ 
+  default: ({ data }: { data: any[] }) => (
+    <div>Heavy Chart Component ({data.length} items)</div>
+  )
+}));
+const DataVisualization = lazy(() => Promise.resolve({ 
+  default: ({ data }: { data: any[] }) => (
+    <div>Data Visualization Component ({data.length} data points)</div>
+  )
+}));
+const ComplexCalculator = lazy(() => Promise.resolve({ 
+  default: ({ data }: { data: any[] }) => (
+    <div>Complex Calculator Component (processing {data.length} items)</div>
+  )
+}));
 
 // Performance-tracked component example
 const OptimizedComponent = memo(withPerformanceTracking(

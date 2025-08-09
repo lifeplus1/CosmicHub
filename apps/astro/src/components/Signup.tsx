@@ -119,7 +119,7 @@ const Signup: React.FC = React.memo(() => {
     try {
       const userCredential = await signUp(formData.email, formData.password);
       const db = getFirestore();
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
+      await setDoc(doc(db, 'users', userCredential.uid), {
         firstName: formData.firstName,
         lastName: formData.lastName,
         dateOfBirth: formData.dateOfBirth,
@@ -380,7 +380,6 @@ const Signup: React.FC = React.memo(() => {
                 type="submit"
                 className="w-full mt-6 cosmic-button"
                 disabled={isLoading}
-                aria-disabled={isLoading ? 'true' : 'false'}
               >
                 Create Cosmic Account
               </button>

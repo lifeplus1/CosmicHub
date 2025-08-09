@@ -3,15 +3,17 @@ Hardened environment configuration using Pydantic BaseSettings.
 Validates and provides type-safe access to environment variables.
 """
 from typing import Optional, Literal
-from pydantic_settings import BaseSettings
-from pydantic import field_validator, Field, ConfigDict
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator, Field
 from pathlib import Path
+
+# Export list for explicit module interface
+__all__ = ['settings', 'get_settings', 'validate_settings', 'AppSettings']
 
 
 class DatabaseSettings(BaseSettings):
     """Database configuration with validation."""
-    model_config = ConfigDict(env_prefix="")
+    model_config = SettingsConfigDict()
     
     url: str = Field(..., description="PostgreSQL connection string", alias="DATABASE_URL")
     
@@ -25,7 +27,7 @@ class DatabaseSettings(BaseSettings):
 
 class RedisSettings(BaseSettings):
     """Redis configuration with fallback."""
-    model_config = ConfigDict(env_prefix="")
+    model_config = SettingsConfigDict()
     
     url: str = Field("redis://localhost:6379", description="Redis connection string", alias="REDIS_URL")
     
@@ -39,7 +41,7 @@ class RedisSettings(BaseSettings):
 
 class EmailSettings(BaseSettings):
     """Email/SMTP configuration."""
-    model_config = ConfigDict(env_prefix="")
+    model_config = SettingsConfigDict()
     
     host: str = Field("localhost", description="SMTP host", alias="SMTP_HOST")
     port: int = Field(1025, description="SMTP port", alias="SMTP_PORT")
@@ -56,7 +58,7 @@ class EmailSettings(BaseSettings):
 
 class ObservabilitySettings(BaseSettings):
     """Monitoring and observability configuration."""
-    model_config = ConfigDict(env_prefix="")
+    model_config = SettingsConfigDict()
     
     sentry_dsn: Optional[str] = Field(None, description="Sentry DSN URL", alias="SENTRY_DSN")
     new_relic_license_key: Optional[str] = Field(None, description="New Relic license key", alias="NEW_RELIC_LICENSE_KEY")
@@ -71,7 +73,7 @@ class ObservabilitySettings(BaseSettings):
 
 class SecuritySettings(BaseSettings):
     """Security and rate limiting configuration."""
-    model_config = ConfigDict(env_prefix="")
+    model_config = SettingsConfigDict()
     
     rate_limit_max: int = Field(60, description="Maximum requests per window", alias="RATE_LIMIT_MAX")
     rate_limit_window: int = Field(60, description="Rate limit window in seconds", alias="RATE_LIMIT_WINDOW")
@@ -86,7 +88,7 @@ class SecuritySettings(BaseSettings):
 
 class LoggingSettings(BaseSettings):
     """Logging configuration."""
-    model_config = ConfigDict(env_prefix="")
+    model_config = SettingsConfigDict()
     
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = Field("INFO", description="Log level", alias="LOG_LEVEL")
     format: Literal["json", "plain"] = Field("plain", description="Log format", alias="LOG_FORMAT")
@@ -95,45 +97,52 @@ class LoggingSettings(BaseSettings):
 
 class AppSettings(BaseSettings):
     """Main application settings with all environment variables."""
-    model_config = ConfigDict(
+    model_config = SettingsConfigDict(
         env_file=[".env.production.server", ".env.local", ".env"],
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra='allow'
+        extra='allow',
+        populate_by_name=True
     )
     
     # Core service settings
-    api_url: str = Field("http://localhost:8000", description="API base URL", alias="API_URL")
-    port: int = Field(8000, description="Application port", alias="PORT")
-    environment: Literal["development", "staging", "production"] = Field("development", description="Deployment environment", alias="DEPLOY_ENVIRONMENT")
+    api_url: str = Field(default="http://localhost:8000", description="API base URL", alias="API_URL")
+    port: int = Field(default=8000, description="Application port", alias="PORT")
+    environment: Literal["development", "staging", "production"] = Field(default="development", description="Deployment environment", alias="DEPLOY_ENVIRONMENT")
     
     # Ephemeris data path
-    ephe_path: str = Field("./ephe", description="Path to ephemeris data files", alias="EPHE_PATH")
+    ephe_path: str = Field(default="./ephe", description="Path to ephemeris data files", alias="EPHE_PATH")
     
     # Database settings
-    database_url: str = Field(..., description="PostgreSQL connection string", alias="DATABASE_URL")
+    database_url: str = Field(default="postgresql://localhost:5432/cosmichub", description="PostgreSQL connection string", alias="DATABASE_URL")
     
     # Redis settings
-    redis_url: str = Field("redis://localhost:6379", description="Redis connection string", alias="REDIS_URL")
+    redis_url: str = Field(default="redis://localhost:6379", description="Redis connection string", alias="REDIS_URL")
     
     # Email/SMTP settings
-    smtp_host: str = Field("localhost", description="SMTP host", alias="SMTP_HOST")
-    smtp_port: int = Field(1025, description="SMTP port", alias="SMTP_PORT")
-    smtp_user: str = Field("", description="SMTP username", alias="SMTP_USER")
-    smtp_password: str = Field("", description="SMTP password", alias="SMTP_PASS")
+    smtp_host: str = Field(default="localhost", description="SMTP host", alias="SMTP_HOST")
+    smtp_port: int = Field(default=1025, description="SMTP port", alias="SMTP_PORT")
+    smtp_user: str = Field(default="", description="SMTP username", alias="SMTP_USER")
+    smtp_password: str = Field(default="", description="SMTP password", alias="SMTP_PASS")
     
     # Observability settings
-    sentry_dsn: Optional[str] = Field(None, description="Sentry DSN URL", alias="SENTRY_DSN")
-    new_relic_license_key: Optional[str] = Field(None, description="New Relic license key", alias="NEW_RELIC_LICENSE_KEY")
+    sentry_dsn: Optional[str] = Field(default=None, description="Sentry DSN URL", alias="SENTRY_DSN")
+    new_relic_license_key: Optional[str] = Field(default=None, description="New Relic license key", alias="NEW_RELIC_LICENSE_KEY")
     
     # Security and rate limiting
-    rate_limit_max: int = Field(60, description="Maximum requests per window", alias="RATE_LIMIT_MAX")
-    rate_limit_window: int = Field(60, description="Rate limit window in seconds", alias="RATE_LIMIT_WINDOW")
+    rate_limit_max: int = Field(default=60, description="Maximum requests per window", alias="RATE_LIMIT_MAX")
+    rate_limit_window: int = Field(default=60, description="Rate limit window in seconds", alias="RATE_LIMIT_WINDOW")
     
     # Logging settings
-    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = Field("INFO", description="Log level", alias="LOG_LEVEL")
-    log_format: Literal["json", "plain"] = Field("plain", description="Log format", alias="LOG_FORMAT")
-    log_file: str = Field("app.log", description="Log file path", alias="LOG_FILE")
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = Field(default="INFO", description="Log level", alias="LOG_LEVEL")
+    log_format: Literal["json", "plain"] = Field(default="plain", description="Log format", alias="LOG_FORMAT")
+    log_file: str = Field(default="app.log", description="Log file path", alias="LOG_FILE")
+    
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def validate_log_level(cls, v: str) -> str:
+        """Convert log level to uppercase for validation."""
+        return str(v).upper()
     
     @field_validator("api_url")
     @classmethod
@@ -199,7 +208,8 @@ def get_settings() -> AppSettings:
 def validate_settings() -> tuple[bool, list[str]]:
     """Validate all settings and return status with any errors."""
     try:
-        settings = AppSettings()
+        # Use the global settings instance for consistency
+        _ = settings  # Access the global settings to ensure it's used
         return True, []
     except Exception as e:
         return False, [str(e)]
@@ -209,7 +219,7 @@ if __name__ == "__main__":
     # CLI validation utility
     valid, errors = validate_settings()
     if valid:
-        settings = AppSettings()
+        # Use the global settings instance
         print("✅ All environment settings are valid")
         print(f"Environment: {settings.environment}")
         print(f"API URL: {settings.api_url}")

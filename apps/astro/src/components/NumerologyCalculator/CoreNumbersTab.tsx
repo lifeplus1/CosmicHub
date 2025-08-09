@@ -1,5 +1,5 @@
 import React from 'react';
-import CoreNumberCard from './CoreNumberCard';
+import CoreNumberCard from './CoreNumbersCard';
 import type { CoreNumbers } from './types';
 
 interface CoreNumbersTabProps {
