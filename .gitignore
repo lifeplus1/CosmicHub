@@ -77,3 +77,9 @@ backend/.env
 backend/logs/
 backend/functionsbackend/firebase-adminsdk.json
 node_modules
+
+# Test/coverage outputs
+coverage/
+**/coverage/
+.vitest/
+**/.vitest/
