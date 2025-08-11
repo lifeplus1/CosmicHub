@@ -2,6 +2,21 @@
  * Application configuration management
  */
 
+// Cross-runtime env accessor (works in Vite browser and Node)
+const viteEnv: any | undefined = (typeof import.meta !== 'undefined' && (import.meta as any).env)
+  ? (import.meta as any).env
+  : undefined;
+
+const getEnv = (key: string, fallback = ''): string => {
+  const fromVite = viteEnv?.[key];
+  const fromNode = typeof process !== 'undefined' && process?.env ? process.env[key] : undefined;
+  return (fromVite ?? fromNode ?? fallback) as string;
+};
+
+const MODE: string = (viteEnv?.MODE
+  ?? (typeof process !== 'undefined' ? process.env?.NODE_ENV : undefined)
+  ?? 'development') as string;
+
 export interface AppConfig {
   app: {
     name: string;
@@ -69,17 +84,17 @@ export const defaultConfig: AppConfig = {
     baseUrl: 'http://localhost:3000'
   },
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseUrl: getEnv('VITE_API_URL', 'http://localhost:8000'),
     timeout: 30000,
     retries: 3
   },
   firebase: {
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''
+  projectId: getEnv('VITE_FIREBASE_PROJECT_ID', ''),
+  apiKey: getEnv('VITE_FIREBASE_API_KEY', ''),
+  authDomain: getEnv('VITE_FIREBASE_AUTH_DOMAIN', ''),
+  storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET', ''),
+  messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID', ''),
+  appId: getEnv('VITE_FIREBASE_APP_ID', '')
   },
   features: {
     aiInterpretation: true,
@@ -135,7 +150,7 @@ export const defaultConfig: AppConfig = {
       }
     },
     trialDays: 14,
-    stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
+  stripePublishableKey: getEnv('VITE_STRIPE_PUBLISHABLE_KEY', '')
   },
   astro: {
     defaultLocation: {
@@ -166,11 +181,11 @@ const productionConfig: Partial<AppConfig> = {
   app: {
     ...defaultConfig.app,
     environment: 'production',
-    baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://cosmichub.app'
+  baseUrl: getEnv('VITE_APP_URL', 'https://cosmichub.app')
   },
   api: {
     ...defaultConfig.api,
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.cosmichub.app'
+  baseUrl: getEnv('VITE_API_URL', 'https://api.cosmichub.app')
   }
 };
 
@@ -188,7 +203,7 @@ const stagingConfig: Partial<AppConfig> = {
 
 // Get configuration based on environment
 export const getConfig = (): AppConfig => {
-  const env = process.env.NODE_ENV || 'development';
+  const env = MODE || 'development';
   
   let envConfig: Partial<AppConfig> = {};
   

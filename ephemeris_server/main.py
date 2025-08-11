@@ -3,7 +3,7 @@ import logging
 from typing import List
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Depends, status, File, UploadFile, Request
+from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -16,10 +16,7 @@ from models import (
     CalculationResponse, 
     BatchCalculationRequest, 
     BatchCalculationResponse,
-    EphemerisFileResponse,
-    HealthResponse,
-    ErrorResponse,
-    PlanetPosition
+    HealthResponse
 )
 from service import EphemerisService
 
@@ -71,7 +68,7 @@ app = FastAPI(
 
 # Add rate limiting middleware
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
 app.add_middleware(SlowAPIMiddleware)
 
 
@@ -113,12 +110,12 @@ async def health_check():
 
 
 @app.get("/ephemeris/{filename}", response_class=FileResponse)
-@limiter.limit("50/minute")
+@limiter.limit("50/minute")  # type: ignore[misc]
 async def get_ephemeris_file(
-    request,
+    request: Request,
     filename: str,
     authorized: bool = Depends(verify_api_key)
-):
+) -> FileResponse:
     """
     Serve ephemeris files securely.
     Requires valid API key in Authorization header.
@@ -157,12 +154,12 @@ async def get_ephemeris_file(
 
 
 @app.post("/calculate", response_model=CalculationResponse)
-@limiter.limit("100/minute")
+@limiter.limit("100/minute")  # type: ignore[misc]
 async def calculate_position(
     request: Request,
     calc_request: CalculationRequest,
     authorized: bool = Depends(verify_api_key)
-):
+) -> CalculationResponse:
     """
     Calculate planetary position for given Julian Day and planet.
     Requires valid API key in Authorization header.
@@ -200,12 +197,12 @@ async def calculate_position(
 
 
 @app.post("/calculate/batch", response_model=BatchCalculationResponse)
-@limiter.limit("20/minute")
+@limiter.limit("20/minute")  # type: ignore[misc]
 async def calculate_batch_positions(
     request: Request,
     batch_request: BatchCalculationRequest,
     authorized: bool = Depends(verify_api_key)
-):
+) -> BatchCalculationResponse:
     """
     Calculate multiple planetary positions in batch.
     Requires valid API key in Authorization header.
@@ -226,7 +223,7 @@ async def calculate_batch_positions(
                 detail=f"Batch size exceeds maximum of {max_batch_size}"
             )
         
-        results = []
+        results: List[CalculationResponse] = []
         for calc in batch_request.calculations:
             try:
                 position = ephemeris_service.calculate_position(
@@ -258,7 +255,7 @@ async def calculate_batch_positions(
 @app.get("/planets", response_model=List[str])
 async def get_supported_planets(
     authorized: bool = Depends(verify_api_key)
-):
+) -> List[str]:
     """
     Get list of supported planets/celestial bodies.
     Requires valid API key in Authorization header.

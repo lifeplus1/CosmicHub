@@ -32,6 +32,15 @@ export interface Variables {
 }
 
 export interface HumanDesignData {
+  birth_info?: {
+    conscious_time: string;
+    unconscious_time: string;
+    location: {
+      latitude: number;
+      longitude: number;
+      timezone: string;
+    };
+  };
   type: string;
   strategy: string;
   authority: string;
@@ -57,6 +66,7 @@ export interface HumanDesignData {
 export interface HumanDesignChartProps {
   birthData?: BirthData;
   onCalculate?: (data: BirthData) => void;
+  onHumanDesignCalculated?: (data: HumanDesignData) => void;
 }
 
 export interface TabProps {

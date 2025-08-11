@@ -3,6 +3,7 @@ import { FaBook, FaInfoCircle } from "react-icons/fa";
 import ChartDisplay from "./ChartDisplay";
 import { MultiSystemChartDisplay } from "./MultiSystemChartDisplay";
 import type { MultiSystemChartData } from "./MultiSystemChartDisplay";
+import type { ChartBirthData } from "../services/api";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";
 import * as SwitchPrimitive from '@radix-ui/react-switch';
@@ -52,6 +53,18 @@ export interface ExtendedChartData {
 
 function isExtendedChartData(data: any): data is ExtendedChartData {
   return data && 'planets' in data && 'houses' in data && 'aspects' in data;
+}
+
+// Helper function to convert FormData to ChartBirthData
+function convertToChartBirthData(formData: FormData): ChartBirthData {
+  return {
+    year: parseInt(formData.year),
+    month: parseInt(formData.month),
+    day: parseInt(formData.day),
+    hour: parseInt(formData.hour),
+    minute: parseInt(formData.minute),
+    city: formData.city
+  };
 }
 
 const ChartCalculator: React.FC = () => {
@@ -398,7 +411,7 @@ const ChartCalculator: React.FC = () => {
           <div>
             {formData.multiSystem
               ? !isExtendedChartData(chart) && (
-                  <MultiSystemChartDisplay data={chart as MultiSystemChartData} />
+                  <MultiSystemChartDisplay birthData={convertToChartBirthData(formData)} showComparison={true} />
                 )
               : isExtendedChartData(chart) && <ChartDisplay chart={chart} />}
           </div>

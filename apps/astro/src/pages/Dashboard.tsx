@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { isFeatureEnabled } from '@cosmichub/config';
 import EnvironmentStatus from '../components/EnvironmentStatus';
 import { PageLoading } from '../components/CosmicLoading';
+import ChartWheel from '../features/ChartWheel';
 
 const Dashboard: React.FC = () => {
   const { user, loading } = useAuth();
+  const [showQuickChart, setShowQuickChart] = useState(false);
+  const [sampleBirthData] = useState({
+    year: 1990,
+    month: 6,
+    day: 21,
+    hour: 12,
+    minute: 0,
+    lat: 40.7128,
+    lon: -74.0060,
+    city: "New York",
+    timezone: "America/New_York"
+  });
 
   if (loading) {
     return <PageLoading />;
@@ -38,12 +51,20 @@ const Dashboard: React.FC = () => {
           <p className="text-cosmic-silver/80 mb-6 leading-relaxed">
             Generate your personalized astrological birth chart with detailed planetary positions and aspects
           </p>
-          <button 
-            onClick={() => window.location.href = '/chart'}
-            className="w-full px-6 py-3 bg-gradient-to-r from-cosmic-purple to-cosmic-blue hover:from-cosmic-purple/80 hover:to-cosmic-blue/80 text-white rounded-lg transition-all duration-300 font-semibold group-hover:shadow-lg"
-          >
-            Create Chart
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => window.location.href = '/chart'}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-cosmic-purple to-cosmic-blue hover:from-cosmic-purple/80 hover:to-cosmic-blue/80 text-white rounded-lg transition-all duration-300 font-semibold"
+            >
+              Create Chart
+            </button>
+            <button 
+              onClick={() => setShowQuickChart(!showQuickChart)}
+              className="px-4 py-3 bg-cosmic-silver/20 hover:bg-cosmic-silver/30 text-cosmic-silver rounded-lg transition-all duration-300 font-semibold"
+            >
+              {showQuickChart ? 'Hide' : 'Preview'}
+            </button>
+          </div>
         </div>
 
         {isFeatureEnabled('healwaveIntegration') && (
@@ -85,6 +106,44 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Chart Wheel Preview Section */}
+      {showQuickChart && (
+        <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-cosmic-purple/20 rounded-lg flex items-center justify-center mr-4">
+                <span className="text-xl">🌌</span>
+              </div>
+              <h3 className="text-2xl font-semibold text-cosmic-gold font-playfair">Sample Chart Wheel</h3>
+            </div>
+            <button 
+              onClick={() => setShowQuickChart(false)}
+              className="text-cosmic-silver/60 hover:text-cosmic-silver transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="bg-cosmic-dark/50 rounded-lg p-4 border border-cosmic-silver/10">
+            <ChartWheel 
+              birthData={sampleBirthData}
+              showAspects={true}
+              showAnimation={true}
+            />
+            <div className="mt-4 text-center">
+              <p className="text-cosmic-silver/70 text-sm mb-3">
+                This is a sample chart for demonstration. Create your own personalized chart above.
+              </p>
+              <button 
+                onClick={() => window.location.href = '/chart'}
+                className="px-6 py-2 bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark font-semibold rounded-lg transition-colors duration-300"
+              >
+                Create Your Chart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Environment Status Section */}
       <div className="flex justify-center">
         <div className="w-full max-w-lg">
@@ -120,10 +179,16 @@ const Dashboard: React.FC = () => {
             healing frequencies, and cosmic insights tailored just for you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-3 bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark font-semibold rounded-lg transition-colors duration-300">
+            <button 
+              onClick={() => window.location.href = '/signup'}
+              className="px-8 py-3 bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark font-semibold rounded-lg transition-colors duration-300"
+            >
               Sign Up
             </button>
-            <button className="px-8 py-3 border border-cosmic-silver/30 hover:border-cosmic-silver/50 text-cosmic-silver hover:bg-cosmic-silver/10 font-semibold rounded-lg transition-all duration-300">
+            <button 
+              onClick={() => window.location.href = '/about'}
+              className="px-8 py-3 border border-cosmic-silver/30 hover:border-cosmic-silver/50 text-cosmic-silver hover:bg-cosmic-silver/10 font-semibold rounded-lg transition-all duration-300"
+            >
               Learn More
             </button>
           </div>

@@ -6,14 +6,12 @@ This module now proxies ephemeris calculations to the dedicated ephemeris server
 for improved performance, scalability, and modularity.
 """
 
-import os
 import logging
 import asyncio
 from typing import Dict, Final, Any
 from utils.ephemeris_client import (
     get_planetary_positions as remote_get_planetary_positions,
     calculate_single_position,
-    PlanetPosition as RemotePlanetPosition,
     EphemerisClient
 )
 
@@ -37,21 +35,21 @@ JUNO: Final[int] = 19
 VESTA: Final[int] = 20
 
 # Legacy type definition for backward compatibility
-class PlanetPosition(dict):
+class PlanetPosition(dict[str, Any]):  # type: ignore[misc]
     """Legacy planet position type for backward compatibility."""
     
     def __init__(self, position: float, retrograde: bool):
-        super().__init__()
+        super().__init__()  # type: ignore[misc]
         self['position'] = position
         self['retrograde'] = retrograde
     
     @property
     def position(self) -> float:
-        return self['position']
+        return self['position']  # type: ignore[return-value]
     
     @property
     def retrograde(self) -> bool:
-        return self['retrograde']
+        return self['retrograde']  # type: ignore[return-value]
 
 # Global variable to track if ephemeris has been initialized (kept for compatibility)
 _ephemeris_initialized = True  # Always True for remote client
@@ -87,29 +85,68 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
     logger.debug(f"Calculating planetary positions for JD: {julian_day} (remote)")
     
     try:
-        # Use async client in sync context
-        loop = None
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        # Use requests library for synchronous HTTP call instead of async
+        import requests
+        import os
         
-        # Get positions from remote server
-        remote_positions = loop.run_until_complete(
-            remote_get_planetary_positions(julian_day)
+        ephemeris_url = os.getenv("EPHEMERIS_SERVER_URL", "http://localhost:8001")
+        api_key = os.getenv("API_KEY", "")
+        
+        # Define the planets and asteroids we want to calculate
+        planets = [
+            "sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto",
+            "chiron", "ceres", "pallas", "juno", "vesta"
+        ]
+        
+        # Use batch calculation for efficiency
+        headers = {"Content-Type": "application/json"}
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        
+        # Create batch request with correct format
+        batch_request: Dict[str, Any] = {
+            "calculations": [
+                {"julian_day": julian_day, "planet": planet}
+                for planet in planets
+            ]
+        }
+        
+        response = requests.post(
+            f"{ephemeris_url}/calculate/batch",
+            json=batch_request,
+            headers=headers,
+            timeout=30
         )
         
-        # Convert to legacy format for backward compatibility
-        positions = {}
-        for planet, remote_pos in remote_positions.items():
-            positions[planet] = PlanetPosition(
-                position=remote_pos.position,
-                retrograde=remote_pos.retrograde
-            )
-        
-        logger.debug(f"Remote planetary positions: {len(positions)} planets calculated")
-        return positions
+        if response.status_code == 200:
+            remote_data = response.json()
+            
+            # Convert to legacy format for backward compatibility
+            positions: Dict[str, PlanetPosition] = {}
+            
+            # Handle both single result and batch results format
+            if "results" in remote_data:
+                # Batch response format
+                for result in remote_data["results"]:
+                    planet = result.get("planet", "unknown")
+                    position_data = result.get("position", {})
+                    positions[planet] = PlanetPosition(
+                        position=position_data.get("position", 0.0),
+                        retrograde=position_data.get("retrograde", False)
+                    )
+            else:
+                # Single result format (fallback)
+                for planet, planet_data in remote_data.items():
+                    positions[planet] = PlanetPosition(
+                        position=planet_data.get("longitude", planet_data.get("position", 0.0)),
+                        retrograde=planet_data.get("retrograde", False)
+                    )
+            
+            logger.debug(f"Remote planetary positions: {len(positions)} planets calculated")
+            return positions
+        else:
+            logger.warning(f"Ephemeris server returned status {response.status_code}: {response.text}")
+            return {}
         
     except Exception as e:
         logger.error(f"Error in remote planetary positions: {str(e)}", exc_info=True)
@@ -132,7 +169,7 @@ async def get_planetary_positions_async(julian_day: float) -> Dict[str, PlanetPo
         remote_positions = await remote_get_planetary_positions(julian_day)
         
         # Convert to legacy format for backward compatibility
-        positions = {}
+        positions: Dict[str, PlanetPosition] = {}
         for planet, remote_pos in remote_positions.items():
             positions[planet] = PlanetPosition(
                 position=remote_pos.position,
@@ -174,7 +211,7 @@ def calculate_planet_position(julian_day: float, planet: str) -> Dict[str, Any]:
         )
         
         if remote_position:
-            result = {
+            result: Dict[str, Any] = {
                 'position': remote_position.position,
                 'retrograde': remote_position.retrograde
             }
@@ -206,7 +243,7 @@ async def calculate_planet_position_async(julian_day: float, planet: str) -> Dic
         remote_position = await calculate_single_position(julian_day, planet)
         
         if remote_position:
-            result = {
+            result: Dict[str, Any] = {
                 'position': remote_position.position,
                 'retrograde': remote_position.retrograde
             }

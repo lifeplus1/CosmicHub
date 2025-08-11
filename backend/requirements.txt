@@ -13,3 +13,4 @@ pytest-cov
 reportlab
 httpx
 redis
+pyswisseph

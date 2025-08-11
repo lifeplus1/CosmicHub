@@ -7,6 +7,7 @@ export type { UserSubscription, SubscriptionPlan } from '@cosmichub/integrations
 export interface SubscriptionState {
   subscription: any | null;
   userTier: string;
+  tier: string; // Alias for userTier for backwards compatibility
   isLoading: boolean;
   hasFeature: (feature: string, app?: 'astro' | 'healwave') => boolean;
   upgradeRequired: (feature: string) => void;
@@ -164,9 +165,10 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   }, [user]);
 
   const value: SubscriptionContextType = {
-  subscription,
+    subscription,
     userTier: subscription?.tier || 'free',
-  isLoading: isLoading || !subscriptionManager,
+    tier: subscription?.tier || 'free', // Alias for backwards compatibility
+    isLoading: isLoading || !subscriptionManager,
     hasFeature,
     upgradeRequired,
     refreshSubscription,

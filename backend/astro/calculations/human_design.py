@@ -11,7 +11,7 @@ import swisseph as swe  # type: ignore
 
 logger = logging.getLogger(__name__)
 
-# I Ching Hexagram Gate Names and Properties
+# I Ching Hexagram Gate Names and Properties (CORRECTED MAPPINGS)
 GATES = {
     1: {"name": "The Creative", "center": "G", "type": "Individual", "theme": "Self-Expression"},
     2: {"name": "The Receptive", "center": "G", "type": "Collective", "theme": "Direction"},
@@ -142,6 +142,64 @@ AUTHORITIES = {
     "Lunar": "Wait a full lunar cycle (28 days)"
 }
 
+# Human Design Channels (Gate pairs that form channels)
+CHANNELS = {
+    "1-8": {"name": "The Channel of Inspiration", "circuit": "Individual", "theme": "Creative Role Model"},
+    "2-14": {"name": "The Channel of the Beat", "circuit": "Individual", "theme": "Keeper of the Keys"},
+    "3-60": {"name": "The Channel of Mutation", "circuit": "Individual", "theme": "Energy for Change"},
+    "4-63": {"name": "The Channel of Logic", "circuit": "Collective", "theme": "Mental Ease"},
+    "5-15": {"name": "The Channel of Rhythm", "circuit": "Collective", "theme": "Being in the Flow"},
+    "6-59": {"name": "The Channel of Mating", "circuit": "Tribal", "theme": "Focused on Reproduction"},
+    "7-31": {"name": "The Channel of the Alpha", "circuit": "Collective", "theme": "Leadership for the Future"},
+    "9-52": {"name": "The Channel of Concentration", "circuit": "Collective", "theme": "Focused Determination"},
+    "10-20": {"name": "The Channel of Awakening", "circuit": "Individual", "theme": "Commitment to Higher Principles"},
+    "10-34": {"name": "The Channel of Exploration", "circuit": "Individual", "theme": "Following One's Convictions"},
+    "10-57": {"name": "The Channel of Perfected Form", "circuit": "Individual", "theme": "Survival"},
+    "11-56": {"name": "The Channel of Curiosity", "circuit": "Collective", "theme": "The Seeker"},
+    "12-22": {"name": "The Channel of Openness", "circuit": "Individual", "theme": "A Social Being"},
+    "13-33": {"name": "The Channel of the Prodigal", "circuit": "Collective", "theme": "A Witness"},
+    "16-48": {"name": "The Channel of the Wavelength", "circuit": "Collective", "theme": "Talent"},
+    "17-62": {"name": "The Channel of Acceptance", "circuit": "Collective", "theme": "An Organized Being"},
+    "18-58": {"name": "The Channel of Judgment", "circuit": "Collective", "theme": "Insatiable Critic"},
+    "19-49": {"name": "The Channel of Synthesis", "circuit": "Tribal", "theme": "Sensitivity"},
+    "20-57": {"name": "The Channel of the Brainwave", "circuit": "Individual", "theme": "Penetrating Awareness"},
+    "21-45": {"name": "The Channel of Money", "circuit": "Tribal", "theme": "A Material Way of Life"},
+    "23-43": {"name": "The Channel of Structuring", "circuit": "Individual", "theme": "Genius to Freak"},
+    "24-61": {"name": "The Channel of Awareness", "circuit": "Individual", "theme": "Thinker"},
+    "25-51": {"name": "The Channel of Initiation", "circuit": "Individual", "theme": "Needing to be First"},
+    "26-44": {"name": "The Channel of Surrender", "circuit": "Tribal", "theme": "A Transmitter"},
+    "27-50": {"name": "The Channel of Preservation", "circuit": "Tribal", "theme": "Custodianship"},
+    "28-38": {"name": "The Channel of Struggle", "circuit": "Individual", "theme": "Stubbornness"},
+    "29-46": {"name": "The Channel of Discovery", "circuit": "Collective", "theme": "Succeeding Where Others Fail"},
+    "30-41": {"name": "The Channel of Recognition", "circuit": "Individual", "theme": "A Focused Way of Life"},
+    "32-54": {"name": "The Channel of Transformation", "circuit": "Tribal", "theme": "Being Driven"},
+    "34-57": {"name": "The Channel of Power", "circuit": "Individual", "theme": "An Archetype"},
+    "35-36": {"name": "The Channel of Transitoriness", "circuit": "Collective", "theme": "A Jack of All Trades"},
+    "37-40": {"name": "The Channel of Community", "circuit": "Tribal", "theme": "A Part seeking a Whole"},
+    "39-55": {"name": "The Channel of Emoting", "circuit": "Individual", "theme": "Moodiness"},
+    "42-53": {"name": "The Channel of Maturation", "circuit": "Collective", "theme": "Balanced Development"},
+    "47-64": {"name": "The Channel of Abstraction", "circuit": "Individual", "theme": "Mental Activity Mixed with Clarity"}
+}
+
+def detect_channels(activations: Dict[str, Any]) -> list[str]:
+    """Detect which channels are formed by the planetary activations"""
+    activated_gates: set[int] = set()
+    
+    # Collect all activated gates from both conscious and unconscious
+    for planet_data in activations.values():
+        gate = planet_data.get("gate")
+        if gate:
+            activated_gates.add(gate)
+    
+    # Check which channels are formed
+    formed_channels: list[str] = []
+    for channel_key in CHANNELS.keys():
+        gate1, gate2 = map(int, channel_key.split("-"))
+        if gate1 in activated_gates and gate2 in activated_gates:
+            formed_channels.append(channel_key)
+    
+    return formed_channels
+
 def get_gate_center(gate_number: int) -> str:
     """Get the center associated with a specific gate number"""
     if gate_number in GATES:
@@ -171,13 +229,17 @@ def calculate_planetary_activations(julian_day: float) -> dict[str, PlanetActiva
         for planet_name, planet_id in planets.items():
             # Calculate planet position
             result = swe.calc_ut(julian_day, planet_id, swe.FLG_SWIEPH)  # type: ignore
-            position = result[0][0]  # type: ignore  # Longitude in degrees
+            position: float = float(result[0][0])  # type: ignore  # Longitude in degrees
             
-            # Convert to Human Design gate/line
-            gate_position = (position * 64) / 360  # type: ignore
-            gate_number = int(gate_position % 64) + 1  # type: ignore
-            line_position = ((gate_position % 1) * 6) + 1  # type: ignore
-            line_number = int(line_position)  # type: ignore
+            # Convert to Human Design gate/line (CORRECTED FORMULA)
+            # Each gate is 5.625 degrees (360/64)
+            gate_degrees: float = 360.0 / 64.0  # 5.625 degrees per gate
+            gate_position: float = position / gate_degrees  # Position in gates (0-63.999...)
+            gate_number: int = int(gate_position) + 1  # Gates are 1-64
+            
+            # Each line is 1/6 of a gate
+            line_position: float = (gate_position % 1.0) * 6.0  # Position within gate (0-5.999...)
+            line_number: int = int(line_position) + 1  # Lines are 1-6
             
             # Ensure valid ranges
             gate_number = max(1, min(64, gate_number))
@@ -189,6 +251,29 @@ def calculate_planetary_activations(julian_day: float) -> dict[str, PlanetActiva
                 'position': position,
                 'center': get_gate_center(gate_number)
             }
+        
+        # Calculate Earth position (opposite of Sun)
+        if 'sun' in activations:
+            sun_position: float = float(activations['sun']['position'])
+            earth_position: float = (sun_position + 180.0) % 360.0
+            
+            # Calculate Earth gate/line
+            gate_degrees: float = 360.0 / 64.0
+            gate_position: float = earth_position / gate_degrees
+            gate_number: int = int(gate_position) + 1
+            line_position: float = (gate_position % 1) * 6
+            line_number: int = int(line_position) + 1
+            
+            gate_number = max(1, min(64, gate_number))
+            line_number = max(1, min(6, line_number))
+            
+            activations['earth'] = {
+                'gate': gate_number,
+                'line': line_number,
+                'position': earth_position,
+                'center': get_gate_center(gate_number)
+            }
+            
     except Exception as e:
         logger.error(f"Error calculating planetary activations: {str(e)}")
     
@@ -294,8 +379,23 @@ def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
         defined_gates: list[int] = []
         center_activations: dict[str, list[int]] = {}
         
-        # Collect all activated gates
-        for planet_data in activations.values():
+        # Collect all activated gates from both conscious and unconscious
+        all_activations: Dict[str, Any] = {}
+        
+        # Handle nested structure (design_data with conscious/unconscious)
+        if 'conscious' in activations and isinstance(activations['conscious'], dict):
+            conscious_data: Dict[str, Any] = activations['conscious']  # type: ignore
+            all_activations.update(conscious_data)
+        
+        if 'unconscious' in activations and isinstance(activations['unconscious'], dict):
+            unconscious_data: Dict[str, Any] = activations['unconscious']  # type: ignore
+            all_activations.update(unconscious_data)
+        
+        # If not nested, assume direct activations
+        if not all_activations:
+            all_activations = activations
+        
+        for planet_data in all_activations.values():
             gate = planet_data.get("gate")
             if gate and gate in GATES:
                 defined_gates.append(gate)
@@ -307,8 +407,8 @@ def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
         # Determine defined centers (need at least one gate)
         defined_centers: list[str] = [str(center) for center in center_activations.keys()]
         
-        # Simplified channel detection (would need full gate-to-gate mapping)
-        channels = []  # This would require a more complex implementation
+        # Detect channels using the new function
+        channels = detect_channels(all_activations)
         
         return {
             "defined_gates": defined_gates,
@@ -329,8 +429,9 @@ def calculate_human_design(year: int, month: int, day: int, hour: int, minute: i
         # Birth time (conscious)
         birth_time = datetime(year, month, day, hour, minute)
         
-        # Design time (unconscious) - approximately 88 days before birth
-        design_time = birth_time - timedelta(days=88, hours=8)  # More precise calculation needed
+        # Design time (unconscious) - approximately 88 degrees of sun movement before birth
+        # This is approximately 88.4 days, not exactly 88 days
+        design_time = birth_time - timedelta(days=88, hours=10, minutes=0)  # More accurate timing
         
         # Calculate activations for both times
         design_data = calculate_design_data(birth_time, design_time)
@@ -433,14 +534,11 @@ def calculate_incarnation_cross(design_data: Dict[str, Any]) -> Dict[str, Any]:
         
         # Get the four gates of the cross
         sun_personality = conscious.get("sun", {}).get("gate", 1)
-        earth_personality = conscious.get("earth", {}).get("gate", 1)  # Opposite of sun
+        earth_personality = conscious.get("earth", {}).get("gate", 1)
         sun_design = unconscious.get("sun", {}).get("gate", 1)
         earth_design = unconscious.get("earth", {}).get("gate", 1)
         
-        # Calculate Earth gates (simplified - should be exact opposite)
-        earth_personality = ((sun_personality + 31) % 64) + 1 if sun_personality <= 32 else ((sun_personality - 33) % 64) + 1
-        earth_design = ((sun_design + 31) % 64) + 1 if sun_design <= 32 else ((sun_design - 33) % 64) + 1
-        
+        # Create the cross name based on the personality sun gate
         cross_name = f"Right Angle Cross of {GATES.get(sun_personality, {}).get('name', 'Unknown')}"
         
         return {

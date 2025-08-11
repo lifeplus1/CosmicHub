@@ -16,27 +16,33 @@ const ChartCalculation: React.FC = () => {
       <Card title="Birth Information" className="max-w-2xl mx-auto">
         <form className="space-y-4">
           <div>
-            <label className="block text-cosmic-silver mb-2">Birth Date</label>
+            <label htmlFor="birth-date" className="block text-cosmic-silver mb-2">Birth Date</label>
             <input 
+              id="birth-date"
               type="date" 
               className="w-full p-3 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
+              aria-label="Select your birth date"
             />
           </div>
           
           <div>
-            <label className="block text-cosmic-silver mb-2">Birth Time</label>
+            <label htmlFor="birth-time" className="block text-cosmic-silver mb-2">Birth Time</label>
             <input 
+              id="birth-time"
               type="time" 
               className="w-full p-3 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
+              aria-label="Select your birth time"
             />
           </div>
           
           <div>
-            <label className="block text-cosmic-silver mb-2">Birth Location</label>
+            <label htmlFor="birth-location" className="block text-cosmic-silver mb-2">Birth Location</label>
             <input 
+              id="birth-location"
               type="text" 
               placeholder="City, Country"
               className="w-full p-3 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
+              aria-label="Enter your birth location"
             />
           </div>
           

@@ -216,6 +216,18 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
   const chartInfo = useMemo(() => {
     if (!chart) return null;
     
+    console.log('🔍 ChartDisplay - chart object:', {
+      hasChart: !!chart,
+      latitude: chart.latitude,
+      latitudeType: typeof chart.latitude,
+      longitude: chart.longitude,
+      longitudeType: typeof chart.longitude,
+      timezone: chart.timezone,
+      timezoneType: typeof chart.timezone,
+      julian_day: chart.julian_day,
+      allKeys: Object.keys(chart)
+    });
+    
     return {
       latitude: typeof chart.latitude === 'number' && !isNaN(chart.latitude) ? chart.latitude.toFixed(4) : 'N/A',
       longitude: typeof chart.longitude === 'number' && !isNaN(chart.longitude) ? chart.longitude.toFixed(4) : 'N/A',

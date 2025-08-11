@@ -3,11 +3,8 @@
 Debug script to test ephemeris server validation.
 """
 import sys
-import os
 sys.path.insert(0, '/Users/Chris/Projects/CosmicHub/ephemeris_server')
 
-import json
-from fastapi.testclient import TestClient
 
 # Import using absolute imports
 from models import CalculationRequest

@@ -4,7 +4,6 @@ import logging
 import redis  # type: ignore
 import json
 from typing import Dict, Optional, Final
-from datetime import datetime, timezone
 
 from models import PlanetPosition
 
@@ -64,9 +63,9 @@ class EphemerisService:
         # Initialize Redis if URL provided
         if redis_url:
             try:
-                self.redis_client = redis.from_url(redis_url, decode_responses=True)
+                self.redis_client = redis.from_url(redis_url, decode_responses=True)  # type: ignore[attr-defined]
                 # Test connection
-                self.redis_client.ping()
+                self.redis_client.ping()  # type: ignore[attr-defined]
                 logger.info("Redis connection established successfully")
             except Exception as e:
                 logger.warning(f"Redis connection failed: {e}. Continuing without cache.")
@@ -93,7 +92,7 @@ class EphemerisService:
                 logger.info(f"Ephemeris files found: {files}")
             
             # Set the ephemeris path
-            swe.set_ephe_path(ephe_path)
+            swe.set_ephe_path(ephe_path)  # type: ignore[attr-defined]
             self._ephemeris_initialized = True
             
             logger.info("Swiss Ephemeris initialized successfully")
@@ -112,9 +111,9 @@ class EphemerisService:
             return None
             
         try:
-            cached_data = self.redis_client.get(cache_key)
+            cached_data = self.redis_client.get(cache_key)  # type: ignore[attr-defined]
             if cached_data:
-                data = json.loads(cached_data)
+                data = json.loads(str(cached_data))  # Convert to string to ensure type safety
                 return PlanetPosition(**data)
         except Exception as e:
             logger.warning(f"Cache read error: {e}")
@@ -128,7 +127,7 @@ class EphemerisService:
             
         try:
             data = position.model_dump()
-            self.redis_client.setex(
+            self.redis_client.setex(  # type: ignore[attr-defined]
                 cache_key, 
                 self.cache_ttl, 
                 json.dumps(data)
@@ -172,16 +171,16 @@ class EphemerisService:
             body = PLANET_MAPPING[planet_lower]
             
             # Calculate position with speed flag to get retrograde status
-            flags = swe.FLG_SWIEPH | swe.FLG_SPEED
-            result = swe.calc_ut(julian_day, body, flags)
+            flags = swe.FLG_SWIEPH | swe.FLG_SPEED  # type: ignore[attr-defined]
+            result = swe.calc_ut(julian_day, body, flags)  # type: ignore[attr-defined]
             
             # Check for errors
-            if result[0][0] < 0:
+            if result[0][0] < 0:  # type: ignore[index]
                 raise ValueError(f"Swiss Ephemeris calculation error for {planet_lower}")
             
             # Extract position and speed (for retrograde determination)
-            position_deg = float(result[0][0])  # Longitude in degrees
-            speed = float(result[0][3])  # Speed in degrees per day
+            position_deg = float(result[0][0])  # type: ignore[index] # Longitude in degrees
+            speed = float(result[0][3])  # type: ignore[index] # Speed in degrees per day
             retrograde = speed < 0
             
             planet_position = PlanetPosition(
@@ -210,7 +209,7 @@ class EphemerisService:
         Returns:
             Dictionary mapping planet names to their positions
         """
-        results = {}
+        results: Dict[str, PlanetPosition] = {}
         for planet in planets:
             try:
                 results[planet.lower()] = self.calculate_position(julian_day, planet)

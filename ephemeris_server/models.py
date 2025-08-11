@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from enum import Enum
 
 class PlanetName(str, Enum):
-    """Supported planet names."""
+    """Supported planet names and asteroids."""
     SUN = "sun"
     MOON = "moon"
     MERCURY = "mercury"
@@ -15,6 +15,12 @@ class PlanetName(str, Enum):
     URANUS = "uranus"
     NEPTUNE = "neptune"
     PLUTO = "pluto"
+    # Asteroids
+    CHIRON = "chiron"
+    CERES = "ceres"
+    PALLAS = "pallas"
+    JUNO = "juno"
+    VESTA = "vesta"
 
 class PlanetPosition(BaseModel):
     """Position data for a planetary body."""

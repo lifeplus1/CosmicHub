@@ -31,12 +31,17 @@ export const AstroRoutes = {
 
   // Advanced features
   GeneKeys: lazyLoadRoute(
-    () => import('../pages/HumanDesign'),
+    () => import('../pages/GeneKeys'),
     'GeneKeys'
   ),
 
-  PearlSequence: lazyLoadRoute(
+  HumanDesign: lazyLoadRoute(
     () => import('../pages/HumanDesign'),
+    'HumanDesign'
+  ),
+
+  PearlSequence: lazyLoadRoute(
+    () => import('../pages/GeneKeys'),
     'PearlSequence'
   ),
 
@@ -139,6 +144,11 @@ export const astroRouteConfig = [
   {
     path: '/gene-keys',
     component: withErrorBoundary(AstroRoutes.GeneKeys),
+    preload: false
+  },
+  {
+    path: '/human-design',
+    component: withErrorBoundary(AstroRoutes.HumanDesign),
     preload: false
   },
   {

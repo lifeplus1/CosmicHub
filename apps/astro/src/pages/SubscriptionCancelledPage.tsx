@@ -73,7 +73,7 @@ export const SubscriptionCancelledPage: React.FC = () => {
                   </Link>
                 </Button>
                 <Button variant="secondary" className="w-full h-auto p-6">
-                  <Link to="/dashboard" className="flex items-center gap-3 text-gray-700 no-underline">
+                  <Link to="/" className="flex items-center gap-3 text-gray-700 no-underline">
                     <FaArrowLeft className="w-6 h-6" />
                     <div className="text-left">
                       <div className="font-semibold">Continue with Free Plan</div>

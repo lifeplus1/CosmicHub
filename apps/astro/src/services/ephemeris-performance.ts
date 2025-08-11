@@ -56,8 +56,8 @@ class EphemerisPerformanceMonitor {
       this.entries = this.entries.slice(-this.maxEntries);
     }
 
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+  // Log to console in development (Vite)
+  if ((import.meta as any).env?.MODE === 'development') {
       console.log(`[Ephemeris] ${operation}: ${latency}ms (cache: ${cacheHit ? 'hit' : 'miss'})`);
     }
   }

@@ -1,129 +1,181 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Card } from '@cosmichub/ui';
+import { useBirthData } from '../contexts/BirthDataContext';
+import { SimpleBirthForm } from '../components/SimpleBirthForm';
+import HumanDesignChart from '../components/HumanDesignChart/HumanDesignChart';
+import type { HumanDesignData } from '../components/HumanDesignChart/types';
 
 const HumanDesign: React.FC = () => {
+  const { birthData, isDataValid, setBirthData } = useBirthData();
+  const [humanDesignData, setHumanDesignData] = useState<HumanDesignData | null>(null);
+
+  // Helper function to format birth info from calculation result
+  const formatBirthInfo = (birthInfo: HumanDesignData['birth_info']) => {
+    if (!birthInfo) return null;
+
+    // Parse the ISO string more carefully to avoid timezone issues
+    const consciousTime = birthInfo.conscious_time;
+    const [datePart, timePart] = consciousTime.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+    
+    return {
+      date: `${month}/${day}/${year}`,
+      time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+      coordinates: `${birthInfo.location.latitude.toFixed(2)}°, ${birthInfo.location.longitude.toFixed(2)}°`,
+      timezone: birthInfo.location.timezone
+    };
+  };
+
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="text-center py-12 bg-gradient-to-r from-cosmic-purple/20 to-cosmic-silver/20 rounded-2xl border border-cosmic-silver/10">
+      {/* Page Header */}
+      <div className="text-center">
         <h1 className="text-4xl font-bold text-cosmic-gold mb-4 font-cinzel">
           Human Design Chart
         </h1>
-        <p className="text-xl text-cosmic-silver/80 font-playfair">
-          Discover your unique energy type and life strategy
+        <p className="text-xl text-cosmic-silver/80">
+          Discover your unique energy type, strategy, and life purpose through the Human Design system
         </p>
       </div>
 
-      {/* Human Design Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-cosmic-silver/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🧬</span>
-            </div>
-            <h2 className="text-2xl font-semibold text-cosmic-gold mb-4 font-playfair">
-              Your Human Design Chart
-            </h2>
-            <p className="text-cosmic-silver/80">
-              A revolutionary system that combines ancient wisdom with modern science
-            </p>
-          </div>
+      {/* Birth Data Input - Only show if no data */}
+      {!birthData && (
+        <SimpleBirthForm
+          title="Enter Birth Data for Human Design"
+          submitButtonText="Generate Human Design Chart"
+          showSampleButton={true}
+        />
+      )}
 
-          <div className="bg-cosmic-dark/30 rounded-lg p-6 border border-cosmic-silver/10 mb-6">
-            <div className="text-center">
-              <div className="w-48 h-48 bg-cosmic-purple/10 rounded-lg border border-cosmic-gold/30 mx-auto mb-4 flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-6xl mb-2 block">⚡</span>
-                  <p className="text-cosmic-silver/60 text-sm">
-                    Your Human Design chart will appear here
-                  </p>
+      {/* Human Design Chart Display */}
+      {birthData && isDataValid && (
+        <div className="space-y-6">
+          {/* Control Panel */}
+          <Card title="Chart Controls">
+            <div className="flex flex-wrap gap-6 items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <div className="text-cosmic-silver">
+                  <span className="text-cosmic-gold font-semibold">Your Chart Type:</span> Human Design
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setBirthData(null)}
+                  className="px-4 py-2 bg-cosmic-purple/20 border border-cosmic-purple/30 rounded-lg hover:bg-cosmic-purple/30 transition-colors text-cosmic-silver"
+                >
+                  📝 Edit Birth Data
+                </button>
+              </div>
+            </div>
+          </Card>
+
+          {/* Human Design Chart Component */}
+          <HumanDesignChart 
+            birthData={birthData}
+            onCalculate={(data) => setBirthData(data)}
+            onHumanDesignCalculated={(hdData) => setHumanDesignData(hdData)}
+          />
+
+          {/* Birth Information */}
+          <Card title="Birth Information">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {humanDesignData?.birth_info ? (
+                // Show birth info from Human Design calculation result
+                (() => {
+                  const birthInfo = formatBirthInfo(humanDesignData.birth_info);
+                  return (
+                    <>
+                      <div className="text-center">
+                        <div className="text-cosmic-gold font-semibold">Date</div>
+                        <div className="text-cosmic-silver">{birthInfo?.date}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-cosmic-gold font-semibold">Time</div>
+                        <div className="text-cosmic-silver">{birthInfo?.time}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-cosmic-gold font-semibold">Location</div>
+                        <div className="text-cosmic-silver">{humanDesignData.birth_info.location.timezone}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-cosmic-gold font-semibold">Coordinates</div>
+                        <div className="text-cosmic-silver text-sm">{birthInfo?.coordinates}</div>
+                      </div>
+                    </>
+                  );
+                })()
+              ) : (
+                // Fallback to context birth data (shown before calculation)
+                <>
+                  <div className="text-center">
+                    <div className="text-cosmic-gold font-semibold">Date</div>
+                    <div className="text-cosmic-silver">{birthData.month}/{birthData.day}/{birthData.year}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-cosmic-gold font-semibold">Time</div>
+                    <div className="text-cosmic-silver">{birthData.hour.toString().padStart(2, '0')}:{birthData.minute.toString().padStart(2, '0')}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-cosmic-gold font-semibold">Location</div>
+                    <div className="text-cosmic-silver">{birthData.city}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-cosmic-gold font-semibold">Coordinates</div>
+                    <div className="text-cosmic-silver text-sm">
+                      {birthData.lat ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </Card>
+
+          {/* Educational Information */}
+          <Card title="About Human Design">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-cosmic-gold">The 5 Energy Types</h3>
+                <div className="space-y-2 text-sm text-cosmic-silver">
+                  <div className="flex justify-between">
+                    <span>• Manifestor (9%)</span>
+                    <span className="text-cosmic-gold">Initiators</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>• Generator (37%)</span>
+                    <span className="text-cosmic-gold">Builders</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>• Manifesting Generator (33%)</span>
+                    <span className="text-cosmic-gold">Multi-passionate</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>• Projector (20%)</span>
+                    <span className="text-cosmic-gold">Guides</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>• Reflector (1%)</span>
+                    <span className="text-cosmic-gold">Evaluators</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-cosmic-gold">Key Components</h3>
+                <div className="space-y-2 text-sm text-cosmic-silver">
+                  <div><span className="text-cosmic-gold">Strategy:</span> Your decision-making approach</div>
+                  <div><span className="text-cosmic-gold">Authority:</span> Your inner guidance system</div>
+                  <div><span className="text-cosmic-gold">Profile:</span> Your personality theme</div>
+                  <div><span className="text-cosmic-gold">Centers:</span> Energy hubs in your body</div>
+                  <div><span className="text-cosmic-gold">Gates:</span> Specific traits and gifts</div>
+                  <div><span className="text-cosmic-gold">Channels:</span> Consistent life forces</div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Energy Type</h3>
-              <p className="text-cosmic-silver/80 text-sm">
-                Your unique way of interacting with the world's energy
-              </p>
-            </div>
-            <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Strategy</h3>
-              <p className="text-cosmic-silver/80 text-sm">
-                How to make decisions that align with your design
-              </p>
-            </div>
-            <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Authority</h3>
-              <p className="text-cosmic-silver/80 text-sm">
-                Your inner guidance system for making choices
-              </p>
-            </div>
-            <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Profile</h3>
-              <p className="text-cosmic-silver/80 text-sm">
-                Your conscious and unconscious personality themes
-              </p>
-            </div>
-          </div>
+          </Card>
         </div>
-
-        <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-cosmic-purple/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">📋</span>
-            </div>
-            <h2 className="text-xl font-semibold text-cosmic-gold mb-4 font-playfair">
-              Generate Your Chart
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-cosmic-silver/80 mb-2">Date of Birth</label>
-              <input 
-                type="date" 
-                title="Enter your birth date"
-                className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-cosmic-silver/80 mb-2">Time of Birth</label>
-              <input 
-                type="time" 
-                title="Enter your birth time"
-                className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-cosmic-silver/80 mb-2">Birth Location</label>
-              <input 
-                type="text" 
-                placeholder="City, Country"
-                className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
-              />
-            </div>
-            
-            <button className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cosmic-silver/30 to-cosmic-purple hover:from-cosmic-silver/40 hover:to-cosmic-purple/80 text-white rounded-lg transition-all duration-300 font-semibold">
-              Generate Human Design Chart
-            </button>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <div className="p-4 bg-cosmic-dark/30 rounded-lg border border-cosmic-silver/10">
-              <h4 className="text-cosmic-gold font-semibold mb-2">The 5 Energy Types</h4>
-              <ul className="text-cosmic-silver/70 text-sm space-y-1">
-                <li>• Manifestor (8%) - Initiators</li>
-                <li>• Generator (37%) - Builders</li>
-                <li>• Manifesting Generator (33%) - Multi-passionate</li>
-                <li>• Projector (21%) - Guides</li>
-                <li>• Reflector (1%) - Evaluators</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

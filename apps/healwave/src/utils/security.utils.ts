@@ -16,7 +16,7 @@ export class BinauralSecurityValidator implements InputValidation {
    */
   sanitize(input: string): string {
     return input
-      .replace(/[<>\"']/g, '') // Remove potential HTML/script characters
+      .replace(/[<>"']/g, '') // Remove potential HTML/script characters
       .replace(/javascript:/gi, '') // Remove javascript protocols
       .replace(/on\w+=/gi, '') // Remove event handlers
       .trim()

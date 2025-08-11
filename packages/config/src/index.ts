@@ -9,3 +9,7 @@ export * from './env';
 
 // Lazy loading (working module)
 export * from './lazy-loading';
+
+// Push notifications and background sync
+export * from './push-notifications';
+export * from './background-sync-enhanced';

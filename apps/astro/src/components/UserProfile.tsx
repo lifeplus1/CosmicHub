@@ -71,7 +71,7 @@ const UserProfile: React.FC = React.memo(() => {
   };
 
   const handleUpgrade = useCallback(() => {
-    navigate('/premium');
+    navigate('/upgrade-demo');
   }, [navigate]);
 
   const currentTier = COSMICHUB_TIERS[userTier as keyof typeof COSMICHUB_TIERS];

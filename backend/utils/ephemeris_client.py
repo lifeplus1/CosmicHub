@@ -8,9 +8,9 @@ and ephemeris data from the remote ephemeris server, with Redis caching support.
 import os
 import json
 import logging
-import asyncio
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timezone
+from typing import Dict, List, Optional, Any, Type
+from types import TracebackType
+from datetime import datetime
 import httpx
 import redis.asyncio as redis  # type: ignore
 from pydantic import BaseModel, Field
@@ -88,7 +88,7 @@ class EphemerisClient:
         self.redis_client = None
         if redis_url:
             try:
-                self.redis_client = redis.from_url(redis_url, decode_responses=True)
+                self.redis_client = redis.from_url(redis_url, decode_responses=True)  # type: ignore[attr-defined]
                 logger.info("Redis client initialized for ephemeris caching")
             except Exception as e:
                 logger.warning(f"Failed to initialize Redis client: {e}")
@@ -98,7 +98,12 @@ class EphemerisClient:
         self.http_client = httpx.AsyncClient(timeout=self.timeout)
         return self
     
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+        self, 
+        exc_type: Optional[Type[BaseException]], 
+        exc_val: Optional[BaseException], 
+        exc_tb: Optional[TracebackType]
+    ) -> None:
         """Async context manager exit."""
         await self.http_client.aclose()
         if self.redis_client:
@@ -136,7 +141,7 @@ class EphemerisClient:
         except Exception as e:
             logger.warning(f"Cache write error: {e}")
     
-    async def _make_request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+    async def _make_request(self, method: str, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
         """Make HTTP request to ephemeris server."""
         url = f"{self.server_url}{endpoint}"
         
@@ -145,7 +150,7 @@ class EphemerisClient:
                 method=method,
                 url=url,
                 headers=self.headers,
-                **kwargs
+                **kwargs  # type: ignore[arg-type]
             )
             response.raise_for_status()
             return response.json()
@@ -234,7 +239,13 @@ class EphemerisClient:
     
     async def get_supported_planets(self) -> List[str]:
         """Get list of supported planets from ephemeris server."""
-        return await self._make_request('GET', '/planets')
+        response = await self._make_request('GET', '/planets')
+        # The response should be a list of strings
+        if isinstance(response, list):
+            return response  # type: ignore[return-value]
+        else:
+            # If the response is wrapped in a dict, extract the list
+            return response.get('planets', [])  # type: ignore[return-value]
     
     async def fetch_ephemeris_data(self, filename: str) -> bytes:
         """
@@ -287,7 +298,7 @@ async def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition
         try:
             batch_response = await client.calculate_batch_positions(calculations)
             
-            result = {}
+            result: Dict[str, PlanetPosition] = {}
             for calc_result in batch_response.results:
                 result[calc_result.planet] = calc_result.position
             

@@ -190,7 +190,7 @@ export const AIInterpretationTest: React.FC = () => {
             {/* Back Button */}
             <div className={styles['back-button-container']}>
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/')}
                 className={styles['back-button']}
               >
                 <FaArrowLeft />

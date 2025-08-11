@@ -7,8 +7,7 @@ through the backend, which then forwards requests to the ephemeris microservice.
 
 import logging
 from typing import List, Dict, Any
-from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, HTTPException, status
 
 from utils.ephemeris_client import EphemerisClient, EphemerisClientError
 from ..models.ephemeris import (
@@ -22,10 +21,6 @@ from ..models.ephemeris import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ephemeris", tags=["ephemeris"])
-
-async def get_ephemeris_client() -> EphemerisClient:
-    """Dependency to get ephemeris client instance."""
-    return EphemerisClient()
 
 @router.get("/health", response_model=EphemerisHealthResponse)
 async def health_check():
@@ -159,7 +154,7 @@ async def get_supported_planets():
         )
 
 @router.get("/positions/{julian_day}", response_model=Dict[str, Any])
-async def get_all_planetary_positions(julian_day: float):
+async def get_all_planetary_positions(julian_day: float) -> Dict[str, Any]:
     """
     Get all planetary positions for a specific Julian Day.
     
@@ -185,18 +180,20 @@ async def get_all_planetary_positions(julian_day: float):
             batch_result = await client.calculate_batch_positions(calculations)
             
             # Convert to dictionary format
-            positions = {}
+            positions: Dict[str, Dict[str, Any]] = {}
             for result in batch_result.results:
                 positions[result.planet] = {
                     "position": result.position.position,
                     "retrograde": result.position.retrograde
                 }
             
-            return {
+            return_data: Dict[str, Any] = {
                 "julian_day": julian_day,
                 "positions": positions,
                 "calculation_time": batch_result.calculation_time
             }
+            
+            return return_data
     except EphemerisClientError as e:
         logger.error(f"Failed to get all planetary positions: {e}")
         raise HTTPException(

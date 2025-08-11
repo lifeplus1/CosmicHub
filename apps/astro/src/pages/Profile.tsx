@@ -43,16 +43,24 @@ const Profile: React.FC = () => {
           <Card title="Preferences">
             <div className="space-y-4">
               <div>
-                <label className="block text-cosmic-silver mb-2">Chart Style</label>
-                <select className="w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver">
+                <label htmlFor="chartStyle" className="block text-cosmic-silver mb-2">Chart Style</label>
+                <select 
+                  id="chartStyle"
+                  aria-label="Select chart style"
+                  className="w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
+                >
                   <option>Western</option>
                   <option>Vedic</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-cosmic-silver mb-2">House System</label>
-                <select className="w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver">
+                <label htmlFor="houseSystem" className="block text-cosmic-silver mb-2">House System</label>
+                <select 
+                  id="houseSystem"
+                  aria-label="Select house system"
+                  className="w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
+                >
                   <option>Placidus</option>
                   <option>Whole Sign</option>
                   <option>Equal House</option>
@@ -82,7 +90,7 @@ const Profile: React.FC = () => {
           <p className="text-cosmic-silver mb-4">
             Please sign in to view your profile
           </p>
-          <Button onClick={() => window.location.href = '/auth'}>
+          <Button onClick={() => window.location.href = '/login'}>
             Sign In
           </Button>
         </Card>

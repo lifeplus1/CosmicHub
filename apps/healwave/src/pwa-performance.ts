@@ -1,0 +1,201 @@
+/**
+ * Advanced PWA Performance Enhancements for HealWave
+ * Builds on existing CosmicHub performance optimizations
+ */
+
+// Simple logger for PWA performance monitoring
+class PWALogger {
+  private static isDevelopment = import.meta.env.DEV;
+  
+  static log(message: string, ...args: any[]): void {
+    if (this.isDevelopment) {
+      // eslint-disable-next-line no-console
+      console.log(message, ...args);
+    }
+  }
+  
+  static warn(message: string, ...args: any[]): void {
+    if (this.isDevelopment) {
+      // eslint-disable-next-line no-console
+      console.warn(message, ...args);
+    }
+  }
+  
+  static error(message: string, ...args: any[]): void {
+    // Always log errors, even in production
+    // eslint-disable-next-line no-console
+    console.error(message, ...args);
+  }
+}
+
+// Core PWA Performance Classes for HealWave
+export class CriticalResourceManager {
+  private static readonly CRITICAL_RESOURCES: string[] = [
+    '/src/main.tsx',
+    '/src/index.css',
+    '/src/styles/index.css'
+  ];
+
+  private static readonly FONT_RESOURCES: string[] = [
+    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+    'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'
+  ];
+
+  static async preloadCriticalResources(): Promise<void> {
+    PWALogger.log('⚡ Preloading critical resources for HealWave...');
+
+    const preloadPromises = this.CRITICAL_RESOURCES.map(resource => {
+      return new Promise<void>((resolve) => {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.href = resource;
+        link.as = resource.endsWith('.css') ? 'style' : 'script';
+        if (resource.endsWith('.tsx') || resource.endsWith('.js')) {
+          link.crossOrigin = 'anonymous';
+        }
+        
+        link.onload = () => {
+          PWALogger.log(`✅ Preloaded: ${resource}`);
+          resolve();
+        };
+        link.onerror = () => {
+          PWALogger.warn(`⚠️ Failed to preload: ${resource}`);
+          resolve(); // Don't block on failed preloads
+        };
+        
+        document.head.appendChild(link);
+      });
+    });
+
+    await Promise.allSettled(preloadPromises);
+    PWALogger.log('🎯 Critical resource preloading complete');
+  }
+}
+
+export class ConnectionAwareLoader {
+  private static connection = (navigator as any).connection || 
+                              (navigator as any).mozConnection || 
+                              (navigator as any).webkitConnection;
+
+  static getConnectionInfo(): {
+    effectiveType: string;
+    downlink: number;
+    saveData: boolean;
+  } {
+    if (!this.connection) {
+      return {
+        effectiveType: '4g',
+        downlink: 10,
+        saveData: false
+      };
+    }
+
+    return {
+      effectiveType: this.connection.effectiveType || '4g',
+      downlink: this.connection.downlink || 10,
+      saveData: this.connection.saveData || false
+    };
+  }
+
+  static shouldOptimizeForSlowConnection(): boolean {
+    const info = this.getConnectionInfo();
+    return info.effectiveType === 'slow-2g' || 
+           info.effectiveType === '2g' || 
+           info.downlink < 1.5 || 
+           info.saveData;
+  }
+}
+
+export class PWAPerformanceMonitor {
+  private static metrics: Map<string, number> = new Map();
+
+  static startTiming(label: string): void {
+    this.metrics.set(`${label}_start`, performance.now());
+  }
+
+  static endTiming(label: string): number {
+    const startTime = this.metrics.get(`${label}_start`);
+    if (startTime === undefined) {
+      PWALogger.warn(`No start time found for ${label}`);
+      return 0;
+    }
+    
+    const duration = performance.now() - startTime;
+    this.metrics.set(label, duration);
+    PWALogger.log(`⏱️ ${label}: ${duration.toFixed(2)}ms`);
+    return duration;
+  }
+
+  static getMetrics(): Record<string, number> {
+    return Object.fromEntries(this.metrics);
+  }
+}
+
+// HealWave-specific performance optimizations
+export class AudioPerformanceOptimizer {
+  private static audioContext: AudioContext | null = null;
+
+  static async initializeAudioContext(): Promise<void> {
+    if (!this.audioContext) {
+      try {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        PWALogger.log('🎵 Audio context initialized for HealWave');
+      } catch (error) {
+        PWALogger.warn('⚠️ Audio context initialization failed:', error);
+      }
+    }
+  }
+
+  static optimizeForAudioPlayback(): void {
+    // Reduce background processing during audio playback
+    document.addEventListener('play', () => {
+      PWALogger.log('🎧 Audio playback started - optimizing performance');
+      // Reduce non-critical processing
+      document.documentElement.style.setProperty('--reduce-animations', '1');
+    }, true);
+
+    document.addEventListener('pause', () => {
+      PWALogger.log('⏸️ Audio playback paused - restoring normal performance');
+      document.documentElement.style.setProperty('--reduce-animations', '0');
+    }, true);
+  }
+
+  static preloadAudioAssets(): void {
+    // Preload critical audio files if needed
+    const criticalAudioFiles: string[] = [
+      // Add your critical audio file paths here
+      // '/audio/critical-frequency.mp3'
+    ];
+
+    criticalAudioFiles.forEach(audioFile => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.href = audioFile;
+      link.as = 'audio';
+      document.head.appendChild(link);
+    });
+  }
+}
+
+// Initialize HealWave-specific performance enhancements
+export async function initializeHealWavePerformance(): Promise<void> {
+  PWALogger.log('🎧 Initializing HealWave PWA performance enhancements...');
+
+  try {
+    // Initialize audio optimizations
+    await AudioPerformanceOptimizer.initializeAudioContext();
+    AudioPerformanceOptimizer.optimizeForAudioPlayback();
+    AudioPerformanceOptimizer.preloadAudioAssets();
+
+    PWALogger.log('✅ HealWave PWA performance enhancements initialized');
+  } catch (error) {
+    PWALogger.error('❌ Failed to initialize HealWave performance enhancements:', error);
+  }
+}
+
+// Auto-initialize when imported
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeHealWavePerformance);
+} else {
+  initializeHealWavePerformance();
+}

@@ -1,76 +1,50 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { FaUser, FaCrown, FaStar, FaCog, FaSignOutAlt, FaChartLine, FaSave, FaCreditCard } from 'react-icons/fa';
-import { useAuth, logOut } from '@cosmichub/auth';
-import { useSubscription } from '@cosmichub/auth';
+import { FaUser, FaChartLine, FaBolt, FaSignOutAlt, FaCrown, FaStar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from './ToastProvider';
-import type { COSMICHUB_TIERS } from '../types/subscription';
 
 interface UserMenuProps {
-  userInfo?: {
-    email: string;
-  } | null;
+  user: { email: string };
+  userTier: string;
+  handleSignOut: () => void;
 }
 
-const UserMenu: React.FC<UserMenuProps> = React.memo(({ userInfo }) => {
-  const { user } = useAuth();
-  const { userTier } = useSubscription();
+const UserMenu: React.FC<UserMenuProps> = React.memo(({ user, userTier, handleSignOut }) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await logOut();
-      toast({
-        title: 'Logged Out',
-        description: 'You have been successfully logged out',
-        status: 'success',
-        duration: 2000,
-        isClosable: true,
-      });
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to log out',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [navigate, toast]);
-
-  const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS) => {
+  const getTierIcon = (tier: string) => {
     switch (tier) {
-      case 'free': return <FaUser className="text-gray-500" />;
+      case 'elite': return <FaCrown className="text-gold-500" />;
       case 'premium': return <FaStar className="text-purple-500" />;
-      case 'elite': return <FaCrown className="text-orange-500" />;
       default: return <FaUser className="text-gray-500" />;
     }
   };
 
-  const getTierColor = (tier: keyof typeof COSMICHUB_TIERS) => {
+  const getTierBadge = (tier: string) => {
     switch (tier) {
-      case 'free': return 'gray-500';
-      case 'premium': return 'purple-500';
-      case 'elite': return 'orange-500';
-      default: return 'gray-500';
+      case 'elite':
+        return <span className="px-2 py-1 text-xs font-bold text-gold-900 bg-gradient-to-r from-gold-400 to-gold-600 rounded-full">ELITE</span>;
+      case 'premium':
+        return <span className="px-2 py-1 text-xs font-bold text-purple-900 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full">PRO</span>;
+      default:
+        return <span className="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-200 rounded-full">FREE</span>;
     }
   };
-
-  const isPremium = userTier === 'premium' || userTier === 'elite';
-
-  if (!user) return null;
 
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <button className="flex items-center p-2 space-x-2 transition-colors rounded-full bg-cosmic-blue/30 hover:bg-cosmic-blue/50" aria-label="User Menu">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cosmic-silver/30">
-            <FaUser className="text-cosmic-silver" />
+        <button
+          className="flex items-center gap-3 p-2 rounded-lg bg-cosmic-blue/20 hover:bg-cosmic-blue/30 transition-colors"
+          aria-label="User Menu"
+        >
+          <div className="w-8 h-8 rounded-full bg-cosmic-silver/20 flex items-center justify-center">
+            {getTierIcon(userTier)}
           </div>
-          <span className="text-sm font-medium text-cosmic-silver">{userInfo?.email || user.email}</span>
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-medium text-cosmic-silver truncate max-w-32">{user.email}</span>
+            {getTierBadge(userTier)}
+          </div>
           <svg className="w-4 h-4 text-cosmic-silver" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
           </svg>
@@ -78,58 +52,40 @@ const UserMenu: React.FC<UserMenuProps> = React.memo(({ userInfo }) => {
       </DropdownMenu.Trigger>
 
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="bg-cosmic-blue/80 backdrop-blur-md border border-cosmic-silver/20 rounded-lg shadow-lg p-2 min-w-[200px]" sideOffset={5}>
-          <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20">
-            <div className="flex items-center space-x-2">
-              {getTierIcon(userTier)}
-              <span className="text-sm">{userInfo?.email || user.email}</span>
-            </div>
-            <span className={`bg-${getTierColor(userTier)}/20 text-${getTierColor(userTier)} px-2 py-1 rounded text-sm font-semibold uppercase`}>
-              {userTier}
-            </span>
-          </DropdownMenu.Item>
-
-          <DropdownMenu.Separator className="h-px my-1 bg-cosmic-silver/20" />
-
-          <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded cursor-pointer hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/profile')}>
+        <DropdownMenu.Content
+          className="bg-cosmic-dark/95 backdrop-blur-lg border border-cosmic-silver/20 rounded-lg p-2 min-w-[200px] shadow-lg"
+          sideOffset={8}
+        >
+          <DropdownMenu.Item
+            className="flex items-center gap-2 p-2 rounded-md hover:bg-cosmic-purple/10 text-cosmic-silver cursor-pointer transition-colors"
+            onSelect={() => navigate('/profile')}
+          >
             <FaUser />
-            <span>View Profile</span>
+            Profile
           </DropdownMenu.Item>
-
-          <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded cursor-pointer hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/saved-charts')}>
-            <FaSave />
-            <span>Saved Charts</span>
-          </DropdownMenu.Item>
-
-          <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded cursor-pointer hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/calculator')}>
+          <DropdownMenu.Item
+            className="flex items-center gap-2 p-2 rounded-md hover:bg-cosmic-purple/10 text-cosmic-silver cursor-pointer transition-colors"
+            onSelect={() => navigate('/saved-charts')}
+          >
             <FaChartLine />
-            <span>Chart Calculator</span>
+            Saved Charts
           </DropdownMenu.Item>
-
-          <DropdownMenu.Separator className="h-px my-1 bg-cosmic-silver/20" />
-
-          {isPremium ? (
-            <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded cursor-pointer hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/profile')}>
-              <FaCreditCard />
-              <span>Manage Subscription</span>
-            </DropdownMenu.Item>
-          ) : (
-            <DropdownMenu.Item className="flex items-center p-2 space-x-2 font-medium text-purple-600 rounded cursor-pointer hover:bg-cosmic-purple/20 focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/premium')}>
-              <FaStar className="text-purple-500" />
-              <span>🌟 Upgrade to Premium</span>
+          {userTier === 'free' && (
+            <DropdownMenu.Item
+              className="flex items-center gap-2 p-2 rounded-md hover:bg-gold-500/10 text-gold-400 cursor-pointer transition-colors"
+              onSelect={() => navigate('/upgrade')}
+            >
+              <FaBolt />
+              Upgrade to Pro
             </DropdownMenu.Item>
           )}
-
-          <DropdownMenu.Item className="flex items-center p-2 space-x-2 rounded cursor-pointer hover:bg-cosmic-purple/20 text-cosmic-silver focus:outline-none focus:bg-cosmic-purple/20" onSelect={() => navigate('/profile')}>
-            <FaCog />
-            <span>Account Settings</span>
-          </DropdownMenu.Item>
-
-          <DropdownMenu.Separator className="h-px my-1 bg-cosmic-silver/20" />
-
-          <DropdownMenu.Item className="flex items-center p-2 space-x-2 text-red-500 rounded cursor-pointer hover:bg-red-50 focus:outline-none focus:bg-red-50" onSelect={handleLogout}>
+          <DropdownMenu.Separator className="h-px my-2 bg-cosmic-silver/20" />
+          <DropdownMenu.Item
+            className="flex items-center gap-2 p-2 rounded-md hover:bg-red-900/10 text-red-400 cursor-pointer transition-colors"
+            onSelect={handleSignOut}
+          >
             <FaSignOutAlt />
-            <span>Sign Out</span>
+            Sign Out
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

@@ -52,11 +52,15 @@ export const EducationalTooltip: React.FC<EducationalTooltipProps> = React.memo(
 
   return (
     <Tooltip.Root>
-      <Tooltip.Trigger asChild>
+      <Tooltip.Trigger asChild={!!children}>
         {children || (
-          <div className="inline-block cursor-help">
+          <button 
+            className="inline-block cursor-help border-none bg-transparent p-0" 
+            aria-label={`Learn more about ${title}`}
+            type="button"
+          >
             <FaQuestionCircle className="text-sm text-gray-400" />
-          </div>
+          </button>
         )}
       </Tooltip.Trigger>
       <Tooltip.Portal>
@@ -77,9 +81,13 @@ EducationalTooltip.displayName = 'EducationalTooltip';
 export const InfoIcon: React.FC<{ tooltip: string }> = React.memo(({ tooltip }) => (
   <Tooltip.Root>
     <Tooltip.Trigger asChild>
-      <div className="inline-block ml-1 cursor-help">
+      <button 
+        className="inline-block ml-1 cursor-help border-none bg-transparent p-0"
+        aria-label="More information"
+        type="button"
+      >
         <FaInfoCircle className="text-sm text-blue-400" />
-      </div>
+      </button>
     </Tooltip.Trigger>
     <Tooltip.Portal>
       <Tooltip.Content

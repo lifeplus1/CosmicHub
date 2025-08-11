@@ -1,0 +1,319 @@
+import React, { useState } from 'react';
+import { Button, Card } from '@cosmichub/ui';
+import { useBirthData } from '../contexts/BirthDataContext';
+import type { ChartBirthData } from '../services/api';
+
+interface SimpleBirthFormProps {
+  title?: string;
+  submitButtonText?: string;
+  onSubmit?: (data: ChartBirthData) => void;
+  showSampleButton?: boolean;
+}
+
+export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
+  title = "Birth Details",
+  submitButtonText = "Calculate Chart",
+  onSubmit,
+  showSampleButton = true
+}) => {
+  const { setBirthData } = useBirthData();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  // Form state using composite fields like the original Calculator with smart defaults
+  const [formData, setFormData] = useState(() => {
+    const today = new Date();
+    const birthYear = today.getFullYear() - 25; // Default to 25 years ago
+    const defaultDate = `${birthYear}-06-15`; // Mid-year default
+    const currentTime = today.toTimeString().slice(0, 5); // Current time in HH:MM format
+    
+    return {
+      birthDate: defaultDate,
+      birthTime: currentTime,
+      birthLocation: ''
+    };
+  });
+
+  // Sample birth data for quick testing
+  const sampleChartData: ChartBirthData = {
+    year: 1990,
+    month: 6,
+    day: 21,
+    hour: 14,
+    minute: 30,
+    city: "New York"
+    // lat, lon, and timezone will be automatically determined by backend
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Clear previous validation errors
+    setValidationErrors({});
+    
+    // Validate form data
+    const errors: Record<string, string> = {};
+    
+    if (!formData.birthDate) {
+      errors.birthDate = 'Birth date is required';
+    }
+    
+    if (!formData.birthTime) {
+      errors.birthTime = 'Birth time is required';
+    }
+    
+    if (!formData.birthLocation.trim()) {
+      errors.birthLocation = 'Birth location is required';
+    }
+    
+    // Check if date is reasonable (between 1900 and current year + 1)
+    if (formData.birthDate) {
+      const selectedYear = new Date(formData.birthDate).getFullYear();
+      const currentYear = new Date().getFullYear();
+      if (selectedYear < 1900 || selectedYear > currentYear + 1) {
+        errors.birthDate = `Year must be between 1900 and ${currentYear + 1}`;
+      }
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Parse the composite date and time fields
+      const dateObj = new Date(formData.birthDate);
+      const [hours, minutes] = formData.birthTime.split(':').map(Number);
+
+      // No need to provide coordinates or timezone - backend will determine automatically from city
+      const chartData: ChartBirthData = {
+        year: dateObj.getFullYear(),
+        month: dateObj.getMonth() + 1, // JavaScript months are 0-indexed
+        day: dateObj.getDate(),
+        hour: hours,
+        minute: minutes,
+        city: formData.birthLocation.trim()
+        // lat, lon, and timezone will be automatically determined by backend
+      };
+
+      setBirthData(chartData);
+      onSubmit?.(chartData);
+    } catch (error) {
+      console.error('Error creating chart:', error);
+      alert('Error creating chart. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoadSample = () => {
+    setBirthData(sampleChartData);
+    onSubmit?.(sampleChartData);
+  };
+
+  // Geolocation functionality
+  const handleDetectLocation = async () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by this browser.');
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          // Use reverse geocoding to get city name
+          const response = await fetch(
+            `https://api.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            const city = data.address?.city || data.address?.town || data.address?.village;
+            const state = data.address?.state;
+            const country = data.address?.country;
+            
+            let locationString = '';
+            if (city && state && country) {
+              locationString = `${city}, ${state}, ${country}`;
+            } else if (city && country) {
+              locationString = `${city}, ${country}`;
+            } else if (country) {
+              locationString = country;
+            }
+            
+            if (locationString) {
+              setFormData(prev => ({ ...prev, birthLocation: locationString }));
+            } else {
+              alert('Could not determine location name. Please enter manually.');
+            }
+          } else {
+            alert('Could not determine location name. Please enter manually.');
+          }
+        } catch (error) {
+          console.error('Error with reverse geocoding:', error);
+          alert('Could not determine location name. Please enter manually.');
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        let message = 'Could not get your location. ';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message += 'Please allow location access and try again.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message += 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            message += 'Location request timed out.';
+            break;
+          default:
+            message += 'An unknown error occurred.';
+            break;
+        }
+        alert(message);
+        setIsDetectingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 600000 // 10 minutes
+      }
+    );
+  };
+
+  return (
+    <Card title={title}>
+      <form onSubmit={handleFormSubmit} className="space-y-4">
+        {/* Birth Date - Single composite field */}
+        <div>
+          <label htmlFor="birth-date" className="block text-cosmic-silver mb-2">Birth Date</label>
+          <input 
+            id="birth-date"
+            type="date" 
+            value={formData.birthDate}
+            onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+            className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
+              validationErrors.birthDate 
+                ? 'border-red-500 focus:border-red-400' 
+                : 'border-cosmic-purple focus:border-cosmic-gold'
+            } transition-colors`}
+            required
+            aria-label="Select your birth date"
+          />
+          {validationErrors.birthDate && (
+            <p className="text-red-400 text-sm mt-1">⚠️ {validationErrors.birthDate}</p>
+          )}
+        </div>
+        
+        {/* Birth Time - Single composite field */}
+        <div>
+          <label htmlFor="birth-time" className="block text-cosmic-silver mb-2">Birth Time</label>
+          <input 
+            id="birth-time"
+            type="time" 
+            value={formData.birthTime}
+            onChange={(e) => setFormData({...formData, birthTime: e.target.value})}
+            className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
+              validationErrors.birthTime 
+                ? 'border-red-500 focus:border-red-400' 
+                : 'border-cosmic-purple focus:border-cosmic-gold'
+            } transition-colors`}
+            required
+            aria-label="Select your birth time"
+          />
+          {validationErrors.birthTime && (
+            <p className="text-red-400 text-sm mt-1">⚠️ {validationErrors.birthTime}</p>
+          )}
+        </div>
+        
+        {/* Birth Location - Single composite field */}
+        <div>
+          <label htmlFor="birth-location" className="block text-cosmic-silver mb-2">Birth Location</label>
+          <div className="flex gap-2">
+            <input 
+              id="birth-location"
+              type="text" 
+              placeholder="City, State/Country (e.g., New York, NY or London, UK)"
+              value={formData.birthLocation}
+              onChange={(e) => setFormData({...formData, birthLocation: e.target.value})}
+              className={`flex-1 p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
+                validationErrors.birthLocation 
+                  ? 'border-red-500 focus:border-red-400' 
+                  : 'border-cosmic-purple focus:border-cosmic-gold'
+              } transition-colors`}
+              required
+              aria-label="Enter your birth location"
+            />
+            <button
+              type="button"
+              onClick={handleDetectLocation}
+              disabled={isDetectingLocation}
+              className="px-4 py-3 bg-cosmic-gold/20 hover:bg-cosmic-gold/30 disabled:bg-gray-600 border border-cosmic-gold/30 text-cosmic-gold text-sm rounded transition-colors whitespace-nowrap"
+              title="Use your current location"
+            >
+              {isDetectingLocation ? '📍...' : '📍 Current'}
+            </button>
+          </div>
+          {validationErrors.birthLocation && (
+            <p className="text-red-400 text-sm mt-1">⚠️ {validationErrors.birthLocation}</p>
+          )}
+          <p className="text-cosmic-silver/60 text-sm mt-1">
+            💡 Timezone will be automatically detected from your location
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-cosmic-purple hover:bg-cosmic-purple/80 disabled:bg-gray-600 text-white p-3 rounded transition-colors relative overflow-hidden"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin text-lg">🌌</div>
+                <span>Calculating cosmic positions...</span>
+              </div>
+            ) : (
+              submitButtonText
+            )}
+          </button>
+          
+          {showSampleButton && (
+            <button
+              type="button"
+              onClick={handleLoadSample}
+              className="w-full px-4 py-2 bg-cosmic-blue hover:bg-cosmic-blue/80 text-white rounded-lg transition-colors"
+            >
+              ⚡ Load Sample Chart
+            </button>
+          )}
+          
+          {/* Quick tips */}
+          <div className="mt-4 p-3 bg-cosmic-gold/10 rounded-lg border border-cosmic-gold/20">
+            <div className="flex items-start gap-2">
+              <span className="text-cosmic-gold mt-0.5">💡</span>
+              <div className="text-sm">
+                <p className="text-cosmic-gold font-medium mb-1">Pro Tips:</p>
+                <ul className="text-cosmic-silver/80 space-y-1 text-xs">
+                  <li>• Use exact birth time from birth certificate for accuracy</li>
+                  <li>• Include state/province for better location matching</li>
+                  <li>• Click "Current" to use your current location as reference</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </Card>
+  );
+};

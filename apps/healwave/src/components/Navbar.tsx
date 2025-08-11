@@ -12,10 +12,12 @@ const Navbar: React.FC = () => {
     try {
       await logOut();
     } catch (error) {
-      console.error('Logout failed:', error);
+      // Use proper error handling instead of console
+      alert('Logout failed. Please try again.');
     }
   };
 
+  // Close dropdown when clicking outside
   const openLogin = () => {
     setAuthMode('login');
     setShowAuthModal(true);

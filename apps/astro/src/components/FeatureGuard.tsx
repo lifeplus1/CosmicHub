@@ -162,7 +162,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({
       navigate('/login');
       return;
     }
-    navigate('/premium');
+    navigate('/upgrade-demo');
   };
 
   const UpgradeCard = () => (

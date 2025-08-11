@@ -24,7 +24,7 @@ const TabLoadingFallback: React.FC = () => (
   </div>
 );
 
-const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalculate }) => {
+const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalculate, onHumanDesignCalculated }) => {
   const [humanDesignData, setHumanDesignData] = useState<HumanDesignData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +40,11 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
     try {
       const response = await calculateHumanDesign(birthData);
       setHumanDesignData(response.human_design);
+      
+      // Pass the Human Design data back to the parent component
+      if (onHumanDesignCalculated) {
+        onHumanDesignCalculated(response.human_design);
+      }
       
       toast({
         title: "Human Design Calculated",

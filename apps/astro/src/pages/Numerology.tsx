@@ -1,6 +1,107 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
+
+interface NumerologyData {
+  fullName: string;
+  birthDate: string;
+}
 
 const Numerology: React.FC = () => {
+  const [numerologyData, setNumerologyData] = useState<NumerologyData>({
+    fullName: '',
+    birthDate: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<{
+    lifePath?: number;
+    expression?: number;
+    soulUrge?: number;
+  }>({});
+
+  console.log('🔢 Numerology page rendered with data:', numerologyData);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    console.log('📝 Numerology input changed:', { name, value });
+    setNumerologyData(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const calculateLifePathNumber = useCallback((dateStr: string): number => {
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    
+    let sum = day + month + year;
+    while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+      sum = sum.toString().split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+    }
+    return sum;
+  }, []);
+
+  const calculateExpressionNumber = useCallback((name: string): number => {
+    const letterValues: { [key: string]: number } = {
+      'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
+      'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'O': 6, 'P': 7, 'Q': 8, 'R': 9,
+      'S': 1, 'T': 2, 'U': 3, 'V': 4, 'W': 5, 'X': 6, 'Y': 7, 'Z': 8
+    };
+    
+    let sum = 0;
+    for (const char of name.toUpperCase().replace(/[^A-Z]/g, '')) {
+      sum += letterValues[char] || 0;
+    }
+    
+    while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+      sum = sum.toString().split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+    }
+    return sum;
+  }, []);
+
+  const calculateSoulUrgeNumber = useCallback((name: string): number => {
+    const vowelValues: { [key: string]: number } = {
+      'A': 1, 'E': 5, 'I': 9, 'O': 6, 'U': 3, 'Y': 7
+    };
+    
+    let sum = 0;
+    for (const char of name.toUpperCase().replace(/[^A-Z]/g, '')) {
+      sum += vowelValues[char] || 0;
+    }
+    
+    while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+      sum = sum.toString().split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+    }
+    return sum;
+  }, []);
+
+  const handleCalculateNumbers = useCallback(async () => {
+    console.log('🔢 Calculate numbers clicked with data:', numerologyData);
+    
+    if (!numerologyData.fullName.trim() || !numerologyData.birthDate) {
+      alert('Please enter both your full name and birth date.');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const lifePath = calculateLifePathNumber(numerologyData.birthDate);
+      const expression = calculateExpressionNumber(numerologyData.fullName);
+      const soulUrge = calculateSoulUrgeNumber(numerologyData.fullName);
+      
+      setResults({
+        lifePath,
+        expression,
+        soulUrge
+      });
+      
+      console.log('✅ Numerology calculations complete:', { lifePath, expression, soulUrge });
+    } catch (error) {
+      console.error('❌ Error calculating numerology:', error);
+      alert('Error calculating your numbers. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [numerologyData, calculateLifePathNumber, calculateExpressionNumber, calculateSoulUrgeNumber]);
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -32,7 +133,9 @@ const Numerology: React.FC = () => {
                 Your life's purpose and the path you're meant to walk
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
-                <span className="text-xl font-bold text-cosmic-gold">?</span>
+                <span className="text-xl font-bold text-cosmic-gold">
+                  {results.lifePath || '?'}
+                </span>
               </div>
             </div>
 
@@ -42,7 +145,9 @@ const Numerology: React.FC = () => {
                 Your natural talents and abilities you're meant to develop
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
-                <span className="text-xl font-bold text-cosmic-gold">?</span>
+                <span className="text-xl font-bold text-cosmic-gold">
+                  {results.expression || '?'}
+                </span>
               </div>
             </div>
 
@@ -52,7 +157,9 @@ const Numerology: React.FC = () => {
                 Your heart's desire and inner motivations
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
-                <span className="text-xl font-bold text-cosmic-gold">?</span>
+                <span className="text-xl font-bold text-cosmic-gold">
+                  {results.soulUrge || '?'}
+                </span>
               </div>
             </div>
           </div>
@@ -73,22 +180,41 @@ const Numerology: React.FC = () => {
               <label htmlFor="full-name" className="block text-cosmic-silver/80 mb-2">Full Name at Birth</label>
               <input 
                 id="full-name"
+                name="fullName"
                 type="text" 
+                value={numerologyData.fullName}
+                onChange={handleInputChange}
                 placeholder="Enter your full birth name"
                 className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                required
               />
             </div>
             <div>
               <label htmlFor="birth-date-numerology" className="block text-cosmic-silver/80 mb-2">Date of Birth</label>
               <input 
                 id="birth-date-numerology"
+                name="birthDate"
                 type="date" 
+                value={numerologyData.birthDate}
+                onChange={handleInputChange}
                 className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                required
               />
             </div>
             
-            <button className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple hover:from-cosmic-gold/80 hover:to-cosmic-purple/80 text-white rounded-lg transition-all duration-300 font-semibold">
-              Calculate My Numbers
+            <button 
+              onClick={handleCalculateNumbers}
+              disabled={isLoading || !numerologyData.fullName.trim() || !numerologyData.birthDate}
+              className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple hover:from-cosmic-gold/80 hover:to-cosmic-purple/80 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-lg transition-all duration-300 font-semibold disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
+                  Calculating...
+                </div>
+              ) : (
+                'Calculate My Numbers'
+              )}
             </button>
 
             <div className="mt-6 p-4 bg-cosmic-dark/30 rounded-lg border border-cosmic-silver/10">

@@ -207,7 +207,11 @@ export const createRouteBundle = (routes: string[]) => {
     routeLoaders[route] = () => {
       const startTime = performance.now();
       
-      return import(/* webpackChunkName: "[request]" */ `../pages/${route}Page`)
+      return import(
+        /* webpackChunkName: "[request]" */
+        /* @vite-ignore */
+        `../pages/${route}Page`
+      )
         .then(module => {
           const loadTime = performance.now() - startTime;
           performanceMonitor.recordMetric('RouteLoad', loadTime, {

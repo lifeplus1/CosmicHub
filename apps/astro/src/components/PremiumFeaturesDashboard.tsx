@@ -22,7 +22,7 @@ export const PremiumFeaturesDashboard: React.FC = () => {
       {userTier !== 'premium' && (
         <button
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-lg transition-colors"
-          onClick={() => navigate('/premium')}
+          onClick={() => navigate('/upgrade-demo')}
         >
           Upgrade
         </button>

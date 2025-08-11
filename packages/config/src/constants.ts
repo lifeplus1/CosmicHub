@@ -11,7 +11,9 @@ export const APP_CONFIG = {
 
 // Performance-optimized API config
 export const API_CONFIG = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseUrl: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) 
+    || (typeof process !== 'undefined' && process.env?.VITE_API_URL) 
+    || 'http://localhost:8000',
   timeout: 30000,
   retryAttempts: 3,
   batchSize: 50, // For efficient data fetching
