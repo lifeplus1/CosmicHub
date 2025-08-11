@@ -25,22 +25,28 @@ const firebaseConfig: FirebaseConfig = {
 };
 
 let app: FirebaseApp | undefined;
+let authInstance: Auth | undefined;
+
 try {
   // Only require apiKey + appId + projectId (minimal) to attempt init; warn instead of throw
   if (!firebaseConfig.apiKey || !firebaseConfig.appId || !firebaseConfig.projectId) {
     console.warn('[auth] Firebase config incomplete; authentication features disabled until env vars provided.');
     // Skip initialization; app will remain undefined
     app = undefined;
+    authInstance = undefined;
   } else {
     app = initializeApp(firebaseConfig as any);
+    // Initialize auth after app is created
+    authInstance = getAuth(app);
   }
 } catch (error) {
   console.error('[auth] Firebase initialization failed:', error);
   app = undefined;
+  authInstance = undefined;
 }
 
 // Export auth if initialized; otherwise create a lazy getter that throws on use
-export const auth: Auth = app ? getAuth(app) : (new Proxy({} as Auth, {
+export const auth: Auth = authInstance || (new Proxy({} as Auth, {
   get() {
     throw new Error('Firebase auth not initialized due to incomplete configuration');
   }
@@ -117,7 +123,9 @@ export const useAuth = (): AuthState => {
 
   const signOut = useCallback(async (): Promise<void> => {
     try {
-      await auth.signOut();
+      if (authInstance) {
+        await authInstance.signOut();
+      }
       notifyAuthStateChange(null);
     } catch (error) {
       console.error('Sign out failed:', error);
@@ -132,24 +140,36 @@ export const useAuth = (): AuthState => {
     // Add to local listeners for mock auth
     authStateListeners.push(setUser);
     
-    // Also listen to Firebase auth changes
-    const unsubscribe = auth.onAuthStateChanged(
-      (currentUser) => {
-        console.log('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
-        if (currentUser) {
-          setUser(currentUser);
-          setLoading(false);
-        } else if (!mockUser) {
-          // Only clear if we don't have a mock user
-          setUser(null);
-          setLoading(false);
-        }
-      },
-      (error) => {
-        console.error('Auth state change error:', error);
+    let unsubscribe: (() => void) | undefined;
+    
+    // Only listen to Firebase auth changes if auth is properly initialized
+    if (authInstance) {
+      try {
+        unsubscribe = authInstance.onAuthStateChanged(
+          (currentUser) => {
+            console.log('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
+            if (currentUser) {
+              setUser(currentUser);
+              setLoading(false);
+            } else if (!mockUser) {
+              // Only clear if we don't have a mock user
+              setUser(null);
+              setLoading(false);
+            }
+          },
+          (error) => {
+            console.error('Auth state change error:', error);
+            setLoading(false);
+          }
+        );
+      } catch (error) {
+        console.warn('Failed to set up auth state listener:', error);
         setLoading(false);
       }
-    );
+    } else {
+      console.log('🧪 Firebase auth not initialized, using mock auth only');
+      setLoading(false);
+    }
 
     // Set initial state
     if (mockUser) {
@@ -164,7 +184,9 @@ export const useAuth = (): AuthState => {
       if (index > -1) {
         authStateListeners.splice(index, 1);
       }
-      unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, []);
 

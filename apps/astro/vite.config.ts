@@ -47,9 +47,13 @@ export default defineConfig({
     port: 5174, // Swapped: astro now on 5174
     host: true,
     cors: true,
+    hmr: {
+      port: 5174,
+      host: 'localhost',
+    },
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'http://localhost:8000',
+        target: process.env.VITE_API_URL || 'http://localhost:8001',
         changeOrigin: true,
         secure: false,
       },

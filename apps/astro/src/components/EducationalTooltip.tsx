@@ -11,14 +11,17 @@ interface EducationalTooltipProps {
   placement?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-export const EducationalTooltip: React.FC<EducationalTooltipProps> = React.memo(({
+export const EducationalTooltip = React.memo(React.forwardRef<
+  HTMLDivElement, 
+  EducationalTooltipProps
+>(({
   title,
   description,
   examples = [],
   tier,
   children,
   placement = 'top'
-}) => {
+}, ref) => {
   const getTierColor = (tier?: 'free' | 'premium' | 'elite') => {
     switch (tier) {
       case 'elite': return 'gold-500';
@@ -74,7 +77,7 @@ export const EducationalTooltip: React.FC<EducationalTooltipProps> = React.memo(
       </Tooltip.Portal>
     </Tooltip.Root>
   );
-});
+}));
 
 EducationalTooltip.displayName = 'EducationalTooltip';
 
