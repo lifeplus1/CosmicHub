@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test - Working!</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        .status { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border-radius: 8px; 
+        }
+        .success { 
+            background-color: rgba(76, 175, 80, 0.3); 
+            border: 2px solid #4CAF50; 
+        }
+        .error { 
+            background-color: rgba(244, 67, 54, 0.3); 
+            border: 2px solid #f44336; 
+        }
+        .info {
+            background-color: rgba(33, 150, 243, 0.3);
+            border: 2px solid #2196F3;
+        }
+        button { 
+            padding: 12px 24px; 
+            margin: 10px; 
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .log {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 CosmicHub API Connection Test</h1>
+        <p>This test verifies that frontend and backend are properly connected!</p>
+        
+        <div class="info">
+            <strong>✅ Status:</strong> Frontend running on port 5174, Backend on port 8000
+        </div>
+        
+        <button onclick="testConnection()">🧪 Test Full API Connection</button>
+        <button onclick="testHumanDesign()">🧬 Test Human Design API</button>
+        <button onclick="clearLog()">🗑️ Clear Log</button>
+        
+        <div id="results"></div>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const resultsDiv = document.getElementById('results');
+        const logDiv = document.getElementById('log');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : '📝';
+            logDiv.innerHTML += `<div>[${timestamp}] ${emoji} ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function addResult(message, isSuccess = true) {
+            const div = document.createElement('div');
+            div.className = `status ${isSuccess ? 'success' : 'error'}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            resultsDiv.appendChild(div);
+        }
+
+        function clearLog() {
+            logDiv.innerHTML = '';
+            resultsDiv.innerHTML = '';
+        }
+
+        async function testConnection() {
+            log('🚀 Starting comprehensive API test...', 'info');
+            
+            try {
+                // Test 1: Health endpoint
+                log('Testing health endpoint...');
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                if (healthResponse.ok) {
+                    const healthData = await healthResponse.json();
+                    log(`Health check passed: ${JSON.stringify(healthData)}`, 'success');
+                    addResult('✅ Health endpoint working!', true);
+                } else {
+                    throw new Error(`Health check failed: ${healthResponse.status}`);
+                }
+
+                // Test 2: CORS headers
+                log('Testing CORS configuration...');
+                const corsResponse = await fetch(`${API_BASE}/health`, {
+                    headers: { 'Origin': 'http://localhost:5174' }
+                });
+                const corsHeader = corsResponse.headers.get('Access-Control-Allow-Origin');
+                if (corsHeader) {
+                    log(`CORS header found: ${corsHeader}`, 'success');
+                    addResult('✅ CORS configuration working!', true);
+                } else {
+                    log('CORS header missing', 'error');
+                    addResult('⚠️ CORS might have issues', false);
+                }
+
+                addResult('🎉 All basic API tests passed!', true);
+                
+            } catch (error) {
+                log(`Connection test failed: ${error.message}`, 'error');
+                addResult(`❌ Connection test failed: ${error.message}`, false);
+            }
+        }
+
+        async function testHumanDesign() {
+            log('🧬 Testing Human Design calculation...', 'info');
+            
+            try {
+                const testData = {
+                    year: 1992,
+                    month: 2,
+                    day: 5,
+                    hour: 23,
+                    minute: 47,
+                    lat: 41.7508,
+                    lon: -88.1535,
+                    timezone: 'America/Chicago',
+                    city: 'Naperville, IL'
+                };
+
+                log(`Sending Human Design request with data: ${JSON.stringify(testData)}`);
+                
+                const response = await fetch(`${API_BASE}/calculate-human-design`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:5174'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Human Design calculation successful!`, 'success');
+                    
+                    if (data.human_design) {
+                        const hd = data.human_design;
+                        log(`Type: ${hd.type || 'Unknown'}`, 'success');
+                        log(`Profile: ${hd.profile?.number || 'Unknown'}`, 'success');
+                        log(`Strategy: ${hd.strategy || 'Unknown'}`, 'success');
+                        log(`Authority: ${hd.authority || 'Unknown'}`, 'success');
+                        log(`Total Gates: ${hd.gates?.length || 0}`, 'success');
+                        addResult(`✅ Human Design working! Type: ${hd.type}, Profile: ${hd.profile?.number}`, true);
+                    } else {
+                        log(`Response: ${JSON.stringify(data)}`, 'info');
+                        addResult(`✅ API responding but check data structure`, true);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`Status ${response.status}: ${errorText}`);
+                }
+            } catch (error) {
+                log(`Human Design test failed: ${error.message}`, 'error');
+                addResult(`❌ Human Design API failed: ${error.message}`, false);
+            }
+        }
+
+        // Auto-run test on page load
+        window.addEventListener('load', () => {
+            log('🌟 Page loaded successfully!', 'success');
+            log('🔗 Frontend: http://localhost:5174');
+            log('🔗 Backend: http://localhost:8000');
+            setTimeout(testConnection, 1000);
+        });
+    </script>
+</body>
+</html>

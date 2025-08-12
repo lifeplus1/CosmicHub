@@ -69,7 +69,8 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
     
     // Check if date is reasonable (between 1900 and current year + 1)
     if (formData.birthDate) {
-      const selectedYear = new Date(formData.birthDate).getFullYear();
+      const [yearStr] = formData.birthDate.split('-');
+      const selectedYear = parseInt(yearStr, 10);
       const currentYear = new Date().getFullYear();
       if (selectedYear < 1900 || selectedYear > currentYear + 1) {
         errors.birthDate = `Year must be between 1900 and ${currentYear + 1}`;
@@ -84,15 +85,20 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
     setIsLoading(true);
     
     try {
-      // Parse the composite date and time fields
-      const dateObj = new Date(formData.birthDate);
+      // Parse the date string explicitly to avoid timezone issues
+      // formData.birthDate is in YYYY-MM-DD format from date input
+      const [yearStr, monthStr, dayStr] = formData.birthDate.split('-');
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10);
+      const day = parseInt(dayStr, 10);
+      
       const [hours, minutes] = formData.birthTime.split(':').map(Number);
 
       // No need to provide coordinates or timezone - backend will determine automatically from city
       const chartData: ChartBirthData = {
-        year: dateObj.getFullYear(),
-        month: dateObj.getMonth() + 1, // JavaScript months are 0-indexed
-        day: dateObj.getDate(),
+        year: year,
+        month: month,
+        day: day,
         hour: hours,
         minute: minutes,
         city: formData.birthLocation.trim()

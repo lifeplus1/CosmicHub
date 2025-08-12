@@ -10,8 +10,7 @@ async function registerServiceWorker(): Promise<void> {
       console.log('🔧 Registering Service Worker...');
       
       const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-        type: 'module'
+        scope: '/'
       });
       
       // Handle updates

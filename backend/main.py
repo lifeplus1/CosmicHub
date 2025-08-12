@@ -146,11 +146,12 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(SecurityHeadersMiddleware)
 
 # Add CORS middleware with strict origins
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5175,http://localhost:5174,http://localhost:3000,http://localhost:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "").split(","),
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -245,18 +246,49 @@ async def calculate_human_design_endpoint(data: BirthData, request: Request):
     await rate_limiter(request)
     
     # Debug: Log incoming request data
-    print(f"🧬 Human Design backend received data: lat={data.lat}, lon={data.lon}, timezone={data.timezone}, city={data.city}")
+    print(f"🧬 Human Design backend received data: year={data.year}, month={data.month}, day={data.day}, hour={data.hour}, minute={data.minute}")
+    print(f"🧬 Location data: lat={data.lat}, lon={data.lon}, timezone={data.timezone}, city={data.city}")
     
     try:
+        # Resolve coordinates if not provided but city is available
+        lat = data.lat
+        lon = data.lon
+        timezone = data.timezone
+        
+        if data.city and (lat is None or lon is None):
+            from astro.calculations.chart import get_location
+            print(f"🌍 Resolving location for city: {data.city}")
+            try:
+                location_data = get_location(data.city)
+                lat = location_data["latitude"]
+                lon = location_data["longitude"]
+                timezone = location_data["timezone"] or timezone
+                print(f"✅ Location resolved: lat={lat}, lon={lon}, timezone={timezone}")
+            except Exception as geo_error:
+                print(f"❌ Geocoding failed for city '{data.city}': {str(geo_error)}")
+                logger.error(f"Geocoding error for city '{data.city}': {str(geo_error)}")
+                # For now, use default coordinates (this should be improved in production)
+                lat = 0.0
+                lon = 0.0
+                timezone = timezone or "UTC"
+                print(f"🔄 Using fallback coordinates: lat={lat}, lon={lon}, timezone={timezone}")
+        
+        # Validate required coordinates
+        if lat is None or lon is None:
+            raise ValueError("Latitude and longitude are required for Human Design calculation")
+        
+        if timezone is None:
+            timezone = "UTC"
+        
         human_design_chart = calculate_human_design(
             year=data.year,
             month=data.month,
             day=data.day,
             hour=data.hour,
             minute=data.minute,
-            lat=data.lat or 0.0,
-            lon=data.lon or 0.0,
-            timezone=data.timezone or "UTC"
+            lat=lat,
+            lon=lon,
+            timezone=timezone
         )
         
         return {"human_design": human_design_chart}

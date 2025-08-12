@@ -1,5 +1,4 @@
 import React from 'react';
-import * as Accordion from '@radix-ui/react-accordion';
 import type { TabProps } from './types';
 
 const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
@@ -11,19 +10,28 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
           <p className="text-sm text-gray-700">Your activated genetic traits</p>
         </div>
         <div className="p-4">
-          <Accordion.Root type="multiple">
-            {humanDesignData.gates.slice(0, 10).map((gate, index) => (
-              <Accordion.Item key={index} value={index.toString()}>
-                <Accordion.Trigger className="flex justify-between w-full py-2 transition-colors hover:bg-cosmic-purple/10">
-                  <span>Gate {gate.number}: {gate.name}</span>
-                  <span className="text-cosmic-silver">▼</span>
-                </Accordion.Trigger>
-                <Accordion.Content className="pb-4">
-                  <p>{gate.description || 'Gate description'}</p>
-                </Accordion.Content>
-              </Accordion.Item>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {humanDesignData.gates.map((gate, index) => (
+              <div key={index} className={`p-3 rounded-md border-l-4 ${gate.type === 'personality' ? 'border-yellow-500 bg-yellow-50/10' : 'border-blue-500 bg-blue-50/10'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">{gate.planet_symbol}</span>
+                    <span className="font-bold">Gate {gate.number}.{gate.line}</span>
+                    <span className="text-sm text-cosmic-silver">({gate.center})</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-xs px-2 py-1 rounded ${gate.type === 'personality' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-blue-500/20 text-blue-300'}`}>
+                      {gate.type}
+                    </span>
+                    <span className="text-xs text-cosmic-silver">{gate.planet}</span>
+                  </div>
+                </div>
+                <div className="mt-1">
+                  <span className="text-sm font-medium">{gate.name}</span>
+                </div>
+              </div>
             ))}
-          </Accordion.Root>
+          </div>
         </div>
       </div>
 
@@ -33,21 +41,23 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
           <p className="text-sm text-gray-700">Your defined energy pathways</p>
         </div>
         <div className="p-4">
-          {humanDesignData.channels.length > 0 ? (
+          {humanDesignData.channels && humanDesignData.channels.length > 0 ? (
             <div className="flex flex-col space-y-3">
               {humanDesignData.channels.map((channel, index) => (
-                <div key={index} className="p-3 rounded-md bg-purple-50">
-                  <p className="font-bold">
-                    Channel {channel.gate1}-{channel.gate2}
+                <div key={index} className="p-3 rounded-md bg-purple-50/10 border border-purple-500/20">
+                  <p className="font-bold text-cosmic-gold">
+                    Channel {typeof channel === 'string' ? channel : `${channel.gate1}-${channel.gate2}`}
                   </p>
-                  <p className="text-sm text-gray-700">
-                    {channel.name}
-                  </p>
+                  {typeof channel !== 'string' && channel.name && (
+                    <p className="text-sm text-cosmic-silver">
+                      {channel.name}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-700">No defined channels</p>
+            <p className="text-cosmic-silver">No defined channels detected</p>
           )}
         </div>
       </div>

@@ -12,8 +12,13 @@ export interface BirthData {
 
 export interface Gate {
   number: number;
+  line: number;
   name: string;
-  description?: string;
+  center: string;
+  planet: string;
+  planet_symbol: string;
+  type: 'personality' | 'design';
+  position: number;
 }
 
 export interface Channel {
@@ -31,6 +36,13 @@ export interface Variables {
   perspective: string;
 }
 
+export interface Profile {
+  number: string;
+  personality_line: number;
+  design_line: number;
+  description: string;
+}
+
 export interface HumanDesignData {
   birth_info?: {
     conscious_time: string;
@@ -44,14 +56,10 @@ export interface HumanDesignData {
   type: string;
   strategy: string;
   authority: string;
-  profile: {
-    line1: number;
-    line2: number;
-    description: string;
-  };
+  profile: Profile;
   defined_centers: string[];
   undefined_centers: string[];
-  channels: Channel[];
+  channels: (string | Channel)[];
   gates: Gate[];
   incarnation_cross: {
     name: string;

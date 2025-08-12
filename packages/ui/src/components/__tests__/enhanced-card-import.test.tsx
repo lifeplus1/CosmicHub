@@ -16,7 +16,7 @@ import Card, {
   LoadingCard, 
   ErrorCard, 
   ChartCard 
-} from './packages/ui/src/components/EnhancedCard';
+} from '../EnhancedCard';
 
 // Simple test to verify everything works
 describe('Import Test', () => {

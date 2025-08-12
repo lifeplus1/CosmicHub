@@ -13,12 +13,13 @@ const HumanDesign: React.FC = () => {
   const formatBirthInfo = (birthInfo: HumanDesignData['birth_info']) => {
     if (!birthInfo) return null;
 
-    // Parse the ISO string more carefully to avoid timezone issues
+    // Parse the ISO string more carefully to preserve the original date
     const consciousTime = birthInfo.conscious_time;
     const [datePart, timePart] = consciousTime.split('T');
     const [year, month, day] = datePart.split('-').map(Number);
     const [hour, minute] = timePart.split(':').map(Number);
     
+    // Use the original input values to avoid timezone conversion issues
     return {
       date: `${month}/${day}/${year}`,
       time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,

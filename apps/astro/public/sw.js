@@ -10,9 +10,7 @@ const OFFLINE_URL = '/offline.html';
 const PRECACHE_URLS = [
   '/',
   '/offline.html',
-  '/manifest.json',
-  '/src/main.tsx',
-  '/src/index.css'
+  '/manifest.json'
 ];
 
 // Install event - precache resources
