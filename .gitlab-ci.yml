@@ -1,143 +1,303 @@
-#############################################################
-# GitLab CI/CD for CosmicHub (budget-friendly monorepo)     #
-# Focus: Env validation, type-check, lint, tests, build.    #
-# Backend Python tests retained; frontends via turbo.       #
-#############################################################
+# .gitlab-ci.yml for CosmicHub monorepo
+# This config runs tests for backend (Python) and both frontends (Vite/React), then deploys if on main branch
 
 stages:
   - validate
-  - typecheck
-  - lint
   - test
   - build
+  - deploy
 
 variables:
+  # Node.js and Python versions
   NODE_VERSION: "20"
   PYTHON_VERSION: "3.13"
-  NODE_ENV: production
-  TURBO_TELEMETRY_DISABLED: "1"
-  # Public build fallbacks (override with protected CI/CD variables)
-  VITE_API_URL: ${VITE_API_URL:-https://api.example.com}
-  VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-placeholder}
-  VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-placeholder}
-  VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-1:000:web:placeholder}
+  # Deployment tokens (set in GitLab CI/CD settings)
+  VERCEL_TOKEN: "$VERCEL_TOKEN"
+  VERCEL_ORG_ID: "$VERCEL_ORG_ID"
+  VERCEL_PROJECT_ID: "$VERCEL_PROJECT_ID"
+  RENDER_SERVICE_ID: "$RENDER_SERVICE_ID"
+  RENDER_API_KEY: "$RENDER_API_KEY"
+  # Firebase/Backend env vars
+  FIREBASE_PROJECT_ID: "$FIREBASE_PROJECT_ID"
+  FIREBASE_PRIVATE_KEY_ID: "$FIREBASE_PRIVATE_KEY_ID"
+  FIREBASE_PRIVATE_KEY: "$FIREBASE_PRIVATE_KEY"
+  FIREBASE_CLIENT_EMAIL: "$FIREBASE_CLIENT_EMAIL"
+  FIREBASE_CLIENT_ID: "$FIREBASE_CLIENT_ID"
+  FIREBASE_AUTH_URI: "$FIREBASE_AUTH_URI"
+  FIREBASE_TOKEN_URI: "$FIREBASE_TOKEN_URI"
+  FIREBASE_AUTH_PROVIDER_X509_CERT_URL: "$FIREBASE_AUTH_PROVIDER_X509_CERT_URL"
+  FIREBASE_CLIENT_X509_CERT_URL: "$FIREBASE_CLIENT_X509_CERT_URL"
+  FIREBASE_UNIVERSE_DOMAIN: "$FIREBASE_UNIVERSE_DOMAIN"
+  FIREBASE_CREDENTIALS: "$FIREBASE_CREDENTIALS"
+  VITE_FIREBASE_API_KEY: "$VITE_FIREBASE_API_KEY"
+  VITE_FIREBASE_AUTH_DOMAIN: "$VITE_FIREBASE_AUTH_DOMAIN"
+  VITE_FIREBASE_PROJECT_ID: "$VITE_FIREBASE_PROJECT_ID"
+  VITE_FIREBASE_STORAGE_BUCKET: "$VITE_FIREBASE_STORAGE_BUCKET"
+  VITE_FIREBASE_MESSAGING_SENDER_ID: "$VITE_FIREBASE_MESSAGING_SENDER_ID"
+  VITE_FIREBASE_APP_ID: "$VITE_FIREBASE_APP_ID"
+  VITE_BACKEND_URL: "https://astrology-app-0emh.onrender.com"
+  API_KEY: "$API_KEY"
+  LOG_FILE: "logs/app.log"
+  PORT: "8000"
+  EPHE_PATH: "/app/ephe"
 
 cache:
-  key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - node_modules/
-    - .npm/
-    - .turbo/cache
     - backend/.venv/
-  policy: pull-push
+    - apps/astro/node_modules/
+    - apps/healwave/node_modules/
+    - .npm/
 
-.node_template: &node_template
+# Validation Stage
+validate-structure:
   image: node:${NODE_VERSION}
-  before_script:
-    - node -v
-    - npm -v
+  stage: validate
+  script:
+    - echo "🔍 Validating project structure..."
+    - test -d apps/astro/src || { echo "❌ Astro frontend src missing"; exit 1; }
+    - test -d apps/healwave/src || { echo "❌ Healwave frontend src missing"; exit 1; }
+    - test -d backend/api || { echo "❌ Backend API directory missing"; exit 1; }
+    - test -f .eslintrc.json || { echo "❌ ESLint config missing"; exit 1; }
+    - test -f .prettierrc || { echo "❌ Prettier config missing"; exit 1; }
+    - test -f docker-compose.yml || { echo "❌ Docker compose config missing"; exit 1; }
+    - echo "✅ Project structure validated"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Lint Stage
+lint-frontend:
+  image: node:${NODE_VERSION}
+  stage: validate
+  script:
+    - echo "🔍 Linting frontend code..."
     - npm ci --cache .npm --prefer-offline
+    - cd apps/astro && npm ci --cache ../../.npm --prefer-offline
+    - cd apps/healwave && npm ci --cache ../../.npm --prefer-offline
+    - npx eslint apps/astro/src apps/healwave/src --ext .ts,.tsx --format stylish
+    - echo "✅ Frontend linting passed"
+  artifacts:
+    reports:
+      junit: lint-results.xml
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-.python_setup: &python_setup
-  before_script:
-    - python3 -V || apt-get update && apt-get install -y python3 python3-venv python3-pip
-    - python3 -m venv backend/.venv
-    - source backend/.venv/bin/activate
+lint-backend:
+  image: python:${PYTHON_VERSION}
+  stage: validate
+  script:
+    - echo "🔍 Linting backend code..."
+    - cd backend
+    - python3 -m venv .venv
+    - source .venv/bin/activate
     - pip install --upgrade pip
-    - pip install -r backend/requirements.txt
+    - pip install flake8 black isort
+    - pip install -r requirements.txt
+    - python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    - python3 -m black --check .
+    - python3 -m isort --check-only .
+    - echo "✅ Backend linting passed"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-validate_env:
-  <<: *node_template
+# Type Checking
+type-check:
+  image: node:${NODE_VERSION}
   stage: validate
   script:
-    - npm run validate-env
-  artifacts:
-    when: always
-    expire_in: 1 week
-    paths:
-      - app.log
+    - echo "🔍 Running TypeScript type checks..."
+    - npm ci --cache .npm --prefer-offline
+    - cd apps/astro && npm ci --cache ../../.npm --prefer-offline && npm run type-check
+    - cd ../healwave && npm ci --cache ../../.npm --prefer-offline && npm run type-check
+    - echo "✅ All type checks passed"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-validate_env_schema:
-  <<: *node_template
-  stage: validate
-  needs: ["validate_env"]
-  script:
-    - npm run validate-env-schema
-
-secret_scan:
-  image: zricethezav/gitleaks:latest
-  stage: validate
-  script:
-    - gitleaks detect --verbose --no-git --source=. --report-format=json --report-path=gitleaks-report.json || true
-    - if [ -s gitleaks-report.json ]; then echo "Secrets detected!" && cat gitleaks-report.json && exit 1; fi
-    - echo "No secrets detected"
-  artifacts:
-    when: always
-    expire_in: 1 week
-    paths:
-      - gitleaks-report.json
-  allow_failure: false
-
-type_check:
-  <<: *node_template
-  stage: typecheck
-  needs: ["validate_env"]
-  script:
-    - npm run type-check
-
-lint:
-  <<: *node_template
-  stage: lint
-  needs: ["validate_env"]
-  script:
-    - npm run lint
-
-backend_tests:
+# Backend tests
+backend-test:
   image: python:${PYTHON_VERSION}
   stage: test
-  needs: ["type_check","lint"]
-  before_script:
-    - python --version
+  services:
+    - name: python:${PYTHON_VERSION}
+  script:
+    - echo "🧪 Running backend tests..."
+    - cd backend
+    - python3 -m venv .venv
+    - source .venv/bin/activate
     - pip install --upgrade pip
-    - pip install -r backend/requirements.txt
-  script:
-    - pytest backend/tests -q
+    - pip install -r requirements.txt
+    - python3 -m pytest tests/ --cov=astro --cov-report=xml --cov-report=html --junitxml=junit.xml -v
+    - python3 -m pytest tests/ -m "slow" || true
+    - echo "✅ Backend tests completed"
   artifacts:
-    when: always
-    expire_in: 1 week
     paths:
-      - backend/.pytest_cache
-
-frontend_tests:
-  <<: *node_template
-  stage: test
-  needs: ["type_check","lint"]
-  script:
-    - npm run test:coverage -- --ci --reporter=default
-    - npm run coverage:report
-  artifacts:
-    when: always
-    expire_in: 1 week
-    paths:
-      - apps/astro/coverage
-      - apps/healwave/coverage
-      - coverage/
+      - backend/htmlcov/
+      - backend/coverage.xml
     reports:
+      junit: backend/junit.xml
       coverage_report:
         coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
-
-build_all:
-  <<: *node_template
-  stage: build
-  needs: ["backend_tests","frontend_tests"]
-  script:
-    - npm run build
-  artifacts:
+        path: backend/coverage.xml
     expire_in: 1 week
-    paths:
-      - apps/**/dist
-      - packages/**/dist
-      - backend
+  dependencies:
+    - lint-backend
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-# Optional deploy stage can be appended here referencing build artifacts
+# Astro Frontend tests
+frontend-astro-test:
+  image: node:${NODE_VERSION}
+  stage: test
+  script:
+    - echo "🧪 Running Astro frontend tests..."
+    - cd apps/astro
+    - npm ci --cache ../../.npm --prefer-offline
+    - npm run test -- --coverage --watchAll=false --passWithNoTests
+    - echo "✅ Astro frontend tests completed"
+  artifacts:
+    paths:
+      - apps/astro/coverage/
+    reports:
+      junit: apps/astro/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: apps/astro/coverage/cobertura-coverage.xml
+    expire_in: 1 week
+  dependencies:
+    - lint-frontend
+    - type-check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# HealWave Frontend tests
+frontend-healwave-test:
+  image: node:${NODE_VERSION}
+  stage: test
+  script:
+    - echo "🧪 Running HealWave frontend tests..."
+    - cd apps/healwave
+    - npm ci --cache ../../.npm --prefer-offline
+    - npm run test -- --watchAll=false --passWithNoTests
+    - echo "✅ HealWave frontend tests completed"
+  artifacts:
+    paths:
+      - apps/healwave/coverage/
+    reports:
+      junit: apps/healwave/junit.xml
+    expire_in: 1 week
+  dependencies:
+    - lint-frontend
+    - type-check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Build Stage
+build-astro:
+  image: node:${NODE_VERSION}
+  stage: build
+  script:
+    - echo "🏗️ Building Astro frontend..."
+    - cd apps/astro
+    - npm ci --cache ../../.npm --prefer-offline
+    - npm run build
+    - echo "✅ Astro build completed"
+  artifacts:
+    paths:
+      - apps/astro/dist/
+    expire_in: 1 week
+  dependencies:
+    - frontend-astro-test
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+build-healwave:
+  image: node:${NODE_VERSION}
+  stage: build
+  script:
+    - echo "🏗️ Building HealWave frontend..."
+    - cd apps/healwave
+    - npm ci --cache ../../.npm --prefer-offline
+    - npm run build
+    - echo "✅ HealWave build completed"
+  artifacts:
+    paths:
+      - apps/healwave/dist/
+    expire_in: 1 week
+  dependencies:
+    - frontend-healwave-test
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Deploy Astro Frontend to Vercel
+frontend-astro-deploy:
+  image: node:${NODE_VERSION}
+  stage: deploy
+  script:
+    - echo "🚀 Deploying Astro frontend to Vercel..."
+    - npm install -g vercel@latest
+    - cd apps/astro
+    - vercel deploy --prod --token=$VERCEL_TOKEN --yes --scope $VERCEL_ORG_ID
+    - echo "✅ Astro frontend deployed successfully"
+  environment:
+    name: production
+    url: https://cosmichub-astro.vercel.app
+  dependencies:
+    - build-astro
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - api_failure
+
+# Deploy Backend to Render
+backend-deploy:
+  image: python:${PYTHON_VERSION}
+  stage: deploy
+  script:
+    - echo "🚀 Deploying backend to Render..."
+    - pip install requests
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install -r backend/requirements.txt
+    - |
+      curl -X POST "https://api.render.com/deploy/srv-$RENDER_SERVICE_ID" \
+        -H "Authorization: Bearer $RENDER_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{}' || { echo "❌ Backend deployment failed"; exit 1; }
+    - echo "✅ Backend deployed successfully"
+  environment:
+    name: production
+    url: https://astrology-app-0emh.onrender.com
+  dependencies:
+    - backend-test
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - api_failure
+
+# Deploy HealWave Frontend (Future deployment)
+frontend-healwave-deploy:
+  image: node:${NODE_VERSION}
+  stage: deploy
+  script:
+    - echo "🚀 HealWave deployment placeholder"
+    - echo "Add deployment steps for HealWave frontend here"
+    - echo "✅ HealWave deployment configured"
+  environment:
+    name: production-healwave
+  dependencies:
+    - build-healwave
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  when: manual

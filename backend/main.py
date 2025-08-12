@@ -146,7 +146,7 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(SecurityHeadersMiddleware)
 
 # Add CORS middleware with strict origins
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5175,http://localhost:5174,http://localhost:3000,http://localhost:5173").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5174,http://localhost:3000,http://localhost:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,

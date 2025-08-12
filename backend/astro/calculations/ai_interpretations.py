@@ -201,6 +201,48 @@ HOUSE_THEMES = {
     12: {'theme': 'Spirituality & Release', 'life_area': 'spirituality, hidden enemies, sacrifice'}
 }
 
+def generate_interpretation(chart_data: Dict[str, Any], interpretation_type: str = "advanced") -> Dict[str, Any]:
+    """Generate AI-powered astrological interpretation (main entry point for WebSocket)"""
+    try:
+        if interpretation_type == "basic":
+            return generate_basic_interpretation(chart_data)
+        elif interpretation_type == "focused":
+            return generate_focused_interpretation(chart_data)
+        else:  # advanced or default
+            return generate_advanced_interpretation(chart_data)
+            
+    except Exception as e:
+        logger.error(f"Error generating {interpretation_type} interpretation: {str(e)}")
+        return {'error': str(e)}
+
+def generate_basic_interpretation(chart_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate basic interpretation focusing on Sun, Moon, Rising"""
+    try:
+        interpretation = {
+            'core_identity': analyze_core_identity(chart_data),
+            'basic_summary': generate_basic_summary(chart_data)
+        }
+        return interpretation
+        
+    except Exception as e:
+        logger.error(f"Error generating basic interpretation: {str(e)}")
+        return {'error': str(e)}
+
+def generate_focused_interpretation(chart_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate focused interpretation on specific life areas"""
+    try:
+        interpretation = {
+            'core_identity': analyze_core_identity(chart_data),
+            'life_purpose': analyze_life_purpose(chart_data),
+            'relationship_patterns': analyze_relationship_patterns(chart_data),
+            'career_path': analyze_career_path(chart_data)
+        }
+        return interpretation
+        
+    except Exception as e:
+        logger.error(f"Error generating focused interpretation: {str(e)}")
+        return {'error': str(e)}
+
 def generate_advanced_interpretation(chart_data: Dict[str, Any]) -> Dict[str, Any]:
     """Generate advanced AI-powered interpretations"""
     try:
@@ -786,4 +828,33 @@ def get_tenth_house_focus(planets_in_tenth: List[str]) -> str:
         focus_descriptions.append(f"{planet.capitalize()}: {archetype}")
     return "Career focus influenced by: " + ", ".join(focus_descriptions)
 
-# More helper functions would continue here for complete interpretation system...
+def generate_basic_summary(chart_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate a basic personality summary"""
+    try:
+        planets = chart_data.get('planets', {})
+        
+        sun_info = get_planet_info(planets.get('sun', {}))
+        moon_info = get_planet_info(planets.get('moon', {}))
+        houses = chart_data.get('houses', [])
+        rising_sign = get_sign_from_position(houses[0]['cusp']) if houses else None
+        
+        summary = {
+            'personality_overview': f"You are a {sun_info['sign']} with {moon_info['sign']} Moon, presenting as {rising_sign or 'Unknown'} Rising",
+            'key_traits': [
+                f"Core identity: {SIGN_ENERGIES.get(sun_info['sign'], {}).get('essence', 'Unknown')}",
+                f"Emotional nature: {SIGN_ENERGIES.get(moon_info['sign'], {}).get('essence', 'Unknown')}",
+                f"Outer expression: {SIGN_ENERGIES.get(rising_sign, {}).get('essence', 'Unknown') if rising_sign else 'Unknown'}"
+            ],
+            'life_themes': [
+                HOUSE_THEMES.get(sun_info['house'], {}).get('theme', 'Identity expression'),
+                HOUSE_THEMES.get(moon_info['house'], {}).get('theme', 'Emotional foundation')
+            ]
+        }
+        
+        return summary
+        
+    except Exception as e:
+        logger.error(f"Error generating basic summary: {str(e)}")
+        return {'error': str(e)}
+
+# Additional helper functions for complete interpretation system...

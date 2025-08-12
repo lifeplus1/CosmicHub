@@ -1,365 +1,293 @@
-"""
-AI-powered astrological interpretation endpoints
-"""
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from typing import Dict, Any
-from datetime import datetime
+# backend/api/routers/ai.py
+import logging
+import json
+import asyncio
+from typing import Dict, Any, Optional
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
+import uuid
 
-from auth import get_current_user
-from database import get_firestore_client
-from ..models.ai import (
-    InterpretationRequest,
-    InterpretationResponse,
-    AIAnalysisRequest,
-    AIAnalysisResponse
-)
-from ..services.ai_service import AIService
-from ..services.astro_service import AstroService
+# Import interpretation functions
+from astro.calculations.ai_interpretations import generate_interpretation
 
-router = APIRouter(prefix="/ai", tags=["ai"])
+logger = logging.getLogger(__name__)
 
-# Initialize services
-ai_service = AIService()
-astro_service = AstroService()
+# Mock auth function for development (same as main.py)
+def get_current_user() -> str:
+    return "elite_user_dev_123"
 
-@router.post("/generate-interpretation", response_model=InterpretationResponse)
-async def generate_interpretation(
-    request: InterpretationRequest,
-    background_tasks: BackgroundTasks,
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Generate AI-powered astrological interpretation for specific sections
-    """
-    try:
-        # Validate chart data
-        if not request.chartData or not request.chartData.get('planets'):
-            raise HTTPException(status_code=400, detail="Invalid chart data provided")
-        
-        # Validate user access
-        if request.userId != current_user.get('uid'):
-            raise HTTPException(status_code=403, detail="Unauthorized access to chart")
-        
-        # Check if chart exists
-        db = get_firestore_client()
-        chart_ref = db.collection('charts').document(request.chartId)
-        chart_doc = chart_ref.get()
-        
-        if not chart_doc.exists:
-            raise HTTPException(status_code=404, detail="Chart not found")
-        
-        # Generate interpretations for requested sections
-        interpretations = {}
-        
-        for section in request.sections:
+router = APIRouter()
+
+class WebSocketMessage(BaseModel):
+    type: str
+    data: Dict[str, Any]
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
+
+class ConnectionManager:
+    """Manages WebSocket connections"""
+    
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
+        self.user_sessions: Dict[str, str] = {}  # user_id -> session_id mapping
+    
+    async def connect(self, websocket: WebSocket, user_id: str, session_id: str):
+        """Accept WebSocket connection and store it"""
+        await websocket.accept()
+        self.active_connections[session_id] = websocket
+        self.user_sessions[user_id] = session_id
+        logger.info(f"WebSocket connected: user_id={user_id}, session_id={session_id}")
+    
+    def disconnect(self, session_id: str, user_id: str):
+        """Remove WebSocket connection"""
+        if session_id in self.active_connections:
+            del self.active_connections[session_id]
+        if user_id in self.user_sessions:
+            del self.user_sessions[user_id]
+        logger.info(f"WebSocket disconnected: user_id={user_id}, session_id={session_id}")
+    
+    async def send_message(self, session_id: str, message: Dict[str, Any]):
+        """Send message to specific session"""
+        if session_id in self.active_connections:
+            websocket = self.active_connections[session_id]
             try:
-                interpretation = await ai_service.generate_section_interpretation(
-                    chart_data=request.chartData,
-                    section=section,
-                    user_id=request.userId
-                )
-                interpretations[section.replace('-', '')] = interpretation
+                await websocket.send_text(json.dumps(message))
             except Exception as e:
-                print(f"Error generating {section} interpretation: {str(e)}")
-                # Continue with other sections even if one fails
-                continue
-        
-        if not interpretations:
-            raise HTTPException(
-                status_code=500, 
-                detail="Failed to generate any interpretations"
-            )
-        
-        # Save interpretations in background
-        background_tasks.add_task(
-            save_interpretation_to_db,
-            request.chartId,
-            interpretations
-        )
-        
-        return InterpretationResponse(
-            chartId=request.chartId,
-            interpretations=interpretations,
-            generatedAt=datetime.utcnow(),
-            success=True
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error in generate_interpretation: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-@router.post("/analyze-chart", response_model=AIAnalysisResponse)
-async def analyze_chart(
-    request: AIAnalysisRequest,
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Perform comprehensive AI analysis of an astrological chart
-    """
-    try:
-        # Validate access
-        if request.userId != current_user.get('uid'):
-            raise HTTPException(status_code=403, detail="Unauthorized access")
-        
-        # Get comprehensive analysis
-        analysis = await ai_service.analyze_chart_comprehensive(
-            chart_data=request.chartData,
-            analysis_type=request.analysisType,
-            user_preferences=request.userPreferences
-        )
-        
-        return AIAnalysisResponse(
-            analysis=analysis,
-            confidence=analysis.get('confidence', 0.8),
-            analysisType=request.analysisType,
-            generatedAt=datetime.utcnow()
-        )
-        
-    except Exception as e:
-        print(f"Error in analyze_chart: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to analyze chart")
-
-@router.post("/ask-question")
-async def ask_astrological_question(
-    question: str,
-    chart_data: Dict[str, Any],
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Ask a specific question about an astrological chart
-    """
-    try:
-        if not question.strip():
-            raise HTTPException(status_code=400, detail="Question cannot be empty")
-        
-        # Get AI response to the question
-        response = await ai_service.answer_chart_question(
-            question=question,
-            chart_data=chart_data,
-            user_id=current_user.get('uid')
-        )
-        
-        return {
-            "answer": response,
-            "question": question,
-            "timestamp": datetime.utcnow()
+                logger.error(f"Error sending message to {session_id}: {str(e)}")
+                # Remove broken connection
+                del self.active_connections[session_id]
+    
+    async def send_streaming_chunk(self, session_id: str, chunk: str, chunk_type: str = "text"):
+        """Send streaming text chunk"""
+        message: Dict[str, Any] = {
+            "type": "stream_chunk",
+            "data": {
+                "chunk": chunk,
+                "chunk_type": chunk_type
+            }
         }
-        
-    except Exception as e:
-        print(f"Error answering question: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to answer question")
-
-@router.get("/interpretation-history/{chart_id}")
-async def get_interpretation_history(
-    chart_id: str,
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Get interpretation history for a chart
-    """
-    try:
-        db = get_firestore_client()
-        
-        # Verify chart ownership
-        chart_ref = db.collection('charts').document(chart_id)
-        chart_doc = chart_ref.get()
-        
-        if not chart_doc.exists:
-            raise HTTPException(status_code=404, detail="Chart not found")
-        
-        chart_data = chart_doc.to_dict()
-        if chart_data.get('userId') != current_user.get('uid'):
-            raise HTTPException(status_code=403, detail="Unauthorized access")
-        
-        # Get interpretation history
-        interpretations_ref = db.collection('interpretations').where(
-            'chartId', '==', chart_id
-        ).order_by('createdAt', direction='desc')
-        
-        interpretations = []
-        for doc in interpretations_ref.stream():
-            data = doc.to_dict()
-            interpretations.append({
-                'id': doc.id,
-                'sections': data.get('sections', []),
-                'createdAt': data.get('createdAt'),
-                'summary': data.get('summary', '')
-            })
-        
-        return {
-            "chartId": chart_id,
-            "interpretations": interpretations,
-            "total": len(interpretations)
+        await self.send_message(session_id, message)
+    
+    async def send_error(self, session_id: str, error: str):
+        """Send error message"""
+        message: Dict[str, Any] = {
+            "type": "error",
+            "data": {
+                "error": error
+            }
         }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error getting interpretation history: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to get history")
+        await self.send_message(session_id, message)
+    
+    async def send_completion(self, session_id: str):
+        """Send completion signal"""
+        message: Dict[str, Any] = {
+            "type": "complete",
+            "data": {}
+        }
+        await self.send_message(session_id, message)
 
-@router.post("/regenerate-section/{chart_id}/{section}")
-async def regenerate_section(
-    chart_id: str,
-    section: str,
-    background_tasks: BackgroundTasks,
-    current_user: dict = Depends(get_current_user)
-):
+# Global connection manager instance
+manager = ConnectionManager()
+
+@router.websocket("/ai/interpret")
+async def websocket_ai_interpret(websocket: WebSocket):
     """
-    Regenerate a specific interpretation section
+    WebSocket endpoint for real-time AI interpretation
+    Expected message format:
+    {
+        "type": "interpret",
+        "data": {
+            "chart_data": {...},
+            "interpretation_type": "advanced",
+            "user_token": "bearer_token"
+        }
+    }
     """
+    session_id = str(uuid.uuid4())
+    user_id = None
+    
     try:
-        db = get_firestore_client()
+        # Accept connection initially
+        await websocket.accept()
+        logger.info(f"WebSocket connection established: session_id={session_id}")
         
-        # Get chart data
-        chart_ref = db.collection('charts').document(chart_id)
-        chart_doc = chart_ref.get()
+        # Send connection acknowledgment
+        await websocket.send_text(json.dumps({
+            "type": "connected", 
+            "data": {"session_id": session_id}
+        }))
         
-        if not chart_doc.exists:
-            raise HTTPException(status_code=404, detail="Chart not found")
+        while True:
+            try:
+                # Receive message from client
+                data = await websocket.receive_text()
+                message_data: Dict[str, Any] = json.loads(data)
+                
+                # Validate message structure
+                if not isinstance(message_data, dict) or "type" not in message_data:
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "data": {"error": "Invalid message format"}
+                    }))
+                    continue
+                
+                message_type = message_data["type"]
+                message_content: Dict[str, Any] = message_data.get("data", {})
+                
+                # Handle authentication for interpretation requests
+                if message_type == "interpret":
+                    user_token = message_content.get("user_token")
+                    if not user_token:
+                        await websocket.send_text(json.dumps({
+                            "type": "error",
+                            "data": {"error": "Authentication token required"}
+                        }))
+                        continue
+                    
+                    # Mock authentication for development (replace with real auth)
+                    try:
+                        # In production, validate the token properly
+                        user_id = "elite_user_dev_123"  # Mock user for development
+                        
+                        # Register the authenticated connection
+                        manager.active_connections[session_id] = websocket
+                        manager.user_sessions[user_id] = session_id
+                        
+                        # Process interpretation request
+                        await process_interpretation_request(session_id, message_content)
+                        
+                    except Exception as e:
+                        logger.error(f"Authentication error: {str(e)}")
+                        await websocket.send_text(json.dumps({
+                            "type": "error",
+                            "data": {"error": "Authentication failed"}
+                        }))
+                        continue
+                
+                elif message_type == "ping":
+                    # Handle ping/keepalive
+                    await websocket.send_text(json.dumps({
+                        "type": "pong",
+                        "data": {}
+                    }))
+                
+                else:
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "data": {"error": f"Unknown message type: {message_type}"}
+                    }))
+                    
+            except json.JSONDecodeError:
+                await websocket.send_text(json.dumps({
+                    "type": "error",
+                    "data": {"error": "Invalid JSON format"}
+                }))
+            except Exception as e:
+                logger.error(f"Error processing message: {str(e)}")
+                await websocket.send_text(json.dumps({
+                    "type": "error",
+                    "data": {"error": "Internal server error"}
+                }))
+                
+    except WebSocketDisconnect:
+        logger.info(f"WebSocket disconnected: session_id={session_id}")
+    except Exception as e:
+        logger.error(f"WebSocket error: {str(e)}")
+    finally:
+        # Clean up connection
+        if user_id:
+            manager.disconnect(session_id, user_id)
+
+async def process_interpretation_request(session_id: str, message_data: Dict[str, Any]):
+    """Process AI interpretation request with streaming response"""
+    try:
+        chart_data = message_data.get("chart_data")
+        interpretation_type = message_data.get("interpretation_type", "advanced")
         
-        chart_data = chart_doc.to_dict()
-        if chart_data.get('userId') != current_user.get('uid'):
-            raise HTTPException(status_code=403, detail="Unauthorized access")
+        if not chart_data:
+            await manager.send_error(session_id, "Chart data is required")
+            return
         
-        # Generate new interpretation for the section
-        interpretation = await ai_service.generate_section_interpretation(
-            chart_data=chart_data.get('chartData'),
-            section=section,
-            user_id=current_user.get('uid'),
-            regenerate=True
-        )
-        
-        # Update in database
-        interpretation_ref = db.collection('interpretations').document(chart_id)
-        interpretation_ref.update({
-            f'sections.{section.replace("-", "")}': interpretation,
-            'updatedAt': datetime.utcnow()
+        # Send processing start notification
+        await manager.send_message(session_id, {
+            "type": "processing_start",
+            "data": {"interpretation_type": interpretation_type}
         })
         
-        return {
-            "section": section,
-            "interpretation": interpretation,
-            "regeneratedAt": datetime.utcnow(),
-            "success": True
-        }
+        # Generate interpretation with streaming
+        async for chunk in generate_interpretation_stream(chart_data, interpretation_type):
+            await manager.send_streaming_chunk(session_id, chunk)
+            # Small delay to simulate real-time streaming
+            await asyncio.sleep(0.05)
         
-    except HTTPException:
-        raise
+        # Send completion signal
+        await manager.send_completion(session_id)
+        
     except Exception as e:
-        print(f"Error regenerating section: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to regenerate section")
+        logger.error(f"Error processing interpretation: {str(e)}")
+        await manager.send_error(session_id, f"Interpretation failed: {str(e)}")
 
-@router.get("/available-sections")
-async def get_available_sections():
-    """
-    Get list of available interpretation sections
-    """
-    sections = [
-        {
-            "id": "core-identity",
-            "title": "Core Identity",
-            "description": "Fundamental nature and personality",
-            "icon": "🌟",
-            "estimatedTime": 30
-        },
-        {
-            "id": "life-purpose",
-            "title": "Life Purpose",
-            "description": "Soul mission and spiritual path",
-            "icon": "🎯",
-            "estimatedTime": 45
-        },
-        {
-            "id": "career-path",
-            "title": "Career & Vocation",
-            "description": "Professional strengths and ideal work",
-            "icon": "💼",
-            "estimatedTime": 40
-        },
-        {
-            "id": "relationships",
-            "title": "Relationships",
-            "description": "Love patterns and partnership dynamics",
-            "icon": "💕",
-            "estimatedTime": 35
-        },
-        {
-            "id": "growth-challenges",
-            "title": "Growth & Challenges",
-            "description": "Development areas and karmic lessons",
-            "icon": "🌱",
-            "estimatedTime": 50
-        },
-        {
-            "id": "spiritual-gifts",
-            "title": "Spiritual Gifts",
-            "description": "Psychic abilities and spiritual talents",
-            "icon": "✨",
-            "estimatedTime": 40
-        },
-        {
-            "id": "integration-themes",
-            "title": "Integration Themes",
-            "description": "Balance points and unity areas",
-            "icon": "⚡",
-            "estimatedTime": 45
-        }
-    ]
-    
+async def generate_interpretation_stream(chart_data: Dict[str, Any], interpretation_type: str):
+    """Generate interpretation with streaming text chunks"""
+    try:
+        # Get the full interpretation first
+        interpretation_result = generate_interpretation(chart_data, interpretation_type)
+        
+        # If the result contains formatted text, stream it
+        if isinstance(interpretation_result, dict):
+            # Stream different sections of the interpretation
+            sections = [
+                ("Core Identity", interpretation_result.get("core_identity", {})),
+                ("Life Purpose", interpretation_result.get("life_purpose", {})),
+                ("Relationship Patterns", interpretation_result.get("relationship_patterns", {})),
+                ("Career Path", interpretation_result.get("career_path", {})),
+                ("Growth Challenges", interpretation_result.get("growth_challenges", {})),
+                ("Spiritual Gifts", interpretation_result.get("spiritual_gifts", {}))
+            ]
+            
+            for section_name, section_data in sections:
+                if section_data:
+                    yield f"\n## {section_name}\n\n"
+                    
+                    # Stream subsections
+                    for key, value in section_data.items():
+                        if isinstance(value, dict):
+                            yield f"### {key.replace('_', ' ').title()}\n"
+                            for subkey, subvalue in value.items():
+                                subkey: str  # type: ignore
+                                subvalue: Any  # type: ignore
+                                if isinstance(subvalue, str):
+                                    yield f"**{subkey.replace('_', ' ').title()}:** {subvalue}\n\n"
+                                elif isinstance(subvalue, list):
+                                    yield f"**{subkey.replace('_', ' ').title()}:**\n"
+                                    for item in subvalue:  # type: Any
+                                        yield f"• {item}\n"
+                                    yield "\n"
+                        elif isinstance(value, str):
+                            yield f"**{key.replace('_', ' ').title()}:** {value}\n\n"
+                        elif isinstance(value, list):
+                            yield f"**{key.replace('_', ' ').title()}:**\n"
+                            for item in value:
+                                yield f"• {item}\n"
+                            yield "\n"
+        else:
+            # If it's a simple string, stream it word by word
+            words = str(interpretation_result).split()
+            for i, word in enumerate(words):
+                if i > 0:
+                    yield " "
+                yield word
+                
+    except Exception as e:
+        logger.error(f"Error in interpretation streaming: {str(e)}")
+        yield f"Error generating interpretation: {str(e)}"
+
+@router.get("/ai/health")
+async def ai_health_check():
+    """Health check for AI service"""
     return {
-        "sections": sections,
-        "totalSections": len(sections),
-        "maxSections": 7
+        "status": "healthy", 
+        "active_connections": len(manager.active_connections),
+        "service": "AI Interpretation WebSocket"
     }
 
-async def save_interpretation_to_db(chart_id: str, interpretations: Dict[str, Any]):
-    """
-    Background task to save interpretations to database
-    """
-    try:
-        db = get_firestore_client()
-        interpretation_ref = db.collection('interpretations').document(chart_id)
-        
-        # Check if interpretation document exists
-        interpretation_doc = interpretation_ref.get()
-        
-        if interpretation_doc.exists:
-            # Update existing interpretation
-            interpretation_ref.update({
-                'sections': {**interpretation_doc.to_dict().get('sections', {}), **interpretations},
-                'updatedAt': datetime.utcnow()
-            })
-        else:
-            # Create new interpretation document
-            interpretation_ref.set({
-                'chartId': chart_id,
-                'sections': interpretations,
-                'createdAt': datetime.utcnow(),
-                'updatedAt': datetime.utcnow()
-            })
-        
-        print(f"Successfully saved interpretations for chart {chart_id}")
-        
-    except Exception as e:
-        print(f"Error saving interpretations to database: {str(e)}")
-
-@router.get("/health")
-async def health_check():
-    """AI service health check"""
-    try:
-        # Test AI service connection
-        health_status = await ai_service.health_check()
-        return {
-            "status": "healthy" if health_status else "degraded",
-            "aiService": health_status,
-            "timestamp": datetime.utcnow()
-        }
-    except Exception as e:
-        return {
-            "status": "unhealthy",
-            "error": str(e),
-            "timestamp": datetime.utcnow()
-        }

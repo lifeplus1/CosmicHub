@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-dotenv
 pydantic-settings
 firebase-admin
@@ -14,3 +14,4 @@ reportlab
 httpx
 redis
 pyswisseph
+websockets
