@@ -10,7 +10,7 @@ import { initializeNotifications } from './services/notificationManager';
 console.log('🚀 CosmicHub Frontend Starting...');
 console.log('📍 Environment:', import.meta.env.MODE);
 console.log('🌐 Base URL:', import.meta.env.BASE_URL);
-console.log('⚙️ API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8000');
+console.log('⚙️ API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8001');
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

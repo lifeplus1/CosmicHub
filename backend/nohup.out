@@ -1,0 +1,28 @@
+2025-08-12 14:53:36,390 INFO main Starting FastAPI application
+2025-08-12 14:53:36,390 INFO main Connecting to Redis at: redis://localhost:6379
+2025-08-12 14:53:36,393 WARNING main Redis connection failed: Error 61 connecting to localhost:6379. Connection refused.. Falling back to in-memory rate limiting.
+2025-08-12 14:53:36,522 INFO auth Firebase Admin SDK initialized successfully
+2025-08-12 14:53:36,610 INFO database Firebase app already initialized
+INFO:     Started server process [95188]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:60584 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60586 - "GET /health HTTP/1.1" 200 OK
+🧬 Human Design backend received data: year=1990, month=1, day=1, hour=12, minute=0
+🧬 Location data: lat=40.7128, lon=-74.006, timezone=America/New_York, city=New York, NY
+INFO:     127.0.0.1:60588 - "POST /calculate-human-design HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60621 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60623 - "GET /health HTTP/1.1" 200 OK
+🧬 Human Design backend received data: year=1990, month=1, day=1, hour=12, minute=0
+🧬 Location data: lat=40.7128, lon=-74.006, timezone=America/New_York, city=New York, NY
+INFO:     127.0.0.1:60625 - "POST /calculate-human-design HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62173 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62175 - "GET /health HTTP/1.1" 200 OK
+🧬 Human Design backend received data: year=1990, month=1, day=1, hour=12, minute=0
+🧬 Location data: lat=40.7128, lon=-74.006, timezone=America/New_York, city=New York, NY
+INFO:     127.0.0.1:62177 - "POST /calculate-human-design HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [95188]

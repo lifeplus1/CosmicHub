@@ -4,9 +4,7 @@ applyTo: '**'
 
 # Project Instructions
 
-USE TERMINAL FOR ALL WRITES. Optimize your resources. Run tests after significant implementations.
-
-Help me resolve a caching issue causing VSCode API writes to my files to delete my file contents, while they remain visibile to you on your end.
+Review my project stucture. Check the shared folder for contexts. Optimize your resources. Run tests after significant implementations. Resolve all errors when you see them. Always check to see if a file already exists before you create a new file.
 
 To improve overall app performance (e.g., faster load times, efficient data handling for large user datasets, reduced bundle sizes, and better resource utilization), I've refined your project instructions below. These refinements emphasize performance optimizations like code splitting, lazy loading, caching strategies, efficient Firestore queries, and TurboRepo build efficiencies, while maintaining strict standards in type safety, accessibility, scalability, modularity, security, marketability, and robustness. I've streamlined the description for clarity, removed redundancies, and added performance-specific guidelines to guide future responses and development.
 

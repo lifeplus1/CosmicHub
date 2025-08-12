@@ -7,7 +7,6 @@
 export class CriticalResourceManager {
   private static readonly CRITICAL_RESOURCES = [
     '/src/main.tsx',
-    '/src/index.css',
     '/src/styles/index.css'
   ];
 
@@ -19,16 +18,19 @@ export class CriticalResourceManager {
   static async preloadCriticalResources(): Promise<void> {
     console.log('⚡ Preloading critical resources...');
 
-    // Preload critical app resources
+    // Only preload resources that exist and are needed immediately
     const preloadPromises = this.CRITICAL_RESOURCES.map(resource => {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
+        // Skip preloading .tsx files since they're handled by Vite
+        if (resource.endsWith('.tsx')) {
+          resolve();
+          return;
+        }
+
         const link = document.createElement('link');
         link.rel = 'preload';
         link.href = resource;
         link.as = resource.endsWith('.css') ? 'style' : 'script';
-        if (resource.endsWith('.tsx') || resource.endsWith('.js')) {
-          link.crossOrigin = 'anonymous';
-        }
         
         link.onload = () => {
           console.log(`✅ Preloaded: ${resource}`);
@@ -65,21 +67,8 @@ export class CriticalResourceManager {
       }
     });
 
-    // Preload font files for better performance
-    const fontPreloads = [
-      'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2',
-      'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2'
-    ];
-
-    fontPreloads.forEach(fontUrl => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.href = fontUrl;
-      link.as = 'font';
-      link.type = 'font/woff2';
-      link.crossOrigin = 'anonymous';
-      document.head.appendChild(link);
-    });
+    // Note: Removed aggressive font preloading to reduce unused resource warnings
+    // Font files will load naturally through the Google Fonts CSS
   }
 
   static async enableResourceHints(): Promise<void> {
@@ -96,7 +85,7 @@ export class CriticalResourceManager {
     dnsPrefetchDomains.forEach(domain => {
       const link = document.createElement('link');
       link.rel = 'dns-prefetch';
-      link.href = `//${domain}`;
+      link.href = `https://${domain}`;
       document.head.appendChild(link);
     });
 

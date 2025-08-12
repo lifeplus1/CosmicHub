@@ -7,7 +7,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaCrown, FaStar, FaCalendarAlt, FaChartLine, FaSave, FaCreditCard, FaCheck, FaTimes, FaArrowUp, FaHistory, FaCog } from 'react-icons/fa';
 import { COSMICHUB_TIERS } from '../types/subscription';
 import ProgressBar from './ProgressBar';
-import styles from './UserProfile.module.css';
+import './UserProfile.module.css';
 
 interface UserStats {
   totalCharts: number;

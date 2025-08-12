@@ -160,7 +160,7 @@ const ChartResults: React.FC = () => {
         console.log('Transformed birth data:', birthData);
         
         // Make API call to calculate chart
-        const response = await fetch('http://localhost:8000/calculate', {
+        const response = await fetch('http://localhost:8001/calculate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -240,7 +240,7 @@ const handleSaveChart = async () => {
         // User is authenticated, use the authenticated endpoint
         const token = await user.getIdToken();
         
-        const response = await fetch('http://localhost:8000/api/charts/save-chart', {
+        const response = await fetch('http://localhost:8001/api/charts/save-chart', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ const handleSaveChart = async () => {
         // No user authenticated, use test endpoint
         console.log('No user authenticated, using test endpoint');
         
-        const response = await fetch('http://localhost:8000/api/charts/test-save-chart', {
+        const response = await fetch('http://localhost:8001/api/charts/test-save-chart', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -286,7 +286,7 @@ const handleSaveChart = async () => {
       console.error('Auth error, falling back to test endpoint:', authError);
       
       // Fallback to test endpoint
-      const response = await fetch('http://localhost:8000/api/charts/test-save-chart', {
+      const response = await fetch('http://localhost:8001/api/charts/test-save-chart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -44,7 +44,7 @@ export const features = {
 
 // API configuration
 export const apiConfig = {
-  baseUrl: env.VITE_API_URL ?? 'http://localhost:8000',
+  baseUrl: env.VITE_API_URL ?? 'http://localhost:8001',
   timeout: 10000,
   retries: 3,
 };

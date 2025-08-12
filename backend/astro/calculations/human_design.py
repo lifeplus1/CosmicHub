@@ -1,6 +1,6 @@
 # backend/astro/calculations/human_design.py
 import logging
-from typing import Dict, Any, Tuple, TypedDict, Optional, List, cast
+from typing import Dict, Any, Tuple, TypedDict, Optional, List
 class PlanetActivation(TypedDict):
     gate: int
     line: int
@@ -305,7 +305,6 @@ def calculate_planetary_activations(julian_day: float) -> dict[str, PlanetActiva
                     'neptune': '♆',
                     'pluto': '♇',
                     'north_node': '☊',
-                    'south_node': '☋',
                     'earth': '⊕'
                 }.get(planet_name, planet_name)
             }
@@ -330,28 +329,6 @@ def calculate_planetary_activations(julian_day: float) -> dict[str, PlanetActiva
                 'center': get_gate_center(earth_gate_number),
                 'planet': 'earth',
                 'planet_symbol': '⊕'
-            }
-        
-        # Calculate South Node position (opposite of North Node)
-        if 'north_node' in activations:
-            north_node_position: float = float(activations['north_node']['position'])
-            south_node_position: float = (north_node_position + 180.0) % 360.0
-            
-            # Apply same gate calculation for South Node
-            hd_south_node_position = (south_node_position - 302.0) % 360.0
-            south_node_gate_index = int(hd_south_node_position / gate_degrees)
-            south_node_gate_number = gate_sequence[south_node_gate_index]
-            south_node_gate_progress = (hd_south_node_position % gate_degrees) / gate_degrees
-            south_node_line_number = int(south_node_gate_progress * 6) + 1
-            south_node_line_number = max(1, min(6, south_node_line_number))
-            
-            activations['south_node'] = {
-                'gate': south_node_gate_number,
-                'line': south_node_line_number,
-                'position': south_node_position,
-                'center': get_gate_center(south_node_gate_number),
-                'planet': 'south_node',
-                'planet_symbol': '☋'
             }
         
         # Cache results for 1 hour
@@ -462,101 +439,42 @@ def determine_type_and_authority(definition: Dict[str, Any]) -> Tuple[str, str]:
 def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze which centers are defined based on planetary activations"""
     try:
-        defined_gates: set[int] = set()
+        defined_gates: list[int] = []
         center_activations: dict[str, list[int]] = {}
         
         # Collect all activated gates from both conscious and unconscious
         all_activations: Dict[str, Any] = {}
         
-        # Handle the structure that comes from calculate_human_design
-        # activations contains the combined planetary activations from both conscious and unconscious
-        # Check if this is the nested structure with conscious/unconscious
-        if 'conscious' in activations and 'unconscious' in activations:
-            # This is design_data structure
+        # Handle nested structure (design_data with conscious/unconscious)
+        if 'conscious' in activations and isinstance(activations['conscious'], dict):
             conscious_data: Dict[str, Any] = activations['conscious']  # type: ignore
-            unconscious_data: Dict[str, Any] = activations['unconscious']  # type: ignore
-            logger.debug(f"ANALYZE_DEFINITION: Processing nested structure")
-            logger.debug(f"ANALYZE_DEFINITION: Conscious planets: {list(conscious_data.keys())}")
-            logger.debug(f"ANALYZE_DEFINITION: Unconscious planets: {list(unconscious_data.keys())}")
-            
-            # Process conscious activations
-            for planet_name, planet_data in conscious_data.items():
-                if isinstance(planet_data, dict):
-                    # Type check: planet_data should be a PlanetActivation dict
-                    planet_activation = cast(PlanetActivation, planet_data)
-                    gate_value = planet_activation.get("gate")
-                    logger.debug(f"ANALYZE_DEFINITION: Conscious {planet_name} -> gate {gate_value}")
-                    if gate_value in GATES:
-                        defined_gates.add(gate_value)
-                        center = GATES[gate_value]["center"]
-                        if center not in center_activations:
-                            center_activations[center] = []
-                        if gate_value not in center_activations[center]:
-                            center_activations[center].append(gate_value)
-                        logger.debug(f"ANALYZE_DEFINITION: Added conscious gate {gate_value} from {planet_name} to center {center}")
-            
-            # Process unconscious activations
-            for planet_name, planet_data in unconscious_data.items():
-                if isinstance(planet_data, dict):
-                    planet_activation = cast(PlanetActivation, planet_data)
-                    gate_value = planet_activation.get("gate")
-                    logger.debug(f"ANALYZE_DEFINITION: Unconscious {planet_name} -> gate {gate_value}")
-                    if gate_value in GATES:
-                        defined_gates.add(gate_value)
-                        center = GATES[gate_value]["center"]
-                        if center not in center_activations:
-                            center_activations[center] = []
-                        if gate_value not in center_activations[center]:
-                            center_activations[center].append(gate_value)
-                        logger.debug(f"ANALYZE_DEFINITION: Added unconscious gate {gate_value} from {planet_name} to center {center}")
-            
-            # Combine for channel detection
             all_activations.update(conscious_data)
-            all_activations.update(unconscious_data)
-            logger.debug(f"ANALYZE_DEFINITION: Combined activations: {len(all_activations)} total")
-        else:
-            # This is already the combined activations (all_activations from calculate_human_design)
-            logger.debug(f"ANALYZE_DEFINITION: Processing direct activations structure")
-            all_activations = activations
-            
-            # Collect unique gates and organize by center
-            for planet_name, planet_data in all_activations.items():
-                if isinstance(planet_data, dict):
-                    planet_activation = cast(PlanetActivation, planet_data)
-                    gate_value = planet_activation.get("gate")
-                    logger.debug(f"ANALYZE_DEFINITION: Direct {planet_name} -> gate {gate_value}")
-                    if gate_value in GATES:
-                        defined_gates.add(gate_value)
-                        center = GATES[gate_value]["center"]
-                        if center not in center_activations:
-                            center_activations[center] = []
-                        if gate_value not in center_activations[center]:  # Avoid duplicates
-                            center_activations[center].append(gate_value)
-                        logger.debug(f"ANALYZE_DEFINITION: Added direct gate {gate_value} from {planet_name} to center {center}")
         
-        logger.debug(f"ANALYZE_DEFINITION: Total defined gates found: {sorted(defined_gates)}")
+        if 'unconscious' in activations and isinstance(activations['unconscious'], dict):
+            unconscious_data: Dict[str, Any] = activations['unconscious']  # type: ignore
+            all_activations.update(unconscious_data)
+        
+        # If not nested, assume direct activations
+        if not all_activations:
+            all_activations = activations
+        
+        for planet_data in all_activations.values():
+            gate = planet_data.get("gate")
+            if gate and gate in GATES:
+                defined_gates.append(gate)
+                center = GATES[gate]["center"]
+                if center not in center_activations:
+                    center_activations[center] = []
+                center_activations[center].append(gate)
+        
+        # Determine defined centers (need at least one gate)
+        defined_centers: list[str] = [str(center) for center in center_activations.keys()]
         
         # Detect channels using the new function
         channels = detect_channels(all_activations)
-        logger.debug(f"ANALYZE_DEFINITION: Channels detected: {channels}")
-        
-        # Determine defined centers based on completed channels
-        # A center is only defined if it has at least one complete channel connecting to it
-        defined_centers: list[str] = []
-        
-        if channels:
-            # Get all centers that are connected by channels
-            channel_centers: set[str] = set()
-            for channel_key in channels:
-                gate1, gate2 = map(int, channel_key.split("-"))
-                if gate1 in GATES and gate2 in GATES:
-                    channel_centers.add(GATES[gate1]["center"])
-                    channel_centers.add(GATES[gate2]["center"])
-            
-            defined_centers = list(channel_centers)
         
         return {
-            "defined_gates": list(defined_gates),
+            "defined_gates": defined_gates,
             "defined_centers": defined_centers,
             "center_activations": center_activations,
             "channels": channels
@@ -600,8 +518,8 @@ def calculate_human_design(year: int, month: int, day: int, hour: int, minute: i
         all_activations.update(design_data["conscious"])
         all_activations.update(design_data["unconscious"])
         
-        # Analyze definition using the design_data structure to get all gates
-        definition = analyze_definition(design_data)
+        # Analyze definition
+        definition = analyze_definition(all_activations)
         
         # Determine type and authority
         hd_type, authority = determine_type_and_authority(definition)
@@ -711,81 +629,11 @@ def calculate_profile(design_data: Dict[str, Any]) -> Dict[str, Any]:
             "number": profile_number,
             "personality_line": personality_line,
             "design_line": design_line,
-            "line1": personality_line,  # Frontend compatibility
-            "line2": design_line,       # Frontend compatibility
             "description": profiles.get(profile_number, "Unknown profile combination")
         }
     except Exception as e:
         logger.error(f"Error calculating profile: {str(e)}")
         return {"number": "1/3", "description": "Profile calculation error"}
-
-# Incarnation Cross mappings based on personality sun gate
-INCARNATION_CROSSES = {
-    1: "Right Angle Cross of the Four Ways",
-    2: "Right Angle Cross of the Sphinx", 
-    3: "Right Angle Cross of the Four Ways",
-    4: "Right Angle Cross of Explanation",
-    5: "Right Angle Cross of Consciousness",
-    6: "Right Angle Cross of the Four Ways",
-    7: "Right Angle Cross of the Sphinx",
-    8: "Right Angle Cross of Contagion",
-    9: "Right Angle Cross of the Four Ways",
-    10: "Right Angle Cross of the Four Ways",
-    11: "Right Angle Cross of Eden",
-    12: "Right Angle Cross of Eden",
-    13: "Right Angle Cross of the Sphinx",
-    14: "Right Angle Cross of the Four Ways",
-    15: "Right Angle Cross of the Four Ways",
-    16: "Right Angle Cross of Planning",
-    17: "Right Angle Cross of the Four Ways",
-    18: "Right Angle Cross of the Four Ways",
-    19: "Right Angle Cross of the Four Ways",
-    20: "Right Angle Cross of the Four Ways",
-    21: "Right Angle Cross of Tension",
-    22: "Right Angle Cross of the Four Ways",
-    23: "Right Angle Cross of Explanation",
-    24: "Right Angle Cross of the Four Ways",
-    25: "Right Angle Cross of the Vessel of Love",
-    26: "Right Angle Cross of Rulership",
-    27: "Right Angle Cross of Unexpected",
-    28: "Right Angle Cross of the Four Ways",
-    29: "Right Angle Cross of the Four Ways",
-    30: "Right Angle Cross of the Four Ways",
-    31: "Right Angle Cross of the Four Ways",
-    32: "Right Angle Cross of Maya",
-    33: "Right Angle Cross of the Sphinx",
-    34: "Right Angle Cross of the Four Ways",
-    35: "Right Angle Cross of the Four Ways",
-    36: "Right Angle Cross of the Four Ways",
-    37: "Right Angle Cross of the Four Ways",
-    38: "Right Angle Cross of the Four Ways",
-    39: "Right Angle Cross of the Four Ways",
-    40: "Right Angle Cross of the Four Ways",
-    41: "Right Angle Cross of the Four Ways",
-    42: "Right Angle Cross of the Four Ways",
-    43: "Right Angle Cross of the Four Ways",
-    44: "Right Angle Cross of the Four Ways",
-    45: "Right Angle Cross of the Four Ways",
-    46: "Right Angle Cross of the Four Ways",
-    47: "Right Angle Cross of the Four Ways",
-    48: "Right Angle Cross of the Four Ways",
-    49: "Right Angle Cross of the Four Ways",
-    50: "Right Angle Cross of the Four Ways",
-    51: "Right Angle Cross of the Four Ways",
-    52: "Right Angle Cross of the Four Ways",
-    53: "Right Angle Cross of the Four Ways",
-    54: "Right Angle Cross of the Four Ways",
-    55: "Right Angle Cross of the Four Ways",
-    56: "Right Angle Cross of the Four Ways",
-    57: "Right Angle Cross of the Four Ways",
-    58: "Right Angle Cross of the Four Ways",
-    59: "Right Angle Cross of the Four Ways",
-    60: "Right Angle Cross of the Four Ways",
-    61: "Right Angle Cross of the Four Ways",
-    62: "Right Angle Cross of the Four Ways",
-    63: "Right Angle Cross of the Four Ways",
-    64: "Right Angle Cross of the Four Ways"
-}
 
 def calculate_incarnation_cross(design_data: Dict[str, Any]) -> Dict[str, Any]:
     """Calculate the Incarnation Cross"""
@@ -799,22 +647,8 @@ def calculate_incarnation_cross(design_data: Dict[str, Any]) -> Dict[str, Any]:
         sun_design = unconscious.get("sun", {}).get("gate", 1)
         earth_design = unconscious.get("earth", {}).get("gate", 1)
         
-        # Determine cross type and name based on the gate relationships
-        # For gates 13/7/1/2, this creates a specific cross pattern
-        cross_types = {
-            # Right Angle Crosses (most common)
-            (13, 7, 1, 2): "Right Angle Cross of the Sphinx",
-            (13, 7, 2, 1): "Right Angle Cross of the Sphinx",
-            # Add more specific cross combinations as needed
-        }
-        
-        # Try to find specific cross pattern first
-        cross_key = (sun_personality, earth_personality, sun_design, earth_design)
-        cross_name = cross_types.get(cross_key)
-        
-        if not cross_name:
-            # Use the cross mapping based on personality sun gate
-            cross_name = INCARNATION_CROSSES.get(sun_personality, "Right Angle Cross of the Four Ways")
+        # Create the cross name based on the personality sun gate
+        cross_name = f"Right Angle Cross of {GATES.get(sun_personality, {}).get('name', 'Unknown')}"
         
         return {
             "name": cross_name,

@@ -3,7 +3,7 @@ import requests
 from typing import Dict, Any
 
 def test_backend() -> None:
-    base_url = "http://localhost:8001"
+    base_url = "http://localhost:8000"  # Docker containerized backend
     
     print("🧪 Testing CosmicHub Backend API")
     print(f"📍 Base URL: {base_url}")
@@ -42,11 +42,14 @@ def test_backend() -> None:
     try:
         print("3. Testing Human Design calculation...")
         test_data: Dict[str, Any] = {
-            'birth_date': '1990-01-01',
-            'birth_time': '12:00',
-            'birth_location': 'New York, NY',
-            'latitude': 40.7128,
-            'longitude': -74.0060,
+            'year': 1990,
+            'month': 1,
+            'day': 1,
+            'hour': 12,
+            'minute': 0,
+            'city': 'New York, NY',
+            'lat': 40.7128,
+            'lon': -74.0060,
             'timezone': 'America/New_York'
         }
         

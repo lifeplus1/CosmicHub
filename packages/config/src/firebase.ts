@@ -22,7 +22,7 @@ const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_PROJECT_ID', 'V
 const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
 
 if (missingVars.length > 0) {
-  throw new Error(`Missing required Firebase environment variables: ${missingVars.join(', ')}`);
+  console.warn(`Missing required Firebase environment variables: ${missingVars.join(', ')}. Using mock auth.`);
 }
 
 //Initialize Firebase app (singleton pattern)

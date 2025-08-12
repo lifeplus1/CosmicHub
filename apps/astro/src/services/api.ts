@@ -1,10 +1,7 @@
 import axios from 'axios';
 import { auth } from '@cosmichub/config/firebase';
 
-// API Configuration
-import { env } from '../config/environment';
-
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
 console.log('🔗 API Service initializing...');
 console.log('🌐 Backend URL:', BACKEND_URL);

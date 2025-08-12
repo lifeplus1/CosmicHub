@@ -38,6 +38,7 @@ try {
     app = initializeApp(firebaseConfig as any);
     // Initialize auth after app is created
     authInstance = getAuth(app);
+    console.log('🔥 Firebase Auth initialized successfully');
   }
 } catch (error) {
   console.error('[auth] Firebase initialization failed:', error);
@@ -45,10 +46,21 @@ try {
   authInstance = undefined;
 }
 
-// Export auth if initialized; otherwise create a lazy getter that throws on use
+// Export auth if initialized; otherwise create a safe mock that doesn't throw
 export const auth: Auth = authInstance || (new Proxy({} as Auth, {
-  get() {
-    throw new Error('Firebase auth not initialized due to incomplete configuration');
+  get(target, prop) {
+    if (prop === 'currentUser') {
+      return null;
+    }
+    if (prop === 'onAuthStateChanged') {
+      return (callback: any) => {
+        // Call immediately with null to indicate no user
+        callback(null);
+        return () => {}; // Return unsubscribe function
+      };
+    }
+    console.warn('Firebase auth not available - using mock auth instead');
+    return undefined;
   }
 }) as Auth);
 

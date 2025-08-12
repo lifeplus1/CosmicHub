@@ -89,12 +89,7 @@ services:
   healwave-app:
     build:
       context: .
-      dockerfile: Dockerfile.healwave
-      target: development
-      cache_from:
-        - cosmichub/healwave:latest
-        - cosmichub/healwave:deps
-        - cosmichub/healwave:builder
+      dockerfile: apps/healwave/Dockerfile
     volumes:
       - ./apps/healwave:/app/apps/healwave
       - ./packages:/app/packages

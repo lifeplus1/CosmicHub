@@ -1,12 +1,11 @@
 import React, { type ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { AuthProvider } from '../contexts/AuthContext';
-import { SubscriptionProvider } from '../contexts/SubscriptionContext';
+import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 
 export const TestWrapper = ({ children }: { children: ReactNode }): JSX.Element => (
   <MemoryRouter>
     <AuthProvider>
-      <SubscriptionProvider>
+      <SubscriptionProvider appType="cosmichub">
         {children}
       </SubscriptionProvider>
     </AuthProvider>
