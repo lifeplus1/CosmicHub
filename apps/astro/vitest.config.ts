@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react({
+    jsxRuntime: 'classic'
+  })],
   define: {
     'import.meta.env.VITE_FIREBASE_API_KEY': '"test-api-key"',
     'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': '"test-project.firebaseapp.com"',
