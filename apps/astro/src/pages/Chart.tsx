@@ -5,8 +5,8 @@ import { Card, Button } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
 import ChartDisplay from '../components/ChartDisplay';
-import { useQuery } from '@tanstack/react-query';
-import { fetchChartData } from '../services/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchChartData, saveChart, type SaveChartRequest } from '../services/api';
 import type { ChartBirthData } from '../services/api';
 
 // Lazy load ChartWheel for optimal performance
@@ -53,6 +53,7 @@ const Chart: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
   const [showAspects, setShowAspects] = useState(true);
   const [showAnimation, setShowAnimation] = useState(true);
+  const queryClient = useQueryClient();
 
   // Fetch chart data and transform it consistently for both components
   const { data: rawChartData, isLoading: chartLoading, error: chartError } = useQuery({
@@ -66,6 +67,45 @@ const Chart: React.FC = () => {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     retry: 2,
   });
+
+  // Save chart mutation
+  const saveMutation = useMutation({
+    mutationFn: saveChart,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
+      alert('Chart saved successfully!');
+    },
+    onError: (error) => {
+      console.error('Error saving chart:', error);
+      alert(`Failed to save chart: ${error.message}`);
+    },
+  });
+
+  const handleSaveChart = () => {
+    if (!user) {
+      alert('Please sign in to save your chart');
+      navigate('/login');
+      return;
+    }
+
+    if (!birthData) {
+      alert('No chart data to save. Please generate a chart first.');
+      return;
+    }
+
+    const saveData: SaveChartRequest = {
+      year: birthData.year,
+      month: birthData.month,
+      day: birthData.day,
+      hour: birthData.hour,
+      minute: birthData.minute,
+      city: birthData.city,
+      house_system: 'P', // Default to Placidus
+      chart_name: `${birthData.city} ${birthData.year}-${birthData.month.toString().padStart(2, '0')}-${birthData.day.toString().padStart(2, '0')}`
+    };
+
+    saveMutation.mutate(saveData);
+  };
 
   // Transform the data consistently for both components
   const chartData = React.useMemo(() => {
@@ -181,6 +221,17 @@ const Chart: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-3">
+                {/* Save Chart Button */}
+                {user && (
+                  <Button 
+                    onClick={handleSaveChart}
+                    disabled={saveMutation.isPending}
+                    className="text-sm bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark"
+                  >
+                    {saveMutation.isPending ? 'Saving...' : '💾 Save Chart'}
+                  </Button>
+                )}
+                
                 {/* Multi-System Link */}
                 <Button 
                   onClick={() => navigate('/multi-system')} 
@@ -230,7 +281,7 @@ const Chart: React.FC = () => {
                   </Button>
                 </div>
               ) : chartData ? (
-                <ChartDisplay chart={chartData as any} />
+                <ChartDisplay chart={chartData as any} onSaveChart={handleSaveChart} />
               ) : (
                 <div className="text-center p-8">
                   <div className="text-cosmic-silver">No chart data available</div>

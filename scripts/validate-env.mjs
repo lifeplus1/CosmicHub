@@ -46,6 +46,30 @@ if (fs.existsSync(path.resolve(process.cwd(), '.env.production.server'))) {
   console.log('\nℹ️  .env.production.server detected (expected). Ensure it is excluded from frontend build contexts.');
 }
 
+// Compare Firebase project between service account (server) and frontend config
+try {
+  const serverEnvPath = path.resolve(process.cwd(), '.env.production.server');
+  if (fs.existsSync(serverEnvPath)) {
+    const text = fs.readFileSync(serverEnvPath, 'utf8');
+    const line = text.split(/\r?\n/).find(l => l.startsWith('FIREBASE_CREDENTIALS='));
+    if (line) {
+      const eq = line.indexOf('=');
+      const jsonTxt = line.slice(eq + 1).trim();
+      try {
+        const sa = JSON.parse(jsonTxt);
+        const saProject = sa && sa.project_id;
+        const publicProject = process.env.VITE_FIREBASE_PROJECT_ID;
+        if (saProject && publicProject && saProject !== publicProject) {
+          const msg = `Firebase project mismatch: service account project_id "${saProject}" vs VITE_FIREBASE_PROJECT_ID "${publicProject}". Choose one project and align both.`;
+          (mode === 'production') ? errors.push(msg) : warnings.push(msg);
+        }
+      } catch (e) {
+        warnings.push(`Could not parse FIREBASE_CREDENTIALS JSON from .env.production.server: ${e?.message || e}`);
+      }
+    }
+  }
+} catch {}
+
 // 1. Required public vars
 for (const k of requiredPublic) {
   if (!process.env[k]) {

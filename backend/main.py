@@ -1,7 +1,27 @@
 # backend/main.py
 import logging
 import os
+from pathlib import Path
 from typing import Optional, Dict, Any, List, cast
+
+# Load environment from local .env files (prefer production server env when DEPLOY_ENVIRONMENT=production)
+try:
+    from dotenv import load_dotenv  # type: ignore
+    _env_loaded = False
+    backend_dir = Path(__file__).resolve().parent
+    # Choose preferred order based on DEPLOY_ENVIRONMENT
+    env_mode = os.environ.get('DEPLOY_ENVIRONMENT', 'development').lower()
+    preferred = ['.env.production.server', '.env'] if env_mode == 'production' else ['.env', '.env.production.server']
+    for fname in preferred:
+        env_path = backend_dir / fname
+        if env_path.exists():
+            load_dotenv(dotenv_path=str(env_path))
+            _env_loaded = True
+            logging.getLogger(__name__).info(f"Loaded backend environment from {fname}")
+            break
+except Exception:
+    # Safe to ignore if python-dotenv not present in certain environments
+    pass
 from fastapi import FastAPI, HTTPException, Query, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator, FieldValidationInfo

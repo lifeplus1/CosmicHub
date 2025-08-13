@@ -24,4 +24,4 @@ echo "🚀 Starting CosmicHub Backend..."
 echo "📍 CORS Origins: $ALLOWED_ORIGINS"
 
 # Start the backend with the virtual environment Python
-/Users/Chris/Projects/CosmicHub/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+/Users/Chris/Projects/CosmicHub/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload

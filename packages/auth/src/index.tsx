@@ -1,50 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator, Auth, User } from 'firebase/auth';
+import { Auth, User, onAuthStateChanged, signOut as fbSignOut } from 'firebase/auth';
+// Use the single, centralized Firebase app/auth to avoid duplicate registrations
+import { app as sharedApp, auth as sharedAuth, hasAuthAvailable } from '@cosmichub/config/firebase';
 
-interface FirebaseConfig {
-  apiKey: string | undefined;
-  authDomain: string | undefined;
-  projectId: string | undefined;
-  storageBucket: string | undefined;
-  messagingSenderId: string | undefined;
-  appId: string | undefined;
-}
-
-// Support Vite (browser / vitest) via import.meta.env, fallback to process.env for other Node contexts
-const envAny: any = (typeof import.meta !== 'undefined' && (import.meta as any)?.env)
-  ? (import.meta as any).env
-  : (process?.env || {});
-const firebaseConfig: FirebaseConfig = {
-  apiKey: envAny.VITE_FIREBASE_API_KEY,
-  authDomain: envAny.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: envAny.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: envAny.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: envAny.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: envAny.VITE_FIREBASE_APP_ID,
-};
-
-let app: FirebaseApp | undefined;
-let authInstance: Auth | undefined;
-
-try {
-  // Only require apiKey + appId + projectId (minimal) to attempt init; warn instead of throw
-  if (!firebaseConfig.apiKey || !firebaseConfig.appId || !firebaseConfig.projectId) {
-    console.warn('[auth] Firebase config incomplete; authentication features disabled until env vars provided.');
-    // Skip initialization; app will remain undefined
-    app = undefined;
-    authInstance = undefined;
-  } else {
-    app = initializeApp(firebaseConfig as any);
-    // Initialize auth after app is created
-    authInstance = getAuth(app);
-    console.log('🔥 Firebase Auth initialized successfully');
-  }
-} catch (error) {
-  console.error('[auth] Firebase initialization failed:', error);
-  app = undefined;
-  authInstance = undefined;
-}
+// Delegate to centralized Firebase config package
+const app = sharedApp;
+const authInstance: Auth | undefined = sharedAuth as Auth | undefined;
 
 // Export auth if initialized; otherwise create a safe mock that doesn't throw
 export const auth: Auth = authInstance || (new Proxy({} as Auth, {
@@ -64,22 +25,8 @@ export const auth: Auth = authInstance || (new Proxy({} as Auth, {
   }
 }) as Auth);
 
-// Connect to emulator in development - DISABLED for now to use production Firebase
-// if (envAny.DEV || (envAny.NODE_ENV || envAny.MODE) === 'development') {
-//   try {
-//     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-//   } catch (error) {
-//     console.warn('Auth emulator connection failed:', error);
-//   }
-// }
-
 console.log('🔥 Firebase Auth initialized:', {
   hasApp: !!app,
-  config: {
-    apiKey: firebaseConfig.apiKey ? '***' : 'missing',
-    authDomain: firebaseConfig.authDomain,
-    projectId: firebaseConfig.projectId
-  }
 });
 
 export interface AuthState {
@@ -136,7 +83,7 @@ export const useAuth = (): AuthState => {
   const signOut = useCallback(async (): Promise<void> => {
     try {
       if (authInstance) {
-        await authInstance.signOut();
+        await fbSignOut(authInstance);
       }
       notifyAuthStateChange(null);
     } catch (error) {
@@ -152,12 +99,13 @@ export const useAuth = (): AuthState => {
     // Add to local listeners for mock auth
     authStateListeners.push(setUser);
     
-    let unsubscribe: (() => void) | undefined;
+  let unsubscribe: (() => void) | undefined;
     
     // Only listen to Firebase auth changes if auth is properly initialized
-    if (authInstance) {
+  if (authInstance && hasAuthAvailable) {
       try {
-        unsubscribe = authInstance.onAuthStateChanged(
+        unsubscribe = onAuthStateChanged(
+          authInstance,
           (currentUser) => {
             console.log('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
             if (currentUser) {

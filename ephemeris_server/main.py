@@ -1,5 +1,6 @@
 import os
 import logging
+from pathlib import Path
 from typing import List
 from contextlib import asynccontextmanager
 
@@ -19,6 +20,21 @@ from models import (
     HealthResponse
 )
 from service import EphemerisService
+try:
+    # Load local env files for development if present
+    from dotenv import load_dotenv  # type: ignore
+    _env_loaded = False
+    for fname in ('.env', '.env.production.server'):
+        env_path = Path(__file__).resolve().parent / fname
+        if env_path.exists():
+            load_dotenv(dotenv_path=str(env_path))
+            _env_loaded = True
+            break
+    if _env_loaded:
+        logging.getLogger(__name__).info("Loaded ephemeris_server environment from local .env file")
+except Exception:
+    # Safe to ignore if python-dotenv is not available in certain environments
+    pass
 
 # Configure logging
 logging.basicConfig(

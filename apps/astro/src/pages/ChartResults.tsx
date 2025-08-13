@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@cosmichub/auth';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ChartDisplay from '../components/ChartDisplay';
 import { CosmicLoading } from '../components/CosmicLoading';
+import { saveChart, type SaveChartRequest } from '../services/api';
 import type { ChartData } from '../types';
 
 interface BirthData {
@@ -55,10 +58,62 @@ interface ExtendedChartData extends ChartData {
 }
 
 const ChartResults: React.FC = () => {
-  const [chartData, setChartData] = useState<ExtendedChartData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [chartData, setChartData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Save chart mutation
+  const saveMutation = useMutation({
+    mutationFn: saveChart,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
+      alert('Chart saved successfully!');
+    },
+    onError: (error) => {
+      console.error('Error saving chart:', error);
+      alert(`Failed to save chart: ${error.message}`);
+    },
+  });
+
+  const handleSaveChart = () => {
+    if (!user) {
+      alert('Please sign in to save your chart');
+      navigate('/login');
+      return;
+    }
+
+    // Get the stored birth data that was used to calculate this chart
+    const storedBirthData = sessionStorage.getItem('birthData');
+    
+    if (!storedBirthData) {
+      console.error('No birth data found for saving');
+      alert('No birth data found. Please generate a chart first.');
+      return;
+    }
+
+    const parsedData: StoredBirthData = JSON.parse(storedBirthData);
+    
+    // Convert stored data to the format expected by the backend
+    const [year, month, day] = parsedData.date.split('-').map(Number);
+    const [hour, minute] = parsedData.time.split(':').map(Number);
+    
+    const saveData: SaveChartRequest = {
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      city: parsedData.location,
+      house_system: 'P', // Default to Placidus
+      chart_name: `${parsedData.location} ${parsedData.date}`
+    };
+
+    console.log('Saving chart with data:', saveData);
+    saveMutation.mutate(saveData);
+  };
 
   // Utility function to get zodiac sign from position
   const getZodiacSignName = (position: number): string => {
@@ -199,117 +254,7 @@ const ChartResults: React.FC = () => {
 
   const handleBackToCalculator = () => {
     navigate('/calculator');
-  };
-
-const handleSaveChart = async () => {
-  try {
-    // Get the stored birth data that was used to calculate this chart
-    const storedBirthData = sessionStorage.getItem('birthData');
-    if (!storedBirthData) {
-      console.error('No birth data found for saving');
-      alert('No birth data found. Please generate a chart first.');
-      return;
-    }
-
-    const parsedData: StoredBirthData = JSON.parse(storedBirthData);
-    
-    // Convert stored data to the format expected by the backend
-    const [year, month, day] = parsedData.date.split('-').map(Number);
-    const [hour, minute] = parsedData.time.split(':').map(Number);
-    
-    const saveData = {
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      city: parsedData.location,
-      house_system: "P", // Default to Placidus
-      chart_name: `${parsedData.location} ${parsedData.date}`
-    };
-
-    console.log('Saving chart with data:', saveData);
-
-    // Try to get Firebase auth first
-    try {
-      const { getAuth } = await import('firebase/auth');
-      const auth = getAuth();
-      const user = auth.currentUser;
-      
-      if (user) {
-        // User is authenticated, use the authenticated endpoint
-        const token = await user.getIdToken();
-        
-        const response = await fetch('http://localhost:8001/api/charts/save-chart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(saveData)
-        });
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error('Save chart error:', errorData);
-          throw new Error(`Failed to save chart: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Chart saved successfully:', result);
-        alert(`Chart saved successfully! Chart ID: ${result.id}`);
-        
-      } else {
-        // No user authenticated, use test endpoint
-        console.log('No user authenticated, using test endpoint');
-        
-        const response = await fetch('http://localhost:8001/api/charts/test-save-chart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(saveData)
-        });
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error('Save chart error:', errorData);
-          throw new Error(`Failed to save chart: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Test chart saved successfully:', result);
-        alert(`Test chart saved successfully! Chart ID: ${result.id}\n\nNote: Sign in to save charts to your personal collection.`);
-      }
-      
-    } catch (authError) {
-      console.error('Auth error, falling back to test endpoint:', authError);
-      
-      // Fallback to test endpoint
-      const response = await fetch('http://localhost:8001/api/charts/test-save-chart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(saveData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Save chart error:', errorData);
-        throw new Error(`Failed to save chart: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('Test chart saved successfully:', result);
-      alert(`Test chart saved successfully! Chart ID: ${result.id}\n\nNote: Sign in to save charts to your personal collection.`);
-    }
-    
-  } catch (error) {
-    console.error('Error saving chart:', error);
-    alert('Failed to save chart. Please try again.');
-  }
-};  if (loading) {
+  };  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <CosmicLoading size="lg" message="Calculating your birth chart..." />

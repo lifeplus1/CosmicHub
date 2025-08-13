@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
           </p>
           <div className="flex gap-2">
             <button 
-              onClick={() => window.location.href = '/chart'}
+              onClick={() => window.location.href = '/calculator'}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-cosmic-purple to-cosmic-blue hover:from-cosmic-purple/80 hover:to-cosmic-blue/80 text-white rounded-lg transition-all duration-300 font-semibold"
             >
               Create Chart
@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
                 This is a sample chart for demonstration. Create your own personalized chart above.
               </p>
               <button 
-                onClick={() => window.location.href = '/chart'}
+                onClick={() => window.location.href = '/calculator'}
                 className="px-6 py-2 bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark font-semibold rounded-lg transition-colors duration-300"
               >
                 Create Your Chart

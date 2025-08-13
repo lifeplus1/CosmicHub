@@ -49,6 +49,102 @@ const getAuthHeaders = async () => {
   };
 };
 
+// Saved Charts API Types
+export interface SavedChart {
+  id: string;
+  name: string;
+  birth_date: string;
+  birth_time: string;
+  birth_location: string;
+  chart_type: string;
+  created_at: string;
+  updated_at: string;
+  birth_data: ChartBirthData;
+  chart_data: any;
+}
+
+export interface SavedChartsResponse {
+  charts: SavedChart[];
+  total: number;
+}
+
+export interface SaveChartRequest {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  city: string;
+  house_system?: string;
+  chart_name?: string;
+}
+
+export interface SaveChartResponse {
+  id: string;
+  message: string;
+  chart_data: SavedChart;
+}
+
+// API Functions for Saved Charts
+export const fetchSavedCharts = async (): Promise<SavedChart[]> => {
+  console.log('📊 Fetching saved charts...');
+  
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${BACKEND_URL}/api/charts/`, {
+      headers
+    });
+    
+    console.log('✅ Saved charts fetched successfully:', response.data);
+    return response.data.charts || [];
+  } catch (error) {
+    console.error('❌ Error fetching saved charts:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to view saved charts');
+    }
+    throw new Error('Failed to fetch saved charts');
+  }
+};
+
+export const saveChart = async (chartData: SaveChartRequest): Promise<SaveChartResponse> => {
+  console.log('💾 Saving chart...', chartData);
+  
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.post(`${BACKEND_URL}/api/charts/save-chart`, chartData, {
+      headers
+    });
+    
+    console.log('✅ Chart saved successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error saving chart:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to save charts');
+    }
+    throw new Error('Failed to save chart');
+  }
+};
+
+export const deleteChart = async (chartId: string): Promise<void> => {
+  console.log(`🗑️ Deleting chart: ${chartId}`);
+  
+  try {
+    const headers = await getAuthHeaders();
+    await axios.delete(`${BACKEND_URL}/api/charts/${chartId}`, {
+      headers
+    });
+    
+    console.log('✅ Chart deleted successfully');
+  } catch (error) {
+    console.error('❌ Error deleting chart:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to delete charts');
+    }
+    throw new Error('Failed to delete chart');
+  }
+};
+
 export const apiClient = {
   get: async (endpoint: string) => {
     console.log('📡 API GET request:', endpoint);

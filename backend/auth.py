@@ -15,6 +15,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+firebase_available = True
+
 # Initialize Firebase Admin SDK using FIREBASE_CREDENTIALS as a single JSON string
 import json
 try:
@@ -47,20 +49,36 @@ except ValueError:
             }
             missing = [k for k, v in cred_dict.items() if not v]
             if missing:
-                logger.error(f"Missing Firebase credential fields: {missing}")
                 raise ValueError(f"Missing Firebase credential fields: {missing}")
             cred = firebase_admin.credentials.Certificate(cred_dict)
         
         initialize_app(cred)
         logger.info("Firebase Admin SDK initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize Firebase: {str(e)}")
-        raise ValueError(f"Failed to initialize Firebase: {str(e)}")
+        # In non-production, allow a mock auth fallback so the app can run
+        env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
+        allow_mock = os.getenv("ALLOW_MOCK_AUTH", "1" if env != "production" else "0")
+        if allow_mock in ("1", "true", "yes") and env != "production":
+            firebase_available = False
+            logger.warning(
+                "Firebase Admin credentials not found. Running with mock auth (development only). "
+                "Set FIREBASE_CREDENTIALS or individual FIREBASE_* vars, or set ALLOW_MOCK_AUTH=0 to disable."
+            )
+        else:
+            logger.error(f"Failed to initialize Firebase: {str(e)}")
+            raise ValueError(f"Failed to initialize Firebase: {str(e)}")
 
 security = HTTPBearer()
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
+        if not firebase_available:
+            # Development fallback: trust any token and return a mock user id
+            token = (credentials.credentials or '').strip()
+            uid = token or os.getenv('DEV_FAKE_UID', 'dev-user')
+            logger.info(f"[MOCK_AUTH] Using mock user: {uid}")
+            return str(uid)
+        
         token = credentials.credentials
         if not token:
             logger.error("No token provided")

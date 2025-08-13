@@ -29,6 +29,7 @@ if (missingVars.length > 0) {
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
+let hasAuthAvailable = false;
 
 try {
   // Check if Firebase app already exists
@@ -38,6 +39,7 @@ try {
   // Initialize services with error handling
   try {
     auth = getAuth(app);
+    hasAuthAvailable = true;
   } catch (authError) {
     console.warn('Firebase Auth initialization failed, using fallback:', authError);
     // Create a proxy that warns instead of throwing
@@ -47,6 +49,7 @@ try {
         return undefined;
       }
     }) as Auth;
+    hasAuthAvailable = false;
   }
   
   try {
@@ -68,7 +71,7 @@ try {
     let firestoreEmulatorConnected = false;
 
     try {
-      if (!authEmulatorConnected && auth && typeof auth.onAuthStateChanged === 'function') {
+      if (!authEmulatorConnected && hasAuthAvailable) {
         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
         authEmulatorConnected = true;
         console.log('🔥 Firebase Auth emulator connected - development mode');
@@ -127,6 +130,7 @@ export const disableFirestoreNetwork = async (): Promise<void> => {
  * Firebase service instances
  */
 export { app, auth, db };
+export { hasAuthAvailable };
 
 /**
  * Environment utilities

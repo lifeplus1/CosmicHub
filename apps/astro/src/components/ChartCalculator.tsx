@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { FaBook, FaInfoCircle } from "react-icons/fa";
+import { useAuth } from '@cosmichub/auth';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ChartDisplay from "./ChartDisplay";
 import { MultiSystemChartDisplay } from "./MultiSystemChartDisplay";
 import type { MultiSystemChartData } from "./MultiSystemChartDisplay";
 import type { ChartBirthData } from "../services/api";
+import { saveChart, type SaveChartRequest } from "../services/api";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";
 import * as SwitchPrimitive from '@radix-ui/react-switch';
@@ -68,6 +71,8 @@ function convertToChartBirthData(formData: FormData): ChartBirthData {
 }
 
 const ChartCalculator: React.FC = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState<FormData>({
     year: "",
     month: "",
@@ -83,6 +88,45 @@ const ChartCalculator: React.FC = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+
+  // Save chart mutation
+  const saveMutation = useMutation({
+    mutationFn: saveChart,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
+      setSuccess("Chart saved successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    },
+    onError: (error) => {
+      console.error('Error saving chart:', error);
+      setError(`Failed to save chart: ${error.message}`);
+    },
+  });
+
+  const handleSaveChart = () => {
+    if (!user) {
+      setError('Please sign in to save your chart');
+      return;
+    }
+
+    if (!chart || !formData.year || !formData.month || !formData.day || !formData.hour || !formData.minute || !formData.city) {
+      setError('Please generate a chart first before saving');
+      return;
+    }
+
+    const saveData: SaveChartRequest = {
+      year: parseInt(formData.year),
+      month: parseInt(formData.month),
+      day: parseInt(formData.day),
+      hour: parseInt(formData.hour),
+      minute: parseInt(formData.minute),
+      city: formData.city,
+      house_system: houseSystem,
+      chart_name: `${formData.city} ${formData.year}-${formData.month.padStart(2, '0')}-${formData.day.padStart(2, '0')}`
+    };
+
+    saveMutation.mutate(saveData);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
@@ -413,7 +457,7 @@ const ChartCalculator: React.FC = () => {
               ? !isExtendedChartData(chart) && (
                   <MultiSystemChartDisplay birthData={convertToChartBirthData(formData)} showComparison={true} />
                 )
-              : isExtendedChartData(chart) && <ChartDisplay chart={chart} />}
+              : isExtendedChartData(chart) && <ChartDisplay chart={chart} onSaveChart={handleSaveChart} />}
           </div>
         )}
       </div>
