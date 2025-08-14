@@ -95,7 +95,7 @@ const MainApp: React.FC = React.memo(() => {
               <Route path="/human-design" element={<HumanDesign />} />
               <Route path="/gene-keys" element={<GeneKeys />} />
               <Route path="/synastry" element={<Synastry />} />
-              <Route path="/ai-interpretation" element={<AIInterpretation />} />
+              <Route path="/ai-interpretation" element={<AIInterpretation chartId="" />} />
               <Route path="/saved-charts" element={<SavedCharts />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />

@@ -21,7 +21,7 @@ const Spinner = () => (
 const InterpretationCard = lazy(() => import('../components/AIInterpretation/InterpretationCard'));
 
 interface AIInterpretationsProps {
-  chartId: string;
+  chartId?: string;
   userId?: string;
 }
 
@@ -29,6 +29,16 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({ chartId, userId }
   const { user } = useAuth();
   const auth = getAuth();
   const effectiveUserId = userId || user?.uid;
+
+  // Early return if no chartId provided
+  if (!chartId) {
+    return (
+      <div className="p-4 text-center">
+        <h2 className="text-xl font-semibold mb-4">AI Interpretations</h2>
+        <p className="text-gray-600">Please select a chart to view AI interpretations.</p>
+      </div>
+    );
+  }
 
   const [interpretations, setInterpretations] = useState<Interpretation[]>([]);
 

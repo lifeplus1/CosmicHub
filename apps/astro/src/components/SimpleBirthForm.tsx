@@ -7,12 +7,14 @@ interface SimpleBirthFormProps {
   title?: string;
   submitButtonText?: string;
   onSubmit?: (data: ChartBirthData) => void;
+  showSampleButton?: boolean;
 }
 
 export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
   title = "Birth Details",
   submitButtonText = "Calculate Chart",
-  onSubmit
+  onSubmit,
+  showSampleButton = false
 }) => {
   const { setBirthData } = useBirthData();
   const [isLoading, setIsLoading] = useState(false);
