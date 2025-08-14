@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
-import { savePreset, getPresets, getUserPresets, deletePreset } from '../services/api';
+import { savePreset, getUserPresets, deletePreset } from '../services/api';
 
 interface PresetSelectorProps {
   onSelectPreset: (preset: FrequencyPreset) => void;
@@ -76,8 +76,9 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
       setLoading(true);
       const userPresets = await getUserPresets();
       setPresets(userPresets);
-    } catch (error) {
-      console.error('Failed to load presets:', error);
+    } catch {
+      // Handle error silently for better UX
+      setPresets([]);
     } finally {
       setLoading(false);
     }
@@ -108,8 +109,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
       setNewPresetName('');
       setNewPresetDescription('');
       setShowSaveDialog(false);
-    } catch (error) {
-      console.error('Failed to save preset:', error);
+    } catch {
       alert('Failed to save preset. Please try again.');
     } finally {
       setLoading(false);
@@ -125,8 +125,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
       setLoading(true);
       await deletePreset(presetId);
       setPresets(prev => prev.filter(p => p.id !== presetId));
-    } catch (error) {
-      console.error('Failed to delete preset:', error);
+    } catch {
       alert('Failed to delete preset. Please try again.');
     } finally {
       setLoading(false);
