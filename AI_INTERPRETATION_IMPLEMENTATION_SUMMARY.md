@@ -71,8 +71,9 @@ Complete implementation of production-grade AI interpretation system for CosmicH
 
 ## Frontend Components (Previous Implementation)
 
-- Lazy loading and performance optimizations
-- Accessibility features (WCAG 2.1 compliant)
+1. **Main AIInterpretation Component** - Core functionality:
+   - Lazy loading and performance optimizations
+   - Accessibility features (WCAG 2.1 compliant)
 
 2. **InterpretationCard.tsx** - Individual interpretation display:
    - Rich card design with confidence scores
@@ -112,9 +113,7 @@ Complete implementation of production-grade AI interpretation system for CosmicH
    - Error management
    - TypeScript type safety
 
-### Backend Template
-
-8. **interpretations.py** - FastAPI endpoints:
+8. **Backend Template** - `interpretations.py` FastAPI endpoints:
    - `/api/interpretations` - Fetch interpretations
    - `/api/interpretations/generate` - Generate new interpretations
    - `/api/interpretations/{id}` - Get specific interpretation
@@ -185,7 +184,7 @@ Replace the mock AI generation with:
 
 ## 📋 File Structure
 
-```
+```text
 apps/astro/src/components/AIInterpretation/
 ├── AIInterpretation.tsx          # Main component
 ├── InterpretationCard.tsx        # Individual interpretation card
