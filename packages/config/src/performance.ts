@@ -1,6 +1,6 @@
 /**
- * Performance Monitoring System for CosmicHub
- * Provides comprehensive performance tracking for components, operations, and pages
+ * Enhanced Performance Monitoring System for CosmicHub
+ * Provides comprehensive performance tracking with memory management and external integrations
  */
 
 export interface PerformanceMetric {
@@ -39,6 +39,7 @@ export interface PerformanceReport {
 }
 
 class PerformanceMonitor {
+  private maxMetrics = 1000; // Prevent memory issues
   private componentMetrics: ComponentMetric[] = [];
   private operationMetrics: OperationMetric[] = [];
   private pageMetrics: PageMetric[] = [];
@@ -49,6 +50,11 @@ class PerformanceMonitor {
     duration: number, 
     metadata: { type: 'render' | 'mount' | 'interaction' | 'custom'; label?: string } & Record<string, any>
   ): void {
+    // Cap metrics to prevent memory issues
+    if (this.componentMetrics.length >= this.maxMetrics) {
+      this.componentMetrics.shift(); // Remove oldest metric
+    }
+
     const metric: ComponentMetric = {
       name: `${componentName}:${metadata.type}`,
       duration,
@@ -60,6 +66,9 @@ class PerformanceMonitor {
 
     this.componentMetrics.push(metric);
     this.notifySubscribers();
+
+    // Send to Firebase Performance Monitoring if available
+    this.sendToFirebasePerformance(componentName, duration, metadata);
 
     // Log in development
     if (process.env.NODE_ENV === 'development') {
@@ -73,6 +82,11 @@ class PerformanceMonitor {
     success: boolean,
     metadata?: Record<string, any>
   ): void {
+    // Cap metrics to prevent memory issues
+    if (this.operationMetrics.length >= this.maxMetrics) {
+      this.operationMetrics.shift(); // Remove oldest metric
+    }
+
     const metric: OperationMetric = {
       name: operationName,
       duration,
@@ -84,6 +98,9 @@ class PerformanceMonitor {
 
     this.operationMetrics.push(metric);
     this.notifySubscribers();
+
+    // Send to Firebase Performance Monitoring
+    this.sendToFirebasePerformance(operationName, duration, { success, ...metadata });
 
     // Log in development
     if (process.env.NODE_ENV === 'development') {
@@ -97,6 +114,11 @@ class PerformanceMonitor {
     type: 'load' | 'interactive' | 'visibility',
     metadata?: Record<string, any>
   ): void {
+    // Cap metrics to prevent memory issues
+    if (this.pageMetrics.length >= this.maxMetrics) {
+      this.pageMetrics.shift(); // Remove oldest metric
+    }
+
     const metric: PageMetric = {
       name: `${pageName}:${type}`,
       duration,
@@ -108,6 +130,9 @@ class PerformanceMonitor {
 
     this.pageMetrics.push(metric);
     this.notifySubscribers();
+
+    // Send to Firebase Performance Monitoring
+    this.sendToFirebasePerformance(`${pageName}_${type}`, duration, metadata);
 
     // Log in development
     if (process.env.NODE_ENV === 'development') {
@@ -185,6 +210,47 @@ class PerformanceMonitor {
     const report = this.getPerformanceReport();
     this.subscribers.forEach(callback => callback(report));
   }
+
+  private sendToFirebasePerformance(
+    name: string, 
+    duration: number, 
+    metadata?: Record<string, any>
+  ): void {
+    try {
+      // Only send to Firebase in production and if available
+      if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
+        // Dynamic import to avoid issues in environments without Firebase
+        import('firebase/performance').then(({ getPerformance, trace }) => {
+          try {
+            const perf = getPerformance();
+            const traceInstance = trace(perf, name);
+            traceInstance.start();
+            traceInstance.putMetric('duration', duration);
+            
+            // Add metadata as attributes
+            if (metadata) {
+              Object.entries(metadata).forEach(([key, value]) => {
+                if (typeof value === 'string' || typeof value === 'number') {
+                  traceInstance.putAttribute(key, String(value));
+                }
+              });
+            }
+            
+            traceInstance.stop();
+          } catch (firebaseError) {
+            // Silently fail if Firebase Performance isn't properly configured
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('Firebase Performance Monitoring not available:', firebaseError);
+            }
+          }
+        }).catch(() => {
+          // Firebase Performance not available
+        });
+      }
+    } catch (error) {
+      // Silently fail if Firebase is not available
+    }
+  }
 }
 
 // Export singleton instance
@@ -193,4 +259,17 @@ export const performanceMonitor = new PerformanceMonitor();
 // Export minimal function for Docker build compatibility
 export const reportPerformance = () => {
   return performanceMonitor.getPerformanceReport();
+};
+
+// Service Worker Integration Helper
+export const initServiceWorkerPerformanceCache = () => {
+  if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+    navigator.serviceWorker.register('/performance-sw.js')
+      .then(registration => {
+        console.log('Performance service worker registered:', registration);
+      })
+      .catch(error => {
+        console.log('Performance service worker registration failed:', error);
+      });
+  }
 };

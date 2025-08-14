@@ -4,27 +4,42 @@ import os
 from pathlib import Path
 from typing import Optional, Dict, Any, List, cast
 
-# Load environment from local .env files (prefer production server env when DEPLOY_ENVIRONMENT=production)
-try:
-    from dotenv import load_dotenv  # type: ignore
-    _env_loaded = False
-    backend_dir = Path(__file__).resolve().parent
-    # Choose preferred order based on DEPLOY_ENVIRONMENT
+# Enhanced environment loading with proper error handling
+def load_environment():
+    """Load environment variables with proper error handling and logging."""
     env_mode = os.environ.get('DEPLOY_ENVIRONMENT', 'development').lower()
-    preferred = ['.env.production.server', '.env'] if env_mode == 'production' else ['.env', '.env.production.server']
-    for fname in preferred:
-        env_path = backend_dir / fname
-        if env_path.exists():
-            load_dotenv(dotenv_path=str(env_path))
-            _env_loaded = True
-            logging.getLogger(__name__).info(f"Loaded backend environment from {fname}")
-            break
-except Exception:
-    # Safe to ignore if python-dotenv not present in certain environments
-    pass
+    try:
+        from dotenv import load_dotenv  # type: ignore
+        backend_dir = Path(__file__).resolve().parent
+        preferred = ['.env.production.server', '.env'] if env_mode == 'production' else ['.env', '.env.production.server']
+        
+        for fname in preferred:
+            env_path = backend_dir / fname
+            if env_path.exists():
+                if load_dotenv(dotenv_path=str(env_path)):
+                    logging.getLogger(__name__).info(f"Successfully loaded environment from {fname}")
+                    return True
+                else:
+                    logging.getLogger(__name__).warning(f"Failed to load environment from {fname}")
+        
+        logging.getLogger(__name__).error("Failed to load any .env file")
+        if env_mode == 'production':
+            raise RuntimeError("No valid .env file found in production environment")
+        return False
+    except ImportError:
+        logging.getLogger(__name__).info("python-dotenv not available, using system environment")
+        return True
+    except Exception as e:
+        logging.getLogger(__name__).error(f"Environment loading error: {str(e)}")
+        if env_mode == 'production':
+            raise RuntimeError(f"Environment loading failed: {str(e)}")
+        return False
+
+# Load environment
+load_environment()
 from fastapi import FastAPI, HTTPException, Query, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, field_validator, FieldValidationInfo
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 from functools import lru_cache
 
 # Local imports (backend directory is container WORKDIR and on PYTHONPATH)
@@ -134,24 +149,52 @@ except Exception as e:  # pragma: no cover - fallback path
 RATE_LIMIT = 60  # requests
 RATE_PERIOD = 60  # seconds
 
+# Enhanced Redis-based rate limiter with memory cleanup
 async def rate_limiter(request: Request) -> None:
+    """Enhanced rate limiter with better memory management and Redis optimization."""
     ip = request.client.host if request.client else "unknown"
     endpoint = request.url.path
     key = f"rate:{ip}:{endpoint}"
+    
     if redis_client:
-        # redis-py client calls are synchronous; execute directly
-        count = redis_client.incr(key)
-        if count == 1:
-            redis_client.expire(key, RATE_PERIOD)
-        if count > RATE_LIMIT:
-            raise HTTPException(429, "Too Many Requests")
+        try:
+            count = redis_client.incr(key)
+            if count == 1:
+                redis_client.expire(key, RATE_PERIOD)
+            if count > RATE_LIMIT:
+                raise HTTPException(status_code=429, detail="Too Many Requests")
+        except Exception as redis_error:
+            logger.warning(f"Redis rate limiting failed: {redis_error}. Falling back to in-memory.")
+            # Fallback to in-memory if Redis fails
+            await _in_memory_rate_limit(ip, endpoint)
     else:
-        now = time.time()
-        window = now - RATE_PERIOD
-        rate_limit_store[(ip, endpoint)] = [t for t in rate_limit_store[(ip, endpoint)] if t > window]
-        if len(rate_limit_store[(ip, endpoint)]) >= RATE_LIMIT:
-            raise HTTPException(429, "Too Many Requests")
-        rate_limit_store[(ip, endpoint)].append(now)
+        await _in_memory_rate_limit(ip, endpoint)
+
+async def _in_memory_rate_limit(ip: str, endpoint: str) -> None:
+    """In-memory rate limiting with automatic cleanup."""
+    now = time.time()
+    window = now - RATE_PERIOD
+    
+    # Clean old entries to prevent memory leaks
+    rate_limit_store[(ip, endpoint)] = [
+        t for t in rate_limit_store[(ip, endpoint)] if t > window
+    ]
+    
+    if len(rate_limit_store[(ip, endpoint)]) >= RATE_LIMIT:
+        raise HTTPException(status_code=429, detail="Too Many Requests")
+    
+    rate_limit_store[(ip, endpoint)].append(now)
+    
+    # Periodic cleanup of the entire store to prevent memory leaks
+    if len(rate_limit_store) > 1000:  # Arbitrary limit
+        cutoff_time = now - (RATE_PERIOD * 2)  # Clean entries older than 2x rate period
+        keys_to_remove = [
+            key for key, timestamps in rate_limit_store.items()
+            if not timestamps or max(timestamps) < cutoff_time
+        ]
+        for key in keys_to_remove:
+            del rate_limit_store[key]
+        logger.info(f"Cleaned {len(keys_to_remove)} old rate limit entries")
 
 from contextlib import asynccontextmanager
 
@@ -189,7 +232,7 @@ class BirthData(BaseModel):
 
     @field_validator('day')
     @classmethod
-    def validate_day(cls, v: int, info: FieldValidationInfo) -> int:  # type: ignore[override]
+    def validate_day(cls, v: int, info: ValidationInfo) -> int:  # type: ignore[override]
         raw = getattr(info, 'data', {})  # type: ignore[attr-defined]
         if isinstance(raw, dict):
             month = raw.get('month')  # type: ignore[attr-defined]
@@ -276,6 +319,7 @@ async def calculate_human_design_endpoint(data: BirthData, request: Request):
         lon = data.lon
         timezone = data.timezone
         
+        # Enhanced geocoding with better error handling
         if data.city and (lat is None or lon is None):
             from astro.calculations.chart import get_location
             print(f"🌍 Resolving location for city: {data.city}")
@@ -288,11 +332,10 @@ async def calculate_human_design_endpoint(data: BirthData, request: Request):
             except Exception as geo_error:
                 print(f"❌ Geocoding failed for city '{data.city}': {str(geo_error)}")
                 logger.error(f"Geocoding error for city '{data.city}': {str(geo_error)}")
-                # For now, use default coordinates (this should be improved in production)
-                lat = 0.0
-                lon = 0.0
-                timezone = timezone or "UTC"
-                print(f"🔄 Using fallback coordinates: lat={lat}, lon={lon}, timezone={timezone}")
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Invalid city '{data.city}' or geocoding service unavailable. Please provide valid latitude and longitude coordinates."
+                )
         
         # Validate required coordinates
         if lat is None or lon is None:
@@ -324,11 +367,13 @@ async def root_health():
 # Structure cleanup suggestion: Move routers to separate files and import here for modularity.
 # Import API routers (local path)
 from api.routers import ai, presets, subscriptions, ephemeris, charts
+from api import interpretations
 app.include_router(ai.router)
 app.include_router(presets.router)
 app.include_router(subscriptions.router)
 app.include_router(ephemeris.router, prefix="/api")
 app.include_router(charts.router, prefix="/api")
+app.include_router(interpretations.router)  # AI Interpretations router
 
 if __name__ == "__main__":
     import uvicorn

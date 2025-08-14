@@ -1,34 +1,114 @@
-import React from 'react';
+// apps/astro/src/components/AIInterpretations.tsx
 
-const AIInterpretation: React.FC = () => {
+import React, { lazy, Suspense, useEffect, useState, memo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getAuth } from 'firebase/auth';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '@cosmichub/config/firebase';
+import { useAuth } from '@cosmichub/auth';
+import type { Interpretation } from '../components/AIInterpretation/types';
+import { fetchAIInterpretations } from '../services/api';
+import styles from './AIInterpretations.module.css';
+
+// Simple Spinner component
+const Spinner = () => (
+  <div className="flex items-center justify-center p-4">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+  </div>
+);
+
+// Lazy-load heavy components for performance
+const InterpretationCard = lazy(() => import('../components/AIInterpretation/InterpretationCard'));
+
+interface AIInterpretationsProps {
+  chartId: string;
+  userId?: string;
+}
+
+const AIInterpretations: React.FC<AIInterpretationsProps> = ({ chartId, userId }) => {
+  const { user } = useAuth();
+  const auth = getAuth();
+  const effectiveUserId = userId || user?.uid;
+
+  const [interpretations, setInterpretations] = useState<Interpretation[]>([]);
+
+  // Fetch AI interpretations from backend with caching
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['interpretations', chartId, effectiveUserId],
+    queryFn: async () => {
+      if (!effectiveUserId) throw new Error('User not authenticated');
+      const response = await fetchAIInterpretations(chartId, effectiveUserId);
+      return response.data;
+    },
+    enabled: !!effectiveUserId && !!chartId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 10, // Retain cache for 10 minutes
+  });
+
+  // Fetch stored interpretations from Firestore
+  useEffect(() => {
+    const fetchStoredInterpretations = async () => {
+      if (!effectiveUserId || !chartId) return;
+      try {
+        const q = query(collection(db, 'interpretations'), where('chartId', '==', chartId), where('userId', '==', effectiveUserId));
+        const snapshot = await getDocs(q);
+        const fetchedInterpretations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Interpretation));
+        setInterpretations(fetchedInterpretations);
+      } catch (err) {
+        console.error('Error fetching interpretations:', err);
+      }
+    };
+    fetchStoredInterpretations();
+  }, [chartId, effectiveUserId]);
+
+  // Combine API and Firestore data
+  useEffect(() => {
+    if (data) {
+      setInterpretations(prev => [...prev, ...data]);
+    }
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className={styles.loading} role="status" aria-label="Loading interpretations">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.error} role="alert" aria-live="assertive">
+        Error loading interpretations: {error.message}
+      </div>
+    );
+  }
+
+  if (!interpretations.length) {
+    return (
+      <div className={styles.empty} role="status" aria-live="polite">
+        No interpretations available for this chart.
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
-      <div className="text-center py-12 bg-gradient-to-r from-cosmic-gold/20 to-cosmic-purple/20 rounded-2xl border border-cosmic-silver/10">
-        <h1 className="text-4xl font-bold text-cosmic-gold mb-4 font-cinzel">
-          AI Chart Interpretation
-        </h1>
-        <p className="text-xl text-cosmic-silver/80 font-playfair">
-          Advanced AI-powered astrological insights
-        </p>
-        <div className="mt-4 inline-flex items-center px-4 py-2 bg-cosmic-gold/20 rounded-full border border-cosmic-gold/30">
-          <span className="text-cosmic-gold mr-2">👑</span>
-          <span className="text-cosmic-gold font-semibold">Elite Feature</span>
+    <section className={styles.container} aria-labelledby="interpretations-heading">
+      <h2 id="interpretations-heading" className={styles.heading}>AI-Powered Astrological Insights</h2>
+      <Suspense fallback={<Spinner />}>
+        <div className={styles.grid}>
+          {interpretations.map(interpretation => (
+            <InterpretationCard
+              key={interpretation.id}
+              interpretation={interpretation}
+              aria-label={`Interpretation for ${interpretation.type}`}
+            />
+          ))}
         </div>
-      </div>
-
-      <div className="text-center py-16">
-        <div className="w-24 h-24 bg-cosmic-gold/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-4xl">🤖</span>
-        </div>
-        <h3 className="text-2xl font-semibold text-cosmic-gold mb-4 font-playfair">
-          AI-Powered Insights Coming Soon
-        </h3>
-        <p className="text-cosmic-silver/80 max-w-md mx-auto">
-          Our advanced AI will provide personalized interpretations of your astrological charts with unprecedented depth and accuracy.
-        </p>
-      </div>
-    </div>
+      </Suspense>
+    </section>
   );
 };
 
-export default AIInterpretation;
+// Memoize to prevent unnecessary re-renders
+export default memo(AIInterpretations);

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth } from '@cosmichub/config/firebase';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 console.log('🔗 API Service initializing...');
 console.log('🌐 Backend URL:', BACKEND_URL);
@@ -446,4 +446,127 @@ export const fetchSynastryAnalysis = async (person1: any, person2: any) => {
   const response = await apiClient.post('/synastry', { person1, person2 });
   console.log('✅ Synastry analysis response received:', response);
   return response;
+};
+
+// AI Interpretation API Functions
+export interface InterpretationRequest {
+  chartId: string;
+  userId: string;
+  type?: string;
+  focus?: string[];
+  question?: string;
+}
+
+export interface Interpretation {
+  id: string;
+  chartId: string;
+  userId: string;
+  type: string;
+  title: string;
+  content: string;
+  summary: string;
+  tags: string[];
+  confidence: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InterpretationResponse {
+  data: Interpretation[];
+  success: boolean;
+  message?: string;
+}
+
+export const fetchAIInterpretations = async (chartId: string, userId: string): Promise<InterpretationResponse> => {
+  console.log('🤖 Fetching AI interpretations...');
+  console.log('📊 Chart ID:', chartId, 'User ID:', userId);
+  
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.post(`${BACKEND_URL}/api/interpretations`, {
+      chartId,
+      userId
+    }, { headers });
+    
+    console.log('✅ AI interpretations response received:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error fetching AI interpretations:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to view interpretations');
+    }
+    throw new Error('Failed to fetch AI interpretations');
+  }
+};
+
+export const generateAIInterpretation = async (request: InterpretationRequest): Promise<InterpretationResponse> => {
+  console.log('🔮 Generating AI interpretation...');
+  console.log('📊 Request data:', request);
+  
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.post(`${BACKEND_URL}/api/interpretations/generate`, request, { headers });
+    
+    console.log('✅ AI interpretation generated:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error generating AI interpretation:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to generate interpretations');
+    }
+    throw new Error('Failed to generate AI interpretation');
+  }
+};
+
+export const fetchInterpretationById = async (interpretationId: string): Promise<Interpretation> => {
+  console.log('🔍 Fetching interpretation by ID:', interpretationId);
+  
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${BACKEND_URL}/api/interpretations/${interpretationId}`, { headers });
+    
+    console.log('✅ Interpretation fetched:', response.data);
+    return response.data.data;
+  } catch (error) {
+    console.error('❌ Error fetching interpretation:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to view interpretation');
+    }
+    throw new Error('Failed to fetch interpretation');
+  }
+};
+
+export const deleteInterpretation = async (interpretationId: string): Promise<void> => {
+  console.log('🗑️ Deleting interpretation:', interpretationId);
+  
+  try {
+    const headers = await getAuthHeaders();
+    await axios.delete(`${BACKEND_URL}/api/interpretations/${interpretationId}`, { headers });
+    
+    console.log('✅ Interpretation deleted successfully');
+  } catch (error) {
+    console.error('❌ Error deleting interpretation:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to delete interpretation');
+    }
+    throw new Error('Failed to delete interpretation');
+  }
+};
+
+export const updateInterpretation = async (interpretationId: string, updates: Partial<Interpretation>): Promise<Interpretation> => {
+  console.log('📝 Updating interpretation:', interpretationId, updates);
+  
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.patch(`${BACKEND_URL}/api/interpretations/${interpretationId}`, updates, { headers });
+    
+    console.log('✅ Interpretation updated:', response.data);
+    return response.data.data;
+  } catch (error) {
+    console.error('❌ Error updating interpretation:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Authentication required to update interpretation');
+    }
+    throw new Error('Failed to update interpretation');
+  }
 };

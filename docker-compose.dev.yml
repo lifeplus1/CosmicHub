@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - EPHEMERIS_URL=http://ephemeris:8001
+      - CORS_ORIGINS=http://localhost:5174,http://localhost:3000
+    depends_on:
+      - ephemeris
+    volumes:
+      - ./backend:/app
+      - ./backend/ephe:/app/ephe
+    restart: unless-stopped
+
+  ephemeris:
+    build:
+      context: ./ephemeris_server
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - EPHE_PATH=/app/ephe
+    volumes:
+      - ./backend/ephe:/app/ephe
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./apps/astro
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./apps/astro:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+networks:
+  default:
+    name: cosmichub-network

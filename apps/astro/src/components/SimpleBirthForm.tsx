@@ -7,44 +7,26 @@ interface SimpleBirthFormProps {
   title?: string;
   submitButtonText?: string;
   onSubmit?: (data: ChartBirthData) => void;
-  showSampleButton?: boolean;
 }
 
 export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
   title = "Birth Details",
   submitButtonText = "Calculate Chart",
-  onSubmit,
-  showSampleButton = true
+  onSubmit
 }) => {
   const { setBirthData } = useBirthData();
   const [isLoading, setIsLoading] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Form state using composite fields like the original Calculator with smart defaults
-  const [formData, setFormData] = useState(() => {
-    const today = new Date();
-    const birthYear = today.getFullYear() - 25; // Default to 25 years ago
-    const defaultDate = `${birthYear}-06-15`; // Mid-year default
-    const currentTime = today.toTimeString().slice(0, 5); // Current time in HH:MM format
-    
-    return {
-      birthDate: defaultDate,
-      birthTime: currentTime,
-      birthLocation: ''
-    };
+  // Form state with empty defaults - users must enter their own data
+  const [formData, setFormData] = useState({
+    birthDate: '',
+    birthTime: '',
+    birthLocation: ''
   });
 
-  // Sample birth data for quick testing
-  const sampleChartData: ChartBirthData = {
-    year: 1990,
-    month: 6,
-    day: 21,
-    hour: 14,
-    minute: 30,
-    city: "New York"
-    // lat, lon, and timezone will be automatically determined by backend
-  };
+  // Sample birth data removed - users must enter their own data
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,10 +97,7 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
     }
   };
 
-  const handleLoadSample = () => {
-    setBirthData(sampleChartData);
-    onSubmit?.(sampleChartData);
-  };
+  // Sample functionality removed
 
   // Geolocation functionality
   const handleDetectLocation = async () => {
@@ -293,16 +272,6 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
               submitButtonText
             )}
           </button>
-          
-          {showSampleButton && (
-            <button
-              type="button"
-              onClick={handleLoadSample}
-              className="w-full px-4 py-2 bg-cosmic-blue hover:bg-cosmic-blue/80 text-white rounded-lg transition-colors"
-            >
-              ⚡ Load Sample Chart
-            </button>
-          )}
           
           {/* Quick tips */}
           <div className="mt-4 p-3 bg-cosmic-gold/10 rounded-lg border border-cosmic-gold/20">

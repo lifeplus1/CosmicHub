@@ -182,7 +182,6 @@ const Chart: React.FC = () => {
         <SimpleBirthForm
           title="Enter Birth Data"
           submitButtonText="Generate Natal Chart"
-          showSampleButton={true}
         />
       )}
 

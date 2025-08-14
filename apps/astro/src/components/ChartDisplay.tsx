@@ -245,8 +245,13 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
   }, [chart?.planets]);
 
   const aspectEntries = useMemo(() => {
-    if (!chart?.aspects) return [];
-    return chart.aspects.filter(aspect => aspect.orb <= 8); // Only show tight aspects
+    if (!chart?.aspects) {
+      console.log('🔍 ChartDisplay: No aspects in chart data');
+      return [];
+    }
+    console.log('🔍 ChartDisplay: Raw aspects count:', chart.aspects.length);
+    console.log('🔍 ChartDisplay: First few aspects:', chart.aspects.slice(0, 3));
+    return chart.aspects.filter(aspect => aspect.orb <= 10); // Show aspects with orb up to 10 degrees
   }, [chart?.aspects]);
 
   const houseEntries = useMemo(() => {
@@ -309,19 +314,20 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               {/* Chart Information */}
               <div className="p-4 border cosmic-card bg-purple-50/10 lg:p-6 rounded-xl border-purple-300/30">
                 <div className="space-y-3">
+                  <h4 className="text-center text-cosmic-gold font-semibold">Chart Coordinates</h4>
                   <div className="flex flex-wrap justify-center gap-4 text-sm lg:gap-8 lg:text-base">
                     <p className="font-semibold text-cosmic-silver">
-                      <strong>Latitude:</strong> {chartInfo?.latitude}°
+                      <strong>Lat:</strong> {chartInfo?.latitude}°
                     </p>
                     <p className="font-semibold text-cosmic-silver">
-                      <strong>Longitude:</strong> {chartInfo?.longitude}°
+                      <strong>Lng:</strong> {chartInfo?.longitude}°
                     </p>
                     <p className="font-semibold text-cosmic-silver">
-                      <strong>Timezone:</strong> {chartInfo?.timezone}
+                      <strong>TZ:</strong> {chartInfo?.timezone}
                     </p>
                   </div>
                   <p className="text-sm text-center text-cosmic-silver opacity-80">
-                    Julian Day: {chartInfo?.julianDay}
+                    Julian Day: {chartInfo?.julianDay} • Coordinates used for calculations
                   </p>
                 </div>
               </div>
@@ -491,41 +497,117 @@ const ChartDisplay: React.FC<ChartDisplayProps> = memo(({
               </Accordion.Content>
             </Accordion.Item>
 
-            {/* Aspects Section */}
+            {/* Enhanced Aspects Section */}
             <Accordion.Item value="3" className="overflow-hidden cosmic-card border-purple-300/30 rounded-xl">
               <Accordion.Trigger className="flex justify-between w-full p-4 transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30 lg:p-6">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">⚹</span>
                   <span className="mb-0 text-lg font-bold lg:text-xl text-cosmic-silver">
-                    Major Aspects ({aspectEntries.length})
+                    Planetary Aspects ({aspectEntries.length})
                   </span>
                 </div>
                 <ChevronDownIcon className="w-5 h-5 transition-transform duration-300 group-radix-state-open:rotate-180" />
               </Accordion.Trigger>
               <Accordion.Content className="p-0">
                 {aspectEntries.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full table-auto">
-                      <thead>
-                        <tr>
-                          <th className="px-4 py-2 text-left min-w-32">Planet 1</th>
-                          <th className="px-4 py-2 text-left min-w-32">Aspect</th>
-                          <th className="px-4 py-2 text-left min-w-32">Planet 2</th>
-                          <th className="px-4 py-2 text-left min-w-24">Orb</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {aspectEntries.map((aspect, index) => (
-                          <AspectRow key={index} aspect={aspect} />
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="space-y-4 p-4">
+                    {/* Aspect Categories */}
+                    {['conjunction', 'opposition', 'trine', 'square', 'sextile'].map(aspectType => {
+                      const aspectsOfType = aspectEntries.filter(aspect => 
+                        aspect.aspect?.toLowerCase() === aspectType
+                      );
+                      
+                      if (aspectsOfType.length === 0) return null;
+                      
+                      const aspectColors = {
+                        conjunction: 'text-yellow-400',
+                        opposition: 'text-red-400',
+                        trine: 'text-green-400',
+                        square: 'text-orange-400',
+                        sextile: 'text-blue-400'
+                      };
+                      
+                      const aspectSymbols = {
+                        conjunction: '☌',
+                        opposition: '☍',
+                        trine: '△',
+                        square: '□',
+                        sextile: '⚹'
+                      };
+                      
+                      return (
+                        <div key={aspectType} className="border border-cosmic-purple/20 rounded-lg p-3">
+                          <h4 className={`text-sm font-semibold mb-2 ${aspectColors[aspectType as keyof typeof aspectColors]} flex items-center gap-2`}>
+                            <span className="text-lg">{aspectSymbols[aspectType as keyof typeof aspectSymbols]}</span>
+                            {aspectType.charAt(0).toUpperCase() + aspectType.slice(1)} ({aspectsOfType.length})
+                          </h4>
+                          <div className="grid gap-2">
+                            {aspectsOfType.map((aspect, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 bg-cosmic-dark/50 rounded text-sm">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-cosmic-gold font-semibold">
+                                    {aspect.point1?.charAt(0).toUpperCase() + aspect.point1?.slice(1)}
+                                  </span>
+                                  <span className={aspectColors[aspectType as keyof typeof aspectColors]}>
+                                    {aspectSymbols[aspectType as keyof typeof aspectSymbols]}
+                                  </span>
+                                  <span className="text-cosmic-gold font-semibold">
+                                    {aspect.point2?.charAt(0).toUpperCase() + aspect.point2?.slice(1)}
+                                  </span>
+                                </div>
+                                <div className="text-cosmic-silver/70 font-mono">
+                                  {aspect.orb?.toFixed(2)}°
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Minor Aspects */}
+                    {(() => {
+                      const minorAspects = aspectEntries.filter(aspect => 
+                        !['conjunction', 'opposition', 'trine', 'square', 'sextile'].includes(aspect.aspect?.toLowerCase() || '')
+                      );
+                      
+                      if (minorAspects.length === 0) return null;
+                      
+                      return (
+                        <div className="border border-cosmic-silver/20 rounded-lg p-3">
+                          <h4 className="text-sm font-semibold mb-2 text-cosmic-silver flex items-center gap-2">
+                            <span className="text-lg">✧</span>
+                            Minor Aspects ({minorAspects.length})
+                          </h4>
+                          <div className="grid gap-1">
+                            {minorAspects.map((aspect, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 bg-cosmic-dark/30 rounded text-xs">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-cosmic-silver">
+                                    {aspect.point1?.charAt(0).toUpperCase() + aspect.point1?.slice(1)}
+                                  </span>
+                                  <span className="text-cosmic-silver/60">
+                                    {aspect.aspect}
+                                  </span>
+                                  <span className="text-cosmic-silver">
+                                    {aspect.point2?.charAt(0).toUpperCase() + aspect.point2?.slice(1)}
+                                  </span>
+                                </div>
+                                <div className="text-cosmic-silver/50 font-mono">
+                                  {aspect.orb?.toFixed(2)}°
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ) : (
                   <div className="p-6">
                     <div className="flex p-4 space-x-4 border border-blue-500 rounded-md bg-blue-900/50">
                       <span className="text-xl text-blue-500">ℹ️</span>
-                      <p className="text-white/80">No major aspects found within 8° orb</p>
+                      <p className="text-white/80">No major aspects found within 10° orb</p>
                     </div>
                   </div>
                 )}

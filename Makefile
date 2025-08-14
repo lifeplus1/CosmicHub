@@ -75,9 +75,20 @@ clean: ## Clean build artifacts and caches
 	rm -rf node_modules/.cache
 	@echo "$(GREEN)✓ Cleanup completed$(NC)"
 
-dev: check-node ## Start development server for astro frontend
-	@echo "$(BLUE)Starting astro development server...$(NC)"
-	cd apps/astro && npm run dev
+dev: ## Start complete development environment
+	@echo "$(BLUE)Starting complete development environment...$(NC)"
+	@./start-dev.sh
+
+start: dev ## Alias for dev
+
+stop: ## Stop all development services
+	@echo "$(BLUE)Stopping all services...$(NC)"
+	@docker-compose down
+	@pkill -f "npm run dev" || true
+	@echo "$(GREEN)✓ All services stopped$(NC)"
+
+logs: ## Show logs for all services
+	@docker-compose logs -f
 
 dev-healwave: check-node ## Start development server for healwave frontend
 	@echo "$(BLUE)Starting healwave development server...$(NC)"
