@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { ToastProvider } from '../components/ToastProvider';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';

@@ -9,7 +9,8 @@
 - **ErrorBoundary.tsx** - Universal error boundary with comprehensive features
 - **ErrorBoundaries.tsx** - Specialized error boundary components for different use cases
 
-#### Key Features:
+#### Key Features
+
 - 🔄 **Auto-retry logic** with exponential backoff
 - 📊 **Error classification** and severity levels  
 - 🎯 **Context-aware recovery** strategies
@@ -30,21 +31,25 @@
 ### 3. Specialized Error Boundary Types
 
 #### PageErrorBoundary
+
 - **Use:** Top-level pages and routes
 - **Features:** Full-screen error UI, critical error handling
 - **Recovery:** Page reload, navigation options
 
 #### SectionErrorBoundary  
+
 - **Use:** Major sections like navigation, content areas
 - **Features:** Isolated error containment
 - **Recovery:** Section retry, fallback content
 
 #### ComponentErrorBoundary
+
 - **Use:** Individual components
 - **Features:** Minimal error UI, quick recovery
 - **Recovery:** Component retry, graceful degradation
 
-#### Specialized Boundaries:
+#### Specialized Boundaries
+
 - **FormErrorBoundary** - Form validation and submission errors
 - **ChartErrorBoundary** - Chart/visualization specific errors
 - **AsyncErrorBoundary** - Async operation errors with loading states
@@ -53,6 +58,7 @@
 ### 4. Updated Applications
 
 #### Astro App (`/apps/astro/`)
+
 - ✅ Enhanced main App.tsx with multi-level error boundaries
 - ✅ Updated Profile.tsx with component-level error boundaries
 - ✅ Improved ErrorBoundary.tsx with cosmic theming
@@ -64,6 +70,7 @@
   - Profile components (account overview, activity summary, preferences)
 
 #### HealWave App (`/apps/healwave/`)
+
 - ✅ Updated ErrorBoundary.tsx to use shared components
 - ✅ Added HealWave-specific theming with gradient backgrounds
 - ✅ Maintained app-specific error messaging
@@ -108,6 +115,7 @@
 ## 📊 Error Classification
 
 ### Error Types
+
 - **Network** - API calls, fetch operations
 - **Validation** - Form validation, data validation
 - **Authentication** - Login, session errors
@@ -118,6 +126,7 @@
 - **Unknown** - Unclassified errors
 
 ### Severity Levels
+
 - **Critical** - App-breaking errors (page level)
 - **High** - Feature-breaking errors (section level)
 - **Medium** - Component-level errors
@@ -126,11 +135,13 @@
 ## 🔄 Recovery Strategies
 
 ### Automatic Recovery
+
 - Network errors → Auto-retry with backoff
 - Chunk loading errors → App reload suggestion
 - Authentication errors → Redirect to login
 
 ### User-Initiated Recovery
+
 - "Try Again" buttons
 - "Reload Page" options
 - "Go Back" navigation
@@ -139,11 +150,13 @@
 ## 📈 Monitoring Integration
 
 ### Development
+
 - Detailed console logging with context
 - Component stack traces
 - Error grouping and categorization
 
 ### Production Ready
+
 - Error reporting service integration hooks
 - Analytics tracking for error metrics
 - User feedback collection points
@@ -151,12 +164,14 @@
 ## 🎨 Design System Integration
 
 ### Cosmic Theme (Astro App)
+
 - Dark background with cosmic colors
 - Gold accents for headings
 - Silver text for content
 - Purple action buttons
 
 ### HealWave Theme (HealWave App)
+
 - Gradient backgrounds
 - Cyan/purple color scheme
 - Healing-focused messaging
