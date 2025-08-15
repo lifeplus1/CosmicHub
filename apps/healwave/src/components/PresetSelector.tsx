@@ -333,6 +333,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
                 maxLength={50}
                 required
                 aria-describedby="preset-name-help"
+                aria-label="Preset Name"
                 autoFocus
               />
               <div id="preset-name-help" className="mt-1 text-xs text-gray-500">
@@ -353,6 +354,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
                 rows={3}
                 maxLength={200}
                 aria-describedby="preset-description-help"
+                aria-label="Description"
               />
               <div id="preset-description-help" className="mt-1 text-xs text-gray-500">
                 Optional. Maximum 200 characters.
