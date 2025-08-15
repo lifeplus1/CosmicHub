@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { xaiConfig, devConsole } from '../../config/environment';
 
 // Temporary direct imports while package resolution is being fixed
 interface InterpretationRequest {
@@ -11,20 +12,13 @@ interface InterpretationRequest {
 
 // XAI Service class (temporary inline implementation)
 class XAIService {
-  private static baseUrl = 'https://api.x.ai/v1';
+  private static baseUrl = xaiConfig.baseUrl;
   
   private static getApiKey(): string {
-    // Try to get from environment variables
-    if (typeof process !== 'undefined' && process.env?.XAI_API_KEY) {
-      return process.env.XAI_API_KEY;
+    if (!xaiConfig.enabled || !xaiConfig.apiKey) {
+      throw new Error('XAI API key is not configured');
     }
-    
-    // Try to get from Vite env
-    if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_XAI_API_KEY) {
-      return (import.meta as any).env.VITE_XAI_API_KEY;
-    }
-    
-    throw new Error('XAI_API_KEY environment variable is not set');
+    return xaiConfig.apiKey;
   }
 
   static async generateInterpretation(request: InterpretationRequest): Promise<string> {
@@ -39,7 +33,7 @@ class XAIService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'grok-beta',
+          model: xaiConfig.model,
           messages: [
             {
               role: 'system',
@@ -140,7 +134,7 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
         try {
           result = await XAIService.generateInterpretation(request);
         } catch (xaiError) {
-          console.warn('xAI service failed, falling back to mock service:', xaiError);
+          devConsole.warn('xAI service failed, falling back to mock service:', xaiError);
           result = await XAIService.generateMockInterpretation(request);
         }
         
@@ -149,7 +143,7 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to generate interpretation';
         setError(errorMessage);
-        console.error('AI interpretation error:', err);
+        devConsole.error('AI interpretation error:', err);
       }
     },
     [queryClient]

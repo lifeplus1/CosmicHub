@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import { isDevelopment, devConsole } from '../config/environment';
 
 /**
  * HealWave-specific error boundary with custom theming
@@ -41,15 +42,10 @@ export class HealWaveErrorBoundary extends Component<HealWaveErrorBoundaryProps,
     });
 
     // HealWave-specific logging
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.group('🎵 HealWave Error Boundary');
-      // eslint-disable-next-line no-console
-      console.error('Error:', error);
-      // eslint-disable-next-line no-console
-      console.error('Error Info:', errorInfo);
-      // eslint-disable-next-line no-console
-      console.groupEnd();
+    if (isDevelopment()) {
+      devConsole.log('🎵 HealWave Error Boundary');
+      devConsole.error('Error:', error);
+      devConsole.error('Error Info:', errorInfo);
     }
 
     // Call custom error handler if provided
@@ -99,7 +95,7 @@ export class HealWaveErrorBoundary extends Component<HealWaveErrorBoundaryProps,
                 The healing frequency was interrupted. Let's restore harmony to your experience.
               </p>
               
-              {import.meta.env.DEV && this.state.error && (
+              {isDevelopment() && this.state.error && (
                 <details className="mb-6 text-left">
                   <summary className="cursor-pointer text-sm font-medium text-gray-400 hover:text-gray-300">
                     Technical Details

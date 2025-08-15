@@ -9,6 +9,7 @@ const envSchema = z.object({
   VITE_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1, 'Firebase messaging sender ID is required'),
   VITE_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
   VITE_API_URL: z.string().url().optional(),
+  VITE_XAI_API_KEY: z.string().optional(),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   VITE_ENABLE_ANALYTICS: z.string().transform(val => val === 'true').optional(),
   VITE_ENABLE_ERROR_REPORTING: z.string().transform(val => val === 'true').optional(),
@@ -68,11 +69,29 @@ export const securityConfig = {
   lockoutDuration: 15 * 60 * 1000, // 15 minutes
 };
 
+// XAI API configuration
+export const xaiConfig = {
+  apiKey: env.VITE_XAI_API_KEY,
+  baseUrl: 'https://api.x.ai/v1',
+  model: 'grok-beta',
+  timeout: 30000,
+  enabled: !!env.VITE_XAI_API_KEY,
+};
+
 // Logging configuration
 export const loggingConfig = {
   level: isDevelopment() ? 'debug' : 'warn',
   enableConsole: isDevelopment(),
   enableRemote: isProduction(),
 };
+
+// Development utilities
+/* eslint-disable no-console */
+export const devConsole = {
+  log: isDevelopment() ? console.log.bind(console) : () => {},
+  warn: isDevelopment() ? console.warn.bind(console) : () => {},
+  error: console.error.bind(console), // Always log errors
+};
+/* eslint-enable no-console */
 
 export default env;

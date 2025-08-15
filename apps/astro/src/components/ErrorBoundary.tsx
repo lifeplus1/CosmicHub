@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import type { ReactNode, ErrorInfo } from 'react';
+import { isDevelopment, devConsole } from '../config/environment';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -28,10 +29,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.group('🚨 Astro Error Boundary');
-    console.error('Error:', error);
-    console.error('Error Info:', errorInfo);
-    console.groupEnd();
+    devConsole.log('🚨 Astro Error Boundary');
+    devConsole.error('Error:', error);
+    devConsole.error('Error Info:', errorInfo);
     
     this.props.onError?.(error, errorInfo);
   }
@@ -57,7 +57,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               {this.props.name ? `Error in ${this.props.name}` : 'An unexpected error occurred'}
             </p>
             
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {isDevelopment() && this.state.error && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm font-medium text-cosmic-silver/80 hover:text-cosmic-silver">
                   Technical Details
