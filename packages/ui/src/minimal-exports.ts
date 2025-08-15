@@ -16,3 +16,8 @@ export * from './components/Badge';
 export * from './components/Spinner';
 export * from './components/UpgradeModal';
 export * from './components/PerformanceDashboard';
+
+// Error handling components
+export { default as ErrorBoundary } from './components/ErrorBoundary';
+export * from './components/ErrorBoundaries';
+export * from './hooks/useErrorHandling';

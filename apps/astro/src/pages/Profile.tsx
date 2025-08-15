@@ -32,7 +32,7 @@ const Profile: React.FC = React.memo(() => {
   });
 
   const loadUserStats = useCallback(async () => {
-    if (user) {
+    if (user?.uid) {
       // Simulate fetching stats from Firestore
       setUserStats({
         totalCharts: 50,
@@ -42,7 +42,7 @@ const Profile: React.FC = React.memo(() => {
         lastLogin: new Date(),
       });
     }
-  }, [user]);
+  }, [user?.uid, user?.metadata?.creationTime]);
 
   useEffect(() => {
     loadUserStats();
@@ -54,7 +54,12 @@ const Profile: React.FC = React.memo(() => {
       toast({ description: 'Signed out successfully', status: 'success' });
       navigate('/login');
     } catch (error) {
-      toast({ description: 'Error signing out', status: 'error' });
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      console.error('Sign out error:', error);
+      toast({ 
+        description: `Error signing out: ${errorMessage}`, 
+        status: 'error' 
+      });
     }
   }, [signOut, navigate, toast]);
 
@@ -125,6 +130,7 @@ const Profile: React.FC = React.memo(() => {
                   </div>
                 </div>
               </Card>
+              
               <Card title="Activity Summary">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div>
@@ -159,6 +165,7 @@ const Profile: React.FC = React.memo(() => {
                 </Button>
               </div>
             </Card>
+            
             <div className="text-center mt-6">
               <Button onClick={handleSignOut} variant="secondary">
                 Sign Out

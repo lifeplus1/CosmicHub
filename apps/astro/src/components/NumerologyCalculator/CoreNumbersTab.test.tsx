@@ -40,13 +40,13 @@ describe('CoreNumbersTab', () => {
   it('renders CoreNumbersTab with data', () => {
     render(<CoreNumbersTab coreNumbers={mockCoreNumbers} />);
 
-    // Check for the titles and numbers
+    // Check for the titles and numbers (handle multiple instances)
     expect(screen.getByText('Life Path')).toBeInTheDocument();
-    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(screen.getAllByText('7').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Destiny')).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getAllByText('5').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Soul Urge')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getAllByText('3').length).toBeGreaterThanOrEqual(1);
   });
 
   it('displays all core numbers', () => {
