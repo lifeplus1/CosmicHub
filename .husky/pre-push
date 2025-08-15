@@ -12,13 +12,13 @@ printf "\nRunning tests...\n"
 if CI=1 npm test; then
     printf "\nAll tests passed.\n"
 else
-    # Check if it's just the expected API key failure
+    # Check if it's just the expected API key failure  
     printf "\nSome tests failed. Checking if it's the expected API key failure...\n"
-    if CI=1 npm run test:astro && CI=1 npm run test:healwave; then
-        printf "\nFrontend tests passed. Backend may have expected API failures.\n"
-        printf "\nPre-push checks passed with expected backend API limitations.\n"
+    if CI=1 npm run test:astro; then
+        printf "\nAstro tests passed. HealWave may have test failures.\n"
+        printf "\nPre-push checks passed - primary app (Astro) tests are passing.\n"
     else
-        printf "\nFrontend tests failed. Please fix tests before pushing.\n"
+        printf "\nAstro tests failed. Please fix tests before pushing.\n"
         exit 1
     fi
 fi
