@@ -21,3 +21,11 @@ export * from './components/PerformanceDashboard';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export * from './components/ErrorBoundaries';
 export * from './hooks/useErrorHandling';
+
+// Re-export specific error boundary types for compatibility
+export { 
+  PageErrorBoundary,
+  ComponentErrorBoundary, 
+  FormErrorBoundary,
+  withErrorBoundary
+} from './components/ErrorBoundaries';
