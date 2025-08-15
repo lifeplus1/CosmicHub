@@ -85,6 +85,26 @@ export const loggingConfig = {
   enableRemote: isProduction(),
 };
 
+// Performance monitoring configuration
+export const performanceConfig = {
+  enabled: isDevelopment() || env.VITE_ENABLE_ANALYTICS,
+  trackingInterval: 5000, // 5 seconds
+  maxOperations: 1000, // Keep last 1000 operations
+  enableMemoryTracking: 'memory' in performance,
+  enablePagePerformance: true,
+  enableComponentTracking: isDevelopment(),
+  thresholds: {
+    slowOperation: 1000, // 1 second
+    memoryWarning: 80, // 80% of heap limit
+    renderWarning: 100, // 100ms render time
+  },
+  logging: {
+    enabled: isDevelopment(),
+    verbose: false,
+    logSlowOperations: true,
+  },
+};
+
 // Development utilities
 /* eslint-disable no-console */
 export const devConsole = {

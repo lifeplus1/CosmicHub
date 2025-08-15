@@ -20,6 +20,8 @@
     "src/performance.ts",
     "src/push-notifications.ts",
     "src/background-sync-enhanced.ts",
+    "src/hooks/index.ts",
+    "src/hooks/usePerformance.ts",
     "src/vite-env.d.ts"
   ],
   "exclude": [

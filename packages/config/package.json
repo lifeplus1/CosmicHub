@@ -12,7 +12,7 @@
     "./component-architecture": "./src/component-library.tsx",
     "./performance": "./src/performance.ts",
     "./lazy-loading": "./src/lazy-loading.tsx",
-    "./hooks": "./src/hooks.tsx"
+    "./hooks": "./src/hooks/index.ts"
   },
   "scripts": {
     "build": "echo 'Skipping config build - apps use direct TypeScript imports'",

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Button } from '@cosmichub/ui';
-import { MultiSystemChartDisplay } from '../components/MultiSystemChartDisplay';
+import { MultiSystemChartDisplay } from '../components/MultiSystemChart';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
 import type { ChartBirthData } from '../services/api';

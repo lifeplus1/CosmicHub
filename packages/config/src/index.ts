@@ -7,6 +7,9 @@
 export * from './config';
 export * from './env';
 
+// Hooks (from hooks folder)
+export * from './hooks/index';
+
 // Lazy loading (working module)
 export * from './lazy-loading';
 

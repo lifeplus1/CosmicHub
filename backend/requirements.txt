@@ -9,6 +9,7 @@ stripe
 requests
 pytz
 pytest
+pytest-asyncio
 pytest-cov
 reportlab
 httpx

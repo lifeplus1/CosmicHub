@@ -193,6 +193,7 @@ class TestInterpretationsAPI:
         assert "Chart data not found" in response.json()["detail"]
 
     @patch('auth.get_current_user')
+    @patch('auth.get_current_user')
     @patch('api.interpretations.db')
     def test_get_interpretation_by_id_success(self, mock_db: Mock, mock_get_user: Mock, mock_user: Dict[str, Any]) -> None:
         """Test successful retrieval of specific interpretation by ID"""

@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import type { ReactNode, ErrorInfo } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { isDevelopment, devConsole } from '../config/environment';
 
 interface ErrorBoundaryProps {
