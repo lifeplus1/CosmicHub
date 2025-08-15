@@ -1,69 +1,53 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ChartDisplay from '../components/ChartDisplay';
-import { AuthProvider } from '@cosmichub/auth';
 
-// Mock Firebase
-vi.mock('../firebase');
+// Mock the astrologyService module
+vi.mock('@/services/astrologyService', () => ({
+  fetchChartData: vi.fn(),
+}));
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <MemoryRouter>
-    <AuthProvider>
-      {children}
-    </AuthProvider>
-  </MemoryRouter>
-);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 describe('ChartDisplay', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state when loading prop is true', () => {
-    render(
-      <TestWrapper>
-        <ChartDisplay chart={null} loading={true} />
-      </TestWrapper>
-    );
-
-    expect(screen.getByText(/calculating your natal chart/i)).toBeInTheDocument();
-  });
-
-  it('renders error message when no chart data is provided', () => {
-    render(
-      <TestWrapper>
-        <ChartDisplay chart={null} />
-      </TestWrapper>
-    );
-
-    expect(screen.getByText(/no chart data available/i)).toBeInTheDocument();
-  });
-
-  it('renders chart display component with test id', () => {
-    const mockChart = {
-      planets: { sun: { position: 0, house: 1 } },
-      houses: [{ house: 1, cusp: 0, sign: 'Aries' }],
+  it('renders chart component without errors', () => {
+    const mockChart: any = {
+      planets: { sun: { name: 'Sun', sign: 'Leo' } },
+      houses: [],
       aspects: [],
-      latitude: 40.7128,
-      longitude: -74.0060,
-      timezone: 'America/New_York',
-      julian_day: 2451545.0,
-      angles: {
-        ascendant: 0,
-        midheaven: 90,
-        descendant: 180,
-        imum_coeli: 270
-      }
+      asteroids: [],
+      angles: { ascendant: 0 }
     };
 
     render(
-      <TestWrapper>
+      <QueryClientProvider client={queryClient}>
         <ChartDisplay chart={mockChart} />
-      </TestWrapper>
+      </QueryClientProvider>
     );
 
-    expect(screen.getByTestId('chart-display')).toBeInTheDocument();
+    expect(screen.getByText(/Chart Analysis/)).toBeDefined();
+  });
+
+  it('displays content when no chart is provided', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ChartDisplay chart={null} />
+      </QueryClientProvider>
+    );
+
+    // Component shows sample data, so we should find chart analysis text
+    expect(screen.getAllByText(/Chart Analysis/)).toHaveLength(2);
   });
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Auth, User, onAuthStateChanged, signOut as fbSignOut } from 'firebase/auth';
 // Use the single, centralized Firebase app/auth to avoid duplicate registrations
 import { app as sharedApp, auth as sharedAuth, hasAuthAvailable } from '@cosmichub/config/firebase';
@@ -79,6 +79,7 @@ const notifyAuthStateChange = (user: User | null) => {
 export const useAuth = (): AuthState => {
   const [user, setUser] = useState<User | null>(mockUser);
   const [loading, setLoading] = useState<boolean>(true);
+  const listenerSetupRef = useRef<boolean>(false);
 
   const signOut = useCallback(async (): Promise<void> => {
     try {
@@ -94,10 +95,23 @@ export const useAuth = (): AuthState => {
   }, []);
 
   useEffect(() => {
-    console.log('🎯 Setting up auth state listener...');
+    // Prevent duplicate listeners
+    if (listenerSetupRef.current) {
+      console.log('🚫 Auth listener already set up, skipping');
+      return;
+    }
+    listenerSetupRef.current = true;
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 Setting up auth state listener...');
+    }
     
     // Add to local listeners for mock auth
-    authStateListeners.push(setUser);
+    const mockAuthListener = (user: User | null) => {
+      console.log('🧪 Mock auth state changed:', user ? user.email : 'null');
+      setUser(user);
+    };
+    authStateListeners.push(mockAuthListener);
     
   let unsubscribe: (() => void) | undefined;
     
@@ -107,7 +121,9 @@ export const useAuth = (): AuthState => {
         unsubscribe = onAuthStateChanged(
           authInstance,
           (currentUser) => {
-            console.log('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
+            }
             if (currentUser) {
               setUser(currentUser);
               setLoading(false);
@@ -139,8 +155,9 @@ export const useAuth = (): AuthState => {
     setLoading(false);
 
     return () => {
+      console.log('🧹 Cleaning up auth listener');
       // Remove from local listeners
-      const index = authStateListeners.indexOf(setUser);
+      const index = authStateListeners.indexOf(mockAuthListener);
       if (index > -1) {
         authStateListeners.splice(index, 1);
       }

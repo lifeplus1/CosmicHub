@@ -42,7 +42,8 @@
     },
     "test": {
       "dependsOn": ["^build:packages"],
-      "outputs": [],
+      "outputs": ["coverage/**", "test-results/**"],
+      "cache": true,
       "env": ["NODE_ENV"],
       "outputLogs": "new-only"
     },
@@ -55,12 +56,14 @@
     },
     "lint": {
       "outputs": [".eslintcache"],
+      "cache": true,
       "env": ["NODE_ENV"],
       "outputLogs": "errors-only"
     },
     "type-check": {
       "dependsOn": ["^build:packages"],
-      "outputs": [],
+      "outputs": ["*.tsbuildinfo"],
+      "cache": true,
       "env": ["NODE_ENV"],
       "outputLogs": "errors-only"
     },

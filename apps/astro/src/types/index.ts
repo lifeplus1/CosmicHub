@@ -66,3 +66,5 @@ export interface TransitData {
   orb?: number;
   include_retrogrades?: boolean;
 }
+
+export * from './astrology.types';

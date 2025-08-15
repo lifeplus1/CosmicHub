@@ -1,4 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, createContext, useContext } from 'react';
+
+// Tooltip Provider Context
+export interface TooltipProviderContextValue {
+  delayDuration?: number;
+  skipDelayDuration?: number;
+}
+
+const TooltipProviderContext = createContext<TooltipProviderContextValue>({});
+
+export interface TooltipProviderProps {
+  children: React.ReactNode;
+  delayDuration?: number;
+  skipDelayDuration?: number;
+}
+
+export const TooltipProvider: React.FC<TooltipProviderProps> = ({
+  children,
+  delayDuration = 200,
+  skipDelayDuration = 100
+}) => {
+  return (
+    <TooltipProviderContext.Provider value={{ delayDuration, skipDelayDuration }}>
+      {children}
+    </TooltipProviderContext.Provider>
+  );
+};
 
 export interface TooltipProps {
   children: React.ReactNode;
@@ -12,9 +38,12 @@ export const Tooltip: React.FC<TooltipProps> = ({
   children,
   content,
   position = 'top',
-  delay = 200,
+  delay,
   className = ''
 }) => {
+  const context = useContext(TooltipProviderContext);
+  const effectiveDelay = delay ?? context.delayDuration ?? 200;
+  
   const [isVisible, setIsVisible] = useState(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -34,7 +63,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   };
 
   const handleMouseEnter = () => {
-    const id = setTimeout(() => setIsVisible(true), delay);
+    const id = setTimeout(() => setIsVisible(true), effectiveDelay);
     setTimeoutId(id);
   };
 

@@ -6,8 +6,8 @@
 // Critical Resource Prioritization
 export class CriticalResourceManager {
   private static readonly CRITICAL_RESOURCES = [
-    '/src/main.tsx',
-    '/src/styles/index.css'
+    // Removed CSS preloading since Vite handles this automatically
+    // '/src/styles/index.css' - This causes the preload warning
   ];
 
   private static readonly FONT_RESOURCES = [
@@ -18,35 +18,10 @@ export class CriticalResourceManager {
   static async preloadCriticalResources(): Promise<void> {
     console.log('⚡ Preloading critical resources...');
 
-    // Only preload resources that exist and are needed immediately
-    const preloadPromises = this.CRITICAL_RESOURCES.map(resource => {
-      return new Promise<void>((resolve) => {
-        // Skip preloading .tsx files since they're handled by Vite
-        if (resource.endsWith('.tsx')) {
-          resolve();
-          return;
-        }
-
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.href = resource;
-        link.as = resource.endsWith('.css') ? 'style' : 'script';
-        
-        link.onload = () => {
-          console.log(`✅ Preloaded: ${resource}`);
-          resolve();
-        };
-        link.onerror = () => {
-          console.warn(`⚠️ Failed to preload: ${resource}`);
-          resolve(); // Don't block on failed preloads
-        };
-        
-        document.head.appendChild(link);
-      });
-    });
-
-    await Promise.allSettled(preloadPromises);
-    console.log('🎯 Critical resource preloading complete');
+    // Skip critical resource preloading since Vite handles this efficiently
+    // Removed manual CSS preloading to fix the preload warning
+    console.log('🎯 Critical resource preloading complete (handled by Vite)');
+    return;
   }
 
   static optimizeFontLoading(): void {

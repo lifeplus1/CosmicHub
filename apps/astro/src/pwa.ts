@@ -5,6 +5,12 @@
 
 // PWA Service Worker Registration
 async function registerServiceWorker(): Promise<void> {
+  // Only register the service worker in production. Vite HMR + SW in dev can cause reload loops.
+  if (!import.meta.env.PROD) {
+    console.warn('⚠️ Skipping Service Worker registration in development to avoid HMR reload loops');
+    return;
+  }
+
   if ('serviceWorker' in navigator) {
     try {
       console.log('🔧 Registering Service Worker...');
@@ -26,7 +32,7 @@ async function registerServiceWorker(): Promise<void> {
         }
       });
       
-      // Check for updates periodically
+      // Check for updates periodically (production only)
       setInterval(() => {
         registration.update();
       }, 60000); // Check every minute
@@ -224,11 +230,30 @@ function hideInstallPrompt(): void {
   }
 }
 
-// Register when DOM is loaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', registerServiceWorker);
+// Register when DOM is loaded (prod) or unregister SW in dev to ensure no stale SW controls the page
+if (import.meta.env.PROD) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', registerServiceWorker);
+  } else {
+    registerServiceWorker();
+  }
 } else {
-  registerServiceWorker();
+  const unregisterInDev = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        if (regs.length > 0) {
+          console.warn(`🧹 Unregistering ${regs.length} service worker(s) in development`);
+        }
+        regs.forEach((r) => r.unregister());
+      });
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', unregisterInDev);
+  } else {
+    unregisterInDev();
+  }
 }
 
 export { registerServiceWorker };

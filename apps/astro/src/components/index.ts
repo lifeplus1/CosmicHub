@@ -6,7 +6,7 @@
 import { lazy } from 'react';
 
 // Lazy load major feature components
-export const ChartDisplay = lazy(() => import('./ChartDisplay'));
+export const ChartDisplay = lazy(() => import('./ChartDisplay/ChartDisplay'));
 export const SynastryAnalysis = lazy(() => import('./SynastryAnalysis/SynastryAnalysis'));
 export const GeneKeysChart = lazy(() => import('./GeneKeysChart/GeneKeysChart'));
 export const NumerologyCalculator = lazy(() => import('./NumerologyCalculator/NumerologyCalculator'));
@@ -22,5 +22,3 @@ export const TransitAnalysis = lazy(() => import('./TransitAnalysis/TransitAnaly
 
 // Re-export commonly used components (not lazy loaded for performance)
 export { default as ErrorBoundary } from './ErrorBoundary';
-// export { default as LoadingSpinner } from './LoadingSpinner/LoadingSpinner';
-// export { default as UpgradeModal } from './UpgradeModal/UpgradeModal';

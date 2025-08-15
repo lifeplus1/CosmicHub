@@ -22,9 +22,9 @@ console.log('✅ Root element found, mounting React app...');
 
 const root = createRoot(rootElement);
 root.render(
-  <StrictMode>
+  // <StrictMode> // Temporarily disabled to prevent infinite reloads
     <App />
-  </StrictMode>
+  // </StrictMode>
 );
 
 console.log('🎉 React app mounted successfully!');

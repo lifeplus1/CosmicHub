@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@cosmichub/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import ChartDisplay from '../components/ChartDisplay';
+import { ChartDisplay } from '../components';
 import { CosmicLoading } from '../components/CosmicLoading';
 import { saveChart, type SaveChartRequest } from '../services/api';
 import type { ChartData } from '../types';
@@ -312,11 +312,12 @@ const ChartResults: React.FC = () => {
             </button>
           </div>
           
-          <ChartDisplay 
-            chart={chartData} 
-            onSaveChart={handleSaveChart}
-            loading={false}
-          />
+          <Suspense fallback={<CosmicLoading />}>
+            <ChartDisplay 
+              chart={chartData} 
+              onSaveChart={handleSaveChart}
+            />
+          </Suspense>
         </>
       )}
     </div>

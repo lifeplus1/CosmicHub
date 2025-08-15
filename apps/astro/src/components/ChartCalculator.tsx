@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { FaBook, FaInfoCircle } from "react-icons/fa";
 import { useAuth } from '@cosmichub/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import ChartDisplay from "./ChartDisplay";
+import { ChartDisplay } from ".";
 import { MultiSystemChartDisplay } from "./MultiSystemChartDisplay";
 import type { MultiSystemChartData } from "./MultiSystemChartDisplay";
 import type { ChartBirthData } from "../services/api";
@@ -52,10 +52,17 @@ export interface ExtendedChartData {
     point1_house?: number;
     point2_house?: number;
   }>;
+  asteroids: Array<{
+    name: string;
+    position: number;
+    house: number;
+    sign: string;
+    retrograde?: boolean;
+  }>;
 }
 
 function isExtendedChartData(data: any): data is ExtendedChartData {
-  return data && 'planets' in data && 'houses' in data && 'aspects' in data;
+  return data && 'planets' in data && 'houses' in data && 'aspects' in data && 'asteroids' in data;
 }
 
 // Helper function to convert FormData to ChartBirthData
@@ -457,7 +464,11 @@ const ChartCalculator: React.FC = () => {
               ? !isExtendedChartData(chart) && (
                   <MultiSystemChartDisplay birthData={convertToChartBirthData(formData)} showComparison={true} />
                 )
-              : isExtendedChartData(chart) && <ChartDisplay chart={chart} onSaveChart={handleSaveChart} />}
+              : isExtendedChartData(chart) && (
+                  <Suspense fallback={<div>Loading chart...</div>}>
+                    <ChartDisplay chart={chart} onSaveChart={handleSaveChart} />
+                  </Suspense>
+                )}
           </div>
         )}
       </div>

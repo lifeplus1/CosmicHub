@@ -57,26 +57,16 @@ const MainApp: React.FC = React.memo(() => {
   const { addNotification } = useCrossAppStore();
   const config = getAppConfig('astro');
 
-  console.log('🎨 MainApp component mounting...');
-  console.log('🔧 App config:', config);
-
   React.useEffect(() => {
-    console.log('⚡ MainApp useEffect running...');
-    
     // Initialize cross-app integration if enabled
     if (isFeatureEnabled('crossAppIntegration')) {
-      console.log('🔗 Cross-app integration enabled');
       addNotification({
         id: 'astro-init',
         message: 'Astrology app initialized with Healwave integration',
         type: 'info',
         timestamp: Date.now(),
       });
-    } else {
-      console.log('🔗 Cross-app integration disabled');
     }
-
-    console.log('✅ MainApp initialized successfully');
   }, [addNotification]);
 
   return (
@@ -119,9 +109,6 @@ const MainApp: React.FC = React.memo(() => {
 });
 
 const App: React.FC = () => {
-  console.log('🌟 App component mounting...');
-  console.log('📦 Providers initializing: Tooltip, Auth, Subscription, BirthData, UpgradeModal, QueryClient');
-  
   return (
     <QueryClientProvider client={queryClient}>
       <Tooltip.Provider>

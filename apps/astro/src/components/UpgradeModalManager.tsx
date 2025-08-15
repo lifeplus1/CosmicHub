@@ -55,7 +55,7 @@ export const UpgradeModalManager: React.FC = () => {
       isOpen={isOpen}
       onClose={closeUpgradeModal}
       feature={feature}
-      currentTier={userTier}
+      currentTier={userTier as 'Free' | 'Basic' | 'Pro' | 'Enterprise'}
       onUpgrade={handleUpgrade}
     />
   );

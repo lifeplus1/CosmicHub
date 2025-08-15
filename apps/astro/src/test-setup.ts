@@ -65,6 +65,28 @@ vi.mock('@cosmichub/ui', () => ({
   useToast: vi.fn(() => ({
     toast: vi.fn(),
   })),
+  TooltipProvider: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  Tooltip: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => React.createElement('div', { className }, children),
+  CardContent: ({ children, className }: { children: React.ReactNode; className?: string }) => React.createElement('div', { className }, children),
+  CardHeader: ({ children, className }: { children: React.ReactNode; className?: string }) => React.createElement('div', { className }, children),
+  CardTitle: ({ children, className }: { children: React.ReactNode; className?: string }) => React.createElement('h3', { className }, children),
+  Button: ({ children, onClick, className }: { children: React.ReactNode; onClick?: () => void; className?: string }) => React.createElement('button', { onClick, className }, children),
+  Input: ({ placeholder, value, onChange, className }: { placeholder?: string; value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; className?: string }) => React.createElement('input', { placeholder, value, onChange, className }),
+  Table: ({ children }: { children: React.ReactNode }) => React.createElement('table', {}, children),
+  TableBody: ({ children }: { children: React.ReactNode }) => React.createElement('tbody', {}, children),
+  TableCell: ({ children, className }: { children: React.ReactNode; className?: string }) => React.createElement('td', { className }, children),
+  TableHead: ({ children }: { children: React.ReactNode }) => React.createElement('th', {}, children),
+  TableHeader: ({ children }: { children: React.ReactNode }) => React.createElement('thead', {}, children),
+  TableRow: ({ children }: { children: React.ReactNode }) => React.createElement('tr', {}, children),
+  Accordion: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  AccordionContent: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  AccordionItem: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  AccordionTrigger: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  Tabs: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  TabsContent: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  TabsList: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  TabsTrigger: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children)
 }));
 
 // Mock integrations package

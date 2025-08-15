@@ -14,6 +14,7 @@ export const Input: React.FC<InputProps> = ({
   ...props 
 }) => {
   const id = props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
+  const ariaInvalid = error ? 'true' : 'false';
   
   return (
     <div className="space-y-1">
@@ -29,7 +30,7 @@ export const Input: React.FC<InputProps> = ({
             ? "border-red-500 focus:border-red-400" 
             : "border-cosmic-purple focus:border-cosmic-gold"
         } text-cosmic-silver focus:outline-none focus:ring-2 focus:ring-cosmic-purple/20 ${className}`}
-        aria-invalid={error ? "true" : "false"}
+        aria-invalid={ariaInvalid}
         aria-describedby={error ? `${id}-error` : helperText ? `${id}-help` : undefined}
         {...props}
       />
