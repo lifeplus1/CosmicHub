@@ -1,113 +1,176 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { Card, Button } from '@cosmichub/ui';
+import * as Tabs from '@radix-ui/react-tabs';
+import { FaUser, FaCog, FaChartLine, FaSave, FaCreditCard, FaArrowUp, FaHistory, FaCalendarAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/ToastProvider';
+import ProgressBar from '../components/ProgressBar';
+import { COSMICHUB_TIERS } from '../types/subscription';
 
-const Profile: React.FC = () => {
+// Lazy load heavy components
+const ChartPreferences = React.lazy(() => import('../components/ChartPreferences'));
+
+interface UserStats {
+  totalCharts: number;
+  chartsThisMonth: number;
+  savedCharts: number;
+  joinDate: Date;
+  lastLogin: Date;
+}
+
+const Profile: React.FC = React.memo(() => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [userStats, setUserStats] = useState<UserStats>({
+    totalCharts: 0,
+    chartsThisMonth: 0,
+    savedCharts: 0,
+    joinDate: new Date(),
+    lastLogin: new Date(),
+  });
+
+  const loadUserStats = useCallback(async () => {
+    if (user) {
+      // Simulate fetching stats from Firestore
+      setUserStats({
+        totalCharts: 50,
+        chartsThisMonth: 10,
+        savedCharts: 5,
+        joinDate: new Date(user.metadata?.creationTime || Date.now()),
+        lastLogin: new Date(),
+      });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadUserStats();
+  }, [loadUserStats]);
+
+  const handleSignOut = useCallback(async () => {
+    try {
+      await signOut();
+      toast({ description: 'Signed out successfully', status: 'success' });
+      navigate('/login');
+    } catch (error) {
+      toast({ description: 'Error signing out', status: 'error' });
+    }
+  }, [signOut, navigate, toast]);
+
+  if (!user) {
+    return (
+      <div className="py-10 text-center">
+        <div className="mx-auto text-4xl text-cosmic-purple animate-spin" aria-hidden="true">⭐</div>
+        <p className="mt-4 text-cosmic-silver">Please sign in to view your profile</p>
+        <Button onClick={() => navigate('/login')} variant="primary" className="mt-4">
+          Sign In
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-cosmic-gold mb-4">
-          Your Profile
-        </h1>
-        <p className="text-xl text-cosmic-silver">
-          Manage your account and preferences
-        </p>
-      </div>
+    <div className="max-w-4xl py-8 mx-auto">
+      <div className="cosmic-card p-6 rounded-lg shadow-lg bg-cosmic-dark">
+        <div className="flex flex-col items-center mb-6 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6">
+          <div className="flex items-center justify-center w-24 h-24 rounded-full bg-cosmic-blue/30">
+            <FaUser className="text-3xl text-cosmic-silver" aria-hidden="true" />
+          </div>
+          <div className="text-center sm:text-left">
+            <h2 className="text-2xl font-bold text-cosmic-gold">{user.email}</h2>
+            <span className="bg-cosmic-purple/20 text-cosmic-purple px-2 py-1 rounded text-sm font-semibold uppercase">
+              Free Tier
+            </span>
+          </div>
+        </div>
 
-      {user ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card title="Account Information">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-cosmic-silver mb-1">Email</label>
-                <p className="text-cosmic-gold">{user.email}</p>
-              </div>
-              <div>
-                <label className="block text-cosmic-silver mb-1">User ID</label>
-                <p className="text-cosmic-gold text-sm font-mono">{user.uid}</p>
-              </div>
-              <div>
-                <label className="block text-cosmic-silver mb-1">Account Created</label>
-                <p className="text-cosmic-gold">
-                  {user.metadata?.creationTime ? 
-                    new Date(user.metadata.creationTime).toLocaleDateString() : 
-                    'Unknown'
-                  }
-                </p>
-              </div>
+        <Tabs.Root defaultValue="overview" className="space-y-6">
+          <Tabs.List className="flex mb-6 border-b border-cosmic-silver/30" aria-label="Profile Tabs">
+            <Tabs.Trigger
+              value="overview"
+              className="px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple"
+            >
+              Overview
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              value="preferences"
+              className="px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple"
+            >
+              Preferences
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              value="account"
+              className="px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple"
+            >
+              Account
+            </Tabs.Trigger>
+          </Tabs.List>
+
+          <Tabs.Content value="overview">
+            <div className="space-y-6">
+              <Card title="Account Overview">
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-cosmic-silver">Email</span>
+                    <span className="text-cosmic-gold">{user.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-cosmic-silver">Account ID</span>
+                    <span className="text-cosmic-gold font-mono text-sm">{user.uid.slice(0, 8)}...</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-cosmic-silver">Joined</span>
+                    <span className="text-cosmic-gold">{userStats.joinDate.toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </Card>
+              <Card title="Activity Summary">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div>
+                    <p className="text-cosmic-silver">Total Charts</p>
+                    <p className="text-2xl font-bold text-cosmic-gold">{userStats.totalCharts}</p>
+                  </div>
+                  <div>
+                    <p className="text-cosmic-silver">Charts This Month</p>
+                    <p className="text-2xl font-bold text-cosmic-gold">{userStats.chartsThisMonth}</p>
+                  </div>
+                  <div>
+                    <p className="text-cosmic-silver">Saved Charts</p>
+                    <p className="text-2xl font-bold text-cosmic-gold">{userStats.savedCharts}</p>
+                  </div>
+                </div>
+              </Card>
             </div>
-          </Card>
+          </Tabs.Content>
 
-          <Card title="Preferences">
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="chartStyle" className="block text-cosmic-silver mb-2">Chart Style</label>
-                <select 
-                  id="chartStyle"
-                  aria-label="Select chart style"
-                  className="w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
-                >
-                  <option>Western</option>
-                  <option>Vedic</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="houseSystem" className="block text-cosmic-silver mb-2">House System</label>
-                <select 
-                  id="houseSystem"
-                  aria-label="Select house system"
-                  className="w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver"
-                >
-                  <option>Placidus</option>
-                  <option>Whole Sign</option>
-                  <option>Equal House</option>
-                </select>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <input type="checkbox" id="notifications" className="rounded" />
-                <label htmlFor="notifications" className="text-cosmic-silver">
-                  Email notifications
-                </label>
-              </div>
-            </div>
-          </Card>
+          <Tabs.Content value="preferences">
+            <React.Suspense fallback={<div className="text-cosmic-silver">Loading preferences...</div>}>
+              <ChartPreferences />
+            </React.Suspense>
+          </Tabs.Content>
 
-          <Card title="Subscription" className="md:col-span-2">
-            <div className="text-center space-y-4">
-              <p className="text-cosmic-silver">You are currently on the Free plan</p>
-              <Button variant="primary">
-                Upgrade to Premium
+          <Tabs.Content value="account">
+            <Card title="Subscription">
+              <div className="text-center space-y-4">
+                <p className="text-cosmic-silver">You are currently on the Free plan</p>
+                <Button onClick={() => navigate('/upgrade')} variant="primary">
+                  <FaArrowUp className="mr-2" /> Upgrade to Premium
+                </Button>
+              </div>
+            </Card>
+            <div className="text-center mt-6">
+              <Button onClick={handleSignOut} variant="secondary">
+                Sign Out
               </Button>
             </div>
-          </Card>
-        </div>
-      ) : (
-        <Card title="Please Sign In" className="text-center">
-          <p className="text-cosmic-silver mb-4">
-            Please sign in to view your profile
-          </p>
-          <Button onClick={() => window.location.href = '/login'}>
-            Sign In
-          </Button>
-        </Card>
-      )}
-
-      {user && (
-        <div className="text-center">
-          <Button 
-            variant="secondary" 
-            onClick={() => signOut()}
-          >
-            Sign Out
-          </Button>
-        </div>
-      )}
+          </Tabs.Content>
+        </Tabs.Root>
+      </div>
     </div>
   );
-};
+});
+
+Profile.displayName = 'Profile';
 
 export default Profile;
