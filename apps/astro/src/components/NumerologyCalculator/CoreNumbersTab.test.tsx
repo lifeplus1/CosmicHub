@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import CoreNumbersTab from './CoreNumbersTab';
 import type { CoreNumbers } from './types';
 
@@ -52,13 +53,13 @@ describe('CoreNumbersTab', () => {
   it('displays all core numbers', () => {
     render(<CoreNumbersTab coreNumbers={mockCoreNumbers} />);
 
-    // Check that all core number types are displayed (use getAllByText to handle multiple renders)
-    expect(screen.getAllByText('Life Path')).toHaveLength(2);
-    expect(screen.getAllByText('Destiny')).toHaveLength(2);
-    expect(screen.getAllByText('Soul Urge')).toHaveLength(2);
-    expect(screen.getAllByText('Personality')).toHaveLength(2);
-    expect(screen.getAllByText('Birth Day')).toHaveLength(2);
-    expect(screen.getAllByText('Attitude')).toHaveLength(2);
-    expect(screen.getAllByText('Power Name')).toHaveLength(2);
+    // Check that all core number types are displayed
+    expect(screen.getByText('Life Path')).toBeInTheDocument();
+    expect(screen.getByText('Destiny')).toBeInTheDocument();
+    expect(screen.getByText('Soul Urge')).toBeInTheDocument();
+    expect(screen.getByText('Personality')).toBeInTheDocument();
+    expect(screen.getByText('Birth Day')).toBeInTheDocument();
+    expect(screen.getByText('Attitude')).toBeInTheDocument();
+    expect(screen.getByText('Power Name')).toBeInTheDocument();
   });
 });
