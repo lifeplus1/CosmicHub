@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 
-// Re-export the shared ErrorBoundary components from @cosmichub/ui
-export { ErrorBoundary, PageErrorBoundary, ComponentErrorBoundary, FormErrorBoundary, withErrorBoundary } from '@cosmichub/ui';
-
 /**
  * HealWave-specific error boundary with custom theming
  * Falls back to shared ErrorBoundary from @cosmichub/ui for most functionality
