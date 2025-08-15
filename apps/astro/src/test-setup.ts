@@ -86,7 +86,9 @@ vi.mock('@cosmichub/ui', () => ({
   Tabs: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
   TabsContent: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
   TabsList: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
-  TabsTrigger: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children)
+  TabsTrigger: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
+  UpgradeModal: ({ children, isOpen }: { children?: React.ReactNode; isOpen?: boolean }) => 
+    isOpen ? React.createElement('div', { 'data-testid': 'upgrade-modal' }, children || 'Upgrade Modal') : null
 }));
 
 // Mock integrations package

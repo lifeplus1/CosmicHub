@@ -73,8 +73,8 @@ describe('App Component', () => {
       </AuthProvider>
     );
 
-    const nav = screen.getByRole('navigation');
-    expect(nav).toHaveAttribute('aria-label', 'Main navigation');
+    const navs = screen.getAllByRole('navigation');
+    expect(navs[0]).toHaveAttribute('aria-label', 'Main navigation');
   });
 
   test('handles authentication context properly', () => {
@@ -98,6 +98,7 @@ describe('App Component', () => {
     // The Suspense fallback should be present during initial render
     // Note: In real tests, you might need to use act() and async utilities
     // to properly test Suspense boundaries
-    expect(screen.getByTestId('router')).toBeInTheDocument();
+    const routers = screen.getAllByTestId('router');
+    expect(routers[0]).toBeInTheDocument();
   });
 });

@@ -11,8 +11,8 @@
 
 2. **Test Stripe Keys**
    ```bash
-   VITE_STRIPE_PUBLISHABLE_KEY=pk_test_51234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqr
-   STRIPE_SECRET_KEY=sk_test_51234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqr
+   VITE_STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
+   STRIPE_SECRET_KEY=sk_test_YOUR_SECRET_KEY_HERE
    ```
 
 ### Testing Scenarios
