@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useSubscription } from '@cosmichub/auth';
+import { useAuth } from '@cosmichub/auth';
+import { stripeService, StripeSession } from '@cosmichub/integrations';
 
 export interface UseUpgradeModalReturn {
   isUpgradeModalOpen: boolean;
@@ -16,6 +18,7 @@ export const useUpgradeModal = (): UseUpgradeModalReturn => {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [requiredFeature, setRequiredFeature] = useState<string | undefined>();
   const { userTier } = useSubscription();
+  const { user } = useAuth();
 
   const openUpgradeModal = useCallback((feature?: string) => {
     setRequiredFeature(feature);
@@ -28,23 +31,45 @@ export const useUpgradeModal = (): UseUpgradeModalReturn => {
   }, []);
 
   const handleUpgrade = useCallback(async (tier: 'Basic' | 'Pro' | 'Enterprise') => {
+    if (!user) {
+      console.error('User not authenticated');
+      closeUpgradeModal();
+      return;
+    }
+
+    if (!stripeService) {
+      console.error('Stripe service not available');
+      closeUpgradeModal();
+      return;
+    }
+
     try {
-      // TODO: Integrate with Stripe Checkout
-      console.log(`Upgrading to ${tier} from ${userTier}`);
+      // Map UI tier names to Stripe tier names
+      const stripeTier = tier === 'Basic' ? 'premium' : tier === 'Pro' ? 'premium' : 'elite';
       
-      // For now, redirect to pricing page with preselected tier
-      const pricingUrl = new URL('/pricing', window.location.origin);
-      pricingUrl.searchParams.set('tier', tier);
-      if (requiredFeature) {
-        pricingUrl.searchParams.set('feature', requiredFeature);
-      }
-      
-      window.location.href = pricingUrl.toString();
+      const successUrl = `${window.location.origin}/pricing/success?tier=${stripeTier}`;
+      const cancelUrl = `${window.location.origin}/pricing/cancel`;
+
+      const session: StripeSession = await stripeService.createCheckoutSession({
+        tier: stripeTier,
+        userId: user.uid,
+        isAnnual: true, // Default to annual, can be made configurable
+        successUrl,
+        cancelUrl,
+        feature: requiredFeature,
+        metadata: {
+          sourceComponent: 'useUpgradeModal',
+          originalTier: userTier
+        }
+      });
+
+      // Update user subscription in Firestore after successful checkout initiation
+      await stripeService.updateUserSubscription(user.uid, stripeTier, true);
     } catch (error) {
       console.error('Upgrade failed:', error);
-      // TODO: Show error notification
+      closeUpgradeModal();
     }
-  }, [userTier, requiredFeature]);
+  }, [user, userTier, requiredFeature, closeUpgradeModal]);
 
   return {
     isUpgradeModalOpen,

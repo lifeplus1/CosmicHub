@@ -43,6 +43,8 @@ const AIInterpretation = lazy(() => import('./pages/AIInterpretation'));
 const SavedCharts = lazy(() => import('./pages/SavedCharts'));
 const Login = lazy(() => import('./pages/Login'));
 const SignUp = lazy(() => import('./pages/SignUp'));
+const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
+const SubscriptionCancel = lazy(() => import('./pages/SubscriptionCancel'));
 
 interface ExtendedChartData {
   latitude: number;
@@ -92,6 +94,8 @@ const MainApp: React.FC = React.memo(() => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/upgrade-demo" element={<UpgradeModalDemo />} />
               <Route path="/performance" element={<PerformanceMonitoring />} />
+              <Route path="/pricing/success" element={<SubscriptionSuccess />} />
+              <Route path="/pricing/cancel" element={<SubscriptionCancel />} />
             </Routes>
           </Suspense>
         </main>

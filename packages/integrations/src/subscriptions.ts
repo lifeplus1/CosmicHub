@@ -4,7 +4,27 @@ import React from 'react';
  * Handles Stripe integration and feature access across all apps
  */
 
-import { EventEmitter } from 'events';
+// Simple EventEmitter implementation for browser compatibility
+class SimpleEventEmitter {
+  private events: { [key: string]: Function[] } = {};
+
+  on(event: string, callback: Function): void {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(callback);
+  }
+
+  off(event: string, callback: Function): void {
+    if (!this.events[event]) return;
+    this.events[event] = this.events[event].filter(cb => cb !== callback);
+  }
+
+  emit(event: string, data?: any): void {
+    if (!this.events[event]) return;
+    this.events[event].forEach(callback => callback(data));
+  }
+}
 
 export interface SubscriptionPlan {
   id: string;
@@ -101,7 +121,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   }
 ];
 
-class SubscriptionManager extends EventEmitter {
+class SubscriptionManager extends SimpleEventEmitter {
   private currentSubscription: UserSubscription | null = null;
   private plans: SubscriptionPlan[] = SUBSCRIPTION_PLANS;
 

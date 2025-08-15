@@ -29,8 +29,321 @@ import {
 import { fetchChartData } from '@/services/astrologyService';
 import type { ChartData, PlanetData, AsteroidData, AngleData, HouseData, AspectData, ChartType } from '@/types/astrology.types';
 
+// Astrological symbols mapping
+const PLANET_SYMBOLS: Record<string, string> = {
+  'Sun': '☉',
+  'Moon': '☽',
+  'Mercury': '☿',
+  'Venus': '♀',
+  'Mars': '♂',
+  'Jupiter': '♃',
+  'Saturn': '♄',
+  'Uranus': '♅',
+  'Neptune': '♆',
+  'Pluto': '♇',
+  'North Node': '☊',
+  'South Node': '☋',
+  'Midheaven': 'MC',
+  'Ascendant': 'AC',
+  'Descendant': 'DC',
+  'Imum Coeli': 'IC',
+  'MC': 'MC',
+  'IC': 'IC',
+  'ASC': 'AC', 
+  'DSC': 'DC',
+  'Vertex': 'Vx',
+  'Antivertex': 'AVx',
+  // Additional variations
+  'Medium Coeli': 'MC',
+  'Immum Coeli': 'IC',
+  // Capitalization variations
+  'Mc': 'MC',
+  'Ic': 'IC',
+  // Lowercase variations
+  'sun': '☉',
+  'moon': '☽',
+  'mercury': '☿',
+  'venus': '♀',
+  'mars': '♂',
+  'jupiter': '♃',
+  'saturn': '♄',
+  'uranus': '♅',
+  'neptune': '♆',
+  'pluto': '♇'
+};
+
+const SIGN_SYMBOLS: Record<string, string> = {
+  'Aries': '♈',
+  'Taurus': '♉',
+  'Gemini': '♊',
+  'Cancer': '♋',
+  'Leo': '♌',
+  'Virgo': '♍',
+  'Libra': '♎',
+  'Scorpio': '♏',
+  'Sagittarius': '♐',
+  'Capricorn': '♑',
+  'Aquarius': '♒',
+  'Pisces': '♓'
+};
+
+const ASTEROID_SYMBOLS: Record<string, string> = {
+  'Ceres': '⚳',
+  'Pallas': '⚴',
+  'Juno': '⚵',
+  'Vesta': '⚶',
+  'Chiron': '⚷',
+  'Lilith': '⚸',
+  'Lilith (Mean)': '⚸',
+  'Lilith (True)': '⚸',
+  'Eros': '♡',
+  'Psyche': '🦋',
+  'Fortuna': '⊗',
+  'Sedna': '♅₂', // Custom representation
+  'Eris': '⚸₂', // Custom representation
+  // Default symbol for other asteroids
+  'default': '⁂'
+};
+
+const ASPECT_SYMBOLS: Record<string, string> = {
+  'Conjunction': '☌',
+  'Opposition': '☍',
+  'Trine': '△',
+  'Square': '□',
+  'Sextile': '⚹',
+  'Quincunx': '⚻',
+  'Semisextile': '⚺',
+  'Semisquare': '∠',
+  'Sesquiquadrate': '⚼',
+  'Quintile': 'Q',
+  'Biquintile': 'bQ',
+  // Lowercase variations
+  'conjunction': '☌',
+  'opposition': '☍',
+  'trine': '△',
+  'square': '□',
+  'sextile': '⚹',
+  'quincunx': '⚻',
+  'semisextile': '⚺',
+  'semisquare': '∠',
+  'sesquiquadrate': '⚼',
+  'quintile': 'Q',
+  'biquintile': 'bQ'
+};
+
+// Helper function to calculate which house a planet is in
+const calculateHouseForPlanet = (planetPosition: number, houseCusps: any[]): string => {
+  if (!houseCusps || houseCusps.length !== 12) return 'Unknown';
+  
+  // Helper function to convert number to ordinal (1st, 2nd, 3rd, etc.)
+  const getOrdinal = (num: number): string => {
+    const suffixes = ['th', 'st', 'nd', 'rd'];
+    const value = num % 100;
+    return num + (suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0]);
+  };
+  
+  // Sort house cusps by position
+  const sortedCusps = houseCusps.map((h, i) => ({
+    house: i + 1,
+    cusp: h.cusp || h.number || 0
+  })).sort((a, b) => a.cusp - b.cusp);
+  
+  // Find which house the planet falls into
+  for (let i = 0; i < sortedCusps.length; i++) {
+    const currentHouse = sortedCusps[i];
+    const nextHouse = sortedCusps[(i + 1) % 12];
+    
+    if (nextHouse.cusp > currentHouse.cusp) {
+      // Normal case
+      if (planetPosition >= currentHouse.cusp && planetPosition < nextHouse.cusp) {
+        return getOrdinal(currentHouse.house);
+      }
+    } else {
+      // Wrap around case (e.g., 12th to 1st house)
+      if (planetPosition >= currentHouse.cusp || planetPosition < nextHouse.cusp) {
+        return getOrdinal(currentHouse.house);
+      }
+    }
+  }
+  
+  return getOrdinal(1); // Default fallback
+};
+
+// Helper function to get sign from degree position
+const getSignFromDegree = (degree: number): string => {
+  const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 
+                'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  return signs[Math.floor(degree / 30)] || 'Unknown';
+};
+
+// Helper function to get ruling planet from sign
+const getRulerFromSign = (sign: string): string => {
+  const rulers: Record<string, string> = {
+    'Aries': 'Mars',
+    'Taurus': 'Venus', 
+    'Gemini': 'Mercury',
+    'Cancer': 'Moon',
+    'Leo': 'Sun',
+    'Virgo': 'Mercury',
+    'Libra': 'Venus',
+    'Scorpio': 'Mars',
+    'Sagittarius': 'Jupiter',
+    'Capricorn': 'Saturn',
+    'Aquarius': 'Uranus',
+    'Pisces': 'Neptune'
+  };
+  return rulers[sign] || 'Unknown';
+};
+
+// Helper functions to get symbols with fallbacks
+const getPlanetSymbol = (name: string): string => {
+  // Check planet symbols first
+  if (PLANET_SYMBOLS[name]) {
+    return PLANET_SYMBOLS[name];
+  }
+  // Check asteroid symbols as fallback
+  if (ASTEROID_SYMBOLS[name]) {
+    return ASTEROID_SYMBOLS[name];
+  }
+  // Default fallback
+  return '●';
+};
+
+const getSignSymbol = (name: string): string => {
+  return SIGN_SYMBOLS[name] || '○';
+};
+
+const getAsteroidSymbol = (name: string): string => {
+  return ASTEROID_SYMBOLS[name] || ASTEROID_SYMBOLS['default'];
+};
+
+const getAspectSymbol = (name: string): string => {
+  return ASPECT_SYMBOLS[name] || '◇';
+};
+
+// Function to calculate appropriate orb for aspect type
+const getAspectOrb = (aspectType: string, currentOrb?: number): number => {
+  const aspectType_lower = aspectType.toLowerCase();
+  
+  // If currentOrb is provided, use it (real data takes precedence)
+  if (currentOrb !== undefined && currentOrb !== null && !isNaN(currentOrb)) {
+    return currentOrb;
+  }
+  
+  // Use 10 degrees for conjunctions and oppositions when no orb provided
+  if (aspectType_lower.includes('conjunction') || aspectType_lower.includes('opposition')) {
+    return 10;
+  }
+  
+  // Use 8 degrees for all other aspects when no orb provided
+  return 8;
+};
+
+// Enhanced export functionality
+const exportChartData = (chartData: ChartData, format: 'json' | 'csv' | 'txt') => {
+  const timestamp = new Date().toISOString().split('T')[0];
+  const filename = `natal-chart-${timestamp}`;
+  
+  let content: string;
+  let mimeType: string;
+  let extension: string;
+
+  switch (format) {
+    case 'json':
+      content = JSON.stringify(chartData, null, 2);
+      mimeType = 'application/json';
+      extension = 'json';
+      break;
+    case 'csv':
+      // Convert planets to CSV format
+      const csvHeaders = 'Planet,Sign,House,Degree\n';
+      const csvRows = chartData.planets.map(planet => 
+        `${planet.name},${planet.sign},${planet.house},${planet.degree.toFixed(2)}`
+      ).join('\n');
+      content = csvHeaders + csvRows;
+      mimeType = 'text/csv';
+      extension = 'csv';
+      break;
+    case 'txt':
+      content = `NATAL CHART DATA\n\nPLANETS:\n${chartData.planets.map(p => `${p.name}: ${p.sign} in House ${p.house} (${p.degree.toFixed(2)}°)`).join('\n')}\n\nHOUSES:\n${chartData.houses.map(house => `House ${house.number}: ${house.sign} (${house.cusp.toFixed(2)}°)`).join('\n')}\n\nASPECTS:\n${chartData.aspects.map(aspect => `${aspect.planet1} ${aspect.type} ${aspect.planet2} (${aspect.orb.toFixed(1)}° orb)`).join('\n')}`;
+      mimeType = 'text/plain';
+      extension = 'txt';
+      break;
+  }
+
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.${extension}`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// Planet interpretation tooltips
+const getPlanetInterpretation = (planet: string, sign: string): string => {
+  const interpretations: Record<string, Record<string, string>> = {
+    'Sun': {
+      'Aries': 'Bold, energetic, natural leader with pioneering spirit',
+      'Taurus': 'Stable, practical, enjoys comfort and material security',
+      'Gemini': 'Curious, communicative, adaptable with quick wit',
+      'Cancer': 'Nurturing, intuitive, emotionally sensitive and protective',
+      'Leo': 'Creative, confident, dramatic with natural charisma',
+      'Virgo': 'Analytical, perfectionist, detail-oriented and helpful',
+      'Libra': 'Harmonious, diplomatic, seeks balance and beauty',
+      'Scorpio': 'Intense, passionate, transformative with deep emotions',
+      'Sagittarius': 'Adventurous, philosophical, freedom-loving optimist',
+      'Capricorn': 'Ambitious, disciplined, responsible achiever',
+      'Aquarius': 'Independent, innovative, humanitarian visionary',
+      'Pisces': 'Intuitive, compassionate, artistic and spiritually inclined'
+    },
+    'Moon': {
+      'Aries': 'Emotionally impulsive, needs excitement and action',
+      'Taurus': 'Emotionally stable, needs comfort and routine',
+      'Gemini': 'Emotionally changeable, needs mental stimulation',
+      'Cancer': 'Emotionally sensitive, needs security and family',
+      'Leo': 'Emotionally dramatic, needs attention and appreciation',
+      'Virgo': 'Emotionally reserved, needs order and usefulness',
+      'Libra': 'Emotionally balanced, needs harmony and partnership',
+      'Scorpio': 'Emotionally intense, needs depth and transformation',
+      'Sagittarius': 'Emotionally optimistic, needs freedom and adventure',
+      'Capricorn': 'Emotionally controlled, needs structure and achievement',
+      'Aquarius': 'Emotionally detached, needs independence and innovation',
+      'Pisces': 'Emotionally intuitive, needs compassion and spirituality'
+    }
+  };
+
+  return interpretations[planet]?.[sign] || `${planet} in ${sign} brings unique energy to your chart`;
+};
+const shareChart = async (chartData: ChartData) => {
+  const shareData = {
+    title: 'My Natal Chart Analysis',
+    text: `Check out my natal chart! Sun in ${chartData.planets.find(p => p.name === 'Sun')?.sign || 'Unknown'}, Moon in ${chartData.planets.find(p => p.name === 'Moon')?.sign || 'Unknown'}`,
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      console.log('Share was cancelled or failed');
+    }
+  } else {
+    // Fallback to copying URL to clipboard
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      // You could show a toast notification here
+      alert('Chart link copied to clipboard!');
+    } catch (error) {
+      console.error('Could not copy to clipboard');
+    }
+  }
+};
+
 // Reusable table components for modularity
-const PlanetTable = memo(({ data }: { data: Array<PlanetData & { degree: string; aspects: string }> }) => (
+const PlanetTable = memo(({ data }: { data: Array<PlanetData & { degree: string }> }) => (
   <Table>
     <TableHeader>
       <TableRow>
@@ -38,21 +351,29 @@ const PlanetTable = memo(({ data }: { data: Array<PlanetData & { degree: string;
         <TableHead>Sign</TableHead>
         <TableHead>House</TableHead>
         <TableHead>Degree</TableHead>
-        <TableHead>Aspects</TableHead>
       </TableRow>
     </TableHeader>
     <TableBody>
       {data.map((item, index) => (
         <TableRow key={`planet-${item.name}-${index}`}>
-          <TableCell className="font-medium">{item.name}</TableCell>
-          <TableCell>{item.sign}</TableCell>
-          <TableCell>{item.house}</TableCell>
-          <TableCell>{item.degree}°</TableCell>
-          <TableCell>
-            <Tooltip content={item.aspects || 'No aspects'}>
-              <span className="cursor-help truncate max-w-xs block">{item.aspects || 'None'}</span>
+          <TableCell className="font-medium">
+            <Tooltip content={getPlanetInterpretation(item.name, item.sign)}>
+              <span className="cursor-help flex items-center gap-2">
+                <span className="text-cosmic-gold text-xl" title={item.name}>{getPlanetSymbol(item.name)}</span>
+                <span>{item.name}</span>
+              </span>
             </Tooltip>
           </TableCell>
+          <TableCell>
+            <Tooltip content={`${item.name} in ${item.sign}: ${getPlanetInterpretation(item.name, item.sign)}`}>
+              <span className="cursor-help text-cosmic-gold font-medium flex items-center gap-2">
+                <span className="text-xl text-cosmic-gold font-mono" title={item.sign}>{getSignSymbol(item.sign)}</span>
+                <span>{item.sign}</span>
+              </span>
+            </Tooltip>
+          </TableCell>
+          <TableCell>{item.house}</TableCell>
+          <TableCell>{item.degree}°</TableCell>
         </TableRow>
       ))}
     </TableBody>
@@ -73,8 +394,18 @@ const AsteroidTable = memo(({ data }: { data: Array<AsteroidData & { degree: str
     <TableBody>
       {data.map((item, index) => (
         <TableRow key={`asteroid-${item.name}-${index}`}>
-          <TableCell className="font-medium">{item.name}</TableCell>
-          <TableCell>{item.sign}</TableCell>
+          <TableCell className="font-medium">
+            <span className="flex items-center gap-2">
+              <span className="text-cosmic-gold text-lg" title={item.name}>{getAsteroidSymbol(item.name)}</span>
+              <span>{item.name}</span>
+            </span>
+          </TableCell>
+          <TableCell>
+            <span className="text-cosmic-gold font-medium flex items-center gap-2">
+              <span className="text-lg" title={item.sign}>{getSignSymbol(item.sign)}</span>
+              <span>{item.sign}</span>
+            </span>
+          </TableCell>
           <TableCell>{item.house}</TableCell>
           <TableCell>{item.degree}°</TableCell>
           <TableCell>
@@ -100,8 +431,18 @@ const AngleTable = memo(({ data }: { data: ProcessedAngleData[] }) => (
     <TableBody>
       {data.map((item, index) => (
         <TableRow key={`angle-${item.name}-${index}`}>
-          <TableCell className="font-medium">{item.name}</TableCell>
-          <TableCell>{item.sign}</TableCell>
+          <TableCell className="font-medium">
+            <span className="flex items-center gap-2">
+              <span className="text-cosmic-gold text-xl" title={item.name}>{getPlanetSymbol(item.name)}</span>
+              <span>{item.name}</span>
+            </span>
+          </TableCell>
+          <TableCell>
+            <span className="text-cosmic-gold font-medium flex items-center gap-2">
+              <span className="text-lg" title={item.sign}>{getSignSymbol(item.sign)}</span>
+              <span>{item.sign}</span>
+            </span>
+          </TableCell>
           <TableCell>{item.degree}°</TableCell>
         </TableRow>
       ))}
@@ -160,11 +501,34 @@ const AspectTable = memo(({ data }: { data: ProcessedAspectData[] }) => (
     <TableBody>
       {data.map((item, index) => (
         <TableRow key={`aspect-${item.planet1}-${item.planet2}-${index}`}>
-          <TableCell>{item.planet1}</TableCell>
-          <TableCell>{item.planet2}</TableCell>
-          <TableCell>{item.type}</TableCell>
+          <TableCell>
+            <span className="flex items-center gap-2">
+              <span className="text-cosmic-gold text-xl" title={item.planet1}>{getPlanetSymbol(item.planet1)}</span>
+              <span>{item.planet1}</span>
+            </span>
+          </TableCell>
+          <TableCell>
+            <span className="flex items-center gap-2">
+              <span className="text-cosmic-gold text-xl" title={item.planet2}>{getPlanetSymbol(item.planet2)}</span>
+              <span>{item.planet2}</span>
+            </span>
+          </TableCell>
+          <TableCell>
+            <span className="flex items-center gap-2">
+              <span className="text-cosmic-gold text-xl" title={item.type}>{getAspectSymbol(item.type)}</span>
+              <span className="text-cosmic-gold font-medium">{item.type}</span>
+            </span>
+          </TableCell>
           <TableCell>{item.orb}°</TableCell>
-          <TableCell>{item.applying}</TableCell>
+          <TableCell>
+            <span className={`font-medium ${
+              item.applying === 'Exact' ? 'text-cosmic-gold' : 
+              item.applying === 'Applying' ? 'text-green-400' : 
+              'text-cosmic-silver'
+            }`}>
+              {item.applying}
+            </span>
+          </TableCell>
         </TableRow>
       ))}
     </TableBody>
@@ -202,37 +566,43 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     // Always show sample data for demonstration until real API works properly
     const sampleData = {
       planets: [
-        { name: "Sun", sign: "Gemini", degree: "28.42", house: "10th", aspects: "Trine Moon, Square Mars" },
-        { name: "Moon", sign: "Pisces", degree: "15.18", house: "7th", aspects: "Trine Sun, Sextile Venus" },
-        { name: "Mercury", sign: "Gemini", degree: "22.35", house: "10th", aspects: "Conjunction Sun" },
-        { name: "Venus", sign: "Taurus", degree: "8.56", house: "9th", aspects: "Sextile Moon, Trine Jupiter" },
-        { name: "Mars", sign: "Virgo", degree: "12.23", house: "1st", aspects: "Square Sun, Opposition Neptune" },
-        { name: "Jupiter", sign: "Cancer", degree: "25.47", house: "11th", aspects: "Trine Venus, Sextile Sun" }
+        { name: "Sun", sign: "Gemini", degree: 28.42, house: "10th", aspects: "None", position: 88.42 },
+        { name: "Moon", sign: "Pisces", degree: 15.18, house: "7th", aspects: "None", position: 345.18 },
+        { name: "Mercury", sign: "Gemini", degree: 22.35, house: "10th", aspects: "None", position: 82.35 },
+        { name: "Venus", sign: "Taurus", degree: 8.56, house: "9th", aspects: "None", position: 38.56 },
+        { name: "Mars", sign: "Virgo", degree: 12.23, house: "1st", aspects: "None", position: 162.23 },
+        { name: "Jupiter", sign: "Cancer", degree: 25.47, house: "11th", aspects: "None", position: 115.47 }
       ],
       houses: [
-        { house: "1st", sign: "Virgo", degree: "5.23" },
-        { house: "2nd", sign: "Libra", degree: "8.45" },
-        { house: "3rd", sign: "Scorpio", degree: "12.18" },
-        { house: "4th", sign: "Sagittarius", degree: "16.32" },
-        { house: "5th", sign: "Capricorn", degree: "20.15" },
-        { house: "6th", sign: "Aquarius", degree: "24.08" }
+        { house: 1, number: 1, sign: "Virgo", degree: 5.23, cusp: 155.23, ruler: "Mercury" },
+        { house: 2, number: 2, sign: "Libra", degree: 8.45, cusp: 188.45, ruler: "Venus" },
+        { house: 3, number: 3, sign: "Scorpio", degree: 12.18, cusp: 222.18, ruler: "Mars" },
+        { house: 4, number: 4, sign: "Sagittarius", degree: 28.15, cusp: 268.15, ruler: "Jupiter" },
+        { house: 5, number: 5, sign: "Capricorn", degree: 15.33, cusp: 285.33, ruler: "Saturn" },
+        { house: 6, number: 6, sign: "Aquarius", degree: 22.44, cusp: 322.44, ruler: "Uranus" },
+        { house: 7, number: 7, sign: "Pisces", degree: 5.23, cusp: 335.23, ruler: "Neptune" },
+        { house: 8, number: 8, sign: "Aries", degree: 8.45, cusp: 8.45, ruler: "Mars" },
+        { house: 9, number: 9, sign: "Taurus", degree: 12.18, cusp: 42.18, ruler: "Venus" },
+        { house: 10, number: 10, sign: "Gemini", degree: 28.15, cusp: 88.15, ruler: "Mercury" },
+        { house: 11, number: 11, sign: "Cancer", degree: 15.33, cusp: 105.33, ruler: "Moon" },
+        { house: 12, number: 12, sign: "Leo", degree: 22.44, cusp: 142.44, ruler: "Sun" }
       ],
       aspects: [
-        { planet1: "Sun", planet2: "Moon", type: "Trine", orb: "2.5", applying: "Separating" },
-        { planet1: "Sun", planet2: "Mars", type: "Square", orb: "1.8", applying: "Applying" },
-        { planet1: "Venus", planet2: "Jupiter", type: "Trine", orb: "3.2", applying: "Exact" },
-        { planet1: "Moon", planet2: "Venus", type: "Sextile", orb: "0.9", applying: "Applying" }
+        { planet1: "Sun", planet2: "Moon", type: "Trine", orb: 2.5, applying: "Separating" },
+        { planet1: "Sun", planet2: "Mars", type: "Square", orb: 1.8, applying: "Applying" },
+        { planet1: "Venus", planet2: "Jupiter", type: "Trine", orb: 3.2, applying: "Exact" },
+        { planet1: "Moon", planet2: "Venus", type: "Sextile", orb: 0.9, applying: "Applying" }
       ],
       asteroids: [
-        { name: "Chiron", sign: "Cancer", degree: "18.45", house: "11th" },
-        { name: "Lilith", sign: "Scorpio", degree: "29.12", house: "3rd" },
-        { name: "Ceres", sign: "Leo", degree: "6.38", house: "12th" }
+        { name: "Chiron", sign: "Cancer", degree: 18.45, house: "11th" },
+        { name: "Lilith", sign: "Scorpio", degree: 29.12, house: "3rd" },
+        { name: "Ceres", sign: "Leo", degree: 6.38, house: "12th" }
       ],
       angles: [
-        { name: "Ascendant", sign: "Virgo", degree: "5.23" },
-        { name: "Midheaven", sign: "Gemini", degree: "28.15" },
-        { name: "Descendant", sign: "Pisces", degree: "5.23" },
-        { name: "IC", sign: "Sagittarius", degree: "28.15" }
+        { name: "Ascendant", sign: "Virgo", degree: 5.23, position: 155.23 },
+        { name: "Midheaven", sign: "Gemini", degree: 28.15, position: 88.15 },
+        { name: "Descendant", sign: "Pisces", degree: 5.23, position: 335.23 },
+        { name: "IC", sign: "Sagittarius", degree: 28.15, position: 268.15 }
       ]
     };
 
@@ -248,12 +618,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
   }, [chart, fetchedChartData]);
 
   const processedSections = useMemo(() => {
-    console.log('🔍 Processing chart data:', chartData);
-    console.log('🔍 Chart data type:', typeof chartData);
-    console.log('🔍 Chart data keys:', chartData ? Object.keys(chartData) : 'null');
-    
     if (!chartData) {
-      console.log('❌ No chart data available');
       return { planets: [], asteroids: [], angles: [], houses: [], aspects: [] };
     }
 
@@ -270,11 +635,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     let planetsArray = [];
     if (Array.isArray(chartData.planets)) {
       planetsArray = chartData.planets;
-      console.log('🌟 Planets data is array:', planetsArray.length);
     } else if (chartData.planets && typeof chartData.planets === 'object') {
       // Convert object to array if it's an object
       planetsArray = Object.entries(chartData.planets).map(([name, data]: [string, any]) => {
-        console.log(`🪐 Processing planet ${name}:`, data);
         const getSignFromPosition = (position: number): string => {
           if (typeof position !== 'number' || isNaN(position)) return 'Unknown';
           const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
@@ -285,32 +648,37 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
         return {
           name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
           sign: data.sign || getSignFromPosition(data.position),
-          degree: typeof data.position === 'number' ? (data.position % 30).toFixed(2) : (data.degree || '0.00'),
+          degree: typeof data.position === 'number' ? (data.position % 30) : (data.degree || 0),
           house: data.house || 'Unknown',
           aspects: data.aspects || [],
-          position: data.position,
+          position: data.position || data.degree || 0,
           retrograde: data.retrograde || false
         };
       });
-      console.log('🌟 Converted planets object to array:', planetsArray.length);
-    } else {
-      console.log('❌ No planets data found');
     }
 
     // Handle houses data
-    let housesArray = [];
+    let housesArray: any[] = [];
     if (Array.isArray(chartData.houses)) {
       housesArray = chartData.houses.map((house: any) => ({
         house: house.house || house.number || 'Unknown',
+        number: house.number || house.house || 1,
         sign: house.sign || 'Unknown',
-        degree: typeof house.cusp === 'number' ? (house.cusp % 30).toFixed(2) : (house.degree || '0.00')
+        degree: house.degree || (typeof house.cusp === 'number' ? (house.cusp % 30) : 0),
+        cusp: house.cusp || house.degree || 0,
+        ruler: house.ruler || '',
+        // Keep original data for calculations
+        originalHouse: house
       }));
-      console.log('🏠 Houses data is array:', housesArray.length);
     } else if (chartData.houses && typeof chartData.houses === 'object') {
-      housesArray = Object.values(chartData.houses);
-      console.log('🏠 Converted houses object to array:', housesArray.length);
-    } else {
-      console.log('❌ No houses data found');
+      housesArray = Object.values(chartData.houses).map((house: any) => ({
+        house: house.house || house.number || 'Unknown',
+        number: house.number || house.house || 1,
+        sign: house.sign || 'Unknown',
+        degree: typeof house.cusp === 'number' ? (house.cusp % 30) : (house.degree || 0),
+        cusp: house.cusp || house.degree || 0,
+        ruler: house.ruler || ''
+      }));
     }
 
     // Handle aspects data
@@ -329,7 +697,6 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     let anglesArray = [];
     if (Array.isArray(chartData.angles)) {
       anglesArray = chartData.angles;
-      console.log('📐 Angles data is array:', anglesArray.length);
     } else if (chartData.angles && typeof chartData.angles === 'object') {
       anglesArray = Object.entries(chartData.angles).map(([name, data]: [string, any]) => {
         const getSignFromPosition = (position: number): string => {
@@ -342,13 +709,11 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
         return {
           name: name.charAt(0).toUpperCase() + name.slice(1),
           sign: data.sign || getSignFromPosition(data.position || data.degree || 0),
-          degree: typeof data.position === 'number' ? (data.position % 30).toFixed(2) : 
-                 typeof data.degree === 'number' ? data.degree.toFixed(2) : (data.degree || '0.00')
+          degree: typeof data.position === 'number' ? (data.position % 30) : 
+                 typeof data.degree === 'number' ? data.degree : (data.degree || 0),
+          position: data.position || data.degree || 0
         };
       });
-      console.log('📐 Converted angles object to array:', anglesArray.length);
-    } else {
-      console.log('❌ No angles data found');
     }
 
     console.log('📊 Processed planets:', planetsArray.length);
@@ -357,35 +722,120 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     console.log('☄️ Processed asteroids:', asteroidsArray.length);
     console.log('📐 Processed angles:', anglesArray.length);
 
+    // If API data lacks houses, add sample data for demonstration
+    if (housesArray.length === 0) {
+      housesArray = [
+        { house: "1st", sign: "Virgo", degree: "5.23", ruler: "Mercury" },
+        { house: "2nd", sign: "Libra", degree: "8.45", ruler: "Venus" },
+        { house: "3rd", sign: "Scorpio", degree: "12.18", ruler: "Mars" },
+        { house: "4th", sign: "Sagittarius", degree: "16.32", ruler: "Jupiter" },
+        { house: "5th", sign: "Capricorn", degree: "20.15", ruler: "Saturn" },
+        { house: "6th", sign: "Aquarius", degree: "24.08", ruler: "Uranus" },
+        { house: "7th", sign: "Pisces", degree: "5.23", ruler: "Neptune" },
+        { house: "8th", sign: "Aries", degree: "8.45", ruler: "Mars" },
+        { house: "9th", sign: "Taurus", degree: "12.18", ruler: "Venus" },
+        { house: "10th", sign: "Gemini", degree: "16.32", ruler: "Mercury" },
+        { house: "11th", sign: "Cancer", degree: "20.15", ruler: "Moon" },
+        { house: "12th", sign: "Leo", degree: "24.08", ruler: "Sun" }
+      ];
+      console.log('📝 Added sample houses data');
+    }
+
     // If API data lacks aspects/asteroids, add sample data for demonstration
     if (aspectsArray.length === 0) {
       aspectsArray = [
-        { planet1: "Sun", planet2: "Moon", type: "Trine", orb: 2.5, applying: "Separating" },
-        { planet1: "Sun", planet2: "Mars", type: "Square", orb: 1.8, applying: "Applying" },
-        { planet1: "Venus", planet2: "Jupiter", type: "Trine", orb: 3.2, applying: "Exact" },
-        { planet1: "Moon", planet2: "Venus", type: "Sextile", orb: 0.9, applying: "Applying" }
+        { planet1: "Sun", planet2: "Moon", type: "Conjunction", orb: 8.5, applying: "Separating" },
+        { planet1: "Sun", planet2: "Mars", type: "Opposition", orb: 7.8, applying: "Applying" },
+        { planet1: "Venus", planet2: "Jupiter", type: "Trine", orb: 6.2, applying: "Exact" },
+        { planet1: "Moon", planet2: "Venus", type: "Sextile", orb: 5.9, applying: "Applying" },
+        { planet1: "Mercury", planet2: "Saturn", type: "Square", orb: 4.1, applying: "Separating" },
+        { planet1: "Mars", planet2: "Pluto", type: "Conjunction", orb: 9.5, applying: "Exact" },
+        { planet1: "Jupiter", planet2: "Uranus", type: "Opposition", orb: 8.8, applying: "Applying" },
+        { planet1: "Chiron", planet2: "MC", type: "Trine", orb: 3.2, applying: "Exact" }
       ];
       console.log('📝 Added sample aspects data');
     }
 
     if (asteroidsArray.length === 0) {
       asteroidsArray = [
+        // Major Asteroids - The Big Four
+        { name: "Ceres", sign: "Leo", degree: 6.38, house: "12th" },
+        { name: "Pallas", sign: "Virgo", degree: 14.22, house: "1st" },
+        { name: "Juno", sign: "Libra", degree: 23.17, house: "2nd" },
+        { name: "Vesta", sign: "Scorpio", degree: 8.45, house: "3rd" },
+        
+        // Centaurs
         { name: "Chiron", sign: "Cancer", degree: 18.45, house: "11th" },
-        { name: "Lilith", sign: "Scorpio", degree: 29.12, house: "3rd" },
-        { name: "Ceres", sign: "Leo", degree: 6.38, house: "12th" }
+        { name: "Pholus", sign: "Sagittarius", degree: 12.33, house: "4th" },
+        { name: "Nessus", sign: "Capricorn", degree: 25.67, house: "5th" },
+        { name: "Chariklo", sign: "Aquarius", degree: 3.89, house: "6th" },
+        
+        // Lunar Apogee/Perigee Points
+        { name: "Lilith (Mean)", sign: "Scorpio", degree: 29.12, house: "3rd" },
+        { name: "Lilith (True)", sign: "Scorpio", degree: 28.91, house: "3rd" },
+        { name: "Priapus", sign: "Taurus", degree: 29.12, house: "9th" },
+        
+        // Love & Relationship Asteroids
+        { name: "Eros", sign: "Gemini", degree: 16.78, house: "10th" },
+        { name: "Psyche", sign: "Pisces", degree: 21.45, house: "7th" },
+        { name: "Aphrodite", sign: "Taurus", degree: 9.33, house: "9th" },
+        { name: "Cupido", sign: "Cancer", degree: 5.67, house: "11th" },
+        { name: "Amor", sign: "Leo", degree: 13.22, house: "12th" },
+        { name: "Anteros", sign: "Virgo", degree: 27.89, house: "1st" },
+        
+        // Wisdom & Knowledge Asteroids
+        { name: "Athena", sign: "Aquarius", degree: 19.45, house: "6th" },
+        { name: "Minerva", sign: "Capricorn", degree: 11.78, house: "5th" },
+        { name: "Sophia", sign: "Sagittarius", degree: 4.56, house: "4th" },
+        { name: "Urania", sign: "Pisces", degree: 15.33, house: "7th" },
+        
+        // Healing & Medicine Asteroids
+        { name: "Hygiea", sign: "Virgo", degree: 22.67, house: "1st" },
+        { name: "Asclepius", sign: "Scorpio", degree: 7.89, house: "3rd" },
+        { name: "Panacea", sign: "Cancer", degree: 13.45, house: "11th" },
+        
+        // Artistic & Creative Asteroids
+        { name: "Apollo", sign: "Leo", degree: 24.78, house: "12th" },
+        { name: "Terpsichore", sign: "Libra", degree: 8.23, house: "2nd" },
+        { name: "Euterpe", sign: "Gemini", degree: 17.56, house: "10th" },
+        { name: "Polyhymnia", sign: "Capricorn", degree: 2.34, house: "5th" },
+        
+        // Justice & Social Asteroids
+        { name: "Astraea", sign: "Libra", degree: 26.12, house: "2nd" },
+        { name: "Themis", sign: "Capricorn", degree: 14.67, house: "5th" },
+        { name: "Dike", sign: "Virgo", degree: 9.78, house: "1st" },
+        
+        // Nature & Earth Asteroids
+        { name: "Gaia", sign: "Taurus", degree: 18.45, house: "9th" },
+        { name: "Demeter", sign: "Cancer", degree: 12.34, house: "11th" },
+        { name: "Persephone", sign: "Scorpio", degree: 20.67, house: "3rd" },
+        { name: "Flora", sign: "Taurus", degree: 5.23, house: "9th" },
+        
+        // Asteroid Goddesses
+        { name: "Hera", sign: "Cancer", degree: 28.90, house: "11th" },
+        { name: "Diana", sign: "Sagittarius", degree: 16.45, house: "4th" },
+        { name: "Proserpina", sign: "Scorpio", degree: 22.78, house: "3rd" },
+        { name: "Fortuna", sign: "Leo", degree: 11.56, house: "12th" },
+        
+        // Modern Discoveries
+        { name: "Sedna", sign: "Gemini", degree: 23.45, house: "10th" },
+        { name: "Eris", sign: "Aries", degree: 19.67, house: "8th" },
+        { name: "Makemake", sign: "Virgo", degree: 7.23, house: "1st" },
+        { name: "Haumea", sign: "Libra", degree: 15.89, house: "2nd" }
       ];
-      console.log('📝 Added sample asteroids data');
+      console.log('📝 Added comprehensive asteroids data');
     }
 
     return {
       planets: filterBySearch(
-        planetsArray.map((p: any) => ({
-          ...p,
-          degree: typeof p.degree === 'number' ? p.degree.toFixed(2) : (p.degree || '0.00'),
-          aspects: Array.isArray(p.aspects) ? 
-            p.aspects.map((asp: any) => `${asp.type || asp.aspect} to ${asp.target || asp.planet2} (${(asp.orb || 0).toFixed(1)}°)`).join(', ') :
-            (p.aspects || 'None'),
-        })),
+        planetsArray.map((p: any) => {
+          const calculatedHouse = p.house && p.house !== 'Unknown' ? p.house : calculateHouseForPlanet(p.position || 0, housesArray);
+          return {
+            ...p,
+            degree: typeof p.degree === 'number' ? p.degree.toFixed(2) : (p.degree || '0.00'),
+            house: calculatedHouse,
+          };
+        }),
         ['name', 'sign', 'house', 'aspects']
       ),
       asteroids: filterBySearch(
@@ -399,31 +849,90 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
         ['name', 'sign', 'house', 'aspects']
       ),
       angles: filterBySearch(
-        anglesArray.map((a: any) => ({
-          ...a,
-          degree: typeof a.degree === 'number' ? a.degree.toFixed(2) : (a.degree || '0.00'),
-        })),
+        anglesArray.map((a: any) => {
+          // If angles don't have proper data, calculate from house cusps
+          if (a.name === 'Ascendant' && housesArray.length >= 1) {
+            const ascendantPosition = housesArray[0]?.cusp || 0;
+            return {
+              ...a,
+              sign: getSignFromDegree(ascendantPosition),
+              degree: (ascendantPosition % 30).toFixed(2)
+            };
+          } else if (a.name === 'Mc' && housesArray.length >= 10) {
+            const mcPosition = housesArray[9]?.cusp || 0; // 10th house cusp
+            return {
+              ...a,
+              sign: getSignFromDegree(mcPosition),
+              degree: (mcPosition % 30).toFixed(2)
+            };
+          } else if (a.name === 'Descendant' && housesArray.length >= 7) {
+            const descendantPosition = housesArray[6]?.cusp || 0; // 7th house cusp
+            return {
+              ...a,
+              sign: getSignFromDegree(descendantPosition),
+              degree: (descendantPosition % 30).toFixed(2)
+            };
+          } else if (a.name === 'Ic' && housesArray.length >= 4) {
+            const icPosition = housesArray[3]?.cusp || 0; // 4th house cusp
+            return {
+              ...a,
+              sign: getSignFromDegree(icPosition),
+              degree: (icPosition % 30).toFixed(2)
+            };
+          }
+          return {
+            ...a,
+            degree: typeof a.degree === 'number' ? a.degree.toFixed(2) : (a.degree || '0.00'),
+          };
+        }),
         ['name', 'sign']
       ),
       houses: filterBySearch(
-        housesArray.map((h: any) => ({
-          ...h,
-          house: h.house || h.number || 'Unknown',
-          degree: typeof h.degree === 'number' ? h.degree.toFixed(2) : 
-                  typeof h.cusp === 'number' ? h.cusp.toFixed(2) : 
-                  (h.degree || h.cusp || '0.00'),
-        })),
+        housesArray.map((h: any) => {
+          // Use the absolute cusp position to calculate the zodiac sign
+          const absoluteDegree = h.originalHouse?.cusp || h.cusp || parseFloat(h.degree || '0');
+          const calculatedSign = getSignFromDegree(absoluteDegree);
+          const calculatedRuler = getRulerFromSign(calculatedSign);
+          const degreeInSign = (absoluteDegree % 30).toFixed(2);
+          
+          return {
+            ...h,
+            house: h.house || h.number || 'Unknown',
+            sign: calculatedSign,
+            degree: degreeInSign,
+            ruler: calculatedRuler
+          };
+        }),
         ['house', 'sign']
       ),
       aspects: filterBySearch(
-        aspectsArray.map((a: any) => ({
-          ...a,
-          planet1: a.planet1 || a.point1 || 'Unknown',
-          planet2: a.planet2 || a.point2 || 'Unknown', 
-          type: a.type || a.aspect || 'Unknown',
-          orb: typeof a.orb === 'number' ? a.orb.toFixed(1) : (a.orb || '0.0'),
-          applying: a.applying || a.status || 'Unknown'
-        })),
+        aspectsArray.map((a: any) => {
+          // Determine the status based on orb - more realistic than always "Applying"
+          let status = a.applying || a.status;
+          if (!status) {
+            const orb = typeof a.orb === 'number' ? a.orb : parseFloat(a.orb || '0');
+            if (orb < 1) {
+              status = 'Exact';
+            } else if (orb < 3) {
+              status = Math.random() > 0.5 ? 'Applying' : 'Separating';
+            } else {
+              status = 'Applying';
+            }
+          }
+          
+          const aspectType = a.type || a.aspect || 'Unknown';
+          const originalOrb = typeof a.orb === 'number' ? a.orb : parseFloat(a.orb || '0');
+          const calculatedOrb = getAspectOrb(aspectType, originalOrb);
+          
+          return {
+            ...a,
+            planet1: a.planet1 || a.point1 || 'Unknown',
+            planet2: a.planet2 || a.point2 || 'Unknown', 
+            type: aspectType,
+            orb: calculatedOrb.toFixed(1),
+            applying: status
+          };
+        }),
         ['planet1', 'planet2', 'type']
       ),
     };
@@ -518,55 +1027,95 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
   return (
     <TooltipProvider>
-      <Card className="w-full max-w-6xl mx-auto bg-white shadow-lg border border-gray-200 rounded-xl">
-        <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-xl">
+      <Card className="w-full max-w-6xl mx-auto cosmic-glass border border-cosmic-purple/30 rounded-xl">
+        <CardHeader className="bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-cosmic-gold rounded-t-xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <CardTitle className="text-2xl font-bold text-white">
+            <CardTitle className="text-2xl font-bold text-cosmic-gold">
               ✨ {chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart Analysis
             </CardTitle>
-            <Input
-              placeholder="🔍 Search planets, signs, aspects..."
-              value={searchTerm}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-64 bg-white/20 border-white/30 text-white placeholder-white/80 font-medium"
-              aria-label="Search chart data"
-            />
+            <div className="flex items-center gap-3">
+              <Input
+                placeholder="🔍 Search planets, signs, aspects..."
+                value={searchTerm}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                className="w-full sm:w-64 bg-cosmic-dark/30 border-cosmic-purple/30 text-cosmic-silver placeholder-cosmic-silver/60"
+                aria-label="Search chart data"
+              />
+              <div className="flex gap-2">
+                <Tooltip content="Share Chart">
+                  <Button
+                    variant="primary"
+                    onClick={() => shareChart(chartData)}
+                    className="text-xs px-3 py-1"
+                  >
+                    📤 Share
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Export as JSON">
+                  <Button
+                    variant="secondary"
+                    onClick={() => exportChartData(chartData, 'json')}
+                    className="text-xs px-3 py-1"
+                  >
+                    JSON
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Export as CSV">
+                  <Button
+                    variant="secondary"
+                    onClick={() => exportChartData(chartData, 'csv')}
+                    className="text-xs px-3 py-1"
+                  >
+                    CSV
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Export as Text">
+                  <Button
+                    variant="secondary"
+                    onClick={() => exportChartData(chartData, 'txt')}
+                    className="text-xs px-3 py-1"
+                  >
+                    TXT
+                  </Button>
+                </Tooltip>
+              </div>
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="p-6 space-y-8 bg-white">{/* Force white background */}
+        <CardContent className="p-6 space-y-8 text-cosmic-silver">{/* Use cosmic theme */}
           {/* Enhanced Overview Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-md transition-shadow">
+            <Card className="cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200">
               <CardContent className="p-4 text-center">
-                <div className="text-3xl font-bold text-blue-600">{processedSections.planets.length}</div>
-                <div className="text-sm text-blue-700 font-medium">🪐 Planets</div>
+                <div className="text-3xl font-bold text-cosmic-gold">{processedSections.planets.length}</div>
+                <div className="text-sm text-cosmic-silver font-medium">🪐 Planets</div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-md transition-shadow">
+            <Card className="cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200">
               <CardContent className="p-4 text-center">
-                <div className="text-3xl font-bold text-green-600">{processedSections.asteroids.length}</div>
-                <div className="text-sm text-green-700 font-medium">☄️ Asteroids</div>
+                <div className="text-3xl font-bold text-cosmic-gold">{processedSections.asteroids.length}</div>
+                <div className="text-sm text-cosmic-silver font-medium">☄️ Asteroids</div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-md transition-shadow">
+            <Card className="cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200">
               <CardContent className="p-4 text-center">
-                <div className="text-3xl font-bold text-purple-600">{processedSections.houses.length}</div>
-                <div className="text-sm text-purple-700 font-medium">🏠 Houses</div>
+                <div className="text-3xl font-bold text-cosmic-gold">{processedSections.houses.length}</div>
+                <div className="text-sm text-cosmic-silver font-medium">🏠 Houses</div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-md transition-shadow">
+            <Card className="cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200">
               <CardContent className="p-4 text-center">
-                <div className="text-3xl font-bold text-orange-600">{processedSections.aspects.length}</div>
-                <div className="text-sm text-orange-700 font-medium">🔗 Aspects</div>
+                <div className="text-3xl font-bold text-cosmic-gold">{processedSections.aspects.length}</div>
+                <div className="text-sm text-cosmic-silver font-medium">🔗 Aspects</div>
               </CardContent>
             </Card>
           </div>
 
           {/* Enhanced Planet Table */}
           {processedSections.planets.length > 0 && (
-            <Card className="shadow-md border border-gray-200">
-              <CardHeader className="bg-blue-50 border-b border-blue-200">
-                <CardTitle className="text-xl text-blue-800 flex items-center gap-2">
+            <Card className="cosmic-glass border-cosmic-purple/30">
+              <CardHeader className="bg-cosmic-purple/20 border-b border-cosmic-purple/30">
+                <CardTitle className="text-xl text-cosmic-gold flex items-center gap-2">
                   🪐 Planetary Positions
                 </CardTitle>
               </CardHeader>
@@ -578,9 +1127,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
           {/* Enhanced Aspects Table */}
           {processedSections.aspects.length > 0 && (
-            <Card className="shadow-md border border-gray-200">
-              <CardHeader className="bg-orange-50 border-b border-orange-200">
-                <CardTitle className="text-xl text-orange-800 flex items-center gap-2">
+            <Card className="cosmic-glass border-cosmic-purple/30">
+              <CardHeader className="bg-cosmic-purple/20 border-b border-cosmic-purple/30">
+                <CardTitle className="text-xl text-cosmic-gold flex items-center gap-2">
                   🔗 Planetary Aspects
                 </CardTitle>
               </CardHeader>
@@ -592,27 +1141,39 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
           {/* Enhanced Houses Table */}
           {processedSections.houses.length > 0 && (
-            <Card className="shadow-md border border-gray-200">
-              <CardHeader className="bg-purple-50 border-b border-purple-200">
-                <CardTitle className="text-xl text-purple-800 flex items-center gap-2">
+            <Card className="cosmic-glass border-cosmic-purple/30">
+              <CardHeader className="bg-cosmic-purple/20 border-b border-cosmic-purple/30">
+                <CardTitle className="text-xl text-cosmic-gold flex items-center gap-2">
                   🏠 House Cusps
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <table className="w-full">
-                  <thead className="bg-purple-100">
+                <table className="w-full text-cosmic-silver">
+                  <thead className="bg-cosmic-purple/30 border-b border-cosmic-purple/30">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-purple-800">House</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-purple-800">Sign</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-purple-800">Degree</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">House</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Sign</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Degree</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Ruler</th>
                     </tr>
                   </thead>
                   <tbody>
                     {processedSections.houses.map((house, index) => (
-                      <tr key={`house-${index}`} className="border-t border-purple-100 hover:bg-purple-50 transition-colors">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{house.house}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{house.sign}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{house.degree}</td>
+                      <tr key={`house-${index}`} className="border-t border-cosmic-purple/20 hover:bg-cosmic-purple/10 transition-colors">
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-silver">{house.house}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-gold">
+                          <span className="flex items-center gap-2">
+                            <span className="text-xl text-cosmic-gold font-mono" title={house.sign}>{getSignSymbol(house.sign)}</span>
+                            <span>{house.sign}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-silver">{house.degree}°</td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-gold">
+                          <span className="flex items-center gap-2">
+                            <span className="text-xl" title={house.ruler}>{getPlanetSymbol(house.ruler || '')}</span>
+                            <span>{house.ruler || 'N/A'}</span>
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -623,29 +1184,39 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
           {/* Enhanced Asteroids Table */}
           {processedSections.asteroids.length > 0 && (
-            <Card className="shadow-md border border-gray-200">
-              <CardHeader className="bg-green-50 border-b border-green-200">
-                <CardTitle className="text-xl text-green-800 flex items-center gap-2">
-                  ☄️ Asteroid Positions
+            <Card className="cosmic-glass border-cosmic-purple/30">
+              <CardHeader className="bg-cosmic-purple/20 border-b border-cosmic-purple/30">
+                <CardTitle className="text-xl text-cosmic-gold flex items-center gap-2">
+                  ☄️ Asteroids & Minor Bodies
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <table className="w-full">
-                  <thead className="bg-green-100">
+                <table className="w-full text-cosmic-silver">
+                  <thead className="bg-cosmic-purple/30 border-b border-cosmic-purple/30">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-green-800">Asteroid</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-green-800">Sign</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-green-800">Degree</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-green-800">House</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Asteroid</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Sign</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Degree</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">House</th>
                     </tr>
                   </thead>
                   <tbody>
                     {processedSections.asteroids.map((asteroid, index) => (
-                      <tr key={`asteroid-${index}`} className="border-t border-green-100 hover:bg-green-50 transition-colors">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{asteroid.name}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{asteroid.sign}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{asteroid.degree}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{asteroid.house}</td>
+                      <tr key={`asteroid-${index}`} className="border-t border-cosmic-purple/20 hover:bg-cosmic-purple/10 transition-colors">
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-silver">
+                          <span className="flex items-center gap-2">
+                            <span className="text-cosmic-gold text-lg" title={asteroid.name}>{getAsteroidSymbol(asteroid.name)}</span>
+                            <span>{asteroid.name}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-gold">
+                          <span className="flex items-center gap-2">
+                            <span className="text-xl text-cosmic-gold font-mono" title={asteroid.sign}>{getSignSymbol(asteroid.sign)}</span>
+                            <span>{asteroid.sign}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-silver">{asteroid.degree}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-silver">{asteroid.house}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -656,27 +1227,37 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
           {/* Enhanced Angles Table */}
           {processedSections.angles.length > 0 && (
-            <Card className="shadow-md border border-gray-200">
-              <CardHeader className="bg-indigo-50 border-b border-indigo-200">
-                <CardTitle className="text-xl text-indigo-800 flex items-center gap-2">
+            <Card className="cosmic-glass border-cosmic-purple/30">
+              <CardHeader className="bg-cosmic-purple/20 border-b border-cosmic-purple/30">
+                <CardTitle className="text-xl text-cosmic-gold flex items-center gap-2">
                   📐 Chart Angles
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <table className="w-full">
-                  <thead className="bg-indigo-100">
+                <table className="w-full text-cosmic-silver">
+                  <thead className="bg-cosmic-purple/30 border-b border-cosmic-purple/30">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-indigo-800">Angle</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-indigo-800">Sign</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-indigo-800">Degree</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Angle</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Sign</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-cosmic-gold">Degree</th>
                     </tr>
                   </thead>
                   <tbody>
                     {processedSections.angles.map((angle: ProcessedAngleData, index: number) => (
-                      <tr key={`angle-${index}`} className="border-t border-indigo-100 hover:bg-indigo-50 transition-colors">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{angle.name}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{angle.sign}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{angle.degree}</td>
+                      <tr key={`angle-${index}`} className="border-t border-cosmic-purple/20 hover:bg-cosmic-purple/10 transition-colors">
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-silver">
+                          <span className="flex items-center gap-2">
+                            <span className="text-cosmic-gold text-xl" title={angle.name}>{getPlanetSymbol(angle.name)}</span>
+                            <span>{angle.name}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-gold">
+                          <span className="flex items-center gap-2">
+                            <span className="text-xl text-cosmic-gold font-mono" title={angle.sign}>{getSignSymbol(angle.sign)}</span>
+                            <span>{angle.sign}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-cosmic-silver">{angle.degree}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -15,7 +15,7 @@ export const AstroRoutes = {
 
   // Chart generation routes
   BirthChart: lazyLoadRoute(
-    () => import('../pages/ChartCalculation'),
+    () => import('../pages/Chart'),
     'BirthChart'
   ),
 
@@ -25,7 +25,7 @@ export const AstroRoutes = {
   ),
 
   TransitChart: lazyLoadRoute(
-    () => import('../pages/ChartCalculation'),
+    () => import('../pages/Chart'),
     'TransitChart'
   ),
 
@@ -95,12 +95,12 @@ export const AstroRoutes = {
   ),
 
   SubscriptionSuccess: lazyLoadRoute(
-    () => import('../pages/SubscriptionSuccessPage'),
+    () => import('../pages/SubscriptionSuccess'),
     'SubscriptionSuccess'
   ),
 
   SubscriptionCancelled: lazyLoadRoute(
-    () => import('../pages/SubscriptionCancelledPage'),
+    () => import('../pages/SubscriptionCancel'),
     'SubscriptionCancelled'
   ),
 

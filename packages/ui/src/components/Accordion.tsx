@@ -73,7 +73,7 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
 }) => {
   return (
     <AccordionItemContext.Provider value={value}>
-      <div className={`border rounded-lg ${className}`} data-value={value}>
+      <div className={`border border-cosmic-purple/30 rounded-lg bg-cosmic-dark/30 ${className}`} data-value={value}>
         {children}
       </div>
     </AccordionItemContext.Provider>
@@ -90,11 +90,11 @@ export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
 
   return (
     <button
-      className={`flex w-full items-center justify-between p-4 text-left font-medium hover:bg-gray-50 ${className}`}
+      className={`flex w-full items-center justify-between p-4 text-left font-medium text-cosmic-silver hover:bg-cosmic-purple/20 transition-colors ${className}`}
       onClick={() => toggleItem(value)}
     >
       {children}
-      <span className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+      <span className={`transition-transform text-cosmic-gold ${isOpen ? 'rotate-180' : ''}`}>
         ▼
       </span>
     </button>
@@ -112,7 +112,7 @@ export const AccordionContent: React.FC<AccordionContentProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`px-4 pb-4 ${className}`}>
+    <div className={`px-4 pb-4 text-cosmic-silver ${className}`}>
       {children}
     </div>
   );

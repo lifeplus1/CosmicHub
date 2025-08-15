@@ -100,3 +100,16 @@ export const useCrossAppStore = (): CrossAppStore => {
 
 export * from './api';
 export * from './ephemeris';
+export * from './stripe';
+export * from './subscriptions';
+
+// Re-export key Stripe functionality for convenience
+export { 
+  stripeService, 
+  getStripeService, 
+  createStripeService,
+  type StripeSession,
+  type StripeCheckoutParams,
+  type SubscriptionData,
+  type StripeConfig
+} from './stripe';

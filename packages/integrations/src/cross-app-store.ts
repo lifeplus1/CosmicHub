@@ -4,7 +4,27 @@ import React from 'react';
  * Enables seamless data sharing between astro and healwave apps
  */
 
-import { EventEmitter } from 'events';
+// Simple EventEmitter implementation for browser compatibility
+class SimpleEventEmitter {
+  private events: { [key: string]: Function[] } = {};
+
+  on(event: string, callback: Function): void {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(callback);
+  }
+
+  off(event: string, callback: Function): void {
+    if (!this.events[event]) return;
+    this.events[event] = this.events[event].filter(cb => cb !== callback);
+  }
+
+  emit(event: string, data?: any): void {
+    if (!this.events[event]) return;
+    this.events[event].forEach(callback => callback(data));
+  }
+}
 
 export interface AppState {
   user: {
@@ -28,7 +48,7 @@ export interface CrossAppEvent {
   timestamp: number;
 }
 
-class CrossAppStore extends EventEmitter {
+class CrossAppStore extends SimpleEventEmitter {
   private state: AppState = {
     user: null,
     currentChart: null,

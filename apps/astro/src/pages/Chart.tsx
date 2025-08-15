@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
-import ChartDisplay from '../components/ChartDisplay';
+import ChartDisplay from '../components/ChartDisplay/ChartDisplay';
 import { ChartBirthData, fetchChartData, ChartData } from '../services/api';
 
 const Chart: React.FC = () => {
@@ -142,10 +142,7 @@ const Chart: React.FC = () => {
           {/* Chart visualization */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Your Natal Chart</h2>
-            <div className="text-center text-gray-600">
-              <p>Chart data loaded successfully!</p>
-              <p className="text-sm mt-2">Chart visualization will be displayed here.</p>
-            </div>
+            <ChartDisplay chart={chartData} />
           </Card>
         </div>
       )}

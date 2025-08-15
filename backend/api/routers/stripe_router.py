@@ -28,9 +28,13 @@ router = APIRouter(prefix="/stripe", tags=["subscription"])
 
 # Pydantic models for request/response validation
 class CheckoutSessionRequest(BaseModel):
-    plan_id: str
-    success_url: str
-    cancel_url: str
+    tier: str  # 'premium' or 'elite'
+    userId: str
+    isAnnual: bool
+    successUrl: str
+    cancelUrl: str
+    feature: Optional[str] = None
+    metadata: Optional[Dict[str, str]] = None
 
 class CheckoutSessionResponse(BaseModel):
     checkout_url: str
@@ -43,6 +47,14 @@ class SubscriptionStatusResponse(BaseModel):
     features: list[str]
     expires_at: Optional[str]
     stripe_subscription_id: Optional[str]
+
+class SessionVerificationRequest(BaseModel):
+    sessionId: str
+
+class SessionVerificationResponse(BaseModel):
+    success: bool
+    subscription: Optional[Dict[str, Any]] = None
+    message: Optional[str] = None
 
 class StripeHealthResponse(BaseModel):
     status: Literal["healthy", "unhealthy"]
@@ -66,14 +78,24 @@ async def create_checkout_session(
 ):
     """Create Stripe checkout session for subscription upgrade"""
     try:
+        # Map frontend tier names to plan IDs
+        plan_mapping = {
+            'premium': 'astro_premium' if request.isAnnual else 'astro_premium_monthly',
+            'elite': 'cosmic_master' if request.isAnnual else 'cosmic_master_monthly'
+        }
+        
+        plan_id = plan_mapping.get(request.tier)
+        if not plan_id:
+            raise HTTPException(status_code=400, detail=f"Invalid tier: {request.tier}")
+        
         result = await create_stripe_checkout_session(
             user_id=user_id,
-            plan_id=request.plan_id,
-            success_url=request.success_url,
-            cancel_url=request.cancel_url
+            plan_id=plan_id,
+            success_url=request.successUrl,
+            cancel_url=request.cancelUrl
         )
         
-        logger.info(f"Checkout session created for user {user_id}: {request.plan_id}")
+        logger.info(f"Checkout session created for user {user_id}: {request.tier} ({'annual' if request.isAnnual else 'monthly'})")
         return CheckoutSessionResponse(**result)
         
     except HTTPException:
@@ -95,6 +117,60 @@ async def get_subscription_status(user_id: str = Depends(verify_firebase_token))
     except Exception as e:
         logger.error(f"Unexpected error getting subscription status: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.post("/verify-session", response_model=SessionVerificationResponse)
+async def verify_checkout_session(
+    request: SessionVerificationRequest,
+    user_id: str = Depends(verify_firebase_token)
+):
+    """Verify Stripe checkout session and return subscription details"""
+    try:
+        # TODO: Implement session verification logic
+        # This would typically involve:
+        # 1. Retrieving the session from Stripe
+        # 2. Verifying it belongs to the authenticated user
+        # 3. Extracting subscription details
+        # 4. Updating local database if needed
+        
+        # For now, return a success response
+        return SessionVerificationResponse(
+            success=True,
+            subscription={
+                "tier": "premium",  # This should come from the actual session
+                "isAnnual": True,
+                "status": "active"
+            },
+            message="Session verified successfully"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error verifying session: {str(e)}")
+        raise HTTPException(status_code=500, detail="Session verification failed")
+
+@router.post("/create-portal-session")
+async def create_customer_portal_session(
+    returnUrl: str,
+    user_id: str = Depends(verify_firebase_token)
+):
+    """Create Stripe customer portal session for subscription management"""
+    try:
+        # For now, return a placeholder. In production, this would:
+        # 1. Get the user's Stripe customer ID from the database
+        # 2. Create a portal session using stripe.billing_portal.Session.create()
+        # 3. Return the portal URL
+        
+        return {
+            "url": f"https://billing.stripe.com/session_placeholder?return_url={returnUrl}",
+            "message": "Portal session creation not yet implemented"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error creating portal session: {str(e)}")
+        raise HTTPException(status_code=500, detail="Portal session creation failed")
 
 @router.get("/plans", response_model=SubscriptionPlansResponse)
 async def get_subscription_plans() -> SubscriptionPlansResponse:

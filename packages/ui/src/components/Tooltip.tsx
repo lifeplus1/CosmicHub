@@ -56,10 +56,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
   };
 
   const arrowClasses = {
-    top: 'top-full left-1/2 transform -translate-x-1/2 border-t-gray-900 border-t-4 border-x-transparent border-x-4 border-b-0',
-    bottom: 'bottom-full left-1/2 transform -translate-x-1/2 border-b-gray-900 border-b-4 border-x-transparent border-x-4 border-t-0',
-    left: 'left-full top-1/2 transform -translate-y-1/2 border-l-gray-900 border-l-4 border-y-transparent border-y-4 border-r-0',
-    right: 'right-full top-1/2 transform -translate-y-1/2 border-r-gray-900 border-r-4 border-y-transparent border-y-4 border-l-0'
+    top: 'top-full left-1/2 transform -translate-x-1/2 border-t-cosmic-dark border-t-4 border-x-transparent border-x-4 border-b-0',
+    bottom: 'bottom-full left-1/2 transform -translate-x-1/2 border-b-cosmic-dark border-b-4 border-x-transparent border-x-4 border-t-0',
+    left: 'left-full top-1/2 transform -translate-y-1/2 border-l-cosmic-dark border-l-4 border-y-transparent border-y-4 border-r-0',
+    right: 'right-full top-1/2 transform -translate-y-1/2 border-r-cosmic-dark border-r-4 border-y-transparent border-y-4 border-l-0'
   };
 
   const handleMouseEnter = () => {
@@ -88,8 +88,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
         <div
           ref={tooltipRef}
           className={`
-            absolute z-50 px-2 py-1 text-sm text-white bg-gray-900 rounded shadow-lg
-            whitespace-nowrap pointer-events-none
+            absolute z-50 px-3 py-2 text-sm text-cosmic-gold bg-cosmic-dark/90 border border-cosmic-purple/30 rounded-lg shadow-lg shadow-cosmic-purple/20
+            whitespace-nowrap pointer-events-none backdrop-blur-sm
             ${positionClasses[position]}
             ${className}
           `}

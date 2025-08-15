@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
+import { stripeService } from '@cosmichub/integrations';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle, FaHeart, FaCalendarAlt, FaFilePdf, FaSave, FaHeadset } from 'react-icons/fa';
 import { COSMICHUB_TIERS } from '../types/subscription';
@@ -25,18 +26,57 @@ const PricingPage: React.FC = React.memo(() => {
       return;
     }
 
+    if (!stripeService) {
+      toast({
+        title: 'Service Unavailable',
+        description: 'Payment service is currently unavailable. Please try again later.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setLoading(tier);
-    setTimeout(() => {
+    try {
+      const successUrl = `${window.location.origin}/pricing/success?tier=${tier}`;
+      const cancelUrl = `${window.location.origin}/pricing/cancel`;
+
+      await stripeService.createCheckoutSession({
+        tier,
+        userId: user.uid,
+        isAnnual,
+        successUrl,
+        cancelUrl,
+        metadata: {
+          sourceComponent: 'PricingPage',
+          billingCycle: isAnnual ? 'annual' : 'monthly'
+        }
+      });
+
+      // Update subscription data in Firestore
+      await stripeService.updateUserSubscription(user.uid, tier, isAnnual);
+      
       toast({
         title: 'Upgrade Initiated',
-        description: 'Checkout process would start here.',
+        description: 'Redirecting to Stripe Checkout...',
         status: 'info',
         duration: 3000,
         isClosable: true,
       });
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      toast({
+        title: 'Upgrade Failed',
+        description: 'An error occurred during the upgrade process. Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
       setLoading(null);
-    }, 1000);
-  }, [user, toast]);
+    }
+  }, [user, isAnnual, toast]);
 
   const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS): JSX.Element => {
     switch (tier) {
