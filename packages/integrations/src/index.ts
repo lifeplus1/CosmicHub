@@ -76,7 +76,7 @@ export * from './xaiService';
 export * from './types';
 
 // Export both cross-app store implementations with explicit naming
-export { useCrossAppStore as useCrossAppNotifications } from './cross-app-hooks';
+export { useCrossAppStore } from './cross-app-hooks';
 export { useCrossAppStore as useCrossAppState } from './useCrossAppStore';
 
 // Re-export key Stripe functionality for convenience

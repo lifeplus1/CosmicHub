@@ -368,12 +368,15 @@ async def root_health():
 # Import API routers (local path)
 from api.routers import ai, presets, subscriptions, ephemeris, charts
 from api import interpretations
+from astro.calculations import transits_clean
+
 app.include_router(ai.router)
 app.include_router(presets.router)
 app.include_router(subscriptions.router)
 app.include_router(ephemeris.router, prefix="/api")
 app.include_router(charts.router, prefix="/api")
 app.include_router(interpretations.router)  # AI Interpretations router
+app.include_router(transits_clean.router, prefix="/api/astro", tags=["transits"])  # Transit calculations router
 
 if __name__ == "__main__":
     import uvicorn

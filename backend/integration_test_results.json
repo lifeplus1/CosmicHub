@@ -1,0 +1,248 @@
+{
+  "passed": 5,
+  "total": 5,
+  "success_rate": 100.0,
+  "duration": 0.10185003280639648,
+  "all_passed": true,
+  "detailed_results": [
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "Status: 200",
+      "timestamp": "2025-08-15T14:57:37.591126",
+      "data": {
+        "status": "ok"
+      }
+    },
+    {
+      "test": "Utility: aspects",
+      "success": true,
+      "message": "Returned valid data",
+      "timestamp": "2025-08-15T14:57:37.595102",
+      "data": {
+        "aspects": {
+          "conjunction": {
+            "angle": 0,
+            "orb": 8,
+            "energy": "intense",
+            "type": "major"
+          },
+          "opposition": {
+            "angle": 180,
+            "orb": 8,
+            "energy": "challenging",
+            "type": "major"
+          },
+          "trine": {
+            "angle": 120,
+            "orb": 6,
+            "energy": "harmonious",
+            "type": "major"
+          },
+          "square": {
+            "angle": 90,
+            "orb": 6,
+            "energy": "challenging",
+            "type": "major"
+          },
+          "sextile": {
+            "angle": 60,
+            "orb": 4,
+            "energy": "supportive",
+            "type": "major"
+          },
+          "quincunx": {
+            "angle": 150,
+            "orb": 3,
+            "energy": "adjusting",
+            "type": "minor"
+          },
+          "semi-sextile": {
+            "angle": 30,
+            "orb": 2,
+            "energy": "subtle",
+            "type": "minor"
+          },
+          "semi-square": {
+            "angle": 45,
+            "orb": 2,
+            "energy": "tension",
+            "type": "minor"
+          },
+          "sesquiquadrate": {
+            "angle": 135,
+            "orb": 2,
+            "energy": "friction",
+            "type": "minor"
+          }
+        },
+        "description": "Standard astrological aspects with orbs and energies"
+      }
+    },
+    {
+      "test": "Utility: planets",
+      "success": true,
+      "message": "Returned valid data",
+      "timestamp": "2025-08-15T14:57:37.598096",
+      "data": {
+        "planets": {
+          "sun": "Sun",
+          "moon": "Moon",
+          "mercury": "Mercury",
+          "venus": "Venus",
+          "mars": "Mars",
+          "jupiter": "Jupiter",
+          "saturn": "Saturn",
+          "uranus": "Uranus",
+          "neptune": "Neptune",
+          "pluto": "Pluto",
+          "chiron": "Chiron"
+        },
+        "description": "Supported planets and celestial bodies"
+      }
+    },
+    {
+      "test": "Utility: lunar-phases",
+      "success": true,
+      "message": "Returned valid data",
+      "timestamp": "2025-08-15T14:57:37.600535",
+      "data": {
+        "phases": {
+          "new_moon": {
+            "angle": 0,
+            "energy": "new beginnings",
+            "description": "Perfect for setting intentions"
+          },
+          "waxing_crescent": {
+            "angle": 45,
+            "energy": "growth",
+            "description": "Time for building momentum"
+          },
+          "first_quarter": {
+            "angle": 90,
+            "energy": "action",
+            "description": "Overcome challenges, take action"
+          },
+          "waxing_gibbous": {
+            "angle": 135,
+            "energy": "refinement",
+            "description": "Refine and adjust plans"
+          },
+          "full_moon": {
+            "angle": 180,
+            "energy": "culmination",
+            "description": "Peak energy, completion"
+          },
+          "waning_gibbous": {
+            "angle": 225,
+            "energy": "reflection",
+            "description": "Release and reflect"
+          },
+          "last_quarter": {
+            "angle": 270,
+            "energy": "release",
+            "description": "Let go of what no longer serves"
+          },
+          "waning_crescent": {
+            "angle": 315,
+            "energy": "rest",
+            "description": "Rest and prepare for new cycle"
+          }
+        },
+        "description": "Lunar phases with energies and descriptions"
+      }
+    },
+    {
+      "test": "Basic Transit Calculation",
+      "success": true,
+      "message": "Found 297 transits in 0.02s",
+      "timestamp": "2025-08-15T14:57:37.622450",
+      "data": {
+        "count": 297,
+        "sample": {
+          "id": "sun_conjunction_sun_20250101",
+          "planet": "Sun",
+          "aspect": "conjunction",
+          "natal_planet": "Sun",
+          "date": "2025-01-01",
+          "degree": 280.81360986906486,
+          "exact_time": null,
+          "orb": 0.0006455766911699357,
+          "intensity": 99.98386058272075,
+          "energy": "intense",
+          "duration_days": 3,
+          "description": "Sun conjunction natal Sun"
+        },
+        "duration": 0.021097898483276367
+      }
+    },
+    {
+      "test": "Transit with Minor Aspects",
+      "success": true,
+      "message": "Found 774 transits in 0.02s",
+      "timestamp": "2025-08-15T14:57:37.642654",
+      "data": {
+        "count": 774,
+        "sample": {
+          "id": "moon_semi-sextile_jupiter_20250201",
+          "planet": "Moon",
+          "aspect": "semi-sextile",
+          "natal_planet": "Jupiter",
+          "date": "2025-02-01",
+          "degree": 344.9590702089672,
+          "exact_time": null,
+          "orb": 1.8174852420438015,
+          "intensity": 54.56286894890496,
+          "energy": "subtle",
+          "duration_days": 1,
+          "description": "Moon semi-sextile natal Jupiter"
+        },
+        "duration": 0.018720149993896484
+      }
+    },
+    {
+      "test": "Lunar Transit Calculation",
+      "success": true,
+      "message": "Found 31 lunar transits with 8 unique phases in 0.00s",
+      "timestamp": "2025-08-15T14:57:37.647176",
+      "data": {
+        "count": 31,
+        "phases": [
+          "Waning Gibbous",
+          "Full Moon",
+          "Waxing Gibbous",
+          "First Quarter",
+          "New Moon",
+          "Last Quarter",
+          "Waning Crescent",
+          "Waxing Crescent"
+        ],
+        "sample": {
+          "phase": "New Moon",
+          "date": "2025-01-01",
+          "exact_time": "00:00:00",
+          "energy": "new beginnings",
+          "degree": 293.91332217134703,
+          "moon_sign": "Capricorn",
+          "intensity": 100.0,
+          "description": "Perfect for setting intentions"
+        },
+        "duration": 0.004303932189941406
+      }
+    },
+    {
+      "test": "Performance & Caching",
+      "success": true,
+      "message": "First: 0.01s (240 results), Second: 0.01s (240 results)",
+      "timestamp": "2025-08-15T14:57:37.668403",
+      "data": {
+        "first_duration": 0.00947713851928711,
+        "second_duration": 0.010876893997192383,
+        "first_count": 240,
+        "second_count": 240,
+        "results_match": true,
+        "performance_improved": true
+      }
+    }
+  ]
+}

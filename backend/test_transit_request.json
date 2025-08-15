@@ -1,0 +1,13 @@
+{
+  "birth_data": {
+    "birth_date": "1990-01-01",
+    "birth_time": "12:00",
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "timezone": "America/New_York"
+  },
+  "date_range": {
+    "start_date": "2025-01-01",
+    "end_date": "2025-01-31"
+  }
+}
