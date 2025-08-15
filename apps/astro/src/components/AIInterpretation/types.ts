@@ -18,15 +18,33 @@ export interface Interpretation {
   updatedAt: string;
 }
 
-export interface InterpretationRequest {
+export interface ChartInterpretationRequest {
   chartId: string;
   userId: string;
   type?: string;
   focus?: string[]; // Areas to focus on: planets, houses, aspects
 }
 
-export interface InterpretationResponse {
+export interface ChartInterpretationResponse {
   data: Interpretation[];
   success: boolean;
   message?: string;
+}
+
+// AI Service types (inline for now)
+export interface InterpretationRequest {
+  birthDate: string;
+  birthTime: string;
+  birthLocation: string;
+  interpretationType: 'general' | 'personality' | 'career' | 'relationships';
+}
+
+export interface InterpretationResponse {
+  interpretation: string;
+}
+
+export interface AIServiceError {
+  message: string;
+  code?: string;
+  statusCode?: number;
 }

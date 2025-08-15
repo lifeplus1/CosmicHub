@@ -1,5 +1,3 @@
-import { useState, useCallback } from 'react';
-
 // Subscription-related types
 export interface UserSubscription {
   tier: 'free' | 'premium' | 'elite';
@@ -70,38 +68,16 @@ export interface HealwaveSession {
   personalizedFor?: AstrologyChart;
 }
 
-export interface Notification {
-  id: string;
-  message: string;
-  type: 'info' | 'success' | 'error';
-  timestamp: number;
-}
-
-export interface CrossAppStore {
-  addNotification: (notification: Notification) => void;
-  notifications: Notification[];
-  clearNotifications: () => void;
-}
-
-export const useCrossAppStore = (): CrossAppStore => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  const addNotification = useCallback((notification: Notification): void => {
-    console.log('Cross-app notification:', notification);
-    setNotifications((prev) => [...prev, notification]);
-  }, []);
-
-  const clearNotifications = useCallback((): void => {
-    setNotifications([]);
-  }, []);
-
-  return { addNotification, notifications, clearNotifications };
-};
-
 export * from './api';
 export * from './ephemeris';
 export * from './stripe';
 export * from './subscriptions';
+export * from './xaiService';
+export * from './types';
+
+// Export both cross-app store implementations with explicit naming
+export { useCrossAppStore as useCrossAppNotifications } from './cross-app-hooks';
+export { useCrossAppStore as useCrossAppState } from './useCrossAppStore';
 
 // Re-export key Stripe functionality for convenience
 export { 

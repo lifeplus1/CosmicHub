@@ -4,9 +4,32 @@
  */
 
 import { loadStripe, Stripe, StripeError } from '@stripe/stripe-js';
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { env } from '@cosmichub/config';
+
+// Firebase will be injected by the consuming app to avoid dependency issues
+interface FirebaseServices {
+  getFirestore: () => any;
+  doc: (db: any, collection: string, id: string) => any;
+  setDoc: (ref: any, data: any, options?: any) => Promise<void>;
+  getDoc: (ref: any) => Promise<any>;
+  getAuth: () => any;
+}
+
+let firebaseServices: FirebaseServices | null = null;
+
+export const initializeFirebaseServices = (services: FirebaseServices) => {
+  firebaseServices = services;
+};
+
+// Type-safe environment access
+const getEnvVar = (key: string, fallback = ''): string => {
+  if (typeof process !== 'undefined' && process.env?.[key]) {
+    return process.env[key];
+  }
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env?.[key]) {
+    return (import.meta as any).env[key];
+  }
+  return fallback;
+};
 
 export interface StripeSession {
   id: string;
@@ -115,8 +138,8 @@ export class StripeService {
     }
 
     // Validate user authentication
-    const auth = getAuth();
-    if (!auth.currentUser || auth.currentUser.uid !== userId) {
+    const auth = firebaseServices?.getAuth();
+    if (!auth?.currentUser || auth.currentUser.uid !== userId) {
       throw new Error('User authentication required for checkout');
     }
 
@@ -190,9 +213,13 @@ export class StripeService {
     isAnnual: boolean,
     additionalData: Partial<SubscriptionData> = {}
   ): Promise<void> {
+    if (!firebaseServices) {
+      throw new Error('Firebase services not initialized');
+    }
+
     try {
-      const db = getFirestore();
-      const userRef = doc(db, 'users', userId);
+      const db = firebaseServices.getFirestore();
+      const userRef = firebaseServices.doc(db, 'users', userId);
       
       const subscriptionData: Partial<SubscriptionData> = {
         tier,
@@ -202,7 +229,7 @@ export class StripeService {
         ...additionalData
       };
 
-      await setDoc(userRef, { subscription: subscriptionData }, { merge: true });
+      await firebaseServices.setDoc(userRef, { subscription: subscriptionData }, { merge: true });
       
       console.log(`Subscription updated for user ${userId}: ${tier} (${isAnnual ? 'annual' : 'monthly'})`);
     } catch (error) {
@@ -215,10 +242,15 @@ export class StripeService {
    * Get user subscription data from Firestore
    */
   public async getUserSubscription(userId: string): Promise<SubscriptionData | null> {
+    if (!firebaseServices) {
+      console.warn('Firebase services not initialized');
+      return null;
+    }
+
     try {
-      const db = getFirestore();
-      const userRef = doc(db, 'users', userId);
-      const userDoc = await getDoc(userRef);
+      const db = firebaseServices.getFirestore();
+      const userRef = firebaseServices.doc(db, 'users', userId);
+      const userDoc = await firebaseServices.getDoc(userRef);
       
       if (!userDoc.exists()) {
         return null;
@@ -236,8 +268,8 @@ export class StripeService {
    * Create customer portal session for subscription management
    */
   public async createPortalSession(returnUrl: string): Promise<{ url: string }> {
-    const auth = getAuth();
-    if (!auth.currentUser) {
+    const auth = firebaseServices?.getAuth();
+    if (!auth?.currentUser) {
       throw new Error('User authentication required for portal access');
     }
 
@@ -277,8 +309,8 @@ export class StripeService {
       console.warn('Using placeholder Stripe key. Please configure real Stripe keys for production.');
     }
 
-    const defaultCheckoutEndpoint = `${env.VITE_API_URL || 'http://localhost:8000'}/api/stripe/create-checkout-session`;
-    const defaultPortalEndpoint = `${env.VITE_API_URL || 'http://localhost:8000'}/api/stripe/create-portal-session`;
+    const defaultCheckoutEndpoint = `${getEnvVar('VITE_API_URL', 'http://localhost:8000')}/api/stripe/create-checkout-session`;
+    const defaultPortalEndpoint = `${getEnvVar('VITE_API_URL', 'http://localhost:8000')}/api/stripe/create-portal-session`;
 
     return {
       publicKey: config.publicKey,
@@ -292,14 +324,14 @@ export class StripeService {
    */
   public async handleCheckoutSuccess(sessionId: string): Promise<boolean> {
     try {
-      const auth = getAuth();
-      if (!auth.currentUser) {
+      const auth = firebaseServices?.getAuth();
+      if (!auth?.currentUser) {
         console.error('No authenticated user found');
         return false;
       }
 
       // Verify the session and update subscription status
-      const response = await fetch(`${env.VITE_API_URL}/api/stripe/verify-session`, {
+      const response = await fetch(`${getEnvVar('VITE_API_URL', 'http://localhost:8000')}/api/stripe/verify-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -349,7 +381,7 @@ let defaultStripeService: StripeService | null = null;
 export const createStripeService = (config?: Partial<StripeConfig>): StripeService => {
   try {
     const stripeConfig = StripeService.validateConfig({
-      publicKey: env.VITE_STRIPE_PUBLISHABLE_KEY || '',
+      publicKey: getEnvVar('VITE_STRIPE_PUBLISHABLE_KEY', ''),
       ...config
     });
 

@@ -1,4 +1,3 @@
-import React from 'react';
 /**
  * Cross-app state management for CosmicHub monorepo
  * Enables seamless data sharing between astro and healwave apps
@@ -190,27 +189,5 @@ class CrossAppStore extends SimpleEventEmitter {
 
 // Create singleton instance
 export const crossAppStore = new CrossAppStore();
-
-// React hook for easy integration
-export const useCrossAppStore = () => {
-  const [state, setState] = React.useState<AppState>(crossAppStore.getState());
-
-  React.useEffect(() => {
-    const unsubscribe = crossAppStore.subscribe('state:synced', setState);
-    return unsubscribe;
-  }, []);
-
-  return {
-    state,
-    updateUser: crossAppStore.updateUser.bind(crossAppStore),
-    updateChart: crossAppStore.updateChart.bind(crossAppStore),
-    updateTheme: crossAppStore.updateTheme.bind(crossAppStore),
-    setActiveApp: crossAppStore.setActiveApp.bind(crossAppStore),
-    syncChartToHealwave: crossAppStore.syncChartToHealwave.bind(crossAppStore),
-    syncFrequenciesToAstro: crossAppStore.syncFrequenciesToAstro.bind(crossAppStore),
-    subscribe: crossAppStore.subscribe.bind(crossAppStore),
-    clear: crossAppStore.clear.bind(crossAppStore)
-  };
-};
 
 export default crossAppStore;

@@ -9,7 +9,7 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
-  "env:sync": "node ./scripts/sync-env.mjs",
+    "env:sync": "node ./scripts/sync-env.mjs",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:astro\" \"npm run dev:healwave\"",
     "dev:astro": "cd apps/astro && npm run dev",
     "dev:healwave": "cd apps/healwave && npm run dev",
@@ -49,7 +49,7 @@
     "preview": "npm run preview:astro",
     "preview:astro": "cd apps/astro && npm run preview",
     "preview:healwave": "cd apps/healwave && npm run preview",
-  "postinstall": "echo 'Run npm run install:all to install all dependencies' && node ./scripts/sync-env.mjs"
+    "postinstall": "echo 'Run npm run install:all to install all dependencies' && node ./scripts/sync-env.mjs"
   },
   "workspaces": [
     "apps/astro",
@@ -57,8 +57,9 @@
     "backend"
   ],
   "dependencies": {
-  "@types/react": "^18.3.0",
-  "firebase": "^10.12.2",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.7",
+    "firebase": "^10.12.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

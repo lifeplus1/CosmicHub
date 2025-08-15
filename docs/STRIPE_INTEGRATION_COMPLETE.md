@@ -203,7 +203,7 @@ http://localhost:5174/upgrade-demo
 
 ### **3. Stripe Test Cards**
 
-```
+```text
 Success: 4242424242424242
 Decline: 4000000000000002
 Requires 3DS: 4000002500003155

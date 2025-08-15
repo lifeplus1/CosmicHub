@@ -5,12 +5,14 @@ WORKDIR /app
 # Copy entire workspace structure
 COPY package*.json ./
 COPY tsconfig.base.json ./
+COPY turbo.json ./
+COPY scripts ./scripts/
 COPY packages ./packages/
 COPY apps/astro ./apps/astro/
 COPY shared ./shared/
 
 # Install root dependencies
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --ignore-scripts
 
 # Install all workspace packages
 RUN npm run build:packages || echo "No build:packages script"

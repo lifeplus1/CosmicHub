@@ -1,25 +1,35 @@
 import React, { useState } from 'react';
-import { useAuth } from '@cosmichub/auth';
 import { generateAIInterpretation } from '../../services/api';
 import { useToast } from '../ToastProvider';
-import type { InterpretationRequest } from './types';
+import { useAIInterpretation } from './useAIInterpretation';
+import type { ChartInterpretationRequest, InterpretationRequest } from './types';
 
 interface InterpretationFormProps {
   onInterpretationGenerated?: (interpretation: any) => void;
   chartId?: string;
+  mode?: 'chart' | 'direct'; // chart mode uses existing API, direct mode uses new AI service
 }
 
 const InterpretationForm: React.FC<InterpretationFormProps> = ({ 
   onInterpretationGenerated,
-  chartId 
+  chartId,
+  mode = 'direct' // Default to new AI service
 }) => {
-  const { user } = useAuth();
+  // Mock user for development - remove auth dependency for now
+  const user = { uid: 'mock-user' };
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
+  const { generateInterpretation, interpretation, loading, error } = useAIInterpretation();
+  
   const [formData, setFormData] = useState({
     type: 'natal',
     focus: [] as string[],
     question: '',
+    // Fields for direct AI interpretation
+    birthDate: '',
+    birthTime: '',
+    birthLocation: '',
+    interpretationType: 'general' as InterpretationRequest['interpretationType']
   });
 
   const interpretationTypes = [
@@ -27,6 +37,13 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     { value: 'transit', label: 'Current Transits', description: 'Current planetary influences' },
     { value: 'synastry', label: 'Relationship Compatibility', description: 'Compare two charts for compatibility' },
     { value: 'composite', label: 'Composite Chart', description: 'Relationship dynamics and purpose' },
+  ];
+
+  const aiInterpretationTypes = [
+    { value: 'general', label: 'General Reading', description: 'Overall cosmic blueprint and life theme' },
+    { value: 'personality', label: 'Personality Analysis', description: 'Deep dive into character traits and strengths' },
+    { value: 'career', label: 'Career Guidance', description: 'Professional path and natural talents' },
+    { value: 'relationships', label: 'Relationship Insights', description: 'Love compatibility and relationship patterns' }
   ];
 
   const focusAreas = [
@@ -43,7 +60,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }));
   };
 
-  const handleGenerate = async () => {
+  const handleChartGenerate = async () => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -58,7 +75,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     setIsGenerating(true);
     
     try {
-      const requestData: InterpretationRequest = {
+      const requestData: ChartInterpretationRequest = {
         chartId: chartId || 'default',
         userId: user.uid,
         type: formData.type,
@@ -71,7 +88,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         ...(formData.question && { question: formData.question })
       };
 
-      const result = await generateAIInterpretation(bodyData);
+      const result = await generateAIInterpretation(bodyData as any);
       
       toast({
         title: "Interpretation Generated",
@@ -84,13 +101,6 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       if (onInterpretationGenerated) {
         onInterpretationGenerated(result.data);
       }
-
-      // Reset form
-      setFormData({
-        type: 'natal',
-        focus: [],
-        question: '',
-      });
 
     } catch (error) {
       console.error('Error generating interpretation:', error);
@@ -106,6 +116,62 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }
   };
 
+  const handleDirectGenerate = async () => {
+    if (!formData.birthDate || !formData.birthTime || !formData.birthLocation) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide your birth date, time, and location",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      const requestData: InterpretationRequest = {
+        birthDate: formData.birthDate,
+        birthTime: formData.birthTime,
+        birthLocation: formData.birthLocation,
+        interpretationType: formData.interpretationType,
+      };
+
+      await generateInterpretation(requestData);
+      
+      if (interpretation) {
+        toast({
+          title: "Interpretation Generated",
+          description: "Your personalized AI interpretation is ready",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+
+        if (onInterpretationGenerated) {
+          onInterpretationGenerated({ content: interpretation });
+        }
+      }
+
+    } catch (error) {
+      console.error('Error generating interpretation:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate interpretation",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleGenerate = () => {
+    if (mode === 'chart') {
+      return handleChartGenerate();
+    } else {
+      return handleDirectGenerate();
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto p-6 bg-cosmic-dark/60 backdrop-blur-xl border border-cosmic-silver/20 rounded-xl">
       <h2 className="text-2xl font-bold text-cosmic-gold mb-6 font-playfair">
@@ -113,82 +179,168 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       </h2>
 
       <div className="space-y-6">
-        {/* Interpretation Type */}
-        <div>
-          <label className="block text-cosmic-gold font-medium mb-3">
-            Interpretation Type
-          </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {interpretationTypes.map((type) => (
-              <label
-                key={type.value}
-                className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                  formData.type === type.value
-                    ? 'border-cosmic-gold bg-cosmic-gold/10'
-                    : 'border-cosmic-silver/30 hover:border-cosmic-silver/50'
-                }`}
-              >
+        {mode === 'direct' && (
+          <>
+            {/* Birth Information for Direct AI */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-cosmic-gold font-medium mb-2">
+                  Birth Date
+                </label>
                 <input
-                  type="radio"
-                  name="type"
-                  value={type.value}
-                  checked={formData.type === type.value}
-                  onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                  className="sr-only"
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+                  className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none"
+                  title="Select your birth date"
+                  aria-label="Birth date"
                 />
-                <div className="text-cosmic-silver">
-                  <div className="font-semibold">{type.label}</div>
-                  <div className="text-sm text-cosmic-silver/70 mt-1">{type.description}</div>
-                </div>
+              </div>
+              <div>
+                <label className="block text-cosmic-gold font-medium mb-2">
+                  Birth Time
+                </label>
+                <input
+                  type="time"
+                  value={formData.birthTime}
+                  onChange={(e) => setFormData(prev => ({ ...prev, birthTime: e.target.value }))}
+                  className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none"
+                  title="Select your birth time"
+                  aria-label="Birth time"
+                />
+              </div>
+              <div>
+                <label className="block text-cosmic-gold font-medium mb-2">
+                  Birth Location
+                </label>
+                <input
+                  type="text"
+                  value={formData.birthLocation}
+                  onChange={(e) => setFormData(prev => ({ ...prev, birthLocation: e.target.value }))}
+                  placeholder="City, Country"
+                  className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* AI Interpretation Type */}
+            <div>
+              <label className="block text-cosmic-gold font-medium mb-3">
+                Interpretation Focus
               </label>
-            ))}
-          </div>
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {aiInterpretationTypes.map((type) => (
+                  <label
+                    key={type.value}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      formData.interpretationType === type.value
+                        ? 'border-cosmic-gold bg-cosmic-gold/10'
+                        : 'border-cosmic-silver/30 hover:border-cosmic-silver/50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="interpretationType"
+                      value={type.value}
+                      checked={formData.interpretationType === type.value}
+                      onChange={(e) => setFormData(prev => ({ ...prev, interpretationType: e.target.value as any }))}
+                      className="sr-only"
+                      aria-labelledby={`interpretation-type-${type.value}`}
+                      aria-label={`${type.label}: ${type.description}`}
+                    />
+                    <div className="text-cosmic-silver">
+                      <div className="font-semibold" id={`interpretation-type-${type.value}`}>{type.label}</div>
+                      <div className="text-sm text-cosmic-silver/70 mt-1">{type.description}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
-        {/* Focus Areas */}
-        <div>
-          <label className="block text-cosmic-gold font-medium mb-3">
-            Focus Areas (Optional)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {focusAreas.map((focus) => (
-              <button
-                key={focus}
-                type="button"
-                onClick={() => handleFocusToggle(focus)}
-                className={`px-3 py-2 text-sm rounded-full border transition-all ${
-                  formData.focus.includes(focus)
-                    ? 'bg-cosmic-purple/20 text-cosmic-purple border-cosmic-purple/50'
-                    : 'bg-cosmic-dark/40 text-cosmic-silver/70 border-cosmic-silver/30 hover:border-cosmic-silver/50'
-                }`}
-              >
-                {focus}
-              </button>
-            ))}
-          </div>
-        </div>
+        {mode === 'chart' && (
+          <>
+            {/* Interpretation Type */}
+            <div>
+              <label className="block text-cosmic-gold font-medium mb-3">
+                Interpretation Type
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {interpretationTypes.map((type) => (
+                  <label
+                    key={type.value}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      formData.type === type.value
+                        ? 'border-cosmic-gold bg-cosmic-gold/10'
+                        : 'border-cosmic-silver/30 hover:border-cosmic-silver/50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="type"
+                      value={type.value}
+                      checked={formData.type === type.value}
+                      onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+                      className="sr-only"
+                      aria-labelledby={`chart-type-${type.value}`}
+                      aria-label={`${type.label}: ${type.description}`}
+                    />
+                    <div className="text-cosmic-silver">
+                      <div className="font-semibold" id={`chart-type-${type.value}`}>{type.label}</div>
+                      <div className="text-sm text-cosmic-silver/70 mt-1">{type.description}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
 
-        {/* Specific Question */}
-        <div>
-          <label className="block text-cosmic-gold font-medium mb-3">
-            Specific Question (Optional)
-          </label>
-          <textarea
-            value={formData.question}
-            onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
-            placeholder="Ask a specific question about your chart..."
-            className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none resize-none"
-            rows={3}
-          />
-        </div>
+            {/* Focus Areas */}
+            <div>
+              <label className="block text-cosmic-gold font-medium mb-3">
+                Focus Areas (Optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {focusAreas.map((focus) => (
+                  <button
+                    key={focus}
+                    type="button"
+                    onClick={() => handleFocusToggle(focus)}
+                    className={`px-3 py-2 text-sm rounded-full border transition-all ${
+                      formData.focus.includes(focus)
+                        ? 'bg-cosmic-purple/20 text-cosmic-purple border-cosmic-purple/50'
+                        : 'bg-cosmic-dark/40 text-cosmic-silver/70 border-cosmic-silver/30 hover:border-cosmic-silver/50'
+                    }`}
+                  >
+                    {focus}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Specific Question */}
+            <div>
+              <label className="block text-cosmic-gold font-medium mb-3">
+                Specific Question (Optional)
+              </label>
+              <textarea
+                value={formData.question}
+                onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
+                placeholder="Ask a specific question about your chart..."
+                className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none resize-none"
+                rows={3}
+              />
+            </div>
+          </>
+        )}
 
         {/* Generate Button */}
         <button
           onClick={handleGenerate}
-          disabled={isGenerating || !user}
+          disabled={isGenerating || loading || (mode === 'chart' && !user)}
           className="w-full py-3 px-6 bg-cosmic-gold text-cosmic-dark font-semibold rounded-lg hover:bg-cosmic-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
         >
-          {isGenerating ? (
+          {(isGenerating || loading) ? (
             <>
               <div className="w-5 h-5 border-2 border-cosmic-dark border-t-transparent rounded-full animate-spin" />
               <span>Generating...</span>
@@ -201,10 +353,23 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
           )}
         </button>
 
-        {!user && (
+        {mode === 'chart' && !user && (
           <p className="text-cosmic-silver/70 text-center text-sm">
             Please log in to generate personalized interpretations
           </p>
+        )}
+
+        {error && (
+          <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400">
+            {error}
+          </div>
+        )}
+
+        {interpretation && (
+          <div className="p-4 bg-cosmic-purple/10 border border-cosmic-purple/30 rounded-lg">
+            <h3 className="text-cosmic-gold font-semibold mb-2">Your Interpretation:</h3>
+            <p className="text-cosmic-silver whitespace-pre-wrap">{interpretation}</p>
+          </div>
         )}
       </div>
     </div>

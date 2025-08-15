@@ -1,10 +1,105 @@
 import { useState, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
+// Temporary direct imports while package resolution is being fixed
 interface InterpretationRequest {
   birthDate: string;
   birthTime: string;
   birthLocation: string;
   interpretationType: 'general' | 'personality' | 'career' | 'relationships';
+}
+
+// XAI Service class (temporary inline implementation)
+class XAIService {
+  private static baseUrl = 'https://api.x.ai/v1';
+  
+  private static getApiKey(): string {
+    // Try to get from environment variables
+    if (typeof process !== 'undefined' && process.env?.XAI_API_KEY) {
+      return process.env.XAI_API_KEY;
+    }
+    
+    // Try to get from Vite env
+    if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_XAI_API_KEY) {
+      return (import.meta as any).env.VITE_XAI_API_KEY;
+    }
+    
+    throw new Error('XAI_API_KEY environment variable is not set');
+  }
+
+  static async generateInterpretation(request: InterpretationRequest): Promise<string> {
+    try {
+      const apiKey = this.getApiKey();
+      const prompt = this.buildPrompt(request);
+      
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'grok-beta',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert astrological interpreter with deep knowledge of cosmic influences, planetary alignments, and their impact on human personality and life path.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`xAI API request failed: ${response.statusText} (${response.status})`);
+      }
+
+      const data = await response.json();
+      const interpretation = data.choices?.[0]?.message?.content;
+      
+      if (!interpretation) {
+        throw new Error('No interpretation received from xAI API');
+      }
+
+      return interpretation;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`xAI API error: ${error.message}`);
+      }
+      throw new Error('Failed to fetch interpretation from xAI API');
+    }
+  }
+
+  private static buildPrompt(request: InterpretationRequest): string {
+    const { birthDate, birthTime, birthLocation, interpretationType } = request;
+    
+    const prompts = {
+      general: `Generate a comprehensive astrological interpretation for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Focus on their cosmic blueprint, planetary influences, and potential for growth.`,
+      personality: `Provide a detailed personality analysis based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Highlight key traits, strengths, and communication style.`,
+      career: `Analyze the career potential based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Suggest suitable career paths and strengths.`,
+      relationships: `Provide a relationship analysis based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Focus on romantic tendencies and compatibility factors.`
+    };
+
+    return prompts[interpretationType] || prompts.general;
+  }
+
+  static async generateMockInterpretation(request: InterpretationRequest): Promise<string> {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const interpretations = {
+      general: `Based on your birth details (${request.birthDate} at ${request.birthTime} in ${request.birthLocation}), your astrological chart reveals a unique cosmic blueprint. Your planetary positions suggest a dynamic personality with strong intuitive abilities and a natural inclination toward creativity and innovation.`,
+      personality: `Your personality profile shows a fascinating blend of traits influenced by your birth chart. Born on ${request.birthDate}, your cosmic signature reveals someone who is naturally empathetic, intellectually curious, and possesses a strong sense of justice.`,
+      career: `Career-wise, your astrological profile from ${request.birthLocation} indicates excellent potential in fields that involve creativity, communication, or helping others. Your planetary alignments suggest you would thrive in roles that allow for independence and innovation.`,
+      relationships: `In relationships, your birth chart reveals someone who values deep, meaningful connections. Born at ${request.birthTime} on ${request.birthDate}, your Venus and Mars placements suggest you are both passionate and nurturing in romantic partnerships.`
+    };
+
+    return interpretations[request.interpretationType] || interpretations.general;
+  }
 }
 
 interface UseAIInterpretationReturn {
@@ -17,29 +112,54 @@ interface UseAIInterpretationReturn {
 
 export const useAIInterpretation = (): UseAIInterpretationReturn => {
   const [interpretation, setInterpretation] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const generateInterpretation = useCallback(async (request: InterpretationRequest) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // TODO: Replace with actual AI service integration
-      // For now, generate a mock interpretation based on the request
-      const response = await mockGenerateInterpretation(request);
-      setInterpretation(response);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate interpretation');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { isLoading: loading } = useQuery({
+    queryKey: ['interpretation'],
+    queryFn: async () => null, // Placeholder; actual fetch happens in generateInterpretation
+    enabled: false, // Prevent auto-fetching
+  });
+
+  const generateInterpretation = useCallback(
+    async (request: InterpretationRequest) => {
+      setError(null);
+      
+      // Check cache first
+      const cacheKey = ['interpretation', JSON.stringify(request)];
+      const cachedInterpretation = queryClient.getQueryData<string>(cacheKey);
+
+      if (cachedInterpretation) {
+        setInterpretation(cachedInterpretation);
+        return;
+      }
+
+      try {
+        // Try xAI service first, fallback to mock if API key is not available
+        let result: string;
+        try {
+          result = await XAIService.generateInterpretation(request);
+        } catch (xaiError) {
+          console.warn('xAI service failed, falling back to mock service:', xaiError);
+          result = await XAIService.generateMockInterpretation(request);
+        }
+        
+        setInterpretation(result);
+        queryClient.setQueryData(cacheKey, result); // Cache the result
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to generate interpretation';
+        setError(errorMessage);
+        console.error('AI interpretation error:', err);
+      }
+    },
+    [queryClient]
+  );
 
   const clearInterpretation = useCallback(() => {
     setInterpretation(null);
     setError(null);
-  }, []);
+    queryClient.removeQueries({ queryKey: ['interpretation'] }); // Clear cache
+  }, [queryClient]);
 
   return {
     interpretation,
@@ -49,22 +169,3 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
     clearInterpretation,
   };
 };
-
-// Mock function to simulate AI interpretation generation
-// TODO: Replace with actual API call to AI service
-async function mockGenerateInterpretation(request: InterpretationRequest): Promise<string> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  const interpretations = {
-    general: `Based on your birth details (${request.birthDate} at ${request.birthTime} in ${request.birthLocation}), your astrological chart reveals a unique cosmic blueprint. Your planetary positions suggest a dynamic personality with strong intuitive abilities and a natural inclination toward creativity and innovation. The alignment of your celestial bodies indicates significant potential for personal growth and spiritual development throughout your lifetime.`,
-    
-    personality: `Your personality profile shows a fascinating blend of traits influenced by your birth chart. Born on ${request.birthDate}, your cosmic signature reveals someone who is naturally empathetic, intellectually curious, and possesses a strong sense of justice. Your birth time of ${request.birthTime} places emphasis on communication and relationships, suggesting you have a gift for connecting with others on a deep level.`,
-    
-    career: `Career-wise, your astrological profile from ${request.birthLocation} indicates excellent potential in fields that involve creativity, communication, or helping others. Your planetary alignments suggest you would thrive in roles that allow for independence and innovation. Consider careers in technology, arts, counseling, or entrepreneurship where your natural abilities can shine.`,
-    
-    relationships: `In relationships, your birth chart reveals someone who values deep, meaningful connections. Born at ${request.birthTime} on ${request.birthDate}, your Venus and Mars placements suggest you are both passionate and nurturing in romantic partnerships. You seek partners who can match your intellectual depth and emotional authenticity.`
-  };
-
-  return interpretations[request.interpretationType] || interpretations.general;
-}

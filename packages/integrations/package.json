@@ -8,17 +8,21 @@
     "build": "echo 'Skipping integrations build - apps use direct TypeScript imports'",
     "build:packages": "tsc",
     "dev": "tsc --watch",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest"
   },
   "dependencies": {
     "@stripe/stripe-js": "^2.4.0",
+    "zod": "^3.22.4",
     "zustand": "^4.4.0"
   },
   "peerDependencies": {
     "react": "^18.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "@types/react": "^18.3.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.6.1"
   },
   "files": [
     "dist",

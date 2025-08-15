@@ -1,5 +1,18 @@
 /**
- * Environment// Environment variable configuration interface
+ * Environment// Environment va// Environment variable configuration interface
+export interface EnvConfig {
+  NODE_ENV: Environment;
+  VITE_API_URL: string;
+  VITE_FIREBASE_PROJECT_ID?: string;
+  VITE_FIREBASE_API_KEY?: string;
+  VITE_FIREBASE_AUTH_DOMAIN?: string;
+  VITE_FIREBASE_STORAGE_BUCKET?: string;
+  VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
+  VITE_FIREBASE_APP_ID?: string;
+  VITE_STRIPE_PUBLISHABLE_KEY?: string;
+  VITE_APP_URL: string;
+  XAI_API_KEY?: string;
+}uration interface
 export interface EnvConfig {
   NODE_E    try {
       new URL(appUrl);
@@ -158,7 +171,8 @@ export const getEnvConfig = (): Partial<EnvConfig> => {
     ...(getEnv('VITE_FIREBASE_STORAGE_BUCKET') && { VITE_FIREBASE_STORAGE_BUCKET: getEnv('VITE_FIREBASE_STORAGE_BUCKET') }),
     ...(getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') && { VITE_FIREBASE_MESSAGING_SENDER_ID: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') }),
     ...(getEnv('VITE_FIREBASE_APP_ID') && { VITE_FIREBASE_APP_ID: getEnv('VITE_FIREBASE_APP_ID') }),
-    ...(getEnv('VITE_STRIPE_PUBLISHABLE_KEY') && { VITE_STRIPE_PUBLISHABLE_KEY: getEnv('VITE_STRIPE_PUBLISHABLE_KEY') })
+    ...(getEnv('VITE_STRIPE_PUBLISHABLE_KEY') && { VITE_STRIPE_PUBLISHABLE_KEY: getEnv('VITE_STRIPE_PUBLISHABLE_KEY') }),
+    ...(getEnv('XAI_API_KEY') && { XAI_API_KEY: getEnv('XAI_API_KEY') })
   };
 
   return baseConfig;

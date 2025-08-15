@@ -1,7 +1,7 @@
 # Multi-stage build for optimized production image
 
 # Build stage
-FROM python:3.13-slim as builder
+FROM python:3.13-slim AS builder
 
 # Set working directory
 WORKDIR /app
@@ -19,7 +19,7 @@ COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install --user -r requirements.txt
 
 # Production stage
-FROM python:3.13-slim as production
+FROM python:3.13-slim AS production
 
 # Set working directory
 WORKDIR /app
