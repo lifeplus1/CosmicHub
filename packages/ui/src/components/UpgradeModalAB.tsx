@@ -165,11 +165,82 @@ export function UpgradeModalAB({ enableABTesting = true, ...props }: UpgradeModa
       
       <UpgradeModal {...enhancedProps} />
       
-      {/* TODO: Create variant-specific modal content based on test results */}
-      {/* This would require either:
-          1. Modifying the base UpgradeModal to accept variant props
-          2. Creating separate modal components for each variant
-          3. Using a render prop pattern to customize content */}
+      {/* Variant-specific modal content based on test results */}
+      {props.isOpen && (
+        <div 
+          className="ab-test-enhancements absolute top-0 left-0 w-full h-full pointer-events-none z-50"
+          data-testid="ab-test-enhancements"
+        >
+          {/* Custom headline overlay based on A/B test */}
+          <div className="custom-headline-overlay pointer-events-auto" data-testid="custom-headline">
+            <div className="headline-content bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-b-lg text-center">
+              <h2 className="text-lg font-bold">{headlineContent.title}</h2>
+              <p className="text-sm opacity-90">{headlineContent.subtitle}</p>
+            </div>
+          </div>
+
+          {/* Social proof for urgency variant */}
+          {headlineTest.variant === 'urgency' && (
+            <div className="social-proof-banner absolute top-16 left-4 right-4 pointer-events-auto" data-testid="social-proof">
+              <div className="bg-red-500 text-white px-3 py-2 rounded-lg text-center text-sm">
+                🔥 <strong>500+ users upgraded this week!</strong> Limited time offer
+              </div>
+            </div>
+          )}
+          
+          {/* Extra benefits highlight for benefit variant */}
+          {headlineTest.variant === 'benefit' && (
+            <div className="benefit-highlights absolute bottom-20 left-4 right-4 pointer-events-auto" data-testid="benefit-highlights">
+              <div className="bg-gradient-to-r from-teal-500 to-blue-600 text-white p-4 rounded-lg">
+                <h3 className="font-bold mb-2">✨ What you'll unlock:</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="benefit-item">📊 Advanced Charts</div>
+                  <div className="benefit-item">🌙 Moon Phases</div>
+                  <div className="benefit-item">🎵 Healing Audio</div>
+                  <div className="benefit-item">� Transit Reports</div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Trust badges for standard variant */}
+          {headlineTest.variant === 'standard' && (
+            <div className="trust-badges absolute bottom-4 left-4 right-4 pointer-events-none" data-testid="trust-badges">
+              <div className="flex justify-center space-x-4 text-xs text-gray-600">
+                <span className="trust-badge">🔒 Secure Checkout</span>
+                <span className="trust-badge">💳 30-Day Refund</span>
+                <span className="trust-badge">⭐ 4.9/5 Rating</span>
+              </div>
+            </div>
+          )}
+
+          {/* Trial countdown for start_trial button variant */}
+          {buttonTest.variant === 'start_trial' && (
+            <div className="trial-info absolute top-24 left-4 right-4 pointer-events-auto" data-testid="trial-info">
+              <div className="bg-green-100 border-l-4 border-green-500 p-3 rounded">
+                <p className="trial-text text-green-800 text-sm">
+                  🎁 Start your <strong>7-day free trial</strong> - no commitment required!
+                </p>
+                <p className="trial-subtext text-green-600 text-xs mt-1">Cancel anytime during trial</p>
+              </div>
+            </div>
+          )}
+
+          {/* Annual savings highlight for annual_discount pricing variant */}
+          {pricingTest.variant === 'annual_discount' && (
+            <div className="savings-highlight absolute bottom-12 left-4 right-4 pointer-events-auto" data-testid="savings-highlight">
+              <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-3">
+                <div className="savings-badge text-yellow-800 font-bold text-center mb-1">
+                  💰 Save over $50/year with annual billing
+                </div>
+                <p className="savings-detail text-yellow-700 text-xs text-center">
+                  That's like getting 2+ months free!
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
