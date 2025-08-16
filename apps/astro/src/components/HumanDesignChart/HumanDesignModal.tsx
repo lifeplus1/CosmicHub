@@ -151,7 +151,7 @@ const HumanDesignModal: React.FC<HumanDesignModalProps> = ({ isOpen, onClose, da
       onClick={handleOverlayClick}
     >
       <div className="bg-cosmic-dark border border-cosmic-purple/30 rounded-lg shadow-2xl shadow-cosmic-purple/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {data.type === 'gate' ? renderGateContent(data as GateModalData) : renderChannelContent(data as ChannelModalData)}
+        {data.type === 'gate' ? renderGateContent(data) : renderChannelContent(data)}
       </div>
     </div>
   );

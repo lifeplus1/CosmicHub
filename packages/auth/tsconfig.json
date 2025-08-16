@@ -14,5 +14,8 @@
   // Add package-specific types via a local global.d.ts if needed instead of here
   },
   "include": ["src/**/*"],
+  "references": [
+    { "path": "../subscriptions" }
+  ],
   "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
 }

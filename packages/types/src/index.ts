@@ -8,6 +8,8 @@ export interface BirthData {
   city?: string;
 }
 
+export * from './birth';
+
 export interface DateRange {
   startDate: string; // ISO format: YYYY-MM-DD
   endDate: string;   // ISO format: YYYY-MM-DD
@@ -72,7 +74,7 @@ export interface LunarTransitCalculationResponse {
 export interface ApiError {
   message: string;
   code: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 // Aspect types for calculations

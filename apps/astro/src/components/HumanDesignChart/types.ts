@@ -1,14 +1,5 @@
-export interface BirthData {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  city: string;
-  timezone?: string;
-  lat?: number;
-  lon?: number;
-}
+// Use shared unified birth data type (alias) from types package
+import type { ChartBirthData } from '@cosmichub/types';
 
 export interface Gate {
   number: number;
@@ -71,8 +62,8 @@ export interface HumanDesignData {
 }
 
 export interface HumanDesignChartProps {
-  birthData?: BirthData;
-  onCalculate?: (data: BirthData) => void;
+  birthData?: ChartBirthData;
+  onCalculate?: (data: ChartBirthData) => void;
   onHumanDesignCalculated?: (data: HumanDesignData) => void;
 }
 

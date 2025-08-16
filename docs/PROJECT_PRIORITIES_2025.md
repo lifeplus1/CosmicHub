@@ -4,6 +4,17 @@ Based on project cleanup implementation and current TODO analysis, here are the 
 
 ## 📈 Completed Optimizations (August 2025)
 
+### Frontend Functionality Assessment Completed
+
+- ✅ **Comprehensive Frontend Analysis**: Analyzed all pages and components across Astro and HealWave apps
+- ✅ **Critical Gap Identification**: Identified Synastry analysis as urgent priority (pure UI mockup)
+- ✅ **Feature Completion Status**: ~60% fully functional, ~25% needs enhancement, ~15% placeholder
+- ✅ **Priority Reassignment**: Updated sprint priorities to address critical user-facing functionality gaps
+- ✅ **AI Model Strategy**: Defined optimal Copilot models and Grok integration workflows for each task type
+
+*Detailed analysis available in [docs/FRONTEND_FUNCTIONALITY_GAPS.md](docs/FRONTEND_FUNCTIONALITY_GAPS.md)*  
+*AI model recommendations in [docs/AI_MODEL_RECOMMENDATIONS.md](docs/AI_MODEL_RECOMMENDATIONS.md)*
+
 ### Recently Completed
 
 - ✅ **Enhanced PWA Icon Generation**: Automated WebP conversion, SVG minification, redundant file cleanup
@@ -43,147 +54,105 @@ Based on project cleanup implementation and current TODO analysis, here are the 
 
 ---
 
-## 📊 Current Priority Breakdown
+## 🎯 Current Status & Consolidated Roadmap
 
-## 🎯 Current Status Overview
+**Project Status**: Production-ready; core monetization, caching, and performance foundations in place.  
+**Focus Shift**: From broad cleanup → targeted instrumentation, security/privacy hardening, and experiment/UX refinements.  
+**Last Major Update**: August 16, 2025  
 
-**Project Status**: Production-ready with recent structure optimization completed  
-**Last Major Update**: August 2025 - Project structure cleanup and optimization  
-**Active TODOs**: 2 remaining items (7 completed! 🎉 - 78% reduction from original 9)
+### ✅ Recently Completed (Incremental Since Structural Cleanup)
 
----
+These were previously mixed across multiple sections—now consolidated:
 
-## 🎉 **ALL REMAINING TODOs COMPLETED!** ✅
+- Redis integration & rate limiting (with in-memory fallback)
+- Subscription API integration (real backend wiring)
+- Firebase Performance monitoring baseline
+- A/B test analytics pipeline (GA + Mixpanel + internal hook)
+- Error notification system (toast upgrade flow)
+- Full Stripe checkout + subscription management
+- Chart preference persistence (Astro + HealWave)
+- AI Interpretation full modal view
+- Documentation consolidation + metadata headers across key operational/security docs
+- CSP report ingest endpoint (`/csp/report`)
+- Pseudonymization utility + initial tests
 
-**Amazing Progress**: All 5 remaining TODO items have been successfully implemented!
+### 🧭 Near-Term (Next 2 Weeks Sprint Candidates)
 
-## 🎉 Recently Completed TODOs ✅
+Goal: Address critical frontend functionality gaps while maintaining reliability & security instrumentation focus.
 
-- ✅ **Redis Integration** - Redis-ready caching implemented with fallback
-- ✅ **Error Notification System** - Toast notifications implemented in UpgradeModalManager
-- ✅ **Chart Preferences Persistence (Astro)** - Full Firestore integration completed
-- ✅ **AI Interpretation Full View** - Modal system and "View Full Analysis" implemented
-- ✅ **HealWave Stripe Checkout Integration** - Complete Stripe integration with proper error handling
-- ✅ **HealWave Chart Preferences** - Full backend/Firestore integration implemented
-- ✅ **Subscription API Integration** - Real backend endpoint integration completed
-- ✅ **Firebase Performance Setup** - Production-ready performance monitoring
-- ✅ **A/B Testing Analytics** - Multi-service analytics integration (Google Analytics, Mixpanel, etc.)
+**Priority 1 - Frontend Functionality Completion:**
 
-## 🚀 Immediate Priorities (Next 2 Weeks)
+1. UI-001 Complete Synastry analysis backend integration – Effort 2d (Status: URGENT - Currently placeholder)
+   *→ Use Claude 3.5 Sonnet + Grok for domain logic*
+2. UI-002 Implement AI interpretation service integration – Effort 1.5d (Status: HIGH - Partial implementation)
+   *→ Use Claude 3.5 Sonnet + Grok for content templates*
+3. UI-003 Complete chart saving/loading CRUD functionality – Effort 1d (Status: HIGH - Partial implementation)
+   *→ Use Claude 3.5 Sonnet (no Grok needed)*
 
-### **Priority 1: Complete Final TODO Items**
+**Priority 2 - Infrastructure & Security:**
 
-Based on current codebase analysis, 2 TODO items still need attention:
+1. OBS-003 Synthetic journey script – Effort 1d (Status: IN-PROGRESS)
+   *→ Use GPT-4o for system automation*
+2. SEC-005 CSP rollout phase 2 – Effort 0.5d (Status: TODO)
+   *→ Use GPT-4o for security policies*
+3. REL-005 Degradation metrics instrumentation – Effort 1d (Status: TODO)
+   *→ Use Claude 3.5 Sonnet for application monitoring*
 
-#### Testing & Polish TODOs
+**Priority 3 - System Reliability:**
 
-- [ ] **Integration Test Improvements** (`tests/integration/healwave-astro-integration.test.ts:125`)
-  - Import actual components and test rendering  
-  - **Effort**: 0.5 days
+1. TEST-001 Integration test enrichment – Effort 0.5d (Status: TODO)
+2. EXP-002 Upgrade modal variant content – Effort 0.5d (Status: TODO)
+3. OBS-004 Weekly SLO report automation – Effort 0.5d (Status: TODO)
+4. SEC-002 Secret inventory generator – Effort 0.5d (Status: TODO)
+5. PRIV-004 Persist & rotate pseudonymization salts – Effort 1d (Status: TODO)
 
-- [ ] **A/B Testing Modal Variants** (`packages/ui/src/components/UpgradeModalAB.tsx:168`)
-  - Create variant-specific modal content based on test results
-  - **Effort**: 0.5 days
+Total (ideal path): ~9 developer-days (requires frontend + backend coordination or full-stack developer).
 
-**Total Estimated Effort**: 1 day (down from 8-12 days!)
+### 🔐 Security & Privacy (Month Horizon)
 
----
+- SEC-006 Threat model mitigation batch 1 (Status: TODO)
+- SEC-007 Abuse pattern detection (Status: BACKLOG)
+- SEC-008 Input validation hardening (Status: BACKLOG)
+- PRIV-005 Salt rotation automation + audit log (Status: BACKLOG)
+- PRIV-006 Pseudonymization risk review + hash collision monitoring script (Status: BACKLOG)
 
-## 🎉 **MAJOR MILESTONE ACHIEVED: 7 out of 9 TODOs COMPLETED!**
+### 🔭 Observability & Reliability
 
-With 78% of TODOs completed, CosmicHub is now **production-ready** with:
+- OBS-010 Prometheus alert rules (Status: BLOCKED – needs OBS-003 & REL-005)
+- OBS-011 Performance metrics dashboard (Status: BACKLOG)
+- REL-010 Circuit breaker + exponential backoff helper (Status: BACKLOG)
+- REL-011 Fallback outcome logging normalization (Status: BACKLOG)
 
-✅ **Business-Critical Features**:
+### 🧪 Experimentation & Analytics
 
-- Full Stripe integration across both apps
-- Complete user preference persistence
-- Production caching and performance monitoring
-- Real subscription management with backend API
+- EXP-010 Experiment registry schema validator (Status: BACKLOG)
+- EXP-011 Guardrail breach automation (Status: BACKLOG)
 
-✅ **Developer Experience**:
+### 📱 UX & Accessibility (Queued After Instrumentation)
 
-- Comprehensive error handling and notifications
-- A/B testing framework with analytics
-- Firebase Performance monitoring
-- Redis-ready caching architecture
+- UX-020 Offline mode (Status: FUTURE)
+- UX-021 Mobile PWA enhancements (Status: FUTURE)
+- A11Y-030 Screen reader + keyboard navigation sweep (Status: FUTURE)
 
----
+### 🌱 Medium-Term (Quarter Horizon)
 
-- [ ] **Subscription API Integration** (`SubscriptionContext.tsx:40,72`)
-  - Replace mock API calls with real backend integration
-  - Complete upgrade modal backend connectivity
-  - **Effort**: 2-3 days
+- COLLAB-050 Real-time collaborative chart sharing (Status: FUTURE)
+- SOCIAL-060 Community sharing & marketplace scaffolding (Status: FUTURE)
+- AI-070 Advanced model integration (Status: FUTURE)
 
-### Performance/Config TODOs
+### 🧹 De-scoped / Reframed Items
 
-- [ ] **Firebase Performance Setup** (`performance.ts:241`)
-  - Configure Firebase Performance monitoring
-  - **Effort**: 0.5 days
+- Redis-based rate limiting (DONE; next step is anomaly detection)
+- WebP optimization (DONE via icon pipeline; future: full asset audit optional)
+- Subscription API integration (DONE)
+- Firebase Performance setup (DONE baseline; future: custom traces optional)
+- Generic “Monitor and prevent abuse patterns” → replaced by SEC-007 concrete logging + thresholds
 
-**Total Estimated Effort**: 4-6 days (down from 8-12 days!)
+### 📌 Tracking Metadata
 
----
-
-## 🔧 High-Priority Enhancements (Next Month)
-
-### **Priority 2: Infrastructure Improvements**
-
-Based on Grok's analysis and cleanup implementation:
-
-#### **Rate Limiting & Security**
-
-- [ ] Implement Redis-based rate limiting middleware
-- [ ] Enhanced API security with request throttling
-- [ ] Monitor and prevent abuse patterns
-- **Impact**: Production stability and security
-
-#### **Performance Optimizations**
-
-- [ ] Component-level code splitting beyond current implementation
-- [ ] WebP image optimization across all apps
-- [ ] Advanced bundle analysis and optimization
-- **Impact**: Faster load times, better UX
-
-#### **Monitoring & Observability**
-
-- [ ] Production error tracking (Sentry integration)
-- [ ] Performance metrics dashboard
-- [ ] User behavior analytics
-- **Impact**: Proactive issue resolution
-
-### **Priority 3: User Experience Enhancements**
-
-#### **Mobile Optimization**
-
-- [ ] Advanced PWA features implementation
-- [ ] Offline mode for chart calculations
-- [ ] Push notifications for transit alerts
-- **Impact**: Better mobile engagement
-
-#### **Accessibility Improvements**
-
-- [ ] Screen reader optimization
-- [ ] Keyboard navigation enhancements
-- [ ] Color contrast accessibility audit
-- **Impact**: Inclusive user experience
+All issue codes (SEC-xxx, OBS-xxx, etc.) correspond to doc sections in `docs/security/`, `docs/observability/`, `docs/privacy/`, and will be mirrored in the forthcoming consolidated ISSUE tracker (to generate).
 
 ---
-
-## 🌟 Medium-Priority Features (Next Quarter)
-
-### **Advanced Features**
-
-- [ ] A/B testing framework for conversion optimization
-- [ ] Advanced AI model integration beyond xAI
-- [ ] Real-time collaborative chart sharing
-- [ ] Enhanced multi-system chart comparisons
-
-### **Community Features**
-
-- [ ] User-generated content platform
-- [ ] Chart sharing and social features
-- [ ] Astrologer marketplace integration
-- [ ] Community discussions and forums
 
 ## 🎯 Success Metrics & KPIs
 
@@ -222,10 +191,11 @@ Based on Grok's analysis and cleanup implementation:
 
 ### **Security Priorities**
 
-1. **Rate Limiting**: Implement Redis-based throttling
-2. **Input Validation**: Enhanced user data validation
-3. **Error Handling**: Graceful failure modes
-4. **Monitoring**: Proactive security monitoring
+1. **Abuse Detection**: Anomaly logging + threshold alerts (SEC-007)
+2. **Input Validation Hardening**: Centralized schema audit (SEC-008)
+3. **Secret Hygiene**: Inventory + rotation automation (SEC-002 / PRIV-005)
+4. **CSP Tightening & Reporting**: Phase 2 directive hardening (SEC-005)
+5. **Graceful Failure Modes**: Consistent structured fallback logging (REL-011)
 
 ### **Performance Standards**
 
@@ -254,7 +224,7 @@ Based on Grok's analysis and cleanup implementation:
 
 ---
 
-*Last Updated: August 15, 2025*  
+*Last Updated: August 16, 2025*  
 *Next Review: September 1, 2025*
 
 ---

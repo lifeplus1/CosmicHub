@@ -2,22 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { Card, Button } from '@cosmichub/ui';
 import ChartWheel from '../features/ChartWheel';
-
-interface BirthData {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  lat: number;
-  lon: number;
-  city: string;
-  timezone: string;
-}
+import type { ChartBirthData } from '@cosmichub/types';
 
 const ChartWheelPage: React.FC = () => {
   const { user } = useAuth();
-  const [birthData, setBirthData] = useState<BirthData | null>(null);
+  const [birthData, setBirthData] = useState<ChartBirthData | null>(null);
   const [showAspects, setShowAspects] = useState(true);
   const [showAnimation, setShowAnimation] = useState(true);
   const [formData, setFormData] = useState({
@@ -38,7 +27,7 @@ const ChartWheelPage: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    const data: BirthData = {
+  const data: ChartBirthData = {
       year: parseInt(formData.year),
       month: parseInt(formData.month),
       day: parseInt(formData.day),
@@ -54,7 +43,7 @@ const ChartWheelPage: React.FC = () => {
   };
 
   const loadSampleChart = () => {
-    const sampleData: BirthData = {
+  const sampleData: ChartBirthData = {
       year: 1990,
       month: 6,
       day: 21,
@@ -333,7 +322,9 @@ const ChartWheelPage: React.FC = () => {
             <div>
               <span className="text-cosmic-silver">Coordinates:</span>
               <span className="text-cosmic-gold ml-2">
-                {birthData.lat.toFixed(4)}, {birthData.lon.toFixed(4)}
+                {birthData.lat !== undefined && birthData.lon !== undefined
+                  ? `${birthData.lat.toFixed(4)}, ${birthData.lon.toFixed(4)}`
+                  : 'Coords N/A'}
               </span>
             </div>
           </div>

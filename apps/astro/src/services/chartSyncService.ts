@@ -3,7 +3,21 @@
  * Manages live updates, transit tracking, and cross-app chart sharing
  */
 
-import { EventEmitter } from 'events';
+// Custom event emitter for browser
+type EventCallback = (payload?: unknown) => void;
+class SimpleEventEmitter {
+  private listeners: Record<string, EventCallback[]> = {};
+  on(event: string, callback: EventCallback) {
+    if (!this.listeners[event]) this.listeners[event] = [];
+    this.listeners[event].push(callback);
+  }
+  emit(event: string, payload?: unknown) {
+    (this.listeners[event] || []).forEach(cb => cb(payload));
+  }
+  removeAllListeners() {
+    this.listeners = {};
+  }
+}
 import { fetchChartData, type ChartBirthData } from './api';
 
 export interface Planet {
@@ -25,8 +39,8 @@ export interface House {
 export interface ChartData {
   planets: Record<string, Planet>;
   houses: House[];
-  aspects?: any[];
-  angles?: any;
+  aspects?: AspectEvent[];
+  angles?: Record<string, number>;
 }
 
 export interface ChartDataSync {
@@ -41,25 +55,28 @@ export interface ChartDataSync {
 
 export interface SyncEvent {
   type: 'transit-update' | 'progression-update' | 'aspect-forming' | 'aspect-separating' | 'chart-refresh';
-  data: any;
+  data: AspectEvent | ChartDataSync | Record<string, unknown>;
   timestamp: Date;
   chartId: string;
 }
 
 export interface AspectEvent {
   type: 'aspect-forming' | 'aspect-separating';
-  transitPlanet: string;
-  natalPlanet: string;
+  transitPlanet: string; // moving planet
+  natalPlanet: string;   // static natal planet
   aspectType: string;
   orb: number;
   exactDate: Date;
   strength: 'strong' | 'medium' | 'weak';
+  // Backward-compatible aliases used by some UI components
+  planet1?: string;
+  planet2?: string;
 }
 
-class ChartSyncService extends EventEmitter {
+class ChartSyncService extends SimpleEventEmitter {
   private charts: Map<string, ChartDataSync> = new Map();
-  private syncIntervals: Map<string, NodeJS.Timeout> = new Map();
-  private transitUpdateInterval: NodeJS.Timeout | null = null;
+  private syncIntervals: Map<string, ReturnType<typeof setInterval>> = new Map();
+  private transitUpdateInterval: ReturnType<typeof setInterval> | null = null;
   private isOnline = navigator.onLine;
   private pendingUpdates: Map<string, Date> = new Map();
 
@@ -72,13 +89,13 @@ class ChartSyncService extends EventEmitter {
   private setupNetworkHandlers() {
     window.addEventListener('online', () => {
       this.isOnline = true;
-      this.emit('connection-restored');
+  this.emit('connection-restored');
       this.processPendingUpdates();
     });
 
     window.addEventListener('offline', () => {
       this.isOnline = false;
-      this.emit('connection-lost');
+  this.emit('connection-lost');
     });
   }
 
@@ -121,7 +138,7 @@ class ChartSyncService extends EventEmitter {
       const progressions = enableProgressions ? await this.fetchProgressions(birthData) : {};
 
       const chartSync: ChartDataSync = {
-        natal: this.transformChartData(natalData),
+  natal: this.transformChartData(natalData as unknown as Record<string, unknown>),
         transits,
         progressions,
         lastUpdate: new Date(),
@@ -139,7 +156,7 @@ class ChartSyncService extends EventEmitter {
         this.syncIntervals.set(chartId, interval);
       }
 
-      this.emit('chart-registered', { chartId, chartSync });
+  this.emit('chart-registered', { chartId, chartSync });
       return chartSync;
 
     } catch (error) {
@@ -197,7 +214,7 @@ class ChartSyncService extends EventEmitter {
       Object.assign(chartData, updates);
       this.charts.set(chartId, chartData);
 
-      this.emit('chart-updated', { chartId, updates });
+  this.emit('chart-updated', { chartId, updates });
 
     } catch (error) {
       console.error(`Failed to update chart ${chartId}:`, error);
@@ -216,11 +233,11 @@ class ChartSyncService extends EventEmitter {
     chartData.transits = newTransits;
     chartData.lastUpdate = new Date();
     
-    this.emit('transit-update', { chartId, transits: newTransits });
+  this.emit('transit-update', { chartId, transits: newTransits });
     
     if (aspectEvents.length > 0) {
       aspectEvents.forEach(event => {
-        this.emit('aspect-event', { chartId, event });
+  this.emit('aspect-event', { chartId, event });
       });
     }
   }
@@ -376,9 +393,15 @@ class ChartSyncService extends EventEmitter {
   /**
    * Transform API chart data to internal format
    */
-  private transformChartData(apiData: any): ChartData {
+  private transformChartData(apiData: Record<string, unknown>): ChartData {
     // Implementation would transform the API response to ChartData format
-    return apiData as ChartData;
+    // Example: extract planets, houses, aspects, angles from apiData
+    return {
+      planets: (apiData.planets as Record<string, Planet>) || {},
+      houses: (apiData.houses as House[]) || [],
+      aspects: (apiData.aspects as AspectEvent[]) || [],
+      angles: (apiData.angles as Record<string, number>) || {},
+    };
   }
 
   /**
@@ -446,7 +469,7 @@ class ChartSyncService extends EventEmitter {
     
     this.charts.delete(chartId);
     this.pendingUpdates.delete(chartId);
-    this.emit('chart-unregistered', { chartId });
+  this.emit('chart-unregistered', { chartId });
   }
 
   /**
@@ -462,7 +485,7 @@ class ChartSyncService extends EventEmitter {
     );
     
     await Promise.allSettled(promises);
-    this.emit('all-charts-refreshed');
+  this.emit('all-charts-refreshed');
   }
 
   /**
@@ -489,7 +512,7 @@ class ChartSyncService extends EventEmitter {
     this.syncIntervals.clear();
     this.charts.clear();
     this.pendingUpdates.clear();
-    this.removeAllListeners();
+  this.removeAllListeners();
   }
 }
 

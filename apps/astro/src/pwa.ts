@@ -3,18 +3,20 @@
  * Registers the comprehensive service worker system
  */
 
+/* eslint-disable no-console */
+
 // PWA Service Worker Registration
 async function registerServiceWorker(): Promise<void> {
   // Only register the service worker in production. Vite HMR + SW in dev can cause reload loops.
   if (!import.meta.env.PROD) {
-    console.warn('⚠️ Skipping Service Worker registration in development to avoid HMR reload loops');
+    if (typeof console !== 'undefined') console.warn('⚠️ Skipping Service Worker registration in development to avoid HMR reload loops');
     return;
   }
 
-  if ('serviceWorker' in navigator) {
+  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
     try {
-      console.log('🔧 Registering Service Worker...');
-      
+      if (typeof console !== 'undefined') console.log('🔧 Registering Service Worker...');
+
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'
       });
@@ -33,45 +35,57 @@ async function registerServiceWorker(): Promise<void> {
       });
       
       // Check for updates periodically (production only)
-      setInterval(() => {
-        registration.update();
-      }, 60000); // Check every minute
+      if (typeof globalThis !== 'undefined' && typeof globalThis.setInterval === 'function') {
+        globalThis.setInterval(() => {
+          void registration.update();
+        }, 60000); // Check every minute
+      }
       
-      console.log('✅ Service Worker registered successfully');
+  if (typeof console !== 'undefined') console.log('✅ Service Worker registered successfully');
       
       // Initialize PWA features
       await initializePWAFeatures();
       
     } catch (error) {
-      console.error('❌ Service Worker registration failed:', error);
+      if (typeof console !== 'undefined') console.error('❌ Service Worker registration failed:', error);
     }
   } else {
-    console.warn('⚠️ Service Worker not supported');
+    if (typeof console !== 'undefined') console.warn('⚠️ Service Worker not supported');
   }
 }
 
 // Initialize PWA features
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform?: string }>;
+}
+
 async function initializePWAFeatures(): Promise<void> {
   // Install prompt handling
-  let deferredPrompt: any;
+  let deferredPrompt: BeforeInstallPromptEvent | null = null;
   
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    showInstallPrompt();
-  });
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeinstallprompt', (e: Event) => {
+      e.preventDefault();
+      deferredPrompt = e as BeforeInstallPromptEvent;
+      showInstallPrompt();
+    });
+  }
   
   // App installed handler
-  window.addEventListener('appinstalled', () => {
-    console.log('🎉 CosmicHub PWA installed successfully');
-    hideInstallPrompt();
-    deferredPrompt = null;
-  });
+  if (typeof window !== 'undefined') {
+    window.addEventListener('appinstalled', () => {
+      if (typeof console !== 'undefined') console.log('🎉 CosmicHub PWA installed successfully');
+      hideInstallPrompt();
+      deferredPrompt = null;
+    });
+  }
   
   // Handle install button click
-  window.addEventListener('install-app', async () => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('install-app', async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt();
+      await deferredPrompt.prompt();
       const choiceResult = await deferredPrompt.userChoice;
       
       if (choiceResult.outcome === 'accepted') {
@@ -82,7 +96,8 @@ async function initializePWAFeatures(): Promise<void> {
       
       deferredPrompt = null;
     }
-  });
+    });
+  }
 }
 
 // Show update notification

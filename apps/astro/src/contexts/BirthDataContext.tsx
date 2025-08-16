@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import type { ChartBirthData } from '../services/api';
+import type { ChartBirthData } from '@cosmichub/types';
 
 interface BirthDataContextType {
   birthData: ChartBirthData | null;
@@ -66,8 +66,7 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
     birthData.month >= 1 && birthData.month <= 12 &&
     birthData.day >= 1 && birthData.day <= 31 &&
     birthData.hour >= 0 && birthData.hour <= 23 &&
-    birthData.minute >= 0 && birthData.minute <= 59 &&
-    birthData.city
+    birthData.minute >= 0 && birthData.minute <= 59
   );
 
   const value: BirthDataContextType = {
@@ -95,7 +94,8 @@ export const useBirthData = (): BirthDataContextType => {
 
 // Helper function to format birth data for display
 export const formatBirthDataDisplay = (data: ChartBirthData): string => {
-  return `${data.month}/${data.day}/${data.year} at ${data.hour.toString().padStart(2, '0')}:${data.minute.toString().padStart(2, '0')} in ${data.city}`;
+  const base = `${data.month}/${data.day}/${data.year} ${data.hour.toString().padStart(2, '0')}:${data.minute.toString().padStart(2, '0')}`;
+  return data.city ? `${base} in ${data.city}` : base;
 };
 
 // Helper function to validate coordinates

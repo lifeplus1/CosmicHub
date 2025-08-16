@@ -1,5 +1,6 @@
-// Core types for birth data and date ranges
-export interface BirthData {
+// Core types for transit analysis birth data (textual form)
+// NOTE: This differs from the shared ChartBirthData (numeric unified form)
+export interface TransitBirthData {
   birth_date: string; // ISO format: YYYY-MM-DD
   birth_time: string; // HH:MM:SS
   latitude: number;

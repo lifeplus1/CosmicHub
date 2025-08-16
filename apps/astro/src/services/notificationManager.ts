@@ -8,13 +8,14 @@ import {
   createPushNotificationManager,
   VAPIDKeys,
   AstrologyNotifications,
-  AstrologyNotificationScheduler
+  AstrologyNotificationScheduler,
+  type NotificationPreferences
 } from '@cosmichub/config';
 import { getBackgroundSyncManager } from '@cosmichub/config';
 
 // VAPID keys - in production, load from secure environment variables
 const VAPID_KEYS: VAPIDKeys = {
-  publicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BExample-VAPID-Key-For-Development-Only',
+  publicKey: ((import.meta as unknown) as { env: Record<string, string> }).env.VITE_VAPID_PUBLIC_KEY || 'BExample-VAPID-Key-For-Development-Only',
   privateKey: '', // Server-side only, never expose in client
   subject: 'mailto:notifications@cosmichub.com'
 };
@@ -60,7 +61,7 @@ export class CosmicHubNotificationManager {
   }
 
   // User subscription management
-  async subscribeUser(userId: string, preferences?: any): Promise<boolean> {
+  async subscribeUser(userId: string, preferences?: Record<string, unknown>): Promise<boolean> {
     const defaultPrefs = {
       dailyHoroscope: false,
       transitAlerts: true,
@@ -76,7 +77,7 @@ export class CosmicHubNotificationManager {
 
     const subscription = await this.pushManager.subscribeUser(
       userId, 
-      preferences || defaultPrefs
+  ((preferences as unknown) as NotificationPreferences) || defaultPrefs
     );
 
     if (subscription) {
@@ -109,7 +110,7 @@ export class CosmicHubNotificationManager {
       // Schedule daily horoscope
       this.astrologyScheduler.scheduleDailyHoroscope(
         this.currentUserId,
-        userBirthData.sunSign || 'Aries',
+        typeof userBirthData.sunSign === 'string' ? userBirthData.sunSign : 'Aries',
         '09:00'
       );
 
@@ -122,7 +123,7 @@ export class CosmicHubNotificationManager {
   }
 
   // Immediate notification triggers
-  async notifyChartCalculationComplete(chartData: any): Promise<void> {
+  async notifyChartCalculationComplete(chartData: { id: string }): Promise<void> {
     await this.pushManager.queueNotification({
       title: '✨ Your Chart is Ready!',
       body: 'Your personalized astrology chart has been calculated. Tap to explore your cosmic blueprint.',
@@ -154,7 +155,7 @@ export class CosmicHubNotificationManager {
   }
 
   // Background sync integration
-  async syncChartCalculation(chartData: any): Promise<string> {
+  async syncChartCalculation(chartData: Record<string, unknown>): Promise<string> {
     return this.backgroundSync.addToSyncQueue({
       type: 'chart_calculation',
       data: chartData,
@@ -165,7 +166,7 @@ export class CosmicHubNotificationManager {
     });
   }
 
-  async syncUserProfile(userData: any): Promise<string> {
+  async syncUserProfile(userData: Record<string, unknown>): Promise<string> {
     return this.backgroundSync.addToSyncQueue({
       type: 'user_data',
       data: userData,
@@ -200,7 +201,7 @@ export class CosmicHubNotificationManager {
     });
   }
 
-  private handleNotificationClick(data: any): void {
+  private handleNotificationClick(data: { action?: string; chartId?: string }): void {
     console.log('🔔 Notification clicked:', data);
 
     switch (data.action) {
@@ -222,12 +223,14 @@ export class CosmicHubNotificationManager {
     }
   }
 
-  private handleSyncMessage(message: any): void {
+  private handleSyncMessage(message: { type?: string; data?: unknown }): void {
     console.log('🔄 Sync message received:', message.type);
 
     switch (message.type) {
       case 'cosmichub-sync-chart_synced':
-        this.notifyChartCalculationComplete(message.data);
+        if (message.data && typeof message.data === 'object' && 'id' in message.data) {
+          this.notifyChartCalculationComplete(message.data as { id: string });
+        }
         break;
       case 'cosmichub-sync-user_data_synced':
         console.log('User data synced successfully');
@@ -236,7 +239,7 @@ export class CosmicHubNotificationManager {
   }
 
   // Utility methods
-  private getUserBirthData(): any {
+  private getUserBirthData(): Record<string, unknown> | null {
     // In a real implementation, get from user profile or local storage
     try {
       const stored = localStorage.getItem('cosmichub-birth-data');
@@ -277,7 +280,7 @@ export class CosmicHubNotificationManager {
   }
 
   // Smart notification suggestions
-  async getSmartSuggestions(): Promise<any> {
+  async getSmartSuggestions(): Promise<Record<string, unknown>> {
     if (!this.currentUserId) return {};
 
     return this.pushManager.suggestNotificationSettings(this.currentUserId);

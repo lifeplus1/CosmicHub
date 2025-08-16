@@ -27,24 +27,11 @@ vi.mock('./firebase', () => ({
   }
 }));
 
-// Mock shared auth module
-vi.mock('../shared/auth.ts', () => ({
-  signIn: vi.fn(),
-  signUp: vi.fn(),
-  signOut: vi.fn(),
-  getCurrentUser: vi.fn(() => ({ uid: 'test_user', email: 'test@example.com' })),
-  onAuthStateChanged: vi.fn()
-}));
-
-// Mock shared api module
-vi.mock('../shared/api.ts', () => ({
-  fetchNatalChart: vi.fn(),
-  fetchSynastryAnalysis: vi.fn(),
-  apiClient: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn()
+// Mock subscriptions package (lightweight)
+vi.mock('@cosmichub/subscriptions', () => ({
+  COSMICHUB_TIERS: {
+    free: { name: 'Free', description: 'Free tier', icon: '👤', color: 'gray', price: { monthly: 0, yearly: 0 }, features: [], limits: { chartsPerMonth: 0, chartStorage: 0, synastryAnalyses: 0, aiQueries: 0 } },
+    premium: { name: 'Premium', description: 'Premium tier', icon: '⭐', color: 'purple', price: { monthly: 10, yearly: 100 }, features: [], limits: { chartsPerMonth: -1, chartStorage: -1, synastryAnalyses: 10, aiQueries: 0 } }
   }
 }));
 

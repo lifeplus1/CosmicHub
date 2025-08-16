@@ -7,7 +7,8 @@ import { FaExpand, FaCompress } from 'react-icons/fa';
 import type { ChartData } from '../../types';
 import { useAuth } from '@cosmichub/auth';
 import { calculateHumanDesign } from '../../services/api';
-import type { BirthData, HumanDesignData, HumanDesignChartProps } from './types';
+import type { HumanDesignData, HumanDesignChartProps } from './types';
+import type { ChartBirthData } from '@cosmichub/types';
 import { getTypeColor, getTypeDescription } from './utils';
 
 // Lazy load tab components for better performance
@@ -109,7 +110,13 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
           {onCalculate && (
             <button 
               className="mt-4 cosmic-button" 
-              onClick={() => onCalculate({} as BirthData)}
+              onClick={() => onCalculate({
+                year: 2000,
+                month: 1,
+                day: 1,
+                hour: 0,
+                minute: 0
+              } as ChartBirthData)}
             >
               🧬 Calculate Human Design
             </button>

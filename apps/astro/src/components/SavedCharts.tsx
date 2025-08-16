@@ -6,7 +6,7 @@ const formatDate = (date: string | Date): string => {
   return d.toLocaleDateString();
 };
 
-type Chart = {
+interface Chart {
   id: string;
   name?: string;
   chart_type?: string;
@@ -14,7 +14,7 @@ type Chart = {
   created_at?: string;
   birth_time?: string;
   birth_location?: string;
-};
+}
 
 const SavedCharts = (): JSX.Element => {
   // Example charts state (replace with real data/fetch)

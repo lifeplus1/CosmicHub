@@ -3,22 +3,13 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaStar, FaKey, FaChartLine } from 'react-icons/fa';
 import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
+import type { ChartBirthData } from '@cosmichub/types';
 
 const HumanDesignChart = lazy(() => import('./HumanDesignChart/HumanDesignChart'));
 const GeneKeysChart = lazy(() => import('./GeneKeysChart'));
 const EducationalContent = lazy(() => import('./EducationalContent'));
 
-interface BirthData {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  city: string;
-  timezone?: string;
-  lat?: number;
-  lon?: number;
-}
+// Using shared ChartBirthData type (alias of UnifiedBirthData)
 
 interface FormData {
   year: string;
@@ -31,7 +22,7 @@ interface FormData {
 }
 
 const HumanDesignGeneKeys: React.FC = React.memo(() => {
-  const [birthData, setBirthData] = useState<BirthData | null>(null);
+  const [birthData, setBirthData] = useState<ChartBirthData | null>(null);
   const [showCalculation, setShowCalculation] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     year: '',
@@ -65,7 +56,7 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
       return;
     }
 
-    const data: BirthData = {
+  const data: ChartBirthData = {
       year: parseInt(formData.year),
       month: parseInt(formData.month),
       day: parseInt(formData.day),

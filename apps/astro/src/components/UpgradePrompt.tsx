@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { FaCheck } from 'react-icons/fa';
-import { COSMICHUB_TIERS } from '../types/subscription';
+import { COSMICHUB_TIERS } from '@cosmichub/subscriptions';
 
 interface UpgradePromptProps {
   isOpen: boolean;
@@ -60,7 +60,7 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(({ isOpen, onClos
             <div>
               <p className="mb-2 font-semibold text-purple-600">{tier.name} includes:</p>
               <ul className="space-y-2">
-                {tier.features.slice(0, 6).map((feature, index) => (
+                {tier.features.slice(0, 6).map((feature: string, index: number) => (
                   <li key={index} className="flex items-center space-x-2">
                     <FaCheck className="text-green-500" />
                     <span className="text-sm text-cosmic-silver">{feature}</span>

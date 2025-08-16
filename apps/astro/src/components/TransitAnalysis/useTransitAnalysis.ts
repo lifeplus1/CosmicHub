@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import type { 
-  BirthData, 
+  TransitBirthData as BirthData, 
   TransitResult, 
   LunarTransitResult, 
   DateRange,

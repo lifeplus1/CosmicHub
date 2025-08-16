@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '../ToastProvider';
 import { calculateGeneKeys } from '../../services/api';
 import * as Tabs from '@radix-ui/react-tabs';
-import type { GeneKeysChartProps, GeneKeysData, GeneKey, BirthData } from './types';
+import type { GeneKeysChartProps, GeneKeysData, GeneKey } from './types';
+import type { ChartBirthData } from '@cosmichub/types';
 import GeneKeyDetails from './GeneKeyDetails';
 import CoreQuartetTab from './CoreQuartetTab';
 import ActivationSequenceTab from './ActivationSequenceTab';
@@ -54,7 +55,13 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
   // Memoized empty state button handler
   const handleEmptyCalculate = useCallback(() => {
     if (onCalculate) {
-      onCalculate({} as BirthData);
+      onCalculate({
+        year: 2000,
+        month: 1,
+        day: 1,
+        hour: 0,
+        minute: 0
+      } as ChartBirthData);
     }
   }, [onCalculate]);
 

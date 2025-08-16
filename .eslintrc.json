@@ -16,7 +16,12 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": ["./frontend/astro/tsconfig.json", "./frontend/healwave/tsconfig.json"]
+    // Updated to correct monorepo app paths
+    "project": [
+      "./apps/astro/tsconfig.json",
+      "./apps/healwave/tsconfig.json",
+      "./packages/subscriptions/tsconfig.json"
+    ]
   },
   "plugins": [
     "@typescript-eslint",
@@ -81,7 +86,23 @@
     "prefer-const": "error",
     "no-var": "error",
     "eqeqeq": ["error", "always"],
-    "curly": ["error", "all"]
+    "curly": ["error", "all"],
+    // Forbid re-introduction of legacy shared/ imports post-migration
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [
+              "shared/*",
+              "./shared/*",
+              "../shared/*"
+            ],
+            "message": "Legacy shared/ modules have been removed. Import from @cosmichub/subscriptions or other @cosmichub/* packages instead."
+          }
+        ]
+      }
+    ]
   },
   "overrides": [
     {

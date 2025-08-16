@@ -97,27 +97,22 @@ export class CriticalResourceManager {
 
 // Connection-aware loading (builds on existing lazy loading)
 export class ConnectionAwareLoader {
-  private static connection = (navigator as any).connection || 
-                              (navigator as any).mozConnection || 
-                              (navigator as any).webkitConnection;
+  private static getConnection(): NetworkInformation | null {
+    if (typeof navigator === 'undefined') return null;
+    const nav = navigator as unknown as { connection?: NetworkInformation; mozConnection?: NetworkInformation; webkitConnection?: NetworkInformation };
+    return nav.connection ?? nav.mozConnection ?? nav.webkitConnection ?? null;
+  }
 
-  static getConnectionInfo(): {
-    effectiveType: string;
-    downlink: number;
-    saveData: boolean;
-  } {
-    if (!this.connection) {
-      return {
-        effectiveType: '4g',
-        downlink: 10,
-        saveData: false
-      };
+  static getConnectionInfo(): { effectiveType: string; downlink: number; saveData: boolean } {
+    const connection = this.getConnection();
+    if (!connection) {
+      return { effectiveType: '4g', downlink: 10, saveData: false };
     }
 
     return {
-      effectiveType: this.connection.effectiveType || '4g',
-      downlink: this.connection.downlink || 10,
-      saveData: this.connection.saveData || false
+      effectiveType: connection.effectiveType ?? '4g',
+      downlink: connection.downlink ?? 10,
+      saveData: connection.saveData ?? false,
     };
   }
 
@@ -187,18 +182,25 @@ export class PWAPerformanceMonitor {
 
   static measurePWAMetrics(): void {
     // Measure PWA-specific metrics
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(() => {
-        const swReadyTime = performance.now();
-        console.log(`🔧 Service Worker ready: ${swReadyTime.toFixed(2)}ms`);
+
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      void navigator.serviceWorker.ready.then(() => {
+        if (typeof globalThis.performance?.now === 'function') {
+          const swReadyTime = globalThis.performance.now();
+          console.log(`🔧 Service Worker ready: ${swReadyTime.toFixed(2)}ms`);
+        }
       });
     }
 
     // Measure app shell loading
-    window.addEventListener('DOMContentLoaded', () => {
-      const domReady = performance.now();
-      console.log(`📄 DOM ready: ${domReady.toFixed(2)}ms`);
-    });
+    if (typeof window !== 'undefined') {
+      window.addEventListener('DOMContentLoaded', () => {
+        if (typeof globalThis.performance?.now === 'function') {
+          const domReady = globalThis.performance.now();
+          console.log(`📄 DOM ready: ${domReady.toFixed(2)}ms`);
+        }
+      });
+    }
 
     // Measure Core Web Vitals
     this.observeWebVitals();
@@ -206,36 +208,49 @@ export class PWAPerformanceMonitor {
 
   private static observeWebVitals(): void {
     // Largest Contentful Paint
-    if ('PerformanceObserver' in window) {
-      const lcpObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        console.log(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
-      });
-      lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-
-      // First Input Delay
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach(entry => {
-          const fidEntry = entry as any; // Type assertion for FID properties
-          console.log(`⚡ FID: ${fidEntry.processingStart - fidEntry.startTime}ms`);
-        });
-      });
-      fidObserver.observe({ entryTypes: ['first-input'] });
-
-      // Cumulative Layout Shift
-      const clsObserver = new PerformanceObserver((list) => {
-        let clsValue = 0;
-        list.getEntries().forEach(entry => {
-          const clsEntry = entry as any; // Type assertion for CLS properties
-          if (!clsEntry.hadRecentInput) {
-            clsValue += clsEntry.value;
+    if (typeof PerformanceObserver !== 'undefined') {
+      try {
+        const lcpObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          const lastEntry = entries[entries.length - 1] as PerformanceEntry & { startTime?: number } | undefined;
+          if (lastEntry?.startTime !== undefined) {
+            console.log(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
           }
         });
-        console.log(`📐 CLS: ${clsValue.toFixed(4)}`);
-      });
-      clsObserver.observe({ entryTypes: ['layout-shift'] });
+        lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+
+        // First Input Delay
+        const fidObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          entries.forEach((entry) => {
+            const e = entry as PerformanceEntry & Record<string, unknown>;
+            const processingStart = e['processingStart'];
+            const startTime = e['startTime'];
+            if (typeof processingStart === 'number' && typeof startTime === 'number') {
+              console.log(`⚡ FID: ${processingStart - startTime}ms`);
+            }
+          });
+        });
+        fidObserver.observe({ entryTypes: ['first-input'] });
+
+        // Cumulative Layout Shift
+        const clsObserver = new PerformanceObserver((list) => {
+          let clsValue = 0;
+          list.getEntries().forEach((entry) => {
+            const e = entry as PerformanceEntry & Record<string, unknown>;
+            const hadRecentInput = e['hadRecentInput'];
+            const value = e['value'];
+            if (hadRecentInput !== true && typeof value === 'number') {
+              clsValue += value;
+            }
+          });
+          console.log(`📐 CLS: ${clsValue.toFixed(4)}`);
+        });
+        clsObserver.observe({ entryTypes: ['layout-shift'] });
+      } catch (err) {
+        // PerformanceObserver may not be supported in some environments
+        if (typeof console !== 'undefined') console.warn('PerformanceObserver not available', err);
+      }
     }
   }
 

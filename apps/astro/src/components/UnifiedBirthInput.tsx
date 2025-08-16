@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, Button } from '@cosmichub/ui';
 import { useBirthData, formatBirthDataDisplay } from '../contexts/BirthDataContext';
-import type { ChartBirthData } from '../services/api';
+import type { ChartBirthData } from '@cosmichub/types';
 
 interface UnifiedBirthInputProps {
   onSubmit?: (data: ChartBirthData) => void;

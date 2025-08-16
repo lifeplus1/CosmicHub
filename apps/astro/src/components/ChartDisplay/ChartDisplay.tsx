@@ -1028,7 +1028,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       <Card className="w-full max-w-4xl mx-auto">
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-64">
-            <div className="text-lg text-red-600">Error loading chart: {(error as Error).message}</div>
+            <div className="text-lg text-red-600">Error loading chart: {(error).message}</div>
           </div>
         </CardContent>
       </Card>

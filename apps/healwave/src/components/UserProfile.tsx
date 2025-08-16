@@ -4,7 +4,7 @@ import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '@cosmichub/auth';
 import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaCrown, FaStar, FaCalendarAlt, FaHeadphones, FaCreditCard, FaArrowUp, FaHistory } from 'react-icons/fa';
-import { HEALWAVE_TIERS } from '../types/subscription';
+import { HEALWAVE_TIERS } from '@cosmichub/subscriptions';
 import ProgressBar from './ProgressBar';
 
 interface UserStats {

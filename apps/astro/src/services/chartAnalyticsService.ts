@@ -188,7 +188,9 @@ class ChartAnalyticsService {
 
       // Exact aspects add to score
       chartData.aspects?.forEach(aspect => {
-        if (aspect.planet1 === name || aspect.planet2 === name) {
+  const p1 = (aspect as any).planet1 ?? aspect.transitPlanet;
+  const p2 = (aspect as any).planet2 ?? aspect.natalPlanet;
+  if (p1 === name || p2 === name) {
           if (aspect.orb < 1) score += 2;
           else if (aspect.orb < 3) score += 1;
         }

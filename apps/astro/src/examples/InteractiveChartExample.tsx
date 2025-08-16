@@ -89,7 +89,7 @@ export const InteractiveChartExample: React.FC = () => {
           { number: 2, cusp: 30, sign: 'Taurus' }
         ],
         aspects: [
-          { planet1: 'sun', planet2: 'moon', angle: 105, orb: 5, type: 'square', applying: true, strength: 'medium' }
+          { transitPlanet: 'sun', natalPlanet: 'moon', aspectType: 'square', orb: 5, type: 'aspect-forming', exactDate: new Date(), strength: 'medium' }
         ]
       });
       

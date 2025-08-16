@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HEALWAVE_TIERS, calculateYearlySavings } from '../types/subscription';
+import { HEALWAVE_TIERS, calculateYearlySavings, type HealwaveSubscriptionTier } from '@cosmichub/subscriptions';
 import { useAuth } from '@cosmichub/auth';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 
@@ -53,7 +53,7 @@ const PricingPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {Object.entries(HEALWAVE_TIERS).map(([tierSlug, tier]) => {
+          {Object.entries(HEALWAVE_TIERS).map(([tierSlug, tier]: [string, HealwaveSubscriptionTier]) => {
             const price = isYearly ? tier.price.yearly : tier.price.monthly;
             const yearlyPrice = tier.price.yearly;
             const monthlyPrice = tier.price.monthly;

@@ -9,7 +9,7 @@ interface Props {
 }
 
 const WesternChart: React.FC<Props> = ({ data }) => {
-  if (!data || !data.planets) return <p className="text-cosmic-silver">No Western chart data available</p>;
+  if (!data?.planets) return <p className="text-cosmic-silver">No Western chart data available</p>;
 
   return (
     <div className="flex flex-col space-y-6">

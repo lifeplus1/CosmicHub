@@ -6,7 +6,7 @@ import { FaUser, FaCog, FaChartLine, FaSave, FaCreditCard, FaArrowUp, FaHistory,
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastProvider';
 import ProgressBar from '../components/ProgressBar';
-import { COSMICHUB_TIERS } from '../types/subscription';
+// (Profile page currently does not use tier details directly; removed local subscription import)
 
 // Lazy load heavy components
 const ChartPreferences = React.lazy(() => import('../components/ChartPreferences'));

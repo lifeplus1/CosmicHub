@@ -1,12 +1,25 @@
+/* eslint-disable no-console */
 import axios from 'axios';
+import { toUnifiedBirthData, type UnifiedBirthData, type AnyBirthInput, type ChartBirthData } from '@cosmichub/types';
 import { auth } from '@cosmichub/config/firebase';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Narrow import.meta.env access to avoid implicit any
+const rawApiUrl: string | undefined =
+  typeof import.meta.env?.VITE_API_URL === 'string'
+    ? import.meta.env.VITE_API_URL
+    : undefined;
+const BACKEND_URL: string = (typeof rawApiUrl === 'string' && rawApiUrl.trim().length > 0)
+  ? rawApiUrl
+  : 'http://localhost:8000';
 
 console.log('🔗 API Service initializing...');
 console.log('🌐 Backend URL:', BACKEND_URL);
 
 // Helper function to get current auth token
+// Lightweight auth shape to avoid relying on any typed firebase re-export
+interface AuthLikeUser { getIdToken(forceRefresh?: boolean): Promise<string>; }
+interface AuthLike { currentUser: AuthLikeUser | null }
+
 export const getAuthToken = async (): Promise<string | null> => {
   console.log('🔑 Getting auth token...');
   const user = auth.currentUser;
@@ -60,7 +73,7 @@ export interface SavedChart {
   created_at: string;
   updated_at: string;
   birth_data: ChartBirthData;
-  chart_data: any;
+  chart_data: ChartData;
 }
 
 export interface SavedChartsResponse {
@@ -80,12 +93,12 @@ export interface SaveChartRequest {
   timezone?: string;
   lat?: number;
   lon?: number;
-}
+} // Closing brace added for SaveChartRequest interface
 
 export interface SaveChartResponse {
   id: string;
   message: string;
-  chart_data: SavedChart;
+  chart_data: ChartData;
 }
 
 // API Functions for Saved Charts
@@ -149,7 +162,7 @@ export const deleteChart = async (chartId: string): Promise<void> => {
 };
 
 export const apiClient = {
-  get: async (endpoint: string) => {
+  get: async <T = unknown>(endpoint: string): Promise<T> => {
     console.log('📡 API GET request:', endpoint);
     const url = `${BACKEND_URL}${endpoint}`;
     console.log('🌐 Full URL:', url);
@@ -163,18 +176,18 @@ export const apiClient = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+  const data: unknown = await response.json();
       console.log('✅ GET response data:', data);
-      return data;
+  return data as T;
     } catch (error) {
       console.error('❌ GET request failed:', error);
       throw error;
     }
   },
   
-  post: async (endpoint: string, data: any) => {
+  post: async <T = unknown>(endpoint: string, body: unknown): Promise<T> => {
     console.log('📡 API POST request:', endpoint);
-    console.log('📤 Request data:', data);
+  console.log('📤 Request data:', body);
     const url = `${BACKEND_URL}${endpoint}`;
     console.log('🌐 Full URL:', url);
     
@@ -184,7 +197,7 @@ export const apiClient = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+  body: JSON.stringify(body),
       });
       
       console.log('📥 Response status:', response.status);
@@ -194,9 +207,9 @@ export const apiClient = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const responseData = await response.json();
+  const responseData: unknown = await response.json();
       console.log('✅ POST response data:', responseData);
-      return responseData;
+  return responseData as T;
     } catch (error) {
       console.error('❌ POST request failed:', error);
       throw error;
@@ -204,7 +217,7 @@ export const apiClient = {
   }
 };
 
-export const fetchChart = async (data: any) => {
+export const fetchChart = async (data: Record<string, unknown>) => {
   console.log('🔮 Fetching chart data...');
   console.log('📊 Chart data input:', data);
   try {
@@ -233,7 +246,7 @@ export const fetchPersonalityAnalysis = async (userId: string) => {
   }
 };
 
-export const fetchNumerology = async (data: any) => {
+export const fetchNumerology = async (data: Record<string, unknown>) => {
   console.log('🔢 Fetching numerology data...');
   console.log('📊 Numerology data input:', data);
   try {
@@ -248,13 +261,14 @@ export const fetchNumerology = async (data: any) => {
   }
 };
 
-export const calculateHumanDesign = async (data: any) => {
+export const calculateHumanDesign = async (data: AnyBirthInput) => {
   console.log('🧬 Calculating Human Design...');
-  console.log('📊 Human Design data input:', data);
+  const unified = toUnifiedBirthData(data as any);
+  console.log('📊 Human Design data input (unified):', unified);
   try {
     const headers = await getAuthHeaders();
     console.log('📡 Making Human Design request to /calculate-human-design');
-    const response = await axios.post(`${BACKEND_URL}/calculate-human-design`, data, { headers });
+    const response = await axios.post(`${BACKEND_URL}/calculate-human-design`, unified, { headers });
     console.log('✅ Human Design response received:', response.data);
     return response.data;
   } catch (error) {
@@ -263,13 +277,14 @@ export const calculateHumanDesign = async (data: any) => {
   }
 };
 
-export const calculateGeneKeys = async (data: any) => {
+export const calculateGeneKeys = async (data: AnyBirthInput) => {
   console.log('🗝️ Calculating Gene Keys...');
-  console.log('📊 Gene Keys data input:', data);
+  const unified = toUnifiedBirthData(data as any);
+  console.log('📊 Gene Keys data input (unified):', unified);
   try {
     const headers = await getAuthHeaders();
     console.log('📡 Making Gene Keys request to /calculate-gene-keys');
-    const response = await axios.post(`${BACKEND_URL}/calculate-gene-keys`, data, { headers });
+    const response = await axios.post(`${BACKEND_URL}/calculate-gene-keys`, unified, { headers });
     console.log('✅ Gene Keys response received:', response.data);
     return response.data;
   } catch (error) {
@@ -321,17 +336,7 @@ export const getContemplationProgress = async (userId: string) => {
 };
 
 // Chart data interfaces for type safety
-export interface ChartBirthData {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  city: string;
-  lat?: number;
-  lon?: number;
-  timezone?: string;
-}
+// ChartBirthData now sourced from shared UnifiedBirthData (re-exported as ChartBirthData)
 
 export interface Planet {
   name: string;
@@ -349,7 +354,7 @@ export interface House {
 export interface ChartData {
   planets: Record<string, Planet>;
   houses: House[];
-  aspects?: any[];
+  aspects?: unknown[];
   angles?: {
     ascendant: number;
     midheaven: number;
@@ -382,59 +387,112 @@ export const fetchChartData = async (birthData: ChartBirthData): Promise<ChartDa
   }
 };
 
-// Transform backend response to match ChartData interface
-const transformBackendResponse = (backendResponse: any): ChartData => {
+// Re-export core types for backward compatibility
+export type { ChartBirthData };
+
+// Transform backend response to match ChartData interface safely
+interface BackendPlanetLike {
+  position?: unknown;
+  longitude?: unknown;
+  retrograde?: unknown;
+  speed?: unknown;
+}
+
+type BackendPlanets = Record<string, unknown> | undefined;
+
+type BackendHouses = Record<string, unknown> | unknown[] | undefined; // backend may return array or keyed object
+
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+
+const coerceNumber = (v: unknown, fallback = 0): number => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
+
+const transformBackendResponse = (backendResponse: unknown): ChartData => {
+  if (!isObject(backendResponse)) {
+    return {
+      planets: {},
+      houses: [],
+      aspects: [],
+      angles: { ascendant: 0, midheaven: 0, descendant: 180, imumcoeli: 180 }
+    };
+  }
+
+  const raw = backendResponse;
+
+  // Planets
   const planets: Record<string, Planet> = {};
-  
-  // Transform planets from backend format
-  if (backendResponse.planets) {
-    Object.entries(backendResponse.planets).forEach(([name, planetData]: [string, any]) => {
+  const rawPlanets: BackendPlanets = isObject(raw.planets) ? (raw.planets as Record<string, unknown>) : undefined;
+  if (rawPlanets) {
+    for (const [name, value] of Object.entries(rawPlanets)) {
+      const p = isObject(value) ? (value as BackendPlanetLike) : {};
+      const position = typeof p.position === 'number'
+        ? p.position
+        : (typeof p.longitude === 'number' ? p.longitude : 0);
       planets[name] = {
         name,
-        position: planetData.position || planetData.longitude || 0,
-        retrograde: planetData.retrograde || false,
-        speed: planetData.speed || 0,
+        position,
+        retrograde: Boolean(p.retrograde),
+        speed: typeof p.speed === 'number' ? p.speed : 0
       };
+    }
+  }
+
+  // Houses
+  const houses: House[] = [];
+  const rawHouses: BackendHouses = raw.houses as BackendHouses;
+  if (isObject(rawHouses)) {
+    for (const [houseKey, houseValue] of Object.entries(rawHouses)) {
+      const houseNumber = houseKey.includes('house_') ? parseInt(houseKey.replace('house_', '')) : parseInt(houseKey, 10);
+      if (Number.isNaN(houseNumber)) continue;
+      let cusp = 0;
+      let sign = '';
+      if (typeof houseValue === 'number') {
+        cusp = houseValue;
+      } else if (isObject(houseValue)) {
+        cusp = coerceNumber((houseValue as Record<string, unknown>).cusp, 0);
+        const signVal = (houseValue as Record<string, unknown>).sign;
+        if (typeof signVal === 'string') sign = signVal;
+      }
+      houses.push({ number: houseNumber, cusp, sign });
+    }
+  } else if (Array.isArray(rawHouses)) {
+    // If backend returns array of numbers
+    rawHouses.forEach((hv, idx) => {
+      const cusp = coerceNumber(hv, 0);
+      houses.push({ number: idx + 1, cusp, sign: '' });
     });
   }
 
-  // Transform houses from backend format
-  const houses: House[] = [];
-  if (backendResponse.houses) {
-    Object.entries(backendResponse.houses).forEach(([houseKey, houseData]: [string, any]) => {
-      // Handle both "house_1" format and direct number keys
-      const houseNumber = houseKey.includes('house_') 
-        ? parseInt(houseKey.replace('house_', ''))
-        : parseInt(houseKey);
-      
-      if (!isNaN(houseNumber)) {
-        houses.push({
-          number: houseNumber,
-          cusp: typeof houseData === 'number' ? houseData : houseData.cusp || 0,
-          sign: houseData.sign || '',
-        });
-      }
-    });
-  }
+  const aspects: unknown[] = Array.isArray(raw.aspects) ? (raw.aspects as unknown[]) : [];
+
+  const defaultAsc = houses[0]?.cusp ?? 0;
+  const defaultMc = houses[9]?.cusp ?? 0;
+  const anglesRaw = isObject(raw.angles) ? raw.angles : undefined;
+  const angles = anglesRaw &&
+    typeof anglesRaw.ascendant === 'number' &&
+    typeof anglesRaw.midheaven === 'number' &&
+    typeof anglesRaw.descendant === 'number' &&
+    typeof anglesRaw.imumcoeli === 'number'
+    ? anglesRaw as { ascendant: number; midheaven: number; descendant: number; imumcoeli: number }
+    : {
+        ascendant: defaultAsc,
+        midheaven: defaultMc,
+        descendant: defaultAsc + 180,
+        imumcoeli: defaultMc + 180
+      };
 
   return {
     planets,
     houses: houses.sort((a, b) => a.number - b.number),
-    aspects: backendResponse.aspects || [],
-    angles: backendResponse.angles || {
-      ascendant: houses[0]?.cusp || 0,
-      midheaven: houses[9]?.cusp || 0,
-      descendant: (houses[0]?.cusp || 0) + 180,
-      imumcoeli: (houses[9]?.cusp || 0) + 180,
-    },
-    latitude: backendResponse.latitude,
-    longitude: backendResponse.longitude,
-    timezone: backendResponse.timezone,
-    julian_day: backendResponse.julian_day
+    aspects,
+    angles,
+    latitude: typeof raw.latitude === 'number' ? raw.latitude : undefined,
+    longitude: typeof raw.longitude === 'number' ? raw.longitude : undefined,
+    timezone: typeof raw.timezone === 'string' ? raw.timezone : undefined,
+    julian_day: typeof raw.julian_day === 'number' ? raw.julian_day : undefined
   };
 };
 
-export const fetchNatalChart = async (birthData: any) => {
+export const fetchNatalChart = async (birthData: Record<string, unknown>) => {
   console.log('🌟 Fetching natal chart...');
   console.log('📊 Natal chart data input:', birthData);
   const response = await apiClient.post('/natal-chart', birthData);
@@ -442,7 +500,7 @@ export const fetchNatalChart = async (birthData: any) => {
   return response;
 };
 
-export const fetchSynastryAnalysis = async (person1: any, person2: any) => {
+export const fetchSynastryAnalysis = async (person1: Record<string, unknown>, person2: Record<string, unknown>) => {
   console.log('💑 Fetching synastry analysis...');
   console.log('📊 Person 1 data:', person1);
   console.log('📊 Person 2 data:', person2);

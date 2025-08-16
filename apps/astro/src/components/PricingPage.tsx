@@ -5,7 +5,8 @@ import { useToast } from './ToastProvider';
 import { stripeService } from '@cosmichub/integrations';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle, FaHeart, FaCalendarAlt, FaFilePdf, FaSave, FaHeadset } from 'react-icons/fa';
-import { COSMICHUB_TIERS } from '../types/subscription';
+// Using centralized subscription tiers
+import { COSMICHUB_TIERS, calculateYearlySavings, AstroSubscriptionTier } from '@cosmichub/subscriptions';
 
 const PricingPage: React.FC = React.memo(() => {
   const { user } = useAuth();
@@ -219,11 +220,11 @@ const PricingPage: React.FC = React.memo(() => {
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {Object.entries(COSMICHUB_TIERS).map(([tierKey, tier]) => (
+          {Object.entries(COSMICHUB_TIERS).map(([tierKey, tier]: [string, AstroSubscriptionTier]) => (
             <div key={tierKey} className={`cosmic-card ${tierKey === userTier ? 'border-2 border-purple-500 shadow-lg' : ''}`}>
               <div className="p-6">
                 <div className="flex items-center mb-4 space-x-3">
-                  {getTierIcon(tierKey as keyof typeof COSMICHUB_TIERS)}
+                  {getTierIcon(tierKey)}
                   <h3 className="text-2xl font-bold text-cosmic-gold">{tier.name}</h3>
                 </div>
                 <p className="mb-6 text-sm text-cosmic-silver">{tier.description}</p>
@@ -232,7 +233,7 @@ const PricingPage: React.FC = React.memo(() => {
                   <span className="text-sm text-cosmic-silver/80">/{isAnnual ? 'year' : 'month'}</span>
                 </div>
                 <ul className="mb-6 space-y-4">
-                  {tier.features.map((feature, index) => (
+                  {tier.features.map((feature: string, index: number) => (
                     <li key={index} className="flex items-start space-x-3">
                       <FaCheck className="mt-1 text-green-500" />
                       <div className="flex flex-col space-y-1">

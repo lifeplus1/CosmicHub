@@ -28,7 +28,20 @@
     "noEmit": true,
     "declaration": false,
     "declarationMap": false,
-    "types": ["react", "react-dom", "node"]
+    "types": ["react", "react-dom", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "@cosmichub/auth": ["packages/auth/src"],
+      "@cosmichub/frequency": ["packages/frequency/src"],
+      "@cosmichub/integrations": ["packages/integrations/src"],
+      "@cosmichub/types": ["packages/types/src"],
+  "@cosmichub/subscriptions": ["packages/subscriptions/src"],
+  "@cosmichub/*": ["packages/*/src"],
+  "@cosmichub/config/firebase": ["packages/config/src/firebase.ts"],
+      "@/*": ["./*"],
+      "astro/*": ["apps/astro/src/*"],
+      "healwave/*": ["apps/healwave/src/*"]
+    }
   },
   "include": [],
   "exclude": ["node_modules", "dist", ".turbo", "**/*.test.*", "**/*.spec.*"]

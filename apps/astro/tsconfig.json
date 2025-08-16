@@ -3,7 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "../../",
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -30,17 +30,22 @@
       "@/*": ["./src/*"],
       "@cosmichub/auth": ["../../packages/auth/src"],
       "@cosmichub/config": ["../../packages/config/src"],
+      "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
       "@cosmichub/frequency": ["../../packages/frequency/src"],
       "@cosmichub/integrations": ["../../packages/integrations/src"],
-      "@cosmichub/ui": ["../../packages/ui/src"]
+      "@cosmichub/subscriptions": ["../../packages/subscriptions/src"],
+      "@cosmichub/ui": ["../../packages/ui/src"],
+      "@cosmichub/types": ["../../packages/types/src"]
     }
   },
   "include": ["src", "types", "src/**/*"],
   "references": [
+    { "path": "../../packages/subscriptions" },
     { "path": "../../packages/auth" },
     { "path": "../../packages/config" },
     { "path": "../../packages/frequency" },
     { "path": "../../packages/ui" },
-    { "path": "../../packages/integrations" }
+  { "path": "../../packages/integrations" },
+  { "path": "../../packages/types" }
   ]
 }

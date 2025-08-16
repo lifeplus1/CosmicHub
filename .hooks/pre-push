@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "[pre-push] Running quality gate..."
+
+echo "1. Lint (frontend & backend)"
+pnpm lint || { echo "Lint failed"; exit 1; }
+
+echo "2. Type check (TS)"
+pnpm type-check || { echo "Type check failed"; exit 1; }
+
+echo "3. Fast backend tests subset"
+cd backend
+pytest -q || { echo "Backend tests failed"; exit 1; }
+cd - >/dev/null
+
+echo "4. Frontend test smoke (Astro only)"
+pnpm test:astro -- --run || echo "Astro tests non-blocking (adjust gating as needed)"
+
+echo "[pre-push] Complete"

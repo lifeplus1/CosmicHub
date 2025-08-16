@@ -61,8 +61,8 @@ vi.mock('../components/ChartPreferences', () => ({
   default: () => <div>Chart Preferences</div>,
 }));
 
-// Mock subscription types
-vi.mock('../types/subscription', () => ({
+// Mock subscription types (now import from package)
+vi.mock('@cosmichub/subscriptions', () => ({
   COSMICHUB_TIERS: {
     free: { name: 'Free Explorer' }
   }

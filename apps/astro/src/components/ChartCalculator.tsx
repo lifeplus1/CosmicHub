@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChartDisplay } from ".";
 import { MultiSystemChartDisplay } from "./MultiSystemChart";
 import type { MultiSystemChartData } from "./MultiSystemChart/types";
-import type { ChartBirthData } from "../services/api";
+import type { ChartBirthData } from '@cosmichub/types';
 import { saveChart, type SaveChartRequest } from "../services/api";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";

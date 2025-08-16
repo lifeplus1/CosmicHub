@@ -1,8 +1,11 @@
 # backend/main.py
 import logging
+import uuid
+import json
 import os
 from pathlib import Path
 from typing import Optional, Dict, Any, List, cast
+from contextlib import suppress
 
 # Enhanced environment loading with proper error handling
 def load_environment():
@@ -94,7 +97,24 @@ os.makedirs(log_dir, exist_ok=True)
 
 # Setup logging with both file and console handlers
 log_level = getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper())
-formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
+class JsonRequestFormatter(logging.Formatter):
+    """Structured JSON formatter that injects request_id if present in record."""
+    def format(self, record: logging.LogRecord) -> str:  # type: ignore[override]
+        base = {
+            "ts": self.formatTime(record, datefmt="%Y-%m-%dT%H:%M:%S%z"),
+            "level": record.levelname,
+            "logger": record.name,
+            "msg": record.getMessage(),
+        }
+        # Optional common extras
+        for key in ("request_id", "path", "method", "status_code", "client_ip"):
+            if hasattr(record, key):
+                base[key] = getattr(record, key)
+        if record.exc_info:
+            base["exc_info"] = self.formatException(record.exc_info)
+        return json.dumps(base, ensure_ascii=False)
+
+formatter = JsonRequestFormatter()
 
 # File handler
 file_handler = RotatingFileHandler(log_file, maxBytes=10**6, backupCount=5)
@@ -114,6 +134,57 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting FastAPI application")
 
+# ---------------- Optional OpenTelemetry Tracing Setup -----------------
+otel_tracer = None  # Global tracer reference used in endpoints
+try:  # Keep startup resilient if OTEL libs or collector not present
+    if os.getenv("ENABLE_TRACING", "true").lower() == "true":
+        from opentelemetry import trace
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+        from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
+        service_name = os.getenv("OTEL_SERVICE_NAME", "cosmichub-backend")
+        otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")  # e.g. http://otel-collector:4318
+        resource = Resource.create({"service.name": service_name})
+        provider = TracerProvider(resource=resource)
+        # If endpoint not provided, exporter will use default env settings
+        exporter = OTLPSpanExporter(endpoint=f"{otlp_endpoint}/v1/traces" if otlp_endpoint else None)
+        provider.add_span_processor(BatchSpanProcessor(exporter))
+        trace.set_tracer_provider(provider)
+        otel_tracer = trace.get_tracer("cosmichub.backend")
+        logger.info("OpenTelemetry tracing configured", extra={"service": service_name})
+    else:
+        logger.info("Tracing disabled via ENABLE_TRACING env var")
+except Exception as e:  # pragma: no cover
+    logger.warning(f"Tracing initialization skipped: {e}")
+
+# ---------------- Basic Prometheus Metrics (optional) -----------------
+metrics_enabled = os.getenv("ENABLE_METRICS", "true").lower() == "true"
+REQUEST_LATENCY_BUCKETS = (
+    0.05, 0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0
+)  # seconds
+if metrics_enabled:
+    try:  # pragma: no cover
+        from prometheus_client import Histogram, Counter, generate_latest, CONTENT_TYPE_LATEST  # type: ignore
+        request_latency = Histogram(
+            "http_request_latency_seconds",
+            "Latency of HTTP requests",
+            ["path", "method", "status"],
+            buckets=REQUEST_LATENCY_BUCKETS,
+        )
+        request_counter = Counter(
+            "http_requests_total", "Total HTTP requests", ["path", "method", "status"]
+        )
+        logger.info("Prometheus metrics initialized")
+    except Exception as m_err:  # pragma: no cover
+        metrics_enabled = False
+        logger.warning(f"Metrics disabled: {m_err}")
+else:
+    logger.info("Metrics disabled via ENABLE_METRICS env var")
+
 # Security headers middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
@@ -127,6 +198,68 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['X-XSS-Protection'] = '1; mode=block'
         response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload'
+        return response
+
+class RequestContextMiddleware(BaseHTTPMiddleware):
+    """Assign a request_id and add structured access log after response."""
+    async def dispatch(self, request: StarletteRequest, call_next: Callable[[StarletteRequest], Awaitable[StarletteResponse]]) -> StarletteResponse:  # type: ignore[override]
+        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        # Store on state for downstream usage
+        request.state.request_id = request_id
+        start = time.time()
+        try:
+            response = await call_next(request)
+        except Exception as e:
+            duration_ms = int((time.time() - start) * 1000)
+            logger.error(
+                "unhandled exception", extra={
+                    "request_id": request_id,
+                    "path": request.url.path,
+                    "method": request.method,
+                    "client_ip": request.client.host if request.client else None,
+                }, exc_info=True
+            )
+            raise e
+        duration_ms = int((time.time() - start) * 1000)
+        # Add request_id header to response
+        response.headers["X-Request-ID"] = request_id
+        logger.info(
+            "access", extra={
+                "request_id": request_id,
+                "path": request.url.path,
+                "method": request.method,
+                "status_code": response.status_code,
+                "client_ip": request.client.host if request.client else None,
+                "duration_ms": duration_ms,
+            }
+        )
+        if metrics_enabled and request.url.path not in ("/metrics",):  # avoid metrics recursion
+            try:  # pragma: no cover
+                request_latency.labels(request.url.path, request.method, str(response.status_code)).observe(duration_ms / 1000.0)  # type: ignore
+                request_counter.labels(request.url.path, request.method, str(response.status_code)).inc()  # type: ignore
+            except Exception:
+                pass
+        return response
+
+class UserEnrichmentMiddleware(BaseHTTPMiddleware):
+    """Derive authenticated user_id (if Authorization Bearer present) and attach to request state for logging/tracing."""
+    async def dispatch(self, request: StarletteRequest, call_next: Callable[[StarletteRequest], Awaitable[StarletteResponse]]):  # type: ignore[override]
+        auth_header = request.headers.get("Authorization", "")
+        user_id = None
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1]
+            # Best-effort decode via Firebase; non-fatal on failure
+            try:  # pragma: no cover - network / firebase admin branch
+                from firebase_admin import auth as fb_auth  # type: ignore
+                decoded = fb_auth.verify_id_token(token, check_revoked=False)  # type: ignore
+                user_id = decoded.get("uid")
+            except Exception:
+                pass
+        request.state.user_id = user_id
+        response = await call_next(request)
+        if user_id:
+            # Add header for downstream correlation (optional)
+            response.headers.setdefault("X-User-ID", user_id)
         return response
 
 # Redis-based rate limiter for scalability (fallback to in-memory if Redis not available)
@@ -206,7 +339,24 @@ async def lifespan(app: FastAPI):  # suppress benign CancelledError on shutdown
         logger.warning(f"Lifespan exception: {e}")
 
 app = FastAPI(lifespan=lifespan)
+
+# Instrument FastAPI & requests after app creation (non-fatal if missing)
+with suppress(Exception):  # pragma: no cover
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor  # type: ignore
+    from opentelemetry.instrumentation.requests import RequestsInstrumentor  # type: ignore
+    FastAPIInstrumentor.instrument_app(app)  # type: ignore
+    RequestsInstrumentor().instrument()  # type: ignore
+    logger.info("FastAPI & requests instrumented for tracing")
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestContextMiddleware)
+app.add_middleware(UserEnrichmentMiddleware)
+
+if metrics_enabled:
+    @app.get("/metrics")
+    async def metrics():  # pragma: no cover - simple passthrough
+        from prometheus_client import generate_latest, CONTENT_TYPE_LATEST  # type: ignore
+        data = generate_latest()  # type: ignore
+        return FastAPI.responses.Response(content=data, media_type=CONTENT_TYPE_LATEST)  # type: ignore
 
 # Add CORS middleware with strict origins
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5174,http://localhost:5175,http://localhost:3000,http://localhost:5173").split(",")
@@ -268,17 +418,29 @@ async def calculate(data: BirthData, request: Request, background_tasks: Backgro
     # Debug: Log incoming request data
     print(f"🔍 Backend received data: lat={data.lat}, lon={data.lon}, timezone={data.timezone}, city={data.city}")
     
-    chart = calculate_chart(
-        year=data.year,
-        month=data.month,
-        day=data.day,
-        hour=data.hour,
-        minute=data.minute,
-        lat=data.lat,
-        lon=data.lon,
-        city=data.city,
-        timezone=data.timezone or "UTC"
-    )
+    def _run_calc():
+        return calculate_chart(
+            year=data.year,
+            month=data.month,
+            day=data.day,
+            hour=data.hour,
+            minute=data.minute,
+            lat=data.lat,
+            lon=data.lon,
+            city=data.city,
+            timezone=data.timezone or "UTC"
+        )
+    if otel_tracer:
+        with otel_tracer.start_as_current_span(
+            "calculate_chart",
+            attributes={
+                "house_system": house_system,
+                "request.id": getattr(request.state, "request_id", "unknown"),
+            },
+        ):
+            chart = _run_calc()
+    else:
+        chart = _run_calc()
     
     # Convert houses list to dictionary format if needed
     houses_data: Any = chart.get('houses', {})
@@ -344,16 +506,22 @@ async def calculate_human_design_endpoint(data: BirthData, request: Request):
         if timezone is None:
             timezone = "UTC"
         
-        human_design_chart = calculate_human_design(
-            year=data.year,
-            month=data.month,
-            day=data.day,
-            hour=data.hour,
-            minute=data.minute,
-            lat=lat,
-            lon=lon,
-            timezone=timezone
-        )
+        def _run_hd():
+            return calculate_human_design(
+                year=data.year,
+                month=data.month,
+                day=data.day,
+                hour=data.hour,
+                minute=data.minute,
+                lat=lat,
+                lon=lon,
+                timezone=timezone
+            )
+        if otel_tracer:
+            with otel_tracer.start_as_current_span("calculate_human_design", attributes={"request.id": getattr(request.state, "request_id", "unknown")}):
+                human_design_chart = _run_hd()
+        else:
+            human_design_chart = _run_hd()
         
         return {"human_design": human_design_chart}
     except Exception as e:
@@ -402,16 +570,22 @@ async def calculate_gene_keys_endpoint(data: BirthData, request: Request):
         if timezone is None:
             timezone = "UTC"
         
-        gene_keys_profile = calculate_gene_keys_profile(
-            year=data.year,
-            month=data.month,
-            day=data.day,
-            hour=data.hour,
-            minute=data.minute,
-            lat=lat,
-            lon=lon,
-            timezone=timezone
-        )
+        def _run_gk():
+            return calculate_gene_keys_profile(
+                year=data.year,
+                month=data.month,
+                day=data.day,
+                hour=data.hour,
+                minute=data.minute,
+                lat=lat,
+                lon=lon,
+                timezone=timezone
+            )
+        if otel_tracer:
+            with otel_tracer.start_as_current_span("calculate_gene_keys", attributes={"request.id": getattr(request.state, "request_id", "unknown")}):
+                gene_keys_profile = _run_gk()
+        else:
+            gene_keys_profile = _run_gk()
         
         return {"gene_keys": gene_keys_profile}
     except Exception as e:
@@ -424,7 +598,7 @@ async def root_health():
 
 # Structure cleanup suggestion: Move routers to separate files and import here for modularity.
 # Import API routers (local path)
-from api.routers import ai, presets, subscriptions, ephemeris, charts, stripe_router
+from api.routers import ai, presets, subscriptions, ephemeris, charts, stripe_router, csp_router
 from api import interpretations
 from astro.calculations import transits_clean
 
@@ -436,6 +610,7 @@ app.include_router(charts.router, prefix="/api")
 app.include_router(interpretations.router)  # AI Interpretations router
 app.include_router(transits_clean.router, prefix="/api/astro", tags=["transits"])  # Transit calculations router
 app.include_router(stripe_router.router)  # Stripe subscription & billing endpoints
+app.include_router(csp_router)  # CSP violation reports
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,150 @@
+name: SBOM Generation
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      fail-on-severity:
+        description: 'Comma-separated severities that cause failure (e.g., CRITICAL,HIGH)'
+        required: false
+        default: 'CRITICAL,HIGH'
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      # Use provided input only for workflow_dispatch; otherwise default
+      FAIL_ON_SEVERITY: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.fail-on-severity) || 'CRITICAL,HIGH' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Node / JS monorepo SBOM generation (replaces deprecated/missing CycloneDX action)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate Node SBOM
+        run: npx @cyclonedx/cyclonedx-npm --output-format xml --output-file bom-node.xml
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install cyclonedx-bom
+        run: pip install cyclonedx-bom
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
+      - name: Generate Python SBOM
+        working-directory: backend
+        run: cyclonedx-bom -r -o ../bom-python.xml
+      - name: Install CycloneDX CLI (for merge/convert/validate)
+        run: |
+          curl -sSL https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/cyclonedx-linux-x64 -o cyclonedx
+          chmod +x cyclonedx
+          sudo mv cyclonedx /usr/local/bin/cyclonedx
+      - name: Merge SBOMs
+        run: cyclonedx merge --input-files bom-node.xml,bom-python.xml --output-file bom-all.xml
+      - name: Convert merged SBOM to JSON
+        run: cyclonedx convert --input-file bom-all.xml --output-format json --output-file bom-all.json
+      - name: Convert merged SBOM to SPDX JSON
+        run: cyclonedx convert --input-file bom-all.xml --output-format spdx-json --output-file bom-all.spdx.json
+      - name: Validate merged SBOM
+        run: cyclonedx validate --input-file bom-all.xml
+      - name: Trivy cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-${{ runner.os }}
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb stable main | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+      - name: Trivy scan (root workspace)
+        run: trivy fs --scanners vuln --format cyclonedx --output vuln-root.cdx.xml . || true
+      - name: Trivy scan (backend)
+        run: trivy fs --scanners vuln --format cyclonedx --output vuln-backend.cdx.xml backend || true
+      - name: Trivy enforce (root)
+        run: trivy fs --scanners vuln --severity $FAIL_ON_SEVERITY --exit-code 1 --no-progress --ignore-unfixed . || (echo "Vulnerabilities at or above $FAIL_ON_SEVERITY detected in root" >&2; exit 1)
+      - name: Trivy enforce (backend)
+        run: trivy fs --scanners vuln --severity $FAIL_ON_SEVERITY --exit-code 1 --no-progress --ignore-unfixed backend || (echo "Vulnerabilities at or above $FAIL_ON_SEVERITY detected in backend" >&2; exit 1)
+      - name: License allowlist check
+        env:
+          LICENSE_ALLOWLIST: MIT|Apache-2.0|BSD-2-Clause|BSD-3-Clause|ISC
+        run: |
+          cyclonedx query --input-file bom-all.xml --expression '.components[].licenses[]?.license.id' | sort -u > licenses.txt || true
+          echo "Licenses found:"; cat licenses.txt || true
+          if [ -s licenses.txt ]; then
+            BAD=$(grep -Ev "^(${LICENSE_ALLOWLIST})$" licenses.txt || true)
+            if [ -n "$BAD" ]; then
+              echo "Disallowed licenses detected:" >&2
+              echo "$BAD" >&2
+              exit 1
+            fi
+          else
+            echo "No license data extracted (continuing)."
+          fi
+      - name: Checksums
+        run: shasum -a 256 bom-*.xml bom-all.json bom-all.spdx.json > sbom-checksums.txt
+      - name: Provenance Attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            bom-all.xml
+            bom-all.json
+            bom-all.spdx.json
+      - name: SBOM Summary
+        if: always()
+        run: |
+          {
+            echo '## SBOM Summary';
+            echo '';
+            echo "**Node components:** $(grep -c '<component ' bom-node.xml)";
+            echo "**Python components:** $(grep -c '<component ' bom-python.xml)";
+            echo "**Merged components:** $(grep -c '<component ' bom-all.xml)";
+            if [ -f licenses.txt ]; then
+              echo ''; echo '### Licenses'; cat licenses.txt; fi
+          } >> $GITHUB_STEP_SUMMARY
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sboms
+          path: |
+            bom-node.xml
+            bom-python.xml
+            bom-all.xml
+            bom-all.json
+            bom-all.spdx.json
+            sbom-checksums.txt
+            licenses.txt
+            vuln-root.cdx.xml
+            vuln-backend.cdx.xml
+  dependency-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4

@@ -57,7 +57,7 @@ class EphemerisPerformanceMonitor {
     }
 
   // Log to console in development (Vite)
-  if ((import.meta as any).env?.MODE === 'development') {
+  if ((import.meta as { env?: { MODE?: string } }).env?.MODE === 'development') {
       console.log(`[Ephemeris] ${operation}: ${latency}ms (cache: ${cacheHit ? 'hit' : 'miss'})`);
     }
   }
@@ -139,30 +139,25 @@ export const ephemerisMonitor = new EphemerisPerformanceMonitor();
 /**
  * Higher-order function to wrap ephemeris operations with performance monitoring.
  */
-export function withPerformanceMonitoring<T extends any[], R>(
+export function withPerformanceMonitoring<TArgs extends unknown[], TResult>(
   operation: string,
-  fn: (...args: T) => Promise<R>,
-  checkCache?: (...args: T) => boolean
-): (...args: T) => Promise<R> {
-  return async (...args: T): Promise<R> => {
+  fn: (...args: TArgs) => Promise<TResult>,
+  checkCache?: (...args: TArgs) => boolean
+): (...args: TArgs) => Promise<TResult> {
+  return async (...args: TArgs): Promise<TResult> => {
     const startTime = performance.now();
     const cacheHit = checkCache ? checkCache(...args) : false;
-    
     try {
       const result = await fn(...args);
       const endTime = performance.now();
       const latency = endTime - startTime;
-      
       ephemerisMonitor.recordOperation(operation, latency, cacheHit, true);
-      
       return result;
     } catch (error) {
       const endTime = performance.now();
       const latency = endTime - startTime;
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
       ephemerisMonitor.recordOperation(operation, latency, cacheHit, false, errorMessage);
-      
       throw error;
     }
   };

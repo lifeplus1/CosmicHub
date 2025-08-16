@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
-import type { ChartBirthData } from '../services/api';
+import type { ChartBirthData } from '@cosmichub/types';
 
 interface SimpleBirthFormProps {
   title?: string;

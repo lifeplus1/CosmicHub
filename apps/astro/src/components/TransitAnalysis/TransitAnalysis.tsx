@@ -3,10 +3,10 @@ import FeatureGuard from '../FeatureGuard';
 import TransitTabs from './TransitsTab';  // Note: TransitTabs component is in TransitsTab.tsx file
 import { TabLoader } from './TabLoader';
 import { useTransitAnalysis } from './useTransitAnalysis';
-import type { BirthData } from './types';
+import type { TransitBirthData } from './types';
 
 export interface TransitAnalysisProps {
-  birthData: BirthData;
+  birthData: TransitBirthData;
 }
 
 const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) => {

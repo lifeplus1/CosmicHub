@@ -1,15 +1,5 @@
 // Types for Gene Keys Chart Components
-export interface BirthData {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  city: string;
-  timezone?: string;
-  lat?: number;
-  lon?: number;
-}
+import type { ChartBirthData as BirthData } from '@cosmichub/types';
 
 export interface GeneKey {
   number: number;

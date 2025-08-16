@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, Literal, List
 import logging
+from contextlib import suppress
 
 from ..stripe_integration import (
     create_stripe_checkout_session,
@@ -107,16 +108,21 @@ async def create_checkout_session(
 @router.get("/subscription-status", response_model=SubscriptionStatusResponse)
 async def get_subscription_status(user_id: str = Depends(verify_firebase_token)):
     """Get user's current subscription status and features"""
-    try:
-        status = await get_user_subscription_status(user_id)
-        
-        return SubscriptionStatusResponse(**status)
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Unexpected error getting subscription status: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    # Optional tracing span
+    tracer = None
+    with suppress(Exception):
+        from opentelemetry import trace  # type: ignore
+        tracer = trace.get_tracer("cosmichub.backend.stripe")
+    span_cm = tracer.start_as_current_span("get_subscription_status", attributes={"user.id": user_id}) if tracer else suppress()
+    with span_cm:  # type: ignore
+        try:
+            status = await get_user_subscription_status(user_id)
+            return SubscriptionStatusResponse(**status)
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error getting subscription status: {str(e)}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/verify-session", response_model=SessionVerificationResponse)
 async def verify_checkout_session(

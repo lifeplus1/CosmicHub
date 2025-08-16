@@ -7,17 +7,6 @@ import { CosmicLoading } from '../components/CosmicLoading';
 import { saveChart, fetchChartData, type SaveChartRequest, type ChartBirthData } from '../services/api';
 import type { ChartData } from '../types';
 
-interface BirthData {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  city: string;
-  lat?: number;
-  lon?: number;
-}
-
 interface StoredBirthData {
   date: string;  // "2023-06-15" format
   time: string;  // "14:30" format

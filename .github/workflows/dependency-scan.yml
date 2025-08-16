@@ -1,0 +1,38 @@
+name: Dependency Scanning
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Python dependency audit
+        working-directory: backend
+        run: pip-audit -r requirements.txt || true
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install pnpm
+        run: npm install -g pnpm@8
+      - name: Install JS deps (root)
+        run: pnpm install --ignore-scripts
+      - name: npm audit (allow non-zero)
+        run: pnpm audit || true
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-results
+          path: .

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { MultiSystemChartData } from './types';
-import type { ChartBirthData } from '../../services/api';
+import type { ChartBirthData } from '@cosmichub/types';
 import WesternChart from './WesternChart';
 import VedicChart from './VedicChart';
 import ChineseChart from './ChineseChart';

@@ -125,6 +125,14 @@ class AppSettings(BaseSettings):
     smtp_user: str = Field(default="", description="SMTP username", alias="SMTP_USER")
     smtp_password: str = Field(default="", description="SMTP password", alias="SMTP_PASS")
     
+    # Firebase Admin SDK settings (secure)
+    firebase_credentials: Optional[str] = Field(default=None, description="Firebase service account credentials (JSON)", alias="FIREBASE_CREDENTIALS")
+    firebase_project_id: Optional[str] = Field(default=None, description="Firebase project ID", alias="FIREBASE_PROJECT_ID")
+    firebase_private_key: Optional[str] = Field(default=None, description="Firebase private key", alias="FIREBASE_PRIVATE_KEY")
+    firebase_private_key_id: Optional[str] = Field(default=None, description="Firebase private key ID", alias="FIREBASE_PRIVATE_KEY_ID")
+    firebase_client_email: Optional[str] = Field(default=None, description="Firebase client email", alias="FIREBASE_CLIENT_EMAIL")
+    firebase_client_id: Optional[str] = Field(default=None, description="Firebase client ID", alias="FIREBASE_CLIENT_ID")
+    
     # Observability settings
     sentry_dsn: Optional[str] = Field(default=None, description="Sentry DSN URL", alias="SENTRY_DSN")
     new_relic_license_key: Optional[str] = Field(default=None, description="New Relic license key", alias="NEW_RELIC_LICENSE_KEY")
@@ -133,10 +141,38 @@ class AppSettings(BaseSettings):
     rate_limit_max: int = Field(default=60, description="Maximum requests per window", alias="RATE_LIMIT_MAX")
     rate_limit_window: int = Field(default=60, description="Rate limit window in seconds", alias="RATE_LIMIT_WINDOW")
     
+    # Mock auth settings (development only)
+    allow_mock_auth: bool = Field(default=True, description="Allow mock authentication in development", alias="ALLOW_MOCK_AUTH")
+    
     # Logging settings
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = Field(default="INFO", description="Log level", alias="LOG_LEVEL")
     log_format: Literal["json", "plain"] = Field(default="plain", description="Log format", alias="LOG_FORMAT")
     log_file: str = Field(default="app.log", description="Log file path", alias="LOG_FILE")
+    
+    @field_validator("firebase_credentials")
+    @classmethod
+    def validate_firebase_credentials(cls, v: Optional[str]) -> Optional[str]:
+        """Validate Firebase credentials JSON if provided."""
+        if v:
+            try:
+                import json
+                cred_data = json.loads(v)
+                required_fields = ["type", "project_id", "private_key", "client_email"]
+                missing_fields = [field for field in required_fields if not cred_data.get(field)]
+                if missing_fields:
+                    raise ValueError(f"Firebase credentials missing required fields: {missing_fields}")
+                return v
+            except json.JSONDecodeError:
+                raise ValueError("FIREBASE_CREDENTIALS must be valid JSON")
+        return v
+    
+    @field_validator("allow_mock_auth")
+    @classmethod
+    def validate_mock_auth(cls, v: bool) -> bool:
+        """Validate mock auth settings."""
+        # In production, mock auth should be disabled
+        # This will be enforced by deployment configuration
+        return v
     
     @field_validator("log_level", mode="before")
     @classmethod

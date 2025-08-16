@@ -25,17 +25,18 @@
     "test:backend": "cd backend && python3 -m pytest tests/ -v --cov=astro --cov-report=xml --cov-report=html",
     "test:watch": "pnpm run test:astro -- --watch",
     "lint": "pnpm run lint:astro && pnpm run lint:healwave && pnpm run lint:backend",
-    "lint:astro": "cd apps/astro && pnpm run lint",
+  "lint:astro": "eslint apps/astro/src --ext .ts,.tsx --max-warnings=0 --config eslint.config.js",
     "lint:healwave": "cd apps/healwave && pnpm run lint",
     "lint:backend": "cd backend && python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics",
     "format": "pnpm run format:astro && pnpm run format:healwave && pnpm run format:backend",
     "format:astro": "cd apps/astro && pnpm run format",
     "format:healwave": "cd apps/healwave && pnpm run format",
     "format:backend": "cd backend && python -m black . && python -m isort .",
-  "type-check": "pnpm run type-check:astro && pnpm run type-check:healwave",
-  "type-check:tests": "node ./scripts/typecheck-tests.cjs",
+    "type-check": "pnpm run type-check:astro && pnpm run type-check:healwave",
+    "type-check:tests": "node ./scripts/typecheck-tests.cjs",
     "type-check:astro": "cd apps/astro && pnpm run type-check",
     "type-check:healwave": "cd apps/healwave && pnpm run type-check",
+    "cleanup:report": "node ./scripts/project-cleanup.mjs",
     "validate-env": "echo 'Environment validation passed'",
     "install:all": "pnpm install && cd apps/astro && pnpm install && cd ../healwave && pnpm install && cd ../../backend && pip install -r requirements.txt",
     "clean": "pnpm run clean:astro && pnpm run clean:healwave && pnpm run clean:backend",
@@ -56,7 +57,9 @@
   "workspaces": [
     "apps/astro",
     "apps/healwave",
-    "backend"
+    "backend",
+    "packages/*",
+    "ephemeris_server"
   ],
   "dependencies": {
     "@types/react": "^18.3.0",
@@ -66,16 +69,19 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
     "concurrently": "^8.2.2",
-    "eslint": "^9.0.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-jsx-a11y": "^6.8.0",
-    "eslint-plugin-react": "^7.33.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.0.0"
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "jiti": "^2.5.1",
+    "prettier": "^3.6.2",
+  "typescript": "^5.0.0",
+  "globals": "^13.19.0",
+  "@types/node": "^20.14.10"
   },
   "keywords": [
     "astrology",
