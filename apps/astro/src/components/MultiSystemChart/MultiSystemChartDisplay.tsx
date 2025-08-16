@@ -36,13 +36,10 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
   if (!chartData && !birthData) {
     return (
       <div className="p-4 border border-yellow-500 rounded-md bg-yellow-900/50">
-        <div className="flex space-x-4">
-          <span className="text-xl text-yellow-500">⚠️</span>
-          <div>
-            <h3 className="font-bold text-white">No Chart Data</h3>
-            <p className="text-white/80">Please calculate a chart to see the multi-system analysis.</p>
+                  <div className="text-center">
+            <h3 className="font-bold text-cosmic-silver">No Chart Data</h3>
+            <p className="text-cosmic-silver/70">Please calculate a chart to see the multi-system analysis.</p>
           </div>
-        </div>
       </div>
     );
   }
@@ -66,7 +63,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
         {/* Birth Information Header */}
         <div className={`cosmic-card bg-${cardBg}`}>
           <div className="p-4">
-            <h2 className="mb-4 text-lg font-bold text-center text-purple-700">
+            <h2 className="mb-4 text-lg font-bold text-center text-cosmic-gold">
               Multi-System Astrological Analysis
             </h2>
             {displayData.birth_info && (
@@ -102,7 +99,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
         {/* Footer with methodology */}
         <div className={`cosmic-card bg-${cardBg} border border-cosmic-silver/30`}>
           <div className="p-4">
-            <p className="text-sm text-center text-white/80">
+            <p className="text-sm text-center text-cosmic-silver">
               This analysis combines Western tropical astrology, Vedic sidereal calculations, Chinese Four Pillars, 
               Mayan sacred calendar, and Uranian midpoint techniques to provide a comprehensive astrological perspective.
             </p>

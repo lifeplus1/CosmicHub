@@ -3,6 +3,7 @@ export {
   useOperationTracking,
   usePagePerformance,
   useMemoryMonitoring,
+  useRealTimePerformance,
   type PerformanceMetrics,
   type OperationMetrics,
   type PagePerformanceMetrics,

@@ -107,37 +107,31 @@ class ComponentTestSuite {
       // Accessibility testing
       if (this.config.accessibility) {
         it('should meet accessibility requirements', async () => {
+          const accessibility = this.config.accessibility; // snapshot for type narrowing
+          if (!accessibility) return; // safety guard
           const { container } = renderWithProviders(
             React.createElement(this.config.component, this.config.props || {})
           );
-          
           // Check required roles
-          this.config.accessibility.requiredRoles.forEach(role => {
+          accessibility.requiredRoles?.forEach(role => {
             const elements = container.querySelectorAll(`[role="${role}"]`);
             expect(elements.length).toBeGreaterThan(0);
           });
-          
           // Check required labels
-          this.config.accessibility.requiredLabels.forEach(label => {
+            accessibility.requiredLabels?.forEach(label => {
             const labeledElements = container.querySelectorAll(`[aria-label*="${label}"], [aria-labelledby*="${label}"]`);
             expect(labeledElements.length).toBeGreaterThan(0);
           });
-          
           // Test keyboard navigation if required
-          if (this.config.accessibility.keyboardNavigation) {
+          if (accessibility.keyboardNavigation) {
             const focusableElements = container.querySelectorAll(
               'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );
-            
             expect(focusableElements.length).toBeGreaterThan(0);
-            
-            // Test tab navigation
             if (focusableElements.length > 0) {
               fireEvent.keyDown(focusableElements[0], { key: 'Tab' });
-              // Additional keyboard navigation tests would go here
             }
           }
-          
           console.log(`♿ Accessibility validation passed for ${this.config.name}`);
         });
       }
@@ -371,4 +365,3 @@ export const createFormTestConfig = (component: React.ComponentType<any>): Compo
 
 // Export utilities
 export { ComponentTestSuite };
-export type { ComponentTestConfig };

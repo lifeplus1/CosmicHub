@@ -3,12 +3,14 @@
  * Demonstrates how to use the enhanced chart system
  */
 
-import React, { useState } from 'react';
-import ChartWheelInteractive from '../features/ChartWheelInteractive';
+import React, { useState, Suspense, lazy } from 'react';
 import { getChartSyncService } from '../services/chartSyncService';
 import { getChartAnalyticsService } from '../services/chartAnalyticsService';
 import { getNotificationManager } from '../services/notificationManager';
 import { Button } from '@cosmichub/ui';
+
+// Lazy load the heavy chart component
+const ChartWheelInteractive = lazy(() => import('../features/ChartWheelInteractive'));
 
 const sampleBirthData = {
   year: 1990,
@@ -154,8 +156,16 @@ export const InteractiveChartExample: React.FC = () => {
       </div>
 
       {/* Interactive Chart */}
-      <ChartWheelInteractive
-        birthData={sampleBirthData}
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-[600px] bg-cosmic-dark rounded-lg border border-cosmic-purple animate-pulse">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cosmic-gold"></div>
+            <span className="text-cosmic-silver">Loading Interactive Chart...</span>
+          </div>
+        </div>
+      }>
+        <ChartWheelInteractive
+          birthData={sampleBirthData}
         showAspects={true}
         showAnimation={true}
         showTransits={chartRegistered}
@@ -165,6 +175,7 @@ export const InteractiveChartExample: React.FC = () => {
           console.log('Aspect selected:', aspect);
         }}
       />
+      </Suspense>
 
       {/* Feature Showcase */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

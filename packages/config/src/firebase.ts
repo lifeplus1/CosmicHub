@@ -3,6 +3,8 @@
  * Centralized configuration with performance optimizations and emulator support
  */
 
+/// <reference types="vite/client" />
+
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, Auth } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator, Firestore, enableNetwork, disableNetwork } from 'firebase/firestore';

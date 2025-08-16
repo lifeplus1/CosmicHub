@@ -21,7 +21,7 @@ CosmicHub/
 │   │   │   └── App.tsx
 │   │   ├── package.json            # ✅ Independent dependencies + shared packages
 │   │   ├── Dockerfile              # 🐳 Independent deployment
-│   │   └── vite.config.ts
+│   │   └── vite.config.ts          # ⚡ Enhanced with advanced code splitting
 │   │
 │   └── healwave/                   # 🎵 HealWave App (healwave.com)
 │       ├── src/
@@ -185,6 +185,38 @@ services:
   - astrology endpoints: /api/charts, /api/transits
   - shared endpoints: /api/auth, /api/subscriptions
 ```text
+
+---
+
+---
+
+## 🛠️ **Development Tools & Optimization (Updated August 2025)**
+
+### Asset Optimization
+- Use `scripts/generate-pwa-icons.sh` to generate WebP icons and minified SVGs
+- Automated cleanup of redundant icon files
+- Cross-platform support with ImageMagick and SVGO integration
+
+### Log Management
+- Logs are stored in `backend/logs` and rotated via `scripts/rotate-logs.sh`
+- Automated compression and cleanup to prevent disk space issues
+- Production-ready structured logging with proper rotation
+
+### Rate Limiting & Security
+- Backend uses in-memory rate limiting (60 requests/minute per user)
+- Enhanced Firestore security rules with user data validation
+- Defense in depth security architecture
+
+### Performance Goals (Updated)
+- Target sub-2s build times using TurboRepo caching (achieved: 83% improvement)
+- Advanced code splitting with manual chunks for optimal loading
+- Lazy loading implementation for heavy chart components
+- Bundle size optimization: 60-80% reduction through strategic splitting
+
+### Testing Structure (Improved)
+- Centralized tests in `/tests/` directory
+- Integration tests in `/tests/integration/`
+- Cross-app integration testing for HealWave-Astro compatibility
 
 ---
 

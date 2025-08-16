@@ -162,6 +162,9 @@ private/
 # === Package Managers ===
 .pnpm-store/
 .rush/
+# Use pnpm-lock.yaml only
+package-lock.json
+yarn.lock
 
 # === Deployment ===
 .vercel/

@@ -125,28 +125,141 @@ async def verify_checkout_session(
 ):
     """Verify Stripe checkout session and return subscription details"""
     try:
-        # TODO: Implement session verification logic
-        # This would typically involve:
-        # 1. Retrieving the session from Stripe
-        # 2. Verifying it belongs to the authenticated user
-        # 3. Extracting subscription details
-        # 4. Updating local database if needed
+        import stripe
+        from backend.database import get_firestore_client
+        from datetime import datetime
         
-        # For now, return a success response
+        # 1. Retrieve the session from Stripe
+        session = stripe.checkout.Session.retrieve(request.sessionId)
+        
+        # 2. Verify it belongs to the authenticated user
+        metadata = session.metadata or {}
+        session_firebase_uid = metadata.get("firebase_uid")
+        if session_firebase_uid != user_id:
+            logger.warning(f"Session {request.sessionId} verification failed: user mismatch")
+            return SessionVerificationResponse(
+                success=False,
+                message="Session does not belong to authenticated user"
+            )
+        
+        # Check if session was successful
+        if session.payment_status != "paid":
+            return SessionVerificationResponse(
+                success=False,
+                message=f"Payment not completed. Status: {session.payment_status}"
+            )
+        
+        # 3. Extract subscription details
+        subscription_id = session.subscription
+        if not subscription_id:
+            return SessionVerificationResponse(
+                success=False,
+                message="No subscription found in session"
+            )
+        
+        # Get subscription details from Stripe
+        stripe_subscription = stripe.Subscription.retrieve(str(subscription_id))
+        
+        # Find plan details by matching price ID
+        plan_id = None
+        plan_data = None
+        if hasattr(stripe_subscription, 'items') and stripe_subscription.items.data:
+            price_id = stripe_subscription.items.data[0].price.id
+            
+            for pid, plan in SUBSCRIPTION_PLANS.items():
+                if plan["price_id"] == price_id:
+                    plan_id = pid
+                    plan_data = plan
+                    break
+        
+        if not plan_id or not plan_data:
+            logger.error(f"Unknown price ID in subscription")
+            return SessionVerificationResponse(
+                success=False,
+                message="Unknown subscription plan"
+            )
+        
+        # 4. Update local database if needed
+        db_client = get_firestore_client()
+        
+        # Check if subscription already exists in our database  
+        subscription_doc = db_client.collection("subscriptions").document(user_id).get() # type: ignore
+        
+        # Get subscription timestamps safely
+        current_period_start = getattr(stripe_subscription, 'current_period_start', None)
+        current_period_end = getattr(stripe_subscription, 'current_period_end', None)
+        
+        subscription_data_dict: Dict[str, Any] = {
+            "user_id": user_id,
+            "stripe_customer_id": str(session.customer) if session.customer else "",
+            "stripe_subscription_id": str(subscription_id),
+            "plan_id": plan_id,
+            "is_active": stripe_subscription.status == "active",
+            "status": str(stripe_subscription.status),
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        # Add timestamp fields if available
+        if current_period_start:
+            subscription_data_dict["current_period_start"] = datetime.fromtimestamp(int(current_period_start)).isoformat()
+        if current_period_end:
+            subscription_data_dict["current_period_end"] = datetime.fromtimestamp(int(current_period_end)).isoformat()
+        
+        # Add created_at if this is a new subscription
+        if not subscription_doc.exists:  # type: ignore
+            subscription_data_dict["created_at"] = datetime.now().isoformat()
+        
+        # Save/update subscription in Firestore using type-safe wrapper
+        db_client.collection("subscriptions").document(user_id).set(subscription_data_dict, merge=True) # type: ignore
+        
+        # Update user document using type-safe wrapper  
+        user_update_dict: Dict[str, Any] = {
+            "subscription_status": "active" if stripe_subscription.status == "active" else str(stripe_subscription.status),
+            "subscription_tier": plan_id,
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        if session.customer:
+            user_update_dict["stripe_customer_id"] = str(session.customer)
+        
+        db_client.collection("users").document(user_id).update(user_update_dict) # type: ignore
+        
+        # Determine if it's an annual plan (based on plan naming convention)
+        is_annual = "monthly" not in plan_id
+        
+        logger.info(f"Session {request.sessionId} verified successfully for user {user_id}: {plan_id}")
+        
+        subscription_response: Dict[str, Any] = {
+            "tier": plan_id,
+            "isAnnual": is_annual,
+            "status": str(stripe_subscription.status),
+            "features": plan_data["features"],
+            "stripe_subscription_id": str(subscription_id)
+        }
+        
+        # Add expiration date if available
+        if current_period_end:
+            subscription_response["expires_at"] = datetime.fromtimestamp(int(current_period_end)).isoformat()
+        
         return SessionVerificationResponse(
             success=True,
-            subscription={
-                "tier": "premium",  # This should come from the actual session
-                "isAnnual": True,
-                "status": "active"
-            },
-            message="Session verified successfully"
+            subscription=subscription_response,
+            message="Session verified and subscription activated successfully"
         )
         
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Unexpected error verifying session: {str(e)}")
+    except Exception as stripe_err:
+        # Handle Stripe-specific errors
+        if "stripe" in str(type(stripe_err)).lower():
+            logger.error(f"Stripe error verifying session {request.sessionId}: {str(stripe_err)}")
+            return SessionVerificationResponse(
+                success=False,
+                message="Failed to verify session with Stripe"
+            )
+        # Re-raise HTTPExceptions
+        if isinstance(stripe_err, HTTPException):
+            raise stripe_err
+        # Handle other unexpected errors  
+        logger.error(f"Unexpected error verifying session {request.sessionId}: {str(stripe_err)}")
         raise HTTPException(status_code=500, detail="Session verification failed")
 
 @router.post("/create-portal-session")

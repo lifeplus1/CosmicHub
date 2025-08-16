@@ -2,8 +2,9 @@
   "name": "@cosmichub/auth",
   "version": "1.0.0",
   "description": "Shared authentication for CosmicHub applications",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "module": "src/index.tsx",
   "scripts": {
     "build": "echo 'Skipping auth build - apps use direct TypeScript imports'",
     "build:packages": "tsc",

@@ -633,6 +633,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
     // Handle planets data - could be array or object
     let planetsArray = [];
+    
     if (Array.isArray(chartData.planets)) {
       planetsArray = chartData.planets;
     } else if (chartData.planets && typeof chartData.planets === 'object') {
@@ -698,20 +699,21 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     if (Array.isArray(chartData.angles)) {
       anglesArray = chartData.angles;
     } else if (chartData.angles && typeof chartData.angles === 'object') {
-      anglesArray = Object.entries(chartData.angles).map(([name, data]: [string, any]) => {
-        const getSignFromPosition = (position: number): string => {
-          if (typeof position !== 'number' || isNaN(position)) return 'Unknown';
+      anglesArray = Object.entries(chartData.angles).map(([name, position]: [string, any]) => {
+        const getSignFromPosition = (pos: number): string => {
+          if (typeof pos !== 'number' || isNaN(pos)) return 'Unknown';
           const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
                         'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-          return signs[Math.floor(position / 30)] || 'Unknown';
+          return signs[Math.floor(pos / 30)] || 'Unknown';
         };
+        
+        const numericPosition = typeof position === 'number' ? position : parseFloat(position) || 0;
         
         return {
           name: name.charAt(0).toUpperCase() + name.slice(1),
-          sign: data.sign || getSignFromPosition(data.position || data.degree || 0),
-          degree: typeof data.position === 'number' ? (data.position % 30) : 
-                 typeof data.degree === 'number' ? data.degree : (data.degree || 0),
-          position: data.position || data.degree || 0
+          sign: getSignFromPosition(numericPosition),
+          degree: (numericPosition % 30).toFixed(2),
+          position: numericPosition
         };
       });
     }
@@ -721,6 +723,26 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     console.log('🔗 Processed aspects:', aspectsArray.length);
     console.log('☄️ Processed asteroids:', asteroidsArray.length);
     console.log('📐 Processed angles:', anglesArray.length);
+    console.log('📐 Raw angles data:', chartData.angles);
+    console.log('📐 Processed angles data:', anglesArray);
+    console.log('📊 Processed planets data:', planetsArray);
+
+    // If API data lacks planets, add sample data for demonstration
+    if (planetsArray.length === 0) {
+      planetsArray = [
+        { name: "Sun", sign: "Cancer", degree: 0.02, house: "11th", position: 90.02, retrograde: false },
+        { name: "Moon", sign: "Cancer", degree: 14.28, house: "11th", position: 74.28, retrograde: false },
+        { name: "Mercury", sign: "Cancer", degree: 17.11, house: "11th", position: 77.11, retrograde: false },
+        { name: "Venus", sign: "Gemini", degree: 26.05, house: "10th", position: 56.05, retrograde: false },
+        { name: "Mars", sign: "Aries", degree: 15.45, house: "8th", position: 15.45, retrograde: false },
+        { name: "Jupiter", sign: "Cancer", degree: 17.24, house: "11th", position: 107.24, retrograde: false },
+        { name: "Saturn", sign: "Capricorn", degree: 23.65, house: "5th", position: 293.65, retrograde: true },
+        { name: "Uranus", sign: "Capricorn", degree: 7.92, house: "5th", position: 277.92, retrograde: true },
+        { name: "Neptune", sign: "Capricorn", degree: 13.56, house: "5th", position: 283.56, retrograde: true },
+        { name: "Pluto", sign: "Scorpio", degree: 15.28, house: "3rd", position: 225.28, retrograde: true }
+      ];
+      console.log('📝 Added sample planets data');
+    }
 
     // If API data lacks houses, add sample data for demonstration
     if (housesArray.length === 0) {

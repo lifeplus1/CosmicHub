@@ -8,8 +8,10 @@
     "declarationMap": true,
     "noEmit": false,
     "jsx": "react-jsx",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "types": ["node"]
+  // Standardize lib to ES2022 (inherits behavior/features from base)
+  "lib": ["ES2022", "DOM", "DOM.Iterable"],
+  // Inherit global types (react, react-dom, node) from tsconfig.base.json to avoid duplication
+  // Add package-specific types via a local global.d.ts if needed instead of here
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]

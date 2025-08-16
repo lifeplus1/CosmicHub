@@ -34,9 +34,30 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-slider', '@radix-ui/react-tooltip'],
-          astro: ['@cosmichub/frequency'],
+          // Core framework chunks
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          
+          // UI library chunks  
+          ui: ['@radix-ui/react-slider', '@radix-ui/react-tooltip', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          
+          // Chart and visualization chunks (heavy components)
+          charts: [
+            './src/components/ChartDisplay/ChartDisplay.tsx',
+            './src/features/ChartWheel.tsx',
+            './src/components/MultiSystemChart/MultiSystemChart.tsx'
+          ],
+          
+          // Authentication and user management
+          auth: ['@cosmichub/auth'],
+          
+          // Astrology calculations and utilities
+          astro: ['@cosmichub/frequency', './src/services/api.ts'],
+          
+          // Configuration and types
+          config: ['@cosmichub/config', '@cosmichub/integrations'],
+          
+          // Shared UI components
+          uiComponents: ['@cosmichub/ui'],
         },
       },
     },

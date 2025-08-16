@@ -331,3 +331,68 @@ export function useMemoryMonitoring() {
     formatBytes,
   };
 }
+
+/**
+ * Hook for real-time performance monitoring
+ * Provides live updates of performance metrics
+ */
+export function useRealTimePerformance() {
+  const [report, setReport] = useState<any>(() => {
+    // Initialize with default structure
+    return {
+      components: [],
+      operations: [],
+      pages: [],
+      summary: {
+        totalMetrics: 0,
+        averageRenderTime: 0,
+        slowestComponent: '',
+        fastestComponent: '',
+        errorRate: 0
+      }
+    };
+  });
+
+  useEffect(() => {
+    let mounted = true;
+
+    // Import performance monitor dynamically to avoid build issues
+    const setupPerformanceMonitoring = async () => {
+      try {
+        const { performanceMonitor } = await import('../performance');
+        
+        if (!mounted) return;
+
+        // Get initial report
+        setReport(performanceMonitor.getPerformanceReport());
+
+        // Subscribe to real-time updates
+        const unsubscribe = performanceMonitor.enableRealTimeUpdates((newReport) => {
+          if (mounted) {
+            setReport(newReport);
+          }
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        console.warn('Failed to setup performance monitoring:', error);
+        return () => {};
+      }
+    };
+
+    let cleanup: (() => void) | undefined;
+    
+    setupPerformanceMonitoring().then((unsubscribe) => {
+      cleanup = unsubscribe;
+    });
+
+    return () => {
+      mounted = false;
+      if (cleanup) {
+        cleanup();
+      }
+    };
+  }, []);
+
+  return report;
+}

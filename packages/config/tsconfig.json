@@ -9,8 +9,11 @@
     "noEmit": false,
     "emitDeclarationOnly": false,
     "jsx": "react-jsx",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "rootDir": "./src"
+  // Standardize lib target with workspace (ES2022)
+  "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "rootDir": "./src",
+  // Types inherited from root/base config (react, react-dom, node).
+  // Vite client types provided via local vite-env.d.ts triple-slash reference to avoid duplication.
   },
   "include": [
     "src/index.ts",

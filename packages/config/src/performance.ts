@@ -220,35 +220,33 @@ class PerformanceMonitor {
       // Only send to Firebase in production and if available
       if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
         // Dynamic import to avoid issues in environments without Firebase
-        import('firebase/performance').then(({ getPerformance, trace }) => {
-          try {
-            const perf = getPerformance();
-            const traceInstance = trace(perf, name);
-            traceInstance.start();
-            traceInstance.putMetric('duration', duration);
-            
-            // Add metadata as attributes
-            if (metadata) {
-              Object.entries(metadata).forEach(([key, value]) => {
-                if (typeof value === 'string' || typeof value === 'number') {
-                  traceInstance.putAttribute(key, String(value));
-                }
-              });
-            }
-            
-            traceInstance.stop();
-          } catch (firebaseError) {
-            // Silently fail if Firebase Performance isn't properly configured
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('Firebase Performance Monitoring not available:', firebaseError);
-            }
-          }
-        }).catch(() => {
-          // Firebase Performance not available
-        });
+        // Check if Firebase Performance is available before importing
+        this.tryFirebasePerformanceImport(name, duration, metadata);
       }
     } catch (error) {
       // Silently fail if Firebase is not available
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Firebase Performance Monitoring skipped:', error);
+      }
+    }
+  }
+
+  private async tryFirebasePerformanceImport(
+    name: string, 
+    duration: number, 
+    metadata?: Record<string, any>
+  ): Promise<void> {
+    try {
+      // Skip Firebase Performance monitoring for now
+      // TODO: Configure Firebase Performance when needed
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Performance] ${name}: ${duration}ms`, metadata);
+      }
+    } catch (firebaseError) {
+      // Firebase Performance not available or not configured
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Firebase Performance Monitoring not available, skipping trace:', name);
+      }
     }
   }
 }

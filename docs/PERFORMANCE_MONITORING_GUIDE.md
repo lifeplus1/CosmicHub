@@ -159,12 +159,14 @@ const HeavyComponent = withPerformanceTracking(
 #### usePerformance(componentName, options?)
 
 Returns:
+
 - `startTiming(label)` - Start custom timing measurement
 - `recordInteraction(action, duration?)` - Record user interactions
 - `renderTime` - Component render time
 - `mountTime` - Component mount time
 
 Options:
+
 - `trackRender: boolean` - Enable render time tracking
 - `trackMounts: boolean` - Enable mount time tracking  
 - `trackInteractions: boolean` - Enable interaction tracking
@@ -172,11 +174,13 @@ Options:
 #### useOperationTracking(operationName)
 
 Returns:
+
 - `trackOperation(operation, label?)` - Track async operations
 
 #### usePagePerformance(pageName)
 
 Automatically tracks:
+
 - Page load performance
 - Page visibility changes
 - Navigation timing
@@ -184,6 +188,7 @@ Automatically tracks:
 #### useRealTimePerformance()
 
 Returns:
+
 - Live `PerformanceReport` object with real-time updates
 
 ## Performance Optimization Patterns

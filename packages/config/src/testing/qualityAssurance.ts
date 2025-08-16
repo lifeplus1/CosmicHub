@@ -4,6 +4,7 @@
  */
 
 import { ComponentTestSuite, ComponentTestConfig } from './componentTesting';
+import { expect } from 'vitest';
 import { performanceMonitor } from '../performance';
 
 export interface QAReport {
@@ -408,4 +409,3 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
 // Export singleton instance
 export const qaEngine = new QualityAssuranceEngine();
 export { QualityAssuranceEngine };
-export type { QAReport };

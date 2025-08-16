@@ -179,7 +179,7 @@ const ChartCalculator: React.FC = () => {
       }
 
       const data = await response.json();
-      setChart(data.chart as ExtendedChartData | MultiSystemChartData);
+      setChart(data as ExtendedChartData | MultiSystemChartData);
       setSuccess(formData.multiSystem 
         ? "Multi-system analysis complete with Western, Vedic, Chinese, Mayan, and Uranian astrology" 
         : "Western tropical chart calculated");

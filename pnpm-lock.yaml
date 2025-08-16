@@ -57,6 +57,9 @@ importers:
 
   apps/astro:
     dependencies:
+      '@cosmichub/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.12(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -369,6 +372,12 @@ importers:
       vitest:
         specifier: ^1.6.1
         version: 1.6.1(@types/node@24.3.0)(jsdom@23.2.0)
+
+  packages/types:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.2
 
   packages/ui:
     dependencies:

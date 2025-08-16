@@ -628,4 +628,3 @@ ${report.recommendations.map(rec => `- ${rec}`).join('\n')}
 // Export singleton instance
 export const designSystem = new DesignSystemEngine();
 export { DesignSystemEngine };
-export type { DesignTokens, ComponentPattern, DesignConsistencyReport };
