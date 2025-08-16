@@ -1,17 +1,79 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { TabProps } from './types';
 
 const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
+  const [gatesView, setGatesView] = useState<'all' | 'personality' | 'design'>('all');
+
+  // Filter gates based on selected view
+  const filteredGates = humanDesignData.gates.filter(gate => {
+    if (gatesView === 'all') return true;
+    return gate.type === gatesView;
+  });
+
+  // Count gates by type for display
+  const personalityGates = humanDesignData.gates.filter(gate => gate.type === 'personality');
+  const designGates = humanDesignData.gates.filter(gate => gate.type === 'design');
+
   return (
     <div className="grid grid-cols-2 gap-6">
       <div className="cosmic-card">
         <div className="p-4">
           <h3 className="font-bold text-md">Active Gates</h3>
           <p className="text-sm text-gray-700">Your activated genetic traits</p>
+          
+          {/* Gates View Toggle */}
+          <div className="mt-4 flex space-x-1 bg-cosmic-dark/30 rounded-lg p-1">
+            <button
+              onClick={() => setGatesView('all')}
+              className={`px-3 py-2 text-xs font-medium rounded-md transition-colors ${
+                gatesView === 'all' 
+                  ? 'bg-cosmic-gold text-cosmic-dark' 
+                  : 'text-cosmic-silver hover:text-cosmic-gold'
+              }`}
+            >
+              All ({humanDesignData.gates.length})
+            </button>
+            <button
+              onClick={() => setGatesView('personality')}
+              className={`px-3 py-2 text-xs font-medium rounded-md transition-colors ${
+                gatesView === 'personality' 
+                  ? 'bg-yellow-500 text-cosmic-dark' 
+                  : 'text-cosmic-silver hover:text-yellow-400'
+              }`}
+            >
+              Personality ({personalityGates.length})
+            </button>
+            <button
+              onClick={() => setGatesView('design')}
+              className={`px-3 py-2 text-xs font-medium rounded-md transition-colors ${
+                gatesView === 'design' 
+                  ? 'bg-blue-500 text-cosmic-dark' 
+                  : 'text-cosmic-silver hover:text-blue-400'
+              }`}
+            >
+              Design ({designGates.length})
+            </button>
+          </div>
         </div>
         <div className="p-4">
+          {/* Gates Description based on selected view */}
+          {gatesView === 'personality' && (
+            <div className="mb-4 p-3 bg-yellow-500/10 border-l-4 border-yellow-500 rounded">
+              <p className="text-sm text-yellow-200">
+                <strong>Personality Gates:</strong> Conscious activations representing your aware mind and how you think about yourself. These are calculated from your birth time.
+              </p>
+            </div>
+          )}
+          {gatesView === 'design' && (
+            <div className="mb-4 p-3 bg-blue-500/10 border-l-4 border-blue-500 rounded">
+              <p className="text-sm text-blue-200">
+                <strong>Design Gates:</strong> Unconscious activations representing your body consciousness and how others see you. These are calculated from 88 days before birth.
+              </p>
+            </div>
+          )}
+          
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {humanDesignData.gates.map((gate, index) => (
+            {filteredGates.map((gate, index) => (
               <div key={index} className={`p-3 rounded-md border-l-4 ${gate.type === 'personality' ? 'border-yellow-500 bg-yellow-50/10' : 'border-blue-500 bg-blue-50/10'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -32,6 +94,12 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
               </div>
             ))}
           </div>
+          
+          {filteredGates.length === 0 && (
+            <p className="text-cosmic-silver text-center py-4">
+              No {gatesView} gates found
+            </p>
+          )}
         </div>
       </div>
 
