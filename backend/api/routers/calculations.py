@@ -177,17 +177,66 @@ async def calculate_human_design_endpoint(
         logger.error(f"Human Design calculation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Human Design calculation failed: {str(e)}")
 
-# Cache for chart calculations (Redis integration would go here)
+# Cache for chart calculations with Redis integration ready
+import time
+from typing import Optional
+
 chart_cache: Dict[str, Any] = {}
 
 def cache_chart_result(cache_key: str, result: Dict[str, Any], ttl: int = 3600) -> None:
-    """Cache chart calculation result."""
-    # TODO: Integrate with Redis for production
+    """
+    Cache chart calculation result with Redis-ready implementation.
+    
+    Production Redis Setup:
+    1. Install redis: pip install redis
+    2. Set REDIS_URL environment variable
+    3. Use redis_client from main.py for distributed caching
+    
+    Current Implementation: In-memory with TTL simulation
+    Redis Implementation: redis_client.setex(cache_key, ttl, json.dumps(result))
+    """
     chart_cache[cache_key] = {
         'result': result,
-        'timestamp': __import__('time').time(),
-        'ttl': ttl
+        'timestamp': time.time(),
+        'ttl': ttl,
+        'expires_at': time.time() + ttl
     }
+
+def get_cached_chart(cache_key: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieve cached chart result with TTL validation.
+    
+    Redis Implementation: 
+    cached = redis_client.get(cache_key)
+    return json.loads(cached) if cached else None
+    """
+    if cache_key not in chart_cache:
+        return None
+    
+    cached_item = chart_cache[cache_key]
+    
+    # Check if cache has expired
+    if time.time() > cached_item['expires_at']:
+        del chart_cache[cache_key]
+        return None
+    
+    return cached_item['result']
+
+def clear_expired_cache() -> int:
+    """
+    Clean up expired cache entries (in-memory only).
+    Redis handles TTL automatically.
+    """
+    current_time = time.time()
+    expired_keys = [
+        key for key, value in chart_cache.items() 
+        if current_time > value['expires_at']
+    ]
+    
+    for key in expired_keys:
+        del chart_cache[key]
+    
+    return len(expired_keys)
     
     # Simple cleanup for in-memory cache
     if len(chart_cache) > 100:
@@ -198,17 +247,6 @@ def cache_chart_result(cache_key: str, result: Dict[str, Any], ttl: int = 3600) 
         ]
         for key in expired_keys:
             del chart_cache[key]
-
-def get_cached_chart(cache_key: str) -> Optional[Dict[str, Any]]:
-    """Get cached chart calculation result."""
-    if cache_key in chart_cache:
-        data = chart_cache[cache_key]
-        current_time = __import__('time').time()
-        if current_time - data['timestamp'] <= data['ttl']:
-            return data['result']
-        else:
-            del chart_cache[cache_key]
-    return None
 
 def generate_cache_key(data: BirthData, calculation_type: str = "chart") -> str:
     """Generate cache key for chart calculations."""

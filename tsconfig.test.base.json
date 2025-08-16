@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // Consolidated test-only type definitions across packages
+    "types": [
+      "react",
+      "react-dom",
+      "node",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
+    "noEmit": true
+  },
+  // Test configs should supply their own include globs; base intentionally has none to avoid TS18003 when used indirectly.
+  // (Direct invocation may warn about no inputs.)
+  "exclude": ["node_modules", "dist", ".turbo"]
+}
