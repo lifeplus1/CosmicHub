@@ -53,20 +53,24 @@ def calculate_aspect(sep: float) -> Optional[AspectData]:
             return {'aspect': aspect, 'orb': orb, 'type': aspect_type}
     return None
 
-def build_aspect_matrix(long1: Dict[str, float], long2: Dict[str, float]) -> List[List[Optional[AspectData]]]:
-    """Build the mutable aspect matrix (10x10) for two charts.
+def build_aspect_matrix(long1: Dict[str, float], long2: Dict[str, float], planets: Optional[List[str]] = None) -> List[List[Optional[AspectData]]]:
+    """Build the mutable aspect matrix for two charts.
 
-    Returns a list of rows (one per PLANETS item). Each row is a list of
-    AspectData or None entries corresponding to aspects from the row planet
-    (person1) to the column planet (person2). Returned as concrete lists so
-    callers able to mutate if needed; functions that only read should accept
-    the Matrix alias (Sequence[Sequence[Optional[AspectData]]]) for covariance.
+    This function is backward-compatible: callers may pass an explicit
+    list of planet keys as the third argument; if omitted the module-level
+    ``PLANETS`` list is used.
+
+    Returns a list of rows (one per planet in ``planets``). Each row is a
+    list of AspectData or None entries corresponding to aspects from the
+    row planet (person1) to the column planet (person2).
     """
+    planets = planets or PLANETS
+
     matrix: List[List[Optional[AspectData]]] = []
-    for p1 in PLANETS:
+    for p1 in planets:
         row: List[Optional[AspectData]] = []
         lon1 = long1.get(p1, 0.0)
-        for p2 in PLANETS:
+        for p2 in planets:
             lon2 = long2.get(p2, 0.0)
             sep = abs(lon1 - lon2) % 360
             if sep > 180:

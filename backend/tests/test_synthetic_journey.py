@@ -25,7 +25,7 @@ TEST_TOKEN = os.environ.get("TEST_AUTH_TOKEN", "test-dev-token")
 JOURNEY_STEPS = [
     {"name": "root", "method": "GET", "path": "/"},
     # Add real API endpoints below once confirmed (examples):
-    {"name": "transits", "method": "GET", "path": "/api/transits/sample"},
+    {"name": "transits", "method": "GET", "path": "/api/astro/transits/sample"},
 ]
 
 

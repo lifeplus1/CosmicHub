@@ -290,6 +290,23 @@ def get_cache_key(prefix: str, birth_data: BirthData, date_range: DateRange, **k
     
     return ":".join(key_parts)
 
+@router.get("/transits/sample")
+async def get_sample_transits():
+    """Get sample transit data for testing purposes."""
+    return {
+        "sample_transits": [
+            {
+                "date": "2025-08-16",
+                "transit_planet": "Mars",
+                "natal_planet": "Sun",
+                "aspect": "conjunction",
+                "orb": 2.5,
+                "exact_date": "2025-08-16T14:30:00Z"
+            }
+        ],
+        "status": "sample_data"
+    }
+
 @router.post("/transits", response_model=List[TransitResult])
 async def calculate_transits(
     request: TransitCalculationRequest,

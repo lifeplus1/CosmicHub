@@ -4,9 +4,11 @@ Modular chart calculation router for better code organization.
 Extracted from main.py for improved maintainability.
 """
 
+from __future__ import annotations
+
 from fastapi import APIRouter, Request, HTTPException, Query, BackgroundTasks
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
-from typing import Optional, Dict, Any, List, cast, Callable, Awaitable, TYPE_CHECKING, Protocol
+from pydantic import BaseModel, Field, field_validator, ValidationInfo, model_validator
+from typing import Optional, Dict, Any, List, cast, Callable, Awaitable, TYPE_CHECKING, Protocol, Any as TypingAny
 import logging
 
 from astro.calculations.chart import calculate_chart, calculate_multi_system_chart
@@ -342,13 +344,15 @@ def generate_cache_key(data: BirthData, calculation_type: str = "chart") -> str:
 # PHASE 2: COMPOSITE CHART VECTORIZATION
 # ========================================
 
-# Import composite chart vectorization if available
+# Type-only imports for static analysis
+if TYPE_CHECKING:
+    from utils.vectorized_composite_utils import VectorizedChartData, create_vectorized_composite_calculator
+
+# Import composite chart vectorization runtime symbols if available
+create_vectorized_composite_calculator = None  # type: ignore[assignment]
+VectorizedChartData = None  # type: ignore[assignment]
 try:
-    from utils.vectorized_composite_utils import (
-        VectorizedCompositeCalculator,
-        VectorizedChartData,
-        create_vectorized_composite_calculator
-    )
+    from utils.vectorized_composite_utils import VectorizedChartData, create_vectorized_composite_calculator  # type: ignore
     composite_vectorization_available = True
 except Exception:
     composite_vectorization_available = False
@@ -356,16 +360,22 @@ except Exception:
 
 class CompositeChartRequest(BaseModel):
     """Request model for composite chart calculation"""
-    charts: List[BirthData] = Field(..., min_items=2, max_items=10)
+    charts: List[BirthData] = Field(...)
     names: Optional[List[str]] = Field(None, description="Names for each chart")
     method: str = Field("midpoint", description="Composite method: 'midpoint' or 'davison'")
+
+    @model_validator(mode="after")
+    def check_charts_length(self) -> "CompositeChartRequest":
+        if not (2 <= len(self.charts) <= 10):
+            raise ValueError("`charts` must contain between 2 and 10 items")
+        return self
 
 @router.post("/composite-chart")
 async def calculate_composite_chart(
     request: CompositeChartRequest,
     use_vectorized: bool = Query(False, description="Enable vectorized calculations for performance"),
     optimization_level: str = Query("balanced", description="Optimization level: fast, balanced, accurate")
-):
+) -> Dict[str, Any]:
     """
     Calculate composite chart from multiple individual charts
     
@@ -389,7 +399,7 @@ async def calculate_composite_chart(
             logger.info("Using vectorized composite chart calculation")
             
             # Convert birth data to vectorized chart data
-            vectorized_charts = []
+            vectorized_charts: List[TypingAny] = []
             for i, birth_data in enumerate(request.charts):
                 # Calculate individual chart first
                 individual_chart = calculate_chart(
@@ -399,24 +409,24 @@ async def calculate_composite_chart(
                 )
                 
                 # Convert to vectorized format
-                vectorized_chart = _convert_to_vectorized_chart(
+                vectorized_chart: TypingAny = _convert_to_vectorized_chart(
                     individual_chart, 
                     chart_id=f"chart_{i}",
                     name=request.names[i] if request.names and i < len(request.names) else f"Person {i+1}"
                 )
                 vectorized_charts.append(vectorized_chart)
-            
-            # Create vectorized calculator
-            calculator = create_vectorized_composite_calculator(optimization_level)
-            
+
+            # Create vectorized calculator (runtime factory) - cast to callable for analyzer
+            calculator: TypingAny = cast(Callable[[str], TypingAny], create_vectorized_composite_calculator)(optimization_level)
+
             # Calculate composite chart
             composite_result = calculator.calculate_composite_chart(
-                vectorized_charts, 
+                vectorized_charts,
                 method=request.method
             )
             
             # Convert to API response format
-            response_data = {
+            response_data: Dict[str, Any] = {
                 "composite_chart": {
                     "planets": composite_result.composite_planets,
                     "houses": composite_result.composite_houses,
@@ -442,7 +452,7 @@ async def calculate_composite_chart(
             logger.info("Using traditional composite chart calculation")
             
             # Calculate individual charts
-            individual_charts = []
+            individual_charts: List[Dict[str, Any]] = []
             for birth_data in request.charts:
                 chart = calculate_chart(
                     birth_data.year, birth_data.month, birth_data.day,
@@ -454,7 +464,7 @@ async def calculate_composite_chart(
             # Traditional composite calculation
             composite_chart = _calculate_traditional_composite(individual_charts, request.method)
             
-            response_data = {
+            response_data: Dict[str, Any] = {
                 "composite_chart": composite_chart,
                 "relationship_analysis": {
                     "method": request.method,
@@ -476,7 +486,7 @@ async def calculate_composite_chart(
         logger.error(f"Error in composite chart calculation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Composite chart calculation failed: {str(e)}")
 
-def _convert_to_vectorized_chart(chart_data: Dict[str, Any], chart_id: str, name: str) -> 'VectorizedChartData':
+def _convert_to_vectorized_chart(chart_data: Dict[str, Any], chart_id: str, name: str) -> TypingAny:
     """Convert traditional chart data to vectorized format"""
     import numpy as np
     from datetime import datetime
@@ -510,11 +520,15 @@ def _convert_to_vectorized_chart(chart_data: Dict[str, Any], chart_id: str, name
             chart_data.get("angles", {}).get("IC", {}).get("longitude", 270),
         ])
         
-        # Create vectorized chart data
-        return VectorizedChartData(
+        # Build aspects array if present
+        aspects_array = np.array(chart_data.get('aspects', []), dtype=object)
+
+        # Create vectorized chart data - cast constructor for analyzer
+        return cast(Callable[..., TypingAny], VectorizedChartData)(
             planets=planets_array,
             houses=houses_array,
             angles=angles_array,
+            aspects=aspects_array,
             chart_id=chart_id,
             name=name,
             birth_datetime=datetime.now()  # Simplified - would use actual birth time
@@ -535,10 +549,10 @@ def _calculate_traditional_composite(charts: List[Dict[str, Any]], method: str) 
                    "Saturn", "Uranus", "Neptune", "Pluto"]
     
     for planet in planet_names:
-        positions = []
+        positions: List[float] = []
         for chart in charts:
             if planet in chart.get("planets", {}):
-                positions.append(chart["planets"][planet].get("longitude", 0))
+                positions.append(float(chart["planets"][planet].get("longitude", 0)))
         
         if positions:
             # Simple midpoint calculation

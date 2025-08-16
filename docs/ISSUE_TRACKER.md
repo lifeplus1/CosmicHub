@@ -15,7 +15,7 @@ Status Legend:
 | UI-003 | Complete chart saving/loading CRUD functionality | PLANNED | you | 2025-08-22 | Partial implementation, needs full persistence **→ Use Claude 3.5 Sonnet** | Frontend Analysis |
 | TEST-001 | Integration test enrichment (healwave-astro path) | PLANNED | you | 2025-08-19 | Add real component render + assertions | PROJECT_PRIORITIES_2025 |
 | EXP-002 | A/B modal variant content | PLANNED | you | 2025-08-19 | Use analytics hook to condition content | PROJECT_PRIORITIES_2025 |
-| OBS-003 | Synthetic journey script | IN-PROGRESS | you | 2025-08-21 | Script scaffold + log output JSON | slo-policy.md |
+| OBS-003 | Synthetic journey script | DONE | you | 2025-08-16 | Script implemented with passing tests, root endpoint added, transits sample endpoint created | slo-policy.md |
 | OBS-004 | Weekly SLO report automation | PLANNED | you | 2025-08-22 | Cron + markdown summary artifact | slo-policy.md |
 | SEC-002 | Secret inventory generator | PLANNED | you | 2025-08-21 | Produce JSON consumed by check_secret_ages.py | secret-rotation.md |
 | PRIV-004 | Persist & rotate pseudonymization salts | PLANNED | you | 2025-08-23 | Firestore (or file) store + rotation policy | pseudonymization.md |

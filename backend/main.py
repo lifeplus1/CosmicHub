@@ -592,6 +592,15 @@ async def calculate_gene_keys_endpoint(data: BirthData, request: Request):
         logger.error(f"Gene Keys calculation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Gene Keys calculation failed: {str(e)}")
 
+@app.get("/")
+async def root():
+    """Root endpoint for health checks and basic API information."""
+    return {
+        "service": "CosmicHub Backend API",
+        "status": "running",
+        "version": "1.0.0"
+    }
+
 @app.get("/health")
 async def root_health():
     return {"status": "ok"}
