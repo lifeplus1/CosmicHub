@@ -5,6 +5,7 @@ import { useSubscription } from '@cosmichub/auth';
 import { useAuth } from '@cosmichub/auth';
 import { stripeService, StripeSession } from '@cosmichub/integrations';
 import { upgradeEventManager } from '../utils/upgradeEvents';
+import { useToast } from './ToastProvider';
 
 /**
  * Centralized component that manages the upgrade modal display and upgrade logic
@@ -13,6 +14,7 @@ export const UpgradeModalManager: React.FC = () => {
   const { isOpen, feature, openUpgradeModal, closeUpgradeModal } = useUpgradeModal();
   const { userTier } = useSubscription();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Listen for upgrade required events
   useEffect(() => {
@@ -63,7 +65,16 @@ export const UpgradeModalManager: React.FC = () => {
       closeUpgradeModal();
     } catch (error) {
       console.error('Upgrade process failed:', error);
-      // TODO: Show error notification to user
+      
+      // Show error notification to user
+      toast({
+        title: 'Upgrade Failed',
+        description: 'We encountered an issue while processing your upgrade. Please try again or contact support if the problem persists.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
+      
       closeUpgradeModal();
     }
   }, [user, userTier, feature, closeUpgradeModal]);
