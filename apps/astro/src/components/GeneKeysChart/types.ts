@@ -32,22 +32,22 @@ export interface GeneKeysData {
   evolution: GeneKey;
   radiance: GeneKey;
   purpose: GeneKey;
+  attraction: GeneKey;
+  iq: GeneKey;
+  eq: GeneKey;
+  sq: GeneKey;
+  core_wound: GeneKey;
   activation: {
     name: string;
     description: string;
     keys: GeneKey[];
   };
-  iq: {
+  venus_sequence: {
     name: string;
     description: string;
     keys: GeneKey[];
   };
-  eq: {
-    name: string;
-    description: string;
-    keys: GeneKey[];
-  };
-  sq: {
+  pearl_sequence: {
     name: string;
     description: string;
     keys: GeneKey[];

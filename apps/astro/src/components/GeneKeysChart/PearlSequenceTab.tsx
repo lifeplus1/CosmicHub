@@ -14,10 +14,10 @@ const SacredSequenceTab: React.FC<SacredSequenceTabProps> = React.memo(({
     onKeySelect(key);
   }, [onKeySelect]);
 
-  if (!geneKeysData.sq) {
+  if (!geneKeysData.pearl_sequence) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-cosmic-silver/60">No Sacred Sequence data available</p>
+        <p className="text-cosmic-silver/60">No Pearl Sequence data available</p>
       </div>
     );
   }
@@ -31,21 +31,21 @@ const SacredSequenceTab: React.FC<SacredSequenceTabProps> = React.memo(({
             <span className="mr-3 text-3xl">🕉️</span>
             <div>
               <h3 className="text-2xl font-bold text-purple-400">
-                {geneKeysData.sq.name}
+                {geneKeysData.pearl_sequence.name}
               </h3>
-              <p className="text-cosmic-silver/80">Spiritual Quotient (SQ) Sequence</p>
+              <p className="text-cosmic-silver/80">Pearl Sequence - Spiritual Mastery</p>
             </div>
           </div>
           
           <p className="leading-relaxed text-cosmic-silver">
-            {geneKeysData.sq.description}
+            {geneKeysData.pearl_sequence.description}
           </p>
         </div>
       </div>
 
       {/* Gene Keys Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {geneKeysData.sq.keys.map((geneKey, index) => (
+        {geneKeysData.pearl_sequence.keys.map((geneKey, index) => (
           <div
             key={`${geneKey.number}-${index}`}
             className="transition-all duration-300 border cursor-pointer cosmic-card bg-gradient-to-br from-purple-800/20 to-violet-800/20 border-purple-500/20 hover:border-purple-400/40 group"

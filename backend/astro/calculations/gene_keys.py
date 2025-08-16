@@ -619,12 +619,27 @@ def calculate_gene_keys_profile(year: int, month: int, day: int, hour: int, minu
             raise ValueError("Failed to calculate Human Design data for Gene Keys")
         
         # Extract the key gates for Gene Keys sequences
-        conscious: Dict[str, Any] = hd_data.get("conscious", {})
-        unconscious: Dict[str, Any] = hd_data.get("unconscious", {})
+        gates_array = hd_data.get("gates", [])
+        
+        # Convert gates array to conscious/unconscious structure for Gene Keys
+        conscious = {}
+        unconscious = {}
+        
+        for gate in gates_array:
+            planet = gate.get("planet", "")
+            gate_number = gate.get("number", 1)
+            gate_type = gate.get("type", "")
+            
+            if gate_type == "personality":  # Conscious
+                conscious[planet] = {"gate": gate_number}
+            elif gate_type == "design":  # Unconscious
+                unconscious[planet] = {"gate": gate_number}
         
         # Core Gates
         sun_gate: int = conscious.get("sun", {}).get("gate", 1)
         earth_gate: int = conscious.get("earth", {}).get("gate", 1)
+        radiance_gate: int = unconscious.get("sun", {}).get("gate", 1)
+        purpose_gate: int = unconscious.get("earth", {}).get("gate", 1)
         
         # Calculate the three main sequences
         activation_sequence: Dict[str, Any] = calculate_activation_sequence(conscious, unconscious)
@@ -635,19 +650,60 @@ def calculate_gene_keys_profile(year: int, month: int, day: int, hour: int, minu
         profile: Dict[str, Any] = {
             "life_work": get_gene_key_details(sun_gate),
             "evolution": get_gene_key_details(earth_gate),
-            "sequences": {
-                "activation": activation_sequence,
-                "venus": venus_sequence,
-                "pearl": pearl_sequence
+            "radiance": get_gene_key_details(radiance_gate),
+            "purpose": get_gene_key_details(purpose_gate),
+            "attraction": venus_sequence.get("attraction", {}),
+            "iq": venus_sequence.get("iq", {}),
+            "eq": venus_sequence.get("eq", {}),
+            "sq": venus_sequence.get("sq", {}),
+            "core_wound": venus_sequence.get("core_wound", {}),
+            "activation": {
+                "name": activation_sequence.get("name", "Activation Sequence"),
+                "description": activation_sequence.get("description", ""),
+                "keys": [
+                    activation_sequence.get("life_work", {}),
+                    activation_sequence.get("evolution", {}),
+                    activation_sequence.get("radiance", {}),
+                    activation_sequence.get("purpose", {})
+                ]
             },
-            "core_gates": {
-                "sun": sun_gate,
-                "earth": earth_gate,
-                "north_node": conscious.get("north_node", {}).get("gate", 1),
-                "south_node": conscious.get("south_node", {}).get("gate", 1)
+            "iq": venus_sequence.get("iq", {}),
+            "eq": venus_sequence.get("eq", {}), 
+            "sq": venus_sequence.get("sq", {}),
+            "venus_sequence": {
+                "name": venus_sequence.get("name", "Venus Sequence"),
+                "description": venus_sequence.get("description", ""),
+                "keys": [
+                    venus_sequence.get("attraction", {}),
+                    venus_sequence.get("iq", {}),
+                    venus_sequence.get("eq", {}),
+                    venus_sequence.get("sq", {})
+                ]
             },
-            "hologenetic_profile": calculate_hologenetic_profile(hd_data),
-            "golden_path": calculate_golden_path(activation_sequence)
+            "pearl_sequence": {
+                "name": pearl_sequence.get("name", "Pearl Sequence"),
+                "description": pearl_sequence.get("description", ""),
+                "keys": [
+                    pearl_sequence.get("vocation", {}),
+                    pearl_sequence.get("culture", {}),
+                    pearl_sequence.get("brand", {}),
+                    pearl_sequence.get("pearl", {})
+                ] if pearl_sequence.get("vocation") else []
+            },
+            "contemplation_sequence": [
+                f"Gene Key {sun_gate}",
+                f"Gene Key {earth_gate}", 
+                f"Gene Key {radiance_gate}",
+                f"Gene Key {purpose_gate}"
+            ],
+            "hologenetic_profile": {
+                "description": "Your complete genetic blueprint and consciousness evolution path",
+                "integration_path": [
+                    f"Core Quartet Integration: {sun_gate}, {earth_gate}, {radiance_gate}, {purpose_gate}",
+                    f"Venus Sequence Integration: IQ → EQ → SQ",
+                    f"Hologenetic Synthesis: All planetary activations working as unified field"
+                ]
+            }
         }
         
         logger.info("Gene Keys profile calculated successfully")
@@ -707,17 +763,20 @@ def calculate_activation_sequence(conscious: Dict[str, Any], unconscious: Dict[s
 def calculate_venus_sequence(conscious: Dict[str, Any], unconscious: Dict[str, Any]) -> Dict[str, Any]:
     """Calculate the Venus Sequence - relationships and love"""
     try:
-        # Attraction (Conscious Venus)
-        attraction_gate = conscious.get("venus", {}).get("gate", 1)
+        # Attraction (Unconscious Moon)
+        attraction_gate = unconscious.get("moon", {}).get("gate", 1)
         
-        # IQ (Unconscious Venus)
-        iq_gate = unconscious.get("venus", {}).get("gate", 1)
+        # IQ (Conscious Venus)
+        iq_gate = conscious.get("venus", {}).get("gate", 1)
         
         # EQ (Conscious Mars)
         eq_gate = conscious.get("mars", {}).get("gate", 1)
         
-        # SQ (Unconscious Mars)
-        sq_gate = unconscious.get("mars", {}).get("gate", 1)
+        # SQ (Unconscious Venus)
+        sq_gate = unconscious.get("venus", {}).get("gate", 1)
+        
+        # Core Wound (Unconscious Mars)
+        core_wound_gate = unconscious.get("mars", {}).get("gate", 1)
         
         return {
             "name": "Venus Sequence",
@@ -726,6 +785,7 @@ def calculate_venus_sequence(conscious: Dict[str, Any], unconscious: Dict[str, A
             "iq": get_gene_key_details(iq_gate),
             "eq": get_gene_key_details(eq_gate),
             "sq": get_gene_key_details(sq_gate),
+            "core_wound": get_gene_key_details(core_wound_gate),
             "theme": "The Art of Being in Relationship"
         }
     except Exception as e:
@@ -763,8 +823,21 @@ def calculate_pearl_sequence(conscious: Dict[str, Any], unconscious: Dict[str, A
 def calculate_hologenetic_profile(hd_data: Dict[str, Any]) -> Dict[str, Any]:
     """Calculate the Hologenetic Profile - your complete genetic makeup"""
     try:
-        conscious = hd_data.get("conscious", {})
-        unconscious = hd_data.get("unconscious", {})
+        gates_array = hd_data.get("gates", [])
+        
+        # Convert gates array to conscious/unconscious structure
+        conscious = {}
+        unconscious = {}
+        
+        for gate in gates_array:
+            planet = gate.get("planet", "")
+            gate_number = gate.get("number", 1)
+            gate_type = gate.get("type", "")
+            
+            if gate_type == "personality":  # Conscious
+                conscious[planet] = {"gate": gate_number}
+            elif gate_type == "design":  # Unconscious
+                unconscious[planet] = {"gate": gate_number}
         
         # All planetary gates
         planets = ["sun", "earth", "moon", "north_node", "south_node", 

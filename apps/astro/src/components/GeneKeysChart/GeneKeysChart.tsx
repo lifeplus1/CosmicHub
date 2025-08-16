@@ -62,7 +62,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
     if (birthData) {
       handleCalculate();
     }
-  }, [birthData, handleCalculate]);
+  }, [birthData]); // Removed handleCalculate from dependencies to prevent infinite loop
 
   // Memoized loading state
   const loadingState = useMemo(() => (

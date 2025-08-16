@@ -146,7 +146,7 @@ except Exception as e:  # pragma: no cover - fallback path
     from collections import defaultdict
     rate_limit_store: Dict[tuple[str, str], List[float]] = defaultdict(list)
 
-RATE_LIMIT = 60  # requests
+RATE_LIMIT = 1000  # requests - increased for development
 RATE_PERIOD = 60  # seconds
 
 # Enhanced Redis-based rate limiter with memory cleanup
@@ -359,6 +359,64 @@ async def calculate_human_design_endpoint(data: BirthData, request: Request):
     except Exception as e:
         logger.error(f"Human Design calculation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Human Design calculation failed: {str(e)}")
+
+@app.post("/calculate-gene-keys")
+async def calculate_gene_keys_endpoint(data: BirthData, request: Request):
+    await rate_limiter(request)
+    
+    # Debug: Log incoming request data
+    print(f"🗝️ Gene Keys backend received data: year={data.year}, month={data.month}, day={data.day}, hour={data.hour}, minute={data.minute}")
+    print(f"🗝️ Location data: lat={data.lat}, lon={data.lon}, timezone={data.timezone}, city={data.city}")
+    
+    try:
+        # Import Gene Keys calculation function
+        from astro.calculations.gene_keys import calculate_gene_keys_profile
+        
+        # Resolve coordinates if not provided but city is available
+        lat = data.lat
+        lon = data.lon
+        timezone = data.timezone
+        
+        # Enhanced geocoding with better error handling
+        if data.city and (lat is None or lon is None):
+            from astro.calculations.chart import get_location
+            print(f"🌍 Resolving location for city: {data.city}")
+            try:
+                location_data = get_location(data.city)
+                lat = location_data["latitude"]
+                lon = location_data["longitude"]
+                timezone = location_data["timezone"] or timezone
+                print(f"✅ Location resolved: lat={lat}, lon={lon}, timezone={timezone}")
+            except Exception as geo_error:
+                print(f"❌ Geocoding failed for city '{data.city}': {str(geo_error)}")
+                logger.error(f"Geocoding error for city '{data.city}': {str(geo_error)}")
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Invalid city '{data.city}' or geocoding service unavailable. Please provide valid latitude and longitude coordinates."
+                )
+        
+        # Validate required coordinates
+        if lat is None or lon is None:
+            raise ValueError("Latitude and longitude are required for Gene Keys calculation")
+        
+        if timezone is None:
+            timezone = "UTC"
+        
+        gene_keys_profile = calculate_gene_keys_profile(
+            year=data.year,
+            month=data.month,
+            day=data.day,
+            hour=data.hour,
+            minute=data.minute,
+            lat=lat,
+            lon=lon,
+            timezone=timezone
+        )
+        
+        return {"gene_keys": gene_keys_profile}
+    except Exception as e:
+        logger.error(f"Gene Keys calculation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Gene Keys calculation failed: {str(e)}")
 
 @app.get("/health")
 async def root_health():
