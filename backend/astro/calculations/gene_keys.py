@@ -1,9 +1,37 @@
 # backend/astro/calculations/gene_keys.py
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from .human_design import calculate_human_design
 
 logger = logging.getLogger(__name__)
+
+# Gene Keys Golden Path Line Themes for each sphere
+GOLDEN_PATH_LINE_THEMES = {
+    "iq": {  # IQ Sphere - Activation Sequence (Mental Intelligence)
+        1: "Attraction",
+        2: "Orientation", 
+        3: "Activation",
+        4: "Meditation",
+        5: "Contemplation",
+        6: "Illumination"
+    },
+    "eq": {  # EQ Sphere - Venus Sequence (Emotional Intelligence)
+        1: "Survival",
+        2: "Seduction",
+        3: "Symbiosis", 
+        4: "Synthesis",
+        5: "Synergy",
+        6: "Synchronicity"
+    },
+    "sq": {  # SQ Sphere - Pearl Sequence (Spiritual Intelligence)
+        1: "Foundation",
+        2: "Stability",
+        3: "Flexibility",
+        4: "Permeability", 
+        5: "Fluidity",
+        6: "Transparency"
+    }
+}
 
 # Gene Keys - 64 Keys with Shadow, Gift, and Siddhi
 GENE_KEYS = {
@@ -622,18 +650,19 @@ def calculate_gene_keys_profile(year: int, month: int, day: int, hour: int, minu
         gates_array = hd_data.get("gates", [])
         
         # Convert gates array to conscious/unconscious structure for Gene Keys
-        conscious = {}
-        unconscious = {}
+        conscious: Dict[str, Dict[str, int]] = {}
+        unconscious: Dict[str, Dict[str, int]] = {}
         
         for gate in gates_array:
             planet = gate.get("planet", "")
             gate_number = gate.get("number", 1)
+            line_number = gate.get("line", 1)
             gate_type = gate.get("type", "")
             
             if gate_type == "personality":  # Conscious
-                conscious[planet] = {"gate": gate_number}
+                conscious[planet] = {"gate": gate_number, "line": line_number}
             elif gate_type == "design":  # Unconscious
-                unconscious[planet] = {"gate": gate_number}
+                unconscious[planet] = {"gate": gate_number, "line": line_number}
         
         # Core Gates
         sun_gate: int = conscious.get("sun", {}).get("gate", 1)
@@ -713,24 +742,37 @@ def calculate_gene_keys_profile(year: int, month: int, day: int, hour: int, minu
         logger.error(f"Error calculating Gene Keys profile: {str(e)}")
         raise
 
-def get_gene_key_details(gate_number: int) -> Dict[str, Any]:
-    """Get detailed information about a specific Gene Key"""
+def get_gene_key_details(gate_number: int, line_number: int = 1, sphere: Optional[str] = None) -> Dict[str, Any]:
+    """Get detailed information about a specific Gene Key with line themes"""
     key_data = GENE_KEYS.get(gate_number, {})
     if not key_data:
         return {"error": f"Gene Key {gate_number} not found"}
     
-    return {
+    result: Dict[str, Any] = {
         "number": gate_number,
-        "name": key_data.get("name", "Unknown"),
-        "shadow": key_data.get("shadow", ""),
-        "gift": key_data.get("gift", ""),
-        "siddhi": key_data.get("siddhi", ""),
-        "description": key_data.get("description", ""),
-        "keynote": key_data.get("keynote", ""),
-        "codon": key_data.get("codon", ""),
-        "programming_partner": get_programming_partner(gate_number),
-        "sphere": get_sphere(gate_number)
+        "line": line_number,
+        "name": str(key_data.get("name", "Unknown")),
+        "shadow": str(key_data.get("shadow", "")),
+        "gift": str(key_data.get("gift", "")),
+        "siddhi": str(key_data.get("siddhi", "")),
+        "description": str(key_data.get("description", "")),
+        "keynote": str(key_data.get("keynote", "")),
+        "codon": str(key_data.get("codon", "")),
+        "programming_partner": int(get_programming_partner(gate_number)),
+        "sphere": str(get_sphere(gate_number))
     }
+    
+    # Add sphere-specific line theme if sphere is specified
+    if sphere and sphere in GOLDEN_PATH_LINE_THEMES:
+        line_theme = GOLDEN_PATH_LINE_THEMES[sphere].get(line_number, f"Line {line_number}")
+        result["line_theme"] = str(line_theme)
+        result["sphere_context"] = str(sphere.upper())
+    
+    return result
+
+def get_gene_key_details_legacy(gate_number: int) -> Dict[str, Any]:
+    """Legacy function for backward compatibility"""
+    return get_gene_key_details(gate_number)
 
 def calculate_activation_sequence(conscious: Dict[str, Any], unconscious: Dict[str, Any]) -> Dict[str, Any]:
     """Calculate the Activation Sequence - your core transformation"""
@@ -765,27 +807,32 @@ def calculate_venus_sequence(conscious: Dict[str, Any], unconscious: Dict[str, A
     try:
         # Attraction (Unconscious Moon)
         attraction_gate = unconscious.get("moon", {}).get("gate", 1)
+        attraction_line = unconscious.get("moon", {}).get("line", 1)
         
         # IQ (Conscious Venus)
         iq_gate = conscious.get("venus", {}).get("gate", 1)
+        iq_line = conscious.get("venus", {}).get("line", 1)
         
         # EQ (Conscious Mars)
         eq_gate = conscious.get("mars", {}).get("gate", 1)
+        eq_line = conscious.get("mars", {}).get("line", 1)
         
         # SQ (Unconscious Venus)
         sq_gate = unconscious.get("venus", {}).get("gate", 1)
+        sq_line = unconscious.get("venus", {}).get("line", 1)
         
         # Core Wound (Unconscious Mars)
         core_wound_gate = unconscious.get("mars", {}).get("gate", 1)
+        core_wound_line = unconscious.get("mars", {}).get("line", 1)
         
         return {
             "name": "Venus Sequence",
             "description": "Your relationships and how you attract and give love",
-            "attraction": get_gene_key_details(attraction_gate),
-            "iq": get_gene_key_details(iq_gate),
-            "eq": get_gene_key_details(eq_gate),
-            "sq": get_gene_key_details(sq_gate),
-            "core_wound": get_gene_key_details(core_wound_gate),
+            "attraction": get_gene_key_details(attraction_gate, attraction_line),
+            "iq": get_gene_key_details(iq_gate, iq_line, "iq"),
+            "eq": get_gene_key_details(eq_gate, eq_line, "eq"),
+            "sq": get_gene_key_details(sq_gate, sq_line, "sq"),
+            "core_wound": get_gene_key_details(core_wound_gate, core_wound_line),
             "theme": "The Art of Being in Relationship"
         }
     except Exception as e:
@@ -826,18 +873,19 @@ def calculate_hologenetic_profile(hd_data: Dict[str, Any]) -> Dict[str, Any]:
         gates_array = hd_data.get("gates", [])
         
         # Convert gates array to conscious/unconscious structure
-        conscious = {}
-        unconscious = {}
+        conscious: Dict[str, Dict[str, int]] = {}
+        unconscious: Dict[str, Dict[str, int]] = {}
         
         for gate in gates_array:
             planet = gate.get("planet", "")
             gate_number = gate.get("number", 1)
             gate_type = gate.get("type", "")
+            line_number = gate.get("line", 1)
             
             if gate_type == "personality":  # Conscious
-                conscious[planet] = {"gate": gate_number}
+                conscious[planet] = {"gate": gate_number, "line": line_number}
             elif gate_type == "design":  # Unconscious
-                unconscious[planet] = {"gate": gate_number}
+                unconscious[planet] = {"gate": gate_number, "line": line_number}
         
         # All planetary gates
         planets = ["sun", "earth", "moon", "north_node", "south_node", 
@@ -854,14 +902,18 @@ def calculate_hologenetic_profile(hd_data: Dict[str, Any]) -> Dict[str, Any]:
         
         for planet in planets:
             if planet in conscious:
-                gate = conscious[planet].get("gate", 1)
-                hologenetic["conscious"][planet] = get_gene_key_details(gate)
-                hologenetic["all_gates"].add(gate)
+                gate_data = conscious[planet]
+                gate = gate_data.get("gate", 1)
+                line = gate_data.get("line", 1)
+                hologenetic["conscious"][planet] = get_gene_key_details(int(gate), int(line))
+                hologenetic["all_gates"].add(int(gate))
                 
             if planet in unconscious:
-                gate = unconscious[planet].get("gate", 1) 
-                hologenetic["unconscious"][planet] = get_gene_key_details(gate)
-                hologenetic["all_gates"].add(gate)
+                gate_data = unconscious[planet]
+                gate = gate_data.get("gate", 1) 
+                line = gate_data.get("line", 1)
+                hologenetic["unconscious"][planet] = get_gene_key_details(int(gate), int(line))
+                hologenetic["all_gates"].add(int(gate))
         
         # Convert set to list for JSON serialization
         hologenetic["all_gates"] = list(hologenetic["all_gates"])

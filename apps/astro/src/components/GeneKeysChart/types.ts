@@ -19,6 +19,10 @@ export interface GeneKey {
   siddhi: string;
   codon: string;
   description: string;
+  line?: number;
+  line_theme?: string;
+  sphere?: string;
+  sphere_context?: string;
 }
 
 export interface Sequence {

@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional, TypedDict, List
 from fastapi import HTTPException, Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth
-from backend.database import get_firestore_client
+from database import get_firestore_client
 
 # Configure Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")

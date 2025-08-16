@@ -1,6 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card, Button } from '@cosmichub/ui';
 import { useToast } from './ToastProvider';
+import { useAuth } from '@cosmichub/auth';
+import { db } from '@cosmichub/config/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 interface ChartPreferencesData {
   theme: 'light' | 'dark' | 'auto';
@@ -11,12 +14,53 @@ interface ChartPreferencesData {
 
 const ChartPreferences: React.FC = React.memo(() => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [preferences, setPreferences] = useState<ChartPreferencesData>({
     theme: 'dark',
     notifications: true,
     sessionReminders: true,
     audioQuality: 'high',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState(true);
+
+  // Load user preferences on mount
+  useEffect(() => {
+    if (user?.uid) {
+      loadUserPreferences();
+    } else {
+      setIsLoadingPreferences(false);
+    }
+  }, [user?.uid]);
+
+  const loadUserPreferences = useCallback(async () => {
+    if (!user?.uid) return;
+
+    try {
+      setIsLoadingPreferences(true);
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.healwavePreferences) {
+          setPreferences(prev => ({
+            ...prev,
+            ...userData.healwavePreferences
+          }));
+        }
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to load user preferences:', error);
+      toast({
+        message: 'Failed to load your preferences',
+        type: 'error'
+      });
+    } finally {
+      setIsLoadingPreferences(false);
+    }
+  }, [user?.uid, toast]);
 
   const handlePreferenceChange = useCallback((key: keyof ChartPreferencesData, value: any) => {
     setPreferences(prev => ({
@@ -26,19 +70,39 @@ const ChartPreferences: React.FC = React.memo(() => {
   }, []);
 
   const handleSavePreferences = useCallback(async () => {
+    if (!user?.uid) {
+      toast({
+        message: 'You must be logged in to save preferences',
+        type: 'error'
+      });
+      return;
+    }
+
     try {
-      // TODO: Save to backend/Firestore
+      setIsLoading(true);
+      
+      // Save preferences to Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, {
+        healwavePreferences: preferences,
+        updatedAt: new Date()
+      }, { merge: true });
+
       toast({
         message: 'Preferences saved successfully',
         type: 'success'
       });
-    } catch {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to save preferences:', error);
       toast({
         message: 'Failed to save preferences',
         type: 'error'
       });
+    } finally {
+      setIsLoading(false);
     }
-  }, [preferences, toast]);
+  }, [user?.uid, preferences, toast]);
 
   return (
     <div className="space-y-6">
@@ -107,9 +171,19 @@ const ChartPreferences: React.FC = React.memo(() => {
       </Card>
 
       <div className="text-center">
-        <Button onClick={handleSavePreferences} variant="primary">
-          Save Preferences
+        <Button 
+          onClick={handleSavePreferences} 
+          variant="primary"
+          disabled={isLoading || isLoadingPreferences || !user}
+        >
+          {isLoading ? 'Saving...' : 'Save Preferences'}
         </Button>
+        {isLoadingPreferences && (
+          <p className="mt-2 text-sm text-cosmic-silver/70">Loading your preferences...</p>
+        )}
+        {!user && (
+          <p className="mt-2 text-sm text-cosmic-silver/70">Sign in to save preferences</p>
+        )}
       </div>
     </div>
   );

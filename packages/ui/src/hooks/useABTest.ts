@@ -98,20 +98,83 @@ export function useABTest(config: ABTestConfig): ABTestResult {
  */
 function createEventTracker(testName: string, variant: string) {
   return (eventName: string, properties: Record<string, any> = {}) => {
-    // Simple console logging for now
-    // In production, integrate with your analytics service (GA, Mixpanel, etc.)
-    console.log('[A/B Test Event]', {
-      test: testName,
+    // Store event in local analytics
+    const events = JSON.parse(localStorage.getItem('ab_test_events') || '[]')
+    events.push({
+      testName,
       variant,
       event: eventName,
       timestamp: new Date().toISOString(),
       ...properties
     })
+    localStorage.setItem('ab_test_events', JSON.stringify(events.slice(-100))) // Keep last 100 events
 
-    // TODO: Integration points for analytics services:
-    // - Google Analytics: gtag('event', eventName, { custom_parameter_ab_test: `${testName}_${variant}` })
-    // - Mixpanel: mixpanel.track(eventName, { ab_test: testName, variant, ...properties })
-    // - PostHog: posthog.capture(eventName, { $set: { ab_test_group: variant }, ...properties })
+    // Send to analytics services
+    try {
+      // Google Analytics (gtag)
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', eventName, {
+          custom_parameter_ab_test: `${testName}_${variant}`,
+          test_name: testName,
+          variant: variant,
+          ...properties
+        });
+      }
+
+      // Mixpanel
+      if (typeof window !== 'undefined' && (window as any).mixpanel) {
+        (window as any).mixpanel.track(eventName, {
+          ab_test: testName,
+          variant: variant,
+          ...properties
+        });
+      }
+
+      // PostHog
+      if (typeof window !== 'undefined' && (window as any).posthog) {
+        (window as any).posthog.capture(eventName, {
+          $set: { ab_test_group: variant },
+          ab_test_name: testName,
+          ...properties
+        });
+      }
+
+      // Firebase Analytics (lazy loaded for production)
+      if (typeof window !== 'undefined' && import.meta.env.PROD) {
+        import('firebase/analytics').then(({ getAnalytics, logEvent }) => {
+          import('@cosmichub/config/firebase').then(({ app }) => {
+            const analytics = getAnalytics(app);
+            logEvent(analytics, eventName, {
+              ab_test_name: testName,
+              ab_test_variant: variant,
+              ...properties
+            });
+          }).catch(() => {
+            // Firebase not available, skip silently
+          });
+        }).catch(() => {
+          // Firebase Analytics not available, skip silently
+        });
+      }
+
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to send A/B test analytics:', error);
+      }
+    }
+
+    // Development logging
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.log('[A/B Test Event]', {
+        test: testName,
+        variant,
+        event: eventName,
+        timestamp: new Date().toISOString(),
+        ...properties
+      });
+    }
   }
 }
 

@@ -39,6 +39,7 @@ def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
 ## Symbolic Significance
 
 The 88-degree rule aligns with Human Design's imprinting theory:
+
 - **Soul Imprinting Phase**: Roughly corresponds to start of third trimester
 - **Gestation Period**: ~88-91 days pre-birth in 280-day cycle  
 - **Astrological Precision**: Prioritizes exact angular measurement over calendar approximation
@@ -46,6 +47,7 @@ The 88-degree rule aligns with Human Design's imprinting theory:
 ## Testing & Validation
 
 Test cases should verify:
+
 - **Seasonal Variation**: Birth dates across all seasons show 86-92 day range
 - **Gate Accuracy**: Final positions calculate to correct gates/lines
 - **Edge Cases**: Dates near year boundaries, leap years, time zone changes

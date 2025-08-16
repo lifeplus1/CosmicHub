@@ -1,11 +1,10 @@
 """
 Tests for astro/calculations/human_design.py
 """
-import pytest
+from typing import Dict, Any
 from astro.calculations.human_design import (
     calculate_human_design,
     calculate_planetary_activations,
-    determine_type_and_authority,
     analyze_definition,
     GATES
 )
@@ -61,14 +60,22 @@ class TestHumanDesignCalculation:
     
     def test_analyze_definition(self):
         """Test definition analysis"""
-        mock_activations = {
+        mock_activations: Dict[str, Dict[str, Any]] = {
             'sun': {'gate': 1, 'center': 'G'},
             'moon': {'gate': 8, 'center': 'G'},
             'mercury': {'gate': 13, 'center': 'G'},
             'venus': {'gate': 25, 'center': 'G'}
         }
-        
-        definition = analyze_definition(mock_activations)
+        # Provide design_data in the shape expected by analyze_definition / detect_channels
+        design_data: Dict[str, Any] = {
+            'conscious': mock_activations,
+            'unconscious': {
+                'earth': {'gate': 1, 'center': 'G'},  # duplicate intentionally
+                'north_node': {'gate': 8, 'center': 'G'}
+            }
+        }
+
+        definition = analyze_definition(design_data, design_data)
         
         assert isinstance(definition, dict)
         assert 'defined_gates' in definition

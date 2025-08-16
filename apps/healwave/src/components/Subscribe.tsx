@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
+import { stripeService, StripeSession } from '@cosmichub/integrations';
 
 const Subscribe: React.FC = () => {
   const { user } = useAuth();
@@ -14,13 +15,40 @@ const Subscribe: React.FC = () => {
       return;
     }
 
+    if (!stripeService) {
+      // eslint-disable-next-line no-console
+      console.error('Stripe service not available');
+      alert('Subscription service is temporarily unavailable. Please try again later.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // TODO: Integrate with Stripe Checkout
-      alert('Subscription system will be available soon!');
+      // Create Stripe checkout session for HealWave Pro
+      const successUrl = `${window.location.origin}/pricing/success?tier=premium`;
+      const cancelUrl = `${window.location.origin}/pricing/cancel`;
+
+      const session: StripeSession = await stripeService.createCheckoutSession({
+        tier: 'premium', // HealWave Pro tier
+        userId: user.uid,
+        isAnnual: true, // Default to annual pricing
+        successUrl,
+        cancelUrl,
+      });
+
+      if (session.url) {
+        // Update user subscription in Firestore before redirect
+        await stripeService.updateUserSubscription(user.uid, 'premium', true);
+        
+        // Redirect to Stripe Checkout
+        window.location.href = session.url;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Subscription error:', error);
-      alert('An error occurred. Please try again later.');
+      alert('An error occurred while setting up your subscription. Please try again later.');
     } finally {
       setIsLoading(false);
     }

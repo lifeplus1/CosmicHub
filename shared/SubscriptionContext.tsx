@@ -37,21 +37,25 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call to your backend
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/subscription`, {
+      // Use actual backend API endpoint for subscription status
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/stripe/subscription-status`, {
         headers: {
-          'Authorization': `Bearer ${await user.getIdToken()}`
+          'Authorization': `Bearer ${await user.getIdToken()}`,
+          'Content-Type': 'application/json'
         }
       });
 
       if (response.ok) {
         const data = await response.json();
         setSubscription(data);
-      } else {
+      } else if (response.status === 404) {
         // User not found or no subscription
         setSubscription(null);
+      } else {
+        throw new Error(`Failed to fetch subscription: ${response.status}`);
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to fetch subscription:', error);
       setSubscription(null);
     } finally {
@@ -69,9 +73,16 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const upgradeRequired = (feature: string) => {
-    // TODO: Show upgrade modal or redirect to pricing page
-    console.log(`Upgrade required for feature: ${feature}`);
-    // You can implement a toast notification or modal here
+    // Trigger upgrade modal using existing event system or direct navigation
+    if (typeof window !== 'undefined') {
+      // Try to use the upgrade event system if available (Astro app)
+      if ((window as any).upgradeEventManager) {
+        (window as any).upgradeEventManager.triggerUpgradeRequired(feature);
+      } else {
+        // Fallback: redirect to pricing page
+        window.location.href = '/pricing';
+      }
+    }
   };
 
   useEffect(() => {

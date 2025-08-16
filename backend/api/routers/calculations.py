@@ -5,12 +5,12 @@ Extracted from main.py for improved maintainability.
 """
 
 from fastapi import APIRouter, Request, HTTPException, Query, BackgroundTasks
-from pydantic import BaseModel, Field, field_validator, FieldValidationInfo
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 from typing import Optional, Dict, Any, List, cast, Callable, Awaitable
 import logging
 
-from ...astro.calculations.chart import calculate_chart
-from ...astro.calculations.human_design import calculate_human_design
+from astro.calculations.chart import calculate_chart
+from astro.calculations.human_design import calculate_human_design
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +29,8 @@ class BirthData(BaseModel):
 
     @field_validator('day')
     @classmethod
-    def validate_day(cls, v: int, info: FieldValidationInfo) -> int:  # type: ignore[override]
-        raw = getattr(info, 'data', {})  # type: ignore[attr-defined]
+    def validate_day(cls, v: int, info: ValidationInfo) -> int:  # type: ignore[override]
+        raw = getattr(info, 'data', {})  # ValidationInfo exposes incoming data
         if isinstance(raw, dict):
             month = raw.get('month')  # type: ignore[attr-defined]
             year = raw.get('year')  # type: ignore[attr-defined]

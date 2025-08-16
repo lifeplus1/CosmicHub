@@ -74,8 +74,22 @@ const GeneKeyItem = memo<{ geneKey: GeneKey; onKeySelect: (key: GeneKey) => void
       className="p-3 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100"
       onClick={handleClick}
     >
-      <p className="mb-1 text-sm font-bold">Gene Key {geneKey.number}</p>
-      <p className="text-xs">{geneKey.name}</p>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm font-bold">Gene Key {geneKey.number}</p>
+        {geneKey.line && (
+          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+            Line {geneKey.line}
+          </span>
+        )}
+      </div>
+      <p className="text-xs text-gray-700 mb-1">{geneKey.name}</p>
+      {geneKey.line_theme && geneKey.sphere_context && (
+        <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded border-l-2 border-purple-300">
+          <p className="text-xs font-medium text-purple-700">
+            {geneKey.sphere_context} Line Theme: {geneKey.line_theme}
+          </p>
+        </div>
+      )}
     </div>
   );
 });
@@ -98,10 +112,27 @@ export const GeneKeyDetails = memo<GeneKeyDetailsProps>(({ selectedKey }) => {
   return (
     <div className="cosmic-card">
       <div className="p-4">
-        <h2 className="text-lg font-bold">
-          Gene Key {selectedKey.number}: {selectedKey.name}
-        </h2>
-        <p className="text-gray-700">Codon: {selectedKey.codon}</p>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-bold">
+            Gene Key {selectedKey.number}: {selectedKey.name}
+          </h2>
+          {selectedKey.line && (
+            <span className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">
+              Line {selectedKey.line}
+            </span>
+          )}
+        </div>
+        <p className="text-gray-700 mb-2">Codon: {selectedKey.codon}</p>
+        {selectedKey.line_theme && selectedKey.sphere_context && (
+          <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border-l-4 border-purple-400">
+            <p className="text-sm font-semibold text-purple-800">
+              {selectedKey.sphere_context} Sphere - Line {selectedKey.line}: {selectedKey.line_theme}
+            </p>
+            <p className="text-xs text-purple-600 mt-1">
+              This is your contemplative theme for the {selectedKey.sphere_context.toLowerCase()} sphere of the Golden Path.
+            </p>
+          </div>
+        )}
       </div>
       <div className="p-4 pt-0">
         <p className="mb-6 text-lg">{selectedKey.description}</p>

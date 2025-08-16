@@ -424,7 +424,7 @@ async def root_health():
 
 # Structure cleanup suggestion: Move routers to separate files and import here for modularity.
 # Import API routers (local path)
-from api.routers import ai, presets, subscriptions, ephemeris, charts
+from api.routers import ai, presets, subscriptions, ephemeris, charts, stripe_router
 from api import interpretations
 from astro.calculations import transits_clean
 
@@ -435,6 +435,7 @@ app.include_router(ephemeris.router, prefix="/api")
 app.include_router(charts.router, prefix="/api")
 app.include_router(interpretations.router)  # AI Interpretations router
 app.include_router(transits_clean.router, prefix="/api/astro", tags=["transits"])  # Transit calculations router
+app.include_router(stripe_router.router)  # Stripe subscription & billing endpoints
 
 if __name__ == "__main__":
     import uvicorn

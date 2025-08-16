@@ -237,14 +237,36 @@ class PerformanceMonitor {
     metadata?: Record<string, any>
   ): Promise<void> {
     try {
-      // Skip Firebase Performance monitoring for now
-      // TODO: Configure Firebase Performance when needed
-      if (process.env.NODE_ENV === 'development') {
+      // Configure Firebase Performance monitoring
+      if (typeof window !== 'undefined' && import.meta.env.PROD) {
+        // In production, attempt to use Firebase Performance
+        const { getPerformance, trace } = await import('firebase/performance');
+        
+        // Use lazy import for Firebase app
+        const firebaseModule = await import('@cosmichub/config/firebase');
+        const perf = getPerformance(firebaseModule.app);
+        const performanceTrace = trace(perf, name);
+        
+        // Record custom timing
+        performanceTrace.start();
+        setTimeout(() => {
+          performanceTrace.stop();
+        }, duration);
+        
+        // Add custom attributes if provided
+        if (metadata) {
+          Object.entries(metadata).forEach(([key, value]) => {
+            performanceTrace.putAttribute(key, String(value));
+          });
+        }
+      } else if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
         console.log(`[Performance] ${name}: ${duration}ms`, metadata);
       }
     } catch (firebaseError) {
       // Firebase Performance not available or not configured
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
         console.log('Firebase Performance Monitoring not available, skipping trace:', name);
       }
     }

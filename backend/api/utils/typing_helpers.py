@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Mapping, Any
 
-from ...database import get_firestore_client
+from database import get_firestore_client  # type: ignore
 
 
 def update_subscription_doc(user_id: str, field_updates: Mapping[str, Any]) -> None:

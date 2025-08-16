@@ -93,7 +93,7 @@ class EphemerisClient:
             except Exception as e:
                 logger.warning(f"Failed to initialize Redis client: {e}")
     
-    async def __aenter__(self):
+    async def __aenter__(self) -> "EphemerisClient":
         """Async context manager entry."""
         self.http_client = httpx.AsyncClient(timeout=self.timeout)
         return self

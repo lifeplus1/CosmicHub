@@ -19,6 +19,7 @@
     "src/index.ts",
     "src/config.ts",
     "src/env.ts", 
+    "src/firebase.ts",
     "src/lazy-loading.tsx",
     "src/performance.ts",
     "src/push-notifications.ts",
