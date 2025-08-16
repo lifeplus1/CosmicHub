@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import React from 'react'
 
 // Mock Firebase modules that are used across the integration

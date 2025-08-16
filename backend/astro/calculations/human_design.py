@@ -1,6 +1,6 @@
 # backend/astro/calculations/human_design.py
 import logging
-from typing import Dict, Any, Tuple, TypedDict, Optional, List
+from typing import Dict, Any, Tuple, TypedDict, Optional, List, cast
 from datetime import datetime, timedelta
 import swisseph as swe  # type: ignore
 from redis import Redis
@@ -194,18 +194,22 @@ def detect_channels(design_data: Dict[str, Any]) -> list[str]:
     
     # Collect gates from conscious activations
     if 'conscious' in design_data and isinstance(design_data['conscious'], dict):
-        for planet_key, planet_data in design_data['conscious'].items():
+        conscious_data = cast(Dict[str, Any], design_data['conscious'])
+        for planet_key in conscious_data:
+            planet_data = conscious_data[planet_key]
             if isinstance(planet_data, dict):
-                gate = planet_data.get("gate")
-                if gate:
+                gate = planet_data.get("gate")  # type: ignore
+                if isinstance(gate, int):
                     activated_gates.add(gate)
     
     # Collect gates from unconscious activations  
     if 'unconscious' in design_data and isinstance(design_data['unconscious'], dict):
-        for planet_key, planet_data in design_data['unconscious'].items():
+        unconscious_data = cast(Dict[str, Any], design_data['unconscious'])
+        for planet_key in unconscious_data:
+            planet_data = unconscious_data[planet_key]
             if isinstance(planet_data, dict):
-                gate = planet_data.get("gate")
-                if gate:
+                gate = planet_data.get("gate")  # type: ignore
+                if isinstance(gate, int):
                     activated_gates.add(gate)
     
     # Check which channels are formed
@@ -525,6 +529,92 @@ def analyze_definition(activations: Dict[str, Any], design_data: Dict[str, Any])
         logger.error(f"Error analyzing definition: {str(e)}")
         return {"defined_gates": [], "defined_centers": [], "center_activations": {}, "channels": []}
 
+def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
+    """Calculate precise design time using 88 degrees solar arc backward from birth Sun position"""
+    try:
+        import pytz
+        # Convert birth time to Julian day
+        birth_jd_result = swe.utc_to_jd(  # type: ignore
+            birth_time_utc.year, birth_time_utc.month, birth_time_utc.day,
+            birth_time_utc.hour, birth_time_utc.minute, 0, 1
+        )
+        birth_jd: float = float(birth_jd_result[1])  # type: ignore
+        
+        # Get Sun position at birth
+        birth_sun_result = swe.calc_ut(birth_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
+        birth_sun_longitude: float = float(birth_sun_result[0][0])  # type: ignore
+        
+        # Calculate target sun longitude (88 degrees earlier)
+        target_sun_longitude: float = (birth_sun_longitude - 88.0) % 360.0
+        
+        # Initial estimate using average solar motion (0.986 deg/day)
+        estimated_days_back: float = 88.0 / 0.986
+        estimated_jd: float = birth_jd - estimated_days_back
+        
+        # Iteratively solve for precise 88-degree offset using Newton-Raphson method
+        max_iterations = 30
+        tolerance = 0.001  # Sufficient precision for gate/line accuracy (0.001° = 3.6 arcseconds)
+        
+        current_jd: float = estimated_jd
+        for _ in range(max_iterations):
+            # Calculate current Sun position
+            current_sun_result = swe.calc_ut(current_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
+            current_sun_longitude: float = float(current_sun_result[0][0])  # type: ignore
+            
+            # Calculate angular difference (handling 360° wrap-around)
+            diff: float = (target_sun_longitude - current_sun_longitude) % 360.0
+            if diff > 180.0:
+                diff -= 360.0
+            
+            # Check if we've reached sufficient precision
+            if abs(diff) < tolerance:
+                break
+            
+            # Calculate Sun's daily motion at current position for Newton-Raphson step
+            tomorrow_jd: float = current_jd + 1.0
+            tomorrow_sun_result = swe.calc_ut(tomorrow_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
+            tomorrow_sun_longitude: float = float(tomorrow_sun_result[0][0])  # type: ignore
+            daily_motion: float = (tomorrow_sun_longitude - current_sun_longitude) % 360.0
+            if daily_motion > 180.0:
+                daily_motion -= 360.0
+            
+            # Prevent division by zero
+            if abs(daily_motion) < 0.0001:
+                daily_motion = 0.986  # fallback to average motion
+            
+            # Newton-Raphson step: adjust Julian day based on remaining angular difference
+            jd_adjustment: float = diff / daily_motion
+            current_jd += jd_adjustment
+            
+            # Sanity check: don't go too far from birth (max ~100 days back)
+            if abs(birth_jd - current_jd) > 100:
+                logger.warning(f"Design time calculation diverging. Using fallback estimate.")
+                current_jd = birth_jd - 88.0  # fallback
+                break
+        
+        # Convert back to datetime
+        design_calendar = swe.jdet_to_utc(current_jd, 1)  # type: ignore  # Gregorian calendar
+        design_time = datetime(
+            int(design_calendar[0]), int(design_calendar[1]), int(design_calendar[2]),  # type: ignore
+            int(design_calendar[3]), int(design_calendar[4]), int(design_calendar[5])   # type: ignore
+        ).replace(tzinfo=pytz.UTC)
+        
+        # Verify result for logging
+        actual_days_back: float = (birth_jd - current_jd)
+        final_sun_result = swe.calc_ut(current_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
+        final_sun_longitude: float = float(final_sun_result[0][0])  # type: ignore
+        actual_degree_difference: float = (birth_sun_longitude - final_sun_longitude) % 360.0
+        
+        logger.debug(f"Precise design time calculation: {actual_days_back:.3f} days back, "
+                    f"{actual_degree_difference:.6f}° solar arc difference")
+        
+        return design_time
+        
+    except Exception as e:
+        logger.error(f"Error calculating precise design time: {str(e)}")
+        # Fallback to approximate calculation
+        return birth_time_utc - timedelta(days=88.0)
+
 def calculate_human_design(year: int, month: int, day: int, hour: int, minute: int, 
                           lat: float, lon: float, timezone: str) -> Dict[str, Any]:
     """Calculate complete Human Design chart"""
@@ -551,9 +641,8 @@ def calculate_human_design(year: int, month: int, day: int, hour: int, minute: i
             birth_time_utc = birth_time.astimezone(pytz.UTC)
             birth_time_for_calc = birth_time_utc
         
-        # Design time (unconscious) - calibrated for perfect accuracy
-        # Using 86.6 days for precise design calculations
-        design_time = birth_time_for_calc - timedelta(days=86.6)
+        # Calculate precise design time using 88 degrees solar arc (not fixed days)
+        design_time = calculate_design_time_88_degrees(birth_time_for_calc)
         
         logger.debug(f"Conscious time (UTC): {birth_time_for_calc}")
         logger.debug(f"Unconscious time (UTC): {design_time}")
