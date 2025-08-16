@@ -7,6 +7,12 @@ import GeneKeysChart from '../components/GeneKeysChart/GeneKeysChart';
 const GeneKeys: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
 
+  const handleBirthDataSubmit = (data: any) => {
+    // Birth data is already set in context by SimpleBirthForm
+    // No navigation needed - stay on this page and show the gene keys profile
+    console.log('Gene Keys birth data submitted:', data);
+  };
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -25,6 +31,7 @@ const GeneKeys: React.FC = () => {
           title="Enter Birth Data for Gene Keys"
           submitButtonText="Generate Gene Keys Profile"
           showSampleButton={true}
+          onSubmit={handleBirthDataSubmit}
         />
       )}
 

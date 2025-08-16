@@ -44,7 +44,7 @@ export default defineConfig({
           charts: [
             './src/components/ChartDisplay/ChartDisplay.tsx',
             './src/features/ChartWheel.tsx',
-            './src/components/MultiSystemChart/MultiSystemChart.tsx'
+            './src/components/MultiSystemChart/MultiSystemChartDisplay.tsx'
           ],
           
           // Authentication and user management

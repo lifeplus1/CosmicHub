@@ -4,7 +4,7 @@ import { useAuth } from '@cosmichub/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChartDisplay } from '../components';
 import { CosmicLoading } from '../components/CosmicLoading';
-import { saveChart, type SaveChartRequest } from '../services/api';
+import { saveChart, fetchChartData, type SaveChartRequest, type ChartBirthData } from '../services/api';
 import type { ChartData } from '../types';
 
 interface BirthData {
@@ -88,9 +88,9 @@ const ChartResults: React.FC = () => {
     // Get the stored birth data that was used to calculate this chart
     const storedBirthData = sessionStorage.getItem('birthData');
     
-    if (!storedBirthData) {
-      console.error('No birth data found for saving');
-      alert('No birth data found. Please generate a chart first.');
+    if (!storedBirthData || !chartData) {
+      console.error('No birth data or chart data found for saving');
+      alert('No chart data found. Please generate a chart first.');
       return;
     }
 
@@ -108,7 +108,10 @@ const ChartResults: React.FC = () => {
       minute,
       city: parsedData.location,
       house_system: 'P', // Default to Placidus
-      chart_name: `${parsedData.location} ${parsedData.date}`
+      chart_name: `${parsedData.location} ${parsedData.date}`,
+      lat: chartData.latitude,
+      lon: chartData.longitude,
+      timezone: chartData.timezone
     };
 
     console.log('Saving chart with data:', saveData);
@@ -127,7 +130,7 @@ const ChartResults: React.FC = () => {
   };
 
   // Transform backend chart data to frontend expected format
-  const transformChartData = (backendData: any, birthData?: BirthData): ExtendedChartData => {
+  const transformChartData = (backendData: any, birthData?: ChartBirthData): ExtendedChartData => {
     console.log('🔄 Transforming chart data:', { backendData, birthData });
     
     // Convert houses object to array format
@@ -137,11 +140,15 @@ const ChartResults: React.FC = () => {
         const numB = parseInt(b.replace('house_', ''));
         return numA - numB;
       })
-      .map(([, houseData]: [string, any]) => ({
-        house: houseData.house,
-        cusp: houseData.cusp,
-        sign: getZodiacSignName(houseData.cusp)
-      }));
+      .map(([key, houseData]: [string, any]) => {
+        const houseNumber = parseInt(key.replace('house_', ''));
+        return {
+          house: houseData.house || houseNumber,
+          number: houseData.house || houseNumber,
+          cusp: houseData.cusp,
+          sign: getZodiacSignName(houseData.cusp)
+        };
+      });
 
     // Get coordinates from the response or provide defaults
     console.log('🔍 Backend data check:', {
@@ -176,7 +183,7 @@ const ChartResults: React.FC = () => {
   };
 
   // Transform stored birth data to backend format
-  const transformBirthData = (storedData: StoredBirthData): BirthData => {
+  const transformBirthData = (storedData: StoredBirthData): ChartBirthData => {
     // Parse date: "2023-06-15" -> { year: 2023, month: 6, day: 15 }
     const [year, month, day] = storedData.date.split('-').map(Number);
     
@@ -189,9 +196,9 @@ const ChartResults: React.FC = () => {
       day,
       hour,
       minute,
-      city: storedData.location,
+      city: storedData.location
       // Let backend handle geocoding from city name
-      // lat and lon are optional in the backend model
+      // lat and lon are optional in the ChartBirthData model
     };
   };
 
@@ -209,33 +216,16 @@ const ChartResults: React.FC = () => {
         
         // Parse stored data and transform to backend format
         const parsedData: StoredBirthData = JSON.parse(storedBirthData);
-        const birthData: BirthData = transformBirthData(parsedData);
+        const birthData: ChartBirthData = transformBirthData(parsedData);
         
         console.log('Original birth data:', parsedData);
         console.log('Transformed birth data:', birthData);
         
-        // Make API call to calculate chart
-        const response = await fetch('http://localhost:8001/calculate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          },
-          body: JSON.stringify(birthData),
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error('API Error:', errorData);
-          throw new Error(`Failed to calculate chart: ${response.status} ${response.statusText}`);
-        }
-        
-        const calculatedChart = await response.json();
+        // Use the API service instead of direct fetch
+        const calculatedChart = await fetchChartData(birthData);
         console.log('Raw backend chart data:', calculatedChart);
         
-        // Transform the backend data to frontend format
+        // Transform the backend data to frontend format  
         const transformedChart = transformChartData(calculatedChart, birthData);
         console.log('Transformed chart data:', transformedChart);
         

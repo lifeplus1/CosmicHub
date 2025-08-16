@@ -77,6 +77,9 @@ export interface SaveChartRequest {
   city: string;
   house_system?: string;
   chart_name?: string;
+  timezone?: string;
+  lat?: number;
+  lon?: number;
 }
 
 export interface SaveChartResponse {

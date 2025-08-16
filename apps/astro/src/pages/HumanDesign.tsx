@@ -9,6 +9,12 @@ const HumanDesign: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
   const [humanDesignData, setHumanDesignData] = useState<HumanDesignData | null>(null);
 
+  const handleBirthDataSubmit = (data: any) => {
+    // Birth data is already set in context by SimpleBirthForm
+    // No navigation needed - stay on this page and show the human design chart
+    console.log('Human Design birth data submitted:', data);
+  };
+
   // Helper function to format birth info from calculation result
   const formatBirthInfo = (birthInfo: HumanDesignData['birth_info']) => {
     if (!birthInfo) return null;
@@ -46,6 +52,7 @@ const HumanDesign: React.FC = () => {
           title="Enter Birth Data for Human Design"
           submitButtonText="Generate Human Design Chart"
           showSampleButton={true}
+          onSubmit={handleBirthDataSubmit}
         />
       )}
 

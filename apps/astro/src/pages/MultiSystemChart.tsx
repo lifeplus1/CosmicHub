@@ -9,6 +9,12 @@ const MultiSystemChart: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
   const [selectedSystems, setSelectedSystems] = useState<string[]>(['western', 'vedic']);
 
+  const handleBirthDataSubmit = (data: any) => {
+    // Birth data is already set in context by SimpleBirthForm
+    // No navigation needed - stay on this page and show the multi-system charts
+    console.log('Multi-system chart birth data submitted:', data);
+  };
+
   const availableSystems = [
     { id: 'western', name: 'Western Tropical', description: 'Standard Western astrology' },
     { id: 'vedic', name: 'Vedic Sidereal', description: 'Ancient Indian astrology' },
@@ -42,6 +48,7 @@ const MultiSystemChart: React.FC = () => {
           title="Enter Birth Data for Multi-System Analysis"
           submitButtonText="Generate Multi-System Charts"
           showSampleButton={true}
+          onSubmit={handleBirthDataSubmit}
         />
       )}
 

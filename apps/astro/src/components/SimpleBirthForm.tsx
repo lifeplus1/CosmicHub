@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import type { ChartBirthData } from '../services/api';
@@ -8,14 +9,17 @@ interface SimpleBirthFormProps {
   submitButtonText?: string;
   onSubmit?: (data: ChartBirthData) => void;
   showSampleButton?: boolean;
+  navigateTo?: string; // Custom navigation path
 }
 
 export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
   title = "Birth Details",
   submitButtonText = "Calculate Chart",
   onSubmit,
-  showSampleButton = false
+  showSampleButton = false,
+  navigateTo
 }) => {
+  const navigate = useNavigate();
   const { setBirthData } = useBirthData();
   const [isLoading, setIsLoading] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -90,7 +94,23 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
       };
 
       setBirthData(chartData);
-      onSubmit?.(chartData);
+      
+      // Store birth data in sessionStorage for ChartResults page
+      const storedBirthData = {
+        date: formData.birthDate, // "YYYY-MM-DD" format
+        time: formData.birthTime, // "HH:MM" format  
+        location: formData.birthLocation.trim()
+      };
+      
+      sessionStorage.setItem('birthData', JSON.stringify(storedBirthData));
+      console.log('✅ Birth data stored in sessionStorage for chart-results page:', storedBirthData);
+      
+      // Navigate to chart-results page instead of calling onSubmit
+      if (onSubmit) {
+        onSubmit(chartData);
+      } else {
+        navigate(navigateTo || '/chart-results');
+      }
     } catch (error) {
       console.error('Error creating chart:', error);
       alert('Error creating chart. Please try again.');

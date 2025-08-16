@@ -1,6 +1,6 @@
 # backend/api/routers/charts.py
 import logging
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
@@ -36,9 +36,10 @@ class ChartListResponse(BaseModel):
 @router.post("/save-chart", response_model=SaveChartResponse)
 async def save_user_chart(
     request: SaveChartRequest,
-    user_id: str = Depends(get_current_user)
+    user: Dict[str, Any] = Depends(get_current_user)
 ):
     """Save a calculated birth chart for the authenticated user"""
+    user_id = user.get("uid", "unknown")
     try:
         # Import here to avoid circular imports
         from astro.calculations.chart import calculate_chart
@@ -149,9 +150,10 @@ async def test_save_user_chart(request: SaveChartRequest):
 async def get_user_charts(
     limit: int = 50,
     start_after: Optional[str] = None,
-    user_id: str = Depends(get_current_user)
+    user: Dict[str, Any] = Depends(get_current_user)
 ):
     """Get all saved charts for the authenticated user"""
+    user_id = user.get("uid", "unknown")
     try:
         charts = get_charts(user_id=user_id, limit=limit, start_after=start_after)
         
@@ -167,9 +169,10 @@ async def get_user_charts(
 @router.delete("/{chart_id}")
 async def delete_user_chart(
     chart_id: str,
-    user_id: str = Depends(get_current_user)
+    user: Dict[str, Any] = Depends(get_current_user)
 ):
     """Delete a specific chart for the authenticated user"""
+    user_id = user.get("uid", "unknown")
     try:
         delete_chart_by_id(user_id=user_id, chart_id=chart_id)
         
