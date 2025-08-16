@@ -76,6 +76,21 @@ const Chart: React.FC = () => {
     navigate('/');
   };
 
+  const handleViewWithSave = () => {
+    if (birthData) {
+      // Store birth data in sessionStorage for ChartResults page
+      const storedBirthData = {
+        date: `${birthData.year}-${birthData.month.toString().padStart(2, '0')}-${birthData.day.toString().padStart(2, '0')}`,
+        time: `${birthData.hour.toString().padStart(2, '0')}:${birthData.minute.toString().padStart(2, '0')}`,
+        location: birthData.city
+      };
+      
+      sessionStorage.setItem('birthData', JSON.stringify(storedBirthData));
+      console.log('✅ Birth data stored for chart-results page:', storedBirthData);
+      navigate('/chart-results');
+    }
+  };
+
   if (!birthData) {
     return (
       <div className="container mx-auto p-6">
@@ -113,6 +128,9 @@ const Chart: React.FC = () => {
             </Button>
             <Button onClick={handleRecalculate} disabled={isLoading}>
               {isLoading ? 'Calculating...' : 'Recalculate'}
+            </Button>
+            <Button onClick={handleViewWithSave} className="bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark">
+              💾 Save Chart
             </Button>
           </div>
         </div>

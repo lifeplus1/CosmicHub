@@ -187,15 +187,25 @@ CHANNELS = {
     "47-64": {"name": "The Channel of Abstraction", "circuit": "Individual", "theme": "Mental Activity Mixed with Clarity"}
 }
 
-def detect_channels(activations: Dict[str, Any]) -> list[str]:
-    """Detect which channels are formed by the planetary activations"""
+def detect_channels(design_data: Dict[str, Any]) -> list[str]:
+    """Detect which channels are formed by the planetary activations from both conscious and unconscious"""
     activated_gates: set[int] = set()
     
-    # Collect all activated gates from both conscious and unconscious
-    for planet_data in activations.values():
-        gate = planet_data.get("gate")
-        if gate:
-            activated_gates.add(gate)
+    # Collect gates from conscious activations
+    if 'conscious' in design_data and isinstance(design_data['conscious'], dict):
+        for planet_key, planet_data in design_data['conscious'].items():
+            if isinstance(planet_data, dict):
+                gate = planet_data.get("gate")
+                if gate:
+                    activated_gates.add(gate)
+    
+    # Collect gates from unconscious activations  
+    if 'unconscious' in design_data and isinstance(design_data['unconscious'], dict):
+        for planet_key, planet_data in design_data['unconscious'].items():
+            if isinstance(planet_data, dict):
+                gate = planet_data.get("gate")
+                if gate:
+                    activated_gates.add(gate)
     
     # Check which channels are formed
     formed_channels: list[str] = []
@@ -331,6 +341,28 @@ def calculate_planetary_activations(julian_day: float) -> dict[str, PlanetActiva
                 'planet_symbol': '⊕'
             }
         
+        # Calculate South Node position (opposite of North Node)
+        if 'north_node' in activations:
+            north_node_position: float = float(activations['north_node']['position'])
+            south_node_position: float = (north_node_position + 180.0) % 360.0
+            
+            # Apply same gate calculation for South Node
+            hd_south_position = (south_node_position - 302.0) % 360.0
+            south_gate_index = int(hd_south_position / gate_degrees)
+            south_gate_number = gate_sequence[south_gate_index]
+            south_gate_progress = (hd_south_position % gate_degrees) / gate_degrees
+            south_line_number = int(south_gate_progress * 6) + 1
+            south_line_number = max(1, min(6, south_line_number))
+            
+            activations['south_node'] = {
+                'gate': south_gate_number,
+                'line': south_line_number,
+                'position': south_node_position,
+                'center': get_gate_center(south_gate_number),
+                'planet': 'south_node',
+                'planet_symbol': '☋'
+            }
+        
         # Cache results for 1 hour
         try:
             redis_client.setex(cache_key, 3600, json.dumps(activations))
@@ -436,7 +468,7 @@ def determine_type_and_authority(definition: Dict[str, Any]) -> Tuple[str, str]:
         logger.error(f"Error determining type and authority: {str(e)}")
         return "Generator", "Sacral"
 
-def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
+def analyze_definition(activations: Dict[str, Any], design_data: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze which centers are defined based on planetary activations"""
     try:
         defined_gates: list[int] = []
@@ -467,11 +499,20 @@ def analyze_definition(activations: Dict[str, Any]) -> Dict[str, Any]:
                     center_activations[center] = []
                 center_activations[center].append(gate)
         
-        # Determine defined centers (need at least one gate)
-        defined_centers: list[str] = [str(center) for center in center_activations.keys()]
-        
         # Detect channels using the new function
-        channels = detect_channels(all_activations)
+        channels = detect_channels(design_data)
+        
+        # Determine defined centers based on formed channels only
+        defined_centers: list[str] = []
+        for channel in channels:
+            if channel in CHANNELS:
+                # Get the two gates from the channel
+                gates_in_channel = [int(g) for g in channel.split('-')]
+                for gate in gates_in_channel:
+                    if gate in GATES:
+                        center = GATES[gate]["center"]
+                        if center not in defined_centers:
+                            defined_centers.append(center)
         
         return {
             "defined_gates": defined_gates,
@@ -519,7 +560,7 @@ def calculate_human_design(year: int, month: int, day: int, hour: int, minute: i
         all_activations.update(design_data["unconscious"])
         
         # Analyze definition
-        definition = analyze_definition(all_activations)
+        definition = analyze_definition(all_activations, design_data)
         
         # Determine type and authority
         hd_type, authority = determine_type_and_authority(definition)

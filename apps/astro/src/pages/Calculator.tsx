@@ -13,8 +13,8 @@ const Calculator: React.FC = () => {
 
   const handleChartGeneration = (data: ChartBirthData) => {
     console.log('🔮 Generate birth chart with data:', data);
-    // Navigate to chart view
-    navigate('/chart');
+    // SimpleBirthForm will handle navigation to chart-results
+    // No need to navigate here since form handles it
   };
 
   const navigateToSystem = (system: string) => {
@@ -60,7 +60,6 @@ const Calculator: React.FC = () => {
       <SimpleBirthForm
         title="Universal Birth Data"
         submitButtonText="Calculate All Charts"
-        onSubmit={handleChartGeneration}
         showSampleButton={true}
       />
 
