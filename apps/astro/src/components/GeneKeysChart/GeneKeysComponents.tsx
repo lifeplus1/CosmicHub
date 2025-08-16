@@ -165,14 +165,11 @@ export const VenusSequence = memo<VenusSequenceProps>(({ geneKeysData, onKeySele
             </Accordion.Trigger>
             <Accordion.Content className="pb-4">
               <p className="mb-4 text-sm text-gray-700">{geneKeysData.iq.description}</p>
-              <div className="grid grid-cols-2 gap-4">
-                {geneKeysData.iq.keys.map((key, index) => (
-                  <GeneKeyItem
-                    key={index}
-                    geneKey={key}
-                    onKeySelect={onKeySelect}
-                  />
-                ))}
+              <div className="grid grid-cols-1 gap-4">
+                <GeneKeyItem
+                  geneKey={geneKeysData.iq}
+                  onKeySelect={onKeySelect}
+                />
               </div>
             </Accordion.Content>
           </Accordion.Item>
@@ -184,14 +181,11 @@ export const VenusSequence = memo<VenusSequenceProps>(({ geneKeysData, onKeySele
             </Accordion.Trigger>
             <Accordion.Content className="pb-4">
               <p className="mb-4 text-sm text-gray-700">{geneKeysData.eq.description}</p>
-              <div className="grid grid-cols-2 gap-4">
-                {geneKeysData.eq.keys.map((key, index) => (
-                  <GeneKeyItem
-                    key={index}
-                    geneKey={key}
-                    onKeySelect={onKeySelect}
-                  />
-                ))}
+              <div className="grid grid-cols-1 gap-4">
+                <GeneKeyItem
+                  geneKey={geneKeysData.eq}
+                  onKeySelect={onKeySelect}
+                />
               </div>
             </Accordion.Content>
           </Accordion.Item>
@@ -203,14 +197,11 @@ export const VenusSequence = memo<VenusSequenceProps>(({ geneKeysData, onKeySele
             </Accordion.Trigger>
             <Accordion.Content className="pb-4">
               <p className="mb-4 text-sm text-gray-700">{geneKeysData.sq.description}</p>
-              <div className="grid grid-cols-2 gap-4">
-                {geneKeysData.sq.keys.map((key, index) => (
-                  <GeneKeyItem
-                    key={index}
-                    geneKey={key}
-                    onKeySelect={onKeySelect}
-                  />
-                ))}
+              <div className="grid grid-cols-1 gap-4">
+                <GeneKeyItem
+                  geneKey={geneKeysData.sq}
+                  onKeySelect={onKeySelect}
+                />
               </div>
             </Accordion.Content>
           </Accordion.Item>
