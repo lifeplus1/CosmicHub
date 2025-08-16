@@ -6,11 +6,38 @@ Extracted from main.py for improved maintainability.
 
 from fastapi import APIRouter, Request, HTTPException, Query, BackgroundTasks
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
-from typing import Optional, Dict, Any, List, cast, Callable, Awaitable
+from typing import Optional, Dict, Any, List, cast, Callable, Awaitable, TYPE_CHECKING, Protocol
 import logging
 
-from astro.calculations.chart import calculate_chart
+from astro.calculations.chart import calculate_chart, calculate_multi_system_chart
 from astro.calculations.human_design import calculate_human_design
+
+# Import vectorized function if available at runtime; provide type-only import for static analysis
+try:  # Runtime optional import
+    from utils.vectorized_multi_system_utils import calculate_multi_system_chart_fast  # type: ignore
+    vectorized_multi_system_available = True
+except Exception:  # Broad except to avoid hard dependency failure in environments lacking optional deps
+    calculate_multi_system_chart_fast = None  # type: ignore[assignment]
+    vectorized_multi_system_available = False
+
+if TYPE_CHECKING:
+    class _VectorizedMultiSystemFunc(Protocol):  # pragma: no cover - type definition only
+        def __call__(
+            self,
+            *,
+            year: int,
+            month: int,
+            day: int,
+            hour: int,
+            minute: int,
+            lat: Optional[float],
+            lon: Optional[float],
+            timezone: Optional[str],
+            city: str,
+            house_system: str
+        ) -> Dict[str, Any]: ...
+    # Provide a typed alias for the optional runtime symbol
+    calculate_multi_system_chart_fast: Optional[_VectorizedMultiSystemFunc]
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +139,66 @@ async def calculate_chart_endpoint(
         logger.error(f"Chart calculation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Chart calculation failed: {str(e)}")
 
+@router.post("/multi-system-chart")
+async def calculate_multi_system_chart_endpoint(
+    data: BirthData, 
+    request: Request, 
+    background_tasks: BackgroundTasks, 
+    house_system: str = Query("P", enum=["P", "E"]),
+    use_vectorized: bool = Query(False, description="Use vectorized calculations for better performance"),
+    rate_limiter_func: Optional[Callable[[Request], Awaitable[None]]] = None
+) -> Dict[str, Any]:
+    """Calculate multi-system astrological chart (Western, Vedic, Chinese, Mayan, Uranian) with optional vectorization."""
+    if rate_limiter_func:
+        await rate_limiter_func(request)
+    
+    logger.info(f"Multi-system chart calculation: vectorized={use_vectorized}, available={vectorized_multi_system_available}")
+    
+    try:
+        # Use vectorized calculation if requested and available
+        if use_vectorized and vectorized_multi_system_available and calculate_multi_system_chart_fast is not None:
+            chart: Dict[str, Any] = calculate_multi_system_chart_fast(
+                year=data.year,
+                month=data.month,
+                day=data.day,
+                hour=data.hour,
+                minute=data.minute,
+                lat=data.lat,
+                lon=data.lon,
+                timezone=data.timezone,
+                city=data.city,
+                house_system=house_system
+            )
+        else:
+            # Use traditional calculation
+            chart = calculate_multi_system_chart(
+                year=data.year,
+                month=data.month,
+                day=data.day,
+                hour=data.hour,
+                minute=data.minute,
+                lat=data.lat,
+                lon=data.lon,
+                timezone=data.timezone,
+                city=data.city,
+                house_system=house_system
+            )
+        
+        # Add performance metadata
+        chart["api_metadata"] = {
+            "endpoint": "multi-system-chart",
+            "vectorized_requested": use_vectorized,
+            "vectorized_available": vectorized_multi_system_available,
+            "vectorized_used": use_vectorized and vectorized_multi_system_available,
+            "house_system": house_system
+        }
+        
+        return chart
+        
+    except Exception as e:
+        logger.error(f"Multi-system chart calculation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Multi-system chart calculation failed: {str(e)}")
+
 @router.post("/human-design")
 async def calculate_human_design_endpoint(
     data: BirthData, 
@@ -179,7 +266,6 @@ async def calculate_human_design_endpoint(
 
 # Cache for chart calculations with Redis integration ready
 import time
-from typing import Optional
 
 chart_cache: Dict[str, Any] = {}
 

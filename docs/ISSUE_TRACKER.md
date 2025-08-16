@@ -10,7 +10,7 @@ Status Legend:
 
 | ID | Title | Status | Owner | Target | Notes | Source Doc |
 |----|-------|--------|-------|--------|-------|------------|
-| UI-001 | Complete Synastry analysis backend integration | URGENT | you | 2025-08-20 | Currently pure UI mockup, needs calculation logic **→ Send domain logic to Grok** | Frontend Analysis |
+| UI-001 | Complete Synastry analysis backend integration | DONE | you | 2025-08-16 | Backend algorithms implemented with PySwissEph, aspect matrices, house overlays, compatibility scoring, and composite charts. Frontend updated to use new API endpoint. | Frontend Analysis |
 | UI-002 | Implement AI interpretation service integration | PLANNED | you | 2025-08-21 | Has structure but needs XAI/Grok API integration **→ Send content templates to Grok** | Frontend Analysis |
 | UI-003 | Complete chart saving/loading CRUD functionality | PLANNED | you | 2025-08-22 | Partial implementation, needs full persistence **→ Use Claude 3.5 Sonnet** | Frontend Analysis |
 | TEST-001 | Integration test enrichment (healwave-astro path) | PLANNED | you | 2025-08-19 | Add real component render + assertions | PROJECT_PRIORITIES_2025 |

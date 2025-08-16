@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
-import { SynastryAnalysis } from '../components/SynastryAnalysis';
+import { SynastryAnalysis } from '../components/SynastryAnalysis/SynastryAnalysis';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (

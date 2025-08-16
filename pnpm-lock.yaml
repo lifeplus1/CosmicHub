@@ -66,6 +66,9 @@ importers:
 
   apps/astro:
     dependencies:
+      '@cosmichub/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@cosmichub/subscriptions':
         specifier: workspace:*
         version: link:../../packages/subscriptions

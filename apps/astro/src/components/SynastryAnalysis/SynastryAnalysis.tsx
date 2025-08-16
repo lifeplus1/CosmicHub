@@ -28,7 +28,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
     setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/calculate-synastry`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/calculate-synastry`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
       }
 
       const data = await response.json();
-      setSynastryResult(data.synastry);
+      setSynastryResult(data);  // Use the response directly since it matches our expected structure
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {

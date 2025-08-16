@@ -601,6 +601,7 @@ async def root_health():
 from api.routers import ai, presets, subscriptions, ephemeris, charts, stripe_router, csp_router
 from api import interpretations
 from astro.calculations import transits_clean
+from routers import synastry
 
 app.include_router(ai.router)
 app.include_router(presets.router)
@@ -611,6 +612,7 @@ app.include_router(interpretations.router)  # AI Interpretations router
 app.include_router(transits_clean.router, prefix="/api/astro", tags=["transits"])  # Transit calculations router
 app.include_router(stripe_router.router)  # Stripe subscription & billing endpoints
 app.include_router(csp_router)  # CSP violation reports
+app.include_router(synastry.router, prefix="/api", tags=["synastry"])  # Synastry analysis endpoints
 
 if __name__ == "__main__":
     import uvicorn

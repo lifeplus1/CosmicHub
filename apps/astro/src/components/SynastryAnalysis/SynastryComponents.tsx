@@ -1,4 +1,5 @@
 import React from 'react';
+import './SynastryComponents.css';
 import { FaStar, FaChevronDown } from 'react-icons/fa';
 import * as Accordion from '@radix-ui/react-accordion';
 
@@ -40,14 +41,16 @@ interface ProgressBarProps {
   colorClass: string;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ score, colorClass }) => (
-  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-    <div 
-      className={`bg-${colorClass} h-2.5 rounded-full transition-all duration-300`}
-      style={{ width: `${Math.min(Math.max(score, 0), 100)}%` }}
-    />
-  </div>
-));
+export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ score, colorClass }) => {
+  const clamped = Math.min(Math.max(score, 0), 100);
+  const step = Math.round(clamped / 5) * 5;
+  const stepClass = `w-step-${step}`;
+  return (
+    <div className="progress-bar">
+      <div className={`progress-fill ${stepClass} bg-${colorClass}`} />
+    </div>
+  );
+});
 
 interface StarRatingProps {
   score: number;

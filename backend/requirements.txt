@@ -15,6 +15,7 @@ reportlab
 httpx
 redis
 pyswisseph
+numpy
 websockets
 opentelemetry-api
 opentelemetry-sdk
