@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 
 # Import our app and components
 from main import app
+from auth import get_current_user
 from api.interpretations import (
     get_chart_data,
     format_interpretation_for_frontend,
@@ -192,38 +193,50 @@ class TestInterpretationsAPI:
         assert response.status_code == 404
         assert "Chart data not found" in response.json()["detail"]
 
-    @patch('auth.get_current_user')
-    @patch('auth.get_current_user')
     @patch('api.interpretations.db')
-    def test_get_interpretation_by_id_success(self, mock_db: Mock, mock_get_user: Mock, mock_user: Dict[str, Any]) -> None:
+    def test_get_interpretation_by_id_success(self, mock_db: Mock) -> None:
         """Test successful retrieval of specific interpretation by ID"""
-        mock_get_user.return_value = mock_user
+        # Mock authenticated user using FastAPI dependency override
+        def mock_get_current_user():
+            return {"uid": "test_user_123", "email": "test@example.com"}
         
-        # Mock Firestore document
-        mock_doc = Mock()
-        mock_doc.exists = True
-        mock_doc.to_dict.return_value = {
-            "chartId": "chart123",
-            "userId": "test_user_123",
-            "type": "natal",
-            "title": "Natal Chart Analysis",
-            "content": "Your chart reveals...",
-            "confidence": 0.85
-        }
-        mock_doc.id = "interp123"
+        app.dependency_overrides[get_current_user] = mock_get_current_user
         
-        mock_doc_ref = Mock()
-        mock_doc_ref.get.return_value = mock_doc
-        mock_collection = Mock()
-        mock_collection.document.return_value = mock_doc_ref
-        mock_db.collection.return_value = mock_collection
-        
-        response = client.get("/api/interpretations/interp123")
-        
-        assert response.status_code == 200
-        data = response.json()
-        assert data["success"] is True
-        assert data["data"]["title"] == "Natal Chart Analysis"
+        try:
+            # Mock Firestore document
+            mock_doc = Mock()
+            mock_doc.exists = True
+            mock_doc.to_dict.return_value = {
+                "chartId": "chart123",
+                "userId": "test_user_123",  # Must match the authenticated user's uid
+                "type": "natal",
+                "title": "Natal Chart Analysis",
+                "content": "Your chart reveals...",
+                "summary": "A brief summary of the chart analysis",
+                "tags": ["natal", "sun", "moon"],
+                "confidence": 0.85,
+                "createdAt": "2023-01-01T00:00:00Z",
+                "updatedAt": "2023-01-01T00:00:00Z"
+            }
+            mock_doc.id = "interp123"
+            
+            mock_doc_ref = Mock()
+            mock_doc_ref.get.return_value = mock_doc
+            mock_collection = Mock()
+            mock_collection.document.return_value = mock_doc_ref
+            mock_db.collection.return_value = mock_collection
+            
+            response = client.get("/api/interpretations/interp123")
+            
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+            assert data["data"]["title"] == "Natal Chart Analysis"
+            assert data["data"]["summary"] == "A brief summary of the chart analysis"
+            assert data["data"]["tags"] == ["natal", "sun", "moon"]
+        finally:
+            # Clean up dependency override
+            app.dependency_overrides.pop(get_current_user, None)
 
     @patch('auth.get_current_user')
     @patch('api.interpretations.db')

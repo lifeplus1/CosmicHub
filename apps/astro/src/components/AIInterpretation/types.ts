@@ -48,3 +48,10 @@ export interface AIServiceError {
   code?: string;
   statusCode?: number;
 }
+
+// Modal component types
+export interface InterpretationModalProps {
+  interpretation: Interpretation;
+  isOpen: boolean;
+  onClose: () => void;
+}

@@ -4,10 +4,13 @@ import { vi } from 'vitest';
 // Mock Firebase modules
 vi.mock('firebase/app', () => ({
   initializeApp: vi.fn(() => ({})),
+  getApps: vi.fn(() => []),
+  getApp: vi.fn(() => ({})),
 }));
 
 vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
+  connectAuthEmulator: vi.fn(),
   onAuthStateChanged: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
   createUserWithEmailAndPassword: vi.fn(),
@@ -18,6 +21,9 @@ vi.mock('firebase/auth', () => ({
 
 vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(() => ({})),
+  connectFirestoreEmulator: vi.fn(),
+  enableNetwork: vi.fn(),
+  disableNetwork: vi.fn(),
   collection: vi.fn(),
   doc: vi.fn(),
   getDoc: vi.fn(),

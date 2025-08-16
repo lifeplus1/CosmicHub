@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import type { Interpretation } from './types';
+
+const LazyInterpretationModal = lazy(() => import('./InterpretationModal')); // Lazy load for performance
 
 interface InterpretationCardProps {
   interpretation: Interpretation;
 }
 
 const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const getTypeEmoji = (type: string) => {
     switch (type.toLowerCase()) {
       case 'natal': return '🌟';
@@ -108,16 +111,34 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation 
         
         <button
           className="text-xs text-cosmic-gold hover:text-cosmic-gold/80 transition-colors"
-          onClick={() => {
-            // TODO: Implement view full interpretation
-            console.log('View full interpretation:', interpretation.id);
-          }}
+          onClick={() => setIsModalOpen(true)}
+          aria-label={`View full ${interpretation.type} interpretation`}
         >
           View Full Analysis →
         </button>
       </footer>
+
+      {/* Lazy-loaded Modal */}
+      <Suspense fallback={
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-cosmic-dark p-6 rounded-xl border border-cosmic-gold/20">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 border-2 border-cosmic-gold border-t-transparent rounded-full animate-spin" />
+              <span className="text-cosmic-gold">Loading analysis...</span>
+            </div>
+          </div>
+        </div>
+      }>
+        {isModalOpen && (
+          <LazyInterpretationModal
+            interpretation={interpretation}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
+      </Suspense>
     </article>
   );
 };
 
-export default InterpretationCard;
+export default React.memo(InterpretationCard); // Memoize to optimize re-renders
