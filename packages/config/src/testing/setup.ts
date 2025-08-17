@@ -4,6 +4,7 @@
  */
 
 import '@testing-library/jest-dom';
+import { logger } from '../utils/logger';
 import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
@@ -17,29 +18,32 @@ afterEach(() => {
 });
 
 // Performance measurement setup
-beforeAll(() => {
+beforeAll((): void => {
   // Mock performance API if not available
-  if (typeof global.performance === 'undefined') {
-    global.performance = {
+  interface DummyObserver { new (...args: unknown[]): unknown }
+  const g = globalThis as { performance?: Performance; ResizeObserver?: DummyObserver; IntersectionObserver?: DummyObserver };
+  if (typeof g.performance === 'undefined') {
+    const perfPolyfill: Partial<Performance> = {
       now: vi.fn(() => Date.now()),
       mark: vi.fn(),
       measure: vi.fn(),
-      getEntriesByName: vi.fn(() => []),
-      getEntriesByType: vi.fn(() => []),
+      getEntriesByName: vi.fn(() => [] as PerformanceEntry[]),
+      getEntriesByType: vi.fn(() => [] as PerformanceEntry[]),
       clearMarks: vi.fn(),
       clearMeasures: vi.fn()
-    } as any;
+    };
+  g.performance = perfPolyfill as Performance;
   }
   
   // Mock ResizeObserver
-  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  g.ResizeObserver = vi.fn().mockImplementation(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn()
   }));
   
   // Mock IntersectionObserver
-  global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  g.IntersectionObserver = vi.fn().mockImplementation(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn()
@@ -50,7 +54,7 @@ beforeAll(() => {
     writable: true,
     value: vi.fn().mockImplementation(query => ({
       matches: false,
-      media: query,
+  media: query as string,
       onchange: null,
       addListener: vi.fn(),
       removeListener: vi.fn(),
@@ -61,20 +65,20 @@ beforeAll(() => {
   });
   
   // Mock window.scrollTo
-  window.scrollTo = vi.fn();
+  window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
   
   // Mock console methods for cleaner test output
   vi.spyOn(console, 'log').mockImplementation(() => {});
   vi.spyOn(console, 'info').mockImplementation(() => {});
   vi.spyOn(console, 'debug').mockImplementation(() => {});
   
-  console.log('🧪 Test environment initialized');
+  logger.info('Test environment initialized');
 });
 
-afterAll(() => {
+afterAll((): void => {
   // Restore console methods
   vi.restoreAllMocks();
-  console.log('🏁 Test environment cleanup completed');
+  logger.info('Test environment cleanup completed');
 });
 
 // Custom matchers for performance testing
@@ -83,12 +87,12 @@ expect.extend({
     const pass = received >= floor && received <= ceiling;
     if (pass) {
       return {
-        message: () => `expected ${received} not to be within range ${floor} - ${ceiling}`,
+  message: (): string => `expected ${received} not to be within range ${floor} - ${ceiling}`,
         pass: true
       };
     } else {
       return {
-        message: () => `expected ${received} to be within range ${floor} - ${ceiling}`,
+  message: (): string => `expected ${received} to be within range ${floor} - ${ceiling}`,
         pass: false
       };
     }
@@ -98,12 +102,12 @@ expect.extend({
     const pass = received <= threshold;
     if (pass) {
       return {
-        message: () => `expected ${received}ms not to be under ${threshold}ms render threshold`,
+  message: (): string => `expected ${received}ms not to be under ${threshold}ms render threshold`,
         pass: true
       };
     } else {
       return {
-        message: () => `expected ${received}ms to be under ${threshold}ms render threshold (slow render detected)`,
+  message: (): string => `expected ${received}ms to be under ${threshold}ms render threshold (slow render detected)`,
         pass: false
       };
     }
@@ -111,24 +115,27 @@ expect.extend({
   
   toBeAccessibleButton(received: HTMLElement) {
     const hasRole = received.getAttribute('role') === 'button' || received.tagName.toLowerCase() === 'button';
-    const hasLabel = received.getAttribute('aria-label') || received.getAttribute('aria-labelledby') || received.textContent?.trim();
+    const ariaLabel = received.getAttribute('aria-label');
+    const ariaLabelledBy = received.getAttribute('aria-labelledby');
+    const text = received.textContent?.trim();
+    const hasLabel = ariaLabel ?? ariaLabelledBy ?? (text && text.length > 0 ? text : null);
     const hasAriaDisabled = received.hasAttribute('aria-disabled');
     
-    const pass = hasRole && hasLabel && hasAriaDisabled;
+  const pass: boolean = hasRole && Boolean(hasLabel) && hasAriaDisabled;
     
-    if (pass) {
+  if (pass === true) {
       return {
-        message: () => `expected element not to be an accessible button`,
+  message: (): string => `expected element not to be an accessible button`,
         pass: true
       };
     } else {
-      const missing = [];
-      if (!hasRole) missing.push('proper role');
-      if (!hasLabel) missing.push('aria-label or text content');
+  const missing: string[] = [];
+  if (!hasRole) missing.push('proper role');
+  if (hasLabel === null) missing.push('aria-label or text content');
       if (!hasAriaDisabled) missing.push('aria-disabled attribute');
       
       return {
-        message: () => `expected element to be accessible button, missing: ${missing.join(', ')}`,
+  message: (): string => `expected element to be accessible button, missing: ${missing.join(', ')}`,
         pass: false
       };
     }
@@ -138,23 +145,23 @@ expect.extend({
     const hasRole = received.getAttribute('role') === 'dialog';
     const hasAriaModal = received.getAttribute('aria-modal') === 'true';
     const hasLabelledBy = received.hasAttribute('aria-labelledby');
-    const hasDescribedBy = received.hasAttribute('aria-describedby');
+  // hasDescribedBy intentionally not used in pass criteria yet (future enhancement)
     
     const pass = hasRole && hasAriaModal && hasLabelledBy;
     
-    if (pass) {
+  if (pass === true) {
       return {
-        message: () => `expected element not to be an accessible modal`,
+  message: (): string => `expected element not to be an accessible modal`,
         pass: true
       };
     } else {
-      const missing = [];
+  const missing: string[] = [];
       if (!hasRole) missing.push('role="dialog"');
       if (!hasAriaModal) missing.push('aria-modal="true"');
       if (!hasLabelledBy) missing.push('aria-labelledby');
       
       return {
-        message: () => `expected element to be accessible modal, missing: ${missing.join(', ')}`,
+  message: (): string => `expected element to be accessible modal, missing: ${missing.join(', ')}`,
         pass: false
       };
     }
@@ -163,11 +170,12 @@ expect.extend({
 
 // Declare custom matchers for TypeScript
 declare module 'vitest' {
-  interface Assertion<T = any> {
-    toBeWithinRange(floor: number, ceiling: number): T;
-    toRenderFast(threshold?: number): T;
-    toBeAccessibleButton(): T;
-    toBeAccessibleModal(): T;
+  // Extend Vitest matchers (avoid redefining generic param conflicts)
+  interface Assertion {
+    toBeWithinRange(floor: number, ceiling: number): Assertion;
+    toRenderFast(threshold?: number): Assertion;
+    toBeAccessibleButton(): Assertion;
+    toBeAccessibleModal(): Assertion;
   }
 }
 

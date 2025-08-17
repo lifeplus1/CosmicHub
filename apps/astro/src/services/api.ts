@@ -4,6 +4,29 @@ import { toUnifiedBirthData, type AnyBirthInput, type ChartBirthData } from '@co
 import { auth } from '@cosmichub/config/firebase';
 import type { GeneKeysData } from '../components/GeneKeysChart/types';
 import type { HumanDesignData } from '../components/HumanDesignChart/types';
+import {
+  type ApiResponse,
+  type ApiSuccessResponse,
+  type ApiErrorResponse,
+  type ChartId,
+  type UserId,
+  type InterpretationId,
+  type SavedChart,
+  type SavedChartsResponse,
+  type SaveChartRequest,
+  type SaveChartResponse,
+  type Interpretation,
+  type InterpretationRequest,
+  type InterpretationResponse,
+  // Import ChartData as ChartDataType to avoid conflict
+  type ChartData as ChartDataType,
+  AuthenticationError,
+  NotFoundError,
+  ValidationError
+} from './api.types';
+
+// Re-export types from api.types
+export * from './api.types';
 
 // Narrow import.meta.env access to avoid implicit any
 const rawApiUrl: string | undefined =
@@ -61,7 +84,7 @@ const getAuthHeaders = async (): Promise<AuthHeaders> => {
   const token = await getAuthToken();
   if (token === null) {
     console.error('❌ Authentication required but no token available');
-    throw new Error('Authentication required');
+    throw new AuthenticationError('Authentication required');
   }
   console.log('✅ Auth headers created');
   return {
@@ -70,58 +93,19 @@ const getAuthHeaders = async (): Promise<AuthHeaders> => {
   };
 };
 
-// Saved Charts API Types
-export interface SavedChart {
-  id: string;
-  name: string;
-  birth_date: string;
-  birth_time: string;
-  birth_location: string;
-  chart_type: string;
-  created_at: string;
-  updated_at: string;
-  birth_data: ChartBirthData;
-  chart_data: ChartData;
-}
-
-export interface SavedChartsResponse {
-  charts: SavedChart[];
-  total: number;
-}
-
-export interface SaveChartRequest {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  city: string;
-  house_system?: string;
-  chart_name?: string;
-  timezone?: string;
-  lat?: number;
-  lon?: number;
-} // Closing brace added for SaveChartRequest interface
-
-export interface SaveChartResponse {
-  id: string;
-  message: string;
-  chart_data: ChartData;
-}
-
 // API Functions for Saved Charts
 export const fetchSavedCharts = async (): Promise<SavedChart[]> => {
   console.log('📊 Fetching saved charts...');
   
   try {
     const headers = await getAuthHeaders();
-  const { data } = await axios.get<SavedChartsResponse>(`${BACKEND_URL}/api/charts/`, { headers });
-  console.log('✅ Saved charts fetched successfully:', data);
-  return Array.isArray(data.charts) ? data.charts : [];
+    const { data } = await axios.get<SavedChartsResponse>(`${BACKEND_URL}/api/charts/`, { headers });
+    console.log('✅ Saved charts fetched successfully:', data);
+    return Array.isArray(data.charts) ? data.charts : [];
   } catch (error) {
     console.error('❌ Error fetching saved charts:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to view saved charts');
+      throw new AuthenticationError('Authentication required to view saved charts');
     }
     throw new Error('Failed to fetch saved charts');
   }
@@ -132,19 +116,19 @@ export const saveChart = async (chartData: SaveChartRequest): Promise<SaveChartR
   
   try {
     const headers = await getAuthHeaders();
-  const { data } = await axios.post<SaveChartResponse>(`${BACKEND_URL}/api/charts/save-chart`, chartData, { headers });
-  console.log('✅ Chart saved successfully:', data);
-  return data;
+    const { data } = await axios.post<SaveChartResponse>(`${BACKEND_URL}/api/charts/save-chart`, chartData, { headers });
+    console.log('✅ Chart saved successfully:', data);
+    return data;
   } catch (error) {
     console.error('❌ Error saving chart:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to save charts');
+      throw new AuthenticationError('Authentication required to save charts');
     }
     throw new Error('Failed to save chart');
   }
 };
 
-export const deleteChart = async (chartId: string): Promise<void> => {
+export const deleteChart = async (chartId: ChartId): Promise<void> => {
   console.log(`🗑️ Deleting chart: ${chartId}`);
   
   try {
@@ -157,7 +141,7 @@ export const deleteChart = async (chartId: string): Promise<void> => {
   } catch (error) {
     console.error('❌ Error deleting chart:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to delete charts');
+      throw new AuthenticationError('Authentication required to delete charts');
     }
     throw new Error('Failed to delete chart');
   }
@@ -170,17 +154,25 @@ export const apiClient = {
     console.log('🌐 Full URL:', url);
     
     try {
-  const response = await fetch(url);
+      const response = await fetch(url);
       console.log('📥 Response status:', response.status);
       
       if (!response.ok) {
         console.error('❌ HTTP error:', response.status, response.statusText);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        
+        // Map HTTP status code to appropriate error
+        if (response.status === 401) {
+          throw new AuthenticationError();
+        } else if (response.status === 404) {
+          throw new NotFoundError(endpoint);
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       }
       
-  const data: unknown = await response.json();
-  console.log('✅ GET response data:', data);
-  return data as T;
+      const data: unknown = await response.json();
+      console.log('✅ GET response data:', data);
+      return data as T;
     } catch (error) {
       console.error('❌ GET request failed:', error);
       throw error;
@@ -189,29 +181,39 @@ export const apiClient = {
   
   post: async <T = unknown>(endpoint: string, body: unknown): Promise<T> => {
     console.log('📡 API POST request:', endpoint);
-  console.log('📤 Request data:', body);
+    console.log('📤 Request data:', body);
     const url = `${BACKEND_URL}${endpoint}`;
     console.log('🌐 Full URL:', url);
     
     try {
-  const response = await fetch(url, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-  body: JSON.stringify(body),
+        body: JSON.stringify(body),
       });
       
       console.log('📥 Response status:', response.status);
       
       if (!response.ok) {
         console.error('❌ HTTP error:', response.status, response.statusText);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        
+        // Map HTTP status code to appropriate error
+        if (response.status === 401) {
+          throw new AuthenticationError();
+        } else if (response.status === 404) {
+          throw new NotFoundError(endpoint);
+        } else if (response.status === 400) {
+          throw new ValidationError('Invalid request data');
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       }
       
-  const responseData: unknown = await response.json();
-  console.log('✅ POST response data:', responseData);
-  return responseData as T;
+      const responseData: unknown = await response.json();
+      console.log('✅ POST response data:', responseData);
+      return responseData as T;
     } catch (error) {
       console.error('❌ POST request failed:', error);
       throw error;
@@ -234,17 +236,22 @@ export const fetchChart = async (data: Record<string, unknown>): Promise<unknown
   }
 };
 
-export const fetchPersonalityAnalysis = async (userId: string): Promise<unknown> => {
+export const fetchPersonalityAnalysis = async (userId: UserId): Promise<unknown> => {
   console.log('🧠 Fetching personality analysis for user:', userId);
   try {
     const headers = await getAuthHeaders();
     console.log('📡 Making personality analysis request to /api/analyze/personality/');
     const response = await axios.get(`${BACKEND_URL}/api/analyze/personality/${userId}`, { headers });
     console.log('✅ Personality analysis response received:', response.data);
-    return response;
+    return response.data;
   } catch (error) {
     console.error('❌ Error fetching personality analysis:', error);
-    throw error;
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new AuthenticationError('Authentication required to access personality analysis');
+    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new NotFoundError(`Personality analysis for user ${userId}`);
+    }
+    throw new Error('Failed to fetch personality analysis');
   }
 };
 
@@ -264,76 +271,107 @@ export const fetchNumerology = async (data: Record<string, unknown>): Promise<un
 };
 
 export const calculateHumanDesign = async (data: AnyBirthInput): Promise<{ human_design: HumanDesignData }> => {
-  console.log('🧬 Calculating Human Design...');
-  const unified = toUnifiedBirthData(data);
-  console.log('📊 Human Design data input (unified):', unified);
+  console.log('🧬 Calculating Human Design chart...');
+  console.log('📊 Human Design input:', data);
+
   try {
+    const unifiedData = toUnifiedBirthData(data);
     const headers = await getAuthHeaders();
-    console.log('📡 Making Human Design request to /calculate-human-design');
-    const response = await axios.post(`${BACKEND_URL}/calculate-human-design`, unified, { headers });
-    console.log('✅ Human Design response received:', response.data);
+    const response = await axios.post<{ human_design: HumanDesignData }>(
+      `${BACKEND_URL}/api/human-design/calculate`, 
+      unifiedData, 
+      { headers }
+    );
+    
+    console.log('✅ Human Design calculation successful:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error calculating Human Design:', error);
-    throw error;
+    console.error('❌ Error calculating Human Design chart:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new AuthenticationError('Authentication required to calculate Human Design chart');
+    } else if (axios.isAxiosError(error) && error.response?.status === 400) {
+      throw new ValidationError('Invalid birth data for Human Design calculation');
+    }
+    throw new Error('Failed to calculate Human Design chart');
   }
 };
 
-export const calculateGeneKeys = async (data: AnyBirthInput): Promise<{ gene_keys: GeneKeysData }> => {
-  console.log('🗝️ Calculating Gene Keys...');
-  const unified = toUnifiedBirthData(data);
-  console.log('📊 Gene Keys data input (unified):', unified);
+export const getHumanDesignProfile = async (userId: UserId): Promise<unknown> => {
+  console.log('🧬 Fetching Human Design profile for user:', userId);
+
   try {
     const headers = await getAuthHeaders();
-    console.log('📡 Making Gene Keys request to /calculate-gene-keys');
-    const response = await axios.post(`${BACKEND_URL}/calculate-gene-keys`, unified, { headers });
+    const response = await axios.get(`${BACKEND_URL}/api/human-design/profile/${userId}`, { headers });
+    
+    console.log('✅ Human Design profile retrieved:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error fetching Human Design profile:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new AuthenticationError('Authentication required to access Human Design profile');
+    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new NotFoundError(`Human Design profile for user ${userId}`);
+    }
+    throw new Error('Failed to fetch Human Design profile');
+  }
+};
+
+export const calculateGeneKeys = async (data: AnyBirthInput): Promise<GeneKeysData> => {
+  console.log('🧬 Calculating Gene Keys...');
+  try {
+    const unifiedData = toUnifiedBirthData(data);
+    console.log('📊 Gene Keys input:', unifiedData);
+    const headers = await getAuthHeaders();
+    console.log('📡 Making Gene Keys request to /gene-keys/calculate');
+    const response = await axios.post<GeneKeysData>(`${BACKEND_URL}/api/gene-keys/calculate`, unifiedData, { headers });
     console.log('✅ Gene Keys response received:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error calculating Gene Keys:', error);
-    throw error;
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new AuthenticationError('Authentication required to calculate Gene Keys');
+    } else if (axios.isAxiosError(error) && error.response?.status === 400) {
+      throw new ValidationError('Invalid birth data for Gene Keys calculation');
+    }
+    throw new Error('Failed to calculate Gene Keys');
   }
 };
 
-export const getHumanDesignProfile = async (userId: string): Promise<unknown> => {
-  console.log('👤 Getting Human Design profile for user:', userId);
-  try {
-    const headers = await getAuthHeaders();
-    console.log('📡 Making Human Design profile request to /human-design/profile/');
-    const response = await axios.get(`${BACKEND_URL}/human-design/profile/${userId}`, { headers });
-    console.log('✅ Human Design profile response received:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Error fetching Human Design profile:', error);
-    throw error;
-  }
-};
-
-export const getGeneKeysProfile = async (userId: string): Promise<unknown> => {
-  console.log('🗝️ Getting Gene Keys profile for user:', userId);
+export const getGeneKeysProfile = async (userId: UserId): Promise<unknown> => {
+  console.log('�️ Getting Gene Keys profile for user:', userId);
   try {
     const headers = await getAuthHeaders();
     console.log('📡 Making Gene Keys profile request to /gene-keys/profile/');
-    const response = await axios.get(`${BACKEND_URL}/gene-keys/profile/${userId}`, { headers });
+    const response = await axios.get(`${BACKEND_URL}/api/gene-keys/profile/${userId}`, { headers });
     console.log('✅ Gene Keys profile response received:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error fetching Gene Keys profile:', error);
-    throw error;
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new AuthenticationError('Authentication required to access Gene Keys profile');
+    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new NotFoundError(`Gene Keys profile for user ${userId}`);
+    }
+    throw new Error('Failed to fetch Gene Keys profile');
   }
 };
 
-export const getContemplationProgress = async (userId: string): Promise<unknown> => {
+export const getContemplationProgress = async (userId: UserId): Promise<unknown> => {
   console.log('🧘 Getting contemplation progress for user:', userId);
   try {
     const headers = await getAuthHeaders();
     console.log('📡 Making contemplation progress request to /gene-keys/contemplation/');
-    const response = await axios.get(`${BACKEND_URL}/gene-keys/contemplation/${userId}`, { headers });
+    const response = await axios.get(`${BACKEND_URL}/api/gene-keys/contemplation/${userId}`, { headers });
     console.log('✅ Contemplation progress response received:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error fetching contemplation progress:', error);
-    throw error;
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new AuthenticationError('Authentication required to access contemplation progress');
+    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new NotFoundError(`Contemplation progress for user ${userId}`);
+    }
+    throw new Error('Failed to fetch contemplation progress');
   }
 };
 
@@ -353,21 +391,8 @@ export interface House {
   sign: string;
 }
 
-export interface ChartData {
-  planets: Record<string, Planet>;
-  houses: House[];
-  aspects?: unknown[];
-  angles?: {
-    ascendant: number;
-    midheaven: number;
-    descendant: number;
-    imumcoeli: number;
-  };
-  latitude?: number;
-  longitude?: number;
-  timezone?: string;
-  julian_day?: number;
-}
+// Use the imported ChartDataType as ChartData to avoid conflicts
+export type ChartData = ChartDataType;
 
 // Enhanced chart fetching function that hits the /calculate endpoint
 export const fetchChartData = async (birthData: ChartBirthData): Promise<ChartData> => {
@@ -513,43 +538,13 @@ export const fetchSynastryAnalysis = async (person1: Record<string, unknown>, pe
 };
 
 // AI Interpretation API Functions
-export interface InterpretationRequest {
-  chartId: string;
-  userId: string;
-  type?: string;
-  focus?: string[];
-  question?: string;
-}
-
-export interface Interpretation {
-  id: string;
-  chartId: string;
-  userId: string;
-  type: string;
-  title: string;
-  content: string;
-  summary: string;
-  tags: string[];
-  confidence: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface InterpretationResponse {
-  data: Interpretation[];
-  success: boolean;
-  message?: string;
-}
-
-interface InterpretationByIdResponse { data: Interpretation; success?: boolean }
-
-export const fetchAIInterpretations = async (chartId: string, userId: string): Promise<InterpretationResponse> => {
+export const fetchAIInterpretations = async (chartId: ChartId, userId: UserId): Promise<InterpretationResponse> => {
   console.log('🤖 Fetching AI interpretations...');
   console.log('📊 Chart ID:', chartId, 'User ID:', userId);
   
   try {
     const headers = await getAuthHeaders();
-  const response = await axios.post<InterpretationResponse>(`${BACKEND_URL}/api/interpretations`, {
+    const response = await axios.post<InterpretationResponse>(`${BACKEND_URL}/api/interpretations`, {
       chartId,
       userId
     }, { headers });
@@ -559,7 +554,7 @@ export const fetchAIInterpretations = async (chartId: string, userId: string): P
   } catch (error) {
     console.error('❌ Error fetching AI interpretations:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to view interpretations');
+      throw new AuthenticationError('Authentication required to view interpretations');
     }
     throw new Error('Failed to fetch AI interpretations');
   }
@@ -571,39 +566,41 @@ export const generateAIInterpretation = async (request: InterpretationRequest): 
   
   try {
     const headers = await getAuthHeaders();
-  const response = await axios.post<InterpretationResponse>(`${BACKEND_URL}/api/interpretations/generate`, request, { headers });
+    const response = await axios.post<InterpretationResponse>(`${BACKEND_URL}/api/interpretations/generate`, request, { headers });
     
     console.log('✅ AI interpretation generated:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error generating AI interpretation:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to generate interpretations');
+      throw new AuthenticationError('Authentication required to generate interpretations');
     }
     throw new Error('Failed to generate AI interpretation');
   }
 };
 
-export const fetchInterpretationById = async (interpretationId: string): Promise<Interpretation> => {
+export const fetchInterpretationById = async (interpretationId: InterpretationId): Promise<Interpretation> => {
   console.log('🔍 Fetching interpretation by ID:', interpretationId);
   
   try {
     const headers = await getAuthHeaders();
-  interface InterpretationByIdResponse { data: Interpretation; success?: boolean }
-  const response = await axios.get<InterpretationByIdResponse>(`${BACKEND_URL}/api/interpretations/${interpretationId}`, { headers });
+    interface InterpretationByIdResponse { data: Interpretation; success?: boolean }
+    const response = await axios.get<InterpretationByIdResponse>(`${BACKEND_URL}/api/interpretations/${interpretationId}`, { headers });
     
     console.log('✅ Interpretation fetched:', response.data);
     return response.data.data;
   } catch (error) {
     console.error('❌ Error fetching interpretation:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to view interpretation');
+      throw new AuthenticationError('Authentication required to view interpretation');
+    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new NotFoundError(`Interpretation ${interpretationId}`);
     }
     throw new Error('Failed to fetch interpretation');
   }
 };
 
-export const deleteInterpretation = async (interpretationId: string): Promise<void> => {
+export const deleteInterpretation = async (interpretationId: InterpretationId): Promise<void> => {
   console.log('🗑️ Deleting interpretation:', interpretationId);
   
   try {
@@ -614,25 +611,39 @@ export const deleteInterpretation = async (interpretationId: string): Promise<vo
   } catch (error) {
     console.error('❌ Error deleting interpretation:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to delete interpretation');
+      throw new AuthenticationError('Authentication required to delete interpretation');
+    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new NotFoundError(`Interpretation ${interpretationId}`);
     }
     throw new Error('Failed to delete interpretation');
   }
 };
 
-export const updateInterpretation = async (interpretationId: string, updates: Partial<Interpretation>): Promise<Interpretation> => {
+export const updateInterpretation = async (
+  interpretationId: InterpretationId, 
+  updates: Partial<Interpretation>
+): Promise<Interpretation> => {
   console.log('📝 Updating interpretation:', interpretationId, updates);
   
   try {
     const headers = await getAuthHeaders();
-  const response = await axios.patch<InterpretationByIdResponse>(`${BACKEND_URL}/api/interpretations/${interpretationId}`, updates, { headers });
+    interface InterpretationByIdResponse { data: Interpretation; success?: boolean }
+    const response = await axios.patch<InterpretationByIdResponse>(
+      `${BACKEND_URL}/api/interpretations/${interpretationId}`, 
+      updates, 
+      { headers }
+    );
     
     console.log('✅ Interpretation updated:', response.data);
     return response.data.data;
   } catch (error) {
     console.error('❌ Error updating interpretation:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Authentication required to update interpretation');
+      throw new AuthenticationError('Authentication required to update interpretation');
+    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new NotFoundError(`Interpretation ${interpretationId}`);
+    } else if (axios.isAxiosError(error) && error.response?.status === 400) {
+      throw new ValidationError('Invalid interpretation update data');
     }
     throw new Error('Failed to update interpretation');
   }

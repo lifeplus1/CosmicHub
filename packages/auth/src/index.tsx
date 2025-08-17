@@ -279,8 +279,17 @@ export async function signUp(email: string, password: string): Promise<User> {
   }
 }
 
-export async function logOut(): Promise<void> { 
-  await auth.signOut(); 
+export async function logOut(): Promise<void> {
+  try {
+    if (authInstance) {
+      await fbSignOut(authInstance);
+    }
+    notifyAuthStateChange(null);
+  } catch (error) {
+    console.error('Log out failed:', error);
+    // Even if Firebase sign out fails, clear local mock state
+    notifyAuthStateChange(null);
+  }
 }
 
 // Export consolidated subscription provider

@@ -6,6 +6,7 @@
 import type { ComponentTestConfig } from './componentTesting';
 import { expect } from 'vitest';
 import type React from 'react';
+import { logger } from '../utils/logger';
 
 export interface QAReport {
   timestamp: string;
@@ -162,7 +163,8 @@ class QualityAssuranceEngine {
   }
 
   async runAutomatedQA(componentPaths?: string[]): Promise<QAReport> {
-    console.log('🔍 Starting Automated Quality Assurance Scan...');
+  const qaLogger = logger.child({ module: 'qa', phase: 'run' });
+  qaLogger.info('Starting Automated Quality Assurance Scan');
     
     const startTime = performance.now();
     const components = componentPaths ?? await this.discoverComponents();
@@ -203,9 +205,9 @@ class QualityAssuranceEngine {
           report.failedComponents++;
         }
         
-        console.log(`✅ ${result.name}: ${result.qualityScore}% (${result.grade})`);
+  qaLogger.info('Component tested', { component: result.name, quality: result.qualityScore, grade: result.grade });
       } catch (error) {
-        console.error(`❌ Failed to test ${componentPath}:`, error);
+  qaLogger.error('Failed to test component', { path: componentPath, error: error instanceof Error ? error.message : String(error) });
         report.failedComponents++;
       }
     }
@@ -236,9 +238,13 @@ class QualityAssuranceEngine {
     }
 
     const duration = performance.now() - startTime;
-    console.log(`\n📊 Quality Assurance Complete (${duration.toFixed(2)}ms)`);
-    console.log(`Overall Grade: ${report.overallGrade} (${report.averageQualityScore}%)`);
-    console.log(`Components: ${report.passedComponents}/${report.totalComponents} passed`);
+    qaLogger.info('Quality Assurance Complete', {
+      durationMs: Number(duration.toFixed(2)),
+      overallGrade: report.overallGrade,
+      averageQuality: report.averageQualityScore,
+      passed: report.passedComponents,
+      total: report.totalComponents
+    });
     
     return report;
   }

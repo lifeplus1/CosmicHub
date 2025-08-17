@@ -6,11 +6,11 @@
 import { describe, it, expect } from 'vitest';
 
 // Mock performance measurement
-const measureRenderTime = async (renderFn: () => void): Promise<number> => {
+const measureRenderTime = (renderFn: () => void): Promise<number> => {
   const start = performance.now();
   renderFn();
   const end = performance.now();
-  return end - start;
+  return Promise.resolve(end - start);
 };
 
 const expectFastRender = (renderTime: number, threshold = 16): void => {

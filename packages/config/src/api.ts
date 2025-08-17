@@ -3,8 +3,10 @@
  */
 
 import { config } from './config';
+// Local fallback to avoid cross-package rootDir limitations; kept in sync with shared utility type
+type UnknownRecord = Record<string, unknown>;
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T;
   success: boolean;
   message?: string;
@@ -14,7 +16,7 @@ export interface ApiResponse<T = any> {
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface RequestOptions {
@@ -218,10 +220,11 @@ export class ApiClient {
   }
 
   // Check if error is retryable
-  private isRetryableError(error: any): boolean {
-    if (error.code) {
+  private isRetryableError(error: unknown): boolean {
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+      const code = String((error as { code: unknown }).code);
       const retryableCodes = ['500', '502', '503', '504', 'TIMEOUT'];
-      return retryableCodes.includes(error.code);
+      return retryableCodes.includes(code);
     }
     return false;
   }
@@ -251,7 +254,7 @@ export class ApiClient {
     }, options?.retries);
   }
 
-  async post<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async post<T, B = UnknownRecord>(endpoint: string, data?: B, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.withRetry(async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), options?.timeout || config.api.timeout);
@@ -271,7 +274,7 @@ export class ApiClient {
     }, options?.retries);
   }
 
-  async put<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async put<T, B = UnknownRecord>(endpoint: string, data?: B, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.withRetry(async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), options?.timeout || config.api.timeout);
@@ -361,31 +364,31 @@ export const api = {
   charts: {
     list: () => apiClient.get(API_ENDPOINTS.charts.list),
     
-    create: (chartData: any) =>
+  create: <TBody = UnknownRecord>(chartData: TBody) =>
       apiClient.post(API_ENDPOINTS.charts.create, chartData),
     
     get: (id: string) =>
       apiClient.get(API_ENDPOINTS.charts.get(id)),
     
-    update: (id: string, data: any) =>
+  update: <TBody = UnknownRecord>(id: string, data: TBody) =>
       apiClient.put(API_ENDPOINTS.charts.update(id), data),
     
     delete: (id: string) =>
       apiClient.delete(API_ENDPOINTS.charts.delete(id)),
     
-    calculate: (params: any) =>
+  calculate: <TBody = UnknownRecord>(params: TBody) =>
       apiClient.post(API_ENDPOINTS.charts.calculate, params)
   },
   
   // AI helpers
   ai: {
-    generateInterpretation: (request: any) =>
+  generateInterpretation: <TBody = UnknownRecord>(request: TBody) =>
       apiClient.post(API_ENDPOINTS.ai.generateInterpretation, request),
     
-    analyzeChart: (request: any) =>
+  analyzeChart: <TBody = UnknownRecord>(request: TBody) =>
       apiClient.post(API_ENDPOINTS.ai.analyzeChart, request),
     
-    askQuestion: (question: string, chartData: any) =>
+  askQuestion: <TChart = UnknownRecord>(question: string, chartData: TChart) =>
       apiClient.post(API_ENDPOINTS.ai.askQuestion, { question, chartData }),
     
     getHistory: (chartId: string) =>

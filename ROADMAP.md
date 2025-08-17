@@ -38,7 +38,7 @@
 - [x] Correlate frontend -> backend via X-Request-ID propagation (fetch interceptor in `apps/healwave/src/auth.ts`)
 - [x] OpenTelemetry tracing (HTTP + key endpoints; Firestore & Stripe span attributes partial – Firestore ops next)
 - [x] Metrics: latency histograms per endpoint, error_rate, p95 chart calc (Prometheus histograms & counter; p95 via SLO script)
-- [ ] Synthetic journey: signup -> subscription -> chart -> save preferences (see OBS-003)
+- [x] Synthetic journey: signup -> subscription -> chart -> save preferences (see OBS-003)
 - [x] Structured log field spec (service, trace_id, span_id, anonymized_user_id) (`docs/observability/logging-spec.md`)
 - [ ] Frontend error reporter includes X-Request-ID in payload
 - [ ] Central log dashboard (top errors, p95 latency, saturation, error budget burn)
@@ -48,8 +48,8 @@
 ## 2. Reliability & Resilience
 
 - [x] Define SLOs: availability 99.5%, p95 /calculate < 1200ms (`docs/observability/slo-policy.md`)
-- [x] Error budget policy & weekly review (documented; automation refinement OBS-004)
-- [ ] k6 load test scripts committed (baseline & stress)
+- [x] Error budget policy & weekly review (documented; automation complete OBS-004) ✅
+- [x] k6 load test scripts committed (baseline & stress) ✅ (`scripts/load/baseline.js` & `scripts/load/stress.js`)
 - [ ] Chaos tests: inject Firestore latency, Redis down, external API timeout
 - [x] Graceful degradation guidelines doc (`docs/operations/degradation-matrix.md`)
 - [x] Capacity model & projected growth assumptions doc (`docs/operations/capacity-planning.md`)
@@ -69,7 +69,7 @@
 - [ ] RBAC enforcement audit checklist & remediation tasks
 - [ ] Security headers + CSP (report-only -> enforce) rollout (phase 1: report endpoint; phase 2 tightening SEC-005)
 - [ ] Anomaly detection rules (role elevation spike, auth failures surge)
-- [ ] SBOM (CycloneDX) generation in CI
+- [x] SBOM (CycloneDX) generation in CI ✅ (`.github/workflows/sbom.yml` complete with security scanning)
 
 ## 4. Cost & Performance Optimization
 

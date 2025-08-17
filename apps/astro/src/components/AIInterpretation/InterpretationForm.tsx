@@ -3,6 +3,7 @@ import { generateAIInterpretation } from '../../services/api';
 import { useToast } from '../ToastProvider';
 import { useAIInterpretation } from './useAIInterpretation';
 import type { ChartInterpretationRequest, InterpretationRequest } from './types';
+import type { InterpretationRequest as ApiInterpretationRequest, ChartId, UserId } from '../../services/api.types';
 
 interface InterpretationResult {
   data?: unknown;
@@ -34,7 +35,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     birthDate: '',
     birthTime: '',
     birthLocation: '',
-    interpretationType: 'general' as InterpretationRequest['interpretationType']
+    interpretationType: 'general' as 'general' | 'personality' | 'career' | 'relationships'
   });
 
   const interpretationTypes = [
@@ -93,7 +94,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         ...(formData.question.trim() !== '' && { question: formData.question })
       };
 
-      const result = await generateAIInterpretation(bodyData as ChartInterpretationRequest);
+      const result = await generateAIInterpretation(bodyData as ApiInterpretationRequest);
       
       toast({
         title: "Interpretation Generated",
@@ -134,26 +135,59 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }
 
     try {
-      const requestData: InterpretationRequest = {
-        birthDate: formData.birthDate,
-        birthTime: formData.birthTime,
-        birthLocation: formData.birthLocation,
-        interpretationType: formData.interpretationType,
-      };
+      if (mode === 'chart' && chartId && user) {
+        // Chart mode: use existing chart
+        const requestData: ApiInterpretationRequest = {
+          chartId: chartId as ChartId,
+          userId: user.uid as UserId,
+          type: formData.type as ApiInterpretationRequest['type'],
+          focus: formData.focus.length > 0 ? formData.focus : undefined,
+          question: formData.question.trim() || undefined
+        };
 
-      await generateInterpretation(requestData);
-      
-      if (interpretation) {
+        // Add question to request if provided
+        const bodyData = {
+          ...requestData,
+          ...(formData.question.trim() !== '' && { question: formData.question })
+        };
+
+        const result = await generateAIInterpretation(bodyData as ApiInterpretationRequest);
+        
         toast({
           title: "Interpretation Generated",
-          description: "Your personalized AI interpretation is ready",
+          description: "Your personalized astrological interpretation is ready",
           status: "success",
           duration: 3000,
           isClosable: true,
         });
 
         if (onInterpretationGenerated) {
-          onInterpretationGenerated({ content: interpretation });
+          onInterpretationGenerated(result);
+        }
+
+      } else {
+        // Direct mode: use birth data (existing logic)
+        const directRequestData: InterpretationRequest = {
+          birthDate: formData.birthDate,
+          birthTime: formData.birthTime,
+          birthLocation: formData.birthLocation,
+          interpretationType: formData.interpretationType as 'general' | 'personality' | 'career' | 'relationships'
+        };
+
+        await generateInterpretation(directRequestData);
+        
+        if (interpretation) {
+          toast({
+            title: "Interpretation Generated",
+            description: "Your personalized AI interpretation is ready",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+
+          if (onInterpretationGenerated) {
+            onInterpretationGenerated({ content: interpretation });
+          }
         }
       }
 
@@ -253,7 +287,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                       checked={formData.interpretationType === type.value}
                       onChange={(e): void => setFormData(prev => ({ 
                         ...prev, 
-                        interpretationType: e.target.value as InterpretationRequest['interpretationType']
+                        interpretationType: e.target.value as 'general' | 'personality' | 'career' | 'relationships'
                       }))}
                       className="sr-only"
                       aria-labelledby={`interpretation-type-${type.value}`}

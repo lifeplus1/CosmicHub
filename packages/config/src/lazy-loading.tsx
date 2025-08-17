@@ -5,6 +5,17 @@
 
 import React, { lazy, Suspense, ComponentType } from 'react';
 import { performanceMonitor } from './performance';
+import {
+  ImportFunction,
+  LazyComponentOptions,
+  ErrorBoundaryProps,
+  LazyComponentCreator,
+  LazyRouteCreator,
+  LazyModalCreator,
+  LazyChartCreator,
+  WithLazyLoading,
+  UseProgressiveLoading
+} from './types/lazy-loading-types';
 
 // Loading components for better UX
 export const DefaultLoadingSpinner: React.FC = () => (
@@ -24,14 +35,9 @@ export const PageLoadingSpinner: React.FC = () => (
 
 // Enhanced lazy loading with performance tracking
 export function createLazyComponent<T extends ComponentType<any>>(
-  importFn: () => Promise<{ default: T }>,
+  importFn: ImportFunction<T>,
   componentName: string,
-  options: {
-    loadingComponent?: ComponentType;
-    errorBoundary?: ComponentType<{ error: Error; resetError: () => void }>;
-    preload?: boolean;
-    timeout?: number;
-  } = {}
+  options: LazyComponentOptions = {}
 ): ComponentType<React.ComponentProps<T>> {
   const {
     loadingComponent: LoadingComponent = DefaultLoadingSpinner,
@@ -96,8 +102,8 @@ export function createLazyComponent<T extends ComponentType<any>>(
 }
 
 // Lazy loading utilities for common patterns
-export const lazyLoadRoute = (
-  importFn: () => Promise<{ default: ComponentType<any> }>,
+export const lazyLoadRoute: LazyRouteCreator = <T extends ComponentType<any>>(
+  importFn: ImportFunction<T>,
   routeName: string
 ) => createLazyComponent(importFn, `Route_${routeName}`, {
   loadingComponent: PageLoadingSpinner,
@@ -105,8 +111,8 @@ export const lazyLoadRoute = (
   timeout: 15000
 });
 
-export const lazyLoadModal = (
-  importFn: () => Promise<{ default: ComponentType<any> }>,
+export const lazyLoadModal: LazyModalCreator = <T extends ComponentType<any>>(
+  importFn: ImportFunction<T>,
   modalName: string
 ) => createLazyComponent(importFn, `Modal_${modalName}`, {
   loadingComponent: DefaultLoadingSpinner,
@@ -114,8 +120,8 @@ export const lazyLoadModal = (
   timeout: 5000
 });
 
-export const lazyLoadChart = (
-  importFn: () => Promise<{ default: ComponentType<any> }>,
+export const lazyLoadChart: LazyChartCreator = <T extends ComponentType<any>>(
+  importFn: ImportFunction<T>,
   chartName: string
 ) => createLazyComponent(importFn, `Chart_${chartName}`, {
   loadingComponent: DefaultLoadingSpinner,
@@ -124,14 +130,11 @@ export const lazyLoadChart = (
 });
 
 // HOC for component-level code splitting
-export function withLazyLoading<P extends object>(
-  importFn: () => Promise<{ default: ComponentType<P> }>,
+export const withLazyLoading: WithLazyLoading = <P extends object>(
+  importFn: ImportFunction<ComponentType<P>>,
   componentName: string,
-  options?: {
-    loadingComponent?: ComponentType;
-    preload?: boolean;
-  }
-) {
+  options?: Pick<LazyComponentOptions, 'loadingComponent' | 'preload'>
+) => {
   return createLazyComponent(importFn, componentName, options);
 }
 
@@ -142,7 +145,7 @@ export interface ProgressiveLoadingOptions {
   loadingComponent?: ComponentType<{ progress: number }>;
 }
 
-export function useProgressiveLoading<T>(
+export const useProgressiveLoading = function<T>(
   items: T[],
   options: ProgressiveLoadingOptions
 ) {
@@ -179,7 +182,7 @@ export function useProgressiveLoading<T>(
   }, [items, options.batchSize, options.delay]);
 
   return { loadedItems, isLoading, progress };
-}
+} as UseProgressiveLoading;
 
 // Bundle splitting utilities
 export const BundleSplitter: Record<string, () => Promise<any>> = {
@@ -352,10 +355,10 @@ export class SmartPreloader {
 
 // Error boundary for lazy loaded components
 export class LazyLoadErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: ComponentType<{ error: Error; resetError: () => void }> },
+  { children: React.ReactNode; fallback?: ComponentType<ErrorBoundaryProps> },
   { hasError: boolean; error: Error | null }
 > {
-  constructor(props: any) {
+  constructor(props: { children: React.ReactNode; fallback?: ComponentType<ErrorBoundaryProps> }) {
     super(props);
     this.state = { hasError: false, error: null };
   }

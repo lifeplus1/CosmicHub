@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { useAuth, logOut } from '@cosmichub/auth';
+import { useAuth } from '@cosmichub/auth';
 import Login from './Login';
 import Signup from './Signup';
 
 const Navbar: React.FC = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   const handleLogout = async () => {
     try {
-      await logOut();
+      await signOut();
     } catch (error) {
       // Use proper error handling instead of console
       alert('Logout failed. Please try again.');

@@ -27,8 +27,9 @@
  * Demonstrates complete testing infrastructure with performance and accessibility validation
  */
 
+/* eslint-disable no-console */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { testRunner, createDevelopmentRunner } from './testRunner';
+import { createDevelopmentRunner } from './testRunner';
 import { 
   renderWithProviders, 
   createMockBirthData, 
@@ -40,13 +41,13 @@ import {
 } from './testUtils';
 
 // Environment-aware performance budgets to avoid flaky thresholds in CI
-const isCI = !!process.env.CI;
+const isCI = process.env.CI !== undefined && process.env.CI !== '';
 // Default budgets can be overridden via PERF_BUDGET_MS env var
 const PERF_BUDGET_MS = Number(process.env.PERF_BUDGET_MS ?? (isCI ? 120 : 50));
 
 // Mock performance monitor
 const performanceMonitor = {
-  recordMetric: (name: string, duration: number, metadata?: any) => {
+  recordMetric: (name: string, duration: number, metadata?: Record<string, unknown>): void => {
     console.log(`📊 Performance metric: ${name} = ${duration}ms`, metadata);
   }
 };
@@ -58,7 +59,7 @@ const TestButton = ({ disabled = false, children, onClick }: {
   disabled?: boolean; 
   children: React.ReactNode;
   onClick?: () => void;
-}) => disabled ? (
+}): React.ReactElement => disabled ? (
   <button 
     type="button"
     disabled={true}
@@ -84,7 +85,7 @@ const TestModal = ({ isOpen, onClose, children }: {
   isOpen: boolean; 
   onClose: () => void;
   children: React.ReactNode;
-}) => {
+}): React.ReactElement | null => {
   if (!isOpen) return null;
   
   return (
@@ -101,7 +102,7 @@ const TestModal = ({ isOpen, onClose, children }: {
   );
 };
 
-const PerformanceTestComponent = ({ iterations = 100 }: { iterations?: number }) => {
+const PerformanceTestComponent = ({ iterations = 100 }: { iterations?: number }): React.ReactElement => {
   const [count, setCount] = React.useState(0);
   
   React.useEffect(() => {
@@ -125,17 +126,17 @@ const PerformanceTestComponent = ({ iterations = 100 }: { iterations?: number })
 describe('Comprehensive Testing Infrastructure Integration', () => {
   let runner: ReturnType<typeof createDevelopmentRunner>;
   
-  beforeAll(async () => {
-    runner = createDevelopmentRunner();
-    console.log('🚀 Starting comprehensive integration test suite');
-  });
+  beforeAll(() => {
+      runner = createDevelopmentRunner();
+      console.log('🚀 Starting comprehensive integration test suite');
+    });
   
   afterAll(() => {
     console.log('✅ Integration test suite completed');
   });
 
   describe('Testing Infrastructure Validation', () => {
-    it('should provide enhanced test utilities', async () => {
+  it('should provide enhanced test utilities', () => {
       const mockData = createMockBirthData();
       expect(mockData).toHaveProperty('dateTime');
       expect(mockData).toHaveProperty('location');
@@ -149,7 +150,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
       expect(Array.isArray(chartData.planets)).toBe(true);
     });
 
-    it('should render components with all providers', async () => {
+  it('should render components with all providers', () => {
       const { getByRole } = renderWithProviders(
         <TestButton disabled={false}>Test Button</TestButton>
       );
@@ -159,7 +160,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
       expect(button.getAttribute('aria-disabled')).toBe('false');
     });
 
-    it('should measure render performance accurately', async () => {
+  it('should measure render performance accurately', async () => {
       const renderTime = await measureRenderTime(() => 
         renderWithProviders(<PerformanceTestComponent iterations={50} />)
       );
@@ -171,7 +172,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
       console.log(`⚡ Component render time: ${renderTime.toFixed(2)}ms`);
     });
 
-    it('should validate accessibility compliance', async () => {
+  it('should validate accessibility compliance', () => {
       const { getByRole } = renderWithProviders(
         <TestButton disabled={false}>Enabled Button</TestButton>
       );
@@ -184,7 +185,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
       expect(button.hasAttribute('aria-label')).toBe(true);
     });
 
-    it('should validate modal accessibility', async () => {
+  it('should validate modal accessibility', () => {
       const { getByRole } = renderWithProviders(
         <TestModal isOpen={true} onClose={() => {}}>
           <p>Modal content</p>
@@ -202,7 +203,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
   });
 
   describe('Performance Monitoring Integration', () => {
-    it('should track component performance metrics', async () => {
+  it('should track component performance metrics', () => {
       const startTime = performance.now();
       
       const { getByTestId } = renderWithProviders(
@@ -218,8 +219,8 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
       console.log(`📊 Performance component rendered in ${renderTime.toFixed(2)}ms`);
     });
 
-    it('should validate performance thresholds', async () => {
-      const heavyComponent = () => renderWithProviders(
+  it('should validate performance thresholds', async () => {
+      const heavyComponent = (): ReturnType<typeof renderWithProviders> => renderWithProviders(
         <PerformanceTestComponent iterations={1000} />
       );
       
@@ -238,25 +239,27 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
   });
 
   describe('Test Runner Integration', () => {
-    it('should execute test suites with comprehensive reporting', async () => {
-      const testSuites = {
-        'Button Accessibility': async () => {
+  it('should execute test suites with comprehensive reporting', async () => {
+  const testSuites: Record<string, () => Promise<void>> = {
+  'Button Accessibility': (): Promise<void> => {
           const { getByRole } = renderWithProviders(
             <TestButton>Accessible Button</TestButton>
           );
           expectAccessibleButton(getByRole('button'));
-        },
+    return Promise.resolve();
+    },
         
-        'Modal Functionality': async () => {
+  'Modal Functionality': (): Promise<void> => {
           const { getByRole } = renderWithProviders(
             <TestModal isOpen={true} onClose={() => {}}>
               Test Modal Content
             </TestModal>
           );
           expectAccessibleModal(getByRole('dialog'));
+        return Promise.resolve();
         },
         
-        'Performance Validation': async () => {
+  'Performance Validation': async () => {
           const renderTime = await measureRenderTime(() => 
             renderWithProviders(<PerformanceTestComponent />)
           );
@@ -325,22 +328,24 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
   });
 
   describe('End-to-End Quality Assurance', () => {
-    it('should validate complete application quality metrics', async () => {
+  it('should validate complete application quality metrics', async () => {
       // Simulate a comprehensive application test
-      const appTestSuites = {
-        'Authentication Flow': async () => {
+  const appTestSuites: Record<string, () => Promise<void>> = {
+  'Authentication Flow': (): Promise<void> => {
           // Mock authentication test
           const { getByRole } = renderWithProviders(
             <TestButton>Sign In</TestButton>
           );
           expectAccessibleButton(getByRole('button'));
-        },
+    return Promise.resolve();
+    },
         
-        'Chart Generation': async () => {
+        'Chart Generation': (): Promise<void> => {
           // Mock chart generation test
           const chartData = createMockChartData();
           expect(chartData.planets.length).toBeGreaterThan(0);
           expect(chartData.houses.length).toBe(12);
+          return Promise.resolve();
         },
         
         'Performance Compliance': async () => {
@@ -351,7 +356,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
           expectWithinRange(renderTime, 0, 20); // Should render within 20ms
         },
         
-        'Accessibility Standards': async () => {
+        'Accessibility Standards': (): Promise<void> => {
           // Mock accessibility test
           const { getByRole } = renderWithProviders(
             <TestModal isOpen={true} onClose={() => {}}>
@@ -359,6 +364,7 @@ describe('Comprehensive Testing Infrastructure Integration', () => {
             </TestModal>
           );
           expectAccessibleModal(getByRole('dialog'));
+          return Promise.resolve();
         }
       };
 

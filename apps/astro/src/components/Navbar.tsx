@@ -2,7 +2,7 @@ import React, { useCallback, useState, lazy, Suspense } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt, FaGlobe, FaCompass, FaChevronDown, FaHeart, FaTools, FaCog, FaKey } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth, logOut } from '@cosmichub/auth';
+import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '@cosmichub/auth';
 import { EducationalTooltip } from './EducationalTooltip';
 
@@ -158,19 +158,19 @@ const DropdownNav: React.FC<DropdownNavProps> = React.memo(({ label, icon: Icon,
 DropdownNav.displayName = 'DropdownNav';
 
 const Navbar: React.FC = React.memo(() => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { tier: userTier } = useSubscription();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = useCallback(async () => {
     try {
-      await logOut();
+      await signOut();
       navigate('/');
     } catch (error) {
       console.error('Sign out error:', error);
     }
-  }, [navigate]);
+  }, [signOut, navigate]);
 
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

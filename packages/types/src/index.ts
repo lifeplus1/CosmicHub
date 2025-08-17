@@ -182,3 +182,5 @@ export interface UsageLimits {
 // Export all types - chart, user, and subscription types will be added in future iterations
 export * from './astrology.types.js';
 export * from './serialize.js';
+export * from './type-guards.js';
+export * from './utility.js';

@@ -6,7 +6,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { qaEngine, QAReport } from './qualityAssurance';
 import { ComponentTestSuite, createButtonTestConfig, createModalTestConfig } from './componentTesting';
-import React from 'react';
+import { logger } from '../utils/logger';
+import React, { type JSX } from 'react';
 
 // Mock Components for Testing
 const MockButton = ({ children, variant = 'primary', disabled = false, loading = false }: {
@@ -14,7 +15,7 @@ const MockButton = ({ children, variant = 'primary', disabled = false, loading =
   variant?: string;
   disabled?: boolean;
   loading?: boolean;
-}) => {
+}): JSX.Element => {
   const isDisabled = disabled || loading;
   return isDisabled ? (
     <button 
@@ -42,19 +43,19 @@ const MockModal = ({ isOpen, children, title, onClose }: {
   children: React.ReactNode;
   title?: string;
   onClose?: () => void;
-}) => {
+}): JSX.Element | null => {
   if (!isOpen) return null;
   
   return (
     <div 
       role="dialog" 
       aria-modal="true"
-      aria-labelledby={title ? "modal-title" : undefined}
+      aria-labelledby={title != null && title !== '' ? 'modal-title' : undefined}
       aria-describedby="modal-content"
       className="modal-overlay"
     >
       <div className="modal-content">
-        {title && <h2 id="modal-title">{title}</h2>}
+        {(title != null && title !== '') && <h2 id="modal-title">{title}</h2>}
         <div id="modal-content">{children}</div>
         <button onClick={onClose} aria-label="Close modal">×</button>
       </div>
@@ -62,79 +63,11 @@ const MockModal = ({ isOpen, children, title, onClose }: {
   );
 };
 
-const MockDropdown = ({ options = [], multiple = false, disabled = false }: {
-  options?: Array<{ value: string; label: string }>;
-  multiple?: boolean;
-  disabled?: boolean;
-}) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const listboxId = 'listbox-1';
-  
-  return (
-    <div className="dropdown">
-      {isOpen ? (
-        <button
-          role="combobox"
-          aria-expanded="true"
-          aria-haspopup="listbox"
-          aria-controls={listboxId}
-          aria-label="Select option"
-          disabled={disabled}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          Select option
-        </button>
-      ) : (
-        <button
-          role="combobox"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-controls={listboxId}
-          aria-label="Select option"
-          disabled={disabled}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          Select option
-        </button>
-      )}
-      {isOpen && (
-        multiple ? (
-          <ul 
-            id={listboxId}
-            role="listbox" 
-            aria-multiselectable="true"
-            aria-label="Options list"
-          >
-            {options.map((option, index) => (
-              <li key={index} role="option" aria-selected="false">
-                {option.label}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <ul 
-            id={listboxId}
-            role="listbox" 
-            aria-multiselectable="false"
-            aria-label="Options list"
-          >
-            {options.map((option, index) => (
-              <li key={index} role="option" aria-selected="false">
-                {option.label}
-              </li>
-            ))}
-          </ul>
-        )
-      )}
-    </div>
-  );
-};
-
 describe('Quality Assurance System Validation', () => {
   let qaReport: QAReport;
   
-  beforeAll(async () => {
-    console.log('🚀 Initializing Quality Assurance System...');
+  beforeAll(() => {
+  logger.info('Initializing Quality Assurance System');
   });
 
   describe('Component Testing Framework', () => {
@@ -145,7 +78,7 @@ describe('Quality Assurance System Validation', () => {
       // Run comprehensive tests
       await testSuite.runComprehensiveTests();
       
-      console.log('✅ Button component testing completed');
+  logger.info('Button component testing completed');
     });
 
     it('should validate modal component quality', async () => {
@@ -154,17 +87,12 @@ describe('Quality Assurance System Validation', () => {
       
       await testSuite.runComprehensiveTests();
       
-      console.log('✅ Modal component testing completed');
+  logger.info('Modal component testing completed');
     });
 
     it('should validate dropdown component accessibility', () => {
       // Test dropdown component directly for accessibility
-      const mockProps = {
-        options: [
-          { value: 'option1', label: 'Option 1' },
-          { value: 'option2', label: 'Option 2' }
-        ]
-      };
+  // (Mock props omitted - dropdown component not rendered in this simplified test)
 
       // Simulate component validation
       const hasComboboxRole = true; // MockDropdown has role="combobox"
@@ -175,7 +103,7 @@ describe('Quality Assurance System Validation', () => {
       expect(hasListboxRole).toBe(true);
       expect(hasAriaExpanded).toBe(true);
       
-      console.log('✅ Dropdown accessibility validation passed');
+  logger.info('Dropdown accessibility validation passed');
     });
   });
 
@@ -204,7 +132,7 @@ describe('Quality Assurance System Validation', () => {
       expect(qaReport.testedComponents).toBeGreaterThan(0);
       expect(qaReport.averageQualityScore).toBeGreaterThan(60); // Minimum acceptable quality
       
-      console.log(`📊 QA Analysis Complete: ${qaReport.overallGrade} grade (${qaReport.averageQualityScore}%)`);
+  logger.info('QA analysis complete', { grade: qaReport.overallGrade, avgQuality: qaReport.averageQualityScore });
     });
 
     it('should provide actionable quality recommendations', () => {
@@ -213,12 +141,9 @@ describe('Quality Assurance System Validation', () => {
       
       // Log recommendations for review
       if (qaReport.recommendations.length > 0) {
-        console.log('📋 Quality Recommendations:');
-        qaReport.recommendations.forEach((rec, index) => {
-          console.log(`  ${index + 1}. ${rec}`);
-        });
+  logger.info('Quality recommendations', { recommendations: qaReport.recommendations });
       } else {
-        console.log('🎉 No quality recommendations - excellent code quality!');
+  logger.info('No quality recommendations - excellent code quality');
       }
       
       // Should have meaningful recommendations if quality is below threshold
@@ -236,9 +161,11 @@ describe('Quality Assurance System Validation', () => {
       expect(qaReport.performanceMetrics.averageRenderTime).toBeGreaterThan(0);
       expect(qaReport.performanceMetrics.averageRenderTime).toBeLessThan(100); // Reasonable threshold
       
-      console.log(`⚡ Average render time: ${qaReport.performanceMetrics.averageRenderTime.toFixed(2)}ms`);
-      console.log(`🐌 Slowest component: ${qaReport.performanceMetrics.slowestComponent}`);
-      console.log(`🚄 Fastest component: ${qaReport.performanceMetrics.fastestComponent}`);
+      logger.info('Performance metrics', {
+        avgRender: Number(qaReport.performanceMetrics.averageRenderTime.toFixed(2)),
+        slowest: qaReport.performanceMetrics.slowestComponent,
+        fastest: qaReport.performanceMetrics.fastestComponent
+      });
     });
 
     it('should validate accessibility compliance across components', () => {
@@ -249,8 +176,10 @@ describe('Quality Assurance System Validation', () => {
       const accessibilityCompliance = (qaReport.totalComponents - qaReport.accessibilityMetrics.componentsWithIssues) / qaReport.totalComponents;
       expect(accessibilityCompliance).toBeGreaterThan(0.7); // 70% minimum compliance
       
-      console.log(`♿ Accessibility compliance: ${(accessibilityCompliance * 100).toFixed(1)}%`);
-      console.log(`🚨 Components needing accessibility improvements: ${qaReport.accessibilityMetrics.componentsWithIssues}`);
+      logger.info('Accessibility compliance', {
+        compliancePct: Number((accessibilityCompliance * 100).toFixed(1)),
+        componentsWithIssues: qaReport.accessibilityMetrics.componentsWithIssues
+      });
     });
 
     it('should generate comprehensive quality report', () => {
@@ -263,8 +192,7 @@ describe('Quality Assurance System Validation', () => {
       expect(report).toContain('Component Results');
       expect(report).toContain('Recommendations');
       
-      console.log('\n📄 Generated Quality Report:');
-      console.log(report);
+  logger.info('Generated quality report');
     });
   });
 
@@ -281,7 +209,7 @@ describe('Quality Assurance System Validation', () => {
         
         // Log component status
         const status = component.qualityScore >= 70 ? '✅' : '❌';
-        console.log(`${status} ${component.name}: ${component.qualityScore}% (${component.grade})`);
+  logger.debug('Component quality status', { component: component.name, score: component.qualityScore, grade: component.grade, status });
       });
     });
 
@@ -294,36 +222,36 @@ describe('Quality Assurance System Validation', () => {
       // At least 80% of components should meet minimum quality threshold
       expect(qualityCompliance).toBeGreaterThan(0.6); // Relaxed for demo
       
-      console.log(`🎯 Quality compliance: ${(qualityCompliance * 100).toFixed(1)}% of components meet standards`);
+  logger.info('Quality compliance', { compliancePct: Number((qualityCompliance * 100).toFixed(1)) });
       
       // Overall project quality
       expect(qaReport.averageQualityScore).toBeGreaterThan(60); // Minimum project quality
       
       if (qaReport.averageQualityScore >= 90) {
-        console.log('🏆 Excellent code quality achieved!');
+  logger.info('Excellent code quality achieved');
       } else if (qaReport.averageQualityScore >= 80) {
-        console.log('👍 Good code quality maintained');
+  logger.info('Good code quality maintained');
       } else if (qaReport.averageQualityScore >= 70) {
-        console.log('⚠️ Acceptable code quality, room for improvement');
+  logger.warn('Acceptable code quality, room for improvement');
       } else {
-        console.log('🔧 Code quality needs attention');
+  logger.warn('Code quality needs attention');
       }
     });
 
     it('should validate performance budget compliance', () => {
-      const performanceBudget = 32; // 32ms maximum render time
+  // performanceBudget retained conceptually but not needed for lint-compliant simplified test
       const fastComponents = qaReport.componentResults.filter(c => c.performance >= 60); // Lowered threshold to 60%
       const performanceCompliance = fastComponents.length / qaReport.componentResults.length;
       
       // Be more lenient - just ensure we have some performance data
       expect(qaReport.componentResults.length).toBeGreaterThan(0); // Ensure we have test data
       
-      console.log(`⚡ Performance budget compliance: ${(performanceCompliance * 100).toFixed(1)}%`);
+  logger.info('Performance budget compliance', { compliancePct: Number((performanceCompliance * 100).toFixed(1)) });
       
       // Check for performance violations
       const slowComponents = qaReport.componentResults.filter(c => c.performance < 60);
       if (slowComponents.length > 0) {
-        console.log(`🐌 Components needing performance optimization: ${slowComponents.map(c => c.name).join(', ')}`);
+  logger.warn('Components needing performance optimization', { components: slowComponents.map(c => c.name) });
       }
     });
   });
@@ -337,16 +265,16 @@ describe('Quality Assurance System Validation', () => {
       expect(qualityTrend).toBeGreaterThan(-10); // Quality shouldn't decrease significantly
       
       if (qualityTrend > 0) {
-        console.log(`📈 Quality improvement trend: +${qualityTrend.toFixed(1)} points`);
+  logger.info('Quality improvement trend positive', { delta: Number(qualityTrend.toFixed(1)) });
       } else if (qualityTrend < 0) {
-        console.log(`📉 Quality declining trend: ${qualityTrend.toFixed(1)} points`);
+  logger.warn('Quality declining trend', { delta: Number(qualityTrend.toFixed(1)) });
       } else {
-        console.log('➡️ Quality stable');
+  logger.info('Quality stable');
       }
     });
 
     it('should provide automated quality improvement suggestions', () => {
-      const generateImprovementPlan = (report: QAReport) => {
+  const generateImprovementPlan = (report: QAReport): { priorityActions: string[]; quickWins: string[]; longTermGoals: string[] } => {
         const lowScoreComponents = report.componentResults.filter(c => c.qualityScore < 70);
         const performanceIssues = report.componentResults.filter(c => c.performance < 70);
         const accessibilityIssues = report.componentResults.filter(c => c.accessibility < 90);
@@ -375,10 +303,11 @@ describe('Quality Assurance System Validation', () => {
       expect(improvementPlan).toHaveProperty('quickWins');
       expect(improvementPlan).toHaveProperty('longTermGoals');
       
-      console.log('\n🎯 Quality Improvement Plan:');
-      console.log('Priority Actions:', improvementPlan.priorityActions);
-      console.log('Quick Wins:', improvementPlan.quickWins);
-      console.log('Long-term Goals:', improvementPlan.longTermGoals);
+      logger.info('Quality improvement plan', {
+        priorityActions: improvementPlan.priorityActions,
+        quickWins: improvementPlan.quickWins,
+        longTermGoals: improvementPlan.longTermGoals
+      });
     });
   });
 });

@@ -6,7 +6,6 @@
 import React, { lazy, Suspense, memo, useCallback, useMemo } from 'react';
 import { 
   usePerformance, 
-  withPerformanceTracking, 
   useOperationTracking,
   usePagePerformance 
 } from './hooks';
@@ -29,47 +28,49 @@ const ComplexCalculator = lazy(() => Promise.resolve({
 }));
 
 // Performance-tracked component example
-const OptimizedComponent = memo(withPerformanceTracking(
+const OptimizedComponent: React.FC<{ data: any[], onUpdate: (id: string) => void }> = memo(
   ({ data, onUpdate }: { data: any[], onUpdate: (id: string) => void }) => {
-    const { startTiming, recordInteraction } = usePerformance('OptimizedComponent');
+    const performance = usePerformance();
+    const [processedData, setProcessedData] = React.useState<any[]>([]);
     
     // Expensive computation with performance tracking
-    const processedData = useMemo(() => {
-      const stopTiming = startTiming('dataProcessing');
+    React.useEffect(() => {
+      const processData = async () => {
+        const { result } = await performance.measure('dataProcessing', () => {
+          return data.map(item => ({
+            ...item,
+            computed: item.value * Math.random() * 1000
+          }));
+        });
+        setProcessedData(result);
+      };
       
-      const result = data.map(item => ({
-        ...item,
-        computed: item.value * Math.random() * 1000
-      }));
-      
-      stopTiming();
-      return result;
-    }, [data, startTiming]);
+      processData();
+    }, [data, performance]);
 
     // Optimized event handler
     const handleClick = useCallback((id: string) => {
-      recordInteraction('click', performance.now());
-      onUpdate(id);
-    }, [onUpdate, recordInteraction]);
+      performance.measure('click', () => {
+        onUpdate(id);
+      });
+    }, [onUpdate, performance]);
 
     return (
       <div className="optimized-component">
-        {processedData.map(item => (
+        {processedData.map((item: any) => (
           <div key={item.id} onClick={() => handleClick(item.id)}>
             {item.name}: {item.computed.toFixed(2)}
           </div>
         ))}
       </div>
     );
-  },
-  'OptimizedComponent',
-  { trackRender: true, trackMounts: true, trackInteractions: true }
-));
+  }
+);
 
 // Page-level performance tracking
 const PerformanceOptimizedPage: React.FC = () => {
-  usePagePerformance('PerformanceOptimizedPage');
-  const { trackOperation } = useOperationTracking('PageOperations');
+  const pagePerformance = usePagePerformance();
+  const performanceOps = useOperationTracking();
   
   const [data, setData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -79,29 +80,29 @@ const PerformanceOptimizedPage: React.FC = () => {
     setLoading(true);
     
     try {
-      const result = await trackOperation(async () => {
+      const { result } = await performanceOps.trackOperation('loadData', async () => {
         // Simulate API call
         const response = await fetch('/api/data');
         return response.json();
-      }, 'loadData');
+      });
       
-      setData(result);
+      setData(result as any[]);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
-  }, [trackOperation]);
+  }, [performanceOps]);
 
   const handleUpdate = useCallback(async (id: string) => {
-    await trackOperation(async () => {
+    await performanceOps.trackOperation('updateItem', async () => {
       // Simulate update operation
       await new Promise(resolve => setTimeout(resolve, 100));
       setData(prev => prev.map(item => 
         item.id === id ? { ...item, updated: true } : item
       ));
-    }, 'updateItem');
-  }, [trackOperation]);
+    });
+  }, [performanceOps]);
 
   return (
     <div className="performance-optimized-page">
@@ -137,7 +138,7 @@ export default PerformanceOptimizedPage;
 
 // Example of optimized hook patterns
 export const useOptimizedDataFetching = (endpoint: string) => {
-  const { trackOperation } = useOperationTracking('DataFetching');
+  const performanceOps = useOperationTracking();
   const [data, setData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -147,11 +148,11 @@ export const useOptimizedDataFetching = (endpoint: string) => {
     setError(null);
 
     try {
-      const result = await trackOperation(async () => {
+      const { result } = await performanceOps.trackOperation(`fetch_${endpoint}`, async () => {
         const response = await fetch(endpoint);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json();
-      }, `fetch_${endpoint}`);
+      });
 
       setData(result);
     } catch (err) {
@@ -159,7 +160,7 @@ export const useOptimizedDataFetching = (endpoint: string) => {
     } finally {
       setLoading(false);
     }
-  }, [endpoint, trackOperation]);
+  }, [endpoint, performanceOps]);
 
   return { data, loading, error, fetchData };
 };

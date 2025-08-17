@@ -1,8 +1,36 @@
 # apps/backend/src/routers/synastry.py
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import Dict, List, Any
-import swisseph as swe  # type: ignore
+from typing import Dict, List, TypedDict, Optional, Any, Union
+
+# Type definitions for better type safety
+class AspectData(TypedDict):
+    planet1: str
+    planet2: str
+    aspect_type: str
+    orb: float
+    influence: str
+
+class HouseOverlay(TypedDict):
+    planet: str
+    house: int
+    influence: str
+    strength: float
+
+class CompatibilityScore(TypedDict):
+    overall: float
+    emotional: float
+    communication: float
+    values: float
+    activities: float
+    growth: float
+
+class Summary(TypedDict):
+    strengths: List[str]
+    challenges: List[str]
+    advice: List[str]
+
+import swisseph as swe
 from datetime import datetime, timezone
 import pytz
 import time
@@ -73,11 +101,11 @@ class CompositeChart(BaseModel):
     relationship_purpose: str
 
 class SynastryResponse(BaseModel):
-    compatibility_analysis: Dict[str, Any]
-    interaspects: List[Dict[str, Any]]
-    house_overlays: List[Dict[str, Any]]
+    compatibility_analysis: CompatibilityScore
+    interaspects: List[AspectData]
+    house_overlays: List[HouseOverlay]
     composite_chart: CompositeChart
-    summary: Dict[str, List[str]]
+    summary: Summary
 
 def parse_datetime(birth_data: BirthData) -> datetime:
     """Parse birth data into datetime object."""
@@ -227,17 +255,54 @@ async def calculate_synastry(
         compatibility = calculate_compatibility_score(aspect_matrix, overlays)
         summary = generate_relationship_summary(aspect_matrix, overlays)
 
+        # Process and validate data types
         interaspects_raw = get_key_aspects(aspect_matrix)
-        interaspects: List[Dict[str, Any]] = [dict(item) for item in interaspects_raw]
-        house_overlays = get_key_overlays(overlays)
+        interaspects: List[AspectData] = []
+        for item in interaspects_raw:
+            aspect_data: AspectData = {
+                "planet1": str(item.get("planet1", "")),
+                "planet2": str(item.get("planet2", "")),
+                "aspect_type": str(item.get("aspect_type", "")),
+                "orb": float(item.get("orb", 0.0)),
+                "influence": str(item.get("influence", ""))
+            }
+            interaspects.append(aspect_data)
+            
+        house_overlays_raw = get_key_overlays(overlays)
+        house_overlays: List[HouseOverlay] = []
+        for item in house_overlays_raw:
+            overlay_data: HouseOverlay = {
+                "planet": str(item.get("planet", "")),
+                "house": int(item.get("house", 0)),
+                "influence": str(item.get("influence", "")),
+                "strength": float(item.get("strength", 0.0))
+            }
+            house_overlays.append(overlay_data)
+            
+        # Ensure compatibility score matches our TypedDict
+        compatibility_data: CompatibilityScore = {
+            "overall": float(compatibility.get("overall", 0.0)),
+            "emotional": float(compatibility.get("emotional", 0.0)),
+            "communication": float(compatibility.get("communication", 0.0)),
+            "values": float(compatibility.get("values", 0.0)),
+            "activities": float(compatibility.get("activities", 0.0)),
+            "growth": float(compatibility.get("growth", 0.0))
+        }
+        
+        # Ensure summary matches our TypedDict
+        summary_data: Summary = {
+            "strengths": summary.get("strengths", []),
+            "challenges": summary.get("challenges", []),
+            "advice": summary.get("advice", [])
+        }
         composite = calculate_composite_midpoints(planets1, planets2)
 
         response_obj = SynastryResponse(
-            compatibility_analysis=compatibility,
+            compatibility_analysis=compatibility_data,
             interaspects=interaspects,
             house_overlays=house_overlays,
             composite_chart=composite,
-            summary=summary
+            summary=summary_data
         )
 
         if _CACHE_TTL > 0:

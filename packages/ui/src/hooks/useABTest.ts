@@ -24,10 +24,15 @@ export interface ABTestConfig {
   enabled?: boolean // Feature flag to enable/disable test
 }
 
+export interface ABTestEventProperties {
+  // Flexible but typed as unknown to encourage validation upstream
+  [key: string]: string | number | boolean | null | undefined;
+}
+
 export interface ABTestResult {
-  variant: string
-  isControl: boolean
-  trackEvent: (eventName: string, properties?: Record<string, any>) => void
+  variant: string;
+  isControl: boolean;
+  trackEvent: (eventName: string, properties?: ABTestEventProperties) => void;
 }
 
 /**
@@ -97,9 +102,9 @@ export function useABTest(config: ABTestConfig): ABTestResult {
  * Create an event tracker for A/B test analytics
  */
 function createEventTracker(testName: string, variant: string) {
-  return (eventName: string, properties: Record<string, any> = {}) => {
+  return (eventName: string, properties: ABTestEventProperties = {}) => {
     // Store event in local analytics
-    const events = JSON.parse(localStorage.getItem('ab_test_events') || '[]')
+    const events: Array<Record<string, unknown>> = JSON.parse(localStorage.getItem('ab_test_events') || '[]')
     events.push({
       testName,
       variant,

@@ -4,6 +4,7 @@
  */
 
 import { performanceMonitor } from '../performance';
+import { logger } from '../utils/logger';
 
 // Design Token System
 export interface DesignTokens {
@@ -77,10 +78,16 @@ export interface DesignConsistencyReport {
   recommendations: string[];
 }
 
+interface ComponentAnalysis {
+  consistencyScore: number;
+  issues: DesignConsistencyReport['issues'];
+  deviations: string[];
+}
+
 class DesignSystemEngine {
   private designTokens: DesignTokens;
   private componentPatterns: Map<string, ComponentPattern> = new Map();
-  private analysisResults: Map<string, any> = new Map();
+  private analysisResults: Map<string, ComponentAnalysis> = new Map();
 
   constructor() {
     this.designTokens = this.initializeDesignTokens();
@@ -313,7 +320,8 @@ class DesignSystemEngine {
   }
 
   async analyzeDesignConsistency(componentPaths: string[]): Promise<DesignConsistencyReport> {
-    console.log('🎨 Starting Design Consistency Analysis...');
+  const dsLogger = logger.child({ module: 'designSystem', action: 'analyzeConsistency' });
+  dsLogger.info('Starting design consistency analysis');
     
     const startTime = performance.now();
     const issues: DesignConsistencyReport['issues'] = [];
@@ -323,7 +331,7 @@ class DesignSystemEngine {
     // Analyze each component
     for (const componentPath of componentPaths) {
       const componentName = this.extractComponentName(componentPath);
-      const analysis = await this.analyzeComponent(componentPath, componentName);
+  const analysis = await this.analyzeComponent(componentPath, componentName);
       
       this.analysisResults.set(componentName, analysis);
       
@@ -346,7 +354,7 @@ class DesignSystemEngine {
     this.analyzeDesignTokenUsage(designTokenUsage);
 
     // Calculate overall score
-    const overallScore = this.calculateOverallScore(issues, patterns);
+  const overallScore = this.calculateOverallScore(issues);
     const grade = this.calculateGrade(overallScore);
 
     const duration = performance.now() - startTime;
@@ -368,23 +376,24 @@ class DesignSystemEngine {
       recommendations: this.generateRecommendations(issues, patterns, overallScore)
     };
 
-    console.log(`🎨 Design Analysis Complete: ${grade} grade (${overallScore}%)`);
-    console.log(`📊 Found ${issues.length} design issues across ${componentPaths.length} components`);
+    dsLogger.info('Design analysis complete', {
+      grade,
+      overallScore,
+      issues: issues.length,
+      components: componentPaths.length,
+      durationMs: Number(duration.toFixed(2))
+    });
 
     return report;
   }
 
-  private async analyzeComponent(componentPath: string, componentName: string): Promise<{
-    consistencyScore: number;
-    issues: DesignConsistencyReport['issues'];
-    deviations: string[];
-  }> {
+  private analyzeComponent(componentPath: string, componentName: string): Promise<ComponentAnalysis> {
     const pattern = this.componentPatterns.get(componentName);
     const issues: DesignConsistencyReport['issues'] = [];
     const deviations: string[] = [];
     
     // Mock component analysis (in real implementation, this would parse actual component code)
-    const mockAnalysis = this.mockComponentAnalysis(componentName, pattern);
+  const mockAnalysis = this.mockComponentAnalysis(componentName);
     
     // Check color consistency
     if (mockAnalysis.colorsUsed.some(color => !this.isValidDesignToken(color))) {
@@ -451,14 +460,21 @@ class DesignSystemEngine {
     const passedChecks = totalChecks - issues.filter(issue => issue.component === componentName).length;
     const consistencyScore = Math.round((passedChecks / totalChecks) * 100);
 
-    return {
+  return Promise.resolve({
       consistencyScore,
       issues: issues.filter(issue => issue.component === componentName),
       deviations
-    };
+  });
   }
 
-  private mockComponentAnalysis(componentName: string, pattern?: ComponentPattern) {
+  private mockComponentAnalysis(componentName: string): {
+    colorsUsed: string[];
+    spacingUsed: string[];
+    fontSizes: string[];
+    hasRequiredARIA: boolean;
+    followsPattern: boolean;
+    usesDesignTokens: number;
+  } {
     // Mock analysis results based on component name and known patterns
     const isWellDesigned = ['Button', 'Input'].includes(componentName);
     
@@ -497,8 +513,7 @@ class DesignSystemEngine {
     usage.shadows = { used: 3, unused: 2, inconsistent: 0 };
   }
 
-  private calculateOverallScore(issues: DesignConsistencyReport['issues'], patterns: DesignConsistencyReport['patterns']): number {
-    const totalIssues = issues.length;
+  private calculateOverallScore(issues: DesignConsistencyReport['issues']): number {
     const criticalIssues = issues.filter(i => i.severity === 'critical').length;
     const highIssues = issues.filter(i => i.severity === 'high').length;
     const mediumIssues = issues.filter(i => i.severity === 'medium').length;
@@ -506,7 +521,6 @@ class DesignSystemEngine {
 
     // Weight issues by severity
     const weightedIssues = (criticalIssues * 4) + (highIssues * 3) + (mediumIssues * 2) + (lowIssues * 1);
-    const maxPossibleScore = patterns.length * 10; // Assume max 10 points per pattern
 
     // Calculate score (higher is better)
     const score = Math.max(0, 100 - (weightedIssues * 5));
@@ -521,7 +535,7 @@ class DesignSystemEngine {
     return 'F';
   }
 
-  private getSeverityWeight(severity: string): number {
+  private getSeverityWeight(severity: DesignConsistencyReport['issues'][number]['severity']): number {
     switch (severity) {
       case 'critical': return 4;
       case 'high': return 3;

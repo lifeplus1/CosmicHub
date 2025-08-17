@@ -4,14 +4,19 @@
  */
 
 import { performanceMonitor } from '../performance';
-import { createDefaultEventBus, TestEventBus, SuiteStartEvent, ErrorEvent, SuiteResultEvent, RunStartEvent, RunSummaryEvent, WarningEvent, RecommendationEvent, ReportGeneratedEvent } from './testEvents';
+import { 
+  createDefaultEventBus, 
+  TestEventBus, 
+  SuiteStartEvent, 
+  ErrorEvent, 
+  SuiteResultEvent, 
+  RunStartEvent, 
+  RunSummaryEvent, 
+  WarningEvent, 
+  RecommendationEvent, 
+  ReportGeneratedEvent 
+} from './testEvents';
 import { TestResult, TestRunSummary } from './testTypes';
-// Add Node.js process type definitions
-declare const process: {
-  version: string;
-  platform: string;
-  memoryUsage: () => { heapUsed: number };
-};
 
 export interface TestRunnerConfig {
   coverage: {
@@ -30,7 +35,7 @@ export interface TestRunnerConfig {
     generateHtml: boolean;
     generateJson: boolean;
     uploadResults: boolean;
-  outputDir?: string; // directory for persisted reports
+    outputDir?: string; // directory for persisted reports
   };
 }
 
@@ -55,7 +60,7 @@ class TestSuiteRunner {
         ...config.performance
       },
       accessibility: {
-        level: 'AA',
+        level: 'AA' as const,
         checkContrast: true,
         ...config.accessibility
       },
@@ -63,7 +68,7 @@ class TestSuiteRunner {
         generateHtml: true,
         generateJson: true,
         uploadResults: false,
-  outputDir: 'test-results',
+        outputDir: 'test-results',
         ...config.reports
       }
     };
@@ -71,7 +76,7 @@ class TestSuiteRunner {
   }
 
   async runSuite(suiteName: string, testFn: () => Promise<void>): Promise<TestResult> {
-  this.bus.emit({ type: 'suite:start', suite: suiteName } as SuiteStartEvent);
+    this.bus.emit({ type: 'suite:start', suite: suiteName } as SuiteStartEvent);
     
     const startTime = performance.now();
     const initialMemory = this.getMemoryUsage();
@@ -79,7 +84,7 @@ class TestSuiteRunner {
     let status: 'passed' | 'failed' | 'skipped' = 'passed';
     const errors: string[] = [];
     let renderTime = 0;
-    const mountTime = 0;
+    const mountTime = 0; // Kept const as it's never reassigned
 
     try {
       // Track performance during test execution
@@ -95,11 +100,11 @@ class TestSuiteRunner {
         type: 'test-suite'
       });
       
-    } catch (error) {
+    } catch (err) {
       status = 'failed';
-      const msg = error instanceof Error ? error.message : String(error);
+      const msg = err instanceof Error ? err.message : String(err);
       errors.push(msg);
-  this.bus.emit({ type: 'error', message: `Test suite failed: ${suiteName}`, suite: suiteName, error: msg } as ErrorEvent);
+      this.bus.emit({ type: 'error', message: `Test suite failed: ${suiteName}`, suite: suiteName, error: msg } as ErrorEvent);
     }
 
     const duration = performance.now() - startTime;
@@ -111,6 +116,9 @@ class TestSuiteRunner {
     
     // Generate mock accessibility results
     const accessibility = this.generateMockAccessibility();
+    
+    // Get process info safely
+    const processInfo = this.getProcessInfo();
 
     const result: TestResult = {
       suite: suiteName,
@@ -126,22 +134,22 @@ class TestSuiteRunner {
       errors,
       metadata: {
         timestamp: new Date().toISOString(),
-        nodeVersion: typeof process !== 'undefined' ? process.version : 'unknown',
-        platform: typeof process !== 'undefined' ? process.platform : 'unknown'
+        nodeVersion: processInfo.version,
+        platform: processInfo.platform
       }
     };
 
     this.results.push(result);
     
     // Log result summary
-  this.emitResultWarnings(result);
-  this.bus.emit({ type: 'suite:result', result } as SuiteResultEvent);
+    this.emitResultWarnings(result);
+    this.bus.emit({ type: 'suite:result', result } as SuiteResultEvent);
     
     return result;
   }
 
   async runAllSuites(suites: Record<string, () => Promise<void>>): Promise<TestRunSummary> {
-  this.bus.emit({ type: 'run:start', totalSuites: Object.keys(suites).length } as RunStartEvent);
+    this.bus.emit({ type: 'run:start', totalSuites: Object.keys(suites).length } as RunStartEvent);
     this.startTime = performance.now();
     this.results = [];
 
@@ -161,11 +169,11 @@ class TestSuiteRunner {
     if (this.config.reports.generateHtml) {
       tasks.push(this.generateHtmlReport(summary));
     }
-    if (tasks.length) {
+  if (tasks.length > 0) {
       await Promise.all(tasks);
     }
 
-    // Log final summary
+  // Log final summary
   this.emitRecommendations(summary);
   this.bus.emit({ type: 'run:summary', summary } as RunSummaryEvent);
     
@@ -284,9 +292,26 @@ class TestSuiteRunner {
   }
 
   private getMemoryUsage(): number {
-  // Safely access memory usage via globalThis to avoid ReferenceError when process is undefined
-  const proc = (globalThis as unknown as { process?: { memoryUsage?: () => { heapUsed: number } } }).process;
-  return proc?.memoryUsage?.().heapUsed ?? 0;
+    // Safely access memory usage across environments
+    const processObject = typeof globalThis !== 'undefined' 
+      && 'process' in globalThis 
+      ? (globalThis as unknown as { process?: { memoryUsage?: () => { heapUsed: number } } }).process
+      : undefined;
+      
+    return processObject?.memoryUsage?.()?.heapUsed ?? 0;
+  }
+  
+  private getProcessInfo(): { version: string; platform: string } {
+    // Safely access process info across environments
+    const processObject = typeof globalThis !== 'undefined' 
+      && 'process' in globalThis 
+      ? (globalThis as unknown as { process?: { version?: string; platform?: string } }).process
+      : undefined;
+
+    return {
+      version: processObject?.version ?? 'unknown',
+      platform: processObject?.platform ?? 'unknown'
+    };
   }
 
   private generateMockCoverage(): { statements: number; branches: number; functions: number; lines: number } {
@@ -299,7 +324,10 @@ class TestSuiteRunner {
     };
   }
 
-  private generateMockAccessibility(): { violations: Array<{ id: string; impact: 'moderate'; description: string; nodes: number }>; warnings: Array<{ id: string; description: string; nodes: number }> } {
+  private generateMockAccessibility(): { 
+    violations: Array<{ id: string; impact: 'moderate'; description: string; nodes: number }>;
+    warnings: Array<{ id: string; description: string; nodes: number }> 
+  } {
     // In real implementation, this would integrate with axe-core or similar tools
     const violations = Math.random() > 0.8 ? [{
       id: 'color-contrast',
@@ -319,26 +347,39 @@ class TestSuiteRunner {
 
   private emitResultWarnings(result: TestResult): void {
     if (result.performance.renderTime > this.config.performance.maxRenderTime) {
-  this.bus.emit({ type: 'warning', message: `Slow render time: ${result.performance.renderTime.toFixed(2)}ms`, suite: result.suite, code: 'PERF_SLOW_RENDER' } as WarningEvent);
+      this.bus.emit({ 
+        type: 'warning', 
+        message: `Slow render time: ${result.performance.renderTime.toFixed(2)}ms`, 
+        suite: result.suite, 
+        code: 'PERF_SLOW_RENDER' 
+      } as WarningEvent);
     }
     if (result.accessibility.violations.length > 0) {
-  this.bus.emit({ type: 'warning', message: `${result.accessibility.violations.length} accessibility violations`, suite: result.suite, code: 'A11Y_VIOLATIONS' } as WarningEvent);
+      this.bus.emit({ 
+        type: 'warning', 
+        message: `${result.accessibility.violations.length} accessibility violations`, 
+        suite: result.suite, 
+        code: 'A11Y_VIOLATIONS' 
+      } as WarningEvent);
     }
   }
 
   private emitRecommendations(summary: TestRunSummary): void {
     summary.quality.recommendations.forEach(rec => {
-  this.bus.emit({ type: 'recommendation', recommendation: rec } as RecommendationEvent);
+      this.bus.emit({ type: 'recommendation', recommendation: rec } as RecommendationEvent);
     });
   }
 
-  private async ensureOutputDir(): Promise<string> {
-  const dir = this.config.reports.outputDir ?? 'test-results';
+  private async ensureOutputDir(subdir?: string): Promise<string> {
+    const baseDir = this.config.reports.outputDir ?? 'test-results';
+    // Normalize subdir (treat empty/whitespace as undefined)
+    const clean = typeof subdir === 'string' && subdir.trim().length > 0 ? subdir.trim() : undefined;
+  const dirPath = clean !== undefined ? `${baseDir}/${clean}` : baseDir;
     try {
       const fs = await import('fs/promises');
-      await fs.mkdir(dir, { recursive: true });
-    } catch {/* ignore mkdir errors */}
-    return dir;
+      await fs.mkdir(dirPath, { recursive: true });
+    } catch { /* ignore mkdir errors */ }
+    return dirPath;
   }
 
   private async generateJsonReport(summary: TestRunSummary): Promise<void> {
@@ -353,9 +394,13 @@ class TestSuiteRunner {
     try {
       const fs = await import('fs/promises');
       await fs.writeFile(path, JSON.stringify(payload, null, 2), 'utf-8');
-  this.bus.emit({ type: 'report:generated', format: 'json', location: path } as ReportGeneratedEvent);
+      this.bus.emit({ type: 'report:generated', format: 'json', location: path } as ReportGeneratedEvent);
     } catch {
-  this.bus.emit({ type: 'error', message: 'Failed to write JSON report', error: path } as ErrorEvent);
+      this.bus.emit({ 
+        type: 'error', 
+        message: 'Failed to write JSON report', 
+        error: path 
+      } as ErrorEvent);
     }
   }
 
@@ -366,9 +411,13 @@ class TestSuiteRunner {
     try {
       const fs = await import('fs/promises');
       await fs.writeFile(path, html, 'utf-8');
-  this.bus.emit({ type: 'report:generated', format: 'html', location: path } as ReportGeneratedEvent);
+      this.bus.emit({ type: 'report:generated', format: 'html', location: path } as ReportGeneratedEvent);
     } catch {
-  this.bus.emit({ type: 'error', message: 'Failed to write HTML report', error: path } as ErrorEvent);
+      this.bus.emit({ 
+        type: 'error', 
+        message: 'Failed to write HTML report', 
+        error: path 
+      } as ErrorEvent);
     }
   }
 
@@ -396,21 +445,21 @@ class TestSuiteRunner {
 export const createDevelopmentRunner = (): TestSuiteRunner => new TestSuiteRunner({
   coverage: { threshold: 70, exclude: ['**/*.test.*', '**/*.spec.*'] },
   performance: { maxRenderTime: 32, maxMountTime: 50 },
-  accessibility: { level: 'AA', checkContrast: true },
+  accessibility: { level: 'AA' as const, checkContrast: true },
   reports: { generateHtml: true, generateJson: false, uploadResults: false }
 });
 
 export const createCIRunner = (): TestSuiteRunner => new TestSuiteRunner({
   coverage: { threshold: 80, exclude: ['**/*.test.*', '**/*.spec.*', '**/stories/**'] },
   performance: { maxRenderTime: 16, maxMountTime: 25 },
-  accessibility: { level: 'AA', checkContrast: true },
+  accessibility: { level: 'AA' as const, checkContrast: true },
   reports: { generateHtml: false, generateJson: true, uploadResults: true }
 });
 
 export const createProductionRunner = (): TestSuiteRunner => new TestSuiteRunner({
   coverage: { threshold: 90, exclude: ['**/*.test.*', '**/*.spec.*'] },
   performance: { maxRenderTime: 10, maxMountTime: 15 },
-  accessibility: { level: 'AAA', checkContrast: true },
+  accessibility: { level: 'AAA' as const, checkContrast: true },
   reports: { generateHtml: true, generateJson: true, uploadResults: true }
 });
 

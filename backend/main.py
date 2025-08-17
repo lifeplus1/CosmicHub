@@ -637,6 +637,7 @@ async def root_health():
 # Structure cleanup suggestion: Move routers to separate files and import here for modularity.
 # Import API routers (local path)
 from api.routers import ai, presets, subscriptions, ephemeris, charts, stripe_router, csp_router
+from api import salt_management  # admin salt endpoints
 from api import interpretations
 from api import charts as unified_charts  # unified serialization chart endpoints (/charts/save)
 from astro.calculations import transits_clean
@@ -653,6 +654,7 @@ app.include_router(transits_clean.router, prefix="/api/astro", tags=["transits"]
 app.include_router(stripe_router.router)  # Stripe subscription & billing endpoints
 app.include_router(csp_router)  # CSP violation reports
 app.include_router(synastry.router, prefix="/api", tags=["synastry"])  # Synastry analysis endpoints
+app.include_router(salt_management.router)  # Admin salt management
 
 if __name__ == "__main__":
     import uvicorn

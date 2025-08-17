@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchSavedCharts, deleteChart, type SavedChart } from '../services/api';
+import type { ChartId } from '../services/api.types';
 import { CosmicLoading } from '../components/CosmicLoading';
 
 const SavedCharts: React.FC = () => {
@@ -33,7 +34,7 @@ const SavedCharts: React.FC = () => {
 
   const handleDeleteChart = (chartId: string, chartName: string) => {
     if (window.confirm(`Are you sure you want to delete "${chartName}"? This action cannot be undone.`)) {
-      deleteMutation.mutate(chartId);
+      deleteMutation.mutate(chartId as ChartId);
     }
   };
 

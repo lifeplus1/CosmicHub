@@ -119,7 +119,39 @@ export default [
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
       '@typescript-eslint/strict-boolean-expressions': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-explicit-any': ['error', {
+        fixToUnknown: false,
+        ignoreRestArgs: false,
+        allowedPredefinedTypes: ['EventTarget'],
+        allowExplicitAny: false,
+        allowTaggedTemplateExpressions: false,
+        "disallowAnyImport": true,
+        allowHigherOrderFunctions: false,
+        allowObjectInteraction: false
+      }],
+      // Override for files with documented exceptions
+      // This allows necessary any usage in specific files with proper documentation
+      'overrides': [
+        {
+          'files': [
+            '**/component-library.tsx',
+            '**/polymorphic-components.tsx'
+          ],
+          'rules': {
+            '@typescript-eslint/no-explicit-any': ['warn', {
+              reportWhenTypeCheckExplicitlyAny: false,
+              fixToUnknown: false
+            }]
+          }
+        }
+      ],
+      '@typescript-eslint/ban-ts-comment': ['error', {
+        'ts-expect-error': 'allow-with-description',
+        'ts-ignore': false,
+        'ts-nocheck': false,
+        'ts-check': false,
+        minimumDescriptionLength: 10
+      }],
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',

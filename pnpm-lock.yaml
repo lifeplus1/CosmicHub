@@ -262,9 +262,27 @@ importers:
 
   apps/healwave:
     dependencies:
+      '@cosmichub/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@cosmichub/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@cosmichub/frequency':
+        specifier: workspace:*
+        version: link:../../packages/frequency
+      '@cosmichub/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
       '@cosmichub/subscriptions':
         specifier: workspace:*
         version: link:../../packages/subscriptions
+      '@cosmichub/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@cosmichub/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@eslint/js':
         specifier: ^8.57.1
         version: 8.57.1

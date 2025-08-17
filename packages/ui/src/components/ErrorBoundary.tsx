@@ -1,7 +1,17 @@
 import React, { Component, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { Button } from './Button';
 
-export interface ErrorInfo {
+import { type UnknownRecord } from '@cosmichub/types/utility';
+
+export interface ErrorMetrics {
+  errorId: string;
+  boundaryName?: string;
+  boundaryLevel: 'page' | 'section' | 'component';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  retryCount: number;
+}
+
+export interface ErrorInfo extends ErrorMetrics {
   message: string;
   stack?: string;
   componentStack: string;
@@ -10,6 +20,23 @@ export interface ErrorInfo {
   url: string;
   userId?: string;
   sessionId?: string;
+}
+
+export interface ErrorReportingService {
+  captureException(error: ErrorInfo): void;
+}
+
+export interface AnalyticsService {
+  track(eventName: string, data: ErrorMetrics): void;
+}
+
+declare global {
+  interface Window {
+    errorReportingService?: ErrorReportingService;
+    analytics?: AnalyticsService;
+    __USER_ID__?: string;
+    __SESSION_ID__?: string;
+  }
 }
 
 export interface ErrorBoundaryProps {
@@ -103,7 +130,29 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     this.retryTimeouts.forEach(clearTimeout);
   }
 
+  private getLogLevel(error: Error, boundaryLevel: string): LogLevel {
+    // Network errors are usually less critical
+    if (error.message.includes('fetch') || error.message.includes('network')) {
+      return 'medium';
+    }
+
+    // Page-level errors are critical
+    if (boundaryLevel === 'page') {
+      return 'critical';
+    }
+
+    // Component render errors
+    if (error.stack?.includes('render')) {
+      return 'high';
+    }
+
+    return 'medium';
+  }
+
   private createErrorInfo(error: Error, reactErrorInfo: ReactErrorInfo): ErrorInfo {
+    const { name, level = 'component' } = this.props;
+    const severity = this.getLogLevel(error, level);
+
     return {
       message: error.message,
       stack: error.stack,
@@ -111,9 +160,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href,
-      // These would be populated by auth context in a real app
-      userId: (window as any).__USER_ID__,
-      sessionId: (window as any).__SESSION_ID__,
+      userId: window.__USER_ID__,
+      sessionId: window.__SESSION_ID__,
+      errorId: this.state.errorId || `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      boundaryName: name,
+      boundaryLevel: level as BoundaryLevel,
+      severity,
+      retryCount: this.state.retryCount
     };
   }
 
@@ -179,30 +232,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     }
   }
 
-  private reportError(errorData: any): void {
-    // In a real application, this would send to error reporting service
-    // Examples: Sentry, Bugsnag, LogRocket, etc.
+  private reportError(errorInfo: ErrorInfo): void {
     try {
-      if ((window as any).errorReportingService) {
-        (window as any).errorReportingService.captureException(errorData);
-      }
+      window.errorReportingService?.captureException(errorInfo);
     } catch (reportingError) {
       console.error('Failed to report error:', reportingError);
     }
   }
 
-  private trackErrorMetrics(errorData: any): void {
-    // Track error metrics for monitoring
+  private trackErrorMetrics(errorData: ErrorMetrics): void {
     try {
-      if ((window as any).analytics) {
-        (window as any).analytics.track('Error Boundary Triggered', {
-          errorId: errorData.errorId,
-          boundaryName: errorData.boundaryName,
-          boundaryLevel: errorData.boundaryLevel,
-          severity: errorData.severity,
-          retryCount: errorData.retryCount,
-        });
-      }
+      window.analytics?.track('Error Boundary Triggered', errorData);
     } catch (analyticsError) {
       console.error('Failed to track error metrics:', analyticsError);
     }

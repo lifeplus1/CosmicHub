@@ -1,0 +1,52 @@
+# Example cron job configuration for salt rotation
+# Add these lines to your crontab (run `crontab -e` to edit)
+
+# Rotate salts that are due for rotation every day at 2:00 AM
+0 2 * * * cd /path/to/CosmicHub && ./scripts/security/rotate_salts.sh >> logs/cron_salt_rotation.log 2>&1
+
+# Force rotate all salts on the first day of each month at 3:00 AM (optional)
+0 3 1 * * cd /path/to/CosmicHub && ./scripts/security/rotate_salts.sh --force >> logs/cron_salt_rotation.log 2>&1
+
+# Check for salts due for rotation (dry run) every 6 hours for monitoring
+0 */6 * * * cd /path/to/CosmicHub && ./scripts/security/rotate_salts.sh --dry-run >> logs/cron_salt_check.log 2>&1
+
+# Example Docker/systemd timer alternatives:
+# 
+# For Docker environments, add to docker-compose.yml:
+# services:
+#   salt-rotator:
+#     build: .
+#     volumes:
+#       - ./logs:/app/logs
+#     command: >
+#       sh -c "echo '0 2 * * * cd /app && ./scripts/security/rotate_salts.sh' | crontab - && crond -f"
+#
+# For systemd timer, create two files:
+# 
+# /etc/systemd/system/salt-rotation.service:
+# [Unit]
+# Description=Salt Rotation Service
+# After=network.target
+#
+# [Service]
+# Type=oneshot
+# WorkingDirectory=/path/to/CosmicHub
+# ExecStart=/path/to/CosmicHub/scripts/security/rotate_salts.sh
+# User=cosmichub
+# Group=cosmichub
+#
+# /etc/systemd/system/salt-rotation.timer:
+# [Unit]
+# Description=Run salt rotation daily
+# Requires=salt-rotation.service
+#
+# [Timer]
+# OnCalendar=daily
+# Persistent=true
+#
+# [Install]
+# WantedBy=timers.target
+#
+# Then enable with:
+# sudo systemctl enable salt-rotation.timer
+# sudo systemctl start salt-rotation.timer

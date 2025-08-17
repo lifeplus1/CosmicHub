@@ -6,8 +6,8 @@
  *  - ConsoleSink implementation (isolates console usage)
  *  - EventBus to dispatch events to sinks
  */
-/* eslint-disable no-console */
 import { TestResult, TestRunSummary } from './testTypes';
+import { logger } from '../utils/logger';
 
 
 export interface BaseEvent {
@@ -72,48 +72,48 @@ export class ConsoleSink implements EventSink {
   handle(event: TestEvent): void {
     switch (event.type) {
       case 'run:start': {
-        const count = event.totalSuites;
-        const suffix = typeof count === 'number' && count > 0 ? ` (${count} suites)` : '';
-        console.log(`🚀 Test run started${suffix}`);
+  const count = event.totalSuites;
+  logger.info('Test run started', { totalSuites: count });
         break; }
       case 'suite:start':
-        console.log(`🧪 Suite start: ${event.suite}`);
+  logger.info('Suite start', { suite: event.suite });
         break;
       case 'suite:result': {
-        const r = event.result;
-        const icon = r.status === 'passed' ? '✅' : r.status === 'failed' ? '❌' : '⏭️';
-        console.log(`${icon} ${r.suite}: ${r.status} (${r.duration.toFixed(2)}ms)`);
-  if (r.errors.length > 0) {
-          r.errors.forEach(e => console.log(`   Error: ${e}`));
+  const r = event.result;
+        logger.info('Suite result', { suite: r.suite, status: r.status, durationMs: Number(r.duration.toFixed(2)), errorCount: r.errors.length });
+        if (r.errors.length > 0) {
+          r.errors.forEach(e => logger.error('Test error', { suite: r.suite, error: e }));
         }
         break; }
       case 'warning':
-        console.warn(`⚠️  ${event.message}${event.suite !== undefined ? ` [${event.suite}]` : ''}`);
+        logger.warn('Test warning', { message: event.message, suite: event.suite });
         break;
       case 'error':
-        console.error(`❌ ${event.message}${event.suite !== undefined ? ` [${event.suite}]` : ''}`);
-  if (typeof event.error === 'string' && event.error.length > 0) console.error(event.error);
+        logger.error('Test error', { message: event.message, suite: event.suite, error: event.error });
+        if (typeof event.error === 'string' && event.error.length > 0) logger.error('Test error detail', { error: event.error });
         break;
       case 'recommendation':
-        console.log(`📋 Recommendation: ${event.recommendation}`);
+        logger.info('Recommendation', { recommendation: event.recommendation });
         break;
       case 'run:summary': {
         const summary = event.summary;
-        console.log('\n📊 Test Run Summary');
-        console.log('='.repeat(50));
-        console.log(`Tests: ${summary.passed}/${summary.total} passed (${(summary.passed / summary.total * 100).toFixed(1)}%)`);
-        console.log(`Duration: ${(summary.duration / 1000).toFixed(2)}s`);
-        console.log(`Coverage: ${summary.coverage.overall.toFixed(1)}%`);
-        console.log(`Performance: ${summary.performance.averageRenderTime.toFixed(2)}ms avg render`);
-        console.log(`Accessibility: ${summary.accessibility.totalViolations} violations`);
-        console.log(`Quality Score: ${summary.quality.score}/100 (${summary.quality.grade})`);
-        console.log('='.repeat(50));
+        logger.info('Test run summary', {
+          passed: summary.passed,
+          total: summary.total,
+          passRate: Number(((summary.passed / summary.total) * 100).toFixed(1)),
+          durationSec: Number((summary.duration / 1000).toFixed(2)),
+          coverage: Number(summary.coverage.overall.toFixed(1)),
+          avgRenderMs: Number(summary.performance.averageRenderTime.toFixed(2)),
+          accessibilityViolations: summary.accessibility.totalViolations,
+          qualityScore: summary.quality.score,
+          qualityGrade: summary.quality.grade
+        });
         break; }
       case 'report:generated':
-  console.log(`📄 Report generated (${event.format})${event.location !== null && event.location !== undefined ? ` -> ${event.location}` : ''}`);
+        logger.info('Report generated', { format: event.format, location: event.location });
         break;
       default:
-        console.log('ℹ️ Event', event);
+        logger.debug('Unhandled test event', { event });
     }
   }
 }

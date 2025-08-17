@@ -1,4 +1,3 @@
-// apps/astro/src/components/ChartDisplay/ChartDisplay.tsx
 import { serializeAstrologyData } from '@cosmichub/types';
 import { getChartSyncService } from '@/services/chartSyncService';
 
@@ -30,6 +29,13 @@ import {
 } from '@cosmichub/ui';
 import { fetchChartData } from '@/services/astrologyService';
 import type { ChartData, PlanetData, AsteroidData, AngleData, HouseData, AspectData, ChartType } from '@/types/astrology.types';
+import { HouseCusp, isHouseCuspArray } from '@/types/house-cusp';
+import { 
+  ProcessedPlanetData, 
+  ProcessedAsteroidData, 
+  ProcessedHouseData, 
+  ProcessedChartSections
+} from '@/types/processed-chart';
 
 // Astrological symbols mapping
 const PLANET_SYMBOLS: Record<string, string> = {
@@ -134,7 +140,7 @@ const ASPECT_SYMBOLS: Record<string, string> = {
 };
 
 // Helper function to calculate which house a planet is in
-const calculateHouseForPlanet = (planetPosition: number, houseCusps: any[]): string => {
+const calculateHouseForPlanet = (planetPosition: number, houseCusps: HouseCusp[]): string => {
   if (!houseCusps || houseCusps.length !== 12) return 'Unknown';
   
   // Helper function to convert number to ordinal (1st, 2nd, 3rd, etc.)
@@ -241,8 +247,38 @@ const getAspectOrb = (aspectType: string, currentOrb?: number): number => {
   return 8;
 };
 
+// Type guard to check if an object has chart-like properties
+function isChartLike(obj: unknown): obj is { 
+  planets?: Record<string, unknown>[] | Record<string, unknown>; 
+  houses?: Record<string, unknown>[] | Record<string, unknown>; 
+  aspects?: Record<string, unknown>[] | Record<string, unknown>;
+  asteroids?: Record<string, unknown>[] | Record<string, unknown>;
+  angles?: Record<string, unknown>[] | Record<string, unknown>;
+} {
+  if (!obj || typeof obj !== 'object') return false;
+  
+  const chart = obj as Record<string, unknown>;
+  return Boolean(
+    Array.isArray(chart.planets) || 
+    Array.isArray(chart.houses) ||
+    Array.isArray(chart.aspects) ||
+    Array.isArray(chart.asteroids) ||
+    Array.isArray(chart.angles) ||
+    // Also check if chart data is in object format
+    (chart.planets && typeof chart.planets === 'object') ||
+    (chart.houses && typeof chart.houses === 'object') ||
+    (chart.angles && typeof chart.angles === 'object')
+  );
+}
+
 // Enhanced export functionality with serialization
-const exportChartData = (chartData: ChartData, format: 'json' | 'csv' | 'txt') => {
+const exportChartData = (chartData: unknown, format: 'json' | 'csv' | 'txt') => {
+  // Validate chart data
+  if (!isChartLike(chartData)) {
+    console.error('Invalid chart data for export');
+    return;
+  }
+  
   const timestamp = new Date().toISOString().split('T')[0];
   const filename = `natal-chart-${timestamp}`;
   
@@ -254,10 +290,10 @@ const exportChartData = (chartData: ChartData, format: 'json' | 'csv' | 'txt') =
     case 'json':
       try {
         // Use the serialization utility for JSON exports to ensure consistency
-        content = serializeAstrologyData(chartData as any);
-      } catch (error) {
-        console.error('Serialization failed, falling back to JSON.stringify:', error);
         content = JSON.stringify(chartData, null, 2);
+      } catch (error) {
+        console.error('Serialization failed:', error);
+        content = JSON.stringify({error: 'Failed to serialize chart data'});
       }
       mimeType = 'application/json';
       extension = 'json';
@@ -265,15 +301,78 @@ const exportChartData = (chartData: ChartData, format: 'json' | 'csv' | 'txt') =
     case 'csv':
       // Convert planets to CSV format
       const csvHeaders = 'Planet,Sign,House,Degree\n';
-      const csvRows = chartData.planets.map(planet => 
-        `${planet.name},${planet.sign},${planet.house},${planet.degree.toFixed(2)}`
-      ).join('\n');
+      const planets = Array.isArray(chartData.planets) ? chartData.planets : [];
+      const csvRows = planets.map(planet => {
+        const name = typeof planet.name === 'string' ? planet.name : 'Unknown';
+        const sign = typeof planet.sign === 'string' ? planet.sign : 'Unknown';
+        const house = planet.house ? String(planet.house) : 'Unknown';
+        let degree = '0.00';
+        
+        if (typeof planet.degree === 'number') {
+          degree = planet.degree.toFixed(2);
+        } else if (typeof planet.degree === 'string') {
+          degree = planet.degree;
+        }
+        
+        return `${name},${sign},${house},${degree}`;
+      }).join('\n');
+      
       content = csvHeaders + csvRows;
       mimeType = 'text/csv';
       extension = 'csv';
       break;
     case 'txt':
-      content = `NATAL CHART DATA\n\nPLANETS:\n${chartData.planets.map(p => `${p.name}: ${p.sign} in House ${p.house} (${p.degree.toFixed(2)}°)`).join('\n')}\n\nHOUSES:\n${chartData.houses.map(house => `House ${house.number}: ${house.sign} (${house.cusp.toFixed(2)}°)`).join('\n')}\n\nASPECTS:\n${chartData.aspects.map(aspect => `${aspect.planet1} ${aspect.type} ${aspect.planet2} (${aspect.orb.toFixed(1)}° orb)`).join('\n')}`;
+      // Safely extract planets data
+      const planetsArray = Array.isArray(chartData.planets) ? chartData.planets : [];
+      const planetsText = planetsArray.map(p => {
+        const name = typeof p.name === 'string' ? p.name : 'Unknown';
+        const sign = typeof p.sign === 'string' ? p.sign : 'Unknown';
+        const house = p.house ? String(p.house) : 'Unknown';
+        let degree = '0.00';
+        
+        if (typeof p.degree === 'number') {
+          degree = p.degree.toFixed(2);
+        } else if (typeof p.degree === 'string') {
+          degree = p.degree;
+        }
+        
+        return `${name}: ${sign} in House ${house} (${degree}°)`;
+      }).join('\n');
+      
+      // Safely extract houses data
+      const housesArray = Array.isArray(chartData.houses) ? chartData.houses : [];
+      const housesText = housesArray.map(h => {
+        const number = h.number ? String(h.number) : h.house ? String(h.house) : 'Unknown';
+        const sign = typeof h.sign === 'string' ? h.sign : 'Unknown';
+        let cusp = '0.00';
+        
+        if (typeof h.cusp === 'number') {
+          cusp = h.cusp.toFixed(2);
+        } else if (typeof h.cusp === 'string') {
+          cusp = h.cusp;
+        }
+        
+        return `House ${number}: ${sign} (${cusp}°)`;
+      }).join('\n');
+      
+      // Safely extract aspects data
+      const aspectsArray = Array.isArray(chartData.aspects) ? chartData.aspects : [];
+      const aspectsText = aspectsArray.map(a => {
+        const planet1 = typeof a.planet1 === 'string' ? a.planet1 : 'Unknown';
+        const planet2 = typeof a.planet2 === 'string' ? a.planet2 : 'Unknown';
+        const type = typeof a.type === 'string' ? a.type : 'Unknown';
+        let orb = '0.0';
+        
+        if (typeof a.orb === 'number') {
+          orb = a.orb.toFixed(1);
+        } else if (typeof a.orb === 'string') {
+          orb = a.orb;
+        }
+        
+        return `${planet1} ${type} ${planet2} (${orb}° orb)`;
+      }).join('\n');
+      
+      content = `NATAL CHART DATA\n\nPLANETS:\n${planetsText}\n\nHOUSES:\n${housesText}\n\nASPECTS:\n${aspectsText}`;
       mimeType = 'text/plain';
       extension = 'txt';
       break;
@@ -325,10 +424,35 @@ const getPlanetInterpretation = (planet: string, sign: string): string => {
 
   return interpretations[planet]?.[sign] || `${planet} in ${sign} brings unique energy to your chart`;
 };
-const shareChart = async (chartData: ChartData) => {
+const shareChart = async (chartData: unknown) => {
+  // Validate chart data
+  if (!isChartLike(chartData)) {
+    console.error('Invalid chart data for sharing');
+    return;
+  }
+  
+  let sunSign = 'Unknown';
+  let moonSign = 'Unknown';
+  
+  // Try to extract sun and moon signs from chartData
+  if (Array.isArray(chartData.planets)) {
+    const sunPlanet = chartData.planets.find(p => 
+      typeof p.name === 'string' && p.name.toLowerCase() === 'sun');
+    const moonPlanet = chartData.planets.find(p => 
+      typeof p.name === 'string' && p.name.toLowerCase() === 'moon');
+      
+    if (sunPlanet && typeof sunPlanet.sign === 'string') {
+      sunSign = sunPlanet.sign;
+    }
+    
+    if (moonPlanet && typeof moonPlanet.sign === 'string') {
+      moonSign = moonPlanet.sign;
+    }
+  }
+  
   const shareData = {
     title: 'My Natal Chart Analysis',
-    text: `Check out my natal chart! Sun in ${chartData.planets.find(p => p.name === 'Sun')?.sign || 'Unknown'}, Moon in ${chartData.planets.find(p => p.name === 'Moon')?.sign || 'Unknown'}`,
+    text: `Check out my natal chart! Sun in ${sunSign}, Moon in ${moonSign}`,
     url: window.location.href
   };
 
@@ -544,10 +668,10 @@ const AspectTable = memo(({ data }: { data: ProcessedAspectData[] }) => (
 ));
 
 export interface ChartDisplayProps {
-  chart?: ChartData | any | null;
+  chart?: ChartData | Record<string, unknown> | null;
   chartId?: string;
   chartType?: ChartType;
-  onSaveChart?: (data: any) => void;
+  onSaveChart?: (data: ChartData | Record<string, unknown>) => void;
 }
 
 const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({ 

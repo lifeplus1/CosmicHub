@@ -6,6 +6,7 @@ import { ChartDisplay } from ".";
 import { MultiSystemChartDisplay } from "./MultiSystemChart";
 import type { MultiSystemChartData } from "./MultiSystemChart/types";
 import type { ChartBirthData } from '@cosmichub/types';
+import type { ChartData } from '@/types/astrology.types';
 import { saveChart, type SaveChartRequest } from "../services/api";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";
@@ -467,7 +468,7 @@ const ChartCalculator: React.FC = () => {
                 )
               : isExtendedChartData(chart) && (
                   <Suspense fallback={<div>Loading chart...</div>}>
-                    <ChartDisplay chart={chart} onSaveChart={handleSaveChart} />
+                    <ChartDisplay chart={chart as unknown as ChartData | Record<string, unknown>} onSaveChart={handleSaveChart} />
                   </Suspense>
                 )}
           </div>

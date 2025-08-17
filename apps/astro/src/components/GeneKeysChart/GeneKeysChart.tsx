@@ -26,7 +26,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
 
     try {
       const response = await calculateGeneKeys(birthData);
-      setGeneKeysData(response.gene_keys);
+      setGeneKeysData(response);
       
       toast({
         title: "Gene Keys Calculated",

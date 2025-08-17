@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import type { ComponentType } from 'react';
 import { 
   createLazyComponent, 
   lazyLoadChart, 
@@ -149,7 +150,21 @@ export const LazyFrequencyCalculator = createLazyComponent(
 );
 
 // Smart preloading hook for UI components
-export function useSmartPreloading() {
+export interface SmartPreloadFunctions {
+  preloadOnHover: (
+    elementRef: React.RefObject<HTMLElement>,
+    componentImport: () => Promise<any>,
+    componentName: string
+  ) => (() => void) | undefined;
+  
+  preloadOnIntersection: (
+    elementRef: React.RefObject<HTMLElement>,
+    componentImport: () => Promise<any>,
+    componentName: string
+  ) => (() => void) | undefined;
+}
+
+export function useSmartPreloading(): SmartPreloadFunctions {
   const preloader = React.useMemo(() => SmartPreloader.getInstance(), []);
 
   const preloadOnHover = React.useCallback((
@@ -186,7 +201,33 @@ export function useSmartPreloading() {
 }
 
 // Component registry for dynamic loading
-export const ComponentRegistry = {
+export type ComponentRegistryKeys = 
+  // Charts
+  | 'astrology-chart'
+  | 'frequency-visualizer'
+  | 'transit-chart'
+  | 'synastry-chart'
+  | 'biofeedback-chart'
+  // Modals
+  | 'chart-modal'
+  | 'settings-modal'
+  | 'frequency-player-modal'
+  | 'profile-modal'
+  | 'share-modal'
+  // Forms
+  | 'advanced-form'
+  | 'frequency-form'
+  | 'birth-data-form'
+  // Analytics
+  | 'analytics-panel'
+  | 'report-generator'
+  | 'export-tools'
+  // Calculators
+  | 'ephemeris-calculator'
+  | 'gene-keys-calculator'
+  | 'frequency-calculator';
+
+export const ComponentRegistry: Record<ComponentRegistryKeys, () => Promise<any>> = {
   // Charts
   'astrology-chart': () => import('./charts/AstrologyChart'),
   'frequency-visualizer': () => import('./charts/FrequencyVisualizer'),
@@ -215,10 +256,10 @@ export const ComponentRegistry = {
   'ephemeris-calculator': () => import('./calculators/EphemerisCalculator'),
   'gene-keys-calculator': () => import('./calculators/GeneKeysCalculator'),
   'frequency-calculator': () => import('./calculators/FrequencyCalculator')
-} as const;
+};
 
 // Dynamic component loader
-export function useDynamicComponent(componentKey: keyof typeof ComponentRegistry) {
+export function useDynamicComponent(componentKey: ComponentRegistryKeys) {
   const [Component, setComponent] = React.useState<React.ComponentType<any> | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | null>(null);
@@ -251,11 +292,20 @@ export function useDynamicComponent(componentKey: keyof typeof ComponentRegistry
 }
 
 // Lazy component wrapper with performance optimization
-export const LazyComponentWrapper: React.FC<{
-  componentKey: keyof typeof ComponentRegistry;
-  props?: any;
+export interface LazyComponentWrapperProps {
+  /** Key of the component in the registry */
+  componentKey: ComponentRegistryKeys;
+  /** Props to pass to the loaded component */
+  props?: Record<string, any>;
+  /** Component to show while loading */
   fallback?: React.ComponentType;
-}> = ({ componentKey, props = {}, fallback: Fallback = DefaultLoadingSpinner }) => {
+}
+
+export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({ 
+  componentKey, 
+  props = {}, 
+  fallback: Fallback = DefaultLoadingSpinner 
+}) => {
   const { Component, loading, error } = useDynamicComponent(componentKey);
 
   if (error) {

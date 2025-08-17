@@ -67,7 +67,19 @@ export function useAsyncError(options: UseAsyncErrorOptions = {}) {
 /**
  * Hook for safe async operations with error handling
  */
-export function useSafeAsync<T = any>() {
+export interface SafeAsyncState<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+export interface UseSafeAsyncReturn<T> extends SafeAsyncState<T> {
+  execute: (asyncFunction: () => Promise<T>) => Promise<T>;
+  reset: () => void;
+}
+
+// Default generic is unknown to force consumers to specify or consciously narrow later
+export function useSafeAsync<T = unknown>(): UseSafeAsyncReturn<T> {
   const [state, setState] = useState<{
     data: T | null;
     loading: boolean;
@@ -96,11 +108,7 @@ export function useSafeAsync<T = any>() {
     setState({ data: null, loading: false, error: null });
   }, []);
 
-  return {
-    ...state,
-    execute,
-    reset,
-  };
+  return { ...state, execute, reset };
 }
 
 /**

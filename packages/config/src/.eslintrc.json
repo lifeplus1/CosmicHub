@@ -1,0 +1,21 @@
+{
+  "rules": {
+    // Allow any in specific patterns when properly documented
+    "@typescript-eslint/no-explicit-any": ["warn", {
+      "fixToUnknown": false,
+      "ignoreRestArgs": false
+    }]
+  },
+  "overrides": [
+    {
+      "files": ["component-library.tsx"],
+      "rules": {
+        // This file has special handling for polymorphic components
+        "@typescript-eslint/no-explicit-any": ["warn", {
+          "fixToUnknown": false,
+          "ignoreRestArgs": false
+        }]
+      }
+    }
+  ]
+}

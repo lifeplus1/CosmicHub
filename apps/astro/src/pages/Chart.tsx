@@ -160,7 +160,7 @@ const Chart: React.FC = () => {
           {/* Chart visualization */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Your Natal Chart</h2>
-            <ChartDisplay chart={chartData} />
+            <ChartDisplay chart={chartData as unknown as Record<string, unknown>} />
           </Card>
         </div>
       )}

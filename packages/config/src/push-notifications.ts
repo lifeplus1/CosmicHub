@@ -17,7 +17,7 @@ export interface NotificationPayload {
   badge?: string;
   image?: string;
   tag?: string;
-  data?: any;
+  data?: Record<string, unknown>;
   actions?: NotificationAction[];
   timestamp?: number;
   urgency?: 'low' | 'normal' | 'high';
@@ -108,11 +108,12 @@ export class PushNotificationManager {
         applicationServerKey: this.urlBase64ToUint8Array(this.vapidKeys.publicKey) as BufferSource
       });
 
+      const subKeys = subscription.toJSON().keys as { auth: string; p256dh: string };
       const userSubscription: UserSubscription = {
         endpoint: subscription.endpoint,
         keys: {
-          auth: subscription.toJSON().keys!.auth,
-          p256dh: subscription.toJSON().keys!.p256dh
+          auth: subKeys.auth,
+          p256dh: subKeys.p256dh
         },
         userId,
         preferences,
@@ -253,7 +254,6 @@ export class PushNotificationManager {
     // Suggest quiet hours based on typical usage
     const now = new Date();
     const currentHour = now.getHours();
-    
     if (currentHour >= 22 || currentHour <= 7) {
       suggestions.quietHours = {
         enabled: true,
@@ -435,7 +435,7 @@ export class AstrologyNotificationScheduler {
   }
 
   // Schedule transit alerts based on birth chart
-  scheduleTransitAlerts(userId: string, birthData: any): void {
+  scheduleTransitAlerts(userId: string, birthData: Record<string, unknown>): void {
     // This would calculate upcoming transits and schedule notifications
     console.log(`🔮 Scheduled transit alerts for user ${userId}`);
   }

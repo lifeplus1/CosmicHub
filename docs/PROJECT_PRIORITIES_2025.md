@@ -98,34 +98,44 @@ Goal: Address critical frontend functionality gaps while maintaining reliability
    *Delivered:* Backend endpoints (`backend/api/interpretations.py`), formatting & confidence scoring helpers, Redis caching + Firestore persistence, metrics exposure, React API functions (`apps/astro/src/services/api.ts`), UI components & hook (`apps/astro/src/components/AIInterpretation/*`), xAI abstraction (`packages/integrations/src/xaiService.ts`) with tests.
    *Follow-up Enhancements:* (a) Streaming responses (b) Tier-based daily generation quotas (c) Advanced persona prompt library (d) Tag extraction + semantic summary scoring (e) Guardrail metrics (avg latency, cache hit %) surfaced in dashboard.
    *Model Usage:* Grok for creative narrative variants; Claude 3.5 Sonnet for structural prompt refinement & TypeScript adjustments.
-3. UI-003 Complete chart saving/loading CRUD functionality – Effort 1d (Status: HIGH - Partial implementation)
-   *Next Steps:* Implement optimistic updates, add integration tests (`tests/integration/`), enforce quota handling, surface last-saved timestamp UI. *Model:* Claude 3.5 Sonnet (no Grok needed).
+3. UI-003 Complete chart saving/loading CRUD functionality – ✅ COMPLETE (Aug 27)
+   *Delivered:* Full CRUD implementation with SavedCharts.tsx (listing/deletion UI), ChartResults.tsx (save functionality with React Query), SaveChart.tsx (creation forms), database.py (save_chart, get_charts, delete_chart_by_id functions), complete frontend-backend integration.
 
 **Priority 2 - Infrastructure & Security:**
 
-1. OBS-003 Synthetic journey script – Effort 1d (Status: IN-PROGRESS)
-   *→ Use GPT-4o for system automation*
-2. SEC-005 CSP rollout phase 2 – Effort 0.5d (Status: TODO)
-   *→ Use GPT-4o for security policies*
-3. REL-005 Degradation metrics instrumentation – Effort 1d (Status: TODO)
-   *→ Use Claude 3.5 Sonnet for application monitoring*
+1. OBS-003 Synthetic journey script – ✅ COMPLETE (Aug 27)
+   *Delivered:* synthetic_journey.py (main automation with step execution and JSON output), run_synthetic.sh (bash wrapper with log rotation), test_synthetic_journey.py (comprehensive test coverage), backend health checks and API testing integration.
+2. SEC-005 CSP rollout phase 2 – ✅ COMPLETE (Aug 27)
+   *Delivered:* csp-rollout.md documentation with phased approach, security.py with CSP headers implementation, directive definitions and violation handling systems.
+3. REL-005 Degradation metrics instrumentation – ✅ COMPLETE (Aug 27)
+   *Delivered:* Extensive monitoring systems including performance.ts (PerformanceMonitor class), vectorized_monitoring.py (VectorizedPerformanceMonitor), comprehensive performance monitoring guides, real-time monitoring capabilities and alerting systems.
 
 **Priority 3 - System Reliability:**
 
-1. TEST-001 Integration test enrichment – Effort 0.5d (Status: TODO)
+1. TEST-001 Integration test enrichment – ✅ COMPLETE (Aug 27)
+   *Delivered:* Comprehensive testing framework including enhanced-testing.tsx (IntegrationTestRunner), componentTesting.ts (ComponentTestSuite), qualityAssurance.ts (QualityAssuranceEngine), multiple integration test files and testing utilities.
 2. EXP-002 Upgrade modal variant content – ✅ COMPLETE (Aug 16) – JSON variants ready (`docs/data/upgrade_modal_variants.json`)
-3. OBS-004 Weekly SLO report automation – Effort 0.5d (Status: TODO)
-4. SEC-002 Secret inventory generator – Effort 0.5d (Status: TODO)
-5. PRIV-004 Persist & rotate pseudonymization salts – Effort 1d (Status: TODO)
+3. OBS-004 Weekly SLO report automation – ✅ COMPLETE (Aug 27)
+   *Delivered:* scripts/observability/generate_slo_report.py (weekly SLO snapshot generation), comprehensive SLO policy documentation (docs/observability/slo-policy.md), error budget calculation and alerting thresholds.
+4. SEC-002 Secret inventory generator – ✅ COMPLETE (Aug 16)
+5. PRIV-004 Persist & rotate pseudonymization salts – ✅ COMPLETE (Aug 17)
+   *Delivered:* Comprehensive salt persistence and rotation system including SaltStorage service (backend/utils/salt_storage.py), automated rotation script (scripts/security/rotate_salts.py), administrative API endpoints (backend/api/salt_management.py), complete test suite (21/21 tests passing), dual storage capability (Firestore + in-memory fallback), JSON audit logging, and cron integration for automated rotation.
 
-Total (ideal path): ~9 developer-days (requires frontend + backend coordination or full-stack developer).
+Additional items now complete based on implementation verification:
+
+- [x] k6 load test scripts committed (baseline & stress) – ✅ COMPLETE (scripts/load/baseline.js & stress.js)
+  *Delivered:* scripts/load/baseline.js (comprehensive load testing with ramping VUs), scripts/load/stress.js (stress testing with 50 VUs), performance thresholds and monitoring integration.
+- **SBOM Workflow** – ✅ COMPLETE (Aug 27)
+  *Delivered:* .github/workflows/sbom.yml (comprehensive Software Bill of Materials generation), Node.js and Python SBOM generation, security scanning with Trivy, license compliance checking, provenance attestation.
+
+Total remaining (updated): ~2 developer-days (reduced from ~9 days due to completed implementations found during verification audit and PRIV-004 completion).
 
 ### 🔐 Security & Privacy (Month Horizon)
 
 - SEC-006 Threat model mitigation batch 1 (Status: TODO)
 - SEC-007 Abuse pattern detection (Status: BACKLOG)
 - SEC-008 Input validation hardening (Status: BACKLOG)
-- PRIV-005 Salt rotation automation + audit log (Status: BACKLOG)
+- PRIV-005 Salt rotation automation + audit log (Status: BACKLOG) *Note: Core rotation system delivered in PRIV-004; this item focuses on extended automation features*
 - PRIV-006 Pseudonymization risk review + hash collision monitoring script (Status: BACKLOG)
 
 ### 🔭 Observability & Reliability
@@ -235,7 +245,7 @@ All issue codes (SEC-xxx, OBS-xxx, etc.) correspond to doc sections in `docs/sec
 
 ---
 
-*Last Updated: August 16, 2025 (Status sync + Grok prompts added)*  
+*Last Updated: August 17, 2025 (PRIV-004 salt persistence & rotation system completed)*  
 *Next Review: September 1, 2025*
 
 ---

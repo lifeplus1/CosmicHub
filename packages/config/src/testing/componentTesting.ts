@@ -3,20 +3,21 @@
  * Automated component validation with performance, accessibility, and quality metrics
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, expectAccessibleButton } from './testUtils';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { fireEvent, waitFor } from '@testing-library/react';
+import { renderWithProviders } from './testUtils';
 import { performanceMonitor } from '../performance';
+import { logger } from '../utils/logger';
 import React from 'react';
 
 // Component Testing Framework
 export interface ComponentTestConfig {
   name: string;
-  component: React.ComponentType<any>;
-  props?: Record<string, any>;
+  component: React.ComponentType<unknown>; // accept unknown props for flexible test components
+  props?: Record<string, unknown>;
   variants?: Array<{
     name: string;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     expectedBehavior?: string;
   }>;
   accessibility?: {
@@ -35,6 +36,7 @@ export interface ComponentTestConfig {
   }>;
 }
 
+// NOTE: Exported for future dynamic suite execution; currently indirectly used via factory.
 class ComponentTestSuite {
   private config: ComponentTestConfig;
   private metrics: Array<{
@@ -49,7 +51,7 @@ class ComponentTestSuite {
     this.config = config;
   }
 
-  async runComprehensiveTests(): Promise<void> {
+  runComprehensiveTests(): void {
     describe(`${this.config.name} Component Testing Suite`, () => {
       beforeEach(() => {
         this.metrics = [];
@@ -57,28 +59,28 @@ class ComponentTestSuite {
       });
 
       // Basic rendering tests
-      it('should render without crashing', async () => {
+  it('should render without crashing', () => {
         const startTime = performance.now();
         
         const { container } = renderWithProviders(
-          React.createElement(this.config.component, this.config.props || {})
+          React.createElement(this.config.component, this.config.props ?? {})
         );
         
         const renderTime = performance.now() - startTime;
         
         expect(container.firstChild).toBeInTheDocument();
         
-        if (this.config.performance?.maxRenderTime) {
+        if (typeof this.config.performance?.maxRenderTime === 'number') {
           expect(renderTime).toBeLessThan(this.config.performance.maxRenderTime);
         }
         
-        console.log(`✅ ${this.config.name} rendered in ${renderTime.toFixed(2)}ms`);
+  logger.debug('Component render', { component: this.config.name, renderTimeMs: Number(renderTime.toFixed(2)) });
       });
 
       // Variant testing
       if (this.config.variants) {
         this.config.variants.forEach((variant) => {
-          it(`should render ${variant.name} variant correctly`, async () => {
+          it(`should render ${variant.name} variant correctly`, () => {
             const startTime = performance.now();
             const initialMemory = this.getMemoryUsage();
             
@@ -99,18 +101,18 @@ class ComponentTestSuite {
               interactionScore: 0 // Will be calculated in interaction tests
             });
             
-            console.log(`🔄 ${variant.name} variant: ${renderTime.toFixed(2)}ms, ${memoryUsage}B memory`);
+            logger.debug('Variant render', { component: this.config.name, variant: variant.name, renderTimeMs: Number(renderTime.toFixed(2)), memoryBytes: memoryUsage });
           });
         });
       }
 
       // Accessibility testing
       if (this.config.accessibility) {
-        it('should meet accessibility requirements', async () => {
+  it('should meet accessibility requirements', () => {
           const accessibility = this.config.accessibility; // snapshot for type narrowing
           if (!accessibility) return; // safety guard
           const { container } = renderWithProviders(
-            React.createElement(this.config.component, this.config.props || {})
+            React.createElement(this.config.component, this.config.props ?? {})
           );
           // Check required roles
           accessibility.requiredRoles?.forEach(role => {
@@ -123,7 +125,7 @@ class ComponentTestSuite {
             expect(labeledElements.length).toBeGreaterThan(0);
           });
           // Test keyboard navigation if required
-          if (accessibility.keyboardNavigation) {
+          if (accessibility.keyboardNavigation === true) {
             const focusableElements = container.querySelectorAll(
               'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );
@@ -132,7 +134,7 @@ class ComponentTestSuite {
               fireEvent.keyDown(focusableElements[0], { key: 'Tab' });
             }
           }
-          console.log(`♿ Accessibility validation passed for ${this.config.name}`);
+          logger.debug('Accessibility validation passed', { component: this.config.name });
         });
       }
 
@@ -141,7 +143,7 @@ class ComponentTestSuite {
         this.config.interactions.forEach((interaction) => {
           it(`should handle ${interaction.name} interaction`, async () => {
             const { container } = renderWithProviders(
-              React.createElement(this.config.component, this.config.props || {})
+              React.createElement(this.config.component, this.config.props ?? {})
             );
             
             const targetElement = container.firstChild as HTMLElement;
@@ -155,13 +157,13 @@ class ComponentTestSuite {
               interaction.expectedResult(container);
             });
             
-            console.log(`🖱️ ${interaction.name} interaction validated`);
+            logger.debug('Interaction validated', { component: this.config.name, interaction: interaction.name });
           });
         });
       }
 
       // Performance regression testing
-      it('should maintain performance benchmarks', async () => {
+  it('should maintain performance benchmarks', () => {
         const benchmarkRuns = 5;
         const renderTimes: number[] = [];
         
@@ -169,7 +171,7 @@ class ComponentTestSuite {
           const startTime = performance.now();
           
           const { unmount } = renderWithProviders(
-            React.createElement(this.config.component, this.config.props || {})
+            React.createElement(this.config.component, this.config.props ?? {})
           );
           
           const renderTime = performance.now() - startTime;
@@ -182,11 +184,12 @@ class ComponentTestSuite {
         const maxRenderTime = Math.max(...renderTimes);
         const minRenderTime = Math.min(...renderTimes);
         
-        console.log(`📈 Performance benchmark: avg ${averageRenderTime.toFixed(2)}ms, min ${minRenderTime.toFixed(2)}ms, max ${maxRenderTime.toFixed(2)}ms`);
+  logger.info('Performance benchmark', { component: this.config.name, avgMs: Number(averageRenderTime.toFixed(2)), minMs: Number(minRenderTime.toFixed(2)), maxMs: Number(maxRenderTime.toFixed(2)) });
         
-        if (this.config.performance?.maxRenderTime) {
-          expect(averageRenderTime).toBeLessThan(this.config.performance.maxRenderTime);
-          expect(maxRenderTime).toBeLessThan(this.config.performance.maxRenderTime * 1.5); // Allow 50% variance for max
+        const limit = this.config.performance?.maxRenderTime;
+        if (typeof limit === 'number' && !Number.isNaN(limit)) {
+          expect(averageRenderTime).toBeLessThan(limit);
+          expect(maxRenderTime).toBeLessThan(limit * 1.5); // Allow 50% variance for max
         }
         
         // Record performance metrics
@@ -200,22 +203,36 @@ class ComponentTestSuite {
         
         expect(qualityMetrics.overall).toBeGreaterThan(80); // Minimum 80% quality score
         
-        console.log(`🏆 Quality Score: ${qualityMetrics.overall}% (${qualityMetrics.grade})`);
-        console.log(`  - Performance: ${qualityMetrics.performance}%`);
-        console.log(`  - Accessibility: ${qualityMetrics.accessibility}%`);
-        console.log(`  - Reliability: ${qualityMetrics.reliability}%`);
+        logger.info('Quality metrics', {
+          component: this.config.name,
+          overall: qualityMetrics.overall,
+          grade: qualityMetrics.grade,
+          performance: qualityMetrics.performance,
+          accessibility: qualityMetrics.accessibility,
+          reliability: qualityMetrics.reliability
+        });
         
         if (qualityMetrics.recommendations.length > 0) {
-          console.log('📋 Recommendations:');
-          qualityMetrics.recommendations.forEach(rec => console.log(`  • ${rec}`));
+          logger.warn('Quality recommendations', { component: this.config.name, recommendations: qualityMetrics.recommendations });
         }
       });
     });
   }
 
   private getMemoryUsage(): number {
-    if (typeof process !== 'undefined' && process.memoryUsage) {
-      return process.memoryUsage().heapUsed;
+    const g: unknown = globalThis as unknown;
+    if (typeof g === 'object' && g !== null && 'process' in g) {
+      const proc = (g as { process?: { memoryUsage?: () => { heapUsed: number } } }).process;
+      if (proc && typeof proc.memoryUsage === 'function') {
+        const mem = proc.memoryUsage();
+        interface MemStat { heapUsed: number }
+        const isMemStat = (m: unknown): m is MemStat => {
+          return typeof m === 'object' && m !== null && 'heapUsed' in m && typeof (m as Record<string, unknown>).heapUsed === 'number';
+        };
+        if (isMemStat(mem)) {
+          return mem.heapUsed;
+        }
+      }
     }
     return 0;
   }
@@ -278,6 +295,8 @@ class ComponentTestSuite {
 }
 
 // Test configuration factory functions
+// Accept strongly typed component; loosen parameter using any with localized lint disable to allow specific prop components in tests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createButtonTestConfig = (component: React.ComponentType<any>): ComponentTestConfig => ({
   name: 'Button',
   component,
@@ -300,7 +319,7 @@ export const createButtonTestConfig = (component: React.ComponentType<any>): Com
     {
       name: 'Click',
       action: (element) => fireEvent.click(element),
-      expectedResult: (container) => {
+  expectedResult: (container: HTMLElement): void => {
         // Verify click was handled (button should be in document)
         expect(container.firstChild).toBeInTheDocument();
       }
@@ -308,13 +327,14 @@ export const createButtonTestConfig = (component: React.ComponentType<any>): Com
     {
       name: 'Keyboard Enter',
       action: (element) => fireEvent.keyDown(element, { key: 'Enter' }),
-      expectedResult: (container) => {
+  expectedResult: (container: HTMLElement): void => {
         expect(container.firstChild).toBeInTheDocument();
       }
     }
   ]
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createModalTestConfig = (component: React.ComponentType<any>): ComponentTestConfig => ({
   name: 'Modal',
   component,
@@ -336,7 +356,7 @@ export const createModalTestConfig = (component: React.ComponentType<any>): Comp
     {
       name: 'Escape Key Close',
       action: (element) => fireEvent.keyDown(element, { key: 'Escape' }),
-      expectedResult: (container) => {
+  expectedResult: (container: HTMLElement): void => {
         // Modal should handle escape key
         expect(container.firstChild).toBeInTheDocument();
       }
@@ -344,7 +364,7 @@ export const createModalTestConfig = (component: React.ComponentType<any>): Comp
   ]
 });
 
-export const createFormTestConfig = (component: React.ComponentType<any>): ComponentTestConfig => ({
+export const createFormTestConfig = (component: React.ComponentType<unknown>): ComponentTestConfig => ({
   name: 'Form',
   component,
   props: {},
@@ -364,4 +384,6 @@ export const createFormTestConfig = (component: React.ComponentType<any>): Compo
 });
 
 // Export utilities
+// Helper to create & (optionally) run the suite externally
+export const createTestSuite = (config: ComponentTestConfig): ComponentTestSuite => new ComponentTestSuite(config);
 export { ComponentTestSuite };
