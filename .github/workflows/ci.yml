@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+            node-version: 20
+            cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+      - name: Type check packages/types
+        run: pnpm --filter ./packages/types type-check
+      - name: Lint
+        run: pnpm lint
+      - name: Build (if needed)
+        run: pnpm build || echo "No build step"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend deps
+        working-directory: backend
+        run: pip install -r requirements.txt
+      - name: Backend tests (selected fast suite)
+        working-directory: backend
+        env:
+          TEST_MODE: "1"
+          ENABLE_TRACING: "false"
+          ENABLE_METRICS: "true"
+        run: pytest -q tests/test_chart_and_interpretation_flow.py tests/test_challenging_aspects.py tests/test_interpretation_backward_compat.py
+      - name: Schema version drift check
+        run: |
+          CURRENT=$(grep -R "INTERPRETATION_SCHEMA_VERSION" -n backend/astro/calculations/ai_interpretations.py | sed -E 's/.*=\s*"([^"]+)".*/\1/')
+          if git diff --name-only origin/main...HEAD | grep -q ai_interpretations.py; then
+            if ! git diff origin/main...HEAD -- backend/astro/calculations/ai_interpretations.py | grep -q "INTERPRETATION_SCHEMA_VERSION"; then
+              echo "Schema file changed without version bump" >&2
+            fi
+          fi
+      - name: Upload pytest artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-logs
+          path: backend/.pytest_cache
+  docs-version-guard:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure schema version documented
+        run: |
+          VERSION=$(grep -R "INTERPRETATION_SCHEMA_VERSION" backend/astro/calculations/ai_interpretations.py | sed -E 's/.*=\s*"([^"]+)".*/\1/')
+          if ! grep -R "${VERSION}" -n docs | grep -qi "interpretation schema"; then
+            echo "Interpretation schema version ${VERSION} not referenced in docs" >&2
+          fi

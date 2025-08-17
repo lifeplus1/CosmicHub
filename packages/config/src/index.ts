@@ -16,3 +16,5 @@ export * from './lazy-loading';
 // Push notifications and background sync
 export * from './push-notifications';
 export * from './background-sync-enhanced';
+// Feature keys (centralized identifiers)
+export * from './featureKeys';

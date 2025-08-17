@@ -3,6 +3,7 @@
  * Implements route-based code splitting for optimal loading performance
  */
 
+import React, { type ComponentType } from 'react';
 import { lazyLoadRoute, LazyLoadErrorBoundary } from '@cosmichub/config';
 
 // Main page routes with lazy loading
@@ -111,12 +112,19 @@ export const AstroRoutes = {
 };
 
 // Lazy loaded components with error boundaries
-export const withErrorBoundary = (Component: React.ComponentType<any>) => {
-  return (props: any) => (
+// Wrap a lazily loaded component with an error boundary.
+// Use a generic to preserve prop types instead of any.
+export const withErrorBoundary = <P extends Record<string, unknown>>(
+  Component: ComponentType<P>
+): React.FC<P> => {
+  const Wrapped: React.FC<P> = (props: P) => (
     <LazyLoadErrorBoundary>
-      <Component {...props} />
+      {React.createElement(Component, props)}
     </LazyLoadErrorBoundary>
   );
+  const baseName = Component.displayName ?? Component.name ?? 'Component';
+  Wrapped.displayName = `WithErrorBoundary(${baseName})`;
+  return Wrapped;
 };
 
 // Route configuration with lazy loading

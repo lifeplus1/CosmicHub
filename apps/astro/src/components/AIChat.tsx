@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "@cosmichub/auth";
 import { getAuthToken } from "../services/api";
@@ -9,18 +9,22 @@ interface ChatResponse {
   choices: { message: { content: string } }[];
 }
 
-export default function AIChat() {
+interface ErrorResponse {
+  response?: {
+    data?: {
+      detail?: string;
+    };
+  };
+}
+
+export default function AIChat(): React.ReactElement {
   const { user, loading } = useAuth();
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState<ChatResponse | null>(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  if (loading) return <div className="text-white">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     setError(null);
     try {
       const token = await getAuthToken();
@@ -33,7 +37,7 @@ export default function AIChat() {
           },
         }
       );
-      setResponse(res.data);
+      setResponse(res.data as ChatResponse);
       toast({
         title: "Response Received",
         description: "Your AI response has been generated successfully",
@@ -43,17 +47,21 @@ export default function AIChat() {
       });
     } catch (error) {
       console.error("Error:", error);
-      const err = error as any;
-      setError(err.response?.data?.detail || "Failed to get response");
+      const err = error as ErrorResponse;
+      const errorMessage = err.response?.data?.detail ?? "Failed to get response";
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: err.response?.data?.detail || "Failed to get response",
+        description: errorMessage,
         status: "error",
         duration: 5000,
         isClosable: true,
       });
     }
   };
+
+  if (loading) return <div className="text-white">Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <div 
@@ -64,24 +72,33 @@ export default function AIChat() {
       </h1>
       <div className="space-y-4">
         <div>
-          <label className="block mb-2 text-cosmic-gold">Your Message</label>
+          <label htmlFor="ai-message-input" className="block mb-2 text-cosmic-gold">Your Message</label>
           <textarea 
+            id="ai-message-input"
             value={message} 
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)} 
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>): void => setMessage(e.target.value)} 
             placeholder="Ask about your chart..." 
             className="w-full p-3 text-white border rounded-lg resize-none bg-cosmic-dark border-cosmic-gold/30 placeholder-cosmic-silver focus:border-cosmic-gold focus:outline-none"
             rows={4}
+            aria-describedby="ai-message-help"
           />
+          <div id="ai-message-help" className="mt-1 text-sm text-cosmic-silver/70">
+            Ask questions about your astrological chart or request interpretations
+          </div>
         </div>
         <button
+          type="button"
           className="w-full py-3 font-semibold transition-colors rounded-lg bg-cosmic-gold text-cosmic-dark hover:bg-cosmic-gold/90 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={handleSubmit}
-          disabled={!message}
+          onClick={(): void => {
+            void handleSubmit();
+          }}
+          disabled={!message.trim()}
+          aria-label="Send message to AI chat"
         >
           Send
         </button>
         {error && <div className="p-3 text-red-400 border rounded-lg bg-red-900/20 border-red-500/30">{error}</div>}
-        {response && (
+        {response !== null && (
           <div className="p-4 mt-4 border rounded-lg bg-cosmic-purple/20 border-cosmic-purple/30">
             <div className="text-cosmic-silver">{response.choices[0].message.content}</div>
           </div>

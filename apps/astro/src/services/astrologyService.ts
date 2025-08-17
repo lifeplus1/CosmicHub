@@ -6,9 +6,9 @@ import { config } from '@cosmichub/config'; // Shared API config from packages/c
 
 export const fetchChartData = async (userId: string, chartType: ChartType): Promise<ChartData> => {
   const auth = getAuth();
-  const token = await auth.currentUser?.getIdToken();
-
-  if (!token) {
+  const user = auth.currentUser;
+  const token = user ? await user.getIdToken() : null;
+  if (token === null || token === undefined || token === '') {
     throw new Error('Authentication required');
   }
 
@@ -24,5 +24,6 @@ export const fetchChartData = async (userId: string, chartType: ChartType): Prom
     throw new Error(`Failed to fetch chart data: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = (await response.json()) as ChartData;
+  return data;
 };

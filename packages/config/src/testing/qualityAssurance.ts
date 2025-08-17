@@ -3,9 +3,9 @@
  * Scans and validates all components across the CosmicHub codebase
  */
 
-import { ComponentTestSuite, ComponentTestConfig } from './componentTesting';
+import type { ComponentTestConfig } from './componentTesting';
 import { expect } from 'vitest';
-import { performanceMonitor } from '../performance';
+import type React from 'react';
 
 export interface QAReport {
   timestamp: string;
@@ -41,7 +41,7 @@ export interface QAReport {
 
 class QualityAssuranceEngine {
   private componentConfigs: Map<string, ComponentTestConfig> = new Map();
-  private testResults: Map<string, any> = new Map();
+  private testResults: Map<string, unknown> = new Map();
 
   constructor() {
     this.initializeComponentConfigs();
@@ -56,7 +56,7 @@ class QualityAssuranceEngine {
     // Button pattern
     this.componentConfigs.set('Button', {
       name: 'Button',
-      component: null as any, // Will be dynamically loaded
+      component: null as unknown as React.ComponentType<unknown>, // Will be dynamically loaded
       props: { children: 'Test Button' },
       variants: [
         { name: 'Primary', props: { variant: 'primary', children: 'Primary Button' } },
@@ -76,7 +76,7 @@ class QualityAssuranceEngine {
     // Modal pattern
     this.componentConfigs.set('Modal', {
       name: 'Modal',
-      component: null as any,
+      component: null as unknown as React.ComponentType<unknown>,
       props: { isOpen: true, children: 'Modal Content' },
       accessibility: {
         requiredRoles: ['dialog'],
@@ -91,7 +91,7 @@ class QualityAssuranceEngine {
     // Form pattern
     this.componentConfigs.set('Form', {
       name: 'Form',
-      component: null as any,
+      component: null as unknown as React.ComponentType<unknown>,
       props: {},
       accessibility: {
         requiredRoles: ['form'],
@@ -106,7 +106,7 @@ class QualityAssuranceEngine {
     // Input pattern
     this.componentConfigs.set('Input', {
       name: 'Input',
-      component: null as any,
+      component: null as unknown as React.ComponentType<unknown>,
       props: { placeholder: 'Test input' },
       variants: [
         { name: 'Text', props: { type: 'text', placeholder: 'Text input' } },
@@ -127,7 +127,7 @@ class QualityAssuranceEngine {
     // Dropdown pattern
     this.componentConfigs.set('Dropdown', {
       name: 'Dropdown',
-      component: null as any,
+      component: null as unknown as React.ComponentType<unknown>,
       props: { options: [{ value: 'test', label: 'Test Option' }] },
       variants: [
         { name: 'Single Select', props: { multiple: false } },
@@ -145,13 +145,11 @@ class QualityAssuranceEngine {
       interactions: [
         {
           name: 'Open Dropdown',
-          action: (element) => {
-            const trigger = element.querySelector('[role="combobox"]') || element;
-            if (trigger) {
-              trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            }
+          action: (element: HTMLElement): void => {
+            const trigger = element.querySelector('[role="combobox"]') ?? element;
+            trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
           },
-          expectedResult: (container) => {
+          expectedResult: (container: HTMLElement): void => {
             // Should open dropdown menu
             const dropdown = container.querySelector('[role="listbox"]');
             if (dropdown) {
@@ -167,7 +165,7 @@ class QualityAssuranceEngine {
     console.log('🔍 Starting Automated Quality Assurance Scan...');
     
     const startTime = performance.now();
-    const components = componentPaths || await this.discoverComponents();
+    const components = componentPaths ?? await this.discoverComponents();
     
     const report: QAReport = {
       timestamp: new Date().toISOString(),
@@ -245,9 +243,9 @@ class QualityAssuranceEngine {
     return report;
   }
 
-  private async discoverComponents(): Promise<string[]> {
+  private discoverComponents(): Promise<string[]> {
     // Mock component discovery - in real implementation, this would scan the file system
-    return [
+    return Promise.resolve([
       'packages/ui/src/components/Button.tsx',
       'packages/ui/src/components/Modal.tsx',
       'packages/ui/src/components/Dropdown.tsx',
@@ -255,10 +253,10 @@ class QualityAssuranceEngine {
       'apps/astro/src/components/Login.tsx',
       'apps/astro/src/components/Signup.tsx',
       'apps/healwave/src/components/FrequencyPlayer.tsx'
-    ];
+    ]);
   }
 
-  private async testComponent(componentPath: string): Promise<{
+  private testComponent(componentPath: string): Promise<{
     name: string;
     path: string;
     qualityScore: number;
@@ -270,9 +268,6 @@ class QualityAssuranceEngine {
   }> {
     const componentName = this.extractComponentName(componentPath);
     const issues: string[] = [];
-    
-    // Get component config or create default
-    const config = this.componentConfigs.get(componentName) || this.createDefaultConfig(componentName);
     
     // Mock testing results - in real implementation, this would run actual tests
     const performance = this.mockPerformanceTest(componentName);
@@ -287,7 +282,7 @@ class QualityAssuranceEngine {
     const qualityScore = Math.round((performance + accessibility + reliability) / 3);
     const grade = this.calculateGrade(qualityScore);
     
-    return {
+    return Promise.resolve({
       name: componentName,
       path: componentPath,
       qualityScore,
@@ -296,7 +291,7 @@ class QualityAssuranceEngine {
       accessibility: accessibility,
       reliability: reliability,
       issues
-    };
+    });
   }
 
   private extractComponentName(path: string): string {
@@ -308,7 +303,7 @@ class QualityAssuranceEngine {
   private createDefaultConfig(componentName: string): ComponentTestConfig {
     return {
       name: componentName,
-      component: null as any,
+      component: null as unknown as React.ComponentType<unknown>,
       props: {},
       accessibility: {
         requiredRoles: [],

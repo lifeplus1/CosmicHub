@@ -12,8 +12,13 @@
   "lib": ["ES2022", "DOM", "DOM.Iterable"],
   // Inherit global types (react, react-dom, node) from tsconfig.base.json to avoid duplication
   // Add package-specific types via a local global.d.ts if needed instead of here
+  "rootDir": "../../"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "../config/src/**/*",
+    "../integrations/src/**/*"
+  ],
   "references": [
     { "path": "../subscriptions" }
   ],

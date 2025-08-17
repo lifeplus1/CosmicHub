@@ -1,4 +1,4 @@
-from backend.utils.pseudonymization import pseudonymize, generate_salt
+from utils.pseudonymization import pseudonymize, generate_salt
 
 def test_deterministic_with_same_salt():
     salt = generate_salt()

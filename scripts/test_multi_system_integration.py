@@ -36,15 +36,14 @@ def test_multi_system_endpoint_integration() -> bool:
     try:
         # Test that the router can be imported
         import sys
-        import os
+        sys.path.append('/Users/Chris/Projects/CosmicHub')
         sys.path.append('/Users/Chris/Projects/CosmicHub/backend')
-        
-        from api.routers.calculations import router, vectorized_multi_system_available
+        from backend.api.routers.calculations import router, vectorized_multi_system_available
         print(f"✅ Calculations router imported successfully")
         print(f"✅ Vectorized multi-system available: {vectorized_multi_system_available}")
-        
+
         # Test endpoint existence
-        routes = [route.path for route in router.routes]
+        routes = [getattr(route, 'path', None) for route in router.routes]
         multi_system_route = '/multi-system-chart' in routes
         print(f"✅ Multi-system endpoint {'found' if multi_system_route else 'NOT FOUND'}")
         if multi_system_route:
@@ -52,12 +51,15 @@ def test_multi_system_endpoint_integration() -> bool:
             print(f"   Full endpoint path: {full_path}")
         else:
             print(f"   Available routes: {routes[:3]}...")  # Show first few routes for debugging
-        
+
         # Test parameter validation
-        from api.routers.calculations import BirthData
+        from backend.api.routers.calculations import BirthData
         birth_data = BirthData(**test_request)
-        print("✅ BirthData validation passed")
-        
+        # Assert that all fields match the test_request
+        for key, value in test_request.items():
+            assert getattr(birth_data, key) == value, f"BirthData field '{key}' mismatch: {getattr(birth_data, key)} != {value}"
+        print("✅ BirthData validation passed and all fields match test data")
+
     except Exception as e:
         print(f"❌ Router integration error: {e}")
         return False

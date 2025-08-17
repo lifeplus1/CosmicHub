@@ -266,6 +266,7 @@ const ChartCalculator: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="e.g., 1990"
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                aria-label="Chart Input Field"
                 required
                 aria-required="true"
               />

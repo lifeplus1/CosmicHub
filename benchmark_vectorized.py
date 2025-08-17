@@ -6,7 +6,7 @@ Run this to see the performance improvements with vectorized operations.
 
 import time
 import random
-from typing import Dict
+from typing import Dict, Optional, Union
 
 # Mock data for testing
 PLANETS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
@@ -15,7 +15,7 @@ def generate_mock_chart() -> Dict[str, float]:
     """Generate a mock birth chart for testing."""
     return {planet: random.uniform(0, 360) for planet in PLANETS}
 
-def benchmark_synastry_calculations():
+def benchmark_synastry_calculations() -> Optional[Dict[str, Union[float, int]]]:
     """Benchmark traditional vs vectorized synastry calculations."""
     
     # Import both versions
@@ -23,10 +23,8 @@ def benchmark_synastry_calculations():
     
     try:
         from backend.utils.vectorized_aspect_utils import build_aspect_matrix_fast
-        vectorized_available = True
         print("✅ Vectorized operations available")
     except ImportError:
-        vectorized_available = False
         print("❌ Vectorized operations not available")
         return
     
@@ -39,7 +37,8 @@ def benchmark_synastry_calculations():
     # Benchmark traditional approach
     print("\n📊 Traditional Calculations:")
     start_time = time.time()
-    traditional_results = []
+    from typing import List, Any
+    traditional_results: List[List[Any]] = []
     for long1, long2 in chart_pairs:
         matrix = build_aspect_matrix(long1, long2)
         traditional_results.append(matrix)
@@ -50,7 +49,7 @@ def benchmark_synastry_calculations():
     # Benchmark vectorized approach
     print("\n⚡ Vectorized Calculations:")
     start_time = time.time()
-    vectorized_results = []
+    vectorized_results: List[List[Any]] = []
     for long1, long2 in chart_pairs:
         matrix = build_aspect_matrix_fast(long1, long2)
         vectorized_results.append(matrix)
@@ -82,19 +81,19 @@ if __name__ == "__main__":
     
     try:
         results = benchmark_synastry_calculations()
-        
-        print(f"\n✨ Summary:")
-        print(f"   With {results['num_pairs']} synastry calculations:")
-        print(f"   • Traditional approach: {results['traditional_time']:.3f}s")
-        print(f"   • Vectorized approach: {results['vectorized_time']:.3f}s")
-        print(f"   • Performance gain: {results['speedup']:.2f}x faster")
-        
-        if results['speedup'] > 2:
-            print(f"\n🎯 Recommendation: Implement vectorized operations NOW!")
-            print(f"   • Significant performance improvement ({results['speedup']:.1f}x)")
-            print(f"   • Better user experience with faster calculations")
-            print(f"   • Reduced server load and costs")
-        
+        if results is not None:
+            print(f"\n✨ Summary:")
+            print(f"   With {results['num_pairs']} synastry calculations:")
+            print(f"   • Traditional approach: {results['traditional_time']:.3f}s")
+            print(f"   • Vectorized approach: {results['vectorized_time']:.3f}s")
+            print(f"   • Performance gain: {results['speedup']:.2f}x faster")
+            if results['speedup'] > 2:
+                print(f"\n🎯 Recommendation: Implement vectorized operations NOW!")
+                print(f"   • Significant performance improvement ({results['speedup']:.1f}x)")
+                print(f"   • Better user experience with faster calculations")
+                print(f"   • Reduced server load and costs")
+        else:
+            print("No results to summarize. Vectorized operations may not be available.")
     except Exception as e:
         print(f"❌ Benchmark failed: {e}")
         print("💡 Make sure NumPy is installed: pip install numpy")

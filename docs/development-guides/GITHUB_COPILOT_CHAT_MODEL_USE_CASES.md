@@ -1,13 +1,53 @@
 # GitHub Copilot Chat Pro Model Use Cases
 
 This document outlines the best use cases for GitHub Copilot Chat Pro models (as of August 2025) in the context of the astrology app monorepo (apps/astro, apps/healwave). It focuses on resolving lint errors, optimizing performance (e.g., 77ms Vite builds, vite.config.ts), ensuring type safety (TypeScript/Pydantic), and maintaining modularity (TurboRepo, turbo.json). Models are accessible via the Copilot Chat Pro dropdown in VS Code, with premium requests (300-1500/month) and agentic modes for autonomous coding.
-Project Context
 
-Tech Stack: React 18 + TypeScript + Vite + Tailwind + Radix UI (frontend); FastAPI + PySwissEph + Firebase (backend); Firestore + Redis (database); Web Audio API (audio).
-Goals: Scalability (Docker/Render, docker-compose.yml), accessibility (WCAG 2.1, Radix UI), type safety (tsconfig.json, pydantic), and robustness (ErrorBoundary.tsx).
-Key Files: apps/astro/src/components (e.g., AIChat.tsx, ChartWheelInteractive.tsx), backend/api (e.g., astro_service.py), packages (e.g., auth, ui).
+## Project Context
 
-Model Summaries and Use Cases
+- **Tech Stack**: React 18 + TypeScript + Vite + Tailwind + Radix UI (frontend); FastAPI + PySwissEph + Firebase (backend); Firestore + Redis (database); Web Audio API (audio).
+- **Goals**: Scalability (Docker/Render, docker-compose.yml), accessibility (WCAG 2.1, Radix UI), type safety (tsconfig.json, pydantic), and robustness (ErrorBoundary.tsx).
+- **Key Files**: apps/astro/src/components (e.g., AIChat.tsx, ChartWheelInteractive.tsx), backend/api (e.g., astro_service.py), packages (e.g., auth, ui).
+
+## Serialization Implementation Use Cases
+
+The CosmicHub monorepo now includes comprehensive serialization utilities for astrology data across frontend (TypeScript/Zod) and backend (Python/Pydantic). Models can assist with serialization-related tasks:
+
+### Frontend Serialization (TypeScript/Zod)
+
+- **Files**: `packages/types/src/serialize.ts`, `packages/types/src/astrology.types.ts`
+- **Components**: `apps/astro/src/components/ChartDisplay/ChartDisplay.tsx`, `apps/astro/src/components/UserProfile.tsx`, `apps/astro/src/components/PdfExport.tsx`
+- **Services**: `apps/astro/src/services/chartSyncService.ts`
+
+**Best Models for Frontend Serialization**:
+
+- **Claude 3.5 Sonnet**: TypeScript type safety, Zod schema validation, React component integration
+- **GPT-4.1**: Fast TypeScript fixes, import path resolution, type inference
+- **Claude 4**: Complex multi-component serialization workflows
+
+### Backend Serialization (Python/Pydantic)
+
+- **Files**: `backend/api/utils/serialization.py`, `backend/api/services/astro_service.py`
+- **Routers**: `backend/api/routers/charts.py`, `backend/api/routers/interpretations.py`
+- **Caching**: Redis integration for serialized data performance optimization
+
+**Best Models for Backend Serialization**:
+
+- **o1-mini**: Complex Pydantic model relationships, field aliases, validation logic
+- **Claude 3.5 Sonnet**: FastAPI integration, Redis caching patterns, error handling
+- **GPT-5.0**: Large-scale data transformation, performance optimization
+
+### Test Coverage
+
+- **Frontend**: `apps/astro/src/__tests__/serialize.test.ts` (Vitest)
+- **Backend**: `backend/tests/test_serialization.py` (Pytest)
+
+**Testing Models**:
+
+- **GPT-4o mini**: Quick test generation, edge case identification
+- **Claude 3.5 Sonnet**: Comprehensive test coverage, mocking strategies
+
+## Model Summaries and Use Cases
+
 Claude 3.5 Sonnet (Anthropic)
 
 Strengths: Precise code analysis, fast debugging, and clear lint error fixes. Excels in TypeScript/ESLint issues and accessibility (WCAG 2.1).

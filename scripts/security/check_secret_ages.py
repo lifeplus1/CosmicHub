@@ -6,7 +6,8 @@ Scans a JSON inventory file containing objects like:
 Exits non-zero if any secret exceeds allowed age.
 """
 from __future__ import annotations
-import json, sys, datetime, pathlib
+import json, datetime, pathlib
+from typing import Any
 
 INVENTORY_PATH = pathlib.Path("logs/security/secret-inventory.json")
 
@@ -15,17 +16,18 @@ def main() -> int:
         print("No inventory file found (passing for now).")
         return 0
     try:
-        data = json.loads(INVENTORY_PATH.read_text())
+        data: list[dict[str, Any]] = json.loads(INVENTORY_PATH.read_text())
     except Exception as e:
         print(f"Failed to read inventory: {e}")
         return 1
-    now = datetime.datetime.utcnow()
-    failures = []
+    now = datetime.datetime.now(datetime.timezone.utc)
+    failures: list[tuple[str, int | str]] = []
     for entry in data:
         try:
-            rotated = datetime.datetime.fromisoformat(entry["last_rotated"].replace("Z","+00:00"))
+            rotated = datetime.datetime.fromisoformat(entry["last_rotated"].replace("Z", "+00:00"))
             age_days = (now - rotated).days
-            if age_days > int(entry.get("max_age_days", 90)):
+            max_age = int(entry.get("max_age_days", 90))
+            if age_days > max_age:
                 failures.append((entry["name"], age_days))
         except Exception:
             failures.append((entry.get("name", "<unknown>"), "parse-error"))

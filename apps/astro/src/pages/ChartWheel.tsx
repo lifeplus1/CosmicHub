@@ -5,7 +5,7 @@ import ChartWheel from '../features/ChartWheel';
 import type { ChartBirthData } from '@cosmichub/types';
 
 const ChartWheelPage: React.FC = () => {
-  const { user } = useAuth();
+  useAuth();
   const [birthData, setBirthData] = useState<ChartBirthData | null>(null);
   const [showAspects, setShowAspects] = useState(true);
   const [showAnimation, setShowAnimation] = useState(true);
@@ -21,12 +21,12 @@ const ChartWheelPage: React.FC = () => {
     timezone: 'America/New_York'
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
   const data: ChartBirthData = {
       year: parseInt(formData.year),
       month: parseInt(formData.month),
@@ -42,7 +42,7 @@ const ChartWheelPage: React.FC = () => {
     setBirthData(data);
   };
 
-  const loadSampleChart = () => {
+  const loadSampleChart = (): void => {
   const sampleData: ChartBirthData = {
       year: 1990,
       month: 6,
@@ -291,7 +291,7 @@ const ChartWheelPage: React.FC = () => {
                 <div className="text-6xl mb-4">🌌</div>
                 <p className="text-lg">Enter your birth information to generate your chart</p>
                 <p className="text-sm mt-2 text-cosmic-silver/70">
-                  Or click "Load Sample Chart" to see a demonstration
+                  Or click &quot;Load Sample Chart&quot; to see a demonstration
                 </p>
               </div>
             </Card>

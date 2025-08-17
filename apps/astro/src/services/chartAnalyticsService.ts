@@ -3,7 +3,7 @@
  * Provides real-time astrological insights and pattern recognition
  */
 
-import { ChartData, Planet, House } from './chartSyncService';
+import { ChartData, Planet } from './chartSyncService';
 
 export interface ChartPattern {
   id: string;

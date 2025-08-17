@@ -1,0 +1,70 @@
+{
+  "seed": 123,
+  "batches": [
+    {
+      "batch_size": 1,
+      "traditional_time": 0.0005478858947753906,
+      "vectorized_time": 0.00035572052001953125,
+      "speedup": 1.5402144772117963,
+      "time_saved_percent": 35.0739773716275,
+      "average_ms_traditional": 0.5478858947753906,
+      "average_ms_vectorized": 0.35572052001953125,
+      "mismatch_pairs": 0,
+      "total_pairs": 1,
+      "differing_cells": 0,
+      "total_cells_compared": 100,
+      "max_orb_diff": 0.0,
+      "median_orb_diff": 0.0
+    },
+    {
+      "batch_size": 10,
+      "traditional_time": 0.004930257797241211,
+      "vectorized_time": 0.0026962757110595703,
+      "speedup": 1.8285436378105933,
+      "time_saved_percent": 45.31166884278737,
+      "average_ms_traditional": 0.4930257797241211,
+      "average_ms_vectorized": 0.26962757110595703,
+      "mismatch_pairs": 0,
+      "total_pairs": 10,
+      "differing_cells": 0,
+      "total_cells_compared": 1000,
+      "max_orb_diff": 0.0,
+      "median_orb_diff": 0.0
+    },
+    {
+      "batch_size": 50,
+      "traditional_time": 0.025783061981201172,
+      "vectorized_time": 0.01401209831237793,
+      "speedup": 1.840057171053751,
+      "time_saved_percent": 45.65386251410183,
+      "average_ms_traditional": 0.5156612396240234,
+      "average_ms_vectorized": 0.2802419662475586,
+      "mismatch_pairs": 0,
+      "total_pairs": 50,
+      "differing_cells": 0,
+      "total_cells_compared": 5000,
+      "max_orb_diff": 0.0,
+      "median_orb_diff": 0.0
+    },
+    {
+      "batch_size": 100,
+      "traditional_time": 0.052681922912597656,
+      "vectorized_time": 0.029113292694091797,
+      "speedup": 1.8095487675047088,
+      "time_saved_percent": 44.737604315635124,
+      "average_ms_traditional": 0.5268192291259766,
+      "average_ms_vectorized": 0.29113292694091797,
+      "mismatch_pairs": 0,
+      "total_pairs": 100,
+      "differing_cells": 0,
+      "total_cells_compared": 10000,
+      "max_orb_diff": 0.0,
+      "median_orb_diff": 0.0
+    }
+  ],
+  "summary": {
+    "avg_speedup": 1.7545910133952123,
+    "median_speedup": 1.819046202657651,
+    "max_orb_diff": 0.0
+  }
+}

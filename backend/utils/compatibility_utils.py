@@ -85,7 +85,13 @@ def calculate_compatibility_score(
     return {
         'overall_score': round(normalized, 1),
         'interpretation': get_compatibility_interpretation(normalized, aspect_count),
-        'breakdown': {k: max(0, min(100, v + 50)) for k, v in breakdown.items()}
+        'breakdown': {k: max(0, min(100, v + 50)) for k, v in breakdown.items()},
+        'meta': {
+            'planet_weights': PLANET_WEIGHTS,
+            'aspect_scores': ASPECT_SCORES,
+            'overlay_bonus_applied': overlay_bonus,
+            'aspect_type_counts': aspect_count
+        }
     }
 
 def calculate_area_score(matrix: Matrix, focus_planets: List[str]) -> float:

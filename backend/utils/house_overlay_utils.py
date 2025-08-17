@@ -36,7 +36,7 @@ def analyze_house_overlays(
     cusps1: List[float]
 ) -> Dict[str, Dict[str, Overlay]]:
     """Analyze how planets from each chart overlay into the other's houses."""
-    overlays = {'p1_in_p2': {}, 'p2_in_p1': {}}
+    overlays: Dict[str, Dict[str, Overlay]] = {'p1_in_p2': {}, 'p2_in_p1': {}}
     
     # Person 1's planets in Person 2's houses
     for planet, lon in long1.items():
@@ -106,7 +106,7 @@ def get_house_interpretation(planet: str, house: int) -> str:
 
 def get_key_overlays(overlays: Dict[str, Dict[str, Overlay]]) -> List[Dict[str, Any]]:
     """Extract key overlay patterns for display."""
-    key_overlays = []
+    key_overlays: List[Dict[str, Any]] = []
     important_houses = [1, 4, 5, 7, 8, 10]  # Most significant for relationships
     
     for direction, overlay_dict in overlays.items():

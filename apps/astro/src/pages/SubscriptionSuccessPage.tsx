@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, type JSX as JSXNamespace } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { FaCheckCircle, FaCrown, FaArrowRight, FaHome, FaCreditCard, FaSpinner } from 'react-icons/fa';
-import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '@cosmichub/auth';
+import { useAuth, useSubscription } from '@cosmichub/auth';
 import { useToast } from '../components/ToastProvider';
 
 interface SubscriptionDetails {
@@ -12,69 +11,65 @@ interface SubscriptionDetails {
   expires_at: string;
 }
 
-export const SubscriptionSuccessPage: React.FC = () => {
+export const SubscriptionSuccessPage: React.FC = (): JSXNamespace.Element => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const subscriptionData = useSubscription() as any; // Type assertion for compatibility
+  const subscriptionData = useSubscription();
   const { toast } = useToast();
   const [subscriptionDetails, setSubscriptionDetails] = useState<SubscriptionDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   const sessionId = searchParams.get('session_id');
-  const refreshSubscription = subscriptionData.refreshSubscription || (() => Promise.resolve());
+  const refreshSubscription: () => Promise<unknown> = useMemo((): (() => Promise<unknown>) => {
+    return typeof subscriptionData?.refreshSubscription === 'function'
+      ? subscriptionData.refreshSubscription
+      : () => Promise.resolve();
+  }, [subscriptionData]);
 
-  useEffect(() => {
-    if (user && sessionId) {
-      verifySubscription();
-    } else if (!sessionId) {
-      setLoading(false);
+  useEffect((): void => {
+    const hasSession = typeof sessionId === 'string' && sessionId.length > 0;
+    if (!(user && hasSession)) {
+      if (!hasSession) setLoading(false);
+      return;
     }
-  }, [user, sessionId]);
-
-  const verifySubscription = async () => {
-    try {
-      const token = await user?.getIdToken();
-      
-      // Verify the Stripe session and get updated subscription
-      const response = await fetch('/api/stripe/subscription-status', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const details = await response.json();
-        setSubscriptionDetails(details);
-        
-        // Refresh the subscription context
-        await refreshSubscription();
-        
-        toast({
-          title: 'Success',
-          description: 'Subscription activated successfully!',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
+  void (async (): Promise<void> => {
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch('/api/stripe/subscription-status', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
-      } else {
-        throw new Error('Failed to verify subscription');
+  if (response.ok) {
+          const details = (await response.json()) as SubscriptionDetails;
+          setSubscriptionDetails(details);
+          await refreshSubscription();
+          toast({
+            title: 'Success',
+            description: 'Subscription activated successfully!',
+            status: 'success',
+            duration: 3000,
+            isClosable: true
+          });
+        } else {
+          throw new Error('Failed to verify subscription');
+        }
+      } catch {
+        toast({
+          title: 'Error',
+            description: 'Unable to verify subscription. Please contact support if issues persist.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Subscription verification failed:', error);
-      toast({
-        title: 'Error', 
-        description: 'Unable to verify subscription. Please contact support if issues persist.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    })();
+  }, [user, sessionId, refreshSubscription, toast]);
 
-  const getTierDisplayName = (tier: string) => {
+  const getTierDisplayName = (tier: string): string => {
     const tierNames: Record<string, string> = {
       'healwave_pro': 'HealWave Pro',
       'astro_premium': 'Astrology Premium',
@@ -83,7 +78,7 @@ export const SubscriptionSuccessPage: React.FC = () => {
     return tierNames[tier] || tier;
   };
 
-  const getTierColor = (tier: string) => {
+  const getTierColor = (tier: string): string => {
     const colors: Record<string, string> = {
       'healwave_pro': 'bg-blue-500',
       'astro_premium': 'bg-purple-500',
@@ -103,7 +98,7 @@ export const SubscriptionSuccessPage: React.FC = () => {
     );
   }
 
-  if (!sessionId) {
+  if (!(typeof sessionId === 'string' && sessionId.length > 0)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
         <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-lg">
@@ -199,7 +194,7 @@ export const SubscriptionSuccessPage: React.FC = () => {
             <div className="mb-4">
               <h2 className="flex items-center gap-2 text-xl font-bold">
                 <FaArrowRight className="w-5 h-5 text-blue-500" />
-                What's Next?
+                What&apos;s Next?
               </h2>
             </div>
             <div className="space-y-4">

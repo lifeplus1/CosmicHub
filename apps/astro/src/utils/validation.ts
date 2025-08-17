@@ -43,6 +43,52 @@ export const healwaveSessionSchema = z.object({
   personalizedFor: z.string().optional() // Chart ID
 });
 
+// Synastry request/response schemas (shared between UI and potential backend alignment)
+export const synastryRequestSchema = z.object({
+  person1: birthDataSchema,
+  person2: birthDataSchema
+});
+
+export const synastryCompatibilityMetaSchema = z.object({
+  planet_weights: z.record(z.number()),
+  aspect_scores: z.record(z.number()),
+  overlay_bonus_applied: z.number(),
+  aspect_type_counts: z.record(z.number())
+});
+
+export const synastryResponseSchema = z.object({
+  compatibility_analysis: z.object({
+    overall_score: z.number(),
+    interpretation: z.string(),
+    breakdown: z.record(z.number()),
+    meta: synastryCompatibilityMetaSchema.optional()
+  }),
+  interaspects: z.array(z.object({
+    person1_planet: z.string(),
+    person2_planet: z.string(),
+    aspect: z.string(),
+    orb: z.number(),
+    strength: z.string(),
+    interpretation: z.string()
+  })),
+  house_overlays: z.array(z.object({
+    person1_planet: z.string(),
+    person2_house: z.number(),
+    interpretation: z.string()
+  })),
+  composite_chart: z.object({
+    midpoint_sun: z.number(),
+    midpoint_moon: z.number(),
+    relationship_purpose: z.string()
+  }),
+  summary: z.object({
+    key_themes: z.array(z.string()),
+    strengths: z.array(z.string()),
+    challenges: z.array(z.string()),
+    advice: z.array(z.string())
+  })
+});
+
 // Form validation helpers
 export const validateBirthData = (data: unknown) => {
   try {
@@ -110,3 +156,5 @@ export type BirthData = z.infer<typeof birthDataSchema>;
 export type UserProfile = z.infer<typeof userProfileSchema>;
 export type ChartCalculation = z.infer<typeof chartCalculationSchema>;
 export type HealwaveSession = z.infer<typeof healwaveSessionSchema>;
+export type SynastryRequest = z.infer<typeof synastryRequestSchema>;
+export type SynastryResponse = z.infer<typeof synastryResponseSchema>;

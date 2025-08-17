@@ -12,6 +12,6 @@
   // Standardize lib target (ES2022) to match monorepo baseline
   "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../vite-env.d.ts"],
   "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
 }

@@ -5,7 +5,7 @@ Performance test for vectorized multi-system calculations
 
 import time
 import numpy as np
-from typing import Dict, Any, List
+from typing import Dict, Any, List, TypedDict
 
 def test_vectorized_vs_traditional_planetary_calculations() -> Dict[str, Any]:
     """Test vectorized planetary position calculations."""
@@ -23,7 +23,7 @@ def test_vectorized_vs_traditional_planetary_calculations() -> Dict[str, Any]:
     traditional_results: List[Dict[str, Dict[str, float]]] = []
     for jd in julian_days:
         # Simulate calculating each system individually
-        systems = {}
+        systems: Dict[str, Dict[str, float]] = {}
         for planet in planets:
             # Mock calculation (in real implementation, this would be SwissEph calls)
             systems[planet] = {
@@ -41,7 +41,7 @@ def test_vectorized_vs_traditional_planetary_calculations() -> Dict[str, Any]:
     start = time.time()
     
     # Vectorized calculations for all dates at once
-    planet_positions = {}
+    planet_positions: Dict[str, Dict[str, np.ndarray]] = {}
     for planet in planets:
         # Calculate all dates for this planet at once (vectorized)
         base_hash = hash(planet) % 360
@@ -62,7 +62,7 @@ def test_vectorized_vs_traditional_planetary_calculations() -> Dict[str, Any]:
     # Convert to expected format
     vectorized_results: List[Dict[str, Dict[str, float]]] = []
     for i in range(len(julian_days)):
-        systems = {}
+        systems: Dict[str, Dict[str, float]] = {}
         for planet in planets:
             systems[planet] = {
                 'western': float(planet_positions[planet]['western'][i]),
@@ -112,7 +112,11 @@ def simulate_real_world_usage():
     
     # Scenario 1: Premium user requests
     print("\n🌟 Scenario 1: Premium user - 3 multi-system charts")
-    test_cases = [
+    class TestCase(TypedDict):
+        dates: int
+        description: str
+
+    test_cases: List[TestCase] = [
         {'dates': 3, 'description': 'Individual, partner, child charts'},
         {'dates': 10, 'description': 'Family analysis (10 people)'},
         {'dates': 25, 'description': 'Astrology consultation batch'},

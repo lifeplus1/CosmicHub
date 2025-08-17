@@ -129,4 +129,36 @@ vi.mock('@cosmichub/config', () => ({
   isEmulator: false,
   isDevelopment: false,
   projectId: 'test-project',
+  // Feature system exports used by FeatureGuard and other components
+  FEATURE_KEYS: {
+    SYNSTRY_ANALYSIS: 'synastry_analysis',
+    AI_INTERPRETATION: 'ai_interpretation',
+    TRANSIT_ANALYSIS: 'transit_analysis',
+    MULTI_SYSTEM_ANALYSIS: 'multi_system_analysis'
+  },
+  isFeatureKey: (value: string) => [
+    'synastry_analysis',
+    'ai_interpretation',
+    'transit_analysis',
+    'multi_system_analysis'
+  ].includes(value),
+  FEATURE_REQUIRED_TIERS: {
+    synastry_analysis: 'premium',
+    ai_interpretation: 'elite',
+    transit_analysis: 'elite',
+    multi_system_analysis: 'premium'
+  },
+  FEATURE_LABELS: {
+    synastry_analysis: 'Synastry Compatibility',
+    ai_interpretation: 'AI Interpretation',
+    transit_analysis: 'Transit Analysis',
+    multi_system_analysis: 'Multi-System Analysis'
+  },
+  ALL_FEATURE_KEYS: [
+    'synastry_analysis',
+    'ai_interpretation',
+    'transit_analysis',
+    'multi_system_analysis'
+  ],
+  isFeatureEnabled: () => false,
 }));

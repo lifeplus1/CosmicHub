@@ -6,23 +6,25 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import {
   createEphemerisClient,
   type EphemerisConfig,
   type PlanetPosition,
   type PlanetName,
-  type CalculationResponse,
-  type BatchCalculationResponse,
-  type EphemerisHealthResponse,
   dateToJulianDay,
   SUPPORTED_PLANETS
+} from '@cosmichub/integrations';
+import type {
+  CalculationResponse,
+  BatchCalculationResponse,
+  EphemerisHealthResponse
 } from '@cosmichub/integrations';
 
 // Configuration for the ephemeris client
 const getEphemerisConfig = (): EphemerisConfig => ({
   // Use the backend API base (frontend talks to backend, which proxies ephemeris)
-  apiBaseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  apiBaseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:8000',
   timeout: 30000,
   // API key handled by backend authentication, not needed here
 });
@@ -41,36 +43,33 @@ export const ephemerisKeys = {
 /**
  * Hook to get a configured ephemeris client instance
  */
-export const useEphemerisClient = () => {
-  return useMemo(() => createEphemerisClient(getEphemerisConfig()), []);
-};
+export const useEphemerisClient = (): ReturnType<typeof createEphemerisClient> =>
+  useMemo(() => createEphemerisClient(getEphemerisConfig()), []);
 
 /**
  * Hook to check ephemeris service health
  */
-export const useEphemerisHealth = () => {
+export const useEphemerisHealth = (): UseQueryResult<EphemerisHealthResponse, Error> => {
   const client = useEphemerisClient();
-  
-  return useQuery({
+  return useQuery<EphemerisHealthResponse, Error>({
     queryKey: ephemerisKeys.health(),
     queryFn: () => client.healthCheck(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 };
 
 /**
  * Hook to get supported planets list
  */
-export const useSupportedPlanets = () => {
+export const useSupportedPlanets = (): UseQueryResult<PlanetName[], Error> => {
   const client = useEphemerisClient();
-  
-  return useQuery({
+  return useQuery<PlanetName[], Error>({
     queryKey: ephemerisKeys.planets(),
     queryFn: () => client.getSupportedPlanets(),
     staleTime: 24 * 60 * 60 * 1000, // 24 hours - rarely changes
-    gcTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000
   });
 };
 
@@ -80,22 +79,20 @@ export const useSupportedPlanets = () => {
 export const usePlanetaryPosition = (
   date: Date | null,
   planet: PlanetName,
-  options?: {
-    enabled?: boolean;
-  }
-) => {
+  options?: { enabled?: boolean }
+): UseQueryResult<CalculationResponse, Error> => {
   const client = useEphemerisClient();
   const julianDay = date ? dateToJulianDay(date) : null;
-  
-  return useQuery({
+  const isEnabled = options?.enabled !== false && julianDay !== null;
+  return useQuery<CalculationResponse, Error>({
     queryKey: julianDay ? ephemerisKeys.calculation(julianDay, planet) : [],
     queryFn: () => {
-      if (!julianDay) throw new Error('Date is required');
+      if (julianDay == null) throw new Error('Date is required');
       return client.calculatePosition(julianDay, planet);
     },
-    enabled: !!(julianDay && options?.enabled !== false),
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    enabled: isEnabled,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000
   });
 };
 
@@ -104,143 +101,137 @@ export const usePlanetaryPosition = (
  */
 export const useAllPlanetaryPositions = (
   date: Date | null,
-  options?: {
-    enabled?: boolean;
-    planets?: PlanetName[];
-  }
-) => {
+  options?: { enabled?: boolean; planets?: PlanetName[] }
+): UseQueryResult<Record<PlanetName, PlanetPosition>, Error> => {
   const client = useEphemerisClient();
   const julianDay = date ? dateToJulianDay(date) : null;
-  const planetsToCalculate = options?.planets || SUPPORTED_PLANETS;
-  
-  return useQuery({
+  const planetsToCalculate: PlanetName[] = options?.planets && options.planets.length > 0
+    ? [...new Set(options.planets)] // dedupe if caller passes duplicates
+    : [...SUPPORTED_PLANETS]; // spread to mutable array
+  const isEnabled = options?.enabled !== false && julianDay !== null;
+  return useQuery<Record<PlanetName, PlanetPosition>, Error>({
     queryKey: julianDay ? ephemerisKeys.allPositions(julianDay) : [],
-    queryFn: async (): Promise<Record<PlanetName, PlanetPosition>> => {
-      if (!julianDay) throw new Error('Date is required');
-      
-      // Use batch calculation for efficiency
-      const calculations = planetsToCalculate.map(planet => ({
+    queryFn: async () => {
+      if (julianDay == null) throw new Error('Date is required');
+      const calculations = planetsToCalculate.map((planet) => ({
         julian_day: julianDay,
-        planet,
+        planet
       }));
-      
       const response = await client.calculateBatchPositions(calculations);
-      
-      // Convert response to record format
-      const positions: Record<string, PlanetPosition> = {};
+      const positions: Partial<Record<PlanetName, PlanetPosition>> = {};
       for (const result of response.results) {
-        positions[result.planet] = result.position;
+        const planetName = result.planet as PlanetName;
+        positions[planetName] = result.position;
       }
-      
       return positions as Record<PlanetName, PlanetPosition>;
     },
-    enabled: !!(julianDay && options?.enabled !== false),
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    enabled: isEnabled,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000
   });
 };
 
 /**
  * Hook to batch calculate multiple planetary positions
  */
-export const useBatchPlanetaryCalculation = () => {
+export const useBatchPlanetaryCalculation = (): UseMutationResult<
+  BatchCalculationResponse,
+  Error,
+  Array<{ date: Date; planet: PlanetName }>,
+  unknown
+> => {
   const client = useEphemerisClient();
   const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (requests: Array<{ date: Date; planet: PlanetName }>) => {
-      const calculations = requests.map(req => ({
+  return useMutation<BatchCalculationResponse, Error, Array<{ date: Date; planet: PlanetName }>>({
+    mutationFn: async (requests) => {
+      const calculations = requests.map((req) => ({
         julian_day: dateToJulianDay(req.date),
-        planet: req.planet,
+        planet: req.planet
       }));
-      
       return client.calculateBatchPositions(calculations);
     },
     onSuccess: (data, variables) => {
-      // Cache individual results for future queries
       data.results.forEach((result, index) => {
         const request = variables[index];
         if (request) {
           const julianDay = dateToJulianDay(request.date);
+          // Cache the full calculation response for the single planet/date
           queryClient.setQueryData(
             ephemerisKeys.calculation(julianDay, request.planet),
             result
           );
         }
       });
-    },
+    }
   });
 };
 
 /**
  * Utility hook to preload planetary positions for a date range
  */
-export const usePrefetchPlanetaryPositions = () => {
+export const usePrefetchPlanetaryPositions = (): { prefetchPositions: (
+  startDate: Date,
+  endDate: Date,
+  planets?: PlanetName[]
+) => Promise<void> } => {
   const queryClient = useQueryClient();
   const client = useEphemerisClient();
-  
+
   const prefetchPositions = async (
     startDate: Date,
     endDate: Date,
     planets: PlanetName[] = [...SUPPORTED_PLANETS]
-  ) => {
+  ): Promise<void> => {
+    if (endDate < startDate) return; // no-op on invalid range
+    const uniquePlanets = [...new Set(planets)];
     const dates: Date[] = [];
     const currentDate = new Date(startDate);
-    
-    // Generate daily dates in range
     while (currentDate <= endDate) {
       dates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
-    // Prefetch in batches to avoid overwhelming the server
     const batchSize = 10;
     for (let i = 0; i < dates.length; i += batchSize) {
       const batch = dates.slice(i, i + batchSize);
-      
-      const promises = batch.map(date => {
-        const julianDay = dateToJulianDay(date);
-        return queryClient.prefetchQuery({
-          queryKey: ephemerisKeys.allPositions(julianDay),
-          queryFn: () => client.getAllPlanetaryPositions(julianDay),
-          staleTime: 60 * 60 * 1000, // 1 hour
-        });
-      });
-      
-      await Promise.all(promises);
+      await Promise.all(
+        batch.map((date) => {
+          const julianDay = dateToJulianDay(date);
+          return queryClient.prefetchQuery({
+            queryKey: ephemerisKeys.allPositions(julianDay),
+            queryFn: () => client.getAllPlanetaryPositions(julianDay),
+            staleTime: 60 * 60 * 1000
+          });
+        })
+      );
     }
   };
-  
+
   return { prefetchPositions };
 };
 
 /**
  * Hook to invalidate ephemeris cache (useful for forcing refresh)
  */
-export const useInvalidateEphemerisCache = () => {
+export const useInvalidateEphemerisCache = (): {
+  invalidateAll: () => void;
+  invalidateCalculation: (julianDay: number, planet: PlanetName) => void;
+  invalidateAllPositions: (julianDay: number) => void;
+} => {
   const queryClient = useQueryClient();
-  
-  const invalidateAll = () => {
-    queryClient.invalidateQueries({ queryKey: ephemerisKeys.all });
+  const invalidateAll = (): void => {
+    void queryClient.invalidateQueries({ queryKey: ephemerisKeys.all });
   };
-  
-  const invalidateCalculation = (julianDay: number, planet: PlanetName) => {
-    queryClient.invalidateQueries({
+  const invalidateCalculation = (julianDay: number, planet: PlanetName): void => {
+    void queryClient.invalidateQueries({
       queryKey: ephemerisKeys.calculation(julianDay, planet)
     });
   };
-  
-  const invalidateAllPositions = (julianDay: number) => {
-    queryClient.invalidateQueries({
+  const invalidateAllPositions = (julianDay: number): void => {
+    void queryClient.invalidateQueries({
       queryKey: ephemerisKeys.allPositions(julianDay)
     });
   };
-  
-  return {
-    invalidateAll,
-    invalidateCalculation,
-    invalidateAllPositions,
-  };
+  return { invalidateAll, invalidateCalculation, invalidateAllPositions };
 };
 
 // Export utility functions for direct use

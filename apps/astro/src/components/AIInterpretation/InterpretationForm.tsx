@@ -4,8 +4,13 @@ import { useToast } from '../ToastProvider';
 import { useAIInterpretation } from './useAIInterpretation';
 import type { ChartInterpretationRequest, InterpretationRequest } from './types';
 
+interface InterpretationResult {
+  data?: unknown;
+  content?: string;
+}
+
 interface InterpretationFormProps {
-  onInterpretationGenerated?: (interpretation: any) => void;
+  onInterpretationGenerated?: (interpretation: InterpretationResult) => void;
   chartId?: string;
   mode?: 'chart' | 'direct'; // chart mode uses existing API, direct mode uses new AI service
 }
@@ -51,7 +56,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     'Strengths', 'Current Cycle', 'Future Trends', 'Spiritual Growth'
   ];
 
-  const handleFocusToggle = (focus: string) => {
+  const handleFocusToggle = (focus: string): void => {
     setFormData(prev => ({
       ...prev,
       focus: prev.focus.includes(focus)
@@ -60,7 +65,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }));
   };
 
-  const handleChartGenerate = async () => {
+  const handleChartGenerate = async (): Promise<void> => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -76,7 +81,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     
     try {
       const requestData: ChartInterpretationRequest = {
-        chartId: chartId || 'default',
+        chartId: chartId ?? 'default',
         userId: user.uid,
         type: formData.type,
         focus: formData.focus.length > 0 ? formData.focus : undefined,
@@ -85,10 +90,10 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       // Add question to request if provided
       const bodyData = {
         ...requestData,
-        ...(formData.question && { question: formData.question })
+        ...(formData.question.trim() !== '' && { question: formData.question })
       };
 
-      const result = await generateAIInterpretation(bodyData as any);
+      const result = await generateAIInterpretation(bodyData as ChartInterpretationRequest);
       
       toast({
         title: "Interpretation Generated",
@@ -99,7 +104,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       });
 
       if (onInterpretationGenerated) {
-        onInterpretationGenerated(result.data);
+        onInterpretationGenerated({ data: result.data });
       }
 
     } catch (error) {
@@ -116,7 +121,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }
   };
 
-  const handleDirectGenerate = async () => {
+  const handleDirectGenerate = async (): Promise<void> => {
     if (!formData.birthDate || !formData.birthTime || !formData.birthLocation) {
       toast({
         title: "Missing Information",
@@ -184,39 +189,42 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
             {/* Birth Information for Direct AI */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-cosmic-gold font-medium mb-2">
+                <label htmlFor="birth-date" className="block text-cosmic-gold font-medium mb-2">
                   Birth Date
                 </label>
                 <input
+                  id="birth-date"
                   type="date"
                   value={formData.birthDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+                  onChange={(e): void => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
                   className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none"
                   title="Select your birth date"
                   aria-label="Birth date"
                 />
               </div>
               <div>
-                <label className="block text-cosmic-gold font-medium mb-2">
+                <label htmlFor="birth-time" className="block text-cosmic-gold font-medium mb-2">
                   Birth Time
                 </label>
                 <input
+                  id="birth-time"
                   type="time"
                   value={formData.birthTime}
-                  onChange={(e) => setFormData(prev => ({ ...prev, birthTime: e.target.value }))}
+                  onChange={(e): void => setFormData(prev => ({ ...prev, birthTime: e.target.value }))}
                   className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none"
                   title="Select your birth time"
                   aria-label="Birth time"
                 />
               </div>
               <div>
-                <label className="block text-cosmic-gold font-medium mb-2">
+                <label htmlFor="birth-location" className="block text-cosmic-gold font-medium mb-2">
                   Birth Location
                 </label>
                 <input
+                  id="birth-location"
                   type="text"
                   value={formData.birthLocation}
-                  onChange={(e) => setFormData(prev => ({ ...prev, birthLocation: e.target.value }))}
+                  onChange={(e): void => setFormData(prev => ({ ...prev, birthLocation: e.target.value }))}
                   placeholder="City, Country"
                   className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none"
                 />
@@ -243,7 +251,10 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                       name="interpretationType"
                       value={type.value}
                       checked={formData.interpretationType === type.value}
-                      onChange={(e) => setFormData(prev => ({ ...prev, interpretationType: e.target.value as any }))}
+                      onChange={(e): void => setFormData(prev => ({ 
+                        ...prev, 
+                        interpretationType: e.target.value as InterpretationRequest['interpretationType']
+                      }))}
                       className="sr-only"
                       aria-labelledby={`interpretation-type-${type.value}`}
                       aria-label={`${type.label}: ${type.description}`}

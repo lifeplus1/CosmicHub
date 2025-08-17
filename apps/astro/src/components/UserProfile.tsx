@@ -8,6 +8,7 @@ import { FaUser, FaCrown, FaStar, FaCalendarAlt, FaChartLine, FaSave, FaCreditCa
 import { COSMICHUB_TIERS } from '@cosmichub/subscriptions';
 import ProgressBar from './ProgressBar';
 import './UserProfile.module.css';
+import { serializeAstrologyData, UserProfile as UserProfileType } from '@cosmichub/types';
 
 interface UserStats {
   totalCharts: number;
@@ -33,6 +34,35 @@ const UserProfile: React.FC = React.memo(() => {
     joinDate: new Date(),
     lastLogin: new Date(),
   });
+
+  const handleSaveProfile = async () => {
+    if (user) {
+      const profileData: UserProfileType = {
+        userId: user.uid,
+        birthData: { // This is mock data, replace with actual form data
+          date: '1990-01-01',
+          time: '12:00',
+          location: 'Greenwich, UK',
+        }
+      };
+      try {
+        const serializedProfile = serializeAstrologyData(profileData);
+        console.log("Serialized Profile for Firestore:", serializedProfile);
+        // Here you would call a service to save the data, e.g.:
+        // await userProfileService.save(JSON.parse(serializedProfile));
+        toast({
+          description: "Profile saved successfully!",
+          status: 'success'
+        });
+      } catch (error) {
+        console.error("Failed to serialize profile:", error);
+        toast({
+          description: "Failed to save profile.",
+          status: 'error'
+        });
+      }
+    }
+  };
 
   const loadUserStats = useCallback(async () => {
     if (user && checkUsageLimit) {

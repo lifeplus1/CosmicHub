@@ -4,19 +4,20 @@ import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
 import HumanDesignChart from '../components/HumanDesignChart/HumanDesignChart';
 import type { HumanDesignData } from '../components/HumanDesignChart/types';
+import type { ChartBirthData } from '@cosmichub/types';
 
 const HumanDesign: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
   const [humanDesignData, setHumanDesignData] = useState<HumanDesignData | null>(null);
 
-  const handleBirthDataSubmit = (data: any) => {
+  const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
     // No navigation needed - stay on this page and show the human design chart
     console.log('Human Design birth data submitted:', data);
   };
 
   // Helper function to format birth info from calculation result
-  const formatBirthInfo = (birthInfo: HumanDesignData['birth_info']) => {
+  const formatBirthInfo = (birthInfo: HumanDesignData['birth_info']): { date: string; time: string; coordinates: string; timezone: string; } | null => {
     if (!birthInfo) return null;
 
     // Parse the ISO string more carefully to preserve the original date
@@ -82,8 +83,8 @@ const HumanDesign: React.FC = () => {
           {/* Human Design Chart Component */}
           <HumanDesignChart 
             birthData={birthData}
-            onCalculate={(data) => setBirthData(data)}
-            onHumanDesignCalculated={(hdData) => setHumanDesignData(hdData)}
+            onCalculate={(data: ChartBirthData) => setBirthData(data)}
+            onHumanDesignCalculated={(hdData: HumanDesignData) => setHumanDesignData(hdData)}
           />
 
           {/* Birth Information */}
@@ -132,7 +133,7 @@ const HumanDesign: React.FC = () => {
                   <div className="text-center">
                     <div className="text-cosmic-gold font-semibold">Coordinates</div>
                     <div className="text-cosmic-silver text-sm">
-                      {birthData.lat ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
+                      {birthData.lat != null ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
                     </div>
                   </div>
                 </>

@@ -23,15 +23,25 @@ def _get_pepper() -> bytes:
     return val.encode("utf-8")
 
 @lru_cache(maxsize=2048)
-def pseudonymize(identifier: str, salt: Optional[bytes] = None) -> str:
-    if not isinstance(identifier, str):  # defensive
-        identifier = str(identifier)
+def pseudonymize(identifier: str | int | float | bytes, salt: Optional[bytes] = None) -> str:
+    """Return a deterministic pseudonym hash.
+
+    Accepts broader primitive types (int/float/bytes) to reduce caller errors.
+    Non-bytes are coerced to UTF-8 encoded string before hashing. The function
+    remains cacheable because the key is the argument tuple; widening types
+    does not change semantics for identical logical identifiers.
+    """
     if salt is None:
         salt = secrets.token_bytes(32)
     pepper = _get_pepper()
     h = hashlib.sha256()
     h.update(salt)
-    h.update(identifier.encode("utf-8"))
+    # Normalize identifier to bytes
+    if isinstance(identifier, bytes):
+        ident_bytes = identifier
+    else:
+        ident_bytes = str(identifier).encode("utf-8")
+    h.update(ident_bytes)
     h.update(pepper)
     return h.hexdigest()
 

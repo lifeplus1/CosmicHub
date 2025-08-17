@@ -5,6 +5,8 @@ from typing import Dict, List, Any
 import swisseph as swe  # type: ignore
 from datetime import datetime, timezone
 import pytz
+import time
+from os import getenv
 
 from utils.aspect_utils import build_aspect_matrix, get_key_aspects
 from utils.house_overlay_utils import analyze_house_overlays, get_key_overlays
@@ -21,6 +23,35 @@ except ImportError:
     pass
 
 router = APIRouter()
+
+# Optional Prometheus metrics (mirrors interpretation pattern)
+metrics_enabled_flag = getenv("ENABLE_METRICS", "true").lower() == "true"
+try:  # Safe optional import
+    if metrics_enabled_flag:
+        from prometheus_client import Counter, Histogram  # type: ignore
+        SYN_COUNTER = Counter('synastry_requests_total', 'Synastry calculation attempts', ['result'])  # type: ignore
+        SYN_LATENCY = Histogram('synastry_generation_seconds', 'Synastry calculation latency seconds', buckets=(0.05,0.1,0.25,0.5,1,2,5,10))  # type: ignore
+        SYN_CACHE = Counter('synastry_cache_events_total', 'Synastry cache events', ['event'])  # type: ignore
+    else:  # pragma: no cover - disabled path
+        SYN_COUNTER = None  # type: ignore
+        SYN_LATENCY = None  # type: ignore
+        SYN_CACHE = None  # type: ignore
+except Exception:  # pragma: no cover - import failure
+    SYN_COUNTER = None  # type: ignore
+    SYN_LATENCY = None  # type: ignore
+    SYN_CACHE = None  # type: ignore
+
+# Simple in-memory cache (lightweight; future: unify with Redis service)
+from typing import Any as _Any
+_syn_cache: dict[str, tuple[float, dict[str, _Any]]] = {}
+_CACHE_TTL = int(getenv('SYNASTRY_CACHE_TTL', '900'))  # 15 min default
+
+def _make_pair_key(p1: 'BirthData', p2: 'BirthData') -> str:
+    # Order-independent key using datetimes (fallback to date+time)
+    k1 = p1.datetime or f"{p1.date}T{p1.time}"
+    k2 = p2.datetime or f"{p2.date}T{p2.time}"
+    a, b = sorted([k1, k2])
+    return f"syn:{a}|{b}"
 
 class BirthData(BaseModel):
     date: str  # YYYY-MM-DD
@@ -158,41 +189,80 @@ async def calculate_synastry(
 ):
     """Calculate comprehensive synastry analysis between two birth charts."""
     try:
-        # Calculate planetary positions and houses for both people
+        start_time = time.time()
+        cache_key = _make_pair_key(request.person1, request.person2)
+
+        # Cache lookup
+        if _CACHE_TTL > 0 and cache_key in _syn_cache:
+            ts, payload = _syn_cache[cache_key]
+            if (time.time() - ts) <= _CACHE_TTL:
+                if SYN_CACHE:
+                    try: SYN_CACHE.labels('hit').inc()  # type: ignore
+                    except Exception: pass
+                if SYN_COUNTER:
+                    try: SYN_COUNTER.labels('cache').inc()  # type: ignore
+                    except Exception: pass
+                return payload  # type: ignore[return-value]
+            else:
+                if SYN_CACHE:
+                    try: SYN_CACHE.labels('expired').inc()  # type: ignore
+                    except Exception: pass
+                _syn_cache.pop(cache_key, None)
+        else:
+            if SYN_CACHE:
+                try: SYN_CACHE.labels('miss').inc()  # type: ignore
+                except Exception: pass
+
+        # Core calculations
         planets1, cusps1 = calculate_planets(request.person1)
         planets2, cusps2 = calculate_planets(request.person2)
 
-        # Build aspect matrix - use vectorized version if available and requested
         if use_vectorized and vectorized_available:
             from ..utils.vectorized_aspect_utils import build_aspect_matrix_fast
             aspect_matrix = build_aspect_matrix_fast(planets1, planets2)
         else:
             aspect_matrix = build_aspect_matrix(planets1, planets2)
 
-        # Analyze house overlays
         overlays = analyze_house_overlays(planets1, cusps2, planets2, cusps1)
-
-        # Calculate compatibility score and relationship summary
         compatibility = calculate_compatibility_score(aspect_matrix, overlays)
         summary = generate_relationship_summary(aspect_matrix, overlays)
 
-        # Key aspects and overlays for display
         interaspects_raw = get_key_aspects(aspect_matrix)
         interaspects: List[Dict[str, Any]] = [dict(item) for item in interaspects_raw]
         house_overlays = get_key_overlays(overlays)
-
         composite = calculate_composite_midpoints(planets1, planets2)
 
-        return SynastryResponse(
+        response_obj = SynastryResponse(
             compatibility_analysis=compatibility,
             interaspects=interaspects,
             house_overlays=house_overlays,
             composite_chart=composite,
             summary=summary
         )
+
+        if _CACHE_TTL > 0:
+            _syn_cache[cache_key] = (time.time(), response_obj.model_dump())
+            if SYN_CACHE:
+                try: SYN_CACHE.labels('store').inc()  # type: ignore
+                except Exception: pass
+
+        if SYN_COUNTER:
+            try: SYN_COUNTER.labels('success').inc()  # type: ignore
+            except Exception: pass
+        if SYN_LATENCY:
+            try: SYN_LATENCY.observe(time.time() - start_time)  # type: ignore
+            except Exception: pass
+
+        return response_obj
     except HTTPException:
+        if SYN_COUNTER:
+            try: SYN_COUNTER.labels('client_error').inc()  # type: ignore
+            except Exception: pass
         raise
     except Exception as e:
+        if SYN_COUNTER:
+            try: SYN_COUNTER.labels('error').inc()  # type: ignore
+            except Exception: pass
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 # Health check endpoint

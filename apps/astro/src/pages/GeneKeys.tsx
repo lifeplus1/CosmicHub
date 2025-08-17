@@ -3,11 +3,12 @@ import { Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
 import GeneKeysChart from '../components/GeneKeysChart/GeneKeysChart';
+import type { ChartBirthData } from '@cosmichub/types';
 
 const GeneKeys: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
 
-  const handleBirthDataSubmit = (data: any) => {
+  const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
     // No navigation needed - stay on this page and show the gene keys profile
     console.log('Gene Keys birth data submitted:', data);
@@ -82,7 +83,7 @@ const GeneKeys: React.FC = () => {
               <div className="text-center">
                 <div className="text-cosmic-gold font-semibold">Coordinates</div>
                 <div className="text-cosmic-silver text-sm">
-                  {birthData.lat ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
+                  {birthData.lat != null ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
                 </div>
               </div>
             </div>

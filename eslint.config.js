@@ -9,15 +9,69 @@ import prettier from 'eslint-config-prettier';
 
 export default [
   js.configs.recommended,
+  // Stricter test files configuration with full type-aware rules
+  {
+    files: [
+      '**/*.spec.{ts,tsx,js,jsx}',
+      '**/*.test.{ts,tsx,js,jsx}',
+      '**/tests/**/*.{ts,tsx,js,jsx}',
+      '**/__tests__/**/*.{ts,tsx,js,jsx}'
+    ],
+    languageOptions: {
+      parser: tsparser,
+      globals: { ...globals.node, ...globals.browser, ...globals.es2020 },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: [
+          'packages/types/tsconfig.test.json',
+          'packages/auth/tsconfig.json',
+          'packages/ui/tsconfig.json'
+        ],
+        ecmaFeatures: { jsx: true }
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      react,
+      'react-hooks': reactHooks,
+      'jsx-a11y': jsxA11y,
+    },
+    rules: {
+      // Allow console in tests but tighten everything else
+      'no-console': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: false }],
+      '@typescript-eslint/no-explicit-any': 'error'
+    },
+  },
   {
   files: ['apps/**/*.{ts,tsx}','packages/**/*.{ts,tsx}'],
+  // Exclude test/spec files here; they are handled by the earlier, more relaxed test config.
+  ignores: ['**/*.test.*','**/*.spec.*','**/tests/**','**/__tests__/**'],
     languageOptions: {
       parser: tsparser,
       globals: { ...globals.browser, ...globals.es2020 },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-  project: ['apps/astro/tsconfig.json', 'apps/healwave/tsconfig.json', 'packages/auth/tsconfig.json', 'packages/types/tsconfig.json'],
+        project: [
+          'apps/astro/tsconfig.json',
+          'apps/healwave/tsconfig.json',
+          'packages/auth/tsconfig.json',
+          'packages/config/tsconfig.json',
+          'packages/integrations/tsconfig.json',
+          'packages/types/tsconfig.json',
+          'packages/ui/tsconfig.json'
+        ],
         ecmaFeatures: { jsx: true }
       },
     },
@@ -79,24 +133,6 @@ export default [
           'patterns': ['shared/*']
         }
       ]
-    },
-  },
-  // Test files and setup (jest, node globals)
-  {
-    files: [
-      '**/test/**',
-      '**/tests/**',
-      '**/*.spec.{ts,tsx,js,jsx}',
-      '**/*.test.{ts,tsx,js,jsx}',
-      '**/setupTests.*',
-      '**/test-setup.*'
-    ],
-    languageOptions: {
-      globals: { ...globals.node, ...globals.jest, ...globals.browser, ...globals.es2020 },
-    },
-    rules: {
-      // Relax browser-only rules in test runner environment
-      'no-console': 'off',
     },
   },
   prettier,

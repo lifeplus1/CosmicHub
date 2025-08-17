@@ -84,19 +84,22 @@ These were previously mixed across multiple sections—now consolidated:
 - Documentation consolidation + metadata headers across key operational/security docs
 - CSP report ingest endpoint (`/csp/report`)
 - Pseudonymization utility + initial tests
+- Real-time collaborative chart sharing specification (story map, architecture patterns, JSON schema)
 
 ### 🧭 Near-Term (Next 2 Weeks Sprint Candidates)
 
 Goal: Address critical frontend functionality gaps while maintaining reliability & security instrumentation focus.
 
-**Priority 1 - Frontend Functionality Completion:**
+**Priority 1 - Frontend Functionality Completion (Updated):**
 
-1. UI-001 Complete Synastry analysis backend integration – Effort 2d (Status: URGENT - Currently placeholder)
-   *→ Use Claude 3.5 Sonnet + Grok for domain logic*
-2. UI-002 Implement AI interpretation service integration – Effort 1.5d (Status: HIGH - Partial implementation)
-   *→ Use Claude 3.5 Sonnet + Grok for content templates*
+1. UI-001 Complete Synastry analysis backend integration – ✅ COMPLETE (Aug 16)
+   *Delivered:* Aspect matrix vectorization, composite chart generation, compatibility scoring, house overlays; frontend wired to new `/api/synastry` path.
+2. UI-002 Implement AI interpretation service integration – ✅ COMPLETE (Aug 16)
+   *Delivered:* Backend endpoints (`backend/api/interpretations.py`), formatting & confidence scoring helpers, Redis caching + Firestore persistence, metrics exposure, React API functions (`apps/astro/src/services/api.ts`), UI components & hook (`apps/astro/src/components/AIInterpretation/*`), xAI abstraction (`packages/integrations/src/xaiService.ts`) with tests.
+   *Follow-up Enhancements:* (a) Streaming responses (b) Tier-based daily generation quotas (c) Advanced persona prompt library (d) Tag extraction + semantic summary scoring (e) Guardrail metrics (avg latency, cache hit %) surfaced in dashboard.
+   *Model Usage:* Grok for creative narrative variants; Claude 3.5 Sonnet for structural prompt refinement & TypeScript adjustments.
 3. UI-003 Complete chart saving/loading CRUD functionality – Effort 1d (Status: HIGH - Partial implementation)
-   *→ Use Claude 3.5 Sonnet (no Grok needed)*
+   *Next Steps:* Implement optimistic updates, add integration tests (`tests/integration/`), enforce quota handling, surface last-saved timestamp UI. *Model:* Claude 3.5 Sonnet (no Grok needed).
 
 **Priority 2 - Infrastructure & Security:**
 
@@ -110,7 +113,7 @@ Goal: Address critical frontend functionality gaps while maintaining reliability
 **Priority 3 - System Reliability:**
 
 1. TEST-001 Integration test enrichment – Effort 0.5d (Status: TODO)
-2. EXP-002 Upgrade modal variant content – Effort 0.5d (Status: TODO)
+2. EXP-002 Upgrade modal variant content – ✅ COMPLETE (Aug 16) – JSON variants ready (`docs/data/upgrade_modal_variants.json`)
 3. OBS-004 Weekly SLO report automation – Effort 0.5d (Status: TODO)
 4. SEC-002 Secret inventory generator – Effort 0.5d (Status: TODO)
 5. PRIV-004 Persist & rotate pseudonymization salts – Effort 1d (Status: TODO)
@@ -145,7 +148,6 @@ Total (ideal path): ~9 developer-days (requires frontend + backend coordination 
 
 ### 🌱 Medium-Term (Quarter Horizon)
 
-- COLLAB-050 Real-time collaborative chart sharing (Status: FUTURE)
 - SOCIAL-060 Community sharing & marketplace scaffolding (Status: FUTURE)
 - AI-070 Advanced model integration (Status: FUTURE)
 
@@ -233,7 +235,7 @@ All issue codes (SEC-xxx, OBS-xxx, etc.) correspond to doc sections in `docs/sec
 
 ---
 
-*Last Updated: August 16, 2025*  
+*Last Updated: August 16, 2025 (Status sync + Grok prompts added)*  
 *Next Review: September 1, 2025*
 
 ---
@@ -246,3 +248,18 @@ All issue codes (SEC-xxx, OBS-xxx, etc.) correspond to doc sections in `docs/sec
 4. **Documentation ROI**: Consolidated docs reduce maintenance overhead while improving discoverability
 
 The project is now in excellent shape for continued development with clear priorities and optimized infrastructure.
+
+---
+
+## 🤖 Grok Prompt Additions (Creative / Ideation Only)
+
+Use these prompts with Grok for first-pass creative/content generation on non-complete initiatives. Keep outputs deterministic (request JSON where noted) for easier refinement.
+
+| Task ID | Prompt |
+|---------|--------|
+| EXP-002 | (Completed) Upgrade modal copy variants JSON delivered (`docs/data/upgrade_modal_variants.json`). |
+| COLLAB-050 | (Completed) Real-time collaborative chart sharing specification delivered. |
+| SOCIAL-060 | Outline phased marketplace roadmap: MVP, Growth, Community. For each phase provide: features[], userStories[], moderationControls[], riskMitigations[], successMetrics[]. Output both a markdown summary table and JSON phases[]. |
+| AI-070 | Propose layered AI interpretation roadmap: baseline templated -> adaptive contextual -> advanced reinforcement. For each layer list capabilities[], requiredDataSignals[], evaluationMetrics[] (engagement proxy, interpretation quality heuristic, retention lift), risks[], guardrails[]. Output markdown comparative table + JSON roadmap[]. |
+
+Guidelines: 1) Prefer concise structured outputs 2) Flag any assumptions clearly 3) Avoid speculative implementation details outside scope.

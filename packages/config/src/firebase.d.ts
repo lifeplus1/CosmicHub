@@ -22,17 +22,17 @@ export { hasAuthAvailable };
 /**
  * Environment utilities
  */
-export declare const isEmulator: any;
-export declare const isDevelopment: any;
-export declare const projectId: any;
+export declare const isEmulator: boolean;
+export declare const isDevelopment: boolean;
+export declare const projectId: string;
 /**
  * Performance monitoring
  */
 export declare const getFirebasePerformanceInfo: () => {
-    projectId: any;
-    authDomain: any;
-    isEmulator: any;
-    isDevelopment: any;
+    projectId: string;
+    authDomain: string;
+    isEmulator: boolean;
+    isDevelopment: boolean;
     timestamp: number;
 };
 //# sourceMappingURL=firebase.d.ts.map

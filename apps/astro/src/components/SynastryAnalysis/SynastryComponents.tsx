@@ -2,52 +2,38 @@ import React from 'react';
 import './SynastryComponents.css';
 import { FaStar, FaChevronDown } from 'react-icons/fa';
 import * as Accordion from '@radix-ui/react-accordion';
+import type { SynastryResult } from './types';
 
-// Types for sub-components
-interface SynastryResult {
-  compatibility_analysis: {
-    overall_score: number;
-    interpretation: string;
-    breakdown: Record<string, number>;
-  };
-  interaspects: Array<{
-    person1_planet: string;
-    person2_planet: string;
-    aspect: string;
-    orb: number;
-    strength: string;
-    interpretation: string;
-  }>;
-  house_overlays: Array<{
-    person1_planet: string;
-    person2_house: number;
-    interpretation: string;
-  }>;
-  composite_chart: {
-    midpoint_sun: number;
-    midpoint_moon: number;
-    relationship_purpose: string;
-  };
-  summary: {
-    key_themes: string[];
-    strengths: string[];
-    challenges: string[];
-    advice: string[];
-  };
-}
+const SCORE_COLOR_MAP: Record<'excellent'|'good'|'moderate'|'low', string> = {
+  excellent: 'text-green-500',
+  good: 'text-blue-500',
+  moderate: 'text-yellow-500',
+  low: 'text-red-500'
+};
 
-interface ProgressBarProps {
-  score: number;
-  colorClass: string;
-}
+const FILL_COLOR_MAP: Record<'excellent'|'good'|'moderate'|'low', string> = {
+  excellent: 'bg-green-500',
+  good: 'bg-blue-500',
+  moderate: 'bg-yellow-500',
+  low: 'bg-red-500'
+};
 
-export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ score, colorClass }) => {
+// Safe aspect color classes (avoid dynamic Tailwind construction & ensure purge safety)
+const ASPECT_COLOR_CLASS: Record<string,string> = {
+  'green-500': 'bg-green-500',
+  'orange-500': 'bg-orange-500',
+  'gray-500': 'bg-gray-500'
+};
+
+interface ProgressBarProps { score: number; tier: 'excellent'|'good'|'moderate'|'low'; }
+
+export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ score, tier }) => {
   const clamped = Math.min(Math.max(score, 0), 100);
   const step = Math.round(clamped / 5) * 5;
   const stepClass = `w-step-${step}`;
   return (
     <div className="progress-bar">
-      <div className={`progress-fill ${stepClass} bg-${colorClass}`} />
+  <div className={`progress-fill ${stepClass} ${FILL_COLOR_MAP[tier]}`} />
     </div>
   );
 });
@@ -70,22 +56,25 @@ export const StarRating: React.FC<StarRatingProps> = React.memo(({ score }) => {
   );
 });
 
-interface CompatibilityScoreProps {
-  synastryResult: SynastryResult;
-  getCompatibilityColor: (score: number) => string;
-}
+interface CompatibilityScoreProps { synastryResult: SynastryResult; }
 
-export const CompatibilityScore: React.FC<CompatibilityScoreProps> = React.memo(({ 
-  synastryResult, 
-  getCompatibilityColor 
-}) => (
+export const CompatibilityScore: React.FC<CompatibilityScoreProps> = React.memo(({ synastryResult }) => {
+  const tierFor = (score:number): 'excellent'|'good'|'moderate'|'low' => {
+    if (score >= 80) return 'excellent';
+    if (score >= 60) return 'good';
+    if (score >= 40) return 'moderate';
+    return 'low';
+  };
+  const tier = tierFor(synastryResult.compatibility_analysis.overall_score);
+  const colorClass = SCORE_COLOR_MAP[tier];
+  return (
   <div className="col-span-1 border lg:col-span-2 cosmic-card border-cosmic-silver/30">
     <div className="p-4">
       <h3 className="mb-4 font-bold text-md text-cosmic-silver">Overall Compatibility Score</h3>
       
       <div className="flex items-center mb-4 space-x-4">
         <StarRating score={synastryResult.compatibility_analysis.overall_score} />
-        <span className={`text-3xl font-bold text-${getCompatibilityColor(synastryResult.compatibility_analysis.overall_score)}`}>
+        <span className={`text-3xl font-bold ${colorClass}`}>
           {synastryResult.compatibility_analysis.overall_score}/100
         </span>
       </div>
@@ -99,23 +88,32 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = React.memo(
         <div>
           <h4 className="mb-4 text-sm font-bold text-cosmic-silver">Compatibility Areas</h4>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Object.entries(synastryResult.compatibility_analysis.breakdown).map(([area, score]) => (
+            {Object.entries(synastryResult.compatibility_analysis.breakdown).map(([area, score]) => {
+              const t = tierFor(score);
+              return (
               <div key={area} className="p-4 border rounded-md border-cosmic-silver/30">
                 <p className="mb-2 text-sm font-semibold capitalize text-cosmic-silver">
                   {area.charAt(0).toUpperCase() + area.slice(1)}
                 </p>
-                <ProgressBar score={score} colorClass={getCompatibilityColor(score)} />
+                <ProgressBar score={score} tier={t} />
                 <p className="text-sm text-white/80">
                   {score.toFixed(1)}%
                 </p>
               </div>
-            ))}
+            );})}
           </div>
+          {synastryResult.compatibility_analysis.meta && (
+            <div className="mt-6 text-xs text-white/60 space-y-1">
+              <p className="font-semibold text-cosmic-silver">Scoring Meta</p>
+              <p>Overlay Bonus Applied: {synastryResult.compatibility_analysis.meta.overlay_bonus_applied}</p>
+              <p>Aspect Counts: {Object.entries(synastryResult.compatibility_analysis.meta.aspect_type_counts).map(([k,v])=>`${k}:${v}`).join(', ')}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
   </div>
-));
+);});
 
 interface KeyAspectsProps {
   synastryResult: SynastryResult;
@@ -144,7 +142,7 @@ export const KeyAspects: React.FC<KeyAspectsProps> = React.memo(({
                     <span className="text-sm font-semibold text-cosmic-silver">
                       {formatPlanetName(aspect.person1_planet)} {aspect.aspect} {formatPlanetName(aspect.person2_planet)}
                     </span>
-                    <span className={`bg-${getAspectColor(aspect.aspect)} text-white px-2 py-1 rounded text-sm`}>
+                    <span className={`${ASPECT_COLOR_CLASS[getAspectColor(aspect.aspect)] || 'bg-gray-500'} text-white px-2 py-1 rounded text-sm`}>
                       {aspect.aspect}
                     </span>
                   </div>

@@ -1,4 +1,6 @@
 // apps/astro/src/components/ChartDisplay/ChartDisplay.tsx
+import { serializeAstrologyData } from '@cosmichub/types';
+import { getChartSyncService } from '@/services/chartSyncService';
 
 import React, { memo, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -239,7 +241,7 @@ const getAspectOrb = (aspectType: string, currentOrb?: number): number => {
   return 8;
 };
 
-// Enhanced export functionality
+// Enhanced export functionality with serialization
 const exportChartData = (chartData: ChartData, format: 'json' | 'csv' | 'txt') => {
   const timestamp = new Date().toISOString().split('T')[0];
   const filename = `natal-chart-${timestamp}`;
@@ -250,7 +252,13 @@ const exportChartData = (chartData: ChartData, format: 'json' | 'csv' | 'txt') =
 
   switch (format) {
     case 'json':
-      content = JSON.stringify(chartData, null, 2);
+      try {
+        // Use the serialization utility for JSON exports to ensure consistency
+        content = serializeAstrologyData(chartData as any);
+      } catch (error) {
+        console.error('Serialization failed, falling back to JSON.stringify:', error);
+        content = JSON.stringify(chartData, null, 2);
+      }
       mimeType = 'application/json';
       extension = 'json';
       break;
@@ -1098,6 +1106,28 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                     className="text-xs px-3 py-1"
                   >
                     TXT
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Save to Firestore">
+                  <Button
+                    variant="primary"
+                    onClick={async () => {
+                      if (onSaveChart) {
+                        onSaveChart(chartData);
+                      } else if (chartData) {
+                        try {
+                          const serializedChart = serializeAstrologyData(chartData as any);
+                          // The service expects a plain object, not a string
+                          await getChartSyncService().syncChart(JSON.parse(serializedChart));
+                          console.log('Chart data saved successfully.');
+                        } catch (e) {
+                          console.error("Failed to save chart", e);
+                        }
+                      }
+                    }}
+                    className="text-xs px-3 py-1"
+                  >
+                    💾 Save
                   </Button>
                 </Tooltip>
               </div>

@@ -38,7 +38,7 @@
       "@cosmichub/types": ["../../packages/types/src"]
     }
   },
-  "include": ["src", "types", "src/**/*"],
+  "include": ["src", "types", "src/**/*", "src/__tests__/**/*"],
   "references": [
     { "path": "../../packages/subscriptions" },
     { "path": "../../packages/auth" },

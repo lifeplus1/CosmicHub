@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { FaInfoCircle } from 'react-icons/fa';
 import FeatureGuard from '../FeatureGuard';
+import { apiClient } from '../../services/api';
+// Lightweight ApiResponse type (mirrors packages/config) to avoid cross-package path resolution issues here
+type ApiResponse<T> = { data: T; success: boolean; message?: string };
 import {
   CompatibilityScore,
   KeyAspects,
@@ -9,6 +12,7 @@ import {
   RelationshipSummary
 } from './SynastryComponents';
 import type { SynastryAnalysisProps, SynastryResult } from './types';
+import { synastryRequestSchema } from '../../utils/validation';
 
 export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
   person1,
@@ -28,36 +32,16 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
     setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/calculate-synastry`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          person1,
-          person2
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to calculate synastry');
-      }
-
-      const data = await response.json();
-      setSynastryResult(data);  // Use the response directly since it matches our expected structure
+      const parsed = synastryRequestSchema.parse({ person1, person2 });
+      // Unified endpoint: backend router mounted at /api/synastry, path /calculate-synastry
+      const result = await apiClient.post('/synastry/calculate-synastry', parsed) as ApiResponse<SynastryResult>;
+      setSynastryResult(result.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
       setLoading(false);
     }
   }, [person1, person2]);
-
-  const getCompatibilityColor = useCallback((score: number) => {
-    if (score >= 80) return 'green-500';
-    if (score >= 60) return 'blue-500';
-    if (score >= 40) return 'yellow-500';
-    return 'red-500';
-  }, []);
 
   const getAspectColor = useCallback((aspect: string) => {
     switch (aspect) {
@@ -78,7 +62,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
   }, []);
 
   return (
-    <FeatureGuard requiredTier="premium" feature="synastry">
+    <FeatureGuard requiredTier="premium" feature="synastry_analysis">
       <div className="py-8 mx-auto max-w-7xl">
         <div className="flex flex-col space-y-6">
           <div className="text-center">
@@ -97,15 +81,15 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
                 and growth opportunities between partners.
               </p>
 
-              {!synastryResult && (
+        {!synastryResult && (
                 <button
                   className="cosmic-button"
                   onClick={calculateSynastry}
                   disabled={loading}
                 >
-                  {loading ? 'Calculating...' : ''}
+          {loading ? 'Calculating...' : 'Calculate Compatibility'}
                   <FaInfoCircle className="mr-2" />
-                  Calculate Compatibility
+          <span className="sr-only">Start synastry compatibility calculation</span>
                 </button>
               )}
             </div>
@@ -120,13 +104,18 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
             </div>
           )}
 
-          {synastryResult && (
+          {loading && !synastryResult && (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 animate-pulse" aria-hidden>
+              {Array.from({length:4}).map((_,i)=>(
+                <div key={i} className="h-40 border rounded cosmic-card border-cosmic-silver/30 bg-gray-800/40" />
+              ))}
+            </div>
+          )}
+
+          {synastryResult && !loading && (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Overall Compatibility Score */}
-              <CompatibilityScore 
-                synastryResult={synastryResult}
-                getCompatibilityColor={getCompatibilityColor}
-              />
+              <CompatibilityScore synastryResult={synastryResult} />
 
               {/* Key Relationship Aspects */}
               <KeyAspects 

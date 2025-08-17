@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import axios from 'axios';
-import { toUnifiedBirthData, type UnifiedBirthData, type AnyBirthInput, type ChartBirthData } from '@cosmichub/types';
+import { toUnifiedBirthData, type AnyBirthInput, type ChartBirthData } from '@cosmichub/types';
 import { auth } from '@cosmichub/config/firebase';
 
 // Narrow import.meta.env access to avoid implicit any
@@ -8,17 +8,22 @@ const rawApiUrl: string | undefined =
   typeof import.meta.env?.VITE_API_URL === 'string'
     ? import.meta.env.VITE_API_URL
     : undefined;
-const BACKEND_URL: string = (typeof rawApiUrl === 'string' && rawApiUrl.trim().length > 0)
-  ? rawApiUrl
-  : 'http://localhost:8000';
+let resolvedApi = '';
+if (typeof rawApiUrl === 'string') {
+  const trimmed = rawApiUrl.trim();
+  if (trimmed.length > 0) {
+    resolvedApi = trimmed;
+  }
+}
+const BACKEND_URL: string = resolvedApi !== '' ? resolvedApi : 'http://localhost:8000';
 
 console.log('🔗 API Service initializing...');
 console.log('🌐 Backend URL:', BACKEND_URL);
 
 // Helper function to get current auth token
 // Lightweight auth shape to avoid relying on any typed firebase re-export
-interface AuthLikeUser { getIdToken(forceRefresh?: boolean): Promise<string>; }
-interface AuthLike { currentUser: AuthLikeUser | null }
+// Firebase user surface we rely on (declared for documentation; value via import)
+// interface AuthLikeUser { getIdToken(forceRefresh?: boolean): Promise<string>; }
 
 export const getAuthToken = async (): Promise<string | null> => {
   console.log('🔑 Getting auth token...');
@@ -48,10 +53,11 @@ export const getAuthToken = async (): Promise<string | null> => {
 };
 
 // Helper function to create authorized headers
-const getAuthHeaders = async () => {
+type AuthHeaders = Record<string, string>;
+const getAuthHeaders = async (): Promise<AuthHeaders> => {
   console.log('📝 Creating auth headers...');
   const token = await getAuthToken();
-  if (!token) {
+  if (token === null) {
     console.error('❌ Authentication required but no token available');
     throw new Error('Authentication required');
   }
@@ -107,12 +113,9 @@ export const fetchSavedCharts = async (): Promise<SavedChart[]> => {
   
   try {
     const headers = await getAuthHeaders();
-    const response = await axios.get(`${BACKEND_URL}/api/charts/`, {
-      headers
-    });
-    
-    console.log('✅ Saved charts fetched successfully:', response.data);
-    return response.data.charts || [];
+  const { data } = await axios.get<SavedChartsResponse>(`${BACKEND_URL}/api/charts/`, { headers });
+  console.log('✅ Saved charts fetched successfully:', data);
+  return Array.isArray(data.charts) ? data.charts : [];
   } catch (error) {
     console.error('❌ Error fetching saved charts:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -127,12 +130,9 @@ export const saveChart = async (chartData: SaveChartRequest): Promise<SaveChartR
   
   try {
     const headers = await getAuthHeaders();
-    const response = await axios.post(`${BACKEND_URL}/api/charts/save-chart`, chartData, {
-      headers
-    });
-    
-    console.log('✅ Chart saved successfully:', response.data);
-    return response.data;
+  const { data } = await axios.post<SaveChartResponse>(`${BACKEND_URL}/api/charts/save-chart`, chartData, { headers });
+  console.log('✅ Chart saved successfully:', data);
+  return data;
   } catch (error) {
     console.error('❌ Error saving chart:', error);
     if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -168,7 +168,7 @@ export const apiClient = {
     console.log('🌐 Full URL:', url);
     
     try {
-      const response = await fetch(url);
+  const response = await fetch(url);
       console.log('📥 Response status:', response.status);
       
       if (!response.ok) {
@@ -177,7 +177,7 @@ export const apiClient = {
       }
       
   const data: unknown = await response.json();
-      console.log('✅ GET response data:', data);
+  console.log('✅ GET response data:', data);
   return data as T;
     } catch (error) {
       console.error('❌ GET request failed:', error);
@@ -192,7 +192,7 @@ export const apiClient = {
     console.log('🌐 Full URL:', url);
     
     try {
-      const response = await fetch(url, {
+  const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +208,7 @@ export const apiClient = {
       }
       
   const responseData: unknown = await response.json();
-      console.log('✅ POST response data:', responseData);
+  console.log('✅ POST response data:', responseData);
   return responseData as T;
     } catch (error) {
       console.error('❌ POST request failed:', error);
@@ -217,7 +217,7 @@ export const apiClient = {
   }
 };
 
-export const fetchChart = async (data: Record<string, unknown>) => {
+export const fetchChart = async (data: Record<string, unknown>): Promise<unknown> => {
   console.log('🔮 Fetching chart data...');
   console.log('📊 Chart data input:', data);
   try {
@@ -232,7 +232,7 @@ export const fetchChart = async (data: Record<string, unknown>) => {
   }
 };
 
-export const fetchPersonalityAnalysis = async (userId: string) => {
+export const fetchPersonalityAnalysis = async (userId: string): Promise<unknown> => {
   console.log('🧠 Fetching personality analysis for user:', userId);
   try {
     const headers = await getAuthHeaders();
@@ -246,7 +246,7 @@ export const fetchPersonalityAnalysis = async (userId: string) => {
   }
 };
 
-export const fetchNumerology = async (data: Record<string, unknown>) => {
+export const fetchNumerology = async (data: Record<string, unknown>): Promise<unknown> => {
   console.log('🔢 Fetching numerology data...');
   console.log('📊 Numerology data input:', data);
   try {
@@ -261,9 +261,9 @@ export const fetchNumerology = async (data: Record<string, unknown>) => {
   }
 };
 
-export const calculateHumanDesign = async (data: AnyBirthInput) => {
+export const calculateHumanDesign = async (data: AnyBirthInput): Promise<unknown> => {
   console.log('🧬 Calculating Human Design...');
-  const unified = toUnifiedBirthData(data as any);
+  const unified = toUnifiedBirthData(data);
   console.log('📊 Human Design data input (unified):', unified);
   try {
     const headers = await getAuthHeaders();
@@ -277,9 +277,9 @@ export const calculateHumanDesign = async (data: AnyBirthInput) => {
   }
 };
 
-export const calculateGeneKeys = async (data: AnyBirthInput) => {
+export const calculateGeneKeys = async (data: AnyBirthInput): Promise<unknown> => {
   console.log('🗝️ Calculating Gene Keys...');
-  const unified = toUnifiedBirthData(data as any);
+  const unified = toUnifiedBirthData(data);
   console.log('📊 Gene Keys data input (unified):', unified);
   try {
     const headers = await getAuthHeaders();
@@ -293,7 +293,7 @@ export const calculateGeneKeys = async (data: AnyBirthInput) => {
   }
 };
 
-export const getHumanDesignProfile = async (userId: string) => {
+export const getHumanDesignProfile = async (userId: string): Promise<unknown> => {
   console.log('👤 Getting Human Design profile for user:', userId);
   try {
     const headers = await getAuthHeaders();
@@ -307,7 +307,7 @@ export const getHumanDesignProfile = async (userId: string) => {
   }
 };
 
-export const getGeneKeysProfile = async (userId: string) => {
+export const getGeneKeysProfile = async (userId: string): Promise<unknown> => {
   console.log('🗝️ Getting Gene Keys profile for user:', userId);
   try {
     const headers = await getAuthHeaders();
@@ -321,7 +321,7 @@ export const getGeneKeysProfile = async (userId: string) => {
   }
 };
 
-export const getContemplationProgress = async (userId: string) => {
+export const getContemplationProgress = async (userId: string): Promise<unknown> => {
   console.log('🧘 Getting contemplation progress for user:', userId);
   try {
     const headers = await getAuthHeaders();
@@ -420,7 +420,7 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
 
   // Planets
   const planets: Record<string, Planet> = {};
-  const rawPlanets: BackendPlanets = isObject(raw.planets) ? (raw.planets as Record<string, unknown>) : undefined;
+  const rawPlanets: BackendPlanets = isObject(raw.planets) ? (raw.planets) : undefined;
   if (rawPlanets) {
     for (const [name, value] of Object.entries(rawPlanets)) {
       const p = isObject(value) ? (value as BackendPlanetLike) : {};
@@ -448,8 +448,8 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
       if (typeof houseValue === 'number') {
         cusp = houseValue;
       } else if (isObject(houseValue)) {
-        cusp = coerceNumber((houseValue as Record<string, unknown>).cusp, 0);
-        const signVal = (houseValue as Record<string, unknown>).sign;
+        cusp = coerceNumber((houseValue).cusp, 0);
+        const signVal = (houseValue).sign;
         if (typeof signVal === 'string') sign = signVal;
       }
       houses.push({ number: houseNumber, cusp, sign });
@@ -492,7 +492,7 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
   };
 };
 
-export const fetchNatalChart = async (birthData: Record<string, unknown>) => {
+export const fetchNatalChart = async (birthData: Record<string, unknown>): Promise<unknown> => {
   console.log('🌟 Fetching natal chart...');
   console.log('📊 Natal chart data input:', birthData);
   const response = await apiClient.post('/natal-chart', birthData);
@@ -500,11 +500,12 @@ export const fetchNatalChart = async (birthData: Record<string, unknown>) => {
   return response;
 };
 
-export const fetchSynastryAnalysis = async (person1: Record<string, unknown>, person2: Record<string, unknown>) => {
+export const fetchSynastryAnalysis = async (person1: Record<string, unknown>, person2: Record<string, unknown>): Promise<unknown> => {
   console.log('💑 Fetching synastry analysis...');
   console.log('📊 Person 1 data:', person1);
   console.log('📊 Person 2 data:', person2);
-  const response = await apiClient.post('/synastry', { person1, person2 });
+  // Unified backend route: /api/synastry/calculate-synastry (router mounted at /api)
+  const response = await apiClient.post('/synastry/calculate-synastry', { person1, person2 });
   console.log('✅ Synastry analysis response received:', response);
   return response;
 };
@@ -538,13 +539,15 @@ export interface InterpretationResponse {
   message?: string;
 }
 
+interface InterpretationByIdResponse { data: Interpretation; success?: boolean }
+
 export const fetchAIInterpretations = async (chartId: string, userId: string): Promise<InterpretationResponse> => {
   console.log('🤖 Fetching AI interpretations...');
   console.log('📊 Chart ID:', chartId, 'User ID:', userId);
   
   try {
     const headers = await getAuthHeaders();
-    const response = await axios.post(`${BACKEND_URL}/api/interpretations`, {
+  const response = await axios.post<InterpretationResponse>(`${BACKEND_URL}/api/interpretations`, {
       chartId,
       userId
     }, { headers });
@@ -566,7 +569,7 @@ export const generateAIInterpretation = async (request: InterpretationRequest): 
   
   try {
     const headers = await getAuthHeaders();
-    const response = await axios.post(`${BACKEND_URL}/api/interpretations/generate`, request, { headers });
+  const response = await axios.post<InterpretationResponse>(`${BACKEND_URL}/api/interpretations/generate`, request, { headers });
     
     console.log('✅ AI interpretation generated:', response.data);
     return response.data;
@@ -584,7 +587,8 @@ export const fetchInterpretationById = async (interpretationId: string): Promise
   
   try {
     const headers = await getAuthHeaders();
-    const response = await axios.get(`${BACKEND_URL}/api/interpretations/${interpretationId}`, { headers });
+  interface InterpretationByIdResponse { data: Interpretation; success?: boolean }
+  const response = await axios.get<InterpretationByIdResponse>(`${BACKEND_URL}/api/interpretations/${interpretationId}`, { headers });
     
     console.log('✅ Interpretation fetched:', response.data);
     return response.data.data;
@@ -619,7 +623,7 @@ export const updateInterpretation = async (interpretationId: string, updates: Pa
   
   try {
     const headers = await getAuthHeaders();
-    const response = await axios.patch(`${BACKEND_URL}/api/interpretations/${interpretationId}`, updates, { headers });
+  const response = await axios.patch<InterpretationByIdResponse>(`${BACKEND_URL}/api/interpretations/${interpretationId}`, updates, { headers });
     
     console.log('✅ Interpretation updated:', response.data);
     return response.data.data;

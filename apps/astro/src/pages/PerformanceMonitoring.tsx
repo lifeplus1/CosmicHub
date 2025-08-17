@@ -4,17 +4,30 @@ import {
   usePagePerformance, 
   useOperationTracking,
   useMemoryMonitoring,
-  type OperationMetrics
+  type OperationMetrics,
+  type PerformanceMetrics
 } from '../hooks/usePerformance';
 import { useEphemerisPerformanceMetrics } from '../services/ephemeris-performance';
 import { EphemerisPerformanceDashboard } from '../components/EphemerisPerformanceDashboard';
+
+interface PerformanceData {
+  renderTime: number | string;
+  mountTime: string;
+  pageLoadTime: number | string;
+  lastRenderTime?: number;
+  lastResult?: string;
+}
 
 /**
  * Performance monitoring demo and dashboard page
  */
 
-export default function PerformanceMonitoring() {
-  const [performanceData, setPerformanceData] = useState<any>({});
+export default function PerformanceMonitoring(): JSX.Element {
+  const [performanceData, setPerformanceData] = useState<PerformanceData>({
+    renderTime: 'Not measured',
+    mountTime: 'Component mounted',
+    pageLoadTime: 'Loading...'
+  });
   const { metrics } = useEphemerisPerformanceMetrics();
   const memoryBarRef = useRef<HTMLDivElement>(null);
   
@@ -33,7 +46,7 @@ export default function PerformanceMonitoring() {
   }, [memoryInfo, getMemoryUsagePercentage]);
 
   // Simulate some expensive operations for demo
-  const simulateExpensiveOperation = async () => {
+  const simulateExpensiveOperation = async (): Promise<void> => {
     await trackOperation('Heavy Operation', async () => {
       // Simulate API call or heavy computation
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
@@ -46,13 +59,13 @@ export default function PerformanceMonitoring() {
     });
   };
 
-  const quickOperation = async () => {
+  const quickOperation = async (): Promise<void> => {
     await trackOperation('Quick Operation', async () => {
       await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
     });
   };
 
-  const measureRenderOperation = async () => {
+  const measureRenderOperation = async (): Promise<void> => {
     const { result, metrics } = await measure('Render Test', async () => {
       // Simulate React re-render work
       for (let i = 0; i < 1000; i++) {
@@ -61,7 +74,7 @@ export default function PerformanceMonitoring() {
       return 'Render complete';
     });
     
-    setPerformanceData((prev: any) => ({
+    setPerformanceData((prev: PerformanceData) => ({
       ...prev,
       lastRenderTime: metrics.duration,
       lastResult: result,
@@ -69,11 +82,12 @@ export default function PerformanceMonitoring() {
   };
 
   useEffect(() => {
-    setPerformanceData({
-      renderTime: perfMetrics?.duration || 'Not measured',
+    setPerformanceData(prev => ({
+      ...prev,
+      renderTime: perfMetrics?.duration ?? 'Not measured',
       mountTime: 'Component mounted',
-      pageLoadTime: pageMetrics.pageLoadTime || 'Loading...',
-    });
+      pageLoadTime: pageMetrics.pageLoadTime ?? 'Loading...',
+    }));
   }, [perfMetrics, pageMetrics]);
 
     // Calculate operation stats
@@ -105,28 +119,36 @@ export default function PerformanceMonitoring() {
                 onClick={simulateExpensiveOperation}
                 disabled={isTracking}
                 className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
+                aria-label={isTracking ? 'Running heavy operation test. Please wait.' : 'Start heavy operation test to measure performance.'}
+                role="button"
               >
-                {isTracking ? 'Running...' : 'Heavy Operation'}
+                <span aria-hidden="true">{isTracking ? 'Running...' : 'Heavy Operation'}</span>
               </button>
               <button
                 onClick={quickOperation}
                 disabled={isTracking}
                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
+                aria-label={isTracking ? 'Running quick operation test. Please wait.' : 'Start quick operation test to measure performance.'}
+                role="button"
               >
-                {isTracking ? 'Running...' : 'Quick Operation'}
+                <span aria-hidden="true">{isTracking ? 'Running...' : 'Quick Operation'}</span>
               </button>
               <button
                 onClick={measureRenderOperation}
                 disabled={isTracking}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
+                aria-label={isTracking ? 'Measuring render time test. Please wait.' : 'Start render time test to measure performance.'}
+                role="button"
               >
-                {isTracking ? 'Measuring...' : 'Render Test'}
+                <span aria-hidden="true">{isTracking ? 'Measuring...' : 'Render Test'}</span>
               </button>
               <button
                 onClick={clearOperations}
                 className="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors"
+                aria-label="Clear operations history to reset tracked performance metrics."
+                role="button"
               >
-                Clear History
+                <span aria-hidden="true">Clear History</span>
               </button>
             </div>
           </div>

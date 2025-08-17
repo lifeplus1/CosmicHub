@@ -12,6 +12,12 @@ export interface SynastryResult {
     overall_score: number;
     interpretation: string;
     breakdown: Record<string, number>;
+    meta?: {
+      planet_weights: Record<string, number>;
+      aspect_scores: Record<string, number>;
+      overlay_bonus_applied: number;
+      aspect_type_counts: Record<string, number>;
+    };
   };
   interaspects: Array<{
     person1_planet: string;
@@ -39,9 +45,10 @@ export interface SynastryResult {
   };
 }
 
+// Updated in component usage: tier mapped to safe class sets
 export interface ProgressBarProps {
   score: number;
-  colorClass: string;
+  tier: 'excellent' | 'good' | 'moderate' | 'low';
 }
 
 export interface StarRatingProps {
@@ -50,7 +57,6 @@ export interface StarRatingProps {
 
 export interface CompatibilityScoreProps {
   synastryResult: SynastryResult;
-  getCompatibilityColor: (score: number) => string;
 }
 
 export interface KeyAspectsProps {

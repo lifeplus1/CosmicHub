@@ -6,7 +6,25 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 from auth import get_current_user
 from database import db
-from astro.calculations.ai_interpretations import generate_interpretation
+from astro.calculations.ai_interpretations import generate_interpretation, INTERPRETATION_SCHEMA_VERSION
+import time
+from os import getenv
+metrics_enabled_flag = getenv("ENABLE_METRICS", "true").lower() == "true"
+try:  # Optional Prometheus import without importing main
+    if metrics_enabled_flag:
+        from prometheus_client import Counter, Histogram  # type: ignore
+        INTERP_COUNTER = Counter('interpretations_total', 'Total interpretation generation attempts', ['result', 'level'])  # type: ignore
+        INTERP_LATENCY = Histogram('interpretation_generation_seconds', 'Interpretation generation latency seconds', buckets=(0.05,0.1,0.25,0.5,1,2,5))  # type: ignore
+        INTERP_CACHE = Counter('interpretation_cache_events_total', 'Interpretation cache events', ['event'])  # type: ignore
+    else:
+        INTERP_COUNTER = None  # type: ignore
+        INTERP_LATENCY = None  # type: ignore
+        INTERP_CACHE = None  # type: ignore
+except Exception:
+    INTERP_COUNTER = None  # type: ignore
+    INTERP_LATENCY = None  # type: ignore
+    INTERP_CACHE = None  # type: ignore
+from .services.astro_service import get_astro_service
 
 router = APIRouter(prefix="/api/interpretations", tags=["interpretations"])
 
@@ -37,6 +55,10 @@ class Interpretation(BaseModel):
     confidence: float
     createdAt: str
     updatedAt: str
+    version: Optional[str] = None
+    schemaVersion: Optional[str] = None
+import logging
+logger = logging.getLogger(__name__)
 
 class InterpretationResponse(BaseModel):
     data: List[Interpretation]
@@ -84,54 +106,167 @@ async def get_interpretations(
 @router.post("/generate", response_model=InterpretationResponse)
 async def generate_interpretation_endpoint(
     request: GenerateInterpretationRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    astro_service: Any = Depends(get_astro_service)
 ) -> InterpretationResponse:
     """
-    Generate a new AI interpretation using existing astrological intelligence.
+    Generate a new AI interpretation with Redis caching for performance.
     """
     try:
-        # Get chart data from storage or generate it
-        chart_data = await get_chart_data(request.chartId, request.userId)
-        
+        # Check cache first for previously generated interpretation
+        cache_key = f"interpretation:{request.chartId}:{request.userId}:{request.type or 'natal'}"
+        ttl_env = int(getenv('INTERPRETATION_CACHE_TTL', '1800'))
+        cached_interpretation = await astro_service.get_cached_data(cache_key)
+
+        if cached_interpretation:
+            print(f"Cache hit for interpretation: {cache_key}")
+            if 'id' not in cached_interpretation:
+                cached_interpretation['id'] = cache_key  # type: ignore[index]
+            cached_interpretation.setdefault('version', INTERPRETATION_SCHEMA_VERSION)
+            cached_interpretation.setdefault('schemaVersion', INTERPRETATION_SCHEMA_VERSION)
+            if INTERP_CACHE:
+                try:
+                    INTERP_CACHE.labels('hit').inc()  # type: ignore
+                except Exception:
+                    pass
+            logger.info(
+                "interpretation_cache_hit",
+                extra={
+                    "chart_id": request.chartId,
+                    "user_id": request.userId,
+                    "level": request.interpretation_level or 'advanced'
+                }
+            )
+            return InterpretationResponse(
+                data=[Interpretation(**cached_interpretation)],
+                success=True,
+                message="Interpretation retrieved from cache"
+            )
+        else:
+            if INTERP_CACHE:
+                try:
+                    INTERP_CACHE.labels('miss').inc()  # type: ignore
+                except Exception:
+                    pass
+
+        # Get chart data from storage (with caching)
+        chart_data = await astro_service.get_chart_data(request.chartId)
+
         if not chart_data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Chart data not found. Please generate a chart first."
             )
-        
-        # Use your existing interpretation engine
+
+        # Normalize chart_data if planets provided as a list (unified serialization format)
+        try:
+            if isinstance(chart_data.get('planets'), list):  # type: ignore[index]
+                planet_list = chart_data['planets']  # type: ignore[index]
+                new_planets: Dict[str, Dict[str, Any]] = {}
+                for p in planet_list:  # type: ignore[assignment]
+                    if not isinstance(p, dict):
+                        continue
+                    name_val = p.get('name')  # type: ignore[assignment]
+                    if not name_val:
+                        continue
+                    # Ensure name is string for key normalization
+                    if not isinstance(name_val, str):  # type: ignore[unreachable]
+                        try:
+                            name_str = str(name_val)  # type: ignore[arg-type]
+                        except Exception:
+                            continue
+                    else:
+                        name_str = name_val
+                    key = name_str.replace(' ', '_').lower()
+                    new_planets[key] = {  # type: ignore[index]
+                        'sign': p.get('sign'),  # type: ignore[index]
+                        'position': p.get('degree') or p.get('position'),  # type: ignore[index]
+                        'degree': p.get('degree'),  # type: ignore[index]
+                        'house': p.get('house'),  # type: ignore[index]
+                    }
+                chart_data['planets'] = new_planets  # type: ignore[index]
+        except Exception:
+            # Non-fatal; proceed with original structure
+            pass
+
+        # Use interpretation engine
         interpretation_level = request.interpretation_level or "advanced"
+        start_time = time.time()
         raw_interpretation = generate_interpretation(chart_data, interpretation_level)
-        
+        elapsed = time.time() - start_time
+        if INTERP_LATENCY:
+            try:
+                INTERP_LATENCY.observe(elapsed)  # type: ignore
+            except Exception:
+                pass
+        logger.info(
+            "interpretation_generated",
+            extra={
+                "chart_id": request.chartId,
+                "user_id": request.userId,
+                "level": interpretation_level,
+                "duration_ms": int(elapsed * 1000)
+            }
+        )
+
         if 'error' in raw_interpretation:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Interpretation generation failed: {raw_interpretation['error']}"
             )
-        
+
         # Format the interpretation for frontend consumption
-        formatted_interpretation = format_interpretation_for_frontend(
-            raw_interpretation, 
-            request, 
+        formatted_interpretation: Dict[str, Any] = format_interpretation_for_frontend(
+            raw_interpretation,
+            request,
             interpretation_level
         )
-        
-        # Save to Firestore
-        doc_ref = db.collection("interpretations").document()
-        formatted_interpretation["id"] = doc_ref.id  # type: ignore[attr-defined]
-        doc_ref.set(formatted_interpretation)  # type: ignore[arg-type]
-        
+
+        # Cache + persist
+        formatted_interpretation.setdefault('version', INTERPRETATION_SCHEMA_VERSION)
+        formatted_interpretation.setdefault('schemaVersion', INTERPRETATION_SCHEMA_VERSION)
+
+        await astro_service.cache_serialized_data(
+            cache_key,
+            formatted_interpretation,
+            expire_seconds=ttl_env
+        )
+
+        # Save to Firestore if available (skip in test mode)
+        import os
+        if db is not None and os.environ.get("TEST_MODE") != "1":  # type: ignore[truthy-bool]
+            try:
+                doc_ref = db.collection("interpretations").document()  # type: ignore[attr-defined]
+                formatted_interpretation["id"] = doc_ref.id  # type: ignore[attr-defined]
+                doc_ref.set(formatted_interpretation)  # type: ignore[arg-type]
+            except Exception:
+                # Non-fatal in generation path
+                formatted_interpretation.setdefault("id", cache_key)
+        else:
+            formatted_interpretation.setdefault("id", cache_key)
+
         interpretation = Interpretation(**formatted_interpretation)
-        
+        if INTERP_COUNTER:
+            try:
+                INTERP_COUNTER.labels(result='success', level=interpretation_level).inc()  # type: ignore
+            except Exception:
+                pass
+
         return InterpretationResponse(
             data=[interpretation],
             success=True,
             message="Interpretation generated successfully using advanced astrological analysis"
         )
         
-    except HTTPException:
-        raise
+    except HTTPException as http_e:
+        if INTERP_COUNTER:
+            try: INTERP_COUNTER.labels(result='http_error', level=request.interpretation_level or 'advanced').inc()  # type: ignore
+            except Exception: pass
+        raise http_e
     except Exception as e:
+        if INTERP_COUNTER:
+            try: INTERP_COUNTER.labels(result='error', level=request.interpretation_level or 'advanced').inc()  # type: ignore
+            except Exception: pass
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate interpretation: {str(e)}"

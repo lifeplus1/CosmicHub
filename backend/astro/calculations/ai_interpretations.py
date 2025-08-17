@@ -1,6 +1,8 @@
 # backend/astro/calculations/ai_interpretations.py
+# type: ignore[file]
 import logging
 from typing import Dict, Any, List
+INTERPRETATION_SCHEMA_VERSION = "1.0.0"
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +100,157 @@ PLANET_ARCHETYPES = { # type: ignore
         }
     }
 }
+
+# ---------------------------------------------------------------------------
+# Missing helper fallbacks
+# These lightweight implementations prevent runtime NameError during tests.
+# They can be expanded with richer astrology logic later.
+def get_saturn_mastery(sign: str, house: int) -> str:  # type: ignore
+    """Return a concise mastery theme for Saturn by sign & house.
+
+    Structure:
+    - Core lesson (sign essence)
+    - House life area focus
+    - Growth directive / integration tip
+    Falls back gracefully for unknown data.
+    """
+    if not sign or house is None:
+        return "Saturn mastery requires sign & house"
+
+    sign_energy = SIGN_ENERGIES.get(sign, {})
+    essence = sign_energy.get('essence', 'develop resilience')
+    shadow = sign_energy.get('shadow', 'limitation patterns')
+    house_area = HOUSE_THEMES.get(house, {}).get('life_area', f'house {house}')
+
+    # Map sign to focused discipline quality
+    discipline_map = {
+        'capricorn': 'structured achievement',
+        'aries': 'courageous initiative',
+        'taurus': 'patient stability',
+        'gemini': 'focused learning',
+        'cancer': 'emotional responsibility',
+        'leo': 'authentic leadership',
+        'virgo': 'refined service',
+        'libra': 'relational balance',
+        'scorpio': 'transformational depth',
+        'sagittarius': 'purposeful exploration',
+        'aquarius': 'innovative systems',
+        'pisces': 'compassionate boundaries'
+    }
+    discipline_quality = discipline_map.get(sign, 'applied discipline')
+
+    # Compose message
+    return (
+        f"Mastery via {discipline_quality}: channel {essence.lower()} into {house_area}. "
+        f"Growth comes from embracing structure while transforming {shadow.lower()}."
+    )
+
+def analyze_challenging_aspects(aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:  # type: ignore
+    """Classify challenging aspects with severity and growth message.
+
+    Input expects aspects list with keys: aspect (str), orb (float), point1, point2
+    Returns list sorted by severity (most exact first) with added fields:
+      - severity: high|moderate|mild
+      - growth_focus: short coaching string
+    """
+    classified: List[Dict[str, Any]] = []
+    for a in aspects:
+        try:
+            orb = float(a.get('orb', 10))
+        except Exception:
+            orb = 10.0
+        aspect_type = a.get('aspect') or a.get('type') or ''
+        if aspect_type.lower() not in { 'square', 'opposition', 'conjunction', 'quincunx' }:
+            # Keep only tension/adjustment types for this classification
+            continue
+        if orb <= 2:
+            severity = 'high'
+        elif orb <= 4:
+            severity = 'moderate'
+        else:
+            severity = 'mild'
+        growth_focus = {
+            'square': 'Create structured action plan',
+            'opposition': 'Balance polar needs via shared objective',
+            'conjunction': 'Differentiate merged energies consciously',
+            'quincunx': 'Experiment & iterate to integrate mismatch'
+        }.get(aspect_type.lower(), 'Integrate differing energies')
+        enriched = dict(a)
+        enriched['severity'] = severity
+        enriched['growth_focus'] = growth_focus
+        enriched['orb'] = orb
+        classified.append(enriched)
+    # Sort by orb ascending (more exact first)
+    classified.sort(key=lambda x: x.get('orb', 10))
+    return classified
+
+def get_neptune_spirituality(sign: str, house: int) -> str:  # type: ignore
+    return f"Spiritual growth via {SIGN_ENERGIES.get(sign, {}).get('essence', 'mysticism')} in house {house}"
+
+def get_elemental_integration(element_count: Dict[str, int]) -> str:  # type: ignore
+    if not element_count:
+        return "No elemental data"
+    dominant = max(element_count, key=lambda k: element_count[k])
+    missing = [k for k, v in element_count.items() if v == 0]
+    return f"Balance dominant {dominant} element; develop {', '.join(missing)}" if missing else f"Balanced with {dominant} emphasis"
+
+# Additional missing helper stubs (placeholders)
+def get_partner_qualities(sign: str) -> str:  # type: ignore
+    return f"Seeks {SIGN_ENERGIES.get(sign, {}).get('essence', 'balanced connection')} qualities"
+
+def get_relationship_lessons(sign: str) -> str:  # type: ignore
+    return f"Learns partnership through {SIGN_ENERGIES.get(sign, {}).get('shadow', 'growth')}"
+
+def synthesize_career_potential(mc_sign: Any, saturn_info: Dict[str, Any], sun_info: Dict[str, Any], tenth_house_planets: List[str]) -> str:  # type: ignore
+    parts: List[str] = []
+    if mc_sign:
+        parts.append(f"Aim for {SIGN_ENERGIES.get(mc_sign, {}).get('essence', mc_sign)}")
+    if saturn_info.get('sign'):
+        parts.append("Build disciplined structure")
+    if sun_info.get('sign'):
+        parts.append("Lead with core identity")
+    if tenth_house_planets:
+        parts.append(f"Activate {', '.join(tenth_house_planets)} in 10th")
+    return "; ".join(parts) or "Explore vocational strengths"
+
+def identify_primary_tension(aspects: List[Dict[str, Any]]) -> str:  # type: ignore
+    return aspects[0].get('aspect', 'none') if aspects else 'none'
+
+def get_resolution_strategies(aspects: List[Dict[str, Any]]) -> str:  # type: ignore
+    return "Cultivate awareness and balance opposing energies" if aspects else "Maintain current growth path"
+
+def identify_hidden_strengths(chart_data: Dict[str, Any]) -> List[str]:  # type: ignore
+    return [k for k in chart_data.get('planets', {}).keys()][:3]
+
+def get_transformation_gifts(aspects: List[Dict[str, Any]]) -> List[str]:  # type: ignore
+    return [a.get('aspect', 'aspect') + " potential" for a in aspects[:3]]
+
+def get_psychic_gifts(sign: str) -> str:  # type: ignore
+    return f"Heightened intuition through {SIGN_ENERGIES.get(sign, {}).get('essence', sign)}"
+
+def get_pluto_healing(sign: str, house: int) -> str:  # type: ignore
+    return f"Transformation in house {house} via {SIGN_ENERGIES.get(sign, {}).get('essence', 'regeneration')}"
+
+def synthesize_spiritual_mission(twelfth_sign: Any, neptune_info: Dict[str, Any], pluto_info: Dict[str, Any]) -> str:  # type: ignore
+    return "Integrate intuition and transformation for compassionate service"
+
+def get_modal_integration(quality_count: Dict[str, int]) -> str:  # type: ignore
+    if not quality_count:
+        return "No modality data"
+    dominant = max(quality_count, key=lambda k: quality_count[k])
+    return f"Balance dominant {dominant} modality"
+
+def get_focal_planet_meaning(planet_aspect_count: Dict[str, int]) -> str:  # type: ignore
+    if not planet_aspect_count:
+        return "No focal planets"
+    top = max(planet_aspect_count, key=lambda k: planet_aspect_count[k])
+    return f"Focus development on {top} aspects"
+
+def synthesize_integration_theme(element_count: Dict[str, int], quality_count: Dict[str, int], planet_aspect_count: Dict[str, int]) -> str:  # type: ignore
+    dominant_element = max(element_count, key=lambda k: element_count[k]) if element_count else 'none'
+    dominant_quality = max(quality_count, key=lambda k: quality_count[k]) if quality_count else 'none'
+    focal = max(planet_aspect_count, key=lambda k: planet_aspect_count[k]) if planet_aspect_count else 'none'
+    return f"Integrate {dominant_element} {dominant_quality} energy via {focal}" if focal != 'none' else f"Balance elemental and modal energies"
 
 SIGN_ENERGIES = {
     'aries': {

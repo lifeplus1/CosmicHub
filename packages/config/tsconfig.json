@@ -15,19 +15,7 @@
   // Types inherited from root/base config (react, react-dom, node).
   // Vite client types provided via local vite-env.d.ts triple-slash reference to avoid duplication.
   },
-  "include": [
-    "src/index.ts",
-    "src/config.ts",
-    "src/env.ts", 
-    "src/firebase.ts",
-    "src/lazy-loading.tsx",
-    "src/performance.ts",
-    "src/push-notifications.ts",
-    "src/background-sync-enhanced.ts",
-    "src/hooks/index.ts",
-    "src/hooks/usePerformance.ts",
-    "src/vite-env.d.ts"
-  ],
+  "include": ["src/**/*", "vite-env.d.ts"],
   "exclude": [
     "dist", 
     "node_modules", 

@@ -46,16 +46,7 @@ const SignUp = lazy(() => import('./pages/SignUp'));
 const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
 const SubscriptionCancel = lazy(() => import('./pages/SubscriptionCancel'));
 
-interface ExtendedChartData {
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  julian_day: number;
-  angles: Record<string, number>;
-  // Extend from ChartData if defined elsewhere
-}
-
-const MainApp: React.FC = React.memo(() => {
+const MainApp: React.FC = React.memo(function MainApp() {
   const { addNotification } = useCrossAppStore();
   const config = getAppConfig('astro');
 

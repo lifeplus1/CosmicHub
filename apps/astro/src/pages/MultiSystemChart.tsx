@@ -9,7 +9,7 @@ const MultiSystemChart: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
   const [selectedSystems, setSelectedSystems] = useState<string[]>(['western', 'vedic']);
 
-  const handleBirthDataSubmit = (data: any) => {
+  const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
     // No navigation needed - stay on this page and show the multi-system charts
     console.log('Multi-system chart birth data submitted:', data);
@@ -22,7 +22,7 @@ const MultiSystemChart: React.FC = () => {
     { id: 'synthesis', name: 'Synthesis', description: 'Combined approach' }
   ];
 
-  const toggleSystem = (systemId: string) => {
+  const toggleSystem = (systemId: string): void => {
     setSelectedSystems(prev => 
       prev.includes(systemId) 
         ? prev.filter(id => id !== systemId)
@@ -71,16 +71,19 @@ const MultiSystemChart: React.FC = () => {
                         ? 'border-cosmic-purple bg-cosmic-purple/10'
                         : 'border-cosmic-silver/20 hover:border-cosmic-purple/50'
                     }`}
+                    htmlFor={`system-${system.id}`}
+                    aria-label={`Select ${system.name}`}
                   >
                     <input
+                      id={`system-${system.id}`}
                       type="checkbox"
                       checked={selectedSystems.includes(system.id)}
                       onChange={() => toggleSystem(system.id)}
                       className="rounded"
                     />
                     <div>
-                      <div className="text-cosmic-gold font-semibold">{system.name}</div>
-                      <div className="text-cosmic-silver/70 text-sm">{system.description}</div>
+                      <div className="text-cosmic-gold font-semibold" id={`label-${system.id}`}>{system.name}</div>
+                      <div className="text-cosmic-silver/70 text-sm" id={`description-${system.id}`}>{system.description}</div>
                     </div>
                   </label>
                 ))}
@@ -129,7 +132,7 @@ const MultiSystemChart: React.FC = () => {
               <div className="text-center">
                 <div className="text-cosmic-gold font-semibold">Coordinates</div>
                 <div className="text-cosmic-silver text-sm">
-                  {birthData.lat ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
+                  {birthData.lat != null ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
                 </div>
               </div>
             </div>

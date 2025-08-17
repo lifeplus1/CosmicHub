@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, type JSX } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 

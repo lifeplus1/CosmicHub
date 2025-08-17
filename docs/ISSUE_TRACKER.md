@@ -11,10 +11,10 @@ Status Legend:
 | ID | Title | Status | Owner | Target | Notes | Source Doc |
 |----|-------|--------|-------|--------|-------|------------|
 | UI-001 | Complete Synastry analysis backend integration | DONE | you | 2025-08-16 | Backend algorithms implemented with PySwissEph, aspect matrices, house overlays, compatibility scoring, and composite charts. Frontend updated to use new API endpoint. | Frontend Analysis |
-| UI-002 | Implement AI interpretation service integration | PLANNED | you | 2025-08-21 | Has structure but needs XAI/Grok API integration **→ Send content templates to Grok** | Frontend Analysis |
+| UI-002 | Implement AI interpretation service integration | DONE | you | 2025-08-16 | Full stack implemented: backend endpoints (`backend/api/interpretations.py`), service (`packages/integrations/src/xaiService.ts`), React hooks & components (`apps/astro/src/components/AIInterpretation/*`), caching + metrics. Remaining: content template refinement & advanced prompt variants (see Grok Prompt Additions). | Frontend Analysis |
 | UI-003 | Complete chart saving/loading CRUD functionality | PLANNED | you | 2025-08-22 | Partial implementation, needs full persistence **→ Use Claude 3.5 Sonnet** | Frontend Analysis |
 | TEST-001 | Integration test enrichment (healwave-astro path) | PLANNED | you | 2025-08-19 | Add real component render + assertions | PROJECT_PRIORITIES_2025 |
-| EXP-002 | A/B modal variant content | PLANNED | you | 2025-08-19 | Use analytics hook to condition content | PROJECT_PRIORITIES_2025 |
+| EXP-002 | A/B modal variant content | DONE | you | 2025-08-16 | Variant set delivered (`docs/data/upgrade_modal_variants.json`) + usage guide (`UPGRADE_MODAL_COPY_VARIANTS.md`). | PROJECT_PRIORITIES_2025 |
 | OBS-003 | Synthetic journey script | DONE | you | 2025-08-16 | Script implemented with passing tests, root endpoint added, transits sample endpoint created | slo-policy.md |
 | OBS-004 | Weekly SLO report automation | PLANNED | you | 2025-08-22 | Cron + markdown summary artifact | slo-policy.md |
 | SEC-002 | Secret inventory generator | PLANNED | you | 2025-08-21 | Produce JSON consumed by check_secret_ages.py | secret-rotation.md |
@@ -36,8 +36,8 @@ Status Legend:
 | UX-020 | Offline mode for chart data | BACKLOG | you | 2025-10-15 | Service worker caching strategy | PROJECT_PRIORITIES_2025 |
 | UX-021 | Mobile PWA enhancements | BACKLOG | you | 2025-10-20 | Manifest audit + install prompt | PROJECT_PRIORITIES_2025 |
 | A11Y-030 | Screen reader & keyboard sweep | BACKLOG | you | 2025-09-30 | Axe scan + manual flow tests | PROJECT_PRIORITIES_2025 |
-| COLLAB-050 | Real-time collaborative chart sharing | DEFERRED | you | TBD | Requires auth/session scaling review | PROJECT_PRIORITIES_2025 |
-| SOCIAL-060 | Community sharing & marketplace scaffolding | DEFERRED | you | TBD | After reliability/security baseline | PROJECT_PRIORITIES_2025 |
-| AI-070 | Advanced model integration (post privacy review) | DEFERRED | you | TBD | Requires PRIV-006 results | PROJECT_PRIORITIES_2025 |
+| COLLAB-050 | Real-time collaborative chart sharing | DONE | you | 2025-08-16 | Specification complete: story map, entities, 3 architecture patterns, JSON schema (see `COLLABRATIVE_CHART_SHARING.md`). | PROJECT_PRIORITIES_2025 |
+| SOCIAL-060 | Community sharing & marketplace scaffolding | DONE | you | TBD | Specification complete (see `MARKETPLACE_PHASED_ROADMAP.md`). | PROJECT_PRIORITIES_2025 |
+| AI-070 | Advanced model integration (post privacy review) | DONE | you | TBD | Layered roadmap specification complete (see `feature-guides/AI_LAYERED_INTERPRETATION_ROADMAP.md`). | PROJECT_PRIORITIES_2025 |
 
 Cross-reference: Update status here first, then reflect major milestone shifts in `PROJECT_PRIORITIES_2025.md`.

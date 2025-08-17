@@ -31,7 +31,9 @@
       "@cosmichub/config": ["./packages/config/src"],
       "@cosmichub/frequency": ["./packages/frequency/src"],
       "@cosmichub/integrations": ["./packages/integrations/src"],
-      "@cosmichub/ui": ["./packages/ui/src"]
+      "@cosmichub/ui": ["./packages/ui/src"],
+      "@cosmichub/types": ["./packages/types/src"],
+      "@cosmichub/subscriptions": ["./packages/subscriptions/src"]
     }
   },
   // Root acts as solution tsconfig only; actual source compilation handled by per-package/app tsconfigs
@@ -49,7 +51,8 @@
     { "path": "./packages/config" },
     { "path": "./packages/frequency" },
     { "path": "./packages/integrations" },
-    { "path": "./packages/ui" }
+    { "path": "./packages/ui" },
+    { "path": "./packages/types" }
   ],
   "files": []
 }

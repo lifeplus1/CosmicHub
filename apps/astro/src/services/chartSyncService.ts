@@ -451,6 +451,39 @@ class ChartSyncService extends SimpleEventEmitter {
   }
 
   /**
+   * Sync chart data to Firestore (for one-off saves)
+   * This method provides backward compatibility with the ChartDisplay component
+   */
+  async syncChart(chartData: any): Promise<void> {
+    try {
+      // Generate a unique chart ID if not provided
+      const chartId = `chart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Transform the chart data to our internal format
+      const transformedData = this.transformChartData(chartData);
+      
+      // Create a ChartDataSync object
+      const chartSync: ChartDataSync = {
+        natal: transformedData,
+        transits: {},
+        lastUpdate: new Date(),
+        nextUpdate: new Date(Date.now() + 5 * 60000)
+      };
+
+      // Store in memory (in production, this would sync to Firestore)
+      this.charts.set(chartId, chartSync);
+      
+      // Emit event for listeners
+      this.emit('chart-synced', { chartId, chartData: chartSync });
+      
+      console.log(`Chart synced successfully with ID: ${chartId}`);
+    } catch (error) {
+      console.error('Failed to sync chart:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all registered charts
    */
   getAllCharts(): Map<string, ChartDataSync> {

@@ -32,6 +32,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     devConsole.error('Error:', error);
     devConsole.error('Error Info:', errorInfo);
     
+    // Check if this is a serialization error and log additional context
+    if (error.message.includes('serialization') || error.message.includes('deserialize')) {
+      devConsole.warn('⚠️ Serialization Error Detected', {
+        errorType: 'SERIALIZATION_ERROR',
+        component: this.props.name,
+        message: error.message,
+        stack: error.stack?.slice(0, 500) // Truncate for logging
+      });
+    }
+    
     this.props.onError?.(error, errorInfo);
   }
 

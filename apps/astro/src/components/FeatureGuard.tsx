@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '@cosmichub/auth';
+import { useAuth, useSubscription } from '@cosmichub/auth';
+import { FEATURE_KEYS, isFeatureKey } from '@cosmichub/config';
 
 interface FeatureGuardProps {
   children: React.ReactNode;
@@ -12,149 +12,31 @@ interface FeatureGuardProps {
   showPreview?: boolean;
 }
 
-export const FeatureGuard: React.FC<FeatureGuardProps> = ({
-  children,
-  requiredTier,
-  feature,
-  upgradeMessage,
-  showPreview = true
-}) => {
+export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTier, feature, upgradeMessage, showPreview = true }) => {
   const { user } = useAuth();
   const { userTier, hasFeature } = useSubscription();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // If user has access, render children normally
-  if (hasFeature(feature)) {
-    return <>{children}</>;
-  }
+  if (hasFeature(feature)) return <>{children}</>;
 
-  const getTierIcon = (tier: string): string => {
-    switch (tier) {
-      case 'premium': return '⭐';
-      case 'elite': return '👑';
-      default: return '🔒';
-    }
+  const featureMap: Record<string, { icon: string; title: string; description: string; benefits: string[]; examples: string[]; }> = {
+    [FEATURE_KEYS.SYNSTRY_ANALYSIS]: { icon: '👫', title: 'Synastry Compatibility Analysis', description: 'Compare two birth charts to understand relationship dynamics and compatibility patterns.', benefits: ['Romantic compatibility insights','Friendship and family dynamics','Communication style analysis','Emotional compatibility patterns','Challenge and growth areas'], examples: ['Compare Venus-Mars connections for romance','Analyze Moon aspects for emotional harmony','Check Mercury contacts for communication','Examine house overlays for life area focus'] },
+    [FEATURE_KEYS.AI_INTERPRETATION]: { icon: '🧠', title: 'AI-Powered Chart Interpretation', description: 'Advanced artificial intelligence analyzes your chart patterns to provide personalized insights.', benefits: ['Deep personality analysis','Life purpose guidance','Career path recommendations','Relationship pattern insights','Custom question answering'], examples: ['Ask specific questions about your chart','Get detailed personality breakdowns','Understand complex aspect patterns','Receive personalized guidance'] },
+    [FEATURE_KEYS.TRANSIT_ANALYSIS]: { icon: '📈', title: 'Transit Analysis & Timing', description: 'Track current planetary movements and their effects on your natal chart for predictive insights.', benefits: ['Current life phase understanding','Opportunity timing windows','Challenge period awareness','Growth cycle tracking','Decision-making guidance'], examples: ['Saturn return timing and effects','Jupiter opportunities periods','Eclipse activation points','Mercury retrograde impacts'] },
+    [FEATURE_KEYS.MULTI_SYSTEM_ANALYSIS]: { icon: '🔮', title: 'Multi-System Analysis', description: 'Compare insights from Western, Vedic, Chinese, Mayan, and Uranian astrological systems.', benefits: ['Western tropical personality insights','Vedic karmic patterns and life purpose','Chinese Four Pillars life cycles','Mayan galactic signature','Comprehensive spiritual perspective'], examples: ['Western Sun vs Vedic Sun differences','Chinese animal year influences','Mayan day sign spiritual meaning','Integrated life path analysis'] }
   };
 
-  const getTierColorClasses = (tier: string) => {
-    switch (tier) {
-      case 'premium': return {
-        border: 'border-purple-400',
-        bg: 'bg-purple-100',
-        text: 'text-purple-600',
-        button: 'bg-purple-600 hover:bg-purple-700',
-        badge: 'bg-purple-500'
-      };
-      case 'elite': return {
-        border: 'border-yellow-400',
-        bg: 'bg-yellow-100',
-        text: 'text-yellow-600',
-        button: 'bg-yellow-600 hover:bg-yellow-700',
-        badge: 'bg-yellow-500'
-      };
-      default: return {
-        border: 'border-gray-400',
-        bg: 'bg-gray-100',
-        text: 'text-gray-600',
-        button: 'bg-gray-600 hover:bg-gray-700',
-        badge: 'bg-gray-500'
-      };
-    }
+  const featureDetails = (isFeatureKey(feature) && featureMap[feature]) || {
+    icon: '🔒',
+    title: `${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)} Feature`,
+    description: upgradeMessage || `This feature requires a ${requiredTier} subscription.`,
+    benefits: ['Enhanced astrological insights','Professional-grade tools','Advanced analysis'],
+    examples: ['Detailed chart analysis','Professional interpretations']
   };
 
-  const getFeatureDetails = (feature: string) => {
-    const featureMap: Record<string, {
-      icon: string;
-      title: string;
-      description: string;
-      benefits: string[];
-      examples: string[];
-    }> = {
-      'synastry_analysis': {
-        icon: '👫',
-        title: 'Synastry Compatibility Analysis',
-        description: 'Compare two birth charts to understand relationship dynamics and compatibility patterns.',
-        benefits: [
-          'Romantic compatibility insights',
-          'Friendship and family dynamics',
-          'Communication style analysis',
-          'Emotional compatibility patterns',
-          'Challenge and growth areas'
-        ],
-        examples: [
-          'Compare Venus-Mars connections for romance',
-          'Analyze Moon aspects for emotional harmony',
-          'Check Mercury contacts for communication',
-          'Examine house overlays for life area focus'
-        ]
-      },
-      'ai_interpretation': {
-        icon: '🧠',
-        title: 'AI-Powered Chart Interpretation',
-        description: 'Advanced artificial intelligence analyzes your chart patterns to provide personalized insights.',
-        benefits: [
-          'Deep personality analysis',
-          'Life purpose guidance',
-          'Career path recommendations',
-          'Relationship pattern insights',
-          'Custom question answering'
-        ],
-        examples: [
-          'Ask specific questions about your chart',
-          'Get detailed personality breakdowns',
-          'Understand complex aspect patterns',
-          'Receive personalized guidance'
-        ]
-      },
-      'transit_analysis': {
-        icon: '📈',
-        title: 'Transit Analysis & Timing',
-        description: 'Track current planetary movements and their effects on your natal chart for predictive insights.',
-        benefits: [
-          'Current life phase understanding',
-          'Opportunity timing windows',
-          'Challenge period awareness',
-          'Growth cycle tracking',
-          'Decision-making guidance'
-        ],
-        examples: [
-          'Saturn return timing and effects',
-          'Jupiter opportunities periods',
-          'Eclipse activation points',
-          'Mercury retrograde impacts'
-        ]
-      },
-      'multi_system_analysis': {
-        icon: '🔮',
-        title: 'Multi-System Analysis',
-        description: 'Compare insights from Western, Vedic, Chinese, Mayan, and Uranian astrological systems.',
-        benefits: [
-          'Western tropical personality insights',
-          'Vedic karmic patterns and life purpose',
-          'Chinese Four Pillars life cycles',
-          'Mayan galactic signature',
-          'Comprehensive spiritual perspective'
-        ],
-        examples: [
-          'Western Sun vs Vedic Sun differences',
-          'Chinese animal year influences',
-          'Mayan day sign spiritual meaning',
-          'Integrated life path analysis'
-        ]
-      }
-    };
-
-    return featureMap[feature] || {
-      icon: '🔒',
-      title: `${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)} Feature`,
-      description: upgradeMessage || `This feature requires a ${requiredTier} subscription.`,
-      benefits: ['Enhanced astrological insights', 'Professional-grade tools', 'Advanced analysis'],
-      examples: ['Detailed chart analysis', 'Professional interpretations']
-    };
-  };
-
-  const featureDetails = getFeatureDetails(feature);
+  const getTierIcon = (tier: string): string => tier === 'premium' ? '⭐' : tier === 'elite' ? '👑' : '🔒';
+  const getTierColorClasses = (tier: string) => tier === 'premium' ? { border: 'border-purple-400', bg: 'bg-purple-100', text: 'text-purple-600', button: 'bg-purple-600 hover:bg-purple-700', badge: 'bg-purple-500' } : tier === 'elite' ? { border: 'border-yellow-400', bg: 'bg-yellow-100', text: 'text-yellow-600', button: 'bg-yellow-600 hover:bg-yellow-700', badge: 'bg-yellow-500' } : { border: 'border-gray-400', bg: 'bg-gray-100', text: 'text-gray-600', button: 'bg-gray-600 hover:bg-gray-700', badge: 'bg-gray-500' };
   const colors = getTierColorClasses(requiredTier);
 
   const handleUpgrade = () => {
