@@ -2,6 +2,8 @@
 import axios from 'axios';
 import { toUnifiedBirthData, type AnyBirthInput, type ChartBirthData } from '@cosmichub/types';
 import { auth } from '@cosmichub/config/firebase';
+import type { GeneKeysData } from '../components/GeneKeysChart/types';
+import type { HumanDesignData } from '../components/HumanDesignChart/types';
 
 // Narrow import.meta.env access to avoid implicit any
 const rawApiUrl: string | undefined =
@@ -261,7 +263,7 @@ export const fetchNumerology = async (data: Record<string, unknown>): Promise<un
   }
 };
 
-export const calculateHumanDesign = async (data: AnyBirthInput): Promise<unknown> => {
+export const calculateHumanDesign = async (data: AnyBirthInput): Promise<{ human_design: HumanDesignData }> => {
   console.log('🧬 Calculating Human Design...');
   const unified = toUnifiedBirthData(data);
   console.log('📊 Human Design data input (unified):', unified);
@@ -277,7 +279,7 @@ export const calculateHumanDesign = async (data: AnyBirthInput): Promise<unknown
   }
 };
 
-export const calculateGeneKeys = async (data: AnyBirthInput): Promise<unknown> => {
+export const calculateGeneKeys = async (data: AnyBirthInput): Promise<{ gene_keys: GeneKeysData }> => {
   console.log('🗝️ Calculating Gene Keys...');
   const unified = toUnifiedBirthData(data);
   console.log('📊 Gene Keys data input (unified):', unified);

@@ -93,6 +93,9 @@ importers:
       '@cosmichub/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@cosmichub/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@cosmichub/subscriptions':
         specifier: workspace:*
         version: link:../../packages/subscriptions

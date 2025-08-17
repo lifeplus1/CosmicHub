@@ -2,7 +2,19 @@ import React, { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useSubscription } from '@cosmichub/auth';
-import { FEATURE_KEYS, isFeatureKey } from '@cosmichub/config';
+
+// Temporary inline constants to avoid import issues
+const FEATURE_KEYS = {
+  SYNSTRY_ANALYSIS: 'synastry_analysis',
+  AI_INTERPRETATION: 'ai_interpretation',
+  TRANSIT_ANALYSIS: 'transit_analysis',
+  MULTI_SYSTEM_ANALYSIS: 'multi_system_analysis'
+} as const;
+
+type FeatureKey = typeof FEATURE_KEYS[keyof typeof FEATURE_KEYS];
+
+const isFeatureKey = (value: string): value is FeatureKey =>
+  Object.values(FEATURE_KEYS).includes(value as FeatureKey);
 
 interface FeatureGuardProps {
   children: React.ReactNode;
@@ -78,7 +90,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
               What you'll unlock:
             </p>
             <ul className="space-y-2">
-              {featureDetails.benefits.map((benefit, index) => (
+              {featureDetails.benefits.map((benefit: string, index: number) => (
                 <li key={index} className="flex items-start space-x-2 text-sm">
                   <span className="mt-1 text-green-500">✓</span>
                   <span className="text-cosmic-silver">{benefit}</span>
@@ -173,7 +185,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
                   Key Benefits:
                 </h3>
                 <ul className="space-y-2">
-                  {featureDetails.benefits.map((benefit, index) => (
+                  {featureDetails.benefits.map((benefit: string, index: number) => (
                     <li key={index} className="flex items-start space-x-2 text-sm">
                       <span className="mt-1 text-green-500">✓</span>
                       <span className="text-cosmic-silver">{benefit}</span>
@@ -187,7 +199,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
                   Examples:
                 </h3>
                 <ul className="space-y-2">
-                  {featureDetails.examples.map((example, index) => (
+                  {featureDetails.examples.map((example: string, index: number) => (
                     <li key={index} className="flex items-start space-x-2 text-sm">
                       <span className={colors.text}>⭐</span>
                       <span className="text-cosmic-silver">{example}</span>
