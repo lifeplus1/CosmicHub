@@ -25,17 +25,16 @@ interface AstroFrequencyPreset extends FrequencyPreset {
 }
 
 interface AstroFrequencyGeneratorProps {
-  chartData?: Record<string, any>; // Strict type if available
-  currentTransits?: Record<string, any>;
+  chartData?: Record<string, unknown>; // Strict type if available
+  currentTransits?: Record<string, unknown>;
 }
 
 /**
  * Astrology-Enhanced Frequency Generator
  * Uses the same shared audio engine as HealWave, but adds astrology-specific features
  */
-export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = React.memo(({ 
-  chartData, 
-  currentTransits 
+const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = React.memo(({ 
+  chartData 
 }) => {
   const [audioEngine] = useState(() => new AudioEngine());
   const [selectedPreset, setSelectedPreset] = useState<AstroFrequencyPreset | null>(null);
@@ -71,9 +70,9 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
 
   // Calculate personalized frequency based on chart data
   const getPersonalizedFrequency = useCallback((basePreset: AstroFrequencyPreset): AstroFrequencyPreset => {
-    if (chartData == null) return basePreset;
+    if (chartData === null || chartData === undefined) return basePreset;
 
-    const dominantElement = chartData.dominantElement || 'earth';
+    const dominantElement = (chartData.dominantElement as string) ?? 'earth';
     const elementMultipliers: Record<string, number> = {
       fire: 1.05,
       earth: 1.0,
@@ -89,7 +88,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
   }, [chartData]);
 
   const handlePlay = useCallback(async () => {
-    if (selectedPreset == null) return;
+    if (selectedPreset === null || selectedPreset === undefined) return;
     try {
       const personalizedPreset = getPersonalizedFrequency(selectedPreset);
       await audioEngine.startFrequency(personalizedPreset, settings);
@@ -113,7 +112,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
       <h2 className="mb-6 text-2xl font-bold">🌟 Astrology-Enhanced Frequency Therapy</h2>
       
       {/* Chart Integration Notice */}
-      {chartData != null && (
+      {chartData !== null && chartData !== undefined && (
         <div className="p-4 mb-6 border border-purple-200 rounded-lg bg-purple-50">
           <h3 className="font-semibold text-purple-800">✨ Personalized for Your Chart</h3>
           <p className="mt-1 text-sm text-purple-700">
@@ -149,7 +148,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
                         <div className="mt-1 text-xs text-gray-500">{preset.description}</div>
                         
                         {/* Astrology Enhancement Info */}
-                        {preset.astrologyData && (
+                        {preset.astrologyData !== null && preset.astrologyData !== undefined && (
                           <div className="p-2 mt-2 text-xs bg-purple-100 rounded">
                             <div className="text-purple-700">
                               🌙 {preset.astrologyData.planetaryAlignment}
@@ -174,7 +173,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
                         <div className="mt-1 text-xs text-gray-500">{preset.description}</div>
                         
                         {/* Astrology Enhancement Info */}
-                        {preset.astrologyData && (
+                        {preset.astrologyData !== null && preset.astrologyData !== undefined && (
                           <div className="p-2 mt-2 text-xs bg-purple-100 rounded">
                             <div className="text-purple-700">
                               🌙 {preset.astrologyData.planetaryAlignment}
@@ -198,7 +197,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
         </div>
 
       {/* Enhanced Controls with Astrology Features */}
-      {selectedPreset != null && (
+      {selectedPreset !== null && selectedPreset !== undefined && (
         <div className="p-4 mb-6 border border-gray-200 rounded-lg">
           <h4 className="mb-3 font-semibold">🎵 Session Settings</h4>
           
@@ -245,7 +244,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
               <span className="text-sm text-gray-600">{settings.duration} min</span>
               
               {/* Astrology Recommendation */}
-              {selectedPreset.astrologyData && (
+              {selectedPreset.astrologyData !== null && selectedPreset.astrologyData !== undefined && (
                 <div className="mt-1 text-xs text-purple-600">
                   Recommended: {selectedPreset.astrologyData.recommendedDuration} min
                 </div>
@@ -255,7 +254,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
 
           <div className="flex gap-3 mt-4">
             <button
-              onClick={handlePlay}
+              onClick={() => void handlePlay()}
               disabled={isPlaying}
               className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
             >
@@ -275,11 +274,16 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
 
       {/* Enhanced Info with Astrology Context - Lazy loaded */}
       <Suspense fallback={<div>Loading...</div>}>
-        {selectedPreset && <LazyAstroInfo preset={selectedPreset} />}
+        {selectedPreset !== null && selectedPreset !== undefined && <LazyAstroInfo preset={selectedPreset} />}
       </Suspense>
     </div>
   );
 });
+
+// Add display name
+AstroFrequencyGenerator.displayName = 'AstroFrequencyGenerator';
+
+export { AstroFrequencyGenerator };
 
 // Suggested Vitest test: 
 // test('personalizes frequency', () => { ... });

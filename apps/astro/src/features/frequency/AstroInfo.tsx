@@ -33,13 +33,13 @@ const AstroInfo: React.FC<AstroInfoProps> = ({ preset }) => {
             <li><strong>Name:</strong> {preset.name}</li>
             <li><strong>Base Frequency:</strong> {preset.baseFrequency} Hz</li>
             <li><strong>Category:</strong> {preset.category}</li>
-            {preset.description && (
+            {(preset.description !== null && preset.description !== undefined && preset.description !== '') && (
               <li><strong>Description:</strong> {preset.description}</li>
             )}
           </ul>
         </div>
 
-        {preset.astrologyData && (
+        {(preset.astrologyData !== null && preset.astrologyData !== undefined) && (
           <div>
             <h4 className="font-medium text-purple-700">Astrological Context</h4>
             <ul className="mt-2 space-y-1 text-sm text-purple-600">
@@ -56,10 +56,10 @@ const AstroInfo: React.FC<AstroInfoProps> = ({ preset }) => {
         <h4 className="font-medium text-purple-800">Benefits & Usage</h4>
         <p className="mt-1 text-sm text-purple-700">
           This frequency is enhanced by current astrological conditions to provide optimal therapeutic benefits. 
-          The personalized adjustments are based on your natal chart's dominant elements and current planetary transits.
+          The personalized adjustments are based on your natal chart&apos;s dominant elements and current planetary transits.
         </p>
         
-        {preset.astrologyData && (
+        {(preset.astrologyData !== null && preset.astrologyData !== undefined) && (
           <div className="mt-2 text-xs text-purple-600">
             <strong>Optimal Times:</strong> Sessions are most effective during {preset.astrologyData.planetaryAlignment.toLowerCase()} periods.
           </div>

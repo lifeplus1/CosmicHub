@@ -104,7 +104,7 @@ export function usePerformance() {
   memory: perf.memory?.usedJSHeapSize,
       };
 
-  throw { error, metrics };
+      throw new Error(JSON.stringify({ error, metrics }));
     }
   }, []);
 
@@ -142,13 +142,13 @@ export function useOperationTracking() {
       const newMap = new Map(prev);
       const operation = newMap.get(operationId);
       
-    if (operation != null) {
+    if (operation !== null && operation !== undefined) {
         const endTime = performance.now();
         const updatedOperation: OperationMetrics = {
           ...operation,
           endTime,
           duration: endTime - operation.startTime,
-      status: (error != null && error !== '') ? 'error' : 'completed',
+      status: (error !== null && error !== undefined && error !== '') ? 'error' : 'completed',
           error,
         };
         newMap.set(operationId, updatedOperation);
@@ -229,7 +229,7 @@ export function usePagePerformance() {
         // Collect paint metrics if available
         const paintEntries = performance.getEntriesByType('paint') as PerformanceEntry[];
           const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-          const firstContentfulPaint = (fcpEntry != null && typeof fcpEntry.startTime === 'number') ? fcpEntry.startTime : 0;
+          const firstContentfulPaint = (fcpEntry !== null && fcpEntry !== undefined && typeof fcpEntry.startTime === 'number') ? fcpEntry.startTime : 0;
 
         // Collect LCP if available
         let largestContentfulPaint = 0;
@@ -238,7 +238,7 @@ export function usePagePerformance() {
             const lcpObserver = new PerformanceObserver((entryList) => {
               const entries = entryList.getEntries();
               const lastEntry = entries[entries.length - 1];
-              if (lastEntry != null) {
+              if (lastEntry !== null && lastEntry !== undefined) {
                 largestContentfulPaint = lastEntry.startTime;
                 setMetrics(prev => ({
                   ...prev,
@@ -247,7 +247,7 @@ export function usePagePerformance() {
               }
             });
             lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-          } catch (e) {
+          } catch {
             // LCP not supported
           }
         }
@@ -261,7 +261,7 @@ export function usePagePerformance() {
 
         setMetrics(pageMetrics);
         setIsLoading(false);
-  } catch (_error) {
+  } catch {
         setIsLoading(false);
       }
     };
@@ -307,7 +307,7 @@ export function useMemoryMonitoring() {
   } | null>(null);
 
   const updateMemoryInfo = useCallback((): void => {
-  if (perf.memory != null) {
+  if (perf.memory !== null && perf.memory !== undefined) {
       const memory = perf.memory;
       setMemoryInfo({
         used: memory.usedJSHeapSize,
@@ -326,7 +326,7 @@ export function useMemoryMonitoring() {
   }, [updateMemoryInfo]);
 
   const getMemoryUsagePercentage = useCallback((): number => {
-  if (memoryInfo == null) return 0;
+  if (memoryInfo === null || memoryInfo === undefined) return 0;
     return (memoryInfo.used / memoryInfo.limit) * 100;
   }, [memoryInfo]);
 

@@ -6,8 +6,6 @@ import type {
   TransitResult, 
   LunarTransitResult, 
   DateRange,
-  TransitCalculationResponse,
-  LunarTransitCalculationResponse,
   TransitAnalysisOptions,
   LunarAnalysisOptions
 } from './types';
@@ -72,13 +70,13 @@ export const useTransitAnalysis = (birthData: BirthData) => {
       }
     } catch (err: unknown) {
       devConsole.error('❌ Error calculating transits:', err);
-  if (isAxiosError(err) && err.response != null) {
+  if (isAxiosError(err) && err.response !== null && err.response !== undefined) {
         // Server responded with error status
-        const detail = (err.response.data as any)?.detail;
-        const message = (err.response.data as any)?.message;
+        const detail = (err.response.data as Record<string, unknown>)?.detail;
+        const message = (err.response.data as Record<string, unknown>)?.message;
         const errorMessage = typeof detail === 'string' ? detail : (typeof message === 'string' ? message : `Server error: ${err.response.status}`);
         setError(errorMessage);
-  } else if (isAxiosError(err) && err.request != null) {
+  } else if (isAxiosError(err) && err.request !== null && err.request !== undefined) {
         // Request was made but no response received
         setError('Unable to connect to transit calculation service. Please check your connection.');
       } else {
@@ -133,13 +131,13 @@ export const useTransitAnalysis = (birthData: BirthData) => {
       }
     } catch (err: unknown) {
       devConsole.error('❌ Error calculating lunar transits:', err);
-  if (isAxiosError(err) && err.response != null) {
+  if (isAxiosError(err) && err.response !== null && err.response !== undefined) {
         // Server responded with error status
-        const detail = (err.response.data as any)?.detail;
-        const message = (err.response.data as any)?.message;
+        const detail = (err.response.data as Record<string, unknown>)?.detail;
+        const message = (err.response.data as Record<string, unknown>)?.message;
         const errorMessage = typeof detail === 'string' ? detail : (typeof message === 'string' ? message : `Server error: ${err.response.status}`);
         setError(errorMessage);
-  } else if (isAxiosError(err) && err.request != null) {
+  } else if (isAxiosError(err) && err.request !== null && err.request !== undefined) {
         // Request was made but no response received
         setError('Unable to connect to lunar transit service. Please check your connection.');
       } else {

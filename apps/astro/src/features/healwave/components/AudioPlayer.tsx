@@ -37,6 +37,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     return () => {
       cleanup();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying, frequency, isInitialized]);
 
   useEffect(() => {
@@ -48,7 +49,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   const initializeAudio = () => {
     try {
-      const AudioContextClass = window.AudioContext ?? (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       audioContextRef.current = new AudioContextClass();
       gainNodeRef.current = audioContextRef.current.createGain();
       gainNodeRef.current.connect(audioContextRef.current.destination);
@@ -95,7 +96,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     stopAudio();
     if (audioContextRef.current !== null && audioContextRef.current !== undefined && 
         audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close();
+      void audioContextRef.current.close();
     }
     setIsInitialized(false);
   };
