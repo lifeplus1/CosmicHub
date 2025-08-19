@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo, useState, useMemo } from 'react';
+import React, { useEffect, useRef, memo, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
 import { fetchChartData, type ChartBirthData, type ChartData as APIChartData } from '../services/api';
@@ -71,40 +71,48 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   });
 
   // Use pre-transformed data if available, otherwise use fetched data
-  const data = preTransformedData || fetchedData;
+  const data = preTransformedData ?? fetchedData;
 
   // Transform API response to our internal ChartData format (only used when no pre-transformed data)
   const transformAPIResponseToChartData = (apiData: APIChartData): ChartData => {
     // Transform planets
     const transformedPlanets: Record<string, Planet> = {};
-    Object.entries(apiData.planets).forEach(([name, planetData]: [string, any]) => {
+    Object.entries(apiData.planets).forEach(([name, planetData]: [string, Planet]) => {
       transformedPlanets[name] = {
         name,
         position: planetData.position,
-        retrograde: planetData.retrograde || false,
-        speed: planetData.speed || 0,
+        retrograde: planetData.retrograde === true,
+        speed: planetData.speed ?? 0,
       };
     });
 
     // Transform houses 
     const transformedHouses: House[] = [];
-    Object.entries(apiData.houses).forEach(([houseKey, houseData]: [string, any]) => {
+    apiData.houses.forEach((houseData: House) => {
       transformedHouses.push({
-        number: houseData.house,
+        number: houseData.number,
         cusp: houseData.cusp,
-        sign: houseData.sign || '',
+        sign: houseData.sign !== '' ? houseData.sign : '',
       });
     });
 
     // Use backend aspects directly (they're more accurate than calculated ones)
-    const transformedAspects = (apiData.aspects || []).map((aspect: any) => ({
-      planet1: aspect.point1,
-      planet2: aspect.point2,
-      angle: getAspectAngle(aspect.aspect),
-      orb: aspect.orb,
-      type: aspect.aspect.toLowerCase() as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx',
-      applying: false,
-    }));
+    const transformedAspects = (apiData.aspects ?? []).map((aspect: unknown) => {
+      const aspectData = aspect as Record<string, unknown>;
+      const point1 = typeof aspectData.point1 === 'string' ? aspectData.point1 : '';
+      const point2 = typeof aspectData.point2 === 'string' ? aspectData.point2 : '';
+      const aspectType = typeof aspectData.aspect === 'string' ? aspectData.aspect : '';
+      const aspectOrb = typeof aspectData.orb === 'number' ? aspectData.orb : 0;
+      
+      return {
+        planet1: point1,
+        planet2: point2,
+        angle: getAspectAngle(aspectType),
+        orb: aspectOrb,
+        type: aspectType.toLowerCase() as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx',
+        applying: false,
+      };
+    });
 
     return {
       planets: transformedPlanets,
@@ -169,7 +177,20 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   useEffect(() => {
     if (!data || !svgRef.current) return;
 
-    const { width, height, radius, center, signs, signSymbols, signColors, planetSymbols, planetColors, aspectColors } = chartConstants;
+    const { 
+      width, 
+      height, 
+      radius, 
+      center, 
+      signs, 
+      signSymbols, 
+      // signColors is currently unused but may be needed for future enhancements
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      signColors, 
+      planetSymbols, 
+      planetColors, 
+      aspectColors 
+    } = chartConstants;
 
     // Clear previous chart
     d3.select(svgRef.current).selectAll('*').remove();
@@ -197,6 +218,8 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     // Draw 12 equal house divisions (30 degrees each)
     for (let i = 0; i < 12; i++) {
       const startAngle = (i * 30 - 90) * Math.PI / 180;
+      // endAngle is currently unused but kept for future arc drawing
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const endAngle = ((i + 1) * 30 - 90) * Math.PI / 180;
 
       // House division lines (every 30 degrees) - equal houses
@@ -227,7 +250,14 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     }
 
     // Helper function to get zodiac sign info
-    function getZodiacInfo(position: number) {
+    function getZodiacInfo(position: number): {
+      signIndex: number;
+      signName: string;
+      signSymbol: string;
+      degree: number;
+      minute: number;
+      formatted: string;
+    } {
       const signIndex = Math.floor(position / 30);
       const degreeInSign = Math.floor(position % 30);
       const minuteInSign = Math.floor((position % 1) * 60);
@@ -248,7 +278,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       
       const planetGroup = g.append('g')
         .attr('class', 'planet-group')
-        .attr('aria-label', `Planet ${planet.name} at ${planet.position.toFixed(1)} degrees${planet.retrograde ? ' retrograde' : ''}`);
+        .attr('aria-label', `Planet ${planet.name} at ${planet.position.toFixed(1)} degrees${planet.retrograde === true ? ' retrograde' : ''}`);
 
       // Ring 1: Planet Symbol (outermost) - use planet symbol, not zodiac
       const planetSymbol = planetGroup.append('text')
@@ -287,7 +317,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
         .text(zodiacInfo.signSymbol);
 
       // Ring 4: Retrograde indicator (innermost)
-      if (planet.retrograde) {
+      if (planet.retrograde === true) {
         planetGroup.append('text')
           .attr('x', Math.cos(angle) * retrogradeRadius)
           .attr('y', Math.sin(angle) * retrogradeRadius)
@@ -336,7 +366,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
         const planet1 = data.planets[aspect.planet1];
         const planet2 = data.planets[aspect.planet2];
         
-        if (!planet1 || !planet2) return;
+        if (planet1 === undefined || planet1 === null || planet2 === undefined || planet2 === null) return;
 
         const angle1 = (planet1.position - 90) * Math.PI / 180;
         const angle2 = (planet2.position - 90) * Math.PI / 180;
@@ -396,14 +426,14 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       .attr('fill', '#333333');
 
     // Cleanup function
-    return () => {
+    return (): void => {
       svg.selectAll('*').remove();
     };
   }, [data, showAspects, showAnimation, chartConstants]);
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     setIsAnimating(true);
-    refetch().finally(() => setIsAnimating(false));
+    void refetch().finally(() => setIsAnimating(false));
   };
 
   if (isLoading && !preTransformedData) return (
