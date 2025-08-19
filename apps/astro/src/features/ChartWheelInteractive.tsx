@@ -1,15 +1,42 @@
 /**
- * Advanced Interactive Chart Wheel with Real-Time Features
+ * Advanced Interactive Chart Wheel Features
  * Enhanced version with tooltips, animations, and real-time updates
  */
 
-import { useEffect, useRef, memo, useState, useMemo, useCallback } from 'react';
+interface APIPlanetData {
+  position: number;
+  retrograde?: boolean;
+  speed?: number;
+}
+
+interface APIHouseData {
+  house: number;
+  cusp: number;
+  sign?: string;
+}
+
+interface APIChartData {
+  planets?: Record<string, APIPlanetData>;
+  houses?: Record<string, APIHouseData>;
+  aspects?: Array<{
+    point1: string;
+    point2: string;
+    aspect: string;
+    orb: number;
+  }>;
+  angles?: {
+    ascendant: number;
+    midheaven: number;
+    descendant: number;
+    imumcoeli: number;
+  };
+}
+
+import React, { useEffect, useRef, memo, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
-import { fetchChartData, type ChartBirthData, type ChartData as APIChartData } from '../services/api';
-import { getChartSyncService, type ChartDataSync } from '../services/chartSyncService';
+import { fetchChartData, type ChartBirthData } from '../services/api';
 import { Button } from '@cosmichub/ui';
-import { getNotificationManager } from '../services/notificationManager';
 import styles from './ChartWheelInteractive.module.css';
 
 // Enhanced interfaces for interactivity
@@ -95,12 +122,13 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
   });
 
   // Fetch natal chart data
-  const { data: fetchedData, isLoading, error, refetch } = useQuery<ChartData>({
+  const { data: fetchedData, isLoading, error, refetch } = useQuery<ChartData, Error>({
     queryKey: ['chartData', birthData],
     queryFn: async () => {
       if (!birthData) throw new Error('Birth data required');
       const response = await fetchChartData(birthData);
-      return transformAPIResponseToChartData(response);
+      // First cast to unknown, then to our internal API type
+      return transformAPIResponseToChartData(response as unknown as APIChartData);
     },
     enabled: !!birthData && !preTransformedData,
     staleTime: 5 * 60 * 1000,
@@ -125,56 +153,73 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         city: 'Greenwich'
       };
       const response = await fetchChartData(transitBirthData);
-      return response.planets || {};
+      return response.planets ?? {};
     },
-    enabled: realTimeUpdates && interactiveState.showTransits,
+    enabled: realTimeUpdates === true && interactiveState.showTransits === true,
     refetchInterval: 60000, // Update every minute
     staleTime: 30000
   });
 
-  const data = preTransformedData || fetchedData;
+  const data = preTransformedData ?? fetchedData;
 
   // Transform API response
   const transformAPIResponseToChartData = (apiData: APIChartData): ChartData => {
     const transformedPlanets: Record<string, Planet> = {};
-    Object.entries(apiData.planets || {}).forEach(([name, planetData]: [string, any]) => {
-      transformedPlanets[name] = {
-        name,
-        position: planetData.position,
-        retrograde: planetData.retrograde || false,
-        speed: planetData.speed || 0,
-        house: calculateHouseForPlanet(planetData.position, apiData.houses)
-      };
+    Object.entries(apiData.planets ?? {}).forEach(([name, planetData]) => {
+      if (typeof planetData === 'object' && planetData !== null) {
+        transformedPlanets[name] = {
+          name,
+          position: typeof planetData.position === 'number' ? planetData.position : 0,
+          retrograde: Boolean(planetData.retrograde),
+          speed: typeof planetData.speed === 'number' ? planetData.speed : 0,
+          house: typeof planetData.position === 'number' ? calculateHouseForPlanet(planetData.position) : 1
+        };
+      }
     });
 
     const transformedHouses: House[] = [];
-    Object.entries(apiData.houses || {}).forEach(([houseKey, houseData]: [string, any]) => {
-      transformedHouses.push({
-        number: houseData.house,
-        cusp: houseData.cusp,
-        sign: houseData.sign || '',
-        planets: []
-      });
+    Object.entries(apiData.houses ?? {}).forEach(([, houseData]) => {
+      if (typeof houseData === 'object' && houseData !== null && 'house' in houseData) {
+        transformedHouses.push({
+          number: typeof houseData.house === 'number' ? houseData.house : 1,
+          cusp: typeof houseData.cusp === 'number' ? houseData.cusp : 0,
+          sign: typeof houseData.sign === 'string' ? houseData.sign : '',
+          planets: []
+        });
+      }
     });
 
     // Add planets to houses
     Object.entries(transformedPlanets).forEach(([planetName, planet]) => {
       const house = transformedHouses.find(h => h.number === planet.house);
       if (house) {
-        house.planets = house.planets || [];
+        house.planets = house.planets ?? [];
         house.planets.push(planetName);
       }
     });
 
-    const transformedAspects = (apiData.aspects || []).map((aspect: any) => ({
-      planet1: aspect.point1,
-      planet2: aspect.point2,
-      angle: getAspectAngle(aspect.aspect),
-      orb: aspect.orb,
-      type: aspect.aspect.toLowerCase() as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx',
-      applying: false,
-      strength: getAspectStrength(aspect.orb)
-    }));
+    const transformedAspects = (apiData.aspects ?? []).map((aspect) => {
+      const aspectData = aspect as { point1: string; point2: string; aspect: string; orb: number };
+      if (
+        aspectData !== null && 
+        aspectData !== undefined &&
+        typeof aspectData.point1 === 'string' &&
+        typeof aspectData.point2 === 'string' &&
+        typeof aspectData.aspect === 'string' &&
+        typeof aspectData.orb === 'number'
+      ) {
+        return {
+          planet1: aspectData.point1,
+          planet2: aspectData.point2,
+          angle: getAspectAngle(aspectData.aspect),
+          orb: aspectData.orb,
+          type: aspectData.aspect.toLowerCase() as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx',
+          applying: false,
+          strength: getAspectStrength(aspectData.orb)
+        };
+      }
+      return null;
+    }).filter((aspect): aspect is NonNullable<typeof aspect> => aspect !== null);
 
     return {
       planets: transformedPlanets,
@@ -186,7 +231,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
   };
 
   // Utility functions
-  const calculateHouseForPlanet = (position: number, houses: any): number => {
+  const calculateHouseForPlanet = (position: number): number => {
     // Simple house calculation - in production, use more accurate method
     return Math.floor(position / 30) + 1;
   };
@@ -196,7 +241,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       'conjunction': 0, 'opposition': 180, 'trine': 120,
       'square': 90, 'sextile': 60, 'quincunx': 150
     };
-    return aspectAngles[aspectType.toLowerCase()] || 0;
+    return aspectAngles[aspectType.toLowerCase()] ?? 0;
   };
 
   const getAspectStrength = (orb: number): 'strong' | 'medium' | 'weak' => {
@@ -211,7 +256,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       ...prev,
       selectedPlanet: prev.selectedPlanet === planetName ? null : planetName,
       highlightedAspects: prev.selectedPlanet === planetName ? [] : 
-        (data?.aspects?.filter(a => a.planet1 === planetName || a.planet2 === planetName).map(a => `${a.planet1}-${a.planet2}`) || [])
+        (data?.aspects?.filter(a => a.planet1 === planetName || a.planet2 === planetName).map(a => `${a.planet1}-${a.planet2}`) ?? [])
     }));
     onPlanetSelect?.(planetName);
   }, [data?.aspects, onPlanetSelect]);
@@ -274,7 +319,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
 
   // Main chart rendering effect
   useEffect(() => {
-    if (!data || !svgRef.current) return;
+    if (data === undefined || data === null || svgRef.current === null) return;
 
     const { width, height, radius, center, signs, signSymbols, signColors, planetSymbols, planetColors, aspectColors } = chartConstants;
 
@@ -334,16 +379,16 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         .endAngle(endAngle);
 
       g.append('path')
-        .attr('d', arc as any)
+        .attr('d', arc as unknown as string)
         .attr('fill', `url(#signGradient${index})`)
         .attr('stroke', '#ffffff')
         .attr('stroke-width', 1)
         .style('cursor', 'pointer')
-        .on('mouseover', function(event) {
+        .on('mouseover', function(this: SVGPathElement, event: MouseEvent) {
           d3.select(this).attr('fill-opacity', 0.8);
           showTooltip(`<strong>${sign}</strong><br/>Element: ${getSignElement(sign)}<br/>Quality: ${getSignQuality(sign)}`, event);
         })
-        .on('mouseout', function() {
+        .on('mouseout', function(this: SVGPathElement) {
           d3.select(this).attr('fill-opacity', 1);
           hideTooltip();
         });
@@ -392,8 +437,8 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         .attr('fill', '#2c3e50')
         .text((i + 1).toString())
         .style('cursor', 'pointer')
-        .on('mouseover', function(event) {
-          showTooltip(`<strong>House ${i + 1}</strong><br/>Sign: ${houseData?.sign || 'Unknown'}<br/>Planets: ${houseData?.planets?.join(', ') || 'None'}`, event);
+        .on('mouseover', function(this: SVGTextElement, event: MouseEvent) {
+          showTooltip(`<strong>House ${i + 1}</strong><br/>Sign: ${houseData?.sign ?? 'Unknown'}<br/>Planets: ${houseData?.planets?.join(', ') ?? 'None'}`, event);
         })
         .on('mouseout', hideTooltip);
     }
@@ -410,18 +455,18 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         .attr('class', 'planet-group')
         .style('cursor', 'pointer')
         .on('click', () => handlePlanetClick(name))
-        .on('mouseover', function(event) {
+        .on('mouseover', function(this: SVGGElement, event: MouseEvent) {
           d3.select(this).select('circle').attr('r', 25);
           const tooltipContent = `
             <strong>${name.charAt(0).toUpperCase() + name.slice(1)}</strong><br/>
             Position: ${formatDegree(planet.position)}<br/>
             House: ${planet.house}<br/>
-            ${planet.retrograde ? '<span style="color: red;">Retrograde ℞</span>' : 'Direct'}
+            ${planet.retrograde === true ? '<span style="color: red;">Retrograde ℞</span>' : 'Direct'}
           `;
           showTooltip(tooltipContent, event);
         })
-        .on('mouseout', function() {
-          if (!isSelected) {
+        .on('mouseout', function(this: SVGGElement) {
+          if (isSelected === false) {
             d3.select(this).select('circle').attr('r', 20);
           }
           hideTooltip();
@@ -433,24 +478,24 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         .attr('cy', Math.sin(angle) * planetRadius)
         .attr('r', isSelected ? 25 : 20)
         .attr('fill', isSelected ? planetColors[name] : '#ffffff')
-        .attr('stroke', planetColors[name] || '#333333')
+        .attr('stroke', planetColors[name] ?? '#333333')
         .attr('stroke-width', isHighlighted ? 4 : 2)
         .attr('fill-opacity', 0.9)
         .style('filter', isSelected ? 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' : 'none');
 
       // Planet symbol
-      const planetSymbol = planetGroup.append('text')
+      planetGroup.append('text')
         .attr('x', Math.cos(angle) * planetRadius)
         .attr('y', Math.sin(angle) * planetRadius)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .attr('font-size', isSelected ? '20' : '16')
         .attr('font-weight', 'bold')
-        .attr('fill', isSelected ? '#ffffff' : planetColors[name] || '#333333')
-        .text(planetSymbols[name] || name.slice(0, 2).toUpperCase());
+        .attr('fill', isSelected ? '#ffffff' : planetColors[name] ?? '#333333')
+        .text(planetSymbols[name] ?? name.slice(0, 2).toUpperCase());
 
       // Retrograde indicator
-      if (planet.retrograde) {
+      if (planet.retrograde === true) {
         planetGroup.append('text')
           .attr('x', Math.cos(angle) * planetRadius + 15)
           .attr('y', Math.sin(angle) * planetRadius - 15)
@@ -463,7 +508,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       }
 
       // Animation
-      if (showAnimation) {
+      if (showAnimation === true) {
         planetGroup
           .style('opacity', 0)
           .transition()
@@ -474,16 +519,16 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     });
 
     // Draw transits if enabled
-    if (interactiveState.showTransits && transitData) {
+    if (interactiveState.showTransits === true && transitData !== undefined && transitData !== null) {
       Object.entries(transitData).forEach(([name, planet]) => {
-        if (!data.planets[name]) return; // Only show transits for natal planets
+        if (data.planets[name] === undefined || data.planets[name] === null) return; // Only show transits for natal planets
 
         const angle = (planet.position - 90) * Math.PI / 180;
         
         const transitGroup = g.append('g')
           .attr('class', 'transit-group')
           .style('cursor', 'pointer')
-          .on('mouseover', function(event) {
+          .on('mouseover', function(this: SVGGElement, event: MouseEvent) {
             const tooltipContent = `
               <strong>Transit ${name.charAt(0).toUpperCase() + name.slice(1)}</strong><br/>
               Current Position: ${formatDegree(planet.position)}<br/>
@@ -499,7 +544,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
           .attr('cy', Math.sin(angle) * transitRadius)
           .attr('r', 15)
           .attr('fill', 'none')
-          .attr('stroke', planetColors[name] || '#333333')
+          .attr('stroke', planetColors[name] ?? '#333333')
           .attr('stroke-width', 2)
           .attr('stroke-dasharray', '3,3');
 
@@ -511,8 +556,8 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
           .attr('dominant-baseline', 'middle')
           .attr('font-size', '12')
           .attr('font-weight', 'bold')
-          .attr('fill', planetColors[name] || '#333333')
-          .text(planetSymbols[name] || name.slice(0, 1).toUpperCase());
+          .attr('fill', planetColors[name] ?? '#333333')
+          .text(planetSymbols[name] ?? name.slice(0, 1).toUpperCase());
 
         // Connect transit to natal position
         const natalAngle = (data.planets[name].position - 90) * Math.PI / 180;
@@ -529,12 +574,12 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     }
 
     // Draw aspects with enhanced interactivity
-    if (showAspects && data.aspects) {
+    if (showAspects === true && data.aspects !== undefined && data.aspects !== null) {
       data.aspects.forEach((aspect, index) => {
         const planet1 = data.planets[aspect.planet1];
         const planet2 = data.planets[aspect.planet2];
         
-        if (!planet1 || !planet2) return;
+        if (planet1 === undefined || planet1 === null || planet2 === undefined || planet2 === null) return;
 
         const angle1 = (planet1.position - 90) * Math.PI / 180;
         const angle2 = (planet2.position - 90) * Math.PI / 180;
@@ -547,13 +592,13 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
           .attr('y1', Math.sin(angle1) * aspectRadius)
           .attr('x2', Math.cos(angle2) * aspectRadius)
           .attr('y2', Math.sin(angle2) * aspectRadius)
-          .attr('stroke', aspectColors[aspect.type] || '#666666')
+          .attr('stroke', aspectColors[aspect.type] ?? '#666666')
           .attr('stroke-width', isHighlighted ? 3 : (aspect.strength === 'strong' ? 2 : 1))
           .attr('stroke-opacity', isHighlighted ? 0.8 : 0.4)
           .attr('stroke-dasharray', getAspectDashArray(aspect.type))
           .style('cursor', 'pointer')
           .on('click', () => handleAspectClick(aspect))
-          .on('mouseover', function(event) {
+          .on('mouseover', function(this: SVGLineElement, event: MouseEvent) {
             d3.select(this).attr('stroke-opacity', 0.8).attr('stroke-width', 3);
             const tooltipContent = `
               <strong>${aspect.type.charAt(0).toUpperCase() + aspect.type.slice(1)}</strong><br/>
@@ -563,15 +608,15 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
             `;
             showTooltip(tooltipContent, event);
           })
-          .on('mouseout', function() {
-            if (!isHighlighted) {
+          .on('mouseout', function(this: SVGLineElement) {
+            if (isHighlighted === false) {
               d3.select(this).attr('stroke-opacity', 0.4).attr('stroke-width', aspect.strength === 'strong' ? 2 : 1);
             }
             hideTooltip();
           });
 
         // Animation for aspects
-        if (showAnimation) {
+        if (showAnimation === true) {
           line
             .attr('stroke-dashoffset', 100)
             .transition()
@@ -625,7 +670,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       Leo: 'Fire', Virgo: 'Earth', Libra: 'Air', Scorpio: 'Water',
       Sagittarius: 'Fire', Capricorn: 'Earth', Aquarius: 'Air', Pisces: 'Water'
     };
-    return elements[sign] || 'Unknown';
+    return elements[sign] ?? 'Unknown';
   };
 
   const getSignQuality = (sign: string): string => {
@@ -634,7 +679,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       Leo: 'Fixed', Virgo: 'Mutable', Libra: 'Cardinal', Scorpio: 'Fixed',
       Sagittarius: 'Mutable', Capricorn: 'Cardinal', Aquarius: 'Fixed', Pisces: 'Mutable'
     };
-    return qualities[sign] || 'Unknown';
+    return qualities[sign] ?? 'Unknown';
   };
 
   const getAspectDashArray = (aspectType: string): string => {
@@ -650,17 +695,17 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
   };
 
   // Control handlers
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     setIsAnimating(true);
-    refetch().finally(() => setIsAnimating(false));
+    void refetch().finally(() => setIsAnimating(false));
   };
 
-  const toggleTransits = () => {
-    setInteractiveState(prev => ({ ...prev, showTransits: !prev.showTransits }));
+  const toggleTransits = (): void => {
+    setInteractiveState((prev): InteractiveState => ({ ...prev, showTransits: !prev.showTransits }));
   };
 
-  const resetSelection = () => {
-    setInteractiveState(prev => ({
+  const resetSelection = (): void => {
+    setInteractiveState((prev): InteractiveState => ({
       ...prev,
       selectedPlanet: null,
       highlightedAspects: [],
@@ -669,8 +714,8 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     }));
   };
 
-  const handleZoom = (direction: 'in' | 'out') => {
-    setInteractiveState(prev => ({
+  const handleZoom = (direction: 'in' | 'out'): void => {
+    setInteractiveState((prev): InteractiveState => ({
       ...prev,
       zoomLevel: Math.max(0.5, Math.min(2, prev.zoomLevel + (direction === 'in' ? 0.1 : -0.1)))
     }));
@@ -739,15 +784,15 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         </div>
 
         {/* Selection Info */}
-        {interactiveState.selectedPlanet && (
+        {interactiveState.selectedPlanet !== null && interactiveState.selectedPlanet !== undefined && (
           <div className={styles.selectionInfo}>
             <h4 className="text-cosmic-gold font-semibold mb-2">
               Selected: {interactiveState.selectedPlanet.charAt(0).toUpperCase() + interactiveState.selectedPlanet.slice(1)}
             </h4>
             <div className="text-cosmic-silver text-sm space-y-1">
-              <div>Position: {formatDegree(data.planets[interactiveState.selectedPlanet]?.position || 0)}</div>
+              <div>Position: {formatDegree(data.planets[interactiveState.selectedPlanet]?.position ?? 0)}</div>
               <div>House: {data.planets[interactiveState.selectedPlanet]?.house}</div>
-              {data.planets[interactiveState.selectedPlanet]?.retrograde && (
+              {data.planets[interactiveState.selectedPlanet]?.retrograde === true && (
                 <div className="text-red-400">Status: Retrograde ℞</div>
               )}
               {interactiveState.highlightedAspects.length > 0 && (
@@ -772,7 +817,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         />
 
         {/* Legend */}
-        {data.aspects && showAspects && (
+        {data.aspects !== undefined && data.aspects !== null && showAspects === true && (
           <div className={styles.chartLegend}>
             <div>
               <h5 className="font-semibold text-gray-800 mb-2">Major Aspects ({data.aspects.length})</h5>
@@ -789,7 +834,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
               </div>
             </div>
 
-            {interactiveState.showTransits && (
+            {interactiveState.showTransits === true && (
               <div>
                 <h5 className="font-semibold text-gray-800 mb-2">Transits</h5>
                 <div className="text-gray-600 text-xs">
