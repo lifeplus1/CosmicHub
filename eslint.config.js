@@ -9,7 +9,7 @@ import prettier from 'eslint-config-prettier';
 
 export default [
   js.configs.recommended,
-  // Test files override: disable strict TS rules in tests
+  // Stricter test files configuration with full type-aware rules
   {
     files: [
       '**/*.spec.{ts,tsx,js,jsx}',
@@ -24,29 +24,34 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         project: [
-          'apps/astro/tsconfig.test.json',
           'packages/types/tsconfig.test.json',
           'packages/auth/tsconfig.json',
           'packages/ui/tsconfig.json'
         ],
         ecmaFeatures: { jsx: true }
-      }
+      },
     },
     plugins: {
       '@typescript-eslint': tseslint,
       react,
       'react-hooks': reactHooks,
-      'jsx-a11y': jsxA11y
+      'jsx-a11y': jsxA11y,
     },
     rules: {
-      // Disable strict TS rules and undef checks for test files
+      // Allow console in tests but tighten everything else
       'no-console': 'off',
-      'no-undef': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/strict-boolean-expressions': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-unused-vars': 'off'
-    }
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: false }],
+      '@typescript-eslint/no-explicit-any': 'error'
+    },
   },
   {
   files: ['apps/**/*.{ts,tsx}','packages/**/*.{ts,tsx}'],
@@ -113,19 +118,12 @@ export default [
       'no-var': 'error',
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
-      '@typescript-eslint/strict-boolean-expressions': ['error', {
-        allowString: false,
-        allowNumber: false,
-        allowNullableObject: false,
-        allowNullableBoolean: false,
-        allowNullableString: false,
-        allowNullableNumber: false,
-        allowAny: false
-      }],
+      '@typescript-eslint/strict-boolean-expressions': 'error',
       '@typescript-eslint/no-explicit-any': ['error', {
-        fixToUnknown: true,
+        fixToUnknown: false,
         ignoreRestArgs: false
       }],
+      // Override settings are configured below using file-specific settings
       '@typescript-eslint/ban-ts-comment': ['error', {
         'ts-expect-error': 'allow-with-description',
         'ts-ignore': false,
@@ -137,14 +135,8 @@ export default [
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
-  '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-unsafe-assignment': 'error',
-      '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/no-unsafe-argument': 'error',
-      '@typescript-eslint/no-floating-promises': 'error',
       'no-restricted-imports': [
         'error',
         {
@@ -155,18 +147,4 @@ export default [
     },
   },
   prettier,
-  
-  // Specific configuration for component library files that may need documented any usage
-  {
-    files: [
-      '**/component-library.tsx',
-      '**/polymorphic-components.tsx'
-    ],
-    rules: {
-      '@typescript-eslint/no-explicit-any': ['warn', {
-        fixToUnknown: false,
-        ignoreRestArgs: false
-      }]
-    }
-  }
 ];

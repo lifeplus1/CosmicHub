@@ -10,8 +10,8 @@ import { devConsole } from '../config/environment';
 interface PdfExportProps {
   chartData?: ChartData;
   birthInfo?: BirthData;
-  synastryData?: any;
-  multiSystemData?: any;
+  synastryData?: unknown;
+  multiSystemData?: unknown;
 }
 
 interface ExportOptions {
@@ -53,7 +53,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
             throw new Error('Chart data is required for standard PDF export');
           }
           // Use serialization utility to ensure consistent data format
-          const serializedChartData = serializeAstrologyData(chartData as unknown as AstrologyChart);
+          const serializedChartData = serializeAstrologyData(chartData as any);
           exportData = {
             chart_data: { chart: JSON.parse(serializedChartData) },
             birth_info: birthInfo,
@@ -73,7 +73,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
               report_type: 'synastry'
             };
           } catch (serializationError) {
-            devConsole.warn('Could not serialize synastry data, using raw data:', serializationError);
+            devConsole.warn?.('Could not serialize synastry data, using raw data:', serializationError);
             exportData = {
               chart_data: { synastry: synastryData },
               report_type: 'synastry'
