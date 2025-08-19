@@ -1,4 +1,11 @@
 import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 
 interface AudioPlayerProps {
   frequency?: number;
@@ -26,9 +33,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
 
   const initializeAudio = useCallback(async () => {
     try {
-      if (!audioContextRef.current) {
+      if (audioContextRef.current == null) {
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContextClass) {
+        if (AudioContextClass == null) {
           throw new Error('Web Audio API not supported in this browser');
         }
 
@@ -44,12 +51,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize audio';
       setError(errorMessage);
-      console.error('Failed to initialize audio context:', error);
+  devConsole.error('Failed to initialize audio context:', error);
     }
   }, []);
 
   const createAudioNodes = useCallback(() => {
-    if (!audioContextRef.current) return;
+    if (audioContextRef.current == null) return;
 
     const context = audioContextRef.current;
 
@@ -93,12 +100,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create audio nodes';
       setError(errorMessage);
-      console.error('Failed to create audio nodes:', error);
+  devConsole.error('Failed to create audio nodes:', error);
     }
   }, [frequency, binauralBeat, volume]);
 
   const stopAudio = useCallback(() => {
-    if (!audioContextRef.current) return;
+    if (audioContextRef.current == null) return;
 
     try {
       const context = audioContextRef.current;
@@ -147,12 +154,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
       }, fadeTime * 1000);
 
     } catch (error) {
-      console.error('Error stopping audio:', error);
+  devConsole.error('Error stopping audio:', error);
     }
   }, []);
 
   useEffect(() => {
-    if (!isInitialized) {
+    if (isInitialized === false) {
       initializeAudio();
       return;
     }
@@ -165,7 +172,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
   }, [isPlaying, isInitialized, createAudioNodes, stopAudio, initializeAudio]);
 
   useEffect(() => {
-    if (!isPlaying || !leftOscillatorRef.current || !rightOscillatorRef.current) return;
+    if (isPlaying === false || leftOscillatorRef.current == null || rightOscillatorRef.current == null) return;
 
     const context = audioContextRef.current;
     if (!context) return;
@@ -178,7 +185,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
   }, [frequency, binauralBeat, isPlaying]);
 
   useEffect(() => {
-    if (!isPlaying || !leftGainRef.current || !rightGainRef.current) return;
+    if (isPlaying === false || leftGainRef.current == null || rightGainRef.current == null) return;
 
     const context = audioContextRef.current;
     if (!context) return;
@@ -191,19 +198,19 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
     return () => {
       stopAudio();
       if (audioContextRef.current) {
-        audioContextRef.current.close().catch(console.error);
+  audioContextRef.current.close().catch(devConsole.error);
       }
     };
   }, [stopAudio]);
 
   useEffect(() => {
-    if (error && onPlayStateChange) {
+    if (error != null && onPlayStateChange != null) {
       onPlayStateChange(false);
     }
   }, [error, onPlayStateChange]);
 
   if (error) {
-    console.warn('AudioPlayer Error:', error);
+  devConsole.warn?.('AudioPlayer Error:', error);
   }
 
   return null;

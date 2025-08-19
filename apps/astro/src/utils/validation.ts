@@ -90,9 +90,12 @@ export const synastryResponseSchema = z.object({
 });
 
 // Form validation helpers
-export const validateBirthData = (data: unknown) => {
+export type ValidationResult<T> = { data: T; error?: never } | { data?: never; error: z.ZodError<T>['errors'] | string };
+
+export const validateBirthData = (data: unknown): ValidationResult<z.infer<typeof birthDataSchema>> => {
   try {
-    return birthDataSchema.parse(data);
+    const validated = birthDataSchema.parse(data);
+    return { data: validated };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors };
@@ -101,9 +104,10 @@ export const validateBirthData = (data: unknown) => {
   }
 };
 
-export const validateUserProfile = (data: unknown) => {
+export const validateUserProfile = (data: unknown): ValidationResult<z.infer<typeof userProfileSchema>> => {
   try {
-    return userProfileSchema.parse(data);
+    const validated = userProfileSchema.parse(data);
+    return { data: validated };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors };
@@ -112,9 +116,10 @@ export const validateUserProfile = (data: unknown) => {
   }
 };
 
-export const validateHealwaveSession = (data: unknown) => {
+export const validateHealwaveSession = (data: unknown): ValidationResult<z.infer<typeof healwaveSessionSchema>> => {
   try {
-    return healwaveSessionSchema.parse(data);
+    const validated = healwaveSessionSchema.parse(data);
+    return { data: validated };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors };
@@ -124,32 +129,55 @@ export const validateHealwaveSession = (data: unknown) => {
 };
 
 // Date and time validation utilities
-export const isValidDate = (dateString: string): boolean => {
+export const isValidDate = (dateString: string | undefined | null): boolean => {
+  if (dateString === undefined || dateString === null || dateString === '') {
+    return false;
+  }
   const date = new Date(dateString);
-  return !isNaN(date.getTime()) && date.getFullYear() > 1900 && date.getFullYear() < 2100;
+  const time = date.getTime();
+  if (Number.isNaN(time)) {
+    return false;
+  }
+  const year = date.getFullYear();
+  return year >= 1901 && year < 2100;
 };
 
-export const isValidTime = (timeString: string): boolean => {
+export const isValidTime = (timeString: string | undefined | null): boolean => {
+  if (timeString === undefined || timeString === null || timeString === '') {
+    return false;
+  }
   const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
   return timeRegex.test(timeString);
 };
 
-export const isValidLatitude = (lat: number): boolean => {
+export const isValidLatitude = (lat: number | undefined | null): boolean => {
+  if (lat === undefined || lat === null || Number.isNaN(lat)) {
+    return false;
+  }
   return lat >= -90 && lat <= 90;
 };
 
-export const isValidLongitude = (lng: number): boolean => {
+export const isValidLongitude = (lng: number | undefined | null): boolean => {
+  if (lng === undefined || lng === null || Number.isNaN(lng)) {
+    return false;
+  }
   return lng >= -180 && lng <= 180;
 };
 
 // Sanitization utilities
-export const sanitizeString = (input: string): string => {
+export const sanitizeString = (input: string | undefined | null): string => {
+  if (input === undefined || input === null || input === '') {
+    return '';
+  }
   return input.trim().replace(/[<>]/g, '');
 };
 
-export const sanitizeNumericInput = (input: string): number | null => {
+export const sanitizeNumericInput = (input: string | undefined | null): number | null => {
+  if (input === undefined || input === null || input === '') {
+    return null;
+  }
   const num = parseFloat(input);
-  return isNaN(num) ? null : num;
+  return Number.isNaN(num) ? null : num;
 };
 
 export type BirthData = z.infer<typeof birthDataSchema>;

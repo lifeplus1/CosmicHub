@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
+import { isNonEmptyString, safeJsonParse } from '@/utils/typeGuards';
 
 interface UsageData {
   chartsThisMonth: number;
@@ -19,53 +20,47 @@ export const useUsageTracking = () => {
   useEffect(() => {
     if (!user) return;
 
-    const stored = localStorage.getItem(`usage_${user.uid}`);
-    if (stored) {
-      const parsedUsage = JSON.parse(stored);
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      
-      // Reset monthly counter if it's a new month
-      if (parsedUsage.lastReset !== currentMonth) {
-        const resetUsage = {
-          ...parsedUsage,
-          chartsThisMonth: 0,
-          lastReset: currentMonth
-        };
-        setUsage(resetUsage);
-        localStorage.setItem(`usage_${user.uid}`, JSON.stringify(resetUsage));
-      } else {
-        setUsage(parsedUsage);
-      }
+    const key = `usage_${user.uid}`;
+    const stored = localStorage.getItem(key);
+    if (!isNonEmptyString(stored)) return;
+
+    const parsedUsage = safeJsonParse<Partial<UsageData>>(stored, {});
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const lastReset = isNonEmptyString(parsedUsage.lastReset) ? parsedUsage.lastReset : currentMonth;
+
+    // Build merged usage with sane defaults
+    const merged: UsageData = {
+      chartsThisMonth: typeof parsedUsage.chartsThisMonth === 'number' ? parsedUsage.chartsThisMonth : 0,
+      savedCharts: typeof parsedUsage.savedCharts === 'number' ? parsedUsage.savedCharts : 0,
+      lastReset
+    };
+
+    if (merged.lastReset !== currentMonth) {
+      const resetUsage: UsageData = { ...merged, chartsThisMonth: 0, lastReset: currentMonth };
+      setUsage(resetUsage);
+      localStorage.setItem(key, JSON.stringify(resetUsage));
+    } else {
+      setUsage(merged);
     }
   }, [user]);
 
   // Save usage to localStorage whenever it changes
   useEffect(() => {
-    if (user) {
-      localStorage.setItem(`usage_${user.uid}`, JSON.stringify(usage));
-    }
+    if (!user) return;
+    localStorage.setItem(`usage_${user.uid}`, JSON.stringify(usage));
   }, [usage, user]);
 
-  const incrementChartCalculation = () => {
-    setUsage(prev => ({
-      ...prev,
-      chartsThisMonth: prev.chartsThisMonth + 1
-    }));
-  };
+  const incrementChartCalculation = useCallback(() => {
+    setUsage(prev => ({ ...prev, chartsThisMonth: prev.chartsThisMonth + 1 }));
+  }, []);
 
-  const incrementSavedChart = () => {
-    setUsage(prev => ({
-      ...prev,
-      savedCharts: prev.savedCharts + 1
-    }));
-  };
+  const incrementSavedChart = useCallback(() => {
+    setUsage(prev => ({ ...prev, savedCharts: prev.savedCharts + 1 }));
+  }, []);
 
-  const decrementSavedChart = () => {
-    setUsage(prev => ({
-      ...prev,
-      savedCharts: Math.max(0, prev.savedCharts - 1)
-    }));
-  };
+  const decrementSavedChart = useCallback(() => {
+    setUsage(prev => ({ ...prev, savedCharts: Math.max(0, prev.savedCharts - 1) }));
+  }, []);
 
   return {
     usage,

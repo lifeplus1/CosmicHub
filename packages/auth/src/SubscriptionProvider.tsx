@@ -1,11 +1,30 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { useAuth } from './index';
+// Local lightweight logger (avoids depending on config devConsole if not exported)
+const safeLogger = {
+  error: (...args: unknown[]) => { void args.length; },
+  warn: (...args: unknown[]) => { void args.length; }
+};
 
 // Re-export types from integrations package
 export type { UserSubscription, SubscriptionPlan } from '@cosmichub/integrations';
 
+// Basic shape we rely on from integrations package. (Kept intentionally minimal)
+export interface BasicSubscription {
+  tier: string; // e.g. 'free' | 'premium' | 'elite'
+  status: string; // e.g. 'active'
+  currentPeriodEnd?: Date; // Normalized to Date within provider
+  [key: string]: unknown; // allow forward-compat extension
+}
+
+interface SubscriptionManagerLike {
+  loadUserSubscription: (user: unknown) => Promise<void>;
+  getCurrentSubscription: () => BasicSubscription | null | undefined;
+  checkFeatureAccess: (feature: string, app: 'astro' | 'healwave') => { canAccess: boolean };
+}
+
 export interface SubscriptionState {
-  subscription: any | null;
+  subscription: BasicSubscription | null;
   userTier: string;
   tier: string; // Alias for userTier for backwards compatibility
   isLoading: boolean;
@@ -15,7 +34,7 @@ export interface SubscriptionState {
   checkUsageLimit?: (limitType: string) => { allowed: boolean; current: number; limit: number };
 }
 
-interface SubscriptionContextType extends SubscriptionState {}
+type SubscriptionContextType = SubscriptionState;
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
@@ -24,86 +43,90 @@ interface SubscriptionProviderProps {
   appType: 'astro' | 'healwave';
 }
 
-export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ 
-  children, 
-  appType 
+export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
+  children,
+  appType
 }) => {
   const { user } = useAuth();
-  const [subscription, setSubscription] = useState<any | null>(null);
+  const [subscription, setSubscription] = useState<BasicSubscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [usageData, setUsageData] = useState({
     chartsThisMonth: 0,
     savedCharts: 0
   });
 
-  // Use integrations package for subscription management
-  const [subscriptionManager, setSubscriptionManager] = React.useState<any>(null);
+  // Use integrations package for subscription management (runtime loaded)
+  const [subscriptionManager, setSubscriptionManager] = React.useState<SubscriptionManagerLike | null>(null);
 
+  // Lazy-load subscription manager from integrations package; avoid holding on to stale ref
   React.useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const mod = await import('@cosmichub/integrations');
-        if (!cancelled) setSubscriptionManager((mod as any).subscriptionManager || (mod as any).default);
+        if (!cancelled) {
+          const candidate = (mod as Record<string, unknown>).subscriptionManager ?? (mod as Record<string, unknown>).default;
+          if (isSubscriptionManager(candidate)) {
+            setSubscriptionManager(candidate);
+          } else {
+            safeLogger.error('Loaded subscription manager does not match expected interface');
+          }
+        }
       } catch (e) {
-        console.error('Failed to load subscription manager', e);
+  safeLogger.error('Failed to load subscription manager', e);
       }
     })();
     return () => { cancelled = true; };
   }, []);
 
-  const refreshSubscription = async () => {
-    if (!user) {
+  const refreshSubscription = useCallback(async () => {
+  if (user === null || user === undefined) {
       setSubscription(null);
       setIsLoading(false);
       return;
     }
-
     setIsLoading(true);
     try {
-      if (!subscriptionManager) return; // still loading
-      // Check for mock users first
-      const email = user.email;
-      if (email?.includes('test')) {
-        // Handle mock users based on app type
+  if (subscriptionManager === null) return; // still loading
+  const email: string = typeof (user as { email?: unknown }).email === 'string' ? (user as { email: string }).email : '';
+      if (email.includes('test')) {
         const mockData = getMockSubscription(email, appType);
-        setSubscription(mockData.subscription);
+        setSubscription(normalizeSubscription(mockData.subscription));
         setUsageData(mockData.usage);
-        setIsLoading(false);
         return;
       }
-
-      // Real API call through integrations package
       await subscriptionManager.loadUserSubscription(user);
       const currentSub = subscriptionManager.getCurrentSubscription();
-      setSubscription(currentSub);
-      
-      // App-specific usage data handling
+      if (currentSub !== null && currentSub !== undefined) {
+        setSubscription(normalizeSubscription(currentSub));
+      } else {
+        setSubscription(null);
+      }
       if (appType === 'astro') {
-        // Fetch astro-specific usage
         const usageResponse = await fetch('/api/astro/usage', {
           headers: { Authorization: `Bearer ${await user.getIdToken()}` }
         });
         if (usageResponse.ok) {
-          const usage = await usageResponse.json();
-          setUsageData(usage);
+          const usage: unknown = await usageResponse.json();
+            if (isAstroUsage(usage)) setUsageData(usage);
         }
       }
-      
     } catch (error) {
-      console.error('Failed to fetch subscription:', error);
+      safeLogger.error('Failed to fetch subscription:', error);
       setSubscription(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, subscriptionManager, appType]);
 
-  const hasFeature = (feature: string, app?: 'astro' | 'healwave'): boolean => {
-    if (!subscriptionManager) return false;
-    return subscriptionManager.checkFeatureAccess(feature, app || appType).canAccess;
-  };
+  const hasFeature = useCallback((feature: string, app?: 'astro' | 'healwave'): boolean => {
+  if (subscriptionManager === null) return false;
+  const targetApp: 'astro' | 'healwave' = app ?? appType;
+  const accessResult = subscriptionManager.checkFeatureAccess(feature, targetApp);
+  return accessResult?.canAccess === true;
+  }, [subscriptionManager, appType]);
 
-  const upgradeRequired = (feature: string) => {
+  const upgradeRequired = useCallback((feature: string) => {
     // App-specific upgrade handling
     if (appType === 'astro') {
       // Use astro's upgrade modal system - try multiple possible paths
@@ -115,10 +138,13 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         
         for (const path of possiblePaths) {
           try {
-            const mod = await import(/* @vite-ignore */ path);
-            (mod as any).upgradeEventManager?.triggerUpgradeRequired(feature);
+            const mod: unknown = await import(/* @vite-ignore */ path);
+            const manager = (mod as Record<string, unknown>).upgradeEventManager as { triggerUpgradeRequired?: (f: string) => void } | undefined;
+            if (typeof manager?.triggerUpgradeRequired === 'function') {
+              manager.triggerUpgradeRequired(feature);
+            }
             return;
-          } catch (e) {
+          } catch {
             // Continue to next path
           }
         }
@@ -131,7 +157,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       };
       
       tryImportUpgradeEvents().catch(() => {
-        console.warn('Upgrade events module not available, using fallback');
+  safeLogger.warn('Upgrade events module not available, using fallback');
       });
     } else {
       // Use healwave's upgrade modal system
@@ -140,7 +166,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       });
       window.dispatchEvent(event);
     }
-  };
+  }, [appType]);
 
   const checkUsageLimit = (limitType: string) => {
     if (appType !== 'astro') {
@@ -160,15 +186,16 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     return { allowed: current < limit, current, limit };
   };
 
+  // Refresh when user or manager becomes available.
   useEffect(() => {
-    refreshSubscription();
-  }, [user]);
+    void refreshSubscription();
+  }, [refreshSubscription]);
 
   const value: SubscriptionContextType = {
     subscription,
-    userTier: subscription?.tier || 'free',
-    tier: subscription?.tier || 'free', // Alias for backwards compatibility
-    isLoading: isLoading || !subscriptionManager,
+  userTier: subscription?.tier ?? 'free',
+  tier: subscription?.tier ?? 'free', // Alias for backwards compatibility
+  isLoading: isLoading === true || subscriptionManager === null,
     hasFeature,
     upgradeRequired,
     refreshSubscription,
@@ -191,7 +218,8 @@ export const useSubscription = (): SubscriptionState => {
 };
 
 // Helper function for mock data
-function getMockSubscription(email: string, appType: 'astro' | 'healwave') {
+function getMockSubscription(email: string, _appType: 'astro' | 'healwave') { // appType reserved for future branching
+  void _appType; // reference param to avoid unused warning
   const baseData = {
     subscription: {
       status: 'active' as const,
@@ -218,4 +246,34 @@ function getMockSubscription(email: string, appType: 'astro' | 'healwave') {
   }
 
   return baseData;
+}
+
+// --- Helpers / Type Guards ---
+function isSubscriptionManager(value: unknown): value is SubscriptionManagerLike {
+  if (value === null || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.loadUserSubscription === 'function' &&
+    typeof v.getCurrentSubscription === 'function' &&
+    typeof v.checkFeatureAccess === 'function';
+}
+
+function normalizeSubscription(sub: unknown): BasicSubscription | null {
+  if (sub === null || typeof sub !== 'object') return null;
+  const s = sub as Record<string, unknown>;
+  const tier = typeof s.tier === 'string' ? s.tier : 'free';
+  const status = typeof s.status === 'string' ? s.status : 'inactive';
+  let currentPeriodEnd: Date | undefined;
+  if (s.currentPeriodEnd instanceof Date) currentPeriodEnd = s.currentPeriodEnd;
+  else if (typeof s.currentPeriodEnd === 'string') {
+    const d = new Date(s.currentPeriodEnd);
+    if (!Number.isNaN(d.getTime())) currentPeriodEnd = d;
+  }
+  return { tier, status, currentPeriodEnd };
+}
+
+interface AstroUsageShape { chartsThisMonth: number; savedCharts: number }
+function isAstroUsage(value: unknown): value is AstroUsageShape {
+  if (value === null || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.chartsThisMonth === 'number' && typeof v.savedCharts === 'number';
 }

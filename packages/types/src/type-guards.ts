@@ -1,7 +1,12 @@
 /**
- * Type Guards for Astrology Data Types
- * 
- * This module provides type predicates (type guards) for safely narrowing types
+ * Type Guards for Astrology Data Typesexport function isPlanet(value: unknown): value is Planet {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
+  
+  const obj = value as Record<string, unknown>;
+  
+  return (* This module provides type predicates (type guards) for safely narrowing types
  * at runtime. These guards allow for more precise type checking in TypeScript
  * and help prevent runtime errors by validating data structures.
  */
@@ -21,7 +26,9 @@ import type {
  * Type guard for Planet objects
  */
 export function isPlanet(value: unknown): value is Planet {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
@@ -40,7 +47,9 @@ export function isPlanet(value: unknown): value is Planet {
  * Type guard for House objects
  */
 export function isHouse(value: unknown): value is House {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
@@ -58,7 +67,9 @@ export function isHouse(value: unknown): value is House {
  * Type guard for Aspect objects
  */
 export function isAspect(value: unknown): value is Aspect {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
@@ -75,7 +86,9 @@ export function isAspect(value: unknown): value is Aspect {
  * Type guard for Asteroid objects
  */
 export function isAsteroid(value: unknown): value is Asteroid {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
@@ -91,7 +104,9 @@ export function isAsteroid(value: unknown): value is Asteroid {
  * Type guard for Angle objects
  */
 export function isAngle(value: unknown): value is Angle {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
@@ -108,7 +123,9 @@ export function isAngle(value: unknown): value is Angle {
  * Performs deep validation of nested structures
  */
 export function isAstrologyChart(value: unknown): value is AstrologyChart {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
@@ -143,14 +160,20 @@ export function isAstrologyChart(value: unknown): value is AstrologyChart {
  * Type guard for UserProfile objects
  */
 export function isUserProfile(value: unknown): value is UserProfile {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
-  if (typeof obj.userId !== 'string') return false;
+  if (typeof obj.userId !== 'string') {
+    return false;
+  }
   
   // Check birthData structure
-  if (!obj.birthData || typeof obj.birthData !== 'object') return false;
+  if (obj.birthData === null || obj.birthData === undefined || typeof obj.birthData !== 'object') {
+    return false;
+  }
   
   const birthData = obj.birthData as Record<string, unknown>;
   
@@ -165,7 +188,9 @@ export function isUserProfile(value: unknown): value is UserProfile {
  * Type guard for NumerologyData objects
  */
 export function isNumerologyData(value: unknown): value is NumerologyData {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
   
   const obj = value as Record<string, unknown>;
   
@@ -205,7 +230,7 @@ export function isAstrologyData(
 export function validateAstrologyChart(chart: unknown): string[] {
   const errors: string[] = [];
   
-  if (!chart || typeof chart !== 'object') {
+  if (chart === null || chart === undefined || typeof chart !== 'object') {
     return ['Chart must be an object'];
   }
   
@@ -280,14 +305,19 @@ export function validateAstrologyChart(chart: unknown): string[] {
  */
 export function safeParseAstrologyChart(jsonString: string): [AstrologyChart | null, string[]] {
   try {
-    const parsed = JSON.parse(jsonString);
+    const parsed = JSON.parse(jsonString) as Record<string, unknown>;
     const validationErrors = validateAstrologyChart(parsed);
     
     if (validationErrors.length > 0) {
       return [null, validationErrors];
     }
     
-    return [parsed as AstrologyChart, []];
+    // Only cast to AstrologyChart if it has passed validation
+    if (isAstrologyChart(parsed)) {
+      return [parsed, []];
+    }
+    
+    return [null, ['Invalid chart data structure']];
   } catch (error) {
     return [null, [(error instanceof Error) ? error.message : 'Unknown parsing error']];
   }

@@ -6,6 +6,7 @@ import { FaUser, FaCog, FaChartLine, FaSave, FaCreditCard, FaArrowUp, FaHistory,
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastProvider';
 import ProgressBar from '../components/ProgressBar';
+import { devConsole } from '../config/environment';
 // (Profile page currently does not use tier details directly; removed local subscription import)
 
 // Lazy load heavy components
@@ -55,10 +56,10 @@ const Profile: React.FC = React.memo(() => {
       navigate('/login');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      console.error('Sign out error:', error);
-      toast({ 
-        description: `Error signing out: ${errorMessage}`, 
-        status: 'error' 
+      devConsole.error('❌ Sign out error:', error);
+      toast({
+        description: `Error signing out: ${errorMessage}`,
+        status: 'error'
       });
     }
   }, [signOut, navigate, toast]);

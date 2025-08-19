@@ -19,12 +19,31 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Local devConsole (kept internal to avoid cross-package dependency)
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
+
 // Validate required config
-const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_PROJECT_ID', 'VITE_FIREBASE_APP_ID'];
-const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
+interface MinimalViteEnv {
+  VITE_FIREBASE_API_KEY?: string;
+  VITE_FIREBASE_PROJECT_ID?: string;
+  VITE_FIREBASE_APP_ID?: string;
+  [k: string]: string | undefined;
+}
+const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_PROJECT_ID', 'VITE_FIREBASE_APP_ID'] as const;
+const envRef: MinimalViteEnv = import.meta.env as unknown as MinimalViteEnv;
+const missingVars = requiredEnvVars.filter((varName) => {
+  const value = envRef[varName];
+  return value === undefined || value === null || value === '';
+});
 
 if (missingVars.length > 0) {
-  console.warn(`Missing required Firebase environment variables: ${missingVars.join(', ')}. Using mock auth.`);
+  devConsole.warn?.(`Missing required Firebase environment variables: ${missingVars.join(', ')}. Using mock auth.`);
 }
 
 //Initialize Firebase app (singleton pattern)
@@ -32,6 +51,11 @@ let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 let hasAuthAvailable = false;
+
+// Type guard for Firestore instance presence
+const hasFirestoreApp = (instance: unknown): instance is Firestore => {
+  return typeof instance === 'object' && instance !== null && 'app' in (instance as Record<string, unknown>);
+};
 
 try {
   // Check if Firebase app already exists
@@ -43,28 +67,32 @@ try {
     auth = getAuth(app);
     hasAuthAvailable = true;
   } catch (authError) {
-    console.warn('Firebase Auth initialization failed, using fallback:', authError);
+    devConsole.warn?.('Firebase Auth initialization failed, using fallback:', authError);
     // Create a proxy that warns instead of throwing
-    auth = new Proxy({} as Auth, {
+    /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+    auth = new Proxy({} as unknown as Auth, {
       get() {
-        console.warn('Firebase Auth not available - using mock auth instead');
-        return undefined;
+        devConsole.warn?.('Firebase Auth not available - using mock auth instead');
+        return undefined as unknown as never;
       }
     }) as Auth;
+    /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
     hasAuthAvailable = false;
   }
   
   try {
     db = getFirestore(app);
   } catch (dbError) {
-    console.warn('Firestore initialization failed:', dbError);
+    devConsole.warn?.('Firestore initialization failed:', dbError);
     // Create a proxy for Firestore as well
-    db = new Proxy({} as Firestore, {
+    /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+    db = new Proxy({} as unknown as Firestore, {
       get() {
-        console.warn('Firestore not available');
-        return undefined;
+        devConsole.warn?.('Firestore not available');
+        return undefined as unknown as never;
       }
     }) as Firestore;
+    /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
   }
 
   // Connect to emulators in development
@@ -76,26 +104,26 @@ try {
       if (!authEmulatorConnected && hasAuthAvailable) {
         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
         authEmulatorConnected = true;
-        console.log('🔥 Firebase Auth emulator connected - development mode');
+  devConsole.log?.('🔥 Firebase Auth emulator connected - development mode');
       }
-    } catch (error) {
-      console.log('Auth emulator already connected or unavailable');
+    } catch {
+      devConsole.log?.('Auth emulator already connected or unavailable');
     }
 
     try {
-      if (!firestoreEmulatorConnected && db && db.app) {
+  if (!firestoreEmulatorConnected && hasFirestoreApp(db)) {
         connectFirestoreEmulator(db, 'localhost', 8080);
         firestoreEmulatorConnected = true;
-        console.log('🔥 Firestore emulator connected - development mode');
+  devConsole.log?.('🔥 Firestore emulator connected - development mode');
       }
-    } catch (error) {
-      console.log('Firestore emulator already connected or unavailable');
+    } catch {
+      devConsole.log?.('Firestore emulator already connected or unavailable');
     }
   }
 
-  console.log(`🔥 Firebase initialized for project: ${firebaseConfig.projectId}`);
+  devConsole.log?.(`🔥 Firebase initialized for project: ${firebaseConfig.projectId}`);
 } catch (error) {
-  console.error('Firebase initialization failed:', error);
+  devConsole.error('Firebase initialization failed:', error);
   throw error;
 }
 
@@ -104,27 +132,27 @@ try {
  */
 export const enableFirestoreNetwork = async (): Promise<void> => {
   try {
-    if (db && db.app) {
+  if (hasFirestoreApp(db)) {
       await enableNetwork(db);
-      console.log('📡 Firestore network enabled');
+      devConsole.log?.('📡 Firestore network enabled');
     } else {
-      console.log('📡 Firestore not available, skipping network enable');
+      devConsole.log?.('📡 Firestore not available, skipping network enable');
     }
   } catch (error) {
-    console.warn('Failed to enable Firestore network:', error);
+    devConsole.warn?.('Failed to enable Firestore network:', error);
   }
 };
 
 export const disableFirestoreNetwork = async (): Promise<void> => {
   try {
-    if (db && db.app) {
+  if (hasFirestoreApp(db)) {
       await disableNetwork(db);
-      console.log('📡 Firestore network disabled');
+      devConsole.log?.('📡 Firestore network disabled');
     } else {
-      console.log('📡 Firestore not available, skipping network disable');
+      devConsole.log?.('📡 Firestore not available, skipping network disable');
     }
   } catch (error) {
-    console.warn('Failed to disable Firestore network:', error);
+    devConsole.warn?.('Failed to disable Firestore network:', error);
   }
 };
 

@@ -157,11 +157,23 @@ export const FEATURE_TOOLTIPS: Record<string, {
 };
 
 export const calculateYearlySavings = (monthly:number, yearly:number) => Math.round(((monthly*12 - yearly)/(monthly*12))*100);
-export const getUserTier = (subscription: { tier:string; status:string } | null) => (!subscription || subscription.status !== 'active') ? 'free' : subscription.tier;
-export const hasFeatureAccess = (userTier:string, requiredTier:string, tiers:Record<string, any>) => {
-  const order = Object.keys(tiers); return order.indexOf(userTier) >= order.indexOf(requiredTier);
+export const getUserTier = (subscription: { tier:string; status:string } | null) => {
+  if (subscription === null || subscription.status !== 'active') {
+    return 'free';
+  }
+  return subscription.tier;
 };
-export const getTierLimits = (tier: string, limit: keyof AstroSubscriptionTier['limits']) => COSMICHUB_TIERS[tier]?.limits[limit];
+export const hasFeatureAccess = (userTier:string, requiredTier:string, tiers:Record<string, HealwaveSubscriptionTier | AstroSubscriptionTier>) => {
+  const order = Object.keys(tiers);
+  return order.indexOf(userTier) >= order.indexOf(requiredTier);
+};
+export const getTierLimits = (tier: string, limit: keyof AstroSubscriptionTier['limits']) => {
+  const tierConfig = COSMICHUB_TIERS[tier];
+  if (tierConfig === undefined) {
+    return undefined;
+  }
+  return tierConfig.limits[limit];
+};
 
 // Backwards compatibility named export (legacy code may look for COSMICHUB_BASIC_TIERS)
 export { COSMICHUB_TIERS as COSMICHUB_BASIC_TIERS };

@@ -14,7 +14,7 @@ const SacredSequenceTab: React.FC<SacredSequenceTabProps> = React.memo(({
     onKeySelect(key);
   }, [onKeySelect]);
 
-  if (!geneKeysData.pearl_sequence) {
+  if (geneKeysData.pearl_sequence === null || geneKeysData.pearl_sequence === undefined) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-cosmic-silver/60">No Pearl Sequence data available</p>
@@ -50,6 +50,9 @@ const SacredSequenceTab: React.FC<SacredSequenceTabProps> = React.memo(({
             key={`${geneKey.number}-${index}`}
             className="transition-all duration-300 border cursor-pointer cosmic-card bg-gradient-to-br from-purple-800/20 to-violet-800/20 border-purple-500/20 hover:border-purple-400/40 group"
             onClick={() => handleKeyClick(geneKey)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleKeyClick(geneKey); } }}
           >
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">

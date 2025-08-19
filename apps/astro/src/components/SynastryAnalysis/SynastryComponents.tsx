@@ -37,6 +37,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ score, tier
     </div>
   );
 });
+ProgressBar.displayName = "ProgressBar";
 
 interface StarRatingProps {
   score: number;
@@ -55,6 +56,7 @@ export const StarRating: React.FC<StarRatingProps> = React.memo(({ score }) => {
     </div>
   );
 });
+StarRating.displayName = "StarRating";
 
 interface CompatibilityScoreProps { synastryResult: SynastryResult; }
 
@@ -114,6 +116,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = React.memo(
     </div>
   </div>
 );});
+CompatibilityScore.displayName = "CompatibilityScore";
 
 interface KeyAspectsProps {
   synastryResult: SynastryResult;
@@ -161,6 +164,7 @@ export const KeyAspects: React.FC<KeyAspectsProps> = React.memo(({
     </div>
   </div>
 ));
+KeyAspects.displayName = "KeyAspects";
 
 interface HouseOverlaysProps {
   synastryResult: SynastryResult;
@@ -198,6 +202,7 @@ export const HouseOverlays: React.FC<HouseOverlaysProps> = React.memo(({
     </div>
   </div>
 ));
+HouseOverlays.displayName = "HouseOverlays";
 
 interface CompositeChartProps {
   synastryResult: SynastryResult;
@@ -229,6 +234,7 @@ export const CompositeChart: React.FC<CompositeChartProps> = React.memo(({ synas
     </div>
   </div>
 ));
+CompositeChart.displayName = "CompositeChart";
 
 interface RelationshipSummaryProps {
   synastryResult: SynastryResult;
@@ -299,3 +305,4 @@ export const RelationshipSummary: React.FC<RelationshipSummaryProps> = React.mem
     </div>
   </div>
 ));
+RelationshipSummary.displayName = "RelationshipSummary";

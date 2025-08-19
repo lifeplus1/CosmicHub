@@ -20,6 +20,8 @@ function validateEnvironment() {
   try {
     return envSchema.parse(import.meta.env);
   } catch (error) {
+    // Use raw console.error here intentionally (bootstrapping prior to devConsole creation)
+    // eslint-disable-next-line no-console
     console.error('Environment validation failed:', error);
     throw new Error('Invalid environment configuration');
   }
@@ -106,12 +108,18 @@ export const performanceConfig = {
 };
 
 // Development utilities
+// Dev logging abstraction (silences in production except errors)
+// Wrapped in factory to support tree-shaking and easier future extension (e.g., remote logging)
 /* eslint-disable no-console */
-export const devConsole = {
-  log: isDevelopment() ? console.log.bind(console) : () => {},
-  warn: isDevelopment() ? console.warn.bind(console) : () => {},
-  error: console.error.bind(console), // Always log errors
-};
+const makeDevConsole = () => ({
+  log: isDevelopment() ? console.log.bind(console) : undefined,
+  warn: isDevelopment() ? console.warn.bind(console) : undefined,
+  info: isDevelopment() ? console.info?.bind(console) : undefined,
+  debug: isDevelopment() ? console.debug?.bind(console) : undefined,
+  error: console.error.bind(console), // Always surface errors
+});
 /* eslint-enable no-console */
+
+export const devConsole = makeDevConsole();
 
 export default env;

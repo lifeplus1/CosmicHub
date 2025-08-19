@@ -44,8 +44,8 @@ const CHANNELS: Record<string, { name: string; circuit: string; theme: string; }
 
 const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
   // Safe data extraction with fallbacks
-  const gates = humanDesignData?.gates || [];
-  const channels = humanDesignData?.channels || [];
+  const gates = humanDesignData?.gates ?? [];
+  const channels = humanDesignData?.channels ?? [];
   
   // Modal state
   const [modalData, setModalData] = useState<GateModalData | ChannelModalData | null>(null);
@@ -61,15 +61,15 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
   // Function to sort gates by planetary order
   const sortGatesByPlanetaryOrder = (gates: any[]) => {
     return gates.sort((a, b) => {
-      const planetA = a?.planet?.toLowerCase() || '';
-      const planetB = b?.planet?.toLowerCase() || '';
+      const planetA = a?.planet?.toLowerCase() ?? '';
+      const planetB = b?.planet?.toLowerCase() ?? '';
       
       const indexA = planetaryOrder.indexOf(planetA);
       const indexB = planetaryOrder.indexOf(planetB);
       
       // If planet not found in order, put it at the end
-      const orderA = indexA === -1 ? 999 : indexA;
-      const orderB = indexB === -1 ? 999 : indexB;
+      const orderA = indexA >= 0 ? indexA : 999;
+      const orderB = indexB >= 0 ? indexB : 999;
       
       return orderA - orderB;
     });
@@ -78,12 +78,12 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
   // Separate gates by type with proper data validation
   const personalityGates = sortGatesByPlanetaryOrder(
     gates.filter(gate => 
-      gate && typeof gate === 'object' && gate.type === 'personality'
+      gate != null && typeof gate === 'object' && gate.type === 'personality'
     )
   );
   const designGates = sortGatesByPlanetaryOrder(
     gates.filter(gate => 
-      gate && typeof gate === 'object' && gate.type === 'design'
+      gate != null && typeof gate === 'object' && gate.type === 'design'
     )
   );
 
@@ -106,7 +106,7 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
 
   const handleChannelClick = (channel: string) => {
     const channelInfo = CHANNELS[channel];
-    if (channelInfo) {
+    if (channelInfo != null) {
       const channelData: ChannelModalData = {
         type: 'channel',
         id: channel,
@@ -137,18 +137,18 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
             {personalityGates.map((gate, index) => (
               <InlineTooltip 
                 key={`personality-${index}`} 
-                content={`Gate ${gate?.number}.${gate?.line} • ${gate?.name || 'Unknown Gate'}`}
+                content={`Gate ${gate?.number ?? '?'}.${gate?.line ?? '?'} • ${gate?.name ?? 'Unknown Gate'}`}
                 position="right"
               >
                 <div 
                   className="px-2 py-1 rounded border-l-4 border-yellow-500 bg-yellow-50/10 flex items-center space-x-2 cursor-pointer hover:bg-yellow-50/20 transition-colors"
                   onClick={() => handleGateClick(gate)}
                 >
-                  <span className="text-xl">{gate?.planet_symbol || '○'}</span>
+                  <span className="text-xl">{gate?.planet_symbol ?? '○'}</span>
                   <span className="font-bold text-sm">
-                    {gate?.number || '?'}.{gate?.line || '?'}
+                    {gate?.number ?? '?'}.{gate?.line ?? '?'}
                   </span>
-                  <span className="text-sm text-yellow-300">{gate?.center || 'Unknown'}</span>
+                  <span className="text-sm text-yellow-300">{gate?.center ?? 'Unknown'}</span>
                 </div>
               </InlineTooltip>
             ))}
@@ -171,18 +171,18 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
             {designGates.map((gate, index) => (
               <InlineTooltip 
                 key={`design-${index}`} 
-                content={`Gate ${gate?.number}.${gate?.line} • ${gate?.name || 'Unknown Gate'}`}
+                content={`Gate ${gate?.number ?? '?'}.${gate?.line ?? '?'} • ${gate?.name ?? 'Unknown Gate'}`}
                 position="left"
               >
                 <div 
                   className="px-2 py-1 rounded border-l-4 border-blue-500 bg-blue-50/10 flex items-center space-x-2 cursor-pointer hover:bg-blue-50/20 transition-colors"
                   onClick={() => handleGateClick(gate)}
                 >
-                  <span className="text-xl">{gate?.planet_symbol || '○'}</span>
+                  <span className="text-xl">{gate?.planet_symbol ?? '○'}</span>
                   <span className="font-bold text-sm">
-                    {gate?.number || '?'}.{gate?.line || '?'}
+                    {gate?.number ?? '?'}.{gate?.line ?? '?'}
                   </span>
-                  <span className="text-sm text-blue-300">{gate?.center || 'Unknown'}</span>
+                  <span className="text-sm text-blue-300">{gate?.center ?? 'Unknown'}</span>
                 </div>
               </InlineTooltip>
             ))}
@@ -202,18 +202,34 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
             Channels ({channels.length})
           </h4>
           <div className="space-y-1">
-            {channels && channels.length > 0 ? (
+            {channels.length > 0 ? (
               channels.map((channel, index) => {
-                const channelId = typeof channel === 'string' 
-                  ? channel 
-                  : channel && typeof channel === 'object' && channel.gate1 && channel.gate2
-                    ? `${channel.gate1}-${channel.gate2}`
-                    : typeof channel === 'object' && channel.name 
-                      ? channel.name
-                      : JSON.stringify(channel);
+                let channelId: string;
+                // If it's a string, use it directly
+                if (typeof channel === 'string') {
+                  channelId = channel;
+                }
+                // If it's an object with valid gate numbers, format them
+                else if (channel != null && 
+                         typeof channel === 'object' &&
+                         typeof channel.gate1 === 'number' && 
+                         typeof channel.gate2 === 'number') {
+                  channelId = `${channel.gate1}-${channel.gate2}`;
+                }
+                // If it's an object with a valid name, use the name
+                else if (channel != null && 
+                         typeof channel === 'object' && 
+                         typeof channel.name === 'string' && 
+                         channel.name.length > 0) {
+                  channelId = channel.name;
+                }
+                // Fallback to stringifying the whole channel
+                else {
+                  channelId = JSON.stringify(channel);
+                }
                 
                 const channelInfo = CHANNELS[channelId];
-                const tooltipContent = channelInfo 
+                const tooltipContent = channelInfo?.name != null
                   ? `${channelId} • ${channelInfo.name}`
                   : `Channel ${channelId}`;
                 
@@ -230,7 +246,7 @@ const GatesChannelsTab: React.FC<TabProps> = ({ humanDesignData }) => {
                       <span className="font-bold text-sm text-cosmic-gold">
                         {channelId}
                       </span>
-                      {channelInfo && (
+                      {channelInfo?.theme != null && (
                         <p className="text-xs text-purple-300 mt-1">
                           {channelInfo.theme}
                         </p>

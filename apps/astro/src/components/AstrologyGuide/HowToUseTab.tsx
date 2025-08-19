@@ -89,7 +89,7 @@ const HowToUseTab: React.FC = React.memo(() => {
               </li>
               <li className="flex items-center space-x-2 text-sm text-cosmic-silver">
                 <FaCheckCircle className="text-green-500" />
-                <span>Remember compatibility isn't just about "good" aspects</span>
+                <span>Remember compatibility isn&apos;t just about &ldquo;good&rdquo; aspects</span>
               </li>
             </ul>
           </div>

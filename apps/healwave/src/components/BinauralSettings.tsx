@@ -1,4 +1,11 @@
 import React, { useState, useCallback, useMemo } from 'react';
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 import { AudioEngine, FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -73,7 +80,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
     const newSettings: AudioSettings = { ...currentSettings, volume: value };
     onSettingsChange(newSettings);
   // Optimistically set volume on engine (no playing state guard available)
-  audioEngine.setVolume(value).catch((error: unknown) => console.error('Volume set failed:', error));
+  audioEngine.setVolume(value).catch((error: unknown) => devConsole.error('Volume set failed:', error));
   }, [currentSettings, onSettingsChange, audioEngine]);
 
   const handleDurationChange = useCallback((value: number): void => {

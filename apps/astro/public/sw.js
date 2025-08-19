@@ -14,13 +14,18 @@ const PRECACHE_URLS = [
 ];
 
 // Install event - precache resources
+// Lightweight guarded logger (avoids bundler import + satisfies no-console)
+const log = (globalThis.devConsole && globalThis.devConsole.log) ? (...args) => globalThis.devConsole.log(...args) : undefined;
+const warn = (globalThis.devConsole && globalThis.devConsole.warn) ? (...args) => globalThis.devConsole.warn(...args) : undefined;
+const error = (globalThis.devConsole && globalThis.devConsole.error) ? (...args) => globalThis.devConsole.error(...args) : undefined;
+
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker installing...');
+  log?.('🔧 Service Worker installing...');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('📦 Precaching resources...');
+  log?.('📦 Precaching resources...');
         return cache.addAll(PRECACHE_URLS);
       })
       .then(() => self.skipWaiting())
@@ -29,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('🚀 Service Worker activating...');
+  log?.('🚀 Service Worker activating...');
   
   event.waitUntil(
     caches.keys()
@@ -37,7 +42,7 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
-              console.log('🗑️ Deleting old cache:', cacheName);
+              log?.('🗑️ Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
@@ -96,7 +101,7 @@ self.addEventListener('fetch', (event) => {
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
-  console.log('🔄 Background sync:', event.tag);
+  log?.('🔄 Background sync:', event.tag);
   
   if (event.tag === 'chart-sync') {
     event.waitUntil(syncChartData());
@@ -132,9 +137,9 @@ self.addEventListener('notificationclick', (event) => {
 async function syncChartData() {
   try {
     // This would sync any pending chart calculations
-    console.log('📊 Syncing chart data...');
+  log?.('📊 Syncing chart data...');
     // Implementation would depend on your specific sync needs
   } catch (error) {
-    console.error('❌ Chart sync failed:', error);
+  error?.('❌ Chart sync failed:', error);
   }
 }

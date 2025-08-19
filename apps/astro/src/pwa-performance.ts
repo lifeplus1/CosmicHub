@@ -3,6 +3,51 @@
  * Builds on existing CosmicHub performance optimizations
  */
 
+// Type definition for devConsole to fix unsafe access issues
+interface DevConsole {
+  log?: (message?: unknown, ...optionalParams: unknown[]) => void;
+  warn?: (message?: unknown, ...optionalParams: unknown[]) => void;
+  error?: (message?: unknown, ...optionalParams: unknown[]) => void;
+}
+
+// Safe logging helper to avoid require() and unsafe assignments
+function safeLog(message: string): void {
+  try {
+    // Use dynamic import instead of require for ES modules
+    void import('./config/environment').then(({ devConsole }: { devConsole: DevConsole }) => {
+      devConsole.log?.(message);
+    }).catch(() => {
+      // Fallback - no logging in production
+    });
+  } catch {
+    // Silent fallback for production
+  }
+}
+
+function safeWarn(message: string, ...args: unknown[]): void {
+  try {
+    void import('./config/environment').then(({ devConsole }: { devConsole: DevConsole }) => {
+      devConsole.warn?.(message, ...args);
+    }).catch(() => {
+      // Fallback - no logging in production
+    });
+  } catch {
+    // Silent fallback for production
+  }
+}
+
+function safeError(message: string, ...args: unknown[]): void {
+  try {
+    void import('./config/environment').then(({ devConsole }: { devConsole: DevConsole }) => {
+      devConsole.error?.(message, ...args);
+    }).catch(() => {
+      // Silent fallback - errors logged through devConsole only
+    });
+  } catch {
+    // Silent fallback - errors logged through devConsole only
+  }
+}
+
 // Critical Resource Prioritization
 export class CriticalResourceManager {
   private static readonly CRITICAL_RESOURCES = [
@@ -15,29 +60,30 @@ export class CriticalResourceManager {
     'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'
   ];
 
-  static async preloadCriticalResources(): Promise<void> {
-    console.log('⚡ Preloading critical resources...');
+  static preloadCriticalResources(): void {
+    safeLog('⚡ Preloading critical resources...');
 
     // Skip critical resource preloading since Vite handles this efficiently
     // Removed manual CSS preloading to fix the preload warning
-    console.log('🎯 Critical resource preloading complete (handled by Vite)');
+    safeLog('🎯 Critical resource preloading complete (handled by Vite)');
     return;
   }
 
   static optimizeFontLoading(): void {
-    console.log('🔤 Optimizing font loading...');
+    safeLog('🔤 Optimizing font loading...');
 
     // Add font-display: swap to improve loading performance
     const fontLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"]');
     fontLinks.forEach(link => {
       const href = link.getAttribute('href');
-      if (href && !href.includes('display=swap')) {
+      const hrefAttr = href ?? '';
+      if (typeof hrefAttr === 'string' && !hrefAttr.includes('display=swap')) {
         try {
-          const url = new URL(href);
+          const url = new URL(hrefAttr);
           url.searchParams.set('display', 'swap');
           link.setAttribute('href', url.toString());
-        } catch (error) {
-          console.warn('🔤 Invalid font URL, skipping:', href);
+        } catch {
+          safeWarn('🔤 Invalid font URL, skipping:', hrefAttr);
         }
       }
     });
@@ -46,8 +92,8 @@ export class CriticalResourceManager {
     // Font files will load naturally through the Google Fonts CSS
   }
 
-  static async enableResourceHints(): Promise<void> {
-    console.log('🔗 Setting up resource hints...');
+  static enableResourceHints(): void {
+    safeLog('🔗 Setting up resource hints...');
 
     // DNS prefetch for external domains
     const dnsPrefetchDomains = [
@@ -82,13 +128,14 @@ export class CriticalResourceManager {
   }
 
   static optimizeScriptLoading(): void {
-    console.log('📜 Optimizing script loading...');
+    safeLog('📜 Optimizing script loading...');
 
     // Defer non-critical scripts
     const scripts = document.querySelectorAll('script[src]');
     scripts.forEach(script => {
       const scriptElement = script as HTMLScriptElement;
-      if (scriptElement.src && !scriptElement.defer && !scriptElement.async) {
+      const src = scriptElement.src ?? '';
+      if (src && !scriptElement.defer && !scriptElement.async) {
         scriptElement.defer = true;
       }
     });
@@ -98,14 +145,14 @@ export class CriticalResourceManager {
 // Connection-aware loading (builds on existing lazy loading)
 export class ConnectionAwareLoader {
   private static getConnection(): NetworkInformation | null {
-    if (typeof navigator === 'undefined') return null;
+    if (globalThis?.navigator === null) return null;
     const nav = navigator as unknown as { connection?: NetworkInformation; mozConnection?: NetworkInformation; webkitConnection?: NetworkInformation };
     return nav.connection ?? nav.mozConnection ?? nav.webkitConnection ?? null;
   }
 
   static getConnectionInfo(): { effectiveType: string; downlink: number; saveData: boolean } {
     const connection = this.getConnection();
-    if (!connection) {
+    if (connection === null) {
       return { effectiveType: '4g', downlink: 10, saveData: false };
     }
 
@@ -118,8 +165,7 @@ export class ConnectionAwareLoader {
 
   static shouldOptimizeForSlowConnection(): boolean {
     const info = this.getConnectionInfo();
-    return info.effectiveType === 'slow-2g' || 
-           info.effectiveType === '2g' || 
+    return ['slow-2g', '2g'].includes(info.effectiveType) || 
            info.downlink < 1.5 || 
            info.saveData;
   }
@@ -128,7 +174,7 @@ export class ConnectionAwareLoader {
     const shouldOptimize = this.shouldOptimizeForSlowConnection();
     
     if (shouldOptimize) {
-      console.log('🐌 Slow connection detected, optimizing resource loading...');
+      safeLog('🐌 Slow connection detected, optimizing resource loading...');
       
       // Reduce image quality
       document.documentElement.style.setProperty('--image-quality', '0.7');
@@ -139,7 +185,7 @@ export class ConnectionAwareLoader {
       // Prioritize critical resources only
       this.prioritizeCriticalOnly();
     } else {
-      console.log('🚀 Fast connection detected, enabling full features...');
+      safeLog('🚀 Fast connection detected, enabling full features...');
     }
   }
 
@@ -152,7 +198,8 @@ export class ConnectionAwareLoader {
     const scripts = document.querySelectorAll('script:not([data-critical])');
     scripts.forEach(script => {
       const scriptElement = script as HTMLScriptElement;
-      if (scriptElement.src && !scriptElement.defer && !scriptElement.async) {
+      const src = scriptElement.src ?? '';
+      if (src && !scriptElement.defer && !scriptElement.async) {
         scriptElement.defer = true;
       }
     });
@@ -169,35 +216,37 @@ export class PWAPerformanceMonitor {
 
   static endTiming(label: string): number {
     const startTime = this.metrics.get(`${label}_start`);
-    if (startTime === undefined) {
-      console.warn(`No start time found for ${label}`);
+    if (startTime === null) {
+      safeWarn(`No start time found for ${label}`);
       return 0;
     }
     
     const duration = performance.now() - startTime;
     this.metrics.set(label, duration);
-    console.log(`⏱️ ${label}: ${duration.toFixed(2)}ms`);
+    safeLog(`⏱️ ${label}: ${duration.toFixed(2)}ms`);
     return duration;
   }
 
   static measurePWAMetrics(): void {
     // Measure PWA-specific metrics
 
-    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+    if (globalThis.navigator?.serviceWorker !== null) {
       void navigator.serviceWorker.ready.then(() => {
-        if (typeof globalThis.performance?.now === 'function') {
-          const swReadyTime = globalThis.performance.now();
-          console.log(`🔧 Service Worker ready: ${swReadyTime.toFixed(2)}ms`);
+        const perfNow = globalThis.performance?.now;
+      if (perfNow !== null) {
+          const swReadyTime = perfNow();
+          safeLog(`🔧 Service Worker ready: ${swReadyTime.toFixed(2)}ms`);
         }
       });
     }
 
     // Measure app shell loading
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== null) {
       window.addEventListener('DOMContentLoaded', () => {
-        if (typeof globalThis.performance?.now === 'function') {
-          const domReady = globalThis.performance.now();
-          console.log(`📄 DOM ready: ${domReady.toFixed(2)}ms`);
+        const perfNow = globalThis.performance?.now;
+        if (perfNow !== null) {
+          const domReady = perfNow();
+          safeLog(`📄 DOM ready: ${domReady.toFixed(2)}ms`);
         }
       });
     }
@@ -208,13 +257,14 @@ export class PWAPerformanceMonitor {
 
   private static observeWebVitals(): void {
     // Largest Contentful Paint
-    if (typeof PerformanceObserver !== 'undefined') {
+    if (globalThis.PerformanceObserver !== null) {
       try {
         const lcpObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          const lastEntry = entries[entries.length - 1] as PerformanceEntry & { startTime?: number } | undefined;
-          if (lastEntry?.startTime !== undefined) {
-            console.log(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
+          const lastEntry = entries[entries.length - 1] as PerformanceEntry & { startTime: number };
+          const startTime = lastEntry?.startTime;
+          if (startTime !== null) {
+            safeLog(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
           }
         });
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
@@ -227,7 +277,7 @@ export class PWAPerformanceMonitor {
             const processingStart = e['processingStart'];
             const startTime = e['startTime'];
             if (typeof processingStart === 'number' && typeof startTime === 'number') {
-              console.log(`⚡ FID: ${processingStart - startTime}ms`);
+              safeLog(`⚡ FID: ${processingStart - startTime}ms`);
             }
           });
         });
@@ -237,19 +287,18 @@ export class PWAPerformanceMonitor {
         const clsObserver = new PerformanceObserver((list) => {
           let clsValue = 0;
           list.getEntries().forEach((entry) => {
-            const e = entry as PerformanceEntry & Record<string, unknown>;
-            const hadRecentInput = e['hadRecentInput'];
-            const value = e['value'];
-            if (hadRecentInput !== true && typeof value === 'number') {
+            const e = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
+            const { hadRecentInput, value } = e;
+            if (!hadRecentInput) {
               clsValue += value;
             }
           });
-          console.log(`📐 CLS: ${clsValue.toFixed(4)}`);
+          safeLog(`📐 CLS: ${clsValue.toFixed(4)}`);
         });
         clsObserver.observe({ entryTypes: ['layout-shift'] });
       } catch (err) {
         // PerformanceObserver may not be supported in some environments
-        if (typeof console !== 'undefined') console.warn('PerformanceObserver not available', err);
+        safeWarn('PerformanceObserver not available', err);
       }
     }
   }
@@ -260,8 +309,8 @@ export class PWAPerformanceMonitor {
 }
 
 // Initialize enhanced PWA performance
-export async function initializePWAPerformance(): Promise<void> {
-  console.log('🚀 Initializing PWA performance enhancements...');
+export function initializePWAPerformance(): void {
+  safeLog('🚀 Initializing PWA performance enhancements...');
 
   // Start overall timing
   PWAPerformanceMonitor.startTiming('pwa_initialization');
@@ -271,13 +320,13 @@ export async function initializePWAPerformance(): Promise<void> {
     ConnectionAwareLoader.adaptResourceLoading();
 
     // Enable resource hints
-    await CriticalResourceManager.enableResourceHints();
+    CriticalResourceManager.enableResourceHints();
 
     // Optimize font loading
     CriticalResourceManager.optimizeFontLoading();
 
     // Preload critical resources
-    await CriticalResourceManager.preloadCriticalResources();
+    CriticalResourceManager.preloadCriticalResources();
 
     // Start performance monitoring
     PWAPerformanceMonitor.measurePWAMetrics();
@@ -285,16 +334,21 @@ export async function initializePWAPerformance(): Promise<void> {
     // End timing
     PWAPerformanceMonitor.endTiming('pwa_initialization');
 
-    console.log('✅ PWA performance enhancements initialized');
+    safeLog('✅ PWA performance enhancements initialized');
 
   } catch (error) {
-    console.error('❌ Failed to initialize PWA performance enhancements:', error);
+    safeError('❌ Failed to initialize PWA performance enhancements:', error);
   }
 }
 
 // Auto-initialize when imported
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializePWAPerformance);
-} else {
-  initializePWAPerformance();
+const doc = typeof document !== 'undefined' ? document : null;
+if (doc !== null) {
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', () => {
+      initializePWAPerformance();
+    });
+  } else {
+    initializePWAPerformance();
+  }
 }

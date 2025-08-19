@@ -17,7 +17,7 @@ const InterpretationModal: React.FC<InterpretationModalProps> = ({ interpretatio
           {/* Modal Header with Close Button */}
           <div className="sticky top-0 bg-cosmic-dark/95 backdrop-blur-sm border-b border-cosmic-gold/20 p-4 flex items-center justify-between z-10">
             <Dialog.Title id={`modal-title-${interpretation.id}`} className="text-xl font-playfair text-cosmic-gold">
-              {interpretation.title || `${interpretation.type} Interpretation`}
+              {interpretation.title !== '' && interpretation.title.length > 0 ? interpretation.title : `${interpretation.type} Interpretation`}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button

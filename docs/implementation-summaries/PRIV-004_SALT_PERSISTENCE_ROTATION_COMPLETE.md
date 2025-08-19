@@ -13,6 +13,7 @@ The salt persistence and rotation system provides secure storage and automated r
 ### 1. Salt Storage Service (`backend/utils/salt_storage.py`)
 
 **Features**:
+
 - **Dual Storage**: Firestore for production, in-memory for development/testing
 - **User-Specific Salts**: Individual salts per user for user data pseudonymization
 - **Global Salts**: Shared salts for analytics events and aggregation
@@ -22,6 +23,7 @@ The salt persistence and rotation system provides secure storage and automated r
 - **Error Handling**: Graceful fallback and error recovery
 
 **Key Methods**:
+
 ```python
 # User salt management
 get_user_salt(user_id: str) -> Optional[bytes]
@@ -42,6 +44,7 @@ batch_rotate_salts(user_ids: List[str], global_types: List[str]) -> Dict[str, An
 ### 2. Enhanced Pseudonymization (`backend/utils/pseudonymization.py`)
 
 **New Integration Functions**:
+
 ```python
 def pseudonymize_user_data(user_id: str, identifier: str) -> str:
     """Pseudonymize data using user-specific salt from storage."""
@@ -53,6 +56,7 @@ def pseudonymize_analytics_data(identifier: str, event_type: str = "events") -> 
 ### 3. Automated Rotation Script (`scripts/security/rotate_salts.py`)
 
 **Capabilities**:
+
 - **Scheduled Rotation**: Check and rotate salts due for rotation
 - **Manual Rotation**: Force rotation of specific user or global salts
 - **Dry Run Mode**: Preview what would be rotated without changes
@@ -61,6 +65,7 @@ def pseudonymize_analytics_data(identifier: str, event_type: str = "events") -> 
 - **Result Reporting**: JSON output for integration with monitoring
 
 **Usage Examples**:
+
 ```bash
 # Check and rotate salts due for rotation
 ./scripts/security/rotate_salts.sh
@@ -81,6 +86,7 @@ def pseudonymize_analytics_data(identifier: str, event_type: str = "events") -> 
 ### 4. API Endpoints (`backend/api/salt_management.py`)
 
 **Administrative Endpoints**:
+
 - `GET /api/admin/salts/status` - Get rotation status and statistics
 - `POST /api/admin/salts/rotate/user/{user_id}` - Rotate specific user salt
 - `POST /api/admin/salts/rotate/global/{salt_type}` - Rotate global salt
@@ -91,6 +97,7 @@ def pseudonymize_analytics_data(identifier: str, event_type: str = "events") -> 
 ### 5. Comprehensive Test Suite (`backend/tests/test_pseudonymization.py`)
 
 **Test Coverage**:
+
 - Basic pseudonymization functionality
 - Salt creation and retrieval
 - Salt rotation mechanics
@@ -115,11 +122,13 @@ PSEUDONYM_PEPPER=your_hex_pepper_here  # Default: uses fallback
 ### Storage Structure
 
 **Firestore Collections**:
+
 - `user_salts/{user_id}` - User-specific salt data
 - `global_salts/{salt_type}` - Global salts by type
 - `salt_audit_log/{audit_id}` - Audit trail of rotations
 
 **Salt Document Schema**:
+
 ```json
 {
   "salt": "hex_encoded_salt_value",
@@ -135,23 +144,27 @@ PSEUDONYM_PEPPER=your_hex_pepper_here  # Default: uses fallback
 ## Security Features
 
 ### 1. **Separation of Concerns**
+
 - Salts stored separately from pseudonymized data
 - Access restricted to backend service account
 - API endpoints require admin authentication (to be implemented)
 
 ### 2. **Audit Trail**
+
 - Complete logging of all rotation events
 - Previous salt hash (first 16 chars) for audit purposes
 - Rotation count and timestamp tracking
 - Background task processing for non-blocking operations
 
 ### 3. **Configurable Rotation**
+
 - User salts default to 90-day rotation
 - Global salts default to 30-day rotation
 - Environment variable configuration
 - Force rotation capability for emergency scenarios
 
 ### 4. **Error Handling & Recovery**
+
 - Graceful fallback to in-memory storage in development
 - Comprehensive error logging and reporting
 - Batch operation error isolation
@@ -222,6 +235,7 @@ new_salt = storage.rotate_user_salt("user456")
 ## Testing Results
 
 All tests pass successfully:
+
 - ✅ 4 basic pseudonymization tests
 - ✅ 11 salt storage functionality tests
 - ✅ Integration tests with real workflow scenarios
@@ -236,21 +250,25 @@ python3 -m pytest backend/tests/test_pseudonymization.py -v
 ## Production Considerations
 
 ### 1. **Database Security**
+
 - Ensure Firestore rules restrict salt collection access
 - Use service account with minimal required permissions
 - Consider encryption at rest for sensitive salt data
 
 ### 2. **API Security**
+
 - Implement proper admin authentication for salt management endpoints
 - Rate limiting on administrative operations
 - HTTPS required for all salt management operations
 
 ### 3. **Monitoring & Alerting**
+
 - Monitor rotation success/failure rates
 - Alert on rotation errors or missed rotations
 - Track salt age and usage statistics
 
 ### 4. **Backup & Recovery**
+
 - Regular backups of salt storage
 - Document recovery procedures for salt compromise
 - Emergency rotation procedures
@@ -258,6 +276,7 @@ python3 -m pytest backend/tests/test_pseudonymization.py -v
 ## Compliance & Privacy
 
 This implementation supports:
+
 - **GDPR Article 32**: Technical measures for data protection
 - **GDPR Article 25**: Data protection by design and by default
 - **Privacy by Design**: Pseudonymization as a privacy-enhancing technology

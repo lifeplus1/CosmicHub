@@ -82,10 +82,10 @@ export const usePlanetaryPosition = (
   options?: { enabled?: boolean }
 ): UseQueryResult<CalculationResponse, Error> => {
   const client = useEphemerisClient();
-  const julianDay = date ? dateToJulianDay(date) : null;
-  const isEnabled = options?.enabled !== false && julianDay !== null;
+  const julianDay = date !== null && date !== undefined ? dateToJulianDay(date) : null;
+  const isEnabled = options?.enabled !== false && julianDay !== null && julianDay !== undefined;
   return useQuery<CalculationResponse, Error>({
-    queryKey: julianDay ? ephemerisKeys.calculation(julianDay, planet) : [],
+  queryKey: julianDay != null ? ephemerisKeys.calculation(julianDay, planet) : [],
     queryFn: () => {
       if (julianDay == null) throw new Error('Date is required');
       return client.calculatePosition(julianDay, planet);
@@ -104,13 +104,14 @@ export const useAllPlanetaryPositions = (
   options?: { enabled?: boolean; planets?: PlanetName[] }
 ): UseQueryResult<Record<PlanetName, PlanetPosition>, Error> => {
   const client = useEphemerisClient();
-  const julianDay = date ? dateToJulianDay(date) : null;
-  const planetsToCalculate: PlanetName[] = options?.planets && options.planets.length > 0
-    ? [...new Set(options.planets)] // dedupe if caller passes duplicates
+  const julianDay = date != null ? dateToJulianDay(date) : null;
+  const hasCustomPlanets = Array.isArray(options?.planets) && options?.planets !== undefined && options.planets.length > 0;
+  const planetsToCalculate: PlanetName[] = hasCustomPlanets
+    ? [...new Set(options!.planets!)] // dedupe if caller passes duplicates
     : [...SUPPORTED_PLANETS]; // spread to mutable array
-  const isEnabled = options?.enabled !== false && julianDay !== null;
+  const isEnabled = options?.enabled !== false && julianDay != null;
   return useQuery<Record<PlanetName, PlanetPosition>, Error>({
-    queryKey: julianDay ? ephemerisKeys.allPositions(julianDay) : [],
+  queryKey: julianDay != null ? ephemerisKeys.allPositions(julianDay) : [],
     queryFn: async () => {
       if (julianDay == null) throw new Error('Date is required');
       const calculations = planetsToCalculate.map((planet) => ({
@@ -152,8 +153,8 @@ export const useBatchPlanetaryCalculation = (): UseMutationResult<
     },
     onSuccess: (data, variables) => {
       data.results.forEach((result, index) => {
-        const request = variables[index];
-        if (request) {
+  const request = variables[index];
+  if (request !== null && request !== undefined) {
           const julianDay = dateToJulianDay(request.date);
           // Cache the full calculation response for the single planet/date
           queryClient.setQueryData(

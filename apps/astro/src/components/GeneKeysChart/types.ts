@@ -1,6 +1,9 @@
 // Types for Gene Keys Chart Components
 import type { ChartBirthData as BirthData } from '@cosmichub/types';
 
+// Re-export the BirthData type for use in tests and other components
+export type { BirthData };
+
 export interface GeneKey {
   number: number;
   name: string;

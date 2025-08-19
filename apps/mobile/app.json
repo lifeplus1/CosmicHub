@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "CosmicHub Mobile",
+    "slug": "cosmichub-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "auto",
+    "newArchEnabled": true,
+    "scheme": "cosmichub",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000014"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cosmichub.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000014"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.cosmichub.mobile"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}

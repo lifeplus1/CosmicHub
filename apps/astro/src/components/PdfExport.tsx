@@ -4,7 +4,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { FaDownload } from 'react-icons/fa';
 import FeatureGuard from './FeatureGuard';
 import type { ChartData, BirthData } from '../types';
-import { serializeAstrologyData } from '@cosmichub/types';
+import { serializeAstrologyData, type AstrologyChart } from '@cosmichub/types';
+import { devConsole } from '../config/environment';
 
 interface PdfExportProps {
   chartData?: ChartData;
@@ -52,7 +53,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
             throw new Error('Chart data is required for standard PDF export');
           }
           // Use serialization utility to ensure consistent data format
-          const serializedChartData = serializeAstrologyData(chartData as any);
+          const serializedChartData = serializeAstrologyData(chartData as unknown as AstrologyChart);
           exportData = {
             chart_data: { chart: JSON.parse(serializedChartData) },
             birth_info: birthInfo,
@@ -72,7 +73,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
               report_type: 'synastry'
             };
           } catch (serializationError) {
-            console.warn('Could not serialize synastry data, using raw data:', serializationError);
+            devConsole.warn('Could not serialize synastry data, using raw data:', serializationError);
             exportData = {
               chart_data: { synastry: synastryData },
               report_type: 'synastry'

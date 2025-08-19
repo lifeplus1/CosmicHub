@@ -3,7 +3,7 @@ import { generateAIInterpretation } from '../../services/api';
 import { useToast } from '../ToastProvider';
 import { useAIInterpretation } from './useAIInterpretation';
 import type { ChartInterpretationRequest, InterpretationRequest } from './types';
-import type { InterpretationRequest as ApiInterpretationRequest, ChartId, UserId } from '../../services/api.types';
+import type { InterpretationRequest as ApiInterpretationRequest } from '../../services/api.types';
 
 interface InterpretationResult {
   data?: unknown;
@@ -67,7 +67,8 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
   };
 
   const handleChartGenerate = async (): Promise<void> => {
-    if (!user) {
+    // TODO: Replace with real authentication check when auth is implemented
+    if (user?.uid === undefined || user?.uid === null || user?.uid === '') {
       toast({
         title: "Authentication Required",
         description: "Please log in to generate interpretations",
@@ -89,9 +90,10 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       };
 
       // Add question to request if provided
+      const trimmedQuestion = formData.question.trim();
       const bodyData = {
         ...requestData,
-        ...(formData.question.trim() !== '' && { question: formData.question })
+        ...(trimmedQuestion !== '' && { question: formData.question })
       };
 
       const result = await generateAIInterpretation(bodyData as ApiInterpretationRequest);
@@ -104,12 +106,19 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         isClosable: true,
       });
 
-      if (onInterpretationGenerated) {
+      if (typeof onInterpretationGenerated === 'function') {
         onInterpretationGenerated({ data: result.data });
       }
 
     } catch (error) {
-      console.error('Error generating interpretation:', error);
+      // Log error for debugging (replace with proper logging service in production)
+      if (error instanceof Error) {
+        // TODO: Replace with structured logging service
+        // console.warn('Interpretation generation failed:', error.message);
+      } else {
+        // TODO: Replace with structured logging service  
+        // console.warn('Interpretation generation failed with unknown error');
+      }
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Failed to generate interpretation",
@@ -123,7 +132,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
   };
 
   const handleDirectGenerate = async (): Promise<void> => {
-    if (!formData.birthDate || !formData.birthTime || !formData.birthLocation) {
+    if (formData.birthDate === '' || formData.birthTime === '' || formData.birthLocation === '') {
       toast({
         title: "Missing Information",
         description: "Please provide your birth date, time, and location",
@@ -135,64 +144,39 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }
 
     try {
-      if (mode === 'chart' && chartId && user) {
-        // Chart mode: use existing chart
-        const requestData: ApiInterpretationRequest = {
-          chartId: chartId as ChartId,
-          userId: user.uid as UserId,
-          type: formData.type as ApiInterpretationRequest['type'],
-          focus: formData.focus.length > 0 ? formData.focus : undefined,
-          question: formData.question.trim() || undefined
-        };
+      // Direct mode: use birth data (existing logic)
+      const directRequestData: InterpretationRequest = {
+        birthDate: formData.birthDate,
+        birthTime: formData.birthTime,
+        birthLocation: formData.birthLocation,
+        interpretationType: formData.interpretationType
+      };
 
-        // Add question to request if provided
-        const bodyData = {
-          ...requestData,
-          ...(formData.question.trim() !== '' && { question: formData.question })
-        };
-
-        const result = await generateAIInterpretation(bodyData as ApiInterpretationRequest);
-        
+      await generateInterpretation(directRequestData);
+      
+      if (typeof interpretation === 'string' && interpretation !== '') {
         toast({
           title: "Interpretation Generated",
-          description: "Your personalized astrological interpretation is ready",
+          description: "Your personalized AI interpretation is ready",
           status: "success",
           duration: 3000,
           isClosable: true,
         });
 
-        if (onInterpretationGenerated) {
-          onInterpretationGenerated(result);
-        }
-
-      } else {
-        // Direct mode: use birth data (existing logic)
-        const directRequestData: InterpretationRequest = {
-          birthDate: formData.birthDate,
-          birthTime: formData.birthTime,
-          birthLocation: formData.birthLocation,
-          interpretationType: formData.interpretationType as 'general' | 'personality' | 'career' | 'relationships'
-        };
-
-        await generateInterpretation(directRequestData);
-        
-        if (interpretation) {
-          toast({
-            title: "Interpretation Generated",
-            description: "Your personalized AI interpretation is ready",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-
-          if (onInterpretationGenerated) {
-            onInterpretationGenerated({ content: interpretation });
-          }
+        if (onInterpretationGenerated !== undefined) {
+          onInterpretationGenerated({ content: interpretation });
         }
       }
 
     } catch (error) {
-      console.error('Error generating interpretation:', error);
+      // Log error for debugging (replace with proper logging service in production)
+      if (error instanceof Error) {
+        // TODO: Replace with structured logging service
+        // console.warn('Interpretation generation failed:', error.message);
+      } else {
+        // TODO: Replace with structured logging service  
+        // console.warn('Interpretation generation failed with unknown error');
+      }
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Failed to generate interpretation",
@@ -203,7 +187,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = (): Promise<void> | void => {
     if (mode === 'chart') {
       return handleChartGenerate();
     } else {
@@ -265,11 +249,11 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
               </div>
             </div>
 
-            {/* AI Interpretation Type */}
+            {/* Interpretation Focus */}
             <div>
-              <label className="block text-cosmic-gold font-medium mb-3">
+              <div className="block text-cosmic-gold font-medium mb-3">
                 Interpretation Focus
-              </label>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {aiInterpretationTypes.map((type) => (
                   <label
@@ -308,9 +292,9 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
           <>
             {/* Interpretation Type */}
             <div>
-              <label className="block text-cosmic-gold font-medium mb-3">
+              <div className="block text-cosmic-gold font-medium mb-3">
                 Interpretation Type
-              </label>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {interpretationTypes.map((type) => (
                   <label
@@ -342,9 +326,9 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
             {/* Focus Areas */}
             <div>
-              <label className="block text-cosmic-gold font-medium mb-3">
+              <div className="block text-cosmic-gold font-medium mb-3">
                 Focus Areas (Optional)
-              </label>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {focusAreas.map((focus) => (
                   <button
@@ -365,10 +349,11 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
             {/* Specific Question */}
             <div>
-              <label className="block text-cosmic-gold font-medium mb-3">
+              <label htmlFor="specific-question" className="block text-cosmic-gold font-medium mb-3">
                 Specific Question (Optional)
               </label>
               <textarea
+                id="specific-question"
                 value={formData.question}
                 onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
                 placeholder="Ask a specific question about your chart..."
@@ -381,8 +366,15 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
         {/* Generate Button */}
         <button
-          onClick={handleGenerate}
-          disabled={isGenerating || loading || (mode === 'chart' && !user)}
+          onClick={() => {
+            const result = handleGenerate();
+            if (result instanceof Promise) {
+              result.catch(() => {
+                // Error handling is done within handleGenerate
+              });
+            }
+          }}
+          disabled={isGenerating || loading || (mode === 'chart' && user?.uid === undefined)}
           className="w-full py-3 px-6 bg-cosmic-gold text-cosmic-dark font-semibold rounded-lg hover:bg-cosmic-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
         >
           {(isGenerating || loading) ? (
@@ -398,19 +390,19 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
           )}
         </button>
 
-        {mode === 'chart' && !user && (
+        {mode === 'chart' && user?.uid === undefined && (
           <p className="text-cosmic-silver/70 text-center text-sm">
             Please log in to generate personalized interpretations
           </p>
         )}
 
-        {error && (
+        {typeof error === 'string' && error !== '' && (
           <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400">
             {error}
           </div>
         )}
 
-        {interpretation && (
+        {typeof interpretation === 'string' && interpretation !== '' && (
           <div className="p-4 bg-cosmic-purple/10 border border-cosmic-purple/30 rounded-lg">
             <h3 className="text-cosmic-gold font-semibold mb-2">Your Interpretation:</h3>
             <p className="text-cosmic-silver whitespace-pre-wrap">{interpretation}</p>

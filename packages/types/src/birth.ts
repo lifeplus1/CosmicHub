@@ -31,19 +31,57 @@ export interface TextBirthData {
 export type AnyBirthInput = UnifiedBirthData | TextBirthData;
 
 export const isUnifiedBirthData = (v: unknown): v is UnifiedBirthData => {
-  if (typeof v !== 'object' || v === null) return false;
+  if (v === null || v === undefined || typeof v !== 'object') {
+    return false;
+  }
+  
+  // Type assertion after null check
   const obj = v as Record<string, unknown>;
-  return ['year','month','day','hour','minute'].every(k => typeof obj[k] === 'number');
+  const requiredKeys = ['year', 'month', 'day', 'hour', 'minute'];
+  
+  // First ensure all required keys exist
+  if (!requiredKeys.every(key => key in obj)) {
+    return false;
+  }
+  
+  // Then check their values are valid numbers
+  return requiredKeys.every(key => {
+    const value = obj[key];
+    return value !== null && value !== undefined && typeof value === 'number' && !Number.isNaN(value);
+  });
 };
 
 export const isTextBirthData = (v: unknown): v is TextBirthData => {
-  if (typeof v !== 'object' || v === null) return false;
+  if (v === null || v === undefined || typeof v !== 'object') {
+    return false;
+  }
+  
+  // Type assertion after null check
   const obj = v as Record<string, unknown>;
-  return typeof obj.birth_date === 'string';
+  
+  // First ensure required properties exist
+  if (!('birth_date' in obj) || !('birth_time' in obj)) {
+    return false;
+  }
+  
+  // Then check if they're valid strings
+  const birthDate = obj.birth_date;
+  const birthTime = obj.birth_time;
+  
+  return (
+    birthDate !== null && 
+    birthDate !== undefined && 
+    typeof birthDate === 'string' && 
+    birthDate !== '' &&
+    birthTime !== null && 
+    birthTime !== undefined && 
+    typeof birthTime === 'string' && 
+    birthTime !== ''
+  );
 };
 
 function assert(condition: unknown, message: string): asserts condition {
-  if (condition === false || condition === null || condition === undefined) {
+  if (condition === null || condition === undefined || condition === false) {
     throw new Error(message);
   }
 }
@@ -54,12 +92,18 @@ function assert(condition: unknown, message: string): asserts condition {
  * Throws descriptive errors for invalid formats or out-of-range values.
  */
 export function parseTextBirthData(data: TextBirthData): UnifiedBirthData {
-  const rawDate = (data.birth_date || '').trim();
-  const rawTime = (data.birth_time || '').trim();
+  // Start with explicit existence and type checks on required fields
+  if (data.birth_date === undefined || data.birth_date === null || data.birth_date === '' ||
+      data.birth_time === undefined || data.birth_time === null || data.birth_time === '') {
+    throw new Error('birth_date and birth_time are required non-empty fields');
+  }
+
+  const rawDate = data.birth_date.trim();
+  const rawTime = data.birth_time.trim();
 
   // Date validation YYYY-MM-DD
   const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rawDate);
-  assert(dateMatch, `Invalid birth_date format: ${rawDate}`);
+  assert(dateMatch !== null && dateMatch !== undefined, `Invalid birth_date format: ${rawDate}`);
   const year = parseInt(dateMatch[1], 10);
   const month = parseInt(dateMatch[2], 10);
   const day = parseInt(dateMatch[3], 10);
@@ -71,7 +115,7 @@ export function parseTextBirthData(data: TextBirthData): UnifiedBirthData {
 
   // Time validation HH:MM(:SS)?
   const timeMatch = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(rawTime);
-  assert(timeMatch, `Invalid birth_time format: ${rawTime}`);
+  assert(timeMatch !== null && timeMatch !== undefined, `Invalid birth_time format: ${rawTime}`);
   const hour = parseInt(timeMatch[1], 10);
   const minute = parseInt(timeMatch[2], 10);
   assert(hour >= 0 && hour <= 23, `Invalid hour: ${hour}`);
@@ -87,16 +131,23 @@ export function parseTextBirthData(data: TextBirthData): UnifiedBirthData {
     day,
     hour,
     minute,
-    city: data.city?.trim(),
+    city: data.city === undefined || data.city === null ? undefined : data.city.trim(),
     lat: data.latitude ?? fallbackLat,
     lon: data.longitude ?? fallbackLon,
-    timezone: data.timezone?.trim()
+    timezone: data.timezone === undefined || data.timezone === null ? undefined : data.timezone.trim()
   };
 }
 
 export function toUnifiedBirthData(input: AnyBirthInput): UnifiedBirthData {
-  if (isUnifiedBirthData(input)) return input;
-  if (isTextBirthData(input)) return parseTextBirthData(input);
+  if (input === null || input === undefined) {
+    throw new Error('Birth data is null or undefined');
+  }
+  if (isUnifiedBirthData(input)) {
+    return input;
+  }
+  if (isTextBirthData(input)) {
+    return parseTextBirthData(input);
+  }
   throw new Error('Unsupported birth data shape');
 }
 
@@ -112,6 +163,9 @@ export type SafeParseResult = SafeParseSuccess | SafeParseFailure;
  * Non-throwing variant returning a discriminated union.
  */
 export function safeParseTextBirthData(data: TextBirthData): SafeParseResult {
+  if (data === null || data === undefined) {
+    return { success: false, error: new Error('Birth data is null or undefined') };
+  }
   try {
     return { success: true, data: parseTextBirthData(data) };
   } catch (e) {

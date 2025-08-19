@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import React from 'react';
 
 // Make React available globally for tests
-global.React = React;
+(globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 // Test setup with comprehensive mocking for external dependencies
 
@@ -88,7 +88,7 @@ vi.mock('@cosmichub/ui', () => ({
   TabsList: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
   TabsTrigger: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
   UpgradeModal: ({ children, isOpen }: { children?: React.ReactNode; isOpen?: boolean }) => 
-    isOpen ? React.createElement('div', { 'data-testid': 'upgrade-modal' }, children || 'Upgrade Modal') : null
+    isOpen === true ? React.createElement('div', { 'data-testid': 'upgrade-modal' }, children ?? 'Upgrade Modal') : null
 }));
 
 // Mock integrations package

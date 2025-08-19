@@ -60,6 +60,14 @@ export interface VAPIDKeys {
   subject: string;
 }
 
+// Statistics returned from PushNotificationManager.getNotificationStats
+export interface NotificationStats {
+  totalSubscriptions: number;
+  activeSubscriptions: number;
+  queuedNotifications: number;
+  permissionStatus: NotificationPermission;
+}
+
 export class PushNotificationManager {
   private vapidKeys: VAPIDKeys;
   private subscriptions = new Map<string, UserSubscription>();
@@ -73,19 +81,22 @@ export class PushNotificationManager {
   }
 
   // Initialize push notifications
-  async initialize(): Promise<boolean> {
+  initialize(): boolean {
+  const globalDev = (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void; warn?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void } }).devConsole;
+  const log = globalDev?.log;
+  const warn = globalDev?.warn;
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.warn('🚫 Push notifications not supported');
+      warn?.('🚫 Push notifications not supported');
       return false;
     }
 
     if (!('Notification' in window)) {
-      console.warn('🚫 Notifications not supported');
+      warn?.('🚫 Notifications not supported');
       return false;
     }
 
-    console.log('🔔 Initializing push notifications...');
-    return true;
+  log?.('🔔 Initializing push notifications...');
+  return true;
   }
 
   // Request permission and subscribe user
@@ -95,7 +106,7 @@ export class PushNotificationManager {
       const permission = await Notification.requestPermission();
       
       if (permission !== 'granted') {
-        console.log('❌ Notification permission denied');
+        (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.('❌ Notification permission denied');
         return null;
       }
 
@@ -125,11 +136,11 @@ export class PushNotificationManager {
       this.subscriptions.set(userId, userSubscription);
       this.saveSubscriptions();
 
-      console.log('✅ User subscribed to push notifications');
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.('✅ User subscribed to push notifications');
       return userSubscription;
 
     } catch (error) {
-      console.error('❌ Failed to subscribe user:', error);
+  (globalThis as unknown as { devConsole?: { error?: (...args: unknown[]) => void } }).devConsole?.error?.('❌ Failed to subscribe user:', error);
       return null;
     }
   }
@@ -140,17 +151,17 @@ export class PushNotificationManager {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       
-      if (subscription) {
+  if (subscription !== null && subscription !== undefined) {
         await subscription.unsubscribe();
       }
 
       this.subscriptions.delete(userId);
       this.saveSubscriptions();
       
-      console.log('✅ User unsubscribed from push notifications');
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.('✅ User unsubscribed from push notifications');
       return true;
     } catch (error) {
-      console.error('❌ Failed to unsubscribe user:', error);
+  (globalThis as unknown as { devConsole?: { error?: (...args: unknown[]) => void } }).devConsole?.error?.('❌ Failed to unsubscribe user:', error);
       return false;
     }
   }
@@ -158,7 +169,7 @@ export class PushNotificationManager {
   // Update user preferences
   updateUserPreferences(userId: string, preferences: Partial<NotificationPreferences>): boolean {
     const subscription = this.subscriptions.get(userId);
-    if (!subscription) {
+  if (subscription === undefined || subscription === null) {
       return false;
     }
 
@@ -174,9 +185,7 @@ export class PushNotificationManager {
   // Send notification (client-side queue for offline)
   async queueNotification(notification: NotificationPayload): Promise<void> {
     // Add timestamp if not provided
-    if (!notification.timestamp) {
-      notification.timestamp = Date.now();
-    }
+  notification.timestamp ??= Date.now();
 
     // Add to queue
     this.notificationQueue.push(notification);
@@ -185,7 +194,7 @@ export class PushNotificationManager {
     if (this.isOnline) {
       await this.processNotificationQueue();
     } else {
-      console.log('📤 Notification queued for when online');
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.('📤 Notification queued for when online');
     }
   }
 
@@ -202,7 +211,7 @@ export class PushNotificationManager {
         // For now, we'll show local notifications
         await this.showLocalNotification(notification);
       } catch (error) {
-        console.error('❌ Failed to process notification:', error);
+  (globalThis as unknown as { devConsole?: { error?: (...args: unknown[]) => void } }).devConsole?.error?.('❌ Failed to process notification:', error);
         // Re-queue failed notifications
         this.notificationQueue.push(notification);
       }
@@ -211,14 +220,16 @@ export class PushNotificationManager {
 
   // Show local notification
   private async showLocalNotification(payload: NotificationPayload): Promise<void> {
+    // No heavy async work presently; retain async for future extensibility
+    await Promise.resolve();
     if (Notification.permission !== 'granted') {
       return;
     }
 
     const options: ExtendedNotificationOptions = {
       body: payload.body,
-      icon: payload.icon || '/icon-192x192.png',
-      badge: payload.badge || '/badge-72x72.png',
+      icon: payload.icon ?? '/icon-192x192.png',
+      badge: payload.badge ?? '/badge-72x72.png',
       image: payload.image,
       tag: payload.tag,
       data: payload.data,
@@ -233,8 +244,9 @@ export class PushNotificationManager {
 
   // Smart notification suggestions based on user behavior
   async suggestNotificationSettings(userId: string): Promise<Partial<NotificationPreferences>> {
+    await Promise.resolve();
     const subscription = this.subscriptions.get(userId);
-    if (!subscription) {
+    if (subscription === undefined || subscription === null) {
       return {};
     }
 
@@ -266,12 +278,7 @@ export class PushNotificationManager {
   }
 
   // Get notification statistics
-  getNotificationStats(): {
-    totalSubscriptions: number;
-    activeSubscriptions: number;
-    queuedNotifications: number;
-    permissionStatus: NotificationPermission;
-  } {
+  getNotificationStats(): NotificationStats {
     const activeSubscriptions = Array.from(this.subscriptions.values())
       .filter(sub => (Date.now() - sub.lastUsed) < 30 * 24 * 60 * 60 * 1000) // Active in last 30 days
       .length;
@@ -288,13 +295,13 @@ export class PushNotificationManager {
   private setupConnectionListener(): void {
     window.addEventListener('online', () => {
       this.isOnline = true;
-      console.log('🌐 Back online - processing notification queue');
-      this.processNotificationQueue();
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.('🌐 Back online - processing notification queue');
+  void this.processNotificationQueue();
     });
 
     window.addEventListener('offline', () => {
       this.isOnline = false;
-      console.log('📴 Gone offline - notifications will queue');
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.('📴 Gone offline - notifications will queue');
     });
   }
 
@@ -320,19 +327,26 @@ export class PushNotificationManager {
       const data = Array.from(this.subscriptions.entries());
       localStorage.setItem('cosmichub-push-subscriptions', JSON.stringify(data));
     } catch (error) {
-      console.warn('Failed to save subscriptions:', error);
+  (globalThis as unknown as { devConsole?: { warn?: (...args: unknown[]) => void } }).devConsole?.warn?.('Failed to save subscriptions:', error);
     }
   }
 
   private loadStoredSubscriptions(): void {
     try {
       const stored = localStorage.getItem('cosmichub-push-subscriptions');
-      if (stored) {
-        const data = JSON.parse(stored);
-        this.subscriptions = new Map(data);
+      if (stored !== null && stored !== undefined && stored.length > 0) {
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(stored) as unknown;
+        } catch {
+          return;
+        }
+        if (Array.isArray(parsed) && parsed.every(p => Array.isArray(p) && typeof p[0] === 'string' && typeof p[1] === 'object' && p[1] !== null)) {
+          this.subscriptions = new Map(parsed as [string, UserSubscription][]);
+        }
       }
     } catch (error) {
-      console.warn('Failed to load stored subscriptions:', error);
+      (globalThis as unknown as { devConsole?: { warn?: (...args: unknown[]) => void } }).devConsole?.warn?.('Failed to load stored subscriptions:', error);
     }
   }
 }
@@ -431,19 +445,19 @@ export class AstrologyNotificationScheduler {
   // Schedule daily horoscope
   scheduleDailyHoroscope(userId: string, sign: string, time: string): void {
     // In a real implementation, this would integrate with your backend scheduler
-    console.log(`📅 Scheduled daily horoscope for ${sign} at ${time}`);
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.(`📅 Scheduled daily horoscope for ${sign} at ${time}`);
   }
 
   // Schedule transit alerts based on birth chart
-  scheduleTransitAlerts(userId: string, birthData: Record<string, unknown>): void {
+  scheduleTransitAlerts(userId: string): void {
     // This would calculate upcoming transits and schedule notifications
-    console.log(`🔮 Scheduled transit alerts for user ${userId}`);
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.(`🔮 Scheduled transit alerts for user ${userId}`);
   }
 
   // Schedule moon phase notifications
   scheduleMoonPhases(userId: string): void {
     // Calculate upcoming moon phases and schedule notifications
-    console.log(`🌙 Scheduled moon phase notifications for user ${userId}`);
+  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.(`🌙 Scheduled moon phase notifications for user ${userId}`);
   }
 }
 

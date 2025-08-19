@@ -10,12 +10,25 @@ interface InterpretationRequest {
   interpretationType: 'general' | 'personality' | 'career' | 'relationships';
 }
 
+// Type interfaces for API response validation
+interface APIMessage {
+  content?: unknown;
+}
+
+interface APIChoice {
+  message?: unknown;
+}
+
+interface APIResponse {
+  choices?: unknown[];
+}
+
 // XAI Service class (temporary inline implementation)
 class XAIService {
   private static baseUrl = xaiConfig.baseUrl;
   
   private static getApiKey(): string {
-    if (!xaiConfig.enabled || !xaiConfig.apiKey) {
+    if (xaiConfig.enabled !== true || typeof xaiConfig.apiKey !== 'string' || xaiConfig.apiKey === '') {
       throw new Error('XAI API key is not configured');
     }
     return xaiConfig.apiKey;
@@ -53,14 +66,46 @@ class XAIService {
         throw new Error(`xAI API request failed: ${response.statusText} (${response.status})`);
       }
 
-      const data = await response.json();
-      const interpretation = data.choices?.[0]?.message?.content;
+      const data: unknown = await response.json();
       
-      if (!interpretation) {
-        throw new Error('No interpretation received from xAI API');
+      // Type-safe parsing of API response
+      if (
+        typeof data !== 'object' ||
+        data === null ||
+        !('choices' in data)
+      ) {
+        throw new Error('Invalid API response: missing choices array');
       }
 
-      return interpretation;
+      const dataObj = data as APIResponse;
+      if (
+        !Array.isArray(dataObj.choices) ||
+        dataObj.choices.length === 0 ||
+        typeof dataObj.choices[0] !== 'object' ||
+        dataObj.choices[0] === null
+      ) {
+        throw new Error('Invalid API response: invalid choices array');
+      }
+
+      const choice = dataObj.choices[0] as APIChoice;
+      if (
+        !('message' in choice) ||
+        typeof choice.message !== 'object' ||
+        choice.message === null
+      ) {
+        throw new Error('Invalid API response: invalid message format');
+      }
+
+      const message = choice.message as APIMessage;
+      if (
+        !('content' in message) ||
+        typeof message.content !== 'string' ||
+        message.content === ''
+      ) {
+        throw new Error('Invalid API response: missing or empty content');
+      }
+
+      return message.content;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`xAI API error: ${error.message}`);
@@ -79,7 +124,7 @@ class XAIService {
       relationships: `Provide a relationship analysis based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Focus on romantic tendencies and compatibility factors.`
     };
 
-    return prompts[interpretationType] || prompts.general;
+    return prompts[interpretationType] ?? prompts.general;
   }
 
   static async generateMockInterpretation(request: InterpretationRequest): Promise<string> {
@@ -92,7 +137,7 @@ class XAIService {
       relationships: `In relationships, your birth chart reveals someone who values deep, meaningful connections. Born at ${request.birthTime} on ${request.birthDate}, your Venus and Mars placements suggest you are both passionate and nurturing in romantic partnerships.`
     };
 
-    return interpretations[request.interpretationType] || interpretations.general;
+    return interpretations[request.interpretationType] ?? interpretations.general;
   }
 }
 
@@ -111,7 +156,7 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
 
   const { isLoading: loading } = useQuery({
     queryKey: ['interpretation'],
-    queryFn: async () => null, // Placeholder; actual fetch happens in generateInterpretation
+    queryFn: () => null, // Placeholder; actual fetch happens in generateInterpretation
     enabled: false, // Prevent auto-fetching
   });
 
@@ -123,7 +168,7 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
       const cacheKey = ['interpretation', JSON.stringify(request)];
       const cachedInterpretation = queryClient.getQueryData<string>(cacheKey);
 
-      if (cachedInterpretation) {
+      if (typeof cachedInterpretation === 'string' && cachedInterpretation !== '') {
         setInterpretation(cachedInterpretation);
         return;
       }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { devConsole } from '../config/environment';
 import { Card, Button } from '@cosmichub/ui';
 import { MultiSystemChartDisplay } from '../components/MultiSystemChart';
 import { useBirthData } from '../contexts/BirthDataContext';
@@ -12,7 +13,7 @@ const MultiSystemChart: React.FC = () => {
   const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
     // No navigation needed - stay on this page and show the multi-system charts
-    console.log('Multi-system chart birth data submitted:', data);
+  devConsole.log?.('🧭 Multi-system chart birth data submitted', data);
   };
 
   const availableSystems = [

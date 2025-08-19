@@ -63,13 +63,18 @@ const CoreQuartetTab: React.FC<CoreQuartetTabProps> = React.memo(({
       {/* Core Keys Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {coreKeys.map((item, index) => {
-          if (!item.key) return null;
+          if (item.key === null || item.key === undefined) {
+            return null;
+          }
           
           return (
             <div
               key={`${item.key.number}-${index}`}
               className={`cosmic-card bg-gradient-to-br from-${item.color}-900/20 to-${item.color}-800/20 border border-${item.color}-500/30 hover:border-${item.color}-400/50 transition-all duration-300 cursor-pointer group`}
               onClick={() => handleKeyClick(item.key)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleKeyClick(item.key); } }}
             >
               <div className="p-6">
                 <div className="flex items-center mb-4">
@@ -146,21 +151,21 @@ const CoreQuartetTab: React.FC<CoreQuartetTabProps> = React.memo(({
           <div className="space-y-4 text-cosmic-silver/90">
             <p>
               Your Core Quartet represents the foundational architecture of your consciousness. 
-              These four Gene Keys work together as an integrated system to guide your life's 
+              These four Gene Keys work together as an integrated system to guide your life&apos;s 
               unfoldment and spiritual evolution.
             </p>
             
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="p-4 border rounded-lg bg-emerald-900/30 border-emerald-500/20">
-                <h5 className="mb-2 font-bold text-emerald-400">Life's Work & Evolution</h5>
+                <h5 className="mb-2 font-bold text-emerald-400">Life&apos;s Work &amp; Evolution</h5>
                 <p className="text-sm">
-                  These work as a pair - your Life's Work shows your natural gifts, while Evolution 
-                  reveals where you'll face resistance and ultimately breakthrough to mastery.
+                  These work as a pair - your Life&apos;s Work shows your natural gifts, while Evolution 
+                  reveals where you&apos;ll face resistance and ultimately breakthrough to mastery.
                 </p>
               </div>
               
               <div className="p-4 border rounded-lg bg-purple-900/30 border-purple-500/20">
-                <h5 className="mb-2 font-bold text-purple-400">Radiance & Purpose</h5>
+                <h5 className="mb-2 font-bold text-purple-400">Radiance &amp; Purpose</h5>
                 <p className="text-sm">
                   Your Radiance attracts the resources you need to fulfill your Purpose. As you 
                   embody your gifts, you naturally magnetize opportunities for service.

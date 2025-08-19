@@ -8,7 +8,7 @@ const PricingPage: React.FC = () => {
   const { user } = useAuth();
 
   const handleSubscribe = async (tierSlug: string) => {
-    if (!user) {
+    if (user === null || user === undefined) {
       alert('Please sign in to subscribe to HealWave Pro');
       return;
     }
@@ -65,7 +65,7 @@ const PricingPage: React.FC = () => {
                 key={tierSlug}
                 className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg border ${isPopular ? 'border-purple-500 border-4' : 'border-gray-200'} relative transition-all duration-300 ${isPopular ? 'scale-105' : 'scale-100'}`}
               >
-                {isPopular && (
+                {isPopular === true && (
                   <span className="absolute flex items-center px-4 py-1 space-x-1 text-sm font-medium text-white transform -translate-x-1/2 bg-purple-500 rounded-full -top-3 left-1/2">
                     <span>★</span>
                     <span>Most Popular</span>
@@ -89,7 +89,7 @@ const PricingPage: React.FC = () => {
                       )}
                     </div>
 
-                    {isYearly && tierSlug !== 'free' && savings > 0 && (
+                    {isYearly === true && tierSlug !== 'free' && typeof savings === 'number' && savings > 0 && (
                       <p className="text-sm font-semibold text-green-500">
                         Save {savings}% yearly
                       </p>

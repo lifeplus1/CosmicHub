@@ -16,7 +16,7 @@ const signs: Sign[] = [
   { name: 'Pisces', element: 'Water', modality: 'Mutable', traits: 'Compassionate, imaginative, spiritual' }
 ];
 
-const getElementColor = (element: string) => {
+const getElementColor = (element: string): string => {
   switch (element.toLowerCase()) {
     case 'fire': return 'red-500';
     case 'earth': return 'green-500';

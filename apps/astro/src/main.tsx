@@ -5,20 +5,21 @@ import App from './App';
 import './pwa';
 import './pwa-performance';
 import { initializeNotifications } from './services/notificationManager';
+import { devConsole } from './config/environment';
 
-// Enhanced browser console logging
-console.log('🚀 CosmicHub Frontend Starting...');
-console.log('📍 Environment:', import.meta.env.MODE);
-console.log('🌐 Base URL:', import.meta.env.BASE_URL);
-console.log('⚙️ API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8001');
+// Enhanced environment-aware logging (silenced in production if devConsole.log noop)
+devConsole.log?.('🚀 CosmicHub Frontend Starting...');
+devConsole.log?.('📍 Environment:', import.meta.env.MODE);
+devConsole.log?.('🌐 Base URL:', import.meta.env.BASE_URL);
+devConsole.log?.('⚙️ API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8001');
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  console.error('❌ Root element not found');
+  devConsole.error('❌ Root element not found');
   throw new Error('Root element not found');
 }
 
-console.log('✅ Root element found, mounting React app...');
+devConsole.log?.('✅ Root element found, mounting React app...');
 
 const root = createRoot(rootElement);
 root.render(
@@ -27,15 +28,15 @@ root.render(
   // </StrictMode>
 );
 
-console.log('🎉 React app mounted successfully!');
+devConsole.log?.('🎉 React app mounted successfully!');
 
 // Initialize push notifications and background sync
 initializeNotifications().then((success) => {
   if (success) {
-    console.log('🔔 Push notifications initialized');
+    devConsole.log?.('🔔 Push notifications initialized');
   } else {
-    console.log('📵 Push notifications not available');
+    devConsole.warn?.('📵 Push notifications not available');
   }
 }).catch((error) => {
-  console.warn('⚠️ Failed to initialize notifications:', error);
+  devConsole.warn?.('⚠️ Failed to initialize notifications:', error);
 });

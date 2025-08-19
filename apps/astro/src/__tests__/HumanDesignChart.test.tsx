@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import HumanDesignChart from '../components/HumanDesignChart/HumanDesignChart';
@@ -49,14 +49,54 @@ const mockHumanDesignData = {
     type: 'Generator',
     strategy: 'To Respond',
     authority: 'Sacral',
-    profile: '4/6',
+    profile: {
+      line1: 4,
+      line2: 6,
+      description: '4/6 Profile - Opportunist/Role Model'
+    },
     signature: 'Satisfaction',
     not_self_theme: 'Frustration',
     defined_centers: ['Sacral', 'Solar Plexus'],
     undefined_centers: ['Head', 'Ajna', 'Throat', 'Identity', 'Will', 'Spleen', 'Root'],
-    channels: ['Channel of Initiation (51-25)'],
-    gates: [51, 25, 42, 3],
-    incarnation_cross: 'Right Angle Cross of the Four Ways'
+    channels: [
+      {
+        gate1: 51,
+        gate2: 25,
+        name: 'Channel of Initiation',
+        description: 'The Channel of Initiation (51-25)'
+      }
+    ],
+    gates: [
+      {
+        number: 51,
+        name: 'Gate of Shock',
+        center: 'Heart',
+        type: 'personality' as const
+      },
+      {
+        number: 25,
+        name: 'Gate of Innocence',
+        center: 'Identity',
+        type: 'design' as const
+      }
+    ],
+    incarnation_cross: {
+      name: 'Right Angle Cross of the Four Ways',
+      description: 'A cross focused on bringing new directions and possibilities',
+      gates: {
+        personality_sun: 51,
+        personality_earth: 25,
+        design_sun: 42,
+        design_earth: 3
+      }
+    },
+    variables: {
+      description: 'Left Angle Variable',
+      digestion: 'Hot',
+      environment: 'Markets',
+      awareness: 'Taste',
+      perspective: 'Power'
+    }
   }
 };
 

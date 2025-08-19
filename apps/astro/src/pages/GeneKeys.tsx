@@ -1,4 +1,5 @@
 import React from 'react';
+import { devConsole } from '../config/environment';
 import { Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
@@ -11,7 +12,7 @@ const GeneKeys: React.FC = () => {
   const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
     // No navigation needed - stay on this page and show the gene keys profile
-    console.log('Gene Keys birth data submitted:', data);
+  devConsole.log?.('🧬 Gene Keys birth data submitted', data);
   };
 
   return (

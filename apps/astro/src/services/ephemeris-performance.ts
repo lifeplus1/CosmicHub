@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import { devConsole, loggingConfig } from '../config/environment';
 
 interface PerformanceMetrics {
   cacheHitRate: number;
@@ -56,9 +57,9 @@ class EphemerisPerformanceMonitor {
       this.entries = this.entries.slice(-this.maxEntries);
     }
 
-  // Log to console in development (Vite)
-  if ((import.meta as { env?: { MODE?: string } }).env?.MODE === 'development') {
-      console.log(`[Ephemeris] ${operation}: ${latency}ms (cache: ${cacheHit ? 'hit' : 'miss'})`);
+    // Development logging routed through devConsole to respect global logging policy
+    if (loggingConfig.enableConsole === true && loggingConfig.level === 'debug') {
+      devConsole.log?.(`[Ephemeris] ${operation}: ${latency}ms (cache: ${cacheHit ? 'hit' : 'miss'})`);
     }
   }
 
@@ -77,7 +78,7 @@ class EphemerisPerformanceMonitor {
     const totalRequests = recentEntries.length;
     const cacheHits = recentEntries.filter(entry => entry.cacheHit).length;
     const cacheMisses = totalRequests - cacheHits;
-    const errors = recentEntries.filter(entry => !entry.success).length;
+    const errors = recentEntries.filter(entry => entry.success === false).length;
     
     const totalLatency = recentEntries.reduce((sum, entry) => sum + entry.latency, 0);
     const averageLatency = totalRequests > 0 ? totalLatency / totalRequests : 0;
@@ -129,7 +130,7 @@ class EphemerisPerformanceMonitor {
    * Log current performance summary to console.
    */
   logSummary(): void {
-    console.log(this.getSummary());
+    devConsole.log?.(this.getSummary());
   }
 }
 

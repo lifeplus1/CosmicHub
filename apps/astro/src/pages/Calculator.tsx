@@ -1,4 +1,5 @@
 import React from 'react';
+import { devConsole } from '../config/environment';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@cosmichub/ui';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
@@ -9,10 +10,10 @@ const Calculator: React.FC = () => {
   const navigate = useNavigate();
   const { birthData } = useBirthData();
 
-  console.log('🧮 Calculator page rendered with birth data:', birthData);
+  devConsole.log?.('🧮 Calculator page rendered with birth data:', birthData);
 
   const handleChartGeneration = (data: ChartBirthData) => {
-    console.log('🔮 Generate birth chart with data:', data);
+    devConsole.log?.('🔮 Generate birth chart with data:', data);
     // SimpleBirthForm will handle navigation to chart-results
     // No need to navigate here since form handles it
   };
@@ -69,35 +70,35 @@ const Calculator: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                id: 'chart',
-                title: 'Natal Chart',
-                description: 'Classic Western astrology wheel with planets and aspects',
-                icon: '⭐',
-                color: 'cosmic-gold',
+                id: "chart",
+                title: "Natal Chart",
+                description: "Classic Western astrology wheel with planets and aspects",
+                icon: "⭐",
+                color: "cosmic-gold",
                 available: true
               },
               {
-                id: 'multi-system',
-                title: 'Multi-System',
-                description: 'Compare Western, Vedic, Uranian systems side by side',
-                icon: '🌍',
-                color: 'cosmic-purple',
+                id: "multi-system",
+                title: "Multi-System",
+                description: "Compare Western, Vedic, Uranian systems side by side",
+                icon: "🌍",
+                color: "cosmic-purple",
                 available: true
               },
               {
-                id: 'numerology',
-                title: 'Numerology',
-                description: 'Life path, destiny, and personality numbers',
-                icon: '🔢',
-                color: 'cosmic-blue',
+                id: "numerology",
+                title: "Numerology",
+                description: "Life path, destiny, and personality numbers",
+                icon: "🔢",
+                color: "cosmic-blue",
                 available: true
               },
               {
-                id: 'human-design',
-                title: 'Human Design',
-                description: 'Your energetic blueprint and strategy',
-                icon: '🧬',
-                color: 'cosmic-silver',
+                id: "human-design",
+                title: "Human Design",
+                description: "Your energetic blueprint and strategy",
+                icon: "🧬",
+                color: "cosmic-silver",
                 available: true
               }
             ].map((system) => (

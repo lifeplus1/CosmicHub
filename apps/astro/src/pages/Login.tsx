@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logIn } from '@cosmichub/auth';
+import { devConsole } from '../config/environment';
 
 interface LoginData {
   email: string;
@@ -16,11 +17,11 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  console.log('🔐 Login page rendered');
+  devConsole.log?.('🔐 Login page rendered');
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log('📝 Login input changed:', { name, value });
+  devConsole.log?.('📝 Login input changed:', { name, value });
     setLoginData(prev => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
     if (error) setError('');
@@ -28,13 +29,13 @@ const Login: React.FC = () => {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🚀 Login form submitted with data:', loginData);
+  devConsole.log?.('🚀 Login form submitted with data:', loginData);
     setError('');
     setIsLoading(true);
 
     try {
       // Basic validation
-      if (!loginData.email || !loginData.password) {
+  if (loginData.email === '' || loginData.password === '') {
         throw new Error('Please enter both email and password');
       }
 
@@ -42,15 +43,15 @@ const Login: React.FC = () => {
         throw new Error('Please enter a valid email address');
       }
 
-      console.log('🔐 Attempting to log in user...');
-      await logIn(loginData.email, loginData.password);
-      console.log('✅ Login successful!');
+  devConsole.log?.('🔐 Attempting to log in user...');
+  await logIn(loginData.email, loginData.password);
+  devConsole.log?.('✅ Login successful!');
       
       // Navigate to dashboard after successful login
       navigate('/');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
-      console.error('❌ Login error:', errorMessage);
+  devConsole.error('❌ Login error:', errorMessage);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -69,7 +70,7 @@ const Login: React.FC = () => {
       </div>
 
       <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
-        {error && (
+  {error !== '' && (
           <div className="mb-6 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
             <p className="text-red-200 text-sm">{error}</p>
           </div>
@@ -107,7 +108,7 @@ const Login: React.FC = () => {
           
           <button 
             type="submit"
-            disabled={isLoading || !loginData.email || !loginData.password}
+            disabled={isLoading || loginData.email === '' || loginData.password === ''}
             className="w-full px-6 py-3 bg-gradient-to-r from-cosmic-purple to-cosmic-blue hover:from-cosmic-purple/80 hover:to-cosmic-blue/80 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-lg transition-all duration-300 font-semibold disabled:cursor-not-allowed"
           >
             {isLoading ? (

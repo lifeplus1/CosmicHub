@@ -27,7 +27,7 @@ export const CosmicLoading: React.FC<CosmicLoadingProps> = ({
         </div>
       </div>
       
-      {message && (
+  {(typeof message === 'string' && message.length > 0) && (
         <p className="mt-4 text-cosmic-silver/80 font-playfair animate-pulse">
           {message}
         </p>

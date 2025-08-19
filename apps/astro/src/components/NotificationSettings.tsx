@@ -3,12 +3,14 @@
  * Allows users to manage push notification preferences
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   PushNotificationManager, 
   NotificationPreferences, 
-  DefaultNotificationPreferences 
+  DefaultNotificationPreferences,
+  NotificationStats
 } from '@cosmichub/config';
+import { devConsole } from '../config/environment';
 
 interface NotificationSettingsProps {
   userId: string;
@@ -25,78 +27,84 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
-  const [stats, setStats] = useState<any>({});
+  const [stats, setStats] = useState<NotificationStats>({
+    totalSubscriptions: 0,
+    activeSubscriptions: 0,
+    queuedNotifications: 0,
+    permissionStatus: 'default'
+  });
 
-  useEffect(() => {
-    loadCurrentSettings();
-    checkNotificationStatus();
-    loadStats();
+  const loadCurrentSettings = useCallback((): void => {
+    const stored = localStorage.getItem(`cosmichub-notification-prefs-${userId}`);
+    if (stored !== null && stored !== undefined && stored.length > 0) {
+  let parsed: unknown;
+  try { parsed = JSON.parse(stored) as unknown; } catch { return; }
+  if (isNotificationPreferences(parsed)) setPreferences(parsed);
+    }
   }, [userId]);
 
-  const loadCurrentSettings = async () => {
-    // In a real implementation, load from your backend
-    const stored = localStorage.getItem(`cosmichub-notification-prefs-${userId}`);
-    if (stored) {
-      try {
-        const prefs = JSON.parse(stored);
-        setPreferences(prefs);
-      } catch (error) {
-        console.warn('Failed to load notification preferences:', error);
-      }
-    }
-  };
-
-  const checkNotificationStatus = () => {
+  const checkNotificationStatus = useCallback((): void => {
     setPermissionStatus(Notification.permission);
-    
-    // Check if user is subscribed
-    navigator.serviceWorker.ready.then(registration => {
-      return registration.pushManager.getSubscription();
-    }).then(subscription => {
-      setIsSubscribed(!!subscription);
-    });
-  };
+    navigator.serviceWorker.ready
+      .then(registration => registration.pushManager.getSubscription())
+      .then(subscription => {
+            setIsSubscribed(subscription !== null && subscription !== undefined);
+      })
+      .catch(err => devConsole.warn?.('Subscription status check failed', err));
+  }, []);
 
-  const loadStats = () => {
-    const notificationStats = pushManager.getNotificationStats();
-    setStats(notificationStats);
-  };
+  const loadStats = useCallback((): void => {
+    try {
+      const notificationStats = pushManager.getNotificationStats();
+      if (notificationStats !== null && notificationStats !== undefined && typeof notificationStats.totalSubscriptions === 'number') {
+        setStats(notificationStats);
+      }
+    } catch (err) {
+      devConsole.warn?.('Failed to load notification stats', err);
+    }
+  }, [pushManager]);
 
-  const handleSubscribe = async () => {
+  useEffect(() => {
+    void loadCurrentSettings();
+    checkNotificationStatus();
+    loadStats();
+  }, [loadCurrentSettings, checkNotificationStatus, loadStats]);
+
+  const handleSubscribe = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const subscription = await pushManager.subscribeUser(userId, preferences);
-      setIsSubscribed(!!subscription);
+  const subscription = await pushManager.subscribeUser(userId, preferences);
+  setIsSubscribed(subscription !== null);
       
-      if (subscription) {
+    if (subscription !== null && subscription !== undefined) {
         // Show welcome notification
         await pushManager.queueNotification({
           title: '🔔 Notifications Enabled!',
-          body: 'You\'ll now receive personalized cosmic insights and healing reminders.',
+          body: 'You\u2019ll now receive personalized cosmic insights and healing reminders.',
           tag: 'welcome-notification',
           urgency: 'low'
         });
       }
     } catch (error) {
-      console.error('Failed to subscribe:', error);
+      devConsole.error('Failed to subscribe:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleUnsubscribe = async () => {
+  const handleUnsubscribe = async (): Promise<void> => {
     setIsLoading(true);
     try {
       await pushManager.unsubscribeUser(userId);
       setIsSubscribed(false);
     } catch (error) {
-      console.error('Failed to unsubscribe:', error);
+      devConsole.error('Failed to unsubscribe:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updatePreferences = (updates: Partial<NotificationPreferences>) => {
+  const updatePreferences = (updates: Partial<NotificationPreferences>): void => {
     const newPreferences = { ...preferences, ...updates };
     setPreferences(newPreferences);
     
@@ -112,7 +120,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     onSettingsChange?.(newPreferences);
   };
 
-  const testNotification = async () => {
+  const testNotification = async (): Promise<void> => {
     await pushManager.queueNotification({
       title: '🧪 Test Notification',
       body: 'This is a test notification to check your settings.',
@@ -121,12 +129,27 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     });
   };
 
-  const getSuggestedSettings = async () => {
+  const getSuggestedSettings = async (): Promise<void> => {
     const suggestions = await pushManager.suggestNotificationSettings(userId);
     if (Object.keys(suggestions).length > 0) {
       updatePreferences(suggestions);
     }
   };
+
+  // Runtime type guard for NotificationPreferences
+  function isNotificationPreferences(value: unknown): value is NotificationPreferences {
+    if (value === null || typeof value !== 'object') return false;
+    const v = value as Record<string, unknown>;
+    return (
+      typeof v.dailyHoroscope === 'boolean' &&
+      typeof v.transitAlerts === 'boolean' &&
+      typeof v.frequencyReminders === 'boolean' &&
+      typeof v.appUpdates === 'boolean' &&
+      typeof v.frequency === 'string' &&
+      typeof v.quietHours === 'object' && v.quietHours !== null &&
+      typeof (v.quietHours as Record<string, unknown>).enabled === 'boolean'
+    );
+  }
 
   return (
     <div className="notification-settings p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
@@ -136,14 +159,14 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
         </h2>
         <div className="flex space-x-2">
           <button
-            onClick={testNotification}
+            onClick={() => { void testNotification(); }}
             disabled={!isSubscribed}
             className="px-3 py-1 text-sm bg-blue-500 text-white rounded disabled:opacity-50"
           >
             Test
           </button>
           <button
-            onClick={getSuggestedSettings}
+            onClick={() => { void getSuggestedSettings(); }}
             className="px-3 py-1 text-sm bg-purple-500 text-white rounded"
           >
             Smart Setup
@@ -167,7 +190,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
           
           {!isSubscribed ? (
             <button
-              onClick={handleSubscribe}
+              onClick={() => { void handleSubscribe(); }}
               disabled={isLoading || permissionStatus === 'denied'}
               className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
             >
@@ -175,7 +198,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
             </button>
           ) : (
             <button
-              onClick={handleUnsubscribe}
+              onClick={() => { void handleUnsubscribe(); }}
               disabled={isLoading}
               className="px-4 py-2 bg-red-500 text-white rounded"
             >
@@ -186,7 +209,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
       </div>
 
       {/* Notification Types */}
-      {isSubscribed && (
+      {isSubscribed === true && (
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -194,7 +217,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
             </h3>
             
             <div className="space-y-4">
-              <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+              <label htmlFor="pref-dailyHoroscope" aria-label="Daily Horoscope preference" className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                 <div>
                   <span className="font-medium text-gray-900 dark:text-white">
                     ✨ Daily Horoscope
@@ -205,13 +228,14 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                 </div>
                 <input
                   type="checkbox"
+          id="pref-dailyHoroscope"
                   checked={preferences.dailyHoroscope}
                   onChange={(e) => updatePreferences({ dailyHoroscope: e.target.checked })}
                   className="w-5 h-5 text-purple-600"
                 />
               </label>
 
-              <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+              <label htmlFor="pref-transitAlerts" aria-label="Transit Alerts preference" className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                 <div>
                   <span className="font-medium text-gray-900 dark:text-white">
                     🪐 Transit Alerts
@@ -222,13 +246,14 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                 </div>
                 <input
                   type="checkbox"
+          id="pref-transitAlerts"
                   checked={preferences.transitAlerts}
                   onChange={(e) => updatePreferences({ transitAlerts: e.target.checked })}
                   className="w-5 h-5 text-purple-600"
                 />
               </label>
 
-              <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+              <label htmlFor="pref-frequencyReminders" aria-label="Frequency Reminders preference" className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                 <div>
                   <span className="font-medium text-gray-900 dark:text-white">
                     🎧 Frequency Reminders
@@ -239,13 +264,14 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                 </div>
                 <input
                   type="checkbox"
+          id="pref-frequencyReminders"
                   checked={preferences.frequencyReminders}
                   onChange={(e) => updatePreferences({ frequencyReminders: e.target.checked })}
                   className="w-5 h-5 text-purple-600"
                 />
               </label>
 
-              <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+              <label htmlFor="pref-appUpdates" aria-label="App Updates preference" className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                 <div>
                   <span className="font-medium text-gray-900 dark:text-white">
                     📱 App Updates
@@ -256,6 +282,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                 </div>
                 <input
                   type="checkbox"
+          id="pref-appUpdates"
                   checked={preferences.appUpdates}
                   onChange={(e) => updatePreferences({ appUpdates: e.target.checked })}
                   className="w-5 h-5 text-purple-600"
@@ -272,13 +299,14 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {(['instant', 'hourly', 'daily', 'weekly'] as const).map(freq => (
-                <label key={freq} className="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+        <label key={freq} htmlFor={`frequency-${freq}`} className="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
                   <input
                     type="radio"
                     name="frequency"
                     value={freq}
                     checked={preferences.frequency === freq}
-                    onChange={(e) => updatePreferences({ frequency: e.target.value as any })}
+          id={`frequency-${freq}`}
+          onChange={() => updatePreferences({ frequency: freq })}
                     className="mr-2 text-purple-600"
                   />
                   <span className="text-sm capitalize text-gray-900 dark:text-white">
@@ -313,12 +341,13 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
               {preferences.quietHours.enabled && (
                 <div className="grid grid-cols-2 gap-4 ml-8">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="quiet-start-time">
                       Start Time
                     </label>
                     <input
                       type="time"
-                      value={preferences.quietHours.start}
+                          id="quiet-start-time"
+                          value={preferences.quietHours.start}
                       onChange={(e) => updatePreferences({
                         quietHours: { ...preferences.quietHours, start: e.target.value }
                       })}
@@ -327,12 +356,13 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="quiet-end-time">
                       End Time
                     </label>
                     <input
                       type="time"
-                      value={preferences.quietHours.end}
+                          id="quiet-end-time"
+                          value={preferences.quietHours.end}
                       onChange={(e) => updatePreferences({
                         quietHours: { ...preferences.quietHours, end: e.target.value }
                       })}
@@ -354,7 +384,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-3 bg-blue-50 dark:bg-blue-900 rounded">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">
-                  {stats.totalSubscriptions || 0}
+                  {Number.isFinite(stats.totalSubscriptions) ? stats.totalSubscriptions : 0}
                 </div>
                 <div className="text-sm text-blue-600 dark:text-blue-300">
                   Total Devices
@@ -363,7 +393,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
               
               <div className="p-3 bg-green-50 dark:bg-green-900 rounded">
                 <div className="text-2xl font-bold text-green-600 dark:text-green-300">
-                  {stats.activeSubscriptions || 0}
+                  {Number.isFinite(stats.activeSubscriptions) ? stats.activeSubscriptions : 0}
                 </div>
                 <div className="text-sm text-green-600 dark:text-green-300">
                   Active Devices
@@ -372,7 +402,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
               
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900 rounded">
                 <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">
-                  {stats.queuedNotifications || 0}
+                  {Number.isFinite(stats.queuedNotifications) ? stats.queuedNotifications : 0}
                 </div>
                 <div className="text-sm text-yellow-600 dark:text-yellow-300">
                   Queued
@@ -401,7 +431,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
           <li>• Enable notifications for the best CosmicHub experience</li>
           <li>• Use quiet hours to avoid late-night notifications</li>
           <li>• Smart Setup analyzes your usage to suggest optimal settings</li>
-          <li>• Test notifications to ensure they're working properly</li>
+          <li>• Test notifications to ensure they&apos;re working properly</li>
         </ul>
       </div>
     </div>

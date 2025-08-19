@@ -1,5 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
+import { devConsole } from '../config/environment';
 
 export interface Toast {
   id: string;
@@ -22,8 +23,8 @@ export const useToast = (): ToastContextType => {
   if (context === undefined) {
     // Return a mock implementation to prevent compilation errors
     return {
-      toast: () => console.log('Toast provider not available'),
-      closeToast: () => console.log('Toast provider not available')
+      toast: () => devConsole.log('Toast provider not available'),
+      closeToast: () => devConsole.log('Toast provider not available')
     };
   }
   return context;

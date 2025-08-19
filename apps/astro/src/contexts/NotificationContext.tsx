@@ -18,7 +18,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
-  if (context === undefined) {
+  if (context === undefined || context === null) {
     throw new Error('useNotifications must be used within a NotificationProvider');
   }
   return context;
@@ -38,7 +38,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     setNotifications(prev => [...prev, newNotification]);
 
     // Auto-remove notification after duration (default 5 seconds)
-    const duration = notification.duration || 5000;
+    const duration = typeof notification.duration === 'number' ? notification.duration : 5000;
     setTimeout(() => {
       removeNotification(id);
     }, duration);

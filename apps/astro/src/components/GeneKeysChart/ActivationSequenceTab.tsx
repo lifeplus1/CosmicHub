@@ -14,7 +14,7 @@ const ActivationSequenceTab: React.FC<ActivationSequenceTabProps> = React.memo((
     onKeySelect(key);
   }, [onKeySelect]);
 
-  if (!geneKeysData.activation) {
+  if (geneKeysData.activation === null || geneKeysData.activation === undefined) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-cosmic-silver/60">No Activation Sequence data available</p>
@@ -50,6 +50,9 @@ const ActivationSequenceTab: React.FC<ActivationSequenceTabProps> = React.memo((
             key={`${geneKey.number}-${index}`}
             className="transition-all duration-300 border cursor-pointer cosmic-card bg-gradient-to-br from-blue-800/20 to-cyan-800/20 border-blue-500/20 hover:border-blue-400/40 group"
             onClick={() => handleKeyClick(geneKey)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleKeyClick(geneKey); } }}
           >
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">

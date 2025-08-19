@@ -29,7 +29,7 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
     );
   }
 
-  if (error) {
+  if (typeof error === 'string' && error !== '') {
     return (
       <div className="p-6 bg-red-900/20 border border-red-500/30 rounded-xl" role="alert">
         <div className="flex items-center space-x-3">
@@ -43,7 +43,7 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
     );
   }
 
-  if (!interpretation) {
+  if (interpretation === null) {
     return (
       <div className="text-center p-12 bg-cosmic-dark/40 rounded-xl border border-cosmic-silver/20">
         <div className="w-20 h-20 bg-cosmic-gold/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -74,7 +74,7 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
             </span>
             <div>
               <h2 className="text-2xl font-bold text-cosmic-gold font-playfair">
-                {interpretation.title || `${interpretation.type} Interpretation`}
+                {interpretation.title !== '' && interpretation.title.length > 0 ? interpretation.title : `${interpretation.type} Interpretation`}
               </h2>
               <p className="text-cosmic-silver/70 capitalize font-medium">
                 {interpretation.type} Analysis
@@ -100,7 +100,7 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
       </header>
 
       {/* Summary */}
-      {interpretation.summary && (
+      {typeof interpretation.summary === 'string' && interpretation.summary !== '' && (
         <div className="p-6 bg-cosmic-gold/5 border-b border-cosmic-silver/10">
           <h3 className="text-sm font-semibold text-cosmic-gold mb-2 uppercase tracking-wide">
             Key Insights
@@ -118,12 +118,13 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
             {contentToShow}
           </div>
           
-          {!showFullContent && interpretation.content.length > 500 && (
+          {showFullContent === false && typeof interpretation.content === 'string' && interpretation.content.length > 500 && (
             <button
               className="mt-4 text-cosmic-gold hover:text-cosmic-gold/80 transition-colors text-sm font-medium"
               onClick={() => {
-                // This would typically be handled by parent component
-                console.log('Show full content for:', interpretation.id);
+                // TODO: This would typically be handled by parent component
+                // console.log('Show full content for:', interpretation.id);
+                // Implement full content display functionality
               }}
             >
               Read Full Interpretation →
@@ -133,7 +134,7 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
       </div>
 
       {/* Tags */}
-      {interpretation.tags && interpretation.tags.length > 0 && (
+      {Array.isArray(interpretation.tags) && interpretation.tags.length !== 0 && (
         <div className="px-6 pb-6">
           <h4 className="text-sm font-semibold text-cosmic-silver/70 mb-3">Related Topics</h4>
           <div className="flex flex-wrap gap-2">

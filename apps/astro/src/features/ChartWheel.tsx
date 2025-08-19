@@ -1,10 +1,22 @@
-import { useEffect, useRef, memo, useState, useMemo } from 'react';
+import React, { useEffect, useRef, memo, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
 import { fetchChartData, type ChartBirthData, type ChartData as APIChartData } from '../services/api';
 import { Button } from '@cosmichub/ui';
 
 // Enhanced TypeScript interfaces
+interface BackendPlanet {
+  position: number;
+  retrograde?: boolean;
+  speed?: number;
+}
+
+interface BackendHouse {
+  house: number;
+  cusp: number;
+  sign?: string;
+}
+
 interface Planet {
   name: string;
   position: number; // Degree in zodiac (0-360)
@@ -13,9 +25,24 @@ interface Planet {
 }
 
 interface House {
+  house: number;
   number: number;
   cusp: number; // Degree position
   sign: string;
+}
+
+interface APIAspect {
+  point1: string;
+  point2: string;
+  aspect: string;
+  orb: number;
+}
+
+interface ChartData {
+  planets: Record<string, Planet>;
+  houses: House[];
+  aspects?: Aspect[];
+  angles?: Record<string, number>;
 }
 
 interface Aspect {
@@ -23,20 +50,21 @@ interface Aspect {
   planet2: string;
   angle: number;
   orb: number;
-  type: 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx';
+  type: AspectType;
   applying: boolean;
 }
 
-interface ChartData {
-  planets: Record<string, Planet>;
-  houses: House[];
-  aspects?: Aspect[];
-  angles?: {
-    ascendant: number;
-    midheaven: number;
-    descendant: number;
-    imumcoeli: number;
-  };
+type AspectType = 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx';
+
+interface BackendChartResponse {
+  planets?: Record<string, BackendPlanet>;
+  houses?: Record<string, BackendHouse>;
+  aspects?: APIAspect[];
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  julian_day?: number;
+  angles?: Record<string, number>;
 }
 
 interface ChartWheelProps {
@@ -59,58 +87,93 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   // Fetch chart data from backend using the /calculate endpoint (only if no pre-transformed data)
   const { data: fetchedData, isLoading, error, refetch } = useQuery<ChartData>({
     queryKey: ['chartData', birthData],
-    queryFn: async () => {
-      if (!birthData) throw new Error('Birth data required');
+  queryFn: async () => {
+  if (birthData == null) throw new Error('Birth data required');
       const response = await fetchChartData(birthData);
       return transformAPIResponseToChartData(response);
     },
-    enabled: !!birthData && !preTransformedData,
+  enabled: birthData != null && preTransformedData == null,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     retry: 2,
   });
 
   // Use pre-transformed data if available, otherwise use fetched data
-  const data = preTransformedData || fetchedData;
+  const data = preTransformedData != null ? preTransformedData : fetchedData;
 
   // Transform API response to our internal ChartData format (only used when no pre-transformed data)
   const transformAPIResponseToChartData = (apiData: APIChartData): ChartData => {
     // Transform planets
     const transformedPlanets: Record<string, Planet> = {};
-    Object.entries(apiData.planets).forEach(([name, planetData]: [string, any]) => {
+    const planets = apiData.planets ?? {};
+    Object.entries(planets).forEach(([name, planetData]) => {
+      if (planetData == null) return;
+      if (typeof planetData.position !== 'number') return;
+      
       transformedPlanets[name] = {
         name,
         position: planetData.position,
-        retrograde: planetData.retrograde || false,
-        speed: planetData.speed || 0,
+        retrograde: planetData.retrograde === true,
+        speed: typeof planetData.speed === 'number' ? planetData.speed : 0,
       };
     });
 
     // Transform houses 
     const transformedHouses: House[] = [];
-    Object.entries(apiData.houses).forEach(([houseKey, houseData]: [string, any]) => {
-      transformedHouses.push({
-        number: houseData.house,
-        cusp: houseData.cusp,
-        sign: houseData.sign || '',
-      });
+    Object.entries(apiData.houses ?? {}).forEach(([houseKey, houseData]) => {
+      function isAPIHouse(data: unknown): data is { house: number; cusp: number; sign?: string } {
+        if (data == null || typeof data !== 'object') return false;
+        const h = data as { house?: number; cusp?: number; sign?: string };
+        return typeof h.house === 'number' && typeof h.cusp === 'number';
+      }
+
+      if (isAPIHouse(houseData)) {
+        transformedHouses.push({
+          house: houseData.house,
+          number: houseData.house,
+          cusp: houseData.cusp,
+          sign: typeof houseData.sign === 'string' ? houseData.sign : '',
+        });
+      }
     });
 
-    // Use backend aspects directly (they're more accurate than calculated ones)
-    const transformedAspects = (apiData.aspects || []).map((aspect: any) => ({
-      planet1: aspect.point1,
-      planet2: aspect.point2,
-      angle: getAspectAngle(aspect.aspect),
-      orb: aspect.orb,
-      type: aspect.aspect.toLowerCase() as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx',
-      applying: false,
-    }));
+    // Transform aspects with proper type handling
+    const transformedAspects: Aspect[] = [];
+    const aspects = apiData.aspects ?? [];
+    
+    function isAPIAspect(data: unknown): data is APIAspect {
+      if (data == null || typeof data !== 'object') return false;
+      const a = data as APIAspect;
+      return (
+        typeof a.point1 === 'string' &&
+        typeof a.point2 === 'string' &&
+        typeof a.aspect === 'string' &&
+        typeof a.orb === 'number'
+      );
+    }
+    
+    for (const aspect of aspects) {
+      if (!isAPIAspect(aspect)) continue;
+      
+      const { point1, point2, aspect: aspectType, orb } = aspect;
+
+      transformedAspects.push({
+        planet1: point1,
+        planet2: point2,
+        angle: getAspectAngle(aspectType),
+        orb: orb,
+        type: aspectType.toLowerCase() as AspectType,
+        applying: false,
+      });
+    }
+
+  const angles = apiData.angles != null ? { ...apiData.angles } : undefined;
 
     return {
       planets: transformedPlanets,
       houses: transformedHouses.sort((a, b) => a.number - b.number),
       aspects: transformedAspects,
-      angles: apiData.angles,
+      angles,
     };
   };
 
@@ -128,7 +191,9 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       'sesquiquadrate': 135,
       'quintile': 72,
     };
-    return aspectAngles[aspectType.toLowerCase()] || 0;
+  const key = aspectType.toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(aspectAngles, key)) return aspectAngles[key];
+  return 0;
   };
 
   // Memoized constants for performance
@@ -167,7 +232,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   }), []);
 
   useEffect(() => {
-    if (!data || !svgRef.current) return;
+  if (data == null || svgRef.current == null) return;
 
     const { width, height, radius, center, signs, signSymbols, signColors, planetSymbols, planetColors, aspectColors } = chartConstants;
 
@@ -242,25 +307,26 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     }
 
     // Draw planets in concentric rings
-    Object.entries(data.planets).forEach(([name, planet], index) => {
+  const planets: Record<string, Planet> = data.planets != null ? data.planets : {};
+    Object.entries(planets).forEach(([name, planet]: [string, Planet], index: number) => {
       const angle = (planet.position - 90) * Math.PI / 180;
       const zodiacInfo = getZodiacInfo(planet.position);
       
       const planetGroup = g.append('g')
         .attr('class', 'planet-group')
-        .attr('aria-label', `Planet ${planet.name} at ${planet.position.toFixed(1)} degrees${planet.retrograde ? ' retrograde' : ''}`);
+  .attr('aria-label', `Planet ${String(planet.name)} at ${planet.position.toFixed(1)} degrees${planet.retrograde === true ? ' retrograde' : ''}`);
 
       // Ring 1: Planet Symbol (outermost) - use planet symbol, not zodiac
-      const planetSymbol = planetGroup.append('text')
+        const planetSymbol = planetGroup.append('text')
         .attr('x', Math.cos(angle) * zodiacSymbolRadius)
         .attr('y', Math.sin(angle) * zodiacSymbolRadius)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .attr('font-size', '18')
         .attr('font-weight', 'bold')
-        .attr('fill', planetColors[name.toLowerCase()] || '#333333')
+          .attr('fill', planetColors[name.toLowerCase()] ?? '#333333')
         .attr('opacity', 0)
-        .text(planetSymbols[name.toLowerCase()] || name.slice(0, 2).toUpperCase());
+          .text(planetSymbols[name.toLowerCase()] ?? name.slice(0, 2).toUpperCase());
 
       // Ring 2: Degree
       const degreeText = planetGroup.append('text')
@@ -287,7 +353,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
         .text(zodiacInfo.signSymbol);
 
       // Ring 4: Retrograde indicator (innermost)
-      if (planet.retrograde) {
+      if (planet.retrograde === true) {
         planetGroup.append('text')
           .attr('x', Math.cos(angle) * retrogradeRadius)
           .attr('y', Math.sin(angle) * retrogradeRadius)
@@ -305,7 +371,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       }
 
       // Animate elements in sequence
-      if (showAnimation) {
+  if (showAnimation) {
         planetSymbol
           .transition()
           .delay(index * 100)
@@ -331,30 +397,31 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     });
 
     // Draw aspects more subtly
-    if (showAspects && data.aspects) {
-      data.aspects.forEach((aspect, index) => {
+  const aspects: Aspect[] = Array.isArray(data.aspects) ? data.aspects : [];
+  if (showAspects && aspects.length > 0) {
+      aspects.forEach((aspect, index) => {
         const planet1 = data.planets[aspect.planet1];
         const planet2 = data.planets[aspect.planet2];
         
-        if (!planet1 || !planet2) return;
+  if (planet1 == null || planet2 == null) return;
 
         const angle1 = (planet1.position - 90) * Math.PI / 180;
         const angle2 = (planet2.position - 90) * Math.PI / 180;
         const aspectRadius = innerRadius - 20; // Position aspects in the center area
 
-        const line = g.append('line')
+          const line = g.append('line')
           .attr('x1', Math.cos(angle1) * aspectRadius)
           .attr('y1', Math.sin(angle1) * aspectRadius)
           .attr('x2', Math.cos(angle1) * aspectRadius)
           .attr('y2', Math.sin(angle1) * aspectRadius)
-          .attr('stroke', aspectColors[aspect.type] || '#666666')
+            .attr('stroke', aspectColors[aspect.type] ?? '#666666')
           .attr('stroke-width', aspect.type === 'conjunction' || aspect.type === 'opposition' ? 2 : 1)
           .attr('stroke-opacity', 0.4)
-          .attr('stroke-dasharray', aspect.type === 'sextile' || aspect.type === 'quincunx' ? '3,3' : null)
-          .attr('aria-label', `${aspect.type} aspect between ${aspect.planet1} and ${aspect.planet2}`);
+          .attr('stroke-dasharray', (aspect.type === 'sextile' || aspect.type === 'quincunx') ? '3,3' : null)
+          .attr('aria-label', `${String(aspect.type)} aspect between ${String(aspect.planet1)} and ${String(aspect.planet2)}`);
 
         // Animate aspect lines
-        if (showAnimation) {
+  if (showAnimation === true) {
           line
             .transition()
             .delay(1500 + index * 100)
@@ -406,14 +473,14 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     refetch().finally(() => setIsAnimating(false));
   };
 
-  if (isLoading && !preTransformedData) return (
+  if (isLoading && preTransformedData == null) return (
     <div className="flex items-center justify-center p-8">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cosmic-gold"></div>
       <span className="ml-2 text-cosmic-silver">Loading chart...</span>
     </div>
   );
 
-  if (error) return (
+  if (error != null) return (
     <div className="text-center p-8">
       <div className="text-red-500 mb-4">Error loading chart</div>
       <Button onClick={handleRefresh} variant="secondary">
@@ -422,7 +489,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     </div>
   );
 
-  if (!data) return (
+  if (data == null) return (
     <div className="text-center p-8">
       <div className="text-cosmic-silver mb-4">No chart data available</div>
     </div>
@@ -445,11 +512,11 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
           className="w-full h-auto max-w-[800px] mx-auto"
         />
         
-        {data.aspects && showAspects && (
+  {showAspects && ((data.aspects?.length ?? 0) > 0) && (
           <div className="mt-6 text-sm text-gray-700">
-            <div className="font-medium mb-3 text-gray-900">Major Aspects ({data.aspects.length})</div>
+            <div className="font-medium mb-3 text-gray-900">Major Aspects ({(data.aspects?.length ?? 0)})</div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
-              {data.aspects.slice(0, 9).map((aspect, index) => (
+              {(Array.isArray(data.aspects) ? data.aspects : []).slice(0, 9).map((aspect, index) => (
                 <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-200">
                   <span className="capitalize font-medium">{aspect.type}</span>
                   <span className="text-gray-600">

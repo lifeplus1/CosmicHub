@@ -11,17 +11,14 @@ interface EducationalTooltipProps {
   placement?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-export const EducationalTooltip = React.memo(React.forwardRef<
-  HTMLDivElement, 
-  EducationalTooltipProps
->(({
+export const EducationalTooltip = React.memo(React.forwardRef<HTMLDivElement, EducationalTooltipProps>(({ 
   title,
   description,
   examples = [],
   tier,
   children,
   placement = 'top'
-}, ref) => {
+}) => {
   const getTierColor = (tier?: 'free' | 'premium' | 'elite') => {
     switch (tier) {
       case 'elite': return 'gold-500';
@@ -35,14 +32,14 @@ export const EducationalTooltip = React.memo(React.forwardRef<
     <div className="flex flex-col space-y-2 max-w-[300px] p-2">
       <div className="flex justify-between w-full">
         <p className="text-sm font-bold text-cosmic-silver">{title}</p>
-        {tier && (
+  {(tier !== null && tier !== undefined) && (
           <span className={`bg-${getTierColor(tier)}/20 text-${getTierColor(tier)} px-2 py-1 rounded text-xs`}>
             {tier === 'elite' ? '👑' : tier === 'premium' ? '🌟' : '📖'} {tier}
           </span>
         )}
       </div>
       <p className="text-xs text-cosmic-silver/80">{description}</p>
-      {examples.length > 0 && (
+  {(Array.isArray(examples) && examples.length > 0) && (
         <div className="flex flex-col space-y-1">
           <p className="text-xs font-bold">Examples:</p>
           {examples.map((example, index) => (
@@ -55,8 +52,8 @@ export const EducationalTooltip = React.memo(React.forwardRef<
 
   return (
     <Tooltip.Root>
-      <Tooltip.Trigger asChild={!!children}>
-        {children || (
+      <Tooltip.Trigger asChild={children !== null && children !== undefined}>
+  {(children ?? (
           <button 
             className="inline-block cursor-help border-none bg-transparent p-0" 
             aria-label={`Learn more about ${title}`}
@@ -64,7 +61,7 @@ export const EducationalTooltip = React.memo(React.forwardRef<
           >
             <FaQuestionCircle className="text-sm text-gray-400" />
           </button>
-        )}
+  ))}
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Content

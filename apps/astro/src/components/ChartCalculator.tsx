@@ -6,7 +6,7 @@ import { ChartDisplay } from ".";
 import { MultiSystemChartDisplay } from "./MultiSystemChart";
 import type { MultiSystemChartData } from "./MultiSystemChart/types";
 import type { ChartBirthData } from '@cosmichub/types';
-import type { ChartData } from '@/types/astrology.types';
+// ChartDisplay now accepts a loose ChartLike shape; no need for ChartData casts here
 import { saveChart, type SaveChartRequest } from "../services/api";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";
@@ -62,8 +62,13 @@ export interface ExtendedChartData {
   }>;
 }
 
-function isExtendedChartData(data: any): data is ExtendedChartData {
-  return data && 'planets' in data && 'houses' in data && 'aspects' in data && 'asteroids' in data;
+function isExtendedChartData(data: unknown): data is ExtendedChartData {
+  return typeof data === 'object' && 
+         data !== null && 
+         'planets' in data && 
+         'houses' in data && 
+         'aspects' in data && 
+         'asteroids' in data;
 }
 
 // Helper function to convert FormData to ChartBirthData
@@ -101,23 +106,33 @@ const ChartCalculator: React.FC = () => {
   const saveMutation = useMutation({
     mutationFn: saveChart,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
+      void queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
       setSuccess("Chart saved successfully!");
-      setTimeout(() => setSuccess(""), 3000);
+      void setTimeout(() => setSuccess(""), 3000);
     },
     onError: (error) => {
-      console.error('Error saving chart:', error);
+      // TODO: Replace with structured logging service
+      // console.error('Error saving chart:', error);
       setError(`Failed to save chart: ${error.message}`);
     },
   });
 
-  const handleSaveChart = () => {
-    if (!user) {
+  const handleSaveChart = (): void => {
+    if (user === null || user === undefined) {
       setError('Please sign in to save your chart');
       return;
     }
 
-    if (!chart || !formData.year || !formData.month || !formData.day || !formData.hour || !formData.minute || !formData.city) {
+    const hasRequiredFormData = (
+      typeof formData.year === 'string' && formData.year.length > 0 &&
+      typeof formData.month === 'string' && formData.month.length > 0 &&
+      typeof formData.day === 'string' && formData.day.length > 0 &&
+      typeof formData.hour === 'string' && formData.hour.length > 0 &&
+      typeof formData.minute === 'string' && formData.minute.length > 0 &&
+      typeof formData.city === 'string' && formData.city.length > 0
+    );
+
+  if ((chart === null || chart === undefined) || !hasRequiredFormData) {
       setError('Please generate a chart first before saving');
       return;
     }
@@ -175,11 +190,23 @@ const ChartCalculator: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to calculate chart");
+        const errorData: unknown = await response.json();
+        const isErrorResponse = (data: unknown): data is { detail: string } => {
+          return (
+            typeof data === 'object' && 
+            data !== null && 
+            'detail' in data && 
+            typeof data.detail === 'string'
+          );
+        };
+        
+        const errorMessage = isErrorResponse(errorData) 
+          ? errorData.detail 
+          : "Failed to calculate chart";
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const data: unknown = await response.json();
       setChart(data as ExtendedChartData | MultiSystemChartData);
       setSuccess(formData.multiSystem 
         ? "Multi-system analysis complete with Western, Vedic, Chinese, Mayan, and Uranian astrology" 
@@ -192,8 +219,10 @@ const ChartCalculator: React.FC = () => {
     }
   };
 
-  const isFormValid = formData.year && formData.month && formData.day && 
-    formData.hour && formData.minute && formData.city;
+  const isFormValid = Object.entries(formData).every(([key, value]) => {
+    if (key === 'multiSystem') return typeof value === 'boolean';
+    return typeof value === 'string' && value.trim().length > 0;
+  });
 
   return (
     <div className="container px-4 py-8 mx-auto">
@@ -250,10 +279,14 @@ const ChartCalculator: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10">
+        <form onSubmit={(e) => {
+          handleSubmit(e).catch(() => {
+            // Error handling is done within handleSubmit
+          });
+        }} className="p-6 space-y-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10">
           <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
             <div className="flex-1">
-              <label className="block mb-2 text-sm font-medium text-gold-200">
+              <label htmlFor="birth-year" className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Year *
                 <EducationalTooltip
                   title="Birth Year in Astrology"
@@ -262,6 +295,7 @@ const ChartCalculator: React.FC = () => {
               </label>
               <input
                 type="number"
+                id="birth-year"
                 name="year"
                 value={formData.year}
                 onChange={handleInputChange}
@@ -273,7 +307,7 @@ const ChartCalculator: React.FC = () => {
               />
             </div>
             <div className="flex-1">
-              <label className="block mb-2 text-sm font-medium text-gold-200">
+              <label htmlFor="birth-month" className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Month *
                 <EducationalTooltip
                   title="Birth Month Significance"
@@ -282,6 +316,7 @@ const ChartCalculator: React.FC = () => {
               </label>
               <input
                 type="number"
+                id="birth-month"
                 name="month"
                 value={formData.month}
                 onChange={handleInputChange}
@@ -294,7 +329,7 @@ const ChartCalculator: React.FC = () => {
               />
             </div>
             <div className="flex-1">
-              <label className="block mb-2 text-sm font-medium text-gold-200">
+              <label htmlFor="birth-day" className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Day *
                 <EducationalTooltip
                   title="Birth Day Nuances"
@@ -303,6 +338,7 @@ const ChartCalculator: React.FC = () => {
               </label>
               <input
                 type="number"
+                id="birth-day"
                 name="day"
                 value={formData.day}
                 onChange={handleInputChange}
@@ -318,7 +354,7 @@ const ChartCalculator: React.FC = () => {
 
           <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
             <div className="flex-1">
-              <label className="block mb-2 text-sm font-medium text-gold-200">
+              <label htmlFor="birth-hour" className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Hour (24h) *
                 <EducationalTooltip
                   title="Birth Time Precision"
@@ -328,6 +364,7 @@ const ChartCalculator: React.FC = () => {
               <input
                 type="number"
                 name="hour"
+                id="birth-hour"
                 value={formData.hour}
                 onChange={handleInputChange}
                 placeholder="0-23"
@@ -339,7 +376,7 @@ const ChartCalculator: React.FC = () => {
               />
             </div>
             <div className="flex-1">
-              <label className="block mb-2 text-sm font-medium text-gold-200">
+              <label htmlFor="birth-minute" className="block mb-2 text-sm font-medium text-gold-200">
                 Birth Minute *
                 <EducationalTooltip
                   title="Minute Accuracy"
@@ -349,6 +386,7 @@ const ChartCalculator: React.FC = () => {
               <input
                 type="number"
                 name="minute"
+                id="birth-minute"
                 value={formData.minute}
                 onChange={handleInputChange}
                 placeholder="0-59"
@@ -360,7 +398,7 @@ const ChartCalculator: React.FC = () => {
               />
             </div>
             <div className="flex-1">
-              <label className="block mb-2 text-sm font-medium text-gold-200">
+              <label htmlFor="house-system" className="block mb-2 text-sm font-medium text-gold-200">
                 House System
                 <EducationalTooltip
                   title="House Systems Explained"
@@ -376,6 +414,7 @@ const ChartCalculator: React.FC = () => {
               <select
                 value={houseSystem}
                 onChange={handleSelectChange}
+                id="house-system"
                 aria-label="House System Selection"
                 className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
               >
@@ -388,7 +427,7 @@ const ChartCalculator: React.FC = () => {
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-medium text-gold-200">
+            <label htmlFor="birth-location" className="block mb-2 text-sm font-medium text-gold-200">
               Birth Location *
               <EducationalTooltip
                 title="Birth Location Importance"
@@ -403,6 +442,7 @@ const ChartCalculator: React.FC = () => {
             <input
               type="text"
               name="city"
+              id="birth-location"
               value={formData.city}
               onChange={handleInputChange}
               placeholder="e.g., New York, NY, USA"
@@ -431,13 +471,13 @@ const ChartCalculator: React.FC = () => {
             </span>
           </div>
 
-          {error && (
+          {(error !== null && error !== undefined && error.length > 0) && (
             <div className="p-3 text-sm text-red-200 border rounded-lg bg-red-500/20 border-red-500/50">
               {error}
             </div>
           )}
 
-          {success && (
+          {(success !== null && success !== undefined && success.length > 0) && (
             <div className="p-3 text-sm text-green-200 border rounded-lg bg-green-500/20 border-green-500/50">
               {success}
             </div>
@@ -460,15 +500,15 @@ const ChartCalculator: React.FC = () => {
         </form>
 
         {/* Chart Display */}
-        {chart && (
+        {(chart !== null && chart !== undefined) && (
           <div>
             {formData.multiSystem
-              ? !isExtendedChartData(chart) && (
+              ? ((isExtendedChartData(chart) === false) && (
                   <MultiSystemChartDisplay birthData={convertToChartBirthData(formData)} showComparison={true} />
-                )
-              : isExtendedChartData(chart) && (
+                ))
+              : (isExtendedChartData(chart) === true) && (
                   <Suspense fallback={<div>Loading chart...</div>}>
-                    <ChartDisplay chart={chart as unknown as ChartData | Record<string, unknown>} onSaveChart={handleSaveChart} />
+                    <ChartDisplay chart={chart as unknown as Record<string, unknown>} onSaveChart={handleSaveChart} />
                   </Suspense>
                 )}
           </div>

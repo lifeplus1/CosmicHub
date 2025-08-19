@@ -34,6 +34,53 @@ CosmicHub/
 
 ## ⚡ Optimized Build System
 
+### 📘 Component Development with Storybook
+
+Storybook is integrated for the `apps/astro` frontend (React + Vite, Storybook 8.6.x).
+
+Run locally:
+
+```bash
+pnpm run storybook        # launches at http://localhost:6006
+```
+
+Build static Storybook (artifact in `apps/astro/storybook-static`):
+
+```bash
+pnpm run build-storybook
+```
+
+Add a new story:
+
+1. Create `*.stories.tsx` next to the component (or inside a `stories/` folder).
+2. Export a default `Meta` and one or more named `StoryObj` exports.
+3. Use existing examples: `ChartDisplay.stories.tsx`, `ErrorBoundary.stories.tsx`.
+
+Notable configuration:
+
+- Config path: `apps/astro/.storybook/`
+- Global decorators: QueryClient provider for data-enabled components
+- CI build: `.github/workflows/storybook.yml` uploads an artifact on PRs / pushes to `main`.
+
+Planned (optional) enhancements:
+
+- Visual regression (Loki or Chromatic)
+- Docs mode + MDX usage for complex astrology components
+- Accessibility snapshot reporting in CI
+
+### 🧪 Storybook QA Tooling (Added)
+
+| Capability | Tool | How it Works | Command |
+|------------|------|--------------|---------|
+| Visual Regression (local, free) | Loki | Captures screenshots of selected stories and compares against approved baselines | `pnpm --filter frontend run storybook:visual` |
+| Approve New Baselines | Loki | Moves current test output to baseline after review | `pnpm --filter frontend run storybook:visual:approve` |
+| Automated A11y Checks | Storybook test runner + axe | Runs axe-core against each story in a headless browser | `pnpm --filter frontend run storybook:a11y` |
+| Story Inventory Report | Custom script | Scans `*.stories.*` files and lists exported stories | `pnpm --filter frontend run storybook:report` |
+
+Baseline images for Loki are stored under `apps/astro/.loki`. Commit approved baselines to version control to track visual changes.
+
+The accessibility test runner currently runs in watch mode; integrate into CI by adding a step executing the same command and collecting its exit code.
+
 ### Quick Start
 
 ```bash
@@ -121,7 +168,60 @@ Use the Makefile for common tasks:
 - **Core Web Vitals**: All metrics in green zone
 - **PWA Score**: 95+ on Lighthouse audits
 
-## 🔑 Salt Management Subsystem (Backend)
+## 🔄 Recent Technical Enhancements (August 2025)
+
+### Unified Notification System
+
+- Consolidated legacy managers into a single `UnifiedNotificationManager` (`notificationManager.unified.ts`).
+- Legacy files (`notificationManager.ts`, `notificationManager.new.ts`) are shims re-exporting the unified implementation.
+- Runtime guards: subscription method fallback (`subscribeUser` → `subscribe`), sync message validation, strict ID presence checks.
+- Public API surface: `initialize`, `subscribe`, `notifyChartReady`, `sendTest`, `status` plus `getNotificationManager()` singleton helper.
+- New unit tests validate guard logic and subscription fallback.
+
+### Stricter Chart Data Validation
+
+- Zod schema (`validateChart.ts`) now enforces:
+	- Planet position range (0–360)
+	- House array length (1–12) & cusp range (0–360)
+	- Angle value ranges
+	- Safe, forward-compatible aspect/asteroid structures (passthrough for extra fields)
+- Accepts partial charts so progressive loading & streaming remain supported.
+- Removed unsafe upstream casts; `ChartDisplay` consumes a unified `ChartLike` + runtime validation.
+
+### API Layer Reliability Improvements
+
+- Corrected `NotFoundError` & `ValidationError` constructor usage (resource + id + validation payload).
+- Consolidated response type imports; ensured single discriminated union `ApiResponse<T>`.
+
+### Test Coverage Expansion
+
+- Astro app suite: 113 passing tests including validator & notification manager specs.
+- Faster feedback via focused unit tests (reduced reliance on broad integration tests).
+
+### Backward Compatibility & Migration
+
+- Shims slated for removal after deprecation window (target: Q4 2025). Update imports to point directly at `notificationManager.unified.ts`.
+- Consider adding an environment flag if early removal desired.
+
+### Quick Commands
+
+```bash
+# Run only validator & notification tests
+pnpm --filter apps/astro test -- --run src/components/ChartDisplay/__tests__/validateChart.test.ts src/services/__tests__/notificationManager.unified.test.ts
+
+# Full type + lint + test pipeline
+pnpm run type-check && pnpm run lint:astro && pnpm run test:astro -- --run
+```
+
+### Next Optional Steps
+
+- Remove notification shim files once all imports updated.
+- Add `validateChartStrict` variant if a lenient mode is ever reintroduced.
+- Auto-generate API docs for error hierarchy & `ApiResponse` via typedoc.
+- Add Loki baselines around chart tables for visual regression safety.
+
+
+## �🔑 Salt Management Subsystem (Backend)
 
 Lightweight in-memory salt rotation system powering pseudonymization:
 

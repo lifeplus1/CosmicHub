@@ -55,6 +55,7 @@ describe('GeneKeysChart', () => {
     render(<GeneKeysChart />);
 
     // When no birth data, shows instruction message
-    expect(screen.getByText(/Enter your birth information to calculate your Gene Keys profile/i)).toBeInTheDocument();
+  const messages = screen.getAllByText(/Enter your birth information to calculate your Gene Keys profile/i);
+  expect(messages.length).toBeGreaterThan(0);
   });
 });

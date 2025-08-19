@@ -21,7 +21,7 @@ export const DurationTimer: React.FC<DurationTimerProps> = ({
     className = ''
 }) => {
     const [remaining, setRemaining] = useState(duration);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
         setRemaining(duration);
@@ -32,20 +32,20 @@ export const DurationTimer: React.FC<DurationTimerProps> = ({
             intervalRef.current = setInterval(() => {
                 setRemaining(prev => {
                     const next = prev - 1;
-                    if (onTick) onTick(next);
+                    if (onTick !== undefined) onTick(next);
                     if (next <= 0) {
-                        clearInterval(intervalRef.current!);
-                        if (onComplete) onComplete();
+                        if (intervalRef.current !== null) clearInterval(intervalRef.current);
+                        if (onComplete !== undefined) onComplete();
                         return 0;
                     }
                     return next;
                 });
             }, 1000);
-        } else if (!isRunning && intervalRef.current) {
+        } else if (!isRunning && intervalRef.current !== null) {
             clearInterval(intervalRef.current);
         }
         return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (intervalRef.current !== null) clearInterval(intervalRef.current);
         };
     }, [isRunning, remaining, onComplete, onTick]);
 

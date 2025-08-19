@@ -10,7 +10,7 @@ interface InterpretationCardProps {
 
 const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const getTypeEmoji = (type: string) => {
+  const getTypeEmoji = (type: string): string => {
     switch (type.toLowerCase()) {
       case 'natal': return '🌟';
       case 'transit': return '🌙';
@@ -20,16 +20,16 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation 
     }
   };
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'text-green-400';
-    if (confidence >= 0.6) return 'text-yellow-400';
+  const getConfidenceColor = (confidence: number): string => {
+    if (typeof confidence !== 'number') return 'text-orange-400';
+    if (confidence >= 0.8 && confidence <= 1.0) return 'text-green-400';
+    if (confidence >= 0.6 && confidence < 0.8) return 'text-yellow-400';
     return 'text-orange-400';
   };
 
   return (
     <article 
       className="p-6 bg-cosmic-dark/60 backdrop-blur-xl border border-cosmic-silver/20 rounded-xl hover:border-cosmic-gold/40 transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-gold/10"
-      role="article" 
       aria-labelledby={`interpretation-${interpretation.id}`}
     >
       {/* Header */}
@@ -43,7 +43,7 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation 
               id={`interpretation-${interpretation.id}`} 
               className="text-lg font-semibold text-cosmic-gold font-playfair"
             >
-              {interpretation.title || `${interpretation.type} Interpretation`}
+              {interpretation.title !== '' && interpretation.title.length > 0 ? interpretation.title : `${interpretation.type} Interpretation`}
             </h3>
             <p className="text-sm text-cosmic-silver/70 capitalize">
               {interpretation.type} Analysis
@@ -61,7 +61,7 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation 
       </header>
 
       {/* Summary */}
-      {interpretation.summary && (
+      {typeof interpretation.summary === 'string' && interpretation.summary !== '' && (
         <div className="mb-4 p-3 bg-cosmic-gold/5 border border-cosmic-gold/20 rounded-lg">
           <p className="text-sm text-cosmic-gold/90 font-medium">
             {interpretation.summary}
@@ -72,7 +72,7 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation 
       {/* Content */}
       <div className="mb-4">
         <p className="text-cosmic-silver/90 leading-relaxed">
-          {interpretation.content.length > 300 
+          {typeof interpretation.content === 'string' && interpretation.content.length > 300 
             ? `${interpretation.content.substring(0, 300)}...` 
             : interpretation.content
           }
@@ -80,7 +80,7 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation 
       </div>
 
       {/* Tags */}
-      {interpretation.tags && interpretation.tags.length > 0 && (
+      {Array.isArray(interpretation.tags) && interpretation.tags.length !== 0 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
             {interpretation.tags.slice(0, 4).map((tag, index) => (
@@ -129,7 +129,7 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({ interpretation 
           </div>
         </div>
       }>
-        {isModalOpen && (
+        {isModalOpen === true && (
           <LazyInterpretationModal
             interpretation={interpretation}
             isOpen={isModalOpen}

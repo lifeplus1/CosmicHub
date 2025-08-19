@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signUp } from '@cosmichub/auth';
+import { devConsole } from '../config/environment';
 
 const SignUp: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -12,17 +13,17 @@ const SignUp: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  console.log('🎨 SignUp page rendered with form data:', formData);
+  devConsole.log?.('🎨 SignUp page rendered with form data:', formData);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log('📝 Form input changed:', { name, value });
+  devConsole.log?.('📝 Form input changed:', { name, value });
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🚀 Form submitted with data:', formData);
+  devConsole.log?.('🚀 Form submitted with data:', formData);
     setError('');
     setIsLoading(true);
 
@@ -36,15 +37,15 @@ const SignUp: React.FC = () => {
         throw new Error('Password must be at least 6 characters');
       }
 
-      console.log('🔐 Attempting to create user account...');
+  devConsole.log?.('🔐 Attempting to create user account...');
       await signUp(formData.email, formData.password);
-      console.log('✅ Account created successfully!');
+  devConsole.log?.('✅ Account created successfully!');
       
       // Navigate to dashboard or login
       navigate('/');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
-      console.error('❌ Signup error:', errorMessage);
+  devConsole.error('❌ Signup error:', errorMessage);
       setError(errorMessage);
     } finally {
       setIsLoading(false);

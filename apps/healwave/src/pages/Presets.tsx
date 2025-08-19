@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 import { AudioSettings, FrequencyPreset } from '@cosmichub/frequency';
 import PresetSelector from '../components/PresetSelector';
 
 const Presets: React.FC = () => {
-  const [currentSettings, setCurrentSettings] = useState<AudioSettings>({
+  const [currentSettings] = useState<AudioSettings>({
     volume: 50,
     duration: 10,
     fadeIn: 3,
@@ -12,7 +19,8 @@ const Presets: React.FC = () => {
   const [currentPreset, setCurrentPreset] = useState<FrequencyPreset | null>(null);
 
   const handleSelectPreset = (preset: FrequencyPreset): void => {
-    console.log('Selected preset:', preset);
+  // Debug selection (development only)
+  devConsole.log?.('Selected preset:', preset);
     setCurrentPreset(preset);
   };
 

@@ -30,7 +30,12 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  if (hasFeature(feature)) return <>{children}</>;
+  // Derive safe user tier string to satisfy strict boolean checks when calling string methods
+  const safeUserTier: string = (typeof userTier === 'string' && userTier.length > 0) ? userTier : 'free';
+
+  if (typeof hasFeature === 'function' && hasFeature(feature) === true) {
+    return <>{children}</>;
+  }
 
   const featureMap: Record<string, { icon: string; title: string; description: string; benefits: string[]; examples: string[]; }> = {
     [FEATURE_KEYS.SYNSTRY_ANALYSIS]: { icon: '👫', title: 'Synastry Compatibility Analysis', description: 'Compare two birth charts to understand relationship dynamics and compatibility patterns.', benefits: ['Romantic compatibility insights','Friendship and family dynamics','Communication style analysis','Emotional compatibility patterns','Challenge and growth areas'], examples: ['Compare Venus-Mars connections for romance','Analyze Moon aspects for emotional harmony','Check Mercury contacts for communication','Examine house overlays for life area focus'] },
@@ -39,10 +44,10 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
     [FEATURE_KEYS.MULTI_SYSTEM_ANALYSIS]: { icon: '🔮', title: 'Multi-System Analysis', description: 'Compare insights from Western, Vedic, Chinese, Mayan, and Uranian astrological systems.', benefits: ['Western tropical personality insights','Vedic karmic patterns and life purpose','Chinese Four Pillars life cycles','Mayan galactic signature','Comprehensive spiritual perspective'], examples: ['Western Sun vs Vedic Sun differences','Chinese animal year influences','Mayan day sign spiritual meaning','Integrated life path analysis'] }
   };
 
-  const featureDetails = (isFeatureKey(feature) && featureMap[feature]) || {
+  const featureDetails = (isFeatureKey(feature) ? featureMap[feature] : undefined) ?? {
     icon: '🔒',
     title: `${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)} Feature`,
-    description: upgradeMessage || `This feature requires a ${requiredTier} subscription.`,
+  description: (upgradeMessage !== undefined && upgradeMessage !== null && upgradeMessage.length > 0) ? upgradeMessage : `This feature requires a ${requiredTier} subscription.`,
     benefits: ['Enhanced astrological insights','Professional-grade tools','Advanced analysis'],
     examples: ['Detailed chart analysis','Professional interpretations']
   };
@@ -52,7 +57,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
   const colors = getTierColorClasses(requiredTier);
 
   const handleUpgrade = () => {
-    if (!user) {
+  if (user === null || user === undefined) {
       navigate('/login');
       return;
     }
@@ -87,10 +92,10 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
           {/* Benefits List */}
           <div>
             <p className="mb-3 font-bold text-white">
-              What you'll unlock:
+              What you&apos;ll unlock:
             </p>
             <ul className="space-y-2">
-              {featureDetails.benefits.map((benefit: string, index: number) => (
+              {(Array.isArray(featureDetails.benefits) ? featureDetails.benefits : []).map((benefit: string, index: number) => (
                 <li key={index} className="flex items-start space-x-2 text-sm">
                   <span className="mt-1 text-green-500">✓</span>
                   <span className="text-cosmic-silver">{benefit}</span>
@@ -100,12 +105,12 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
           </div>
 
           {/* Current Tier Info */}
-          {user && (
+          {(user !== null && user !== undefined) && (
             <div className="flex p-3 space-x-3 border border-blue-500 rounded-md bg-blue-900/50">
               <span className="text-xl text-blue-500">ℹ️</span>
               <div className="flex flex-col space-y-0">
                 <p className="text-sm font-bold text-white">
-                  Current plan: {userTier.charAt(0).toUpperCase() + userTier.slice(1)}
+                  Current plan: {safeUserTier.charAt(0).toUpperCase() + safeUserTier.slice(1)}
                 </p>
                 <p className="text-xs text-white/80">
                   Upgrade to {requiredTier} to access this feature
@@ -121,7 +126,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
               onClick={handleUpgrade}
             >
               <span>⬆️</span>
-              <span>{user ? `Upgrade to ${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)}` : 'Sign In to Upgrade'}</span>
+              <span>{(user !== null && user !== undefined) ? `Upgrade to ${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)}` : 'Sign In to Upgrade'}</span>
             </button>
             
             <button
@@ -149,7 +154,7 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
 
   return (
     <>
-      {showPreview ? (
+  {(showPreview === true) ? (
         <div className="relative">
           {/* Blurred Preview */}
           <div className="relative pointer-events-none blur-lg opacity-30">
@@ -185,12 +190,12 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
                   Key Benefits:
                 </h3>
                 <ul className="space-y-2">
-                  {featureDetails.benefits.map((benefit: string, index: number) => (
+                  {Array.isArray(featureDetails.benefits) ? featureDetails.benefits.map((benefit: string, index: number) => (
                     <li key={index} className="flex items-start space-x-2 text-sm">
                       <span className="mt-1 text-green-500">✓</span>
                       <span className="text-cosmic-silver">{benefit}</span>
                     </li>
-                  ))}
+                  )) : null}
                 </ul>
               </div>
 
@@ -199,12 +204,12 @@ export const FeatureGuard: React.FC<FeatureGuardProps> = ({ children, requiredTi
                   Examples:
                 </h3>
                 <ul className="space-y-2">
-                  {featureDetails.examples.map((example: string, index: number) => (
+                  {Array.isArray(featureDetails.examples) ? featureDetails.examples.map((example: string, index: number) => (
                     <li key={index} className="flex items-start space-x-2 text-sm">
                       <span className={colors.text}>⭐</span>
                       <span className="text-cosmic-silver">{example}</span>
                     </li>
-                  ))}
+                  )) : null}
                 </ul>
               </div>
 

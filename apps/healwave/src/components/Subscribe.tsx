@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 import { stripeService, StripeSession } from '@cosmichub/integrations';
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 
 const Subscribe: React.FC = () => {
   const { user } = useAuth();
@@ -17,7 +24,7 @@ const Subscribe: React.FC = () => {
 
     if (!stripeService) {
       // eslint-disable-next-line no-console
-      console.error('Stripe service not available');
+  devConsole.error('Stripe service not available');
       alert('Subscription service is temporarily unavailable. Please try again later.');
       return;
     }
@@ -47,7 +54,7 @@ const Subscribe: React.FC = () => {
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Subscription error:', error);
+  devConsole.error('Subscription error:', error);
       alert('An error occurred while setting up your subscription. Please try again later.');
     } finally {
       setIsLoading(false);

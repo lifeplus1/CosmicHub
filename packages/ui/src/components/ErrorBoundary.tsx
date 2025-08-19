@@ -1,7 +1,13 @@
 import React, { Component, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { Button } from './Button';
 
-import { type UnknownRecord } from '@cosmichub/types/utility';
+// (Removed unused UnknownRecord import)
+
+// Local type aliases (were implicitly used below)
+type BoundaryLevel = 'page' | 'section' | 'component';
+type LogLevel = 'low' | 'medium' | 'high' | 'critical';
+const ENV_MODE: string = (globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } })
+  .process?.env?.NODE_ENV ?? 'development';
 
 export interface ErrorMetrics {
   errorId: string;
@@ -107,19 +113,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     const { resetKeys, resetOnPropsChange } = this.props;
     const { hasError } = this.state;
 
-    if (hasError && prevProps.resetKeys !== resetKeys) {
-      // Reset error boundary if resetKeys changed
+    if (hasError) {
       if (resetKeys && prevProps.resetKeys) {
-        const hasResetKeyChanged = resetKeys.some(
-          (key, index) => prevProps.resetKeys![index] !== key
-        );
-        if (hasResetKeyChanged) {
-          this.resetErrorBoundary();
-        }
+        const hasResetKeyChanged = resetKeys.some((key, index) => prevProps.resetKeys?.[index] !== key);
+        if (hasResetKeyChanged) this.resetErrorBoundary();
       }
-
-      // Reset on any prop change if enabled
-      if (resetOnPropsChange && prevProps !== this.props) {
+      if (resetOnPropsChange === true && prevProps !== this.props) {
         this.resetErrorBoundary();
       }
     }
@@ -130,39 +129,21 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     this.retryTimeouts.forEach(clearTimeout);
   }
 
-  private getLogLevel(error: Error, boundaryLevel: string): LogLevel {
-    // Network errors are usually less critical
-    if (error.message.includes('fetch') || error.message.includes('network')) {
-      return 'medium';
-    }
-
-    // Page-level errors are critical
-    if (boundaryLevel === 'page') {
-      return 'critical';
-    }
-
-    // Component render errors
-    if (error.stack?.includes('render')) {
-      return 'high';
-    }
-
-    return 'medium';
-  }
-
-  private createErrorInfo(error: Error, reactErrorInfo: ReactErrorInfo): ErrorInfo {
+  private createErrorInfo(error: Error, reactErrorInfo: ReactErrorInfo | null): ErrorInfo {
     const { name, level = 'component' } = this.props;
     const severity = this.getLogLevel(error, level);
 
+    const errorId = this.state.errorId ?? `error-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     return {
       message: error.message,
       stack: error.stack,
-      componentStack: reactErrorInfo.componentStack || '',
+  componentStack: reactErrorInfo?.componentStack ?? '',
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href,
       userId: window.__USER_ID__,
       sessionId: window.__SESSION_ID__,
-      errorId: this.state.errorId || `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      errorId,
       boundaryName: name,
       boundaryLevel: level as BoundaryLevel,
       severity,
@@ -172,12 +153,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
 
   private logError(error: Error, errorInfo: ErrorInfo): void {
     const { name, level = 'component' } = this.props;
-    const logLevel = this.getLogLevel(error, level);
+  const logLevel = this.getLogLevel(error, level);
 
     // Structure error data
-    const errorData = {
+    const errorData: ErrorInfo = {
       ...errorInfo,
-      errorId: this.state.errorId,
+      errorId: this.state.errorId ?? errorInfo.errorId,
       boundaryName: name,
       boundaryLevel: level,
       retryCount: this.state.retryCount,
@@ -185,25 +166,29 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     };
 
     // Console logging for development
-    if (process.env.NODE_ENV === 'development') {
+  // Resolve environment safely without assuming global process exists (e.g., some browsers)
+  if (ENV_MODE === 'development') {
       const emoji = this.getErrorEmoji(logLevel);
-      console.group(`${emoji} Error Boundary (${level}): ${name || 'Unknown'}`);
+      // eslint-disable-next-line no-console
+      console.group(`${emoji} Error Boundary (${level}): ${name ?? 'Unknown'}`);
+      // eslint-disable-next-line no-console
       console.error('Error:', error);
+      // eslint-disable-next-line no-console
       console.error('Component Stack:', errorInfo.componentStack);
+      // eslint-disable-next-line no-console
       console.error('Full Context:', errorData);
+      // eslint-disable-next-line no-console
       console.groupEnd();
     }
 
     // Production error reporting
-    if (process.env.NODE_ENV === 'production') {
-      this.reportError(errorData);
-    }
+  if (ENV_MODE === 'production') this.reportError(errorData);
 
     // Analytics tracking
     this.trackErrorMetrics(errorData);
   }
 
-  private getLogLevel(error: Error, boundaryLevel: string): 'low' | 'medium' | 'high' | 'critical' {
+  private getLogLevel(error: Error, boundaryLevel: BoundaryLevel): LogLevel {
     // Network errors are usually less critical
     if (error.message.includes('fetch') || error.message.includes('network')) {
       return 'medium';
@@ -215,7 +200,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     }
 
     // Component render errors
-    if (error.stack?.includes('render')) {
+  if (typeof error.stack === 'string' && error.stack.includes('render')) {
       return 'high';
     }
 
@@ -234,17 +219,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
 
   private reportError(errorInfo: ErrorInfo): void {
     try {
-      window.errorReportingService?.captureException(errorInfo);
+  window.errorReportingService?.captureException(errorInfo);
     } catch (reportingError) {
-      console.error('Failed to report error:', reportingError);
+  // eslint-disable-next-line no-console
+  console.error('Failed to report error:', reportingError);
     }
   }
 
   private trackErrorMetrics(errorData: ErrorMetrics): void {
     try {
-      window.analytics?.track('Error Boundary Triggered', errorData);
+  window.analytics?.track('Error Boundary Triggered', errorData);
     } catch (analyticsError) {
-      console.error('Failed to track error metrics:', analyticsError);
+  // eslint-disable-next-line no-console
+  console.error('Failed to track error metrics:', analyticsError);
     }
   }
 
@@ -272,9 +259,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
       /loading chunk failed/i,
     ];
 
-    return recoverablePatterns.some(pattern => 
-      pattern.test(error.message) || pattern.test(error.stack || '')
-    );
+  const stack = error.stack ?? '';
+  return recoverablePatterns.some(pattern => pattern.test(error.message) || pattern.test(stack));
   }
 
   private resetErrorBoundary = (): void => {
@@ -301,11 +287,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     const { fallback, level = 'component' } = this.props;
     const { error, retryCount } = this.state;
 
-    if (fallback) {
+    if (fallback !== undefined) {
       if (typeof fallback === 'function') {
-        return fallback(error!, this.createErrorInfo(error!, this.state.errorInfo!), this.handleRetry);
+        if (!error) return null;
+        const info = this.createErrorInfo(error, this.state.errorInfo);
+        return (fallback as (e: Error, info: ErrorInfo, retry: () => void) => ReactNode)(
+          error,
+          info,
+          this.handleRetry
+        );
       }
-      return fallback;
+      return fallback as ReactNode;
     }
 
     return this.renderDefaultErrorUI(level, retryCount >= this.maxRetries);
@@ -357,14 +349,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
             </p>
             
             {/* Development error details */}
-            {process.env.NODE_ENV === 'development' && error && (
+            {ENV_MODE === 'development' && !!error && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm font-medium text-cosmic-silver/80 hover:text-cosmic-silver">
                   Technical Details
                 </summary>
                 <div className="mt-2 p-3 bg-cosmic-dark/80 rounded border border-cosmic-silver/20 text-xs font-mono text-red-400 overflow-auto max-h-40">
                   <div className="font-semibold text-red-300">Error: {error.message}</div>
-                  {error.stack && (
+                  {typeof error.stack === 'string' && (
                     <pre className="mt-2 whitespace-pre-wrap text-red-400/80">
                       {error.stack}
                     </pre>

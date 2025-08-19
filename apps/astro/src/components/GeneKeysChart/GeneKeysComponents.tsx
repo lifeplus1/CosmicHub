@@ -17,10 +17,21 @@ export const GeneKeyDisplay = memo<GeneKeyDisplayProps>(({ geneKey, title, descr
     onKeySelect(geneKey);
   }, [geneKey, onKeySelect]);
 
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleClick();
+    }
+  }, [handleClick]);
+
   return (
     <div 
       className="transition-all duration-200 cursor-pointer cosmic-card hover:shadow-lg"
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`Select Gene Key ${geneKey.number}: ${title}`}
     >
       <div className="p-4">
         <h3 className="font-bold text-purple-600 text-md">{title}</h3>
@@ -69,21 +80,33 @@ const GeneKeyItem = memo<{ geneKey: GeneKey; onKeySelect: (key: GeneKey) => void
     onKeySelect(geneKey);
   }, [geneKey, onKeySelect]);
 
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleClick();
+    }
+  }, [handleClick]);
+
   return (
     <div 
       className="p-3 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100"
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`Select Gene Key ${geneKey.number}: ${geneKey.name}`}
     >
       <div className="flex items-center justify-between mb-2">
         <p className="text-sm font-bold">Gene Key {geneKey.number}</p>
-        {geneKey.line && (
+        {typeof geneKey.line === 'number' && !isNaN(geneKey.line) && (
           <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
             Line {geneKey.line}
           </span>
         )}
       </div>
       <p className="text-xs text-gray-700 mb-1">{geneKey.name}</p>
-      {geneKey.line_theme && geneKey.sphere_context && (
+      {typeof geneKey.line_theme === 'string' && geneKey.line_theme.length > 0 && 
+       typeof geneKey.sphere_context === 'string' && geneKey.sphere_context.length > 0 && (
         <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded border-l-2 border-purple-300">
           <p className="text-xs font-medium text-purple-700">
             {geneKey.sphere_context} Line Theme: {geneKey.line_theme}
@@ -98,7 +121,7 @@ GeneKeyItem.displayName = 'GeneKeyItem';
 
 // Memoized Gene Key details component
 export const GeneKeyDetails = memo<GeneKeyDetailsProps>(({ selectedKey }) => {
-  if (!selectedKey) {
+  if (selectedKey === null || selectedKey === undefined) {
     return (
       <div className="flex p-4 space-x-4 border border-blue-500 rounded-md bg-blue-900/50">
         <span className="text-xl text-blue-500">ℹ️</span>
@@ -116,14 +139,15 @@ export const GeneKeyDetails = memo<GeneKeyDetailsProps>(({ selectedKey }) => {
           <h2 className="text-lg font-bold">
             Gene Key {selectedKey.number}: {selectedKey.name}
           </h2>
-          {selectedKey.line && (
+          {typeof selectedKey.line === 'number' && !isNaN(selectedKey.line) && (
             <span className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">
               Line {selectedKey.line}
             </span>
           )}
         </div>
         <p className="text-gray-700 mb-2">Codon: {selectedKey.codon}</p>
-        {selectedKey.line_theme && selectedKey.sphere_context && (
+        {typeof selectedKey.line_theme === 'string' && selectedKey.line_theme.length > 0 && 
+         typeof selectedKey.sphere_context === 'string' && selectedKey.sphere_context.length > 0 && (
           <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border-l-4 border-purple-400">
             <p className="text-sm font-semibold text-purple-800">
               {selectedKey.sphere_context} Sphere - Line {selectedKey.line}: {selectedKey.line_theme}

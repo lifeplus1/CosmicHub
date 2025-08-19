@@ -1,5 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+interface PerformanceMemoryInfo {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+interface PerformanceWithOptionalMemory extends Performance {
+  memory?: PerformanceMemoryInfo;
+}
+
+const perf: PerformanceWithOptionalMemory = (typeof performance !== 'undefined'
+  ? performance
+  : ({} as Performance)) as PerformanceWithOptionalMemory;
+
 export interface PerformanceMetrics {
   duration: number;
   startTime: number;
@@ -17,7 +31,7 @@ export interface OperationMetrics {
   duration?: number;
   status: 'pending' | 'completed' | 'error';
   error?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PagePerformanceMetrics {
@@ -37,13 +51,13 @@ export function usePerformance() {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const startTimeRef = useRef<number>(0);
 
-  const start = useCallback(() => {
+  const start = useCallback((): void => {
     startTimeRef.current = performance.now();
     setIsTracking(true);
     setMetrics(null);
   }, []);
 
-  const end = useCallback(() => {
+  const end = useCallback((): PerformanceMetrics | null => {
     if (!isTracking) return null;
 
     const endTime = performance.now();
@@ -53,7 +67,7 @@ export function usePerformance() {
       duration,
       startTime: startTimeRef.current,
       endTime,
-      memory: (performance as any).memory?.usedJSHeapSize,
+  memory: perf.memory?.usedJSHeapSize,
     };
 
     setMetrics(newMetrics);
@@ -63,7 +77,7 @@ export function usePerformance() {
   }, [isTracking]);
 
   const measure = useCallback(async <T>(
-    operationName: string,
+    _operationName: string,
     operation: () => Promise<T> | T
   ): Promise<{ result: T; metrics: PerformanceMetrics }> => {
     const startTime = performance.now();
@@ -76,21 +90,21 @@ export function usePerformance() {
         duration: endTime - startTime,
         startTime,
         endTime,
-        memory: (performance as any).memory?.usedJSHeapSize,
+  memory: perf.memory?.usedJSHeapSize,
       };
 
       return { result, metrics };
-    } catch (error) {
+  } catch (error) {
       const endTime = performance.now();
       
       const metrics: PerformanceMetrics = {
         duration: endTime - startTime,
         startTime,
         endTime,
-        memory: (performance as any).memory?.usedJSHeapSize,
+  memory: perf.memory?.usedJSHeapSize,
       };
 
-      throw { error, metrics };
+  throw { error, metrics };
     }
   }, []);
 
@@ -109,7 +123,7 @@ export function usePerformance() {
 export function useOperationTracking() {
   const [operations, setOperations] = useState<Map<string, OperationMetrics>>(new Map());
 
-  const startOperation = useCallback((operationName: string, metadata?: Record<string, any>) => {
+  const startOperation = useCallback((operationName: string, metadata?: Record<string, unknown>) => {
     const operationId = `${operationName}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const operation: OperationMetrics = {
       operationId,
@@ -128,13 +142,13 @@ export function useOperationTracking() {
       const newMap = new Map(prev);
       const operation = newMap.get(operationId);
       
-      if (operation) {
+    if (operation != null) {
         const endTime = performance.now();
         const updatedOperation: OperationMetrics = {
           ...operation,
           endTime,
           duration: endTime - operation.startTime,
-          status: error ? 'error' : 'completed',
+      status: (error != null && error !== '') ? 'error' : 'completed',
           error,
         };
         newMap.set(operationId, updatedOperation);
@@ -147,7 +161,7 @@ export function useOperationTracking() {
   const trackOperation = useCallback(async <T>(
     operationName: string,
     operation: () => Promise<T> | T,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<T> => {
     const operationId = startOperation(operationName, metadata);
     
@@ -175,8 +189,8 @@ export function useOperationTracking() {
     const errors = ops.filter(op => op.status === 'error');
     const pending = ops.filter(op => op.status === 'pending');
 
-    const avgDuration = completed.length > 0
-      ? completed.reduce((sum, op) => sum + (op.duration || 0), 0) / completed.length
+      const avgDuration = completed.length > 0
+        ? completed.reduce((sum, op) => sum + (typeof op.duration === 'number' ? op.duration : 0), 0) / completed.length
       : 0;
 
     return {
@@ -207,24 +221,24 @@ export function usePagePerformance() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const collectMetrics = () => {
+  const collectMetrics = (): void => {
       try {
         const navigationTiming = performance.timing;
         const pageLoadTime = navigationTiming.loadEventEnd - navigationTiming.navigationStart;
 
         // Collect paint metrics if available
         const paintEntries = performance.getEntriesByType('paint') as PerformanceEntry[];
-        const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-        const firstContentfulPaint = fcpEntry ? fcpEntry.startTime : 0;
+          const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+          const firstContentfulPaint = (fcpEntry != null && typeof fcpEntry.startTime === 'number') ? fcpEntry.startTime : 0;
 
         // Collect LCP if available
         let largestContentfulPaint = 0;
         if ('PerformanceObserver' in window) {
           try {
             const lcpObserver = new PerformanceObserver((entryList) => {
-              const entries = entryList.getEntries() as any[];
+              const entries = entryList.getEntries();
               const lastEntry = entries[entries.length - 1];
-              if (lastEntry) {
+              if (lastEntry != null) {
                 largestContentfulPaint = lastEntry.startTime;
                 setMetrics(prev => ({
                   ...prev,
@@ -247,14 +261,13 @@ export function usePagePerformance() {
 
         setMetrics(pageMetrics);
         setIsLoading(false);
-      } catch (error) {
-        console.warn('Failed to collect page performance metrics:', error);
+  } catch (_error) {
         setIsLoading(false);
       }
     };
 
     // Collect metrics after page load
-    if (document.readyState === 'complete') {
+  if (document.readyState === 'complete') {
       collectMetrics();
       return () => {}; // Return empty cleanup function
     } else {
@@ -263,7 +276,7 @@ export function usePagePerformance() {
     }
   }, []);
 
-  const refreshMetrics = useCallback(() => {
+  const refreshMetrics = useCallback((): void => {
     setIsLoading(true);
     // Re-collect metrics
     const navigationTiming = performance.timing;
@@ -293,9 +306,9 @@ export function useMemoryMonitoring() {
     limit: number;
   } | null>(null);
 
-  const updateMemoryInfo = useCallback(() => {
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
+  const updateMemoryInfo = useCallback((): void => {
+  if (perf.memory != null) {
+      const memory = perf.memory;
       setMemoryInfo({
         used: memory.usedJSHeapSize,
         total: memory.totalJSHeapSize,
@@ -312,12 +325,12 @@ export function useMemoryMonitoring() {
     return () => clearInterval(interval);
   }, [updateMemoryInfo]);
 
-  const getMemoryUsagePercentage = useCallback(() => {
-    if (!memoryInfo) return 0;
+  const getMemoryUsagePercentage = useCallback((): number => {
+  if (memoryInfo == null) return 0;
     return (memoryInfo.used / memoryInfo.limit) * 100;
   }, [memoryInfo]);
 
-  const formatBytes = useCallback((bytes: number) => {
+  const formatBytes = useCallback((bytes: number): string => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     if (bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));

@@ -123,8 +123,10 @@ export function deserializeAstrologyData<T extends AstrologyChart | UserProfile 
     throw new Error(`Unknown or invalid data type for deserialization: ${dataType}`);
   } catch (error) {
     if (error instanceof Error) {
-      // Preserve error context for debugging while keeping public message generic
-      console.error('Deserialization error:', error.message);
+  // Preserve error context for debugging while keeping public message generic.
+  // Use global devConsole if present to avoid raw console.* usage (silences no-console warnings).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (globalThis as any)?.devConsole?.error?.('Deserialization error:', error.message);
     }
     throw new Error('Failed to deserialize data');
   }

@@ -4,7 +4,7 @@ import type { Interpretation } from './types';
  * Format interpretation content for display
  */
 export const formatInterpretationContent = (content: string, maxLength?: number): string => {
-  if (!maxLength) return content;
+  if (typeof maxLength !== 'number' || maxLength < 1) return content;
   return content.length > maxLength 
     ? `${content.substring(0, maxLength)}...` 
     : content;
@@ -36,9 +36,7 @@ export const sortInterpretationsByDate = (interpretations: Interpretation[]): In
 export const groupInterpretationsByType = (interpretations: Interpretation[]): Record<string, Interpretation[]> => {
   return interpretations.reduce((groups, interpretation) => {
     const type = interpretation.type;
-    if (!groups[type]) {
-      groups[type] = [];
-    }
+    groups[type] ??= [];
     groups[type].push(interpretation);
     return groups;
   }, {} as Record<string, Interpretation[]>);
@@ -51,7 +49,7 @@ export const filterInterpretationsByTags = (
   interpretations: Interpretation[], 
   tags: string[]
 ): Interpretation[] => {
-  if (tags.length === 0) return interpretations;
+  if (!Array.isArray(tags) || tags.length === 0) return interpretations;
   
   return interpretations.filter(interpretation =>
     tags.some(tag => interpretation.tags.includes(tag))
@@ -79,7 +77,7 @@ export const getInterpretationTypeEmoji = (type: string): string => {
  */
 export const generateSummary = (content: string, maxWords: number = 20): string => {
   const words = content.split(' ');
-  if (words.length <= maxWords) return content;
+  if (!Array.isArray(words) || words.length <= maxWords) return content;
   
   return words.slice(0, maxWords).join(' ') + '...';
 };

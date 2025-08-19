@@ -3,29 +3,20 @@
  * Builds on existing CosmicHub performance optimizations
  */
 
-// Simple logger for PWA performance monitoring
+// Simple logger for PWA performance monitoring using shared devConsole pattern
+// Local lightweight proxy (avoids cross-app import during early init)
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
+
 class PWALogger {
-  private static isDevelopment = import.meta.env.DEV;
-  
-  static log(message: string, ...args: any[]): void {
-    if (this.isDevelopment) {
-      // eslint-disable-next-line no-console
-      console.log(message, ...args);
-    }
-  }
-  
-  static warn(message: string, ...args: any[]): void {
-    if (this.isDevelopment) {
-      // eslint-disable-next-line no-console
-      console.warn(message, ...args);
-    }
-  }
-  
-  static error(message: string, ...args: any[]): void {
-    // Always log errors, even in production
-    // eslint-disable-next-line no-console
-    console.error(message, ...args);
-  }
+  static log(message: string, ...args: unknown[]): void { devConsole.log?.(message, ...args); }
+  static warn(message: string, ...args: unknown[]): void { devConsole.warn?.(message, ...args); }
+  static error(message: string, ...args: unknown[]): void { devConsole.error(message, ...args); }
 }
 
 // Core PWA Performance Classes for HealWave

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '@cosmichub/auth';
+import { useAuth, useSubscription } from '@cosmichub/auth';
 import { stripeService } from '@cosmichub/integrations';
 import { FaCheckCircle, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
+import { devConsole } from '../config/environment';
 
 const SubscriptionSuccess: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -50,7 +50,7 @@ const SubscriptionSuccess: React.FC = () => {
           setMessage('There was an issue verifying your subscription. Please contact support.');
         }
       } catch (error) {
-        console.error('Subscription verification error:', error);
+        devConsole.error('❌ Subscription verification error:', error);
         setVerificationStatus('error');
         setMessage('Failed to verify your subscription. Please contact support if you were charged.');
       }

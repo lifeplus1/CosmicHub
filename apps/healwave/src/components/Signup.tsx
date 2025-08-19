@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FC, type FormEvent, type ChangeEvent } from 'react';
 import { signUp, useAuth } from '@cosmichub/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
@@ -7,7 +7,49 @@ interface SignupProps {
   onClose?: () => void;
 }
 
-const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
+interface NotificationPreferences {
+  sessionReminders: boolean;
+  weeklyProgress: boolean;
+  newFrequencies: boolean;
+  healthTips: boolean;
+}
+
+interface UserProfile {
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  dateOfBirth: string | null;
+  occupation: string | null;
+  experienceLevel: string | null;
+  primaryGoals: string | null;
+  healthConditions: string | null;
+  meditationExperience: string | null;
+  preferredSessionLength: string | null;
+  notificationPreferences: NotificationPreferences;
+  createdAt: string;
+  lastLoginAt: string;
+  profileCompleted: boolean;
+  privacyConsentGiven: boolean;
+  privacyConsentDate: string;
+  healthDisclaimerAccepted: boolean;
+  healthDisclaimerDate: string;
+  signupSource: string;
+  hasCompletedOnboarding: boolean;
+  totalSessionsCompleted: number;
+  totalListeningMinutes: number;
+  favoriteFrequencies: string[];
+  lastActiveAt: string;
+  moodTrackingEnabled: boolean;
+  progressTrackingEnabled: boolean;
+  reminderSettings: {
+    enabled: boolean;
+    frequency: string;
+    preferredTime: string;
+  };
+}
+
+const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
   // Basic account fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,7 +94,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
     );
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
 
@@ -89,9 +131,9 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
       const db = getFirestore();
       
       // Create comprehensive user profile
-      const userProfile = {
+      const userProfile: UserProfile = {
         // Basic info
-        email: user.email,
+        email: user.email || '',
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         fullName: `${firstName.trim()} ${lastName.trim()}`,
@@ -177,10 +219,12 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 type="text"
                 id="firstName"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
                 required
+                aria-required="true"
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Your first name"
+                aria-label="First Name"
               />
             </div>
 
@@ -192,10 +236,12 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 type="text"
                 id="lastName"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
                 required
+                aria-required="true"
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Your last name"
+                aria-label="Last Name"
               />
             </div>
           </div>
@@ -208,10 +254,12 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               required
+              aria-required="true"
               className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="your@email.com"
+              aria-label="Email Address"
             />
           </div>
 
@@ -224,10 +272,12 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 type="password"
                 id="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 required
+                aria-required="true"
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="••••••••"
+                aria-label="Password"
               />
             </div>
 
@@ -241,8 +291,10 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                aria-required="true"
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="••••••••"
+                aria-label="Confirm Password"
               />
             </div>
           </div>
@@ -261,6 +313,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
                   className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  aria-label="Date of Birth"
                 />
               </div>
 
@@ -275,6 +328,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   onChange={(e) => setOccupation(e.target.value)}
                   className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Your profession"
+                  aria-label="Occupation"
                 />
               </div>
             </div>
@@ -292,6 +346,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
                 className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                aria-label="Experience with Sound Healing"
               >
                 <option value="">Select level...</option>
                 <option value="beginner">Beginner</option>
@@ -311,6 +366,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 rows={3}
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="e.g., Reduce stress, improve sleep..."
+                aria-label="Primary Wellness Goals"
               />
             </div>
 
@@ -325,6 +381,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 rows={3}
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Any conditions we should be aware of (optional)"
+                aria-label="Relevant Health Conditions"
               />
             </div>
 
@@ -337,6 +394,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 value={meditationExperience}
                 onChange={(e) => setMeditationExperience(e.target.value)}
                 className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                aria-label="Meditation Experience"
               >
                 <option value="">Select...</option>
                 <option value="none">None</option>
@@ -355,6 +413,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 value={preferredSessionLength}
                 onChange={(e) => setPreferredSessionLength(e.target.value)}
                 className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                aria-label="Preferred Session Length"
               >
                 <option value="">Select...</option>
                 <option value="short">Short (5-15 min)</option>
@@ -377,6 +436,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     sessionReminders: e.target.checked
                   }))}
                   className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
+                  aria-label="Daily session reminders"
                 />
                 <span className="text-gray-200">Daily session reminders</span>
               </label>
@@ -390,6 +450,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     weeklyProgress: e.target.checked
                   }))}
                   className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
+                  aria-label="Weekly progress reports"
                 />
                 <span className="text-gray-200">Weekly progress reports</span>
               </label>
@@ -403,6 +464,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     newFrequencies: e.target.checked
                   }))}
                   className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
+                  aria-label="New frequency releases"
                 />
                 <span className="text-gray-200">New frequency releases</span>
               </label>
@@ -416,6 +478,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                     healthTips: e.target.checked
                   }))}
                   className="w-4 h-4 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
+                  aria-label="Wellness tips and insights"
                 />
                 <span className="text-gray-200">Wellness tips and insights</span>
               </label>
@@ -431,6 +494,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   checked={healthDisclaimer}
                   onChange={(e) => setHealthDisclaimer(e.target.checked)}
                   required
+                  aria-required="true"
                   className="w-4 h-4 mt-1 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-sm text-gray-200">
@@ -444,6 +508,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   checked={privacyConsent}
                   onChange={(e) => setPrivacyConsent(e.target.checked)}
                   required
+                  aria-required="true"
                   className="w-4 h-4 mt-1 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="text-sm text-gray-200">

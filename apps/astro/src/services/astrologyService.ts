@@ -20,7 +20,7 @@ export const fetchChartData = async (userId: string, chartType: ChartType): Prom
     },
   });
 
-  if (!response.ok) {
+  if (response.ok === false) {
     throw new Error(`Failed to fetch chart data: ${response.statusText}`);
   }
 

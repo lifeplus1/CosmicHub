@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import { useState, type FC, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import type { ChartBirthData } from '@cosmichub/types';
+import { devConsole } from '../config/environment';
+
+type FormFields = {
+  birthDate: string;
+  birthTime: string;
+  birthLocation: string;
+};
 
 interface SimpleBirthFormProps {
   title?: string;
@@ -12,7 +19,7 @@ interface SimpleBirthFormProps {
   navigateTo?: string; // Custom navigation path
 }
 
-export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
+export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
   title = "Birth Details",
   submitButtonText = "Calculate Chart",
   onSubmit,
@@ -34,29 +41,35 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
 
   // Sample birth data removed - users must enter their own data
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Clear previous validation errors
-    setValidationErrors({});
-    
-    // Validate form data
+  const validateFormData = (data: typeof formData): Record<string, string> => {
     const errors: Record<string, string> = {};
-    
-    if (!formData.birthDate) {
+
+    // Required field validation (explicit empty string checks)
+    if (data.birthDate === '') {
       errors.birthDate = 'Birth date is required';
     }
-    
-    if (!formData.birthTime) {
+    if (data.birthTime === '') {
       errors.birthTime = 'Birth time is required';
     }
-    
-    if (!formData.birthLocation.trim()) {
+    const trimmedLocation = data.birthLocation.trim();
+    if (trimmedLocation === '') {
       errors.birthLocation = 'Birth location is required';
     }
     
+    return errors;
+  };
+
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+
+    // Clear previous validation errors
+    setValidationErrors({});
+
+    // Validate form data
+    const errors = validateFormData(formData);
+
     // Check if date is reasonable (between 1900 and current year + 1)
-    if (formData.birthDate) {
+  if (formData.birthDate !== '') {
       const [yearStr] = formData.birthDate.split('-');
       const selectedYear = parseInt(yearStr, 10);
       const currentYear = new Date().getFullYear();
@@ -64,56 +77,54 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
         errors.birthDate = `Year must be between 1900 and ${currentYear + 1}`;
       }
     }
-    
-    if (Object.keys(errors).length > 0) {
+
+    const hasErrors = Object.keys(errors).length != 0;
+    if (hasErrors) {
       setValidationErrors(errors);
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       // Parse the date string explicitly to avoid timezone issues
-      // formData.birthDate is in YYYY-MM-DD format from date input
       const [yearStr, monthStr, dayStr] = formData.birthDate.split('-');
       const year = parseInt(yearStr, 10);
       const month = parseInt(monthStr, 10);
       const day = parseInt(dayStr, 10);
-      
+
       const [hours, minutes] = formData.birthTime.split(':').map(Number);
 
-      // No need to provide coordinates or timezone - backend will determine automatically from city
       const chartData: ChartBirthData = {
-        year: year,
-        month: month,
-        day: day,
+        year,
+        month,
+        day,
         hour: hours,
         minute: minutes,
-        city: formData.birthLocation.trim()
-        // lat, lon, and timezone will be automatically determined by backend
+        city: formData.birthLocation.trim(),
       };
 
       setBirthData(chartData);
-      
-      // Store birth data in sessionStorage for ChartResults page
+
       const storedBirthData = {
-        date: formData.birthDate, // "YYYY-MM-DD" format
-        time: formData.birthTime, // "HH:MM" format  
-        location: formData.birthLocation.trim()
+        date: formData.birthDate,
+        time: formData.birthTime,
+        location: formData.birthLocation.trim(),
       };
-      
+
       sessionStorage.setItem('birthData', JSON.stringify(storedBirthData));
-      console.log('✅ Birth data stored in sessionStorage for chart-results page:', storedBirthData);
-      
-      // Navigate to chart-results page instead of calling onSubmit
-      if (onSubmit) {
+
+      if (onSubmit != null) {
         onSubmit(chartData);
       } else {
-        navigate(navigateTo || '/chart-results');
+        navigate(navigateTo ?? '/chart-results');
       }
     } catch (error) {
-      console.error('Error creating chart:', error);
-      alert('Error creating chart. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      devConsole.error('Error creating chart:', errorMessage);
+      setValidationErrors({ 
+        form: 'Failed to create chart. Please check your inputs and try again.' 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -122,9 +133,11 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
   // Sample functionality removed
 
   // Geolocation functionality
-  const handleDetectLocation = async () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by this browser.');
+  const handleDetectLocation = async (): Promise<void> => {
+    if (navigator.geolocation == null) {
+      setValidationErrors({
+        birthLocation: 'Geolocation is not supported by this browser.'
+      });
       return;
     }
 
@@ -140,54 +153,61 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
             `https://api.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
           );
           
-          if (response.ok) {
+            if (response.status === 200) {
             const data = await response.json();
-            const city = data.address?.city || data.address?.town || data.address?.village;
-            const state = data.address?.state;
-            const country = data.address?.country;
-            
-            let locationString = '';
-            if (city && state && country) {
+            const address = data.address ?? {};
+            const city = address.city ?? address.town ?? address.village ?? '';
+            const state = address.state ?? '';
+            const country = address.country ?? '';            let locationString = '';
+            if (city !== '' && state !== '' && country !== '') {
               locationString = `${city}, ${state}, ${country}`;
-            } else if (city && country) {
+            } else if (city !== '' && country !== '') {
               locationString = `${city}, ${country}`;
-            } else if (country) {
+            } else if (country !== '') {
               locationString = country;
             }
-            
-            if (locationString) {
+
+            if (locationString !== '') {
               setFormData(prev => ({ ...prev, birthLocation: locationString }));
             } else {
-              alert('Could not determine location name. Please enter manually.');
+              setValidationErrors({
+                birthLocation: 'Could not determine location name. Please enter manually.'
+              });
             }
           } else {
-            alert('Could not determine location name. Please enter manually.');
+            setValidationErrors({
+              birthLocation: 'Could not determine location name. Please enter manually.'
+            });
           }
         } catch (error) {
-          console.error('Error with reverse geocoding:', error);
-          alert('Could not determine location name. Please enter manually.');
+          devConsole.error('Error with reverse geocoding:', error);
+          setValidationErrors({
+            birthLocation: 'Could not determine location name. Please enter manually.'
+          });
         } finally {
           setIsDetectingLocation(false);
         }
       },
-      (error) => {
-        console.error('Geolocation error:', error);
+      (error: GeolocationPositionError) => {
+        devConsole.error('Geolocation error:', error);
         let message = 'Could not get your location. ';
         switch (error.code) {
-          case error.PERMISSION_DENIED:
+          case GeolocationPositionError.PERMISSION_DENIED:
             message += 'Please allow location access and try again.';
             break;
-          case error.POSITION_UNAVAILABLE:
+          case GeolocationPositionError.POSITION_UNAVAILABLE:
             message += 'Location information is unavailable.';
             break;
-          case error.TIMEOUT:
+          case GeolocationPositionError.TIMEOUT:
             message += 'Location request timed out.';
             break;
           default:
             message += 'An unknown error occurred.';
             break;
         }
-        alert(message);
+        setValidationErrors({
+          birthLocation: message
+        });
         setIsDetectingLocation(false);
       },
       {
@@ -206,19 +226,23 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
           <label htmlFor="birth-date" className="block text-cosmic-silver mb-2">Birth Date</label>
           <input 
             id="birth-date"
+            name="birthDate"
             type="date" 
             value={formData.birthDate}
-            onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData(prev => ({...prev, birthDate: e.target.value}))}
             className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
-              validationErrors.birthDate 
-                ? 'border-red-500 focus:border-red-400' 
+              typeof validationErrors.birthDate === 'string' && validationErrors.birthDate !== ''
+                ? 'border-red-500 focus:border-red-400'
                 : 'border-cosmic-purple focus:border-cosmic-gold'
             } transition-colors`}
             required
             aria-label="Select your birth date"
+            aria-describedby="birth-date-error"
           />
-          {validationErrors.birthDate && (
-            <p className="text-red-400 text-sm mt-1">⚠️ {validationErrors.birthDate}</p>
+          {typeof validationErrors.birthDate === 'string' && validationErrors.birthDate !== '' && (
+            <p id="birth-date-error" className="text-red-400 text-sm mt-1" aria-live="polite">
+              ⚠️ {validationErrors.birthDate}
+            </p>
           )}
         </div>
         
@@ -229,17 +253,20 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
             id="birth-time"
             type="time" 
             value={formData.birthTime}
-            onChange={(e) => setFormData({...formData, birthTime: e.target.value})}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData(prev => ({...prev, birthTime: e.target.value}))}
             className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
-              validationErrors.birthTime 
-                ? 'border-red-500 focus:border-red-400' 
+              typeof validationErrors.birthTime === 'string' && validationErrors.birthTime !== ''
+                ? 'border-red-500 focus:border-red-400'
                 : 'border-cosmic-purple focus:border-cosmic-gold'
             } transition-colors`}
             required
             aria-label="Select your birth time"
+            aria-describedby="birth-time-error"
           />
-          {validationErrors.birthTime && (
-            <p className="text-red-400 text-sm mt-1">⚠️ {validationErrors.birthTime}</p>
+          {typeof validationErrors.birthTime === 'string' && validationErrors.birthTime !== '' && (
+            <p id="birth-time-error" className="text-red-400 text-sm mt-1" aria-live="polite">
+              ⚠️ {validationErrors.birthTime}
+            </p>
           )}
         </div>
         
@@ -252,14 +279,15 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
               type="text" 
               placeholder="City, State/Country (e.g., New York, NY or London, UK)"
               value={formData.birthLocation}
-              onChange={(e) => setFormData({...formData, birthLocation: e.target.value})}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData(prev => ({...prev, birthLocation: e.target.value}))}
               className={`flex-1 p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
-                validationErrors.birthLocation 
-                  ? 'border-red-500 focus:border-red-400' 
+                typeof validationErrors.birthLocation === 'string' && validationErrors.birthLocation !== ''
+                  ? 'border-red-500 focus:border-red-400'
                   : 'border-cosmic-purple focus:border-cosmic-gold'
               } transition-colors`}
               required
               aria-label="Enter your birth location"
+              aria-describedby="birth-location-error"
             />
             <button
               type="button"
@@ -271,8 +299,10 @@ export const SimpleBirthForm: React.FC<SimpleBirthFormProps> = ({
               {isDetectingLocation ? '📍...' : '📍 Current'}
             </button>
           </div>
-          {validationErrors.birthLocation && (
-            <p className="text-red-400 text-sm mt-1">⚠️ {validationErrors.birthLocation}</p>
+          {typeof validationErrors.birthLocation === 'string' && validationErrors.birthLocation !== '' && (
+            <p id="birth-location-error" className="text-red-400 text-sm mt-1" aria-live="polite">
+              ⚠️ {validationErrors.birthLocation}
+            </p>
           )}
           <p className="text-cosmic-silver/60 text-sm mt-1">
             💡 Timezone will be automatically detected from your location

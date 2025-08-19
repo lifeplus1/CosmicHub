@@ -1,4 +1,5 @@
 import React, { useCallback, useState, lazy, Suspense } from 'react';
+import { devConsole } from '../config/environment';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt, FaGlobe, FaCompass, FaChevronDown, FaHeart, FaTools, FaCog, FaKey } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
@@ -44,7 +45,7 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({ to, icon: Icon, label, too
       try {
         navigate(to);
       } catch (error) {
-        console.error('Navigation error:', error);
+  devConsole.error('Navigation error:', error);
         window.location.href = to;
       }
     },
@@ -92,7 +93,7 @@ const DropdownNav: React.FC<DropdownNavProps> = React.memo(({ label, icon: Icon,
     try {
       navigate(to);
     } catch (error) {
-      console.error('Navigation error:', error);
+  devConsole.error('Navigation error:', error);
       window.location.href = to;
     }
   }, [navigate]);
@@ -168,7 +169,7 @@ const Navbar: React.FC = React.memo(() => {
       await signOut();
       navigate('/');
     } catch (error) {
-      console.error('Sign out error:', error);
+      devConsole.error('Sign out error:', error);
     }
   }, [signOut, navigate]);
 
@@ -206,7 +207,7 @@ const Navbar: React.FC = React.memo(() => {
       label: 'Multi-System Analysis',
       tooltip: { title: 'Multi-System Charts', description: 'Compare Western, Vedic, Chinese, and other astrological systems side by side.' }
     },
-    ...(user ? [
+    ...(user != null ? [
       { 
         to: '/saved-charts', 
         icon: FaChartLine, 
@@ -237,7 +238,7 @@ const Navbar: React.FC = React.memo(() => {
     }
   ];
 
-  const premiumFeatures: NavItem[] = user ? [
+  const premiumFeatures: NavItem[] = user != null ? [
     { 
       to: '/synastry', 
       icon: FaUsers, 
@@ -266,7 +267,7 @@ const Navbar: React.FC = React.memo(() => {
       icon: FaBrain,
       items: personalInsights
     },
-    ...(user && premiumFeatures.length > 0 ? [{
+    ...(user != null && premiumFeatures.length > 0 ? [{
       label: 'Premium',
       icon: FaCrown,
       items: premiumFeatures
@@ -307,7 +308,7 @@ const Navbar: React.FC = React.memo(() => {
           {/* User Menu / Auth */}
           <div className="hidden md:flex items-center gap-4">
             <Suspense fallback={<div className="w-24 h-10 bg-cosmic-purple/20 rounded-lg animate-pulse" />}>
-              {user && user.email ? (
+              {user?.email != null ? (
                 <UserMenu user={{ email: user.email }} userTier={userTier} handleSignOut={handleSignOut} />
               ) : (
                 <div className="flex items-center gap-3">
@@ -383,7 +384,7 @@ const Navbar: React.FC = React.memo(() => {
               </div>
               
               {/* Premium features section */}
-              {user && premiumFeatures.length > 0 && (
+              {user != null && premiumFeatures.length > 0 && (
                 <div className="pt-2 border-t border-cosmic-silver/10">
                   <h3 className="px-4 py-2 text-sm font-semibold text-cosmic-gold uppercase tracking-wider flex items-center gap-2">
                     <FaCrown className="text-yellow-400" />
@@ -399,7 +400,7 @@ const Navbar: React.FC = React.memo(() => {
               
               {/* Auth section */}
               <div className="pt-4 border-t border-cosmic-silver/10">
-                {user && user.email ? (
+                {user?.email != null ? (
                   <button
                     onClick={handleSignOut}
                     className="w-full flex items-center gap-3 px-4 py-3 text-red-400 rounded-lg hover:bg-red-900/10 transition-colors duration-200 font-medium"

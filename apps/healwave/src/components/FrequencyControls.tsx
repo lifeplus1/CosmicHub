@@ -1,10 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 import { useAuth } from "@cosmichub/auth";
-import { savePreset, getPresets } from "../services/api";
+import { savePreset } from "../services/api";
 import AudioPlayer from "./AudioPlayer";
 import DurationTimer from "./DurationTimer";
 
-const PRESETS = {
+/* const PRESETS = {
   solfeggio: [
     { value: "174", label: "174 Hz (Pain Relief & Security)" },
     { value: "285", label: "285 Hz (Tissue Healing)" },
@@ -89,13 +96,13 @@ const PRESETS = {
     { value: "111", label: "111 Hz (Cellular Rejuvenation)" },
     // ... (truncated as per original)
   ],
-};
+}; */
 
 const FrequencyControls = () => {
   const { user } = useAuth();
-  const [frequency, setFrequency] = useState(528);
-  const [binaural, setBinaural] = useState(0);
-  const [volume, setVolume] = useState(0.5);
+  const [frequency] = useState(528);
+  const [binaural] = useState(0);
+  const [volume] = useState(0.5);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(15);
   const [presetName, setPresetName] = useState('');
@@ -128,7 +135,7 @@ const FrequencyControls = () => {
       setPresetName('');
       setShowPresets(false);
     } catch (error) {
-      console.error('Failed to save preset:', error);
+  devConsole.error('Failed to save preset:', error);
     }
   };
 

@@ -19,7 +19,9 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
   const { toast } = useToast();
 
   const handleCalculate = useCallback(async () => {
-    if (!birthData) return;
+    if (birthData === null || birthData === undefined) {
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -54,22 +56,25 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
 
   // Memoized empty state button handler
   const handleEmptyCalculate = useCallback(() => {
-    if (onCalculate) {
-      onCalculate({
+    if (typeof onCalculate === 'function') {
+      // Provide a deterministic sample request for quick demo
+      void Promise.resolve(onCalculate({
         year: 2000,
         month: 1,
         day: 1,
         hour: 0,
         minute: 0
-      } as ChartBirthData);
+      } as ChartBirthData));
     }
   }, [onCalculate]);
 
   useEffect(() => {
-    if (birthData) {
-      handleCalculate();
+    if (birthData !== null && birthData !== undefined) {
+      void handleCalculate();
     }
-  }, [birthData]); // Removed handleCalculate from dependencies to prevent infinite loop
+    // Intentional: handleCalculate depends on toast causing changing identity; rely only on birthData changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [birthData]);
 
   // Memoized loading state
   const loadingState = useMemo(() => (
@@ -92,7 +97,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
       <p className="mb-4 text-lg text-gray-700">
         Enter your birth information to calculate your Gene Keys profile
       </p>
-      {onCalculate && (
+  {(typeof onCalculate === 'function') && (
         <button className="cosmic-button" onClick={handleEmptyCalculate}>
           Calculate Gene Keys
         </button>
@@ -100,9 +105,9 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
     </div>
   ), [onCalculate, handleEmptyCalculate]);
 
-  if (loading) return loadingState;
-  if (error) return errorState;
-  if (!geneKeysData) return emptyState;
+  if (loading === true) return loadingState;
+  if (error !== null) return errorState;
+  if (geneKeysData === null) return emptyState;
 
   return (
     <div className="p-6">
@@ -123,7 +128,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
           <Tabs.Trigger value="profile" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors">
             🌌 Hologenetic Profile
           </Tabs.Trigger>
-          {selectedKey && (
+          {(selectedKey !== null) && (
             <Tabs.Trigger value="details" className="px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors">
               📖 Gene Key {selectedKey.number}
             </Tabs.Trigger>

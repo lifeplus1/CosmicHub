@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { devConsole } from '../../../config/environment';
 import { Card } from '@cosmichub/ui';
 import styles from './AudioPlayer.module.css';
 
@@ -39,28 +40,31 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   }, [isPlaying, frequency, isInitialized]);
 
   useEffect(() => {
-    if (gainNodeRef.current) {
-      gainNodeRef.current.gain.setValueAtTime(volume / 100, audioContextRef.current?.currentTime || 0);
+    if (gainNodeRef.current !== null && gainNodeRef.current !== undefined) {
+      const currentTime = audioContextRef.current?.currentTime ?? 0;
+      gainNodeRef.current.gain.setValueAtTime(volume / 100, currentTime);
     }
   }, [volume]);
 
   const initializeAudio = () => {
     try {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext ?? (window as any).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
       gainNodeRef.current = audioContextRef.current.createGain();
       gainNodeRef.current.connect(audioContextRef.current.destination);
       gainNodeRef.current.gain.setValueAtTime(volume / 100, audioContextRef.current.currentTime);
       setIsInitialized(true);
     } catch (error) {
-      console.error('Failed to initialize audio context:', error);
+      devConsole.error('❌ Failed to initialize audio context:', error);
     }
   };
 
   const startAudio = () => {
-    if (!audioContextRef.current || !gainNodeRef.current) return;
+    if (audioContextRef.current === null || audioContextRef.current === undefined || 
+        gainNodeRef.current === null || gainNodeRef.current === undefined) return;
 
     try {
-      if (oscillatorRef.current) {
+      if (oscillatorRef.current !== null && oscillatorRef.current !== undefined) {
         oscillatorRef.current.stop();
         oscillatorRef.current.disconnect();
       }
@@ -71,25 +75,26 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       oscillatorRef.current.connect(gainNodeRef.current);
       oscillatorRef.current.start();
     } catch (error) {
-      console.error('Failed to start audio:', error);
+      devConsole.error('❌ Failed to start audio:', error);
     }
   };
 
   const stopAudio = () => {
-    if (oscillatorRef.current) {
+    if (oscillatorRef.current !== null && oscillatorRef.current !== undefined) {
       try {
         oscillatorRef.current.stop();
         oscillatorRef.current.disconnect();
         oscillatorRef.current = null;
       } catch (error) {
-        console.error('Failed to stop audio:', error);
+        devConsole.error('❌ Failed to stop audio:', error);
       }
     }
   };
 
   const cleanup = () => {
     stopAudio();
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+    if (audioContextRef.current !== null && audioContextRef.current !== undefined && 
+        audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close();
     }
     setIsInitialized(false);

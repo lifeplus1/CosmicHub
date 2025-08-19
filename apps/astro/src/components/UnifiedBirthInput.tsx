@@ -51,15 +51,15 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
   
   // Form state - initialize with existing birth data or defaults
   const [formData, setFormData] = useState(() => ({
-    year: birthData?.year?.toString() || '',
-    month: birthData?.month?.toString() || '',
-    day: birthData?.day?.toString() || '',
-    hour: birthData?.hour?.toString() || '',
-    minute: birthData?.minute?.toString() || '',
-    city: birthData?.city || '',
-    lat: birthData?.lat?.toString() || '',
-    lon: birthData?.lon?.toString() || '',
-    timezone: birthData?.timezone || ''
+    year: birthData?.year !== undefined ? birthData.year.toString() : '',
+    month: birthData?.month !== undefined ? birthData.month.toString() : '',
+    day: birthData?.day !== undefined ? birthData.day.toString() : '',
+    hour: birthData?.hour !== undefined ? birthData.hour.toString() : '',
+    minute: birthData?.minute !== undefined ? birthData.minute.toString() : '',
+    city: birthData?.city !== undefined && birthData.city !== null ? birthData.city : '',
+    lat: birthData?.lat !== undefined ? birthData.lat.toString() : '',
+    lon: birthData?.lon !== undefined ? birthData.lon.toString() : '',
+    timezone: birthData?.timezone !== undefined && birthData.timezone !== null ? birthData.timezone : ''
   }));
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -67,17 +67,17 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
 
   // Update form when birth data changes from context
   useEffect(() => {
-    if (birthData) {
+    if (birthData !== null && birthData !== undefined) {
       setFormData({
-        year: birthData.year?.toString() || '',
-        month: birthData.month?.toString() || '',
-        day: birthData.day?.toString() || '',
-        hour: birthData.hour?.toString() || '',
-        minute: birthData.minute?.toString() || '',
-        city: birthData.city || '',
-        lat: birthData.lat?.toString() || '',
-        lon: birthData.lon?.toString() || '',
-        timezone: birthData.timezone || ''
+        year: birthData.year !== undefined ? birthData.year.toString() : '',
+        month: birthData.month !== undefined ? birthData.month.toString() : '',
+        day: birthData.day !== undefined ? birthData.day.toString() : '',
+        hour: birthData.hour !== undefined ? birthData.hour.toString() : '',
+        minute: birthData.minute !== undefined ? birthData.minute.toString() : '',
+        city: birthData.city !== undefined && birthData.city !== null ? birthData.city : '',
+        lat: birthData.lat !== undefined ? birthData.lat.toString() : '',
+        lon: birthData.lon !== undefined ? birthData.lon.toString() : '',
+        timezone: birthData.timezone !== undefined && birthData.timezone !== null ? birthData.timezone : ''
       });
     }
   }, [birthData]);
@@ -86,13 +86,16 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Smart city search
-    if (field === 'city' && value.length > 2) {
-      const filtered = MAJOR_CITIES.filter(city => 
-        city.name.toLowerCase().includes(value.toLowerCase())
-      );
-      setCitySearchResults(filtered.slice(0, 5));
-    } else if (field === 'city' && value.length <= 2) {
-      setCitySearchResults([]);
+    if (field === 'city') {
+      if (value.length > 2) {
+        const filtered = MAJOR_CITIES.filter(city => 
+          typeof city.name === 'string' && city.name.length > 0 && 
+          city.name.toLowerCase().includes(value.toLowerCase())
+        );
+        setCitySearchResults(filtered.slice(0, 5));
+      } else {
+        setCitySearchResults([]);
+      }
     }
   }, []);
 
@@ -125,20 +128,20 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
     e.preventDefault();
     
     const newBirthData: ChartBirthData = {
-      year: parseInt(formData.year),
-      month: parseInt(formData.month),
-      day: parseInt(formData.day),
-      hour: parseInt(formData.hour),
-      minute: parseInt(formData.minute),
-      city: formData.city,
-      lat: formData.lat ? parseFloat(formData.lat) : undefined,
-      lon: formData.lon ? parseFloat(formData.lon) : undefined,
-      timezone: formData.timezone || undefined
+      year: formData.year.length > 0 ? parseInt(formData.year, 10) : 0,
+      month: formData.month.length > 0 ? parseInt(formData.month, 10) : 0,
+      day: formData.day.length > 0 ? parseInt(formData.day, 10) : 0,
+      hour: formData.hour.length > 0 ? parseInt(formData.hour, 10) : 0,
+      minute: formData.minute.length > 0 ? parseInt(formData.minute, 10) : 0,
+      city: formData.city.length > 0 ? formData.city : '',
+      lat: formData.lat.length > 0 ? parseFloat(formData.lat) : undefined,
+      lon: formData.lon.length > 0 ? parseFloat(formData.lon) : undefined,
+      timezone: formData.timezone.length > 0 ? formData.timezone : undefined
     };
 
     // Validate required fields
-    if (!newBirthData.year || !newBirthData.month || !newBirthData.day || 
-        !newBirthData.hour || newBirthData.minute === undefined || !newBirthData.city) {
+    if (newBirthData.year === 0 || newBirthData.month === 0 || newBirthData.day === 0 || 
+        newBirthData.hour === 0 || newBirthData.minute === 0 || newBirthData.city === '') {
       alert('Please fill in all required fields');
       return;
     }
@@ -149,18 +152,19 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
 
   // Auto-submit when data is complete and valid
   useEffect(() => {
-    if (autoSubmit && isDataValid && birthData) {
+    if (autoSubmit === true && isDataValid === true && birthData !== null && birthData !== undefined) {
       onSubmit?.(birthData);
     }
   }, [autoSubmit, isDataValid, birthData, onSubmit]);
 
-  const isFormComplete = formData.year && formData.month && formData.day && 
-                        formData.hour && formData.minute !== '' && formData.city;
+  const isFormComplete = formData.year.length > 0 && formData.month.length > 0 && 
+                        formData.day.length > 0 && formData.hour.length > 0 && 
+                        formData.minute.length > 0 && formData.city.length > 0;
 
   return (
     <div className={`unified-birth-input ${className}`}>
       {/* Current Data Display */}
-      {showCurrentData && birthData && (
+      {showCurrentData === true && birthData !== null && birthData !== undefined && (
         <Card className="mb-6 bg-cosmic-gold/10 border-cosmic-gold/30">
           <div className="flex items-center justify-between">
             <div>
@@ -181,7 +185,7 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
       )}
 
       {/* Input Form */}
-      {(!birthData || !showCurrentData) && (
+      {(birthData === null || birthData === undefined || showCurrentData === false) && (
         <Card title={title}>
           <p className="text-cosmic-silver/70 mb-6">{description}</p>
           

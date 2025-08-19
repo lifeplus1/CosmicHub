@@ -18,11 +18,13 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
   currentFrequency,
   duration
 }) => {
-  const [customFrequency, setCustomFrequency] = useState(currentFrequency);
+  const [customFrequency, setCustomFrequency] = useState<number>(currentFrequency);
   const radioGroupRef = useRef<HTMLDivElement | null>(null);
   const groupLabelId = useId();
+  const customFrequencyId = useId();
+  const durationId = useId();
 
-  const presetFrequencies = [
+  const presetFrequencies = React.useMemo(() => [
     { name: '396 Hz - Root Chakra', value: 396 },
     { name: '417 Hz - Sacral Chakra', value: 417 },
     { name: '528 Hz - Solar Plexus', value: 528 },
@@ -30,12 +32,12 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
     { name: '741 Hz - Throat Chakra', value: 741 },
     { name: '852 Hz - Third Eye', value: 852 },
     { name: '963 Hz - Crown Chakra', value: 963 }
-  ];
+  ], []);
 
-  const handlePresetSelect = (frequency: number) => {
+  const handlePresetSelect = useCallback((frequency: number) => {
     setCustomFrequency(frequency);
     onFrequencyChange(frequency);
-  };
+  }, [onFrequencyChange]);
 
   const handleCustomFrequencySubmit = () => {
     onFrequencyChange(customFrequency);
@@ -46,28 +48,46 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
       <Card className="bg-cosmic-dark/50">
         <div className="space-y-4">
           <h3 className="mb-4 text-lg font-semibold text-cosmic-gold">Frequency Selection</h3>
-          <div>
-            <label id={groupLabelId} className="block mb-2 text-cosmic-silver">Preset Frequencies</label>
+          <div role="group" aria-labelledby={groupLabelId}>
+            <div id={groupLabelId} className="block mb-2 text-cosmic-silver">Preset Frequencies</div>
             <div
               className="grid grid-cols-1 gap-2 sm:grid-cols-2"
               role="radiogroup"
               aria-labelledby={groupLabelId}
               ref={radioGroupRef}
+              tabIndex={0}
               onKeyDown={useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
                 const keys = ['ArrowRight','ArrowDown','ArrowLeft','ArrowUp','Home','End'];
                 if (!keys.includes(e.key)) return;
                 e.preventDefault();
-                const buttons = radioGroupRef.current?.querySelectorAll<HTMLButtonElement>('button[role="radio"]');
-                if (!buttons || buttons.length === 0) return;
+
+                if (radioGroupRef.current === null) return;
+                const buttons = radioGroupRef.current.querySelectorAll<HTMLButtonElement>('button[role="radio"]');
+                if (buttons.length === 0) return;
+
                 const idx = presetFrequencies.findIndex(p => p.value === currentFrequency);
                 const currentIndex = idx >= 0 ? idx : 0;
                 let nextIndex = currentIndex;
-                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextIndex = (currentIndex + 1) % buttons.length;
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
-                if (e.key === 'Home') nextIndex = 0;
-                if (e.key === 'End') nextIndex = buttons.length - 1;
+
+                switch (e.key) {
+                  case 'ArrowRight':
+                  case 'ArrowDown':
+                    nextIndex = (currentIndex + 1) % buttons.length;
+                    break;
+                  case 'ArrowLeft':
+                  case 'ArrowUp':
+                    nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+                    break;
+                  case 'Home':
+                    nextIndex = 0;
+                    break;
+                  case 'End':
+                    nextIndex = buttons.length - 1;
+                    break;
+                }
+
                 const nextPreset = presetFrequencies[nextIndex];
-                if (nextPreset) {
+                if (nextPreset !== undefined) {
                   handlePresetSelect(nextPreset.value);
                   buttons[nextIndex].focus();
                 }
@@ -105,17 +125,22 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
           </div>
 
           <div>
-            <label htmlFor="custom-frequency" className="block mb-2 text-cosmic-silver">
+            <label htmlFor={customFrequencyId} className="block mb-2 text-cosmic-silver">
               Custom Frequency (Hz)
             </label>
             <div className="flex gap-2">
               <input
-                id="custom-frequency"
+                id={customFrequencyId}
                 type="number"
                 min="20"
                 max="20000"
                 value={customFrequency}
-                onChange={(e) => setCustomFrequency(Number(e.target.value))}
+                onChange={(e) => {
+                  const newValue = Number(e.target.value);
+                  if (!Number.isNaN(newValue)) {
+                    setCustomFrequency(newValue);
+                  }
+                }}
                 className="flex-1 p-3 border rounded bg-cosmic-dark border-cosmic-purple text-cosmic-silver"
                 aria-describedby="frequency-help"
               />
@@ -134,16 +159,21 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
         <div className="space-y-4">
           <h3 className="mb-4 text-lg font-semibold text-cosmic-gold">Duration & Controls</h3>
           <div>
-            <label htmlFor="duration" className="block mb-2 text-cosmic-silver">
+            <label htmlFor={durationId} className="block mb-2 text-cosmic-silver">
               Duration (minutes)
             </label>
             <input
-              id="duration"
+              id={durationId}
               type="number"
               min="1"
               max="60"
               value={duration}
-              onChange={(e) => onDurationChange(Number(e.target.value))}
+              onChange={(e) => {
+                const newValue = Number(e.target.value);
+                if (!Number.isNaN(newValue)) {
+                  onDurationChange(newValue);
+                }
+              }}
               className="w-full p-3 border rounded bg-cosmic-dark border-cosmic-purple text-cosmic-silver"
             />
           </div>

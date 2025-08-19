@@ -4,13 +4,16 @@
  */
 
 import React, { useState, Suspense, lazy } from 'react';
+import { devConsole } from '../config/environment';
 import { getChartSyncService } from '../services/chartSyncService';
-import { getChartAnalyticsService } from '../services/chartAnalyticsService';
+import { getChartAnalyticsService, type PersonalityInsight, type ChartAnalysis } from '../services/chartAnalyticsService';
 import { getNotificationManager } from '../services/notificationManager';
 import { Button } from '@cosmichub/ui';
 
 // Lazy load the heavy chart component
 const ChartWheelInteractive = lazy(() => import('../features/ChartWheelInteractive'));
+// Re-exported Aspect type from ChartWheelInteractive for callback typing (dynamic import so use typeof inference if needed)
+import type { Aspect } from '../features/ChartWheelInteractive';
 
 const sampleBirthData = {
   year: 1990,
@@ -26,7 +29,8 @@ const sampleBirthData = {
 
 export const InteractiveChartExample: React.FC = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  type AnalysisState = PersonalityInsight[] | ChartAnalysis | null;
+  const [analysisResult, setAnalysisResult] = useState<AnalysisState>(null);
   const [chartRegistered, setChartRegistered] = useState(false);
 
   const handlePlanetSelect = async (planet: string) => {
@@ -34,7 +38,7 @@ export const InteractiveChartExample: React.FC = () => {
     
     // Get analytics for selected planet
     const analyticsService = getChartAnalyticsService();
-    const insights = analyticsService.getPersonalityInsights({
+  const insights = analyticsService.getPersonalityInsights({
       planets: { [planet]: { name: planet, position: 0 } },
       houses: [],
       aspects: []
@@ -43,8 +47,14 @@ export const InteractiveChartExample: React.FC = () => {
     setAnalysisResult(insights);
 
     // Send notification about planet selection
-    const notificationManager = getNotificationManager();
-    await notificationManager.sendTestNotification();
+  const notificationManager = getNotificationManager();
+  // Updated to use unified notification manager test API
+    if (typeof notificationManager.sendTest === 'function') {
+      const result = notificationManager.sendTest.call(notificationManager);
+      if (result !== null && typeof result === 'object' && 'then' in result && typeof (result as Promise<unknown>).then === 'function') {
+        await (result as Promise<unknown>);
+      }
+    }
   };
 
   const handleRegisterChart = async () => {
@@ -62,23 +72,23 @@ export const InteractiveChartExample: React.FC = () => {
       
       // Listen for chart events
       syncService.on('aspect-event', (event) => {
-        console.log('Aspect event detected:', event);
+        devConsole.log?.('Aspect event detected:', event);
       });
       
       syncService.on('transit-update', (event) => {
-        console.log('Transit update received:', event);
+        devConsole.log?.('Transit update received:', event);
       });
       
     } catch (error) {
-      console.error('Failed to register chart:', error);
+      devConsole.error('❌ Failed to register chart:', error);
     }
   };
 
-  const handleAnalyzeChart = async () => {
+  const handleAnalyzeChart = () => {
     const analyticsService = getChartAnalyticsService();
     
     try {
-      const analysis = await analyticsService.analyzeChart('example-chart', {
+  const analysis = analyticsService.analyzeChart('example-chart', {
         planets: { 
           sun: { name: 'sun', position: 75 }, // Leo
           moon: { name: 'moon', position: 180 }, // Libra
@@ -96,7 +106,7 @@ export const InteractiveChartExample: React.FC = () => {
       setAnalysisResult(analysis);
       
     } catch (error) {
-      console.error('Failed to analyze chart:', error);
+      devConsole.error('❌ Failed to analyze chart:', error);
     }
   };
 
@@ -109,7 +119,7 @@ export const InteractiveChartExample: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Button 
-            onClick={handleRegisterChart}
+            onClick={() => { void handleRegisterChart(); }}
             disabled={chartRegistered}
             variant="primary"
             className="w-full"
@@ -118,7 +128,7 @@ export const InteractiveChartExample: React.FC = () => {
           </Button>
           
           <Button 
-            onClick={handleAnalyzeChart}
+            onClick={() => { void handleAnalyzeChart(); }}
             variant="secondary"
             className="w-full"
           >
@@ -126,7 +136,7 @@ export const InteractiveChartExample: React.FC = () => {
           </Button>
           
           <Button 
-            onClick={() => setAnalysisResult(null)}
+            onClick={() => { setAnalysisResult(null); }}
             variant="secondary"
             className="w-full"
           >
@@ -134,7 +144,7 @@ export const InteractiveChartExample: React.FC = () => {
           </Button>
         </div>
 
-        {selectedPlanet && (
+  {selectedPlanet !== null && selectedPlanet !== undefined && (
           <div className="bg-cosmic-purple/20 rounded p-4 mb-4 border border-cosmic-gold/20">
             <h3 className="text-cosmic-gold font-semibold mb-2">
               Selected Planet: {selectedPlanet}
@@ -145,7 +155,7 @@ export const InteractiveChartExample: React.FC = () => {
           </div>
         )}
 
-        {analysisResult && (
+  {analysisResult !== null && analysisResult !== undefined && (
           <div className="bg-green-900/20 rounded p-4 mb-4 border border-green-500/30">
             <h3 className="text-green-400 font-semibold mb-2">Analysis Results</h3>
             <pre className="text-green-300 text-xs overflow-auto max-h-32">
@@ -170,9 +180,14 @@ export const InteractiveChartExample: React.FC = () => {
         showAnimation={true}
         showTransits={chartRegistered}
         realTimeUpdates={chartRegistered}
-        onPlanetSelect={handlePlanetSelect}
-        onAspectSelect={(aspect: any) => {
-          console.log('Aspect selected:', aspect);
+  onPlanetSelect={(planet) => { void handlePlanetSelect(planet); }}
+  onAspectSelect={(aspect: Aspect) => {
+          devConsole.log?.('Aspect selected:', {
+            planets: `${aspect.planet1}-${aspect.planet2}`,
+            type: aspect.type,
+            orb: aspect.orb,
+            strength: aspect.strength
+          });
         }}
       />
       </Suspense>

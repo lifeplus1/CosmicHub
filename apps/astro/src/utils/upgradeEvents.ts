@@ -26,7 +26,14 @@ class UpgradeEventManager {
       try {
         listener(event);
       } catch (error) {
-        console.error('Error in upgrade event listener:', error);
+        // Lazy import to avoid cyclic dependency and keep this utility lightweight
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const { devConsole } = require('../config/environment');
+          devConsole.error('❌ Error in upgrade event listener:', error);
+        } catch {
+          if (typeof console !== 'undefined') console.error('Error in upgrade event listener:', error);
+        }
       }
     });
   }

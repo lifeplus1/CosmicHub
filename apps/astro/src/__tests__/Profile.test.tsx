@@ -88,22 +88,22 @@ vi.mock('react-icons/fa', () => ({
   FaCalendarAlt: () => <span>Calendar</span>,
 }));
 
-describe('Profile Component', () => {
+describe('Profile Component', (): void => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders without crashing', () => {
+  it('renders without crashing', (): void => {
     const { container } = render(<Profile />);
     expect(container).toBeTruthy();
   });
 
-  it('displays user email', () => {
+  it('displays user email', (): void => {
     render(<Profile />);
     expect(screen.getAllByText('test@example.com').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('shows account overview', () => {
+  it('shows account overview', (): void => {
     render(<Profile />);
     expect(screen.getAllByText('Account Overview').length).toBeGreaterThanOrEqual(1);
   });

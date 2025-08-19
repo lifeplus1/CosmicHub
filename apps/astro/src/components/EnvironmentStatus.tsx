@@ -5,21 +5,36 @@ interface EnvironmentStatusProps {
 }
 
 export const EnvironmentStatus: React.FC<EnvironmentStatusProps> = ({ className = '' }) => {
-  const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  // Helper uses typeof import.meta.env to avoid referencing possibly undefined global type name
+  function getEnv<K extends string>(key: K): string | undefined {
+    const envObj = import.meta.env as Record<string, unknown>;
+    const raw = envObj[key];
+    return typeof raw === 'string' ? raw : undefined;
+  }
+
+  // Explicitly type config to prevent unsafe any propagation
+  const firebaseConfig: {
+    apiKey: string | undefined;
+    authDomain: string | undefined;
+    projectId: string | undefined;
+    storageBucket: string | undefined;
+    messagingSenderId: string | undefined;
+    appId: string | undefined;
+  } = {
+    apiKey: getEnv('VITE_FIREBASE_API_KEY'),
+    authDomain: getEnv('VITE_FIREBASE_AUTH_DOMAIN'),
+    projectId: getEnv('VITE_FIREBASE_PROJECT_ID'),
+    storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET'),
+    messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID'),
+    appId: getEnv('VITE_FIREBASE_APP_ID'),
   };
 
-  const isFirebaseConfigured = Object.values(firebaseConfig).every(value => 
-    value && value !== '' && !value.includes('placeholder')
-  );
+  const isFirebaseConfigured = Object.values(firebaseConfig).every(value => {
+    return typeof value === 'string' && value.length > 0 && value.includes('placeholder') === false;
+  });
 
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const isDevelopment = import.meta.env.DEV;
+  const apiUrl = getEnv('VITE_API_URL');
+  const isDevelopment: boolean = Boolean(import.meta.env.DEV);
 
   return (
     <div className={`rounded-xl border p-6 ${className}`}>
@@ -45,7 +60,7 @@ export const EnvironmentStatus: React.FC<EnvironmentStatusProps> = ({ className 
         <div className="flex items-center justify-between p-3 bg-cosmic-dark/30 rounded-lg">
           <span className="text-sm text-cosmic-silver/80 font-medium">API URL:</span>
           <span className="text-sm text-cosmic-silver font-mono text-right">
-            {apiUrl || 'Not configured'}
+            {(typeof apiUrl === 'string' && apiUrl.length > 0) ? apiUrl : 'Not configured'}
           </span>
         </div>
 
@@ -63,12 +78,12 @@ export const EnvironmentStatus: React.FC<EnvironmentStatusProps> = ({ className 
         <div className="flex items-center justify-between p-3 bg-cosmic-dark/30 rounded-lg">
           <span className="text-sm text-cosmic-silver/80 font-medium">Project ID:</span>
           <span className="text-sm text-cosmic-silver font-mono text-right">
-            {firebaseConfig.projectId || 'None'}
+            {(typeof firebaseConfig.projectId === 'string' && firebaseConfig.projectId.length > 0) ? firebaseConfig.projectId : 'None'}
           </span>
         </div>
       </div>
 
-      {!isFirebaseConfigured && (
+  {(isFirebaseConfigured === false) && (
         <div className="mt-4 p-4 bg-gradient-to-r from-orange-600/10 to-yellow-600/10 border border-orange-600/20 rounded-lg">
           <div className="flex items-start">
             <span className="text-orange-300 mr-2 mt-0.5">ℹ️</span>

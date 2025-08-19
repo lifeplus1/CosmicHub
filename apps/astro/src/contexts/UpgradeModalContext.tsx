@@ -49,7 +49,7 @@ export const UpgradeModalProvider: React.FC<UpgradeModalProviderProps> = ({ chil
  */
 export const useUpgradeModal = (): UpgradeModalContextType => {
   const context = useContext(UpgradeModalContext);
-  if (!context) {
+  if (context === undefined || context === null) {
     throw new Error('useUpgradeModal must be used within UpgradeModalProvider');
   }
   return context;

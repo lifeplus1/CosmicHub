@@ -1,4 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 import { Card, Button } from '@cosmichub/ui';
 import { useToast } from './ToastProvider';
 import { useAuth } from '@cosmichub/auth';
@@ -52,7 +59,7 @@ const ChartPreferences: React.FC = React.memo(() => {
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to load user preferences:', error);
+  devConsole.error('Failed to load user preferences:', error);
       toast({
         message: 'Failed to load your preferences',
         type: 'error'
@@ -94,7 +101,7 @@ const ChartPreferences: React.FC = React.memo(() => {
       });
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to save preferences:', error);
+  devConsole.error('Failed to save preferences:', error);
       toast({
         message: 'Failed to save preferences',
         type: 'error'

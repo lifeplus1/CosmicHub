@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import axios from 'axios';
@@ -29,15 +29,18 @@ const AnalyzePersonality: React.FC = React.memo(() => {
     minute: '',
     city: '',
   });
-  const [houseSystem, _setHouseSystem] = useState<'P' | 'E'>('P');
+  const [houseSystem, setHouseSystem] = useState<'P' | 'E'>('P');
   const [result, setResult] = useState<PersonalityResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const _navigate = useNavigate();
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'houseSystem' && (value === 'P' || value === 'E')) {
+      setHouseSystem(value);
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   }, []);
 
   const handleSubmit = useCallback(async (e: React.FormEvent): Promise<void> => {
@@ -60,7 +63,14 @@ const AnalyzePersonality: React.FC = React.memo(() => {
           },
         }
       );
-      setResult(response.data);
+      // Type-safe result assignment with validation
+      const responseData = response.data as unknown;
+      if (responseData !== null && responseData !== undefined && typeof responseData === 'object' && 
+          'sun_sign' in responseData && 'traits' in responseData) {
+        setResult(responseData as PersonalityResult);
+      } else {
+        throw new Error('Invalid response format');
+      }
       toast({
         title: 'Personality Analyzed',
         description: 'Your personality analysis is complete.',
@@ -83,20 +93,24 @@ const AnalyzePersonality: React.FC = React.memo(() => {
   }, [formData, toast]);
 
   const onFormSubmit = useCallback((e: React.FormEvent): void => {
-    handleSubmit(e).catch((error) => {
-      console.error('Form submission error:', error);
+    handleSubmit(e).catch((error: unknown) => {
+      // Log error for debugging
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
     });
   }, [handleSubmit]);
 
-  const isFormValid = useCallback(() => {
-    return Object.values(formData).every((value) => value.trim()) && houseSystem;
+  const isFormValid = useCallback((): boolean => {
+    return Object.values(formData).every((value: string) => 
+      typeof value === 'string' && value.trim().length > 0
+    ) && (houseSystem === 'P' || houseSystem === 'E');
   }, [formData, houseSystem]);
 
   if (loading) {
     return <span className="text-cosmic-silver">Loading...</span>;
   }
 
-  if (!user) {
+  if (user === null || user === undefined) {
     return <Navigate to="/login" replace />;
   }
 
@@ -187,6 +201,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
             <label htmlFor="houseSystem" className="block mb-2 text-cosmic-gold">House System <span aria-hidden="true">*</span></label>
             <select
               id="houseSystem"
+              name="houseSystem"
               value={houseSystem}
               onChange={handleInputChange}
               className="cosmic-input"
@@ -203,13 +218,13 @@ const AnalyzePersonality: React.FC = React.memo(() => {
           >
             Analyze Personality
           </button>
-          {error && (
+          {error !== null && error.length > 0 && (
             <div className="flex p-4 space-x-4 border border-red-500 rounded-md bg-red-900/50">
               <span className="text-xl text-red-500">⚠️</span>
               <span>{error}</span>
             </div>
           )}
-          {result && (
+          {result !== null && (
             <div className="p-4 mt-4 rounded-lg bg-cosmic-blue/30">
               <p className="text-cosmic-silver">Sun Sign: <span className="font-bold">{result.sun_sign}</span></p>
               <p className="text-cosmic-silver">Traits: <span className="font-bold">{result.traits}</span></p>

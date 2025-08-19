@@ -5,13 +5,7 @@
  * by leveraging the type guards from @cosmichub/types.
  */
 
-import { 
-  type AstrologyChart,
-  type UserProfile,
-  type NumerologyData
-} from '@cosmichub/types';
-
-// Import type guards directly from the local types file
+import { type AstrologyChart } from '@cosmichub/types';
 import {
   isAstrologyChart,
   isUserProfile,
@@ -76,21 +70,21 @@ export function validateUserProfile(profile: unknown): string[] | null {
   const errors: string[] = [];
   
   // Additional validation beyond type structure
-  const typedProfile = profile as UserProfile;
+  const typedProfile = profile;
   
-  if (!typedProfile.userId || typedProfile.userId.trim() === '') {
+  if (typedProfile.userId === undefined || typedProfile.userId === null || typedProfile.userId.trim().length === 0) {
     errors.push('User ID is required');
   }
   
-  if (!typedProfile.birthData.date || !/^\d{4}-\d{2}-\d{2}$/.test(typedProfile.birthData.date)) {
+  if (typedProfile.birthData.date === undefined || typedProfile.birthData.date === null || !/^\d{4}-\d{2}-\d{2}$/.test(typedProfile.birthData.date)) {
     errors.push('Birth date must be in YYYY-MM-DD format');
   }
   
-  if (!typedProfile.birthData.time || !/^\d{2}:\d{2}(:\d{2})?$/.test(typedProfile.birthData.time)) {
+  if (typedProfile.birthData.time === undefined || typedProfile.birthData.time === null || !/^\d{2}:\d{2}(:\d{2})?$/.test(typedProfile.birthData.time)) {
     errors.push('Birth time must be in HH:MM or HH:MM:SS format');
   }
   
-  if (!typedProfile.birthData.location || typedProfile.birthData.location.trim() === '') {
+  if (typedProfile.birthData.location === undefined || typedProfile.birthData.location === null || typedProfile.birthData.location.trim().length === 0) {
     errors.push('Birth location is required');
   }
   
@@ -109,7 +103,7 @@ export function validateNumerologyData(data: unknown): string[] | null {
   const errors: string[] = [];
   
   // Additional validation beyond type structure
-  const typedData = data as NumerologyData;
+  const typedData = data;
   
   // Life path should be between 1-9 or 11, 22, 33 (master numbers)
   const validLifePathNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33];

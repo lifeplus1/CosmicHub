@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { devConsole } from '../config/environment';
 
 interface NumerologyData {
   fullName: string;
@@ -17,11 +18,11 @@ const Numerology: React.FC = () => {
     soulUrge?: number;
   }>({});
 
-  console.log('🔢 Numerology page rendered with data:', numerologyData);
+  devConsole.log?.('🔢 Numerology page rendered with data:', numerologyData);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log('📝 Numerology input changed:', { name, value });
+  devConsole.log?.('📝 Numerology input changed:', { name, value });
     setNumerologyData(prev => ({ ...prev, [name]: value }));
   }, []);
 
@@ -47,7 +48,7 @@ const Numerology: React.FC = () => {
     
     let sum = 0;
     for (const char of name.toUpperCase().replace(/[^A-Z]/g, '')) {
-      sum += letterValues[char] || 0;
+      sum += letterValues[char] ?? 0;
     }
     
     while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
@@ -63,7 +64,7 @@ const Numerology: React.FC = () => {
     
     let sum = 0;
     for (const char of name.toUpperCase().replace(/[^A-Z]/g, '')) {
-      sum += vowelValues[char] || 0;
+      sum += vowelValues[char] ?? 0;
     }
     
     while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
@@ -73,9 +74,9 @@ const Numerology: React.FC = () => {
   }, []);
 
   const handleCalculateNumbers = useCallback(async () => {
-    console.log('🔢 Calculate numbers clicked with data:', numerologyData);
+  devConsole.log?.('🔢 Calculate numbers clicked with data:', numerologyData);
     
-    if (!numerologyData.fullName.trim() || !numerologyData.birthDate) {
+    if (numerologyData.fullName.trim() === '' || !numerologyData.birthDate) {
       alert('Please enter both your full name and birth date.');
       return;
     }
@@ -93,9 +94,9 @@ const Numerology: React.FC = () => {
         soulUrge
       });
       
-      console.log('✅ Numerology calculations complete:', { lifePath, expression, soulUrge });
+  devConsole.log?.('✅ Numerology calculations complete:', { lifePath, expression, soulUrge });
     } catch (error) {
-      console.error('❌ Error calculating numerology:', error);
+      devConsole.error('❌ Error calculating numerology:', error);
       alert('Error calculating your numbers. Please try again.');
     } finally {
       setIsLoading(false);
@@ -134,7 +135,7 @@ const Numerology: React.FC = () => {
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
-                  {results.lifePath || '?'}
+                  {results.lifePath ?? '?'}
                 </span>
               </div>
             </div>
@@ -146,7 +147,7 @@ const Numerology: React.FC = () => {
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
-                  {results.expression || '?'}
+                  {results.expression ?? '?'}
                 </span>
               </div>
             </div>
@@ -158,7 +159,7 @@ const Numerology: React.FC = () => {
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
-                  {results.soulUrge || '?'}
+                  {results.soulUrge ?? '?'}
                 </span>
               </div>
             </div>
@@ -204,7 +205,7 @@ const Numerology: React.FC = () => {
             
             <button 
               onClick={handleCalculateNumbers}
-              disabled={isLoading || !numerologyData.fullName.trim() || !numerologyData.birthDate}
+              disabled={isLoading || numerologyData.fullName.trim() === '' || !numerologyData.birthDate}
               className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple hover:from-cosmic-gold/80 hover:to-cosmic-purple/80 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-lg transition-all duration-300 font-semibold disabled:cursor-not-allowed"
             >
               {isLoading ? (

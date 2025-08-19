@@ -21,6 +21,7 @@ Status Legend:
 | PRIV-004 | Persist & rotate pseudonymization salts | DONE | you | 2025-08-17 | Complete salt persistence and rotation system implemented: SaltStorage class with Firestore/in-memory dual storage, automated rotation script with cron integration, comprehensive test suite (15 tests passing), API endpoints for administration, and full documentation. Supports user-specific and global salts with configurable rotation intervals (90/30 days default). | pseudonymization.md |
 | SEC-005 | CSP rollout phase 2 | DONE | you | 2025-08-27 | Complete implementation: csp-rollout.md documentation with phased approach, security.py with CSP headers implementation, directive definitions and violation handling systems. | csp-rollout.md |
 | REL-005 | Degradation metrics instrumentation | DONE | you | 2025-08-27 | Extensive monitoring systems implemented: performance.ts (PerformanceMonitor class), vectorized_monitoring.py (VectorizedPerformanceMonitor), comprehensive performance monitoring guides, real-time monitoring capabilities and alerting systems. | degradation-matrix.md |
+
 ## 🎯 **Current Active Tasks** (August 2025)
 
 **Status**: All major implementation phases complete. Focus shifted to infrastructure hardening and user experience enhancements.

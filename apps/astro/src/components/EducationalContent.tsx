@@ -1,7 +1,7 @@
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
-import { FaChartLine, FaKey, FaDna, FaHeart, FaBrain, FaCompass, FaStar } from 'react-icons/fa';
+import { FaChartLine, FaKey, FaDna, FaHeart, FaBrain, FaCompass } from 'react-icons/fa';
 
 const EducationalContent: React.FC = React.memo(() => {
   return (
@@ -43,7 +43,7 @@ const EducationalContent: React.FC = React.memo(() => {
                       </li>
                       <li className="flex items-center">
                         <FaCompass className="mr-2 text-blue-500" />
-                        <span><strong>Strategy:</strong> How you're designed to engage with life</span>
+                        <span><strong>Strategy:</strong> How you&apos;re designed to engage with life</span>
                       </li>
                       <li className="flex items-center">
                         <FaHeart className="mr-2 text-blue-500" />

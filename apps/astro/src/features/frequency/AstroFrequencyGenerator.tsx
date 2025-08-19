@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { devConsole } from '../../config/environment';
 import { 
   AudioEngine, 
   FrequencyPreset, 
@@ -70,7 +71,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
 
   // Calculate personalized frequency based on chart data
   const getPersonalizedFrequency = useCallback((basePreset: AstroFrequencyPreset): AstroFrequencyPreset => {
-    if (!chartData) return basePreset;
+    if (chartData == null) return basePreset;
 
     const dominantElement = chartData.dominantElement || 'earth';
     const elementMultipliers: Record<string, number> = {
@@ -88,13 +89,13 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
   }, [chartData]);
 
   const handlePlay = useCallback(async () => {
-    if (!selectedPreset) return;
+    if (selectedPreset == null) return;
     try {
       const personalizedPreset = getPersonalizedFrequency(selectedPreset);
       await audioEngine.startFrequency(personalizedPreset, settings);
       setIsPlaying(true);
     } catch (error) {
-      console.error('Failed to start astrology frequency:', error);
+      devConsole.error('❌ Failed to start astrology frequency:', error);
     }
   }, [audioEngine, selectedPreset, settings, getPersonalizedFrequency]);
 
@@ -112,7 +113,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
       <h2 className="mb-6 text-2xl font-bold">🌟 Astrology-Enhanced Frequency Therapy</h2>
       
       {/* Chart Integration Notice */}
-      {chartData && (
+      {chartData != null && (
         <div className="p-4 mb-6 border border-purple-200 rounded-lg bg-purple-50">
           <h3 className="font-semibold text-purple-800">✨ Personalized for Your Chart</h3>
           <p className="mt-1 text-sm text-purple-700">
@@ -197,7 +198,7 @@ export const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = R
         </div>
 
       {/* Enhanced Controls with Astrology Features */}
-      {selectedPreset && (
+      {selectedPreset != null && (
         <div className="p-4 mb-6 border border-gray-200 rounded-lg">
           <h4 className="mb-3 font-semibold">🎵 Session Settings</h4>
           

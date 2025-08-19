@@ -1,4 +1,5 @@
 // /Users/Chris/Projects/CosmicHub/apps/astro/src/__tests__/App.test.tsx
+import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, test, expect, vi } from 'vitest';
 import '@testing-library/jest-dom';
@@ -26,12 +27,12 @@ vi.mock('@cosmichub/integrations', () => ({
 
 // Mock React Router
 vi.mock('react-router-dom', () => ({
-  BrowserRouter: ({ children }: { children: React.ReactNode }) => <div data-testid="router">{children}</div>,
-  Routes: ({ children }: { children: React.ReactNode }) => <div data-testid="routes">{children}</div>,
-  Route: ({ element }: { element: React.ReactElement }) => element,
+  BrowserRouter: ({ children }: { children: React.ReactNode }): JSX.Element => <div data-testid="router">{children}</div>,
+  Routes: ({ children }: { children: React.ReactNode }): JSX.Element => <div data-testid="routes">{children}</div>,
+  Route: ({ element }: { element: React.ReactElement }): React.ReactElement => element,
   useNavigate: vi.fn(() => vi.fn()),
   useLocation: vi.fn(() => ({ pathname: '/' })),
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>
+  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string } & React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => <a href={to} {...props}>{children}</a>
 }));
 
 // Mock lazy components
@@ -47,8 +48,8 @@ vi.mock('../components/Footer', () => ({
   default: () => <footer data-testid="footer">Footer</footer>
 }));
 
-describe('App Component', () => {
-  test('renders with auth provider and main structure', () => {
+describe('App Component', (): void => {
+  test('renders with auth provider and main structure', (): void => {
     render(
       <AuthProvider appName="astro">
         <App />
@@ -66,7 +67,7 @@ describe('App Component', () => {
     expect(screen.getByTestId('footer')).toBeInTheDocument();
   });
 
-  test('applies correct accessibility attributes', () => {
+  test('applies correct accessibility attributes', (): void => {
     render(
       <AuthProvider appName="astro">
         <App />
@@ -77,7 +78,7 @@ describe('App Component', () => {
     expect(navs[0]).toHaveAttribute('aria-label', 'Main navigation');
   });
 
-  test('handles authentication context properly', () => {
+  test('handles authentication context properly', (): void => {
     const { container } = render(
       <AuthProvider appName="astro">
         <App />
@@ -88,7 +89,7 @@ describe('App Component', () => {
     expect(container.firstChild).toBeInTheDocument();
   });
 
-  test('renders cosmic loading component for lazy routes', async () => {
+  test('renders cosmic loading component for lazy routes', async (): Promise<void> => {
     render(
       <AuthProvider appName="astro">
         <App />

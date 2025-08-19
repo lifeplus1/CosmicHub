@@ -15,7 +15,10 @@ const VenusSequenceTab: React.FC<VenusSequenceTabProps> = React.memo(({
   }, [onKeySelect]);
 
   // Check if we have the individual Venus sequence components
-  if (!geneKeysData.attraction && !geneKeysData.iq && !geneKeysData.eq && !geneKeysData.sq) {
+  if ((geneKeysData.attraction === null || geneKeysData.attraction === undefined) &&
+      (geneKeysData.iq === null || geneKeysData.iq === undefined) &&
+      (geneKeysData.eq === null || geneKeysData.eq === undefined) &&
+      (geneKeysData.sq === null || geneKeysData.sq === undefined)) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-cosmic-silver/60">No Venus Sequence data available</p>
@@ -52,10 +55,10 @@ const VenusSequenceTab: React.FC<VenusSequenceTabProps> = React.memo(({
       icon: "✨", 
       color: "violet"
     }
-  ].filter(item => item.key); // Only include items that have data
+  ].filter(item => (item.key !== null && item.key !== undefined)); // Only include items that have data
 
   // Add Core Wound if it exists
-  if (geneKeysData.core_wound) {
+  if (geneKeysData.core_wound !== null && geneKeysData.core_wound !== undefined) {
     venusKeys.push({
       key: geneKeysData.core_wound,
       title: "Core Wound",
@@ -89,13 +92,18 @@ const VenusSequenceTab: React.FC<VenusSequenceTabProps> = React.memo(({
       {/* Gene Keys Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {venusKeys.map((item, index) => {
-          if (!item.key) return null;
+          if (item.key === null || item.key === undefined) {
+            return null;
+          }
           
           return (
             <div
               key={`${item.key.number}-${index}`}
               className={`cosmic-card bg-gradient-to-br from-${item.color}-900/20 to-${item.color}-800/20 border border-${item.color}-500/30 hover:border-${item.color}-400/50 transition-all duration-300 cursor-pointer group`}
               onClick={() => handleKeyClick(item.key)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleKeyClick(item.key); } }}
             >
               <div className="p-6">
                 <div className="flex items-center mb-4">
@@ -193,7 +201,7 @@ const VenusSequenceTab: React.FC<VenusSequenceTabProps> = React.memo(({
                 </li>
                 <li className="flex items-start">
                   <span className="mr-2 text-pink-400">•</span>
-                  <span>Allow your heart's wisdom to guide your connections</span>
+                  <span>Allow your heart&apos;s wisdom to guide your connections</span>
                 </li>
               </ul>
             </div>

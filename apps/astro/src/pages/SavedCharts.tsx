@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchSavedCharts, deleteChart, type SavedChart } from '../services/api';
 import type { ChartId } from '../services/api.types';
 import { CosmicLoading } from '../components/CosmicLoading';
+import { devConsole } from '../config/environment';
 
 const SavedCharts: React.FC = () => {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ const SavedCharts: React.FC = () => {
   const { data: charts = [], isLoading, error } = useQuery({
     queryKey: ['savedCharts'],
     queryFn: fetchSavedCharts,
-    enabled: !!user,
+    enabled: user != null,
     staleTime: 30 * 1000, // 30 seconds
   });
 
@@ -27,7 +28,7 @@ const SavedCharts: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
     },
     onError: (error) => {
-      console.error('Error deleting chart:', error);
+      devConsole.error('❌ Error deleting chart:', error);
       alert('Failed to delete chart. Please try again.');
     },
   });
@@ -53,7 +54,7 @@ const SavedCharts: React.FC = () => {
     });
   };
 
-  if (!user) {
+  if (user == null) {
     return (
       <div className="space-y-8">
         <div className="text-center py-12 bg-gradient-to-r from-cosmic-blue/20 to-cosmic-purple/20 rounded-2xl border border-cosmic-silver/10">
@@ -91,7 +92,7 @@ const SavedCharts: React.FC = () => {
       )}
 
       {/* Error State */}
-      {error && (
+  {error != null && (
         <Card title="Error Loading Charts">
           <div className="text-center py-8">
             <div className="text-red-400 mb-4">Failed to load saved charts</div>
@@ -106,7 +107,7 @@ const SavedCharts: React.FC = () => {
       )}
 
       {/* Charts Grid */}
-      {!isLoading && !error && (
+  {isLoading === false && error == null && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {charts.length === 0 ? (
             /* Empty State */
@@ -145,11 +146,13 @@ const SavedCharts: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-cosmic-gold mb-1">
-                        {chart.name || `${chart.birth_location} Chart`}
+                        {chart.name != null && chart.name !== ''
+                          ? chart.name
+                          : `${chart.birth_location != null && chart.birth_location !== '' ? chart.birth_location : 'Unknown'} Chart`}
                       </h3>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 text-xs bg-cosmic-purple/20 text-cosmic-purple rounded">
-                          {chart.chart_type || 'Natal'}
+                          {chart.chart_type != null && chart.chart_type !== '' ? chart.chart_type : 'Natal'}
                         </span>
                         <span className="text-cosmic-silver/70 text-sm">
                           {formatDate(chart.created_at)}

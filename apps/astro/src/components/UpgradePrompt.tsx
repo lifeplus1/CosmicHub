@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { devConsole } from '../config/environment';
 import * as Dialog from '@radix-ui/react-dialog';
 import { FaCheck } from 'react-icons/fa';
 import { COSMICHUB_TIERS } from '@cosmichub/subscriptions';
@@ -15,7 +16,7 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(({ isOpen, onClos
   const tier = COSMICHUB_TIERS[requiredTier];
 
   const handleUpgrade = useCallback(() => {
-    console.log(`Upgrading to ${tier.name}`);
+    devConsole.log(`Upgrading to ${tier.name}`);
     onClose();
   }, [tier.name, onClose]);
 

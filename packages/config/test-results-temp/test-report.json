@@ -1,0 +1,90 @@
+{
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "duration": 7.41208400000005,
+    "coverage": {
+      "overall": 91.22466579614712,
+      "statements": 90.54355639884842,
+      "branches": 85.32948657413772,
+      "functions": 98.97224688288236,
+      "lines": 90.05337332872003
+    },
+    "performance": {
+      "averageRenderTime": 5.842417000000069,
+      "maxRenderTime": 5.842417000000069,
+      "totalMemoryUsage": 33816
+    },
+    "accessibility": {
+      "totalViolations": 0,
+      "criticalViolations": 0,
+      "totalWarnings": 1
+    },
+    "quality": {
+      "score": 100,
+      "grade": "A",
+      "recommendations": []
+    }
+  },
+  "results": [
+    {
+      "suite": "alpha",
+      "status": "passed",
+      "duration": 6.29754099999991,
+      "coverage": {
+        "statements": 90.54355639884842,
+        "branches": 85.32948657413772,
+        "functions": 98.97224688288236,
+        "lines": 90.05337332872003
+      },
+      "performance": {
+        "renderTime": 5.842417000000069,
+        "mountTime": 0,
+        "memoryUsage": 33816
+      },
+      "accessibility": {
+        "violations": [],
+        "warnings": [
+          {
+            "id": "aria-label",
+            "description": "Consider adding aria-label for better accessibility",
+            "nodes": 1
+          }
+        ]
+      },
+      "errors": [],
+      "metadata": {
+        "timestamp": "2025-08-18T23:38:03.336Z",
+        "nodeVersion": "v24.4.1",
+        "platform": "darwin"
+      }
+    }
+  ],
+  "timestamp": "2025-08-18T23:38:03.352Z",
+  "config": {
+    "coverage": {
+      "threshold": 80,
+      "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.d.ts"
+      ]
+    },
+    "performance": {
+      "maxRenderTime": 16,
+      "maxMountTime": 100
+    },
+    "accessibility": {
+      "level": "AA",
+      "checkContrast": true
+    },
+    "reports": {
+      "generateHtml": true,
+      "generateJson": true,
+      "uploadResults": false,
+      "outputDir": "test-results-temp"
+    }
+  }
+}

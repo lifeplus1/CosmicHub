@@ -9,7 +9,7 @@ interface Props {
 }
 
 const WesternChart: React.FC<Props> = ({ data }) => {
-  if (!data?.planets) return <p className="text-cosmic-silver">No Western chart data available</p>;
+  if (data?.planets == null) return <p className="text-cosmic-silver">No Western chart data available</p>;
 
   return (
     <div className="flex flex-col space-y-6">
@@ -70,7 +70,7 @@ const WesternChart: React.FC<Props> = ({ data }) => {
               <Accordion.Trigger className="flex justify-between w-full p-4 transition-colors duration-300 bg-purple-500/20 hover:bg-purple-500/30 lg:p-6">
                 <div className="flex space-x-2">
                   <span className="mb-0 font-bold">Aspects</span>
-                  <span className="px-2 py-1 text-sm rounded bg-cosmic-purple/20 text-cosmic-purple">{data.aspects?.length || 0}</span>
+                  <span className="px-2 py-1 text-sm rounded bg-cosmic-purple/20 text-cosmic-purple">{data.aspects != null ? data.aspects.length : 0}</span>
                 </div>
                 <ChevronDownIcon />
               </Accordion.Trigger>
@@ -85,7 +85,7 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {(data.aspects || []).map((aspect, idx) => (
+                      {(data.aspects != null ? data.aspects : []).map((aspect, idx) => (
                         <tr key={idx}>
                           <td className="px-4 py-2 border-b border-cosmic-gold/20">
                             <div className="flex space-x-2">

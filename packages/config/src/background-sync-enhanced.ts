@@ -2,13 +2,27 @@
  * Enhanced Background Sync for CosmicHub
  * Extends the existing service worker with smart sync capabilities
  */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/require-await */
 
-import { PushNotificationManager, NotificationPayload } from './push-notifications';
+import { PushNotificationManager } from './push-notifications';
 
+// Local devConsole (avoid cross-package dependency). Non-error methods disabled in production.
+/* eslint-disable no-console */
+const IS_DEV = typeof globalThis !== 'undefined' &&
+  typeof (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process !== 'undefined' &&
+  (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV !== 'production';
+const devConsole = {
+  log: IS_DEV ? console.log.bind(console) : undefined,
+  warn: IS_DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
+
+type JSONValue = string | number | boolean | null | JSONValue[] | { [k: string]: JSONValue };
 export interface SyncQueueItem {
   id: string;
   type: 'chart_calculation' | 'user_data' | 'frequency_session' | 'notification';
-  data: any;
+  data: JSONValue | Record<string, unknown>;
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   priority: 'low' | 'normal' | 'high';
@@ -20,7 +34,7 @@ export interface SyncQueueItem {
 
 export interface SyncResult {
   success: boolean;
-  data?: any;
+  data?: JSONValue | Record<string, unknown>;
   error?: string;
   retryAfter?: number;
 }
@@ -28,7 +42,7 @@ export interface SyncResult {
 export interface OfflineAction {
   id: string;
   type: string;
-  data: any;
+  data: JSONValue | Record<string, unknown>;
   timestamp: number;
   synced: boolean;
 }
@@ -66,15 +80,15 @@ export class AdvancedBackgroundSync {
 
     // Try to sync immediately if online
     if (this.isOnline && !this.syncInProgress) {
-      this.processSyncQueue();
+      void this.processSyncQueue();
     }
 
-    console.log(`📤 Added to sync queue: ${item.type} (${syncItem.id})`);
+  devConsole.log?.(`📤 Added to sync queue: ${item.type} (${syncItem.id})`);
     return syncItem.id;
   }
 
   // Add offline action for later sync
-  addOfflineAction(type: string, data: any): string {
+  addOfflineAction(type: string, data: JSONValue | Record<string, unknown>): string {
     const action: OfflineAction = {
       id: this.generateId(),
       type,
@@ -86,7 +100,7 @@ export class AdvancedBackgroundSync {
     this.offlineActions.push(action);
     this.persistOfflineActions();
 
-    console.log(`💾 Stored offline action: ${type} (${action.id})`);
+  devConsole.log?.(`💾 Stored offline action: ${type} (${action.id})`);
     return action.id;
   }
 
@@ -113,7 +127,7 @@ export class AdvancedBackgroundSync {
         return a.createdAt - b.createdAt;
       });
 
-    console.log(`🔄 Processing ${itemsToSync.length} sync items...`);
+  devConsole.log?.(`🔄 Processing ${itemsToSync.length} sync items...`);
 
     for (const item of itemsToSync) {
       try {
@@ -148,7 +162,7 @@ export class AdvancedBackgroundSync {
 
       // Add authentication if available
       const authToken = localStorage.getItem('cosmichub-auth-token');
-      if (authToken) {
+      if (authToken !== null && authToken !== undefined && authToken !== '') {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
 
@@ -161,8 +175,8 @@ export class AdvancedBackgroundSync {
       const response = await fetch(item.url, requestOptions);
       
       if (response.ok) {
-        const data = await response.json();
-        return { success: true, data };
+  const data: unknown = await response.json();
+  return { success: true, data: data as Record<string, unknown> };
       } else {
         const errorText = await response.text();
         return { 
@@ -182,7 +196,7 @@ export class AdvancedBackgroundSync {
 
   // Handle successful sync
   private async handleSyncSuccess(item: SyncQueueItem, result: SyncResult): Promise<void> {
-    console.log(`✅ Sync successful: ${item.type} (${item.id})`);
+  devConsole.log?.(`✅ Sync successful: ${item.type} (${item.id})`);
 
     // Handle different sync types
     switch (item.type) {
@@ -196,7 +210,7 @@ export class AdvancedBackgroundSync {
         await this.handleFrequencySyncSuccess(item, result);
         break;
       case 'notification':
-        console.log('📨 Notification sync successful');
+  devConsole.log?.('📨 Notification sync successful');
         break;
     }
   }
@@ -206,13 +220,14 @@ export class AdvancedBackgroundSync {
     item.retryCount++;
 
     if (item.retryCount >= item.maxRetries) {
-      console.error(`💥 Sync failed permanently: ${item.type} (${item.id})`);
+  devConsole.error(`💥 Sync failed permanently: ${item.type} (${item.id})`);
       this.removeSyncItem(item.id);
       await this.notifyPermanentFailure(item);
     } else {
-      const retryDelay = result.retryAfter || this.getRetryDelay(item.retryCount);
+  const retryDelayRaw = result.retryAfter ?? this.getRetryDelay(item.retryCount);
+  const retryDelay = Number.isFinite(retryDelayRaw) && (retryDelayRaw as number) > 0 ? (retryDelayRaw as number) : 0;
       item.nextRetryAt = Date.now() + retryDelay;
-      console.warn(`⚠️ Sync failed, retrying in ${retryDelay}ms: ${item.type} (${item.id})`);
+  devConsole.warn?.(`⚠️ Sync failed, retrying in ${retryDelay}ms: ${item.type} (${item.id})`);
     }
   }
 
@@ -220,12 +235,12 @@ export class AdvancedBackgroundSync {
   private async handleChartSyncSuccess(item: SyncQueueItem, result: SyncResult): Promise<void> {
     // Broadcast chart data to other tabs/apps
     this.broadcastMessage('chart_synced', {
-      chartId: item.data.chartId,
-      result: result.data
+  chartId: (typeof item.data === 'object' && item.data && 'chartId' in item.data) ? (item.data as Record<string, unknown>).chartId : undefined,
+  result: result.data as unknown
     });
 
     // Show success notification
-    if (this.pushNotificationManager) {
+  if (this.pushNotificationManager != null) {
       await this.pushNotificationManager.queueNotification({
         title: '📊 Chart Calculation Complete',
         body: 'Your astrology chart has been calculated and synced successfully.',
@@ -237,8 +252,8 @@ export class AdvancedBackgroundSync {
 
   private async handleUserDataSyncSuccess(item: SyncQueueItem, result: SyncResult): Promise<void> {
     // Update local storage with synced data
-    const userData = result.data;
-    if (userData) {
+    const userData = result.data as Record<string, unknown> | undefined;
+    if (userData != null) {
       localStorage.setItem('cosmichub-user-data', JSON.stringify(userData));
     }
 
@@ -247,15 +262,17 @@ export class AdvancedBackgroundSync {
 
   private async handleFrequencySyncSuccess(item: SyncQueueItem, result: SyncResult): Promise<void> {
     // Mark offline actions as synced
-    const sessionId = item.data.sessionId;
+  const sessionId = (typeof item.data === 'object' && item.data && 'sessionId' in item.data)
+    ? (item.data as Record<string, unknown>).sessionId
+    : undefined;
     this.offlineActions
-      .filter(action => action.data.sessionId === sessionId)
+  .filter(action => typeof action.data === 'object' && action.data !== null && 'sessionId' in action.data && (action.data as Record<string, unknown>).sessionId === sessionId)
       .forEach(action => action.synced = true);
 
     this.persistOfflineActions();
 
     // Show success notification
-    if (this.pushNotificationManager) {
+  if (this.pushNotificationManager != null) {
       await this.pushNotificationManager.queueNotification({
         title: '🎧 Session Data Synced',
         body: 'Your frequency therapy session has been saved to your profile.',
@@ -280,18 +297,15 @@ export class AdvancedBackgroundSync {
   private setupConnectionListener(): void {
     window.addEventListener('online', () => {
       this.isOnline = true;
-      console.log('🌐 Back online - starting sync...');
-      
-      // Wait a moment for the connection to stabilize
-      setTimeout(() => {
-        this.processSyncQueue();
-      }, 1000);
+  devConsole.log?.('🌐 Back online - starting sync...');
+      // Wait a moment for the connection to stabilize then process queue
+      setTimeout(() => { void this.processSyncQueue(); }, 1000);
     });
 
     window.addEventListener('offline', () => {
       this.isOnline = false;
       this.syncInProgress = false;
-      console.log('📴 Gone offline - queuing actions...');
+  devConsole.log?.('📴 Gone offline - queuing actions...');
     });
   }
 
@@ -299,14 +313,14 @@ export class AdvancedBackgroundSync {
   private startPeriodicSync(): void {
     setInterval(() => {
       if (this.isOnline && !this.syncInProgress && this.syncQueue.length > 0) {
-        console.log('⏰ Periodic sync check...');
-        this.processSyncQueue();
+  devConsole.log?.('⏰ Periodic sync check...');
+        void this.processSyncQueue();
       }
     }, 30000); // Every 30 seconds
   }
 
   // Cross-tab communication
-  private broadcastMessage(type: string, data: any): void {
+  private broadcastMessage(type: string, data: JSONValue | Record<string, unknown> | undefined): void {
     const message = {
       type: `cosmichub-sync-${type}`,
       data,
@@ -315,22 +329,26 @@ export class AdvancedBackgroundSync {
 
     try {
       localStorage.setItem(`cosmichub-broadcast-${Date.now()}`, JSON.stringify(message));
-      
       // Clean up old broadcast messages
       setTimeout(() => {
         const keys = Object.keys(localStorage).filter(key => key.startsWith('cosmichub-broadcast-'));
         keys.forEach(key => {
           const item = localStorage.getItem(key);
-          if (item) {
-            const parsed = JSON.parse(item);
-            if (Date.now() - parsed.timestamp > 10000) { // 10 seconds old
-              localStorage.removeItem(key);
-            }
+          if (item !== null && item !== undefined && item !== '') {
+            try {
+              const parsed = JSON.parse(item);
+              if (typeof parsed === 'object' && parsed && 'timestamp' in parsed) {
+                const ts = (parsed as Record<string, unknown>).timestamp;
+                if (typeof ts === 'number' && Date.now() - ts > 10000) {
+                  localStorage.removeItem(key);
+                }
+              }
+            } catch { /* ignore parse error */ }
           }
         });
       }, 1000);
     } catch (error) {
-      console.warn('Failed to broadcast sync message:', error);
+      devConsole.warn?.('Failed to broadcast sync message:', error);
     }
   }
 
@@ -371,7 +389,7 @@ export class AdvancedBackgroundSync {
     try {
       localStorage.setItem('cosmichub-sync-queue', JSON.stringify(this.syncQueue));
     } catch (error) {
-      console.warn('Failed to persist sync queue:', error);
+  devConsole.warn?.('Failed to persist sync queue:', error);
     }
   }
 
@@ -379,7 +397,7 @@ export class AdvancedBackgroundSync {
     try {
       localStorage.setItem('cosmichub-offline-actions', JSON.stringify(this.offlineActions));
     } catch (error) {
-      console.warn('Failed to persist offline actions:', error);
+  devConsole.warn?.('Failed to persist offline actions:', error);
     }
   }
 
@@ -397,9 +415,9 @@ export class AdvancedBackgroundSync {
         this.offlineActions = JSON.parse(actionsData);
       }
 
-      console.log(`📂 Loaded ${this.syncQueue.length} queued items and ${this.offlineActions.length} offline actions`);
+  devConsole.log?.(`📂 Loaded ${this.syncQueue.length} queued items and ${this.offlineActions.length} offline actions`);
     } catch (error) {
-      console.warn('Failed to load persisted sync data:', error);
+  devConsole.warn?.('Failed to load persisted sync data:', error);
     }
   }
 
@@ -428,7 +446,7 @@ export class AdvancedBackgroundSync {
     this.offlineActions = [];
     this.persistSyncQueue();
     this.persistOfflineActions();
-    console.log('🗑️ Cleared all sync data');
+  devConsole.log?.('🗑️ Cleared all sync data');
   }
 }
 

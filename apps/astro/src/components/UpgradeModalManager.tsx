@@ -6,6 +6,7 @@ import { useAuth } from '@cosmichub/auth';
 import { stripeService, StripeSession } from '@cosmichub/integrations';
 import { upgradeEventManager } from '../utils/upgradeEvents';
 import { useToast } from './ToastProvider';
+import { devConsole } from '../config/environment';
 
 /**
  * Centralized component that manages the upgrade modal display and upgrade logic
@@ -27,13 +28,13 @@ export const UpgradeModalManager: React.FC = () => {
 
   const handleUpgrade = useCallback(async (tier: 'Basic' | 'Pro' | 'Enterprise') => {
     if (!user) {
-      console.error('User not authenticated');
+      devConsole.error('User not authenticated');
       closeUpgradeModal();
       return;
     }
 
     if (!stripeService) {
-      console.error('Stripe service not available');
+      devConsole.error('Stripe service not available');
       closeUpgradeModal();
       return;
     }
@@ -64,7 +65,7 @@ export const UpgradeModalManager: React.FC = () => {
       // Close modal after successful initiation
       closeUpgradeModal();
     } catch (error) {
-      console.error('Upgrade process failed:', error);
+      devConsole.error('Upgrade process failed:', error);
       
       // Show error notification to user
       toast({

@@ -1,17 +1,15 @@
 import React from 'react';
-import { useSubscription } from '@cosmichub/auth';
+import { useSubscription, type SubscriptionState } from '@cosmichub/auth';
 
 /**
  * Demo component to test the upgrade modal functionality
  * This demonstrates how to use the subscription system to gate premium features
  */
 export const UpgradeModalDemo: React.FC = () => {
-  const subscriptionData = useSubscription() as any; // Type assertion to bypass TypeScript issues
-  
-  // Extract properties with fallbacks
-  const hasFeature = subscriptionData.hasFeature || (() => false);
-  const upgradeRequired = subscriptionData.upgradeRequired || (() => {});
-  const userTier = subscriptionData.tier || subscriptionData.userTier || 'Free';
+  const subscriptionData = useSubscription() as SubscriptionState;
+  const hasFeature = subscriptionData?.hasFeature ?? (() => false);
+  const upgradeRequired = subscriptionData?.upgradeRequired ?? (() => {});
+  const userTier = (subscriptionData?.tier || subscriptionData?.userTier || 'Free') as string;
 
   const testGeneKeysFeature = () => {
     if (!hasFeature('Pro')) {

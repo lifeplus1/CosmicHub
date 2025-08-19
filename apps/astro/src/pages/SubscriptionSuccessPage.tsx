@@ -1,4 +1,9 @@
-import React, { useEffect, useState, useMemo, type JSX as JSXNamespace } from 'react';
+import React, { useEffect, useState, useMemo, type JSX as JSXNamespace }    const tierNames: Record<string, string> = {
+      'healwave_pro': 'Healwave Pro',
+      'astro_premium': 'Astrology Premium',
+      'cosmic_master': 'Cosmic Master'
+    };
+    return typeof tierNames[tier] === 'string' ? tierNames[tier] : tier;'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { FaCheckCircle, FaCrown, FaArrowRight, FaHome, FaCreditCard, FaSpinner } from 'react-icons/fa';
 import { useAuth, useSubscription } from '@cosmichub/auth';
@@ -28,7 +33,7 @@ export const SubscriptionSuccessPage: React.FC = (): JSXNamespace.Element => {
 
   useEffect((): void => {
     const hasSession = typeof sessionId === 'string' && sessionId.length > 0;
-    if (!(user && hasSession)) {
+    if (!(user !== null && user !== undefined && hasSession)) {
       if (!hasSession) setLoading(false);
       return;
     }

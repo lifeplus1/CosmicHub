@@ -39,6 +39,7 @@
     }
   },
   "include": ["src", "types", "src/**/*", "src/__tests__/**/*"],
+  "exclude": ["**/*.refactor_attempt.*", "**/*.backup.*", "**/*.old.*"],
   "references": [
     { "path": "../../packages/subscriptions" },
     { "path": "../../packages/auth" },

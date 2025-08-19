@@ -3,6 +3,13 @@
  */
 
 import { createComponentLibraryOptimizer } from './componentLibrary';
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 
 const optimizer = createComponentLibraryOptimizer();
 
@@ -43,31 +50,31 @@ const buttonCode = `const Button = ({ children, onClick }) => {
   );
 };`;
 
-console.log('🔍 Analyzing Components...\n');
+devConsole.log?.('🔍 Analyzing Components...\n');
 
 // Analyze dropdown
 const dropdownIssues = optimizer.analyzeComponent(dropdownCode, 'Dropdown');
-console.log(`📊 Dropdown: Found ${dropdownIssues.length} issues`);
+devConsole.log?.(`📊 Dropdown: Found ${dropdownIssues.length} issues`);
 dropdownIssues.forEach(issue => {
   const emoji = { critical: '🚨', high: '⚠️', medium: '📝', low: '💡' }[issue.severity];
-  console.log(`  ${emoji} ${issue.message}`);
+  devConsole.log?.(`  ${emoji} ${issue.message}`);
 });
 
 // Analyze button  
 const buttonIssues = optimizer.analyzeComponent(buttonCode, 'Button');
-console.log(`\n� Button: Found ${buttonIssues.length} issues`);
+devConsole.log?.(`\n� Button: Found ${buttonIssues.length} issues`);
 buttonIssues.forEach(issue => {
   const emoji = { critical: '🚨', high: '⚠️', medium: '📝', low: '�' }[issue.severity];
-  console.log(`  ${emoji} ${issue.message}`);
+  devConsole.log?.(`  ${emoji} ${issue.message}`);
 });
 
 // Auto-fix
-console.log('\n🔧 Auto-fixing Dropdown...');
+devConsole.log?.('\n🔧 Auto-fixing Dropdown...');
 const fixedDropdown = optimizer.autoFixComponent(dropdownCode, 'Dropdown');
 if (fixedDropdown !== dropdownCode) {
-  console.log('✅ Fixed undefined function reference');
+  devConsole.log?.('✅ Fixed undefined function reference');
 } else {
-  console.log('ℹ️ No auto-fixes applied');
+  devConsole.log?.('ℹ️ No auto-fixes applied');
 }
 
 // Generate report
@@ -76,16 +83,16 @@ const report = optimizer.generateReport([
   { name: 'Button', code: buttonCode }
 ]);
 
-console.log('\n📋 Library Report');
-console.log('================');
-console.log(`Components: ${report.totalComponents}`);
-console.log(`Issues: ${report.issuesFound.length}`);
-console.log(`Health: ${report.overallHealth}%`);
-console.log(`Design Compliance: ${report.designSystemCompliance.toFixed(1)}%`);
+devConsole.log?.('\n📋 Library Report');
+devConsole.log?.('================');
+devConsole.log?.(`Components: ${report.totalComponents}`);
+devConsole.log?.(`Issues: ${report.issuesFound.length}`);
+devConsole.log?.(`Health: ${report.overallHealth}%`);
+devConsole.log?.(`Design Compliance: ${report.designSystemCompliance.toFixed(1)}%`);
 
-console.log('\n🎯 Recommendations:');
+devConsole.log?.('\n🎯 Recommendations:');
 report.recommendations.forEach((rec, i) => {
-  console.log(`  ${i + 1}. ${rec}`);
+  devConsole.log?.(`  ${i + 1}. ${rec}`);
 });
 
-console.log('\n✨ Analysis Complete!');
+devConsole.log?.('\n✨ Analysis Complete!');

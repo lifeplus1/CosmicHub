@@ -9,12 +9,16 @@ interface ChatResponse {
   choices: { message: { content: string } }[];
 }
 
+interface ErrorResponseData {
+  detail: string;
+}
+
+interface ErrorResponseWrapper {
+  data: ErrorResponseData;
+}
+
 interface ErrorResponse {
-  response?: {
-    data?: {
-      detail?: string;
-    };
-  };
+  response: ErrorResponseWrapper;
 }
 
 export default function AIChat(): React.ReactElement {
@@ -26,8 +30,18 @@ export default function AIChat(): React.ReactElement {
 
   const handleSubmit = async (): Promise<void> => {
     setError(null);
+    
+    if (message === null || message === undefined || typeof message !== 'string' || message.trim().length === 0) {
+      return;
+    }
+
     try {
       const token = await getAuthToken();
+      
+      if (token === null || token === undefined || token.length === 0) {
+        throw new Error('Authentication token is missing');
+      }
+
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/chat`,
         { text: message },
@@ -37,7 +51,24 @@ export default function AIChat(): React.ReactElement {
           },
         }
       );
-      setResponse(res.data as ChatResponse);
+
+      if (res === null || res === undefined || res.data === null || res.data === undefined || typeof res.data !== 'object') {
+        throw new Error('No response data received');
+      }
+
+      const chatResponse = res.data as ChatResponse;
+      
+      if (chatResponse === null || chatResponse === undefined || 
+          !Array.isArray(chatResponse.choices) || 
+          chatResponse.choices.length === 0 ||
+          chatResponse.choices[0] === null || 
+          chatResponse.choices[0] === undefined ||
+          typeof chatResponse.choices[0].message?.content !== 'string' ||
+          chatResponse.choices[0].message.content.length === 0) {
+        throw new Error('Invalid response format');
+      }
+
+      setResponse(chatResponse);
       toast({
         title: "Response Received",
         description: "Your AI response has been generated successfully",
@@ -46,8 +77,7 @@ export default function AIChat(): React.ReactElement {
         isClosable: true,
       });
     } catch (error) {
-      console.error("Error:", error);
-      const err = error as ErrorResponse;
+      const err = error as Partial<ErrorResponse>;
       const errorMessage = err.response?.data?.detail ?? "Failed to get response";
       setError(errorMessage);
       toast({
@@ -60,11 +90,18 @@ export default function AIChat(): React.ReactElement {
     }
   };
 
-  if (loading) return <div className="text-white">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (loading === true) {
+    return <div className="text-white" role="status" aria-label="Loading authentication">Loading...</div>;
+  }
+  
+  if (user === undefined || user === null || typeof user !== 'object') {
+    return <Navigate to="/login" replace aria-label="Redirecting to login" />;
+  }
 
   return (
     <div 
+      role="main"
+      aria-label="AI Astrology Chat Interface"
       className="max-w-2xl p-6 mx-auto text-white border shadow-2xl bg-cosmic-dark/80 backdrop-blur-xl border-cosmic-gold/20 rounded-xl"
     >
       <h1 className="mb-6 text-2xl font-bold text-center text-cosmic-gold">
@@ -92,17 +129,28 @@ export default function AIChat(): React.ReactElement {
           onClick={(): void => {
             void handleSubmit();
           }}
-          disabled={!message.trim()}
+          disabled={message === null || message === undefined || typeof message !== 'string' || message.trim().length === 0}
           aria-label="Send message to AI chat"
         >
           Send
         </button>
-        {error && <div className="p-3 text-red-400 border rounded-lg bg-red-900/20 border-red-500/30">{error}</div>}
-        {response !== null && (
-          <div className="p-4 mt-4 border rounded-lg bg-cosmic-purple/20 border-cosmic-purple/30">
-            <div className="text-cosmic-silver">{response.choices[0].message.content}</div>
-          </div>
-        )}
+  {error !== null && error !== undefined && typeof error === 'string' && error.length > 0 && (
+    <div className="p-3 text-red-400 border rounded-lg bg-red-900/20 border-red-500/30" role="alert">
+      {error}
+    </div>
+  )}
+  {response !== null && response !== undefined && 
+   typeof response === 'object' &&
+   Array.isArray(response.choices) && 
+   response.choices.length > 0 && 
+   response.choices[0] !== null && 
+   response.choices[0] !== undefined &&
+   typeof response.choices[0].message?.content === 'string' &&
+   response.choices[0].message.content.length > 0 && (
+    <div className="p-4 mt-4 border rounded-lg bg-cosmic-purple/20 border-cosmic-purple/30">
+      <div className="text-cosmic-silver">{response.choices[0].message.content}</div>
+    </div>
+  )}
       </div>
     </div>
   );

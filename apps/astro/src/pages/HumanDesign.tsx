@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { devConsole } from '../config/environment';
 import { Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
@@ -13,7 +14,7 @@ const HumanDesign: React.FC = () => {
   const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
     // No navigation needed - stay on this page and show the human design chart
-    console.log('Human Design birth data submitted:', data);
+  if (devConsole.log) devConsole.log('🧬 Human Design birth data submitted', data);
   };
 
   // Helper function to format birth info from calculation result

@@ -9,7 +9,10 @@ const serializeValue = (val: unknown): string => {
       return '[object]';
     }
   }
-  return String(val);
+  if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+    return String(val);
+  }
+  return '[unknown]';
 };
 
 export const exportTableAsCSV = <T extends Record<string, unknown>>(data: T[], filename: string): void => {

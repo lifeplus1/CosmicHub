@@ -1,4 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+/* eslint-disable no-console */
+const devConsole = {
+  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
+  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  error: console.error.bind(console)
+};
+/* eslint-enable no-console */
 import { useAuth } from '@cosmichub/auth';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
 import { savePreset, getUserPresets, deletePreset } from '../services/api';
@@ -84,7 +91,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
       setPresets([]);
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
-        console.error('Error loading user presets:', err);
+  devConsole.error('Error loading user presets:', err);
       }
     } finally {
       setLoading(false);
@@ -92,7 +99,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
   }, []);
 
   const handleSavePreset = useCallback(async () => {
-    if (!user || !newPresetName.trim()) return;
+    if (user == null || newPresetName.trim().length === 0) return;
 
     try {
       setLoading(true);
@@ -101,9 +108,9 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
         id: `user-${Date.now()}`,
         name: newPresetName.trim(),
         category: 'custom',
-        baseFrequency: currentPreset?.baseFrequency || 40,
-        binauralBeat: currentPreset?.binauralBeat || 0,
-        description: newPresetDescription.trim() || undefined,
+        baseFrequency: currentPreset?.baseFrequency != null ? currentPreset.baseFrequency : 40,
+        binauralBeat: currentPreset?.binauralBeat != null ? currentPreset.binauralBeat : 0,
+        description: newPresetDescription.trim().length > 0 ? newPresetDescription.trim() : undefined,
         metadata: {
           volume: currentSettings.volume,
           duration: currentSettings.duration,
@@ -121,7 +128,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
       setError('Failed to save preset. Please try again.');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
-        console.error('Error saving preset:', err);
+  devConsole.error('Error saving preset:', err);
       }
     } finally {
       setLoading(false);
@@ -129,9 +136,9 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
   }, [user, newPresetName, newPresetDescription, currentPreset, currentSettings]);
 
   const handleDeletePreset = useCallback(async (presetId: string) => {
-    if (!user) return;
+    if (user == null) return;
 
-    if (!confirm('Are you sure you want to delete this preset?')) return;
+    if (confirm('Are you sure you want to delete this preset?') === false) return;
 
     try {
       setLoading(true);
@@ -142,7 +149,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
       setError('Failed to delete preset. Please try again.');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
-        console.error('Error deleting preset:', err);
+  devConsole.error('Error deleting preset:', err);
       }
     } finally {
       setLoading(false);
@@ -161,7 +168,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
   return (
     <div className="preset-selector" role="region" aria-label="Frequency Presets">
       {/* Error Alert */}
-      {error && (
+      {error != null && (
         <div 
           role="alert" 
           className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg"
@@ -180,7 +187,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
 
       <div className="preset-header flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Frequency Presets</h3>
-        {user && (
+        {user != null && (
           <button
             onClick={() => setShowSaveDialog(true)}
             className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"

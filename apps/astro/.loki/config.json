@@ -1,0 +1,15 @@
+{
+  "configurations": {
+    "chrome.laptop": {
+      "target": "chrome.app",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 1
+    }
+  },
+  "storiesFilter": ".*--sample$|.*--basic$",
+  "chromeFlags": ["--disable-gpu", "--no-sandbox"],
+  "diffingEngine": "pixelmatch",
+  "outputDir": "./.loki",
+  "storybookBuildDir": "storyboard-static"
+}

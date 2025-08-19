@@ -4,8 +4,8 @@ import { useAuth } from '@cosmichub/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChartDisplay } from '../components';
 import { CosmicLoading } from '../components/CosmicLoading';
-import { saveChart, fetchChartData, type SaveChartRequest, type ChartBirthData } from '../services/api';
-import type { ChartData } from '../types';
+import { saveChart, fetchChartData, type SaveChartRequest } from '../services/api';
+import { devConsole } from '../config/environment';
 
 interface StoredBirthData {
   date: string;  // "2023-06-15" format
@@ -13,32 +13,60 @@ interface StoredBirthData {
   location: string;
 }
 
-// Backend response structure
-interface BackendChartData {
-  planets: Record<string, {
-    position: number;
-    house: number;
-    retrograde?: boolean;
-    speed?: number;
-  }>;
-  houses: Record<string, {
-    house: number;
-    cusp: number;
-  }>;
-  aspects: Array<{
-    point1: string;
-    point2: string;
-    aspect: string;
-    orb: number;
-    exact: boolean;
-    point1_sign?: string;
-    point2_sign?: string;
-    point1_house?: number;
-    point2_house?: number;
-  }>;
+interface BackendPlanet {
+  position: number;
+  house: number;
+  retrograde?: boolean;
+  speed?: number;
 }
 
-interface ExtendedChartData extends ChartData {
+interface BackendHouse {
+  house: number;
+  cusp: number;
+}
+
+interface BackendAspect {
+  point1: string;
+  point2: string;
+  aspect: string;
+  orb: number;
+  exact: boolean;
+  point1_sign?: string;
+  point2_sign?: string;
+  point1_house?: number;
+  point2_house?: number;
+}
+
+interface BackendChartResponse {
+  planets?: Record<string, BackendPlanet>;
+  houses?: Record<string, BackendHouse>;
+  aspects?: BackendAspect[];
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  julian_day?: number;
+  angles?: Record<string, number>;
+}
+
+// Type guard for BackendChartResponse
+function isBackendChartResponse(data: unknown): data is BackendChartResponse {
+  const response = data as BackendChartResponse;
+  return typeof response === 'object' && 
+         response !== null &&
+         (!('planets' in response) || typeof response.planets === 'object') &&
+         (!('houses' in response) || typeof response.houses === 'object') &&
+         (!('aspects' in response) || Array.isArray(response.aspects)) &&
+         (!('latitude' in response) || typeof response.latitude === 'number') &&
+         (!('longitude' in response) || typeof response.longitude === 'number') &&
+         (!('timezone' in response) || typeof response.timezone === 'string') &&
+         (!('julian_day' in response) || typeof response.julian_day === 'number') &&
+         (!('angles' in response) || typeof response.angles === 'object');
+}
+
+interface ExtendedChartData {
+  planets: Record<string, BackendPlanet>;
+  houses: Array<{ house: number; number: number; cusp: number; sign: string }>;
+  aspects: BackendAspect[];
   latitude: number;
   longitude: number;
   timezone: string;
@@ -50,7 +78,7 @@ const ChartResults: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [chartData, setChartData] = useState<any | null>(null);
+  const [chartData, setChartData] = useState<ExtendedChartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,36 +86,58 @@ const ChartResults: React.FC = () => {
   const saveMutation = useMutation({
     mutationFn: saveChart,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
-      alert('Chart saved successfully!');
+      void queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
+      void alert('Chart saved successfully!');
     },
-    onError: (error) => {
-      console.error('Error saving chart:', error);
-      alert(`Failed to save chart: ${error.message}`);
-    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      devConsole.error('❌ Error saving chart:', error);
+      void alert(`Failed to save chart: ${message}`);
+    }
   });
 
   const handleSaveChart = () => {
-    if (!user) {
-      alert('Please sign in to save your chart');
-      navigate('/login');
+    if (user === null) {
+      void alert('Please sign in to save your chart');
+      void navigate('/login');
       return;
     }
 
     // Get the stored birth data that was used to calculate this chart
     const storedBirthData = sessionStorage.getItem('birthData');
-    
-    if (!storedBirthData || !chartData) {
-      console.error('No birth data or chart data found for saving');
-      alert('No chart data found. Please generate a chart first.');
+    if (storedBirthData === null || chartData === null) {
+      void alert('No chart data found. Please generate a chart first.');
       return;
     }
 
-    const parsedData: StoredBirthData = JSON.parse(storedBirthData);
+    function isStoredBirthData(data: unknown): data is StoredBirthData {
+      const parsed = data as StoredBirthData;
+      return (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof parsed.date === 'string' &&
+        typeof parsed.time === 'string' &&
+        typeof parsed.location === 'string'
+      );
+    }
+
+    let birthData: StoredBirthData;
+    try {
+      const parsed: unknown = JSON.parse(storedBirthData);
+      if (!isStoredBirthData(parsed)) {
+        throw new Error('Invalid birth data format');
+      }
+      birthData = parsed;
+    } catch {
+      void alert('Invalid birth data format');
+      return;
+    }
     
     // Convert stored data to the format expected by the backend
-    const [year, month, day] = parsedData.date.split('-').map(Number);
-    const [hour, minute] = parsedData.time.split(':').map(Number);
+    const dateParts = birthData.date.split('-').map(Number);
+    const timeParts = birthData.time.split(':').map(Number);
+    const [year = 0, month = 1, day = 1] = dateParts;
+    const [hour = 0, minute = 0] = timeParts;
     
     const saveData: SaveChartRequest = {
       year,
@@ -95,16 +145,15 @@ const ChartResults: React.FC = () => {
       day,
       hour,
       minute,
-      city: parsedData.location,
+      city: birthData.location,
       house_system: 'P', // Default to Placidus
-      chart_name: `${parsedData.location} ${parsedData.date}`,
+      chart_name: `${birthData.location} ${birthData.date}`,
       lat: chartData.latitude,
       lon: chartData.longitude,
       timezone: chartData.timezone
     };
 
-    console.log('Saving chart with data:', saveData);
-    saveMutation.mutate(saveData);
+    void saveMutation.mutate(saveData);
   };
 
   // Utility function to get zodiac sign from position
@@ -113,127 +162,118 @@ const ChartResults: React.FC = () => {
       "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
       "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
     ];
-    if (typeof position !== 'number' || isNaN(position)) return 'Unknown';
+    if (typeof position !== 'number' || Number.isNaN(position) || position < 0) return 'Unknown';
     const signIndex = Math.floor(position / 30) % 12;
-    return zodiacSigns[signIndex] || 'Unknown';
-  };
-
-  // Transform backend chart data to frontend expected format
-  const transformChartData = (backendData: any, birthData?: ChartBirthData): ExtendedChartData => {
-    console.log('🔄 Transforming chart data:', { backendData, birthData });
-    
-    // Convert houses object to array format
-    const housesArray = Object.entries(backendData.houses || {})
-      .sort(([a], [b]) => {
-        const numA = parseInt(a.replace('house_', ''));
-        const numB = parseInt(b.replace('house_', ''));
-        return numA - numB;
-      })
-      .map(([key, houseData]: [string, any]) => {
-        const houseNumber = parseInt(key.replace('house_', ''));
-        return {
-          house: houseData.house || houseNumber,
-          number: houseData.house || houseNumber,
-          cusp: houseData.cusp,
-          sign: getZodiacSignName(houseData.cusp)
-        };
-      });
-
-    // Get coordinates from the response or provide defaults
-    console.log('🔍 Backend data check:', {
-      hasLatitude: 'latitude' in backendData,
-      latitude: backendData.latitude,
-      hasLongitude: 'longitude' in backendData, 
-      longitude: backendData.longitude,
-      hasTimezone: 'timezone' in backendData,
-      timezone: backendData.timezone,
-      hasJulianDay: 'julian_day' in backendData,
-      julian_day: backendData.julian_day
-    });
-    
-    const latitude = backendData.latitude || 0;
-    const longitude = backendData.longitude || 0;
-    const timezone = backendData.timezone || 'Unknown';
-    const julian_day = backendData.julian_day || 0;
-    const angles = backendData.angles || {};
-
-    console.log('✅ Transformation complete:', { latitude, longitude, timezone, housesCount: housesArray.length });
-
-    return {
-      planets: backendData.planets || {},
-      houses: housesArray,
-      aspects: backendData.aspects || [],
-      latitude,
-      longitude,
-      timezone,
-      julian_day,
-      angles
-    };
-  };
-
-  // Transform stored birth data to backend format
-  const transformBirthData = (storedData: StoredBirthData): ChartBirthData => {
-    // Parse date: "2023-06-15" -> { year: 2023, month: 6, day: 15 }
-    const [year, month, day] = storedData.date.split('-').map(Number);
-    
-    // Parse time: "14:30" -> { hour: 14, minute: 30 }
-    const [hour, minute] = storedData.time.split(':').map(Number);
-    
-    return {
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      city: storedData.location
-      // Let backend handle geocoding from city name
-      // lat and lon are optional in the ChartBirthData model
-    };
+    return signIndex >= 0 && signIndex < zodiacSigns.length ? zodiacSigns[signIndex] : 'Unknown';
   };
 
   useEffect(() => {
+    const transformChartData = (backendData: BackendChartResponse): ExtendedChartData => {
+      // Convert houses object to array format (defensive for missing data)
+      const housesSource: Record<string, BackendHouse> = typeof backendData.houses === 'object' && backendData.houses !== null ? backendData.houses : {};
+      const housesArray = Object.entries(housesSource)
+        .sort(([a], [b]) => {
+          const numA = Number(a.replace('house_', ''));
+          const numB = Number(b.replace('house_', ''));
+          if (Number.isNaN(numA)) return -1;
+          if (Number.isNaN(numB)) return 1;
+          return numA - numB;
+        })
+        .map(([key, houseData]) => {
+          const numStr = key.replace('house_', '');
+          const houseNumber = Number.isNaN(Number(numStr)) ? 0 : Number(numStr);
+          const house = typeof houseData.house === 'number' ? houseData.house : houseNumber;
+          return {
+            house,
+            number: house,
+            cusp: houseData.cusp,
+            sign: getZodiacSignName(houseData.cusp)
+          };
+        });
+
+      const latitude = backendData.latitude ?? 0;
+      const longitude = backendData.longitude ?? 0;
+      const timezone = backendData.timezone ?? 'Unknown';
+      const julian_day = backendData.julian_day ?? 0;
+      const angles = backendData.angles ?? {};
+
+      return {
+        planets: backendData.planets ?? {},
+        houses: housesArray,
+        aspects: backendData.aspects ?? [],
+        latitude,
+        longitude,
+        timezone,
+        julian_day,
+        angles
+      };
+    };
+
     const calculateChart = async () => {
       try {
         // Get birth data from session storage
         const storedBirthData = sessionStorage.getItem('birthData');
-        
-        if (!storedBirthData) {
+        if (storedBirthData === null || storedBirthData === '') {
           setError('No birth data found. Please go back and enter your birth information.');
           setLoading(false);
           return;
         }
-        
+
+        function isStoredBirthData(data: unknown): data is StoredBirthData {
+          const parsed = data as StoredBirthData;
+          return (
+            typeof parsed === 'object' &&
+            parsed !== null &&
+            typeof parsed.date === 'string' &&
+            typeof parsed.time === 'string' &&
+            typeof parsed.location === 'string'
+          );
+        }
+
         // Parse stored data and transform to backend format
-        const parsedData: StoredBirthData = JSON.parse(storedBirthData);
-        const birthData: ChartBirthData = transformBirthData(parsedData);
-        
-        console.log('Original birth data:', parsedData);
-        console.log('Transformed birth data:', birthData);
+        let parsedData: StoredBirthData;
+        try {
+          const parsed: unknown = JSON.parse(storedBirthData);
+          if (!isStoredBirthData(parsed)) {
+            throw new Error('Invalid birth data format');
+          }
+          parsedData = parsed;
+        } catch {
+          throw new Error('Invalid birth data format');
+        }
         
         // Use the API service instead of direct fetch
-        const calculatedChart = await fetchChartData(birthData);
-        console.log('Raw backend chart data:', calculatedChart);
-        
+        const rawChart = await fetchChartData({
+          year: (Number.isNaN(Number(parsedData.date.split('-')[0])) ? 0 : Number(parsedData.date.split('-')[0])),
+          month: (Number.isNaN(Number(parsedData.date.split('-')[1])) ? 1 : Number(parsedData.date.split('-')[1])),
+          day: (Number.isNaN(Number(parsedData.date.split('-')[2])) ? 1 : Number(parsedData.date.split('-')[2])),
+          hour: (Number.isNaN(Number(parsedData.time.split(':')[0])) ? 0 : Number(parsedData.time.split(':')[0])),
+          minute: (Number.isNaN(Number(parsedData.time.split(':')[1])) ? 0 : Number(parsedData.time.split(':')[1])),
+          city: parsedData.location
+        });
+
+        if (!isBackendChartResponse(rawChart)) {
+          throw new Error('Invalid chart data received from server');
+        }
+
         // Transform the backend data to frontend format  
-        const transformedChart = transformChartData(calculatedChart, birthData);
-        console.log('Transformed chart data:', transformedChart);
-        
+        const transformedChart = transformChartData(rawChart);
         setChartData(transformedChart);
-        
       } catch (err) {
-        console.error('Error calculating chart:', err);
         setError(err instanceof Error ? err.message : 'An error occurred while calculating the chart');
       } finally {
         setLoading(false);
       }
     };
     
-    calculateChart();
+    void calculateChart();
   }, []);
 
   const handleBackToCalculator = () => {
-    navigate('/calculator');
-  };  if (loading) {
+    void navigate('/calculator');
+  };
+
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <CosmicLoading size="lg" message="Calculating your birth chart..." />
@@ -244,7 +284,7 @@ const ChartResults: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error !== null && error !== '') {
     return (
       <div className="max-w-2xl mx-auto text-center">
         <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-6 mb-6">
@@ -274,7 +314,7 @@ const ChartResults: React.FC = () => {
         </p>
       </div>
 
-      {chartData && (
+      {chartData !== null && (
         <>
           <div className="flex justify-center mb-6">
             <button
@@ -292,8 +332,8 @@ const ChartResults: React.FC = () => {
           </div>
           
           <Suspense fallback={<CosmicLoading />}>
-            <ChartDisplay 
-              chart={chartData} 
+            <ChartDisplay
+              chart={chartData}
               onSaveChart={handleSaveChart}
             />
           </Suspense>

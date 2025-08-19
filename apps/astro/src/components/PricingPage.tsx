@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { devConsole } from '../config/environment';
 import { useAuth } from '@cosmichub/auth';
 import { useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
@@ -66,7 +67,7 @@ const PricingPage: React.FC = React.memo(() => {
         isClosable: true,
       });
     } catch (error) {
-      console.error('Upgrade error:', error);
+      devConsole.error('Upgrade error:', error);
       toast({
         title: 'Upgrade Failed',
         description: 'An error occurred during the upgrade process. Please try again.',

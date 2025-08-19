@@ -3,54 +3,50 @@
  * Registers the comprehensive service worker system
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console */ // We wrap console usage through devConsole fallback below
+import { devConsole, isDevelopment } from './config/environment';
 
 // PWA Service Worker Registration
-async function registerServiceWorker(): Promise<void> {
+function registerServiceWorker(): void {
   // Only register the service worker in production. Vite HMR + SW in dev can cause reload loops.
   if (!import.meta.env.PROD) {
-    if (typeof console !== 'undefined') console.warn('⚠️ Skipping Service Worker registration in development to avoid HMR reload loops');
+    devConsole.warn?.('⚠️ Skipping Service Worker registration in development to avoid HMR reload loops');
     return;
   }
 
   if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
     try {
-      if (typeof console !== 'undefined') console.log('🔧 Registering Service Worker...');
+      devConsole.log?.('🔧 Registering Service Worker...');
 
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      });
-      
-      // Handle updates
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New content is available, show update notification
-              showUpdateNotification();
+      void navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then((registration) => {
+          // Handle updates
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New content is available, show update notification
+                  showUpdateNotification();
+                }
+              });
             }
           });
-        }
-      });
-      
-      // Check for updates periodically (production only)
-      if (typeof globalThis !== 'undefined' && typeof globalThis.setInterval === 'function') {
-        globalThis.setInterval(() => {
-          void registration.update();
-        }, 60000); // Check every minute
-      }
-      
-  if (typeof console !== 'undefined') console.log('✅ Service Worker registered successfully');
-      
-      // Initialize PWA features
-      await initializePWAFeatures();
-      
+          // Check for updates periodically (production only)
+          if (typeof globalThis !== 'undefined' && typeof globalThis.setInterval === 'function') {
+            globalThis.setInterval(() => { void registration.update(); }, 60000); // Check every minute
+          }
+          devConsole.log?.('✅ Service Worker registered successfully');
+          initializePWAFeatures();
+        })
+        .catch((error) => {
+          devConsole.error('❌ Service Worker registration failed:', error);
+        });
     } catch (error) {
-      if (typeof console !== 'undefined') console.error('❌ Service Worker registration failed:', error);
+      devConsole.error('❌ Service Worker registration failed (outer try/catch):', error);
     }
   } else {
-    if (typeof console !== 'undefined') console.warn('⚠️ Service Worker not supported');
+    devConsole.warn?.('⚠️ Service Worker not supported');
   }
 }
 
@@ -60,7 +56,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform?: string }>;
 }
 
-async function initializePWAFeatures(): Promise<void> {
+function initializePWAFeatures(): void {
   // Install prompt handling
   let deferredPrompt: BeforeInstallPromptEvent | null = null;
   
@@ -75,7 +71,7 @@ async function initializePWAFeatures(): Promise<void> {
   // App installed handler
   if (typeof window !== 'undefined') {
     window.addEventListener('appinstalled', () => {
-      if (typeof console !== 'undefined') console.log('🎉 CosmicHub PWA installed successfully');
+      devConsole.log?.('🎉 CosmicHub PWA installed successfully');
       hideInstallPrompt();
       deferredPrompt = null;
     });
@@ -83,19 +79,18 @@ async function initializePWAFeatures(): Promise<void> {
   
   // Handle install button click
   if (typeof window !== 'undefined') {
-    window.addEventListener('install-app', async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const choiceResult = await deferredPrompt.userChoice;
-      
-      if (choiceResult.outcome === 'accepted') {
-        console.log('✅ User accepted the install prompt');
-      } else {
-        console.log('❌ User dismissed the install prompt');
-      }
-      
-      deferredPrompt = null;
-    }
+    window.addEventListener('install-app', () => {
+      void (async () => {
+        if (!deferredPrompt) return;
+        await deferredPrompt.prompt();
+        const choiceResult = await deferredPrompt.userChoice;
+        if (choiceResult.outcome === 'accepted') {
+          devConsole.log?.('✅ User accepted the install prompt');
+        } else {
+          devConsole.log?.('❌ User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+      })();
     });
   }
 }
@@ -255,12 +250,19 @@ if (import.meta.env.PROD) {
 } else {
   const unregisterInDev = () => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((regs) => {
-        if (regs.length > 0) {
-          console.warn(`🧹 Unregistering ${regs.length} service worker(s) in development`);
-        }
-        regs.forEach((r) => r.unregister());
-      });
+      navigator.serviceWorker.getRegistrations()
+        .then((regs) => {
+          if (regs.length > 0) {
+            devConsole.warn?.(`🧹 Unregistering ${regs.length} service worker(s) in development`);
+          }
+          // Unregister all registrations in parallel
+          void Promise.all(regs.map(r => r.unregister().catch(() => false)));
+        })
+        .catch((error) => {
+          if (isDevelopment()) {
+            devConsole.error('Failed to fetch service worker registrations for unregister', error);
+          }
+        });
     }
   };
 
