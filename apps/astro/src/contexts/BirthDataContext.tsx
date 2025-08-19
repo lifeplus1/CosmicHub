@@ -22,15 +22,25 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
   const [birthData, setBirthDataState] = useState<ChartBirthData | null>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
+      if (stored !== null && stored !== '') {
+        const parsed = JSON.parse(stored) as unknown;
         // Validate the data structure
-        if (parsed && typeof parsed === 'object' && parsed.year && parsed.month && parsed.day) {
-          return parsed;
+        if (
+          parsed !== null && 
+          typeof parsed === 'object' && 
+          parsed !== null &&
+          'year' in parsed && typeof (parsed as Record<string, unknown>).year === 'number' && 
+          'month' in parsed && typeof (parsed as Record<string, unknown>).month === 'number' && 
+          'day' in parsed && typeof (parsed as Record<string, unknown>).day === 'number'
+        ) {
+          return parsed as ChartBirthData;
         }
       }
     } catch (error) {
-      console.warn('Failed to parse stored birth data:', error);
+      // Using a type-safe approach for error logging
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // eslint-disable-next-line no-console
+      console.warn('Failed to parse stored birth data:', errorMessage);
     }
     return null;
   });
@@ -43,16 +53,20 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
     setBirthDataState(data);
     setLastUpdated(Date.now());
     
-    if (data) {
+    if (data !== null) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        console.log('✅ Birth data saved to storage:', data);
+        // Log removed for linting compliance
       } catch (error) {
-        console.error('❌ Failed to save birth data:', error);
+        // Log retained for error case but made type-safe
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        // Using a safer logging approach that satisfies ESLint
+        // eslint-disable-next-line no-console
+        console.error('❌ Failed to save birth data:', errorMessage);
       }
     } else {
       localStorage.removeItem(STORAGE_KEY);
-      console.log('🗑️ Birth data cleared from storage');
+      // Log removed for linting compliance
     }
   }, []);
 
@@ -61,7 +75,7 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
   }, [setBirthData]);
 
   const isDataValid = Boolean(
-    birthData &&
+    birthData !== null &&
     birthData.year > 1900 && birthData.year < 2100 &&
     birthData.month >= 1 && birthData.month <= 12 &&
     birthData.day >= 1 && birthData.day <= 31 &&
@@ -95,7 +109,7 @@ export const useBirthData = (): BirthDataContextType => {
 // Helper function to format birth data for display
 export const formatBirthDataDisplay = (data: ChartBirthData): string => {
   const base = `${data.month}/${data.day}/${data.year} ${data.hour.toString().padStart(2, '0')}:${data.minute.toString().padStart(2, '0')}`;
-  return data.city ? `${base} in ${data.city}` : base;
+  return data.city !== undefined && data.city !== '' ? `${base} in ${data.city}` : base;
 };
 
 // Helper function to validate coordinates
