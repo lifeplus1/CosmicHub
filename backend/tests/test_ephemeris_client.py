@@ -1,7 +1,11 @@
 """Targeted tests for utils.ephemeris_client (non-network portions)."""
+
 from __future__ import annotations
-import pytest
+
 import os
+
+import pytest
+
 import utils.ephemeris_client as ec
 
 

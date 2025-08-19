@@ -279,7 +279,7 @@ const ChartWheelPage: React.FC = () => {
 
         {/* Chart Display */}
         <div className="lg:col-span-2">
-          {birthData ? (
+          {birthData !== null ? (
             <ChartWheel 
               birthData={birthData}
               showAspects={showAspects}
@@ -300,7 +300,7 @@ const ChartWheelPage: React.FC = () => {
       </div>
 
       {/* Chart Information */}
-      {birthData && (
+  {birthData !== null && (
         <Card title="Chart Information">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
             <div>

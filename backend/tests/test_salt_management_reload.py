@@ -1,8 +1,10 @@
 """Tests for explicit reload endpoint in salt management API."""
+
 from fastapi.testclient import TestClient
+
 from main import app
-from utils.salt_storage import get_salt_storage
 from utils.salt_backend import get_salt_backend
+from utils.salt_storage import get_salt_storage
 
 client = TestClient(app)
 
@@ -27,6 +29,7 @@ def test_reload_applies_env_intervals(monkeypatch):  # type: ignore[no-untyped-d
     data = audit.json()
     # next_rotation should be ~45 days from created_at
     from datetime import datetime
+
     created = datetime.fromisoformat(data["created_at"])  # type: ignore[arg-type]
     next_rot = datetime.fromisoformat(data["next_rotation"])  # type: ignore[arg-type]
     delta = next_rot - created

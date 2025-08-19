@@ -1,9 +1,13 @@
 # apps/backend/src/utils/aspect_utils.py
-from typing import Dict, List, Optional, TypedDict, Literal, Sequence
+from typing import Dict, List, Literal, Optional, Sequence, TypedDict
+
 from pydantic import BaseModel, Field
 
+
 class Aspect(BaseModel):
-    aspect: Optional[str] = Field(None, description="Aspect type (e.g., 'conjunction')")
+    aspect: Optional[str] = Field(
+        None, description="Aspect type (e.g., 'conjunction')"
+    )
     orb: float = Field(..., description="Orb in degrees")
     type: str = Field(..., description="harmonious/challenging/neutral")
 
@@ -19,29 +23,47 @@ class KeyAspectData(TypedDict):
     person2_planet: str
     aspect: str
     orb: float
-    strength: Literal['strong', 'moderate']
+    strength: Literal["strong", "moderate"]
     interpretation: str
+
 
 # Read-only synastry aspect matrix type (10x10 planet grid). Each cell is either
 # an AspectData for a detected aspect or None if no aspect within allowed orbs.
 Matrix = Sequence[Sequence[Optional[AspectData]]]
 
-PLANETS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
+PLANETS = [
+    "sun",
+    "moon",
+    "mercury",
+    "venus",
+    "mars",
+    "jupiter",
+    "saturn",
+    "uranus",
+    "neptune",
+    "pluto",
+]
 
 ASPECT_DEGREES = {
-    'conjunction': 0,
-    'sextile': 60,
-    'square': 90,
-    'trine': 120,
-    'opposition': 180,
-    'quincunx': 150,  # Modern
-    'semi_sextile': 30   # Modern
+    "conjunction": 0,
+    "sextile": 60,
+    "square": 90,
+    "trine": 120,
+    "opposition": 180,
+    "quincunx": 150,  # Modern
+    "semi_sextile": 30,  # Modern
 }
 
 ORBS = {
-    'conjunction': 10, 'opposition': 10, 'trine': 8, 'square': 8,
-    'sextile': 6, 'quincunx': 3, 'semi_sextile': 2
+    "conjunction": 10,
+    "opposition": 10,
+    "trine": 8,
+    "square": 8,
+    "sextile": 6,
+    "quincunx": 3,
+    "semi_sextile": 2,
 }
+
 
 def calculate_aspect(sep: float) -> Optional[AspectData]:
     """Calculate aspect between two planetary positions."""
@@ -49,11 +71,24 @@ def calculate_aspect(sep: float) -> Optional[AspectData]:
         orb_max = ORBS[aspect]
         orb = min(abs(sep - deg), abs(sep - (360 - deg)))
         if orb <= orb_max:
-            aspect_type = 'harmonious' if aspect in ['conjunction', 'trine', 'sextile'] else 'challenging' if aspect in ['square', 'opposition', 'quincunx'] else 'neutral'
-            return {'aspect': aspect, 'orb': orb, 'type': aspect_type}
+            aspect_type = (
+                "harmonious"
+                if aspect in ["conjunction", "trine", "sextile"]
+                else (
+                    "challenging"
+                    if aspect in ["square", "opposition", "quincunx"]
+                    else "neutral"
+                )
+            )
+            return {"aspect": aspect, "orb": orb, "type": aspect_type}
     return None
 
-def build_aspect_matrix(long1: Dict[str, float], long2: Dict[str, float], planets: Optional[List[str]] = None) -> List[List[Optional[AspectData]]]:
+
+def build_aspect_matrix(
+    long1: Dict[str, float],
+    long2: Dict[str, float],
+    planets: Optional[List[str]] = None,
+) -> List[List[Optional[AspectData]]]:
     """Build the mutable aspect matrix for two charts.
 
     This function is backward-compatible: callers may pass an explicit
@@ -80,7 +115,10 @@ def build_aspect_matrix(long1: Dict[str, float], long2: Dict[str, float], planet
         matrix.append(row)
     return matrix
 
-def get_key_aspects(matrix: Matrix, max_orb: float = 3.0) -> List[KeyAspectData]:
+
+def get_key_aspects(
+    matrix: Matrix, max_orb: float = 3.0
+) -> List[KeyAspectData]:
     """Extract key/tight aspects from an aspect matrix.
 
     Parameters:
@@ -92,43 +130,53 @@ def get_key_aspects(matrix: Matrix, max_orb: float = 3.0) -> List[KeyAspectData]
     for i, row in enumerate(matrix):
         p1 = PLANETS[i]
         for j, aspect in enumerate(row):
-            if aspect and aspect['orb'] <= max_orb:
+            if aspect and aspect["orb"] <= max_orb:
                 p2 = PLANETS[j]
-                key_aspects.append({
-                    'person1_planet': p1,
-                    'person2_planet': p2,
-                    'aspect': aspect['aspect'],
-                    'orb': aspect['orb'],
-                    'strength': 'strong' if aspect['orb'] <= 1.5 else 'moderate',
-                    'interpretation': get_aspect_interpretation(p1, p2, aspect['aspect'])
-                })
+                key_aspects.append(
+                    {
+                        "person1_planet": p1,
+                        "person2_planet": p2,
+                        "aspect": aspect["aspect"],
+                        "orb": aspect["orb"],
+                        "strength": (
+                            "strong" if aspect["orb"] <= 1.5 else "moderate"
+                        ),
+                        "interpretation": get_aspect_interpretation(
+                            p1, p2, aspect["aspect"]
+                        ),
+                    }
+                )
     return key_aspects
+
 
 def get_aspect_interpretation(planet1: str, planet2: str, aspect: str) -> str:
     """Get interpretation for planet-aspect combination."""
     # Basic interpretation templates - can be expanded
     interpretations = {
-        ('sun', 'moon'): {
-            'conjunction': 'Deep emotional harmony and understanding between core selves.',
-            'trine': 'Natural flow between ego and emotions, supportive partnership.',
-            'square': 'Creative tension between will and feelings, growth through challenges.',
-            'opposition': 'Complementary but opposing needs, balance required.'
+        ("sun", "moon"): {
+            "conjunction": "Deep emotional harmony and understanding between core selves.",
+            "trine": "Natural flow between ego and emotions, supportive partnership.",
+            "square": "Creative tension between will and feelings, growth through challenges.",
+            "opposition": "Complementary but opposing needs, balance required.",
         },
-        ('venus', 'mars'): {
-            'conjunction': 'Strong romantic and sexual attraction, passionate connection.',
-            'trine': 'Harmonious blend of love and desire, natural chemistry.',
-            'square': 'Intense attraction with potential conflicts over affection styles.',
-            'opposition': 'Magnetic pull with contrasting approaches to love and action.'
-        }
+        ("venus", "mars"): {
+            "conjunction": "Strong romantic and sexual attraction, passionate connection.",
+            "trine": "Harmonious blend of love and desire, natural chemistry.",
+            "square": "Intense attraction with potential conflicts over affection styles.",
+            "opposition": "Magnetic pull with contrasting approaches to love and action.",
+        },
     }
-    
+
     # Try both planet orders
     key = (planet1, planet2)
     reverse_key = (planet2, planet1)
-    
+
     if key in interpretations and aspect in interpretations[key]:
         return interpretations[key][aspect]
-    elif reverse_key in interpretations and aspect in interpretations[reverse_key]:
+    elif (
+        reverse_key in interpretations
+        and aspect in interpretations[reverse_key]
+    ):
         return interpretations[reverse_key][aspect]
     else:
         return f"{planet1.title()} {aspect} {planet2.title()}: This aspect brings unique dynamics to the relationship."

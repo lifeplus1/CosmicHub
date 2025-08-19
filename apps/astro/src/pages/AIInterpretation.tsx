@@ -10,12 +10,8 @@ import { useAuth } from '@cosmichub/auth';
 import { useParams } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
 import type { Interpretation } from '../components/AIInterpretation/types';
-import {
-  fetchAIInterpretations,
-  fetchSavedCharts,
-  type SavedChart,
-} from '../services/api';
-import type { ChartId, UserId } from '../services/api.types';
+import { fetchAIInterpretations, fetchSavedCharts } from '../services/api';
+import type { SavedChart, ChartId, UserId } from '../services/api.types';
 import styles from './AIInterpretations.module.css';
 
 // Simple Spinner component
@@ -70,7 +66,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
     data: savedCharts = [],
     isLoading: chartsLoading,
     error: chartsError,
-  } = useQuery({
+  } = useQuery<SavedChart[], Error>({
     queryKey: ['savedCharts'],
     queryFn: fetchSavedCharts,
     enabled:
@@ -101,14 +97,21 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
     }
 
     if (chartsError !== null && chartsError !== undefined) {
-      return (
-        <div className='text-center p-8'>
-          <div className='text-red-400 mb-4'>Error loading saved charts</div>
-          <p className='text-cosmic-silver'>
-            Please try again later or contact support.
-          </p>
-        </div>
-      );
+      if (chartsError instanceof Error) {
+        return (
+          <div className='text-center p-8'>
+            <div className='text-red-400 mb-4'>Error loading saved charts</div>
+            <p className='text-cosmic-silver'>{chartsError.message}</p>
+          </div>
+        );
+      } else {
+        return (
+          <div className='text-center p-8'>
+            <div className='text-red-400 mb-4'>Unknown error loading charts</div>
+            <p className='text-cosmic-silver'>Please try again later.</p>
+          </div>
+        );
+      }
     }
 
     if (!isNonEmptyArray<SavedChart>(savedCharts)) {

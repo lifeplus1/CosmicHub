@@ -3,7 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import ChartDisplay from '../components/ChartDisplay/ChartDisplay';
-import { fetchChartData, ChartData, ChartBirthData } from '../services/api';
+import type { ChartLike } from '../components/ChartDisplay/normalizeChart';
+import { fetchChartData, type ChartBirthData } from '../services/api';
+import type { ChartData } from '../services/api.types';
 import { componentLogger } from '../utils/componentLogger';
 
 interface StoredBirthData {
@@ -96,13 +98,13 @@ const Chart: React.FC = () => {
       setChartData(chartResult);
 
     } catch (err) {
-      componentLogger.error('Chart', 'Error calculating chart', err);
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : typeof err === 'string'
-          ? err
-          : 'An error occurred while calculating the chart';
-      setError(errorMessage);
+      if (err instanceof Error) {
+        componentLogger.error('Chart', 'Error calculating chart', err);
+        setError(err.message);
+      } else {
+        componentLogger.error('Chart', 'Error calculating chart', String(err));
+        setError(typeof err === 'string' ? err : 'An error occurred while calculating the chart');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +138,11 @@ const Chart: React.FC = () => {
       sessionStorage.setItem('birthData', JSON.stringify(storedBirthData));
       componentLogger.info('Chart', 'Birth data stored for chart-results page', storedBirthData);
     } catch (err) {
-      componentLogger.error('Chart', 'Failed to store birth data', err);
+      if (err instanceof Error) {
+        componentLogger.error('Chart', 'Failed to store birth data', err);
+      } else {
+        componentLogger.error('Chart', 'Failed to store birth data', String(err));
+      }
     }
     navigate('/chart-results');
   }, [birthData, navigate]);
@@ -226,7 +232,7 @@ const Chart: React.FC = () => {
           {/* Chart visualization */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Your Natal Chart</h2>
-            <ChartDisplay chart={chartData} />
+            <ChartDisplay chart={chartData as unknown as ChartLike} />
           </Card>
         </div>
       )}

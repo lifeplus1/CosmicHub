@@ -43,8 +43,8 @@ const MultiSystemChart: React.FC = () => {
         </p>
       </div>
 
-      {/* Birth Data Input - Only show if no data */}
-      {!birthData && (
+  {/* Birth Data Input - Only show if no data */}
+  {birthData === null && (
         <SimpleBirthForm
           title="Enter Birth Data for Multi-System Analysis"
           submitButtonText="Generate Multi-System Charts"
@@ -53,8 +53,8 @@ const MultiSystemChart: React.FC = () => {
         />
       )}
 
-      {/* System Selection and Charts */}
-      {birthData && isDataValid && (
+  {/* System Selection and Charts */}
+  {birthData !== null && isDataValid && (
         <div className="space-y-6">
           {/* System Selection */}
           <Card title="Astrological Systems">
@@ -133,7 +133,9 @@ const MultiSystemChart: React.FC = () => {
               <div className="text-center">
                 <div className="text-cosmic-gold font-semibold">Coordinates</div>
                 <div className="text-cosmic-silver text-sm">
-                  {birthData.lat != null ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
+                  {birthData.lat !== undefined && birthData.lon !== undefined
+                    ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
+                    : 'Auto-detected'}
                 </div>
               </div>
             </div>

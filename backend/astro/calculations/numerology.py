@@ -3,267 +3,382 @@ Numerology calculations for life path, destiny, and personality numbers.
 Includes Pythagorean, Chaldean, and Kabbalah numerology systems.
 """
 
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 import re
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 # Pythagorean number mapping (A=1, B=2, ... Z=26, reduced to 1-9)
 PYTHAGOREAN = {
-    'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
-    'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'O': 6, 'P': 7, 'Q': 8, 'R': 9,
-    'S': 1, 'T': 2, 'U': 3, 'V': 4, 'W': 5, 'X': 6, 'Y': 7, 'Z': 8
+    "A": 1,
+    "B": 2,
+    "C": 3,
+    "D": 4,
+    "E": 5,
+    "F": 6,
+    "G": 7,
+    "H": 8,
+    "I": 9,
+    "J": 1,
+    "K": 2,
+    "L": 3,
+    "M": 4,
+    "N": 5,
+    "O": 6,
+    "P": 7,
+    "Q": 8,
+    "R": 9,
+    "S": 1,
+    "T": 2,
+    "U": 3,
+    "V": 4,
+    "W": 5,
+    "X": 6,
+    "Y": 7,
+    "Z": 8,
 }
 
 # Chaldean number mapping (different from Pythagorean, no 9)
 CHALDEAN = {
-    'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 8, 'G': 3, 'H': 5, 'I': 1,
-    'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'O': 7, 'P': 8, 'Q': 1, 'R': 2,
-    'S': 3, 'T': 4, 'U': 6, 'V': 6, 'W': 6, 'X': 5, 'Y': 1, 'Z': 7
+    "A": 1,
+    "B": 2,
+    "C": 3,
+    "D": 4,
+    "E": 5,
+    "F": 8,
+    "G": 3,
+    "H": 5,
+    "I": 1,
+    "J": 1,
+    "K": 2,
+    "L": 3,
+    "M": 4,
+    "N": 5,
+    "O": 7,
+    "P": 8,
+    "Q": 1,
+    "R": 2,
+    "S": 3,
+    "T": 4,
+    "U": 6,
+    "V": 6,
+    "W": 6,
+    "X": 5,
+    "Y": 1,
+    "Z": 7,
 }
+
 
 def calculate_numerology(name: str, birth_date: datetime) -> Dict[str, Any]:
     """
     Calculate comprehensive numerology analysis.
-    
+
     Args:
         name: Full name as string
         birth_date: Birth date as datetime object
-        
+
     Returns:
         Dictionary containing all numerology calculations
     """
     calc = NumerologyCalculator()
-    
+
     # Clean name for calculations
-    clean_name = re.sub(r'[^a-zA-Z\s]', '', name.upper())
-    
-    result = { # type: ignore
-        'core_numbers': {
-            'life_path': calc.calculate_life_path(birth_date),
-            'destiny': calc.calculate_destiny_number(clean_name),
-            'soul_urge': calc.calculate_soul_urge(clean_name),
-            'personality': calc.calculate_personality_number(clean_name),
-            'birth_day': calc.calculate_birth_day_number(birth_date),
-            'attitude': calc.calculate_attitude_number(birth_date),
-            'power_name': calc.calculate_power_name_number(clean_name)
+    clean_name = re.sub(r"[^a-zA-Z\s]", "", name.upper())
+
+    result = {  # type: ignore
+        "core_numbers": {
+            "life_path": calc.calculate_life_path(birth_date),
+            "destiny": calc.calculate_destiny_number(clean_name),
+            "soul_urge": calc.calculate_soul_urge(clean_name),
+            "personality": calc.calculate_personality_number(clean_name),
+            "birth_day": calc.calculate_birth_day_number(birth_date),
+            "attitude": calc.calculate_attitude_number(birth_date),
+            "power_name": calc.calculate_power_name_number(clean_name),
         },
-        'karmic_numbers': calc.calculate_karmic_numbers(clean_name, birth_date),
-        'personal_year': calc.calculate_personal_year(birth_date),
-        'challenge_numbers': calc.calculate_challenge_numbers(birth_date),
-        'pinnacle_numbers': calc.calculate_pinnacle_numbers(birth_date),
-        'systems': {
-            'pythagorean': calc.calculate_pythagorean_analysis(clean_name),
-            'chaldean': calc.calculate_chaldean_analysis(clean_name)
+        "karmic_numbers": calc.calculate_karmic_numbers(
+            clean_name, birth_date
+        ),
+        "personal_year": calc.calculate_personal_year(birth_date),
+        "challenge_numbers": calc.calculate_challenge_numbers(birth_date),
+        "pinnacle_numbers": calc.calculate_pinnacle_numbers(birth_date),
+        "systems": {
+            "pythagorean": calc.calculate_pythagorean_analysis(clean_name),
+            "chaldean": calc.calculate_chaldean_analysis(clean_name),
         },
-        'interpretation': calc.get_comprehensive_interpretation(clean_name, birth_date)
+        "interpretation": calc.get_comprehensive_interpretation(
+            clean_name, birth_date
+        ),
     }
-    
-    return result # type: ignore
+
+    return result  # type: ignore
+
 
 class NumerologyCalculator:
     """Enhanced numerology calculator with multiple systems and interpretations."""
-    
-    def reduce_to_single_digit(self, number: int, keep_master: bool = True) -> int:
+
+    def reduce_to_single_digit(
+        self, number: int, keep_master: bool = True
+    ) -> int:
         """Reduce number to single digit, optionally keeping master numbers 11, 22, 33."""
         while number > 9:
             if keep_master and number in [11, 22, 33]:
                 return number
             number = sum(int(digit) for digit in str(number))
         return number
-    
+
     def calculate_life_path(self, birth_date: datetime) -> Dict[str, Any]:
         """Calculate life path number from birth date."""
         # Method 1: Add all digits
-        date_str = birth_date.strftime('%m%d%Y')
+        date_str = birth_date.strftime("%m%d%Y")
         total = sum(int(digit) for digit in date_str)
         life_path = self.reduce_to_single_digit(total)
-        
+
         # Method 2: Add month, day, year separately then combine
         month = self.reduce_to_single_digit(birth_date.month)
         day = self.reduce_to_single_digit(birth_date.day)
         year = self.reduce_to_single_digit(birth_date.year)
         alternative = self.reduce_to_single_digit(month + day + year)
-        
+
         return {
-            'number': life_path,
-            'alternative_calculation': alternative,
-            'components': {'month': month, 'day': day, 'year': year},
-            'meaning': self.get_life_path_meaning(life_path)
+            "number": life_path,
+            "alternative_calculation": alternative,
+            "components": {"month": month, "day": day, "year": year},
+            "meaning": self.get_life_path_meaning(life_path),
         }
-    
+
     def calculate_destiny_number(self, name: str) -> Dict[str, Any]:
         """Calculate destiny number from full name (Pythagorean)."""
-        total = sum(PYTHAGOREAN.get(char, 0) for char in name if char.isalpha())
+        total = sum(
+            PYTHAGOREAN.get(char, 0) for char in name if char.isalpha()
+        )
         destiny = self.reduce_to_single_digit(total)
-        
+
         return {
-            'number': destiny,
-            'calculation_total': total,
-            'meaning': self.get_destiny_meaning(destiny)
+            "number": destiny,
+            "calculation_total": total,
+            "meaning": self.get_destiny_meaning(destiny),
         }
-    
+
     def calculate_soul_urge(self, name: str) -> Dict[str, Any]:
         """Calculate soul urge number from vowels in name."""
-        vowels = 'AEIOU'
-        vowel_total = sum(PYTHAGOREAN.get(char, 0) for char in name if char in vowels)
+        vowels = "AEIOU"
+        vowel_total = sum(
+            PYTHAGOREAN.get(char, 0) for char in name if char in vowels
+        )
         soul_urge = self.reduce_to_single_digit(vowel_total)
-        
+
         return {
-            'number': soul_urge,
-            'vowel_total': vowel_total,
-            'vowels_used': [char for char in name if char in vowels],
-            'meaning': self.get_soul_urge_meaning(soul_urge)
+            "number": soul_urge,
+            "vowel_total": vowel_total,
+            "vowels_used": [char for char in name if char in vowels],
+            "meaning": self.get_soul_urge_meaning(soul_urge),
         }
-    
+
     def calculate_personality_number(self, name: str) -> Dict[str, Any]:
         """Calculate personality number from consonants in name."""
-        vowels = 'AEIOU'
-        consonant_total = sum(PYTHAGOREAN.get(char, 0) for char in name if char.isalpha() and char not in vowels)
+        vowels = "AEIOU"
+        consonant_total = sum(
+            PYTHAGOREAN.get(char, 0)
+            for char in name
+            if char.isalpha() and char not in vowels
+        )
         personality = self.reduce_to_single_digit(consonant_total)
-        
+
         return {
-            'number': personality,
-            'consonant_total': consonant_total,
-            'consonants_used': [char for char in name if char.isalpha() and char not in vowels],
-            'meaning': self.get_personality_meaning(personality)
+            "number": personality,
+            "consonant_total": consonant_total,
+            "consonants_used": [
+                char for char in name if char.isalpha() and char not in vowels
+            ],
+            "meaning": self.get_personality_meaning(personality),
         }
-    
-    def calculate_birth_day_number(self, birth_date: datetime) -> Dict[str, Any]:
+
+    def calculate_birth_day_number(
+        self, birth_date: datetime
+    ) -> Dict[str, Any]:
         """Calculate birth day number (day of month)."""
         day = birth_date.day
         birth_day = self.reduce_to_single_digit(day)
-        
+
         return {
-            'number': birth_day,
-            'day_of_month': day,
-            'meaning': self.get_birth_day_meaning(birth_day)
+            "number": birth_day,
+            "day_of_month": day,
+            "meaning": self.get_birth_day_meaning(birth_day),
         }
-    
-    def calculate_attitude_number(self, birth_date: datetime) -> Dict[str, Any]:
+
+    def calculate_attitude_number(
+        self, birth_date: datetime
+    ) -> Dict[str, Any]:
         """Calculate attitude number (month + day)."""
         total = birth_date.month + birth_date.day
         attitude = self.reduce_to_single_digit(total)
-        
+
         return {
-            'number': attitude,
-            'calculation': f"{birth_date.month} + {birth_date.day} = {total}",
-            'meaning': self.get_attitude_meaning(attitude)
+            "number": attitude,
+            "calculation": f"{birth_date.month} + {birth_date.day} = {total}",
+            "meaning": self.get_attitude_meaning(attitude),
         }
-    
+
     def calculate_power_name_number(self, name: str) -> Dict[str, Any]:
         """Calculate power name number (first name + last name)."""
         names = name.split()
         if len(names) >= 2:
-            first_name_total = sum(PYTHAGOREAN.get(char, 0) for char in names[0])
-            last_name_total = sum(PYTHAGOREAN.get(char, 0) for char in names[-1])
+            first_name_total = sum(
+                PYTHAGOREAN.get(char, 0) for char in names[0]
+            )
+            last_name_total = sum(
+                PYTHAGOREAN.get(char, 0) for char in names[-1]
+            )
             total = first_name_total + last_name_total
             power_name = self.reduce_to_single_digit(total)
-            
+
             return {
-                'number': power_name,
-                'first_name_value': first_name_total,
-                'last_name_value': last_name_total,
-                'total': total,
-                'meaning': self.get_power_name_meaning(power_name)
+                "number": power_name,
+                "first_name_value": first_name_total,
+                "last_name_value": last_name_total,
+                "total": total,
+                "meaning": self.get_power_name_meaning(power_name),
             }
-        
-        return {'number': 0, 'meaning': 'Requires first and last name'}
-    
-    def calculate_karmic_numbers(self, name: str, birth_date: datetime) -> Dict[str, Any]:
+
+        return {"number": 0, "meaning": "Requires first and last name"}
+
+    def calculate_karmic_numbers(
+        self, name: str, birth_date: datetime
+    ) -> Dict[str, Any]:
         """Calculate karmic debt and lesson numbers."""
         # Karmic debt numbers: 13, 14, 16, 19
         karmic_debts = []
-        
+
         # Check life path for karmic debt
-        life_path_total = sum(int(d) for d in birth_date.strftime('%m%d%Y'))
+        life_path_total = sum(int(d) for d in birth_date.strftime("%m%d%Y"))
         if life_path_total in [13, 14, 16, 19]:
-            karmic_debts.append(life_path_total) # type: ignore
-        
+            karmic_debts.append(life_path_total)  # type: ignore
+
         # Check destiny number for karmic debt
-        destiny_total = sum(PYTHAGOREAN.get(char, 0) for char in name if char.isalpha())
+        destiny_total = sum(
+            PYTHAGOREAN.get(char, 0) for char in name if char.isalpha()
+        )
         if destiny_total in [13, 14, 16, 19]:
-            karmic_debts.append(destiny_total) # type: ignore
-        
+            karmic_debts.append(destiny_total)  # type: ignore
+
         # Calculate karmic lessons (missing numbers 1-9 in name)
-        name_numbers = set() # type: ignore
+        name_numbers = set()  # type: ignore
         for char in name:
             if char.isalpha():
-                name_numbers.add(PYTHAGOREAN.get(char, 0)) # type: ignore
-        
+                name_numbers.add(PYTHAGOREAN.get(char, 0))  # type: ignore
+
         karmic_lessons = [i for i in range(1, 10) if i not in name_numbers]
-        
+
         return {
-            'karmic_debts': karmic_debts,
-            'karmic_lessons': karmic_lessons,
-            'debt_meanings': [self.get_karmic_debt_meaning(debt) for debt in karmic_debts], # type: ignore
-            'lesson_meanings': [self.get_karmic_lesson_meaning(lesson) for lesson in karmic_lessons]
+            "karmic_debts": karmic_debts,
+            "karmic_lessons": karmic_lessons,
+            "debt_meanings": [self.get_karmic_debt_meaning(debt) for debt in karmic_debts],  # type: ignore
+            "lesson_meanings": [
+                self.get_karmic_lesson_meaning(lesson)
+                for lesson in karmic_lessons
+            ],
         }
-    
-    def calculate_personal_year(self, birth_date: datetime, target_year: Optional[int] = None) -> Dict[str, Any]:
+
+    def calculate_personal_year(
+        self, birth_date: datetime, target_year: Optional[int] = None
+    ) -> Dict[str, Any]:
         """Calculate personal year number for current or target year."""
         if target_year is None:
             target_year = datetime.now().year
-        
+
         month = birth_date.month
         day = birth_date.day
         total = month + day + target_year
         personal_year = self.reduce_to_single_digit(total)
-        
+
         return {
-            'number': personal_year,
-            'year': target_year,
-            'calculation': f"{month} + {day} + {target_year} = {total}",
-            'meaning': self.get_personal_year_meaning(personal_year)
+            "number": personal_year,
+            "year": target_year,
+            "calculation": f"{month} + {day} + {target_year} = {total}",
+            "meaning": self.get_personal_year_meaning(personal_year),
         }
-    
-    def calculate_challenge_numbers(self, birth_date: datetime) -> Dict[str, Any]:
+
+    def calculate_challenge_numbers(
+        self, birth_date: datetime
+    ) -> Dict[str, Any]:
         """Calculate the four challenge numbers."""
-        month = self.reduce_to_single_digit(birth_date.month, keep_master=False)
+        month = self.reduce_to_single_digit(
+            birth_date.month, keep_master=False
+        )
         day = self.reduce_to_single_digit(birth_date.day, keep_master=False)
         year = self.reduce_to_single_digit(birth_date.year, keep_master=False)
-        
+
         first_challenge = abs(month - day)
         second_challenge = abs(day - year)
         third_challenge = abs(first_challenge - second_challenge)
         fourth_challenge = abs(month - year)
-        
+
         return {
-            'first_challenge': {'number': first_challenge, 'period': 'Birth to ~28'},
-            'second_challenge': {'number': second_challenge, 'period': '~28 to ~52'},
-            'third_challenge': {'number': third_challenge, 'period': '~52 onwards'},
-            'fourth_challenge': {'number': fourth_challenge, 'period': 'Lifetime'},
-            'meanings': {
-                'first': self.get_challenge_meaning(first_challenge),
-                'second': self.get_challenge_meaning(second_challenge),
-                'third': self.get_challenge_meaning(third_challenge),
-                'fourth': self.get_challenge_meaning(fourth_challenge)
-            }
+            "first_challenge": {
+                "number": first_challenge,
+                "period": "Birth to ~28",
+            },
+            "second_challenge": {
+                "number": second_challenge,
+                "period": "~28 to ~52",
+            },
+            "third_challenge": {
+                "number": third_challenge,
+                "period": "~52 onwards",
+            },
+            "fourth_challenge": {
+                "number": fourth_challenge,
+                "period": "Lifetime",
+            },
+            "meanings": {
+                "first": self.get_challenge_meaning(first_challenge),
+                "second": self.get_challenge_meaning(second_challenge),
+                "third": self.get_challenge_meaning(third_challenge),
+                "fourth": self.get_challenge_meaning(fourth_challenge),
+            },
         }
-    
-    def calculate_pinnacle_numbers(self, birth_date: datetime) -> Dict[str, Any]:
+
+    def calculate_pinnacle_numbers(
+        self, birth_date: datetime
+    ) -> Dict[str, Any]:
         """Calculate the four pinnacle numbers."""
-        month = self.reduce_to_single_digit(birth_date.month, keep_master=False)
+        month = self.reduce_to_single_digit(
+            birth_date.month, keep_master=False
+        )
         day = self.reduce_to_single_digit(birth_date.day, keep_master=False)
         year = self.reduce_to_single_digit(birth_date.year, keep_master=False)
-        
+
         first_pinnacle = self.reduce_to_single_digit(month + day)
         second_pinnacle = self.reduce_to_single_digit(day + year)
-        third_pinnacle = self.reduce_to_single_digit(first_pinnacle + second_pinnacle)
+        third_pinnacle = self.reduce_to_single_digit(
+            first_pinnacle + second_pinnacle
+        )
         fourth_pinnacle = self.reduce_to_single_digit(month + year)
-        
+
         return {
-            'first_pinnacle': {'number': first_pinnacle, 'period': 'Birth to ~28'},
-            'second_pinnacle': {'number': second_pinnacle, 'period': '~28 to ~37'},
-            'third_pinnacle': {'number': third_pinnacle, 'period': '~37 to ~46'},
-            'fourth_pinnacle': {'number': fourth_pinnacle, 'period': '~46 onwards'},
-            'meanings': {
-                'first': self.get_pinnacle_meaning(first_pinnacle),
-                'second': self.get_pinnacle_meaning(second_pinnacle),
-                'third': self.get_pinnacle_meaning(third_pinnacle),
-                'fourth': self.get_pinnacle_meaning(fourth_pinnacle)
-            }
+            "first_pinnacle": {
+                "number": first_pinnacle,
+                "period": "Birth to ~28",
+            },
+            "second_pinnacle": {
+                "number": second_pinnacle,
+                "period": "~28 to ~37",
+            },
+            "third_pinnacle": {
+                "number": third_pinnacle,
+                "period": "~37 to ~46",
+            },
+            "fourth_pinnacle": {
+                "number": fourth_pinnacle,
+                "period": "~46 onwards",
+            },
+            "meanings": {
+                "first": self.get_pinnacle_meaning(first_pinnacle),
+                "second": self.get_pinnacle_meaning(second_pinnacle),
+                "third": self.get_pinnacle_meaning(third_pinnacle),
+                "fourth": self.get_pinnacle_meaning(fourth_pinnacle),
+            },
         }
-    
+
     def calculate_pythagorean_analysis(self, name: str) -> Dict[str, Any]:
         """Full Pythagorean numerology analysis."""
         letter_values = {}
@@ -272,15 +387,17 @@ class NumerologyCalculator:
                 value = PYTHAGOREAN.get(char, 0)
                 if value not in letter_values:
                     letter_values[value] = []
-                letter_values[value].append(char) # type: ignore
-        
+                letter_values[value].append(char)  # type: ignore
+
         return {
-            'system': 'Pythagorean',
-            'letter_values': letter_values,
-            'total_value': sum(PYTHAGOREAN.get(char, 0) for char in name if char.isalpha()),
-            'characteristics': self.get_pythagorean_characteristics(letter_values) # type: ignore
+            "system": "Pythagorean",
+            "letter_values": letter_values,
+            "total_value": sum(
+                PYTHAGOREAN.get(char, 0) for char in name if char.isalpha()
+            ),
+            "characteristics": self.get_pythagorean_characteristics(letter_values),  # type: ignore
         }
-    
+
     def calculate_chaldean_analysis(self, name: str) -> Dict[str, Any]:
         """Full Chaldean numerology analysis."""
         letter_values = {}
@@ -289,32 +406,36 @@ class NumerologyCalculator:
                 value = CHALDEAN.get(char, 0)
                 if value not in letter_values:
                     letter_values[value] = []
-                letter_values[value].append(char) # type: ignore
-        
+                letter_values[value].append(char)  # type: ignore
+
         total = sum(CHALDEAN.get(char, 0) for char in name if char.isalpha())
         chaldean_number = self.reduce_to_single_digit(total)
-        
+
         return {
-            'system': 'Chaldean',
-            'letter_values': letter_values,
-            'total_value': total,
-            'chaldean_number': chaldean_number,
-            'meaning': self.get_chaldean_meaning(chaldean_number)
+            "system": "Chaldean",
+            "letter_values": letter_values,
+            "total_value": total,
+            "chaldean_number": chaldean_number,
+            "meaning": self.get_chaldean_meaning(chaldean_number),
         }
-    
-    def get_comprehensive_interpretation(self, name: str, birth_date: datetime) -> Dict[str, str]:
+
+    def get_comprehensive_interpretation(
+        self, name: str, birth_date: datetime
+    ) -> Dict[str, str]:
         """Generate comprehensive numerology interpretation."""
-        life_path = self.calculate_life_path(birth_date)['number']
-        destiny = self.calculate_destiny_number(name)['number']
-        soul_urge = self.calculate_soul_urge(name)['number']
-        
+        life_path = self.calculate_life_path(birth_date)["number"]
+        destiny = self.calculate_destiny_number(name)["number"]
+        soul_urge = self.calculate_soul_urge(name)["number"]
+
         return {
-            'life_purpose': f"Your life path {life_path} combined with destiny {destiny} suggests a journey focused on {self.get_combined_purpose(life_path, destiny)}",
-            'personality_overview': f"With soul urge {soul_urge} and destiny {destiny}, you are naturally drawn to {self.get_personality_overview(soul_urge, destiny)}",
-            'current_focus': f"In your personal year {self.calculate_personal_year(birth_date)['number']}, focus on {self.get_current_year_focus(self.calculate_personal_year(birth_date)['number'])}",
-            'spiritual_path': self.get_spiritual_path_guidance(life_path, soul_urge)
+            "life_purpose": f"Your life path {life_path} combined with destiny {destiny} suggests a journey focused on {self.get_combined_purpose(life_path, destiny)}",
+            "personality_overview": f"With soul urge {soul_urge} and destiny {destiny}, you are naturally drawn to {self.get_personality_overview(soul_urge, destiny)}",
+            "current_focus": f"In your personal year {self.calculate_personal_year(birth_date)['number']}, focus on {self.get_current_year_focus(self.calculate_personal_year(birth_date)['number'])}",
+            "spiritual_path": self.get_spiritual_path_guidance(
+                life_path, soul_urge
+            ),
         }
-    
+
     # Interpretation methods
     def get_life_path_meaning(self, number: int) -> str:
         meanings = {
@@ -329,10 +450,12 @@ class NumerologyCalculator:
             9: "Humanitarian server with wisdom and universal love",
             11: "Intuitive illuminator with spiritual insight and inspiration",
             22: "Master builder with practical vision and global impact",
-            33: "Master teacher with unconditional love and healing"
+            33: "Master teacher with unconditional love and healing",
         }
-        return meanings.get(number, "Unique spiritual path requiring individual interpretation")
-    
+        return meanings.get(
+            number, "Unique spiritual path requiring individual interpretation"
+        )
+
     def get_destiny_meaning(self, number: int) -> str:
         meanings = {
             1: "Destined to lead, innovate, and blaze new trails",
@@ -343,10 +466,12 @@ class NumerologyCalculator:
             6: "Destined to nurture, heal, and serve family/community",
             7: "Destined to seek truth, develop wisdom, and teach",
             8: "Destined to achieve material success and organize large undertakings",
-            9: "Destined to serve humanity and complete important cycles"
+            9: "Destined to serve humanity and complete important cycles",
         }
-        return meanings.get(number, "Unique destiny requiring individual expression")
-    
+        return meanings.get(
+            number, "Unique destiny requiring individual expression"
+        )
+
     def get_soul_urge_meaning(self, number: int) -> str:
         meanings = {
             1: "Deep desire for independence, leadership, and personal achievement",
@@ -357,10 +482,12 @@ class NumerologyCalculator:
             6: "Soul needs to nurture, heal, and create harmonious relationships",
             7: "Inner drive for spiritual understanding and mystical knowledge",
             8: "Soul craves material success and recognition of achievements",
-            9: "Deep desire to serve humanity and make a global impact"
+            9: "Deep desire to serve humanity and make a global impact",
         }
-        return meanings.get(number, "Unique soul mission requiring personal discovery")
-    
+        return meanings.get(
+            number, "Unique soul mission requiring personal discovery"
+        )
+
     def get_personality_meaning(self, number: int) -> str:
         meanings = {
             1: "Appears confident, independent, and leadership-oriented",
@@ -371,10 +498,10 @@ class NumerologyCalculator:
             6: "Appears caring, responsible, and family-oriented",
             7: "Appears mysterious, analytical, and spiritually inclined",
             8: "Appears ambitious, successful, and business-minded",
-            9: "Appears wise, humanitarian, and globally conscious"
+            9: "Appears wise, humanitarian, and globally conscious",
         }
         return meanings.get(number, "Unique personality expression")
-    
+
     def get_birth_day_meaning(self, number: int) -> str:
         meanings = {
             1: "Natural leadership abilities and pioneering spirit",
@@ -385,10 +512,10 @@ class NumerologyCalculator:
             6: "Nurturing instincts and healing abilities",
             7: "Analytical mind and spiritual inclinations",
             8: "Business acumen and material achievement drive",
-            9: "Humanitarian nature and wisdom beyond years"
+            9: "Humanitarian nature and wisdom beyond years",
         }
         return meanings.get(number, "Special birth day influence")
-    
+
     def get_attitude_meaning(self, number: int) -> str:
         meanings = {
             1: "Projects confidence and leadership in first impressions",
@@ -399,10 +526,10 @@ class NumerologyCalculator:
             6: "Appears caring, responsible, and family-oriented",
             7: "Projects mystery, depth, and spiritual awareness",
             8: "Appears ambitious, successful, and authoritative",
-            9: "Projects wisdom, compassion, and global awareness"
+            9: "Projects wisdom, compassion, and global awareness",
         }
         return meanings.get(number, "Unique attitude and first impression")
-    
+
     def get_power_name_meaning(self, number: int) -> str:
         meanings = {
             1: "Power through leadership and individual achievement",
@@ -413,19 +540,19 @@ class NumerologyCalculator:
             6: "Power through nurturing and healing others",
             7: "Power through wisdom and spiritual understanding",
             8: "Power through business acumen and material mastery",
-            9: "Power through humanitarian service and universal love"
+            9: "Power through humanitarian service and universal love",
         }
         return meanings.get(number, "Unique power expression through name")
-    
+
     def get_karmic_debt_meaning(self, number: int) -> str:
         meanings = {
             13: "Need to learn discipline, hard work, and transformation through effort",
             14: "Need to learn moderation, freedom with responsibility, and avoiding excess",
             16: "Need to learn humility, spiritual development, and releasing ego",
-            19: "Need to learn independence while helping others, avoiding selfishness"
+            19: "Need to learn independence while helping others, avoiding selfishness",
         }
         return meanings.get(number, "No karmic debt indicated")
-    
+
     def get_karmic_lesson_meaning(self, number: int) -> str:
         meanings = {
             1: "Learn self-reliance, leadership, and individual initiative",
@@ -436,10 +563,10 @@ class NumerologyCalculator:
             6: "Learn nurturing, healing, and taking care of others",
             7: "Learn spiritual development, analysis, and inner wisdom",
             8: "Learn material mastery, business skills, and achievement",
-            9: "Learn humanitarian service, wisdom, and letting go"
+            9: "Learn humanitarian service, wisdom, and letting go",
         }
         return meanings.get(number, "Lesson already mastered")
-    
+
     def get_personal_year_meaning(self, number: int) -> str:
         meanings = {
             1: "New beginnings, leadership opportunities, and fresh starts",
@@ -450,10 +577,12 @@ class NumerologyCalculator:
             6: "Responsibility, family, healing, and home focus",
             7: "Spiritual development, study, and inner reflection",
             8: "Material achievement, business success, and recognition",
-            9: "Completion, humanitarian service, and preparing for new cycle"
+            9: "Completion, humanitarian service, and preparing for new cycle",
         }
-        return meanings.get(number, "Transitional year requiring individual guidance")
-    
+        return meanings.get(
+            number, "Transitional year requiring individual guidance"
+        )
+
     def get_challenge_meaning(self, number: int) -> str:
         meanings = {
             0: "No specific challenge - maintain balance and avoid extremes",
@@ -464,10 +593,12 @@ class NumerologyCalculator:
             5: "Learn to embrace change without being irresponsible",
             6: "Learn to serve others without becoming a martyr",
             7: "Learn to develop spirituality without withdrawing from life",
-            8: "Learn to achieve materially without losing spiritual values"
+            8: "Learn to achieve materially without losing spiritual values",
         }
-        return meanings.get(number, "Unique challenge requiring individual understanding")
-    
+        return meanings.get(
+            number, "Unique challenge requiring individual understanding"
+        )
+
     def get_pinnacle_meaning(self, number: int) -> str:
         meanings = {
             1: "Time for leadership, independence, and new beginnings",
@@ -478,10 +609,10 @@ class NumerologyCalculator:
             6: "Time for responsibility, family, healing, and service",
             7: "Time for spiritual development, study, and inner growth",
             8: "Time for material achievement, business success, and recognition",
-            9: "Time for humanitarian service, wisdom, and global awareness"
+            9: "Time for humanitarian service, wisdom, and global awareness",
         }
         return meanings.get(number, "Unique pinnacle period")
-    
+
     def get_chaldean_meaning(self, number: int) -> str:
         meanings = {
             1: "Chaldean 1: Leadership and independence with ancient wisdom",
@@ -491,39 +622,43 @@ class NumerologyCalculator:
             5: "Chaldean 5: Freedom and adventure with esoteric understanding",
             6: "Chaldean 6: Nurturing and healing with cosmic love",
             7: "Chaldean 7: Spiritual mastery and mystical wisdom",
-            8: "Chaldean 8: Material achievement with karmic balance"
+            8: "Chaldean 8: Material achievement with karmic balance",
         }
         return meanings.get(number, "Unique Chaldean interpretation")
-    
-    def get_pythagorean_characteristics(self, letter_values: Dict) -> List[str]: # type: ignore
+
+    def get_pythagorean_characteristics(self, letter_values: Dict) -> List[str]:  # type: ignore
         """Get personality characteristics based on Pythagorean letter analysis."""
         characteristics = []
-        
+
         # Analyze dominant numbers
-        for num, letters in letter_values.items(): # type: ignore
-            count = len(letters) # type: ignore
+        for num, letters in letter_values.items():  # type: ignore
+            count = len(letters)  # type: ignore
             if count >= 3:
                 if num == 1:
-                    characteristics.append("Strong leadership tendencies") # type: ignore
+                    characteristics.append("Strong leadership tendencies")  # type: ignore
                 elif num == 2:
-                    characteristics.append("Highly cooperative nature") # type: ignore
+                    characteristics.append("Highly cooperative nature")  # type: ignore
                 elif num == 3:
-                    characteristics.append("Naturally creative and expressive") # type: ignore # type: ignore
+                    characteristics.append("Naturally creative and expressive")  # type: ignore # type: ignore
                 elif num == 4:
-                    characteristics.append("Very practical and organized") # type: ignore
+                    characteristics.append("Very practical and organized")  # type: ignore
                 elif num == 5:
-                    characteristics.append("Freedom-loving and adventurous") # type: ignore
+                    characteristics.append("Freedom-loving and adventurous")  # type: ignore
                 elif num == 6:
-                    characteristics.append("Naturally nurturing and responsible") # type: ignore
+                    characteristics.append("Naturally nurturing and responsible")  # type: ignore
                 elif num == 7:
-                    characteristics.append("Deeply spiritual and analytical") # type: ignore
+                    characteristics.append("Deeply spiritual and analytical")  # type: ignore
                 elif num == 8:
-                    characteristics.append("Business-minded and ambitious") # type: ignore
+                    characteristics.append("Business-minded and ambitious")  # type: ignore
                 elif num == 9:
-                    characteristics.append("Humanitarian and globally conscious") # type: ignore
-        
-        return characteristics if characteristics else ["Balanced numerical expression"]
-    
+                    characteristics.append("Humanitarian and globally conscious")  # type: ignore
+
+        return (
+            characteristics
+            if characteristics
+            else ["Balanced numerical expression"]
+        )
+
     def get_combined_purpose(self, life_path: int, destiny: int) -> str:
         """Get combined life purpose interpretation."""
         combinations = {
@@ -533,12 +668,14 @@ class NumerologyCalculator:
             (3, 3): "joyful creative expression and artistic mastery",
             (7, 7): "spiritual teaching and mystical wisdom sharing",
             (8, 8): "major material achievements and business empire building",
-            (9, 6): "humanitarian healing and global service"
+            (9, 6): "humanitarian healing and global service",
         }
-        
-        return combinations.get((life_path, destiny), 
-                               f"balancing personal growth (path {life_path}) with worldly expression (destiny {destiny})")
-    
+
+        return combinations.get(
+            (life_path, destiny),
+            f"balancing personal growth (path {life_path}) with worldly expression (destiny {destiny})",
+        )
+
     def get_personality_overview(self, soul_urge: int, destiny: int) -> str:
         """Get personality overview based on soul urge and destiny."""
         if soul_urge == destiny:
@@ -547,7 +684,7 @@ class NumerologyCalculator:
             return f"harmonious blend of inner desires and outer expression"
         else:
             return f"learning to balance inner needs ({soul_urge}) with outer purpose ({destiny})"
-    
+
     def get_current_year_focus(self, personal_year: int) -> str:
         """Get current year focus guidance."""
         focus_areas = {
@@ -559,11 +696,15 @@ class NumerologyCalculator:
             6: "family responsibilities and healing work",
             7: "spiritual development and inner reflection",
             8: "material goals and business achievements",
-            9: "completing projects and preparing for new cycles"
+            9: "completing projects and preparing for new cycles",
         }
-        return focus_areas.get(personal_year, "following your intuitive guidance")
-    
-    def get_spiritual_path_guidance(self, life_path: int, soul_urge: int) -> str:
+        return focus_areas.get(
+            personal_year, "following your intuitive guidance"
+        )
+
+    def get_spiritual_path_guidance(
+        self, life_path: int, soul_urge: int
+    ) -> str:
         """Get spiritual path guidance."""
         if life_path == 7 or soul_urge == 7:
             return "Your spiritual path involves deep study, meditation, and sharing mystical wisdom with others."

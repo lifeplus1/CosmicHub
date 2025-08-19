@@ -6,7 +6,7 @@ const SubscriptionCancel: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
-  const tier = searchParams.get('tier') || 'premium';
+  const tier = searchParams.get('tier') ?? 'premium';
   const feature = searchParams.get('feature');
 
   const handleRetryCheckout = () => {

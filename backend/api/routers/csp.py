@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/csp", tags=["csp"])
 
+
 @router.post("/report")
 async def csp_report(request: Request):
     """Accept CSP violation reports (report-only). Future: aggregation & metrics."""

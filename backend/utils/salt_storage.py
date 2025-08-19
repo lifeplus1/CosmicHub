@@ -10,12 +10,13 @@ functionality required by the admin salt management API:
 Implementation is in-memory by default; Firestore hooks can be re-added
 incrementally later. The interface is intentionally small and typed.
 """
+
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Any, TypedDict, cast
-from datetime import datetime, timedelta, timezone
-import os
 import logging
+import os
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from .pseudonymization import generate_salt
 
@@ -42,8 +43,12 @@ class SaltStorage:
         self.use_memory = use_memory
         self.db_client = db_client
         self.memory_store: Dict[str, Dict[str, Any]] = {}
-        self.user_salt_interval_days = int(os.getenv("USER_SALT_ROTATION_DAYS", "90"))
-        self.global_salt_interval_days = int(os.getenv("GLOBAL_SALT_ROTATION_DAYS", "30"))
+        self.user_salt_interval_days = int(
+            os.getenv("USER_SALT_ROTATION_DAYS", "90")
+        )
+        self.global_salt_interval_days = int(
+            os.getenv("GLOBAL_SALT_ROTATION_DAYS", "30")
+        )
 
     # Legacy shim
     def _get_current_time(self) -> datetime:  # pragma: no cover
@@ -85,7 +90,9 @@ class SaltStorage:
             return existing
         return self.create_user_salt(user_id)
 
-    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:
+    def create_user_salt(
+        self, user_id: str, salt: Optional[bytes] = None
+    ) -> bytes:
         if salt is None:
             salt = generate_salt()
         now = self._get_current_time()
@@ -94,7 +101,9 @@ class SaltStorage:
             "created_at": now.isoformat(),
             "last_rotated": now.isoformat(),
             "rotation_count": 0,
-            "next_rotation": (now + timedelta(days=self.user_salt_interval_days)).isoformat(),
+            "next_rotation": (
+                now + timedelta(days=self.user_salt_interval_days)
+            ).isoformat(),
         }
         return salt
 
@@ -104,12 +113,16 @@ class SaltStorage:
         now = self._get_current_time()
         rec = self.memory_store.get(user_id, {})
         count = int(rec.get("rotation_count", 0)) + 1
-        rec.update({
-            "salt": new.hex(),
-            "last_rotated": now.isoformat(),
-            "rotation_count": count,
-            "next_rotation": (now + timedelta(days=self.user_salt_interval_days)).isoformat(),
-        })
+        rec.update(
+            {
+                "salt": new.hex(),
+                "last_rotated": now.isoformat(),
+                "rotation_count": count,
+                "next_rotation": (
+                    now + timedelta(days=self.user_salt_interval_days)
+                ).isoformat(),
+            }
+        )
         if old:
             rec["previous_salt_hash"] = old.hex()[:16]
         self.memory_store[user_id] = rec
@@ -119,7 +132,9 @@ class SaltStorage:
     def get_global_salt(self, salt_type: str = "events") -> Optional[bytes]:
         return self.get_user_salt(f"global_{salt_type}")
 
-    def create_global_salt(self, salt_type: str = "events", salt: Optional[bytes] = None) -> bytes:
+    def create_global_salt(
+        self, salt_type: str = "events", salt: Optional[bytes] = None
+    ) -> bytes:
         if salt is None:
             salt = generate_salt()
         now = self._get_current_time()
@@ -129,7 +144,9 @@ class SaltStorage:
             "created_at": now.isoformat(),
             "last_rotated": now.isoformat(),
             "rotation_count": 0,
-            "next_rotation": (now + timedelta(days=self.global_salt_interval_days)).isoformat(),
+            "next_rotation": (
+                now + timedelta(days=self.global_salt_interval_days)
+            ).isoformat(),
             "salt_type": salt_type,
         }
         return salt
@@ -159,13 +176,15 @@ class SaltStorage:
                 continue
             if now >= nxt:
                 if key.startswith("global_"):
-                    due_globals.append(key[len("global_"):])
+                    due_globals.append(key[len("global_") :])
                 else:
                     due_users.append(key)
         return {"users": due_users, "globals": due_globals}
 
     # Batch
-    async def batch_rotate_salts(self, user_ids: List[str], global_types: List[str]) -> BatchRotateResult:
+    async def batch_rotate_salts(
+        self, user_ids: List[str], global_types: List[str]
+    ) -> BatchRotateResult:
         start = self._get_current_time().isoformat()
         users_rotated = 0
         globals_rotated = 0
@@ -209,4 +228,3 @@ def reset_salt_storage() -> None:
 
 
 __all__ = ["SaltStorage", "get_salt_storage", "reset_salt_storage"]
-        

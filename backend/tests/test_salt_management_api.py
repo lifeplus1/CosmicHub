@@ -1,8 +1,9 @@
 """API tests for salt management endpoints."""
+
 from fastapi.testclient import TestClient
 
 from main import app
-from utils.salt_storage import get_salt_storage, SaltStorage
+from utils.salt_storage import SaltStorage, get_salt_storage
 
 client = TestClient(app)
 
@@ -58,9 +59,13 @@ def test_batch_rotation():
     uids = ["u1", "u2", "u3"]
     for uid in uids:
         storage.create_user_salt(uid)
-        storage.memory_store[uid]["next_rotation"] = "1970-01-01T00:00:00+00:00"
+        storage.memory_store[uid][
+            "next_rotation"
+        ] = "1970-01-01T00:00:00+00:00"
     storage.create_global_salt("events")
-    storage.memory_store["global_events"]["next_rotation"] = "1970-01-01T00:00:00+00:00"
+    storage.memory_store["global_events"][
+        "next_rotation"
+    ] = "1970-01-01T00:00:00+00:00"
 
     resp = client.post("/api/admin/salts/rotate/batch")
     assert resp.status_code == 200
@@ -72,7 +77,10 @@ def test_batch_rotation():
 def test_pseudonymize_dev_guard():
     _reset_storage()
     # Missing dev flag -> forbidden
-    bad = client.post("/api/admin/salts/dev/pseudonymize", json={"user_id": "u1", "identifier": "abc"})
+    bad = client.post(
+        "/api/admin/salts/dev/pseudonymize",
+        json={"user_id": "u1", "identifier": "abc"},
+    )
     assert bad.status_code == 403
 
     ok = client.post(

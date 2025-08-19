@@ -4,7 +4,8 @@ import { useAuth } from '@cosmichub/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChartDisplay } from '../components';
 import { CosmicLoading } from '../components/CosmicLoading';
-import { saveChart, fetchChartData, type SaveChartRequest } from '../services/api';
+import { saveChart, fetchChartData } from '../services/api';
+import type { SaveChartRequest, SaveChartResponse } from '../services/api.types';
 import { devConsole } from '../config/environment';
 
 interface StoredBirthData {
@@ -83,7 +84,7 @@ const ChartResults: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Save chart mutation
-  const saveMutation = useMutation({
+  const saveMutation = useMutation<SaveChartResponse, unknown, SaveChartRequest>({
     mutationFn: saveChart,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['savedCharts'] });

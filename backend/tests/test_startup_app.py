@@ -10,6 +10,6 @@ from backend.main import app  # type: ignore
 
 
 def test_app_routes_present() -> None:
-    paths = {getattr(r, 'path', '') for r in app.routes}  # type: ignore[arg-type]
-    assert any(p.startswith('/api/astro') for p in paths)
-    assert '/calculate-gene-keys' in paths
+    paths = {getattr(r, "path", "") for r in app.routes}  # type: ignore[arg-type]
+    assert any(p.startswith("/api/astro") for p in paths)
+    assert "/calculate-gene-keys" in paths

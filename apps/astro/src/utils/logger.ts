@@ -4,11 +4,11 @@
 export class Logger {
   private static formatMessage(level: string, message: string, data?: unknown): string {
     const timestamp = new Date().toISOString();
-    return `[${timestamp}] ${level.toUpperCase()}: ${message}${data ? ` - ${JSON.stringify(data)}` : ''}`;
+  return `[${timestamp}] ${level.toUpperCase()}: ${message}${data !== undefined ? ` - ${JSON.stringify(data)}` : ''}`;
   }
 
   static debug(message: string, data?: unknown): void {
-    if (process.env.NODE_ENV !== 'production') {
+  if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.debug(this.formatMessage('debug', message, data));
     }

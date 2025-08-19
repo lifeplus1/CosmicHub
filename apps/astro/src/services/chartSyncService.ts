@@ -6,17 +6,8 @@ import { Logger } from '../utils/logger';
 import { 
   type ChartData, 
   type Planet, 
+  type House,
   type PlanetName,
-  t  private updateChart(rawChartId: string, options: Pick<ChartSyncOptions, 'enableTransitUpdates' | 'enableProgressions' | 'aspectAlerts'>): Promise<void> {
-    const chartId = toChartId(rawChartId);
-    
-    if (!this.isOnline) {
-      this.pendingUpdates.set(chartId, new Date());
-      return;
-    }
-
-    const chartData = this.charts.get(chartId);
-    if (chartData == null) return;
   type Aspect,
   type ChartId,
   type ZodiacSign,

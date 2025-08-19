@@ -1,7 +1,7 @@
-import types
 import sys
-from pathlib import Path
+import types
 from datetime import datetime
+from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, Generator, Mapping, TypedDict
 
@@ -47,7 +47,9 @@ class _Plan(TypedDict):
 
 
 @pytest.fixture(autouse=True)
-def patch_subscription_plans(monkeypatch: pytest.MonkeyPatch) -> Dict[str, _Plan]:
+def patch_subscription_plans(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Dict[str, _Plan]:
     """Provide deterministic subscription plans with known price IDs for matching in verification logic."""
     plans: Dict[str, _Plan] = {
         "astro_premium": {
@@ -95,15 +97,21 @@ def test_get_plans(client: TestClient) -> None:
     assert "price_id" not in str(data)
 
 
-def test_create_checkout_session_success(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
-    async def fake_create_checkout_session(user_id: str, plan_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+def test_create_checkout_session_success(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def fake_create_checkout_session(
+        user_id: str, plan_id: str, success_url: str, cancel_url: str
+    ) -> Dict[str, Any]:
         return {
             "checkout_url": f"https://stripe.test/checkout/{plan_id}",
             "session_id": "sess_123",
             "plan": sr.SUBSCRIPTION_PLANS.get(plan_id, {}),
         }
 
-    monkeypatch.setattr(sr, "create_stripe_checkout_session", fake_create_checkout_session)
+    monkeypatch.setattr(
+        sr, "create_stripe_checkout_session", fake_create_checkout_session
+    )
 
     payload: Dict[str, Any] = {
         "tier": "premium",
@@ -131,7 +139,9 @@ def test_create_checkout_session_invalid_tier(client: TestClient) -> None:
     assert resp.status_code == 400
 
 
-def test_subscription_status(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_subscription_status(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     async def fake_status(user_id: str) -> Dict[str, Any]:
         return {
             "status": "active",
@@ -147,11 +157,15 @@ def test_subscription_status(client: TestClient, monkeypatch: pytest.MonkeyPatch
     assert resp.json()["status"] == "active"
 
 
-def test_cancel_and_reactivate_subscription(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cancel_and_reactivate_subscription(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     # Provide active status for cancel path and inactive for reactivate path via mutable store
     state = {"active": True}
 
-    async def fake_status(user_id: str) -> Dict[str, Any]:  # toggles before each endpoint call
+    async def fake_status(
+        user_id: str,
+    ) -> Dict[str, Any]:  # toggles before each endpoint call
         return {
             "status": "active" if state["active"] else "inactive",
             "tier": "astro_premium",
@@ -177,7 +191,9 @@ def test_cancel_and_reactivate_subscription(client: TestClient, monkeypatch: pyt
     assert resp_reactivate.json()["status"] == "reactivated"
 
 
-def test_health_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_health_endpoint(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sr, "get_stripe_account", lambda: {"id": "acct_test"})
     resp = client.get("/stripe/health")
     assert resp.status_code == 200
@@ -186,21 +202,29 @@ def test_health_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch) ->
     assert data["stripe_connected"] is True
 
 
-def test_webhook_handler(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_webhook_handler(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     called = {"handled": False}
 
-    async def fake_handle(request: Any) -> Dict[str, str]:  # signature matches expected call
+    async def fake_handle(
+        request: Any,
+    ) -> Dict[str, str]:  # signature matches expected call
         called["handled"] = True
         return {"status": "success"}
 
     monkeypatch.setattr(sr, "handle_stripe_webhook", fake_handle)  # type: ignore[arg-type]
-    resp = client.post("/stripe/webhook", content="{}", headers={"stripe-signature": "sig"})
+    resp = client.post(
+        "/stripe/webhook", content="{}", headers={"stripe-signature": "sig"}
+    )
     # Should accept immediately with received status regardless of processing outcome
     assert resp.status_code == 200
     assert resp.json()["status"] == "received"
 
 
-def _make_session(metadata_uid: str, payment_status: str = "paid") -> types.SimpleNamespace:
+def _make_session(
+    metadata_uid: str, payment_status: str = "paid"
+) -> types.SimpleNamespace:
     obj = types.SimpleNamespace()
     obj.metadata = {"firebase_uid": metadata_uid}
     obj.payment_status = payment_status
@@ -221,8 +245,11 @@ def _make_subscription(price_id: str) -> types.SimpleNamespace:
     )
 
 
-def test_verify_session_success(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_verify_session_success(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     import sys
+
     # Build fake stripe module with required functions/classes
     stripe_mod = ModuleType("stripe")
     checkout_ns = types.SimpleNamespace(Session=types.SimpleNamespace(retrieve=lambda sid: _make_session("test-user")))  # type: ignore[arg-type]
@@ -236,18 +263,25 @@ def test_verify_session_success(client: TestClient, monkeypatch: pytest.MonkeyPa
         def __init__(self) -> None:
             self._data: Dict[str, Any] = {}
             self.exists = False
+
         def get(self) -> "FakeDoc":
             return self
-        def set(self, value: Mapping[str, Any], merge: bool = False) -> None:  # noqa: ARG002
+
+        def set(
+            self, value: Mapping[str, Any], merge: bool = False
+        ) -> None:  # noqa: ARG002
             self._data.update(value)
+
         def update(self, value: Mapping[str, Any]) -> None:
             self._data.update(value)
+
         def to_dict(self) -> Dict[str, Any]:
             return dict(self._data)
 
     class FakeCollection:
         def __init__(self) -> None:
             self.docs: Dict[str, FakeDoc] = {"test-user": FakeDoc()}
+
         def document(self, doc_id: str) -> FakeDoc:
             self.docs.setdefault(doc_id, FakeDoc())
             return self.docs[doc_id]
@@ -256,24 +290,34 @@ def test_verify_session_success(client: TestClient, monkeypatch: pytest.MonkeyPa
         def __init__(self) -> None:
             self._subs = FakeCollection()
             self._users = FakeCollection()
-        def collection(self, name: str) -> Any:  # return type intentionally Any for Firestore mimic
+
+        def collection(
+            self, name: str
+        ) -> Any:  # return type intentionally Any for Firestore mimic
             if name == "subscriptions":
                 return self._subs
             if name == "users":
                 return self._users
             return FakeCollection()
 
-    monkeypatch.setattr("backend.database.get_firestore_client", lambda: FakeDB())
+    monkeypatch.setattr(
+        "backend.database.get_firestore_client", lambda: FakeDB()
+    )
 
-    resp = client.post("/stripe/verify-session", json={"sessionId": "sess_123"})
+    resp = client.post(
+        "/stripe/verify-session", json={"sessionId": "sess_123"}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
     assert data["subscription"]["tier"].startswith("astro_premium")
 
 
-def test_verify_session_user_mismatch(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_verify_session_user_mismatch(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     import sys
+
     stripe_mod = ModuleType("stripe")
     checkout_ns = types.SimpleNamespace(Session=types.SimpleNamespace(retrieve=lambda sid: _make_session("other-user")))  # type: ignore[arg-type]
     subscription_ns = types.SimpleNamespace(retrieve=lambda sid: _make_subscription("price_test_premium"))  # type: ignore[arg-type]
@@ -281,7 +325,9 @@ def test_verify_session_user_mismatch(client: TestClient, monkeypatch: pytest.Mo
     setattr(stripe_mod, "Subscription", subscription_ns)
     sys.modules["stripe"] = stripe_mod  # type: ignore[assignment]
     monkeypatch.setattr("backend.database.get_firestore_client", lambda: None)
-    resp = client.post("/stripe/verify-session", json={"sessionId": "sess_123"})
+    resp = client.post(
+        "/stripe/verify-session", json={"sessionId": "sess_123"}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is False

@@ -1,23 +1,34 @@
 """Tests for calculations router cache utilities."""
+
 from __future__ import annotations
+
+import pathlib
+import sys
 import time
-import sys, pathlib
+
 root = pathlib.Path(__file__).resolve().parent.parent
 if str(root) not in sys.path:
     sys.path.insert(0, str(root))
 from api.routers.calculations import (
+    BirthData,
     cache_chart_result,
-    get_cached_chart,
     clear_expired_cache,
     generate_cache_key,
-    BirthData,
+    get_cached_chart,
 )
 
 
 def _sample_birth() -> BirthData:
     return BirthData(
-        year=1990, month=6, day=15, hour=12, minute=0,
-        city="Test", timezone="UTC", lat=0.0, lon=0.0
+        year=1990,
+        month=6,
+        day=15,
+        hour=12,
+        minute=0,
+        city="Test",
+        timezone="UTC",
+        lat=0.0,
+        lon=0.0,
     )
 
 

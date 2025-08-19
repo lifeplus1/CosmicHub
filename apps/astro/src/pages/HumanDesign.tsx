@@ -14,12 +14,26 @@ const HumanDesign: React.FC = () => {
   const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
     // No navigation needed - stay on this page and show the human design chart
-  if (devConsole.log) devConsole.log('🧬 Human Design birth data submitted', data);
+    // Helper type for the logger
+    interface Logger {
+      log?: (msg: string, data: unknown) => void;
+    }
+
+    // Type-safe logging helper
+    const log = (msg: string, data: unknown): void => {
+      const logger = devConsole as Logger | null | undefined;
+      const logFn = logger?.log;
+      if (typeof logFn === 'function') {
+        logFn(msg, data);
+      }
+    };
+
+    log('🧬 Human Design birth data submitted', data);
   };
 
   // Helper function to format birth info from calculation result
   const formatBirthInfo = (birthInfo: HumanDesignData['birth_info']): { date: string; time: string; coordinates: string; timezone: string; } | null => {
-    if (!birthInfo) return null;
+    if (birthInfo === null || birthInfo === undefined) return null;
 
     // Parse the ISO string more carefully to preserve the original date
     const consciousTime = birthInfo.conscious_time;
@@ -48,8 +62,8 @@ const HumanDesign: React.FC = () => {
         </p>
       </div>
 
-      {/* Birth Data Input - Only show if no data */}
-      {!birthData && (
+  {/* Birth Data Input - Only show if no data */}
+  {(birthData === null || birthData === undefined) && (
         <SimpleBirthForm
           title="Enter Birth Data for Human Design"
           submitButtonText="Generate Human Design Chart"
@@ -59,7 +73,7 @@ const HumanDesign: React.FC = () => {
       )}
 
       {/* Human Design Chart Display */}
-      {birthData && isDataValid && (
+      {birthData !== null && birthData !== undefined && isDataValid === true && (
         <div className="space-y-6">
           {/* Control Panel */}
           <Card title="Chart Controls">
@@ -83,7 +97,7 @@ const HumanDesign: React.FC = () => {
 
           {/* Human Design Chart Component */}
           <HumanDesignChart 
-            birthData={birthData}
+            birthData={birthData ?? undefined}
             onCalculate={(data: ChartBirthData) => setBirthData(data)}
             onHumanDesignCalculated={(hdData: HumanDesignData) => setHumanDesignData(hdData)}
           />
@@ -91,7 +105,7 @@ const HumanDesign: React.FC = () => {
           {/* Birth Information */}
           <Card title="Birth Information">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {humanDesignData?.birth_info ? (
+              {humanDesignData?.birth_info !== undefined && humanDesignData.birth_info !== null ? (
                 // Show birth info from Human Design calculation result
                 (() => {
                   const birthInfo = formatBirthInfo(humanDesignData.birth_info);
@@ -121,20 +135,30 @@ const HumanDesign: React.FC = () => {
                 <>
                   <div className="text-center">
                     <div className="text-cosmic-gold font-semibold">Date</div>
-                    <div className="text-cosmic-silver">{birthData.month}/{birthData.day}/{birthData.year}</div>
+                    <div className="text-cosmic-silver">
+                      {birthData !== null && birthData !== undefined && `${birthData.month}/${birthData.day}/${birthData.year}`}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-cosmic-gold font-semibold">Time</div>
-                    <div className="text-cosmic-silver">{birthData.hour.toString().padStart(2, '0')}:{birthData.minute.toString().padStart(2, '0')}</div>
+                    <div className="text-cosmic-silver">
+                      {birthData !== null && birthData !== undefined && `${String(birthData.hour).padStart(2, '0')}:${String(birthData.minute).padStart(2, '0')}`}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-cosmic-gold font-semibold">Location</div>
-                    <div className="text-cosmic-silver">{birthData.city}</div>
+                    <div className="text-cosmic-silver">
+                      {birthData?.city ?? 'Not specified'}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-cosmic-gold font-semibold">Coordinates</div>
                     <div className="text-cosmic-silver text-sm">
-                      {birthData.lat != null ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
+                      {birthData !== null && birthData !== undefined && 
+                       typeof birthData.lat === 'number' && typeof birthData.lon === 'number'
+                        ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
+                        : 'Auto-detected'
+                      }
                     </div>
                   </div>
                 </>

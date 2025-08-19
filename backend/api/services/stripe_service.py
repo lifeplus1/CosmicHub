@@ -1,7 +1,9 @@
-import stripe
 from os import getenv
 
+import stripe
+
 stripe.api_key = getenv("STRIPE_SECRET_KEY")
+
 
 def create_stripe_session(email: str, price_id: str):
     return stripe.checkout.Session.create(

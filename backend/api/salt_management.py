@@ -1,31 +1,35 @@
 """Salt management administrative API endpoints (backend adapter aware)."""
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
-from typing import Dict, Any, List, Optional, cast
-from datetime import datetime, timezone
-import time
+
 import asyncio
-import os
 import logging
+import os
+import time
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, cast
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from utils.pseudonymization import (
+    pseudonymize_analytics_data,
+    pseudonymize_user_data,
+)
 from utils.salt_backend import (
-    get_salt_backend,
-    backend_storage_type,
     SaltBackendProtocol,
+    backend_storage_type,
+    get_salt_backend,
 )
 from utils.salt_storage import reset_salt_storage
-from utils.pseudonymization import (
-    pseudonymize_user_data,
-    pseudonymize_analytics_data,
-)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/admin/salts", tags=["salt-management"])
 
 # Metrics (optional Prometheus) -------------------------------------------------
 try:  # pragma: no cover - import guarded
-    from prometheus_client import Counter, Gauge, Histogram  # type: ignore
     from typing import Any as _Any
+
+    from prometheus_client import Counter, Gauge, Histogram  # type: ignore
+
     salt_op_counter: _Any = Counter(  # type: ignore[assignment]
         "salt_operations_total",
         "Total salt management operations",
@@ -40,18 +44,35 @@ try:  # pragma: no cover - import guarded
         "salt_operation_latency_seconds",
         "Latency of salt management operations",
         ["operation", "result"],
-        buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 1.0, 2.0, 5.0),
+        buckets=(
+            0.005,
+            0.01,
+            0.025,
+            0.05,
+            0.1,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            2.0,
+            5.0,
+        ),
     )  # type: ignore[call-arg]
 except Exception:  # Fallback no-op shims
+
     class _NoOp:
         def labels(self, *_, **__):  # type: ignore[no-untyped-def]
             return self
+
         def inc(self, *_: object, **__: object) -> None:  # type: ignore[no-untyped-def]
             pass
+
         def set(self, *_: object, **__: object) -> None:  # type: ignore[no-untyped-def]
             pass
+
         def observe(self, *_: object, **__: object) -> None:  # type: ignore[no-untyped-def]
             pass
+
     salt_op_counter = _NoOp()
     salts_due_gauge = _NoOp()
     salt_op_latency_hist = _NoOp()
@@ -60,8 +81,10 @@ except Exception:  # Fallback no-op shims
 try:  # Reuse existing auth if available
     from auth import get_current_user  # type: ignore
 except Exception:  # pragma: no cover
+
     async def get_current_user():  # type: ignore
         return {"uid": "dev-user"}
+
 
 def admin_guard(user=Depends(get_current_user)) -> dict:  # type: ignore[no-untyped-def]
     """Currently passes through any authenticated user.
@@ -181,17 +204,22 @@ async def reload_salt_system(user=Depends(admin_guard)) -> SaltStatusResponse:  
             salt_op_latency_hist.labels("reload", "error").observe(time.perf_counter() - start_t)  # type: ignore
         except Exception:
             pass
-        raise HTTPException(status_code=500, detail="Failed to reload salt backend")
+        raise HTTPException(
+            status_code=500, detail="Failed to reload salt backend"
+        )
 
 
 @router.get("/status", response_model=SaltStatusResponse)
 async def get_salt_status(user=Depends(admin_guard)) -> SaltStatusResponse:  # type: ignore[no-untyped-def]
     try:
         # If rotation interval env vars set after process start (tests), refresh backend
-        refresh_needed = any(env in os.environ for env in (
-            "USER_SALT_ROTATION_DAYS",
-            "GLOBAL_SALT_ROTATION_DAYS",
-        ))
+        refresh_needed = any(
+            env in os.environ
+            for env in (
+                "USER_SALT_ROTATION_DAYS",
+                "GLOBAL_SALT_ROTATION_DAYS",
+            )
+        )
         if refresh_needed:
             reset_salt_storage()
         backend = get_salt_backend(refresh=refresh_needed)
@@ -216,7 +244,9 @@ async def get_salt_status(user=Depends(admin_guard)) -> SaltStatusResponse:  # t
             salt_op_counter.labels("status", "error").inc()  # type: ignore
         except Exception:
             pass
-        raise HTTPException(status_code=500, detail="Failed to get salt status")
+        raise HTTPException(
+            status_code=500, detail="Failed to get salt status"
+        )
 
 
 @router.post("/rotate/user/{user_id}", response_model=RotateUserSaltResponse)
@@ -224,7 +254,9 @@ async def rotate_user_salt(user_id: str, background_tasks: BackgroundTasks, forc
     backend = get_salt_backend()
     existing = backend.get_user_salt(user_id)
     if not existing and not force:
-        raise HTTPException(status_code=404, detail=f"No salt found for user {user_id}")
+        raise HTTPException(
+            status_code=404, detail=f"No salt found for user {user_id}"
+        )
 
     def _task() -> None:
         start_t = time.perf_counter()
@@ -261,7 +293,9 @@ async def rotate_user_salt(user_id: str, background_tasks: BackgroundTasks, forc
     )
 
 
-@router.post("/rotate/global/{salt_type}", response_model=RotateGlobalSaltResponse)
+@router.post(
+    "/rotate/global/{salt_type}", response_model=RotateGlobalSaltResponse
+)
 async def rotate_global_salt(salt_type: str, background_tasks: BackgroundTasks, user=Depends(admin_guard)) -> RotateGlobalSaltResponse:  # type: ignore[no-untyped-def]
     backend = get_salt_backend()
 
@@ -326,6 +360,7 @@ async def rotate_batch_salts(background_tasks: BackgroundTasks, force: bool = Fa
                     salt_op_latency_hist.labels("rotate_batch", "error").observe(time.perf_counter() - start_t)  # type: ignore
                 except Exception:
                     pass
+
         asyncio.get_running_loop().create_task(_run())
 
     background_tasks.add_task(_task, due["users"], due["globals"])
@@ -350,7 +385,10 @@ async def get_user_salt_audit(user_id: str, user=Depends(admin_guard)) -> UserSa
     if mem and hasattr(mem, "memory_store"):
         raw = getattr(mem, "memory_store", {}).get(user_id, {})  # type: ignore[arg-type]
     if not raw:
-        raise HTTPException(status_code=404, detail=f"No salt information found for user {user_id}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"No salt information found for user {user_id}",
+        )
     user_data = cast(Dict[str, Any], raw)
     return UserSaltAuditResponse(
         user_id=user_id,
@@ -359,7 +397,9 @@ async def get_user_salt_audit(user_id: str, user=Depends(admin_guard)) -> UserSa
         last_rotated=cast(Optional[str], user_data.get("last_rotated")),
         rotation_count=int(user_data.get("rotation_count", 0) or 0),
         next_rotation=cast(Optional[str], user_data.get("next_rotation")),
-        previous_salt_hash=cast(Optional[str], user_data.get("previous_salt_hash")),
+        previous_salt_hash=cast(
+            Optional[str], user_data.get("previous_salt_hash")
+        ),
         timestamp=utc_timestamp(),
     )
 
@@ -367,11 +407,17 @@ async def get_user_salt_audit(user_id: str, user=Depends(admin_guard)) -> UserSa
 @router.post("/dev/pseudonymize", response_model=PseudonymizeTestResponse)
 async def test_pseudonymization(data: PseudonymizeTestRequest, user=Depends(admin_guard)) -> PseudonymizeTestResponse:  # type: ignore[no-untyped-def]
     if not data.enable_dev_mode:
-        raise HTTPException(status_code=403, detail="Development mode not enabled")
+        raise HTTPException(
+            status_code=403, detail="Development mode not enabled"
+        )
     if not data.user_id or data.identifier is None:
-        raise HTTPException(status_code=400, detail="user_id and identifier are required")
+        raise HTTPException(
+            status_code=400, detail="user_id and identifier are required"
+        )
     user_pseudo = pseudonymize_user_data(data.user_id, data.identifier)
-    analytics_pseudo = pseudonymize_analytics_data(data.identifier, data.event_type)
+    analytics_pseudo = pseudonymize_analytics_data(
+        data.identifier, data.event_type
+    )
     try:
         salt_op_counter.labels("pseudonymize_test", "success").inc()  # type: ignore
     except Exception:

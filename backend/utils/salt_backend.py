@@ -17,56 +17,91 @@ Future Backends (planned):
     - RedisCachedFirestoreBackend (read-cache + durable write-through)
     - SQLSaltBackend (Postgres with transactional rotations)
 """
+
 from __future__ import annotations
-from typing import Protocol, Optional, Dict, List, runtime_checkable, Any
+
 import os
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 from .salt_storage import BatchRotateResult, SaltStorage, get_salt_storage
+
 
 @runtime_checkable
 class SaltBackendProtocol(Protocol):
     """Minimal contract shared by all salt backends."""
+
     # User salts
-    def get_user_salt(self, user_id: str) -> Optional[bytes]: ...  # noqa: D401,E701
-    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes: ...  # noqa
+    def get_user_salt(
+        self, user_id: str
+    ) -> Optional[bytes]: ...  # noqa: D401,E701
+    def create_user_salt(
+        self, user_id: str, salt: Optional[bytes] = None
+    ) -> bytes: ...  # noqa
     def rotate_user_salt(self, user_id: str) -> bytes: ...  # noqa
     def get_or_create_user_salt(self, user_id: str) -> bytes: ...  # noqa
 
     # Global salts
-    def get_global_salt(self, salt_type: str = "events") -> Optional[bytes]: ...  # noqa
-    def create_global_salt(self, salt_type: str = "events", salt: Optional[bytes] = None) -> bytes: ...  # noqa
-    def get_or_create_global_salt(self, salt_type: str = "events") -> bytes: ...  # noqa
+    def get_global_salt(
+        self, salt_type: str = "events"
+    ) -> Optional[bytes]: ...  # noqa
+    def create_global_salt(
+        self, salt_type: str = "events", salt: Optional[bytes] = None
+    ) -> bytes: ...  # noqa
+    def get_or_create_global_salt(
+        self, salt_type: str = "events"
+    ) -> bytes: ...  # noqa
 
     # Rotation queries / batch
     def get_salts_due_for_rotation(self) -> Dict[str, List[str]]: ...  # noqa
-    async def batch_rotate_salts(self, user_ids: List[str], global_types: List[str]) -> BatchRotateResult: ...  # noqa
+    async def batch_rotate_salts(
+        self, user_ids: List[str], global_types: List[str]
+    ) -> BatchRotateResult: ...  # noqa
+
 
 class InMemorySaltBackend(SaltBackendProtocol):
     """Adapter around existing in-memory SaltStorage for protocol compliance."""
+
     def __init__(self, storage: Optional[SaltStorage] = None):
         self._storage = storage or get_salt_storage()
 
     # Delegate methods
     def get_user_salt(self, user_id: str) -> Optional[bytes]:
         return self._storage.get_user_salt(user_id)
-    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:
+
+    def create_user_salt(
+        self, user_id: str, salt: Optional[bytes] = None
+    ) -> bytes:
         return self._storage.create_user_salt(user_id, salt)
+
     def rotate_user_salt(self, user_id: str) -> bytes:
         return self._storage.rotate_user_salt(user_id)
+
     def get_or_create_user_salt(self, user_id: str) -> bytes:
         return self._storage.get_or_create_user_salt(user_id)
+
     def get_global_salt(self, salt_type: str = "events") -> Optional[bytes]:
         return self._storage.get_global_salt(salt_type)
-    def create_global_salt(self, salt_type: str = "events", salt: Optional[bytes] = None) -> bytes:
+
+    def create_global_salt(
+        self, salt_type: str = "events", salt: Optional[bytes] = None
+    ) -> bytes:
         return self._storage.create_global_salt(salt_type, salt)
+
     def get_or_create_global_salt(self, salt_type: str = "events") -> bytes:
         return self._storage.get_or_create_global_salt(salt_type)
+
     def get_salts_due_for_rotation(self) -> Dict[str, List[str]]:
         return self._storage.get_salts_due_for_rotation()
-    async def batch_rotate_salts(self, user_ids: List[str], global_types: List[str]) -> BatchRotateResult:
+
+    async def batch_rotate_salts(
+        self, user_ids: List[str], global_types: List[str]
+    ) -> BatchRotateResult:
         return await self._storage.batch_rotate_salts(user_ids, global_types)
 
-class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until real impl
+
+class FirestoreSaltBackend(
+    SaltBackendProtocol
+):  # pragma: no cover - until real impl
     """Firestore-backed salt storage (currently emulated with in-memory delegate).
 
     Implementation strategy (future):
@@ -89,6 +124,7 @@ class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until rea
             if use_emulate:
                 raise ImportError("Emulation forced")
             import google.cloud.firestore  # type: ignore
+
             # Placeholder: real client wiring deferred.
             self._client: Any = google.cloud.firestore.Client()  # type: ignore[attr-defined]
             # Mark unimplemented operations by raising when used.
@@ -102,35 +138,53 @@ class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until rea
     def _ensure_delegate(self) -> SaltStorage:
         if self._delegate is None:
             # Real implementation not yet available
-            raise NotImplementedError("Firestore operations not implemented yet")
+            raise NotImplementedError(
+                "Firestore operations not implemented yet"
+            )
         return self._delegate
 
     # User salts
     def get_user_salt(self, user_id: str) -> Optional[bytes]:
         return self._ensure_delegate().get_user_salt(user_id)
-    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:
+
+    def create_user_salt(
+        self, user_id: str, salt: Optional[bytes] = None
+    ) -> bytes:
         return self._ensure_delegate().create_user_salt(user_id, salt)
+
     def rotate_user_salt(self, user_id: str) -> bytes:
         return self._ensure_delegate().rotate_user_salt(user_id)
+
     def get_or_create_user_salt(self, user_id: str) -> bytes:
         return self._ensure_delegate().get_or_create_user_salt(user_id)
 
     # Global salts
     def get_global_salt(self, salt_type: str = "events") -> Optional[bytes]:
         return self._ensure_delegate().get_global_salt(salt_type)
-    def create_global_salt(self, salt_type: str = "events", salt: Optional[bytes] = None) -> bytes:
+
+    def create_global_salt(
+        self, salt_type: str = "events", salt: Optional[bytes] = None
+    ) -> bytes:
         return self._ensure_delegate().create_global_salt(salt_type, salt)
+
     def get_or_create_global_salt(self, salt_type: str = "events") -> bytes:
         return self._ensure_delegate().get_or_create_global_salt(salt_type)
 
     # Queries / batch
     def get_salts_due_for_rotation(self) -> Dict[str, List[str]]:
         return self._ensure_delegate().get_salts_due_for_rotation()
-    async def batch_rotate_salts(self, user_ids: List[str], global_types: List[str]) -> BatchRotateResult:
-        return await self._ensure_delegate().batch_rotate_salts(user_ids, global_types)
+
+    async def batch_rotate_salts(
+        self, user_ids: List[str], global_types: List[str]
+    ) -> BatchRotateResult:
+        return await self._ensure_delegate().batch_rotate_salts(
+            user_ids, global_types
+        )
+
 
 # Singleton cache for adapter
 _backend_singleton: Optional[SaltBackendProtocol] = None
+
 
 def get_salt_backend(refresh: bool = False) -> SaltBackendProtocol:
     global _backend_singleton
@@ -151,6 +205,7 @@ def backend_storage_type(backend: SaltBackendProtocol) -> str:
     if isinstance(backend, FirestoreSaltBackend):  # type: ignore[arg-type]
         return "firestore"  # Currently unused (fallback maps to memory)
     return backend.__class__.__name__.lower()
+
 
 __all__ = [
     "SaltBackendProtocol",

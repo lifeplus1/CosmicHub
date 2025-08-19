@@ -56,6 +56,16 @@ Based on current analysis of active errors:
 
 **Total Resolved**: ~75+ issues across production components
 
+### ✅ api.ts Service Core - COMPLETED (August 19)
+
+- Removed 20+ duplicate declarations and redundant helpers
+- Consolidated imports; eliminated duplicate wildcard/type imports
+- Added robust backend response transformer with explicit null checks
+- Resolved all strict-boolean-expression, eqeqeq, and unused var errors in `api.ts`
+- Established single source of utility helpers (no duplication)
+
+**Impact**: Core API gateway now clean; safer for downstream refactors.
+
 ## Current Action Plan
 
 ### Week 1 Priority: Boolean Expression Cleanup (August 19-25)

@@ -23,11 +23,11 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
   const [birthData, setBirthDataState] = useState<ChartBirthData | null>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored != null) {
+  if (stored !== null) {
         const parsed = JSON.parse(stored);
         // Validate the data structure
-        if (parsed !== null && typeof parsed === 'object' && typeof parsed.year === 'number' && typeof parsed.month === 'number' && typeof parsed.day === 'number') {
-          return parsed;
+        if (parsed !== null && typeof parsed === 'object' && typeof (parsed as any).year === 'number' && typeof (parsed as any).month === 'number' && typeof (parsed as any).day === 'number') {
+          return parsed as ChartBirthData;
         }
       }
     } catch (error) {

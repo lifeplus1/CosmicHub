@@ -7,13 +7,15 @@ const ProfileSimple: React.FC = (): JSX.Element => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  if (!user) {
+  if (user === null || user === undefined) {
     return <div>Loading...</div>;
   }
 
-  const handleSignOut = async (): Promise<void> => {
-    await signOut();
-    navigate('/login');
+  const handleSignOut = (): void => {
+    void (async () => {
+      await signOut();
+      navigate('/login');
+    })();
   };
 
   return (

@@ -9,14 +9,20 @@ Enhancements:
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from typing import Any, Dict, List, Literal
+
+import swisseph as swe
+from fastapi import APIRouter, Depends, Header, HTTPException
 from firebase_admin import auth
 from pydantic import BaseModel
-from typing import Literal, Dict, List, Any
-import swisseph as swe
+
+from api.utils.serialization import ChartData as SerializedChartData
+from api.utils.serialization import (
+    serialize_data,
+)
 from settings import settings
-from .services.astro_service import get_astro_service, AstroService
-from api.utils.serialization import serialize_data, ChartData as SerializedChartData
+
+from .services.astro_service import AstroService, get_astro_service
 
 # Example usage after all class definitions:
 
@@ -24,10 +30,12 @@ router = APIRouter(prefix="/charts")
 
 # ----- Typed models to avoid 'Unknown' types -----
 
+
 class PlanetAspect(BaseModel):
     type: str
     target: str
     orb: float
+
 
 class Planet(BaseModel):
     name: str
@@ -36,6 +44,7 @@ class Planet(BaseModel):
     house: int | None = None
     aspects: List[PlanetAspect] = []
 
+
 class Asteroid(BaseModel):
     name: str
     sign: str
@@ -43,16 +52,19 @@ class Asteroid(BaseModel):
     house: int | None = None
     aspects: List[PlanetAspect] = []
 
+
 class Angle(BaseModel):
     name: str
     sign: str
     degree: float
+
 
 class House(BaseModel):
     number: int
     sign: str
     cusp: float
     planets: List[str] = []
+
 
 class Aspect(BaseModel):
     planet1: str
@@ -61,6 +73,7 @@ class Aspect(BaseModel):
     orb: float
     applying: bool | None = None
 
+
 class ChartData(BaseModel):
     planets: List[Planet]
     asteroids: List[Asteroid]
@@ -68,20 +81,31 @@ class ChartData(BaseModel):
     houses: List[House]
     aspects: List[Aspect]
 
+
 # ----- Dependencies -----
 def verify_id_token_dependency(
     authorization: str | None = Header(default=None, alias="Authorization")
 ) -> Dict[str, Any]:
     import os
-    if os.environ.get("TEST_MODE") == "1":  # Lightweight bypass for test environment
+
+    if (
+        os.environ.get("TEST_MODE") == "1"
+    ):  # Lightweight bypass for test environment
         return {"uid": "dev-user"}
     if not authorization:
-        raise HTTPException(status_code=401, detail="Missing Authorization header")
-    token_str = authorization.split("Bearer ")[-1] if "Bearer " in authorization else authorization
+        raise HTTPException(
+            status_code=401, detail="Missing Authorization header"
+        )
+    token_str = (
+        authorization.split("Bearer ")[-1]
+        if "Bearer " in authorization
+        else authorization
+    )
     try:
         return auth.verify_id_token(token_str)  # type: ignore[no-any-return]
     except Exception as e:  # pragma: no cover - passthrough
         raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
+
 
 @router.get("/{chart_type}/{user_id}", response_model=ChartData)
 async def get_chart(
@@ -100,21 +124,42 @@ async def get_chart(
                     sign="Leo",
                     house=5,
                     degree=15.25,
-                    aspects=[PlanetAspect(type="Conjunction", target="Mercury", orb=2.5)],
+                    aspects=[
+                        PlanetAspect(
+                            type="Conjunction", target="Mercury", orb=2.5
+                        )
+                    ],
                 )
             ],
             asteroids=[
-                Asteroid(name="Ceres", sign="Virgo", house=6, degree=10.75, aspects=[])
+                Asteroid(
+                    name="Ceres",
+                    sign="Virgo",
+                    house=6,
+                    degree=10.75,
+                    aspects=[],
+                )
             ],
             angles=[Angle(name="Ascendant", sign="Aries", degree=12.33)],
-            houses=[House(number=1, sign="Aries", cusp=12.33, planets=["Sun"])],
+            houses=[
+                House(number=1, sign="Aries", cusp=12.33, planets=["Sun"])
+            ],
             aspects=[
-                Aspect(planet1="Sun", planet2="Mercury", type="Conjunction", orb=2.5, applying=True)
-            ]
+                Aspect(
+                    planet1="Sun",
+                    planet2="Mercury",
+                    type="Conjunction",
+                    orb=2.5,
+                    applying=True,
+                )
+            ],
         )
         return chart_data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Chart calculation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Chart calculation failed: {str(e)}"
+        )
+
 
 @router.post("/save", response_model=Dict[str, Any])
 async def save_chart(
@@ -153,28 +198,40 @@ async def save_chart(
                     "planet2": a.planet2,
                     "type": a.type,
                     "orb": a.orb,
-                    "applying": str(a.applying).lower() if a.applying is not None else ""
+                    "applying": (
+                        str(a.applying).lower()
+                        if a.applying is not None
+                        else ""
+                    ),
                 }
                 for a in chart_data.aspects
             ],
-            asteroids=[
-                {
-                    "name": a.name,
-                    "sign": a.sign,
-                    "degree": a.degree,
-                    "house": a.house if a.house is not None else "",
-                }
-                for a in chart_data.asteroids
-            ] if chart_data.asteroids else None,
-            angles=[
-                {
-                    "name": ang.name,
-                    "sign": ang.sign,
-                    "degree": ang.degree,
-                    "position": ang.degree,  # placeholder for full 360° value
-                }
-                for ang in chart_data.angles
-            ] if chart_data.angles else None,
+            asteroids=(
+                [
+                    {
+                        "name": a.name,
+                        "sign": a.sign,
+                        "degree": a.degree,
+                        "house": a.house if a.house is not None else "",
+                    }
+                    for a in chart_data.asteroids
+                ]
+                if chart_data.asteroids
+                else None
+            ),
+            angles=(
+                [
+                    {
+                        "name": ang.name,
+                        "sign": ang.sign,
+                        "degree": ang.degree,
+                        "position": ang.degree,  # placeholder for full 360° value
+                    }
+                    for ang in chart_data.angles
+                ]
+                if chart_data.angles
+                else None
+            ),
         )
 
         # Produce serialized JSON (compact, validated)
@@ -184,11 +241,15 @@ async def save_chart(
         chart_id = f"chart_{token.get('uid', 'unknown')}_{hash(serialized_json) % 1000000}"
 
         # Cache by passing the Pydantic model so astro_service uses serialize_data internally
-        cache_success = await astro_service.cache_chart_data(chart_id, serialized_model.model_dump())
-        
+        cache_success = await astro_service.cache_chart_data(
+            chart_id, serialized_model.model_dump()
+        )
+
         # Log the operation
-        print(f"Chart cached: {cache_success}. Chart ID: {chart_id} (size={len(serialized_json)} chars)")
-        
+        print(
+            f"Chart cached: {cache_success}. Chart ID: {chart_id} (size={len(serialized_json)} chars)"
+        )
+
         return {
             "status": "success",
             "chart_id": chart_id,
@@ -196,8 +257,10 @@ async def save_chart(
             "message": "Chart saved successfully with unified serialization",
             "serialized_size": len(serialized_json),
             "version": "1.0.0",
-            "schemaVersion": "1.0.0"
+            "schemaVersion": "1.0.0",
         }
-        
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save chart: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to save chart: {str(e)}"
+        )

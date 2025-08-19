@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
           Welcome to CosmicHub
         </h1>
         <p className="text-xl text-cosmic-silver/80 font-playfair">
-          {user ? `Hello, ${user.email}!` : 'Your cosmic journey begins here'}
+          {user !== null ? `Hello, ${user.email}!` : 'Your cosmic journey begins here'}
         </p>
         <div className="mt-6 flex justify-center">
           <div className="w-24 h-1 bg-gradient-to-r from-cosmic-gold to-cosmic-purple rounded-full"></div>
@@ -107,7 +107,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Chart Wheel Preview Section */}
-      {showQuickChart && (
+  {showQuickChart === true && (
         <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
@@ -152,7 +152,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Recent Activity Section */}
-      {user && (
+  {user !== null && (
         <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
           <div className="flex items-center mb-6">
             <div className="w-10 h-10 bg-cosmic-gold/20 rounded-lg flex items-center justify-center mr-4">
@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Welcome Message for Non-Authenticated Users */}
-      {!user && (
+  {user === null && (
         <div className="bg-gradient-to-r from-cosmic-purple/20 to-cosmic-gold/20 backdrop-blur-lg border border-cosmic-gold/30 rounded-xl p-8 text-center">
           <h3 className="text-2xl font-bold text-cosmic-gold mb-4 font-playfair">
             Begin Your Cosmic Journey

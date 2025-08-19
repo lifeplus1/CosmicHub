@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import axios from 'axios';
 import { devConsole } from '../config/environment';
 import { toUnifiedBirthData, type AnyBirthInput } from '@cosmichub/types';
@@ -14,8 +13,6 @@ import {
   type Aspect,
   type ChartData,
   type ChartBirthData,
-  type ApiResponse,
-  type ApiErrorResponse,
   type ChartId,
   type UserId,
   type InterpretationId,
@@ -55,48 +52,9 @@ const zodiacSigns: readonly ZodiacSign[] = [
 ];
 
 const isZodiacSign = (v: unknown): v is ZodiacSign => 
-  typeof v === 'string' && zodiacSigns.includes(v as ZodiacSign);  type ApiErrorResponse,
-  type ChartId,
-  type UserId,
-  type InterpretationId,
-  type SavedChart,
-  type SavedChartsResponse,
-  type SaveChartRequest,
-  type SaveChartResponse,
-  type Interpretation,
-  type InterpretationRequest,
-  type InterpretationResponse,
-  // Import ChartData as ChartDataType to avoid conflict
-  type ChartData as ChartDataType,
-  AuthenticationError,
-  NotFoundError,
-  ValidationError
-} from './api.types';
+  typeof v === 'string' && zodiacSigns.includes(v as ZodiacSign);
 
-import { 
-  type Planet,
-  type House,
-  type PlanetName,
-  type AspectType,
-  type ZodiacSign,
-  type Aspect,
-  type ChartData,
-  type ApiResponse,
-  type ApiErrorResponse,
-  type ChartId,
-  type UserId,
-  type InterpretationId,
-  type SavedChart,
-  type SavedChartsResponse,
-  type SaveChartRequest,
-  type SaveChartResponse,
-  type Interpretation,
-  type InterpretationRequest,
-  type InterpretationResponse,
-  AuthenticationError,
-  NotFoundError,
-  ValidationError
-} from './api.types';
+// Types exported in previous import
 
 // Re-export types from api.types
 export * from './api.types';
@@ -111,7 +69,10 @@ const getDefaultPlanets = (): Record<PlanetName, Planet> => ({
   saturn: { name: 'saturn', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
   uranus: { name: 'uranus', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
   neptune: { name: 'neptune', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
-  pluto: { name: 'pluto', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 }
+  pluto: { name: 'pluto', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  chiron: { name: 'chiron', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  north_node: { name: 'north_node', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  south_node: { name: 'south_node', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 }
 });
 
 // Narrow import.meta.env access to avoid implicit any

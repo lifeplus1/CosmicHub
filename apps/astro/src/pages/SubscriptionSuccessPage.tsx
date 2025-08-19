@@ -1,9 +1,5 @@
-import React, { useEffect, useState, useMemo, type JSX as JSXNamespace }    const tierNames: Record<string, string> = {
-      'healwave_pro': 'Healwave Pro',
-      'astro_premium': 'Astrology Premium',
-      'cosmic_master': 'Cosmic Master'
-    };
-    return typeof tierNames[tier] === 'string' ? tierNames[tier] : tier;'react';
+import React, { useEffect, useState, useMemo } from 'react';
+
 import { useSearchParams, Link } from 'react-router-dom';
 import { FaCheckCircle, FaCrown, FaArrowRight, FaHome, FaCreditCard, FaSpinner } from 'react-icons/fa';
 import { useAuth, useSubscription } from '@cosmichub/auth';
@@ -16,7 +12,7 @@ interface SubscriptionDetails {
   expires_at: string;
 }
 
-export const SubscriptionSuccessPage: React.FC = (): JSXNamespace.Element => {
+export const SubscriptionSuccessPage: React.FC = (): JSX.Element => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const subscriptionData = useSubscription();
@@ -27,7 +23,7 @@ export const SubscriptionSuccessPage: React.FC = (): JSXNamespace.Element => {
   const sessionId = searchParams.get('session_id');
   const refreshSubscription: () => Promise<unknown> = useMemo((): (() => Promise<unknown>) => {
     return typeof subscriptionData?.refreshSubscription === 'function'
-      ? subscriptionData.refreshSubscription
+  ? subscriptionData.refreshSubscription
       : () => Promise.resolve();
   }, [subscriptionData]);
 

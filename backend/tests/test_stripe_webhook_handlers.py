@@ -1,8 +1,8 @@
-import types
 import sys
-from pathlib import Path
+import types
 from datetime import datetime
-from typing import Any, Dict, Mapping, TypedDict, List
+from pathlib import Path
+from typing import Any, Dict, List, Mapping, TypedDict
 
 import pytest
 
@@ -19,15 +19,21 @@ class FakeDoc:
     def __init__(self) -> None:
         self._data: Dict[str, Any] = {}
         self.exists = False
+
     def get(self) -> "FakeDoc":
         return self
-    def set(self, value: Mapping[str, Any], merge: bool = False) -> None:  # noqa: ARG002
+
+    def set(
+        self, value: Mapping[str, Any], merge: bool = False
+    ) -> None:  # noqa: ARG002
         # Simulate write
         self._data.update(value)
         self.exists = True
+
     def update(self, value: Mapping[str, Any]) -> None:
         self._data.update(value)
         self.exists = True
+
     def to_dict(self) -> Dict[str, Any]:
         return dict(self._data)
 
@@ -35,6 +41,7 @@ class FakeDoc:
 class FakeCollection:
     def __init__(self) -> None:
         self.docs: Dict[str, FakeDoc] = {}
+
     def document(self, doc_id: str) -> FakeDoc:
         self.docs.setdefault(doc_id, FakeDoc())
         return self.docs[doc_id]
@@ -44,6 +51,7 @@ class FakeDB:
     def __init__(self) -> None:
         self.subs = FakeCollection()
         self.users = FakeCollection()
+
     def collection(self, name: str) -> Any:  # noqa: ANN401
         if name == "subscriptions":
             return self.subs
@@ -82,13 +90,18 @@ def patch_stripe(monkeypatch: pytest.MonkeyPatch) -> None:
 class SubItemPrice(TypedDict):
     id: str
 
+
 class SubItem(TypedDict):
     price: SubItemPrice
+
 
 class SubItems(TypedDict):
     data: List[SubItem]
 
-class SubscriptionPayload(TypedDict, total=False):  # kept for structure reference only
+
+class SubscriptionPayload(
+    TypedDict, total=False
+):  # kept for structure reference only
     customer: str
     id: str
     status: str
@@ -96,8 +109,12 @@ class SubscriptionPayload(TypedDict, total=False):  # kept for structure referen
     current_period_end: int
     items: Dict[str, Any]
 
-class InvoicePayload(TypedDict, total=False):  # kept for structure reference only
+
+class InvoicePayload(
+    TypedDict, total=False
+):  # kept for structure reference only
     subscription: str
+
 
 @pytest.mark.asyncio
 async def test_handle_subscription_created(fake_db: FakeDB) -> None:
@@ -157,17 +174,26 @@ async def test_handle_payment_succeeded_and_failed(fake_db: FakeDB) -> None:
 
 
 @pytest.mark.asyncio
-async def test_handle_webhook_invalid_signature(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_handle_webhook_invalid_signature(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     # Patch construct_event to raise signature error path
     class SignatureError(Exception):
         pass
+
     class FakeStripeErrorNamespace:
         SignatureVerificationError = SignatureError
+
     class FakeWebhook:
         @staticmethod
-        def construct_event(payload: bytes, sig: str | None, secret: str | None) -> Dict[str, Any]:  # noqa: D401, ANN001
+        def construct_event(
+            payload: bytes, sig: str | None, secret: str | None
+        ) -> Dict[str, Any]:  # noqa: D401, ANN001
             raise SignatureError("bad sig")
-    fake_stripe = types.SimpleNamespace(Webhook=FakeWebhook, error=FakeStripeErrorNamespace())
+
+    fake_stripe = types.SimpleNamespace(
+        Webhook=FakeWebhook, error=FakeStripeErrorNamespace()
+    )
     monkeypatch.setattr(integ, "stripe", fake_stripe)  # type: ignore[arg-type]
 
     from fastapi import Request
@@ -175,10 +201,17 @@ async def test_handle_webhook_invalid_signature(monkeypatch: pytest.MonkeyPatch)
 
     class DummyRequest(Request):  # type: ignore[misc]
         def __init__(self) -> None:  # type: ignore[no-untyped-def]
-            scope: Dict[str, Any] = {"type": "http", "method": "POST", "path": "/", "headers": []}
+            scope: Dict[str, Any] = {
+                "type": "http",
+                "method": "POST",
+                "path": "/",
+                "headers": [],
+            }
             super().__init__(scope, receive=lambda: None)  # type: ignore[arg-type]
+
         async def body(self) -> bytes:  # noqa: D401
             return b"{}"
+
         @property
         def headers(self) -> Headers:  # type: ignore[override]
             return Headers({"stripe-signature": "sig"})

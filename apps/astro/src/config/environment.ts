@@ -89,7 +89,7 @@ export const loggingConfig = {
 
 // Performance monitoring configuration
 export const performanceConfig = {
-  enabled: isDevelopment() || env.VITE_ENABLE_ANALYTICS,
+  enabled: isDevelopment() || env.VITE_ENABLE_ANALYTICS === true,
   trackingInterval: 5000, // 5 seconds
   maxOperations: 1000, // Keep last 1000 operations
   enableMemoryTracking: 'memory' in performance,
