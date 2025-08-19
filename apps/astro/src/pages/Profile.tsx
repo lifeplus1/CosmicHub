@@ -2,10 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { Card, Button } from '@cosmichub/ui';
 import * as Tabs from '@radix-ui/react-tabs';
-import { FaUser, FaCog, FaChartLine, FaSave, FaCreditCard, FaArrowUp, FaHistory, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaArrowUp } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastProvider';
-import ProgressBar from '../components/ProgressBar';
 import { devConsole } from '../config/environment';
 // (Profile page currently does not use tier details directly; removed local subscription import)
 
@@ -32,21 +31,21 @@ const Profile: React.FC = React.memo(() => {
     lastLogin: new Date(),
   });
 
-  const loadUserStats = useCallback(async () => {
-    if (user?.uid) {
+  const loadUserStats = useCallback(() => {
+    if (user?.uid !== undefined && user?.uid !== null) {
       // Simulate fetching stats from Firestore
       setUserStats({
         totalCharts: 50,
         chartsThisMonth: 10,
         savedCharts: 5,
-        joinDate: new Date(user.metadata?.creationTime || Date.now()),
+        joinDate: new Date(user.metadata?.creationTime ?? Date.now()),
         lastLogin: new Date(),
       });
     }
   }, [user?.uid, user?.metadata?.creationTime]);
 
   useEffect(() => {
-    loadUserStats();
+  void loadUserStats();
   }, [loadUserStats]);
 
   const handleSignOut = useCallback(async () => {
@@ -64,7 +63,7 @@ const Profile: React.FC = React.memo(() => {
     }
   }, [signOut, navigate, toast]);
 
-  if (!user) {
+  if (user === null || user === undefined) {
     return (
       <div className="py-10 text-center">
         <div className="mx-auto text-4xl text-cosmic-purple animate-spin" aria-hidden="true">⭐</div>
@@ -161,14 +160,14 @@ const Profile: React.FC = React.memo(() => {
             <Card title="Subscription">
               <div className="text-center space-y-4">
                 <p className="text-cosmic-silver">You are currently on the Free plan</p>
-                <Button onClick={() => navigate('/upgrade')} variant="primary">
+                <Button onClick={() => { navigate('/upgrade'); }} variant="primary">
                   <FaArrowUp className="mr-2" /> Upgrade to Premium
                 </Button>
               </div>
             </Card>
             
             <div className="text-center mt-6">
-              <Button onClick={handleSignOut} variant="secondary">
+              <Button onClick={() => { void handleSignOut(); }} variant="secondary">
                 Sign Out
               </Button>
             </div>

@@ -24,7 +24,7 @@ const Login: React.FC = () => {
   devConsole.log?.('📝 Login input changed:', { name, value });
     setLoginData(prev => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
-    if (error) setError('');
+  if (error !== '') setError('');
   }, [error]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -39,7 +39,7 @@ const Login: React.FC = () => {
         throw new Error('Please enter both email and password');
       }
 
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginData.email)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginData.email)) {
         throw new Error('Please enter a valid email address');
       }
 
@@ -69,14 +69,14 @@ const Login: React.FC = () => {
         </p>
       </div>
 
-      <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
+    <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
   {error !== '' && (
           <div className="mb-6 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
             <p className="text-red-200 text-sm">{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+  <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-cosmic-silver/80 mb-2">Email</label>
             <input 
@@ -123,7 +123,7 @@ const Login: React.FC = () => {
 
           <div className="text-center">
             <p className="text-cosmic-silver/70">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <a href="/signup" className="text-cosmic-gold hover:text-cosmic-gold/80 font-semibold">
                 Sign Up
               </a>

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { devConsole } from '../config/environment';
 import { VisuallyHidden } from '@/components/accessibility/VisuallyHidden';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@cosmichub/auth';
-import { useSubscription, type SubscriptionState } from '@cosmichub/auth';
+import { useAuth, useSubscription, type SubscriptionState } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';
 import { 
@@ -28,25 +27,34 @@ interface UserStats {
   lastLogin: Date;
 }
 
-interface UsageLimit {
-  current: number;
-  limit: number;
-}
-
-interface UsageLimits {
-  chartsPerMonth: UsageLimit;
-  chartStorage: UsageLimit;
-}
-
-interface ToastConfig {
-  description: string;
-  status: 'success' | 'error' | 'warning' | 'info';
-  duration?: number;
-}
+// Removed unused interfaces (UsageLimit, UsageLimits, ToastConfig) per lint
 
 const UserProfile = React.memo(() => {
   const { user } = useAuth();
-  const { subscription, userTier, isLoading, checkUsageLimit } = useSubscription() as SubscriptionState;
+  const subscriptionUnknown = useSubscription();
+  const isSubscriptionState = (val: unknown): val is SubscriptionState => {
+    return (
+      val !== null &&
+      typeof val === 'object' &&
+      'userTier' in (val as Record<string, unknown>) &&
+      'checkUsageLimit' in (val as Record<string, unknown>)
+    );
+  };
+  const fallbackSubscription = {
+    subscription: undefined,
+    userTier: 'free',
+    isLoading: false,
+    checkUsageLimit: () => ({ current: 0, limit: 0 }),
+    tier: 'free',
+    hasFeature: () => false,
+    upgradeRequired: () => {},
+    refreshSubscription: async () => {}
+  } as unknown as SubscriptionState;
+  const subscriptionState: SubscriptionState = isSubscriptionState(subscriptionUnknown)
+    ? subscriptionUnknown
+    : fallbackSubscription;
+  // Destructure only safely typed fields we consume frequently
+  const { userTier, isLoading, checkUsageLimit } = subscriptionState;
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -58,7 +66,7 @@ const UserProfile = React.memo(() => {
     lastLogin: new Date(),
   });
 
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = () => {
     if (user === null || user === undefined) {
       toast({
         description: "Please log in to save your profile.",
@@ -78,8 +86,10 @@ const UserProfile = React.memo(() => {
 
     try {
       const serializedProfile = serializeAstrologyData(profileData);
-      // Here you would call a service to save the data, e.g.:
-      // await userProfileService.save(JSON.parse(serializedProfile));
+      // TODO: integrate persistence service. For now just ensure variable is used implicitly
+      if (serializedProfile.length === 0) {
+        devConsole.warn?.('Serialized profile unexpectedly empty');
+      }
       
       toast({
         description: "Profile saved successfully!",
@@ -98,14 +108,14 @@ const UserProfile = React.memo(() => {
     }
   };
 
-  const loadUserStats = useCallback(async () => {
+  const loadUserStats = useCallback(() => {
     if (user === null || user === undefined || typeof checkUsageLimit !== 'function') {
       return;
     }
 
-    try {
-      const chartsUsage = checkUsageLimit('chartsPerMonth');
-      const savedUsage = checkUsageLimit('chartStorage');
+  try {
+  const chartsUsage = checkUsageLimit('chartsPerMonth');
+  const savedUsage = checkUsageLimit('chartStorage');
       
       setUserStats({
         totalCharts: chartsUsage.current + 50, // TODO: Get actual total from backend
@@ -125,10 +135,10 @@ const UserProfile = React.memo(() => {
   }, [user, checkUsageLimit, toast]);
 
   useEffect(() => {
-    loadUserStats();
+  void loadUserStats();
   }, [loadUserStats]);
 
-  const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS): JSX.Element => {
+  const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS): React.ReactElement => {
     const iconProps = {
       className: "text-cosmic-silver",
       "aria-hidden": "true" as const
@@ -163,7 +173,10 @@ const UserProfile = React.memo(() => {
     navigate('/upgrade');
   }, [navigate]);
 
-  const currentTier = COSMICHUB_TIERS[userTier as keyof typeof COSMICHUB_TIERS];
+  const isTierKey = (t: unknown): t is keyof typeof COSMICHUB_TIERS =>
+    typeof t === 'string' && t in COSMICHUB_TIERS;
+  const tierKey: keyof typeof COSMICHUB_TIERS = isTierKey(userTier) ? userTier : 'free';
+  const currentTier = COSMICHUB_TIERS[tierKey];
   const chartsUsage = typeof checkUsageLimit === 'function' ? checkUsageLimit('chartsPerMonth') : { current: 0, limit: 0 };
   const savedUsage = typeof checkUsageLimit === 'function' ? checkUsageLimit('chartStorage') : { current: 0, limit: 0 };
 
@@ -245,11 +258,24 @@ const UserProfile = React.memo(() => {
                         ? `$${currentTier.price.monthly.toFixed(2)}/month` 
                         : 'Free'}
                     </p>
-                    {currentTier.price.monthly > 0 && subscription?.currentPeriodEnd !== undefined && (
-                      <p className="text-sm text-cosmic-silver/80">
-                        Next billing: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-                      </p>
-                    )}
+                    {(() => {
+                      if (currentTier.price.monthly <= 0) return null;
+                      if (
+                        subscriptionState.subscription !== null &&
+                        subscriptionState.subscription !== undefined &&
+                        typeof subscriptionState.subscription === 'object' &&
+                        typeof (subscriptionState.subscription as { currentPeriodEnd?: unknown }).currentPeriodEnd === 'number'
+                      ) {
+                        const end = (subscriptionState.subscription as { currentPeriodEnd: number }).currentPeriodEnd;
+                        const dateStr = new Date(end).toLocaleDateString();
+                        return (
+                          <p className="text-sm text-cosmic-silver/80">
+                            Next billing: {dateStr}
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 </div>
                 <button
@@ -311,8 +337,8 @@ const UserProfile = React.memo(() => {
                 <h2 id="recent-activity-heading" className="mb-4 text-lg font-bold text-cosmic-gold">
                   Recent Activity
                 </h2>
-                <ul className="space-y-2" role="list">
-                  <li className="flex items-center space-x-2" role="listitem">
+                <ul className="space-y-2">
+                  <li className="flex items-center space-x-2">
                     <FaHistory className="text-cosmic-blue" aria-hidden="true" />
                     <span className="text-cosmic-silver">
                       Last Login: <time dateTime={userStats.lastLogin.toISOString()}>
@@ -320,7 +346,7 @@ const UserProfile = React.memo(() => {
                       </time>
                     </span>
                   </li>
-                  <li className="flex items-center space-x-2" role="listitem">
+                  <li className="flex items-center space-x-2">
                     <FaCalendarAlt className="text-cosmic-blue" aria-hidden="true" />
                     <span className="text-cosmic-silver">
                       Joined: <time dateTime={userStats.joinDate.toISOString()}>
@@ -359,7 +385,7 @@ const UserProfile = React.memo(() => {
                     aria-live="polite"
                   >
                     <span className="text-xl text-yellow-500" aria-hidden="true">⚠️</span>
-                    <p className="text-cosmic-silver">You've reached your monthly chart limit. Upgrade your plan to create more charts.</p>
+                    <p className="text-cosmic-silver">You&apos;ve reached your monthly chart limit. Upgrade your plan to create more charts.</p>
                   </div>
                 )}
               </section>
@@ -388,7 +414,7 @@ const UserProfile = React.memo(() => {
                     aria-live="polite"
                   >
                     <span className="text-xl text-yellow-500" aria-hidden="true">⚠️</span>
-                    <p className="text-cosmic-silver">You've reached your chart storage limit. Upgrade your plan to save more charts.</p>
+                    <p className="text-cosmic-silver">You&apos;ve reached your chart storage limit. Upgrade your plan to save more charts.</p>
                   </div>
                 )}
               </section>

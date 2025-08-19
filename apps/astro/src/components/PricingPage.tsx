@@ -1,13 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { devConsole } from '../config/environment';
-import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '@cosmichub/auth';
+import { useAuth, useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import { stripeService } from '@cosmichub/integrations';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle, FaHeart, FaCalendarAlt, FaFilePdf, FaSave, FaHeadset } from 'react-icons/fa';
 // Using centralized subscription tiers
-import { COSMICHUB_TIERS, calculateYearlySavings, AstroSubscriptionTier } from '@cosmichub/subscriptions';
+import { COSMICHUB_TIERS, AstroSubscriptionTier } from '@cosmichub/subscriptions';
 
 const PricingPage: React.FC = React.memo(() => {
   const { user } = useAuth();
@@ -17,7 +16,7 @@ const PricingPage: React.FC = React.memo(() => {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleUpgrade = useCallback(async (tier: 'premium' | 'elite') => {
-    if (!user) {
+    if (user === null || user === undefined) {
       toast({
         title: 'Authentication Required',
         description: 'Please sign in to upgrade your plan.',
@@ -28,7 +27,7 @@ const PricingPage: React.FC = React.memo(() => {
       return;
     }
 
-    if (!stripeService) {
+    if (stripeService === undefined || stripeService === null) {
       toast({
         title: 'Service Unavailable',
         description: 'Payment service is currently unavailable. Please try again later.',
@@ -80,7 +79,7 @@ const PricingPage: React.FC = React.memo(() => {
     }
   }, [user, isAnnual, toast]);
 
-  const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS): JSX.Element => {
+  const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS) => {
     switch (tier) {
       case 'free': return <FaUser className="text-gray-500" />;
       case 'premium': return <FaStar className="text-purple-500" />;
@@ -98,7 +97,7 @@ const PricingPage: React.FC = React.memo(() => {
     }
   };
 
-  const getFeatureIcon = (feature: string): JSX.Element => {
+  const getFeatureIcon = (feature: string) => {
     switch (feature) {
       case 'Basic birth chart calculation': return <FaChartLine className="text-blue-500" />;
       case 'Western tropical astrology': return <FaUsers className="text-green-500" />;
@@ -129,7 +128,8 @@ const PricingPage: React.FC = React.memo(() => {
       'Mayan calendar': 'Tzolk\'in and Haab cycles for spiritual timing.',
       'Uranian astrology': 'Midpoint and transneptunian planet analysis.'
     };
-    return descriptions[feature] || 'Advanced astrological feature for deeper insights.';
+    const desc = descriptions[feature];
+    return desc === undefined || desc === '' ? 'Advanced astrological feature for deeper insights.' : desc;
   };
 
   const getFeatureExamples = (feature: string): string[] => {
@@ -159,7 +159,8 @@ const PricingPage: React.FC = React.memo(() => {
         'Business partnership potential'
       ]
     };
-    return examples[feature] || [];
+    const ex = examples[feature];
+    return Array.isArray(ex) ? ex : [];
   };
 
   const getFeatureTier = (feature: string): 'free' | 'premium' | 'elite' | undefined => {
@@ -240,7 +241,8 @@ const PricingPage: React.FC = React.memo(() => {
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm text-cosmic-silver">{feature}</p>
                         <div className="flex items-center space-x-2">
-                          <span className={`bg-${getTierColor(feature)}/20 text-${getTierColor(feature)} px-2 py-1 rounded text-xs`}>
+                          {/* Guard against invalid tier color values (tailwind safelist recommended) */}
+                          <span className={`px-2 py-1 rounded text-xs bg-${getTierColor(feature)}/20 text-${getTierColor(feature)}`}>
                             {getFeatureTier(feature)}
                           </span>
                           <Tooltip.Root>
@@ -269,13 +271,13 @@ const PricingPage: React.FC = React.memo(() => {
                 </ul>
                 <button
                   className="w-full cosmic-button"
-                  disabled={loading === tierKey || tierKey === userTier}
-                  onClick={() => handleUpgrade(tierKey as 'premium' | 'elite')}
+                  disabled={(loading !== null && loading === tierKey) || (typeof userTier === 'string' && tierKey === userTier)}
+                  onClick={() => { void handleUpgrade(tierKey as 'premium' | 'elite'); }}
                   aria-label={tierKey === userTier ? 'Current Plan' : 'Select Plan'}
                 >
-                  {tierKey === userTier ? 'Current Plan' : tier.price.monthly === 0 ? 'Free' : 'Subscribe Now'}
+                  {tierKey === userTier ? 'Current Plan' : (tier.price.monthly === 0 ? 'Free' : 'Subscribe Now')}
                 </button>
-                {tier.price.monthly === 0 && (
+                {tier.price.monthly === 0 && typeof tier.price.monthly === 'number' && (
                   <p className="mt-2 text-xs text-center text-cosmic-silver/80">Always free</p>
                 )}
               </div>

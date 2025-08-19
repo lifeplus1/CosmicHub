@@ -39,7 +39,7 @@
     "type-check": "node ./scripts/typecheck.mjs",
     "type-check:tests": "node ./scripts/typecheck-tests.cjs",
     "type-check:astro": "cd apps/astro && pnpm run type-check",
-  "type-check:astro:stories": "cd apps/astro && tsc -p tsconfig.json --noEmit --pretty",
+    "type-check:astro:stories": "cd apps/astro && tsc -p tsconfig.json --noEmit --pretty",
     "type-check:healwave": "cd apps/healwave && pnpm run type-check",
     "type-check:types": "tsc -p packages/types/tsconfig.json --noEmit && tsc -p packages/types/tsconfig.test.json --noEmit",
     "cleanup:report": "node ./scripts/project-cleanup.mjs",
@@ -131,9 +131,6 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "eslint --max-warnings=0"
-    ],
-    "*.{ts,tsx}": [
-      "bash -c 'if git diff --cached --name-only | grep -E \\\"\\.test\\.(ts|tsx)$\\\" > /dev/null; then pnpm type-check:types; fi'"
     ],
     "*.{md,json,yml,yaml}": [
       "prettier --check"

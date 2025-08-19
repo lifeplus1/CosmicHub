@@ -68,7 +68,7 @@ const Signup: React.FC = React.memo(() => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+  if (formData.email === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       toast({
         title: 'Invalid Email',
         description: 'Please enter a valid email address',
@@ -104,7 +104,7 @@ const Signup: React.FC = React.memo(() => {
       return;
     }
 
-    if (!formData.privacyConsent) {
+  if (formData.privacyConsent !== true) {
       toast({
         title: 'Consent Required',
         description: 'You must agree to the Privacy Policy and Terms of Service',
@@ -161,7 +161,7 @@ const Signup: React.FC = React.memo(() => {
           <h2 className="text-3xl font-bold text-center text-cosmic-gold font-cinzel">Join Cosmic Hub</h2>
           <p className="text-lg text-center text-cosmic-silver">Create your account to unlock personalized astrology insights.</p>
 
-          <form onSubmit={handleSubmit} aria-label="Signup Form">
+          <form onSubmit={(e) => { void handleSubmit(e); }} aria-label="Signup Form">
             <div className="flex flex-col space-y-6">
               <div>
                 <label htmlFor="email" className="block mb-2 text-cosmic-gold">Email <span aria-hidden="true">*</span></label>
@@ -316,41 +316,45 @@ const Signup: React.FC = React.memo(() => {
                 />
               </div>
               <div className="flex flex-col space-y-2">
-                <label className="font-semibold text-cosmic-gold">Notification Preferences</label>
-                <label className="flex items-center space-x-2">
+                <span className="font-semibold text-cosmic-gold" id="notification-preferences-heading">Notification Preferences</span>
+        <label htmlFor="dailyHoroscope" className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     name="dailyHoroscope"
+          id="dailyHoroscope"
                     checked={formData.notificationPreferences.dailyHoroscope}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
                   />
                   <span className="text-cosmic-silver">Daily Horoscope</span>
                 </label>
-                <label className="flex items-center space-x-2">
+        <label htmlFor="monthlyForecast" className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     name="monthlyForecast"
+          id="monthlyForecast"
                     checked={formData.notificationPreferences.monthlyForecast}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
                   />
                   <span className="text-cosmic-silver">Monthly Forecast</span>
                 </label>
-                <label className="flex items-center space-x-2">
+        <label htmlFor="compatibilityInsights" className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     name="compatibilityInsights"
+          id="compatibilityInsights"
                     checked={formData.notificationPreferences.compatibilityInsights}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
                   />
                   <span className="text-cosmic-silver">Compatibility Insights</span>
                 </label>
-                <label className="flex items-center space-x-2">
+        <label htmlFor="newFeatures" className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     name="newFeatures"
+          id="newFeatures"
                     checked={formData.notificationPreferences.newFeatures}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
@@ -359,22 +363,23 @@ const Signup: React.FC = React.memo(() => {
                 </label>
               </div>
               <div>
-                <label className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     name="privacyConsent"
+                    id="privacyConsent"
                     checked={formData.privacyConsent}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
                     aria-required="true"
                   />
-                  <span className="text-sm text-cosmic-silver">
+                  <label htmlFor="privacyConsent" className="text-sm text-cosmic-silver">
                     I agree to the{' '}
                     <a href="/privacy-policy" className="underline text-cosmic-gold hover:text-cosmic-gold/80">Privacy Policy</a>{' '}
                     and{' '}
                     <a href="/terms-of-service" className="underline text-cosmic-gold hover:text-cosmic-gold/80">Terms of Service</a>
-                  </span>
-                </label>
+                  </label>
+                </div>
               </div>
               <button
                 type="submit"

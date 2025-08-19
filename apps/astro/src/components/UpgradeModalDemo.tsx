@@ -1,18 +1,18 @@
 import React from 'react';
-import { useSubscription, type SubscriptionState } from '@cosmichub/auth';
+import { useSubscription } from '@cosmichub/auth';
 
 /**
  * Demo component to test the upgrade modal functionality
  * This demonstrates how to use the subscription system to gate premium features
  */
 export const UpgradeModalDemo: React.FC = () => {
-  const subscriptionData = useSubscription() as SubscriptionState;
-  const hasFeature = subscriptionData?.hasFeature ?? (() => false);
-  const upgradeRequired = subscriptionData?.upgradeRequired ?? (() => {});
-  const userTier = (subscriptionData?.tier || subscriptionData?.userTier || 'Free') as string;
+  const subscriptionData = useSubscription();
+  const hasFeature = typeof subscriptionData?.hasFeature === 'function' ? subscriptionData.hasFeature : () => false;
+  const upgradeRequired = typeof subscriptionData?.upgradeRequired === 'function' ? subscriptionData.upgradeRequired : () => {};
+  const userTier = (subscriptionData?.tier ?? subscriptionData?.userTier ?? 'Free');
 
   const testGeneKeysFeature = () => {
-    if (!hasFeature('Pro')) {
+  if (hasFeature('Pro') !== true) {
       upgradeRequired('Gene Keys Analysis');
       return;
     }
@@ -21,7 +21,7 @@ export const UpgradeModalDemo: React.FC = () => {
   };
 
   const testSynastryFeature = () => {
-    if (!hasFeature('Pro')) {
+  if (hasFeature('Pro') !== true) {
       upgradeRequired('Synastry Compatibility Analysis');
       return;
     }
@@ -29,7 +29,7 @@ export const UpgradeModalDemo: React.FC = () => {
   };
 
   const testPdfExport = () => {
-    if (!hasFeature('Pro')) {
+  if (hasFeature('Pro') !== true) {
       upgradeRequired('PDF Chart Export');
       return;
     }
@@ -37,7 +37,7 @@ export const UpgradeModalDemo: React.FC = () => {
   };
 
   const testEnterpriseFeature = () => {
-    if (!hasFeature('Enterprise')) {
+  if (hasFeature('Enterprise') !== true) {
       upgradeRequired('API Access & White-label Solutions');
       return;
     }
@@ -65,7 +65,7 @@ export const UpgradeModalDemo: React.FC = () => {
           </p>
           <p className="text-gray-600 mt-2">
             Click the buttons below to test different upgrade scenarios. 
-            If you don't have access, you'll see the upgrade modal.
+            If you don&apos;t have access, you&apos;ll see the upgrade modal.
           </p>
         </div>
 
@@ -120,7 +120,7 @@ export const UpgradeModalDemo: React.FC = () => {
         <div className="mt-8 p-4 bg-cosmic-purple bg-opacity-10 rounded-lg border border-cosmic-purple border-opacity-30">
           <h4 className="font-semibold text-cosmic-purple mb-2">🔧 Developer Notes:</h4>
           <ul className="text-sm text-gray-700 space-y-1">
-            <li>• The upgrade modal will show tier-specific recommendations</li>
+              <li>• The upgrade modal will show tier-specific recommendations</li>
             <li>• Currently redirects to pricing page with pre-selected tier</li>
             <li>• Ready for Stripe integration (TODO items marked)</li>
             <li>• Event-based system prevents circular dependencies</li>

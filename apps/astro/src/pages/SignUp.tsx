@@ -29,7 +29,7 @@ const SignUp: React.FC = () => {
 
     try {
       // Basic validation
-      if (!formData.email || !formData.password || !formData.fullName) {
+  if (formData.email === '' || formData.password === '' || formData.fullName === '') {
         throw new Error('Please fill in all fields');
       }
 
@@ -64,13 +64,13 @@ const SignUp: React.FC = () => {
       </div>
 
       <div className="bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl p-8">
-        {error && (
+  {error !== '' && (
           <div className="mb-6 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
             <p className="text-red-200 text-sm">{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+  <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-6">
           <div>
             <label htmlFor="fullName" className="block text-cosmic-silver/80 mb-2">Full Name</label>
             <input 
