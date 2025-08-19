@@ -1,15 +1,11 @@
 import { useState, type FC, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card } from '@cosmichub/ui';
+import { Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import type { ChartBirthData } from '@cosmichub/types';
 import { devConsole } from '../config/environment';
 
-type FormFields = {
-  birthDate: string;
-  birthTime: string;
-  birthLocation: string;
-};
+// Removed unused FormFields type (was never referenced)
 
 interface SimpleBirthFormProps {
   title?: string;
@@ -23,7 +19,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
   title = "Birth Details",
   submitButtonText = "Calculate Chart",
   onSubmit,
-  showSampleButton = false,
+  // showSampleButton removed (unused prop)
   navigateTo
 }) => {
   const navigate = useNavigate();
@@ -59,7 +55,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
     return errors;
   };
 
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
     // Clear previous validation errors
@@ -78,7 +74,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
       }
     }
 
-    const hasErrors = Object.keys(errors).length != 0;
+  const hasErrors = Object.keys(errors).length !== 0;
     if (hasErrors) {
       setValidationErrors(errors);
       return;
@@ -86,7 +82,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
 
     setIsLoading(true);
 
-    try {
+  try {
       // Parse the date string explicitly to avoid timezone issues
       const [yearStr, monthStr, dayStr] = formData.birthDate.split('-');
       const year = parseInt(yearStr, 10);
@@ -114,7 +110,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
 
       sessionStorage.setItem('birthData', JSON.stringify(storedBirthData));
 
-      if (onSubmit != null) {
+  if (onSubmit !== undefined && onSubmit !== null) {
         onSubmit(chartData);
       } else {
         navigate(navigateTo ?? '/chart-results');
@@ -133,8 +129,18 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
   // Sample functionality removed
 
   // Geolocation functionality
-  const handleDetectLocation = async (): Promise<void> => {
-    if (navigator.geolocation == null) {
+  interface ReverseGeocodeResponse {
+    address?: {
+      city?: string;
+      town?: string;
+      village?: string;
+      state?: string;
+      country?: string;
+    };
+  }
+
+  const handleDetectLocation = (): void => {
+  if (navigator.geolocation === null || navigator.geolocation === undefined) {
       setValidationErrors({
         birthLocation: 'Geolocation is not supported by this browser.'
       });
@@ -144,8 +150,9 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
     setIsDetectingLocation(true);
     
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
+      (position) => {
+        void (async () => {
+          try {
           const { latitude, longitude } = position.coords;
           
           // Use reverse geocoding to get city name
@@ -153,12 +160,13 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             `https://api.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
           );
           
-            if (response.status === 200) {
-            const data = await response.json();
+          if (response.status === 200) {
+            const data = await response.json() as unknown as ReverseGeocodeResponse; // typed response
             const address = data.address ?? {};
             const city = address.city ?? address.town ?? address.village ?? '';
             const state = address.state ?? '';
-            const country = address.country ?? '';            let locationString = '';
+            const country = address.country ?? '';
+            let locationString = '';
             if (city !== '' && state !== '' && country !== '') {
               locationString = `${city}, ${state}, ${country}`;
             } else if (city !== '' && country !== '') {
@@ -187,8 +195,9 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
         } finally {
           setIsDetectingLocation(false);
         }
+        })();
       },
-      (error: GeolocationPositionError) => {
+  (error: GeolocationPositionError) => {
         devConsole.error('Geolocation error:', error);
         let message = 'Could not get your location. ';
         switch (error.code) {
@@ -210,7 +219,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
         });
         setIsDetectingLocation(false);
       },
-      {
+  {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 600000 // 10 minutes
@@ -220,7 +229,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
 
   return (
     <Card title={title}>
-      <form onSubmit={handleFormSubmit} className="space-y-4">
+  <form onSubmit={(e) => { handleFormSubmit(e); }} className="space-y-4">
         {/* Birth Date - Single composite field */}
         <div>
           <label htmlFor="birth-date" className="block text-cosmic-silver mb-2">Birth Date</label>
@@ -334,7 +343,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
                 <ul className="text-cosmic-silver/80 space-y-1 text-xs">
                   <li>• Use exact birth time from birth certificate for accuracy</li>
                   <li>• Include state/province for better location matching</li>
-                  <li>• Click "Current" to use your current location as reference</li>
+                  <li>• Click &quot;Current&quot; to use your current location as reference</li>
                 </ul>
               </div>
             </div>

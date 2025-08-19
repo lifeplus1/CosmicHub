@@ -2,6 +2,20 @@
  * Strongly-typed definitions for house cusp data in chart calculations
  */
 
+export type ZodiacSign = 
+  | 'aries'
+  | 'taurus' 
+  | 'gemini' 
+  | 'cancer' 
+  | 'leo' 
+  | 'virgo' 
+  | 'libra' 
+  | 'scorpio' 
+  | 'sagittarius' 
+  | 'capricorn' 
+  | 'aquarius' 
+  | 'pisces';
+
 export interface HouseCusp {
   /** House number (1-12) */
   house?: number;

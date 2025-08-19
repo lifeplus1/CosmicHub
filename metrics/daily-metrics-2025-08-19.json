@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-08-19T08:06:31.755622Z",
+  "commit_sha": "76f7358f880ccf47abfe5845de7265478a4ac8e5",
+  "branch_name": "backend-lint-hybrid",
+  "collection_method": "local_script",
+  "eslint_error_count": 0,
+  "eslint_files_with_errors": "estimate",
+  "typescript_error_count": 0,
+  "flake8_critical_count": 1,
+  "flake8_total_count": 1,
+  "mypy_error_count": 0
+}

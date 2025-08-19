@@ -1,0 +1,72 @@
+/* eslint-disable no-console */
+import axios from 'axios';
+import { devConsole } from '../config/environment';
+import { toUnifiedBirthData, type AnyBirthInput } from '@cosmichub/types';
+import { auth } from '@cosmichub/config/firebase';
+import type { GeneKeysData } from '../components/GeneKeysChart/types';
+import type { HumanDesignData } from '../components/HumanDesignChart/types';
+import {
+  type Planet,
+  type House,
+  type PlanetName,
+  type AspectType,
+  type ZodiacSign,
+  type Aspect,
+  type ChartData,
+  type ChartBirthData,
+  type ApiResponse,
+  type ApiErrorResponse,
+  type ChartId,
+  type UserId,
+  type InterpretationId,
+  type SavedChart,
+  type SavedChartsResponse,
+  type SaveChartRequest,
+  type SaveChartResponse,
+  type Interpretation,
+  type InterpretationRequest,
+  type InterpretationResponse,
+  AuthenticationError,
+  NotFoundError,
+  ValidationError
+} from './api.types';
+
+// Backend response transformation types and helpers
+interface BackendPlanetLike {
+  position?: number;
+  longitude?: number;
+  retrograde?: boolean;
+  speed?: number;
+  sign?: ZodiacSign;
+  house?: number;
+}
+
+type BackendPlanets = Record<string, BackendPlanetLike> | undefined;
+type BackendHouses = Record<string, { cusp?: number; sign?: string }> | number[] | undefined;
+
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+const coerceNumber = (v: unknown, fallback = 0): number => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
+
+const zodiacSigns: readonly ZodiacSign[] = [
+  'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
+  'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'
+];
+
+const isZodiacSign = (v: unknown): v is ZodiacSign => 
+  typeof v === 'string' && zodiacSigns.includes(v as ZodiacSign);
+
+const getDefaultPlanets = (): Record<PlanetName, Planet> => ({
+  sun: { name: 'sun', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  moon: { name: 'moon', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  mercury: { name: 'mercury', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  venus: { name: 'venus', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  mars: { name: 'mars', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  jupiter: { name: 'jupiter', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  saturn: { name: 'saturn', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  uranus: { name: 'uranus', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  neptune: { name: 'neptune', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  pluto: { name: 'pluto', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  chiron: { name: 'chiron', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  north_node: { name: 'north_node', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  south_node: { name: 'south_node', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 }
+});

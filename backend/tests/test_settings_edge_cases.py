@@ -1,6 +1,7 @@
 import importlib
 import sys
 from pathlib import Path
+
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -13,6 +14,7 @@ def _reload_settings():  # noqa: D401
     if "backend.settings" in sys.modules:
         del sys.modules["backend.settings"]
     import backend.settings as s  # type: ignore
+
     importlib.reload(s)
     return s
 
@@ -29,7 +31,9 @@ def test_invalid_port(monkeypatch: pytest.MonkeyPatch) -> None:
         _reload_settings()
 
 
-def test_ephe_path_auto_created(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_ephe_path_auto_created(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     new_dir = tmp_path / "ephe_sub"
     monkeypatch.setenv("EPHE_PATH", str(new_dir))
     s = _reload_settings()

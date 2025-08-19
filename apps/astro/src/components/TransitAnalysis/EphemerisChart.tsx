@@ -9,7 +9,6 @@ import React from 'react';
 import {
   useAllPlanetaryPositions,
   useEphemerisHealth,
-  formatPlanetPosition,
   getAstrologicalSign,
   type PlanetName,
 } from '../../services/ephemeris';
@@ -32,7 +31,7 @@ const PlanetRow: React.FC<PlanetRowProps> = ({ planet, position, retrograde }) =
       <td className="py-2 px-3 font-medium capitalize">{planet}</td>
       <td className="py-2 px-3">{sign.sign}</td>
       <td className="py-2 px-3 text-right">
-        {sign.signDegrees}° {sign.signMinutes}'
+        {sign.signDegrees}° {sign.signMinutes}&apos;
         {retrograde && (
           <span className="ml-1 text-red-500" title="Retrograde">
             ℞
@@ -58,7 +57,7 @@ const HealthIndicator: React.FC = () => {
     );
   }
   
-  if (error || health?.status !== 'healthy') {
+  if ((error !== null && error !== undefined) || (health !== null && health !== undefined && health.status !== 'healthy')) {
     return (
       <div className="flex items-center text-sm text-red-600">
         <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
@@ -92,7 +91,7 @@ export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
         </div>
         <div className="animate-pulse">
           <div className="space-y-3">
-            {[...Array(15)].map((_, i) => (
+            {Array.from({ length: 15 }).map((_, i) => (
               <div key={i} className="flex space-x-4">
                 <div className="h-4 bg-gray-200 rounded w-20"></div>
                 <div className="h-4 bg-gray-200 rounded w-16"></div>
@@ -106,7 +105,7 @@ export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
     );
   }
   
-  if (error) {
+  if (error !== null && error !== undefined) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
@@ -121,7 +120,7 @@ export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
             {error instanceof Error ? error.message : 'Unknown error occurred'}
           </div>
           <button
-            onClick={() => refetch()}
+            onClick={() => void refetch()}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Try Again
@@ -131,7 +130,7 @@ export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
     );
   }
   
-  if (!positions) {
+  if (positions === null || positions === undefined) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">

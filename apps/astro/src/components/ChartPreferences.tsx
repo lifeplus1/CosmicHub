@@ -91,7 +91,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> = function ChartPreferen
     // userId: drives Firestore path & validity checks (derived above for stability)
     // toast: stable from provider; included for clarity (fires notifications on errors)
     // db/doc/getDoc imported functions are stable and excluded.
-  }, [userId, toast]);
+  }, [toast, user?.uid]);
 
   // Load user preferences on mount
   useEffect(() => {
@@ -124,7 +124,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> = function ChartPreferen
       abortController.abort();
     };
     // deps: userId (drives whether to attempt load) + loadUserPreferences (async loader)
-  }, [userId, loadUserPreferences]);
+  }, [loadUserPreferences, user?.uid]);
 
   const handlePreferenceChange = useCallback(<K extends keyof ChartPreferencesData>(
     key: K,
@@ -191,7 +191,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> = function ChartPreferen
       onSaved(preferences);
     }
     // deps: preferences (data saved), userId (path), toast (notifications), onSaved (callback)
-  }, [preferences, userId, toast, onSaved]);
+  }, [preferences, toast, onSaved, user?.uid]);
 
   return (
     <div className="space-y-6" aria-live="polite" role="form" aria-labelledby="chart-prefs-heading">

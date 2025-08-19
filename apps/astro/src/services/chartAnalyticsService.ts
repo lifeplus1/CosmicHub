@@ -3,7 +3,7 @@
  * Provides real-time astrological insights and pattern recognition
  */
 
-import type { ChartData, Planet, Aspect, PlanetName } from './api.types';
+import type { ChartData, Planet, Aspect } from './api.types';
 // NOTE: We intentionally import only types from api.types to avoid runtime coupling.
 
 // Internal utility types & helpers
@@ -14,12 +14,28 @@ function getPlanetEntries(chartData: ChartData): PlanetEntries {
   return Object.entries(chartData.planets) as PlanetEntries;
 }
 
+/** Type guard for Aspect interface */
+function isAspect(value: unknown): value is Aspect {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'orb' in value &&
+    typeof (value as Aspect).orb === 'number' &&
+    Number.isFinite((value as Aspect).orb) &&
+    'planet1' in value &&
+    typeof (value as Aspect).planet1 === 'string' &&
+    'planet2' in value &&
+    typeof (value as Aspect).planet2 === 'string'
+  );
+}
+
 function forEachAspect(chartData: ChartData, cb: (aspect: Aspect) => void): void {
-  if (!Array.isArray(chartData.aspects)) return;
-  // Iterate defensively while preserving strong typing
-  for (const aspect of chartData.aspects) {
-    if (aspect && typeof aspect.orb === 'number') {
-      cb(aspect);
+  const aspects = chartData.aspects;
+  if (Array.isArray(aspects)) {
+    for (const aspect of aspects) {
+      if (isAspect(aspect)) {
+        cb(aspect);
+      }
     }
   }
 }
@@ -38,10 +54,10 @@ export interface ChartPattern {
 
 export interface ChartAnalysis {
   chartId: string;
-  dominantElement: string;
-  dominantQuality: string;
+  dominantElement: Element;
+  dominantQuality: Quality;
   dominantPlanet: string;
-  chartShape: string;
+  chartShape: ChartShape;
   patterns: ChartPattern[];
   strengths: string[];
   challenges: string[];
@@ -71,6 +87,29 @@ export interface PersonalityInsight {
   development: string; // How to develop this trait
 }
 
+export enum ChartShape {
+  Undefined = 'undefined',
+  Bundle = 'Bundle',
+  Bowl = 'Bowl',
+  Locomotive = 'Locomotive',
+  Splash = 'Splash'
+}
+
+export enum Element {
+  Fire = 'Fire',
+  Earth = 'Earth',
+  Air = 'Air',
+  Water = 'Water',
+  Unknown = 'Unknown'
+}
+
+export enum Quality {
+  Cardinal = 'Cardinal',
+  Fixed = 'Fixed',
+  Mutable = 'Mutable',
+  Unknown = 'Unknown'
+}
+
 class ChartAnalyticsService {
   private analysisCache: Map<string, ChartAnalysis> = new Map();
   private patternRecognizers: Map<string, (chart: ChartData) => ChartPattern[]> = new Map();
@@ -93,7 +132,7 @@ class ChartAnalyticsService {
       strengths: this.identifyStrengths(chartData),
       challenges: this.identifyChallenges(chartData),
       lifeThemes: this.extractLifeThemes(chartData),
-      currentTransitHighlights: transitData ? this.analyzeCurrentTransits(chartData, transitData) : [],
+      currentTransitHighlights: transitData !== undefined ? this.analyzeCurrentTransits(chartData, transitData) : [],
       upcomingEvents: [], // Would be populated with ephemeris calculations
       energyLevel: this.calculateEnergyLevel(chartData, transitData),
       emotionalClimate: this.assessEmotionalClimate(chartData, transitData),
@@ -153,35 +192,70 @@ class ChartAnalyticsService {
   /**
    * Calculate dominant element (Fire, Earth, Air, Water)
    */
-  private calculateDominantElement(chartData: ChartData): string {
-    const elementCounts = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
+  private calculateDominantElement(chartData: ChartData): Element {
+    const elementCounts: Record<Element, number> = {
+      [Element.Fire]: 0,
+      [Element.Earth]: 0,
+      [Element.Air]: 0,
+      [Element.Water]: 0,
+      [Element.Unknown]: 0
+    };
     
     Object.values(chartData.planets).forEach(planet => {
       const sign = this.getSignFromPosition(planet.position);
       const element = this.getElementFromSign(sign);
-      elementCounts[element as keyof typeof elementCounts]++;
+      elementCounts[element]++;
     });
 
-    return Object.entries(elementCounts).reduce((a, b) => 
-      elementCounts[a[0] as keyof typeof elementCounts] > elementCounts[b[0] as keyof typeof elementCounts] ? a : b
-    )[0];
+    // Filter out unknown elements and find the most frequent
+    const validElements = Object.entries(elementCounts).filter(([key]) => {
+      const elementKey = key as Element;
+      return elementKey !== Element.Unknown;
+    });
+    
+    if (validElements.length === 0) {
+      return Element.Unknown;
+    }
+    
+    return validElements.reduce((a, b) => {
+      const aKey = a[0] as Element;
+      const bKey = b[0] as Element;
+      return elementCounts[aKey] > elementCounts[bKey] ? a : b;
+    })[0] as Element;
   }
 
   /**
    * Calculate dominant quality (Cardinal, Fixed, Mutable)
    */
-  private calculateDominantQuality(chartData: ChartData): string {
-    const qualityCounts = { Cardinal: 0, Fixed: 0, Mutable: 0 };
+  private calculateDominantQuality(chartData: ChartData): Quality {
+    const qualityCounts: Record<Quality, number> = {
+      [Quality.Cardinal]: 0,
+      [Quality.Fixed]: 0,
+      [Quality.Mutable]: 0,
+      [Quality.Unknown]: 0
+    };
     
     Object.values(chartData.planets).forEach(planet => {
       const sign = this.getSignFromPosition(planet.position);
       const quality = this.getQualityFromSign(sign);
-      qualityCounts[quality as keyof typeof qualityCounts]++;
+      qualityCounts[quality]++;
     });
 
-    return Object.entries(qualityCounts).reduce((a, b) => 
-      qualityCounts[a[0] as keyof typeof qualityCounts] > qualityCounts[b[0] as keyof typeof qualityCounts] ? a : b
-    )[0];
+    // Filter out unknown qualities and find the most frequent
+    const validQualities = Object.entries(qualityCounts).filter(([key]) => {
+      const qualityKey = key as Quality;
+      return qualityKey !== Quality.Unknown;
+    });
+    
+    if (validQualities.length === 0) {
+      return Quality.Unknown;
+    }
+    
+    return validQualities.reduce((a, b) => {
+      const aKey = a[0] as Quality;
+      const bKey = b[0] as Quality;
+      return qualityCounts[aKey] > qualityCounts[bKey] ? a : b;
+    })[0] as Quality;
   }
 
   /**
@@ -195,7 +269,8 @@ class ChartAnalyticsService {
       let score = 0;
 
       // Angular houses get higher scores
-      if (planet.house !== null && planet.house !== undefined && [1, 4, 7, 10].includes(planet.house)) {
+      const houseNumber = planet.house;
+      if (typeof houseNumber === 'number' && Number.isFinite(houseNumber) && [1, 4, 7, 10].includes(houseNumber)) {
         score += 3;
       }
 
@@ -204,9 +279,10 @@ class ChartAnalyticsService {
         // Only natal aspects considered here (transit aspects would be supplied separately)
         const p1 = aspect.planet1;
         const p2 = aspect.planet2;
-        if (p1 === name || p2 === name) {
-          if (aspect.orb < 1) score += 2;
-          else if (aspect.orb < 3) score += 1;
+        const orb = aspect.orb;
+        if ((p1 === name || p2 === name) && typeof orb === 'number' && Number.isFinite(orb)) {
+          if (orb < 1) score += 2;
+          else if (orb < 3) score += 1;
         }
       });
 
@@ -225,24 +301,29 @@ class ChartAnalyticsService {
   /**
    * Determine overall chart shape/pattern
    */
-  private determineChartShape(chartData: ChartData): string {
-  const planetPositions = getPlanetEntries(chartData).map(([, p]) => p.position).sort((a, b) => a - b);
+  private determineChartShape(chartData: ChartData): ChartShape {
+  const planetPositions = getPlanetEntries(chartData)
+    .map(([, p]) => p.position)
+    .filter((pos): pos is number => typeof pos === 'number' && Number.isFinite(pos))
+    .sort((a, b) => a - b);
     
-    if (planetPositions.length < 2) return 'undefined';
+    if (planetPositions.length <= 1) {
+      return ChartShape.Undefined;
+    }
 
     const spans = planetPositions.map((pos, i) => {
-      const nextPos = planetPositions[i + 1] || (planetPositions[0] + 360);
+      const nextPos = planetPositions[i + 1] ?? (planetPositions[0] + 360);
       return nextPos - pos;
     });
 
     const maxSpan = Math.max(...spans);
     const totalSpan = planetPositions[planetPositions.length - 1] - planetPositions[0];
 
-    if (maxSpan > 120) return 'Bundle';
-    if (totalSpan <= 120) return 'Bundle';
-    if (totalSpan <= 240) return 'Bowl';
-    if (maxSpan > 60) return 'Locomotive';
-    return 'Splash';
+    if (maxSpan > 120) return ChartShape.Bundle;
+    if (totalSpan <= 120) return ChartShape.Bundle;
+    if (totalSpan <= 240) return ChartShape.Bowl;
+    if (maxSpan > 60) return ChartShape.Locomotive;
+    return ChartShape.Splash;
   }
 
   /**
@@ -343,8 +424,20 @@ class ChartAnalyticsService {
           const [name2, planet2] = planets[j];
           const [name3, planet3] = planets[k];
 
-          if (this.isGrandTrine(planet1.position, planet2.position, planet3.position)) {
-            const element = this.getElementFromPosition(planet1.position);
+          // Ensure all positions are valid numbers
+          // Validate planet positions
+          if (!this.isValidPosition(planet1.position) || 
+              !this.isValidPosition(planet2.position) || 
+              !this.isValidPosition(planet3.position)) {
+            continue;
+          }
+
+          const pos1 = planet1.position;
+          const pos2 = planet2.position;
+          const pos3 = planet3.position;
+
+          if (this.isGrandTrine(pos1, pos2, pos3)) {
+            const element = this.getElementFromPosition(pos1);
             patterns.push({
               id: `grand-trine-${name1}-${name2}-${name3}`,
               name: `${element} Grand Trine`,
@@ -452,6 +545,13 @@ class ChartAnalyticsService {
   }
 
   /**
+   * Check if a position value is valid
+   */
+  private isValidPosition(position: unknown): position is number {
+    return typeof position === 'number' && Number.isFinite(position);
+  }
+
+  /**
    * Get zodiac sign from position
    */
   private getSignFromPosition(position: number): string {
@@ -463,13 +563,13 @@ class ChartAnalyticsService {
   /**
    * Get element from sign
    */
-  private getElementFromSign(sign: string): string {
-    const elements: Record<string, string> = {
-      Aries: 'Fire', Taurus: 'Earth', Gemini: 'Air', Cancer: 'Water',
-      Leo: 'Fire', Virgo: 'Earth', Libra: 'Air', Scorpio: 'Water',
-      Sagittarius: 'Fire', Capricorn: 'Earth', Aquarius: 'Air', Pisces: 'Water'
+  private getElementFromSign(sign: string): Element {
+    const elements: Record<string, Element> = {
+      Aries: Element.Fire, Taurus: Element.Earth, Gemini: Element.Air, Cancer: Element.Water,
+      Leo: Element.Fire, Virgo: Element.Earth, Libra: Element.Air, Scorpio: Element.Water,
+      Sagittarius: Element.Fire, Capricorn: Element.Earth, Aquarius: Element.Air, Pisces: Element.Water
     };
-    return elements[sign] || 'Unknown';
+    return elements[sign] ?? Element.Unknown;
   }
 
   /**
@@ -483,13 +583,13 @@ class ChartAnalyticsService {
   /**
    * Get quality from sign
    */
-  private getQualityFromSign(sign: string): string {
-    const qualities: Record<string, string> = {
-      Aries: 'Cardinal', Taurus: 'Fixed', Gemini: 'Mutable', Cancer: 'Cardinal',
-      Leo: 'Fixed', Virgo: 'Mutable', Libra: 'Cardinal', Scorpio: 'Fixed',
-      Sagittarius: 'Mutable', Capricorn: 'Cardinal', Aquarius: 'Fixed', Pisces: 'Mutable'
+  private getQualityFromSign(sign: string): Quality {
+    const qualities: Record<string, Quality> = {
+      Aries: Quality.Cardinal, Taurus: Quality.Fixed, Gemini: Quality.Mutable, Cancer: Quality.Cardinal,
+      Leo: Quality.Fixed, Virgo: Quality.Mutable, Libra: Quality.Cardinal, Scorpio: Quality.Fixed,
+      Sagittarius: Quality.Mutable, Capricorn: Quality.Cardinal, Aquarius: Quality.Fixed, Pisces: Quality.Mutable
     };
-    return qualities[sign] || 'Unknown';
+    return qualities[sign] ?? Quality.Unknown;
   }
 
   // Additional methods for analysis (implementations would be expanded)

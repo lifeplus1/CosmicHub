@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@cosmichub/ui';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
 import { useBirthData } from '../contexts/BirthDataContext';
-import type { ChartBirthData } from '../services/api';
 
 const Calculator: React.FC = () => {
   const navigate = useNavigate();
@@ -12,14 +11,9 @@ const Calculator: React.FC = () => {
 
   devConsole.log?.('🧮 Calculator page rendered with birth data:', birthData);
 
-  const handleChartGeneration = (data: ChartBirthData) => {
-    devConsole.log?.('🔮 Generate birth chart with data:', data);
-    // SimpleBirthForm will handle navigation to chart-results
-    // No need to navigate here since form handles it
-  };
 
   const navigateToSystem = (system: string) => {
-    if (!birthData) {
+    if (birthData === null) {
       alert('Please enter your birth data first to access chart systems.');
       return;
     }
@@ -65,7 +59,7 @@ const Calculator: React.FC = () => {
       />
 
       {/* Quick Navigation - Only show when data exists */}
-      {birthData && (
+      {birthData !== null && (
         <Card title="🚀 Quick Access to Chart Systems">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
@@ -136,8 +130,8 @@ const Calculator: React.FC = () => {
               <div>
                 <h4 className="text-cosmic-gold font-semibold">Pro Tip</h4>
                 <p className="text-cosmic-silver/80 text-sm">
-                  Your birth data is automatically saved and shared across all chart systems. 
-                  Edit anytime by clicking the "Edit" button on any page.
+                  Your birth data is automatically saved and shared across all chart systems.
+                  Edit anytime by clicking the &quot;Edit&quot; button on any page.
                 </p>
               </div>
             </div>

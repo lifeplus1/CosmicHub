@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { UpgradeModal } from '@cosmichub/ui';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
-import { useSubscription } from '@cosmichub/auth';
-import { useAuth } from '@cosmichub/auth';
-import { stripeService, StripeSession } from '@cosmichub/integrations';
+import { useSubscription, useAuth } from '@cosmichub/auth';
+import { stripeService } from '@cosmichub/integrations';
 import { upgradeEventManager } from '../utils/upgradeEvents';
 import { useToast } from './ToastProvider';
 import { devConsole } from '../config/environment';
@@ -27,13 +26,13 @@ export const UpgradeModalManager: React.FC = () => {
   }, [openUpgradeModal]);
 
   const handleUpgrade = useCallback(async (tier: 'Basic' | 'Pro' | 'Enterprise') => {
-    if (!user) {
+    if (user === null || user === undefined) {
       devConsole.error('User not authenticated');
       closeUpgradeModal();
       return;
     }
 
-    if (!stripeService) {
+    if (stripeService === undefined || stripeService === null) {
       devConsole.error('Stripe service not available');
       closeUpgradeModal();
       return;
@@ -46,7 +45,7 @@ export const UpgradeModalManager: React.FC = () => {
       const successUrl = `${window.location.origin}/pricing/success?tier=${stripeTier}`;
       const cancelUrl = `${window.location.origin}/pricing/cancel`;
 
-      const session: StripeSession = await stripeService.createCheckoutSession({
+  await stripeService.createCheckoutSession({
         tier: stripeTier,
         userId: user.uid,
         isAnnual: true, // Default to annual, can be made configurable
@@ -78,7 +77,7 @@ export const UpgradeModalManager: React.FC = () => {
       
       closeUpgradeModal();
     }
-  }, [user, userTier, feature, closeUpgradeModal]);
+  }, [user, userTier, feature, closeUpgradeModal, toast]);
 
   return (
     <UpgradeModal
@@ -86,7 +85,7 @@ export const UpgradeModalManager: React.FC = () => {
       onClose={closeUpgradeModal}
       feature={feature}
       currentTier={userTier as 'Free' | 'Basic' | 'Pro' | 'Enterprise'}
-      onUpgrade={handleUpgrade}
+  onUpgrade={(tier) => { void handleUpgrade(tier); }}
     />
   );
 };

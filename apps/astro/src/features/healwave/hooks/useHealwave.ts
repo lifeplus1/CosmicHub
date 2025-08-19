@@ -27,7 +27,7 @@ export const useHealwave = () => {
     sessions: []
   });
 
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
 
   const setFrequency = useCallback((frequency: number) => {
     setState(prev => ({ ...prev, currentFrequency: frequency }));
@@ -72,7 +72,7 @@ export const useHealwave = () => {
 
   const stopSession = useCallback(() => {
     setState(prev => ({ ...prev, isPlaying: false }));
-    if (intervalId) {
+    if (intervalId !== null && intervalId !== undefined) {
       clearInterval(intervalId);
       setIntervalId(null);
     }
@@ -92,12 +92,13 @@ export const useHealwave = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
-  const getPersonalizedFrequency = useCallback((chartData?: any): number => {
-    if (!chartData) return 528; // Default to 528 Hz (Love frequency)
+  const getPersonalizedFrequency = useCallback((chartData?: Record<string, unknown>): number => {
+    if (chartData === null || chartData === undefined || typeof chartData !== 'object') return 528; // Default to 528 Hz (Love frequency)
     
     // Simple personalization based on chart data
     // In a real implementation, this would use complex astrological calculations
-    const sunSign = chartData.sun?.sign || 'Leo';
+    const sunData = chartData.sun as Record<string, unknown> | undefined;
+    const sunSign = (typeof sunData === 'object' && sunData !== null && typeof sunData.sign === 'string') ? sunData.sign : 'Leo';
     const frequencyMap: Record<string, number> = {
       'Aries': 741,     // Throat Chakra - Expression
       'Taurus': 417,    // Sacral Chakra - Creativity
@@ -113,12 +114,12 @@ export const useHealwave = () => {
       'Pisces': 963     // Crown Chakra - Spirituality
     };
 
-    return frequencyMap[sunSign] || 528;
+    return frequencyMap[sunSign] ?? 528;
   }, []);
 
   useEffect(() => {
     return () => {
-      if (intervalId) {
+      if (intervalId !== null && intervalId !== undefined) {
         clearInterval(intervalId);
       }
     };

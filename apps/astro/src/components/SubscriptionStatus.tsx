@@ -16,7 +16,6 @@ export const SubscriptionStatus: React.FC = React.memo(() => {
 
   const tierInfo = COSMICHUB_TIERS[userTier];
   const isElite = userTier === 'elite';
-  const isPremium = userTier === 'premium';
 
   return (
     <div className="bg-cosmic-blue/30 rounded-xl px-4 py-2 border border-cosmic-silver/20 max-w-[320px]">

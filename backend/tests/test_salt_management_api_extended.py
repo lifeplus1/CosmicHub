@@ -8,11 +8,12 @@ These complement `test_salt_management_api.py` focusing on:
  - Batch rotation when nothing due
  - Global salt rotation endpoint
 """
+
 from fastapi.testclient import TestClient
 
 from main import app
-from utils.salt_storage import get_salt_storage, SaltStorage
 from utils.salt_backend import get_salt_backend
+from utils.salt_storage import SaltStorage, get_salt_storage
 
 client = TestClient(app)
 

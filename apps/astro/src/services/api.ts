@@ -1,7 +1,6 @@
-/* eslint-disable no-console */
 import axios from 'axios';
 import { devConsole } from '../config/environment';
-import { toUnifiedBirthData, type AnyBirthInput } from '@cosmichub/types';
+import { toUnifiedBirthData, type AnyBirthInput, type ChartBirthData } from '@cosmichub/types';
 import { auth } from '@cosmichub/config/firebase';
 import type { GeneKeysData } from '../components/GeneKeysChart/types';
 import type { HumanDesignData } from '../components/HumanDesignChart/types';
@@ -9,15 +8,10 @@ import {
   type Planet,
   type House,
   type PlanetName,
-  type AspectType,
   type ZodiacSign,
-  type Aspect,
   type ChartData,
-  type ChartBirthData,
-  type ApiResponse,
-  type ApiErrorResponse,
-  type ChartId,
   type UserId,
+  type ChartId,
   type InterpretationId,
   type SavedChart,
   type SavedChartsResponse,
@@ -26,77 +20,47 @@ import {
   type Interpretation,
   type InterpretationRequest,
   type InterpretationResponse,
+  type Aspect,
   AuthenticationError,
   NotFoundError,
   ValidationError
 } from './api.types';
 
 // Backend response transformation types and helpers
-interface BackendPlanetLike {
+interface BackendChartPlanet {
   position?: number;
   longitude?: number;
   retrograde?: boolean;
   speed?: number;
   sign?: ZodiacSign;
   house?: number;
+  dignity?: 'domicile' | 'exaltation' | 'fall' | 'detriment';
+  essential_dignity?: number;
 }
 
-type BackendPlanets = Record<string, BackendPlanetLike> | undefined;
+type BackendChartPlanets = Record<PlanetName, BackendChartPlanet>;
 
-type BackendHouses = Record<string, { cusp?: number; sign?: string }> | number[] | undefined;
+type BackendChartHouses = Record<string, { cusp?: number; sign?: ZodiacSign }> | number[];
 
-const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+const isChartObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 
-const coerceNumber = (v: unknown, fallback = 0): number => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
+const coerceChartNumber = (v: unknown, fallback = 0): number => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
 
-const zodiacSigns: readonly ZodiacSign[] = [
+const ZODIAC_SIGNS: readonly ZodiacSign[] = [
   'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
   'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'
 ];
 
 const isZodiacSign = (v: unknown): v is ZodiacSign => 
-  typeof v === 'string' && zodiacSigns.includes(v as ZodiacSign);  type ApiErrorResponse,
-  type ChartId,
-  type UserId,
-  type InterpretationId,
-  type SavedChart,
-  type SavedChartsResponse,
-  type SaveChartRequest,
-  type SaveChartResponse,
-  type Interpretation,
-  type InterpretationRequest,
-  type InterpretationResponse,
-  // Import ChartData as ChartDataType to avoid conflict
-  type ChartData as ChartDataType,
-  AuthenticationError,
-  NotFoundError,
-  ValidationError
-} from './api.types';
+  typeof v === 'string' && ZODIAC_SIGNS.includes(v as ZodiacSign);
 
-import { 
-  type Planet,
-  type House,
-  type PlanetName,
-  type AspectType,
-  type ZodiacSign,
-  type Aspect,
-  type ChartData,
-  type ApiResponse,
-  type ApiErrorResponse,
-  type ChartId,
-  type UserId,
-  type InterpretationId,
-  type SavedChart,
-  type SavedChartsResponse,
-  type SaveChartRequest,
-  type SaveChartResponse,
-  type Interpretation,
-  type InterpretationRequest,
-  type InterpretationResponse,
-  AuthenticationError,
-  NotFoundError,
-  ValidationError
-} from './api.types';
+const PLANET_NAMES: readonly PlanetName[] = [
+  'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
+  'uranus', 'neptune', 'pluto', 'chiron', 'north_node', 'south_node'
+];
+
+const isPlanetName = (v: unknown): v is PlanetName =>
+  typeof v === 'string' && PLANET_NAMES.includes(v as PlanetName);
 
 // Re-export types from api.types
 export * from './api.types';
@@ -111,7 +75,10 @@ const getDefaultPlanets = (): Record<PlanetName, Planet> => ({
   saturn: { name: 'saturn', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
   uranus: { name: 'uranus', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
   neptune: { name: 'neptune', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
-  pluto: { name: 'pluto', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 }
+  pluto: { name: 'pluto', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  chiron: { name: 'chiron', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  north_node: { name: 'north_node', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 },
+  south_node: { name: 'south_node', position: 0, retrograde: false, speed: 0, sign: 'aries', house: 1 }
 });
 
 // Narrow import.meta.env access to avoid implicit any
@@ -146,7 +113,7 @@ export const getAuthToken = async (): Promise<string | null> => {
     return 'mock-dev-token';
   }
   
-  if (user == null) {
+  if (user === null) {
     devConsole.warn?.('⚠️ No authenticated user found');
     return null;
   }
@@ -478,8 +445,7 @@ export const getContemplationProgress = async (userId: UserId): Promise<unknown>
 // Types moved to api.types.ts
 export type { Planet, House } from './api.types';
 
-// Use the imported ChartDataType as ChartData to avoid conflicts
-export type ChartData = ChartDataType;
+// Re-export ChartData from api.types
 
 // Enhanced chart fetching function that hits the /calculate endpoint
 export const fetchChartData = async (birthData: ChartBirthData): Promise<ChartData> => {
@@ -505,55 +471,53 @@ export const fetchChartData = async (birthData: ChartBirthData): Promise<ChartDa
 export type { ChartBirthData };
 
 // Transform backend response to match ChartData interface safely
-interface BackendPlanetLike {
-  position?: unknown;
-  longitude?: unknown;
-  retrograde?: unknown;
-  speed?: unknown;
-}
-
-type BackendPlanets = Record<string, unknown> | undefined;
-
-type BackendHouses = Record<string, unknown> | unknown[] | undefined; // backend may return array or keyed object
-
-const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
-
-const coerceNumber = (v: unknown, fallback = 0): number => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
-
 const transformBackendResponse = (backendResponse: unknown): ChartData => {
-  if (!isObject(backendResponse)) {
+  if (!isChartObject(backendResponse)) {
+    // Return a default chart with all required planets
     return {
-      planets: {},
+      planets: getDefaultPlanets(),
       houses: [],
       aspects: [],
-      angles: { ascendant: 0, midheaven: 0, descendant: 180, imumcoeli: 180 }
+      angles: { ascendant: 0, midheaven: 0, descendant: 180, imumcoeli: 180 },
+      latitude: 0,
+      longitude: 0,
+      timezone: 'UTC',
+      julian_day: 0,
+      house_system: 'placidus'
     };
   }
 
   const raw = backendResponse;
 
   // Planets
-  const planets: Record<string, Planet> = {};
-  const rawPlanets: BackendPlanets = isObject(raw.planets) ? (raw.planets) : undefined;
+  const planets: Record<PlanetName, Planet> = getDefaultPlanets();
+  const rawPlanets: BackendChartPlanets | undefined = isChartObject(raw.planets) ? raw.planets as BackendChartPlanets : undefined;
   if (rawPlanets) {
     for (const [name, value] of Object.entries(rawPlanets)) {
-      const p = isObject(value) ? (value as BackendPlanetLike) : {};
-      const position = typeof p.position === 'number'
-        ? p.position
-        : (typeof p.longitude === 'number' ? p.longitude : 0);
-      planets[name] = {
-        name,
-        position,
-        retrograde: Boolean(p.retrograde),
-        speed: typeof p.speed === 'number' ? p.speed : 0
-      };
+      if (isChartObject(value) && isPlanetName(name)) {
+        const p = value as BackendChartPlanet;
+        const position = typeof p.position === 'number'
+          ? p.position
+          : (typeof p.longitude === 'number' ? p.longitude : 0);
+        const planetName = name as PlanetName;
+        planets[planetName] = {
+          name: planetName,
+          position,
+          retrograde: Boolean(p.retrograde),
+          speed: typeof p.speed === 'number' ? p.speed : 0,
+          sign: p.sign ?? 'aries',
+          house: typeof p.house === 'number' ? p.house : 1,
+          dignity: p.dignity,
+          essential_dignity: p.essential_dignity
+        };
+      }
     }
   }
 
   // Houses
   const houses: House[] = [];
-  const rawHouses: BackendHouses = raw.houses as BackendHouses;
-  if (isObject(rawHouses)) {
+  const rawHouses: BackendChartHouses = raw.houses as BackendChartHouses;
+  if (isChartObject(rawHouses)) {
     for (const [houseKey, houseValue] of Object.entries(rawHouses)) {
       const houseNumber = houseKey.includes('house_') ? parseInt(houseKey.replace('house_', '')) : parseInt(houseKey, 10);
       if (Number.isNaN(houseNumber) || houseNumber < 1 || houseNumber > 12) continue;
@@ -561,8 +525,8 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
       let sign: ZodiacSign = 'aries'; // Default sign
       if (typeof houseValue === 'number') {
         cusp = houseValue;
-      } else if (isObject(houseValue)) {
-        cusp = coerceNumber((houseValue).cusp, 0);
+      } else if (isChartObject(houseValue)) {
+        cusp = coerceChartNumber((houseValue).cusp, 0);
         const signVal = (houseValue).sign;
         if (typeof signVal === 'string' && isZodiacSign(signVal)) {
           sign = signVal;
@@ -575,16 +539,48 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
     rawHouses.forEach((hv, idx) => {
       const houseNumber = idx + 1;
       if (houseNumber < 1 || houseNumber > 12) return;
-      const cusp = coerceNumber(hv, 0);
+      const cusp = coerceChartNumber(hv, 0);
       houses.push({ number: houseNumber as 1|2|3|4|5|6|7|8|9|10|11|12, cusp, sign: 'aries' });
     });
   }
 
-  const aspects: unknown[] = Array.isArray(raw.aspects) ? (raw.aspects as unknown[]) : [];
+  // Aspects
+  const aspects: Aspect[] = [];
+  const rawAspects = Array.isArray(raw.aspects) ? raw.aspects : [];
+  for (const aspect of rawAspects) {
+    if (isChartObject(aspect)) {
+      const {
+        aspect_type,
+        planet1,
+        planet2,
+        orb,
+        applying,
+        exact,
+        power
+      } = aspect as unknown as Aspect;
+
+      if (
+        isZodiacSign(planet1) &&
+        isZodiacSign(planet2) &&
+        typeof orb === 'number' &&
+        typeof applying === 'boolean'
+      ) {
+        aspects.push({
+          aspect_type,
+          planet1,
+          planet2,
+          orb,
+          applying,
+          exact: exact ?? false,
+          power: typeof power === 'number' ? power : undefined
+        });
+      }
+    }
+  }
 
   const defaultAsc = houses[0]?.cusp ?? 0;
   const defaultMc = houses[9]?.cusp ?? 0;
-  const anglesRaw = isObject(raw.angles) ? raw.angles : undefined;
+  const anglesRaw = isChartObject(raw.angles) ? raw.angles : undefined;
   const angles = anglesRaw &&
     typeof anglesRaw.ascendant === 'number' &&
     typeof anglesRaw.midheaven === 'number' &&
@@ -598,15 +594,23 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
         imumcoeli: defaultMc + 180
       };
 
+  // Handle required fields with defaults
+  const latitude = typeof raw.latitude === 'number' ? raw.latitude : 0;
+  const longitude = typeof raw.longitude === 'number' ? raw.longitude : 0;
+  const timezone = typeof raw.timezone === 'string' ? raw.timezone : 'UTC';
+  const julian_day = typeof raw.julian_day === 'number' ? raw.julian_day : 0;
+  const house_system = typeof raw.house_system === 'string' ? raw.house_system as 'placidus' : 'placidus';
+
   return {
     planets,
     houses: houses.sort((a, b) => a.number - b.number),
     aspects,
     angles,
-    latitude: typeof raw.latitude === 'number' ? raw.latitude : undefined,
-    longitude: typeof raw.longitude === 'number' ? raw.longitude : undefined,
-    timezone: typeof raw.timezone === 'string' ? raw.timezone : undefined,
-    julian_day: typeof raw.julian_day === 'number' ? raw.julian_day : undefined
+    latitude,
+    longitude,
+    timezone,
+    julian_day,
+    house_system
   };
 };
 

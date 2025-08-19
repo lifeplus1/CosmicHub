@@ -77,7 +77,7 @@ export const xaiConfig = {
   baseUrl: 'https://api.x.ai/v1',
   model: 'grok-beta',
   timeout: 30000,
-  enabled: !!env.VITE_XAI_API_KEY,
+  enabled: env.VITE_XAI_API_KEY !== null && env.VITE_XAI_API_KEY !== undefined && env.VITE_XAI_API_KEY !== '',
 };
 
 // Logging configuration
@@ -89,7 +89,7 @@ export const loggingConfig = {
 
 // Performance monitoring configuration
 export const performanceConfig = {
-  enabled: isDevelopment() || env.VITE_ENABLE_ANALYTICS,
+  enabled: isDevelopment() || env.VITE_ENABLE_ANALYTICS === true,
   trackingInterval: 5000, // 5 seconds
   maxOperations: 1000, // Keep last 1000 operations
   enableMemoryTracking: 'memory' in performance,

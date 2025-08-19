@@ -28,7 +28,7 @@ const GeneKeys: React.FC = () => {
       </div>
 
       {/* Birth Data Input - Only show if no data */}
-      {!birthData && (
+      {birthData === null && (
         <SimpleBirthForm
           title="Enter Birth Data for Gene Keys"
           submitButtonText="Generate Gene Keys Profile"
@@ -38,7 +38,7 @@ const GeneKeys: React.FC = () => {
       )}
 
       {/* Gene Keys Chart Display */}
-      {birthData && isDataValid && (
+      {birthData !== null && isDataValid && (
         <div className="space-y-6">
           {/* Control Panel */}
           <Card title="Chart Controls">
@@ -84,7 +84,9 @@ const GeneKeys: React.FC = () => {
               <div className="text-center">
                 <div className="text-cosmic-gold font-semibold">Coordinates</div>
                 <div className="text-cosmic-silver text-sm">
-                  {birthData.lat != null ? `${birthData.lat.toFixed(2)}°, ${birthData.lon?.toFixed(2)}°` : 'Auto-detected'}
+                  {birthData.lat !== undefined && birthData.lon !== undefined
+                    ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
+                    : 'Auto-detected'}
                 </div>
               </div>
             </div>
@@ -114,7 +116,7 @@ const GeneKeys: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-cosmic-gold">Core Components</h3>
                 <div className="space-y-2 text-sm text-cosmic-silver">
-                  <div><span className="text-cosmic-gold">Life's Work:</span> Your primary life purpose</div>
+                  <div><span className="text-cosmic-gold">Life&apos;s Work:</span> Your primary life purpose</div>
                   <div><span className="text-cosmic-gold">Evolution:</span> Your greatest challenge and growth</div>
                   <div><span className="text-cosmic-gold">Radiance:</span> How you attract abundance</div>
                   <div><span className="text-cosmic-gold">Purpose:</span> Your highest service to humanity</div>

@@ -1,6 +1,6 @@
-from typing import Dict, Any
 import sys
 from pathlib import Path
+from typing import Any, Dict
 
 ROOT = Path(__file__).resolve().parent.parent
 PARENT = ROOT.parent
@@ -16,13 +16,22 @@ client = TestClient(app)
 
 
 def _base_birth() -> Dict[str, Any]:
-    return {"birth_date":"1990-01-01","birth_time":"00:00:00","latitude":0.0,"longitude":0.0,"timezone":"UTC"}
+    return {
+        "birth_date": "1990-01-01",
+        "birth_time": "00:00:00",
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "timezone": "UTC",
+    }
 
 
 def test_transits_date_range_exceeds_limit() -> None:
     payload: Dict[str, Any] = {
         "birth_data": _base_birth(),
-        "date_range": {"start_date": "1990-01-01", "end_date": "1992-01-01"},  # > 365 days
+        "date_range": {
+            "start_date": "1990-01-01",
+            "end_date": "1992-01-01",
+        },  # > 365 days
         "include_minor_aspects": False,
         "include_asteroids": False,
         "orb": 2.0,
@@ -35,7 +44,10 @@ def test_transits_date_range_exceeds_limit() -> None:
 def test_lunar_transits_date_range_exceeds_limit() -> None:
     payload: Dict[str, Any] = {
         "birth_data": _base_birth(),
-        "date_range": {"start_date": "1990-01-01", "end_date": "1991-05-01"},  # > 90 days
+        "date_range": {
+            "start_date": "1990-01-01",
+            "end_date": "1991-05-01",
+        },  # > 90 days
         "include_void_of_course": False,
         "include_daily_phases": True,
     }
@@ -50,10 +62,19 @@ def test_minor_aspects_toggle(monkeypatch: pytest.MonkeyPatch) -> None:
 
     calls = {"count": 0}
 
-    def fake_calculate_aspect(pos1: float, pos2: float, orb: float = 2.0) -> Dict[str, Any]:  # noqa: D401
+    def fake_calculate_aspect(
+        pos1: float, pos2: float, orb: float = 2.0
+    ) -> Dict[str, Any]:  # noqa: D401
         # always return a minor aspect so filtering matters
         calls["count"] += 1
-        return {"aspect": "semi-square", "angle": 45.0, "orb": 0.5, "intensity": 80.0, "energy": "tension", "type": "minor"}
+        return {
+            "aspect": "semi-square",
+            "angle": 45.0,
+            "orb": 0.5,
+            "intensity": 80.0,
+            "energy": "tension",
+            "type": "minor",
+        }
 
     monkeypatch.setattr(tc, "calculate_aspect", fake_calculate_aspect)
 
@@ -65,14 +86,21 @@ def test_minor_aspects_toggle(monkeypatch: pytest.MonkeyPatch) -> None:
     }
 
     # Without minor aspects
-    payload_no_minor: Dict[str, Any] = dict(base_payload, include_minor_aspects=False)
+    payload_no_minor: Dict[str, Any] = dict(
+        base_payload, include_minor_aspects=False
+    )
     r1 = client.post("/api/astro/transits", json=payload_no_minor)
     assert r1.status_code == 200
     data1 = r1.json()
-    assert all(item["aspect"] != "semi-square" for item in data1) or len(data1) == 0
+    assert (
+        all(item["aspect"] != "semi-square" for item in data1)
+        or len(data1) == 0
+    )
 
     # With minor aspects
-    payload_minor: Dict[str, Any] = dict(base_payload, include_minor_aspects=True)
+    payload_minor: Dict[str, Any] = dict(
+        base_payload, include_minor_aspects=True
+    )
     r2 = client.post("/api/astro/transits", json=payload_minor)
     assert r2.status_code == 200
     data2 = r2.json()

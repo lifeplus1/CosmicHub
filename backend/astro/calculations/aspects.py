@@ -1,6 +1,6 @@
-
-from typing import TypedDict, List, Dict, Any, Optional
 import logging
+from typing import Any, Dict, List, Optional, TypedDict
+
 
 # TypedDict for aspect data
 class AspectData(TypedDict, total=False):
@@ -15,16 +15,29 @@ class AspectData(TypedDict, total=False):
     point1_house: int
     point2_house: int
 
+
 logger = logging.getLogger(__name__)
+
 
 def get_zodiac_sign(degree: float) -> str:
     signs = [
-        "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-        "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+        "Aries",
+        "Taurus",
+        "Gemini",
+        "Cancer",
+        "Leo",
+        "Virgo",
+        "Libra",
+        "Scorpio",
+        "Sagittarius",
+        "Capricorn",
+        "Aquarius",
+        "Pisces",
     ]
     sign = int(degree // 30)
     deg = degree % 30
     return f"{deg:.2f}° {signs[sign]}"
+
 
 def get_house_for_planet(position: float, houses: List[Dict[str, Any]]) -> int:
     for i in range(len(houses)):
@@ -38,9 +51,10 @@ def get_house_for_planet(position: float, houses: List[Dict[str, Any]]) -> int:
                 return i + 1
     return 1
 
+
 def calculate_aspects(
     planets: Dict[str, Dict[str, Any]],
-    houses: Optional[List[Dict[str, Any]]] = None
+    houses: Optional[List[Dict[str, Any]]] = None,
 ) -> List[AspectData]:
     logger.debug(f"Calculating aspects for planets: {planets}")
     try:
@@ -56,31 +70,41 @@ def calculate_aspects(
             (120, "Trine", 8.0),
             (135, "Sesquiquadrate", 2.0),
             (150, "Quincunx", 2.0),
-            (180, "Opposition", 10.0)
+            (180, "Opposition", 10.0),
         ]
         planet_names = list(planets.keys())
 
         for i, planet1 in enumerate(planet_names):
-            for planet2 in planet_names[i+1:]:
+            for planet2 in planet_names[i + 1 :]:
                 pos1 = planets[planet1]["position"]
                 pos2 = planets[planet2]["position"]
                 angle = abs((pos1 - pos2 + 180) % 360 - 180)
 
                 for aspect_angle, aspect_name, orb in aspect_types:
-                    if abs(angle - aspect_angle) <= orb or abs(angle - (360 - aspect_angle)) <= orb:
+                    if (
+                        abs(angle - aspect_angle) <= orb
+                        or abs(angle - (360 - aspect_angle)) <= orb
+                    ):
                         aspect: AspectData = {
                             "point1": planet1,
                             "point2": planet2,
                             "aspect": aspect_name,
-                            "orb": min(abs(angle - aspect_angle), abs(angle - (360 - aspect_angle))),
+                            "orb": min(
+                                abs(angle - aspect_angle),
+                                abs(angle - (360 - aspect_angle)),
+                            ),
                             "point1_position": pos1,
-                            "point2_position": pos2
+                            "point2_position": pos2,
                         }
                         if houses:
                             aspect["point1_sign"] = get_zodiac_sign(pos1)
                             aspect["point2_sign"] = get_zodiac_sign(pos2)
-                            aspect["point1_house"] = get_house_for_planet(pos1, houses)
-                            aspect["point2_house"] = get_house_for_planet(pos2, houses)
+                            aspect["point1_house"] = get_house_for_planet(
+                                pos1, houses
+                            )
+                            aspect["point2_house"] = get_house_for_planet(
+                                pos2, houses
+                            )
                         aspects.append(aspect)
 
         logger.debug(f"Aspects calculated: {aspects}")

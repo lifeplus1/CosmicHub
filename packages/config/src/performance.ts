@@ -7,12 +7,20 @@ export interface PerformanceMetric {
   name: string;
   duration: number;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
+
+export interface MetricMetadata {
+  label?: string;
+  [key: string]: unknown;
+}
+
+export type ComponentMetricType = 'render' | 'mount' | 'interaction' | 'custom';
+export type PageMetricType = 'load' | 'interactive' | 'visibility';
 
 export interface ComponentMetric extends PerformanceMetric {
   componentName: string;
-  type: 'render' | 'mount' | 'interaction' | 'custom';
+  type: ComponentMetricType;
 }
 
 export interface OperationMetric extends PerformanceMetric {
@@ -22,7 +30,7 @@ export interface OperationMetric extends PerformanceMetric {
 
 export interface PageMetric extends PerformanceMetric {
   pageName: string;
-  type: 'load' | 'interactive' | 'visibility';
+  type: PageMetricType;
 }
 
 export interface PerformanceReport {
@@ -48,7 +56,7 @@ class PerformanceMonitor {
   recordComponentMetric(
     componentName: string, 
     duration: number, 
-    metadata: { type: 'render' | 'mount' | 'interaction' | 'custom'; label?: string } & Record<string, any>
+    metadata: { type: ComponentMetricType } & MetricMetadata
   ): void {
     // Cap metrics to prevent memory issues
     if (this.componentMetrics.length >= this.maxMetrics) {
@@ -80,7 +88,7 @@ class PerformanceMonitor {
     operationName: string,
     duration: number,
     success: boolean,
-    metadata?: Record<string, any>
+    metadata?: MetricMetadata
   ): void {
     // Cap metrics to prevent memory issues
     if (this.operationMetrics.length >= this.maxMetrics) {
@@ -111,8 +119,8 @@ class PerformanceMonitor {
   recordPageMetric(
     pageName: string,
     duration: number,
-    type: 'load' | 'interactive' | 'visibility',
-    metadata?: Record<string, any>
+    type: PageMetricType,
+    metadata?: MetricMetadata
   ): void {
     // Cap metrics to prevent memory issues
     if (this.pageMetrics.length >= this.maxMetrics) {
@@ -140,7 +148,7 @@ class PerformanceMonitor {
     }
   }
 
-  recordMetric(name: string, duration: number, metadata?: Record<string, any>): void {
+  recordMetric(name: string, duration: number, metadata?: MetricMetadata): void {
     // Generic metric recording for backwards compatibility
     this.recordOperationMetric(name, duration, true, metadata);
   }
@@ -214,7 +222,7 @@ class PerformanceMonitor {
   private sendToFirebasePerformance(
     name: string, 
     duration: number, 
-    metadata?: Record<string, any>
+    metadata?: MetricMetadata
   ): void {
     try {
       // Only send to Firebase in production and if available

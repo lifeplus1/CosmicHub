@@ -1,20 +1,29 @@
 import os
 from typing import Any
+
 os.environ.setdefault("ENABLE_TRACING", "false")
 from fastapi import status
 from fastapi.testclient import TestClient
+
 from main import app
 
 
 def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[no-any-unimported]
     """End-to-end (sync via TestClient): save chart then request interpretation; ensures 404 then success after save."""
-    monkeypatch.setenv("TEST_MODE", "1")  # Use mock auth  # type: ignore[attr-defined]
-    monkeypatch.setenv("ENABLE_TRACING", "false")  # Disable OTLP exporter noise  # type: ignore[attr-defined]
-    monkeypatch.setenv("INTERPRETATION_CACHE_TTL", "120")  # shorter TTL for tests
+    monkeypatch.setenv(
+        "TEST_MODE", "1"
+    )  # Use mock auth  # type: ignore[attr-defined]
+    monkeypatch.setenv(
+        "ENABLE_TRACING", "false"
+    )  # Disable OTLP exporter noise  # type: ignore[attr-defined]
+    monkeypatch.setenv(
+        "INTERPRETATION_CACHE_TTL", "120"
+    )  # shorter TTL for tests
 
     # Monkeypatch firebase auth verify to return a deterministic user for unified charts router
     try:
         from firebase_admin import auth as fb_auth  # type: ignore
+
         monkeypatch.setattr(fb_auth, "verify_id_token", lambda token: {"uid": "dev-user"})  # type: ignore[attr-defined]
     except Exception:
         pass
@@ -27,9 +36,12 @@ def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[n
     resp_missing = client.post(
         "/api/interpretations/generate",
         json={
-            "chartId": "non-existent", "userId": "dev-user", "type": "natal", "interpretation_level": "advanced"
+            "chartId": "non-existent",
+            "userId": "dev-user",
+            "type": "natal",
+            "interpretation_level": "advanced",
         },
-        headers={"Authorization": "Bearer test"}
+        headers={"Authorization": "Bearer test"},
     )
     assert resp_missing.status_code == status.HTTP_404_NOT_FOUND
 
@@ -37,13 +49,38 @@ def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[n
     resp_save = client.post(
         "/api/charts/save",
         json={
-            "planets": [{"name": "Sun", "sign": "Leo", "degree": 15.25, "house": 5, "aspects": []}],
+            "planets": [
+                {
+                    "name": "Sun",
+                    "sign": "Leo",
+                    "degree": 15.25,
+                    "house": 5,
+                    "aspects": [],
+                }
+            ],
             "asteroids": [],
-            "angles": [{"name": "Ascendant", "sign": "Aries", "degree": 12.33}],
-            "houses": [{"number": 1, "sign": "Aries", "cusp": 12.33, "planets": ["Sun"]}],
-            "aspects": [{"planet1": "Sun", "planet2": "Mercury", "type": "Conjunction", "orb": 2.5, "applying": True}]
+            "angles": [
+                {"name": "Ascendant", "sign": "Aries", "degree": 12.33}
+            ],
+            "houses": [
+                {
+                    "number": 1,
+                    "sign": "Aries",
+                    "cusp": 12.33,
+                    "planets": ["Sun"],
+                }
+            ],
+            "aspects": [
+                {
+                    "planet1": "Sun",
+                    "planet2": "Mercury",
+                    "type": "Conjunction",
+                    "orb": 2.5,
+                    "applying": True,
+                }
+            ],
         },
-        headers={"Authorization": "Bearer test"}
+        headers={"Authorization": "Bearer test"},
     )
     assert resp_save.status_code == status.HTTP_200_OK, resp_save.text
     chart_id = resp_save.json()["chart_id"]
@@ -53,9 +90,12 @@ def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[n
     resp_interp = client.post(
         "/api/interpretations/generate",
         json={
-            "chartId": chart_id, "userId": "dev-user", "type": "natal", "interpretation_level": "advanced"
+            "chartId": chart_id,
+            "userId": "dev-user",
+            "type": "natal",
+            "interpretation_level": "advanced",
         },
-        headers={"Authorization": "Bearer test"}
+        headers={"Authorization": "Bearer test"},
     )
     assert resp_interp.status_code == status.HTTP_200_OK
     data = resp_interp.json()
@@ -67,9 +107,12 @@ def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[n
     resp_interp_cached = client.post(
         "/api/interpretations/generate",
         json={
-            "chartId": chart_id, "userId": "dev-user", "type": "natal", "interpretation_level": "advanced"
+            "chartId": chart_id,
+            "userId": "dev-user",
+            "type": "natal",
+            "interpretation_level": "advanced",
         },
-        headers={"Authorization": "Bearer test"}
+        headers={"Authorization": "Bearer test"},
     )
     assert resp_interp_cached.status_code == status.HTTP_200_OK
     cached_message = resp_interp_cached.json()["message"].lower()

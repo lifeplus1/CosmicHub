@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { devConsole } from '../../config/environment';
 import axios, { AxiosError } from 'axios';
 import type { 
   TransitBirthData as BirthData, 
@@ -9,64 +10,26 @@ import type {
   LunarAnalysisOptions
 } from './types';
 
-interface TransitAnalysisReturn {
-  // State
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  transitResults: TransitResult[];
-  lunarTransits: LunarTransitResult[];
-  loading: boolean;
-  loadingLunar: boolean;
-  error: string | null;
-  dateRange: DateRange;
-  setDateRange: (range: DateRange) => void;
-  
-  // Actions
-  calculateTransits: (options?: TransitAnalysisOptions) => Promise<void>;
-  calculateLunarTransits: (options?: LunarAnalysisOptions) => Promise<void>;
-  clearError: () => void;
-  
-  // Computed values
-  isValidDateRange: boolean;
-  transitSummary: {
-    total: number;
-    major: number;
-    challenging: number;
-    harmonious: number;
-    intensity: number;
-  };
-  lunarSummary: {
-    total: number;
-    newMoons: number;
-    fullMoons: number;
-    averageIntensity: number;
-  };
-  
-  // Helper values
-  hasResults: boolean;
-  isCalculating: boolean;
-}
-
-export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn => {
+export const useTransitAnalysis = (birthData: BirthData) => {
   const [activeTab, setActiveTab] = useState<string>('transits');
   const [transitResults, setTransitResults] = useState<TransitResult[]>([]);
   const [lunarTransits, setLunarTransits] = useState<LunarTransitResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingLunar, setLoadingLunar] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>();
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   });
 
   // API base URL - could be moved to config
-  const API_BASE_URL: string = (typeof import.meta.env.VITE_API_URL === 'string' && import.meta.env.VITE_API_URL !== '') 
-    ? import.meta.env.VITE_API_URL 
+  const API_BASE_URL = typeof import.meta.env.VITE_API_URL === 'string' && import.meta.env.VITE_API_URL.length > 0
+    ? import.meta.env.VITE_API_URL
     : 'http://localhost:8000';
 
-  const calculateTransits = useCallback(async (options: TransitAnalysisOptions = {}): Promise<void> => {
+  const calculateTransits = useCallback(async (options: TransitAnalysisOptions = {}) => {
     setLoading(true);
-    setError(null);
+    setError(undefined);
     
     try {
       const requestPayload = {
@@ -81,13 +44,12 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
           start_date: dateRange.startDate,
           end_date: dateRange.endDate
         },
-        include_minor_aspects: options.includeMinorAspects === true,
-        include_asteroids: options.includeAsteroids === true,
+        include_minor_aspects: options.includeMinorAspects ?? false,
+        include_asteroids: options.includeAsteroids ?? false,
         orb: options.orb ?? 2.0
       };
 
-      // eslint-disable-next-line no-console
-      console.log('🚀 Calculating transits with payload:', requestPayload);
+  devConsole.log?.('🚀 Calculating transits with payload:', requestPayload);
 
       const response = await axios.post<TransitResult[]>(
         `${API_BASE_URL}/api/astro/transits`,
@@ -99,29 +61,22 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
           timeout: 30000, // 30 second timeout
         }
       );
-
-      if (response.data !== undefined && Array.isArray(response.data)) {
+  if (Array.isArray(response.data) === true) {
         setTransitResults(response.data);
-        // eslint-disable-next-line no-console
-        console.log(`✅ Transit calculation successful: ${response.data.length} results`);
+  devConsole.log?.(`✅ Transit calculation successful: ${response.data.length} results`);
       } else {
-        // eslint-disable-next-line no-console
-        console.error('❌ Invalid response format:', response.data);
+        devConsole.error('❌ Invalid response format:', response.data);
         setError('Invalid response format from server');
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('❌ Error calculating transits:', error);
-      
-      const axiosError = error as AxiosError<{detail?: string; message?: string}>;
-      
-      if (axiosError.response !== undefined) {
+    } catch (err: unknown) {
+      devConsole.error('❌ Error calculating transits:', err);
+  if (isAxiosError(err) && err.response !== null && err.response !== undefined) {
         // Server responded with error status
-        const errorMessage = axiosError.response.data?.detail ?? 
-                          axiosError.response.data?.message ?? 
-                          `Server error: ${axiosError.response.status}`;
+        const detail = (err.response.data as Record<string, unknown>)?.detail;
+        const message = (err.response.data as Record<string, unknown>)?.message;
+        const errorMessage = typeof detail === 'string' ? detail : (typeof message === 'string' ? message : `Server error: ${err.response.status}`);
         setError(errorMessage);
-      } else if (axiosError.request !== undefined) {
+  } else if (isAxiosError(err) && err.request !== null && err.request !== undefined) {
         // Request was made but no response received
         setError('Unable to connect to transit calculation service. Please check your connection.');
       } else {
@@ -133,9 +88,9 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
     }
   }, [birthData, dateRange, API_BASE_URL]);
 
-  const calculateLunarTransits = useCallback(async (options: LunarAnalysisOptions = {}): Promise<void> => {
+  const calculateLunarTransits = useCallback(async (options: LunarAnalysisOptions = {}) => {
     setLoadingLunar(true);
-    setError(null);
+    setError(undefined);
     
     try {
       const requestPayload = {
@@ -150,12 +105,11 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
           start_date: dateRange.startDate,
           end_date: dateRange.endDate
         },
-        include_void_of_course: options.includeVoidOfCourse === true,
-        include_daily_phases: options.includeDailyPhases !== false // default to true
+        include_void_of_course: options.includeVoidOfCourse ?? false,
+        include_daily_phases: options.includeDailyPhases ?? true
       };
 
-      // eslint-disable-next-line no-console
-      console.log('🌙 Calculating lunar transits with payload:', requestPayload);
+  devConsole.log?.('🌙 Calculating lunar transits with payload:', requestPayload);
 
       const response = await axios.post<LunarTransitResult[]>(
         `${API_BASE_URL}/api/astro/lunar-transits`,
@@ -168,28 +122,22 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
         }
       );
 
-      if (response.data !== undefined && Array.isArray(response.data)) {
+  if (Array.isArray(response.data) === true) {
         setLunarTransits(response.data);
-        // eslint-disable-next-line no-console
-        console.log(`✅ Lunar transit calculation successful: ${response.data.length} results`);
+  devConsole.log?.(`✅ Lunar transit calculation successful: ${response.data.length} results`);
       } else {
-        // eslint-disable-next-line no-console
-        console.error('❌ Invalid lunar response format:', response.data);
+        devConsole.error('❌ Invalid lunar response format:', response.data);
         setError('Invalid response format from server');
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('❌ Error calculating lunar transits:', error);
-      
-      const axiosError = error as AxiosError<{detail?: string; message?: string}>;
-      
-      if (axiosError.response !== undefined) {
+    } catch (err: unknown) {
+      devConsole.error('❌ Error calculating lunar transits:', err);
+  if (isAxiosError(err) && err.response !== null && err.response !== undefined) {
         // Server responded with error status
-        const errorMessage = axiosError.response.data?.detail ?? 
-                          axiosError.response.data?.message ?? 
-                          `Server error: ${axiosError.response.status}`;
+        const detail = (err.response.data as Record<string, unknown>)?.detail;
+        const message = (err.response.data as Record<string, unknown>)?.message;
+        const errorMessage = typeof detail === 'string' ? detail : (typeof message === 'string' ? message : `Server error: ${err.response.status}`);
         setError(errorMessage);
-      } else if (axiosError.request !== undefined) {
+  } else if (isAxiosError(err) && err.request !== null && err.request !== undefined) {
         // Request was made but no response received
         setError('Unable to connect to lunar transit service. Please check your connection.');
       } else {
@@ -203,7 +151,7 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
 
   // Clear error when user changes settings
   const clearError = useCallback(() => {
-    setError(null);
+    setError(undefined);
   }, []);
 
   // Memoize results to prevent unnecessary re-renders
@@ -221,31 +169,34 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
 
   // Calculate summary statistics
   const transitSummary = useMemo(() => {
-    const majorAspects = transitResults.filter(t => ['conjunction', 'opposition', 'trine', 'square', 'sextile'].includes(t.aspect));
-    const challengingAspects = transitResults.filter(t => ['opposition', 'square'].includes(t.aspect));
-    const harmonious = transitResults.filter(t => ['trine', 'sextile'].includes(t.aspect));
+  const majorAspectSet = new Set(['conjunction', 'opposition', 'trine', 'square', 'sextile']);
+  const challengingSet = new Set(['opposition', 'square']);
+  const harmoniousSet = new Set(['trine', 'sextile']);
+  const majorAspects = transitResults.filter(t => majorAspectSet.has(t.aspect));
+  const challengingAspects = transitResults.filter(t => challengingSet.has(t.aspect));
+  const harmonious = transitResults.filter(t => harmoniousSet.has(t.aspect));
     
     return {
       total: transitResults.length,
       major: majorAspects.length,
       challenging: challengingAspects.length,
       harmonious: harmonious.length,
-      intensity: transitResults.length > 0 
-        ? Math.round(transitResults.reduce((sum, t) => sum + (t.intensity || 0), 0) / transitResults.length)
+  intensity: transitResults.length > 0
+        ? Math.round(transitResults.reduce((sum, t) => sum + (t.intensity ?? 0), 0) / transitResults.length)
         : 0
     };
   }, [transitResults]);
 
   const lunarSummary = useMemo(() => {
-    const newMoons = lunarTransits.filter(l => l.phase.toLowerCase().includes('new'));
-    const fullMoons = lunarTransits.filter(l => l.phase.toLowerCase().includes('full'));
+  const newMoons = lunarTransits.filter(l => l.phase.toLowerCase().includes('new'));
+  const fullMoons = lunarTransits.filter(l => l.phase.toLowerCase().includes('full'));
     
     return {
       total: lunarTransits.length,
       newMoons: newMoons.length,
       fullMoons: fullMoons.length,
-      averageIntensity: lunarTransits.length > 0
-        ? Math.round(lunarTransits.reduce((sum, l) => sum + (l.intensity || 0), 0) / lunarTransits.length)
+  averageIntensity: lunarTransits.length > 0
+        ? Math.round(lunarTransits.reduce((sum, l) => sum + (l.intensity ?? 0), 0) / lunarTransits.length)
         : 0
     };
   }, [lunarTransits]);
@@ -277,3 +228,8 @@ export const useTransitAnalysis = (birthData: BirthData): TransitAnalysisReturn 
     isCalculating: loading || loadingLunar,
   };
 };
+
+function isAxiosError(error: unknown): error is AxiosError {
+  const err = error as Error & { isAxiosError?: boolean };
+  return err !== null && typeof err === 'object' && err.isAxiosError === true;
+}

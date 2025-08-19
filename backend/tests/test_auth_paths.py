@@ -21,20 +21,26 @@ class DummyCred:
 
 
 @pytest.mark.asyncio
-async def test_get_current_user_mock_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_get_current_user_mock_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(authmod, "firebase_available", False)
     user = await authmod.get_current_user(credentials=None)  # type: ignore[arg-type]
     assert user["uid"] == "dev-user"
 
 
 @pytest.mark.asyncio
-async def test_get_current_user_verify_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_get_current_user_verify_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(authmod, "firebase_available", True)
     monkeypatch.setattr(authmod, "_in_test_mode", lambda: False)
+
     class FakeAuth:
         @staticmethod
         def verify_id_token(token: str) -> Dict[str, Any]:  # noqa: D401
             raise Exception("BadToken")
+
     monkeypatch.setattr(authmod, "auth", FakeAuth)  # type: ignore[arg-type]
     cred = DummyCred("badtoken")
     with pytest.raises(HTTPException) as exc:
@@ -44,13 +50,17 @@ async def test_get_current_user_verify_failure(monkeypatch: pytest.MonkeyPatch) 
 
 
 @pytest.mark.asyncio
-async def test_get_current_user_success(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_get_current_user_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(authmod, "firebase_available", True)
     monkeypatch.setattr(authmod, "_in_test_mode", lambda: False)
+
     class FakeAuth:
         @staticmethod
         def verify_id_token(token: str) -> Dict[str, Any]:  # noqa: D401
             return {"uid": "real-user"}
+
     monkeypatch.setattr(authmod, "auth", FakeAuth)  # type: ignore[arg-type]
     cred = DummyCred("goodtoken")
     user = await authmod.get_current_user(credentials=cred)  # type: ignore[arg-type]

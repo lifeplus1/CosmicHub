@@ -3,11 +3,10 @@
  * Implements code splitting for heavy UI components
  */
 
-import React from 'react';
-import type { ComponentType } from 'react';
+import React, { type ComponentType, type JSX } from 'react';
 import { 
-  createLazyComponent, 
-  lazyLoadChart, 
+  createLazyComponent,
+  lazyLoadChart,
   lazyLoadModal,
   DefaultLoadingSpinner,
   SmartPreloader
@@ -150,29 +149,79 @@ export const LazyFrequencyCalculator = createLazyComponent(
 );
 
 // Smart preloading hook for UI components
+// Type imports for component props
+import type { AstrologyChartProps } from './charts/AstrologyChart';
+import type { FrequencyVisualizerProps } from './charts/FrequencyVisualizer';
+import type { TransitChartProps } from './charts/TransitChart';
+import type { SynastryChartProps } from './charts/SynastryChart';
+import type { BiofeedbackChartProps } from './charts/BiofeedbackChart';
+import type { ChartModalProps } from './modals/ChartModal';
+import type { SettingsModalProps } from './modals/SettingsModal';
+import type { FrequencyPlayerModalProps } from './modals/FrequencyPlayerModal';
+import type { ProfileModalProps } from './modals/ProfileModal';
+import type { ShareModalProps } from './modals/ShareModal';
+import type { AdvancedFormProps } from './forms/AdvancedForm';
+import type { FrequencyFormProps } from './forms/FrequencyForm';
+import type { BirthDataFormProps } from './forms/BirthDataForm';
+import type { AnalyticsPanelProps } from './analytics/AnalyticsPanel';
+import type { ReportGeneratorProps } from './reports/ReportGenerator';
+import type { ExportToolsProps } from './tools/ExportTools';
+import type { EphemerisCalculatorProps } from './calculators/EphemerisCalculator';
+import type { GeneKeysCalculatorProps } from './calculators/GeneKeysCalculator';
+import type { FrequencyCalculatorProps } from './calculators/FrequencyCalculator';
+
+// Base interface for component modules
+export interface LazyLoadedModule<T = unknown> {
+  default: ComponentType<T>;
+  [key: string]: unknown;
+}
+
+// Props map for lazy loaded components
+export interface LazyComponentPropsMap {
+  'astrology-chart': AstrologyChartProps;
+  'frequency-visualizer': FrequencyVisualizerProps;
+  'transit-chart': TransitChartProps;
+  'synastry-chart': SynastryChartProps;
+  'biofeedback-chart': BiofeedbackChartProps;
+  'chart-modal': ChartModalProps;
+  'settings-modal': SettingsModalProps;
+  'frequency-player-modal': FrequencyPlayerModalProps;
+  'profile-modal': ProfileModalProps;
+  'share-modal': ShareModalProps;
+  'advanced-form': AdvancedFormProps;
+  'frequency-form': FrequencyFormProps;
+  'birth-data-form': BirthDataFormProps;
+  'analytics-panel': AnalyticsPanelProps;
+  'report-generator': ReportGeneratorProps;
+  'export-tools': ExportToolsProps;
+  'ephemeris-calculator': EphemerisCalculatorProps;
+  'gene-keys-calculator': GeneKeysCalculatorProps;
+  'frequency-calculator': FrequencyCalculatorProps;
+}
+
 export interface SmartPreloadFunctions {
-  preloadOnHover: (
+  preloadOnHover: <K extends keyof LazyComponentPropsMap>(
     elementRef: React.RefObject<HTMLElement>,
-    componentImport: () => Promise<any>,
-    componentName: string
+    componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
+    componentName: K
   ) => (() => void) | undefined;
   
-  preloadOnIntersection: (
+  preloadOnIntersection: <K extends keyof LazyComponentPropsMap>(
     elementRef: React.RefObject<HTMLElement>,
-    componentImport: () => Promise<any>,
-    componentName: string
+    componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
+    componentName: K
   ) => (() => void) | undefined;
 }
 
 export function useSmartPreloading(): SmartPreloadFunctions {
   const preloader = React.useMemo(() => SmartPreloader.getInstance(), []);
 
-  const preloadOnHover = React.useCallback((
+  const preloadOnHover = React.useCallback(<K extends ComponentRegistryKeys>(
     elementRef: React.RefObject<HTMLElement>,
-    componentImport: () => Promise<any>,
-    componentName: string
+    componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
+    componentName: K
   ) => {
-    if (elementRef.current) {
+    if (elementRef.current !== null) {
       return preloader.preloadOnHover(
         elementRef.current,
         componentImport,
@@ -182,12 +231,12 @@ export function useSmartPreloading(): SmartPreloadFunctions {
     return undefined;
   }, [preloader]);
 
-  const preloadOnIntersection = React.useCallback((
+  const preloadOnIntersection = React.useCallback(<K extends ComponentRegistryKeys>(
     elementRef: React.RefObject<HTMLElement>,
-    componentImport: () => Promise<any>,
-    componentName: string
+    componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
+    componentName: K
   ) => {
-    if (elementRef.current) {
+    if (elementRef.current !== null) {
       return preloader.preloadOnIntersection(
         elementRef.current,
         componentImport,
@@ -227,7 +276,10 @@ export type ComponentRegistryKeys =
   | 'gene-keys-calculator'
   | 'frequency-calculator';
 
-export const ComponentRegistry: Record<ComponentRegistryKeys, () => Promise<any>> = {
+// Create a type-safe component registry
+export const ComponentRegistry: {
+  [K in ComponentRegistryKeys]: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>;
+} = {
   // Charts
   'astrology-chart': () => import('./charts/AstrologyChart'),
   'frequency-visualizer': () => import('./charts/FrequencyVisualizer'),
@@ -259,19 +311,19 @@ export const ComponentRegistry: Record<ComponentRegistryKeys, () => Promise<any>
 };
 
 // Dynamic component loader
-export function useDynamicComponent(componentKey: ComponentRegistryKeys) {
-  const [Component, setComponent] = React.useState<React.ComponentType<any> | null>(null);
+export function useDynamicComponent<K extends ComponentRegistryKeys>(componentKey: K) {
+  const [Component, setComponent] = React.useState<React.ComponentType<LazyComponentPropsMap[K]> | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
-    if (!componentKey) return;
+    if (componentKey.length === 0) return;
 
     setLoading(true);
     setError(null);
 
     const importFn = ComponentRegistry[componentKey];
-    if (!importFn) {
+    if (importFn === null || importFn === undefined) {
       setError(new Error(`Component "${componentKey}" not found in registry`));
       setLoading(false);
       return;
@@ -282,7 +334,7 @@ export function useDynamicComponent(componentKey: ComponentRegistryKeys) {
         setComponent(() => module.default);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err: Error) => {
         setError(err);
         setLoading(false);
       });
@@ -292,23 +344,23 @@ export function useDynamicComponent(componentKey: ComponentRegistryKeys) {
 }
 
 // Lazy component wrapper with performance optimization
-export interface LazyComponentWrapperProps {
+export interface LazyComponentWrapperProps<K extends ComponentRegistryKeys> {
   /** Key of the component in the registry */
-  componentKey: ComponentRegistryKeys;
+  componentKey: K;
   /** Props to pass to the loaded component */
-  props?: Record<string, any>;
+  props?: LazyComponentPropsMap[K];
   /** Component to show while loading */
   fallback?: React.ComponentType;
 }
 
-export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({ 
+export const LazyComponentWrapper = <K extends ComponentRegistryKeys>({ 
   componentKey, 
-  props = {}, 
+  props = {} as LazyComponentPropsMap[K], 
   fallback: Fallback = DefaultLoadingSpinner 
-}) => {
+}: LazyComponentWrapperProps<K>): JSX.Element => {
   const { Component, loading, error } = useDynamicComponent(componentKey);
 
-  if (error) {
+  if (error !== null) {
     return (
       <div className="p-4 border border-red-200 rounded-lg bg-red-50">
         <p className="text-red-600 text-sm">Failed to load component: {error.message}</p>
@@ -316,7 +368,7 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
     );
   }
 
-  if (loading || !Component) {
+  if (loading || Component === null) {
     return <Fallback />;
   }
 

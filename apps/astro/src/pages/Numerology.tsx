@@ -73,10 +73,10 @@ const Numerology: React.FC = () => {
     return sum;
   }, []);
 
-  const handleCalculateNumbers = useCallback(async () => {
+  const handleCalculateNumbers = useCallback(() => {
   devConsole.log?.('🔢 Calculate numbers clicked with data:', numerologyData);
     
-    if (numerologyData.fullName.trim() === '' || !numerologyData.birthDate) {
+  if (numerologyData.fullName.trim() === '' || numerologyData.birthDate.trim() === '') {
       alert('Please enter both your full name and birth date.');
       return;
     }
@@ -131,7 +131,7 @@ const Numerology: React.FC = () => {
             <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
               <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Life Path Number</h3>
               <p className="text-cosmic-silver/80 text-sm mb-3">
-                Your life's purpose and the path you're meant to walk
+                Your life&apos;s purpose and the path you&apos;re meant to walk
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
@@ -143,7 +143,7 @@ const Numerology: React.FC = () => {
             <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
               <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Expression Number</h3>
               <p className="text-cosmic-silver/80 text-sm mb-3">
-                Your natural talents and abilities you're meant to develop
+                Your natural talents and abilities you&apos;re meant to develop
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
@@ -155,7 +155,7 @@ const Numerology: React.FC = () => {
             <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
               <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Soul Urge Number</h3>
               <p className="text-cosmic-silver/80 text-sm mb-3">
-                Your heart's desire and inner motivations
+                Your heart&apos;s desire and inner motivations
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
@@ -204,8 +204,8 @@ const Numerology: React.FC = () => {
             </div>
             
             <button 
-              onClick={handleCalculateNumbers}
-              disabled={isLoading || numerologyData.fullName.trim() === '' || !numerologyData.birthDate}
+              onClick={() => void handleCalculateNumbers()}
+              disabled={isLoading || numerologyData.fullName.trim() === '' || numerologyData.birthDate.trim() === ''}
               className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple hover:from-cosmic-gold/80 hover:to-cosmic-purple/80 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-lg transition-all duration-300 font-semibold disabled:cursor-not-allowed"
             >
               {isLoading ? (

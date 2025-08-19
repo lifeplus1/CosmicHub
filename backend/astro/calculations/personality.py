@@ -2,7 +2,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 def get_personality_traits(chart: Dict[str, Any]) -> Dict[str, Any]:
     logger.debug(f"Analyzing personality for chart: {chart}")
@@ -20,20 +21,31 @@ def get_personality_traits(chart: Dict[str, Any]) -> Dict[str, Any]:
             "Sagittarius": "Adventurous, optimistic, philosophical",
             "Capricorn": "Disciplined, responsible, ambitious",
             "Aquarius": "Innovative, independent, humanitarian",
-            "Pisces": "Empathetic, imaginative, spiritual"
+            "Pisces": "Empathetic, imaginative, spiritual",
         }
         return {
             "sun_sign": sun_sign,
-            "traits": traits.get(sun_sign, "Unknown")
+            "traits": traits.get(sun_sign, "Unknown"),
         }
     except Exception as e:
         logger.error(f"Error in personality analysis: {str(e)}", exc_info=True)
         raise ValueError(f"Error in personality analysis: {str(e)}")
 
+
 def get_sun_sign(position: float) -> str:
     zodiac_signs = [
-        "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-        "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+        "Aries",
+        "Taurus",
+        "Gemini",
+        "Cancer",
+        "Leo",
+        "Virgo",
+        "Libra",
+        "Scorpio",
+        "Sagittarius",
+        "Capricorn",
+        "Aquarius",
+        "Pisces",
     ]
     sign_index = int(position % 360 / 30)
     return zodiac_signs[sign_index]
