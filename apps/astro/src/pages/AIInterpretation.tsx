@@ -19,7 +19,7 @@ import type { ChartId, UserId } from '../services/api.types';
 import styles from './AIInterpretations.module.css';
 
 // Simple Spinner component
-const Spinner = () => (
+const Spinner = (): React.JSX.Element => (
   <div className='flex items-center justify-center p-4'>
     <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500'></div>
   </div>
@@ -79,7 +79,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
   });
 
   // Helper function to format date display
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -88,7 +88,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
   };
 
   // Chart Selector Component
-  const ChartSelector = () => {
+  const ChartSelector = (): React.JSX.Element => {
     if (chartsLoading) {
       return (
         <div className='flex items-center justify-center p-8'>
@@ -289,7 +289,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
   };
 
   useEffect(() => {
-    const fetchStoredInterpretations = async () => {
+    const fetchStoredInterpretations = async (): Promise<void> => {
       if (
         !isNonEmptyString(effectiveUserId) ||
         !isNonEmptyString(selectedChartId)

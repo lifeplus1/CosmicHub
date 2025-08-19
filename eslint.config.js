@@ -121,30 +121,9 @@ export default [
       '@typescript-eslint/strict-boolean-expressions': 'error',
       '@typescript-eslint/no-explicit-any': ['error', {
         fixToUnknown: false,
-        ignoreRestArgs: false,
-        allowedPredefinedTypes: ['EventTarget'],
-        allowExplicitAny: false,
-        allowTaggedTemplateExpressions: false,
-        "disallowAnyImport": true,
-        allowHigherOrderFunctions: false,
-        allowObjectInteraction: false
+        ignoreRestArgs: false
       }],
-      // Override for files with documented exceptions
-      // This allows necessary any usage in specific files with proper documentation
-      'overrides': [
-        {
-          'files': [
-            '**/component-library.tsx',
-            '**/polymorphic-components.tsx'
-          ],
-          'rules': {
-            '@typescript-eslint/no-explicit-any': ['warn', {
-              reportWhenTypeCheckExplicitlyAny: false,
-              fixToUnknown: false
-            }]
-          }
-        }
-      ],
+      // Override settings are configured below using file-specific settings
       '@typescript-eslint/ban-ts-comment': ['error', {
         'ts-expect-error': 'allow-with-description',
         'ts-ignore': false,
