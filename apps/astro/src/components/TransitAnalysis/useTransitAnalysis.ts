@@ -5,8 +5,6 @@ import type {
   TransitResult, 
   LunarTransitResult, 
   DateRange,
-  TransitCalculationResponse,
-  LunarTransitCalculationResponse,
   TransitAnalysisOptions,
   LunarAnalysisOptions
 } from './types';
