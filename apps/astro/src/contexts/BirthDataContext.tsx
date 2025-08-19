@@ -24,9 +24,12 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
   if (stored !== null) {
-        const parsed = JSON.parse(stored);
+        const parsed: unknown = JSON.parse(stored);
         // Validate the data structure
-        if (parsed !== null && typeof parsed === 'object' && typeof (parsed as any).year === 'number' && typeof (parsed as any).month === 'number' && typeof (parsed as any).day === 'number') {
+        if (parsed !== null && parsed !== undefined && typeof parsed === 'object' && 
+            'year' in parsed && typeof (parsed as Record<string, unknown>).year === 'number' && 
+            'month' in parsed && typeof (parsed as Record<string, unknown>).month === 'number' && 
+            'day' in parsed && typeof (parsed as Record<string, unknown>).day === 'number') {
           return parsed as ChartBirthData;
         }
       }
@@ -37,14 +40,14 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
   });
 
   const [lastUpdated, setLastUpdated] = useState<number | null>(
-    birthData != null ? Date.now() : null
+    birthData !== null && birthData !== undefined ? Date.now() : null
   );
 
   const setBirthData = useCallback((data: ChartBirthData | null) => {
     setBirthDataState(data);
     setLastUpdated(Date.now());
     
-    if (data != null) {
+    if (data !== null && data !== undefined) {
       try {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   devConsole.log?.('✅ Birth data saved to storage:', data);
@@ -95,7 +98,7 @@ export const useBirthData = (): BirthDataContextType => {
 // Helper function to format birth data for display
 export const formatBirthDataDisplay = (data: ChartBirthData): string => {
   const base = `${data.month}/${data.day}/${data.year} ${data.hour.toString().padStart(2, '0')}:${data.minute.toString().padStart(2, '0')}`;
-  return data.city != null ? `${base} in ${data.city}` : base;
+  return (data.city !== null && data.city !== undefined) ? `${base} in ${data.city}` : base;
 };
 
 // Helper function to validate coordinates

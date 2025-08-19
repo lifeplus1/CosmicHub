@@ -8,7 +8,7 @@ export class Logger {
   }
 
   static debug(message: string, data?: unknown): void {
-  if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  if (typeof globalThis.process !== 'undefined' && globalThis.process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.debug(this.formatMessage('debug', message, data));
     }
@@ -24,7 +24,7 @@ export class Logger {
     console.warn(this.formatMessage('warn', message, data));
   }
 
-  static error(message: string, error?: Error | unknown): void {
+  static error(message: string, error?: Error): void {
     // eslint-disable-next-line no-console
     console.error(this.formatMessage('error', message, {
       message: error instanceof Error ? error.message : String(error),

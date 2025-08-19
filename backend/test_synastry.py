@@ -1,6 +1,5 @@
 # Test script for synastry backend integration
 import asyncio
-import json
 
 import httpx
 

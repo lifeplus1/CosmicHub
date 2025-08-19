@@ -9,8 +9,8 @@ def test_database_memory_fallback(monkeypatch: pytest.MonkeyPatch):
     """Force memory DB mode and exercise save/get/delete/batch/stats functions."""
     monkeypatch.setenv("DEPLOY_ENVIRONMENT", "development")
     monkeypatch.setenv("FIREBASE_PRIVATE_KEY", "")
-    import backend.database  # type: ignore
-
+    
+    # Import database module after environment setup
     importlib.reload(sys.modules["backend.database"])  # type: ignore[arg-type]
     import backend.database as dbmod
 

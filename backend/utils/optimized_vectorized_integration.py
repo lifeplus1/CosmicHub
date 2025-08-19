@@ -14,11 +14,9 @@ import numpy as np
 from utils.vectorized_caching import (
     ChartDataHasher,
     TieredCacheManager,
-    cached_calculation,
     get_global_cache_manager,
 )
 from utils.vectorized_memory_optimization import (
-    MemoryMonitor,
     MemoryOptimizedVectorizedCalculator,
     memory_optimized_processing,
 )
@@ -156,7 +154,7 @@ class OptimizedVectorizedAspectCalculator:
                 )
 
                 # Log completion (metrics are automatically logged by the monitor)
-                logger.debug(f"Synastry calculation completed with monitoring")
+                logger.debug("Synastry calculation completed with monitoring")
         else:
             result = self._compute_synastry_aspects(
                 chart1, chart2, orb, aspects

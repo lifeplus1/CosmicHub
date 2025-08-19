@@ -432,21 +432,26 @@ def generate_cache_key(
 # ========================================
 
 # Type-only imports for static analysis
+# Type checking imports
 if TYPE_CHECKING:
+    from utils.vectorized_composite_utils import (
+        VectorizedChartData as TypedVectorizedChartData,
+        create_vectorized_composite_calculator as typed_create_vectorized_composite_calculator,
+    )
+
+# Initialize with None as defaults
+VectorizedChartData = None  # type: ignore[assignment]
+create_vectorized_composite_calculator = None  # type: ignore[assignment]
+composite_vectorization_available = False
+
+# Runtime import - attempt to load the actual implementation
+try:
+    # pylint: disable=ungrouped-imports
+    # flake8: noqa: F811
     from utils.vectorized_composite_utils import (
         VectorizedChartData,
         create_vectorized_composite_calculator,
     )
-
-# Import composite chart vectorization runtime symbols if available
-create_vectorized_composite_calculator = None  # type: ignore[assignment]
-VectorizedChartData = None  # type: ignore[assignment]
-try:
-    from utils.vectorized_composite_utils import (  # type: ignore
-        VectorizedChartData,
-        create_vectorized_composite_calculator,
-    )
-
     composite_vectorization_available = True
 except Exception:
     composite_vectorization_available = False

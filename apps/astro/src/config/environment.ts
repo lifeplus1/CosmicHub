@@ -77,7 +77,7 @@ export const xaiConfig = {
   baseUrl: 'https://api.x.ai/v1',
   model: 'grok-beta',
   timeout: 30000,
-  enabled: !!env.VITE_XAI_API_KEY,
+  enabled: env.VITE_XAI_API_KEY !== null && env.VITE_XAI_API_KEY !== undefined && env.VITE_XAI_API_KEY !== '',
 };
 
 // Logging configuration

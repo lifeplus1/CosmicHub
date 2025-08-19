@@ -16,7 +16,6 @@ from utils.vectorized_memory_optimization import (
     ArrayMemoryPool,
     MemoryMonitor,
     MemoryOptimizedVectorizedCalculator,
-    get_global_memory_pool,
     memory_optimized_processing,
 )
 

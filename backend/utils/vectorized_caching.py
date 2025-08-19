@@ -469,7 +469,7 @@ def get_global_cache_manager() -> TieredCacheManager:
 
 def clear_global_cache() -> None:
     """Clear the global cache if initialized."""
-    global _global_cache_manager
+    # Access the module-level variable directly
     if _global_cache_manager is not None:
         _global_cache_manager.clear_all()
 

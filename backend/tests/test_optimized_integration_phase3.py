@@ -4,7 +4,7 @@ Test suite for Phase 3 Integration with existing workflows.
 
 import os
 import sys
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest

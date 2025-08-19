@@ -247,10 +247,8 @@ request_counter: Any = None
 if _metrics_enabled():
     try:  # pragma: no cover
         from prometheus_client import (  # type: ignore[import]
-            CONTENT_TYPE_LATEST,
             Counter,
             Histogram,
-            generate_latest,
         )
 
         request_latency = Histogram(  # type: ignore[assignment]
@@ -474,12 +472,9 @@ app = FastAPI(lifespan=lifespan)
 
 # Instrument FastAPI & requests after app creation (non-fatal if missing)
 with suppress(Exception):  # pragma: no cover
-    from opentelemetry.instrumentation.fastapi import (
-        FastAPIInstrumentor,  # type: ignore
-    )
-    from opentelemetry.instrumentation.requests import (
-        RequestsInstrumentor,  # type: ignore
-    )
+    # Use noqa to suppress flake8 redefinition errors
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor  # type: ignore # noqa: F811
+    from opentelemetry.instrumentation.requests import RequestsInstrumentor  # type: ignore # noqa: F811
 
     FastAPIInstrumentor.instrument_app(app)  # type: ignore
     RequestsInstrumentor().instrument()  # type: ignore
@@ -491,15 +486,15 @@ app.add_middleware(UserEnrichmentMiddleware)
 try:
     if _metrics_enabled():
         from fastapi import Response
-        from prometheus_client import (  # type: ignore
-            CONTENT_TYPE_LATEST,
-            generate_latest,
-        )
+        
+        # Import needed prometheus client functions - avoiding F811
+        # We need to reference them with different names first to avoid redefinition
+        from prometheus_client import CONTENT_TYPE_LATEST as _content_type, generate_latest as _generate_latest  # type: ignore
 
         @app.get("/metrics")
         async def metrics() -> Any:  # pragma: no cover - simple passthrough
-            data = generate_latest()  # type: ignore
-            return Response(content=data, media_type=CONTENT_TYPE_LATEST)  # type: ignore
+            data = _generate_latest()  # type: ignore
+            return Response(content=data, media_type=_content_type)  # type: ignore
 
     else:
         # Provide a lightweight fallback metrics endpoint so tests depending on /metrics do not 404

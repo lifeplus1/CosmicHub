@@ -56,6 +56,7 @@ interface Aspect {
 
 type AspectType = 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface BackendChartResponse {
   planets?: Record<string, BackendPlanet>;
   houses?: Record<string, BackendHouse>;
@@ -88,18 +89,18 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   const { data: fetchedData, isLoading, error, refetch } = useQuery<ChartData>({
     queryKey: ['chartData', birthData],
   queryFn: async () => {
-  if (birthData == null) throw new Error('Birth data required');
+  if (birthData === null || birthData === undefined) throw new Error('Birth data required');
       const response = await fetchChartData(birthData);
       return transformAPIResponseToChartData(response);
     },
-  enabled: birthData != null && preTransformedData == null,
+  enabled: birthData !== null && birthData !== undefined && preTransformedData === null,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     retry: 2,
   });
 
   // Use pre-transformed data if available, otherwise use fetched data
-  const data = preTransformedData != null ? preTransformedData : fetchedData;
+  const data = preTransformedData ?? fetchedData;
 
   // Transform API response to our internal ChartData format (only used when no pre-transformed data)
   const transformAPIResponseToChartData = (apiData: APIChartData): ChartData => {
@@ -107,7 +108,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     const transformedPlanets: Record<string, Planet> = {};
     const planets = apiData.planets ?? {};
     Object.entries(planets).forEach(([name, planetData]) => {
-      if (planetData == null) return;
+      if (planetData === null || planetData === undefined) return;
       if (typeof planetData.position !== 'number') return;
       
       transformedPlanets[name] = {
@@ -120,9 +121,9 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
 
     // Transform houses 
     const transformedHouses: House[] = [];
-    Object.entries(apiData.houses ?? {}).forEach(([houseKey, houseData]) => {
+    Object.entries(apiData.houses ?? {}).forEach(([, houseData]) => {
       function isAPIHouse(data: unknown): data is { house: number; cusp: number; sign?: string } {
-        if (data == null || typeof data !== 'object') return false;
+        if (data === null || data === undefined || typeof data !== 'object') return false;
         const h = data as { house?: number; cusp?: number; sign?: string };
         return typeof h.house === 'number' && typeof h.cusp === 'number';
       }
@@ -142,7 +143,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     const aspects = apiData.aspects ?? [];
     
     function isAPIAspect(data: unknown): data is APIAspect {
-      if (data == null || typeof data !== 'object') return false;
+      if (data === null || data === undefined || typeof data !== 'object') return false;
       const a = data as APIAspect;
       return (
         typeof a.point1 === 'string' &&
@@ -167,7 +168,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       });
     }
 
-  const angles = apiData.angles != null ? { ...apiData.angles } : undefined;
+  const angles = (apiData.angles !== null && apiData.angles !== undefined) ? { ...apiData.angles } : undefined;
 
     return {
       planets: transformedPlanets,
@@ -232,9 +233,9 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   }), []);
 
   useEffect(() => {
-  if (data == null || svgRef.current == null) return;
+  if (data === null || data === undefined || svgRef.current === null || svgRef.current === undefined) return;
 
-    const { width, height, radius, center, signs, signSymbols, signColors, planetSymbols, planetColors, aspectColors } = chartConstants;
+    const { width, height, radius, center, signs, signSymbols, planetSymbols, planetColors, aspectColors } = chartConstants;
 
     // Clear previous chart
     d3.select(svgRef.current).selectAll('*').remove();
@@ -262,7 +263,6 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     // Draw 12 equal house divisions (30 degrees each)
     for (let i = 0; i < 12; i++) {
       const startAngle = (i * 30 - 90) * Math.PI / 180;
-      const endAngle = ((i + 1) * 30 - 90) * Math.PI / 180;
 
       // House division lines (every 30 degrees) - equal houses
       g.append('line')
@@ -307,7 +307,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     }
 
     // Draw planets in concentric rings
-  const planets: Record<string, Planet> = data.planets != null ? data.planets : {};
+  const planets: Record<string, Planet> = data.planets ?? {};
     Object.entries(planets).forEach(([name, planet]: [string, Planet], index: number) => {
       const angle = (planet.position - 90) * Math.PI / 180;
       const zodiacInfo = getZodiacInfo(planet.position);
@@ -403,7 +403,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
         const planet1 = data.planets[aspect.planet1];
         const planet2 = data.planets[aspect.planet2];
         
-  if (planet1 == null || planet2 == null) return;
+  if (planet1 === null || planet1 === undefined || planet2 === null || planet2 === undefined) return;
 
         const angle1 = (planet1.position - 90) * Math.PI / 180;
         const angle2 = (planet2.position - 90) * Math.PI / 180;
@@ -470,17 +470,17 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
 
   const handleRefresh = () => {
     setIsAnimating(true);
-    refetch().finally(() => setIsAnimating(false));
+    void refetch().finally(() => setIsAnimating(false));
   };
 
-  if (isLoading && preTransformedData == null) return (
+  if (isLoading && (preTransformedData === null || preTransformedData === undefined)) return (
     <div className="flex items-center justify-center p-8">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cosmic-gold"></div>
       <span className="ml-2 text-cosmic-silver">Loading chart...</span>
     </div>
   );
 
-  if (error != null) return (
+  if (error !== null && error !== undefined) return (
     <div className="text-center p-8">
       <div className="text-red-500 mb-4">Error loading chart</div>
       <Button onClick={handleRefresh} variant="secondary">
@@ -489,7 +489,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     </div>
   );
 
-  if (data == null) return (
+  if (data === null || data === undefined) return (
     <div className="text-center p-8">
       <div className="text-cosmic-silver mb-4">No chart data available</div>
     </div>

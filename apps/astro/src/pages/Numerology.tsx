@@ -131,7 +131,7 @@ const Numerology: React.FC = () => {
             <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
               <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Life Path Number</h3>
               <p className="text-cosmic-silver/80 text-sm mb-3">
-                Your life's purpose and the path you're meant to walk
+                Your life&apos;s purpose and the path you&apos;re meant to walk
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
@@ -143,7 +143,7 @@ const Numerology: React.FC = () => {
             <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
               <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Expression Number</h3>
               <p className="text-cosmic-silver/80 text-sm mb-3">
-                Your natural talents and abilities you're meant to develop
+                Your natural talents and abilities you&apos;re meant to develop
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">
@@ -155,7 +155,7 @@ const Numerology: React.FC = () => {
             <div className="bg-cosmic-dark/30 rounded-lg p-4 border border-cosmic-silver/10">
               <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Soul Urge Number</h3>
               <p className="text-cosmic-silver/80 text-sm mb-3">
-                Your heart's desire and inner motivations
+                Your heart&apos;s desire and inner motivations
               </p>
               <div className="w-12 h-12 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold text-cosmic-gold">

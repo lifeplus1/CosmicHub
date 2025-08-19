@@ -5,15 +5,11 @@
 
 import React, { lazy, Suspense, ComponentType } from 'react';
 import { performanceMonitor } from './performance';
+import type { ComponentRegistryKeys, LazyComponentPropsMap, LazyLoadedModule } from './types/component-registry';
 import {
   ImportFunction,
   LazyComponentOptions,
   ErrorBoundaryProps,
-  LazyComponentCreator,
-  LazyRouteCreator,
-  LazyModalCreator,
-  LazyChartCreator,
-  WithLazyLoading,
   UseProgressiveLoading
 } from './types/lazy-loading-types';
 
@@ -34,11 +30,11 @@ export const PageLoadingSpinner: React.FC = () => (
 );
 
 // Enhanced lazy loading with performance tracking
-export function createLazyComponent<T extends ComponentType<any>>(
-  importFn: ImportFunction<T>,
+export function createLazyComponent<T extends object>(
+  importFn: ImportFunction<ComponentType<T>>,
   componentName: string,
   options: LazyComponentOptions = {}
-): ComponentType<React.ComponentProps<T>> {
+): React.ForwardRefExoticComponent<React.PropsWithoutRef<T> & React.RefAttributes<unknown>> {
   const {
     loadingComponent: LoadingComponent = DefaultLoadingSpinner,
     preload = false,
@@ -90,11 +86,11 @@ export function createLazyComponent<T extends ComponentType<any>>(
   }
 
   // Return wrapped component with Suspense
-  const WrappedComponent: ComponentType<React.ComponentProps<T>> = (props) => (
+  const WrappedComponent = React.forwardRef<unknown, T>((props, ref) => (
     <Suspense fallback={<LoadingComponent />}>
-      <LazyComponent {...props} />
+      <LazyComponent {...props} ref={ref} />
     </Suspense>
-  );
+  ));
 
   WrappedComponent.displayName = `Lazy(${componentName})`;
   
@@ -102,40 +98,46 @@ export function createLazyComponent<T extends ComponentType<any>>(
 }
 
 // Lazy loading utilities for common patterns
-export const lazyLoadRoute: LazyRouteCreator = <T extends ComponentType<any>>(
-  importFn: ImportFunction<T>,
+export const lazyLoadRoute = <P extends object>(
+  importFn: ImportFunction<ComponentType<P>>,
   routeName: string
-) => createLazyComponent(importFn, `Route_${routeName}`, {
-  loadingComponent: PageLoadingSpinner,
-  preload: false,
-  timeout: 15000
-});
+): React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<unknown>> => (
+  createLazyComponent<P>(importFn, `Route_${routeName}`, {
+    loadingComponent: PageLoadingSpinner,
+    preload: false,
+    timeout: 15000
+  })
+);
 
-export const lazyLoadModal: LazyModalCreator = <T extends ComponentType<any>>(
-  importFn: ImportFunction<T>,
+export const lazyLoadModal = <P extends object>(
+  importFn: ImportFunction<ComponentType<P>>,
   modalName: string
-) => createLazyComponent(importFn, `Modal_${modalName}`, {
-  loadingComponent: DefaultLoadingSpinner,
-  preload: true, // Modals are often triggered by user interaction
-  timeout: 5000
-});
+): React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<unknown>> => (
+  createLazyComponent<P>(importFn, `Modal_${modalName}`, {
+    loadingComponent: DefaultLoadingSpinner,
+    preload: true,
+    timeout: 5000
+  })
+);
 
-export const lazyLoadChart: LazyChartCreator = <T extends ComponentType<any>>(
-  importFn: ImportFunction<T>,
+export const lazyLoadChart = <P extends object>(
+  importFn: ImportFunction<ComponentType<P>>,
   chartName: string
-) => createLazyComponent(importFn, `Chart_${chartName}`, {
-  loadingComponent: DefaultLoadingSpinner,
-  preload: false,
-  timeout: 8000
-});
+): React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<unknown>> => (
+  createLazyComponent<P>(importFn, `Chart_${chartName}`, {
+    loadingComponent: DefaultLoadingSpinner,
+    preload: false,
+    timeout: 8000
+  })
+);
 
 // HOC for component-level code splitting
-export const withLazyLoading: WithLazyLoading = <P extends object>(
+export const withLazyLoading = <P extends object>(
   importFn: ImportFunction<ComponentType<P>>,
   componentName: string,
   options?: Pick<LazyComponentOptions, 'loadingComponent' | 'preload'>
-) => {
-  return createLazyComponent(importFn, componentName, options);
+): React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<unknown>> => {
+  return createLazyComponent<P>(importFn, componentName, options);
 }
 
 // Progressive loading for large datasets
@@ -184,8 +186,14 @@ export const useProgressiveLoading = function<T>(
   return { loadedItems, isLoading, progress };
 } as UseProgressiveLoading;
 
+// Bundle import types
+interface BundleImport {
+  default: unknown;
+  [key: string]: unknown;
+}
+
 // Bundle splitting utilities
-export const BundleSplitter: Record<string, () => Promise<any>> = {
+export const BundleSplitter: Record<string, () => Promise<BundleImport>> = {
   // Vendor libraries (should be loaded first)
   loadVendorBundle: () => import('react').then(() => import('react-dom')),
   
@@ -204,7 +212,7 @@ export const BundleSplitter: Record<string, () => Promise<any>> = {
 
 // Route-based code splitting for apps
 export const createRouteBundle = (routes: string[]) => {
-  const routeLoaders: Record<string, () => Promise<any>> = {};
+  const routeLoaders: Record<string, () => Promise<BundleImport>> = {};
 
   routes.forEach(route => {
     routeLoaders[route] = () => {
@@ -215,7 +223,7 @@ export const createRouteBundle = (routes: string[]) => {
         /* @vite-ignore */
         `../pages/${route}Page`
       )
-        .then(module => {
+        .then((module: BundleImport) => {
           const loadTime = performance.now() - startTime;
           performanceMonitor.recordMetric('RouteLoad', loadTime, {
             route,
@@ -223,7 +231,7 @@ export const createRouteBundle = (routes: string[]) => {
           });
           return module;
         })
-        .catch(error => {
+        .catch((error: Error) => {
           const loadTime = performance.now() - startTime;
           performanceMonitor.recordMetric('RouteLoad', loadTime, {
             route,
@@ -234,28 +242,26 @@ export const createRouteBundle = (routes: string[]) => {
         });
     };
   });
-
+  
   return routeLoaders;
 };
 
 // Smart preloading based on user behavior
 export class SmartPreloader {
-  private static instance: SmartPreloader;
-  private hoverTimeouts: Map<string, NodeJS.Timeout> = new Map();
-  private loadedComponents: Set<string> = new Set();
+  private static instance: SmartPreloader | null = null;
+  private hoverTimeouts: Map<ComponentRegistryKeys, ReturnType<typeof setTimeout>> = new Map();
+  private loadedComponents: Set<ComponentRegistryKeys> = new Set();
 
   static getInstance(): SmartPreloader {
-    if (!SmartPreloader.instance) {
-      SmartPreloader.instance = new SmartPreloader();
-    }
+    SmartPreloader.instance ??= new SmartPreloader();
     return SmartPreloader.instance;
   }
 
   // Preload component on hover with delay
-  preloadOnHover(
+  preloadOnHover<K extends ComponentRegistryKeys>(
     element: HTMLElement,
-    importFn: () => Promise<any>,
-    componentName: string,
+    importFn: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
+    componentName: K,
     delay: number = 200
   ) {
     if (this.loadedComponents.has(componentName)) {
@@ -287,7 +293,7 @@ export class SmartPreloader {
 
     const handleMouseLeave = () => {
       const timeout = this.hoverTimeouts.get(componentName);
-      if (timeout) {
+      if (timeout !== undefined) {
         clearTimeout(timeout);
         this.hoverTimeouts.delete(componentName);
       }
@@ -301,7 +307,7 @@ export class SmartPreloader {
       element.removeEventListener('mouseenter', handleMouseEnter);
       element.removeEventListener('mouseleave', handleMouseLeave);
       const timeout = this.hoverTimeouts.get(componentName);
-      if (timeout) {
+      if (timeout !== undefined) {
         clearTimeout(timeout);
         this.hoverTimeouts.delete(componentName);
       }
@@ -309,10 +315,10 @@ export class SmartPreloader {
   }
 
   // Preload based on intersection observer
-  preloadOnIntersection(
+  preloadOnIntersection<K extends ComponentRegistryKeys>(
     target: HTMLElement,
-    importFn: () => Promise<any>,
-    componentName: string,
+    importFn: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
+    componentName: K,
     threshold: number = 0.1
   ) {
     if (this.loadedComponents.has(componentName) || typeof window === 'undefined') {
@@ -380,9 +386,9 @@ export class LazyLoadErrorBoundary extends React.Component<
   };
 
   render() {
-    if (this.state.hasError) {
-      const FallbackComponent = this.props.fallback || DefaultErrorFallback;
-      return <FallbackComponent error={this.state.error!} resetError={this.resetError} />;
+    if (this.state.hasError && this.state.error !== null) {
+      const FallbackComponent = this.props.fallback ?? DefaultErrorFallback;
+      return <FallbackComponent error={this.state.error} resetError={this.resetError} />;
     }
 
     return this.props.children;
@@ -414,7 +420,7 @@ export function useLazyLoading() {
   }, []);
 
   const isLoading = React.useCallback((componentName: string) => {
-    return loadingStates[componentName] || false;
+    return loadingStates[componentName] ?? false;
   }, [loadingStates]);
 
   return { setLoading, isLoading, loadingStates };

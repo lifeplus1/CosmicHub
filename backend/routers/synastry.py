@@ -1,5 +1,5 @@
 # apps/backend/src/routers/synastry.py
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Dict, List, TypedDict
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel

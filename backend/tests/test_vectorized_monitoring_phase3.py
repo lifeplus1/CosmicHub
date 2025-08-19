@@ -7,7 +7,6 @@ This test suite validates the performance monitoring framework for vectorized op
 import os
 import sys
 import time
-from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest

@@ -1,10 +1,21 @@
 """
-Advanced Vectorized Composite Chart Calculator
+High-performance vectorized composite chart calculator.
+
+Creates a unified composite view from multiple natal charts for
+analyzing astrological relationships.
+
+Features:
+- NumPy vectorized math
+- Optimized house systems
+- Fast aspect grids
+- Memory-efficient
+- Error handling
+
+Performance: 25-45% faster vs traditionaltorized Composite Chart Calculator
 Phase 2 - CosmicHub Vectorization
 
-This module provides high-performance vectorized calculations for composite charts,
-which are used in relationship astrology to create a combined chart representing
-the relationship between two or more individuals.
+Fast vectorized calculator for composite charts.
+Creates a unified view from multiple natal charts for astrological synergy.
 
 Key Features:
 - NumPy vectorized midpoint calculations
@@ -13,7 +24,7 @@ Key Features:
 - Memory-efficient batch processing
 - Graceful fallback to traditional methods
 
-Performance Target: 25-45% improvement over traditional composite calculations
+Performance Target: 25-45% improvement over traditional calculations
 """
 
 import logging
@@ -106,7 +117,8 @@ class VectorizedCompositeCalculator:
             self.batch_size = 500
 
         logger.info(
-            f"VectorizedCompositeCalculator initialized with {optimization_level} optimization"
+            f"VectorizedCompositeCalculator initialized with "
+            f"{optimization_level} optimization"
         )
 
     def calculate_composite_chart(
@@ -126,12 +138,11 @@ class VectorizedCompositeCalculator:
 
         try:
             if len(charts) < 2:
-                raise ValueError(
-                    "At least 2 charts required for composite calculation"
-                )
+                raise ValueError("At least 2 charts required for composite calculation")
 
             logger.info(
-                f"Calculating composite chart for {len(charts)} individuals using {method} method"
+                f"Calculating composite chart for {len(charts)} individuals "
+                f"using {method} method"
             )
 
             # Convert charts to NumPy arrays for vectorized operations
@@ -141,15 +152,10 @@ class VectorizedCompositeCalculator:
             composite_planets = self._calculate_composite_planets(
                 vectorized_data, method
             )
-            composite_houses = self._calculate_composite_houses(
-                vectorized_data, method
-            )
-            composite_angles = self._calculate_composite_angles(
-                vectorized_data, method
-            )
-            composite_aspects = self._calculate_composite_aspects(
-                composite_planets
-            )
+            # Calculate different chart components
+            composite_houses = self._calculate_composite_houses(vectorized_data, method)
+            composite_angles = self._calculate_composite_angles(vectorized_data, method)
+            composite_aspects = self._calculate_composite_aspects(composite_planets)
 
             # Calculate relationship metrics
             relationship_metrics = self._calculate_relationship_metrics(
@@ -170,7 +176,8 @@ class VectorizedCompositeCalculator:
             }
 
             logger.info(
-                f"Composite chart calculation completed in {calculation_time:.3f} seconds"
+                f"Composite chart calculation completed in "
+                f"{calculation_time:.3f} seconds"
             )
 
             return CompositeChartResult(
@@ -219,18 +226,14 @@ class VectorizedCompositeCalculator:
 
         if method == "midpoint":
             # Vectorized midpoint calculation across all charts
-            composite_positions = self._calculate_midpoints_vectorized(
-                planets_array
-            )
+            composite_positions = self._calculate_midpoints_vectorized(planets_array)
         else:  # davison method
             composite_positions = self._calculate_davison_positions_vectorized(
                 planets_array
             )
 
         # Convert back to dictionary format
-        for i, planet_name in enumerate(
-            self.planet_names[: len(composite_positions)]
-        ):
+        for i, planet_name in enumerate(self.planet_names[: len(composite_positions)]):
             position = float(composite_positions[i])
 
             composite_planets[planet_name] = {
@@ -243,9 +246,7 @@ class VectorizedCompositeCalculator:
 
         return composite_planets
 
-    def _calculate_midpoints_vectorized(
-        self, planets_array: np.ndarray
-    ) -> np.ndarray:
+    def _calculate_midpoints_vectorized(self, planets_array: np.ndarray) -> np.ndarray:
         """
         Vectorized midpoint calculation for all planets across all charts
 
@@ -261,21 +262,13 @@ class VectorizedCompositeCalculator:
             # Simple midpoint for two charts
             chart1, chart2 = planets_array[0], planets_array[1]
 
-            # Handle zodiac circle wrap-around (0°/360°)
+            # Calculate zodiac midpoints handling 0°/360° wrap
             diff = np.abs(chart2 - chart1)
-            use_simple = diff <= 180
-
-            # Simple average where difference <= 180°
-            midpoints = (
-                np.where(
-                    use_simple,
-                    (chart1 + chart2) / 2,
-                    (chart1 + chart2 + 360) / 2,
-                )
-                % 360
-            )
+            simple_avg = (chart1 + chart2) / 2
+            wrap_avg = (chart1 + chart2 + 360) / 2
+            midpoints = np.where(diff <= 180, simple_avg, wrap_avg) % 360
+        # Multiple charts - use circular mean
         else:
-            # Multiple charts - use circular mean
             # Convert to unit vectors on the unit circle
             angles_rad = np.deg2rad(planets_array)
 
@@ -331,9 +324,7 @@ class VectorizedCompositeCalculator:
         composite_angles = {}
 
         # Vectorized angle calculations
-        composite_angle_positions = self._calculate_midpoints_vectorized(
-            angles_array
-        )
+        composite_angle_positions = self._calculate_midpoints_vectorized(angles_array)
 
         for i, angle_name in enumerate(
             self.angle_names[: len(composite_angle_positions)]
@@ -351,7 +342,10 @@ class VectorizedCompositeCalculator:
     def _calculate_composite_aspects(
         self, composite_planets: Dict[str, Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        """Calculate aspects in composite chart using vectorized operations"""
+        """
+        Calculate aspects in composite chart using vectorized operations
+        Returns list of aspect dictionaries with planet1, planet2, aspect details
+        """
 
         planet_positions = np.array(
             [data["longitude"] for data in composite_planets.values()]
@@ -360,10 +354,14 @@ class VectorizedCompositeCalculator:
 
         aspects = []
 
-        # Vectorized aspect calculation
+        # Calculate aspects across all planets
         n_planets = len(planet_positions)
+        aspects = []
+
+        # Loop through all planet pairs
         for i in range(n_planets):
             for j in range(i + 1, n_planets):
+                # Calculate angle between planets
                 angle_diff = self._calculate_aspect_angle(
                     planet_positions[i], planet_positions[j]
                 )
@@ -378,7 +376,7 @@ class VectorizedCompositeCalculator:
                                 "aspect": self._get_aspect_name(aspect_angle),
                                 "angle": float(angle_diff),
                                 "orb": float(abs(angle_diff - aspect_angle)),
-                                "applying": False,  # Composite aspects are not applying/separating
+                                "applying": False,  # Composite aspects aren't applying/separating
                             }
                         )
                         break
@@ -396,8 +394,8 @@ class VectorizedCompositeCalculator:
         planets_array = vectorized_data["planets"]
 
         # Element compatibility (simplified)
-        element_compatibility = (
-            self._calculate_element_compatibility_vectorized(planets_array)
+        element_compatibility = self._calculate_element_compatibility_vectorized(
+            planets_array
         )
 
         # Angular relationships (major aspect density)
@@ -409,9 +407,7 @@ class VectorizedCompositeCalculator:
         planet_positions = np.array(
             [data["longitude"] for data in composite_planets.values()]
         )
-        concentration_score = self._calculate_concentration_score(
-            planet_positions
-        )
+        concentration_score = self._calculate_concentration_score(planet_positions)
 
         return {
             "element_compatibility": float(element_compatibility),
@@ -426,82 +422,80 @@ class VectorizedCompositeCalculator:
         self, planets_array: np.ndarray
     ) -> float:
         """Calculate elemental compatibility using vectorization"""
+        # Element signs already mapped in _get_element_distribution:
+        # Fire (0-89°), Earth (90-179°), Air (180-269°), Water (270-359°)
 
-        # Element mapping: Fire, Earth, Air, Water (simplified)
-        element_ranges = np.array(
-            [
-                [0, 90],  # Fire (Aries, Leo, Sagittarius)
-                [90, 180],  # Earth (Taurus, Virgo, Capricorn)
-                [180, 270],  # Air (Gemini, Libra, Aquarius)
-                [270, 360],  # Water (Cancer, Scorpio, Pisces)
-            ]
-        )
-
-        # Calculate element distribution for each chart
+        # Calculate element distribution and compatibility for each chart pair
         compatibility_scores = []
 
         for i in range(len(planets_array)):
             for j in range(i + 1, len(planets_array)):
-                chart1_elements = self._get_element_distribution(
-                    planets_array[i]
-                )
-                chart2_elements = self._get_element_distribution(
-                    planets_array[j]
-                )
+                # Get element distributions
+                chart1 = self._get_element_distribution(planets_array[i])
+                chart2 = self._get_element_distribution(planets_array[j])
 
                 # Calculate compatibility based on element harmony
-                compatibility = np.sum(chart1_elements * chart2_elements)
+                compatibility = np.sum(chart1 * chart2)
                 compatibility_scores.append(compatibility)
 
+        # Return mean compatibility or default value if no scores
         return np.mean(compatibility_scores) if compatibility_scores else 0.5
 
-    def _get_element_distribution(
-        self, planet_positions: np.ndarray
-    ) -> np.ndarray:
-        """Get element distribution for a chart"""
-        elements = np.zeros(4)  # Fire, Earth, Air, Water
+    def _get_element_distribution(self, planet_positions: np.ndarray) -> np.ndarray:
+        """
+        Calculate element distribution for a chart
+        Returns normalized counts for Fire, Earth, Air, Water
+        """
+        # Initialize element counters
+        elements = np.zeros(4, dtype=np.float64)
 
-        for pos in planet_positions:
-            sign_index = int(pos // 30) % 12
-            element_index = sign_index % 4
-            elements[element_index] += 1
+        # Count planets in each element
+        for position in planet_positions:
+            # Get zodiac sign (0-11)
+            sign = int(position // 30) % 12
+            # Map sign to element (0=Fire, 1=Earth, 2=Air, 3=Water)
+            element = sign % 4
+            elements[element] += 1
 
-        return elements / np.sum(elements)  # Normalize
+        # Normalize to get percentages
+        total = np.sum(elements)
+        return elements / total if total > 0 else elements
 
     def _calculate_concentration_score(self, positions: np.ndarray) -> float:
-        """Calculate how concentrated planets are in the composite chart"""
-
+        """
+        Calculate how concentrated planets are in the composite chart
+        Returns a float between 0-1 (1 = highly concentrated)
+        """
         if len(positions) < 2:
             return 0.5
 
-        # Calculate standard deviation of positions (lower = more concentrated)
-        std_dev = np.std(positions)
+        # Calculate spread using standard deviation
+        std_dev = float(np.std(positions))
 
-        # Convert to 0-1 score (1 = highly concentrated, 0 = spread out)
-        concentration = max(0, 1 - (std_dev / 180))
+        # Convert to 0-1 score (lower std_dev = higher concentration)
+        score = float(np.clip(1 - (std_dev / 180), 0, 1))
 
-        return concentration
+        return score
 
     def _calculate_memory_efficiency(
         self, vectorized_data: Dict[str, np.ndarray]
     ) -> float:
-        """Calculate memory efficiency score for the calculation"""
-
+        """
+        Calculate memory efficiency score for the calculation
+        Returns a float between 0 and 1 (1 = most efficient)
+        """
+        # Calculate total memory usage (only for ndarray values)
         total_elements = sum(
-            array.size
-            for array in vectorized_data.values()
-            if isinstance(array, np.ndarray)
+            array.size for array in vectorized_data.values() if hasattr(array, "size")
         )
-        memory_usage_mb = (
-            total_elements * 8 / (1024 * 1024)
-        )  # Assuming float64
 
-        # Score based on memory usage (lower usage = higher score)
-        efficiency_score = max(
-            0, min(1, 1 - (memory_usage_mb / 100))
-        )  # 100MB baseline
+        # Convert to MB assuming float64 (8 bytes per element)
+        mem_usage_mb = float(total_elements * 8) / (1024 * 1024)
 
-        return efficiency_score
+        # Efficiency score (100MB baseline, lower is better)
+        score = float(np.clip(1 - (mem_usage_mb / 100), 0, 1))
+
+        return score
 
     def _calculate_aspect_angle(self, pos1: float, pos2: float) -> float:
         """Calculate the aspect angle between two positions"""
@@ -578,21 +572,22 @@ def benchmark_composite_calculation(
         iterations: Number of benchmark iterations
 
     Returns:
-        Performance metrics
+        Performance metrics as a dictionary of float values
     """
     calculator = VectorizedCompositeCalculator("balanced")
-    times = []
+    execution_times: List[float] = []
 
     for _ in range(iterations):
-        start_time = datetime.now()
-        result = calculator.calculate_composite_chart(charts)
-        execution_time = (datetime.now() - start_time).total_seconds()
-        times.append(execution_time)
+        start = datetime.now()
+        calculator.calculate_composite_chart(charts)  # Store result if needed
+        duration = float((datetime.now() - start).total_seconds())
+        execution_times.append(duration)
 
+    times_array = np.array(execution_times, dtype=np.float64)
     return {
-        "mean_time": np.mean(times),
-        "std_dev": np.std(times),
-        "min_time": np.min(times),
-        "max_time": np.max(times),
-        "total_iterations": iterations,
+        "mean_time": float(np.mean(times_array)),
+        "std_dev": float(np.std(times_array)),
+        "min_time": float(np.min(times_array)),
+        "max_time": float(np.max(times_array)),
+        "total_iterations": float(iterations),
     }

@@ -15,14 +15,11 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from utils.vectorized_caching import (
-    CacheKey,
-    CacheStats,
     ChartDataHasher,
     InMemoryCache,
     PersistentCache,
     TieredCacheManager,
     cached_calculation,
-    get_global_cache_manager,
 )
 
 

@@ -31,31 +31,40 @@ class SaltBackendProtocol(Protocol):
     """Minimal contract shared by all salt backends."""
 
     # User salts
-    def get_user_salt(
-        self, user_id: str
-    ) -> Optional[bytes]: ...  # noqa: D401,E701
+    def get_user_salt(self, user_id: str) -> Optional[bytes]:
+        ...  # noqa: D401,E701
+
     def create_user_salt(
         self, user_id: str, salt: Optional[bytes] = None
-    ) -> bytes: ...  # noqa
-    def rotate_user_salt(self, user_id: str) -> bytes: ...  # noqa
-    def get_or_create_user_salt(self, user_id: str) -> bytes: ...  # noqa
+    ) -> bytes:
+        ...  # noqa
+
+    def rotate_user_salt(self, user_id: str) -> bytes:
+        ...  # noqa
+
+    def get_or_create_user_salt(self, user_id: str) -> bytes:
+        ...  # noqa
 
     # Global salts
-    def get_global_salt(
-        self, salt_type: str = "events"
-    ) -> Optional[bytes]: ...  # noqa
+    def get_global_salt(self, salt_type: str = "events") -> Optional[bytes]:
+        ...  # noqa
+
     def create_global_salt(
         self, salt_type: str = "events", salt: Optional[bytes] = None
-    ) -> bytes: ...  # noqa
-    def get_or_create_global_salt(
-        self, salt_type: str = "events"
-    ) -> bytes: ...  # noqa
+    ) -> bytes:
+        ...  # noqa
+
+    def get_or_create_global_salt(self, salt_type: str = "events") -> bytes:
+        ...  # noqa
 
     # Rotation queries / batch
-    def get_salts_due_for_rotation(self) -> Dict[str, List[str]]: ...  # noqa
+    def get_salts_due_for_rotation(self) -> Dict[str, List[str]]:
+        ...  # noqa
+
     async def batch_rotate_salts(
         self, user_ids: List[str], global_types: List[str]
-    ) -> BatchRotateResult: ...  # noqa
+    ) -> BatchRotateResult:
+        ...  # noqa
 
 
 class InMemorySaltBackend(SaltBackendProtocol):
@@ -68,9 +77,7 @@ class InMemorySaltBackend(SaltBackendProtocol):
     def get_user_salt(self, user_id: str) -> Optional[bytes]:
         return self._storage.get_user_salt(user_id)
 
-    def create_user_salt(
-        self, user_id: str, salt: Optional[bytes] = None
-    ) -> bytes:
+    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:
         return self._storage.create_user_salt(user_id, salt)
 
     def rotate_user_salt(self, user_id: str) -> bytes:
@@ -99,9 +106,7 @@ class InMemorySaltBackend(SaltBackendProtocol):
         return await self._storage.batch_rotate_salts(user_ids, global_types)
 
 
-class FirestoreSaltBackend(
-    SaltBackendProtocol
-):  # pragma: no cover - until real impl
+class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until real impl
     """Firestore-backed salt storage (currently emulated with in-memory delegate).
 
     Implementation strategy (future):
@@ -138,18 +143,14 @@ class FirestoreSaltBackend(
     def _ensure_delegate(self) -> SaltStorage:
         if self._delegate is None:
             # Real implementation not yet available
-            raise NotImplementedError(
-                "Firestore operations not implemented yet"
-            )
+            raise NotImplementedError("Firestore operations not implemented yet")
         return self._delegate
 
     # User salts
     def get_user_salt(self, user_id: str) -> Optional[bytes]:
         return self._ensure_delegate().get_user_salt(user_id)
 
-    def create_user_salt(
-        self, user_id: str, salt: Optional[bytes] = None
-    ) -> bytes:
+    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:
         return self._ensure_delegate().create_user_salt(user_id, salt)
 
     def rotate_user_salt(self, user_id: str) -> bytes:
@@ -177,9 +178,7 @@ class FirestoreSaltBackend(
     async def batch_rotate_salts(
         self, user_ids: List[str], global_types: List[str]
     ) -> BatchRotateResult:
-        return await self._ensure_delegate().batch_rotate_salts(
-            user_ids, global_types
-        )
+        return await self._ensure_delegate().batch_rotate_salts(user_ids, global_types)
 
 
 # Singleton cache for adapter

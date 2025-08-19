@@ -1,0 +1,111 @@
+name: Lint and Type Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  frontend-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - name: ESLint (critical errors only)
+      run: pnpm exec eslint apps/astro/src --ext .ts,.tsx --max-warnings=0 --format=compact
+    - name: TypeScript type check
+      run: pnpm exec tsc --noEmit
+    - name: Prettier check
+      run: pnpm exec prettier --check apps/astro/src
+
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt
+        pip install flake8 mypy black isort
+    - name: Flake8 (critical codes only)
+      run: |
+        cd backend
+        python -m flake8 . --select=F401,F601,F811,F821,F822,F823,F824,E722 --statistics
+    - name: Black format check
+      run: |
+        cd backend
+        python -m black --check --diff .
+    - name: isort import check
+      run: |
+        cd backend
+        python -m isort --check-only --diff .
+    - name: MyPy type check (non-strict modules)
+      run: |
+        cd backend
+        python -m mypy . --ignore-missing-imports --no-strict-optional
+      continue-on-error: true
+
+  metrics-collection:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [frontend-lint, backend-lint]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Collect lint metrics
+      run: |
+        cd backend && pip install flake8
+        cd .. && pnpm install --frozen-lockfile
+        
+        # Create metrics directory
+        mkdir -p metrics
+        
+        # Collect current metrics
+        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        COMMIT_SHA=${{ github.sha }}
+        
+        # Frontend metrics
+        ESLINT_ERRORS=$(pnpm exec eslint apps/astro/src --ext .ts,.tsx --format=json 2>/dev/null | jq '[.[].messages[]] | length' || echo "0")
+        
+        # Backend metrics  
+        cd backend
+        FLAKE8_CRITICAL=$(python -m flake8 . --select=F401,F601,F811,F821,F822,F823,F824,E722 --format='%(path)s:%(row)d:%(col)d: %(code)s %(text)s' | wc -l || echo "0")
+        FLAKE8_TOTAL=$(python -m flake8 . --format='%(path)s:%(row)d:%(col)d: %(code)s %(text)s' | wc -l || echo "0")
+        cd ..
+        
+        # Create metrics JSON
+        cat > metrics/daily-metrics-$(date +%Y-%m-%d).json << EOF
+        {
+          "timestamp": "$TIMESTAMP",
+          "commit_sha": "$COMMIT_SHA",
+          "eslint_error_count": $ESLINT_ERRORS,
+          "flake8_critical_count": $FLAKE8_CRITICAL,
+          "flake8_total_count": $FLAKE8_TOTAL,
+          "collection_method": "ci_pipeline"
+        }
+        EOF
+        
+        cat metrics/daily-metrics-$(date +%Y-%m-%d).json
+    - name: Commit metrics
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add metrics/
+        git diff --staged --quiet || git commit -m "chore: update daily lint metrics [skip ci]"
+        git push
+      continue-on-error: true

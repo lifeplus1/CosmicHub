@@ -1,20 +1,5 @@
 """
 Comprehensive unit tests for vectorized synastry calculations.
-Cleaned and restored: removed unused List import and fixed syntax/indentation.
-"""
-
-import os
-import sys
-from typing import Dict, cast
-
-import numpy as np
-import pytest
-
-# Add backend to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-"""
-Comprehensive unit tests for vectorized synastry calculations.
 This cleaned suite calls vectorized functions with dict inputs (PLANETS keys)
 and performs conservative assertions on shapes and types so tests are robust
 across small implementation changes.

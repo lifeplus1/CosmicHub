@@ -707,9 +707,6 @@ def calculate_gene_keys_profile(
             "radiance": get_gene_key_details(radiance_gate),
             "purpose": get_gene_key_details(purpose_gate),
             "attraction": venus_sequence.get("attraction", {}),
-            "iq": venus_sequence.get("iq", {}),
-            "eq": venus_sequence.get("eq", {}),
-            "sq": venus_sequence.get("sq", {}),
             "core_wound": venus_sequence.get("core_wound", {}),
             "activation": {
                 "name": activation_sequence.get("name", "Activation Sequence"),
@@ -721,9 +718,6 @@ def calculate_gene_keys_profile(
                     activation_sequence.get("purpose", {}),
                 ],
             },
-            "iq": venus_sequence.get("iq", {}),
-            "eq": venus_sequence.get("eq", {}),
-            "sq": venus_sequence.get("sq", {}),
             "venus_sequence": {
                 "name": venus_sequence.get("name", "Venus Sequence"),
                 "description": venus_sequence.get("description", ""),

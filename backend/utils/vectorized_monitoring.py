@@ -21,10 +21,10 @@ import numpy as np
 PSUTIL_AVAILABLE: bool = False
 try:
     import psutil
-
     PSUTIL_AVAILABLE = True
 except ImportError:
-    pass
+    # psutil is not available
+    psutil = None
 
 logger = logging.getLogger(__name__)
 
@@ -173,8 +173,7 @@ class VectorizedPerformanceMonitor:
             return 0.0
 
         try:
-            import psutil
-
+            # Use the psutil that was already imported
             process = psutil.Process()
             return process.memory_info().rss / (1024 * 1024)  # Convert to MB
         except Exception:
