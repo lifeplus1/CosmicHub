@@ -1,12 +1,14 @@
 import React from 'react';
-import { MayanChartData } from './types';
+import type { MayanChartData } from './types';
 
 interface Props {
   data: MayanChartData;
 }
 
 const MayanChart: React.FC<Props> = ({ data }) => {
-  if (!data) return <p className="text-cosmic-silver">No Mayan astrology data available</p>;
+  if (data === undefined || data === null) {
+    return <p className="text-cosmic-silver">No Mayan astrology data available</p>;
+  }
 
   return (
     <div className="flex flex-col space-y-4">
@@ -19,7 +21,7 @@ const MayanChart: React.FC<Props> = ({ data }) => {
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <p className="mb-2 font-bold">Tzolk'in Signature</p>
+              <p className="mb-2 font-bold">Tzolk&apos;in Signature</p>
               <p className="mb-2 text-2xl">{data.sacred_number?.number} {data.day_sign?.name}</p>
               <p className="mb-2 text-sm"><strong>Symbol:</strong> {data.day_sign?.symbol}</p>
               <p className="mb-2 text-sm"><strong>Color:</strong> {data.day_sign?.color}</p>

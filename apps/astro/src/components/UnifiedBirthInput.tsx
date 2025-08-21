@@ -51,15 +51,15 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
   
   // Form state - initialize with existing birth data or defaults
   const [formData, setFormData] = useState(() => ({
-    year: birthData?.year !== undefined ? birthData.year.toString() : '',
-    month: birthData?.month !== undefined ? birthData.month.toString() : '',
-    day: birthData?.day !== undefined ? birthData.day.toString() : '',
-    hour: birthData?.hour !== undefined ? birthData.hour.toString() : '',
-    minute: birthData?.minute !== undefined ? birthData.minute.toString() : '',
-    city: birthData?.city !== undefined && birthData.city !== null ? birthData.city : '',
-    lat: birthData?.lat !== undefined ? birthData.lat.toString() : '',
-    lon: birthData?.lon !== undefined ? birthData.lon.toString() : '',
-    timezone: birthData?.timezone !== undefined && birthData.timezone !== null ? birthData.timezone : ''
+    year: birthData?.year?.toString() ?? '',
+    month: birthData?.month?.toString() ?? '',
+    day: birthData?.day?.toString() ?? '',
+    hour: birthData?.hour?.toString() ?? '',
+    minute: birthData?.minute?.toString() ?? '',
+    city: birthData?.city ?? '',
+    lat: birthData?.lat?.toString() ?? '',
+    lon: birthData?.lon?.toString() ?? '',
+    timezone: birthData?.timezone ?? ''
   }));
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -69,15 +69,15 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
   useEffect(() => {
     if (birthData !== null && birthData !== undefined) {
       setFormData({
-        year: birthData.year !== undefined ? birthData.year.toString() : '',
-        month: birthData.month !== undefined ? birthData.month.toString() : '',
-        day: birthData.day !== undefined ? birthData.day.toString() : '',
-        hour: birthData.hour !== undefined ? birthData.hour.toString() : '',
-        minute: birthData.minute !== undefined ? birthData.minute.toString() : '',
-        city: birthData.city !== undefined && birthData.city !== null ? birthData.city : '',
-        lat: birthData.lat !== undefined ? birthData.lat.toString() : '',
-        lon: birthData.lon !== undefined ? birthData.lon.toString() : '',
-        timezone: birthData.timezone !== undefined && birthData.timezone !== null ? birthData.timezone : ''
+        year: birthData.year?.toString() ?? '',
+        month: birthData.month?.toString() ?? '',
+        day: birthData.day?.toString() ?? '',
+        hour: birthData.hour?.toString() ?? '',
+        minute: birthData.minute?.toString() ?? '',
+        city: birthData.city ?? '',
+        lat: birthData.lat?.toString() ?? '',
+        lon: birthData.lon?.toString() ?? '',
+        timezone: birthData.timezone ?? ''
       });
     }
   }, [birthData]);
@@ -193,10 +193,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
             {/* Date of Birth */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-cosmic-silver font-medium mb-2">
+                <label htmlFor="birth-year" className="block text-cosmic-silver font-medium mb-2">
                   Year <span className="text-red-400">*</span>
                 </label>
                 <input
+                  id="birth-year"
                   type="number"
                   value={formData.year}
                   onChange={(e) => handleInputChange('year', e.target.value)}
@@ -208,10 +209,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-cosmic-silver font-medium mb-2">
+                <label htmlFor="birth-month" className="block text-cosmic-silver font-medium mb-2">
                   Month <span className="text-red-400">*</span>
                 </label>
                 <select
+                  id="birth-month"
                   value={formData.month}
                   onChange={(e) => handleInputChange('month', e.target.value)}
                   required
@@ -227,10 +229,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-cosmic-silver font-medium mb-2">
+                <label htmlFor="birth-day" className="block text-cosmic-silver font-medium mb-2">
                   Day <span className="text-red-400">*</span>
                 </label>
                 <input
+                  id="birth-day"
                   type="number"
                   value={formData.day}
                   onChange={(e) => handleInputChange('day', e.target.value)}
@@ -246,10 +249,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
             {/* Time of Birth */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-cosmic-silver font-medium mb-2">
+                <label htmlFor="birth-hour" className="block text-cosmic-silver font-medium mb-2">
                   Hour (24-hour) <span className="text-red-400">*</span>
                 </label>
                 <input
+                  id="birth-hour"
                   type="number"
                   value={formData.hour}
                   onChange={(e) => handleInputChange('hour', e.target.value)}
@@ -261,10 +265,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-cosmic-silver font-medium mb-2">
+                <label htmlFor="birth-minute" className="block text-cosmic-silver font-medium mb-2">
                   Minute <span className="text-red-400">*</span>
                 </label>
                 <input
+                  id="birth-minute"
                   type="number"
                   value={formData.minute}
                   onChange={(e) => handleInputChange('minute', e.target.value)}
@@ -279,10 +284,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
 
             {/* Birth Location */}
             <div className="relative">
-              <label className="block text-cosmic-silver font-medium mb-2">
+              <label htmlFor="birth-city" className="block text-cosmic-silver font-medium mb-2">
                 Birth City <span className="text-red-400">*</span>
               </label>
               <input
+                id="birth-city"
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
@@ -321,10 +327,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
               {showAdvanced && (
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-cosmic-silver/70 font-medium mb-2">
+                    <label htmlFor="birth-lat" className="block text-cosmic-silver/70 font-medium mb-2">
                       Latitude
                     </label>
                     <input
+                      id="birth-lat"
                       type="number"
                       step="0.000001"
                       value={formData.lat}
@@ -334,10 +341,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-cosmic-silver/70 font-medium mb-2">
+                    <label htmlFor="birth-lon" className="block text-cosmic-silver/70 font-medium mb-2">
                       Longitude
                     </label>
                     <input
+                      id="birth-lon"
                       type="number"
                       step="0.000001"
                       value={formData.lon}
@@ -347,10 +355,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-cosmic-silver/70 font-medium mb-2">
+                    <label htmlFor="birth-timezone" className="block text-cosmic-silver/70 font-medium mb-2">
                       Timezone
                     </label>
                     <input
+                      id="birth-timezone"
                       type="text"
                       value={formData.timezone}
                       onChange={(e) => handleInputChange('timezone', e.target.value)}

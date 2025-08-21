@@ -1,8 +1,5 @@
 import React from 'react';
-import { 
-  performanceMonitor, 
-  type PerformanceReport
-} from '@cosmichub/config/performance';
+import '@cosmichub/config/performance';
 import { useRealTimePerformance } from '@cosmichub/config/hooks';
 import { Card } from './Card';
 import { Badge } from './Badge';
@@ -20,6 +17,22 @@ interface MetricDisplay {
   description: string;
 }
 
+interface ComponentMetric {
+  componentName: string;
+  type: string;
+  duration: number;
+}
+
+interface OperationMetric {
+  operationName: string;
+  duration: number;
+  success: boolean;
+  metadata?: {
+    label?: string;
+  };
+}
+
+
 /**
  * Enhanced Performance Dashboard component for monitoring Core Web Vitals and app performance
  * Now with real-time updates and comprehensive metrics display
@@ -30,14 +43,16 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
 }) => {
   const report = useRealTimePerformance();
   const vitalsData = React.useMemo(() => {
-    // Use available performance data instead of webVitals
-    const metrics = performanceMonitor.getMetrics();
+    const avg = report.summary.averageRenderTime;
+    const total = report.summary.totalMetrics;
+    // Reproduce performanceScore formula used in performance monitor to avoid unsafe direct call
+    const performanceScore = Math.round(Math.max(0, 100 - (avg / 2) - report.summary.errorRate));
     return {
-      averageRenderTime: metrics.averageRenderTime,
-      performanceScore: metrics.performanceScore,
-      totalMetrics: metrics.totalMetrics
+      averageRenderTime: Number.isFinite(avg) ? avg : 0,
+      performanceScore: Number.isFinite(performanceScore) ? performanceScore : 0,
+      totalMetrics: Number.isFinite(total) ? total : 0
     };
-  }, [report.components, report.operations]);
+  }, [report.summary.averageRenderTime, report.summary.errorRate, report.summary.totalMetrics]);
 
   // Mock web vitals data based on performance metrics
   const webVitals: MetricDisplay[] = React.useMemo(() => [
@@ -247,7 +262,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             <Card className="p-6">
               <h3 className="text-xl font-bold text-cosmic-dark mb-4">Component Performance</h3>
               <div className="space-y-3">
-                {report.components.slice(-10).map((metric: any, index: number) => (
+                {report.components.slice(-10).map((metric: ComponentMetric, index: number) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                     <div>
                       <span className="font-medium">{metric.componentName}</span>
@@ -267,7 +282,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             <Card className="p-6">
               <h3 className="text-xl font-bold text-cosmic-dark mb-4">Operation Performance</h3>
               <div className="space-y-3">
-                {report.operations.slice(-10).map((metric: any, index: number) => (
+                {report.operations.slice(-10).map((metric: OperationMetric, index: number) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                     <div>
                       <span className="font-medium">{metric.operationName}</span>

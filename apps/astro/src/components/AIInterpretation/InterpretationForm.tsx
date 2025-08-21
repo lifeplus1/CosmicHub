@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { generateAIInterpretation } from '../../services/api';
+import type { ApiResult } from '../../services/apiResult';
+import type { InterpretationResponse, InterpretationRequest as ApiInterpretationRequest } from '../../services/api.types';
 import { useToast } from '../ToastProvider';
 import { useAIInterpretation } from './useAIInterpretation';
 import type { ChartInterpretationRequest, InterpretationRequest } from './types';
-import type { InterpretationRequest as ApiInterpretationRequest } from '../../services/api.types';
 
 interface InterpretationResult {
   data?: unknown;
@@ -96,7 +97,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         ...(trimmedQuestion !== '' && { question: formData.question })
       };
 
-      const result = await generateAIInterpretation(bodyData as ApiInterpretationRequest);
+  const result: ApiResult<InterpretationResponse> = await generateAIInterpretation(bodyData as ApiInterpretationRequest);
       
       toast({
         title: "Interpretation Generated",
@@ -106,8 +107,12 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         isClosable: true,
       });
 
-      if (typeof onInterpretationGenerated === 'function') {
-        onInterpretationGenerated({ data: result.data });
+      if (result.success) {
+        if (typeof onInterpretationGenerated === 'function') {
+          onInterpretationGenerated({ data: result.data });
+        }
+      } else {
+        throw new Error(result.error);
       }
 
     } catch (error) {

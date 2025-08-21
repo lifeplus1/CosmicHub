@@ -1,0 +1,12 @@
+{
+  "created": "2025-08-19T11:09:01.495Z",
+  "rules": {
+    "@typescript-eslint/strict-boolean-expressions": 231,
+    "eqeqeq": 34,
+    "@typescript-eslint/no-unsafe-member-access": 136,
+    "@typescript-eslint/no-unsafe-assignment": 91,
+    "@typescript-eslint/no-misused-promises": 0,
+    "@typescript-eslint/no-floating-promises": 0,
+    "@typescript-eslint/explicit-function-return-type": 0
+  }
+}

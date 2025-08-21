@@ -41,7 +41,7 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
 
   // Timer logic with cleanup
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+  let interval: ReturnType<typeof setInterval> | null = null;
 
     if (isRunning && timeRemaining > 0) {
       interval = setInterval(() => {
@@ -154,16 +154,16 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(({
       </div>
 
       <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-        <div 
+        <div
           className={`h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 transition-all duration-1000 ease-linear ${
             isRunning ? 'animate-pulse' : ''
           }`}
           style={{ width: `${progressPercentage}%` }}
           role="progressbar"
-          aria-valuenow={progressPercentage}
+          aria-valuenow={Number.isFinite(progressPercentage) ? Math.round(progressPercentage) : 0}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={`Session progress: ${Math.round(progressPercentage)}% complete`}
+          aria-label={`Session progress ${Math.round(progressPercentage)} percent`}
         />
       </div>
 

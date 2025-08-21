@@ -44,8 +44,9 @@ const mockBirthData = {
   city: 'New York'
 };
 
-const mockHumanDesignData = {
-  human_design: {
+const mockHumanDesignSuccess = {
+  success: true as const,
+  data: { human_design: {
     type: 'Generator',
     strategy: 'To Respond',
     authority: 'Sacral',
@@ -97,13 +98,13 @@ const mockHumanDesignData = {
       awareness: 'Taste',
       perspective: 'Power'
     }
-  }
+  }}
 };
 
 describe('HumanDesignChart Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCalculateHumanDesign.mockResolvedValue(mockHumanDesignData);
+  mockCalculateHumanDesign.mockResolvedValue(mockHumanDesignSuccess);
   });
 
   afterEach(() => {

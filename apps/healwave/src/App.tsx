@@ -12,18 +12,7 @@ const FrequencyGenerator = lazy(() => import('./pages/FrequencyGenerator'));
 const Presets = lazy(() => import('./pages/Presets'));
 const Profile = lazy(() => import('./pages/Profile'));
 
-interface AppConfig {
-  app: string;
-  environment: string;
-  version: string;
-}
-
-interface Notification {
-  id: string;
-  message: string;
-  type: 'info' | 'success' | 'error';
-  timestamp: number;
-}
+// Removed unused internal AppConfig and Notification interfaces (types supplied by config/store modules)
 
 const MainApp: React.FC = () => {
   const { addNotification } = useCrossAppStore();

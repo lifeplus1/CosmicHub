@@ -5,36 +5,26 @@ export const API_ENDPOINTS = {
   humanDesign: '/api/human-design',
 } as const;
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
+import { buildSuccess, buildFailure, type StandardApiResponse } from './utils/apiShared';
 
-export async function apiRequest<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<ApiResponse<T>> {
+export type ApiResponse<T> = StandardApiResponse<T>;
+
+export async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
   try {
     const response = await fetch(endpoint, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
       ...options,
     });
-
-    const data = await response.json();
-    
+    let raw: unknown;
+    try { raw = await response.json(); } catch { raw = undefined; }
+    const obj = (typeof raw === 'object' && raw !== null) ? raw as Record<string, unknown> : {};
     if (!response.ok) {
-      return { success: false, error: data.message || 'Request failed' };
+      const msg = typeof obj.message === 'string' ? obj.message : 'Request failed';
+      return buildFailure(msg, String(response.status), obj);
     }
-
-    return { success: true, data };
+    return buildSuccess(raw as T);
   } catch (error) {
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return buildFailure(msg);
   }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { signUp, logIn, logOut } from '@cosmichub/auth';
 
 // Skip real Firebase tests in CI/push environments

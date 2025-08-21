@@ -52,7 +52,7 @@ export default function AIChat(): React.ReactElement {
         }
       );
 
-      if (res === null || res === undefined || res.data === null || res.data === undefined || typeof res.data !== 'object') {
+  if (res?.data === null || res?.data === undefined || typeof res?.data !== 'object') {
         throw new Error('No response data received');
       }
 

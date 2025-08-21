@@ -58,4 +58,9 @@ Object.defineProperty(window, 'AudioContext', {
 });
 
 // Mock Web Audio API
-global.AudioContext = global.AudioContext || vi.fn();
+globalThis.AudioContext ??= vi.fn().mockImplementation(() => ({
+  createOscillator: vi.fn(),
+  createGain: vi.fn(),
+  destination: {},
+  currentTime: 0
+}));

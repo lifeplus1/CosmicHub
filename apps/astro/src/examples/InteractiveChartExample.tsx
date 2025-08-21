@@ -4,6 +4,7 @@
  */
 
 import React, { useState, Suspense, lazy } from 'react';
+import { createStubChartData } from '../test-utils/createStubChartData';
 import { devConsole } from '../config/environment';
 import { getChartSyncService } from '../services/chartSyncService';
 import { getChartAnalyticsService, type PersonalityInsight, type ChartAnalysis } from '../services/chartAnalyticsService';
@@ -38,11 +39,8 @@ export const InteractiveChartExample: React.FC = () => {
     
     // Get analytics for selected planet
     const analyticsService = getChartAnalyticsService();
-  const insights = analyticsService.getPersonalityInsights({
-      planets: { [planet]: { name: planet, position: 0 } },
-      houses: [],
-      aspects: []
-    });
+  const stubChart = createStubChartData();
+    const insights = analyticsService.getPersonalityInsights(stubChart);
     
     setAnalysisResult(insights);
 
@@ -88,20 +86,9 @@ export const InteractiveChartExample: React.FC = () => {
     const analyticsService = getChartAnalyticsService();
     
     try {
-  const analysis = analyticsService.analyzeChart('example-chart', {
-        planets: { 
-          sun: { name: 'sun', position: 75 }, // Leo
-          moon: { name: 'moon', position: 180 }, // Libra
-          mercury: { name: 'mercury', position: 60 } // Gemini
-        },
-        houses: [
-          { number: 1, cusp: 0, sign: 'Aries' },
-          { number: 2, cusp: 30, sign: 'Taurus' }
-        ],
-        aspects: [
-          { transitPlanet: 'sun', natalPlanet: 'moon', aspectType: 'square', orb: 5, type: 'aspect-forming', exactDate: new Date(), strength: 'medium' }
-        ]
-      });
+  const analysis = analyticsService.analyzeChart('example-chart', createStubChartData());
+
+// Minimal stub ChartData builder (kept internal to example)
       
       setAnalysisResult(analysis);
       
@@ -121,7 +108,7 @@ export const InteractiveChartExample: React.FC = () => {
           <Button 
             onClick={() => { void handleRegisterChart(); }}
             disabled={chartRegistered}
-            variant="primary"
+            variant={chartRegistered ? 'secondary' : 'primary'}
             className="w-full"
           >
             {chartRegistered ? '✅ Chart Registered' : '🔄 Register Chart'}

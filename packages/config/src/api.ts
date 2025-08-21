@@ -3,6 +3,7 @@
  */
 
 import { config } from './config';
+import { buildSuccess, parseErrorLike, type StandardApiError } from './utils/api/error';
 // Local fallback to avoid cross-package rootDir limitations; kept in sync with shared utility type
 type UnknownRecord = Record<string, unknown>;
 
@@ -13,11 +14,7 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 
-export interface ApiError {
-  code: string;
-  message: string;
-  details?: unknown;
-}
+export type ApiError = StandardApiError;
 
 export interface RequestOptions {
   headers?: Record<string, string>;
@@ -182,25 +179,42 @@ export class ApiClient {
 
   // Handle API response
   private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+    let raw: unknown;
     try {
-      const data = await response.json();
-      
+      raw = await response.json();
+    } catch {
+      // Non-JSON or empty body
       if (!response.ok) {
-        throw new Error(data.message || data.error || 'API request failed');
+        const err: ApiError = { code: response.status.toString(), message: 'API request failed', details: undefined };
+        throw new Error(JSON.stringify(err));
       }
-      
-      return {
-        data: data.data || data,
-        success: true,
-        message: data.message
-      };
-    } catch (error) {
-      throw {
-        code: response.status.toString(),
-        message: error instanceof Error ? error.message : 'Unknown error',
-        details: error
-      } as ApiError;
+      return { data: undefined as unknown as T, success: true };
     }
+
+    const dataObj = (typeof raw === 'object' && raw !== null) ? raw as Record<string, unknown> : {};
+    const messageVal = typeof dataObj.message === 'string' ? dataObj.message : undefined;
+    const errorVal = typeof dataObj.error === 'string' ? dataObj.error : undefined;
+  const payload = dataObj.data !== undefined ? dataObj.data : raw;
+
+    if (!response.ok) {
+      const errMsg = messageVal ?? errorVal ?? 'API request failed';
+      const err: ApiError = { code: response.status.toString(), message: errMsg, details: payload };
+      throw new Error(JSON.stringify(err));
+    }
+
+    return buildSuccess(payload as T, messageVal);
+  }
+
+  private parseApiError(e: unknown, status: number): ApiError {
+    if (e instanceof Error) {
+      try {
+        const parsed = JSON.parse(e.message) as unknown;
+        return parseErrorLike(parsed, status.toString());
+      } catch {
+        return parseErrorLike(e, status.toString());
+      }
+    }
+    return parseErrorLike(e, status.toString());
   }
 
   // Retry logic

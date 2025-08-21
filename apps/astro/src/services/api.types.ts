@@ -170,8 +170,13 @@ export function isSuccessResponse<T>(response: ApiResponse<T>): response is ApiS
   return response.status === 'success';
 }
 
-export function isErrorResponse(response: ApiResponse<unknown>): response is ApiErrorResponseBase {
+export function isErrorResponse<T>(response: ApiResponse<T>): response is ApiErrorResponse {
   return ['error', 'validation_error', 'not_found', 'unauthorized', 'forbidden', 'server_error'].includes(response.status);
+}
+
+// Convenience helper when only status string is available
+export function isErrorStatus(status: ApiResponseStatus): boolean {
+  return ['error', 'validation_error', 'not_found', 'unauthorized', 'forbidden', 'server_error'].includes(status);
 }
 
 export function isValidationError(response: ApiResponse<unknown>): response is ApiValidationErrorResponse {

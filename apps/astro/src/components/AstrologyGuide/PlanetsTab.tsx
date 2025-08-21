@@ -1,5 +1,5 @@
 import React from 'react';
-import { Planet } from './types';
+import type { Planet } from './types';
 
 const planets: Planet[] = [
   { name: 'Sun', symbol: '☉', meaning: 'Core identity, ego, life purpose' },

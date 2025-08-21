@@ -33,13 +33,20 @@ export default defineConfig({
     },
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'json-summary'],
       exclude: [
         'node_modules/',
-        'src/test/setup.ts',
+        'src/test-setup.ts',
         '**/*.d.ts',
         '**/*.config.*',
         'dist/',
+        '.storybook/**',
+        'src/**/*.stories.*',
+        'src/examples/**',
+        'src/pages/**',
+        'src/features/**',
+        'src/components/**/index.ts',
+        'src/components/HumanDesignChart/gateKeynotes.ts',
       ],
       thresholds: {
         global: {

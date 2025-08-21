@@ -3,7 +3,7 @@
  * This shows how to integrate the notification system into your existing components
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, type ReactElement } from 'react';
 import { getNotificationManager } from '../services/notificationManager';
 import { devConsole } from '../config/environment';
 import type { NotificationPreferences } from '@cosmichub/config';
@@ -66,8 +66,8 @@ function isValidChartData(data: unknown): data is ChartData {
 
 // Example: Chart Calculation Component with Notifications
 export const ChartCalculationWithNotifications: React.FC = () => {
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [notificationManager] = useState(() => getNotificationManager());
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [notificationManager] = useState<ReturnType<typeof getNotificationManager>>((): ReturnType<typeof getNotificationManager> => getNotificationManager());
 
   const calculateChart = async (birthData: BirthData): Promise<ChartData | null> => {
     setIsCalculating(true);
@@ -103,7 +103,7 @@ export const ChartCalculationWithNotifications: React.FC = () => {
       setIsCalculating(false);
       
       // Error handling - notification manager doesn't support direct queue access
-      // eslint-disable-next-line no-console
+       
       console.error('Chart calculation failed:', error);
       
       throw error;
@@ -129,38 +129,33 @@ export const ChartCalculationWithNotifications: React.FC = () => {
 
 // Example: User Settings Page with Notification Preferences
 export const UserSettingsWithNotifications: React.FC = () => {
-  const [notificationManager] = useState(() => getNotificationManager());
+  const [notificationManager] = useState<ReturnType<typeof getNotificationManager>>((): ReturnType<typeof getNotificationManager> => getNotificationManager());
   const [status, setStatus] = useState<NotificationStatus>({});
 
-  useEffect(() => {
+  useEffect((): (() => void) => {
     // Load notification status
-    const loadStatus = (): void => {
-      const raw = notificationManager.status();
-      const hasPerm = raw.push != null && raw.push.permissionStatus != null && typeof raw.push.permissionStatus === 'string';
-      const hasBg = raw.background != null && raw.background.isOnline != null;
-      let pushNotifications: NotificationStatus['pushNotifications'];
-  if (hasPerm) {
-        pushNotifications = {
-          permissionStatus: raw.push.permissionStatus,
-          activeSubscriptions: typeof raw.push.activeSubscriptions === 'number' ? raw.push.activeSubscriptions : undefined
-        };
-      }
-      let backgroundSync: NotificationStatus['backgroundSync'];
-  if (hasBg && raw.background !== undefined && raw.background !== null) {
-        backgroundSync = {
-          isOnline: raw.background.isOnline,
-          queuedItems: typeof raw.background.queuedItems === 'number' ? raw.background.queuedItems : undefined
-        };
-      }
-      const mapped: NotificationStatus = { pushNotifications, backgroundSync };
-      setStatus(mapped);
+  const loadStatus = (): void => {
+  const raw = notificationManager.status() as unknown as { push?: Record<string, unknown>; background?: Record<string, unknown> };
+      const push = raw.push ?? {};
+      const background = raw.background ?? {};
+      const permissionStatus = typeof push.permissionStatus === 'string' ? push.permissionStatus : undefined;
+  const pushNotifications = (permissionStatus !== undefined && permissionStatus !== '') ? {
+        permissionStatus,
+        activeSubscriptions: typeof push.activeSubscriptions === 'number' ? push.activeSubscriptions : undefined
+      } : undefined;
+      const isOnline = typeof background.isOnline === 'boolean' ? background.isOnline : undefined;
+  const backgroundSync = (isOnline !== undefined) ? {
+        isOnline,
+        queuedItems: typeof background.queuedItems === 'number' ? background.queuedItems : undefined
+      } : undefined;
+      setStatus({ pushNotifications, backgroundSync });
     };
 
     loadStatus();
     
     // Update status every 10 seconds
-    const interval = setInterval(loadStatus, 10000);
-    return () => clearInterval(interval);
+  const interval = setInterval((): void => { loadStatus(); }, 10000);
+  return () => { clearInterval(interval); };
   }, [notificationManager]);
 
   const handleSubscribe = async (): Promise<void> => {
@@ -169,11 +164,12 @@ export const UserSettingsWithNotifications: React.FC = () => {
       transitAlerts: true,
       frequencyReminders: false,
       appUpdates: true,
-      quietHours: { enabled: true, start: '22:00', end: '08:00' },
-      frequency: 'daily' as const
+  quietHours: { enabled: true, start: '22:00', end: '08:00' },
+  frequency: 'daily' as const,
+  maxDailyNotifications: 5
   } satisfies NotificationPreferences);
 
-    if (success) {
+    if (success === true) {
       // Send welcome notification
       await notificationManager.sendTest();
     }
@@ -187,28 +183,28 @@ export const UserSettingsWithNotifications: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 bg-gray-100 rounded">
             <div className="text-2xl font-bold text-blue-600">
-              {status.pushNotifications != null && status.pushNotifications.permissionStatus === 'granted' ? '✅' : '❌'}
+              {status.pushNotifications?.permissionStatus === 'granted' ? '✅' : '❌'}
             </div>
             <div className="text-sm">Push Permission</div>
           </div>
           
           <div className="p-4 bg-gray-100 rounded">
             <div className="text-2xl font-bold text-green-600">
-              {status.backgroundSync != null && status.backgroundSync.isOnline === true ? '🌐' : '📴'}
+              {status.backgroundSync?.isOnline === true ? '🌐' : '📴'}
             </div>
             <div className="text-sm">Connection Status</div>
           </div>
           
           <div className="p-4 bg-gray-100 rounded">
             <div className="text-2xl font-bold text-yellow-600">
-              {status.backgroundSync != null && status.backgroundSync.queuedItems != null ? status.backgroundSync.queuedItems : 0}
+              {status.backgroundSync?.queuedItems ?? 0}
             </div>
             <div className="text-sm">Queued Items</div>
           </div>
           
           <div className="p-4 bg-gray-100 rounded">
             <div className="text-2xl font-bold text-purple-600">
-              {status.pushNotifications != null && status.pushNotifications.activeSubscriptions != null ? status.pushNotifications.activeSubscriptions : 0}
+              {status.pushNotifications?.activeSubscriptions ?? 0}
             </div>
             <div className="text-sm">Active Devices</div>
           </div>
@@ -217,23 +213,23 @@ export const UserSettingsWithNotifications: React.FC = () => {
 
       <div className="notification-actions">
         <button
-          onClick={() => { void handleSubscribe(); }}
+          onClick={(): void => { void handleSubscribe(); }}
           className="px-4 py-2 bg-green-600 text-white rounded mr-4"
         >
           Enable Notifications
         </button>
         
         <button
-          onClick={() => { void notificationManager.sendTest(); }}
+          onClick={(): void => { void notificationManager.sendTest(); }}
           className="px-4 py-2 bg-blue-600 text-white rounded mr-4"
         >
           Test Notification
         </button>
         
         <button
-          onClick={() => { 
+          onClick={(): void => { 
             // getSmartSuggestions method not available in current implementation
-            // eslint-disable-next-line no-console
+             
             console.log('Smart setup not yet implemented');
           }}
           className="px-4 py-2 bg-purple-600 text-white rounded"
@@ -249,9 +245,9 @@ export const UserSettingsWithNotifications: React.FC = () => {
 export const DashboardWithNotifications: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  useEffect(() => {
+  useEffect((): (() => void) => {
     // Listen for background sync events
-    const handleStorageChange = (event: StorageEvent): void => {
+  const handleStorageChange = (event: StorageEvent): void => {
       if (typeof event.key === 'string' && event.key.startsWith('cosmichub-sync-') && typeof event.newValue === 'string' && event.newValue.length > 0) {
         try {
           const parsed: unknown = JSON.parse(event.newValue);
@@ -260,7 +256,7 @@ export const DashboardWithNotifications: React.FC = () => {
           if (maybe.type === 'cosmichub-sync-chart_synced' || maybe.type === 'cosmichub-sync-user_data_synced') {
             if (typeof maybe.timestamp !== 'number') return;
             const msg: StorageMessage = { type: maybe.type, timestamp: maybe.timestamp, data: maybe.data };
-            setNotifications(prev => [{
+            setNotifications((prev: NotificationItem[]): NotificationItem[] => [{
               id: Date.now(),
               type: msg.type === 'cosmichub-sync-chart_synced' ? 'chart_synced' : 'user_data_synced',
               data: (msg.data !== undefined && msg.data !== null && typeof msg.data === 'object') ? (msg.data as Record<string, unknown>) : {},
@@ -293,7 +289,7 @@ export const DashboardWithNotifications: React.FC = () => {
     
     setNotifications(demoNotifications);
 
-    return () => { window.removeEventListener('storage', handleStorageChange); };
+  return () => { window.removeEventListener('storage', handleStorageChange); };
   }, []);
 
   const triggerTransitAlert = (): void => {
@@ -309,7 +305,7 @@ export const DashboardWithNotifications: React.FC = () => {
       <div className="notification-feed mb-6">
         <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
         <div className="space-y-2">
-          {notifications.map(notification => (
+          {notifications.map((notification: NotificationItem): ReactElement => (
             <div 
               key={notification.id}
               className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded"
@@ -338,21 +334,21 @@ export const DashboardWithNotifications: React.FC = () => {
         
         <div className="space-x-4">
           <button
-            onClick={() => { void triggerTransitAlert(); }}
+            onClick={(): void => { void triggerTransitAlert(); }}
             className="px-4 py-2 bg-red-600 text-white rounded"
           >
             🪐 Transit Alert
           </button>
           
           <button
-            onClick={() => { void triggerDailyHoroscope(); }}
+            onClick={(): void => { void triggerDailyHoroscope(); }}
             className="px-4 py-2 bg-yellow-600 text-white rounded"
           >
             ✨ Daily Horoscope
           </button>
           
           <button
-            onClick={() => { 
+            onClick={(): void => { 
               // notifyRetrograde method not available in current implementation
               devConsole.debug?.('Retrograde alert demo: Mercury entering retrograde');
             }}
@@ -367,58 +363,71 @@ export const DashboardWithNotifications: React.FC = () => {
 };
 
 // Example: Hook for using notifications in any component
-export const useNotifications = () => {
-  const [manager] = useState(() => getNotificationManager());
+interface UseNotificationsReturn {
+  manager: ReturnType<typeof getNotificationManager>;
+  status: NotificationStatus;
+  isOnline: boolean;
+  hasPermission: boolean;
+  queuedItems: number;
+  subscribe: (userId: string, preferences?: UserPreferences) => Promise<boolean>;
+  unsubscribe: () => Promise<boolean>;
+  sendTest: () => Promise<boolean>;
+  notifyChart: (chartData: unknown) => Promise<void>;
+  syncChart: () => Promise<void>;
+}
+
+export const useNotifications = (): UseNotificationsReturn => {
+  const [manager] = useState<ReturnType<typeof getNotificationManager>>((): ReturnType<typeof getNotificationManager> => getNotificationManager());
   const [status, setStatus] = useState<NotificationStatus>({});
 
-  useEffect(() => {
-    const updateStatus = (): void => {
-      const raw = manager.status();
-  const perm = (raw.push != null && typeof raw.push.permissionStatus === 'string' && raw.push.permissionStatus.length > 0);
-  const bg = (raw.background != null && typeof raw.background.isOnline === 'boolean');
-      let pushNotifications: NotificationStatus['pushNotifications'];
-  if (perm && raw.push !== undefined && raw.push !== null) {
-        pushNotifications = {
-          permissionStatus: raw.push.permissionStatus,
-          activeSubscriptions: typeof raw.push.activeSubscriptions === 'number' ? raw.push.activeSubscriptions : undefined
-        };
-      }
-      let backgroundSync: NotificationStatus['backgroundSync'];
-  if (bg && raw.background !== undefined && raw.background !== null) {
-        backgroundSync = {
-          isOnline: raw.background.isOnline,
-          queuedItems: typeof raw.background.queuedItems === 'number' ? raw.background.queuedItems : undefined
-        };
-      }
-      const narrowed: NotificationStatus = { pushNotifications, backgroundSync };
-      setStatus(narrowed);
+  useEffect((): (() => void) => {
+  const updateStatus = (): void => {
+  const raw = manager.status() as unknown as { push?: Record<string, unknown>; background?: Record<string, unknown> };
+      const push = raw.push ?? {};
+      const background = raw.background ?? {};
+      const permVal = typeof push.permissionStatus === 'string' ? push.permissionStatus : undefined;
+  const pushNotifications = (permVal !== undefined && permVal !== '') ? {
+        permissionStatus: permVal,
+        activeSubscriptions: typeof push.activeSubscriptions === 'number' ? push.activeSubscriptions : undefined
+      } : undefined;
+      const onlineVal = typeof background.isOnline === 'boolean' ? background.isOnline : undefined;
+  const backgroundSync = (onlineVal !== undefined) ? {
+        isOnline: onlineVal,
+        queuedItems: typeof background.queuedItems === 'number' ? background.queuedItems : undefined
+      } : undefined;
+      setStatus({ pushNotifications, backgroundSync });
     };
     
     updateStatus();
-    const interval = setInterval(updateStatus, 5000);
+  const interval = setInterval((): void => { updateStatus(); }, 5000);
     
-    return () => clearInterval(interval);
+  return () => { clearInterval(interval); };
   }, [manager]);
 
   return {
   manager,
   status,
-  isOnline: (status.backgroundSync != null && status.backgroundSync.isOnline === true),
-  hasPermission: (status.pushNotifications != null && status.pushNotifications.permissionStatus === 'granted'),
-    queuedItems: status.backgroundSync != null && status.backgroundSync.queuedItems != null ? status.backgroundSync.queuedItems : 0,
+  isOnline: (status.backgroundSync?.isOnline === true),
+  hasPermission: (status.pushNotifications?.permissionStatus === 'granted'),
+  queuedItems: status.backgroundSync?.queuedItems ?? 0,
     
     // Helper methods
-  subscribe: (userId: string, preferences?: UserPreferences) => manager.subscribe(userId, preferences),
+  subscribe: (userId: string, preferences?: UserPreferences): Promise<boolean> => manager.subscribe(userId, preferences),
     
-  unsubscribe: () => Promise.resolve(),
+  unsubscribe: (): Promise<boolean> => Promise.resolve(true),
     
-  sendTest: () => manager.sendTest(),
+  sendTest: (): Promise<boolean> => manager.sendTest(),
     
-  notifyChart: (chartData: unknown) => isValidChartData(chartData) ? manager.notifyChartReady(chartData) : Promise.resolve(),
+  notifyChart: (chartData: unknown): Promise<void> => {
+      if (isValidChartData(chartData)) {
+        return manager.notifyChartReady(chartData);
+      }
+      return Promise.resolve();
+    },
     
-    syncChart: () => {
+    syncChart: (): Promise<void> => {
       // syncChartCalculation method not available in current implementation
-  devConsole.debug?.('Sync chart not yet implemented');
+      devConsole.debug?.('Sync chart not yet implemented');
       return Promise.resolve();
     }
   };

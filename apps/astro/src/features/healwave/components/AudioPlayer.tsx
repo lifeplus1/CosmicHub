@@ -37,7 +37,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     return () => {
       cleanup();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [isPlaying, frequency, isInitialized]);
 
   useEffect(() => {

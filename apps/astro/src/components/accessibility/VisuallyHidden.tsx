@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 /**
  * VisuallyHidden
@@ -6,8 +6,8 @@ import React from 'react';
  * Use for live updates, contextual labels for icon-only buttons, and status messages.
  */
 export interface VisuallyHiddenProps {
-  as?: keyof JSX.IntrinsicElements;
-  children: React.ReactNode;
+  as?: keyof HTMLElementTagNameMap;
+  children: ReactNode;
   /**
    * If true, element becomes visible when focused (for skip links). Ensure element is focusable.
    */

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '@cosmichub/auth';
+import { useAuth, useSubscription } from '@cosmichub/auth';
 import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaCrown, FaStar, FaCalendarAlt, FaHeadphones, FaCreditCard, FaArrowUp, FaHistory } from 'react-icons/fa';
 import { HEALWAVE_TIERS } from '@cosmichub/subscriptions';
@@ -15,13 +14,20 @@ interface UserStats {
   lastSession: Date;
 }
 
+interface SubscriptionUsage { current: number; limit: number; }
+interface SubscriptionInfo { currentPeriodEnd?: string | number | Date | null | undefined; name?: string; price?: { monthly?: number | null | undefined }; }
+interface SubscriptionHookData {
+  subscription?: SubscriptionInfo | null;
+  userTier: string;
+  isLoading: boolean;
+  checkUsageLimit?: (key: string) => SubscriptionUsage | undefined;
+}
+
 const UserProfile: React.FC = React.memo(() => {
   const { user } = useAuth();
-  const subscriptionData = useSubscription();
+  const subscriptionData = useSubscription() as unknown as SubscriptionHookData; // Narrowing locally; upstream hook lacks exported type
   const navigate = useNavigate();
-
-  // Type assertion for compatibility with existing code
-  const { subscription, userTier, isLoading, checkUsageLimit } = subscriptionData as any;
+  const { subscription, userTier, isLoading, checkUsageLimit } = subscriptionData;
 
   const [userStats, setUserStats] = useState<UserStats>({
     totalSessions: 0,
@@ -31,16 +37,17 @@ const UserProfile: React.FC = React.memo(() => {
     lastSession: new Date(),
   });
 
-  const loadUserStats = useCallback(async () => {
-    if (user && checkUsageLimit) {
-      // For HealWave, we track sessions instead of charts
-      const sessionUsage = checkUsageLimit('sessionsPerDay') || { current: 0, limit: 0 };
+  const loadUserStats = useCallback((): void => {
+    if (user !== null && user !== undefined && typeof checkUsageLimit === 'function') {
+      const usage = checkUsageLimit('sessionsPerDay') ?? { current: 0, limit: 0 };
+      const creation = user.metadata?.creationTime;
+      const joinDate = typeof creation === 'string' ? new Date(creation) : new Date();
       setUserStats({
-        totalSessions: sessionUsage.current + 25, // Mock total sessions
-        sessionsThisMonth: sessionUsage.current,
-        favoriteFrequencies: 8, // Mock favorite frequencies
-        joinDate: new Date(user.metadata?.creationTime || Date.now()),
-        lastSession: new Date(),
+        totalSessions: usage.current + 25,
+        sessionsThisMonth: usage.current,
+        favoriteFrequencies: 8,
+        joinDate,
+        lastSession: new Date()
       });
     }
   }, [user, checkUsageLimit]);
@@ -49,7 +56,7 @@ const UserProfile: React.FC = React.memo(() => {
     loadUserStats();
   }, [loadUserStats]);
 
-  const getTierIcon = (tier: keyof typeof HEALWAVE_TIERS) => {
+  const getTierIcon = (tier: keyof typeof HEALWAVE_TIERS): React.ReactNode => {
     switch (tier) {
       case 'free': return <FaUser className="text-cosmic-silver" aria-hidden="true" />;
       case 'premium': return <FaStar className="text-cosmic-purple" aria-hidden="true" />;
@@ -58,7 +65,7 @@ const UserProfile: React.FC = React.memo(() => {
     }
   };
 
-  const getTierColor = (tier: keyof typeof HEALWAVE_TIERS) => {
+  const getTierColor = (tier: keyof typeof HEALWAVE_TIERS): string => {
     switch (tier) {
       case 'free': return 'cosmic-silver';
       case 'premium': return 'cosmic-purple';
@@ -67,14 +74,16 @@ const UserProfile: React.FC = React.memo(() => {
     }
   };
 
-  const handleUpgrade = useCallback(() => {
+  const handleUpgrade = useCallback((): void => {
     navigate('/upgrade');
   }, [navigate]);
 
   const currentTier = HEALWAVE_TIERS[userTier as keyof typeof HEALWAVE_TIERS];
-  const sessionUsage = checkUsageLimit ? checkUsageLimit('sessionsPerDay') : { current: 0, limit: 2 };
+  const sessionUsage: SubscriptionUsage = typeof checkUsageLimit === 'function'
+    ? (checkUsageLimit('sessionsPerDay') ?? { current: 0, limit: 2 })
+    : { current: 0, limit: 2 };
 
-  if (isLoading || !user) {
+  if (isLoading === true || user === null || user === undefined) {
     return (
       <div className="py-10 text-center">
         <div className="mx-auto text-4xl text-cosmic-purple animate-spin" aria-hidden="true">🎵</div>
@@ -143,13 +152,13 @@ const UserProfile: React.FC = React.memo(() => {
                   <div>
                     <p className="text-cosmic-silver">Billing</p>
                     <p className="font-bold text-cosmic-gold">
-                      {currentTier?.price?.monthly > 0 ? `$${currentTier.price.monthly}/month` : 'Free'}
+                      {currentTier?.price?.monthly !== undefined && currentTier.price.monthly !== null && currentTier.price.monthly > 0 ? `$${currentTier.price.monthly}/month` : 'Free'}
                     </p>
-                    {currentTier?.price?.monthly > 0 && subscription?.currentPeriodEnd && (
-                      <p className="text-sm text-cosmic-silver/80">
-                        Next billing: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-                      </p>
-                    )}
+                      {currentTier?.price?.monthly !== undefined && currentTier.price.monthly !== null && currentTier.price.monthly > 0 && subscription?.currentPeriodEnd !== null && subscription?.currentPeriodEnd !== undefined && (
+                        <p className="text-sm text-cosmic-silver/80">
+                          Next billing: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                        </p>
+                      )}
                   </div>
                 </div>
                 <button
@@ -217,10 +226,10 @@ const UserProfile: React.FC = React.memo(() => {
                   percentage={(sessionUsage.current / Math.max(sessionUsage.limit, 1)) * 100}
                   color="purple"
                 />
-                {sessionUsage.current >= sessionUsage.limit && (
+                {sessionUsage.limit > 0 && sessionUsage.current >= sessionUsage.limit && (
                   <div className="flex p-4 mt-4 space-x-4 border border-yellow-500 rounded-md bg-yellow-900/50">
                     <span className="text-xl text-yellow-500" aria-hidden="true">⚠️</span>
-                    <p className="text-cosmic-silver">You've reached your daily session limit. Upgrade your plan for unlimited sessions.</p>
+                    <p className="text-cosmic-silver">You&apos;ve reached your daily session limit. Upgrade your plan for unlimited sessions.</p>
                   </div>
                 )}
               </div>

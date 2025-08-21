@@ -1,6 +1,6 @@
 import React from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { MultiSystemChartData } from './types';
+import type { MultiSystemChartData } from './types';
 import type { ChartBirthData } from '@cosmichub/types';
 import WesternChart from './WesternChart';
 import VedicChart from './VedicChart';
@@ -12,6 +12,7 @@ import SynthesisChart from './SynthesisChart';
 interface MultiSystemChartProps {
   chartData?: MultiSystemChartData;
   birthData?: ChartBirthData;
+  // showComparison prop reserved for future comparative views (currently unused)
   showComparison?: boolean;
   isLoading?: boolean;
 }
@@ -19,7 +20,8 @@ interface MultiSystemChartProps {
 export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({ 
   chartData, 
   birthData, 
-  showComparison = false,
+  // maintain API surface while unused
+  showComparison: _showComparison = false,
   isLoading = false 
 }) => {
   const bgColor = "purple-50";
@@ -45,7 +47,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
   }
 
   // If we have birthData but no chartData, show a placeholder message
-  const displayData = chartData || {
+  const displayData = chartData ?? {
     birth_info: birthData ? {
       date: `${birthData.year}-${String(birthData.month).padStart(2, '0')}-${String(birthData.day).padStart(2, '0')}`,
       time: `${String(birthData.hour).padStart(2, '0')}:${String(birthData.minute).padStart(2, '0')}`,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AudioEngine, FrequencyPreset } from '@cosmichub/frequency';
+// Removed unused imports from '@cosmichub/frequency'
 
 const TestComponent: React.FC = () => {
   return <div>Test Component</div>;

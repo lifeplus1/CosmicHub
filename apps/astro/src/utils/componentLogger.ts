@@ -13,6 +13,7 @@ export const componentLogger = {
     Logger.warn(`[${component}] ${message}`, ...meta);
   },
   error: (component: string, message: string, ...meta: unknown[]): void => {
-    Logger.error(`[${component}] ${message}`, ...meta);
+    const err = meta.find(m => m instanceof Error);
+    Logger.error(`[${component}] ${message}`, err);
   }
 };

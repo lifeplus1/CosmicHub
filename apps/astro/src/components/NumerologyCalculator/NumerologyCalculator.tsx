@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import { useToast } from '../ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Accordion from '@radix-ui/react-accordion';
-import { FaStar, FaInfoCircle } from 'react-icons/fa';
-import FeatureGuard from '../FeatureGuard';
 
 interface NumerologyData {
   name: string;
@@ -116,7 +114,7 @@ const NumerologyCalculator: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     
     if (!formData.name.trim()) {
@@ -149,7 +147,11 @@ const NumerologyCalculator: React.FC = () => {
         throw new Error('Failed to calculate numerology');
       }
 
-      const data = await response.json();
+      interface ApiResponse {
+        numerology: NumerologyResult;
+      }
+      
+      const data = await response.json() as ApiResponse;
       setResult(data.numerology);
 
       toast({
@@ -172,12 +174,12 @@ const NumerologyCalculator: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: name === 'name' ? value : parseInt(value) }));
   };
 
-  const renderCoreNumber = (title: string, number: number, meaning: string, components?: { month: number; day: number; year: number }) => (
+  const renderCoreNumber = (title: string, number: number, meaning: string, components?: { month: number; day: number; year: number }): React.ReactNode => (
     <div className="cosmic-card">
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
@@ -194,7 +196,7 @@ const NumerologyCalculator: React.FC = () => {
     </div>
   );
 
-  const SystemsDisplay = ({ systems }: { systems: NumerologyResult['systems'] }) => (
+  const SystemsDisplay = ({ systems }: { systems: NumerologyResult['systems'] }): React.ReactNode => (
     <div className="flex flex-col space-y-6">
       <div className="cosmic-card">
         <div className="p-4">
@@ -248,11 +250,12 @@ const NumerologyCalculator: React.FC = () => {
 
   return (
     <div className="flex flex-col space-y-6">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(e); }}>
         <div className="flex flex-col space-y-4">
           <div>
-            <label className="block mb-2 text-cosmic-gold">Full Name</label>
+            <label htmlFor="name" className="block mb-2 text-cosmic-gold">Full Name</label>
             <input
+              id="name"
               className="cosmic-input"
               name="name"
               value={formData.name}
@@ -262,8 +265,9 @@ const NumerologyCalculator: React.FC = () => {
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block mb-2 text-cosmic-gold">Year</label>
+              <label htmlFor="year" className="block mb-2 text-cosmic-gold">Year</label>
               <input
+                id="year"
                 className="cosmic-input"
                 name="year"
                 type="number"
@@ -273,8 +277,9 @@ const NumerologyCalculator: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block mb-2 text-cosmic-gold">Month</label>
+              <label htmlFor="month" className="block mb-2 text-cosmic-gold">Month</label>
               <input
+                id="month"
                 className="cosmic-input"
                 name="month"
                 type="number"
@@ -286,8 +291,9 @@ const NumerologyCalculator: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block mb-2 text-cosmic-gold">Day</label>
+              <label htmlFor="day" className="block mb-2 text-cosmic-gold">Day</label>
               <input
+                id="day"
                 className="cosmic-input"
                 name="day"
                 type="number"
@@ -299,7 +305,7 @@ const NumerologyCalculator: React.FC = () => {
               />
             </div>
           </div>
-          <button className="cosmic-button" type="submit">
+          <button className="cosmic-button" type="submit" onClick={(e) => { e.preventDefault(); void handleSubmit(e); }}>
             Calculate Numerology
           </button>
         </div>

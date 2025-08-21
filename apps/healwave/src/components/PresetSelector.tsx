@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-/* eslint-disable no-console */
+// Provide a minimal process shim typing if not present (front-end safe)
+declare const process: { env?: Record<string, string | undefined>; NODE_ENV?: string } | undefined;
+// Allow controlled console usage in development only
+/* eslint-disable no-console -- development debug helpers guarded by import.meta.env.DEV */
 const devConsole = {
   log: import.meta.env.DEV ? console.log.bind(console) : undefined,
   warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
   error: console.error.bind(console)
 };
 /* eslint-enable no-console */
+// console usage intentionally gated by DEV checks
 import { useAuth } from '@cosmichub/auth';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
 import { savePreset, getUserPresets, deletePreset } from '../services/api';
@@ -73,43 +77,55 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
     }
   ], []);
 
-  useEffect(() => {
-    if (user) {
-      loadUserPresets();
-    }
-  }, [user]);
-
   const loadUserPresets = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const userPresets = await getUserPresets();
-      setPresets(userPresets);
+      if (userPresets.success) {
+        setPresets(userPresets.data);
+      } else {
+        setError(userPresets.error);
+        setPresets([]);
+      }
     } catch (err) {
       // Handle error with better UX
       setError('Failed to load presets. Please try again.');
       setPresets([]);
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-  devConsole.error('Error loading user presets:', err);
+      if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development') {
+        devConsole.error('Error loading user presets:', err);
       }
     } finally {
       setLoading(false);
     }
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      void loadUserPresets();
+    }
+  }, [user, loadUserPresets]);
+
   const handleSavePreset = useCallback(async () => {
-    if (user == null || newPresetName.trim().length === 0) return;
+  if (user == null || newPresetName.trim().length === 0) return; // user null/undefined guard
 
     try {
       setLoading(true);
       setError(null);
-      const preset: any = {
+      interface NewPreset extends FrequencyPreset {
+        metadata: {
+          volume: number;
+          duration: number;
+          fadeIn: number;
+          fadeOut: number;
+        };
+      }
+      const preset: NewPreset = {
         id: `user-${Date.now()}`,
         name: newPresetName.trim(),
         category: 'custom',
-        baseFrequency: currentPreset?.baseFrequency != null ? currentPreset.baseFrequency : 40,
-        binauralBeat: currentPreset?.binauralBeat != null ? currentPreset.binauralBeat : 0,
+  baseFrequency: currentPreset?.baseFrequency ?? 40,
+  binauralBeat: currentPreset?.binauralBeat ?? 0,
         description: newPresetDescription.trim().length > 0 ? newPresetDescription.trim() : undefined,
         metadata: {
           volume: currentSettings.volume,
@@ -120,15 +136,18 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
       };
 
       const savedPreset = await savePreset(preset);
-      setPresets(prev => [...prev, savedPreset]);
+      if (savedPreset.success) {
+        setPresets(prev => [...prev, savedPreset.data]);
+      } else {
+        setError(savedPreset.error);
+      }
       setNewPresetName('');
       setNewPresetDescription('');
       setShowSaveDialog(false);
     } catch (err) {
       setError('Failed to save preset. Please try again.');
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-  devConsole.error('Error saving preset:', err);
+      if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development') {
+        devConsole.error('Error saving preset:', err);
       }
     } finally {
       setLoading(false);
@@ -136,20 +155,23 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
   }, [user, newPresetName, newPresetDescription, currentPreset, currentSettings]);
 
   const handleDeletePreset = useCallback(async (presetId: string) => {
-    if (user == null) return;
+  if (user == null) return; // user null/undefined guard
 
-    if (confirm('Are you sure you want to delete this preset?') === false) return;
+  if (window.confirm('Are you sure you want to delete this preset?') === false) return;
 
     try {
       setLoading(true);
       setError(null);
-      await deletePreset(presetId);
-      setPresets(prev => prev.filter(p => p.id !== presetId));
+      const result = await deletePreset(presetId);
+      if (result.success) {
+        setPresets(prev => prev.filter(p => p.id !== presetId));
+      } else {
+        setError(result.error);
+      }
     } catch (err) {
       setError('Failed to delete preset. Please try again.');
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-  devConsole.error('Error deleting preset:', err);
+      if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development') {
+        devConsole.error('Error deleting preset:', err);
       }
     } finally {
       setLoading(false);
@@ -168,7 +190,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
   return (
     <div className="preset-selector" role="region" aria-label="Frequency Presets">
       {/* Error Alert */}
-      {error != null && (
+  {error != null && (
         <div 
           role="alert" 
           className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg"
@@ -187,7 +209,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
 
       <div className="preset-header flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Frequency Presets</h3>
-        {user != null && (
+  {user != null && (
           <button
             onClick={() => setShowSaveDialog(true)}
             className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -211,7 +233,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
               key={preset.id}
               role="listitem"
               className="p-4 transition-colors border rounded-lg cursor-pointer preset-card bg-gray-50 hover:bg-gray-100 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-1"
-              onClick={() => onSelectPreset(preset)}
+              onClick={() => { onSelectPreset(preset); }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
@@ -265,7 +287,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
                   <div className="flex items-start justify-between">
                     <div 
                       className="flex-1 cursor-pointer"
-                      onClick={() => onSelectPreset(preset)}
+                      onClick={() => { onSelectPreset(preset); }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
@@ -286,7 +308,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeletePreset(preset.id);
+                        void handleDeletePreset(preset.id);
                       }}
                       className="p-1 ml-2 text-red-500 transition-colors hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 disabled:opacity-50"
                       disabled={loading}
@@ -400,7 +422,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
                 Cancel
               </button>
               <button
-                onClick={handleSavePreset}
+                onClick={() => { void handleSavePreset(); }}
                 className="flex-1 px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                 disabled={loading || !newPresetName.trim()}
                 aria-describedby="save-button-help"

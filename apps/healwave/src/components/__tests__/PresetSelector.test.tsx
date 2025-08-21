@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
 import PresetSelector from '../PresetSelector';
@@ -23,6 +24,7 @@ vi.mock('../../services/api', () => ({
 
 // Import mocked functions after mock setup
 import * as apiModule from '../../services/api';
+import { ok } from '@cosmichub/config';
 
 const mockSavePreset = vi.mocked(apiModule.savePreset);
 const mockGetUserPresets = vi.mocked(apiModule.getUserPresets);
@@ -48,12 +50,19 @@ describe('PresetSelector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Ensure getUserPresets resolves immediately with an empty array
-    mockGetUserPresets.mockResolvedValue([]);
-    mockSavePreset.mockResolvedValue(undefined);
-    mockDeletePreset.mockResolvedValue(undefined);
+    mockGetUserPresets.mockResolvedValue(ok([]));
+    mockSavePreset.mockResolvedValue(ok({
+      id: 'saved',
+      name: 'Saved',
+      category: 'brainwave',
+      baseFrequency: 40,
+      binauralBeat: 4,
+      description: 'A saved preset'
+    } as any));
+    mockDeletePreset.mockResolvedValue(ok(null));
   });
 
-  it('renders preset selector with basic functionality', () => {
+  it('renders preset selector with basic functionality', async () => {
     render(
       <PresetSelector
         onSelectPreset={mockOnSelectPreset}
@@ -61,13 +70,13 @@ describe('PresetSelector', () => {
         currentPreset={mockCurrentPreset}
       />
     );
-
-    expect(screen.getByRole('button', { name: /save current settings/i })).toBeDefined();
-    expect(screen.getByText('Built-in Presets')).toBeDefined();
-    expect(screen.getByText('Your Presets')).toBeDefined();
+    // Await for effect-driven updates to settle
+    expect(await screen.findByRole('button', { name: /save current settings/i })).toBeDefined();
+    expect(await screen.findByText('Built-in Presets')).toBeDefined();
+    expect(await screen.findByText('Your Presets')).toBeDefined();
   });
 
-  it('shows built-in presets correctly', () => {
+  it('shows built-in presets correctly', async () => {
     render(
       <PresetSelector
         onSelectPreset={mockOnSelectPreset}
@@ -75,16 +84,16 @@ describe('PresetSelector', () => {
         currentPreset={mockCurrentPreset}
       />
     );
-
-    // Check that built-in presets are displayed
-    expect(screen.getByText('Deep Relaxation')).toBeDefined();
-    expect(screen.getByText('Enhanced Focus')).toBeDefined();
-    expect(screen.getByText('Meditation')).toBeDefined();
-    expect(screen.getByText('Sleep Induction')).toBeDefined();
-    expect(screen.getByText('Creative Flow')).toBeDefined();
+    // Check that built-in presets are displayed after initial renders
+    expect(await screen.findByText('Deep Relaxation')).toBeDefined();
+    expect(await screen.findByText('Enhanced Focus')).toBeDefined();
+    expect(await screen.findByText('Meditation')).toBeDefined();
+    expect(await screen.findByText('Sleep Induction')).toBeDefined();
+    expect(await screen.findByText('Creative Flow')).toBeDefined();
   });
 
-  it('calls onSelectPreset when built-in preset is clicked', () => {
+  it('calls onSelectPreset when built-in preset is clicked', async () => {
+    const user = userEvent.setup();
     render(
       <PresetSelector
         onSelectPreset={mockOnSelectPreset}
@@ -94,8 +103,8 @@ describe('PresetSelector', () => {
     );
 
     // Find and click the Deep Relaxation preset
-    const deepRelaxationPreset = screen.getByLabelText(/select deep relaxation preset/i);
-    fireEvent.click(deepRelaxationPreset);
+    const deepRelaxationPreset = await screen.findByLabelText(/select deep relaxation preset/i);
+    await user.click(deepRelaxationPreset);
 
     expect(mockOnSelectPreset).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -106,7 +115,7 @@ describe('PresetSelector', () => {
     );
   });
 
-  it('displays loading state for user presets initially', () => {
+  it('displays loading state for user presets initially', async () => {
     render(
       <PresetSelector
         onSelectPreset={mockOnSelectPreset}
@@ -116,10 +125,11 @@ describe('PresetSelector', () => {
     );
 
     // Should show loading initially - use getAllByText for multiple matches
-    expect(screen.getAllByText('Loading presets...').length).toBeGreaterThan(0);
+    const loadingEls = await screen.findAllByText('Loading presets...');
+    expect(loadingEls.length).toBeGreaterThan(0);
   });
 
-  it('has proper accessibility attributes', () => {
+  it('has proper accessibility attributes', async () => {
     render(
       <PresetSelector
         onSelectPreset={mockOnSelectPreset}
@@ -127,11 +137,10 @@ describe('PresetSelector', () => {
         currentPreset={mockCurrentPreset}
       />
     );
-
-    // Check accessibility attributes
-    expect(screen.getByLabelText('Frequency Presets')).toBeDefined();
-    expect(screen.getByRole('button', { name: /save current settings/i })).toBeDefined();
-    expect(screen.getByText('Built-in Presets')).toBeDefined();
-    expect(screen.getByText('Your Presets')).toBeDefined();
+    // Check accessibility attributes after async updates
+    expect(await screen.findByLabelText('Frequency Presets')).toBeDefined();
+    expect(await screen.findByRole('button', { name: /save current settings/i })).toBeDefined();
+    expect(await screen.findByText('Built-in Presets')).toBeDefined();
+    expect(await screen.findByText('Your Presets')).toBeDefined();
   });
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { House } from './types';
+import type { House } from './types';
 
 const houses: House[] = [
   { number: 1, area: 'Self, appearance, first impressions' },

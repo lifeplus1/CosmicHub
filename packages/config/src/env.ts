@@ -32,15 +32,30 @@ export interface EnvConfig {
 }n and validation
  */
 
+// Define process for TypeScript
+declare const process: {
+  env?: Record<string, string | undefined>;
+} | undefined;
+
+// Define import.meta type for Vite
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface ImportMeta {
+  env: Record<string, string | undefined>;
+}
+
+// Type for environment variables
+type EnvRecord = Record<string, string | undefined>;
+
 // Cross-runtime env accessor (works in Vite browser and Node)
-const viteEnv: any | undefined = (typeof import.meta !== 'undefined' && (import.meta as any).env)
-  ? (import.meta as any).env
+const viteEnv: EnvRecord | undefined = (typeof import.meta !== 'undefined' && import.meta.env)
+  ? import.meta.env as EnvRecord
   : undefined;
 
 const getEnv = (key: string, fallback = ''): string => {
-  const fromVite = viteEnv?.[key];
+  // Type-safe access to environment variables
+  const fromVite = viteEnv ? viteEnv[key] : undefined;
   const fromNode = typeof process !== 'undefined' && process?.env ? process.env[key] : undefined;
-  return (fromVite ?? fromNode ?? fallback) as string;
+  return (fromVite ?? fromNode ?? fallback);
 };
 
 // Environment types
@@ -58,6 +73,18 @@ export interface EnvConfig {
   VITE_FIREBASE_APP_ID?: string;
   VITE_STRIPE_PUBLISHABLE_KEY?: string;
   VITE_APP_URL: string;
+  XAI_API_KEY?: string;
+  // Deployment-specific environment variables
+  MONITORING_API_KEY?: string;
+  MONITORING_API_KEY_PROD?: string;
+  REDIS_PASSWORD?: string;
+  REDIS_PASSWORD_PROD?: string;
+  SENTRY_DSN?: string;
+  SENTRY_DSN_PROD?: string;
+  GA_TRACKING_ID?: string;
+  GA_TRACKING_ID_PROD?: string;
+  VAULT_ENDPOINT?: string;
+  APP_VERSION?: string;
 }
 
 // Required environment variables by environment (supporting both VITE_ and NEXT_PUBLIC_ prefixes)
@@ -172,7 +199,18 @@ export const getEnvConfig = (): Partial<EnvConfig> => {
     ...(getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') && { VITE_FIREBASE_MESSAGING_SENDER_ID: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') }),
     ...(getEnv('VITE_FIREBASE_APP_ID') && { VITE_FIREBASE_APP_ID: getEnv('VITE_FIREBASE_APP_ID') }),
     ...(getEnv('VITE_STRIPE_PUBLISHABLE_KEY') && { VITE_STRIPE_PUBLISHABLE_KEY: getEnv('VITE_STRIPE_PUBLISHABLE_KEY') }),
-    ...(getEnv('XAI_API_KEY') && { XAI_API_KEY: getEnv('XAI_API_KEY') })
+    ...(getEnv('XAI_API_KEY') && { XAI_API_KEY: getEnv('XAI_API_KEY') }),
+    // Deployment-specific environment variables
+    ...(getEnv('MONITORING_API_KEY') && { MONITORING_API_KEY: getEnv('MONITORING_API_KEY') }),
+    ...(getEnv('MONITORING_API_KEY_PROD') && { MONITORING_API_KEY_PROD: getEnv('MONITORING_API_KEY_PROD') }),
+    ...(getEnv('REDIS_PASSWORD') && { REDIS_PASSWORD: getEnv('REDIS_PASSWORD') }),
+    ...(getEnv('REDIS_PASSWORD_PROD') && { REDIS_PASSWORD_PROD: getEnv('REDIS_PASSWORD_PROD') }),
+    ...(getEnv('SENTRY_DSN') && { SENTRY_DSN: getEnv('SENTRY_DSN') }),
+    ...(getEnv('SENTRY_DSN_PROD') && { SENTRY_DSN_PROD: getEnv('SENTRY_DSN_PROD') }),
+    ...(getEnv('GA_TRACKING_ID') && { GA_TRACKING_ID: getEnv('GA_TRACKING_ID') }),
+    ...(getEnv('GA_TRACKING_ID_PROD') && { GA_TRACKING_ID_PROD: getEnv('GA_TRACKING_ID_PROD') }),
+    ...(getEnv('VAULT_ENDPOINT') && { VAULT_ENDPOINT: getEnv('VAULT_ENDPOINT') }),
+    ...(getEnv('APP_VERSION') && { APP_VERSION: getEnv('APP_VERSION') })
   };
 
   return baseConfig;

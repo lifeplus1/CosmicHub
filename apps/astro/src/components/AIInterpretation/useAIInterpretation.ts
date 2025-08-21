@@ -188,7 +188,7 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to generate interpretation';
         setError(errorMessage);
-        devConsole.error('AI interpretation error:', err);
+  devConsole.error('AI interpretation error:', err);
       }
     },
     [queryClient]

@@ -29,7 +29,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@cosmichub/auth": ["../../packages/auth/src"],
-      "@cosmichub/config": ["../../packages/config/src"],
+  "@cosmichub/config": ["../../packages/config/dist"],
       "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
       "@cosmichub/frequency": ["../../packages/frequency/src"],
       "@cosmichub/integrations": ["../../packages/integrations/src"],

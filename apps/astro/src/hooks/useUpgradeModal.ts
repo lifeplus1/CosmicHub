@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useSubscription, useAuth } from '@cosmichub/auth';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { stripeService, type StripeSession } from '@cosmichub/integrations';
 
 export interface UseUpgradeModalReturn {

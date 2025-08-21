@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '../ToastProvider';
 import { calculateGeneKeys } from '../../services/api';
+import type { ApiResult } from '../../services/apiResult';
 import * as Tabs from '@radix-ui/react-tabs';
 import type { GeneKeysChartProps, GeneKeysData, GeneKey } from './types';
 import type { ChartBirthData } from '@cosmichub/types';
@@ -12,6 +13,9 @@ import PearlSequenceTab from './PearlSequenceTab';
 import HologenicProfileTab from './HologenicProfileTab';
 
 const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onCalculate }) => {
+  // Holds the calculated Gene Keys profile; stays null until a valid object is received.
+  // (Tests previously caused an undefined value to be set which bypassed the strict null check
+  // and led to runtime errors deeper in the tree. We defensively constrain to null | GeneKeysData.)
   const [geneKeysData, setGeneKeysData] = useState<GeneKeysData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +31,12 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
     setError(null);
 
     try {
-      const response = await calculateGeneKeys(birthData);
-      setGeneKeysData(response);
+      const result: ApiResult<GeneKeysData> = await calculateGeneKeys(birthData);
+      if (result.success) {
+        setGeneKeysData(result.data);
+      } else {
+        throw new Error(result.error);
+      }
       
       toast({
         title: "Gene Keys Calculated",
@@ -73,7 +81,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
       void handleCalculate();
     }
     // Intentional: handleCalculate depends on toast causing changing identity; rely only on birthData changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [birthData]);
 
   // Memoized loading state
@@ -107,6 +115,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(({ birthData, onC
 
   if (loading === true) return loadingState;
   if (error !== null) return errorState;
+  // Treat both null and undefined (should not happen now) as empty state
   if (geneKeysData === null) return emptyState;
 
   return (

@@ -6,7 +6,7 @@ import { stripeService } from '@cosmichub/integrations';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle, FaHeart, FaCalendarAlt, FaFilePdf, FaSave, FaHeadset } from 'react-icons/fa';
 // Using centralized subscription tiers
-import { COSMICHUB_TIERS, AstroSubscriptionTier } from '@cosmichub/subscriptions';
+import { COSMICHUB_TIERS, type AstroSubscriptionTier } from '@cosmichub/subscriptions';
 
 const PricingPage: React.FC = React.memo(() => {
   const { user } = useAuth();

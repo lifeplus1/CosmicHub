@@ -16,7 +16,7 @@ const InlineTooltip: React.FC<InlineTooltipProps> = ({
   className = ''
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const positionClasses = {
@@ -34,7 +34,7 @@ const InlineTooltip: React.FC<InlineTooltipProps> = ({
   };
 
   const handleMouseEnter = () => {
-    const id = setTimeout(() => setIsVisible(true), delay);
+  const id: ReturnType<typeof setTimeout> = setTimeout(() => setIsVisible(true), delay);
     setTimeoutId(id);
   };
 

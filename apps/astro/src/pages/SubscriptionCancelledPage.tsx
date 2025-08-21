@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaTimesCircle, FaArrowLeft, FaCreditCard, FaCommentDots, FaSyncAlt } from 'react-icons/fa';
-import { Button } from '@cosmichub/ui';
-import { Card } from '@cosmichub/ui';
+import { Button, Card } from '@cosmichub/ui';
 
 export const SubscriptionCancelledPage: React.FC = () => {
   return (
@@ -47,7 +46,7 @@ export const SubscriptionCancelledPage: React.FC = () => {
 
               <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>Good news!</strong> You'll continue to have access to all premium features 
+                  <strong>Good news!</strong> You&apos;ll continue to have access to all premium features 
                   until the end of your current billing period. After that, your account will 
                   automatically switch to our free plan.
                 </p>
@@ -92,7 +91,7 @@ export const SubscriptionCancelledPage: React.FC = () => {
                 Help us improve
               </h3>
               <p className="text-green-700 mb-6">
-                We're sorry to see you go! Your feedback helps us make CosmicHub better for everyone.
+                We&apos;re sorry to see you go! Your feedback helps us make CosmicHub better for everyone.
               </p>
               
               <div className="space-y-3">

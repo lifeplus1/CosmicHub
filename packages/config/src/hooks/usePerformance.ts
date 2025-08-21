@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import type { PerformanceReport } from '../performance';
 
 // Lightweight internal logger (no-op in prod build)
-const logDev = (...args: unknown[]): void => { if (import.meta.env?.DEV) { // eslint-disable-next-line no-console
-  console.log(...args); } };
-const warnDev = (...args: unknown[]): void => { if (import.meta.env?.DEV) { // eslint-disable-next-line no-console
-  console.warn(...args); } };
-const errorDev = (...args: unknown[]): void => { // eslint-disable-next-line no-console
-  console.error(...args); };
+const logDev = (...args: unknown[]): void => { if (import.meta.env?.DEV) { console.log(...args); } };
+const warnDev = (...args: unknown[]): void => { if (import.meta.env?.DEV) { console.warn(...args); } };
+const errorDev = (...args: unknown[]): void => { console.error(...args); };
 
 export interface PerformanceMetrics {
   duration: number;
@@ -38,24 +36,10 @@ export interface PagePerformanceMetrics {
 }
 
 // Shape of real-time performance monitoring report
-export interface RealTimePerformanceReportSummary {
-  totalMetrics: number;
-  averageRenderTime: number;
-  slowestComponent: string;
-  fastestComponent: string;
-  errorRate: number;
-}
-
-export interface RealTimePerformanceReport {
-  components: unknown[];
-  operations: unknown[];
-  pages: unknown[];
-  summary: RealTimePerformanceReportSummary;
-}
-
+// Internal minimal monitor interface (mirrors PerformanceMonitor in performance.ts)
 interface PerformanceMonitorLike {
-  getPerformanceReport: () => RealTimePerformanceReport;
-  enableRealTimeUpdates: (cb: (r: RealTimePerformanceReport) => void) => (() => void);
+  getPerformanceReport: () => PerformanceReport;
+  enableRealTimeUpdates: (cb: (r: PerformanceReport) => void) => (() => void);
 }
 
 // Non-standard memory interface (Chrome specific); defined defensively.
@@ -332,8 +316,14 @@ export function useMemoryMonitoring(): {
  * Hook for real-time performance monitoring
  * Provides live updates of performance metrics
  */
-export function useRealTimePerformance(): RealTimePerformanceReport {
-  const [report, setReport] = useState<RealTimePerformanceReport>({
+function isPerformanceReport(value: unknown): value is PerformanceReport {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return Array.isArray(v.components) && Array.isArray(v.operations) && Array.isArray(v.pages) && typeof v.summary === 'object' && v.summary !== null;
+}
+
+export function useRealTimePerformance(): PerformanceReport {
+  const [report, setReport] = useState<PerformanceReport>({
     components: [],
     operations: [],
     pages: [],
@@ -349,8 +339,9 @@ export function useRealTimePerformance(): RealTimePerformanceReport {
         const mod: unknown = await import('../performance');
         const pmCandidate = (mod as Record<string, unknown>).performanceMonitor;
         if (!mounted || !isPerformanceMonitor(pmCandidate)) return;
-        setReport(pmCandidate.getPerformanceReport());
-        cleanup = pmCandidate.enableRealTimeUpdates((r) => { if (mounted) setReport(r); });
+  const initial = pmCandidate.getPerformanceReport();
+  if (isPerformanceReport(initial)) setReport(initial);
+  cleanup = pmCandidate.enableRealTimeUpdates((r) => { if (mounted && isPerformanceReport(r)) setReport(r); });
       } catch (err) {
         warnDev('Failed to setup performance monitoring', err);
       }

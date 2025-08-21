@@ -21,6 +21,7 @@
     "node_modules", 
     "**/*.test.*", 
     "**/*.spec.*",
+    "src/enhanced-testing.tsx",
     "src/optimization/**",
     "src/testing/**"
   ]

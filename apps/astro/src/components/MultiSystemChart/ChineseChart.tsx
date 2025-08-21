@@ -1,12 +1,14 @@
 import React from 'react';
-import { ChineseChartData } from './types';
+import type { ChineseChartData } from './types';
 
 interface Props {
   data: ChineseChartData;
 }
 
 const ChineseChart: React.FC<Props> = ({ data }) => {
-  if (!data) return <p className="text-cosmic-silver">No Chinese astrology data available</p>;
+  if (data === undefined || data === null) {
+    return <p className="text-cosmic-silver">No Chinese astrology data available</p>;
+  }
 
   return (
     <div className="flex flex-col space-y-4">

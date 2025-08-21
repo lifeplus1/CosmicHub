@@ -13,18 +13,16 @@ import {
   type PlanetPosition,
   type PlanetName,
   dateToJulianDay,
-  SUPPORTED_PLANETS
-} from '@cosmichub/integrations';
-import type {
-  CalculationResponse,
-  BatchCalculationResponse,
-  EphemerisHealthResponse
+  SUPPORTED_PLANETS,
+  type CalculationResponse,
+  type BatchCalculationResponse,
+  type EphemerisHealthResponse
 } from '@cosmichub/integrations';
 
 // Configuration for the ephemeris client
 const getEphemerisConfig = (): EphemerisConfig => ({
   // Use the backend API base (frontend talks to backend, which proxies ephemeris)
-  apiBaseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:8000',
+  apiBaseUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000',
   timeout: 30000,
   // API key handled by backend authentication, not needed here
 });
@@ -85,9 +83,9 @@ export const usePlanetaryPosition = (
   const julianDay = date !== null && date !== undefined ? dateToJulianDay(date) : null;
   const isEnabled = options?.enabled !== false && julianDay !== null && julianDay !== undefined;
   return useQuery<CalculationResponse, Error>({
-  queryKey: julianDay != null ? ephemerisKeys.calculation(julianDay, planet) : [],
+  queryKey: julianDay !== null ? ephemerisKeys.calculation(julianDay, planet) : [],
     queryFn: () => {
-      if (julianDay == null) throw new Error('Date is required');
+      if (julianDay === null) throw new Error('Date is required');
       return client.calculatePosition(julianDay, planet);
     },
     enabled: isEnabled,
@@ -104,16 +102,16 @@ export const useAllPlanetaryPositions = (
   options?: { enabled?: boolean; planets?: PlanetName[] }
 ): UseQueryResult<Record<PlanetName, PlanetPosition>, Error> => {
   const client = useEphemerisClient();
-  const julianDay = date != null ? dateToJulianDay(date) : null;
+  const julianDay = date !== null ? dateToJulianDay(date) : null;
   const hasCustomPlanets = Array.isArray(options?.planets) && options?.planets !== undefined && options.planets.length > 0;
   const planetsToCalculate: PlanetName[] = hasCustomPlanets
-    ? [...new Set(options!.planets!)] // dedupe if caller passes duplicates
+    ? [...new Set(options.planets)] // dedupe if caller passes duplicates
     : [...SUPPORTED_PLANETS]; // spread to mutable array
-  const isEnabled = options?.enabled !== false && julianDay != null;
+  const isEnabled = options?.enabled !== false && julianDay !== null;
   return useQuery<Record<PlanetName, PlanetPosition>, Error>({
-  queryKey: julianDay != null ? ephemerisKeys.allPositions(julianDay) : [],
+  queryKey: julianDay !== null ? ephemerisKeys.allPositions(julianDay) : [],
     queryFn: async () => {
-      if (julianDay == null) throw new Error('Date is required');
+      if (julianDay === null) throw new Error('Date is required');
       const calculations = planetsToCalculate.map((planet) => ({
         julian_day: julianDay,
         planet
@@ -181,10 +179,11 @@ export const usePrefetchPlanetaryPositions = (): { prefetchPositions: (
   const prefetchPositions = async (
     startDate: Date,
     endDate: Date,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     planets: PlanetName[] = [...SUPPORTED_PLANETS]
   ): Promise<void> => {
     if (endDate < startDate) return; // no-op on invalid range
-    const uniquePlanets = [...new Set(planets)];
+    // Create dates array for the date range
     const dates: Date[] = [];
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {

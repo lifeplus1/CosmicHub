@@ -7,7 +7,7 @@ import React, { type ComponentType } from 'react';
 import { lazyLoadRoute, LazyLoadErrorBoundary } from '@cosmichub/config';
 
 // Main page routes with lazy loading
-export const AstroRoutes = {
+export const AstroRoutes: Record<string, ReturnType<typeof lazyLoadRoute>> = {
   // Dashboard route
   Dashboard: lazyLoadRoute(
     () => import('../pages/Dashboard'),

@@ -1,14 +1,16 @@
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
-import { VedicChartData } from './types';
+import type { VedicChartData } from './types';
 
 interface Props {
   data: VedicChartData;
 }
 
 const VedicChart: React.FC<Props> = ({ data }) => {
-  if (!data) return <p className="text-cosmic-silver">No Vedic astrology data available</p>;
+  if (data === null || data === undefined) {
+    return <p className="text-cosmic-silver">No Vedic astrology data available</p>;
+  }
 
   return (
     <div className="flex flex-col space-y-4">
@@ -49,7 +51,7 @@ const VedicChart: React.FC<Props> = ({ data }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(data.planets || {}).map(([planet, info]: [string, { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }]) => (
+                    {Object.entries(data.planets ?? {}).map(([planet, info]: [string, { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }]) => (
                       <tr key={planet}>
                         <td className="py-2 font-medium capitalize">{planet}</td>
                         <td className="py-2">{info.vedic_sign}</td>

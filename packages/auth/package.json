@@ -12,7 +12,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@cosmichub/config": "workspace:*"
+  "@cosmichub/config": "workspace:*",
+  "@cosmichub/integrations": "workspace:*"
   },
   "peerDependencies": {
     "firebase": "^10.12.2",

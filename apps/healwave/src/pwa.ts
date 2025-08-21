@@ -6,26 +6,9 @@
 // Simple logger for PWA service worker
 class PWALogger {
   private static isDevelopment = import.meta.env.DEV;
-  
-  static log(message: string, ...args: any[]): void {
-    if (this.isDevelopment) {
-      // eslint-disable-next-line no-console
-      console.log(message, ...args);
-    }
-  }
-  
-  static warn(message: string, ...args: any[]): void {
-    if (this.isDevelopment) {
-      // eslint-disable-next-line no-console
-      console.warn(message, ...args);
-    }
-  }
-  
-  static error(message: string, ...args: any[]): void {
-    // Always log errors, even in production
-    // eslint-disable-next-line no-console
-    console.error(message, ...args);
-  }
+  static log(message: string, ...args: unknown[]): void { if (this.isDevelopment) { /* eslint-disable no-console */ console.log(message, ...args); /* eslint-enable no-console */ } }
+  static warn(message: string, ...args: unknown[]): void { if (this.isDevelopment) { /* eslint-disable no-console */ console.warn(message, ...args); /* eslint-enable no-console */ } }
+  static error(message: string, ...args: unknown[]): void { /* eslint-disable no-console */ console.error(message, ...args); /* eslint-enable no-console */ }
 }
 
 // PWA Service Worker Registration
@@ -34,7 +17,7 @@ async function registerServiceWorker(): Promise<void> {
     try {
       PWALogger.log('🔧 Registering Service Worker...');
       
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+  const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         type: 'module'
       });
@@ -53,14 +36,13 @@ async function registerServiceWorker(): Promise<void> {
       });
       
       // Check for updates periodically
-      setInterval(() => {
-        registration.update();
-      }, 60000); // Check every minute
+  setInterval(() => { void registration.update(); }, 60000); // Check every minute
       
       PWALogger.log('✅ Service Worker registered successfully');
       
       // Initialize PWA features
-      await initializePWAFeatures();
+  // Fire-and-forget; internal logic attaches listeners only
+  initializePWAFeatures();
       
     } catch (error) {
       PWALogger.error('❌ Service Worker registration failed:', error);
@@ -71,38 +53,35 @@ async function registerServiceWorker(): Promise<void> {
 }
 
 // Initialize PWA features
-async function initializePWAFeatures(): Promise<void> {
-  // Install prompt handling
-  let deferredPrompt: any;
+function initializePWAFeatures(): void {
+  let deferredPrompt: { prompt: () => void; userChoice: Promise<{ outcome: string }> } | null = null;
   
-  window.addEventListener('beforeinstallprompt', (e) => {
+  window.addEventListener('beforeinstallprompt', (e: Event): void => {
     e.preventDefault();
-    deferredPrompt = e;
+    const evt = e as unknown as { prompt: () => void; userChoice: Promise<{ outcome: string }> };
+    deferredPrompt = evt;
     showInstallPrompt();
   });
   
   // App installed handler
-  window.addEventListener('appinstalled', () => {
+  window.addEventListener('appinstalled', (): void => {
     PWALogger.log('🎉 HealWave PWA installed successfully');
     hideInstallPrompt();
     deferredPrompt = null;
   });
   
   // Handle install button click
-  window.addEventListener('install-app', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choiceResult = await deferredPrompt.userChoice;
-      
-      if (choiceResult.outcome === 'accepted') {
-        PWALogger.log('✅ User accepted the install prompt');
-      } else {
-        PWALogger.log('❌ User dismissed the install prompt');
+  window.addEventListener('install-app', () => { void (async () => {
+    if (deferredPrompt !== null) {
+      try {
+        deferredPrompt.prompt();
+        const choiceResult = await deferredPrompt.userChoice;
+        PWALogger.log(choiceResult.outcome === 'accepted' ? '✅ User accepted the install prompt' : '❌ User dismissed the install prompt');
+      } finally {
+        deferredPrompt = null;
       }
-      
-      deferredPrompt = null;
     }
-  });
+  })(); });
 }
 
 // Show update notification
@@ -148,14 +127,10 @@ function showUpdateNotification(): void {
   document.body.appendChild(updateBanner);
   
   // Handle update button
-  document.getElementById('update-app-btn')?.addEventListener('click', () => {
-    window.location.reload();
-  });
+  document.getElementById('update-app-btn')?.addEventListener('click', () => { window.location.reload(); });
   
   // Handle dismiss button
-  document.getElementById('dismiss-update-btn')?.addEventListener('click', () => {
-    updateBanner.remove();
-  });
+  document.getElementById('dismiss-update-btn')?.addEventListener('click', () => { updateBanner.remove(); });
 }
 
 // Show install prompt
@@ -231,15 +206,10 @@ function showInstallPrompt(): void {
   document.body.appendChild(installBanner);
   
   // Handle install button
-  document.getElementById('install-app-btn')?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('install-app'));
-    installBanner.remove();
-  });
+  document.getElementById('install-app-btn')?.addEventListener('click', () => { window.dispatchEvent(new CustomEvent('install-app')); installBanner.remove(); });
   
   // Handle dismiss button
-  document.getElementById('dismiss-install-btn')?.addEventListener('click', () => {
-    installBanner.remove();
-  });
+  document.getElementById('dismiss-install-btn')?.addEventListener('click', () => { installBanner.remove(); });
 }
 
 // Hide install prompt

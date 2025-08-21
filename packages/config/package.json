@@ -2,10 +2,12 @@
   "name": "@cosmichub/config",
   "version": "1.0.0",
   "description": "Shared configuration for CosmicHub applications",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
+  ".": "./src/index.ts",
+  "./api-result": "./src/utils/api/result.ts",
+  "./push-notifications": "./src/push-notifications.ts",
     "./firebase": "./src/firebase.ts",
     "./enhanced-testing": "./src/enhanced-testing.tsx",
     "./accessibility-testing": "./src/accessibility-testing.tsx",
@@ -15,7 +17,8 @@
     "./hooks": "./src/hooks/index.ts"
   },
   "scripts": {
-    "build": "echo 'Skipping config build - apps use direct TypeScript imports'",
+    "build": "tsc -p tsconfig.json",
+    "build:types": "tsc -p tsconfig.json --emitDeclarationOnly",
     "build:packages": "tsc",
     "dev": "tsc --watch",
     "type-check": "tsc --noEmit",

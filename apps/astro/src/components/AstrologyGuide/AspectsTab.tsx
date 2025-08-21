@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Accordion from '@radix-ui/react-accordion';
-import { Aspect } from './types';
+import type { Aspect } from './types';
 
 const aspects: Aspect[] = [
   { name: 'Conjunction', symbol: '☌', degree: 0, nature: 'Neutral/Intensifying', description: 'Blends energies powerfully' },
@@ -27,7 +27,7 @@ const AspectsTab: React.FC = React.memo(() => {
             </Accordion.Trigger>
             <Accordion.Content className="p-4">
               <div className="flex flex-col space-y-2">
-                <span className={`bg-${aspect.nature.includes('Harmonious') ? 'green-500' : 'red-500'}/20 text-${aspect.nature.includes('Harmonious') ? 'green-500' : 'red-500'} px-2 py-1 rounded text-xs`}>
+                <span className={`px-2 py-1 rounded text-xs ${aspect.nature.includes('Harmonious') ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                   {aspect.nature}
                 </span>
                 <p className="text-cosmic-silver">{aspect.description}</p>

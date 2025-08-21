@@ -46,12 +46,13 @@ export interface NotificationPreferences {
   transitAlerts: boolean;
   frequencyReminders: boolean;
   appUpdates: boolean;
+  frequency?: 'instant' | 'hourly' | 'daily' | 'weekly';
   quietHours: {
     enabled: boolean;
     start: string; // HH:MM format
-    end: string;   // HH:MM format
+    end: string; // HH:MM format
   };
-  frequency: 'instant' | 'hourly' | 'daily' | 'weekly';
+  maxDailyNotifications: number;
 }
 
 export interface VAPIDKeys {
@@ -66,6 +67,12 @@ export interface NotificationStats {
   activeSubscriptions: number;
   queuedNotifications: number;
   permissionStatus: NotificationPermission;
+  totalSent: number;
+  totalDelivered: number;
+  totalClicked: number;
+  avgDeliveryTime: number;
+  lastSent?: number;
+  errors: number;
 }
 
 export class PushNotificationManager {
@@ -255,12 +262,10 @@ export class PushNotificationManager {
     // Analyze usage patterns (placeholder logic)
     const hoursSinceLastUse = (Date.now() - subscription.lastUsed) / (1000 * 60 * 60);
 
-    if (hoursSinceLastUse > 168) { // 1 week
-      suggestions.frequency = 'weekly';
-    } else if (hoursSinceLastUse > 24) { // 1 day
-      suggestions.frequency = 'daily';
-    } else {
-      suggestions.frequency = 'instant';
+    // More frequent users might want more notifications
+    if (hoursSinceLastUse < 24) {
+      suggestions.dailyHoroscope = true;
+      suggestions.transitAlerts = true;
     }
 
     // Suggest quiet hours based on typical usage
@@ -287,7 +292,12 @@ export class PushNotificationManager {
       totalSubscriptions: this.subscriptions.size,
       activeSubscriptions,
       queuedNotifications: this.notificationQueue.length,
-      permissionStatus: Notification.permission
+      permissionStatus: Notification.permission,
+      totalSent: 0, // TODO: Implement tracking
+      totalDelivered: 0, // TODO: Implement tracking
+      totalClicked: 0, // TODO: Implement tracking
+      avgDeliveryTime: 0, // TODO: Implement tracking
+      errors: 0 // TODO: Implement tracking
     };
   }
 
@@ -357,12 +367,13 @@ export const DefaultNotificationPreferences: NotificationPreferences = {
   transitAlerts: false,
   frequencyReminders: false,
   appUpdates: true,
+  frequency: 'daily',
   quietHours: {
     enabled: true,
     start: '22:00',
     end: '08:00'
   },
-  frequency: 'daily'
+  maxDailyNotifications: 5
 };
 
 // Astrology-specific notification templates

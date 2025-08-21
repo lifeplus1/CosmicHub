@@ -9,23 +9,23 @@ export class Logger {
 
   static debug(message: string, data?: unknown): void {
   if (typeof globalThis.process !== 'undefined' && globalThis.process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
+       
       console.debug(this.formatMessage('debug', message, data));
     }
   }
 
   static info(message: string, data?: unknown): void {
-    // eslint-disable-next-line no-console
+     
     console.info(this.formatMessage('info', message, data));
   }
 
   static warn(message: string, data?: unknown): void {
-    // eslint-disable-next-line no-console
+     
     console.warn(this.formatMessage('warn', message, data));
   }
 
   static error(message: string, error?: Error): void {
-    // eslint-disable-next-line no-console
+     
     console.error(this.formatMessage('error', message, {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined

@@ -80,8 +80,7 @@ const removeUndefinedReplacer = (_key: string, value: unknown): unknown => (
 export function serializeAstrologyData(data: AstrologyChart | UserProfile | NumerologyData): string {
   try {
     let validatedData: ChartDataValidated | ProfileDataValidated | NumerologyDataValidated;
-    
-    // Use type guards for more precise type narrowing
+
     if (isAstrologyChart(data)) {
       validatedData = ChartSchema.parse(data);
     } else if (isUserProfile(data)) {
@@ -91,11 +90,9 @@ export function serializeAstrologyData(data: AstrologyChart | UserProfile | Nume
     } else {
       throw new Error('Unknown data type for serialization');
     }
-    
-    // Optimize JSON size by removing undefined fields
+
     return JSON.stringify(validatedData, removeUndefinedReplacer);
-  } catch (error) {
-    // Swallow internal error details to avoid leaking structure; rethrow generic
+  } catch {
     throw new Error('Failed to serialize data');
   }
 }
@@ -121,12 +118,14 @@ export function deserializeAstrologyData<T extends AstrologyChart | UserProfile 
     // Use getAstrologyDataType for more detailed error message
     const dataType = getAstrologyDataType(parsedUnknown);
     throw new Error(`Unknown or invalid data type for deserialization: ${dataType}`);
-  } catch (error) {
-    if (error instanceof Error) {
-  // Preserve error context for debugging while keeping public message generic.
-  // Use global devConsole if present to avoid raw console.* usage (silences no-console warnings).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (globalThis as any)?.devConsole?.error?.('Deserialization error:', error.message);
+  } catch (err) {
+    if (err instanceof Error) {
+      const g: unknown = globalThis as unknown;
+      // Narrow devConsole shape safely
+      const maybeConsole = (g as { devConsole?: { error?: (msg: unknown, detail?: unknown) => void } }).devConsole;
+      if (maybeConsole && typeof maybeConsole.error === 'function') {
+        maybeConsole.error('Deserialization error:', err.message);
+      }
     }
     throw new Error('Failed to deserialize data');
   }

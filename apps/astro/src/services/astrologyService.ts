@@ -1,7 +1,7 @@
 // apps/astro/src/services/astrologyService.ts
 
 import { getAuth } from 'firebase/auth';
-import { ChartData, ChartType } from '@/types/astrology.types';
+import type { ChartData, ChartType } from '@/types/astrology.types';
 import { config } from '@cosmichub/config'; // Shared API config from packages/config
 
 export const fetchChartData = async (userId: string, chartType: ChartType): Promise<ChartData> => {

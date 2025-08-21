@@ -24,3 +24,34 @@ else
 fi
 
 printf "\nAll pre-push checks passed.\n"
+
+printf "\nRunning strict lint on changed files...\n"
+pnpm run lint:changed:strict || exit 1
+
+printf "\nChecking lint ratchet (no regressions)...\n"
+pnpm run lint:ratchet || exit 1
+
+printf "\nEnforcing guard rules (must stay zero)...\n"
+pnpm run lint:guard || exit 1
+
+printf "\nPre-push lint guard passed.\n"
+
+printf "\nRunning full lint (all workspaces) to ensure global cleanliness...\n"
+pnpm run lint || exit 1
+
+printf "\nRunning backend critical lint directly (adaptive python)...\n"
+pnpm run lint:backend || exit 1
+
+printf "\nRunning accessibility checks (Astro) ...\n"
+pnpm run a11y:check || echo "Accessibility check reported issues (non-blocking)."
+
+printf "\nGenerating coverage (tests) and enforcing ratchet...\n"
+pnpm run test:astro -- --coverage --run || exit 1
+node scripts/coverage-badge.mjs || true
+pnpm run coverage:ratchet:check || exit 1
+
+printf "\nCollecting dependency and security reports...\n"
+node scripts/deps-report.mjs || true
+pnpm run audit:prod || true
+
+printf "\nAll extended pre-push quality checks completed.\n"

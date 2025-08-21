@@ -9,7 +9,7 @@ const HologenicProfileTab: React.FC<HologenicProfileTabProps> = React.memo(({
   geneKeysData 
 }) => {
   // Strict null/undefined check for hologenetic_profile
-  if (geneKeysData.hologenetic_profile == null || typeof geneKeysData.hologenetic_profile !== 'object') {
+  if (geneKeysData.hologenetic_profile === null || geneKeysData.hologenetic_profile === undefined || typeof geneKeysData.hologenetic_profile !== 'object') {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-cosmic-silver/60">No Hologenetic Profile data available</p>
@@ -79,7 +79,7 @@ const HologenicProfileTab: React.FC<HologenicProfileTabProps> = React.memo(({
       </div>
 
       {/* Contemplation Sequence */}
-  {geneKeysData.contemplation_sequence != null && Array.isArray(geneKeysData.contemplation_sequence) && geneKeysData.contemplation_sequence.length > 0 && (
+  {geneKeysData.contemplation_sequence !== null && geneKeysData.contemplation_sequence !== undefined && Array.isArray(geneKeysData.contemplation_sequence) && geneKeysData.contemplation_sequence.length > 0 && (
         <div className="border cosmic-card bg-gradient-to-br from-amber-900/20 to-orange-900/20 border-amber-500/30">
           <div className="p-6">
             <h4 className="flex items-center mb-6 text-2xl font-bold text-amber-400">

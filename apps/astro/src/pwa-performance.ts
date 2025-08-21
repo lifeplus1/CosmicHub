@@ -143,10 +143,17 @@ export class CriticalResourceManager {
 }
 
 // Connection-aware loading (builds on existing lazy loading)
+// Local fallback type for NetworkInformation (not in standard lib in some TS configs)
+// Minimal subset used by this file
+interface NetworkInformationFallback {
+  effectiveType?: string;
+  downlink?: number;
+  saveData?: boolean;
+}
 export class ConnectionAwareLoader {
-  private static getConnection(): NetworkInformation | null {
+  private static getConnection(): NetworkInformationFallback | null {
     if (globalThis?.navigator === null) return null;
-    const nav = navigator as unknown as { connection?: NetworkInformation; mozConnection?: NetworkInformation; webkitConnection?: NetworkInformation };
+    const nav = navigator as unknown as { connection?: NetworkInformationFallback; mozConnection?: NetworkInformationFallback; webkitConnection?: NetworkInformationFallback };
     return nav.connection ?? nav.mozConnection ?? nav.webkitConnection ?? null;
   }
 
@@ -215,13 +222,12 @@ export class PWAPerformanceMonitor {
   }
 
   static endTiming(label: string): number {
-    const startTime = this.metrics.get(`${label}_start`);
-    if (startTime === null) {
+  const startTime = this.metrics.get(`${label}_start`);
+  if (startTime === null || startTime === undefined) { // explicit null/undefined check for lint
       safeWarn(`No start time found for ${label}`);
       return 0;
     }
-    
-    const duration = performance.now() - startTime;
+  const duration = performance.now() - startTime;
     this.metrics.set(label, duration);
     safeLog(`⏱️ ${label}: ${duration.toFixed(2)}ms`);
     return duration;
@@ -230,22 +236,22 @@ export class PWAPerformanceMonitor {
   static measurePWAMetrics(): void {
     // Measure PWA-specific metrics
 
-    if (globalThis.navigator?.serviceWorker !== null) {
+  if (globalThis.navigator?.serviceWorker !== null && globalThis.navigator?.serviceWorker !== undefined) {
       void navigator.serviceWorker.ready.then(() => {
-        const perfNow = globalThis.performance?.now;
-      if (perfNow !== null) {
-          const swReadyTime = perfNow();
+        const perfObj = globalThis.performance;
+        if (perfObj !== undefined && perfObj !== null && typeof perfObj.now === 'function') {
+          const swReadyTime = perfObj.now();
           safeLog(`🔧 Service Worker ready: ${swReadyTime.toFixed(2)}ms`);
         }
       });
     }
 
     // Measure app shell loading
-    if (globalThis.window !== null) {
+  if (globalThis.window !== null && globalThis.window !== undefined) {
       window.addEventListener('DOMContentLoaded', () => {
-        const perfNow = globalThis.performance?.now;
-        if (perfNow !== null) {
-          const domReady = perfNow();
+        const perfObj = globalThis.performance;
+        if (perfObj !== undefined && perfObj !== null && typeof perfObj.now === 'function') {
+          const domReady = perfObj.now();
           safeLog(`📄 DOM ready: ${domReady.toFixed(2)}ms`);
         }
       });

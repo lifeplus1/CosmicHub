@@ -1,0 +1,102 @@
+[
+  {
+    "rule": "@typescript-eslint/no-explicit-any",
+    "count": 97
+  },
+  {
+    "rule": "@typescript-eslint/no-unsafe-member-access",
+    "count": 61
+  },
+  {
+    "rule": "@typescript-eslint/no-unsafe-assignment",
+    "count": 39
+  },
+  {
+    "rule": "@typescript-eslint/no-unused-vars",
+    "count": 30
+  },
+  {
+    "rule": "no-undef",
+    "count": 26
+  },
+  {
+    "rule": "eqeqeq",
+    "count": 19
+  },
+  {
+    "rule": "@typescript-eslint/require-await",
+    "count": 16
+  },
+  {
+    "rule": "@typescript-eslint/no-unsafe-call",
+    "count": 15
+  },
+  {
+    "rule": "@typescript-eslint/no-unsafe-return",
+    "count": 13
+  },
+  {
+    "rule": "@typescript-eslint/no-unsafe-argument",
+    "count": 13
+  },
+  {
+    "rule": "jsx-a11y/click-events-have-key-events",
+    "count": 11
+  },
+  {
+    "rule": "@typescript-eslint/no-misused-promises",
+    "count": 11
+  },
+  {
+    "rule": "@typescript-eslint/no-unsafe-function-type",
+    "count": 6
+  },
+  {
+    "rule": "@typescript-eslint/no-floating-promises",
+    "count": 6
+  },
+  {
+    "rule": "react/no-unescaped-entities",
+    "count": 5
+  },
+  {
+    "rule": "@typescript-eslint/no-unnecessary-type-assertion",
+    "count": 5
+  },
+  {
+    "rule": "react/display-name",
+    "count": 3
+  },
+  {
+    "rule": "no-duplicate-imports",
+    "count": 3
+  },
+  {
+    "rule": "@typescript-eslint/no-empty-object-type",
+    "count": 3
+  },
+  {
+    "rule": "prefer-const",
+    "count": 2
+  },
+  {
+    "rule": "jsx-a11y/label-has-associated-control",
+    "count": 2
+  },
+  {
+    "rule": "@typescript-eslint/no-redundant-type-constituents",
+    "count": 2
+  },
+  {
+    "rule": "no-unused-expressions",
+    "count": 1
+  },
+  {
+    "rule": "jsx-a11y/no-redundant-roles",
+    "count": 1
+  },
+  {
+    "rule": "@typescript-eslint/only-throw-error",
+    "count": 1
+  }
+]

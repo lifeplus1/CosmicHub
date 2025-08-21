@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import { isDevelopment, devConsole } from '../config/environment';
 
 interface ErrorBoundaryProps {
@@ -45,13 +45,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     this.props.onError?.(error, errorInfo);
   }
 
-  private handleRetry = () => {
+  private handleRetry = (): void => {
     this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  render(): ReactNode {
     if (this.state.hasError) {
-      if (this.props.fallback) {
+      if (this.props.fallback !== undefined && this.props.fallback !== null) {
         return this.props.fallback;
       }
 
@@ -63,10 +63,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               Something went wrong
             </h2>
             <p className="text-cosmic-silver text-sm mb-6">
-              {this.props.name != null ? `Error in ${this.props.name}` : 'An unexpected error occurred'}
+              {this.props.name !== undefined && this.props.name !== null ? `Error in ${this.props.name}` : 'An unexpected error occurred'}
             </p>
             
-            {isDevelopment() === true && this.state.error != null && (
+            {isDevelopment() === true && this.state.error !== null && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm font-medium text-cosmic-silver/80 hover:text-cosmic-silver">
                   Technical Details
@@ -75,7 +75,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                   <div className="font-semibold text-red-300">
                     {this.state.error.message}
                   </div>
-                  {this.state.error.stack != null && (
+                  {this.state.error.stack !== undefined && this.state.error.stack !== null && (
                     <pre className="mt-2 whitespace-pre-wrap text-red-400/80">
                       {this.state.error.stack}
                     </pre>

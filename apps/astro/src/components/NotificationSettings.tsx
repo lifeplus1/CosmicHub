@@ -4,13 +4,10 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  PushNotificationManager, 
-  NotificationPreferences, 
-  DefaultNotificationPreferences,
-  NotificationStats
-} from '@cosmichub/config';
+import { DefaultNotificationPreferences, type PushNotificationManager, type NotificationPreferences, type NotificationStats } from '@cosmichub/config';
 import { devConsole } from '../config/environment';
+
+// Using shared NotificationStats
 
 interface NotificationSettingsProps {
   userId: string;
@@ -31,7 +28,12 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     totalSubscriptions: 0,
     activeSubscriptions: 0,
     queuedNotifications: 0,
-    permissionStatus: 'default'
+    permissionStatus: 'default',
+    totalSent: 0,
+    totalDelivered: 0,
+    totalClicked: 0,
+    avgDeliveryTime: 0,
+    errors: 0
   });
 
   const loadCurrentSettings = useCallback((): void => {
@@ -55,12 +57,20 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
 
   const loadStats = useCallback((): void => {
     try {
-      const notificationStats = pushManager.getNotificationStats();
+  const notificationStats = pushManager.getNotificationStats() as Partial<NotificationStats>;
       if (notificationStats !== null && notificationStats !== undefined && typeof notificationStats.totalSubscriptions === 'number') {
-        setStats(notificationStats);
+  setStats((prev: NotificationStats) => ({
+          ...prev,
+          ...notificationStats,
+          totalSent: notificationStats.totalSent ?? prev.totalSent,
+          totalDelivered: notificationStats.totalDelivered ?? prev.totalDelivered,
+          totalClicked: notificationStats.totalClicked ?? prev.totalClicked,
+          avgDeliveryTime: notificationStats.avgDeliveryTime ?? prev.avgDeliveryTime,
+          errors: notificationStats.errors ?? prev.errors
+        }));
       }
     } catch (err) {
-      devConsole.warn?.('Failed to load notification stats', err);
+      devConsole.warn('Failed to load notification stats', err);
     }
   }, [pushManager]);
 
@@ -112,7 +122,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     localStorage.setItem(`cosmichub-notification-prefs-${userId}`, JSON.stringify(newPreferences));
     
     // Update with push manager if subscribed
-    if (isSubscribed) {
+    if (isSubscribed === true) {
       pushManager.updateUserPreferences(userId, updates);
     }
     
@@ -182,13 +192,11 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
               Permission Status
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              {permissionStatus === 'granted' && '✅ Notifications enabled'}
-              {permissionStatus === 'denied' && '❌ Notifications blocked'}
-              {permissionStatus === 'default' && '⏳ Not requested yet'}
+              {permissionStatus === 'granted' ? '✅ Notifications enabled' : permissionStatus === 'denied' ? '❌ Notifications blocked' : '⏳ Not requested yet'}
             </p>
           </div>
           
-          {!isSubscribed ? (
+  {isSubscribed === false ? (
             <button
               onClick={() => { void handleSubscribe(); }}
               disabled={isLoading || permissionStatus === 'denied'}

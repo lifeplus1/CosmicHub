@@ -8,8 +8,7 @@ import {
   createCompoundComponent, 
   createPolymorphicComponent,
   useComponentContext,
-  withPerformanceTracking,
-  type PolymorphicComponentProps
+  withPerformanceTracking
 } from '@cosmichub/config/component-architecture';
 import styles from './EnhancedCard.module.css';
 
@@ -100,7 +99,11 @@ BaseCard.displayName = 'BaseCard';
 export const Card = createCompoundComponent(
   withPerformanceTracking(BaseCard, 'Card'),
   'Card'
-) as any;
+) as unknown as React.FC<CardProps> & {
+  Header: typeof CardHeader;
+  Body: typeof CardBody;
+  Footer: typeof CardFooter;
+};
 
 // Card header with essential props
 export interface CardHeaderProps {
@@ -122,14 +125,14 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
     <div
       className={`card__header ${className}`}
     >
-      {(title || subtitle) && (
+      {(Boolean(title) || Boolean(subtitle)) && (
         <div className="card__header-content">
-          {title && (
+          {Boolean(title) && (
             <h3 className="card__title" data-testid="card-title">
               {title}
             </h3>
           )}
-          {subtitle && (
+          {Boolean(subtitle) && (
             <p className="card__subtitle" data-testid="card-subtitle">
               {subtitle}
             </p>
@@ -137,7 +140,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
         </div>
       )}
       {children}
-      {actions && (
+      {Boolean(actions) && (
         <div className="card__actions" data-testid="card-actions">
           {actions}
         </div>
@@ -167,11 +170,11 @@ export const CardBody: React.FC<CardBodyProps> = ({
     `card__body--padding-${padding}`,
     scrollable && 'card__body--scrollable',
     scrollable && styles.bodyScrollable,
-    maxHeight && styles.bodyWithMaxHeight,
+    Boolean(maxHeight) && styles.bodyWithMaxHeight,
     className
   ].filter(Boolean).join(' ');
 
-  const bodyStyle = maxHeight ? { '--card-body-max-height': maxHeight } as React.CSSProperties : undefined;
+  const bodyStyle = (maxHeight !== null && maxHeight !== undefined) ? { '--card-body-max-height': maxHeight } as React.CSSProperties : undefined;
 
   return (
     <div 
@@ -222,7 +225,7 @@ export const InteractiveCard = forwardRef<HTMLDivElement, CardProps & {
   onClick?: () => void;
   onKeyDown?: (event: React.KeyboardEvent) => void;
 }>(({ onClick, onKeyDown, ...props }, ref) => {
-  const handleKeyDown = (event: React.KeyboardEvent) => {
+  const handleKeyDown = (event: React.KeyboardEvent): void => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onClick?.();
@@ -237,8 +240,6 @@ export const InteractiveCard = forwardRef<HTMLDivElement, CardProps & {
       clickable
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
     />
   );
 });
@@ -300,7 +301,7 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
 // Chart card with lazy loading
 export interface ChartCardProps extends CardProps {
   chartType: 'line' | 'bar' | 'pie' | 'astrology';
-  data: any[];
+  data: unknown[];
   title?: string;
   description?: string;
 }
@@ -312,71 +313,72 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   description,
   ...props
 }) => {
-  const [ChartComponent, setChartComponent] = React.useState<React.ComponentType<any> | null>(null);
+  const [ChartComponent, setChartComponent] = React.useState<React.ComponentType<{ data: unknown[] }> | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
     let isMounted = true;
 
-    const loadChart = async () => {
+    const loadChart = async (): Promise<void> => {
       try {
         setLoading(true);
         setError(null);
 
-        let module;
+  let module: { LazyAstrologyChart: unknown };
         switch (chartType) {
           case 'astrology':
             module = await import('./lazy-components');
             break;
           default:
             // Fallback chart component
-            module = { LazyAstrologyChart: () => <div>Chart placeholder</div> };
+            module = { LazyAstrologyChart: (): React.ReactElement => <div>Chart placeholder</div> };
         }
 
-        if (isMounted) {
-          setChartComponent(() => module.LazyAstrologyChart);
+        if (isMounted === true) {
+          const comp = module.LazyAstrologyChart;
+          if (typeof comp === 'function' || (typeof comp === 'object' && comp !== null)) {
+            setChartComponent(() => comp as React.ComponentType<{ data: unknown[] }>);
+          }
           setLoading(false);
         }
-      } catch (err) {
-        if (isMounted) {
+      } catch (err: unknown) {
+        if (isMounted === true) {
           setError(err instanceof Error ? err : new Error('Failed to load chart'));
           setLoading(false);
         }
       }
     };
 
-    loadChart();
+    void loadChart();
 
-    return () => {
-      isMounted = false;
-    };
+  return (): void => { isMounted = false; };
   }, [chartType]);
 
-  if (loading) {
+  if (loading === true) {
     return <LoadingCard {...props} loadingText={`Loading ${chartType} chart...`} />;
   }
 
-  if (error) {
+  if (error !== null) {
     return (
       <ErrorCard 
         {...props} 
         error={error} 
-        onRetry={() => window.location.reload()} 
+        onRetry={(): void => { window.location.reload(); }} 
       />
     );
   }
 
   return (
     <Card {...props}>
-      {title && (
+      {Boolean(title) && (
         <Card.Header 
           title={title}
           subtitle={description}
         />
       )}
       <Card.Body>
-        {ChartComponent && <ChartComponent data={data} />}
+  {(ChartComponent !== null) && <ChartComponent data={data} />}
       </Card.Body>
     </Card>
   );

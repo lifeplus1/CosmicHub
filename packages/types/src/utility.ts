@@ -7,8 +7,9 @@
 // JSON primitives and structured values
 export type JSONPrimitive = string | number | boolean | null;
 export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
-export interface JSONObject { [key: string]: JSONValue; }
-export interface JSONArray extends Array<JSONValue> {}
+// Define JSON structures using interfaces with explicit members to satisfy lint rules
+export interface JSONObject { [key: string]: JSONValue }
+export type JSONArray = JSONValue[];
 
 // Narrow record types
 export type UnknownRecord = Record<string, unknown>;

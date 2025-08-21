@@ -1,12 +1,6 @@
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { devConsole } from '../../config/environment';
-import { 
-  AudioEngine, 
-  FrequencyPreset, 
-  AudioSettings, 
-  PLANETARY_FREQUENCIES,
-  SOLFEGGIO_FREQUENCIES 
-} from '@cosmichub/frequency';
+import { AudioEngine, PLANETARY_FREQUENCIES, SOLFEGGIO_FREQUENCIES, type FrequencyPreset, type AudioSettings } from '@cosmichub/frequency';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';

@@ -7,7 +7,7 @@ interface GeneKeyDetailsProps {
 }
 
 const GeneKeyDetails: React.FC<GeneKeyDetailsProps> = React.memo(({ selectedKey, onClose }) => {
-  if (selectedKey == null) {
+  if (selectedKey === null) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-cosmic-silver/60">Select a Gene Key to view details</p>
@@ -18,7 +18,7 @@ const GeneKeyDetails: React.FC<GeneKeyDetailsProps> = React.memo(({ selectedKey,
   return (
     <div className="border cosmic-card bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-cosmic-gold/30">
       <div className="p-6">
-        {onClose != null && (
+  {onClose !== undefined && (
           <div className="flex justify-end mb-4">
             <button
               onClick={onClose}

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from './ToastProvider';
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { useAuth } from "@cosmichub/auth";
 
-export default function SaveChart() {
+export default function SaveChart(): React.ReactNode {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     year: "",
@@ -24,12 +24,12 @@ export default function SaveChart() {
     return null;
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError(null);
     try {
@@ -55,8 +55,9 @@ export default function SaveChart() {
         isClosable: true,
       });
       navigate("/saved-charts");
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || "Failed to save chart";
+    } catch (error: unknown) {
+      const err = error as AxiosError<{detail?: string}>;
+      const msg = err.response?.data?.detail ?? "Failed to save chart";
       setError(msg);
       toast({
         title: "Error",
@@ -68,12 +69,12 @@ export default function SaveChart() {
     }
   };
 
-  const isFormValid = () => Object.values(formData).every((v) => v);
+  const isFormValid = (): boolean => Object.values(formData).every((v) => v !== "");
 
   return (
     <div className="max-w-2xl p-6 mx-auto cosmic-card">
       <h1 className="mb-6 text-3xl font-bold text-center text-cosmic-gold font-cinzel">Save Natal Chart</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(e); }} className="space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="year" className="block mb-2 text-cosmic-gold">Year *</label>
@@ -181,7 +182,7 @@ export default function SaveChart() {
         >
           Save Chart
         </button>
-        {error && <p className="text-center text-red-400">{error}</p>}
+        {error !== null && <p className="text-center text-red-400">{error}</p>}
       </form>
     </div>
   );

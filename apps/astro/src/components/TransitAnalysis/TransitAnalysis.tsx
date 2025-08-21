@@ -55,11 +55,11 @@ const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) => {
             lunarTransits={lunarTransits}
             loading={loading}
             loadingLunar={loadingLunar}
-            error={error}
+            error={error ?? null}
             dateRange={dateRange}
             setDateRange={setDateRange}
-            onCalculateTransits={calculateTransits}
-            onCalculateLunar={calculateLunarTransits}
+            onCalculateTransits={() => { void calculateTransits(); }}
+            onCalculateLunar={() => { void calculateLunarTransits(); }}
             onClearError={clearError}
             transitSummary={transitSummary}
             lunarSummary={lunarSummary}

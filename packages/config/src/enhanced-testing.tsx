@@ -154,7 +154,18 @@ export interface EnhancedRenderOptions {
 export function renderWithEnhancements(
   component: React.ReactElement,
   options: EnhancedRenderOptions = {}
-) {
+): ReturnType<typeof render> & {
+  measureRenderTime: () => Promise<number>;
+  checkAccessibility: () => Promise<{ passed: boolean; issues: string[] }>;
+  testInteractions: () => Promise<Array<{ action: string; success: boolean; error?: string }>>;
+  testPropsUpdate: (newProps: Record<string, unknown>) => Promise<void>;
+  simulateError: () => Promise<unknown>;
+  testAnimationPerformance: () => Promise<{ averageFrameTime: number; frames: number; passed: boolean }>;
+  getPerformanceMetrics: () => Array<{ metric: string; value: number }>;
+  getAccessibilityIssues: () => Promise<string[]>;
+  runFullAnalysis: () => Promise<{ performance: { renderTime: number; metrics: { metric: string; value: number }[]; recommendations: string[] }; accessibility: { passed: boolean; issues: string[] }; interactions: { action: string; success: boolean; error?: string }[]; animations: { averageFrameTime: number; passed: boolean } }>;
+  testResponsiveness: () => Promise<Array<{ breakpoint: string; width: number; visible: boolean }>>;
+} {
   const { config, mockProviders, initialProps, rerender } = options;
 
   const renderResult = render(

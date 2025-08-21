@@ -14,6 +14,7 @@ export interface NotificationPreferences {
   appUpdates: boolean;
   frequency: NotificationFrequency;
   quietHours: QuietHours;
+  maxDailyNotifications: number;
 }
 
 export interface SyncMessageData {

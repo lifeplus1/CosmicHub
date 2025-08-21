@@ -35,7 +35,7 @@ export interface HouseCusp {
  * Type guard to check if an object is a valid HouseCusp
  */
 export function isHouseCusp(obj: unknown): obj is HouseCusp {
-  if (!obj || typeof obj !== 'object') return false;
+  if (obj === null || obj === undefined || typeof obj !== 'object') return false;
   
   const houseCusp = obj as HouseCusp;
   return (

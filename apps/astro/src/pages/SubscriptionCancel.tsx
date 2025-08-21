@@ -9,19 +9,22 @@ const SubscriptionCancel: React.FC = () => {
   const tier = searchParams.get('tier') ?? 'premium';
   const feature = searchParams.get('feature');
 
-  const handleRetryCheckout = () => {
+  const handleRetryCheckout = (): void => {
     // Redirect back to pricing page with the same tier pre-selected
     const url = new URL('/pricing', window.location.origin);
-    if (tier) url.searchParams.set('tier', tier);
-    if (feature) url.searchParams.set('feature', feature);
+  // tier always non-empty due to default above
+  url.searchParams.set('tier', tier);
+    if (feature !== null && feature !== undefined && feature !== '') {
+      url.searchParams.set('feature', feature);
+    }
     navigate(`/pricing?${url.searchParams.toString()}`);
   };
 
-  const handleReturnToDashboard = () => {
+  const handleReturnToDashboard = (): void => {
     navigate('/', { replace: true });
   };
 
-  const handleBrowseFeatures = () => {
+  const handleBrowseFeatures = (): void => {
     navigate('/upgrade-demo');
   };
 
@@ -38,7 +41,7 @@ const SubscriptionCancel: React.FC = () => {
           No worries! Your checkout was cancelled and no charges were made to your account.
         </p>
 
-        {feature && (
+  {feature !== null && feature !== undefined && feature !== '' && (
           <div className="bg-blue-50 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-700">
               <span className="font-semibold">{feature}</span> is still waiting for you! 

@@ -5,6 +5,7 @@ import { useBirthData } from '../contexts/BirthDataContext';
 import ChartDisplay from '../components/ChartDisplay/ChartDisplay';
 import type { ChartLike } from '../components/ChartDisplay/normalizeChart';
 import { fetchChartData, type ChartBirthData } from '../services/api';
+import type { ApiResult } from '../services/apiResult';
 import type { ChartData } from '../services/api.types';
 import { componentLogger } from '../utils/componentLogger';
 
@@ -94,8 +95,12 @@ const Chart: React.FC = () => {
     
     try {
       // Use the API function to calculate chart
-      const chartResult = await fetchChartData(birthData);
-      setChartData(chartResult);
+      const result: ApiResult<ChartData> = await fetchChartData(birthData);
+      if (result.success) {
+        setChartData(result.data);
+      } else {
+        setError(result.error);
+      }
 
     } catch (err) {
       if (err instanceof Error) {

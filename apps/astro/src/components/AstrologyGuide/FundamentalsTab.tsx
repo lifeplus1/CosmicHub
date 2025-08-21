@@ -2,7 +2,7 @@ import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { FaSun, FaStar, FaGlobe, FaMoon, FaClock, FaLightbulb } from 'react-icons/fa';
-import { Fundamental } from './types';
+import type { Fundamental } from './types';
 
 const fundamentals: Fundamental[] = [
   {

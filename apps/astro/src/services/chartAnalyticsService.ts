@@ -491,7 +491,7 @@ class ChartAnalyticsService {
    * Detect Grand Crosses
    */
   private detectGrandCrosses(chartData: ChartData): ChartPattern[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
     // Implementation for grand cross detection
     return [];
@@ -501,7 +501,7 @@ class ChartAnalyticsService {
    * Detect Yods (Finger of God)
    */
   private detectYods(chartData: ChartData): ChartPattern[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
     // Implementation for yod detection
     return [];
@@ -594,51 +594,51 @@ class ChartAnalyticsService {
 
   // Additional methods for analysis (implementations would be expanded)
   private identifyStrengths(chartData: ChartData): string[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
     return ['Leadership abilities', 'Creative expression', 'Emotional intelligence'];
   }
 
   private identifyChallenges(chartData: ChartData): string[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
     return ['Impatience with details', 'Tendency to overthink', 'Need for more self-confidence'];
   }
 
   private extractLifeThemes(chartData: ChartData): string[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
     return ['Personal transformation', 'Creative self-expression', 'Service to others'];
   }
 
   private analyzeCurrentTransits(natalChart: ChartData, transits: Record<string, Planet>): string[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _natalChart = natalChart;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _transits = transits;
     return ['Jupiter enhancing optimism', 'Saturn encouraging discipline', 'Mercury improving communication'];
   }
 
   private calculateEnergyLevel(chartData: ChartData, transitData?: Record<string, Planet>): number {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _transitData = transitData;
     return 75; // Placeholder - would calculate based on current planetary energies
   }
 
   private assessEmotionalClimate(chartData: ChartData, transitData?: Record<string, Planet>): string {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _transitData = transitData;
     return 'Optimistic with creative potential';
   }
 
   private generateRecommendations(chartData: ChartData, transitData?: Record<string, Planet>): string[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _transitData = transitData;
     return [
       'Focus on creative projects this month',
@@ -648,7 +648,7 @@ class ChartAnalyticsService {
   }
 
   private analyzePlanetaryInsights(chartData: ChartData): PersonalityInsight[] {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _chartData = chartData;
     // Placeholder - would analyze each planet's placement and aspects
     return [];
@@ -664,31 +664,31 @@ class ChartAnalyticsService {
   }
 
   private getSunSignDevelopment(sign: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _sign = sign;
     return 'Focus on authentic self-expression and leadership development';
   }
 
   private getMoonSignDescription(sign: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _sign = sign;
     return 'Your emotional nature and inner world tendencies';
   }
 
   private getMoonSignDevelopment(sign: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _sign = sign;
     return 'Develop emotional intelligence and intuitive abilities';
   }
 
   private getRisingSignDescription(sign: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _sign = sign;
     return 'Your natural approach to life and first impressions';
   }
 
   private getRisingSignDevelopment(sign: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const _sign = sign;
     return 'Cultivate your natural presentation and social skills';
   }

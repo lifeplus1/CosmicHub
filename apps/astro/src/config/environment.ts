@@ -21,7 +21,7 @@ function validateEnvironment() {
     return envSchema.parse(import.meta.env);
   } catch (error) {
     // Use raw console.error here intentionally (bootstrapping prior to devConsole creation)
-    // eslint-disable-next-line no-console
+     
     console.error('Environment validation failed:', error);
     throw new Error('Invalid environment configuration');
   }
@@ -110,15 +110,24 @@ export const performanceConfig = {
 // Development utilities
 // Dev logging abstraction (silences in production except errors)
 // Wrapped in factory to support tree-shaking and easier future extension (e.g., remote logging)
-/* eslint-disable no-console */
-const makeDevConsole = () => ({
-  log: isDevelopment() ? console.log.bind(console) : undefined,
-  warn: isDevelopment() ? console.warn.bind(console) : undefined,
-  info: isDevelopment() ? console.info?.bind(console) : undefined,
-  debug: isDevelopment() ? console.debug?.bind(console) : undefined,
+ 
+interface DevConsole {
+  log: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  debug: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+}
+
+const noop = (): void => {};
+const makeDevConsole = (): DevConsole => ({
+  log: isDevelopment() ? console.log.bind(console) : noop,
+  warn: isDevelopment() ? console.warn.bind(console) : noop,
+  info: isDevelopment() ? (console.info?.bind(console) ?? noop) : noop,
+  debug: isDevelopment() ? console.debug.bind(console) : noop,
   error: console.error.bind(console), // Always surface errors
 });
-/* eslint-enable no-console */
+ 
 
 export const devConsole = makeDevConsole();
 

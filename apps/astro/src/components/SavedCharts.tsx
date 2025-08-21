@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, type JSX } from 'react';
 
 // Fallback date formatter with better error handling
 const formatDate = (date: string | Date | undefined | null): string => {
-  if (date == null || date === '') return 'Unknown';
+  if (date === null || date === undefined || date === '') return 'Unknown';
   try {
     const d = typeof date === 'string' ? new Date(date) : date;
     // Check if date is valid
@@ -69,7 +69,7 @@ const SavedCharts = (): JSX.Element => {
                         {(
                           chart.name !== null && chart.name !== ''
                             ? chart.name
-                            : (chart.birth_data != null && typeof chart.birth_data.city === 'string' && chart.birth_data.city !== ''
+                            : (chart.birth_data !== null && chart.birth_data !== undefined && typeof chart.birth_data.city === 'string' && chart.birth_data.city !== ''
                                 ? `${chart.birth_data.city} Chart`
                                 : 'Unnamed Chart')
                         )}
@@ -80,19 +80,19 @@ const SavedCharts = (): JSX.Element => {
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 text-xs text-gray-800 bg-gray-100 rounded">Date</span>
                         <span className="text-sm font-medium text-gray-700">
-                          {chart.created_at != null && chart.created_at !== '' ? formatDate(chart.created_at) : 'Unknown'}
+                          {chart.created_at !== null && chart.created_at !== undefined && chart.created_at !== '' ? formatDate(chart.created_at) : 'Unknown'}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 text-xs text-gray-800 bg-gray-100 rounded">Time</span>
                         <span className="text-sm font-medium text-gray-700">
-                          {chart.birth_time != null && chart.birth_time !== '' ? chart.birth_time : 'Unknown'}
+                          {chart.birth_time !== null && chart.birth_time !== undefined && chart.birth_time !== '' ? chart.birth_time : 'Unknown'}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 text-xs text-gray-800 bg-gray-100 rounded">Location</span>
                         <span className="flex-1 text-sm font-medium text-gray-700 truncate">
-                          {chart.birth_location != null && chart.birth_location !== '' ? chart.birth_location : 'Unknown'}
+                          {chart.birth_location !== null && chart.birth_location !== undefined && chart.birth_location !== '' ? chart.birth_location : 'Unknown'}
                         </span>
                       </div>
                     </div>

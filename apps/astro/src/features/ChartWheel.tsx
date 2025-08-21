@@ -2,6 +2,7 @@ import React, { useEffect, useRef, memo, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
 import { fetchChartData, type ChartBirthData, type ChartData as APIChartData } from '../services/api';
+import type { ApiResult } from '../services/apiResult';
 import { Button } from '@cosmichub/ui';
 
 // Enhanced TypeScript interfaces
@@ -90,8 +91,9 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     queryKey: ['chartData', birthData],
   queryFn: async () => {
   if (birthData === null || birthData === undefined) throw new Error('Birth data required');
-      const response = await fetchChartData(birthData);
-      return transformAPIResponseToChartData(response);
+  const result: ApiResult<APIChartData> = await fetchChartData(birthData);
+  if (!result.success) throw new Error(result.error);
+  return transformAPIResponseToChartData(result.data);
     },
   enabled: birthData !== null && birthData !== undefined && preTransformedData === null,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, type ReactElement } from 'react';
 
 import { useSearchParams, Link } from 'react-router-dom';
 import { FaCheckCircle, FaCrown, FaArrowRight, FaHome, FaCreditCard, FaSpinner } from 'react-icons/fa';
@@ -12,7 +12,7 @@ interface SubscriptionDetails {
   expires_at: string;
 }
 
-export const SubscriptionSuccessPage: React.FC = (): JSX.Element => {
+export const SubscriptionSuccessPage: React.FC = (): ReactElement => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const subscriptionData = useSubscription();

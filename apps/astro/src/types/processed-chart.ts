@@ -1,7 +1,7 @@
 /**
  * Strongly-typed definitions for processed chart data used in displays
  */
-import { AspectData, PlanetData, AsteroidData, AngleData, HouseData } from './astrology.types';
+import type { PlanetData, AsteroidData, HouseData } from './astrology.types';
 
 /**
  * Processed planet data with formatted degree for display
@@ -91,7 +91,7 @@ export interface ProcessedChartSections {
  * Type guard to check if an object is a valid ProcessedAngleData
  */
 export function isProcessedAngleData(obj: unknown): obj is ProcessedAngleData {
-  if (!obj || typeof obj !== 'object') return false;
+  if (obj === null || typeof obj !== 'object') return false;
   
   const angle = obj as ProcessedAngleData;
   return (

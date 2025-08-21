@@ -3,7 +3,7 @@
  * Registers the comprehensive service worker system
  */
 
-/* eslint-disable no-console */ // We wrap console usage through devConsole fallback below
+  // We wrap console usage through devConsole fallback below
 import { devConsole, isDevelopment } from './config/environment';
 
 // PWA Service Worker Registration

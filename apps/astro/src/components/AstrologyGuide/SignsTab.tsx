@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sign } from './types';
+import type { Sign } from './types';
 
 const signs: Sign[] = [
   { name: 'Aries', element: 'Fire', modality: 'Cardinal', traits: 'Energetic, pioneering, assertive' },
@@ -36,9 +36,11 @@ const SignsTab: React.FC = React.memo(() => {
             <div className="p-4 pt-2">
               <h4 className="mb-3 font-bold text-md text-gold-300">{sign.name}</h4>
               <div className="flex mb-3 space-x-2">
-                <span className={`bg-${getElementColor(sign.element)}/20 text-${getElementColor(sign.element)} px-2 py-1 rounded text-xs`}>
-                  {sign.element}
-                </span>
+                {(() => { const color = getElementColor(sign.element); return (
+                  <span className={`px-2 py-1 rounded text-xs bg-${color}/20 text-${color}`}>
+                    {sign.element}
+                  </span>
+                ); })()}
                 <span className="px-2 py-1 text-xs border rounded bg-gold-100/20 text-gold-300 border-gold-300/30">
                   {sign.modality}
                 </span>

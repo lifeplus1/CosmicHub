@@ -1,10 +1,9 @@
 import React, { useCallback, useState, lazy, Suspense } from 'react';
 import { devConsole } from '../config/environment';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt, FaGlobe, FaCompass, FaChevronDown, FaHeart, FaTools, FaCog, FaKey } from 'react-icons/fa';
+import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt, FaGlobe, FaCompass, FaChevronDown, FaTools, FaKey } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@cosmichub/auth';
-import { useSubscription } from '@cosmichub/auth';
+import { useAuth, useSubscription } from '@cosmichub/auth';
 import { EducationalTooltip } from './EducationalTooltip';
 
 // Lazy load components for performance
@@ -30,9 +29,11 @@ interface DropdownNavItem {
   items: NavItem[];
 }
 
-interface NavLinkProps extends NavItem {}
+// Using type instead of interface for inheritance to avoid empty interface warnings
+type NavLinkProps = NavItem;
 
-interface DropdownNavProps extends DropdownNavItem {}
+// Using type instead of interface for inheritance to avoid empty interface warnings
+type DropdownNavProps = DropdownNavItem;
 
 const NavLink: React.FC<NavLinkProps> = React.memo(({ to, icon: Icon, label, tooltip, tier }) => {
   const navigate = useNavigate();
@@ -207,7 +208,7 @@ const Navbar: React.FC = React.memo(() => {
       label: 'Multi-System Analysis',
       tooltip: { title: 'Multi-System Charts', description: 'Compare Western, Vedic, Chinese, and other astrological systems side by side.' }
     },
-    ...(user != null ? [
+    ...(user !== null ? [
       { 
         to: '/saved-charts', 
         icon: FaChartLine, 
@@ -238,7 +239,7 @@ const Navbar: React.FC = React.memo(() => {
     }
   ];
 
-  const premiumFeatures: NavItem[] = user != null ? [
+  const premiumFeatures: NavItem[] = user !== null ? [
     { 
       to: '/synastry', 
       icon: FaUsers, 
@@ -267,7 +268,7 @@ const Navbar: React.FC = React.memo(() => {
       icon: FaBrain,
       items: personalInsights
     },
-    ...(user != null && premiumFeatures.length > 0 ? [{
+    ...(user !== null && premiumFeatures.length > 0 ? [{
       label: 'Premium',
       icon: FaCrown,
       items: premiumFeatures
@@ -308,8 +309,12 @@ const Navbar: React.FC = React.memo(() => {
           {/* User Menu / Auth */}
           <div className="hidden md:flex items-center gap-4">
             <Suspense fallback={<div className="w-24 h-10 bg-cosmic-purple/20 rounded-lg animate-pulse" />}>
-              {user?.email != null ? (
-                <UserMenu user={{ email: user.email }} userTier={userTier} handleSignOut={handleSignOut} />
+              {user?.email !== null && user?.email !== undefined ? (
+                <UserMenu 
+                  user={{ email: user.email }} 
+                  userTier={userTier} 
+                  handleSignOut={handleSignOut as () => void} 
+                />
               ) : (
                 <div className="flex items-center gap-3">
                   <NavLink 
@@ -319,7 +324,7 @@ const Navbar: React.FC = React.memo(() => {
                     tooltip={{ title: 'Sign In', description: 'Access your account and unlock premium astrological features.' }}
                   />
                   <button
-                    onClick={() => navigate('/signup')}
+                    onClick={() => void navigate('/signup')}
                     className="px-6 py-2 bg-gradient-to-r from-cosmic-gold to-cosmic-purple text-cosmic-dark rounded-lg font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300 border border-cosmic-gold/20"
                     aria-label="Sign Up for Cosmic Hub"
                   >
@@ -354,7 +359,18 @@ const Navbar: React.FC = React.memo(() => {
             <div className="space-y-2">
               {/* Core items in mobile */}
               {coreNavItems.map((item) => (
-                <div key={item.to} onClick={() => setIsMobileMenuOpen(false)}>
+                <div 
+                  key={item.to} 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  onKeyDown={(e) => { 
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Navigate to ${item.label} and close menu`}
+                >
                   <NavLink {...item} />
                 </div>
               ))}
@@ -365,7 +381,18 @@ const Navbar: React.FC = React.memo(() => {
                   Chart Tools
                 </h3>
                 {chartingTools.map((item) => (
-                  <div key={item.to} onClick={() => setIsMobileMenuOpen(false)}>
+                  <div 
+                    key={item.to} 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    onKeyDown={(e) => { 
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setIsMobileMenuOpen(false);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Navigate to ${item.label} and close menu`}
+                  >
                     <NavLink {...item} />
                   </div>
                 ))}
@@ -377,21 +404,43 @@ const Navbar: React.FC = React.memo(() => {
                   Personal Insights
                 </h3>
                 {personalInsights.map((item) => (
-                  <div key={item.to} onClick={() => setIsMobileMenuOpen(false)}>
+                  <div 
+                    key={item.to} 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    onKeyDown={(e) => { 
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setIsMobileMenuOpen(false);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Navigate to ${item.label} and close menu`}
+                  >
                     <NavLink {...item} />
                   </div>
                 ))}
               </div>
               
               {/* Premium features section */}
-              {user != null && premiumFeatures.length > 0 && (
+              {user !== null && premiumFeatures.length > 0 && (
                 <div className="pt-2 border-t border-cosmic-silver/10">
                   <h3 className="px-4 py-2 text-sm font-semibold text-cosmic-gold uppercase tracking-wider flex items-center gap-2">
                     <FaCrown className="text-yellow-400" />
                     Premium Features
                   </h3>
                   {premiumFeatures.map((item) => (
-                    <div key={item.to} onClick={() => setIsMobileMenuOpen(false)}>
+                    <div 
+                      key={item.to} 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      onKeyDown={(e) => { 
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setIsMobileMenuOpen(false);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Navigate to ${item.label} and close menu`}
+                    >
                       <NavLink {...item} />
                     </div>
                   ))}
@@ -400,9 +449,11 @@ const Navbar: React.FC = React.memo(() => {
               
               {/* Auth section */}
               <div className="pt-4 border-t border-cosmic-silver/10">
-                {user?.email != null ? (
+                {user?.email !== null && user?.email !== undefined ? (
                   <button
-                    onClick={handleSignOut}
+                    onClick={() => {
+                      void handleSignOut();
+                    }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-red-400 rounded-lg hover:bg-red-900/10 transition-colors duration-200 font-medium"
                     aria-label="Sign Out"
                   >
@@ -411,7 +462,17 @@ const Navbar: React.FC = React.memo(() => {
                   </button>
                 ) : (
                   <div className="space-y-2">
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
+                    <div 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      onKeyDown={(e) => { 
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setIsMobileMenuOpen(false);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Navigate to sign in and close menu"
+                    >
                       <NavLink 
                         to="/login"
                         icon={FaUser}

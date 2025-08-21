@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { devConsole } from '../../config/environment';
-import axios, { AxiosError } from 'axios';
+import axios, { type AxiosError } from 'axios';
 import type { 
   TransitBirthData as BirthData, 
   TransitResult, 

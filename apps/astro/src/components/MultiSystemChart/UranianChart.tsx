@@ -1,14 +1,16 @@
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
-import { UranianChartData } from './types';
+import type { UranianChartData } from './types';
 
 interface Props {
   data: UranianChartData;
 }
 
 const UranianChart: React.FC<Props> = ({ data }) => {
-  if (!data) return <p className="text-cosmic-silver">No Uranian astrology data available</p>;
+  if (data === null || data === undefined) {
+    return <p className="text-cosmic-silver">No Uranian astrology data available</p>;
+  }
 
   return (
     <div className="flex flex-col space-y-4">
@@ -35,7 +37,7 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(data.uranian_planets || {}).map(([planet, info]: [string, { symbol?: string; position?: number; meaning?: string }]) => (
+                    {Object.entries(data.uranian_planets ?? {}).map(([planet, info]: [string, { symbol?: string; position?: number; meaning?: string }]) => (
                       <tr key={planet}>
                         <td className="py-2">
                           <div className="flex">
@@ -68,7 +70,7 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {(data.dial_aspects || []).slice(0, 8).map((aspect, idx) => (
+                    {(data.dial_aspects ?? []).slice(0, 8).map((aspect, idx) => (
                       <tr key={idx}>
                         <td className="py-2 text-sm">{aspect.body1} - {aspect.body2}</td>
                         <td className="py-2">{aspect.angle}°</td>

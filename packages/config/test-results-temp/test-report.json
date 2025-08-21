@@ -4,18 +4,18 @@
     "passed": 1,
     "failed": 0,
     "skipped": 0,
-    "duration": 7.41208400000005,
+    "duration": 7.371124999999893,
     "coverage": {
-      "overall": 91.22466579614712,
-      "statements": 90.54355639884842,
-      "branches": 85.32948657413772,
-      "functions": 98.97224688288236,
-      "lines": 90.05337332872003
+      "overall": 90.75285359737886,
+      "statements": 94.57770816628125,
+      "branches": 80.91237553752192,
+      "functions": 96.21321367879962,
+      "lines": 91.30811700691267
     },
     "performance": {
-      "averageRenderTime": 5.842417000000069,
-      "maxRenderTime": 5.842417000000069,
-      "totalMemoryUsage": 33816
+      "averageRenderTime": 6.097332999999935,
+      "maxRenderTime": 6.097332999999935,
+      "totalMemoryUsage": 18352
     },
     "accessibility": {
       "totalViolations": 0,
@@ -32,17 +32,17 @@
     {
       "suite": "alpha",
       "status": "passed",
-      "duration": 6.29754099999991,
+      "duration": 6.70091699999989,
       "coverage": {
-        "statements": 90.54355639884842,
-        "branches": 85.32948657413772,
-        "functions": 98.97224688288236,
-        "lines": 90.05337332872003
+        "statements": 94.57770816628125,
+        "branches": 80.91237553752192,
+        "functions": 96.21321367879962,
+        "lines": 91.30811700691267
       },
       "performance": {
-        "renderTime": 5.842417000000069,
+        "renderTime": 6.097332999999935,
         "mountTime": 0,
-        "memoryUsage": 33816
+        "memoryUsage": 18352
       },
       "accessibility": {
         "violations": [],
@@ -56,13 +56,13 @@
       },
       "errors": [],
       "metadata": {
-        "timestamp": "2025-08-18T23:38:03.336Z",
+        "timestamp": "2025-08-21T07:19:28.945Z",
         "nodeVersion": "v24.4.1",
         "platform": "darwin"
       }
     }
   ],
-  "timestamp": "2025-08-18T23:38:03.352Z",
+  "timestamp": "2025-08-21T07:19:28.952Z",
   "config": {
     "coverage": {
       "threshold": 80,

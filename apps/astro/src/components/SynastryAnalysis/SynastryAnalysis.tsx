@@ -2,8 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { FaInfoCircle } from 'react-icons/fa';
 import FeatureGuard from '../FeatureGuard';
 import { apiClient } from '../../services/api';
-// Lightweight ApiResponse type (mirrors packages/config) to avoid cross-package path resolution issues here
-type ApiResponse<T> = { data: T; success: boolean; message?: string };
 import {
   CompatibilityScore,
   KeyAspects,
@@ -34,10 +32,11 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
     try {
       const parsed = synastryRequestSchema.parse({ person1, person2 });
       // Unified endpoint: backend router mounted at /api/synastry, path /calculate-synastry
-      const result = await apiClient.post('/synastry/calculate-synastry', parsed) as ApiResponse<SynastryResult>;
-      setSynastryResult(result.data);
+  const result = await apiClient.post<SynastryResult>('/synastry/calculate-synastry', parsed);
+  setSynastryResult(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      const message: string = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -81,10 +80,10 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
                 and growth opportunities between partners.
               </p>
 
-        {!synastryResult && (
+  {synastryResult === null && (
                 <button
                   className="cosmic-button"
-                  onClick={calculateSynastry}
+      onClick={() => { void calculateSynastry(); }}
                   disabled={loading}
                 >
           {loading ? 'Calculating...' : 'Calculate Compatibility'}
@@ -95,7 +94,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
             </div>
           </div>
 
-          {error && (
+          {error !== null && (
             <div className="p-4 border border-red-500 rounded-md bg-red-900/50">
               <div className="flex space-x-4">
                 <span className="text-xl text-red-500">⚠️</span>
@@ -104,7 +103,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
             </div>
           )}
 
-          {loading && !synastryResult && (
+          {loading === true && synastryResult === null && (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 animate-pulse" aria-hidden>
               {Array.from({length:4}).map((_,i)=>(
                 <div key={i} className="h-40 border rounded cosmic-card border-cosmic-silver/30 bg-gray-800/40" />
@@ -112,7 +111,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
             </div>
           )}
 
-          {synastryResult && !loading && (
+          {synastryResult !== null && loading === false && (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Overall Compatibility Score */}
               <CompatibilityScore synastryResult={synastryResult} />
@@ -148,7 +147,7 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(({
                   </button>
                   <button
                     className="px-4 py-2 text-purple-500 transition-colors border border-purple-500 rounded bg-purple-500/20 hover:bg-purple-500/30"
-                    onClick={calculateSynastry}
+                    onClick={() => { void calculateSynastry(); }}
                     disabled={loading}
                   >
                     Recalculate

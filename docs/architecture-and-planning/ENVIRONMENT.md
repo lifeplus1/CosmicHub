@@ -2,6 +2,15 @@
 
 This repository separates public client variables from server-only secrets to minimize accidental exposure.
 
+## Recent Improvements (August 2025)
+
+- ✅ **Unified Environment Handling**: Consolidated environment variable access with type-safe `getEnvVar` function in `packages/config/src/env.ts`
+- ✅ **Cross-Runtime Compatibility**: Works seamlessly in both Vite browser and Node.js environments  
+- ✅ **Production Deployment Config**: Comprehensive production deployment configuration in `packages/config/src/production-deployment.ts`
+- ✅ **Type Safety**: All environment variables properly typed in `EnvConfig` interface with validation
+- ✅ **Environment Variable Validation**: Runtime validation with helpful error messages
+- ✅ **Feature Flags**: Environment-specific feature flag system integrated
+
 ## File Separation
 
 | File | Purpose | Commit? | Contents |
@@ -29,8 +38,24 @@ This repository separates public client variables from server-only secrets to mi
 | `VITE_FIREBASE_STORAGE_BUCKET` | Optional | For storage uploads |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Optional | For messaging features |
 | `VITE_ENABLE_ANALYTICS` | Optional | Feature flag |
-| `VITE_ENABLE_ERROR_REPORTING` | Optional | Feature flag |
-| `VITE_ENABLE_PERFORMANCE_MONITORING` | Optional | Feature flag |
+| `XAI_API_KEY` | Optional | xAI API key for AI services |
+
+## Deployment-Specific Variables (Production)
+
+These variables are used by the production deployment configuration system:
+
+| Variable | Description |
+|----------|-------------|
+| `MONITORING_API_KEY` | API key for monitoring services (staging) |
+| `MONITORING_API_KEY_PROD` | API key for monitoring services (production) |
+| `REDIS_PASSWORD` | Redis authentication password (staging) |
+| `REDIS_PASSWORD_PROD` | Redis authentication password (production) |
+| `SENTRY_DSN` | Sentry DSN for error tracking (staging) |
+| `SENTRY_DSN_PROD` | Sentry DSN for error tracking (production) |
+| `GA_TRACKING_ID` | Google Analytics tracking ID (staging) |
+| `GA_TRACKING_ID_PROD` | Google Analytics tracking ID (production) |
+| `VAULT_ENDPOINT` | HashiCorp Vault endpoint for secrets management |
+| `APP_VERSION` | Current application version |
 
 ## Server-Only Variables
 

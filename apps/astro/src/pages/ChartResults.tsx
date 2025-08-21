@@ -85,7 +85,11 @@ const ChartResults: React.FC = () => {
 
   // Save chart mutation
   const saveMutation = useMutation<SaveChartResponse, unknown, SaveChartRequest>({
-    mutationFn: saveChart,
+    mutationFn: async (payload: SaveChartRequest) => {
+      const result = await saveChart(payload);
+      if (!result.success) throw new Error(result.error);
+      return result.data;
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
       void alert('Chart saved successfully!');
@@ -244,7 +248,7 @@ const ChartResults: React.FC = () => {
         }
         
         // Use the API service instead of direct fetch
-        const rawChart = await fetchChartData({
+  const result = await fetchChartData({
           year: (Number.isNaN(Number(parsedData.date.split('-')[0])) ? 0 : Number(parsedData.date.split('-')[0])),
           month: (Number.isNaN(Number(parsedData.date.split('-')[1])) ? 1 : Number(parsedData.date.split('-')[1])),
           day: (Number.isNaN(Number(parsedData.date.split('-')[2])) ? 1 : Number(parsedData.date.split('-')[2])),
@@ -252,10 +256,9 @@ const ChartResults: React.FC = () => {
           minute: (Number.isNaN(Number(parsedData.time.split(':')[1])) ? 0 : Number(parsedData.time.split(':')[1])),
           city: parsedData.location
         });
-
-        if (!isBackendChartResponse(rawChart)) {
-          throw new Error('Invalid chart data received from server');
-        }
+  if (!result.success) throw new Error(result.error);
+  const rawChart: unknown = result.data;
+  if (!isBackendChartResponse(rawChart)) throw new Error('Invalid chart data received from server');
 
         // Transform the backend data to frontend format  
         const transformedChart = transformChartData(rawChart);

@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { type ReactElement } from 'react';
 import { Card, Button } from '@cosmichub/ui';
 import { useAuth } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 
-const ProfileSimple: React.FC = (): JSX.Element => {
+const ProfileSimple: React.FC = (): ReactElement => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 

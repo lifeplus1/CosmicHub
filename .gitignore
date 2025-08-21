@@ -87,6 +87,14 @@ out/
 .parcel-cache/
 .vite/
 
+# === Generated Source Files (Prevent Accidental Commits) ===
+# TypeScript compiled outputs in source directories
+packages/*/src/*.js
+packages/*/src/*.d.ts
+# Skip test files and actual JS sources when needed
+!packages/*/src/*.test.js
+!packages/*/src/*.spec.js
+
 # === Environment Variables ===
 .env
 *.env

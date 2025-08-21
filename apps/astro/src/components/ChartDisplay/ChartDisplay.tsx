@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import { serializeAstrologyData, type AstrologyChart } from '@cosmichub/types';
 import { getChartSyncService } from '@/services/chartSyncService';
-import {
+import type {
   ChartDisplayPlanet,
   ChartDisplayHouse,
   ChartDisplayAspect,

@@ -7,6 +7,7 @@ import React, { useEffect, useRef, memo, useState, useMemo, useCallback } from '
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
 import { fetchChartData, type ChartBirthData } from '../services/api';
+import type { ApiResult } from '../services/apiResult';
 import { Button } from '@cosmichub/ui';
 import styles from './ChartWheelInteractive.module.css';
 
@@ -86,8 +87,9 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     queryKey: ['chartData', birthData],
     queryFn: async () => {
       if (birthData === null || birthData === undefined) throw new Error('Birth data required');
-      const response = await fetchChartData(birthData);
-      return transformAPIResponseToChartData(response);
+  const result: ApiResult<APIChartData> = await fetchChartData(birthData);
+  if (!result.success) throw new Error(result.error);
+  return transformAPIResponseToChartData(result.data);
     },
     enabled: birthData !== null && birthData !== undefined && preTransformedData === null,
     staleTime: 5 * 60 * 1000,
@@ -111,8 +113,9 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         timezone: 'UTC',
         city: 'Greenwich'
       };
-      const response = await fetchChartData(transitBirthData);
-      return response.planets ?? {};
+  const result: ApiResult<APIChartData> = await fetchChartData(transitBirthData);
+  if (!result.success) return {};
+  return result.data.planets ?? {};
     },
     enabled: realTimeUpdates === true && interactiveState.showTransits === true,
     refetchInterval: 60000, // Update every minute

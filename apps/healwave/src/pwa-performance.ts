@@ -63,10 +63,12 @@ export class CriticalResourceManager {
   }
 }
 
+interface NetworkInformationLike { effectiveType?: string; downlink?: number; saveData?: boolean; }
 export class ConnectionAwareLoader {
-  private static connection = (navigator as any).connection || 
-                              (navigator as any).mozConnection || 
-                              (navigator as any).webkitConnection;
+  private static readonly connection: NetworkInformationLike | undefined =
+    (navigator as unknown as { connection?: NetworkInformationLike }).connection ??
+    (navigator as unknown as { mozConnection?: NetworkInformationLike }).mozConnection ??
+    (navigator as unknown as { webkitConnection?: NetworkInformationLike }).webkitConnection;
 
   static getConnectionInfo(): {
     effectiveType: string;
@@ -82,9 +84,9 @@ export class ConnectionAwareLoader {
     }
 
     return {
-      effectiveType: this.connection.effectiveType || '4g',
-      downlink: this.connection.downlink || 10,
-      saveData: this.connection.saveData || false
+      effectiveType: this.connection.effectiveType ?? '4g',
+      downlink: this.connection.downlink ?? 10,
+      saveData: this.connection.saveData ?? false
     };
   }
 
@@ -126,14 +128,19 @@ export class PWAPerformanceMonitor {
 export class AudioPerformanceOptimizer {
   private static audioContext: AudioContext | null = null;
 
-  static async initializeAudioContext(): Promise<void> {
-    if (!this.audioContext) {
-      try {
-        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  static initializeAudioContext(): void {
+    if (this.audioContext !== null) return;
+    try {
+      const ctor = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
+        ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (ctor) {
+        this.audioContext = new ctor();
         PWALogger.log('🎵 Audio context initialized for HealWave');
-      } catch (error) {
-        PWALogger.warn('⚠️ Audio context initialization failed:', error);
+      } else {
+        PWALogger.warn('⚠️ AudioContext API not available');
       }
+    } catch (error) {
+      PWALogger.warn('⚠️ Audio context initialization failed:', error);
     }
   }
 
@@ -169,12 +176,12 @@ export class AudioPerformanceOptimizer {
 }
 
 // Initialize HealWave-specific performance enhancements
-export async function initializeHealWavePerformance(): Promise<void> {
+export function initializeHealWavePerformance(): void {
   PWALogger.log('🎧 Initializing HealWave PWA performance enhancements...');
 
   try {
     // Initialize audio optimizations
-    await AudioPerformanceOptimizer.initializeAudioContext();
+  AudioPerformanceOptimizer.initializeAudioContext();
     AudioPerformanceOptimizer.optimizeForAudioPlayback();
     AudioPerformanceOptimizer.preloadAudioAssets();
 
@@ -186,7 +193,7 @@ export async function initializeHealWavePerformance(): Promise<void> {
 
 // Auto-initialize when imported
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeHealWavePerformance);
+  document.addEventListener('DOMContentLoaded', () => { initializeHealWavePerformance(); });
 } else {
   initializeHealWavePerformance();
 }

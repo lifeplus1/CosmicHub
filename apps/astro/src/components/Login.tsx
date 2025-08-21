@@ -45,7 +45,7 @@ const Login: React.FC = React.memo(() => {
             <p className="text-lg text-cosmic-silver">Log in to access your personalized astrology insights.</p>
           </div>
 
-          <form onSubmit={handleSubmit} aria-label="Login Form">
+          <form onSubmit={(e) => { void handleSubmit(e); }} aria-label="Login Form">
             <div className="flex flex-col space-y-6">
               <div>
                 <label htmlFor="email" className="block mb-2 text-cosmic-gold">Email <span aria-hidden="true">*</span></label>

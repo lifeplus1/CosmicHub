@@ -57,7 +57,7 @@ export class CacheManager {
   private performance = new Map<string, { hits: number; misses: number; size: number }>();
 
   static getInstance(): CacheManager {
-    if (!CacheManager.instance) {
+    if (CacheManager.instance === undefined || CacheManager.instance === null) {
       CacheManager.instance = new CacheManager();
     }
     return CacheManager.instance;
@@ -85,13 +85,12 @@ export class CacheManager {
   async get(request: Request | string): Promise<Response | null> {
     const requestKey = typeof request === 'string' ? request : request.url;
     const strategy = this.findMatchingStrategy(requestKey);
-    
-    if (!strategy) {
+    if (strategy === null || strategy === undefined) {
       return null;
     }
 
     const cache = this.caches.get(strategy.cacheName!);
-    if (!cache) {
+    if (cache === undefined) {
       return null;
     }
 
@@ -99,19 +98,14 @@ export class CacheManager {
       switch (strategy.strategy) {
         case 'cache-first':
           return await this.cacheFirstStrategy(request, cache, strategy);
-        
         case 'network-first':
           return await this.networkFirstStrategy(request, cache, strategy);
-        
         case 'stale-while-revalidate':
           return await this.staleWhileRevalidateStrategy(request, cache, strategy);
-        
         case 'network-only':
           return await this.networkOnlyStrategy(request);
-        
         case 'cache-only':
           return await this.cacheOnlyStrategy(request, cache);
-        
         default:
           return await this.networkFirstStrategy(request, cache, strategy);
       }
@@ -133,8 +127,8 @@ export class CacheManager {
       
       // Check if cache is stale
       if (this.isCacheStale(cachedResponse, strategy.maxAge)) {
-        // Refresh in background
-        this.refreshCacheInBackground(request, cache, strategy);
+        // Refresh in background - properly handle the promise
+        void this.refreshCacheInBackground(request, cache, strategy);
       }
       
       return cachedResponse;
@@ -191,7 +185,7 @@ export class CacheManager {
     const cachedResponse = await cache.match(request);
     
     // Always try to revalidate in background
-    this.refreshCacheInBackground(request, cache, strategy);
+    void this.refreshCacheInBackground(request, cache, strategy);
     
     if (cachedResponse) {
       this.recordCacheHit(strategy.cacheName!);
@@ -225,13 +219,11 @@ export class CacheManager {
 
   private async cacheOnlyStrategy(request: Request | string, cache: Cache): Promise<Response | null> {
     const cachedResponse = await cache.match(request);
-    
     if (cachedResponse) {
-      this.recordCacheHit(cache.toString());
+      this.recordCacheHit('cache-only');
       return cachedResponse;
     }
-
-    this.recordCacheMiss(cache.toString());
+    this.recordCacheMiss('cache-only');
     return null;
   }
 
@@ -281,8 +273,8 @@ export class CacheManager {
       await this.enforceCacheSizeLimit(cache, strategy.maxEntries);
     }
 
-    // Update cache size tracking
-    this.updateCacheSize(strategy.cacheName!);
+    // Update cache size tracking - use void to handle floating promise
+    void this.updateCacheSize(strategy.cacheName!);
   }
 
   private async refreshCacheInBackground(
@@ -318,10 +310,10 @@ export class CacheManager {
   }
 
   private isCacheStale(response: Response, maxAge?: number): boolean {
-    if (!maxAge) return false;
+  if (maxAge === undefined || maxAge === null || maxAge === 0) return false;
 
     const cacheDate = response.headers.get('date');
-    if (!cacheDate) return true;
+  if (cacheDate === null) return true;
 
     const cacheTime = new Date(cacheDate).getTime();
     const now = Date.now();
@@ -361,7 +353,10 @@ export class CacheManager {
     const stats = this.performance.get(cacheName);
     if (stats) {
       // Estimate cache size (simplified)
-      stats.size = stats.hits + stats.misses;
+      // Add actual async operation to justify the async method
+      const cache = await caches.open(cacheName);
+      const keys = await cache.keys();
+      stats.size = keys.length;
     }
   }
 
@@ -370,7 +365,7 @@ export class CacheManager {
     const currentCacheNames = new Set(Array.from(this.strategies.values()).map(s => s.cacheName).filter(Boolean));
     
     for (const cacheName of cacheNames) {
-      if (!currentCacheNames.has(cacheName)) {
+  if (!currentCacheNames.has(cacheName)) {
         console.log(`🗑️ Deleting old cache: ${cacheName}`);
         await caches.delete(cacheName);
       }
@@ -399,14 +394,16 @@ export class CacheManager {
   }
 
   getCacheStats(): Map<string, { hits: number; misses: number; size: number; hitRate: number }> {
-    const stats = new Map();
+    const stats = new Map<string, { hits: number; misses: number; size: number; hitRate: number }>();
     
     this.performance.forEach((perf, cacheName) => {
       const total = perf.hits + perf.misses;
       const hitRate = total > 0 ? (perf.hits / total) * 100 : 0;
       
       stats.set(cacheName, {
-        ...perf,
+        hits: perf.hits,
+        misses: perf.misses,
+        size: perf.size,
         hitRate: parseFloat(hitRate.toFixed(2))
       });
     });
@@ -449,7 +446,7 @@ export class ServiceWorkerManager {
 
     // Set up push notifications
     if (this.config.pushNotifications.enabled) {
-      await this.setupPushNotifications();
+      this.setupPushNotifications();
     }
 
     // Handle install event
@@ -470,32 +467,32 @@ export class ServiceWorkerManager {
     console.log('✅ Service Worker initialized successfully');
   }
 
-  private async handleInstall(event: Event): Promise<void> {
+  private handleInstall(event: Event): void {
     console.log('📦 Service Worker installing...');
 
     if ('waitUntil' in event) {
-      (event as any).waitUntil(
+  (event as unknown as { waitUntil(p: Promise<unknown>): void }).waitUntil(
         (async () => {
           // Pre-cache offline pages
           const cache = await caches.open('offline-v1');
           await cache.addAll(this.config.offlinePages);
 
           if (this.config.skipWaiting) {
-            await (self as any).skipWaiting();
+            await (self as unknown as { skipWaiting(): Promise<void> }).skipWaiting();
           }
         })()
       );
     }
   }
 
-  private async handleActivate(event: Event): Promise<void> {
+  private handleActivate(event: Event): void {
     console.log('🚀 Service Worker activating...');
 
     if ('waitUntil' in event) {
-      (event as any).waitUntil(
+  (event as unknown as { waitUntil(p: Promise<unknown>): void }).waitUntil(
         (async () => {
           if (this.config.clientsClaim) {
-            await (self as any).clients.claim();
+            await (self as unknown as { clients: { claim(): Promise<void> } }).clients.claim();
           }
 
           // Clean up old caches
@@ -505,8 +502,8 @@ export class ServiceWorkerManager {
     }
   }
 
-  private async handleFetch(event: Event): Promise<void> {
-    const fetchEvent = event as any; // Type assertion for service worker context
+  private handleFetch(event: Event): void {
+    const fetchEvent = event as unknown as { request: Request; respondWith(p: Promise<Response>): void };
     const request = fetchEvent.request;
 
     // Skip non-GET requests for caching
@@ -515,11 +512,11 @@ export class ServiceWorkerManager {
     }
 
     // Skip cross-origin requests
-    if (!request.url.startsWith(self.location.origin)) {
+  if (typeof request.url !== 'string' || !request.url.startsWith(self.location.origin)) {
       return;
     }
 
-    if ('respondWith' in fetchEvent) {
+    if (fetchEvent.respondWith) {
       fetchEvent.respondWith(
         (async () => {
           try {
@@ -573,15 +570,15 @@ export class ServiceWorkerManager {
     });
   }
 
-  private async handleBackgroundSync(event: Event): Promise<void> {
-    const syncEvent = event as any; // Type assertion for service worker context
+  private handleBackgroundSync(event: Event): void {
+    const syncEvent = event as unknown as { tag: string; waitUntil(p: Promise<unknown>): void };
     const syncConfig = this.backgroundSync.get(syncEvent.tag);
     
-    if (!syncConfig) {
+  if (syncConfig === undefined) {
       return;
     }
 
-    if ('waitUntil' in syncEvent) {
+    if (syncEvent.waitUntil) {
       syncEvent.waitUntil(
         (async () => {
           let retries = 0;
@@ -609,7 +606,7 @@ export class ServiceWorkerManager {
             }
           }
 
-          if (!success) {
+          if (success === false) {
             console.error(`💥 Background sync failed after ${syncConfig.maxRetries} attempts: ${syncConfig.name}`);
           }
         })()
@@ -617,28 +614,40 @@ export class ServiceWorkerManager {
     }
   }
 
-  private async setupPushNotifications(): Promise<void> {
-    // In a real implementation, this would set up push notification handling
+  private setupPushNotifications(): void {
     console.log('🔔 Push notifications configured');
   }
 
-  private async handlePushNotification(event: Event): Promise<void> {
-    const pushEvent = event as any; // Type assertion for service worker context
-    
-    if (!pushEvent.data) {
+  private handlePushNotification(event: Event): void {
+    interface PushPayload {
+      title?: unknown;
+      body?: unknown;
+      icon?: unknown;
+      badge?: unknown;
+      data?: unknown;
+    }
+    const pushEvent = event as unknown as { data: { json(): unknown } | null; waitUntil(p: Promise<unknown>): void };
+    if (pushEvent.data === null) {
       return;
     }
-
-    const data = pushEvent.data.json();
-    
-    if ('waitUntil' in pushEvent) {
+    const raw = pushEvent.data.json();
+    if (typeof raw !== 'object' || raw === null) {
+      return;
+    }
+    const payload = raw as PushPayload;
+    const title = typeof payload.title === 'string' ? payload.title : 'Notification';
+    const body = typeof payload.body === 'string' ? payload.body : undefined;
+    const icon = typeof payload.icon === 'string' ? payload.icon : '/icon-192x192.png';
+    const badge = typeof payload.badge === 'string' ? payload.badge : '/badge-72x72.png';
+  const data = payload.data;
+    if (pushEvent.waitUntil) {
+      const reg = (self as unknown as { registration: { showNotification(t: string, o: NotificationOptions): Promise<void> } }).registration;
       pushEvent.waitUntil(
-        (self as any).registration.showNotification(data.title, {
-          body: data.body,
-          icon: data.icon || '/icon-192x192.png',
-          badge: data.badge || '/badge-72x72.png',
-          data: data.data,
-          actions: data.actions
+        reg.showNotification(title, {
+          body,
+            icon,
+            badge,
+            data
         })
       );
     }
@@ -649,7 +658,7 @@ export class ServiceWorkerManager {
     const currentCacheNames = new Set(Array.from(this.backgroundSync.keys()));
     
     for (const cacheName of cacheNames) {
-      if (!currentCacheNames.has(cacheName)) {
+  if (!currentCacheNames.has(cacheName)) {
         console.log(`🗑️ Deleting old cache: ${cacheName}`);
         await caches.delete(cacheName);
       }
@@ -727,8 +736,8 @@ export const DefaultServiceWorkerConfig: ServiceWorkerConfig = {
     }
   ],
   pushNotifications: {
-    publicKey: process.env.VAPID_PUBLIC_KEY || '',
-    privateKey: process.env.VAPID_PRIVATE_KEY || '',
+  publicKey: (globalThis as unknown as { process?: { env?: Record<string,string|undefined> } }).process?.env?.VAPID_PUBLIC_KEY ?? '',
+  privateKey: (globalThis as unknown as { process?: { env?: Record<string,string|undefined> } }).process?.env?.VAPID_PRIVATE_KEY ?? '',
     subject: 'mailto:admin@cosmichub.com',
     enabled: false
   },

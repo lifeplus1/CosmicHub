@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { logIn, useAuth } from '@cosmichub/auth';
-import { useNavigate } from 'react-router-dom';
+// Removed unused useNavigate import
 
 interface LoginProps {
   onSwitchToSignup?: () => void;

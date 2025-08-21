@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastProvider';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@cosmichub/config/firebase';
-import { FaUser, FaStar, FaCrown, FaSignInAlt } from 'react-icons/fa';
+import { FaSignInAlt } from 'react-icons/fa';
 
 interface MockUser {
   email: string;
@@ -62,7 +62,7 @@ const MockLoginPanel: React.FC = React.memo(() => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleMockLogin = useCallback(async (mockUser: MockUser) => {
+  const handleMockLogin = useCallback(async (mockUser: MockUser): Promise<void> => {
     try {
       await signInWithEmailAndPassword(auth, mockUser.email, mockUser.password);
       
@@ -75,8 +75,10 @@ const MockLoginPanel: React.FC = React.memo(() => {
       });
       
       navigate('/chart');
-    } catch (error) {
-      if (error instanceof Error && (error as any).code === 'auth/user-not-found') {
+    } catch (error: unknown) {
+      // Narrow firebase auth error shape
+      const err = error as { code?: string } | null;
+      if (err && err.code === 'auth/user-not-found') {
         try {
           await createUserWithEmailAndPassword(auth, mockUser.email, mockUser.password);
           toast({
@@ -87,7 +89,7 @@ const MockLoginPanel: React.FC = React.memo(() => {
             isClosable: true,
           });
           navigate('/chart');
-        } catch (createError) {
+        } catch {
           toast({
             title: 'Error',
             description: 'Failed to create mock account',
@@ -108,7 +110,7 @@ const MockLoginPanel: React.FC = React.memo(() => {
     }
   }, [navigate, toast]);
 
-  const getTierColor = (tier: MockUser['tier']) => {
+  const getTierColor = (tier: MockUser['tier']): string => {
     switch (tier) {
       case 'free': return 'gray-500';
       case 'premium': return 'purple-500';
@@ -140,7 +142,7 @@ const MockLoginPanel: React.FC = React.memo(() => {
                     </span>
                     <button
                       className="cosmic-button"
-                      onClick={() => handleMockLogin(mockUser)}
+                      onClick={() => { void handleMockLogin(mockUser); }}
                       aria-label={`Login as ${mockUser.displayName}`}
                     >
                       <FaSignInAlt className="mr-2" />

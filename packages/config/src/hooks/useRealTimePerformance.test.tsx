@@ -10,7 +10,7 @@ const initialReport = {
   operations: [],
   pages: [],
   summary: { totalMetrics: 1, averageRenderTime: 5, slowestComponent: '', fastestComponent: '', errorRate: 0 }
-};
+} as const;
 
 vi.mock('../performance', () => {
   return {
@@ -52,7 +52,7 @@ describe('useRealTimePerformance', () => {
 
     // Simulate real-time update
     const updated = {
-      components: [{ name: 'CompA', duration: 10 }],
+      components: [{ name: 'CompA:render', duration: 10, timestamp: Date.now(), componentName: 'CompA', type: 'render', metadata: { type: 'render' } }],
       operations: [],
       pages: [],
       summary: { totalMetrics: 2, averageRenderTime: 7, slowestComponent: 'CompA', fastestComponent: 'CompA', errorRate: 0 }

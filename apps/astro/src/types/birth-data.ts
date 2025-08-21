@@ -1,4 +1,4 @@
-import { UnifiedBirthData } from '@cosmichub/types';
+import type { UnifiedBirthData } from '@cosmichub/types';
 
 export interface ChartBirthData extends UnifiedBirthData {
   year: number;
@@ -14,7 +14,7 @@ export interface ChartBirthData extends UnifiedBirthData {
 
 // Type guard for ChartBirthData
 export function isChartBirthData(value: unknown): value is ChartBirthData {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || typeof value !== 'object') return false;
   
   const data = value as Partial<ChartBirthData>;
   return (
@@ -45,7 +45,7 @@ export interface StoredBirthData {
 
 // Type guard for StoredBirthData
 export function isStoredBirthData(value: unknown): value is StoredBirthData {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || typeof value !== 'object') return false;
   
   const data = value as Partial<StoredBirthData>;
   return (

@@ -15,7 +15,7 @@ const HealwavePage: React.FC = () => {
     setVolume,
     setDuration,
     togglePlayPause,
-    formatTime
+  // formatTime
   } = useHealwave();
 
   return (

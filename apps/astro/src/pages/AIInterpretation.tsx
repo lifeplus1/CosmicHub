@@ -1,6 +1,6 @@
 // apps/astro/src/components/AIInterpretations.tsx
 
-import React, { lazy, Suspense, useEffect, useState, memo } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { isDefined, isNonEmptyString, isNonEmptyArray } from '../utils/guards';
 import { useQuery } from '@tanstack/react-query';
 import { getAuth } from 'firebase/auth';
@@ -11,7 +11,8 @@ import { useParams } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
 import type { Interpretation } from '../components/AIInterpretation/types';
 import { fetchAIInterpretations, fetchSavedCharts } from '../services/api';
-import type { SavedChart, ChartId, UserId } from '../services/api.types';
+import type { ApiResult } from '../services/apiResult';
+import type { SavedChart, ChartId, UserId, InterpretationResponse } from '../services/api.types';
 import styles from './AIInterpretations.module.css';
 
 // Simple Spinner component
@@ -63,16 +64,17 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
 
   // Fetch saved charts for selection
   const {
-    data: savedCharts = [],
+    data: savedChartsResult,
     isLoading: chartsLoading,
     error: chartsError,
-  } = useQuery<SavedChart[], Error>({
+  } = useQuery<ApiResult<SavedChart[]>, Error>({
     queryKey: ['savedCharts'],
     queryFn: fetchSavedCharts,
     enabled:
       user !== null && user !== undefined && initialChartId === undefined, // explicit undefined check retained
     staleTime: 30 * 1000,
   });
+  const savedCharts: SavedChart[] = (savedChartsResult?.success) ? savedChartsResult.data : [];
 
   // Helper function to format date display
   const formatDate = (dateString: string): string => {
@@ -114,7 +116,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
       }
     }
 
-    if (!isNonEmptyArray<SavedChart>(savedCharts)) {
+  if (!isNonEmptyArray<SavedChart>(savedCharts)) {
       return (
         <div className='text-center py-16'>
           <div className='w-24 h-24 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto mb-6'>
@@ -216,7 +218,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
   const noChartSelected = !isNonEmptyString(selectedChartId);
 
   // Fetch AI interpretations from backend with caching
-  const { data, isLoading, error } = useQuery({
+  const { data: interpretationsResult, isLoading, error } = useQuery<ApiResult<InterpretationResponse>>({
     queryKey: ['interpretations', selectedChartId, effectiveUserId],
     queryFn: async () => {
       if (
@@ -225,17 +227,17 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
       ) {
         throw new Error('User not authenticated or no chart selected');
       }
-      const response = await fetchAIInterpretations(
+      return await fetchAIInterpretations(
         selectedChartId as ChartId,
         effectiveUserId as UserId
       );
-      return response.data ?? [];
     },
     enabled:
       isNonEmptyString(effectiveUserId) && isNonEmptyString(selectedChartId),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });
+  // interpretationsResult.data.data is normalized later; direct intermediate array not needed
 
   // Fetch stored interpretations from Firestore
   // Shared parsing helper to normalize raw interpretation objects
@@ -330,16 +332,16 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
 
   // Combine API and Firestore data
   useEffect(() => {
-    if (!isDefined(data) || !Array.isArray(data)) {
-      return;
-    }
+    if (!isDefined(interpretationsResult) || interpretationsResult.success === false) return;
+    const apiList = interpretationsResult.data.data ?? [];
+    if (!Array.isArray(apiList)) return;
     setInterpretations(prev => {
-      const mapped: Interpretation[] = data.map(item =>
+      const mapped: Interpretation[] = apiList.map(item =>
         normalizeInterpretation(item, selectedChartId, effectiveUserId)
       );
       return [...prev, ...mapped];
     });
-  }, [data, selectedChartId, effectiveUserId]);
+  }, [interpretationsResult, selectedChartId, effectiveUserId]);
 
   if (noChartSelected) {
     return (
@@ -560,4 +562,4 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
 };
 
 // Memoize to prevent unnecessary re-renders
-export default memo(AIInterpretations);
+export default AIInterpretations;

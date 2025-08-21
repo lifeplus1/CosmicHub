@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchSavedCharts, deleteChart, type SavedChart } from '../services/api';
+import type { ApiResult } from '../services/apiResult';
 import type { ChartId } from '../services/api.types';
 import { CosmicLoading } from '../components/CosmicLoading';
 import { devConsole } from '../config/environment';
@@ -14,18 +15,19 @@ const SavedCharts: React.FC = () => {
   const queryClient = useQueryClient();
 
   // Fetch saved charts
-  const { data: charts = [], isLoading, error } = useQuery({
+  const { data: chartsResult, isLoading, error } = useQuery<ApiResult<SavedChart[]>>({
     queryKey: ['savedCharts'],
     queryFn: fetchSavedCharts,
-  enabled: user !== null,
+    enabled: user !== null,
     staleTime: 30 * 1000, // 30 seconds
   });
+  const charts: SavedChart[] = chartsResult?.success ? chartsResult.data : [];
 
   // Delete chart mutation
   const deleteMutation = useMutation({
     mutationFn: deleteChart,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
+      void queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
     },
     onError: (error) => {
       devConsole.error('❌ Error deleting chart:', error);
@@ -40,8 +42,6 @@ const SavedCharts: React.FC = () => {
   };
 
   const handleViewChart = (chart: SavedChart) => {
-    // Store chart data and navigate to chart view
-    // You could store in context or session storage
     sessionStorage.setItem('selectedChart', JSON.stringify(chart));
     navigate('/chart');
   };
@@ -85,21 +85,23 @@ const SavedCharts: React.FC = () => {
       </div>
 
       {/* Loading State */}
-      {isLoading && (
+  {isLoading && (
         <div className="flex justify-center py-16">
           <CosmicLoading size="lg" message="Loading your saved charts..." />
         </div>
       )}
 
       {/* Error State */}
-  {error !== null && (
+  {(error !== null || (chartsResult && chartsResult.success === false)) && (
         <Card title="Error Loading Charts">
           <div className="text-center py-8">
             <div className="text-red-400 mb-4">Failed to load saved charts</div>
             <p className="text-cosmic-silver/70 mb-4">
-              {error instanceof Error ? error.message : 'An unknown error occurred'}
+              {chartsResult && chartsResult.success === false
+                ? chartsResult.error
+                : (error instanceof Error ? error.message : 'An unknown error occurred')}
             </p>
-            <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['savedCharts'] })}>
+            <Button onClick={() => { void queryClient.invalidateQueries({ queryKey: ['savedCharts'] }); }}>
               Retry
             </Button>
           </div>
@@ -107,7 +109,7 @@ const SavedCharts: React.FC = () => {
       )}
 
       {/* Charts Grid */}
-  {isLoading === false && error === null && (
+  {isLoading === false && error === null && chartsResult && chartsResult.success === true && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {charts.length === 0 ? (
             /* Empty State */
@@ -180,13 +182,13 @@ const SavedCharts: React.FC = () => {
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-4 border-t border-cosmic-silver/10">
                     <Button
-                      onClick={() => handleViewChart(chart)}
+                      onClick={() => { handleViewChart(chart); }}
                       className="flex-1 bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark"
                     >
                       View Chart
                     </Button>
                     <Button
-                      onClick={() => handleDeleteChart(chart.id, chart.name)}
+                      onClick={() => { handleDeleteChart(chart.id, chart.name); }}
                       variant="secondary"
                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                       disabled={deleteMutation.isPending}

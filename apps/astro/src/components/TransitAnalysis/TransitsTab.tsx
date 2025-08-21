@@ -29,7 +29,7 @@ const TransitsTabContent: React.FC<{
         </span>
       </div>
       
-      {error && (
+  {error !== null && (
         <div className="mb-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
           <div className="flex items-center gap-2 text-red-400">
             <FaExclamationTriangle className="flex-shrink-0" />
@@ -53,7 +53,7 @@ const TransitsTabContent: React.FC<{
         {loading ? 'Calculating...' : 'Calculate Transits'}
       </button>
       
-      {transitResults.length > 0 && (
+  {transitResults.length > 0 && (
         <div className="space-y-4">
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-cosmic-deep-purple/30 rounded-lg">
@@ -97,7 +97,7 @@ const TransitsTabContent: React.FC<{
                     Intensity: {Math.round(transit.intensity)}%
                   </span>
                 </div>
-                {transit.description && (
+                {typeof transit.description === 'string' && transit.description.length > 0 && (
                   <p className="text-xs text-cosmic-silver mt-2">{transit.description}</p>
                 )}
               </div>
@@ -137,7 +137,7 @@ const LunarCyclesTabContent: React.FC<{
         </span>
       </div>
       
-      {error && (
+  {error !== null && (
         <div className="mb-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
           <div className="flex items-center gap-2 text-red-400">
             <FaExclamationTriangle className="flex-shrink-0" />
@@ -161,7 +161,7 @@ const LunarCyclesTabContent: React.FC<{
         {loadingLunar ? 'Calculating...' : 'Calculate Lunar Cycles'}
       </button>
       
-      {lunarTransits.length > 0 && (
+  {lunarTransits.length > 0 && (
         <div className="space-y-4">
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-cosmic-deep-purple/30 rounded-lg">
@@ -202,7 +202,7 @@ const LunarCyclesTabContent: React.FC<{
                     {lunar.energy}
                   </span>
                 </div>
-                {lunar.description && (
+                  {typeof lunar.description === 'string' && lunar.description.length > 0 && (
                   <p className="text-xs text-cosmic-silver mt-2">{lunar.description}</p>
                 )}
               </div>

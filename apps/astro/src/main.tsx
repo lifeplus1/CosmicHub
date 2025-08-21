@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { StrictMode } from 'react';
+// import { StrictMode } from 'react'; // Temporarily disabled
 import './index.css';
 import App from './App';
 import './pwa';
@@ -11,7 +11,7 @@ import { devConsole } from './config/environment';
 devConsole.log?.('🚀 CosmicHub Frontend Starting...');
 devConsole.log?.('📍 Environment:', import.meta.env.MODE);
 devConsole.log?.('🌐 Base URL:', import.meta.env.BASE_URL);
-devConsole.log?.('⚙️ API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8001');
+devConsole.log?.('⚙️ API URL:', import.meta.env.VITE_API_URL ?? 'http://localhost:8001');
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

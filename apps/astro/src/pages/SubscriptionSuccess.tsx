@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth, useSubscription } from '@cosmichub/auth';
-import { stripeService } from '@cosmichub/integrations';
+// stripeService import guarded (module may be optional in some builds)
+interface StripeServiceLike { handleCheckoutSuccess?: (sessionId: string) => Promise<boolean>; }
+// Provided via global injection when integrations bundle is present; fallback empty object
+const injectedStripe: unknown = (globalThis as { stripeService?: unknown }).stripeService;
+const stripeService: StripeServiceLike = (injectedStripe !== null && injectedStripe !== undefined && typeof injectedStripe === 'object') 
+  ? (injectedStripe as StripeServiceLike) 
+  : {};
 import { FaCheckCircle, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 import { devConsole } from '../config/environment';
 
@@ -14,17 +20,17 @@ const SubscriptionSuccess: React.FC = () => {
   const [message, setMessage] = useState('Verifying your subscription...');
 
   const sessionId = searchParams.get('session_id');
-  const tier = searchParams.get('tier') || 'premium';
+  const tier = searchParams.get('tier') ?? 'premium';
 
   useEffect(() => {
-    const verifySubscription = async () => {
-      if (!sessionId) {
+    const verifySubscription = async (): Promise<void> => {
+      if (sessionId === null) {
         setVerificationStatus('error');
         setMessage('Missing session information. Please contact support if you were charged.');
         return;
       }
 
-      if (!user) {
+      if (user === null || user === undefined) {
         setVerificationStatus('error');
         setMessage('Please sign in to complete your subscription setup.');
         return;
@@ -32,7 +38,9 @@ const SubscriptionSuccess: React.FC = () => {
 
       try {
         // Verify the checkout session
-        const success = stripeService ? await stripeService.handleCheckoutSuccess(sessionId) : false;
+        const success = typeof stripeService.handleCheckoutSuccess === 'function'
+          ? await stripeService.handleCheckoutSuccess(sessionId)
+          : false;
         
         if (success) {
           // Refresh subscription data
@@ -42,9 +50,7 @@ const SubscriptionSuccess: React.FC = () => {
           setMessage('Your subscription has been activated successfully!');
           
           // Redirect to dashboard after 3 seconds
-          setTimeout(() => {
-            navigate('/', { replace: true });
-          }, 3000);
+          setTimeout(() => { navigate('/', { replace: true }); }, 3000);
         } else {
           setVerificationStatus('error');
           setMessage('There was an issue verifying your subscription. Please contact support.');
@@ -56,14 +62,14 @@ const SubscriptionSuccess: React.FC = () => {
       }
     };
 
-    verifySubscription();
+  void verifySubscription();
   }, [sessionId, user, refreshSubscription, navigate]);
 
-  const handleReturnToDashboard = () => {
+  const handleReturnToDashboard = (): void => {
     navigate('/', { replace: true });
   };
 
-  const handleContactSupport = () => {
+  const handleContactSupport = (): void => {
     // You can implement a support contact method here
     window.open('mailto:support@cosmichub.app?subject=Subscription Issue&body=I need help with my subscription verification.', '_blank');
   };
@@ -89,7 +95,7 @@ const SubscriptionSuccess: React.FC = () => {
             <p className="text-cosmic-silver mb-6">{message}</p>
             
             <div className="bg-green-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">What's Next?</h3>
+              <h3 className="text-lg font-semibold text-green-800 mb-2">What&apos;s Next?</h3>
               <ul className="text-sm text-green-700 space-y-1 text-left">
                 <li>• Access to all premium features</li>
                 <li>• Unlimited chart calculations</li>
@@ -126,7 +132,7 @@ const SubscriptionSuccess: React.FC = () => {
             
             <div className="bg-red-50 rounded-lg p-4 mb-6">
               <p className="text-sm text-red-700">
-                Don't worry! If your payment went through, we'll activate your subscription shortly. 
+                Don&apos;t worry! If your payment went through, we&apos;ll activate your subscription shortly. 
                 Check your email for a receipt, or contact our support team for assistance.
               </p>
             </div>

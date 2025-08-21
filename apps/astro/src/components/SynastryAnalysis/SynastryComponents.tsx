@@ -86,7 +86,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = React.memo(
       </p>
 
       {/* Compatibility Breakdown */}
-      {synastryResult.compatibility_analysis.breakdown && (
+  {synastryResult.compatibility_analysis.breakdown !== null && synastryResult.compatibility_analysis.breakdown !== undefined && (
         <div>
           <h4 className="mb-4 text-sm font-bold text-cosmic-silver">Compatibility Areas</h4>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -104,7 +104,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = React.memo(
               </div>
             );})}
           </div>
-          {synastryResult.compatibility_analysis.meta && (
+          {synastryResult.compatibility_analysis.meta !== null && synastryResult.compatibility_analysis.meta !== undefined && (
             <div className="mt-6 text-xs text-white/60 space-y-1">
               <p className="font-semibold text-cosmic-silver">Scoring Meta</p>
               <p>Overlay Bonus Applied: {synastryResult.compatibility_analysis.meta.overlay_bonus_applied}</p>

@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, memo, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useToast } from '../ToastProvider';
-import axios from 'axios';
-import { FaExpand, FaCompress } from 'react-icons/fa';
-import type { ChartData } from '../../types';
-import { useAuth } from '@cosmichub/auth';
+// Removed unused imports (axios, icons, memo hooks) for lint compliance
 import { calculateHumanDesign } from '../../services/api';
+import type { ApiResult } from '../../services/apiResult';
 import type { HumanDesignData, HumanDesignChartProps } from './types';
 import type { ChartBirthData } from '@cosmichub/types';
 import { getTypeColor, getTypeDescription } from './utils';
@@ -29,30 +27,37 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
   const [humanDesignData, setHumanDesignData] = useState<HumanDesignData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  // Note: user context not required in this component currently (removed to satisfy no-unused-vars)
   const { toast } = useToast();
 
-  const handleCalculate = async () => {
-    if (!birthData) return;
+  const handleCalculate = useCallback(async (): Promise<void> => {
+    if (birthData === null || birthData === undefined) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await calculateHumanDesign(birthData);
-      setHumanDesignData(response.human_design);
-      
-      // Pass the Human Design data back to the parent component
-      if (onHumanDesignCalculated) {
-        onHumanDesignCalculated(response.human_design);
+      const result: ApiResult<{ human_design: HumanDesignData }> = await calculateHumanDesign(birthData);
+      if (result.success) {
+        setHumanDesignData(result.data.human_design);
+        if (onHumanDesignCalculated) {
+          onHumanDesignCalculated(result.data.human_design);
+        }
+        toast({
+          title: "Human Design Calculated",
+          description: "Your Human Design chart has been generated successfully!",
+          status: "success",
+          duration: 3000,
+        });
+      } else {
+        setError(result.error);
+        toast({
+          title: "Calculation Error",
+          description: result.error,
+          status: "error",
+          duration: 5000,
+        });
       }
-      
-      toast({
-        title: "Human Design Calculated",
-        description: "Your Human Design chart has been generated successfully!",
-        status: "success",
-        duration: 3000,
-      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to calculate Human Design';
       setError(errorMessage);
@@ -65,13 +70,13 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
     } finally {
       setLoading(false);
     }
-  };
+  }, [birthData, onHumanDesignCalculated, toast]);
 
   useEffect(() => {
-    if (birthData) {
-      handleCalculate();
+    if (birthData !== null && birthData !== undefined) {
+      void handleCalculate();
     }
-  }, [birthData]);
+  }, [birthData, handleCalculate]);
 
   if (loading) {
     return (
@@ -84,7 +89,7 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
     );
   }
 
-  if (error) {
+  if (error !== null) {
     return (
       <div className="p-6 cosmic-card">
         <div className="flex p-4 space-x-4 border border-red-500 rounded-md bg-red-900/50">
@@ -98,7 +103,7 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
     );
   }
 
-  if (!humanDesignData) {
+  if (humanDesignData === null) {
     return (
       <div className="p-8 cosmic-card">
         <div className="space-y-4 text-center">
@@ -126,6 +131,11 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
     );
   }
 
+  // Normalize potentially nullable string fields
+  const typeValue: string = typeof humanDesignData.type === 'string' && humanDesignData.type.trim().length > 0
+    ? humanDesignData.type
+    : 'Unknown Type';
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header with Type and Strategy */}
@@ -137,10 +147,10 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
               <Tooltip.Provider>
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
-                    <span 
-                      className={`${getTypeColor(humanDesignData.type)} text-white font-bold text-lg px-4 py-2 rounded-full cursor-help inline-block`}
+                    <span
+                      className={`${getTypeColor(typeValue)} text-white font-bold text-lg px-4 py-2 rounded-full cursor-help inline-block`}
                     >
-                      {humanDesignData.type}
+                      {typeValue}
                     </span>
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
@@ -149,8 +159,8 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({ birthData, onCalcul
                       sideOffset={5}
                     >
                       <div className="space-y-2">
-                        <div className="font-bold text-cosmic-gold">{humanDesignData.type}</div>
-                        <div>{getTypeDescription(humanDesignData.type)}</div>
+                        <div className="font-bold text-cosmic-gold">{typeValue}</div>
+                        <div>{getTypeDescription(typeValue)}</div>
                       </div>
                       <Tooltip.Arrow className="fill-cosmic-dark" />
                     </Tooltip.Content>

@@ -40,34 +40,46 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
     }));
   }, []);
 
-  const exportToPdf = useCallback(async () => {
+  const exportToPdf = useCallback(async (): Promise<void> => {
     setLoading(true);
 
     try {
-      let exportData: any = {};
+      // Narrow export payload shape
+      interface StandardExport { chart_data: { chart: unknown }; birth_info?: BirthData; report_type: 'standard'; }
+      interface SynastryExport { chart_data: { synastry: unknown }; report_type: 'synastry'; }
+      interface MultiSystemExport { chart_data: { charts: unknown }; report_type: 'multi_system'; }
+      type ExportPayload = StandardExport | SynastryExport | MultiSystemExport;
+
+      let exportData: ExportPayload; // will be assigned in switch
       let endpoint = '/api/export-pdf';
 
       switch (options.reportType) {
-        case 'standard':
-          if (!chartData) {
+        case 'standard': {
+          if (chartData === null || chartData === undefined) {
             throw new Error('Chart data is required for standard PDF export');
           }
-          // Use serialization utility to ensure consistent data format
-          const serializedChartData = serializeAstrologyData(chartData as any);
+          // Serialize with safe intermediate cast; if shape mismatch, fall back to raw
+          let serializedChartData: string;
+          try {
+            serializedChartData = serializeAstrologyData(chartData as unknown as AstrologyChart);
+          } catch (serializationError) {
+            devConsole.warn?.('Chart serialization failed, falling back to raw chartData', serializationError);
+            serializedChartData = JSON.stringify(chartData);
+          }
           exportData = {
             chart_data: { chart: JSON.parse(serializedChartData) },
             birth_info: birthInfo,
             report_type: 'standard'
           };
           break;
-
-        case 'synastry':
-          if (!synastryData) {
+        }
+        case 'synastry': {
+          if (synastryData === null || synastryData === undefined) {
             throw new Error('Synastry data is required for synastry PDF export');
           }
-          // Serialize synastry data if it matches our schema
           try {
-            const serializedSynastryData = serializeAstrologyData(synastryData);
+            const maybeChart = synastryData as Partial<AstrologyChart>;
+            const serializedSynastryData = serializeAstrologyData(maybeChart as AstrologyChart);
             exportData = {
               chart_data: { synastry: JSON.parse(serializedSynastryData) },
               report_type: 'synastry'
@@ -81,19 +93,20 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
           }
           endpoint = '/api/export-synastry-pdf';
           break;
-
-        case 'multi_system':
-          if (!multiSystemData) {
+        }
+        case 'multi_system': {
+          if (multiSystemData === null || multiSystemData === undefined) {
             throw new Error('Multi-system data is required for multi-system PDF export');
           }
-          exportData = {
-            chart_data: { charts: multiSystemData },
-            report_type: 'multi_system'
-          };
-          break;
-
-        default:
+            exportData = {
+              chart_data: { charts: multiSystemData },
+              report_type: 'multi_system'
+            };
+            break;
+        }
+        default: {
           throw new Error('Invalid report type selected');
+        }
       }
 
       const response = await fetch(endpoint, {
@@ -124,10 +137,10 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
         duration: 3000,
         isClosable: true,
       });
-    } catch (err) {
+  } catch (err: unknown) {
       toast({
         title: 'PDF Generation Failed',
-        description: err instanceof Error ? err.message : 'Unknown error occurred',
+    description: err instanceof Error ? err.message : 'Unknown error occurred',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -224,7 +237,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
               <div className="flex p-4 space-x-4 border border-blue-500 rounded-md bg-blue-900/50">
                 <span className="text-xl text-blue-500">ℹ️</span>
                 <div className="flex flex-col space-y-2">
-                  <p className="font-bold text-cosmic-silver">What's Included:</p>
+                  <p className="font-bold text-cosmic-silver">What&apos;s Included:</p>
                   <p className="text-sm text-cosmic-silver">
                     • Professional formatting with planetary positions<br />
                     • House cusp details and sign placements<br />
@@ -264,7 +277,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
               </button>
               <button
                 className="flex-1 cosmic-button"
-                onClick={exportToPdf}
+                onClick={() => { void exportToPdf(); }}
                 disabled={loading}
               >
                 <FaDownload className="mr-2" />
