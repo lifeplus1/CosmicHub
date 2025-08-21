@@ -1,0 +1,31 @@
+{
+  "perProject": {
+    "astro": {
+      "lines": 6.74,
+      "statements": 6.74,
+      "functions": 35.36,
+      "branches": 65.73,
+      "weight": 75086
+    },
+    "types": {
+      "lines": 65.83,
+      "statements": 65.83,
+      "functions": 72.73,
+      "branches": 57.78,
+      "weight": 480
+    },
+    "backend": {
+      "lines": 75.28,
+      "statements": 75.28,
+      "functions": 75.28,
+      "branches": 0,
+      "weight": 9987
+    }
+  },
+  "combined": {
+    "lines": 15.07,
+    "statements": 15.07,
+    "functions": 40.23,
+    "branches": 58.02
+  }
+}
