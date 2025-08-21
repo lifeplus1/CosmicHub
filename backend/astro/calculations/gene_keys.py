@@ -707,6 +707,12 @@ def calculate_gene_keys_profile(
             "radiance": get_gene_key_details(radiance_gate),
             "purpose": get_gene_key_details(purpose_gate),
             "attraction": venus_sequence.get("attraction", {}),
+            # Expose individual Venus Sequence developmental spheres for direct access
+            # Tests (test_gene_keys_line_themes.py) expect top-level keys 'iq', 'eq', 'sq'
+            # including line_theme and sphere_context metadata produced by get_gene_key_details.
+            "iq": venus_sequence.get("iq", {}),
+            "eq": venus_sequence.get("eq", {}),
+            "sq": venus_sequence.get("sq", {}),
             "core_wound": venus_sequence.get("core_wound", {}),
             "activation": {
                 "name": activation_sequence.get("name", "Activation Sequence"),

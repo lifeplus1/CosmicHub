@@ -5,24 +5,72 @@ const levelPriority: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30,
 
 export interface LoggerConfig { level?: LogLevel; }
 
-class BasicLogger {
-  private level: LogLevel;
-  private onceKeys = new Set<string>();
-  constructor(cfg: LoggerConfig = {}) { this.level = cfg.level ?? 'info'; }
-  setLevel(l: LogLevel) { this.level = l; }
-  private allowed(l: LogLevel) { return levelPriority[l] >= levelPriority[this.level]; }
-  debug(msg: string, meta?: unknown) { if (this.allowed('debug')) console.debug(`[debug] ${msg}`, meta ?? ''); }
-  info(msg: string, meta?: unknown) { if (this.allowed('info')) console.info(`[info] ${msg}`, meta ?? ''); }
-  warn(msg: string, meta?: unknown) { if (this.allowed('warn')) console.warn(`[warn] ${msg}`, meta ?? ''); }
-  error(msg: string, meta?: unknown) { if (this.allowed('error')) console.error(`[error] ${msg}`, meta ?? ''); }
-  once(key: string, level: LogLevel, msg: string, meta?: unknown) {
-    if (this.onceKeys.has(key)) return;
-    this.onceKeys.add(key);
+export class BasicLogger {
+  private logLevel: LogLevel = 'info';
+  private seenMessages = new Set<string>();
+  private prefix: string = '';
+
+  constructor(prefix: string = '') {
+    this.prefix = prefix;
+  }
+
+  setLevel(level: LogLevel): void {
+    this.logLevel = level;
+  }
+
+  child(context: Record<string, unknown>): BasicLogger {
+    const childPrefix = Object.entries(context)
+      .map(([key, value]) => `${key}=${String(value)}`)
+      .join(' ');
+    const fullPrefix = this.prefix ? `${this.prefix} ${childPrefix}` : childPrefix;
+    const childLogger = new BasicLogger(fullPrefix);
+    childLogger.logLevel = this.logLevel;
+    childLogger.seenMessages = this.seenMessages; // Share seen messages
+    return childLogger;
+  }
+
+  private shouldLog(level: LogLevel): boolean {
+    return levelPriority[level] >= levelPriority[this.logLevel];
+  }
+
+  debug(message: string, data?: unknown): void {
+    if (this.shouldLog('debug')) {
+    const prefixedMessage = this.prefix ? `${this.prefix} ${message}` : message;
+    console.log(`[debug] ${prefixedMessage}`, data ?? '');
+    }
+  }
+
+  info(message: string, data?: unknown): void {
+    if (this.shouldLog('info')) {
+    const prefixedMessage = this.prefix ? `${this.prefix} ${message}` : message;
+    console.log(`[info] ${prefixedMessage}`, data ?? '');
+    }
+  }
+
+  warn(message: string, data?: unknown): void {
+    if (this.shouldLog('warn')) {
+    const prefixedMessage = this.prefix ? `${this.prefix} ${message}` : message;
+    console.warn(`[warn] ${prefixedMessage}`, data ?? '');
+    }
+  }
+
+  error(message: string, data?: unknown): void {
+    if (this.shouldLog('error')) {
+    const prefixedMessage = this.prefix ? `${this.prefix} ${message}` : message;
+    console.error(`[error] ${prefixedMessage}`, data ?? '');
+    }
+  }
+
+  // One-time logging to reduce noise
+  once(level: LogLevel, key: string, message: string, data?: unknown): void {
+    if (this.seenMessages.has(key)) return;
+    this.seenMessages.add(key);
+    
     switch (level) {
-      case 'debug': this.debug(msg, meta); break;
-      case 'info': this.info(msg, meta); break;
-      case 'warn': this.warn(msg, meta); break;
-      case 'error': this.error(msg, meta); break;
+      case 'debug': this.debug(message, data); break;
+      case 'info': this.info(message, data); break;
+      case 'warn': this.warn(message, data); break;
+      case 'error': this.error(message, data); break;
     }
   }
 }

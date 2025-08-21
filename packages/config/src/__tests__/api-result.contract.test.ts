@@ -18,16 +18,16 @@ describe('ApiResult public surface contract', () => {
     'unwrapOr',
     'mapResult',
     'mapSuccess',
-  'mapFailure',
-  'logger',
-  'silenceLogsForTests'
-  ] as const;
-
-  it('includes required ApiResult helper functions', () => {
+    'mapFailure',
+    'silenceLogsForTests'
+  ] as const;  it('includes required ApiResult helper functions', () => {
     for (const name of expectedFunctionExports) {
       expect(exported, `Missing export: ${name}`).toHaveProperty(name);
       expect(typeof (exported as any)[name], `Export ${name} should be a function`).toBe('function');
     }
+    // logger is an object, not a function
+    expect(exported).toHaveProperty('logger');
+    expect(typeof (exported as any).logger).toBe('object');
   });
 
   it('ok/fail produce correctly discriminated unions', () => {

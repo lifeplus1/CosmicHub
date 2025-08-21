@@ -32,7 +32,7 @@ export const toFailure = (error: unknown, opts: FailureMapOptions): ApiFailure =
   if (status === 404) return fail(opts.notFound ?? 'Resource not found', ErrorCode.NOT_FOUND);
   if (status === 400) return fail(opts.validation ?? 'Validation error', ErrorCode.VALIDATION);
   }
-  logger.once('apiresult.fallback', 'warn', 'ApiResult toFailure fallback path used', { errorType: typeof error });
+  logger.once('warn', 'apiresult.fallback', 'ApiResult toFailure fallback path used', { errorType: typeof error });
   return fail(opts.defaultMsg);
 };
 
