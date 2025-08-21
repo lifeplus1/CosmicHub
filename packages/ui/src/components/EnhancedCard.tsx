@@ -224,7 +224,7 @@ Card.Footer = CardFooter;
 export const InteractiveCard = forwardRef<HTMLDivElement, CardProps & {
   onClick?: () => void;
   onKeyDown?: (event: React.KeyboardEvent) => void;
-}>(({ onClick, onKeyDown, ...props }, ref) => {
+}>(({ onClick, onKeyDown, ...props }) => {
   const handleKeyDown = (event: React.KeyboardEvent): void => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -234,13 +234,7 @@ export const InteractiveCard = forwardRef<HTMLDivElement, CardProps & {
   };
 
   return (
-    <Card
-      ref={ref}
-      {...props}
-      clickable
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-    />
+  <Card {...props} clickable onClick={onClick} onKeyDown={handleKeyDown} />
   );
 });
 

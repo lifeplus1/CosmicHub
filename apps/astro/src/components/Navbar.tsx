@@ -1,7 +1,7 @@
 import React, { useCallback, useState, lazy, Suspense } from 'react';
 import { devConsole } from '../config/environment';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt, FaGlobe, FaCompass, FaChevronDown, FaTools, FaKey } from 'react-icons/fa';
+import { FaHome, FaCalculator, FaUsers, FaStar, FaCrown, FaUser, FaChartLine, FaBook, FaBrain, FaSignOutAlt, FaGlobe, FaCompass, FaChevronDown, FaTools, FaKey, FaPen } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, useSubscription } from '@cosmichub/auth';
 import { EducationalTooltip } from './EducationalTooltip';
@@ -191,6 +191,12 @@ const Navbar: React.FC = React.memo(() => {
       icon: FaCompass, 
       label: 'Interactive Chart',
       tooltip: { title: 'Interactive Chart', description: 'Explore your birth chart with beautiful D3.js visualizations and interactive elements.' }
+    },
+    { 
+      to: '/blog', 
+      icon: FaPen, 
+      label: 'Blog',
+      tooltip: { title: 'Cosmic Insights Blog', description: 'Explore astrology, numerology, human design, and cosmic wisdom through expert articles.' }
     }
   ];
 

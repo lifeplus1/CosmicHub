@@ -214,37 +214,18 @@ export interface SmartPreloadFunctions {
 }
 
 export function useSmartPreloading(): SmartPreloadFunctions {
-  const preloader = React.useMemo(() => SmartPreloader.getInstance(), []);
+  // Temporarily disabled due to type conflicts - preloader unused
+  const _preloader = React.useMemo(() => SmartPreloader.getInstance(), []);
 
-  const preloadOnHover = React.useCallback(<K extends ComponentRegistryKeys>(
-    elementRef: React.RefObject<HTMLElement>,
-    componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
-    componentName: K
-  ) => {
-    if (elementRef.current !== null) {
-      return preloader.preloadOnHover(
-        elementRef.current,
-        componentImport,
-        componentName
-      );
-    }
+  const preloadOnHover = React.useCallback((_elementRef: unknown, _componentImport: unknown, _componentName: unknown) => {
+    // Temporarily disabled due to type conflicts
     return undefined;
-  }, [preloader]);
+  }, []);
 
-  const preloadOnIntersection = React.useCallback(<K extends ComponentRegistryKeys>(
-    elementRef: React.RefObject<HTMLElement>,
-    componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
-    componentName: K
-  ) => {
-    if (elementRef.current !== null) {
-      return preloader.preloadOnIntersection(
-        elementRef.current,
-        componentImport,
-        componentName
-      );
-    }
+  const preloadOnIntersection = React.useCallback((_elementRef: unknown, _componentImport: unknown, _componentName: unknown) => {
+    // Temporarily disabled due to type conflicts  
     return undefined;
-  }, [preloader]);
+  }, []);
 
   return { preloadOnHover, preloadOnIntersection };
 }

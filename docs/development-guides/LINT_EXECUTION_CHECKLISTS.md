@@ -5,17 +5,20 @@
 ---
 
 ### 🤖 BATCH 1 CHECKLIST: Claude 3.5 Sonnet
+
 **Focus**: Type Safety & Core Components | **Time**: 3-4 hours
 
 #### Pre-execution Setup
+
 ```bash
 cd /Users/Chris/Projects/CosmicHub
 git checkout -b lint-cleanup-batch-1-claude35
 ```
 
 #### File Priority Queue (11 files, 91 errors)
+
 1. `apps/astro/src/services/api.ts` (25 errors) ⭐ HIGH IMPACT
-2. `apps/astro/src/services/ephemeris.ts` (15 errors) 
+2. `apps/astro/src/services/ephemeris.ts` (15 errors)
 3. `apps/astro/src/components/PdfExport.tsx` (15 errors)
 4. `apps/astro/src/components/SaveChart.tsx` (14 errors)
 5. `apps/astro/src/components/UnifiedBirthInput.tsx` (9 errors)
@@ -27,12 +30,14 @@ git checkout -b lint-cleanup-batch-1-claude35
 11. `apps/astro/src/components/TransitAnalysis/types.ts` (1 error)
 
 #### Key Patterns to Apply
+
 - Replace `any` with proper interfaces
 - Add type guards: `function isType(value: unknown): value is Type`
 - Fix unsafe operations: `@typescript-eslint/no-unsafe-*`
 - Boolean expressions: Use explicit null/undefined checks
 
 #### Success Criteria
+
 - [ ] Target: 91 → 20 errors (78% reduction)
 - [ ] `tsc --noEmit` passes for all files
 - [ ] Service layer properly typed
@@ -41,15 +46,18 @@ git checkout -b lint-cleanup-batch-1-claude35
 ---
 
 ### 🤖 BATCH 2 CHECKLIST: GPT-4o
+
 **Focus**: React Components & Forms | **Time**: 3-4 hours
 
 #### Pre-execution Setup
+
 ```bash
 cd /Users/Chris/Projects/CosmicHub
 git checkout -b lint-cleanup-batch-2-gpt4o
 ```
 
 #### File Priority Queue (11 files, 86 errors)
+
 1. `apps/astro/src/components/SimpleBirthForm.tsx` (25 errors) ⭐ HIGH IMPACT
 2. `apps/astro/src/components/UserProfile.tsx` (17 errors) ⭐ HIGH IMPACT
 3. `apps/astro/src/pages/Profile.tsx` (11 errors)
@@ -63,12 +71,14 @@ git checkout -b lint-cleanup-batch-2-gpt4o
 11. `apps/astro/src/components/SubscriptionStatus.tsx` (1 error)
 
 #### Key Patterns to Apply
+
 - React Hook dependencies: Fix `exhaustive-deps` warnings
 - Form validation: Proper input handling patterns
 - Promise handling in event handlers
 - Boolean expressions for user state
 
 #### Success Criteria
+
 - [ ] Target: 86 → 15 errors (83% reduction)
 - [ ] Form components work correctly
 - [ ] No React hook violations
@@ -77,15 +87,18 @@ git checkout -b lint-cleanup-batch-2-gpt4o
 ---
 
 ### 🤖 BATCH 3 CHECKLIST: Claude 4
+
 **Focus**: Complex Logic & Data Processing | **Time**: 4-5 hours
 
 #### Pre-execution Setup
+
 ```bash
 cd /Users/Chris/Projects/CosmicHub
 git checkout -b lint-cleanup-batch-3-claude4
 ```
 
 #### File Priority Queue (9 files, 133 errors)
+
 1. `apps/astro/src/features/ChartWheelInteractive.tsx` (45 errors) ⭐ HIGHEST IMPACT
 2. `apps/astro/src/features/ChartWheel.tsx` (25 errors) ⭐ HIGH IMPACT
 3. `apps/astro/src/components/TransitAnalysis/useTransitAnalysis.ts` (15 errors)
@@ -97,12 +110,14 @@ git checkout -b lint-cleanup-batch-3-claude4
 9. `apps/astro/src/features/healwave/components/AudioPlayer.tsx` (3 errors)
 
 #### Key Patterns to Apply
+
 - D3.js type safety: Proper SVG element typing
 - Algorithm safety: Mathematical operations validation
 - Complex state management: Hooks with multiple dependencies
 - Performance optimization patterns
 
 #### Success Criteria
+
 - [ ] Target: 133 → 25 errors (81% reduction)
 - [ ] Chart rendering works correctly
 - [ ] D3.js integration is type-safe
@@ -111,15 +126,18 @@ git checkout -b lint-cleanup-batch-3-claude4
 ---
 
 ### 🤖 BATCH 4 CHECKLIST: GPT-4o-mini
+
 **Focus**: Utilities, Pages & Quick Wins | **Time**: 2-3 hours
 
 #### Pre-execution Setup
+
 ```bash
 cd /Users/Chris/Projects/CosmicHub
 git checkout -b lint-cleanup-batch-4-gpt4omini
 ```
 
 #### File Priority Queue (15 files, 52 errors)
+
 1. `apps/astro/src/pages/SavedCharts.tsx` (8 errors) ⭐ HIGHEST IMPACT
 2. `apps/astro/src/pages/HumanDesign.tsx` (5 errors)
 3. `apps/astro/src/pages/Numerology.tsx` (5 errors)
@@ -137,12 +155,14 @@ git checkout -b lint-cleanup-batch-4-gpt4omini
 15. `apps/astro/src/config/environment.ts` (1 error)
 
 #### Key Patterns to Apply
+
 - Quick wins: Console statements, unused variables
 - Page component patterns: Navigation, routing
 - Utility function safety: Input validation
 - Context provider patterns
 
 #### Success Criteria
+
 - [ ] Target: 52 → 10 errors (81% reduction)
 - [ ] All pages render correctly
 - [ ] Utilities are properly typed
@@ -151,9 +171,11 @@ git checkout -b lint-cleanup-batch-4-gpt4omini
 ---
 
 ### 🐍 BACKEND CHECKLIST: COMPLETED ✅
+
 **Focus**: Automated formatting (84.3% reduction achieved!) | **Time**: 3 minutes
 
 #### 🚨 CRITICAL: Automated Phase COMPLETE ✅
+
 ```bash
 cd /Users/Chris/Projects/CosmicHub/backend
 
@@ -169,14 +191,17 @@ python3 -m flake8 . --statistics      # ACTUAL: 831 issues (84.3% reduction)
 ```
 
 #### Manual Phase Target Files (~831 remaining issues)
+
 Focus on remaining error types:
+
 - **E501**: Line too long (requires manual refactoring)
 - **E402**: Module level import not at top of file
-- **F541**: f-string is missing placeholders  
+- **F541**: f-string is missing placeholders
 - **F811**: Redefinition of unused variables
 - **F601**: Dictionary key repeated with different values
 
 #### Success Criteria
+
 - [x] **CRITICAL**: 5,289 → 831 issues (84.3% automated reduction) ✅
 - [x] All Python files properly formatted with black ✅
 - [x] Import organization cleaned with isort ✅
@@ -189,6 +214,7 @@ Focus on remaining error types:
 ## 🔄 Integration Checklist (After All Batches Complete)
 
 ### Phase 1: Merge Preparation
+
 ```bash
 cd /Users/Chris/Projects/CosmicHub
 
@@ -198,12 +224,13 @@ git checkout -b lint-cleanup-integration
 
 # Merge each batch (resolve any conflicts)
 git merge lint-cleanup-batch-1-claude35
-git merge lint-cleanup-batch-2-gpt4o  
+git merge lint-cleanup-batch-2-gpt4o
 git merge lint-cleanup-batch-3-claude4
 git merge lint-cleanup-batch-4-gpt4omini
 ```
 
 ### Phase 2: Verification
+
 ```bash
 # Full lint check
 pnpm run lint
@@ -219,8 +246,9 @@ pnpm run build
 ```
 
 ### Phase 3: Success Metrics
+
 - [ ] Frontend: 673 → 200 errors (70% reduction minimum)
-- [ ] Backend: 3,275 → 100 issues (97% reduction minimum)  
+- [ ] Backend: 3,275 → 100 issues (97% reduction minimum)
 - [ ] All tests passing
 - [ ] Build successful
 - [ ] No new errors introduced
@@ -230,17 +258,18 @@ pnpm run build
 ## 🚀 Execution Commands Summary
 
 ### Start All Batches Concurrently
+
 ```bash
 # Terminal 1
 echo "🤖 BATCH 1: Claude 3.5 Sonnet - Type Safety & Core Components"
 cd /Users/Chris/Projects/CosmicHub && git checkout -b lint-cleanup-batch-1-claude35
 
-# Terminal 2  
+# Terminal 2
 echo "🤖 BATCH 2: GPT-4o - React Components & Forms"
 cd /Users/Chris/Projects/CosmicHub && git checkout -b lint-cleanup-batch-2-gpt4o
 
 # Terminal 3
-echo "🤖 BATCH 3: Claude 4 - Complex Logic & Data Processing" 
+echo "🤖 BATCH 3: Claude 4 - Complex Logic & Data Processing"
 cd /Users/Chris/Projects/CosmicHub && git checkout -b lint-cleanup-batch-3-claude4
 
 # Terminal 4
@@ -249,6 +278,7 @@ cd /Users/Chris/Projects/CosmicHub && git checkout -b lint-cleanup-batch-4-gpt4o
 ```
 
 ### Backend (Can Run Parallel)
+
 ```bash
 # Terminal 5 (or any available)
 echo "🐍 BACKEND: Automated + Manual Cleanup"
@@ -258,6 +288,6 @@ python -m black . && python -m isort . && python -m flake8 . --statistics
 
 ---
 
-*Created*: August 19, 2025  
-*Purpose*: Execution-ready checklists for concurrent AI model cleanup  
-*Status*: Ready for immediate execution - No file conflicts
+_Created_: August 19, 2025  
+_Purpose_: Execution-ready checklists for concurrent AI model cleanup  
+_Status_: Ready for immediate execution - No file conflicts

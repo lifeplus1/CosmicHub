@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
-import { useCrossAppStore } from '@cosmichub/integrations';
 import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
 import { BirthDataProvider } from './contexts/BirthDataContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -45,22 +44,19 @@ const Login = lazy(() => import('./pages/Login'));
 const SignUp = lazy(() => import('./pages/SignUp'));
 const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
 const SubscriptionCancel = lazy(() => import('./pages/SubscriptionCancel'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const BlogAuthors = lazy(() => import('./components/BlogAuthor').then(module => ({ default: module.BlogAuthors })));
 
 const MainApp: React.FC = React.memo(function MainApp() {
-  const { addNotification } = useCrossAppStore();
   const config = getAppConfig('astro');
 
   React.useEffect(() => {
     // Initialize cross-app integration if enabled
     if (isFeatureEnabled('crossAppIntegration')) {
-      addNotification({
-        id: 'astro-init',
-        message: 'Astrology app initialized with Healwave integration',
-        type: 'info',
-        timestamp: Date.now(),
-      });
+      console.info('Astrology app initialized with cross-app integration');
     }
-  }, [addNotification]);
+  }, []);
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -83,6 +79,9 @@ const MainApp: React.FC = React.memo(function MainApp() {
                 <AIInterpretation />
               } />
               <Route path="/saved-charts" element={<SavedCharts />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/blog/authors" element={<BlogAuthors />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/profile" element={<Profile />} />

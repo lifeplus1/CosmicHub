@@ -50,6 +50,10 @@ pnpm run test:astro -- --coverage --run || exit 1
 node scripts/coverage-badge.mjs || true
 pnpm run coverage:ratchet:check || exit 1
 
+printf "\nRunning extended multi-project coverage ratchet...\n"
+pnpm run coverage:ratchet || exit 1
+pnpm run coverage:report || true
+
 printf "\nCollecting dependency and security reports...\n"
 node scripts/deps-report.mjs || true
 pnpm run audit:prod || true

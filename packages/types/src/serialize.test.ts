@@ -16,7 +16,18 @@ const sampleChart: AstrologyChart = {
     { name: 'Moon', sign: 'Aries', degree: 2.5, position: 12.5, house: '1', aspects: [] }
   ],
   houses: [
-    { house: 1, number: 1, sign: 'Aries', degree: 0, cusp: 0, ruler: 'Mars' }
+    { house: 1, number: 1, sign: 'Aries', degree: 0, cusp: 0, ruler: 'Mars' },
+    { house: 2, number: 2, sign: 'Taurus', degree: 30, cusp: 30, ruler: 'Venus' },
+    { house: 3, number: 3, sign: 'Gemini', degree: 60, cusp: 60, ruler: 'Mercury' },
+    { house: 4, number: 4, sign: 'Cancer', degree: 90, cusp: 90, ruler: 'Moon' },
+    { house: 5, number: 5, sign: 'Leo', degree: 120, cusp: 120, ruler: 'Sun' },
+    { house: 6, number: 6, sign: 'Virgo', degree: 150, cusp: 150, ruler: 'Mercury' },
+    { house: 7, number: 7, sign: 'Libra', degree: 180, cusp: 180, ruler: 'Venus' },
+    { house: 8, number: 8, sign: 'Scorpio', degree: 210, cusp: 210, ruler: 'Pluto' },
+    { house: 9, number: 9, sign: 'Sagittarius', degree: 240, cusp: 240, ruler: 'Jupiter' },
+    { house: 10, number: 10, sign: 'Capricorn', degree: 270, cusp: 270, ruler: 'Saturn' },
+    { house: 11, number: 11, sign: 'Aquarius', degree: 300, cusp: 300, ruler: 'Uranus' },
+    { house: 12, number: 12, sign: 'Pisces', degree: 330, cusp: 330, ruler: 'Neptune' }
   ],
   aspects: [
     { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 5.0, applying: 'true' }

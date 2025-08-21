@@ -2,14 +2,14 @@
 
 ## Overview
 
-This document consolidates all linting configurations, guidelines, and best practices for the CosmicHub project.
+This document consolidates all linting configurations, guidelines, and best practices for the
+CosmicHub project.
 
 ## Current Lint Configuration
 
 ### Frontend (TypeScript/React)
 
-**Configuration File**: `eslint.config.js`
-**Type**: ESLint Flat Config (Modern)
+**Configuration File**: `eslint.config.js` **Type**: ESLint Flat Config (Modern)
 
 #### Core Rules Enabled
 
@@ -21,18 +21,18 @@ This document consolidates all linting configurations, guidelines, and best prac
   '@typescript-eslint/no-unsafe-assignment': 'error',
   '@typescript-eslint/no-unsafe-member-access': 'error',
   '@typescript-eslint/no-unsafe-call': 'error',
-  
+
   // Boolean Expressions
   '@typescript-eslint/strict-boolean-expressions': 'error',
-  
+
   // Promise Handling
   '@typescript-eslint/no-floating-promises': 'error',
   '@typescript-eslint/no-misused-promises': 'error',
-  
+
   // React
   'react-hooks/rules-of-hooks': 'error',
   'react-hooks/exhaustive-deps': 'warn',
-  
+
   // Accessibility
   'jsx-a11y/alt-text': 'error',
   'jsx-a11y/label-has-associated-control': 'error',
@@ -95,7 +95,7 @@ check_untyped_defs = true
   "lint:astro": "eslint apps/astro/src --ext .ts,.tsx --max-warnings=0",
   "lint:healwave": "cd apps/healwave && pnpm run lint",
   "lint:types": "eslint packages/types/src --ext .ts --max-warnings=0",
-  
+
   "format": "pnpm run format:astro && pnpm run format:healwave",
   "format:astro": "cd apps/astro && pnpm run format",
   "format:healwave": "cd apps/healwave && pnpm run format"
@@ -118,12 +118,14 @@ check_untyped_defs = true
 #### 1. Type Safety Patterns
 
 **❌ Avoid**:
+
 ```typescript
 const data: any = response.data;
 const name = data.user.name; // Unsafe
 ```
 
 **✅ Prefer**:
+
 ```typescript
 interface UserResponse {
   user: {
@@ -151,28 +153,44 @@ if (isUserResponse(data)) {
 #### 2. Boolean Expression Patterns
 
 **❌ Avoid**:
+
 ```typescript
-if (str) { /* ... */ }
-if (obj) { /* ... */ }
-if (data?.property) { /* ... */ }
+if (str) {
+  /* ... */
+}
+if (obj) {
+  /* ... */
+}
+if (data?.property) {
+  /* ... */
+}
 ```
 
 **✅ Prefer**:
+
 ```typescript
-if (typeof str === 'string' && str.length > 0) { /* ... */ }
-if (obj !== null && obj !== undefined) { /* ... */ }
-if (data?.property !== undefined && data.property !== null) { /* ... */ }
+if (typeof str === 'string' && str.length > 0) {
+  /* ... */
+}
+if (obj !== null && obj !== undefined) {
+  /* ... */
+}
+if (data?.property !== undefined && data.property !== null) {
+  /* ... */
+}
 ```
 
 #### 3. Promise Handling Patterns
 
 **❌ Avoid**:
+
 ```typescript
 fetchData(); // Floating promise
 onClick={async () => await someFunction()} // Misused in JSX
 ```
 
 **✅ Prefer**:
+
 ```typescript
 void fetchData().catch(error => {
   console.error('Failed to fetch data:', error);
@@ -186,6 +204,7 @@ onClick={() => {
 #### 4. React Hook Patterns
 
 **❌ Avoid**:
+
 ```typescript
 useEffect(() => {
   fetchData(userId);
@@ -193,6 +212,7 @@ useEffect(() => {
 ```
 
 **✅ Prefer**:
+
 ```typescript
 useEffect(() => {
   if (userId) {
@@ -224,7 +244,7 @@ from ..models import ChartData
 
 ```python
 def calculate_aspects(
-    chart1: Dict[str, float], 
+    chart1: Dict[str, float],
     chart2: Dict[str, float]
 ) -> List[AspectData]:
     """Calculate aspects between two charts."""
@@ -234,6 +254,7 @@ def calculate_aspects(
 #### 3. Error Handling
 
 **❌ Avoid**:
+
 ```python
 try:
     result = risky_operation()
@@ -242,6 +263,7 @@ except:  # Bare except
 ```
 
 **✅ Prefer**:
+
 ```python
 try:
     result = risky_operation()
@@ -258,12 +280,7 @@ Create `.vscode/settings.json`:
 
 ```json
 {
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "eslint.format.enable": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
@@ -280,17 +297,20 @@ Create `.vscode/settings.json`:
 ### VSCode Extensions
 
 **Frontend**:
+
 - ESLint
 - TypeScript Importer
 - Auto Rename Tag
 - Bracket Pair Colorizer
 
 **Backend**:
+
 - Python
 - Python Docstring Generator
 - Python Type Hint
 
 **General**:
+
 - Prettier - Code formatter
 - GitLens
 - Error Lens
@@ -311,20 +331,20 @@ repos:
         language: system
         files: apps/astro/.*\.(ts|tsx)$
         pass_filenames: false
-        
+
       - id: typescript-check
         name: TypeScript Check
         entry: bash -c 'cd apps/astro && pnpm run type-check'
         language: system
         files: apps/astro/.*\.(ts|tsx)$
         pass_filenames: false
-        
+
       - id: python-black
         name: Black Python formatter
         entry: black
         language: python
         files: backend/.*\.py$
-        
+
       - id: python-flake8
         name: Flake8 Python linter
         entry: flake8
@@ -339,17 +359,9 @@ In `package.json`:
 ```json
 {
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --max-warnings=0 --fix",
-      "prettier --write"
-    ],
-    "*.{md,json,yml,yaml}": [
-      "prettier --write"
-    ],
-    "backend/**/*.py": [
-      "black",
-      "flake8"
-    ]
+    "*.{ts,tsx,js,jsx}": ["eslint --max-warnings=0 --fix", "prettier --write"],
+    "*.{md,json,yml,yaml}": ["prettier --write"],
+    "backend/**/*.py": ["black", "flake8"]
   }
 }
 ```
@@ -399,18 +411,21 @@ jobs:
 ### When to Disable Rules
 
 1. **Temporarily**: Use inline comments for complex refactoring
+
 ```typescript
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const legacyData: any = getLegacyApiResponse();
 ```
 
 2. **File-level**: For generated or legacy files
+
 ```typescript
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Generated file - do not edit
 ```
 
 3. **Configuration**: For consistent project-wide exceptions
+
 ```javascript
 // In eslint.config.js
 rules: {
@@ -436,18 +451,18 @@ rules: {
     'error',
     {
       'paths': [
-        { 
-          'name': 'shared', 
-          'message': 'Use @cosmichub/types instead' 
+        {
+          'name': 'shared',
+          'message': 'Use @cosmichub/types instead'
         }
       ],
       'patterns': ['shared/*']
     }
   ],
-  
+
   // Relaxed for component library
   '@typescript-eslint/no-explicit-any': [
-    'warn', // Instead of 'error' 
+    'warn', // Instead of 'error'
     { fixToUnknown: false }
   ]
 }
@@ -458,6 +473,7 @@ rules: {
 ### Monthly Audit Process
 
 1. **Run Comprehensive Audit**:
+
 ```bash
 # Full project lint check
 pnpm run lint 2>&1 | tee lint-audit-$(date +%Y%m%d).log
@@ -467,11 +483,13 @@ cd backend && python -m flake8 . --statistics
 ```
 
 2. **Analyze Results**:
+
 - Count errors by category
 - Identify new patterns
 - Check for regressions
 
 3. **Update Documentation**:
+
 - Update this guide with new patterns
 - Document any rule changes
 - Share learnings with team
@@ -495,14 +513,17 @@ cd backend && python -m flake8 . --statistics
 ### Common Issues
 
 #### "Parsing error: 'from' expected"
+
 - **Cause**: Missing imports or syntax error
 - **Fix**: Check import statements and TypeScript syntax
 
 #### "Rule 'x' is not defined"
+
 - **Cause**: Missing plugin or incorrect rule name
 - **Fix**: Verify plugin installation and rule name
 
 #### Python "No module named 'flake8'"
+
 - **Cause**: Missing Python dependencies
 - **Fix**: `pip install flake8` in backend directory
 
@@ -529,11 +550,13 @@ If linting is slow:
 If migrating from old `.eslintrc.js`:
 
 1. **Convert to flat config**:
+
 ```bash
 npx @eslint/migrate-config .eslintrc.js
 ```
 
 2. **Update scripts**:
+
 ```json
 "lint": "ESLINT_USE_FLAT_CONFIG=true eslint ."
 ```
@@ -549,6 +572,5 @@ npx @eslint/migrate-config .eslintrc.js
 
 ---
 
-*Last Updated*: August 19, 2025
-*Configuration Version*: ESLint 9.x Flat Config, Flake8 7.x
-*Status*: Production Ready
+_Last Updated_: August 19, 2025 _Configuration Version_: ESLint 9.x Flat Config, Flake8 7.x
+_Status_: Production Ready

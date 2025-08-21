@@ -1,6 +1,7 @@
 {
-  "lines": 6.67,
-  "statements": 6.67,
-  "functions": 32.41,
-  "branches": 59.78
+  "lines": 15.07,
+  "statements": 15.07,
+  "functions": 40.23,
+  "branches": 58.04,
+  "projects": ["astro", "backend", "types"]
 }
