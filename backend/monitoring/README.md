@@ -1,259 +1,221 @@
 # CosmicHub Monitoring Stack
 
-## OBS-010: Prometheus Alert Rules Setup
+Comprehensive monitoring and alerting setup for CosmicHub using Prometheus, Alertmanager, and Grafana.
 
-This directory contains the complete monitoring infrastructure for CosmicHub, implementing
-comprehensive Prometheus-based monitoring with SLO-aligned alerting.
+## OBS-010: Prometheus Alert Rules Setup ✅
 
-## 🎯 Overview
+This monitoring stack implements comprehensive alerting aligned with our SLO policy:
+- **99.5% Availability** target across all services
+- **<2% Error Rate** maximum threshold
+- **Latency SLOs**: P95 < 2000ms for calculations, < 1000ms for subscription checks
 
-Our monitoring solution provides:
-
-- **SLO-aligned alerting** (99.5% availability, <2% error rate)
-- **Multi-layered alert severity** (Critical, Warning, Info)
-- **Performance monitoring** with P95 latency tracking
-- **Business metrics** for traffic and engagement insights
-- **Pre-computed recording rules** for efficient dashboards
-
-## 🚀 Quick Start
-
-### 1. Deploy Monitoring Stack
+### Quick Start
 
 ```bash
-# Make script executable
-chmod +x backend/monitoring/deploy-monitoring.sh
+# Deploy the complete monitoring stack
+./backend/monitoring/deploy-monitoring.sh deploy --env production
 
-# Start monitoring (includes health checks)
-./backend/monitoring/deploy-monitoring.sh start
-```
-
-### 2. Access Monitoring Interfaces
-
-- **Prometheus**: http://localhost:9090
-- **Alertmanager**: http://localhost:9093
-- **cAdvisor**: http://localhost:8080
-- **Node Exporter**: http://localhost:9100/metrics
-
-### 3. Configure Notifications (Optional)
-
-```bash
-# Edit notification settings
-cp .env.monitoring.example .env.monitoring
-vim .env.monitoring
-```
-
-## 📊 Architecture
-
-### Components
-
-```
-┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
-│   CosmicHub     │    │  Ephemeris   │    │   Prometheus    │
-│   Backend       │────│   Server     │────│   (Metrics)     │
-│   :8000         │    │   :8001      │    │   :9090         │
-└─────────────────┘    └──────────────┘    └─────────────────┘
-                                                    │
-┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
-│  Alertmanager   │    │  Node        │    │   cAdvisor      │
-│  (Alerts)       │────│  Exporter    │────│  (Containers)   │
-│  :9093          │    │  :9100       │    │  :8080          │
-└─────────────────┘    └──────────────┘    └─────────────────┘
-```
-
-### Data Flow
-
-1. **Metric Collection**: Services expose `/metrics` endpoints
-2. **Scraping**: Prometheus scrapes metrics every 10-30s
-3. **Rule Evaluation**: Alert rules evaluated every 15s
-4. **Alerting**: Critical alerts fire to Alertmanager
-5. **Notification**: Alerts sent via configured channels
-
-## ⚠️ Alert Rules Reference
-
-### Critical Alerts (SLO Breaches)
-
-| Alert                        | Condition             | Impact                  | Action                                |
-| ---------------------------- | --------------------- | ----------------------- | ------------------------------------- |
-| `ServiceAvailabilityBreach`  | Availability < 99.5%  | User-facing degradation | Check failed requests, service health |
-| `ErrorRateSLOBreach`         | Error rate > 2%       | Increased user errors   | Check logs, DB connectivity           |
-| `LatencySLOBreach_Calculate` | P95 latency > 2000ms  | Slow chart generation   | Check ephemeris performance           |
-| `BackendServiceDown`         | Backend unreachable   | Complete API outage     | Restart service, check health         |
-| `EphemerisServiceDown`       | Ephemeris unreachable | Chart calculations lost | Restart ephemeris service             |
-
-### Warning Alerts (Early Warnings)
-
-| Alert                     | Condition            | Impact                  | Action                          |
-| ------------------------- | -------------------- | ----------------------- | ------------------------------- |
-| `HighResponseTimeWarning` | P95 latency > 1500ms | Performance degradation | Monitor trends, check resources |
-| `HighErrorRateWarning`    | Error rate > 1%      | Early warning           | Investigate error patterns      |
-
-### Info Alerts (Business Metrics)
-
-| Alert               | Condition          | Impact          | Action           |
-| ------------------- | ------------------ | --------------- | ---------------- |
-| `HighTrafficVolume` | Requests > 100/sec | High engagement | Monitor capacity |
-
-## 🔧 Configuration Files
-
-### `prometheus/prometheus.yml`
-
-Production Prometheus configuration with:
-
-- **Scrape targets**: Backend (10s), Ephemeris (15s), System (30s)
-- **Storage**: 30-day retention, 10GB limit
-- **Alerting**: Integrated with Alertmanager
-- **Performance**: Optimized query limits
-
-### `prometheus/alert-rules.yml`
-
-Comprehensive alert rules with:
-
-- **195 lines** of SLO-aligned rules
-- **Critical/Warning/Info** severity levels
-- **Recording rules** for dashboard efficiency
-- **Runbook links** for operational guidance
-
-### `docker-compose.monitoring.yml`
-
-Complete monitoring stack:
-
-- Prometheus, Alertmanager, Grafana
-- Node Exporter, cAdvisor, Redis Exporter
-- Blackbox Exporter for health checks
-- Production-ready networking
-
-## 📈 SLO Alignment
-
-Our monitoring directly supports business objectives:
-
-### Service Level Objectives (SLOs)
-
-- **Availability**: 99.5% (measured over 5-minute windows)
-- **Error Rate**: < 2% (5xx errors over total requests)
-- **Latency**: P95 < 2000ms for /calculate endpoint
-
-### Service Level Indicators (SLIs)
-
-- **Request Success Rate**: `(non-5xx requests) / (total requests)`
-- **Response Time**: P95 of `http_request_duration_seconds`
-- **Service Uptime**: `up{job="service-name"}`
-
-## 🚨 Runbook Integration
-
-Each alert includes runbook links for immediate action guidance:
-
-- **Availability**: https://docs.cosmichub.com/runbooks/availability
-- **Error Rate**: https://docs.cosmichub.com/runbooks/error-rate
-- **Latency**: https://docs.cosmichub.com/runbooks/latency
-- **Service Down**: https://docs.cosmichub.com/runbooks/service-down
-
-## 🛠️ Operations
-
-### Common Commands
-
-```bash
-# View monitoring stack status
+# Check status
 ./backend/monitoring/deploy-monitoring.sh status
 
-# Test alert system
-./backend/monitoring/deploy-monitoring.sh test
-
 # View logs
-docker-compose -f backend/monitoring/docker-compose.monitoring.yml logs -f
-
-# Stop monitoring
-./backend/monitoring/deploy-monitoring.sh stop
-
-# Restart monitoring
-./backend/monitoring/deploy-monitoring.sh restart
+./backend/monitoring/deploy-monitoring.sh logs
 ```
 
-### Troubleshooting
+### Architecture
 
-#### Prometheus Not Starting
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Prometheus    │────│   Alertmanager  │────│     Grafana     │
+│   (Metrics)     │    │    (Alerts)     │    │  (Dashboards)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  CosmicHub API  │    │ Notification    │    │   Monitoring    │
+│   (Backend)     │    │   Channels      │    │   Dashboard     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Ephemeris API   │
+│  (Calculations) │
+└─────────────────┘
+```
+
+## Alert Categories
+
+### 🔴 Critical Alerts
+- **Service Down**: Backend/Ephemeris service unavailable
+- **SLO Breaches**: Availability < 99.5%, Error Rate > 2%, Latency exceeded
+- **Database Issues**: Connection failures, query timeouts
+
+### 🟡 Warning Alerts  
+- **Performance Degradation**: High latency approaching SLO limits
+- **Resource Constraints**: Memory/CPU/Disk usage warnings
+- **Security Issues**: Authentication failures, suspicious patterns
+
+### 🔵 Info Alerts
+- **Business Metrics**: High traffic, user registration spikes
+- **Operational Info**: Deployment notifications, capacity planning
+
+## Services & Access Points
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| Prometheus | http://localhost:9090 | Metrics storage & querying |
+| Alertmanager | http://localhost:9093 | Alert routing & management |
+| Grafana | http://localhost:3001 | Dashboards & visualization |
+| Node Exporter | http://localhost:9100 | System metrics |
+| Blackbox | http://localhost:9115 | Endpoint monitoring |
+
+### Default Credentials
+- **Grafana**: admin/admin (change on first login)
+
+## Configuration Files
+
+```
+backend/monitoring/
+├── prometheus/
+│   ├── prometheus.yml          # Main Prometheus config
+│   ├── alert-rules.yml         # Comprehensive alert rules
+├── alertmanager/
+│   └── alertmanager.yml        # Alert routing config
+├── grafana/
+│   └── provisioning/           # Dashboard & datasource config
+├── docker-compose.monitoring.yml
+├── deploy-monitoring.sh        # Deployment automation
+└── README.md                   # This file
+```
+
+## Alert Rules Overview
+
+### SLO-Based Alerts
+- **ServiceAvailabilityBreach**: < 99.5% availability
+- **ErrorRateSLOBreach**: > 2% error rate  
+- **LatencySLOBreach**: P95 latency exceeded (2000ms calculate, 1000ms subscription)
+
+### Service Health
+- **BackendServiceDown**: API unavailable
+- **EphemerisServiceDown**: Calculation service unavailable
+- **DatabaseConnectionFailure**: DB connectivity issues
+
+### Performance Warnings
+- **HighResponseTimeWarning**: Latency approaching limits
+- **HighErrorRateWarning**: Error rate elevated (>1% warning before 2% critical)
+- **HighMemoryUsage**: >80% memory usage
+- **HighCPUUsage**: >80% CPU usage
+
+### Business & Security
+- **AuthenticationFailureSpike**: Potential security issues
+- **RateLimitingActive**: Traffic restrictions active
+- **HighTrafficVolume**: Positive engagement indicator
+
+## Deployment Commands
 
 ```bash
-# Check configuration syntax
-promtool check config backend/monitoring/prometheus/prometheus.yml
-promtool check rules backend/monitoring/prometheus/alert-rules.yml
+# Full deployment with backup
+./deploy-monitoring.sh deploy --env production --backup
 
-# Check Docker logs
-docker-compose -f backend/monitoring/docker-compose.monitoring.yml logs prometheus
+# Validate configuration
+./deploy-monitoring.sh validate
+
+# Update existing stack
+./deploy-monitoring.sh update
+
+# Monitor logs
+./deploy-monitoring.sh logs prometheus
+
+# Check service health
+./deploy-monitoring.sh status
+
+# Clean restart
+./deploy-monitoring.sh restart
 ```
 
-#### No Metrics Visible
+## Metrics Endpoints
 
-```bash
-# Check service targets
-curl http://localhost:9090/api/v1/targets
+Ensure your services expose metrics at these endpoints:
 
-# Verify service endpoints
-curl http://localhost:8000/metrics
-curl http://localhost:8001/metrics
+### Backend API (`backend:8000`)
 ```
-
-#### Alerts Not Firing
-
-```bash
-# Check alert rules evaluation
-curl http://localhost:9090/api/v1/rules
-
-# Test alert queries manually
-curl 'http://localhost:9090/api/v1/query?query=up{job="cosmichub-backend"}'
+GET /metrics
 ```
+**Required metrics:**
+- `http_requests_total` - Total HTTP requests (labels: status, method, route)
+- `http_request_duration_seconds` - Request duration histogram
+- `auth_failures_total` - Authentication failures
+- `db_connection_errors_total` - Database errors
+- `rate_limit_exceeded_total` - Rate limiting events
 
-## 📧 Notification Setup
-
-### Slack Integration
-
-```bash
-# Set Slack webhook in .env.monitoring
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+### Ephemeris Server (`ephemeris:8001`) 
 ```
-
-### PagerDuty Integration
-
-```bash
-# Set PagerDuty service key in .env.monitoring
-PAGERDUTY_SERVICE_KEY=your-pagerduty-service-key
+GET /metrics
 ```
+**Required metrics:**
+- `calculation_queue_depth` - Pending calculations
+- `calculation_duration_seconds` - Processing time
+- `calculation_errors_total` - Failed calculations
 
-### Email Alerts
+## Runbook Links
 
-```bash
-# Configure SMTP in .env.monitoring
-SMTP_PASSWORD=your-smtp-password
-```
+All alerts reference runbooks for quick resolution:
+- Service Down: `https://docs.cosmichub.com/runbooks/service-down`
+- Performance: `https://docs.cosmichub.com/runbooks/performance`
+- Security: `https://docs.cosmichub.com/runbooks/security`
+- Database: `https://docs.cosmichub.com/runbooks/database`
 
-## 🏗️ Development
+## SLO Alignment
 
-### Adding New Alerts
+This monitoring setup directly supports our Service Level Objectives:
 
-1. Edit `prometheus/alert-rules.yml`
-2. Test with `promtool check rules`
-3. Reload Prometheus: `curl -X POST http://localhost:9090/-/reload`
+| SLO | Target | Alert Threshold | Alert Name |
+|-----|--------|-----------------|------------|
+| Availability | 99.5% | < 99.5% for 2min | ServiceAvailabilityBreach |
+| Error Rate | < 2% | > 2% for 1min | ErrorRateSLOBreach |
+| Latency (Calculate) | P95 < 2000ms | > 2000ms for 3min | LatencySLOBreach_Calculate |
+| Latency (Subscription) | P95 < 1000ms | > 1000ms for 3min | LatencySLOBreach_Subscription |
 
-### Custom Metrics
+## Troubleshooting
 
-Add metrics to your service:
+### Common Issues
 
-```python
-# Python example
-from prometheus_client import Counter, Histogram
+1. **Services won't start**
+   ```bash
+   # Check Docker status
+   docker info
+   
+   # Validate configs
+   ./deploy-monitoring.sh validate
+   ```
 
-request_count = Counter('http_requests_total', 'HTTP requests', ['method', 'status'])
-request_duration = Histogram('http_request_duration_seconds', 'Request duration')
-```
+2. **No metrics appearing**
+   - Verify service endpoints are accessible
+   - Check Prometheus targets: http://localhost:9090/targets
+   - Review service logs
 
-## 📚 Resources
+3. **Alerts not firing**
+   - Validate alert rules syntax
+   - Check Prometheus Rules: http://localhost:9090/rules
+   - Verify metric names match your service output
 
-- [Prometheus Documentation](https://prometheus.io/docs/)
-- [Alertmanager Configuration](https://prometheus.io/docs/alerting/latest/configuration/)
-- [PromQL Query Language](https://prometheus.io/docs/prometheus/latest/querying/basics/)
-- [CosmicHub SLO Policy](https://docs.cosmichub.com/slo-policy)
+### Monitoring the Monitoring
+
+The monitoring stack monitors itself:
+- Prometheus health: http://localhost:9090/-/healthy
+- Alertmanager health: http://localhost:9093/-/healthy
+- Self-monitoring alerts included in alert rules
+
+## Next Steps
+
+1. **Customize Alerting**: Update `alertmanager.yml` with your notification channels
+2. **Add Dashboards**: Import Grafana dashboards for visual monitoring
+3. **Extend Metrics**: Add business-specific metrics to your services
+4. **Production Hardening**: Configure authentication, TLS, and access controls
 
 ---
 
-**Implementation Status**: ✅ Complete - OBS-010 Prometheus Alert Rules Setup  
-**Last Updated**: August 22, 2025  
-**Version**: 1.0.0
+**Related Tasks:**
+- ✅ OBS-010: Prometheus alert rules setup
+- 📋 OBS-011: Grafana dashboard creation (next)
+- 📋 OBS-012: Incident response automation (future)
