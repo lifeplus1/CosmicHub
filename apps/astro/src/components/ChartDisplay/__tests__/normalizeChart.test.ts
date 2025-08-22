@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { normalizeChart, isChartLike, hasChartContent, getSignFromDegree, getRulerFromSign, getAspectOrb, type ChartLike } from '../normalizeChart';
 
 // Helper to deeply clone via JSON for immutability checks
-const clone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
+const clone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj)) as T;
 
 describe('normalizeChart utilities', () => {
   it('identifies a loose chart-like object', () => {

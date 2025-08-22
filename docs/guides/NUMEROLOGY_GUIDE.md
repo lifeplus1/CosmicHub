@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Numerology Calculator is a comprehensive tool that provides deep insights into personality, life purpose, and spiritual path through the ancient science of numbers. It analyzes both your name and birth date to reveal hidden patterns and meanings.
+The Numerology Calculator is a comprehensive tool that provides deep insights into personality, life
+purpose, and spiritual path through the ancient science of numbers. It analyzes both your name and
+birth date to reveal hidden patterns and meanings.
 
 ## 🌟 Key Features
 
@@ -69,6 +71,7 @@ The Numerology Calculator is a comprehensive tool that provides deep insights in
 ### Master Numbers
 
 Special significance for 11, 22, and 33:
+
 - **11**: Intuitive illuminator and spiritual messenger
 - **22**: Master builder with practical vision
 - **33**: Master teacher with healing abilities
@@ -164,19 +167,19 @@ Special significance for 11, 22, and 33:
 {
   "core_numbers": {
     "life_path": { "number": 3, "meaning": "..." },
-    "destiny": { "number": 8, "meaning": "..." },
+    "destiny": { "number": 8, "meaning": "..." }
     // ... all core numbers
   },
   "karmic_numbers": {
     "karmic_debts": [13, 16],
-    "karmic_lessons": [4, 7],
+    "karmic_lessons": [4, 7]
     // ... detailed meanings
   },
   "personal_year": {
     "number": 5,
     "year": 2025,
     "meaning": "Year of change and freedom"
-  },
+  }
   // ... additional analyses
 }
 ```
@@ -272,8 +275,11 @@ Special significance for 11, 22, and 33:
 5. **Explore the tabs** for comprehensive insights
 6. **Save or share** your results
 
-The Numerology Calculator provides a powerful window into the hidden patterns of your life, offering guidance for personal growth, relationships, and spiritual development through the ancient wisdom of numbers.
+The Numerology Calculator provides a powerful window into the hidden patterns of your life, offering
+guidance for personal growth, relationships, and spiritual development through the ancient wisdom of
+numbers.
 
 ---
 
-*"Numbers are the Universal language offered by the deity to humans as confirmation of the truth."* - Pythagoras
+_"Numbers are the Universal language offered by the deity to humans as confirmation of the
+truth."_ - Pythagoras

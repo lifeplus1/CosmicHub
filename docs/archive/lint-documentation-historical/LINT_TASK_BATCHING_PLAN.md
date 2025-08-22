@@ -2,20 +2,21 @@
 
 ## Overview
 
-Organized lint cleanup tasks into 4 concurrent batches to avoid file collisions while leveraging each AI model's strengths. Each batch targets different file sets and issue types.
+Organized lint cleanup tasks into 4 concurrent batches to avoid file collisions while leveraging
+each AI model's strengths. Each batch targets different file sets and issue types.
 
 ---
 
 ## 🤖 BATCH 1: Claude 3.5 Sonnet - Type Safety & Core Components
 
-**Specialty**: Complex type safety, systematic pattern application
-**Estimated Time**: 3-4 hours
+**Specialty**: Complex type safety, systematic pattern application **Estimated Time**: 3-4 hours
 **Priority**: 🔴 CRITICAL
 
 ### Target Files (No Overlaps)
+
 ```
 apps/astro/src/components/PdfExport.tsx                    (15 errors)
-apps/astro/src/components/SaveChart.tsx                    (14 errors) 
+apps/astro/src/components/SaveChart.tsx                    (14 errors)
 apps/astro/src/components/TransitAnalysis/types.ts         (1 error)
 apps/astro/src/components/UnifiedBirthInput.tsx           (9 errors)
 apps/astro/src/services/api.ts                            (25 errors)
@@ -28,12 +29,14 @@ apps/astro/src/types/processed-chart.ts                   (3 errors)
 ```
 
 ### Focus Areas
+
 - **Type Safety Issues**: `@typescript-eslint/no-unsafe-*` (Primary strength)
 - **Interface Design**: Replace `any` with proper types
 - **Type Guards**: Implement runtime validation
 - **Service Layer Types**: API response typing
 
 ### Success Metrics
+
 - Target: 91 errors → 20 errors (78% reduction)
 - No file conflicts with other batches
 - Establish reusable type patterns
@@ -42,11 +45,11 @@ apps/astro/src/types/processed-chart.ts                   (3 errors)
 
 ## 🤖 BATCH 2: GPT-4o - React Components & Forms
 
-**Specialty**: React patterns, form handling, component architecture
-**Estimated Time**: 3-4 hours
+**Specialty**: React patterns, form handling, component architecture **Estimated Time**: 3-4 hours
 **Priority**: 🔴 CRITICAL
 
 ### Target Files (No Overlaps)
+
 ```
 apps/astro/src/components/ChartPreferences.tsx             (3 warnings)
 apps/astro/src/components/PricingPage.tsx                  (9 errors)
@@ -62,12 +65,14 @@ apps/astro/src/pages/Profile.tsx                          (11 errors)
 ```
 
 ### Focus Areas
+
 - **React Patterns**: Hook dependencies, component lifecycle
 - **Form Validation**: Input handling, user interactions
 - **Boolean Expressions**: User state conditionals
 - **Promise Handling**: Auth flows, API calls
 
 ### Success Metrics
+
 - Target: 86 errors → 15 errors (83% reduction)
 - Focus on user-facing components
 - Establish form handling patterns
@@ -76,11 +81,11 @@ apps/astro/src/pages/Profile.tsx                          (11 errors)
 
 ## 🤖 BATCH 3: Claude 4 - Complex Logic & Data Processing
 
-**Specialty**: Complex algorithms, data processing, performance
-**Estimated Time**: 4-5 hours
+**Specialty**: Complex algorithms, data processing, performance **Estimated Time**: 4-5 hours
 **Priority**: 🔴 HIGH
 
 ### Target Files (No Overlaps)
+
 ```
 apps/astro/src/features/ChartWheel.tsx                     (25 errors)
 apps/astro/src/features/ChartWheelInteractive.tsx         (45 errors)
@@ -94,12 +99,14 @@ apps/astro/src/components/TransitAnalysis/useTransitAnalysis.ts (15 errors)
 ```
 
 ### Focus Areas
+
 - **Complex Logic**: Chart calculations, astronomical data
 - **Performance**: Optimization patterns, memory management
 - **D3.js Integration**: Visualization type safety
 - **Algorithm Safety**: Mathematical operations, data validation
 
 ### Success Metrics
+
 - Target: 133 errors → 25 errors (81% reduction)
 - Focus on computational correctness
 - Establish performance patterns
@@ -108,11 +115,11 @@ apps/astro/src/components/TransitAnalysis/useTransitAnalysis.ts (15 errors)
 
 ## 🤖 BATCH 4: GPT-4o-mini - Utilities, Pages & Cleanup
 
-**Specialty**: Quick fixes, utility functions, page components
-**Estimated Time**: 2-3 hours
+**Specialty**: Quick fixes, utility functions, page components **Estimated Time**: 2-3 hours
 **Priority**: 🟡 MEDIUM
 
 ### Target Files (No Overlaps)
+
 ```
 apps/astro/src/pages/Calculator.tsx                       (4 errors)
 apps/astro/src/pages/ChartWheel.tsx                       (2 errors)
@@ -132,12 +139,14 @@ packages/types/src/utility.ts                             (1 error)
 ```
 
 ### Focus Areas
+
 - **Page Components**: Navigation, state management
 - **Utility Functions**: Helper functions, configuration
 - **Context Providers**: State management patterns
 - **Quick Wins**: Console statements, unused variables
 
 ### Success Metrics
+
 - Target: 52 errors → 10 errors (81% reduction)
 - Focus on easy wins and patterns
 - Clean up auxiliary code
@@ -146,11 +155,11 @@ packages/types/src/utility.ts                             (1 error)
 
 ## 🐍 BACKEND BATCH: Automated + Manual (Any Model)
 
-**Specialty**: Python formatting and code quality
-**Estimated Time**: 1-2 hours
-**Priority**: 🟡 MEDIUM (High impact, low complexity)
+**Specialty**: Python formatting and code quality **Estimated Time**: 1-2 hours **Priority**: 🟡
+MEDIUM (High impact, low complexity)
 
 ### Automated Phase (Run First)
+
 ```bash
 cd backend
 
@@ -163,6 +172,7 @@ python -m flake8 . --statistics
 ```
 
 ### Manual Cleanup Targets (Remaining ~400 issues)
+
 ```
 backend/utils/vectorized_caching.py                       (F824 unused global)
 backend/utils/vectorized_composite_utils.py               (Code structure)
@@ -171,6 +181,7 @@ backend/utils/vectorized_monitoring.py                    (Import cleanup)
 ```
 
 ### Focus Areas
+
 - **Error Handling**: Replace bare except clauses
 - **Import Organization**: Remove unused imports
 - **Variable Cleanup**: Remove unused assignments
@@ -188,11 +199,11 @@ backend/utils/vectorized_monitoring.py                    (Import cleanup)
 # Terminal 1 - Claude 3.5 Sonnet
 echo "Starting Batch 1: Type Safety & Core Components"
 
-# Terminal 2 - GPT-4o  
+# Terminal 2 - GPT-4o
 echo "Starting Batch 2: React Components & Forms"
 
 # Terminal 3 - Claude 4
-echo "Starting Batch 3: Complex Logic & Data Processing" 
+echo "Starting Batch 3: Complex Logic & Data Processing"
 
 # Terminal 4 - GPT-4o-mini
 echo "Starting Batch 4: Utilities, Pages & Cleanup"
@@ -225,23 +236,24 @@ cd backend && python -m black . && python -m isort .
 
 ### Frontend Progress
 
-| Batch | Current Errors | Target Errors | Reduction % |
-|-------|---------------|---------------|-------------|
-| Batch 1 (Claude 3.5) | 91 | 20 | 78% |
-| Batch 2 (GPT-4o) | 86 | 15 | 83% |
-| Batch 3 (Claude 4) | 133 | 25 | 81% |
-| Batch 4 (GPT-4o-mini) | 52 | 10 | 81% |
-| **TOTAL** | **362** | **70** | **81%** |
+| Batch                 | Current Errors | Target Errors | Reduction % |
+| --------------------- | -------------- | ------------- | ----------- |
+| Batch 1 (Claude 3.5)  | 91             | 20            | 78%         |
+| Batch 2 (GPT-4o)      | 86             | 15            | 83%         |
+| Batch 3 (Claude 4)    | 133            | 25            | 81%         |
+| Batch 4 (GPT-4o-mini) | 52             | 10            | 81%         |
+| **TOTAL**             | **362**        | **70**        | **81%**     |
 
-*Note: This covers ~54% of the 673 total frontend errors. Remaining errors in other files can be addressed in subsequent rounds.*
+_Note: This covers ~54% of the 673 total frontend errors. Remaining errors in other files can be
+addressed in subsequent rounds._
 
 ### Backend Progress
 
-| Phase | Current Issues | Target Issues | Reduction % |
-|-------|---------------|---------------|-------------|
-| Automated | 3,275 | 400 | 88% |
-| Manual | 400 | 50 | 88% |
-| **TOTAL** | **3,275** | **50** | **98%** |
+| Phase     | Current Issues | Target Issues | Reduction % |
+| --------- | -------------- | ------------- | ----------- |
+| Automated | 3,275          | 400           | 88%         |
+| Manual    | 400            | 50            | 88%         |
+| **TOTAL** | **3,275**      | **50**        | **98%**     |
 
 ---
 
@@ -292,6 +304,6 @@ Each batch maintains:
 
 ---
 
-*Created*: August 19, 2025  
-*Strategy*: Concurrent AI model optimization with collision avoidance  
-*Status*: Ready for execution - No file conflicts between batches
+_Created_: August 19, 2025  
+_Strategy_: Concurrent AI model optimization with collision avoidance  
+_Status_: Ready for execution - No file conflicts between batches

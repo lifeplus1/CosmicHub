@@ -49,14 +49,14 @@ describe('API migration to ApiResult', () => {
     if (!result.success) expect(result.code).toBe('400');
   });
 
-  it('fetchAIInterpretations returns success', async () => {
+  it('fetchAIInterpretations returns success', async (): Promise<void> => {
     mockedAxios.post.mockResolvedValue(buildResponse({ data: [] }));
   const result = await api.fetchAIInterpretations('chart-1' as unknown as api.ChartId, 'user-1' as unknown as api.UserId);
     expect(result.success).toBe(true);
     if (result.success) expect(Array.isArray(result.data.data)).toBe(true);
   });
 
-  it('fetchAIInterpretations returns failure on 401', async () => {
+  it('fetchAIInterpretations returns failure on 401', async (): Promise<void> => {
     mockedAxios.post.mockRejectedValue({ response: { status: 401 } });
   const result = await api.fetchAIInterpretations('chart-1' as unknown as api.ChartId, 'user-1' as unknown as api.UserId);
     expect(result.success).toBe(false);

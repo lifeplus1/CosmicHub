@@ -33,7 +33,7 @@
 ### 🚀 **Fonts Used:**
 
 - **Cinzel**: Headings and decorative text (elegant serif)
-- **Quicksand**: Body text and UI elements (modern sans-serif)  
+- **Quicksand**: Body text and UI elements (modern sans-serif)
 - **Cormorant Garamond**: Chart titles and special content (readable serif)
 
 ### 📊 **Technical Details:**
@@ -47,7 +47,6 @@
   --font-primary: 'Quicksand', system-ui, sans-serif;
   --font-heading: 'Cinzel', Georgia, serif;
   --font-decorative: 'Cormorant Garamond', Georgia, serif;
-
 }
 ```
 

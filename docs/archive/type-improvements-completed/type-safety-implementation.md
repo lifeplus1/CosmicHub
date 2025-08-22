@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document summarizes the changes made to improve type safety across the CosmicHub codebase. The goal is to maintain strict typing standards while allowing for pragmatic exceptions where TypeScript's type system has limitations.
+This document summarizes the changes made to improve type safety across the CosmicHub codebase. The
+goal is to maintain strict typing standards while allowing for pragmatic exceptions where
+TypeScript's type system has limitations.
 
 ## Changes Implemented
 
@@ -31,7 +33,6 @@ This document summarizes the changes made to improve type safety across the Cosm
 - Created specialized type utility files:
   - `house-cusp.ts`: Strongly-typed definitions for house cusp data
   - `processed-chart.ts`: Type interfaces for processed chart data
-  
 - Implemented advanced type safety patterns:
   - Robust type guards with precise type narrowing
   - Proper use of `Omit<T, K>` utility type to handle incompatible fields

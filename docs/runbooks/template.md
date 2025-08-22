@@ -1,10 +1,7 @@
 # Incident Runbook Template
 
-Status: Adopted
-Owner: Reliability Lead
-Last-Updated: 2025-08-16
-Next-Review: 2025-11-01
-Source: Manual
+Status: Adopted Owner: Reliability Lead Last-Updated: 2025-08-16 Next-Review: 2025-11-01 Source:
+Manual
 
 ## 1. Summary
 
@@ -23,10 +20,10 @@ Concise one-paragraph description (what failed, user-facing impact, current stat
 
 ## 4. Timeline
 
-| Time (UTC) | Event |
-|-----------|-------|
-| 12:03 | Alert fired |
-| ... | ... |
+| Time (UTC) | Event       |
+| ---------- | ----------- |
+| 12:03      | Alert fired |
+| ...        | ...         |
 
 ## 5. Current Mitigation Status
 
@@ -43,7 +40,7 @@ Concise one-paragraph description (what failed, user-facing impact, current stat
 ## 7. Mitigation Options
 
 | Option | Description | Trade-offs |
-|--------|-------------|------------|
+| ------ | ----------- | ---------- |
 
 ## 8. Communications
 

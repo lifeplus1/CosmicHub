@@ -1,35 +1,39 @@
 # Guidelines for Using `any` Type in TypeScript
 
-While we generally avoid using the `any` type to maintain type safety, there are specific scenarios where it may be necessary. This document outlines our approach to handling these exceptions.
+While we generally avoid using the `any` type to maintain type safety, there are specific scenarios
+where it may be necessary. This document outlines our approach to handling these exceptions.
 
 ## AI Model Recommendations for TypeScript Type Challenges
 
 When facing complex typing challenges, different AI models have varying strengths that can help:
 
-| Task | Recommended Models | Notes |
-|------|-------------------|-------|
-| Complex generic type patterns | GPT-5, Claude 3.7/4.0 | These models excel at understanding deeply nested generic types and can suggest proper type definitions |
-| Type inference debugging | GPT-5, Claude 3.5, Gemini 2.5 Pro | Good at explaining why TypeScript is inferring specific types |
-| Converting `any` to proper types | GPT-5, Claude 3.5/3.7 | Strong at incrementally improving type safety |
-| Polymorphic component typing | GPT-5, Claude 4.0 | Best at solving React component typing challenges |
-| Migration from JS to TS | GPT-4o, o3 mini, Claude 3.5 | Cost-effective for bulk conversions |
-| Type utility creation | GPT-5, Claude 3.7/4.0 | Excellent at creating complex conditional types |
-| Performance optimization | GPT-5, GPT-5 mini | Good at reducing type complexity while maintaining safety |
-| Quick type fixes | o4 mini, GPT-5 mini | Efficient for straightforward typing issues |
-| ESLint configuration | GPT-4.1, GPT-4o, Claude 3.5 | Helpful for configuring proper type linting rules |
-| Learning TypeScript types | GPT-4o, Claude 3.5, o3 mini | Provide clear, educational explanations |
+| Task                             | Recommended Models                | Notes                                                                                                   |
+| -------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Complex generic type patterns    | GPT-5, Claude 3.7/4.0             | These models excel at understanding deeply nested generic types and can suggest proper type definitions |
+| Type inference debugging         | GPT-5, Claude 3.5, Gemini 2.5 Pro | Good at explaining why TypeScript is inferring specific types                                           |
+| Converting `any` to proper types | GPT-5, Claude 3.5/3.7             | Strong at incrementally improving type safety                                                           |
+| Polymorphic component typing     | GPT-5, Claude 4.0                 | Best at solving React component typing challenges                                                       |
+| Migration from JS to TS          | GPT-4o, o3 mini, Claude 3.5       | Cost-effective for bulk conversions                                                                     |
+| Type utility creation            | GPT-5, Claude 3.7/4.0             | Excellent at creating complex conditional types                                                         |
+| Performance optimization         | GPT-5, GPT-5 mini                 | Good at reducing type complexity while maintaining safety                                               |
+| Quick type fixes                 | o4 mini, GPT-5 mini               | Efficient for straightforward typing issues                                                             |
+| ESLint configuration             | GPT-4.1, GPT-4o, Claude 3.5       | Helpful for configuring proper type linting rules                                                       |
+| Learning TypeScript types        | GPT-4o, Claude 3.5, o3 mini       | Provide clear, educational explanations                                                                 |
 
 ## When `any` Is Acceptable
 
 The `any` type should only be used in the following scenarios:
 
-1. **Complex Generic Type Patterns**: When dealing with highly polymorphic components or functions where TypeScript's type system cannot fully express the intended behavior.
+1. **Complex Generic Type Patterns**: When dealing with highly polymorphic components or functions
+   where TypeScript's type system cannot fully express the intended behavior.
 
-2. **Third-Party Libraries**: When interfacing with untyped third-party libraries that don't provide type definitions.
+2. **Third-Party Libraries**: When interfacing with untyped third-party libraries that don't provide
+   type definitions.
 
 3. **Gradual Migration**: Temporarily during migration of legacy JavaScript code to TypeScript.
 
-4. **Type System Limitations**: In rare cases where TypeScript's type system has inherent limitations.
+4. **Type System Limitations**: In rare cases where TypeScript's type system has inherent
+   limitations.
 
 ## Required Documentation
 
@@ -74,7 +78,8 @@ Before using `any`, consider these alternatives:
 
 3. **Type Predicates**: Create custom type guards with `is` to narrow types safely.
 
-4. **Type Assertions**: Use `as` to assert a more specific type when you know more than TypeScript does.
+4. **Type Assertions**: Use `as` to assert a more specific type when you know more than TypeScript
+   does.
 
 5. **Record<string, unknown>**: For objects with dynamic properties, prefer this over `any`.
 
@@ -87,9 +92,11 @@ For complex typing scenarios where `any` seems necessary, consider these advance
 Useful for partial updates to deeply nested objects:
 
 ```typescript
-type DeepPartial<T> = T extends object ? {
-  [P in keyof T]?: DeepPartial<T[P]>;
-} : T;
+type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
 
 // Instead of:
 function updateNestedConfig(config: any, updates: any): any {
@@ -119,9 +126,8 @@ const userData = apiResponse as any;
 
 // Use:
 const userData = assertType<UserData>(
-  apiResponse, 
-  (v): v is UserData => 
-    typeof v === 'object' && v !== null && 'id' in v && 'name' in v
+  apiResponse,
+  (v): v is UserData => typeof v === 'object' && v !== null && 'id' in v && 'name' in v
 );
 ```
 
@@ -131,20 +137,18 @@ For complex state management:
 
 ```typescript
 type ActionMap<M extends Record<string, any>> = {
-  [Key in keyof M]: M[Key] extends undefined
-    ? { type: Key }
-    : { type: Key; payload: M[Key] }
+  [Key in keyof M]: M[Key] extends undefined ? { type: Key } : { type: Key; payload: M[Key] };
 };
 
 // Example usage:
 type Actions = ActionMap<{
-  'SET_LOADING': boolean;
-  'SET_DATA': Array<DataItem>;
-  'SET_ERROR': Error;
+  SET_LOADING: boolean;
+  SET_DATA: Array<DataItem>;
+  SET_ERROR: Error;
 }>[keyof ActionMap<{
-  'SET_LOADING': boolean;
-  'SET_DATA': Array<DataItem>;
-  'SET_ERROR': Error;
+  SET_LOADING: boolean;
+  SET_DATA: Array<DataItem>;
+  SET_ERROR: Error;
 }>];
 ```
 
@@ -158,7 +162,7 @@ const UserSchema = z.object({
   id: z.string(),
   name: z.string(),
   role: z.enum(['admin', 'user']),
-  metadata: z.record(z.unknown()).optional()
+  metadata: z.record(z.unknown()).optional(),
 });
 
 // Apply validation at the boundary
@@ -191,18 +195,20 @@ type HOC<P> = (Component: ComponentType<P>) => ComponentType<Omit<P, 'theme'>>;
 // For multiple wrapped HOCs, use composition types:
 type ComposeHOC<TInput, TOutput> = (Component: ComponentType<TInput>) => ComponentType<TOutput>;
 
-type ComposeHOCs<HOCs extends readonly ComposeHOC<any, any>[]> = 
-  HOCs extends readonly [ComposeHOC<infer TInput, any>, ...infer Rest]
-    ? Rest extends readonly ComposeHOC<any, any>[]
-      ? Rest extends readonly [ComposeHOC<any, infer TOutput>]
-        ? ComposeHOC<TInput, TOutput>
-        : Rest extends readonly [...infer Middle, ComposeHOC<any, infer TOutput>]
-          ? Middle extends readonly ComposeHOC<any, any>[]
-            ? ComposeHOC<TInput, TOutput>
-            : never
+type ComposeHOCs<HOCs extends readonly ComposeHOC<any, any>[]> = HOCs extends readonly [
+  ComposeHOC<infer TInput, any>,
+  ...infer Rest,
+]
+  ? Rest extends readonly ComposeHOC<any, any>[]
+    ? Rest extends readonly [ComposeHOC<any, infer TOutput>]
+      ? ComposeHOC<TInput, TOutput>
+      : Rest extends readonly [...infer Middle, ComposeHOC<any, infer TOutput>]
+        ? Middle extends readonly ComposeHOC<any, any>[]
+          ? ComposeHOC<TInput, TOutput>
           : never
-      : never
-    : never;
+        : never
+    : never
+  : never;
 ```
 
 ### Recursive Types for Tree Structures
@@ -223,9 +229,9 @@ type HeteroTreeNode<T extends Record<string, unknown>> = {
 
 // Example usage:
 type DocumentNode = HeteroTreeNode<{
-  'text': string;
-  'image': { src: string; alt?: string };
-  'list': { ordered: boolean };
+  text: string;
+  image: { src: string; alt?: string };
+  list: { ordered: boolean };
 }>;
 ```
 
@@ -246,11 +252,12 @@ class TypedEventEmitter {
   emit<K extends EventKey>(event: K, payload: EventPayload<K>): void {
     // Implementation
   }
-  
+
   on<K extends EventKey>(event: K, callback: (payload: EventPayload<K>) => void): void {
     // Implementation
   }
 }
 ```
 
-Remember: The goal is not to eliminate `any` completely, but to ensure it's used responsibly and only when necessary.
+Remember: The goal is not to eliminate `any` completely, but to ensure it's used responsibly and
+only when necessary.

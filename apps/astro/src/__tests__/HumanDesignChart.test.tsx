@@ -29,7 +29,7 @@ vi.mock('../components/ToastProvider', () => ({
 
 const mockCalculateHumanDesign = vi.mocked(api.calculateHumanDesign);
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+const TestWrapper = ({ children }: { children: React.ReactNode }): React.ReactElement => (
   <MemoryRouter>
     {children}
   </MemoryRouter>

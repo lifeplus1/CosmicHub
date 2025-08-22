@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document summarizes the improvements made using Claude 3.7's type system expertise and provides recommendations for when to switch to different AI models for subsequent phases of the type improvement plan.
+This document summarizes the improvements made using Claude 3.7's type system expertise and provides
+recommendations for when to switch to different AI models for subsequent phases of the type
+improvement plan.
 
 ## Completed Improvements
 

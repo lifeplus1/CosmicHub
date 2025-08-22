@@ -5,7 +5,8 @@ Maintains a non-increasing count of TypeScript errors across the monorepo.
 ## Latest Status (Aug 21 2025)
 
 - Astro & HealWave apps at 0 type errors under current strict flags.
-- Recent reductions: removed residual TS4111 (index signature dot access), TS2345 (unsafe slider callbacks), TS2532 (unsafe optional focus/array indexing) in HealWave.
+- Recent reductions: removed residual TS4111 (index signature dot access), TS2345 (unsafe slider
+  callbacks), TS2532 (unsafe optional focus/array indexing) in HealWave.
 - Next target: shared packages & backend service layer narrowing before baseline reset.
 
 ## Workflow
@@ -16,7 +17,8 @@ Maintains a non-increasing count of TypeScript errors across the monorepo.
 
 Baseline lives at `metrics/type-errors-baseline.json`. Keep it in git.
 
-When front-end apps reach sustained zero for >1 week and backend delta is actively reducing, consider resetting baseline to lock in improvements.
+When front-end apps reach sustained zero for >1 week and backend delta is actively reducing,
+consider resetting baseline to lock in improvements.
 
 ## Reset Baseline Intentionally
 

@@ -1,11 +1,7 @@
-
 # Blameless Postmortem Template
 
-Status: Adopted
-Owner: Reliability Lead
-Last-Updated: 2025-08-16
-Next-Review: 2025-11-01
-Source: Manual
+Status: Adopted Owner: Reliability Lead Last-Updated: 2025-08-16 Next-Review: 2025-11-01 Source:
+Manual
 
 ## 1. Summary
 
@@ -20,7 +16,7 @@ One-paragraph plain language summary of what happened and current status.
 ## 3. Timeline
 
 | Time (UTC) | Event | Notes |
-|-----------|-------|-------|
+| ---------- | ----- | ----- |
 
 ## 4. Detection & Response
 
@@ -49,8 +45,8 @@ Describe causal chain (technical + process). Avoid blame; focus on system condit
 
 ## 9. Action Items (SMART)
 
-| ID | Description | Owner | Priority | Due Date | Status |
-|----|-------------|-------|----------|----------|--------|
+| ID  | Description | Owner | Priority | Due Date | Status |
+| --- | ----------- | ----- | -------- | -------- | ------ |
 
 ## 10. Prevention / Hardening Plan
 

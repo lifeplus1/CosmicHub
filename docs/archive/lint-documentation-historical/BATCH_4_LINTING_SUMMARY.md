@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document summarizes the TypeScript linting fixes applied to the Batch 4 files in the CosmicHub project. These fixes help ensure type safety and proper code quality throughout the codebase.
+This document summarizes the TypeScript linting fixes applied to the Batch 4 files in the CosmicHub
+project. These fixes help ensure type safety and proper code quality throughout the codebase.
 
 ## Files Fixed
 

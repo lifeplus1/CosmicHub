@@ -10,7 +10,17 @@ vi.mock('@cosmichub/config', () => {
     createPushNotificationManager: () => ({
       initialize: vi.fn().mockResolvedValue(true),
       queueNotification,
-	getNotificationStats: () => ({ 
+	getNotificationStats: (): {
+          totalSubscriptions: number;
+          activeSubscriptions: number;
+          queuedNotifications: number;
+          permissionStatus: NotificationPermission;
+          totalSent: number;
+          totalDelivered: number;
+          totalClicked: number;
+          avgDeliveryTime: number;
+          errors: number;
+        } => ({ 
         totalSubscriptions: 1, 
         activeSubscriptions: 1, 
         queuedNotifications: 0, 
@@ -24,29 +34,29 @@ vi.mock('@cosmichub/config', () => {
       subscribeUser: vi.fn().mockResolvedValue(true)
     }),
     AstrologyNotificationScheduler: class { 
-      scheduleDailyHoroscope() {}
-      scheduleTransitAlerts() {}
-      scheduleMoonPhases() {}
+      scheduleDailyHoroscope(): void {}
+      scheduleTransitAlerts(): void {}
+      scheduleMoonPhases(): void {}
     },
     getBackgroundSyncManager: () => ({
-      setPushNotificationManager() {},
-      getSyncStatus: () => ({ idle: true })
+      setPushNotificationManager(): void {},
+      getSyncStatus: (): { idle: boolean } => ({ idle: true })
     })
   };
 });
 
 describe('UnifiedNotificationManager', () => {
-  beforeEach(() => {
+  beforeEach((): void => {
     // clear localStorage mock between tests
     (global as any).localStorage = {
       store: {} as Record<string,string>,
-      getItem(key: string) { return this.store[key] ?? null; },
-      setItem(key: string, val: string) { this.store[key] = val; },
-      removeItem(key: string) { delete this.store[key]; }
+      getItem(key: string): string | null { return this.store[key] ?? null; },
+      setItem(key: string, val: string): void { this.store[key] = val; },
+      removeItem(key: string): void { delete this.store[key]; }
     };
   });
 
-  it('initializes without user id and returns typed status', async () => {
+  it('initializes without user id and returns typed status', async (): Promise<void> => {
     const mgr = getNotificationManager();
     const ok = await mgr.initialize();
     expect(ok).toBe(true);
@@ -54,14 +64,14 @@ describe('UnifiedNotificationManager', () => {
     expect(status.push.queuedNotifications).toBe(0);
   });
 
-  it('subscribes user with default prefs when invalid prefs passed', async () => {
+  it('subscribes user with default prefs when invalid prefs passed', async (): Promise<void> => {
     const mgr = getNotificationManager();
     await mgr.initialize();
     const ok = await mgr.subscribe('user-1', { not: 'valid' });
     expect(ok).toBe(true);
   });
 
-  it('ignores notifyChartReady when chart missing id', async () => {
+  it('ignores notifyChartReady when chart missing id', async (): Promise<void> => {
     const mgr = getNotificationManager();
     await mgr.initialize();
     // @ts-expect-error intentionally missing id
@@ -69,13 +79,18 @@ describe('UnifiedNotificationManager', () => {
     // no throw expected
   });
 
-  it('fills default stats fields when push manager omits extended metrics', async () => {
+  it('fills default stats fields when push manager omits extended metrics', async (): Promise<void> => {
     // Remock with reduced stats shape
     vi.doMock('@cosmichub/config', () => ({
       createPushNotificationManager: () => ({
         initialize: vi.fn().mockResolvedValue(true),
         queueNotification: vi.fn().mockResolvedValue(undefined),
-        getNotificationStats: () => ({
+        getNotificationStats: (): {
+          totalSubscriptions: number;
+          activeSubscriptions: number;
+          queuedNotifications: number;
+          permissionStatus: NotificationPermission;
+        } => ({
           totalSubscriptions: 2,
           activeSubscriptions: 2,
           queuedNotifications: 1,
@@ -83,13 +98,13 @@ describe('UnifiedNotificationManager', () => {
         })
       }),
       AstrologyNotificationScheduler: class { 
-        scheduleDailyHoroscope() {}
-        scheduleTransitAlerts() {}
-        scheduleMoonPhases() {}
+        scheduleDailyHoroscope(): void {}
+        scheduleTransitAlerts(): void {}
+        scheduleMoonPhases(): void {}
       },
       getBackgroundSyncManager: () => ({
-        setPushNotificationManager() {},
-        getSyncStatus: () => ({ idle: false })
+        setPushNotificationManager(): void {},
+        getSyncStatus: (): { idle: boolean } => ({ idle: false })
       })
     }));
 

@@ -2,17 +2,18 @@
 
 ## Optimal Instance Configuration
 
-Based on the CosmicHub project structure and performance requirements, here are the recommended specifications for concurrent GitHub Copilot instances:
+Based on the CosmicHub project structure and performance requirements, here are the recommended
+specifications for concurrent GitHub Copilot instances:
 
 ### Development Environment
 
-| Purpose | Instances | Copilot Agent Model | Memory | Description |
-|---------|-----------|---------------------|--------|-------------|
-| TypeScript Transpilation | 2 | GPT-4o | 8GB | Handles complex TypeScript type inference and module resolution |
-| ESLint Processing | 2 | GPT-4o mini | 4GB | Processes linting fixes and rule applications |
-| Test Creation | 3 | GPT-4o | 8GB | Generates comprehensive test coverage |
-| API Documentation | 1 | Claude 3 Opus | 8GB | Creates detailed API documentation with examples |
-| Architecture Review | 1 | GPT-4o | 8GB | Reviews structural changes and architectural decisions |
+| Purpose                  | Instances | Copilot Agent Model | Memory | Description                                                     |
+| ------------------------ | --------- | ------------------- | ------ | --------------------------------------------------------------- |
+| TypeScript Transpilation | 2         | GPT-4o              | 8GB    | Handles complex TypeScript type inference and module resolution |
+| ESLint Processing        | 2         | GPT-4o mini         | 4GB    | Processes linting fixes and rule applications                   |
+| Test Creation            | 3         | GPT-4o              | 8GB    | Generates comprehensive test coverage                           |
+| API Documentation        | 1         | Claude 3 Opus       | 8GB    | Creates detailed API documentation with examples                |
+| Architecture Review      | 1         | GPT-4o              | 8GB    | Reviews structural changes and architectural decisions          |
 
 ## Optimal Prompts for Each Instance Type
 
@@ -108,13 +109,13 @@ For this project:
 
 ### CI/CD Pipeline
 
-| Purpose | Instances | Copilot Agent Model | Memory | Description |
-|---------|-----------|---------------------|--------|-------------|
-| Code Review | 4 | GPT-4o | 8GB | Reviews pull requests and suggests improvements |
-| Security Scanning | 2 | Claude 3 Opus | 8GB | Analyzes code for security vulnerabilities |
-| Performance Optimization | 2 | GPT-4o | 8GB | Identifies and resolves performance bottlenecks |
-| Documentation Generation | 1 | Claude 3 Sonnet | 4GB | Generates user and developer documentation |
-| Dependency Analysis | 1 | GPT-4o mini | 4GB | Analyzes and optimizes package dependencies |
+| Purpose                  | Instances | Copilot Agent Model | Memory | Description                                     |
+| ------------------------ | --------- | ------------------- | ------ | ----------------------------------------------- |
+| Code Review              | 4         | GPT-4o              | 8GB    | Reviews pull requests and suggests improvements |
+| Security Scanning        | 2         | Claude 3 Opus       | 8GB    | Analyzes code for security vulnerabilities      |
+| Performance Optimization | 2         | GPT-4o              | 8GB    | Identifies and resolves performance bottlenecks |
+| Documentation Generation | 1         | Claude 3 Sonnet     | 4GB    | Generates user and developer documentation      |
+| Dependency Analysis      | 1         | GPT-4o mini         | 4GB    | Analyzes and optimizes package dependencies     |
 
 ### Security Scanning Instances (Claude 3 Opus)
 
@@ -244,14 +245,14 @@ Pay special attention to:
        runs-on: ubuntu-latest
        strategy:
          matrix:
-           agent: ["gpt-4o"]
+           agent: ['gpt-4o']
            shard: [1, 2, 3, 4]
        steps:
          - name: Run Copilot Code Review
            uses: github/copilot-review-action@v1
            with:
              agent-model: ${{ matrix.agent }}
-             memory: "8GB"
+             memory: '8GB'
    ```
 
 2. In development, configure Copilot Chat for optimal collaboration:
@@ -317,7 +318,8 @@ Set up monitoring to track:
 3. Suggestion acceptance rates by file type
 4. Cost per feature by agent model
 
-Use this data to further refine the optimal model selection and concurrency levels based on project needs.
+Use this data to further refine the optimal model selection and concurrency levels based on project
+needs.
 
 ## Cost Management
 

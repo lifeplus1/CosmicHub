@@ -6,8 +6,9 @@
 
 The authentication error was occurring due to several issues in the token handling flow:
 
-1. **Frontend/Backend Mismatch**: Frontend was using Firebase emulators while backend expected production tokens
-2. **Stale Token Usage**: API service was using localStorage instead of fresh Firebase tokens  
+1. **Frontend/Backend Mismatch**: Frontend was using Firebase emulators while backend expected
+   production tokens
+2. **Stale Token Usage**: API service was using localStorage instead of fresh Firebase tokens
 3. **Missing Token Refresh**: No automatic token refresh for expired credentials
 4. **Poor Error Handling**: Generic error messages made debugging difficult
 
@@ -49,7 +50,7 @@ const getAuthToken = async () => {
 const getAuthToken = async (): Promise<string | null> => {
   const user = auth.currentUser;
   if (!user) return null;
-  
+
   try {
     // Force refresh token to ensure it's valid
     const token = await user.getIdToken(true);
@@ -65,8 +66,8 @@ const getAuthHeaders = async () => {
   const token = await getAuthToken();
   if (!token) throw new Error('Authentication required');
   return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
   };
 };
 ```
@@ -117,6 +118,7 @@ except auth.RevokedIdTokenError as e:
 ### 🔧 **Environment Configuration:**
 
 To use emulators in development (optional), add to `.env`:
+
 ```env
 VITE_USE_EMULATOR=true
 ```

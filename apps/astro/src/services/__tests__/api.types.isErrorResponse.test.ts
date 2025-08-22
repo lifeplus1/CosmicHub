@@ -7,7 +7,11 @@ function makeSuccess(): ApiSuccessResponseBase<Foo> {
   return { status: 'success', data: { value: 42 }, timestamp: new Date().toISOString() };
 }
 
-function makeError(status: 'error'|'validation_error'|'not_found'|'unauthorized'|'forbidden'|'server_error') {
+function makeError(status: 'error'|'validation_error'|'not_found'|'unauthorized'|'forbidden'|'server_error'): {
+  status: typeof status;
+  timestamp: string;
+  error: { code: string; message: string };
+} {
   return {
     status,
     timestamp: new Date().toISOString(),
@@ -26,7 +30,8 @@ describe('isErrorResponse', () => {
 
   it('narrows error', () => {
     const resp = makeError('error');
-    const union: ApiResponse<Foo> = resp as any;
+    // Explicitly cast with type assertion for testing
+    const union: ApiResponse<Foo> = resp as ApiResponse<Foo>;
     expect(isErrorResponse(union)).toBe(true);
     if (isErrorResponse(union)) {
       expect(union.error.message).toBe('boom');

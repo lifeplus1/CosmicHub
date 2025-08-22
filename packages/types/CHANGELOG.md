@@ -4,7 +4,8 @@
 
 ### Added
 
-- Validation in `parseTextBirthData` (format checking, calendar validation, leap year support, trimming)
+- Validation in `parseTextBirthData` (format checking, calendar validation, leap year support,
+  trimming)
 - Edge case test coverage (in Astro app test suite)
 - `safeParseTextBirthData` non-throwing helper returning discriminated union
 
@@ -14,4 +15,5 @@
 
 ### Notes
 
-- Downstream consumers relying on permissive parsing should migrate to `safeParseTextBirthData` or wrap calls in try/catch.
+- Downstream consumers relying on permissive parsing should migrate to `safeParseTextBirthData` or
+  wrap calls in try/catch.

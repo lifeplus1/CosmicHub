@@ -87,11 +87,13 @@ EPHE_PATH=/app/ephe
 PYTHONPATH=/app/backend
 ```
 
-All environment variables are correctly aligned between Docker configuration and deployment platform requirements.
+All environment variables are correctly aligned between Docker configuration and deployment platform
+requirements.
 
 ## Ready for Production Deployment 🚀
 
 The optimized Docker configuration is now ready for deployment on:
+
 - **Render.com** (with Docker support)
 - **Railway.app** (automatic Docker detection)
 - **Google Cloud Run** (container deployment)

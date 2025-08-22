@@ -1,14 +1,18 @@
 # CosmicHub Monorepo
 
-A high-performance monorepo for astrology and healing frequency applications with optimized build system and production-ready architecture.
+A high-performance monorepo for astrology and healing frequency applications with optimized build
+system and production-ready architecture.
 
 ## 🚀 Current Status - August 2025
 
 **Production Ready**: ✅ Both apps fully functional and optimized  
-**Code Quality**: ✅ Phase 2C Complete - TypeScript compilation clean, ESLint configuration optimized  
-**Recent Updates**: Build stability achieved, lint configuration fixed with accurate technical debt baseline  
+**Code Quality**: ✅ Phase 2C Complete - TypeScript compilation clean, ESLint configuration
+optimized  
+**Recent Updates**: Build stability achieved, lint configuration fixed with accurate technical debt
+baseline  
 **Build Performance**: 83% improvement (20s → 2s)  
-**Technical Debt**: 953 ESLint errors (accurate baseline post-configuration fix) - Phase 3 roadmap available
+**Technical Debt**: 953 ESLint errors (accurate baseline post-configuration fix) - Phase 3 roadmap
+available
 
 ## 🏗️ Architecture
 
@@ -66,16 +70,18 @@ Planned (optional) enhancements:
 
 ### 🧪 Storybook QA Tooling (Added)
 
-| Capability | Tool | How it Works | Command |
-|------------|------|--------------|---------|
-| Visual Regression (local, free) | Loki | Captures screenshots of selected stories and compares against approved baselines | `pnpm --filter frontend run storybook:visual` |
-| Approve New Baselines | Loki | Moves current test output to baseline after review | `pnpm --filter frontend run storybook:visual:approve` |
-| Automated A11y Checks | Storybook test runner + axe | Runs axe-core against each story in a headless browser | `pnpm --filter frontend run storybook:a11y` |
-| Story Inventory Report | Custom script | Scans `*.stories.*` files and lists exported stories | `pnpm --filter frontend run storybook:report` |
+| Capability                      | Tool                        | How it Works                                                                     | Command                                               |
+| ------------------------------- | --------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Visual Regression (local, free) | Loki                        | Captures screenshots of selected stories and compares against approved baselines | `pnpm --filter frontend run storybook:visual`         |
+| Approve New Baselines           | Loki                        | Moves current test output to baseline after review                               | `pnpm --filter frontend run storybook:visual:approve` |
+| Automated A11y Checks           | Storybook test runner + axe | Runs axe-core against each story in a headless browser                           | `pnpm --filter frontend run storybook:a11y`           |
+| Story Inventory Report          | Custom script               | Scans `*.stories.*` files and lists exported stories                             | `pnpm --filter frontend run storybook:report`         |
 
-Baseline images for Loki are stored under `apps/astro/.loki`. Commit approved baselines to version control to track visual changes.
+Baseline images for Loki are stored under `apps/astro/.loki`. Commit approved baselines to version
+control to track visual changes.
 
-The accessibility test runner currently runs in watch mode; integrate into CI by adding a step executing the same command and collecting its exit code.
+The accessibility test runner currently runs in watch mode; integrate into CI by adding a step
+executing the same command and collecting its exit code.
 
 ### Quick Start
 
@@ -83,7 +89,7 @@ The accessibility test runner currently runs in watch mode; integrate into CI by
 # Fast development build (~2 seconds)
 npm run build:fast
 
-# Development mode with hot reload  
+# Development mode with hot reload
 npm run dev
 
 # Individual app development
@@ -93,12 +99,12 @@ npm run dev --workspace=apps/healwave
 
 ### Build Commands
 
-| Command | Purpose | Speed | Use Case |
-|---------|---------|-------|----------|
-| `npm run build:fast` | **Recommended** - Fast app builds | ~2s | Development, CI/CD |
-| `npm run build:apps` | App builds only | ~2s | Application deployment |
-| `npm run build:packages` | Package builds only | ~1.5s | Library distribution |
-| `npm run build` | Legacy full build | ~2s | Backward compatibility |
+| Command                  | Purpose                           | Speed | Use Case               |
+| ------------------------ | --------------------------------- | ----- | ---------------------- |
+| `npm run build:fast`     | **Recommended** - Fast app builds | ~2s   | Development, CI/CD     |
+| `npm run build:apps`     | App builds only                   | ~2s   | Application deployment |
+| `npm run build:packages` | Package builds only               | ~1.5s | Library distribution   |
+| `npm run build`          | Legacy full build                 | ~2s   | Backward compatibility |
 
 ### Performance Enhancements (August 2025)
 
@@ -145,7 +151,7 @@ Use the Makefile for common tasks:
 - `./scripts/generate-pwa-icons.sh` — Generate optimized PWA icons with WebP support
 - Supports SVG minification and PNG fallbacks
 
-#### Log Management  
+#### Log Management
 
 - `./scripts/rotate-logs.sh` — Automated log rotation with compression
 - Prevents disk space issues in production
@@ -168,25 +174,30 @@ Use the Makefile for common tasks:
 
 ### Unified Notification System
 
-- Consolidated legacy managers into a single `UnifiedNotificationManager` (`notificationManager.unified.ts`).
-- Legacy files (`notificationManager.ts`, `notificationManager.new.ts`) are shims re-exporting the unified implementation.
-- Runtime guards: subscription method fallback (`subscribeUser` → `subscribe`), sync message validation, strict ID presence checks.
-- Public API surface: `initialize`, `subscribe`, `notifyChartReady`, `sendTest`, `status` plus `getNotificationManager()` singleton helper.
+- Consolidated legacy managers into a single `UnifiedNotificationManager`
+  (`notificationManager.unified.ts`).
+- Legacy files (`notificationManager.ts`, `notificationManager.new.ts`) are shims re-exporting the
+  unified implementation.
+- Runtime guards: subscription method fallback (`subscribeUser` → `subscribe`), sync message
+  validation, strict ID presence checks.
+- Public API surface: `initialize`, `subscribe`, `notifyChartReady`, `sendTest`, `status` plus
+  `getNotificationManager()` singleton helper.
 - New unit tests validate guard logic and subscription fallback.
 
 ### Stricter Chart Data Validation
 
 - Zod schema (`validateChart.ts`) now enforces:
-	- Planet position range (0–360)
-	- House array length (1–12) & cusp range (0–360)
-	- Angle value ranges
-	- Safe, forward-compatible aspect/asteroid structures (passthrough for extra fields)
+  - Planet position range (0–360)
+  - House array length (1–12) & cusp range (0–360)
+  - Angle value ranges
+  - Safe, forward-compatible aspect/asteroid structures (passthrough for extra fields)
 - Accepts partial charts so progressive loading & streaming remain supported.
 - Removed unsafe upstream casts; `ChartDisplay` consumes a unified `ChartLike` + runtime validation.
 
 ### API Layer Reliability Improvements
 
-- Corrected `NotFoundError` & `ValidationError` constructor usage (resource + id + validation payload).
+- Corrected `NotFoundError` & `ValidationError` constructor usage (resource + id + validation
+  payload).
 - Consolidated response type imports; ensured single discriminated union `ApiResponse<T>`.
 
 ### Test Coverage Expansion
@@ -196,7 +207,8 @@ Use the Makefile for common tasks:
 
 ### Backward Compatibility & Migration
 
-- Shims slated for removal after deprecation window (target: Q4 2025). Update imports to point directly at `notificationManager.unified.ts`.
+- Shims slated for removal after deprecation window (target: Q4 2025). Update imports to point
+  directly at `notificationManager.unified.ts`.
 - Consider adding an environment flag if early removal desired.
 
 ### Quick Commands
@@ -216,31 +228,37 @@ pnpm run type-check && pnpm run lint:astro && pnpm run test:astro -- --run
 - Auto-generate API docs for error hierarchy & `ApiResponse` via typedoc.
 - Add Loki baselines around chart tables for visual regression safety.
 
-
 ## �🔑 Salt Management Subsystem (Backend)
 
 Lightweight in-memory salt rotation system powering pseudonymization:
 
 - Per-user & global salts with rotation metadata
 - Adapter layer (`SaltBackendProtocol`) ready for future Firestore implementation
-- Environment-configurable intervals: `USER_SALT_ROTATION_DAYS` (default 90), `GLOBAL_SALT_ROTATION_DAYS` (default 30)
+- Environment-configurable intervals: `USER_SALT_ROTATION_DAYS` (default 90),
+  `GLOBAL_SALT_ROTATION_DAYS` (default 30)
 - Deterministic pseudonymization helpers (user + analytics contexts)
-- Admin API endpoints (`/api/admin/salts/...`): status, rotate (user/global/batch), audit, pseudonymize (dev), reload
-- Explicit reload endpoint: `POST /api/admin/salts/reload` applies env overrides during a running process (test/admin use)
+- Admin API endpoints (`/api/admin/salts/...`): status, rotate (user/global/batch), audit,
+  pseudonymize (dev), reload
+- Explicit reload endpoint: `POST /api/admin/salts/reload` applies env overrides during a running
+  process (test/admin use)
 
-Planned: real Firestore backend (transactional rotations) and metrics/logging. See `docs/implementation-summaries/salt-management-implementation.md` for architecture details.
+Planned: real Firestore backend (transactional rotations) and metrics/logging. See
+`docs/implementation-summaries/salt-management-implementation.md` for architecture details.
 
 ## Environment Variables
 
-Environment strategy: strict separation of public (VITE_*) and server-only variables.
-Docs: `docs/ENVIRONMENT.md`
+Environment strategy: strict separation of public (VITE\_\*) and server-only variables. Docs:
+`docs/ENVIRONMENT.md`
 
 **Recent Improvements (August 2025)**:
 
-- ✅ **Unified Environment Handling**: Consolidated environment variable access with type-safe `getEnvVar` function
-- ✅ **Cross-Runtime Compatibility**: Works seamlessly in both Vite browser and Node.js environments  
-- ✅ **Production Deployment Config**: Comprehensive production deployment configuration with monitoring, security, and performance settings
-- ✅ **Type Safety**: All environment variables properly typed in `EnvConfig` interface with validation
+- ✅ **Unified Environment Handling**: Consolidated environment variable access with type-safe
+  `getEnvVar` function
+- ✅ **Cross-Runtime Compatibility**: Works seamlessly in both Vite browser and Node.js environments
+- ✅ **Production Deployment Config**: Comprehensive production deployment configuration with
+  monitoring, security, and performance settings
+- ✅ **Type Safety**: All environment variables properly typed in `EnvConfig` interface with
+  validation
 
 Validation commands:
 
@@ -257,7 +275,7 @@ Validation commands:
 
 #### Operational Log Management
 
-- Automated log rotation to prevent disk space issues  
+- Automated log rotation to prevent disk space issues
 - Compressed archive storage for historical data
 - Production-ready logging with structured output
 
@@ -275,15 +293,17 @@ Validation commands:
 
 ### **Recently Completed** ✅
 
-All major development phases complete! See [DEVELOPMENT_COMPLETION_SUMMARY.md](docs/DEVELOPMENT_COMPLETION_SUMMARY.md) for full details:
+All major development phases complete! See
+[DEVELOPMENT_COMPLETION_SUMMARY.md](docs/DEVELOPMENT_COMPLETION_SUMMARY.md) for full details:
 
 - ✅ **Core Features**: Synastry analysis, AI interpretations, chart persistence, Stripe integration
 - ✅ **Backend Systems**: 213/213 tests passing with vectorized calculations and caching
-- ✅ **Frontend Applications**: Both Astro and HealWave fully functional with 69/69 tests passing  
+- ✅ **Frontend Applications**: Both Astro and HealWave fully functional with 69/69 tests passing
 - ✅ **Infrastructure**: Security, monitoring, performance optimization, and deployment systems
 - ✅ **User Experience**: Complete user journeys from authentication to premium features
 
-**Current Focus**: Infrastructure hardening (monitoring dashboards, security enhancements, accessibility)
+**Current Focus**: Infrastructure hardening (monitoring dashboards, security enhancements,
+accessibility)
 
 ### Recent Completions (August 2025)
 
@@ -291,7 +311,8 @@ All major development phases complete! See [DEVELOPMENT_COMPLETION_SUMMARY.md](d
 - ✅ Enhanced build system with advanced code splitting
 - ✅ Automated log rotation and asset optimization
 - ✅ Consolidated documentation and testing structure
-- ✅ **ESLint Configuration Fix**: Resolved inflated technical debt metrics (9,000+ → 953 actual errors)
+- ✅ **ESLint Configuration Fix**: Resolved inflated technical debt metrics (9,000+ → 953 actual
+  errors)
 - ✅ **Phase 2C Completion**: TypeScript compilation clean, accurate lint baseline established
 
 ## 🔍 Code Quality & Technical Debt
@@ -302,7 +323,7 @@ All major development phases complete! See [DEVELOPMENT_COMPLETION_SUMMARY.md](d
 
 **TypeScript Compilation**: ❌ 10 errors in 6 files
 
-- Missing `NotificationStats` export from config package  
+- Missing `NotificationStats` export from config package
 - API Result type incompatibility with React Query
 - vitest-axe import issues
 
@@ -319,16 +340,20 @@ All major development phases complete! See [DEVELOPMENT_COMPLETION_SUMMARY.md](d
 ### Documentation
 
 - **Quick Summary**: [`LINT_SUMMARY.md`](./LINT_SUMMARY.md)
-- **Comprehensive Roadmap**: [`docs/development/LINT_STATUS_AND_ROADMAP.md`](docs/development/LINT_STATUS_AND_ROADMAP.md)
-- **Phase 2C Completion**: [`docs/phase-completions/PHASE_2C_FINAL_COMPLETION_REPORT.md`](docs/phase-completions/PHASE_2C_FINAL_COMPLETION_REPORT.md)
-- **Configuration Fix Details**: [`docs/development/ESLINT_CONFIGURATION_REFINEMENT.md`](docs/development/ESLINT_CONFIGURATION_REFINEMENT.md)
+- **Comprehensive Roadmap**:
+  [`docs/development/LINT_STATUS_AND_ROADMAP.md`](docs/development/LINT_STATUS_AND_ROADMAP.md)
+- **Phase 2C Completion**:
+  [`docs/phase-completions/PHASE_2C_FINAL_COMPLETION_REPORT.md`](docs/phase-completions/PHASE_2C_FINAL_COMPLETION_REPORT.md)
+- **Configuration Fix Details**:
+  [`docs/development/ESLINT_CONFIGURATION_REFINEMENT.md`](docs/development/ESLINT_CONFIGURATION_REFINEMENT.md)
 
 ### Immediate Action Plan
 
 1. **Fix TypeScript errors** (Critical - Hours)
-2. **Migrate ESLint to flat config** (High - 1-2 days)  
+2. **Migrate ESLint to flat config** (High - 1-2 days)
 3. **Re-establish lint baseline** (Medium - Resume Phase 3 planning)
 
 ## CI/CD
 
-Use `.gitlab-ci.yml` for GitLab or `.github/workflows/ci.yml` for GitHub Actions. Only one should be active.
+Use `.gitlab-ci.yml` for GitLab or `.github/workflows/ci.yml` for GitHub Actions. Only one should be
+active.

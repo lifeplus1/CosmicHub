@@ -29,7 +29,7 @@ Please provide:
 
 4. **INTERPRETATION TEMPLATES**:
    - Text templates for major aspect patterns
-   - Relationship strength indicators and descriptions  
+   - Relationship strength indicators and descriptions
    - Challenge areas and growth opportunities
    - Compatibility summary frameworks
 
@@ -47,7 +47,7 @@ Focus on both traditional and modern astrological techniques. Provide mathematic
 ```text
 Based on the synastry analysis system you provided, I need specific implementation guidance for a FastAPI backend with TypeScript frontend:
 
-1. **DATA STRUCTURES**: 
+1. **DATA STRUCTURES**:
    - JSON schema for synastry analysis requests
    - Response format for compatibility scores and interpretations
    - Database schema for caching synastry results
@@ -89,7 +89,7 @@ Please provide:
 
 2. **PLANETARY INTERPRETATION TEMPLATES**:
    - Framework for Planet-in-Sign combinations (all 120 combinations)
-   - Planet-in-House interpretation structures (all 144 combinations)  
+   - Planet-in-House interpretation structures (all 144 combinations)
    - Aspect interpretation templates with orb considerations
    - Retrograde planet interpretation modifications
 
@@ -120,7 +120,7 @@ Please provide:
 Focus on creating interpretations that are:
 - Psychologically insightful but accessible
 - Personalized and specific rather than generic
-- Balanced between positive and challenging aspects  
+- Balanced between positive and challenging aspects
 - Actionable with practical life guidance
 - Engaging and well-written for modern audiences
 
@@ -192,4 +192,4 @@ Please provide concrete implementation examples and best practices.
 
 ---
 
-*Copy these prompts directly into your Grok interface for immediate results.*
+_Copy these prompts directly into your Grok interface for immediate results._

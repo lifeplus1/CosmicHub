@@ -11,7 +11,7 @@
 ### Firestore Database
 
 - **Reads**: 50,000/day
-- **Writes**: 20,000/day  
+- **Writes**: 20,000/day
 - **Deletes**: 20,000/day
 - **Storage**: 1 GB
 
@@ -66,7 +66,7 @@ firebase database:get / --shallow  # Check database size
 
 // AVOID: Deep nesting (costs more to read)
 {
-  userId: "123", 
+  userId: "123",
   charts: {
     chart1: { lots: { of: { nested: { data: {} } } } }
   }

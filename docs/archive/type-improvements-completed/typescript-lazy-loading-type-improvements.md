@@ -2,7 +2,9 @@
 
 ## Overview
 
-We've improved the TypeScript type definitions for the lazy loading system in the CosmicHub codebase. These improvements make the code more maintainable, easier to understand, and less prone to errors.
+We've improved the TypeScript type definitions for the lazy loading system in the CosmicHub
+codebase. These improvements make the code more maintainable, easier to understand, and less prone
+to errors.
 
 ## Key Improvements
 
@@ -48,7 +50,9 @@ export function createLazyComponent<T extends ComponentType<any>>(
     preload?: boolean;
     timeout?: number;
   } = {}
-) { /* ... */ }
+) {
+  /* ... */
+}
 ```
 
 After:
@@ -58,7 +62,9 @@ export function createLazyComponent<T extends ComponentType<any>>(
   importFn: ImportFunction<T>,
   componentName: string,
   options: LazyComponentOptions = {}
-) { /* ... */ }
+) {
+  /* ... */
+}
 ```
 
 ### 3. Type-Safe Component Registry
@@ -79,10 +85,8 @@ export function useDynamicComponent(componentKey: keyof typeof ComponentRegistry
 After:
 
 ```typescript
-export type ComponentRegistryKeys = 
-  | 'astrology-chart'
-  | 'frequency-visualizer'
-  // ... other component keys
+export type ComponentRegistryKeys = 'astrology-chart' | 'frequency-visualizer';
+// ... other component keys
 
 export const ComponentRegistry: Record<ComponentRegistryKeys, () => Promise<any>> = {
   'astrology-chart': () => import('./charts/AstrologyChart'),
@@ -120,10 +124,10 @@ export interface LazyComponentWrapperProps {
   fallback?: React.ComponentType;
 }
 
-export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({ 
-  componentKey, 
-  props = {}, 
-  fallback: Fallback = DefaultLoadingSpinner 
+export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
+  componentKey,
+  props = {},
+  fallback: Fallback = DefaultLoadingSpinner,
 }) => {
   // ...
 };
@@ -149,7 +153,7 @@ export interface SmartPreloadFunctions {
     componentImport: () => Promise<any>,
     componentName: string
   ) => (() => void) | undefined;
-  
+
   preloadOnIntersection: (
     elementRef: React.RefObject<HTMLElement>,
     componentImport: () => Promise<any>,

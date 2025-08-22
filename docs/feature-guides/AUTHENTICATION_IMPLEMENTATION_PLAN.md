@@ -2,7 +2,8 @@
 
 ## 🎯 OVERVIEW
 
-Implement proper authentication across both Astro and HealWave applications with Firebase Auth integration, replacing the current mock authentication system.
+Implement proper authentication across both Astro and HealWave applications with Firebase Auth
+integration, replacing the current mock authentication system.
 
 ## 📋 CURRENT STATE ANALYSIS
 
@@ -193,7 +194,7 @@ CREATE TABLE user_sessions (
 ## 🗓️ TIMELINE ESTIMATE
 
 - **Phase 1 (Backend)**: 1-2 days
-- **Phase 2 (Frontend)**: 2-3 days  
+- **Phase 2 (Frontend)**: 2-3 days
 - **Phase 3 (User Management)**: 1-2 days
 - **Phase 4 (Security & Testing)**: 1-2 days
 

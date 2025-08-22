@@ -1,23 +1,24 @@
 # CSP Rollout Plan
 
 ---
-Status: Draft
-Owner: Security Steward
-Last-Updated: 2025-08-16
-Next-Review: 2025-09-05
-Source: Manual
+
+Status: Draft Owner: Security Steward Last-Updated: 2025-08-16 Next-Review: 2025-09-05 Source:
+Manual
+
 ---
 
 ## 1. Objectives
 
-Reduce XSS risk and untrusted resource inclusion while enabling controlled analytics / font / image sources.
+Reduce XSS risk and untrusted resource inclusion while enabling controlled analytics / font / image
+sources.
 
 ## 2. Phased Approach
 
 1. Inventory: Collect current external domains from network logs & build output.
 2. Draft Policy (Report-Only): Minimal allowlist + violation reporting endpoint.
 3. Tightening Iterations: Remove unused sources weekly.
-4. Enforcement: Switch to `Content-Security-Policy` header once noise <3% legitimate violations for 7 consecutive days.
+4. Enforcement: Switch to `Content-Security-Policy` header once noise <3% legitimate violations for
+   7 consecutive days.
 5. Maintenance: Quarterly review + diff new dependencies.
 
 ## 3. Initial Directive Set (Report-Only)
@@ -42,13 +43,13 @@ Goal: Remove `'unsafe-inline'` & `'unsafe-eval'` by introducing build-time hashi
 
 ## 5. Hardening Milestones
 
-| Milestone | Target |
-|-----------|--------|
-| M1 | Report-only baseline active |
-| M2 | Eliminate unused external script hosts |
-| M3 | Replace inline scripts with modules/nonces |
-| M4 | Enforce policy (no unsafe-* in script-src) |
-| M5 | Add `object-src 'none'; base-uri 'self'; frame-ancestors 'none'` |
+| Milestone | Target                                                           |
+| --------- | ---------------------------------------------------------------- |
+| M1        | Report-only baseline active                                      |
+| M2        | Eliminate unused external script hosts                           |
+| M3        | Replace inline scripts with modules/nonces                       |
+| M4        | Enforce policy (no unsafe-\* in script-src)                      |
+| M5        | Add `object-src 'none'; base-uri 'self'; frame-ancestors 'none'` |
 
 ## 6. Tooling
 

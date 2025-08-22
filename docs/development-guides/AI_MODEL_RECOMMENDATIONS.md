@@ -15,7 +15,7 @@ Source: Task Analysis & AI Capability Assessment (Updated with Latest Pro Models
 #### 🏆 Tier 1 - Premium Pro Models (Latest & Most Capable)
 
 - `claude-sonnet-4` - Best for complex reasoning, long context, code architecture
-- `gpt-5-preview` - Advanced multimodal, superior at system design and documentation  
+- `gpt-5-preview` - Advanced multimodal, superior at system design and documentation
 - `gemini-2.5-pro-preview` - Excellent code generation, mathematical reasoning, large context
 
 #### ⭐ Tier 2 - Established Pro Models (Proven & Reliable)
@@ -31,28 +31,28 @@ Source: Task Analysis & AI Capability Assessment (Updated with Latest Pro Models
 
 ### **GitHub Copilot Model Recommendations**
 
-| Task Category | Primary Model | Fallback Model | Rationale | Example Use Cases |
-|---------------|---------------|----------------|-----------|-------------------|
-| **Frontend React/TypeScript** | `claude-sonnet-4` | `claude-3.5-sonnet` | Superior component architecture, advanced TypeScript patterns, better context understanding | UI-001 Synastry components, complex React hooks |
-| **Backend Python/FastAPI** | `claude-sonnet-4` | `claude-3.5-sonnet` | Excellent at async patterns, type hints, advanced API design | Synastry calculation endpoints, streaming APIs |
-| **Data Processing/Algorithms** | `gemini-2.5-pro-preview` | `claude-sonnet-4` | Superior mathematical reasoning, complex algorithm optimization | Chart compatibility scoring, statistical analysis |
-| **System Architecture** | `gpt-5-preview` | `gpt-4o` | Advanced system design, better at large-scale architecture patterns | Microservices design, scalability planning |
-| **DevOps/Infrastructure** | `gpt-5-preview` | `gpt-4o` | Enhanced system configuration, deployment automation | Kubernetes configs, CI/CD optimization |
-| **Documentation** | `gpt-5-preview` | `gpt-4o` | Superior structured writing, comprehensive technical explanations | API docs, architecture guides |
-| **Testing** | `gemini-2.5-pro-preview` | `claude-sonnet-4` | Better test pattern generation, edge case identification | Integration tests, property-based testing |
-| **Security/Compliance** | `gpt-5-preview` | `gpt-4o` | Advanced security patterns, compliance frameworks | Security audits, penetration testing guidance |
-| **Performance Optimization** | `claude-sonnet-4` | `gemini-2.5-pro-preview` | Better at code optimization, performance analysis | Bundle optimization, database query tuning |
-| **Rapid Prototyping** | `gemini-2.0-flash` | `claude-3.5-sonnet` | Fast iteration, quick proof-of-concept development | MVP features, quick experiments |
+| Task Category                  | Primary Model            | Fallback Model           | Rationale                                                                                   | Example Use Cases                                 |
+| ------------------------------ | ------------------------ | ------------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| **Frontend React/TypeScript**  | `claude-sonnet-4`        | `claude-3.5-sonnet`      | Superior component architecture, advanced TypeScript patterns, better context understanding | UI-001 Synastry components, complex React hooks   |
+| **Backend Python/FastAPI**     | `claude-sonnet-4`        | `claude-3.5-sonnet`      | Excellent at async patterns, type hints, advanced API design                                | Synastry calculation endpoints, streaming APIs    |
+| **Data Processing/Algorithms** | `gemini-2.5-pro-preview` | `claude-sonnet-4`        | Superior mathematical reasoning, complex algorithm optimization                             | Chart compatibility scoring, statistical analysis |
+| **System Architecture**        | `gpt-5-preview`          | `gpt-4o`                 | Advanced system design, better at large-scale architecture patterns                         | Microservices design, scalability planning        |
+| **DevOps/Infrastructure**      | `gpt-5-preview`          | `gpt-4o`                 | Enhanced system configuration, deployment automation                                        | Kubernetes configs, CI/CD optimization            |
+| **Documentation**              | `gpt-5-preview`          | `gpt-4o`                 | Superior structured writing, comprehensive technical explanations                           | API docs, architecture guides                     |
+| **Testing**                    | `gemini-2.5-pro-preview` | `claude-sonnet-4`        | Better test pattern generation, edge case identification                                    | Integration tests, property-based testing         |
+| **Security/Compliance**        | `gpt-5-preview`          | `gpt-4o`                 | Advanced security patterns, compliance frameworks                                           | Security audits, penetration testing guidance     |
+| **Performance Optimization**   | `claude-sonnet-4`        | `gemini-2.5-pro-preview` | Better at code optimization, performance analysis                                           | Bundle optimization, database query tuning        |
+| **Rapid Prototyping**          | `gemini-2.0-flash`       | `claude-3.5-sonnet`      | Fast iteration, quick proof-of-concept development                                          | MVP features, quick experiments                   |
 
 ### **Grok Integration Tasks**
 
-| Task Type | Send to Grok? | Rationale | Expected Output |
-|-----------|--------------|-----------|-----------------|
-| **Astrological Domain Logic** | ✅ **YES** | Grok has extensive knowledge of astrology, numerology, and esoteric systems | Synastry calculation algorithms, interpretation templates |
-| **Mathematical Calculations** | ✅ **YES** | Strong at complex mathematical formulations and statistical analysis | Aspect orb calculations, compatibility scoring formulas |
-| **Creative Content** | ✅ **YES** | Excellent at generating engaging, personality-driven content | AI interpretation text, user-facing descriptions |
-| **System Architecture** | ❌ **NO** | Better handled by development-focused models | Use Claude Sonnet 4 instead |
-| **Code Implementation** | ❌ **NO** | Copilot models are superior for actual code generation | Use GitHub Copilot with recommended models |
+| Task Type                     | Send to Grok? | Rationale                                                                   | Expected Output                                           |
+| ----------------------------- | ------------- | --------------------------------------------------------------------------- | --------------------------------------------------------- |
+| **Astrological Domain Logic** | ✅ **YES**    | Grok has extensive knowledge of astrology, numerology, and esoteric systems | Synastry calculation algorithms, interpretation templates |
+| **Mathematical Calculations** | ✅ **YES**    | Strong at complex mathematical formulations and statistical analysis        | Aspect orb calculations, compatibility scoring formulas   |
+| **Creative Content**          | ✅ **YES**    | Excellent at generating engaging, personality-driven content                | AI interpretation text, user-facing descriptions          |
+| **System Architecture**       | ❌ **NO**     | Better handled by development-focused models                                | Use Claude Sonnet 4 instead                               |
+| **Code Implementation**       | ❌ **NO**     | Copilot models are superior for actual code generation                      | Use GitHub Copilot with recommended models                |
 
 ## 🚀 **Priority Task Recommendations**
 
@@ -64,8 +64,10 @@ Source: Task Analysis & AI Capability Assessment (Updated with Latest Pro Models
 **Workflow**:
 
 1. **Grok**: Generate synastry compatibility calculation formulas and interpretation logic
-2. **Claude Sonnet 4**: Implement FastAPI endpoints with advanced async patterns and comprehensive error handling
-3. **Claude Sonnet 4**: Create React components with sophisticated TypeScript patterns and state management
+2. **Claude Sonnet 4**: Implement FastAPI endpoints with advanced async patterns and comprehensive
+   error handling
+3. **Claude Sonnet 4**: Create React components with sophisticated TypeScript patterns and state
+   management
 4. **Gemini 2.5 Pro Preview**: Write comprehensive test suites with complex mathematical validation
 
 **Grok Prompt Template**:
@@ -73,7 +75,7 @@ Source: Task Analysis & AI Capability Assessment (Updated with Latest Pro Models
 ```text
 "Generate comprehensive synastry analysis algorithms for two birth charts including:
 1. Planetary aspect comparison matrices
-2. House overlay analysis methods  
+2. House overlay analysis methods
 3. Compatibility scoring formulas (0-100 scale)
 4. Interpretation templates for major aspect patterns
 5. Relationship strength indicators
@@ -107,8 +109,8 @@ Provide both detailed and summary interpretation formats."
 ### **UI-003: Complete Chart Saving/Loading CRUD Functionality**
 
 **Primary Model**: `claude-sonnet-4` via GitHub Copilot  
-**Secondary Model**: `gpt-5-preview` for system architecture
-**Grok Integration**: Not needed (pure technical implementation)
+**Secondary Model**: `gpt-5-preview` for system architecture **Grok Integration**: Not needed (pure
+technical implementation)
 
 **Workflow**:
 
@@ -121,44 +123,52 @@ Provide both detailed and summary interpretation formats."
 
 ### **Infrastructure & Security Tasks**
 
-| Task | Model | Justification |
-|------|-------|---------------|
-| OBS-003 Synthetic journey script | `gpt-5-preview` | Superior system automation and architecture patterns |
-| SEC-005 CSP rollout phase 2 | `gpt-5-preview` | Advanced security policy knowledge and compliance frameworks |
-| REL-005 Degradation metrics | `claude-sonnet-4` | Enhanced application-level monitoring and performance analysis |
-| SEC-002 Secret inventory generator | `gpt-5-preview` | Advanced security-focused task handling |
-| PRIV-004 Salt rotation | `gpt-5-preview` | Superior cryptographic operations knowledge |
+| Task                               | Model             | Justification                                                  |
+| ---------------------------------- | ----------------- | -------------------------------------------------------------- |
+| OBS-003 Synthetic journey script   | `gpt-5-preview`   | Superior system automation and architecture patterns           |
+| SEC-005 CSP rollout phase 2        | `gpt-5-preview`   | Advanced security policy knowledge and compliance frameworks   |
+| REL-005 Degradation metrics        | `claude-sonnet-4` | Enhanced application-level monitoring and performance analysis |
+| SEC-002 Secret inventory generator | `gpt-5-preview`   | Advanced security-focused task handling                        |
+| PRIV-004 Salt rotation             | `gpt-5-preview`   | Superior cryptographic operations knowledge                    |
 
 ### **Testing & Quality Assurance**
 
-| Task | Model | Justification |
-|------|-------|---------------|
-| TEST-001 Integration test enrichment | `gemini-2.5-pro-preview` | Superior test pattern generation and edge case identification |
-| Frontend component testing | `claude-sonnet-4` | Advanced React testing library knowledge and TypeScript patterns |
-| API endpoint testing | `claude-sonnet-4` | Enhanced FastAPI testing patterns and async handling |
-| End-to-end test scenarios | `gpt-5-preview` | Advanced user journey modeling and system integration |
+| Task                                 | Model                    | Justification                                                    |
+| ------------------------------------ | ------------------------ | ---------------------------------------------------------------- |
+| TEST-001 Integration test enrichment | `gemini-2.5-pro-preview` | Superior test pattern generation and edge case identification    |
+| Frontend component testing           | `claude-sonnet-4`        | Advanced React testing library knowledge and TypeScript patterns |
+| API endpoint testing                 | `claude-sonnet-4`        | Enhanced FastAPI testing patterns and async handling             |
+| End-to-end test scenarios            | `gpt-5-preview`          | Advanced user journey modeling and system integration            |
 
 ## 🔧 **Implementation Guidelines**
 
 ### **For GitHub Copilot Usage:**
 
-1. **Set Model Context**: Configure Tier 1 models (`claude-sonnet-4`, `gpt-5-preview`, `gemini-2.5-pro-preview`) as primary options
-2. **Provide Rich Context**: Include comprehensive type definitions, component structures, and architectural patterns
+1. **Set Model Context**: Configure Tier 1 models (`claude-sonnet-4`, `gpt-5-preview`,
+   `gemini-2.5-pro-preview`) as primary options
+2. **Provide Rich Context**: Include comprehensive type definitions, component structures, and
+   architectural patterns
 3. **Iterative Refinement**: Use Tier 1 models for complex generation, Tier 2 for rapid iteration
-4. **Code Reviews**: Always validate AI-generated code for astrological accuracy and architectural soundness
+4. **Code Reviews**: Always validate AI-generated code for astrological accuracy and architectural
+   soundness
 
 ### **For Grok Integration:**
 
-1. **Domain Expertise**: Leverage for astrological calculations, interpretations, and esoteric knowledge
-2. **Content Generation**: Use for user-facing text, interpretation templates, and personality-driven content
-3. **Mathematical Formulas**: Excellent for complex astrological calculations and statistical analysis
+1. **Domain Expertise**: Leverage for astrological calculations, interpretations, and esoteric
+   knowledge
+2. **Content Generation**: Use for user-facing text, interpretation templates, and
+   personality-driven content
+3. **Mathematical Formulas**: Excellent for complex astrological calculations and statistical
+   analysis
 4. **Creative Elements**: Best for engaging, contextual content that requires domain understanding
 
 ### **Hybrid Workflows:**
 
-1. **Grok → Tier 1 Models**: Generate domain logic with Grok, implement with Claude Sonnet 4 or GPT-5 Preview
+1. **Grok → Tier 1 Models**: Generate domain logic with Grok, implement with Claude Sonnet 4 or
+   GPT-5 Preview
 2. **Tier 1 → Grok**: Create technical architecture with GPT-5 Preview, enhance content with Grok
-3. **Multi-Model Validation**: Use different Tier 1 models for cross-checking complex implementations
+3. **Multi-Model Validation**: Use different Tier 1 models for cross-checking complex
+   implementations
 
 ## 📊 **Expected Outcomes**
 
@@ -205,4 +215,5 @@ Provide both detailed and summary interpretation formats."
 
 ---
 
-*This guide includes the latest AI models (GPT-5 Preview, Gemini 2.5 Pro Preview, Claude Sonnet 4) and should be referenced for all development tasks. Updated regularly as AI capabilities evolve.*
+_This guide includes the latest AI models (GPT-5 Preview, Gemini 2.5 Pro Preview, Claude Sonnet 4)
+and should be referenced for all development tasks. Updated regularly as AI capabilities evolve._

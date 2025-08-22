@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document describes our implementation of TypeScript and Python type stubs for Google Cloud services. These type stubs enhance developer experience and code safety when interacting with Google Cloud APIs.
+This document describes our implementation of TypeScript and Python type stubs for Google Cloud
+services. These type stubs enhance developer experience and code safety when interacting with Google
+Cloud APIs.
 
 ## Python Type Stubs
 
@@ -29,24 +31,24 @@ DocumentSnapshot = TypeVar('DocumentSnapshot')
 
 class Client:
     def __init__(
-        self, 
+        self,
         project: Optional[str] = None,
         credentials: Optional[Any] = None,
         database: str = "(default)"
     ) -> None: ...
-    
+
     def collection(self, collection_path: str) -> CollectionReference: ...
     def collection_group(self, collection_id: str) -> CollectionGroup: ...
     def document(self, document_path: str) -> DocumentReference: ...
-    def get_all(self, references: List[DocumentReference], 
-                field_paths: Optional[List[str]] = None, 
+    def get_all(self, references: List[DocumentReference],
+                field_paths: Optional[List[str]] = None,
                 transaction: Optional[Transaction] = None) -> List[DocumentSnapshot]: ...
     # Additional methods...
 
 class CollectionReference:
     def __init__(self, collection_path: str, client: Client) -> None: ...
     def document(self, document_path: Optional[str] = None) -> DocumentReference: ...
-    def add(self, document_data: Dict[str, Any], 
+    def add(self, document_data: Dict[str, Any],
             document_id: Optional[str] = None) -> Tuple[DocumentReference, Any]: ...
     def where(self, field_path: str, op_string: str, value: Any) -> Query: ...
     def order_by(self, field_path: str, direction: Optional[str] = None) -> Query: ...
@@ -69,7 +71,8 @@ class CollectionReference:
 
 ### TypeScript Type Definition Approach
 
-For TypeScript, we've extended the existing `@google-cloud` type definitions with additional typing information specific to our usage patterns:
+For TypeScript, we've extended the existing `@google-cloud` type definitions with additional typing
+information specific to our usage patterns:
 
 ```typescript
 // extensions/google-cloud.d.ts
@@ -126,26 +129,26 @@ import { AstrologyChart, UserProfile } from '../types';
 // Type-safe Firestore access
 export class ChartRepository {
   private readonly collection: CollectionReference<AstrologyChart>;
-  
+
   constructor(private firestore: Firestore) {
     this.collection = firestore.collection('charts') as CollectionReference<AstrologyChart>;
   }
-  
+
   async getById(id: string): Promise<AstrologyChart | null> {
     const doc = await this.collection.doc(id).get();
     if (!doc.exists) return null;
     return doc.data()!; // Type is AstrologyChart
   }
-  
+
   async findByUserId(userId: string): Promise<AstrologyChart[]> {
     const snapshot = await this.collection
       .where('userId', '==', userId)
       .orderBy('createdAt', 'desc')
       .get();
-      
+
     return snapshot.docs.map(doc => doc.data()); // Type is AstrologyChart[]
   }
-  
+
   // Additional methods...
 }
 ```
@@ -166,9 +169,9 @@ def get_user_charts(user_id: str) -> List[AstrologyChart]:
     db = firestore.Client()
     charts_ref = db.collection('charts')
     query = charts_ref.where('userId', '==', user_id)
-    
+
     results: List[AstrologyChart] = []
-    
+
     for doc in query.stream():
         data = doc.to_dict()
         # Validate using type guard
@@ -179,7 +182,7 @@ def get_user_charts(user_id: str) -> List[AstrologyChart]:
         else:
             # Log error but continue processing
             print(f"Invalid chart data in document {doc.id}")
-    
+
     return results
 ```
 
@@ -193,10 +196,10 @@ async function getUserCharts(userId: string): Promise<AstrologyChart[]> {
   const db = new firestore.Firestore();
   const chartsRef = db.collection('charts');
   const query = chartsRef.where('userId', '==', userId);
-  
+
   const snapshot = await query.get();
   const results: AstrologyChart[] = [];
-  
+
   snapshot.forEach(doc => {
     const data = doc.data();
     // Validate using type guard
@@ -207,7 +210,7 @@ async function getUserCharts(userId: string): Promise<AstrologyChart[]> {
       console.error(`Invalid chart data in document ${doc.id}`);
     }
   });
-  
+
   return results;
 }
 ```
@@ -224,11 +227,11 @@ from typing import Any, Dict, List, Optional, Sequence
 
 class SecretManagerServiceClient:
     def __init__(
-        self, 
+        self,
         credentials: Optional[Any] = None,
         transport: Optional[str] = None
     ) -> None: ...
-    
+
     def create_secret(
         self,
         request: Optional[Dict[str, Any]] = None,
@@ -240,7 +243,7 @@ class SecretManagerServiceClient:
         timeout: Optional[float] = None,
         metadata: Optional[Sequence[Tuple[str, str]]] = None
     ) -> Dict[str, Any]: ...
-    
+
     def add_secret_version(
         self,
         request: Optional[Dict[str, Any]] = None,
@@ -251,7 +254,7 @@ class SecretManagerServiceClient:
         timeout: Optional[float] = None,
         metadata: Optional[Sequence[Tuple[str, str]]] = None
     ) -> Dict[str, Any]: ...
-    
+
     def access_secret_version(
         self,
         request: Optional[Dict[str, Any]] = None,
@@ -261,7 +264,7 @@ class SecretManagerServiceClient:
         timeout: Optional[float] = None,
         metadata: Optional[Sequence[Tuple[str, str]]] = None
     ) -> Dict[str, Any]: ...
-    
+
     # Additional methods...
 ```
 

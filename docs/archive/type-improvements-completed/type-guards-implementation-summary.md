@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document summarizes the implementation of type guards and validators for the CosmicHub project, which enhance type safety across the entire application stack.
+This document summarizes the implementation of type guards and validators for the CosmicHub project,
+which enhance type safety across the entire application stack.
 
 ## Implemented Components
 
@@ -63,4 +64,7 @@ This document summarizes the implementation of type guards and validators for th
 
 ## Conclusion
 
-The implementation of type guards and validators significantly improves type safety across the CosmicHub application. By providing consistent validation in both TypeScript and Python, we ensure data integrity throughout the application stack and improve developer experience with better error messages and type narrowing.
+The implementation of type guards and validators significantly improves type safety across the
+CosmicHub application. By providing consistent validation in both TypeScript and Python, we ensure
+data integrity throughout the application stack and improve developer experience with better error
+messages and type narrowing.

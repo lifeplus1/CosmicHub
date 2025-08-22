@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document consolidates all type-related tasks for the CosmicHub project, organizing completed work and remaining priorities. Tasks are mapped to the best GitHub Copilot Pro models based on their specific strengths for type-related work.
+This document consolidates all type-related tasks for the CosmicHub project, organizing completed
+work and remaining priorities. Tasks are mapped to the best GitHub Copilot Pro models based on their
+specific strengths for type-related work.
 
 ## Completed Tasks ✅
 
@@ -10,37 +12,48 @@ This document consolidates all type-related tasks for the CosmicHub project, org
 
 #### Performance & Configuration Modules (Completed with GPT-4.1)
 
-- **Critical Type Safety Fixes**: Replaced all `any` types with proper interfaces and generic types in:
+- **Critical Type Safety Fixes**: Replaced all `any` types with proper interfaces and generic types
+  in:
   - `/packages/config/src/push-notifications.ts`
   - `/packages/config/src/component-library.tsx`
-- **Performance Metrics Typing**: Added missing type definitions for performance metrics and configuration objects
-- **Generic Configuration Patterns**: Improved generic constraints for factories and configuration utilities
+- **Performance Metrics Typing**: Added missing type definitions for performance metrics and
+  configuration objects
+- **Generic Configuration Patterns**: Improved generic constraints for factories and configuration
+  utilities
 
-- **React Performance Type Safety**: Fixed build-breaking errors in `react-performance.tsx` with proper hook typings and async handling
-- **Component Library Type Safety**: Fixed polymorphic component types in `component-library.tsx` with proper documentation
+- **React Performance Type Safety**: Fixed build-breaking errors in `react-performance.tsx` with
+  proper hook typings and async handling
+- **Component Library Type Safety**: Fixed polymorphic component types in `component-library.tsx`
+  with proper documentation
 - **Chart Display Type Safety**: Replaced `any` types with proper interfaces in `ChartDisplay.tsx`
-- **Type Guards Implementation**: Created comprehensive type guards in `/packages/types/src/type-guards.ts`
+- **Type Guards Implementation**: Created comprehensive type guards in
+  `/packages/types/src/type-guards.ts`
 - **Specialized Type Files**:
   - `/apps/astro/src/types/house-cusp.ts`
   - `/apps/astro/src/types/processed-chart.ts`
-- **API Service Type Safety**: Implemented branded types, discriminated unions, and enhanced error handling
+- **API Service Type Safety**: Implemented branded types, discriminated unions, and enhanced error
+  handling
 - **Lazy Loading Type Improvements**: Type-safe component registry and hook return values
 - **Serialization Type Safety**: Enhanced `/packages/types/src/serialize.ts` with proper type guards
 
 #### Critical TypeScript Error Resolution (Completed August 17, 2025)
 
 - **Systematic Error Resolution**: Fixed 15 TypeScript compilation errors across 8 files
-- **Branded Type Integration**: Successfully implemented ChartId, UserId, InterpretationId branded types
+- **Branded Type Integration**: Successfully implemented ChartId, UserId, InterpretationId branded
+  types
 - **Component Type Safety**: Fixed type casting and interface conflicts in:
   - `/apps/astro/src/pages/AIInterpretation.tsx` - Added chart selection with proper type casting
-  - `/apps/astro/src/components/AIInterpretation/InterpretationForm.tsx` - Resolved request type conflicts
+  - `/apps/astro/src/components/AIInterpretation/InterpretationForm.tsx` - Resolved request type
+    conflicts
   - `/apps/astro/src/pages/SavedCharts.tsx` - Fixed ChartId casting for API calls
-  - `/apps/astro/src/components/ChartDisplay/ChartDisplay.tsx` - Resolved import conflicts and boolean return types
+  - `/apps/astro/src/components/ChartDisplay/ChartDisplay.tsx` - Resolved import conflicts and
+    boolean return types
   - `/apps/astro/src/components/GeneKeysChart/GeneKeysChart.tsx` - Fixed property access issues
   - `/apps/astro/src/utils/chart-validation.ts` - Fixed import paths and package building
   - `/apps/astro/src/components/ChartCalculator.tsx` - Fixed ExtendedChartData type casting
   - `/apps/astro/src/pages/Chart.tsx` - Fixed ChartData index signature compatibility
-- **Package Building**: Rebuilt `@cosmichub/types` package to generate missing type declaration files
+- **Package Building**: Rebuilt `@cosmichub/types` package to generate missing type declaration
+  files
 - **Type Validation**: All files now pass TypeScript compilation with zero errors
 
 ### Python Improvements (Completed with Claude 3.7/o1-mini)
@@ -111,17 +124,21 @@ This document consolidates all type-related tasks for the CosmicHub project, org
 
 - Generic default now `unknown` (not `any`), explicit return contract (`UseSafeAsyncReturn`).
 
-1. Added strongly typed A/B test event tracking (`ABTestEventProperties`) removing broad `Record<string, any>`.
+1. Added strongly typed A/B test event tracking (`ABTestEventProperties`) removing broad
+   `Record<string, any>`.
 
 1. API client generics:
 
 - `ApiResponse<T = unknown>` and request body generics for `post/put`.
-- Removed broad `any` body params; introduced local `UnknownRecord` while avoiding cross rootDir issues.
+- Removed broad `any` body params; introduced local `UnknownRecord` while avoiding cross rootDir
+  issues.
 - Hardened retry logic with safe `unknown` narrowing.
 
-1. Removed multiple incidental `any` usages without losing flexibility (strategic `unknown` + explicit narrowing patterns).
+1. Removed multiple incidental `any` usages without losing flexibility (strategic `unknown` +
+   explicit narrowing patterns).
 
-1. Exported new utilities through `types` package index for future gradual adoption (currently local fallback in `config` until tsconfig multi-root adjustments are made).
+1. Exported new utilities through `types` package index for future gradual adoption (currently local
+   fallback in `config` until tsconfig multi-root adjustments are made).
 
 **Measured Outcomes:**
 
@@ -131,11 +148,14 @@ This document consolidates all type-related tasks for the CosmicHub project, org
 
 **Deferred / Next (Optional):**
 
-- Update `packages/config/tsconfig.json` to include shared types for direct import of utilities (remove local fallback type duplication).
-- Add type dependency graph doc (could be auto-generated via TS compiler API) – not required for milestone.
+- Update `packages/config/tsconfig.json` to include shared types for direct import of utilities
+  (remove local fallback type duplication).
+- Add type dependency graph doc (could be auto-generated via TS compiler API) – not required for
+  milestone.
 - Extend `Result<T,E>` adoption across error-handling utilities & API layer.
 
-**Validation:** Type checks pass for modified packages; no new `any` introduced (audited via targeted grep excluding intentional comments/legacy test scaffolding).
+**Validation:** Type checks pass for modified packages; no new `any` introduced (audited via
+targeted grep excluding intentional comments/legacy test scaffolding).
 
 ### 🟡 MEDIUM PRIORITY - UI Components
 
@@ -199,7 +219,8 @@ This document consolidates all type-related tasks for the CosmicHub project, org
 - `/packages/types/src/serialize.ts` (remaining tasks)
 - `/packages/frequency/src/index.ts`
 
-- **Best Model**: **GPT-5.0 (Preview)** or **Claude 4** - Superior reasoning for complex type transformations and multi-component workflows
+- **Best Model**: **GPT-5.0 (Preview)** or **Claude 4** - Superior reasoning for complex type
+  transformations and multi-component workflows
 - **Tasks**:
   - Complete serialization type improvements
   - Add frequency calculation types
@@ -215,7 +236,8 @@ This document consolidates all type-related tasks for the CosmicHub project, org
 - `/backend/database.py`
 - `/backend/security.py`
 
-- **Best Model**: **GPT-5.0 (Preview)** or **o1-mini** - Superior reasoning for complex backend logic and systematic type improvements
+- **Best Model**: **GPT-5.0 (Preview)** or **o1-mini** - Superior reasoning for complex backend
+  logic and systematic type improvements
 - **Tasks**:
   - Remove remaining `# type: ignore` comments
   - Add proper Pydantic model validation
@@ -242,15 +264,15 @@ This document consolidates all type-related tasks for the CosmicHub project, org
 
 ### Primary Models for Type Work
 
-| Model | Best Use Cases | Type-Specific Strengths |
-|-------|---------------|------------------------|
+| Model                 | Best Use Cases                              | Type-Specific Strengths                                       |
+| --------------------- | ------------------------------------------- | ------------------------------------------------------------- |
 | **Claude 3.5 Sonnet** | Lint fixes, accessibility, React components | TypeScript/ESLint mastery, WCAG compliance, precise debugging |
-| **Claude 4** | Complex refactors, multi-file changes | Agentic workflows, repo-wide type improvements |
-| **GPT-5.0 (Preview)** | Systemic type refactors, complex logic | Superior reasoning, 1M+ context, deep type analysis |
-| **GPT-4.1** | Fast TypeScript fixes, type inference | Low latency, efficient for CI/CD, hook patterns |
-| **o1-mini** | Backend logic, Pydantic models | Step-by-step reasoning, complex Python type relationships |
-| **GPT-4o** | UI components, forms, visual elements | Multimodal debugging, form validation, component patterns |
-| **GPT-4o mini** | Quick fixes, tests, small components | Cost-effective, fast iteration, test generation |
+| **Claude 4**          | Complex refactors, multi-file changes       | Agentic workflows, repo-wide type improvements                |
+| **GPT-5.0 (Preview)** | Systemic type refactors, complex logic      | Superior reasoning, 1M+ context, deep type analysis           |
+| **GPT-4.1**           | Fast TypeScript fixes, type inference       | Low latency, efficient for CI/CD, hook patterns               |
+| **o1-mini**           | Backend logic, Pydantic models              | Step-by-step reasoning, complex Python type relationships     |
+| **GPT-4o**            | UI components, forms, visual elements       | Multimodal debugging, form validation, component patterns     |
+| **GPT-4o mini**       | Quick fixes, tests, small components        | Cost-effective, fast iteration, test generation               |
 
 ### Task Assignment Strategy
 
@@ -267,7 +289,7 @@ This document consolidates all type-related tasks for the CosmicHub project, org
 2. **UI Components** with **Claude 3.5 Sonnet** - comprehensive component typing
 3. **Form Components** with **GPT-4o** - specialized form handling
 
-#### Phase 2 (Weeks 4-5): Hooks & Utilities  
+#### Phase 2 (Weeks 4-5): Hooks & Utilities
 
 1. **Hook Types** with **GPT-4.1** - efficient hook patterns
 2. **Type Utilities** with **Claude 4** - complex type transformations
@@ -371,10 +393,10 @@ The following files contain duplicate information and can be archived after cons
 
 ---
 
-*Document created: August 17, 2025*  
-*Last updated: August 17, 2025*  
-*Consolidates: 26 type-related documentation files*  
-*Status: Active - Master roadmap for type system improvements*  
+_Document created: August 17, 2025_  
+_Last updated: August 17, 2025_  
+_Consolidates: 26 type-related documentation files_  
+_Status: Active - Master roadmap for type system improvements_
 
 **Latest Updates:**
 

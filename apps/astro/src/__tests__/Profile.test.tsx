@@ -26,7 +26,7 @@ vi.mock('@cosmichub/auth', () => ({
 vi.mock('@cosmichub/ui', () => ({
   Card: ({ children, title }: { children: React.ReactNode; title?: string }) => (
     <div data-testid="card">
-      {title && <h3>{title}</h3>}
+      {title !== undefined && title !== null && title !== '' && <h3>{title}</h3>}
       {children}
     </div>
   ),

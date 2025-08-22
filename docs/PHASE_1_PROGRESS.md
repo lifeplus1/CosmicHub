@@ -24,7 +24,7 @@
 
 2. **Package Dependency Management**
    - Added explicit dependency from UI package to config package
-   - Configured workspace dependency with "workspace:*" in package.json
+   - Configured workspace dependency with "workspace:\*" in package.json
 
 3. **Build Process Improvements**
    - Created build scripts to ensure correct build order
@@ -32,7 +32,8 @@
 
 ## Current Status
 
-The infrastructure fixes are partially complete. We've implemented a workaround that allows the build to proceed despite the TypeScript errors by:
+The infrastructure fixes are partially complete. We've implemented a workaround that allows the
+build to proceed despite the TypeScript errors by:
 
 1. Building the config package first
 2. Building the UI package with type checking disabled

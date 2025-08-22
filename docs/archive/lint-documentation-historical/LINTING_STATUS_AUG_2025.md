@@ -12,24 +12,26 @@
 ## Key Status Updates
 
 ### NotificationIntegrationExamples.tsx - CLEAN ✅
+
 - **Previous Status**: Listed as 84 errors (high priority)
 - **Current Status**: **CLEAN** - No ESLint errors detected
 - **Achievement**: Successfully resolved through systematic cleanup
 
 ### Verified Progress
+
 - **Total reduction**: From 1,116+ to 875 errors (22%+ improvement)
 - **Boolean expressions**: Now 355 errors (previously suggested >1,300, showing major progress)
 - **Documentation accuracy**: Current audit reveals better state than documentation indicated
 
 ## Current High-Priority Files (August 18, 2025)
 
-| File | Errors | Status Change |
-|------|--------|---------------|
-| **chartAnalyticsService.ts** | 57 | Still high priority |
-| **pwa.ts** | 57 | Still high priority |
-| **useTransitAnalysis.ts** | 49 | Still high priority |
-| **GatesChannelsTab.tsx** | 49 | Reduced from 80+ |
-| **SimpleBirthForm.tsx** | 46 | Maintained high priority |
+| File                         | Errors | Status Change            |
+| ---------------------------- | ------ | ------------------------ |
+| **chartAnalyticsService.ts** | 57     | Still high priority      |
+| **pwa.ts**                   | 57     | Still high priority      |
+| **useTransitAnalysis.ts**    | 49     | Still high priority      |
+| **GatesChannelsTab.tsx**     | 49     | Reduced from 80+         |
+| **SimpleBirthForm.tsx**      | 46     | Maintained high priority |
 
 ## Verified Clean Components (0 errors, 0 warnings)
 
@@ -52,18 +54,18 @@
 
 ## Rule Distribution Analysis
 
-| Rule | Count | % of Total |
-|------|-------|------------|
-| strict-boolean-expressions | 378 | 33.9% |
-| unsafe-member-access | 114 | 10.2% |
-| unsafe-assignment | 94 | 8.4% |
-| unsafe-call | 69 | 6.2% |
-| no-explicit-any | 60 | 5.4% |
-| unsafe-return | 56 | 5.0% |
-| no-unsafe-argument | 48 | 4.3% |
-| prefer-nullish-coalescing | 41 | 3.7% |
-| no-console | 40 | 3.6% |
-| no-floating-promises | 35 | 3.1% |
+| Rule                       | Count | % of Total |
+| -------------------------- | ----- | ---------- |
+| strict-boolean-expressions | 378   | 33.9%      |
+| unsafe-member-access       | 114   | 10.2%      |
+| unsafe-assignment          | 94    | 8.4%       |
+| unsafe-call                | 69    | 6.2%       |
+| no-explicit-any            | 60    | 5.4%       |
+| unsafe-return              | 56    | 5.0%       |
+| no-unsafe-argument         | 48    | 4.3%       |
+| prefer-nullish-coalescing  | 41    | 3.7%       |
+| no-console                 | 40    | 3.6%       |
+| no-floating-promises       | 35    | 3.1%       |
 
 ## Recent Progress (August 19, 2025)
 
@@ -84,7 +86,8 @@ Reduced `strict-boolean-expressions` violations by **71%** (from ~1,300+ to 378 
 ### Priority 1: Continue Boolean Expression Cleanup
 
 - **Focus**: 378 remaining `strict-boolean-expressions` errors
-- **Strategy**: Target highest-count files first (pwa-performance.ts, NotificationIntegrationExamples.tsx)
+- **Strategy**: Target highest-count files first (pwa-performance.ts,
+  NotificationIntegrationExamples.tsx)
 - **Pattern**: Convert implicit boolean checks to explicit null/undefined/empty checks
 
 ### Priority 2: Type Safety Improvements
@@ -116,10 +119,12 @@ Analysis filtered to TypeScript/React source files only, excluding:
 
 ## Historical Context
 
-The original codebase had over 1,300 `strict-boolean-expressions` violations. Through systematic cleanup, this has been reduced to 378, representing a 71% improvement in boolean expression safety. This progress validates the current approach and patterns established for continued improvement.
+The original codebase had over 1,300 `strict-boolean-expressions` violations. Through systematic
+cleanup, this has been reduced to 378, representing a 71% improvement in boolean expression safety.
+This progress validates the current approach and patterns established for continued improvement.
 
 ---
 
-*Last Updated: August 19, 2025*  
-*Audit Method: Direct ESLint scan with JSON analysis*  
-*Scope: TypeScript/React source files in apps/astro*
+_Last Updated: August 19, 2025_  
+_Audit Method: Direct ESLint scan with JSON analysis_  
+_Scope: TypeScript/React source files in apps/astro_

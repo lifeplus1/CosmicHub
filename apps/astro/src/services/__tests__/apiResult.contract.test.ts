@@ -11,7 +11,7 @@ import {
   mapSuccess,
   mapFailure
 } from '@cosmichub/config';
-import type { ApiResult, ApiSuccess, ApiFailure, NotificationStats } from '@cosmichub/config';
+import type { ApiResult, NotificationStats } from '@cosmichub/config';
 
 // Contract test: ensures shared ApiResult & NotificationStats surface remains stable
 

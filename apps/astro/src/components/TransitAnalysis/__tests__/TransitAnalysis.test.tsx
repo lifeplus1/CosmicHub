@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
 
 describe('TransitAnalysis Tests', () => {
   it('should pass basic Vitest functionality test', () => {

@@ -11,34 +11,28 @@
 
 ### Free Tier (Forever Free)
 
-✅ **Basic Binaural Beats**: 3 core frequencies (Alpha, Beta, Theta)
-✅ **Session Timer**: Up to 20 minutes per session
-✅ **Basic Presets**: 5 curated wellness sessions
-✅ **Daily Usage**: 2 sessions per day limit
-✅ **Basic Audio Quality**: Standard 128kbps
-✅ **Basic Progress Tracking**: Simple session counter
+✅ **Basic Binaural Beats**: 3 core frequencies (Alpha, Beta, Theta) ✅ **Session Timer**: Up to 20
+minutes per session ✅ **Basic Presets**: 5 curated wellness sessions ✅ **Daily Usage**: 2 sessions
+per day limit ✅ **Basic Audio Quality**: Standard 128kbps ✅ **Basic Progress Tracking**: Simple
+session counter
 
 ### Premium Tier - "HealWave Pro" ($9.99/month or $79.99/year)
 
-🔒 **Advanced Frequencies**: 15+ therapeutic frequencies (Gamma, Delta, Schumann, etc.)
-🔒 **Unlimited Sessions**: No time or usage limits
-🔒 **Premium Presets**: 50+ expert-designed therapeutic programs
-🔒 **Custom Frequency Builder**: Create personalized binaural sequences
-🔒 **High-Fidelity Audio**: 320kbps premium quality
-🔒 **Advanced Progress Tracking**: Detailed analytics, mood tracking, wellness insights
-🔒 **Offline Mode**: Download sessions for offline use
-🔒 **Background Sounds**: Nature sounds, white noise, ambient music mixing
-🔒 **Sleep & Wake Programs**: Specialized circadian rhythm support
-🔒 **Export Sessions**: Save custom sessions as audio files
-🔒 **Priority Support**: Direct access to wellness experts
+🔒 **Advanced Frequencies**: 15+ therapeutic frequencies (Gamma, Delta, Schumann, etc.) 🔒
+**Unlimited Sessions**: No time or usage limits 🔒 **Premium Presets**: 50+ expert-designed
+therapeutic programs 🔒 **Custom Frequency Builder**: Create personalized binaural sequences 🔒
+**High-Fidelity Audio**: 320kbps premium quality 🔒 **Advanced Progress Tracking**: Detailed
+analytics, mood tracking, wellness insights 🔒 **Offline Mode**: Download sessions for offline use
+🔒 **Background Sounds**: Nature sounds, white noise, ambient music mixing 🔒 **Sleep & Wake
+Programs**: Specialized circadian rhythm support 🔒 **Export Sessions**: Save custom sessions as
+audio files 🔒 **Priority Support**: Direct access to wellness experts
 
 ### Enterprise Tier - "HealWave Clinical" ($49.99/month)
 
-🏥 **Clinical Features**: FDA-compliant therapeutic protocols
-🏥 **Practitioner Dashboard**: Client management and progress monitoring
-🏥 **White-label Options**: Custom branding for clinics
-🏥 **HIPAA Compliance**: Medical-grade privacy and security
-🏥 **Research Access**: Latest neurofeedback research and protocols
+🏥 **Clinical Features**: FDA-compliant therapeutic protocols 🏥 **Practitioner Dashboard**: Client
+management and progress monitoring 🏥 **White-label Options**: Custom branding for clinics 🏥
+**HIPAA Compliance**: Medical-grade privacy and security 🏥 **Research Access**: Latest
+neurofeedback research and protocols
 
 ---
 
@@ -46,36 +40,30 @@
 
 ### Free Tier (Forever Free)
 
-✅ **Basic Birth Chart**: Western astrology only
-✅ **Core Planet Positions**: Sun, Moon, Rising sign analysis
-✅ **Daily Horoscope**: Generic sun sign predictions
-✅ **Basic Numerology**: Life path number calculation only
-✅ **Chart Storage**: Save up to 3 birth charts
-✅ **Monthly Limits**: 5 chart calculations per month
+✅ **Basic Birth Chart**: Western astrology only ✅ **Core Planet Positions**: Sun, Moon, Rising
+sign analysis ✅ **Daily Horoscope**: Generic sun sign predictions ✅ **Basic Numerology**: Life
+path number calculation only ✅ **Chart Storage**: Save up to 3 birth charts ✅ **Monthly Limits**:
+5 chart calculations per month
 
 ### Premium Tier - "CosmicHub Pro" ($14.99/month or $129.99/year)
 
-🔒 **Multi-System Analysis**: All 5 systems (Western, Vedic, Chinese, Mayan, Uranian)
-🔒 **Complete Birth Chart**: All planets, houses, aspects, angles
-🔒 **Advanced Numerology**: Complete analysis (Pythagorean, Chaldean, Karmic numbers)
-🔒 **Unlimited Calculations**: No monthly limits
-🔒 **Chart Comparisons**: Synastry and compatibility analysis
-🔒 **Transit Predictions**: Personalized timing and forecasts
-🔒 **Detailed Interpretations**: AI-powered comprehensive readings
-🔒 **Chart Sharing**: Export and share beautiful chart visualizations
-🔒 **Historical Tracking**: Track planetary cycles and personal growth
-🔒 **Premium Reports**: PDF exports with detailed analysis
-🔒 **Priority Calculations**: Faster processing and priority queue
+🔒 **Multi-System Analysis**: All 5 systems (Western, Vedic, Chinese, Mayan, Uranian) 🔒 **Complete
+Birth Chart**: All planets, houses, aspects, angles 🔒 **Advanced Numerology**: Complete analysis
+(Pythagorean, Chaldean, Karmic numbers) 🔒 **Unlimited Calculations**: No monthly limits 🔒 **Chart
+Comparisons**: Synastry and compatibility analysis 🔒 **Transit Predictions**: Personalized timing
+and forecasts 🔒 **Detailed Interpretations**: AI-powered comprehensive readings 🔒 **Chart
+Sharing**: Export and share beautiful chart visualizations 🔒 **Historical Tracking**: Track
+planetary cycles and personal growth 🔒 **Premium Reports**: PDF exports with detailed analysis 🔒
+**Priority Calculations**: Faster processing and priority queue
 
 ### Cosmic Elite Tier - "CosmicHub Elite" ($29.99/month or $249.99/year)
 
-✨ **Live Astrologer Consultations**: Monthly 1-on-1 sessions
-✨ **Custom Timing Reports**: Electional astrology for important decisions
-✨ **Advanced Progressions**: Secondary progressions and solar returns
-✨ **Research Database**: Access to astrological research and techniques
-✨ **Early Access**: Beta features and new astrological systems
-✨ **Personalized Recommendations**: Custom gemstones, colors, timing advice
-✨ **Family Charts**: Analyze up to 10 family members with relationship dynamics
+✨ **Live Astrologer Consultations**: Monthly 1-on-1 sessions ✨ **Custom Timing Reports**:
+Electional astrology for important decisions ✨ **Advanced Progressions**: Secondary progressions
+and solar returns ✨ **Research Database**: Access to astrological research and techniques ✨
+**Early Access**: Beta features and new astrological systems ✨ **Personalized Recommendations**:
+Custom gemstones, colors, timing advice ✨ **Family Charts**: Analyze up to 10 family members with
+relationship dynamics
 
 ---
 
@@ -88,7 +76,7 @@
 - **Enterprise Conversion**: 0.5% of total users
 - **Target**: 50,000 users → 4,000 premium → $40,000 MRR
 
-### CosmicHub Revenue Model  
+### CosmicHub Revenue Model
 
 - **Free Users**: 75% of user base
 - **Premium Conversion**: 15-20% (higher due to specific interest)

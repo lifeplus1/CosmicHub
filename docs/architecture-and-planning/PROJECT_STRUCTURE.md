@@ -8,7 +8,7 @@
 
 ## 📁 **Current Optimized Structure**
 
-```text
+````text
 CosmicHub/
 ├── apps/                           # 🎯 STANDALONE APPLICATIONS
 │   ├── astro/                      # ⭐ Astrology App (cosmichub.com)
@@ -115,7 +115,7 @@ function AstroFrequencyGenerator({ chartData, transits }) {
 
 ### **2. Astrology-Specific Features**
 - **Transit-based frequency recommendations**
-- **Chart-synchronized binaural beats** 
+- **Chart-synchronized binaural beats**
 - **Planetary frequency mappings**
 - **Human design integration**
 - **Personalized frequency calculations**
@@ -169,10 +169,10 @@ export const useCrossAppSubscription = () => {
 
 ### **Astrology Deployment** (cosmichub.com)
 ```yaml
-# vercel.json for Astrology  
+# vercel.json for Astrology
 {
   "name": "cosmichub-astro",
-  "buildCommand": "cd apps/astro && npm run build", 
+  "buildCommand": "cd apps/astro && npm run build",
   "outputDirectory": "apps/astro/dist"
 }
 ```text
@@ -249,3 +249,4 @@ services:
 ---
 
 **🎯 Result**: HealWave functions as a completely standalone app while sharing robust, tested infrastructure with the astrology app. Users get the best experience in each app, and developers avoid code duplication.
+````

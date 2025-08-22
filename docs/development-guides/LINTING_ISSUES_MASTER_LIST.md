@@ -6,23 +6,25 @@
 
 **New Totals**: **875 total issues** in src/ (TypeScript/React files only)
 
-**Major Discrepancy Resolved**: Previous documentation suggested 1,116+ issues, but current comprehensive audit shows **875 issues** - indicating **substantial undocumented progress**.
+**Major Discrepancy Resolved**: Previous documentation suggested 1,116+ issues, but current
+comprehensive audit shows **875 issues** - indicating **substantial undocumented progress**.
 
 **Key Findings**:
+
 - **NotificationIntegrationExamples.tsx**: Previously listed as 84 errors → **NOW CLEAN** ✅
 - **Total boolean expressions**: 355 (down from >1,300+ historically)
 - **Documentation lag**: Significant cleanup has occurred without full documentation updates
 
 ## Current Priority Distribution (875 total)
 
-| Rule Category | Count | % | Priority |
-|---------------|-------|---|----------|
-| **strict-boolean-expressions** | 355 | 40.6% | 🔴 CRITICAL |
-| **Unsafe operations** | 190 | 21.7% | 🔴 HIGH |
-| **Unused variables** | 60 | 6.9% | 🟡 MEDIUM |
-| **Promise handling** | 38 | 4.3% | 🟡 MEDIUM |
-| **Accessibility** | 45 | 5.1% | 🟡 MEDIUM |
-| **Other issues** | 187 | 21.4% | 🟢 LOW |
+| Rule Category                  | Count | %     | Priority    |
+| ------------------------------ | ----- | ----- | ----------- |
+| **strict-boolean-expressions** | 355   | 40.6% | 🔴 CRITICAL |
+| **Unsafe operations**          | 190   | 21.7% | 🔴 HIGH     |
+| **Unused variables**           | 60    | 6.9%  | 🟡 MEDIUM   |
+| **Promise handling**           | 38    | 4.3%  | 🟡 MEDIUM   |
+| **Accessibility**              | 45    | 5.1%  | 🟡 MEDIUM   |
+| **Other issues**               | 187   | 21.4% | 🟢 LOW      |
 
 ## Top Files Requiring Attention (August 18 Audit)
 
@@ -35,6 +37,7 @@
 ## Verified Clean Status ✅
 
 **Confirmed Clean** (August 18, 2025):
+
 - **NotificationIntegrationExamples.tsx** - Previously 84 errors → **0 errors**
 
 **Under Review**: Previous "clean" component claims being re-verified with current audit scope
@@ -42,11 +45,13 @@
 ## Updated Strategy (Post-Audit)
 
 ### Immediate Focus (Next 2 Weeks)
+
 1. **chartAnalyticsService.ts** - Complete type safety overhaul
-2. **pwa.ts** - Service worker improvements  
+2. **pwa.ts** - Service worker improvements
 3. **Boolean expression patterns** - Apply systematic fixes across remaining 355 errors
 
 ### Success Metrics Revised
+
 - **Current baseline**: 875 errors (not 1,116+)
 - **Target 1**: Reduce to 700 errors (focus on boolean expressions)
 - **Target 2**: Complete top 10 highest-error files
@@ -76,7 +81,8 @@ Key metrics from comprehensive ESLint scan:
 - **unsafe-assignment**: 94 violations (8.4% of total)
 - **no-console**: 40 warnings (3.6% of total)
 
-Next: capture refreshed JSON snapshot; remove residual console in PWA/performance bootstrap + firebase/env; begin unsafe member access + hook/a11y batch.
+Next: capture refreshed JSON snapshot; remove residual console in PWA/performance bootstrap +
+firebase/env; begin unsafe member access + hook/a11y batch.
 
 ## Major Progress Achievement
 
@@ -86,16 +92,17 @@ Next: capture refreshed JSON snapshot; remove residual console in PWA/performanc
 
 **Current Focus**: Remaining 378 boolean expressions in highest-count files
 
-**Latest Fix**: ChartWheelInteractive.tsx boolean expressions and type safety improvements (Now 0 errors/warnings)
+**Latest Fix**: ChartWheelInteractive.tsx boolean expressions and type safety improvements (Now 0
+errors/warnings)
 
 ### Recent Pattern Library
 
 ```typescript
 // String type validation pattern (ChartWheelInteractive.tsx)
-typeof value === 'string' && value.length > 0
+typeof value === 'string' && value.length > 0;
 
 // Safe object property access pattern
-typeof obj[key] === 'string' ? obj[key] : fallback
+typeof obj[key] === 'string' ? obj[key] : fallback;
 
 // No more truthy string checks
 // Before: if (someString) { ... }
@@ -109,11 +116,12 @@ Based on current analysis of 1,116 active issues in Astro app:
 1. **Boolean Expression Issues**: 378 errors (33.9% of total)
    - `@typescript-eslint/strict-boolean-expressions`
    - **Progress**: Reduced from ~1,300+ to 378 (71% reduction)
-   - **Next Target**: Files with highest error counts (pwa-performance.ts, NotificationIntegrationExamples.tsx)
+   - **Next Target**: Files with highest error counts (pwa-performance.ts,
+     NotificationIntegrationExamples.tsx)
 
 2. **Type Safety Issues**: 268 errors (24.0% of total)
    - `@typescript-eslint/no-unsafe-member-access` (114 errors)
-   - `@typescript-eslint/no-unsafe-assignment` (94 errors)  
+   - `@typescript-eslint/no-unsafe-assignment` (94 errors)
    - `@typescript-eslint/no-unsafe-call` (69 errors)
 
 3. **Console Statements**: 40 warnings (3.6% of total)
@@ -162,8 +170,8 @@ Based on current analysis of 1,116 active issues in Astro app:
 
 ### Priority 1: Complete Boolean Expression Cleanup
 
-**Status**: 71% COMPLETE - Reduced from ~1,300+ to 378 remaining
-**Target**: Focus on highest-count problem files
+**Status**: 71% COMPLETE - Reduced from ~1,300+ to 378 remaining **Target**: Focus on highest-count
+problem files
 
 **Priority Files**:
 
@@ -210,7 +218,7 @@ Based on current analysis of 1,116 active issues in Astro app:
    - Primary violations: date handling, type safety
 
 5. **InterpretationDisplay.tsx** - 67 errors
-   - Main AI interpretation UI component  
+   - Main AI interpretation UI component
    - Primary violations: async handling, type guards needed
 
 6. **SimpleBirthForm.tsx** - 46 errors
@@ -230,7 +238,7 @@ Based on successful fixes in ChartWheelInteractive.tsx and other clean component
 #### Boolean Expression Safety
 
 ```typescript
-// ✅ Safe string validation  
+// ✅ Safe string validation
 if (typeof value === 'string' && value.length > 0) {
   // Process non-empty string
 }
@@ -240,7 +248,7 @@ const color = typeof planetColors[body] === 'string' ? planetColors[body] : defa
 
 // ✅ Explicit null/undefined checks
 if (data !== null && data !== undefined) {
-  // Process data  
+  // Process data
 }
 ```
 
@@ -252,7 +260,7 @@ function isValidData(data: unknown): data is DataType {
   return data !== null && typeof data === 'object' && 'requiredProperty' in data;
 }
 
-// ✅ Safe object access  
+// ✅ Safe object access
 if ('property' in obj && typeof obj.property === 'string') {
   // Use obj.property safely
 }
@@ -273,16 +281,15 @@ This ensures accuracy and prevents documentation drift from actual codebase stat
 ### Systematic Approach
 
 1. **Focus on highest-error files first** for maximum impact
-2. **Apply proven patterns** from successfully cleaned components  
+2. **Apply proven patterns** from successfully cleaned components
 3. **Verify clean status** of completed components regularly
 4. **Update documentation** based on actual audits, not assumptions
 
 ---
 
-*Last Updated: August 19, 2025*  
-*Method: Comprehensive ESLint audit*  
-*Scope: TypeScript/React source files only*
-**Rule**: `@typescript-eslint/no-explicit-any`
+_Last Updated: August 19, 2025_  
+_Method: Comprehensive ESLint audit_  
+_Scope: TypeScript/React source files only_ **Rule**: `@typescript-eslint/no-explicit-any`
 
 **Files with Most Issues**:
 
@@ -301,8 +308,7 @@ This ensures accuracy and prevents documentation drift from actual codebase stat
 
 #### 1. Promise Handling Issues
 
-**Count**: ~150 errors
-**Rules**:
+**Count**: ~150 errors **Rules**:
 
 - `@typescript-eslint/no-floating-promises`
 - `@typescript-eslint/no-misused-promises`
@@ -322,8 +328,7 @@ onClick={() => void someFunction()} // proper void handling
 
 #### 2. Missing Function Return Types
 
-**Count**: ~100 warnings
-**Rule**: `@typescript-eslint/explicit-function-return-type`
+**Count**: ~100 warnings **Rule**: `@typescript-eslint/explicit-function-return-type`
 
 **Examples**:
 
@@ -337,8 +342,7 @@ const handleClick = (event: MouseEvent): void => { ... }
 
 #### 3. React/Accessibility Issues
 
-**Count**: ~80 errors
-**Rules**:
+**Count**: ~80 errors **Rules**:
 
 - `jsx-a11y/label-has-associated-control`
 - `jsx-a11y/no-redundant-roles`
@@ -349,22 +353,19 @@ const handleClick = (event: MouseEvent): void => { ... }
 
 #### 1. Console Statements
 
-**Count**: ~200 warnings
-**Rule**: `no-console`
-**Resolution**: Replace with proper logging or remove debug statements
+**Count**: ~200 warnings **Rule**: `no-console` **Resolution**: Replace with proper logging or
+remove debug statements
 
 #### 2. Unused Variables/Imports
 
-**Count**: ~100 errors
-**Rules**:
+**Count**: ~100 errors **Rules**:
 
 - `@typescript-eslint/no-unused-vars`
 - `no-duplicate-imports`
 
 #### 3. Code Style Issues
 
-**Count**: ~50 errors
-**Rules**:
+**Count**: ~50 errors **Rules**:
 
 - `eqeqeq` (use === instead of ==)
 - `no-case-declarations`
@@ -378,7 +379,7 @@ const handleClick = (event: MouseEvent): void => { ... }
    - Primary issues: unsafe types, boolean expressions, any usage
    - **Recommended Model**: Claude 3.5 Sonnet
 
-2. **Chart.tsx** - ~150 errors  
+2. **Chart.tsx** - ~150 errors
    - Primary issues: unsafe assignments, type guards needed
    - **Recommended Model**: Claude 3.5 Sonnet
 
@@ -387,7 +388,7 @@ const handleClick = (event: MouseEvent): void => { ... }
    - **Recommended Model**: GPT-4o (form expertise)
 
 4. **chartSyncService.ts** - ~80 errors
-   - Primary issues: service typing, async patterns  
+   - Primary issues: service typing, async patterns
    - **Recommended Model**: GPT-5.0 Preview (complex logic)
 
 5. **chartAnalyticsService.ts** - ~70 errors
@@ -421,7 +422,7 @@ const handleClick = (event: MouseEvent): void => { ... }
 **Focus**: Make the build pass ✅
 
 1. ✅ Fix TypeScript configuration issues
-2. ✅ Resolve parsing errors in test files  
+2. ✅ Resolve parsing errors in test files
 3. ✅ Address build-breaking type errors
 
 **Models Used**:
@@ -431,7 +432,7 @@ const handleClick = (event: MouseEvent): void => { ... }
 
 **Status**: Phase 1 complete. TypeScript compilation passing, no parsing errors.
 
-### Phase 2: High Priority Type Safety (Weeks 2-3)  
+### Phase 2: High Priority Type Safety (Weeks 2-3)
 
 **Focus**: Eliminate unsafe type operations
 
@@ -491,9 +492,7 @@ const handleClick = (event: MouseEvent): void => { ... }
 
 ```typescript
 function isChartData(value: unknown): value is ChartData {
-  return typeof value === 'object' && 
-         value !== null && 
-         'planets' in value;
+  return typeof value === 'object' && value !== null && 'planets' in value;
 }
 ```
 
@@ -567,7 +566,7 @@ Complex logic requiring human judgment:
 
 - **Phase 1**: ✅ **ACHIEVED - 0 build-breaking errors**
 - **Phase 2**: <100 unsafe type operations
-- **Phase 3**: <50 boolean expression errors  
+- **Phase 3**: <50 boolean expression errors
 - **Phase 4**: <20 promise handling errors
 - **Phase 5**: <50 total remaining issues
 
@@ -598,9 +597,10 @@ Complex logic requiring human judgment:
 
 **Document Created**: August 17, 2025  
 **Last Updated**: August 17, 2025 (Evening Update)  
-**Total Issues**: 1,389 problems (1,068 errors, 321 warnings) - **SIGNIFICANT PROGRESS: ~600 issues resolved**  
+**Total Issues**: 1,389 problems (1,068 errors, 321 warnings) - **SIGNIFICANT PROGRESS: ~600 issues
+resolved**  
 **Estimated Remaining Effort**: 4-5 weeks with systematic approach (reduced from 6 weeks)  
-**Priority**: High - Continuing systematic quality improvements  
+**Priority**: High - Continuing systematic quality improvements
 
 ### 🎯 **PROGRESS HIGHLIGHTS**
 
@@ -614,7 +614,8 @@ Complex logic requiring human judgment:
 
 **Primary Issue Categories**:
 
-- **Type Safety Issues**: ~491 errors (`@typescript-eslint/no-unsafe-*`, `@typescript-eslint/no-explicit-any`, `@typescript-eslint/strict-boolean-expressions`)
+- **Type Safety Issues**: ~491 errors (`@typescript-eslint/no-unsafe-*`,
+  `@typescript-eslint/no-explicit-any`, `@typescript-eslint/strict-boolean-expressions`)
 - **Console Statements**: ~105 warnings (`no-console`)
 - **Unused Variables**: ~74 errors (`@typescript-eslint/no-unused-vars`)
 - **Other Issues**: ~329 mixed errors (floating promises, accessibility, React patterns)

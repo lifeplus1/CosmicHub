@@ -1,12 +1,12 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { SynastryAnalysis } from '../components/SynastryAnalysis/SynastryAnalysis';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+const TestWrapper = ({ children }: { children: React.ReactNode }): React.ReactElement => (
   <MemoryRouter>
     <AuthProvider>
       <SubscriptionProvider appType="astro">

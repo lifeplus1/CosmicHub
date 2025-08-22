@@ -2,13 +2,16 @@
 
 ## Overview
 
-This document details the type safety improvements implemented using Claude 3.7's advanced type system understanding. Claude 3.7 is particularly effective at handling complex TypeScript type patterns including generics, type guards, and polymorphic components.
+This document details the type safety improvements implemented using Claude 3.7's advanced type
+system understanding. Claude 3.7 is particularly effective at handling complex TypeScript type
+patterns including generics, type guards, and polymorphic components.
 
 ## Completed Improvements
 
 ### Component Library Enhancements
 
-We updated the `/packages/config/src/component-library.tsx` file to properly document necessary type assertions while maintaining type safety:
+We updated the `/packages/config/src/component-library.tsx` file to properly document necessary type
+assertions while maintaining type safety:
 
 ```tsx
 // Before:
@@ -63,7 +66,7 @@ We added specialized type guards to ensure runtime type safety:
 // Type guard example for chart data
 function isProcessedChartData(data: unknown): data is ProcessedChartData {
   if (!data || typeof data !== 'object') return false;
-  
+
   const candidate = data as Partial<ProcessedChartData>;
   return (
     Array.isArray(candidate.planets) &&
@@ -80,8 +83,7 @@ Claude 3.7 excels at creating complex type utilities. Here are some patterns we'
 ### Conditional Type Selection
 
 ```typescript
-type ConditionalType<T, Condition extends boolean> = 
-  Condition extends true ? T : never;
+type ConditionalType<T, Condition extends boolean> = Condition extends true ? T : never;
 ```
 
 ### Enhanced Type Inference
@@ -93,23 +95,29 @@ type InferFromPromise<T> = T extends Promise<infer U> ? U : never;
 ### Typed Event Handlers
 
 ```typescript
-type ChartInteractionEvent<T extends HTMLElement = HTMLDivElement> = 
-  React.MouseEvent<T> & { chartData?: ProcessedChartData };
+type ChartInteractionEvent<T extends HTMLElement = HTMLDivElement> = React.MouseEvent<T> & {
+  chartData?: ProcessedChartData;
+};
 ```
 
 ## Lessons Learned
 
-1. **Type Assertions Documentation**: When type assertions are necessary, proper documentation is essential for maintainability
+1. **Type Assertions Documentation**: When type assertions are necessary, proper documentation is
+   essential for maintainability
 
-2. **Specialized Type Files**: Creating dedicated type files for complex data structures improves organization and reusability
+2. **Specialized Type Files**: Creating dedicated type files for complex data structures improves
+   organization and reusability
 
-3. **Type Guards for Runtime Safety**: TypeScript's static types don't persist at runtime, so implementing type guards provides an extra layer of safety
+3. **Type Guards for Runtime Safety**: TypeScript's static types don't persist at runtime, so
+   implementing type guards provides an extra layer of safety
 
-4. **Claude 3.7 Strengths**: Claude 3.7 excels at complex generic type patterns, type utility creation, and documentation of type system edge cases
+4. **Claude 3.7 Strengths**: Claude 3.7 excels at complex generic type patterns, type utility
+   creation, and documentation of type system edge cases
 
 ## Advanced Type Patterns
 
-We've implemented several advanced type patterns using Claude 3.7's improved type reasoning capabilities:
+We've implemented several advanced type patterns using Claude 3.7's improved type reasoning
+capabilities:
 
 ### Type-Safe Lazy Loading Components
 
@@ -175,8 +183,12 @@ We've implemented branded types to ensure type safety for similar-looking values
 
 ```typescript
 // Before:
-function getChartById(id: string) { /* ... */ }
-function getUserById(id: string) { /* ... */ }
+function getChartById(id: string) {
+  /* ... */
+}
+function getUserById(id: string) {
+  /* ... */
+}
 // No type safety - can accidentally mix up IDs
 
 // After:
@@ -188,9 +200,15 @@ type UserId = Brand<string, 'UserId'>;
 type TransactionId = Brand<string, 'TransactionId'>;
 
 // Type-safe API functions
-function getChartById(id: ChartId) { /* ... */ }
-function getUserById(id: UserId) { /* ... */ }
-function getTransactionById(id: TransactionId) { /* ... */ }
+function getChartById(id: ChartId) {
+  /* ... */
+}
+function getUserById(id: UserId) {
+  /* ... */
+}
+function getTransactionById(id: TransactionId) {
+  /* ... */
+}
 
 // Create branded values
 function createChartId(id: string): ChartId {
@@ -212,7 +230,7 @@ We've enhanced type safety for discriminated unions with exhaustiveness checking
 
 ```typescript
 // Define a discriminated union
-type ChartEvent = 
+type ChartEvent =
   | { type: 'planet_click'; planetName: string; position: { x: number; y: number } }
   | { type: 'house_click'; houseNumber: number; position: { x: number; y: number } }
   | { type: 'aspect_click'; planet1: string; planet2: string; aspectType: string }
@@ -227,10 +245,14 @@ function assertNever(x: never): never {
 function handleChartEvent(event: ChartEvent): void {
   switch (event.type) {
     case 'planet_click':
-      console.log(`Planet clicked: ${event.planetName} at position ${event.position.x}, ${event.position.y}`);
+      console.log(
+        `Planet clicked: ${event.planetName} at position ${event.position.x}, ${event.position.y}`
+      );
       break;
     case 'house_click':
-      console.log(`House clicked: ${event.houseNumber} at position ${event.position.x}, ${event.position.y}`);
+      console.log(
+        `House clicked: ${event.houseNumber} at position ${event.position.x}, ${event.position.y}`
+      );
       break;
     case 'aspect_click':
       console.log(`Aspect clicked: ${event.planet1} - ${event.planet2} (${event.aspectType})`);
@@ -269,7 +291,7 @@ function withChartData<T extends ComponentType<any>>(
   return function WithChartData(props: Omit<ComponentProps<T>, 'chartData'>) {
     // Fetch chart data (typed as ProcessedChartData)
     const chartData = useChartData();
-    
+
     // Spread props and add chartData
     return <Component {...props as any} chartData={chartData} />;
   };
@@ -324,20 +346,20 @@ const zodiacHierarchy: AstrologicalHierarchy = {
           children: [
             { value: { name: 'Aries', description: 'Cardinal Fire' } },
             { value: { name: 'Leo', description: 'Fixed Fire' } },
-            { value: { name: 'Sagittarius', description: 'Mutable Fire' } }
-          ]
+            { value: { name: 'Sagittarius', description: 'Mutable Fire' } },
+          ],
         },
         // Other elements...
-      ]
+      ],
     },
     // Other categorizations...
-  ]
+  ],
 };
 
 // Type-safe recursive function to process the hierarchy
 function processHierarchy<T>(node: TreeNode<T>, level: number = 0): void {
   console.log(`${'  '.repeat(level)}${node.value}`);
-  
+
   // TypeScript knows node.children is an array of TreeNode<T> if it exists
   node.children?.forEach(child => processHierarchy(child, level + 1));
 }
@@ -371,17 +393,15 @@ interface Chart {
 
 // Create a mapped type for all API responses
 type ApiResponses = {
-  'users': User[];
-  'user': User;
-  'charts': Chart[];
-  'chart': Chart;
+  users: User[];
+  user: User;
+  charts: Chart[];
+  chart: Chart;
 };
 
 // Type-safe API client with mapped responses
 class ApiClient {
-  async get<K extends keyof ApiResponses>(
-    endpoint: K
-  ): Promise<ApiResponse<ApiResponses[K]>> {
+  async get<K extends keyof ApiResponses>(endpoint: K): Promise<ApiResponse<ApiResponses[K]>> {
     const response = await fetch(`/api/${endpoint}`);
     const data = await response.json();
     return data;
@@ -412,5 +432,4 @@ const chart = chartResponse.data; // TypeScript knows this is Chart
 
 ## Document Information
 
-Document created: August 18, 2025
-Last updated: August 19, 2025
+Document created: August 18, 2025 Last updated: August 19, 2025

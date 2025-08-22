@@ -1,6 +1,8 @@
 # Phase 2 Implementation Plan: Enhanced Type Checking and Module Resolution
 
-This document outlines the implementation plan for Phase 2 of our linting and type checking improvements, focusing on resolving the remaining TypeScript module resolution issues and enhancing the type safety of our codebase.
+This document outlines the implementation plan for Phase 2 of our linting and type checking
+improvements, focusing on resolving the remaining TypeScript module resolution issues and enhancing
+the type safety of our codebase.
 
 ## Objectives
 
@@ -99,7 +101,11 @@ export type { Analytics, AnalyticsCallOptions };
 
 // Define proper types for all analytics methods
 export interface AnalyticsService {
-  logEvent: (eventName: string, eventParams?: Record<string, any>, options?: AnalyticsCallOptions) => void;
+  logEvent: (
+    eventName: string,
+    eventParams?: Record<string, any>,
+    options?: AnalyticsCallOptions
+  ) => void;
   setCurrentScreen: (screenName: string, options?: AnalyticsCallOptions) => void;
   setUserId: (userId: string, options?: AnalyticsCallOptions) => void;
   setUserProperties: (properties: Record<string, any>, options?: AnalyticsCallOptions) => void;
@@ -118,7 +124,7 @@ import type { Analytics, AnalyticsCallOptions } from '../firebase/analytics';
 
 export function useAnalytics() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  
+
   useEffect(() => {
     const loadAnalytics = async () => {
       try {
@@ -131,18 +137,20 @@ export function useAnalytics() {
         console.error('Failed to load analytics:', error);
       }
     };
-    
+
     loadAnalytics();
   }, []);
 
   const logEvent = useCallback(
     (eventName: string, eventParams?: Record<string, any>, options?: AnalyticsCallOptions) => {
       if (!analytics) return;
-      
+
       // Only import logEvent when needed
-      import('firebase/analytics').then(({ logEvent }) => {
-        logEvent(analytics, eventName, eventParams, options);
-      }).catch(console.error);
+      import('firebase/analytics')
+        .then(({ logEvent }) => {
+          logEvent(analytics, eventName, eventParams, options);
+        })
+        .catch(console.error);
     },
     [analytics]
   );
@@ -237,18 +245,24 @@ if (fs.existsSync(TYPE_ERROR_BASELINE)) {
 
 // Fail if errors increased
 if (currentErrors.totalErrors > baseline.totalErrors) {
-  console.error(`❌ Type errors increased from ${baseline.totalErrors} to ${currentErrors.totalErrors}`);
+  console.error(
+    `❌ Type errors increased from ${baseline.totalErrors} to ${currentErrors.totalErrors}`
+  );
   process.exit(1);
 }
 
 // Success if errors decreased
 if (currentErrors.totalErrors < baseline.totalErrors) {
-  console.log(`✅ Type errors decreased from ${baseline.totalErrors} to ${currentErrors.totalErrors}`);
+  console.log(
+    `✅ Type errors decreased from ${baseline.totalErrors} to ${currentErrors.totalErrors}`
+  );
   // Update baseline
   fs.writeFileSync(TYPE_ERROR_BASELINE, JSON.stringify(currentErrors, null, 2));
 }
 
-console.log(`✅ Type error check passed: ${currentErrors.totalErrors} errors (baseline: ${baseline.totalErrors})`);
+console.log(
+  `✅ Type error check passed: ${currentErrors.totalErrors} errors (baseline: ${baseline.totalErrors})`
+);
 ```
 
 3. Add the script to package.json:
@@ -287,16 +301,18 @@ console.log(`✅ Type error check passed: ${currentErrors.totalErrors} errors (b
 
 ## Timeline
 
-| Task | Duration | Dependencies |
-|------|----------|--------------|
-| Fix Subpath Exports in Config Package | 2 days | None |
-| Fix Firebase Analytics Typing | 1 day | Config Package Exports |
-| Remove UI Package Workarounds | 1 day | Fixed Exports and Typing |
-| Enforce Stricter Type Checking | 2 days | All previous tasks |
-| Testing and Verification | 1 day | All previous tasks |
+| Task                                  | Duration | Dependencies             |
+| ------------------------------------- | -------- | ------------------------ |
+| Fix Subpath Exports in Config Package | 2 days   | None                     |
+| Fix Firebase Analytics Typing         | 1 day    | Config Package Exports   |
+| Remove UI Package Workarounds         | 1 day    | Fixed Exports and Typing |
+| Enforce Stricter Type Checking        | 2 days   | All previous tasks       |
+| Testing and Verification              | 1 day    | All previous tasks       |
 
 **Total Estimated Time**: 7 working days
 
 ## Rollback Plan
 
-If issues arise during implementation, we can roll back to the Phase 1 implementation with temporary workarounds. All changes should be committed in small, atomic pull requests to facilitate easy rollback if needed.
+If issues arise during implementation, we can roll back to the Phase 1 implementation with temporary
+workarounds. All changes should be committed in small, atomic pull requests to facilitate easy
+rollback if needed.

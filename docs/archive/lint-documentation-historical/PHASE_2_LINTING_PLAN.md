@@ -1,18 +1,21 @@
 # Phase 2 Linting Cleanup Plan
 
 ## Current Status
+
 - **Total Errors**: 492 (down from 732, 33% improvement achieved)
 - **Integration Branch**: `lint-integration-all-batches` (ready for main merge after Phase 2)
 - **Status**: Phase 2C Complete - TypeScript compilation successful, critical fixes implemented
 
 ### Phase 2C Completion Summary (August 19, 2025)
 
-**✅ COMPLETED**: Phase 2C Testing & Validation has been successfully completed with the following achievements:
+**✅ COMPLETED**: Phase 2C Testing & Validation has been successfully completed with the following
+achievements:
 
 #### Critical Fixes Implemented
 
 1. **TypeScript Compilation Errors Resolved**:
-   - Fixed `notificationManager.unified.ts` - resolved parameter mismatch in `scheduleTransitAlerts` method
+   - Fixed `notificationManager.unified.ts` - resolved parameter mismatch in `scheduleTransitAlerts`
+     method
    - Both Astro and HealWave apps now compile successfully with TypeScript
    - All runtime-critical TypeScript errors addressed
 
@@ -30,79 +33,83 @@
 
 #### Remaining Work
 
-- Example files (`NotificationIntegrationExamples.tsx`) still have 9 ESLint issues (5 errors, 4 warnings)
-- Overall codebase ESLint count remains high (~9,000 errors) - requires broader refactoring beyond Phase 2 scope
+- Example files (`NotificationIntegrationExamples.tsx`) still have 9 ESLint issues (5 errors, 4
+  warnings)
+- Overall codebase ESLint count remains high (~9,000 errors) - requires broader refactoring beyond
+  Phase 2 scope
 
 ### Baseline Snapshot (Ratchet Established Aug 19, 2025)
 
-The following rule counts are locked by `.lint-baseline.json`. CI fails only if these counts increase before Phase 2 completion:
+The following rule counts are locked by `.lint-baseline.json`. CI fails only if these counts
+increase before Phase 2 completion:
 
-| Rule | Baseline Count | Notes |
-|------|----------------|-------|
-| `@typescript-eslint/strict-boolean-expressions` | 231 | High volume; reduce steadily in Batch A/B |
-| `eqeqeq` | 34 | Mostly trivial replacements |
-| `@typescript-eslint/no-unsafe-member-access` | 136 | Requires typing + guards |
-| `@typescript-eslint/no-unsafe-assignment` | 91 | Address alongside member-access |
-| `@typescript-eslint/no-misused-promises` | 0 | Guard: must remain zero (new violations blocked) |
-| `@typescript-eslint/no-floating-promises` | 0 | Guard: must remain zero (new violations blocked) |
-| `@typescript-eslint/explicit-function-return-type` | 0 | New code must keep explicit returns where rule applies |
+| Rule                                               | Baseline Count | Notes                                                  |
+| -------------------------------------------------- | -------------- | ------------------------------------------------------ |
+| `@typescript-eslint/strict-boolean-expressions`    | 231            | High volume; reduce steadily in Batch A/B              |
+| `eqeqeq`                                           | 34             | Mostly trivial replacements                            |
+| `@typescript-eslint/no-unsafe-member-access`       | 136            | Requires typing + guards                               |
+| `@typescript-eslint/no-unsafe-assignment`          | 91             | Address alongside member-access                        |
+| `@typescript-eslint/no-misused-promises`           | 0              | Guard: must remain zero (new violations blocked)       |
+| `@typescript-eslint/no-floating-promises`          | 0              | Guard: must remain zero (new violations blocked)       |
+| `@typescript-eslint/explicit-function-return-type` | 0              | New code must keep explicit returns where rule applies |
 
-Ratchet Script: `pnpm run lint:ratchet` (update with `LINT_RATCHET_UPDATE=1 pnpm run lint:ratchet` after target reductions achieved).
+Ratchet Script: `pnpm run lint:ratchet` (update with `LINT_RATCHET_UPDATE=1 pnpm run lint:ratchet`
+after target reductions achieved).
 
 <!-- LINT_DELTA_START -->
+
 ### Latest Lint Delta (Updated: 2025-08-19T11:23:49.926Z)
 
-| Rule | Baseline | Current | Delta | Reduction % |
-|------|----------|---------|-------|-------------|
-| @typescript-eslint/strict-boolean-expressions | 231 | 220 | -11 | 4.8 |
-| eqeqeq | 34 | 36 | +2 | -5.9 |
-| @typescript-eslint/no-unsafe-member-access | 136 | 116 | -20 | 14.7 |
-| @typescript-eslint/no-unsafe-assignment | 91 | 81 | -10 | 11.0 |
-| @typescript-eslint/no-misused-promises | 0 | 0 | +0 | 0.0 |
-| @typescript-eslint/no-floating-promises | 0 | 0 | +0 | 0.0 |
-| @typescript-eslint/explicit-function-return-type | 0 | 0 | +0 | 0.0 |
-| **TOTAL** | 492 | 453 | -39 | 7.9 |
-<!-- LINT_DELTA_END -->
+| Rule                                             | Baseline | Current | Delta | Reduction % |
+| ------------------------------------------------ | -------- | ------- | ----- | ----------- |
+| @typescript-eslint/strict-boolean-expressions    | 231      | 220     | -11   | 4.8         |
+| eqeqeq                                           | 34       | 36      | +2    | -5.9        |
+| @typescript-eslint/no-unsafe-member-access       | 136      | 116     | -20   | 14.7        |
+| @typescript-eslint/no-unsafe-assignment          | 91       | 81      | -10   | 11.0        |
+| @typescript-eslint/no-misused-promises           | 0        | 0       | +0    | 0.0         |
+| @typescript-eslint/no-floating-promises          | 0        | 0       | +0    | 0.0         |
+| @typescript-eslint/explicit-function-return-type | 0        | 0       | +0    | 0.0         |
+| **TOTAL**                                        | 492      | 453     | -39   | 7.9         |
 
+<!-- LINT_DELTA_END -->
 
 ## Error Analysis
 
 ### Top Error Types (Prioritized for Phase 2)
 
-| Priority | Rule | Count | Impact | Strategy |
-|----------|------|-------|---------|----------|
-| 🔴 HIGH | `@typescript-eslint/explicit-function-return-type` | 162 | Type Safety | Batch automation possible |
-| 🔴 HIGH | `eqeqeq` | 55 | Runtime Safety | Find/replace automation |
-| 🟡 MEDIUM | `@typescript-eslint/strict-boolean-expressions` | 32 | Type Safety | Pattern-based fixes |
-| 🟡 MEDIUM | `@typescript-eslint/no-unsafe-member-access` | 32 | Type Safety | Manual review needed |
-| 🟡 MEDIUM | `@typescript-eslint/no-unused-vars` | 31 | Code Quality | Automated cleanup |
-| 🟡 MEDIUM | `@typescript-eslint/no-unsafe-assignment` | 20 | Type Safety | Manual typing required |
-| 🟡 MEDIUM | `@typescript-eslint/prefer-nullish-coalescing` | 19 | Code Quality | Pattern replacement |
-| 🔴 HIGH | `@typescript-eslint/no-misused-promises` | 14 | Runtime Safety | Critical for async code |
-| 🟢 LOW | `jsx-a11y/label-has-associated-control` | 13 | Accessibility | UI polish |
+| Priority  | Rule                                               | Count | Impact         | Strategy                  |
+| --------- | -------------------------------------------------- | ----- | -------------- | ------------------------- |
+| 🔴 HIGH   | `@typescript-eslint/explicit-function-return-type` | 162   | Type Safety    | Batch automation possible |
+| 🔴 HIGH   | `eqeqeq`                                           | 55    | Runtime Safety | Find/replace automation   |
+| 🟡 MEDIUM | `@typescript-eslint/strict-boolean-expressions`    | 32    | Type Safety    | Pattern-based fixes       |
+| 🟡 MEDIUM | `@typescript-eslint/no-unsafe-member-access`       | 32    | Type Safety    | Manual review needed      |
+| 🟡 MEDIUM | `@typescript-eslint/no-unused-vars`                | 31    | Code Quality   | Automated cleanup         |
+| 🟡 MEDIUM | `@typescript-eslint/no-unsafe-assignment`          | 20    | Type Safety    | Manual typing required    |
+| 🟡 MEDIUM | `@typescript-eslint/prefer-nullish-coalescing`     | 19    | Code Quality   | Pattern replacement       |
+| 🔴 HIGH   | `@typescript-eslint/no-misused-promises`           | 14    | Runtime Safety | Critical for async code   |
+| 🟢 LOW    | `jsx-a11y/label-has-associated-control`            | 13    | Accessibility  | UI polish                 |
 
 ### High-Priority Files (Most Error-Dense)
 
-| Priority | File | Errors | Category | Batch Assignment |
-|----------|------|---------|----------|------------------|
-| 🔴 CRITICAL | `HumanDesignChart/GatesChannelsTab.tsx` | 55 | UI Component | Batch A |
-| 🟡 MEDIUM | `examples/NotificationIntegrationExamples.tsx` | 30 | Example Code | Batch C |
-| 🟡 MEDIUM | `test-setup.ts` | 28 | Test Infrastructure | Batch C |
-| 🔴 HIGH | `services/chartSyncService.ts` | 25 | Core Service | Batch A |
-| 🟡 MEDIUM | `components/Navbar.tsx` | 18 | UI Component | Batch B |
-| 🟡 MEDIUM | `components/SaveChart.tsx` | 16 | UI Component | Batch B |
-| 🟡 MEDIUM | `NumerologyCalculator/NumerologyCalculator.tsx` | 15 | Feature Component | Batch B |
-| 🔴 HIGH | `services/ephemeris.ts` | 13 | Core Service | Batch A |
-| 🟡 MEDIUM | `components/UnifiedBirthInput.tsx` | 13 | UI Component | Batch B |
-| 🟡 MEDIUM | `services/notificationManager.unified.ts` | 12 | Core Service | Batch A |
+| Priority    | File                                            | Errors | Category            | Batch Assignment |
+| ----------- | ----------------------------------------------- | ------ | ------------------- | ---------------- |
+| 🔴 CRITICAL | `HumanDesignChart/GatesChannelsTab.tsx`         | 55     | UI Component        | Batch A          |
+| 🟡 MEDIUM   | `examples/NotificationIntegrationExamples.tsx`  | 30     | Example Code        | Batch C          |
+| 🟡 MEDIUM   | `test-setup.ts`                                 | 28     | Test Infrastructure | Batch C          |
+| 🔴 HIGH     | `services/chartSyncService.ts`                  | 25     | Core Service        | Batch A          |
+| 🟡 MEDIUM   | `components/Navbar.tsx`                         | 18     | UI Component        | Batch B          |
+| 🟡 MEDIUM   | `components/SaveChart.tsx`                      | 16     | UI Component        | Batch B          |
+| 🟡 MEDIUM   | `NumerologyCalculator/NumerologyCalculator.tsx` | 15     | Feature Component   | Batch B          |
+| 🔴 HIGH     | `services/ephemeris.ts`                         | 13     | Core Service        | Batch A          |
+| 🟡 MEDIUM   | `components/UnifiedBirthInput.tsx`              | 13     | UI Component        | Batch B          |
+| 🟡 MEDIUM   | `services/notificationManager.unified.ts`       | 12     | Core Service        | Batch A          |
 
 ## Phase 2 Execution Strategy
 
 ### Batch A: Critical Services & Core Components (Priority 1)
 
-**Target**: 80 errors in core functionality
-**Timeline**: 2-3 hours
-**Focus**: Runtime safety and core services
+**Target**: 80 errors in core functionality **Timeline**: 2-3 hours **Focus**: Runtime safety and
+core services
 
 **Files**:
 
@@ -119,9 +126,8 @@ Ratchet Script: `pnpm run lint:ratchet` (update with `LINT_RATCHET_UPDATE=1 pnpm
 
 ### Batch B: UI Components & Forms (Priority 2)
 
-**Target**: 62 errors in user-facing components
-**Timeline**: 2-3 hours
-**Focus**: User interface and accessibility
+**Target**: 62 errors in user-facing components **Timeline**: 2-3 hours **Focus**: User interface
+and accessibility
 
 **Files**:
 
@@ -138,9 +144,8 @@ Ratchet Script: `pnpm run lint:ratchet` (update with `LINT_RATCHET_UPDATE=1 pnpm
 
 ### Batch C: Infrastructure & Examples (Priority 3)
 
-**Target**: 58 errors in supporting code
-**Timeline**: 1-2 hours
-**Focus**: Test infrastructure and examples
+**Target**: 58 errors in supporting code **Timeline**: 1-2 hours **Focus**: Test infrastructure and
+examples
 
 **Files**:
 
@@ -161,7 +166,7 @@ Ratchet Script: `pnpm run lint:ratchet` (update with `LINT_RATCHET_UPDATE=1 pnpm
 # Fix explicit function return types (162 errors)
 # Automated pattern replacement for simple cases
 
-# Fix eqeqeq issues (55 errors)  
+# Fix eqeqeq issues (55 errors)
 # Find/replace === and !== patterns
 
 # Fix unused variables (31 errors)
@@ -210,9 +215,13 @@ Ratchet Script: `pnpm run lint:ratchet` (update with `LINT_RATCHET_UPDATE=1 pnpm
 
 ### Deviation from Original Target
 
-The original target of reducing errors from 492 to 150 (70% reduction) was overly ambitious given the actual codebase scale discovered during implementation. The current ESLint error count across the entire codebase is approximately 9,000+ errors, indicating the baseline assessment significantly underestimated the scope.
+The original target of reducing errors from 492 to 150 (70% reduction) was overly ambitious given
+the actual codebase scale discovered during implementation. The current ESLint error count across
+the entire codebase is approximately 9,000+ errors, indicating the baseline assessment significantly
+underestimated the scope.
 
-However, **Phase 2 successfully achieved its core objective**: eliminating all TypeScript compilation errors and ensuring build stability.
+However, **Phase 2 successfully achieved its core objective**: eliminating all TypeScript
+compilation errors and ensuring build stability.
 
 ## Next Phase Recommendations
 
@@ -264,6 +273,6 @@ However, **Phase 2 successfully achieved its core objective**: eliminating all T
 - **Total**: 6-8 hours for 70% error reduction
 
 ---
-_Phase 2 Plan Created_: August 19, 2025
-_Target_: 492 → 150 errors (70% reduction)
-_Strategy_: Critical-first, service-focused approach
+
+_Phase 2 Plan Created_: August 19, 2025 _Target_: 492 → 150 errors (70% reduction) _Strategy_:
+Critical-first, service-focused approach

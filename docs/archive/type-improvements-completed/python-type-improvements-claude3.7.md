@@ -2,13 +2,16 @@
 
 ## Overview
 
-This document outlines the improvements made to Python type safety in the CosmicHub backend. Claude 3.7 is particularly effective at handling complex Python type annotations, especially with libraries that don't provide complete type stubs.
+This document outlines the improvements made to Python type safety in the CosmicHub backend. Claude
+3.7 is particularly effective at handling complex Python type annotations, especially with libraries
+that don't provide complete type stubs.
 
 ## Key Patterns Addressed
 
 ### 1. Third-Party Library Type Annotations
 
-Many type issues in the codebase are related to third-party libraries lacking proper type stubs. Instead of using `# type: ignore`, we've created specialized type stubs for these libraries:
+Many type issues in the codebase are related to third-party libraries lacking proper type stubs.
+Instead of using `# type: ignore`, we've created specialized type stubs for these libraries:
 
 ```python
 # Before:
@@ -83,28 +86,28 @@ def is_valid_planets(data: object) -> TypeGuard[Dict[str, float]]:
     """Validate that the planets data has the expected structure."""
     if not isinstance(data, dict):
         return False
-    
-    required_planets = ['sun', 'moon', 'mercury', 'venus', 'mars', 
+
+    required_planets = ['sun', 'moon', 'mercury', 'venus', 'mars',
                         'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
-    return all(planet in data and isinstance(data[planet], float) 
+    return all(planet in data and isinstance(data[planet], float)
                for planet in required_planets)
 
 def is_valid_cusps(data: object) -> TypeGuard[List[float]]:
     """Validate that the cusps data has the expected structure."""
     if not isinstance(data, list):
         return False
-    
+
     # Expect 12 house cusps
     return len(data) == 12 and all(isinstance(cusp, float) for cusp in data)
 
 def calculate_synastry(request: SynastryRequest):
     planets1_raw, cusps1_raw = calculate_planets(request.person1)
-    
+
     # Validate and use type guards
     if not is_valid_planets(planets1_raw):
         raise ValueError("Invalid planets data structure")
     planets1 = planets1_raw  # TypeGuard ensures this is Dict[str, float]
-    
+
     if not is_valid_cusps(cusps1_raw):
         raise ValueError("Invalid cusps data structure")
     cusps1 = cusps1_raw  # TypeGuard ensures this is List[float]
@@ -164,7 +167,8 @@ We've created the following type stub files:
 7. `backend/types/stubs/google/cloud/storage.pyi` - Type stubs for Google Cloud Storage
 8. `backend/types/stubs/google/cloud/pubsub.pyi` - Type stubs for Google Cloud PubSub
 9. `backend/types/stubs/google/cloud/exceptions.pyi` - Common exceptions for Google Cloud APIs
-10. `backend/types/stubs/google/cloud/secretmanager.pyi` - Type stubs for Google Cloud Secret Manager
+10. `backend/types/stubs/google/cloud/secretmanager.pyi` - Type stubs for Google Cloud Secret
+    Manager
 
 ### Custom Type Definitions
 
@@ -198,7 +202,8 @@ class CompatibilityScore(TypedDict):
 
 ### Using Google Cloud Type Stubs
 
-With our comprehensive type stubs for Google Cloud services, Python code that interacts with these libraries now has proper type checking:
+With our comprehensive type stubs for Google Cloud services, Python code that interacts with these
+libraries now has proper type checking:
 
 ```python
 # Before:
@@ -230,13 +235,13 @@ def get_user_data(user_id: str) -> UserData:
     db = firestore.Client()
     user_ref = db.collection('users').document(user_id)
     user_doc = user_ref.get()
-    
+
     if not user_doc.exists:
         raise ValueError(f"User {user_id} not found")
-    
+
     # to_dict() now has proper type information
     user_data = user_doc.to_dict()
-    
+
     # Type checker can now validate this cast
     return UserData(
         display_name=user_data.get('display_name', ''),
@@ -271,7 +276,7 @@ def upload_chart_image(chart_id: str, image_data: bytes) -> str:
     bucket = client.bucket('astro-charts')
     blob = bucket.blob(f'charts/{chart_id}.png')
     blob.upload_from_string(image_data, content_type='image/png')
-    
+
     # Now properly typed as str
     return blob.public_url
 ```
@@ -304,10 +309,14 @@ ignore_missing_imports = true
 
 ## Best Practices Established
 
-1. **Use TypeGuard for Runtime Type Validation**: Implement TypeGuard functions to validate data structures at runtime
-2. **Create Type Stubs for Third-Party Libraries**: Instead of `# type: ignore`, create proper type stubs
-3. **Use TypedDict for Dict Structures**: Replace Dict[str, Any] with properly defined TypedDict classes
-4. **Be Explicit with Optional Types**: Use `is None` checks instead of truthiness checks for Optional types
+1. **Use TypeGuard for Runtime Type Validation**: Implement TypeGuard functions to validate data
+   structures at runtime
+2. **Create Type Stubs for Third-Party Libraries**: Instead of `# type: ignore`, create proper type
+   stubs
+3. **Use TypedDict for Dict Structures**: Replace Dict[str, Any] with properly defined TypedDict
+   classes
+4. **Be Explicit with Optional Types**: Use `is None` checks instead of truthiness checks for
+   Optional types
 
 ## Advanced Type Patterns
 
@@ -348,10 +357,10 @@ class AspectConfig(Protocol):
 def calculate_aspects(planets: PlanetPositions, aspects_config: List[AspectConfig]) -> List[AspectData]:
     # Now the function explicitly requires objects that match these protocols
     result: List[AspectData] = []
-    
+
     # We can access planets.sun, planets.moon, etc. with proper type checking
     # We can access aspect.name, aspect.angle, etc. with proper type checking
-    
+
     return result
 ```
 
@@ -479,7 +488,7 @@ except CalculationError as e:
     else:
         # Handle other errors
         logger.error(f"Calculation error: {e.message}")
-    
+
     # We can return a properly typed error response
     raise HTTPException(
         status_code=400,
@@ -550,7 +559,7 @@ async def get_chart(
                     details={"chart_id": chart_id}
                 ).dict()
             )
-        
+
         return ChartResponse(**chart)
     except Exception as e:
         logger.exception(f"Error fetching chart {chart_id}")

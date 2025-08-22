@@ -1,10 +1,12 @@
 # Mock Login System for CosmicHub
 
-This document explains how to use the mock login system for testing different subscription tiers in CosmicHub.
+This document explains how to use the mock login system for testing different subscription tiers in
+CosmicHub.
 
 ## Overview
 
-The mock login system provides three predefined user accounts with different subscription tiers to test the application's premium features and subscription logic.
+The mock login system provides three predefined user accounts with different subscription tiers to
+test the application's premium features and subscription logic.
 
 ## Mock User Accounts
 
@@ -98,8 +100,10 @@ The mock login system provides three predefined user accounts with different sub
 The mock login system works by:
 
 1. **Authentication**: Uses Firebase Auth with predefined email/password combinations
-2. **Tier Recognition**: The `SubscriptionContext` checks the user's email address and assigns the appropriate tier
-3. **Feature Access**: The `FeatureGuard` component and `useSubscription` hook control access to features based on the user's tier
+2. **Tier Recognition**: The `SubscriptionContext` checks the user's email address and assigns the
+   appropriate tier
+3. **Feature Access**: The `FeatureGuard` component and `useSubscription` hook control access to
+   features based on the user's tier
 4. **Usage Simulation**: Mock usage data is provided to test limits and quotas
 
 ## Development Notes

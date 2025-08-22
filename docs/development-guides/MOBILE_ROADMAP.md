@@ -2,7 +2,8 @@
 
 ## Current Status: Foundation Complete ✅
 
-The mobile app foundation has been successfully set up with Expo and is ready for feature development when you're ready to proceed.
+The mobile app foundation has been successfully set up with Expo and is ready for feature
+development when you're ready to proceed.
 
 ## Phase 1: Core Mobile Infrastructure (Complete)
 
@@ -123,7 +124,7 @@ The mobile app foundation has been successfully set up with Expo and is ready fo
 When ready to proceed:
 
 - **Phase 2 (Auth)**: 1-2 weeks
-- **Phase 3 (Astrology)**: 3-4 weeks  
+- **Phase 3 (Astrology)**: 3-4 weeks
 - **Phase 4 (HealWave)**: 2-3 weeks
 - **Phase 5 (Mobile Features)**: 2-3 weeks
 - **Phase 6 (Offline)**: 1-2 weeks

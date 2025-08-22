@@ -2,23 +2,24 @@
 
 ## VisuallyHidden
 
-A reusable component for rendering content that is available to assistive technologies but hidden visually.
+A reusable component for rendering content that is available to assistive technologies but hidden
+visually.
 
 ### Usage
 
 ```tsx
 import { VisuallyHidden } from '@/components/accessibility/VisuallyHidden';
 
-<button aria-label="Save" onClick={handleSave}>
+<button aria-label='Save' onClick={handleSave}>
   <IconSave />
   <VisuallyHidden>Save chart</VisuallyHidden>
-</button>
+</button>;
 ```
 
 For live regions:
 
 ```tsx
-<VisuallyHidden as="div" role="status" aria-live="polite">
+<VisuallyHidden as='div' role='status' aria-live='polite'>
   Updated at {timestamp}
 </VisuallyHidden>
 ```
@@ -26,7 +27,7 @@ For live regions:
 Focusable (e.g., skip link):
 
 ```tsx
-<a href="#main" className="skip-link">
+<a href='#main' className='skip-link'>
   <VisuallyHidden focusable>Skip to main content</VisuallyHidden>
 </a>
 ```

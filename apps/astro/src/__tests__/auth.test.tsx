@@ -1,11 +1,11 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '@cosmichub/auth';
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+const TestWrapper = ({ children }: { children: React.ReactNode }): React.ReactElement => (
   <MemoryRouter>
     <AuthProvider>
       {children}
@@ -15,7 +15,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('Auth functionality', () => {
   it('provides auth context to children', () => {
-    const TestComponent = () => <div>Test Component</div>;
+    const TestComponent = (): React.ReactElement => <div>Test Component</div>;
     
     render(
       <TestWrapper>

@@ -2,7 +2,9 @@
 
 ## Overview
 
-This guide documents the implementation of React performance optimizations and lazy loading throughout the CosmicHub monorepo. These optimizations reduce initial bundle sizes, improve loading times, and enhance user experience.
+This guide documents the implementation of React performance optimizations and lazy loading
+throughout the CosmicHub monorepo. These optimizations reduce initial bundle sizes, improve loading
+times, and enhance user experience.
 
 ## 🚀 Performance Improvements Implemented
 
@@ -61,7 +63,7 @@ preloader.preloadOnIntersection(targetElement, importFn, 'ComponentName');
 const { loadedItems, isLoading, progress } = useProgressiveLoading(items, {
   batchSize: 20,
   delay: 100,
-  loadingComponent: ProgressIndicator
+  loadingComponent: ProgressIndicator,
 });
 ```
 
@@ -143,10 +145,7 @@ Features:
 ```typescript
 import { lazyLoadRoute } from '@cosmichub/config/lazy-loading';
 
-const MyRoute = lazyLoadRoute(
-  () => import('./MyPage'),
-  'MyPage'
-);
+const MyRoute = lazyLoadRoute(() => import('./MyPage'), 'MyPage');
 ```
 
 ### Smart Preloading Hook
@@ -218,7 +217,7 @@ All lazy loading operations are automatically tracked using the performance moni
 performanceMonitor.recordMetric('ComponentLazyLoad', loadTime, {
   componentName,
   success: true,
-  trigger: 'user-interaction'
+  trigger: 'user-interaction',
 });
 ```
 

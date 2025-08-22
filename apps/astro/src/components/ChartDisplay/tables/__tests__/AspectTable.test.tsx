@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import { AspectTable } from '../';
 
 const sample = [
@@ -30,9 +30,9 @@ describe('AspectTable', () => {
   expect(applyingEl).toBeDefined();
   expect(separatingEl).toBeDefined();
   expect(exactEl).toBeDefined();
-  if (applyingEl) expect(applyingEl.className).toMatch(/text-green-400/);
-  if (separatingEl) expect(separatingEl.className).toMatch(/text-cosmic-silver/);
-  if (exactEl) expect(exactEl.className).toMatch(/text-cosmic-gold/);
+  if (applyingEl !== null && applyingEl !== undefined) expect(applyingEl.className).toMatch(/text-green-400/);
+  if (separatingEl !== null && separatingEl !== undefined) expect(separatingEl.className).toMatch(/text-cosmic-silver/);
+  if (exactEl !== null && exactEl !== undefined) expect(exactEl.className).toMatch(/text-cosmic-gold/);
     expect((table as HTMLElement).textContent).toContain('☌');
     expect((table as HTMLElement).textContent).toContain('△');
     expect((table as HTMLElement).textContent).toContain('□');

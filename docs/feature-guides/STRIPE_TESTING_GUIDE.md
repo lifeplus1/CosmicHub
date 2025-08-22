@@ -238,4 +238,5 @@ Test error scenarios:
 - Graceful error handling
 - Mobile responsive
 
-The Stripe integration is production-ready and provides a solid foundation for subscription-based growth.
+The Stripe integration is production-ready and provides a solid foundation for subscription-based
+growth.

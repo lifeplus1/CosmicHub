@@ -1,25 +1,30 @@
 # React Hook Patterns & Dependency Management (Draft)
 
-> Draft created August 18, 2025 – consolidates emerging internal conventions while auditing `Chart.tsx` & `ChartPreferences.tsx`. Refine after broader adoption.
+> Draft created August 18, 2025 – consolidates emerging internal conventions while auditing
+> `Chart.tsx` & `ChartPreferences.tsx`. Refine after broader adoption.
 
 ## Core Principles
 
-1. Determinism: Effects should re-run only when the *semantic inputs* change.
-2. Stability: Prefer `useRef` for mutable, non-reactive objects (caches, controllers) instead of suppressing deps.
-3. Transparency: Any intentional omission from a dependency array must have an inline comment justification.
-4. Safety First: Narrow nullable values *before* using them inside effects / callbacks – reduces strict boolean noise and stabilizes deps.
-5. Separation: Split effects by concern (data fetch, subscription, DOM side-effect) rather than one large effect with conditional branches.
+1. Determinism: Effects should re-run only when the _semantic inputs_ change.
+2. Stability: Prefer `useRef` for mutable, non-reactive objects (caches, controllers) instead of
+   suppressing deps.
+3. Transparency: Any intentional omission from a dependency array must have an inline comment
+   justification.
+4. Safety First: Narrow nullable values _before_ using them inside effects / callbacks – reduces
+   strict boolean noise and stabilizes deps.
+5. Separation: Split effects by concern (data fetch, subscription, DOM side-effect) rather than one
+   large effect with conditional branches.
 
 ## Dependency Decision Guide
 
-| Situation | Preferred Pattern | Rationale |
-|-----------|------------------|-----------|
-| Referencing props/state primitives | Include directly | Built-in stability; triggers on actual change |
-| Complex object recalculated inline | Wrap in `useMemo` then depend on memo | Prevents repeated effect triggers |
-| Callback passed to child relying on stable refs | Use `useCallback` with precise deps or stable ref wrappers | Avoids unnecessary re-renders |
-| Mutable instance (AbortController, Map, worker) | Store in `useRef` and mutate | Instance stability without re-runs |
-| External singleton (service module) | Reference directly, exclude from deps with comment | Module identity is static |
-| Timer / interval management | Keep id in `useRef` | Prevent stale closure & double intervals |
+| Situation                                       | Preferred Pattern                                          | Rationale                                     |
+| ----------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------- |
+| Referencing props/state primitives              | Include directly                                           | Built-in stability; triggers on actual change |
+| Complex object recalculated inline              | Wrap in `useMemo` then depend on memo                      | Prevents repeated effect triggers             |
+| Callback passed to child relying on stable refs | Use `useCallback` with precise deps or stable ref wrappers | Avoids unnecessary re-renders                 |
+| Mutable instance (AbortController, Map, worker) | Store in `useRef` and mutate                               | Instance stability without re-runs            |
+| External singleton (service module)             | Reference directly, exclude from deps with comment         | Module identity is static                     |
+| Timer / interval management                     | Keep id in `useRef`                                        | Prevent stale closure & double intervals      |
 
 ## Common Patterns
 
@@ -108,20 +113,26 @@ const ensurePlayer = () => {
 Prefer explicit comparisons:
 
 ```tsx
-if (value !== null && value !== undefined) { /* safe */ }
-if (text !== '') { /* non-empty string */ }
-if (Array.isArray(items) && items.length > 0) { /* non-empty list */ }
+if (value !== null && value !== undefined) {
+  /* safe */
+}
+if (text !== '') {
+  /* non-empty string */
+}
+if (Array.isArray(items) && items.length > 0) {
+  /* non-empty list */
+}
 ```
 
 ## Anti-Patterns & Fixes
 
-| Anti-Pattern | Why Problematic | Fix |
-|--------------|-----------------|-----|
-| Large effect with many unrelated concerns | Hard to reason, noisy deps | Split per concern |
-| Suppressing deps without comment | Hidden stale closure risk | Add justification or refactor |
-| Recreating objects inline used in deps | Forces effect thrash | Memoize or lift constant |
-| Using objects/functions as flags | Identity changes unexpectedly | Use primitive booleans/ids |
-| `useEffect(async () => { ... })` | Implicit Promise handling | Inline IIFE inside effect |
+| Anti-Pattern                              | Why Problematic               | Fix                           |
+| ----------------------------------------- | ----------------------------- | ----------------------------- |
+| Large effect with many unrelated concerns | Hard to reason, noisy deps    | Split per concern             |
+| Suppressing deps without comment          | Hidden stale closure risk     | Add justification or refactor |
+| Recreating objects inline used in deps    | Forces effect thrash          | Memoize or lift constant      |
+| Using objects/functions as flags          | Identity changes unexpectedly | Use primitive booleans/ids    |
+| `useEffect(async () => { ... })`          | Implicit Promise handling     | Inline IIFE inside effect     |
 
 ## Hook Audit Checklist (Use Per File)
 
@@ -136,7 +147,8 @@ if (Array.isArray(items) && items.length > 0) { /* non-empty list */ }
 ## Migration Notes
 
 - When reducing `strict-boolean-expressions` noise, add early returns to narrow before hooks.
-- Replace patterns like `if (!obj)` with explicit `if (obj === null || obj === undefined)` then narrow.
+- Replace patterns like `if (!obj)` with explicit `if (obj === null || obj === undefined)` then
+  narrow.
 - Prefer creating small custom hooks for repeated logic (e.g., `useAbortableAsync` for fetch flows).
 
 ## Next Refinements (Planned)
@@ -146,4 +158,5 @@ if (Array.isArray(items) && items.length > 0) { /* non-empty list */ }
 - Provide examples from `ChartDisplay` once refactor scope approved.
 
 ---
+
 Draft complete – update after initial dependency audits.

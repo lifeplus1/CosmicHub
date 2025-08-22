@@ -37,7 +37,8 @@ All previous warnings resolved. Phase 1 tightening introduced no new issues.
 
 ### 2. **Backend Lint Note**
 
-- Backend Python lint now passes (fl*ke8 critical error set returns 0). Added adaptive script that uses `python` or falls back to `python3`.
+- Backend Python lint now passes (fl\*ke8 critical error set returns 0). Added adaptive script that
+  uses `python` or falls back to `python3`.
 
 ## Configuration Status
 
@@ -71,7 +72,8 @@ All previous warnings resolved. Phase 1 tightening introduced no new issues.
 - `docs/development-guides/LINT_CONFIGURATION_GUIDE.md` - Setup guide
 - `docs/development/ESLINT_CONFIGURATION_REFINEMENT.md` - Technical details
 
-**ARCHIVED**: All historical lint documentation moved to `docs/archive/lint-documentation-historical/`
+**ARCHIVED**: All historical lint documentation moved to
+`docs/archive/lint-documentation-historical/`
 
 ---
 

@@ -2,7 +2,8 @@
 
 ## 🚀 Implementation Complete
 
-This document outlines the comprehensive Stripe Checkout integration that has been successfully implemented to replace the mock upgrade flows in CosmicHub.
+This document outlines the comprehensive Stripe Checkout integration that has been successfully
+implemented to replace the mock upgrade flows in CosmicHub.
 
 ## 📋 What Was Implemented
 
@@ -85,7 +86,7 @@ This document outlines the comprehensive Stripe Checkout integration that has be
 export class StripeService {
   private static instance: StripeService;
   private stripe: Stripe | null = null;
-  
+
   public static getInstance(config?: StripeConfig): StripeService {
     if (!StripeService.instance) {
       StripeService.instance = new StripeService(config);
@@ -233,7 +234,7 @@ const { hasFeature, upgradeRequired } = useSubscription();
 
 const handlePremiumFeature = () => {
   if (!hasFeature('Pro')) {
-    upgradeRequired('Feature Name');  // 🆕 Triggers Stripe modal
+    upgradeRequired('Feature Name'); // 🆕 Triggers Stripe modal
     return;
   }
   // Feature logic...
@@ -318,6 +319,8 @@ const handlePremiumFeature = () => {
 
 ## 🎉 **Implementation Complete!**
 
-The Stripe integration is fully functional and ready for production use. The architecture is extensible, maintainable, and provides a solid foundation for subscription-based revenue growth.
+The Stripe integration is fully functional and ready for production use. The architecture is
+extensible, maintainable, and provides a solid foundation for subscription-based revenue growth.
 
-**All TODO items have been resolved and replaced with production-ready Stripe Checkout integration.**
+**All TODO items have been resolved and replaced with production-ready Stripe Checkout
+integration.**

@@ -136,6 +136,47 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn'
     },
   },
+  
+  // Test files with relaxed TypeScript rules
+  {
+    files: [
+      '**/*.test.{ts,tsx}', 
+      '**/*.spec.{ts,tsx}', 
+      '**/tests/**/*.{ts,tsx}', 
+      '**/__tests__/**/*.{ts,tsx}', 
+      '**/test/**/*.{ts,tsx}',
+      '**/apps/astro/src/test/setup.ts'
+    ],
+    languageOptions: {
+      parser: tsparser,
+      globals: { ...globals.browser, ...globals.jest, ...globals.node },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: [
+          'apps/astro/tsconfig.json',
+          'apps/healwave/tsconfig.json'
+        ]
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      'react': react,
+      'react-hooks': reactHooks,
+      'jsx-a11y': jsxA11y
+    },
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off'
+    }
+  },
+  
   {
   files: ['apps/**/*.{ts,tsx}','packages/**/*.{ts,tsx}'],
   // Exclude test/spec files here; they are handled by the earlier, more relaxed test config.

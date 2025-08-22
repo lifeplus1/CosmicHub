@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Ensure a consistent, type‑safe pipeline from frontend chart capture through backend storage, caching, and AI interpretation generation.
+Ensure a consistent, type‑safe pipeline from frontend chart capture through backend storage,
+caching, and AI interpretation generation.
 
 ## Data Shape (Unified Serialized Chart)
 
@@ -16,21 +17,27 @@ Key fields stored & cached (Python `SerializedChartData` / TS `ChartSchema`):
 
 Differences vs legacy internal models:
 
-- Planets stored as list (backend normalization converts to dict keyed by lowercase name before interpretation).
+- Planets stored as list (backend normalization converts to dict keyed by lowercase name before
+  interpretation).
 - `position` duplicates `degree` placeholder until full 360° ecliptic longitude available.
-- Some optional values become empty string "" after serialization (undefined→null→string conversion avoidance) – consumer code should treat "" as missing.
+- Some optional values become empty string "" after serialization (undefined→null→string conversion
+  avoidance) – consumer code should treat "" as missing.
 
 ## Endpoints
 
-- POST `/api/charts/save` (unified) → returns `{ chart_id, cached }` and writes serialized model into cache.
-- POST `/api/interpretations/generate` → pulls cached chart, normalizes `planets` list→dict, runs AI interpretation pipeline, caches result (30m TTL) at key: `interpretation:{chartId}:{userId}:{type}`.
+- POST `/api/charts/save` (unified) → returns `{ chart_id, cached }` and writes serialized model
+  into cache.
+- POST `/api/interpretations/generate` → pulls cached chart, normalizes `planets` list→dict, runs AI
+  interpretation pipeline, caches result (30m TTL) at key:
+  `interpretation:{chartId}:{userId}:{type}`.
 
 ## Caching Layers
 
 1. In‑memory or Redis (preferred if `REDIS_URL` reachable).
 2. Chart save: `cache_chart_data(chart_id, serialized_model)`.
 3. Interpretation: `cache_serialized_data(cache_key, interpretation_dict, 1800s)`.
-4. On cache hit for interpretation, missing `id` field is injected with cache key to satisfy Pydantic.
+4. On cache hit for interpretation, missing `id` field is injected with cache key to satisfy
+   Pydantic.
 
 ## Test Coverage
 
@@ -44,13 +51,13 @@ Frontend / Shared: `packages/types/src/serialize.test.ts` ensures round‑trip s
 
 ## Failure Modes & Mitigations
 
-| Stage | Symptom | Cause | Mitigation |
-|-------|---------|-------|------------|
-| Chart Save | 401 | Missing / invalid Firebase token | `TEST_MODE=1` bypass in tests; otherwise ensure Firebase init env vars set |
-| Interpretation | 404 | Chart not cached | Ensure POST `/api/charts/save` executed first |
-| Interpretation | 500 NameError | Missing helper in `ai_interpretations` | Stub helpers added (replace with real logic later) |
-| Interpretation | 500 ValidationError (id missing) | Cached interpretation lacked `id` | Automatic id injection on cache hit |
-| Redis | Fallback warning | Connection refused | In‑memory cache automatically used |
+| Stage          | Symptom                          | Cause                                  | Mitigation                                                                 |
+| -------------- | -------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| Chart Save     | 401                              | Missing / invalid Firebase token       | `TEST_MODE=1` bypass in tests; otherwise ensure Firebase init env vars set |
+| Interpretation | 404                              | Chart not cached                       | Ensure POST `/api/charts/save` executed first                              |
+| Interpretation | 500 NameError                    | Missing helper in `ai_interpretations` | Stub helpers added (replace with real logic later)                         |
+| Interpretation | 500 ValidationError (id missing) | Cached interpretation lacked `id`      | Automatic id injection on cache hit                                        |
+| Redis          | Fallback warning                 | Connection refused                     | In‑memory cache automatically used                                         |
 
 ## Environment Flags
 
@@ -60,12 +67,15 @@ Frontend / Shared: `packages/types/src/serialize.test.ts` ensures round‑trip s
 
 ## Extending Interpretation Logic
 
-Replace placeholder helper stubs in `ai_interpretations.py` (search: `# Additional missing helper stubs`) with domain‑rich implementations. Add unit tests before expanding logic.
+Replace placeholder helper stubs in `ai_interpretations.py` (search:
+`# Additional missing helper stubs`) with domain‑rich implementations. Add unit tests before
+expanding logic.
 
 ## Operational Checks
 
 1. Save a chart: observe log `Chart cached: True`.
-2. Generate interpretation: first call 200 with message "generated"; second call shows `Cache hit` log + message contains "cache".
+2. Generate interpretation: first call 200 with message "generated"; second call shows `Cache hit`
+   log + message contains "cache".
 3. Memory vs Redis: logs show either "Redis connection successful" or fallback warning.
 
 ## Quick Curl Smoke (Optional)

@@ -7,8 +7,14 @@ import type { HumanDesignData } from '../HumanDesignChart/types';
 
 describe('Accessibility smoke tests', () => {
   beforeAll(() => {
-    if (!(HTMLCanvasElement.prototype as any).getContext) {
-      (HTMLCanvasElement.prototype as any).getContext = () => ({});
+    const canvas = HTMLCanvasElement.prototype as unknown;
+    const hasContext = canvas !== null && 
+                       canvas !== undefined && 
+                       typeof canvas === 'object' && 
+                       !('getContext' in canvas);
+                       
+    if (hasContext) {
+      (HTMLCanvasElement.prototype as any).getContext = (): Record<string, unknown> => ({});
     }
   });
   const minimalData: HumanDesignData = {

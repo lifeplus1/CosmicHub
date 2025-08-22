@@ -16,9 +16,9 @@ describe.skip('lint-badge output (slow integration)', () => {
     for (let i = 0; i < 4; i++) { // safety limit
       const pkgPath = path.join(root, 'package.json');
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // We use JSON.parse since we're reading a JSON file
         const pkg = JSON.parse(readFileSync(pkgPath,'utf8')) as { scripts?: Record<string,string> };
-        if (pkg.scripts && 'lint:badge' in pkg.scripts) break;
+        if (pkg.scripts !== null && pkg.scripts !== undefined && 'lint:badge' in pkg.scripts) break;
       } catch {/* ignore */}
       root = path.join(root, '..');
     }
@@ -28,14 +28,14 @@ describe.skip('lint-badge output (slow integration)', () => {
     const badge = JSON.parse(raw) as Record<string, unknown>;
 
     expect(badge).toMatchObject({ schemaVersion: 1, label: 'lint reduction' });
-  expect(typeof badge['message']).toBe('string');
-  expect(typeof badge['color']).toBe('string');
+    expect(typeof badge['message']).toBe('string');
+    expect(typeof badge['color']).toBe('string');
 
-  const message = badge['message'] as string;
+    const message = badge['message'] as string;
     // Pattern: "<delta> (<percent>%)" where percent can be negative or positive float
     expect(/^[-]?\d+ \([-]?\d+(?:\.\d+)?%\)$/.test(message)).toBe(true);
 
-  const color = badge['color'] as string;
+    const color = badge['color'] as string;
     const allowed = ['red', 'orange', 'yellow', 'green', 'brightgreen'];
     expect(allowed.includes(color)).toBe(true);
 
@@ -43,10 +43,10 @@ describe.skip('lint-badge output (slow integration)', () => {
     const pctMatch = message.match(/\((-?\d+(?:\.\d+)?)%\)$/);
     expect(pctMatch).not.toBeNull();
     const pct = Number(pctMatch?.[1]);
-    if (pct <= 0) expect(color).toBe('red');
-    else if (pct < 25) expect(color).toBe('orange');
-    else if (pct < 50) expect(color).toBe('yellow');
-    else if (pct < 75) expect(color).toBe('green');
+    if (pct !== null && pct !== undefined && pct <= 0) expect(color).toBe('red');
+    else if (pct !== null && pct !== undefined && pct < 25) expect(color).toBe('orange');
+    else if (pct !== null && pct !== undefined && pct < 50) expect(color).toBe('yellow');
+    else if (pct !== null && pct !== undefined && pct < 75) expect(color).toBe('green');
     else expect(color).toBe('brightgreen');
   });
 });

@@ -8,8 +8,7 @@ Extend vectorized operations to high-impact endpoints before Phase 2 comprehensi
 
 ### 1. Multi-System Chart Calculation (HIGHEST PRIORITY)
 
-**File**: `backend/api/routers/calculations.py`
-**Endpoint**: `POST /api/calculations/chart`
+**File**: `backend/api/routers/calculations.py` **Endpoint**: `POST /api/calculations/chart`
 **Impact**: 20-40% performance improvement
 
 #### Implementation Plan – Multi-System Charts
@@ -28,9 +27,8 @@ Extend vectorized operations to high-impact endpoints before Phase 2 comprehensi
 
 ### 2. Transit Calculations (HIGH PRIORITY)
 
-**File**: `backend/astro/calculations/transits_clean.py`
-**Functions**: `calculate_transit_dates`, `calculate_natal_chart`
-**Impact**: 30-50% performance improvement
+**File**: `backend/astro/calculations/transits_clean.py` **Functions**: `calculate_transit_dates`,
+`calculate_natal_chart` **Impact**: 30-50% performance improvement
 
 #### Implementation Plan – Transit Calculations
 
@@ -47,8 +45,7 @@ Extend vectorized operations to high-impact endpoints before Phase 2 comprehensi
 
 ### 3. Ephemeris Batch Enhancement (MODERATE PRIORITY)
 
-**File**: `backend/api/routers/ephemeris.py`
-**Endpoint**: `POST /api/ephemeris/calculate/batch`
+**File**: `backend/api/routers/ephemeris.py` **Endpoint**: `POST /api/ephemeris/calculate/batch`
 **Impact**: 15-25% improvement to existing batch operations
 
 #### Implementation Plan – Ephemeris Batch
@@ -69,7 +66,7 @@ Extend vectorized operations to high-impact endpoints before Phase 2 comprehensi
 ### Estimated Effort
 
 - **Multi-System Charts**: 4-6 hours
-- **Transit Calculations**: 3-4 hours  
+- **Transit Calculations**: 3-4 hours
 - **Ephemeris Enhancement**: 2-3 hours
 - **Testing & Integration**: 2-3 hours
 
@@ -90,18 +87,18 @@ Extend vectorized operations to high-impact endpoints before Phase 2 comprehensi
 # backend/utils/vectorized_multi_system_utils.py
 class VectorizedMultiSystemCalculator:
     """Vectorized calculations for multi-system astrology."""
-    
+
     def calculate_all_systems_vectorized(
-        self, 
-        julian_day: float, 
-        latitude: float, 
+        self,
+        julian_day: float,
+        latitude: float,
         longitude: float
     ) -> Dict[str, Any]:
         """Calculate all astrological systems using vectorized operations."""
-        
+
         # Vectorized planetary positions for all systems
         planetary_positions = self._calculate_all_planetary_positions(julian_day)
-        
+
         # Parallel system calculations
         systems = {
             'western': self._calculate_western_vectorized(planetary_positions),
@@ -110,17 +107,17 @@ class VectorizedMultiSystemCalculator:
             'mayan': self._calculate_mayan_vectorized(julian_day),
             'uranian': self._calculate_uranian_vectorized(planetary_positions)
         }
-        
+
         return systems
 ```
 
 ### Transit Calculations Vectorization
 
 ```python
-# backend/utils/vectorized_transit_utils.py  
+# backend/utils/vectorized_transit_utils.py
 class VectorizedTransitCalculator:
     """Vectorized transit calculations for time series analysis."""
-    
+
     def calculate_transit_series(
         self,
         start_date: datetime,
@@ -128,17 +125,17 @@ class VectorizedTransitCalculator:
         planets: List[str]
     ) -> np.ndarray:
         """Calculate planetary positions for date range using vectorization."""
-        
+
         # Generate date array
-        date_range = np.array([start_date + timedelta(days=i) 
+        date_range = np.array([start_date + timedelta(days=i)
                               for i in range((end_date - start_date).days)])
-        
+
         # Vectorized Julian Day calculation
         julian_days = np.array([julian_day(date) for date in date_range])
-        
+
         # Batch planetary position calculations
         positions = self._batch_planetary_positions(julian_days, planets)
-        
+
         return positions
 ```
 
@@ -146,26 +143,26 @@ class VectorizedTransitCalculator:
 
 ### Before Vectorization
 
-| Operation | Time | Throughput |
-|-----------|------|------------|
-| Multi-system chart | 2.5s | 24 charts/min |
-| Transit calculation | 1.8s | 33 transits/min |
+| Operation            | Time | Throughput          |
+| -------------------- | ---- | ------------------- |
+| Multi-system chart   | 2.5s | 24 charts/min       |
+| Transit calculation  | 1.8s | 33 transits/min     |
 | Ephemeris batch (50) | 0.8s | 3,750 positions/min |
 
-### After Vectorization  
+### After Vectorization
 
-| Operation | Time | Throughput | Improvement |
-|-----------|------|------------|-------------|
-| Multi-system chart | 1.5s | 40 charts/min | **67% faster** |
-| Transit calculation | 0.9s | 67 transits/min | **100% faster** |
-| Ephemeris batch (50) | 0.6s | 5,000 positions/min | **33% faster** |
+| Operation            | Time | Throughput          | Improvement     |
+| -------------------- | ---- | ------------------- | --------------- |
+| Multi-system chart   | 1.5s | 40 charts/min       | **67% faster**  |
+| Transit calculation  | 0.9s | 67 transits/min     | **100% faster** |
+| Ephemeris batch (50) | 0.6s | 5,000 positions/min | **33% faster**  |
 
 ## ✅ Success Criteria
 
 ### Performance Benchmarks
 
 - [ ] Multi-system charts: >30% improvement
-- [ ] Transit calculations: >40% improvement  
+- [ ] Transit calculations: >40% improvement
 - [ ] Ephemeris batches: >20% improvement
 - [ ] Memory usage: <80% of current usage
 - [ ] Zero accuracy regression (±0.01°)
@@ -186,7 +183,7 @@ class VectorizedTransitCalculator:
 - **Better user experience** for premium features
 - **Reduced server costs** for computational workloads
 
-### Phase 2 Preparation  
+### Phase 2 Preparation
 
 - **Broader vectorization coverage** before comprehensive testing
 - **More realistic performance benchmarks** with production workloads
