@@ -62,6 +62,7 @@ from functools import lru_cache
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from security import configure_security
 
 # Local imports (backend directory is container WORKDIR and on PYTHONPATH)
 # Note: These imports are intentionally kept for future use and side effects
@@ -270,27 +271,10 @@ else:
     logger.info("Metrics disabled via ENABLE_METRICS env var (initial load)")
 
 from typing import Awaitable, Callable
-
 # Security headers middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response as StarletteResponse
-
-
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self,
-        request: StarletteRequest,
-        call_next: Callable[[StarletteRequest], Awaitable[StarletteResponse]],
-    ) -> StarletteResponse:
-        response = await call_next(request)
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=63072000; includeSubDomains; preload"
-        )
-        return response
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
@@ -479,7 +463,8 @@ with suppress(Exception):  # pragma: no cover
     FastAPIInstrumentor.instrument_app(app)  # type: ignore
     RequestsInstrumentor().instrument()  # type: ignore
     logger.info("FastAPI & requests instrumented for tracing")
-app.add_middleware(SecurityHeadersMiddleware)
+# Configure comprehensive security (replaces old SecurityHeadersMiddleware)
+configure_security(app)
 app.add_middleware(RequestContextMiddleware)
 app.add_middleware(UserEnrichmentMiddleware)
 
