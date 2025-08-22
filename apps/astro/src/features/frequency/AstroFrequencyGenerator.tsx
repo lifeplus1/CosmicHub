@@ -14,9 +14,9 @@ interface AstrologyEnhancement {
   chartHarmonic: number;
 }
 
-interface AstroFrequencyPreset extends FrequencyPreset {
+type AstroFrequencyPreset = FrequencyPreset & {
   astrologyData?: AstrologyEnhancement;
-}
+};
 
 interface AstroFrequencyGeneratorProps {
   chartData?: Record<string, unknown>; // Strict type if available
@@ -66,7 +66,11 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = React.me
   const getPersonalizedFrequency = useCallback((basePreset: AstroFrequencyPreset): AstroFrequencyPreset => {
     if (chartData === null || chartData === undefined) return basePreset;
 
-    const dominantElement = (chartData.dominantElement as string) ?? 'earth';
+    // Access via bracket to satisfy noPropertyAccessFromIndexSignature and narrow
+    const dominantRaw = chartData['dominantElement'];
+    const dominantElement = (typeof dominantRaw === 'string' && dominantRaw.length > 0)
+      ? dominantRaw
+      : 'earth';
     const elementMultipliers: Record<string, number> = {
       fire: 1.05,
       earth: 1.0,
@@ -74,11 +78,11 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = React.me
       water: 0.98,
     };
 
-    return {
-      ...basePreset,
-      baseFrequency: basePreset.baseFrequency * (elementMultipliers[dominantElement] ?? 1.0),
-      description: `${basePreset.description} - Personalized for ${dominantElement} dominance`,
-    };
+    const adjustedFrequency = basePreset.baseFrequency * (elementMultipliers[dominantElement] ?? 1.0);
+    return Object.assign({}, basePreset, {
+      baseFrequency: adjustedFrequency,
+      description: `${basePreset.description ?? ''} - Personalized for ${dominantElement} dominance`.trim()
+    });
   }, [chartData]);
 
   const handlePlay = useCallback(async () => {
@@ -206,7 +210,7 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = React.me
                 value={[settings.volume]}
                 min={0}
                 max={100}
-                onValueChange={([value]) => updateSettings('volume', value)}
+                onValueChange={([value]) => updateSettings('volume', typeof value === 'number' ? value : settings.volume)}
                 aria-label="Volume control"
               >
                 <Slider.Track className="relative flex-grow h-1 bg-gray-200 rounded-full">
@@ -227,7 +231,7 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = React.me
                 value={[settings.duration]}
                 min={1}
                 max={60}
-                onValueChange={([value]) => updateSettings('duration', value)}
+                onValueChange={([value]) => updateSettings('duration', typeof value === 'number' ? value : settings.duration)}
                 aria-label="Session duration"
               >
                 <Slider.Track className="relative flex-grow h-1 bg-gray-200 rounded-full">

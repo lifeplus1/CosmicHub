@@ -177,6 +177,7 @@ const UserProfile = React.memo(() => {
     typeof t === 'string' && t in COSMICHUB_TIERS;
   const tierKey: keyof typeof COSMICHUB_TIERS = isTierKey(userTier) ? userTier : 'free';
   const currentTier = COSMICHUB_TIERS[tierKey];
+  const tierSafe = currentTier ?? { name: 'Free', description: '', price: { monthly: 0 }, features: [] } as const;
   const chartsUsage = typeof checkUsageLimit === 'function' ? checkUsageLimit('chartsPerMonth') : { current: 0, limit: 0 };
   const savedUsage = typeof checkUsageLimit === 'function' ? checkUsageLimit('chartStorage') : { current: 0, limit: 0 };
 
@@ -248,31 +249,36 @@ const UserProfile = React.memo(() => {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-cosmic-silver">Current Plan</p>
-                    <p className="font-bold text-cosmic-gold">{currentTier.name}</p>
-                    <p className="text-sm text-cosmic-silver/80">{currentTier.description}</p>
+                    <p className="font-bold text-cosmic-gold">{tierSafe.name}</p>
+                    <p className="text-sm text-cosmic-silver/80">{tierSafe.description}</p>
                   </div>
                   <div>
                     <p className="text-cosmic-silver">Billing</p>
                     <p className="font-bold text-cosmic-gold">
-                      {currentTier.price.monthly > 0 
-                        ? `$${currentTier.price.monthly.toFixed(2)}/month` 
+                      {tierSafe.price.monthly > 0 
+                        ? `$${tierSafe.price.monthly.toFixed(2)}/month` 
                         : 'Free'}
                     </p>
                     {(() => {
-                      if (currentTier.price.monthly <= 0) return null;
+                      if (tierSafe.price.monthly <= 0) return null;
+                      const subUnknown = subscriptionState.subscription as unknown;
                       if (
-                        subscriptionState.subscription !== null &&
-                        subscriptionState.subscription !== undefined &&
-                        typeof subscriptionState.subscription === 'object' &&
-                        typeof (subscriptionState.subscription as { currentPeriodEnd?: unknown }).currentPeriodEnd === 'number'
+                        subUnknown !== null &&
+                        typeof subUnknown === 'object'
                       ) {
-                        const end = (subscriptionState.subscription as { currentPeriodEnd: number }).currentPeriodEnd;
-                        const dateStr = new Date(end).toLocaleDateString();
-                        return (
-                          <p className="text-sm text-cosmic-silver/80">
-                            Next billing: {dateStr}
-                          </p>
-                        );
+                        // Accept either number epoch or Date instance
+                        const endRaw = (subUnknown as { currentPeriodEnd?: unknown })['currentPeriodEnd'];
+                        let endDate: Date | null = null;
+                        if (typeof endRaw === 'number') endDate = new Date(endRaw);
+                        else if (endRaw instanceof Date) endDate = endRaw;
+                        if (endDate !== null) {
+                          const dateStr = endDate.toLocaleDateString();
+                          return (
+                            <p className="text-sm text-cosmic-silver/80">
+                              Next billing: {dateStr}
+                            </p>
+                          );
+                        }
                       }
                       return null;
                     })()}
@@ -281,9 +287,9 @@ const UserProfile = React.memo(() => {
                 <button
                   className="w-full mt-4 cosmic-button sm:w-auto"
                   onClick={handleUpgrade}
-                  aria-label={currentTier.name === 'Free' ? 'Upgrade Plan' : 'Manage Subscription'}
+                  aria-label={tierSafe.name === 'Free' ? 'Upgrade Plan' : 'Manage Subscription'}
                 >
-                  {currentTier.name === 'Free' ? (
+                  {tierSafe.name === 'Free' ? (
                     <span className="flex items-center space-x-2">
                       <FaArrowUp />
                       <span>Upgrade Plan</span>

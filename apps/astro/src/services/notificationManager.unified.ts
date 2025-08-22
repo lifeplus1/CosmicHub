@@ -109,14 +109,14 @@ const isRecord = (v: unknown): v is Record<string, unknown> => {
 
 const hasStringId = (v: unknown): v is { id: string } => {
   if (!isRecord(v)) return false;
-  return typeof v.id === 'string';
+  return typeof (v as Record<string, unknown>)['id'] === 'string';
 };
 
 const isQuietHours = (v: unknown): v is QuietHours => {
   if (!isRecord(v)) return false;
-  return typeof v.enabled === 'boolean' && 
-         typeof v.start === 'string' && 
-         typeof v.end === 'string';
+  return typeof (v as Record<string, unknown>)['enabled'] === 'boolean' && 
+         typeof (v as Record<string, unknown>)['start'] === 'string' && 
+         typeof (v as Record<string, unknown>)['end'] === 'string';
 };
 
 const isValidFrequency = (v: unknown): v is NotificationFrequency => {
@@ -135,17 +135,17 @@ const isNotificationPreferences = (v: unknown): v is NotificationPreferences => 
     quietHours
   } = v;
   
-  return typeof dailyHoroscope === 'boolean' &&
-         typeof transitAlerts === 'boolean' &&
-         typeof frequencyReminders === 'boolean' &&
-         typeof appUpdates === 'boolean' &&
-         isValidFrequency(frequency) &&
-         isQuietHours(quietHours);
+  return typeof (v as Record<string, unknown>)['dailyHoroscope'] === 'boolean' &&
+         typeof (v as Record<string, unknown>)['transitAlerts'] === 'boolean' &&
+         typeof (v as Record<string, unknown>)['frequencyReminders'] === 'boolean' &&
+         typeof (v as Record<string, unknown>)['appUpdates'] === 'boolean' &&
+         isValidFrequency((v as Record<string, unknown>)['frequency']) &&
+         isQuietHours((v as Record<string, unknown>)['quietHours']);
 };
 
 const isSyncMessageData = (v: unknown): v is SyncMessageData => {
   if (!isRecord(v)) return false;
-  const { type } = v;
+  const type = (v as Record<string, unknown>)['type'];
   return typeof type === 'string' &&
          ['cosmichub-sync-chart_synced', 'cosmichub-sync-user_data_synced'].includes(type);
 };
@@ -308,10 +308,10 @@ export class UnifiedNotificationManager {
         const d = evt.data;
         if (!isRecord(d)) return;
         
-        if (d.type !== 'notification-click') return;
+  if (d['type'] !== 'notification-click') return;
 
-        const action = typeof d.action === 'string' ? d.action : undefined;
-        const chartId = typeof d.chartId === 'string' ? d.chartId : undefined;
+  const action = typeof d['action'] === 'string' ? d['action'] : undefined;
+  const chartId = typeof d['chartId'] === 'string' ? d['chartId'] : undefined;
         this.onClick({ action, chartId });
       });
     }
@@ -322,7 +322,7 @@ export class UnifiedNotificationManager {
 
     if (isValidWindow(window)) {
       window.addEventListener('storage', e => {
-        if (e.key === null || e.key === undefined || !e.key.startsWith('cosmichub-sync-') || e.newValue === null || e.newValue === undefined) {
+  if (e.key === null || e.key === undefined || !e.key.startsWith('cosmichub-sync-') || e.newValue === null || e.newValue === undefined) {
           return;
         }
 
@@ -361,8 +361,8 @@ export class UnifiedNotificationManager {
       if (raw === null) return null;
 
       const parsed: unknown = JSON.parse(raw);
-      if (!isRecord(parsed) || typeof parsed.sunSign !== 'string') return null;
-      return { sunSign: parsed.sunSign };
+  if (!isRecord(parsed) || typeof (parsed as Record<string, unknown>)['sunSign'] !== 'string') return null;
+  return { sunSign: (parsed as Record<string, unknown>)['sunSign'] as string };
     } catch {
       return null;
     }

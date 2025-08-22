@@ -65,8 +65,8 @@ export const isTextBirthData = (v: unknown): v is TextBirthData => {
   }
   
   // Then check if they're valid strings
-  const birthDate = obj.birth_date;
-  const birthTime = obj.birth_time;
+  const birthDate = obj['birth_date'];
+  const birthTime = obj['birth_time'];
   
   return (
     birthDate !== null && 
@@ -93,17 +93,20 @@ function assert(condition: unknown, message: string): asserts condition {
  */
 export function parseTextBirthData(data: TextBirthData): UnifiedBirthData {
   // Start with explicit existence and type checks on required fields
-  if (data.birth_date === undefined || data.birth_date === null || data.birth_date === '' ||
-      data.birth_time === undefined || data.birth_time === null || data.birth_time === '') {
+  if (data['birth_date'] === undefined || data['birth_date'] === null || data['birth_date'] === '' ||
+      data['birth_time'] === undefined || data['birth_time'] === null || data['birth_time'] === '') {
     throw new Error('birth_date and birth_time are required non-empty fields');
   }
 
-  const rawDate = data.birth_date.trim();
-  const rawTime = data.birth_time.trim();
+  const rawDate = data['birth_date'].trim();
+  const rawTime = data['birth_time'].trim();
 
   // Date validation YYYY-MM-DD
   const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rawDate);
   assert(dateMatch !== null && dateMatch !== undefined, `Invalid birth_date format: ${rawDate}`);
+  if (dateMatch[1] === undefined || dateMatch[2] === undefined || dateMatch[3] === undefined) {
+    throw new Error(`Invalid birth_date capture groups: ${rawDate}`);
+  }
   const year = parseInt(dateMatch[1], 10);
   const month = parseInt(dateMatch[2], 10);
   const day = parseInt(dateMatch[3], 10);
@@ -116,26 +119,34 @@ export function parseTextBirthData(data: TextBirthData): UnifiedBirthData {
   // Time validation HH:MM(:SS)?
   const timeMatch = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(rawTime);
   assert(timeMatch !== null && timeMatch !== undefined, `Invalid birth_time format: ${rawTime}`);
+  if (timeMatch[1] === undefined || timeMatch[2] === undefined) {
+    throw new Error(`Invalid birth_time capture groups: ${rawTime}`);
+  }
   const hour = parseInt(timeMatch[1], 10);
   const minute = parseInt(timeMatch[2], 10);
   assert(hour >= 0 && hour <= 23, `Invalid hour: ${hour}`);
   assert(minute >= 0 && minute <= 59, `Invalid minute: ${minute}`);
 
   const extendedData = data as Record<string, unknown>;
-  const fallbackLat = typeof extendedData.lat === 'number' ? extendedData.lat : undefined;
-  const fallbackLon = typeof extendedData.lon === 'number' ? extendedData.lon : undefined;
+  const fallbackLat = typeof extendedData['lat'] === 'number' ? extendedData['lat'] : undefined;
+  const fallbackLon = typeof extendedData['lon'] === 'number' ? extendedData['lon'] : undefined;
 
-  return {
-    year,
-    month,
-    day,
-    hour,
-    minute,
-    city: data.city === undefined || data.city === null ? undefined : data.city.trim(),
-    lat: data.latitude ?? fallbackLat,
-    lon: data.longitude ?? fallbackLon,
-    timezone: data.timezone === undefined || data.timezone === null ? undefined : data.timezone.trim()
-  };
+  const result: UnifiedBirthData = { year, month, day, hour, minute } as UnifiedBirthData;
+  if (data.city !== undefined && data.city !== null && data.city.trim() !== '') {
+    result.city = data.city.trim();
+  }
+  const latVal = data.latitude ?? fallbackLat;
+  if (typeof latVal === 'number') {
+    result.lat = latVal;
+  }
+  const lonVal = data.longitude ?? fallbackLon;
+  if (typeof lonVal === 'number') {
+    result.lon = lonVal;
+  }
+  if (data.timezone !== undefined && data.timezone !== null && data.timezone.trim() !== '') {
+    result.timezone = data.timezone.trim();
+  }
+  return result;
 }
 
 export function toUnifiedBirthData(input: AnyBirthInput): UnifiedBirthData {

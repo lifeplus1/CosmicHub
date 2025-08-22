@@ -33,13 +33,13 @@ export function isPlanet(value: unknown): value is Planet {
   const obj = value as Record<string, unknown>;
   
   return (
-    typeof obj.name === 'string' &&
-    typeof obj.sign === 'string' &&
-    typeof obj.degree === 'number' &&
-    typeof obj.position === 'number' &&
-    typeof obj.house === 'string' &&
-    (obj.retrograde === undefined || typeof obj.retrograde === 'boolean') &&
-    (obj.aspects === undefined || Array.isArray(obj.aspects))
+  typeof obj['name'] === 'string' &&
+  typeof obj['sign'] === 'string' &&
+  typeof obj['degree'] === 'number' &&
+  typeof obj['position'] === 'number' &&
+  typeof obj['house'] === 'string' &&
+  (obj['retrograde'] === undefined || typeof obj['retrograde'] === 'boolean') &&
+  (obj['aspects'] === undefined || Array.isArray(obj['aspects']))
   );
 }
 
@@ -54,12 +54,12 @@ export function isHouse(value: unknown): value is House {
   const obj = value as Record<string, unknown>;
   
   return (
-    typeof obj.house === 'number' &&
-    typeof obj.number === 'number' &&
-    typeof obj.sign === 'string' &&
-    typeof obj.degree === 'number' &&
-    typeof obj.cusp === 'number' &&
-    typeof obj.ruler === 'string'
+  typeof obj['house'] === 'number' &&
+  typeof obj['number'] === 'number' &&
+  typeof obj['sign'] === 'string' &&
+  typeof obj['degree'] === 'number' &&
+  typeof obj['cusp'] === 'number' &&
+  typeof obj['ruler'] === 'string'
   );
 }
 
@@ -74,11 +74,11 @@ export function isAspect(value: unknown): value is Aspect {
   const obj = value as Record<string, unknown>;
   
   return (
-    typeof obj.planet1 === 'string' &&
-    typeof obj.planet2 === 'string' &&
-    typeof obj.type === 'string' &&
-    typeof obj.orb === 'number' &&
-    typeof obj.applying === 'string'
+  typeof obj['planet1'] === 'string' &&
+  typeof obj['planet2'] === 'string' &&
+  typeof obj['type'] === 'string' &&
+  typeof obj['orb'] === 'number' &&
+  typeof obj['applying'] === 'string'
   );
 }
 
@@ -93,10 +93,10 @@ export function isAsteroid(value: unknown): value is Asteroid {
   const obj = value as Record<string, unknown>;
   
   return (
-    typeof obj.name === 'string' &&
-    typeof obj.sign === 'string' &&
-    typeof obj.degree === 'number' &&
-    typeof obj.house === 'string'
+  typeof obj['name'] === 'string' &&
+  typeof obj['sign'] === 'string' &&
+  typeof obj['degree'] === 'number' &&
+  typeof obj['house'] === 'string'
   );
 }
 
@@ -111,10 +111,10 @@ export function isAngle(value: unknown): value is Angle {
   const obj = value as Record<string, unknown>;
   
   return (
-    typeof obj.name === 'string' &&
-    typeof obj.sign === 'string' &&
-    typeof obj.degree === 'number' &&
-    typeof obj.position === 'number'
+  typeof obj['name'] === 'string' &&
+  typeof obj['sign'] === 'string' &&
+  typeof obj['degree'] === 'number' &&
+  typeof obj['position'] === 'number'
   );
 }
 
@@ -130,28 +130,28 @@ export function isAstrologyChart(value: unknown): value is AstrologyChart {
   const obj = value as Record<string, unknown>;
   
   // Check for required arrays
-  if (!Array.isArray(obj.planets) || 
-      !Array.isArray(obj.houses) || 
-      !Array.isArray(obj.aspects) || 
-      !Array.isArray(obj.asteroids) || 
-      !Array.isArray(obj.angles)) {
+  if (!Array.isArray(obj['planets']) || 
+      !Array.isArray(obj['houses']) || 
+      !Array.isArray(obj['aspects']) || 
+      !Array.isArray(obj['asteroids']) || 
+      !Array.isArray(obj['angles'])) {
     return false;
   }
   
   // Validate each planet
-  if (!obj.planets.every(isPlanet)) return false;
+  if (!obj['planets'].every(isPlanet)) return false;
   
   // Validate each house
-  if (!obj.houses.every(isHouse)) return false;
+  if (!obj['houses'].every(isHouse)) return false;
   
   // Validate each aspect
-  if (!obj.aspects.every(isAspect)) return false;
+  if (!obj['aspects'].every(isAspect)) return false;
   
   // Validate each asteroid
-  if (!obj.asteroids.every(isAsteroid)) return false;
+  if (!obj['asteroids'].every(isAsteroid)) return false;
   
   // Validate each angle
-  if (!obj.angles.every(isAngle)) return false;
+  if (!obj['angles'].every(isAngle)) return false;
   
   return true;
 }
@@ -166,21 +166,21 @@ export function isUserProfile(value: unknown): value is UserProfile {
   
   const obj = value as Record<string, unknown>;
   
-  if (typeof obj.userId !== 'string') {
+  if (typeof obj['userId'] !== 'string') {
     return false;
   }
   
   // Check birthData structure
-  if (obj.birthData === null || obj.birthData === undefined || typeof obj.birthData !== 'object') {
+  if (obj['birthData'] === null || obj['birthData'] === undefined || typeof obj['birthData'] !== 'object') {
     return false;
   }
   
-  const birthData = obj.birthData as Record<string, unknown>;
+  const birthData = obj['birthData'] as Record<string, unknown>;
   
   return (
-    typeof birthData.date === 'string' &&
-    typeof birthData.time === 'string' &&
-    typeof birthData.location === 'string'
+  typeof birthData['date'] === 'string' &&
+  typeof birthData['time'] === 'string' &&
+  typeof birthData['location'] === 'string'
   );
 }
 
@@ -195,9 +195,9 @@ export function isNumerologyData(value: unknown): value is NumerologyData {
   const obj = value as Record<string, unknown>;
   
   return (
-    typeof obj.lifePath === 'number' &&
-    typeof obj.destiny === 'number' &&
-    typeof obj.personalYear === 'number'
+  typeof obj['lifePath'] === 'number' &&
+  typeof obj['destiny'] === 'number' &&
+  typeof obj['personalYear'] === 'number'
   );
 }
 
@@ -237,59 +237,59 @@ export function validateAstrologyChart(chart: unknown): string[] {
   const obj = chart as Record<string, unknown>;
   
   // Check required properties
-  if (!Array.isArray(obj.planets)) {
+  if (!Array.isArray(obj['planets'])) {
     errors.push('Chart is missing planets array');
-  } else if (obj.planets.length === 0) {
+  } else if (obj['planets'].length === 0) {
     errors.push('Chart must have at least one planet');
   } else {
     // Validate each planet
-    obj.planets.forEach((planet, index) => {
+    obj['planets'].forEach((planet, index) => {
       if (!isPlanet(planet)) {
         errors.push(`Invalid planet at index ${index}`);
       }
     });
   }
   
-  if (!Array.isArray(obj.houses)) {
+  if (!Array.isArray(obj['houses'])) {
     errors.push('Chart is missing houses array');
-  } else if (obj.houses.length !== 12) {
+  } else if (obj['houses'].length !== 12) {
     errors.push('Chart must have exactly 12 houses');
   } else {
     // Validate each house
-    obj.houses.forEach((house, index) => {
+    obj['houses'].forEach((house, index) => {
       if (!isHouse(house)) {
         errors.push(`Invalid house at index ${index}`);
       }
     });
   }
   
-  if (!Array.isArray(obj.aspects)) {
+  if (!Array.isArray(obj['aspects'])) {
     errors.push('Chart is missing aspects array');
   } else {
     // Validate each aspect
-    obj.aspects.forEach((aspect, index) => {
+    obj['aspects'].forEach((aspect, index) => {
       if (!isAspect(aspect)) {
         errors.push(`Invalid aspect at index ${index}`);
       }
     });
   }
   
-  if (!Array.isArray(obj.asteroids)) {
+  if (!Array.isArray(obj['asteroids'])) {
     errors.push('Chart is missing asteroids array');
   } else {
     // Validate each asteroid
-    obj.asteroids.forEach((asteroid, index) => {
+    obj['asteroids'].forEach((asteroid, index) => {
       if (!isAsteroid(asteroid)) {
         errors.push(`Invalid asteroid at index ${index}`);
       }
     });
   }
   
-  if (!Array.isArray(obj.angles)) {
+  if (!Array.isArray(obj['angles'])) {
     errors.push('Chart is missing angles array');
   } else {
     // Validate each angle
-    obj.angles.forEach((angle, index) => {
+    obj['angles'].forEach((angle, index) => {
       if (!isAngle(angle)) {
         errors.push(`Invalid angle at index ${index}`);
       }

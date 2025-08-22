@@ -35,9 +35,17 @@ describe('normalizeChart utilities', () => {
   it('derives rulers and degrees for houses', () => {
     const raw: ChartLike = { houses: [ { number: 1, cusp: 12 }, { number: 2, cusp: 47 } ] };
     const { houses } = normalizeChart(raw);
-    expect(houses[0].degree).toBe(12 % 30);
-    expect(houses[0].ruler).toBe(getRulerFromSign(houses[0].sign));
-    expect(houses[1].degree).toBe(47 % 30);
+  const h0 = houses[0];
+  const h1 = houses[1];
+    expect(h0).toBeDefined();
+    expect(h1).toBeDefined();
+    if (h0 !== undefined) {
+      expect(h0.degree).toBe(12 % 30);
+      expect(h0.ruler).toBe(getRulerFromSign(h0.sign));
+    }
+    if (h1 !== undefined) {
+      expect(h1.degree).toBe(47 % 30);
+    }
   });
 
   it('parses aspect orb intelligently and applies default when missing', () => {

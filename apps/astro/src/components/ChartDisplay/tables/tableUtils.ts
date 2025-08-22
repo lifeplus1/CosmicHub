@@ -44,13 +44,19 @@ export const getAspectSymbol = (aspect: string): string => {
 	return '◇';
 };
 export const getAsteroidSymbol = (name: string): string => {
-	if (typeof name !== 'string' || name.length === 0) return ASTEROID_SYMBOLS.default;
-	return (ASTEROID_SYMBOLS[name] !== undefined && ASTEROID_SYMBOLS[name].length > 0)
-		? ASTEROID_SYMBOLS[name]
-		: ASTEROID_SYMBOLS.default;
+	// Access via bracket to satisfy noPropertyAccessFromIndexSignature & guard undefined due to noUncheckedIndexedAccess
+	const fallback = ASTEROID_SYMBOLS['default'] ?? '⁂';
+	if (typeof name !== 'string' || name.length === 0) return fallback;
+	const direct = ASTEROID_SYMBOLS[name];
+	return (direct !== undefined && direct.length > 0) ? direct : fallback;
 };
 
-function capitalize(s: string){ return (typeof s === 'string' && s.length > 0) ? s[0].toUpperCase()+s.slice(1).toLowerCase() : s; }
+function capitalize(s: string){
+	if (typeof s !== 'string' || s.length === 0) return s;
+	// charAt returns '' rather than undefined when out of range (safer under noUncheckedIndexedAccess)
+	const first = s.charAt(0).toUpperCase();
+	return first + s.slice(1).toLowerCase();
+}
 
 // Lightweight interpretation subset (avoid pulling heavy logic)
 const INTERPRETATIONS: Record<string, Record<string, string>> = {

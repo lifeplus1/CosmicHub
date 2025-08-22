@@ -22,7 +22,7 @@ import {
 // Configuration for the ephemeris client
 const getEphemerisConfig = (): EphemerisConfig => ({
   // Use the backend API base (frontend talks to backend, which proxies ephemeris)
-  apiBaseUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000',
+  apiBaseUrl: (import.meta.env['VITE_API_URL'] as string | undefined) ?? 'http://localhost:8000',
   timeout: 30000,
   // API key handled by backend authentication, not needed here
 });

@@ -172,7 +172,7 @@ export interface ErrorContext {
   sessionId?: string;
   feature?: string;
   action?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export function createEnhancedError(
@@ -193,7 +193,7 @@ export function createEnhancedError(
   }
   
   // Add stack trace from original error if available
-  if (originalError && originalError.stack) {
+  if (originalError?.stack) {
     error.stack = `${error.stack}\nCaused by: ${originalError.stack}`;
   }
   
@@ -216,7 +216,7 @@ export enum ErrorType {
 
 export function classifyError(error: Error): ErrorType {
   const message = error.message.toLowerCase();
-  const stack = error.stack?.toLowerCase() || '';
+  const stack = error.stack?.toLowerCase() ?? '';
 
   if (message.includes('network') || message.includes('fetch') || message.includes('timeout')) {
     return ErrorType.NETWORK;
@@ -292,7 +292,7 @@ export interface RecoveryAction {
 
 export function getRecoveryActions(
   error: Error,
-  context: ErrorContext = {}
+  _context: ErrorContext = {}
 ): RecoveryAction[] {
   const errorType = classifyError(error);
   const actions: RecoveryAction[] = [];

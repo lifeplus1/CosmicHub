@@ -37,9 +37,16 @@ const HumanDesign: React.FC = () => {
 
     // Parse the ISO string more carefully to preserve the original date
     const consciousTime = birthInfo.conscious_time;
-    const [datePart, timePart] = consciousTime.split('T');
-    const [year, month, day] = datePart.split('-').map(Number);
-    const [hour, minute] = timePart.split(':').map(Number);
+  const parts = consciousTime.split('T');
+  const datePart = parts[0] ?? '';
+  const timePart = parts[1] ?? '00:00:00';
+  const [yearRaw, monthRaw, dayRaw] = datePart.split('-');
+  const [hourRaw, minuteRaw] = timePart.split(':');
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  const hour = Number(hourRaw);
+  const minute = Number(minuteRaw);
     
     // Use the original input values to avoid timezone conversion issues
     return {

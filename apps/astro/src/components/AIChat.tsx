@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "@cosmichub/auth";
 import { getAuthToken } from "../services/api";
 import { useToast } from "./ToastProvider";
+import { apiConfig } from '../config/environment';
 
 interface ChatResponse {
   choices: { message: { content: string } }[];
@@ -43,7 +44,7 @@ export default function AIChat(): React.ReactElement {
       }
 
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/chat`,
+        `${apiConfig.baseUrl}/chat`,
         { text: message },
         {
           headers: {

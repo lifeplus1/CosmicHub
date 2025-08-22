@@ -17,14 +17,18 @@ export const useTransitAnalysis = (birthData: BirthData) => {
   const [loading, setLoading] = useState(false);
   const [loadingLunar, setLoadingLunar] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  const [dateRange, setDateRange] = useState<DateRange>(() => {
+    const startSplit = new Date().toISOString().split('T');
+    const endSplit = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T');
+    return {
+      startDate: startSplit[0] ?? '',
+      endDate: endSplit[0] ?? ''
+    };
   });
 
   // API base URL - could be moved to config
-  const API_BASE_URL = typeof import.meta.env.VITE_API_URL === 'string' && import.meta.env.VITE_API_URL.length > 0
-    ? import.meta.env.VITE_API_URL
+  const API_BASE_URL = typeof import.meta.env['VITE_API_URL'] === 'string' && import.meta.env['VITE_API_URL'].length > 0
+    ? import.meta.env['VITE_API_URL']
     : 'http://localhost:8000';
 
   const calculateTransits = useCallback(async (options: TransitAnalysisOptions = {}) => {
@@ -72,8 +76,8 @@ export const useTransitAnalysis = (birthData: BirthData) => {
       devConsole.error('❌ Error calculating transits:', err);
   if (isAxiosError(err) && err.response !== null && err.response !== undefined) {
         // Server responded with error status
-        const detail = (err.response.data as Record<string, unknown>)?.detail;
-        const message = (err.response.data as Record<string, unknown>)?.message;
+  const detail = (err.response.data as Record<string, unknown>)?.['detail'];
+  const message = (err.response.data as Record<string, unknown>)?.['message'];
         const errorMessage = typeof detail === 'string' ? detail : (typeof message === 'string' ? message : `Server error: ${err.response.status}`);
         setError(errorMessage);
   } else if (isAxiosError(err) && err.request !== null && err.request !== undefined) {
@@ -133,8 +137,8 @@ export const useTransitAnalysis = (birthData: BirthData) => {
       devConsole.error('❌ Error calculating lunar transits:', err);
   if (isAxiosError(err) && err.response !== null && err.response !== undefined) {
         // Server responded with error status
-        const detail = (err.response.data as Record<string, unknown>)?.detail;
-        const message = (err.response.data as Record<string, unknown>)?.message;
+  const detail = (err.response.data as Record<string, unknown>)?.['detail'];
+  const message = (err.response.data as Record<string, unknown>)?.['message'];
         const errorMessage = typeof detail === 'string' ? detail : (typeof message === 'string' ? message : `Server error: ${err.response.status}`);
         setError(errorMessage);
   } else if (isAxiosError(err) && err.request !== null && err.request !== undefined) {

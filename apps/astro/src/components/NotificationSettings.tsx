@@ -151,13 +151,13 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     if (value === null || typeof value !== 'object') return false;
     const v = value as Record<string, unknown>;
     return (
-      typeof v.dailyHoroscope === 'boolean' &&
-      typeof v.transitAlerts === 'boolean' &&
-      typeof v.frequencyReminders === 'boolean' &&
-      typeof v.appUpdates === 'boolean' &&
-      typeof v.frequency === 'string' &&
-      typeof v.quietHours === 'object' && v.quietHours !== null &&
-      typeof (v.quietHours as Record<string, unknown>).enabled === 'boolean'
+  typeof v['dailyHoroscope'] === 'boolean' &&
+  typeof v['transitAlerts'] === 'boolean' &&
+  typeof v['frequencyReminders'] === 'boolean' &&
+  typeof v['appUpdates'] === 'boolean' &&
+  typeof v['frequency'] === 'string' &&
+  typeof v['quietHours'] === 'object' && v['quietHours'] !== null &&
+  typeof (v['quietHours'] as Record<string, unknown>)['enabled'] === 'boolean'
     );
   }
 

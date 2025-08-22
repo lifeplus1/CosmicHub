@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true
+  },
+  "include": [
+    "packages/ui/src/components/ErrorBoundary.tsx",
+    "packages/ui/src/components/ErrorBoundaries.tsx",
+    "packages/ui/src/hooks/useErrorHandling.ts",
+    "packages/ui/src/hooks/useABTest.ts",
+    "packages/ui/src/components/Button.tsx"
+  ]
+}

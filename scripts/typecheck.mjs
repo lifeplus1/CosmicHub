@@ -51,6 +51,9 @@ const run = (cmd, args, cwd) =>
   try {
     for (const app of sequences) {
       if (app === 'astro') {
+  // Ensure UI package (and config) are built so declaration outputs exist for project references
+  await run('pnpm', ['-F', '@cosmichub/ui', 'build'], resolve(__dirname, '..'));
+  await run('pnpm', ['-F', '@cosmichub/config', 'build'], resolve(__dirname, '..'));
         await run(
           'pnpm',
           ['run', 'type-check:astro'],

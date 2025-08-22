@@ -95,9 +95,13 @@ const calculateHouseForPlanet = (planetPosition: number, houseCusps: HouseCusp[]
   
   // Helper function to convert number to ordinal (1st, 2nd, 3rd, etc.)
   const getOrdinal = (num: number): string => {
-    const suffixes = ['th', 'st', 'nd', 'rd'];
-    const value = num % 100;
-    return num + (suffixes[(value - 20) % 10] ?? suffixes[value] ?? suffixes[0]);
+    const suffixes = ['th', 'st', 'nd', 'rd'] as const;
+    const v = Math.abs(num) % 100;
+    const teen = v >= 11 && v <= 13;
+    if (teen) return `${num}th`;
+    const last = v % 10;
+    const suffix = last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th';
+    return `${num}${suffix}`;
   };
   
   // Sort house cusps by position
@@ -109,8 +113,9 @@ const calculateHouseForPlanet = (planetPosition: number, houseCusps: HouseCusp[]
   // Find which house the planet falls into
   for (let i = 0; i < sortedCusps.length; i++) {
     const currentHouse = sortedCusps[i];
-    const nextHouse = sortedCusps[(i + 1) % 12];
-    
+    const nextHouse = sortedCusps[(i + 1) % sortedCusps.length];
+    if (!currentHouse || !nextHouse) continue;
+
     if (nextHouse.cusp > currentHouse.cusp) {
       // Normal case
       if (planetPosition >= currentHouse.cusp && planetPosition < nextHouse.cusp) {
@@ -137,36 +142,36 @@ const calculateHouseForPlanet = (planetPosition: number, houseCusps: HouseCusp[]
 const coercePlanet = (v: unknown): ChartPlanet => {
   const obj = (typeof v === 'object' && v !== null) ? v as Record<string, unknown> : {};
   return {
-    name: typeof obj.name === 'string' ? obj.name : '',
-    sign: typeof obj.sign === 'string' ? obj.sign : '',
-    house: (typeof obj.house === 'string' || typeof obj.house === 'number') ? obj.house : undefined,
-    degree: typeof obj.degree === 'number' ? obj.degree : 0,
-    position: typeof obj.position === 'number' ? obj.position : undefined,
-    retrograde: typeof obj.retrograde === 'boolean' ? obj.retrograde : undefined
+    name: typeof obj['name'] === 'string' ? obj['name'] as string : '',
+    sign: typeof obj['sign'] === 'string' ? obj['sign'] as string : '',
+    house: (typeof obj['house'] === 'string' || typeof obj['house'] === 'number') ? obj['house'] as string | number : undefined,
+    degree: typeof obj['degree'] === 'number' ? obj['degree'] as number : 0,
+    position: typeof obj['position'] === 'number' ? obj['position'] as number : undefined,
+    retrograde: typeof obj['retrograde'] === 'boolean' ? obj['retrograde'] as boolean : undefined
   };
 };
 const coerceHouse = (v: unknown): ChartHouse => {
   const obj = (typeof v === 'object' && v !== null) ? v as Record<string, unknown> : {};
-  const numberRaw = obj.number;
-  const houseRaw = obj.house;
+  const numberRaw = obj['number'];
+  const houseRaw = obj['house'];
   const number = typeof numberRaw === 'number' ? numberRaw : (typeof houseRaw === 'number' ? houseRaw : 0);
-  const cuspRaw = obj.cusp;
+  const cuspRaw = obj['cusp'];
   return {
     number,
     house: typeof houseRaw === 'number' ? houseRaw : undefined,
-    sign: typeof obj.sign === 'string' ? obj.sign : '',
+    sign: typeof obj['sign'] === 'string' ? obj['sign'] as string : '',
     cusp: typeof cuspRaw === 'number' ? cuspRaw : 0,
-    ruler: typeof obj.ruler === 'string' ? obj.ruler : undefined
+    ruler: typeof obj['ruler'] === 'string' ? obj['ruler'] as string : undefined
   };
 };
 const coerceAspect = (v: unknown): ChartAspect => {
   const obj = (typeof v === 'object' && v !== null) ? v as Record<string, unknown> : {};
   return {
-    planet1: typeof obj.planet1 === 'string' ? obj.planet1 : '',
-    planet2: typeof obj.planet2 === 'string' ? obj.planet2 : '',
-    type: typeof obj.type === 'string' ? obj.type : '',
-    orb: typeof obj.orb === 'number' ? obj.orb : 0,
-    applying: typeof obj.applying === 'string' ? obj.applying : undefined
+    planet1: typeof obj['planet1'] === 'string' ? obj['planet1'] as string : '',
+    planet2: typeof obj['planet2'] === 'string' ? obj['planet2'] as string : '',
+    type: typeof obj['type'] === 'string' ? obj['type'] as string : '',
+    orb: typeof obj['orb'] === 'number' ? obj['orb'] as number : 0,
+    applying: typeof obj['applying'] === 'string' ? obj['applying'] as string : undefined
   };
 };
 

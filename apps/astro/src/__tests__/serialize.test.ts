@@ -130,8 +130,12 @@ describe('Serialization and Deserialization', () => {
 
       const serialized = serializeAstrologyData(chartWithOptionals);
       const deserialized = deserializeAstrologyData<AstrologyChart>(serialized);
-      expect(deserialized.planets[0].retrograde).toBe(true);
-      expect(deserialized.planets[0].aspects).toHaveLength(1);
+    const firstPlanet = deserialized.planets[0];
+        expect(firstPlanet).toBeDefined();
+        if (firstPlanet !== undefined) {
+          expect(firstPlanet.retrograde).toBe(true);
+          expect(firstPlanet.aspects).toHaveLength(1);
+        }
     });
   });
 
@@ -260,9 +264,13 @@ describe('Serialization and Deserialization', () => {
       expect(deserialized.aspects).toBeDefined();
       
       // Verify planet data is complete for rendering
-      expect(deserialized.planets[0].name).toBeDefined();
-      expect(deserialized.planets[0].sign).toBeDefined();
-      expect(deserialized.planets[0].degree).toBeDefined();
+  const planet0 = deserialized.planets[0];
+      expect(planet0).toBeDefined();
+      if (planet0 !== undefined) {
+        expect(planet0.name).toBeDefined();
+        expect(planet0.sign).toBeDefined();
+        expect(planet0.degree).toBeDefined();
+      }
     });
 
     it('should maintain precision for degree calculations', () => {
@@ -280,8 +288,12 @@ describe('Serialization and Deserialization', () => {
       const serialized = serializeAstrologyData(preciseChart);
       const deserialized = deserializeAstrologyData<AstrologyChart>(serialized);
       
-      expect(deserialized.planets[0].degree).toBeCloseTo(23.456789123, 6);
-      expect(deserialized.planets[0].position).toBeCloseTo(233.456789123, 6);
+  const precise0 = deserialized.planets[0];
+      expect(precise0).toBeDefined();
+      if (precise0 !== undefined) {
+        expect(precise0.degree).toBeCloseTo(23.456789123, 6);
+        expect(precise0.position).toBeCloseTo(233.456789123, 6);
+      }
     });
   });
 });

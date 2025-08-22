@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from './ToastProvider';
 import axios, { type AxiosError } from "axios";
+import { apiConfig } from '../config/environment';
 import { useAuth } from "@cosmichub/auth";
 
 export default function SaveChart(): React.ReactNode {
@@ -35,7 +36,7 @@ export default function SaveChart(): React.ReactNode {
     try {
       const token = await user.getIdToken();
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/save-chart`,
+        `${apiConfig.baseUrl}/save-chart`,
         {
           year: parseInt(formData.year),
           month: parseInt(formData.month),

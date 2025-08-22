@@ -50,10 +50,10 @@ const ChartPreferences: React.FC = React.memo(() => {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        if (userData.healwavePreferences) {
+    if ((userData as Record<string, unknown>)['healwavePreferences']) {
           setPreferences(prev => ({
             ...prev,
-            ...userData.healwavePreferences
+      ...((userData as Record<string, unknown>)['healwavePreferences'] as Partial<ChartPreferencesData>)
           }));
         }
       }

@@ -1,0 +1,12 @@
+{
+  "totalErrors": 0,
+  "fileErrors": {},
+  "byProject": {
+    "apps/astro": 0,
+    "apps/healwave": 0,
+    "packages/ui": 0,
+    "packages/config": 0,
+    "packages/types": 0
+  },
+  "generatedAt": "2025-08-22T01:17:30.159Z"
+}

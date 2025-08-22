@@ -9,11 +9,14 @@
     "noEmit": false,
     "emitDeclarationOnly": false,
     "jsx": "react-jsx",
-  // Standardize lib target with workspace (ES2022)
-  "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Standardize lib target with workspace (ES2022)
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "rootDir": "./src",
-  // Types inherited from root/base config (react, react-dom, node).
-  // Vite client types provided via local vite-env.d.ts triple-slash reference to avoid duplication.
+    // Allow for properly resolved type declarations
+    "skipLibCheck": true,
+    "paths": {
+      "@cosmichub/config/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*", "vite-env.d.ts"],
   "exclude": [

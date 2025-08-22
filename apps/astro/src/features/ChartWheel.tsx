@@ -195,7 +195,10 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       'quintile': 72,
     };
   const key = aspectType.toLowerCase();
-  if (Object.prototype.hasOwnProperty.call(aspectAngles, key)) return aspectAngles[key];
+  if (Object.prototype.hasOwnProperty.call(aspectAngles, key)) {
+    const val = aspectAngles[key];
+    return typeof val === 'number' ? val : 0;
+  }
   return 0;
   };
 
@@ -295,13 +298,16 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
 
     // Helper function to get zodiac sign info
     function getZodiacInfo(position: number) {
-      const signIndex = Math.floor(position / 30);
+      const rawIndex = Math.floor(position / 30);
+      const signIndex = rawIndex >= 0 && rawIndex < signs.length ? rawIndex : 0;
       const degreeInSign = Math.floor(position % 30);
       const minuteInSign = Math.floor((position % 1) * 60);
+      const signName = signs[signIndex] ?? 'Unknown';
+      const signSymbol = signSymbols[signIndex] ?? '?';
       return {
         signIndex,
-        signName: signs[signIndex],
-        signSymbol: signSymbols[signIndex],
+        signName,
+        signSymbol,
         degree: degreeInSign,
         minute: minuteInSign,
         formatted: `${degreeInSign}°${minuteInSign.toString().padStart(2, '0')}'`

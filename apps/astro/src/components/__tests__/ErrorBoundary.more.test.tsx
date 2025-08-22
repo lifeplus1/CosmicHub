@@ -31,7 +31,10 @@ describe('ErrorBoundary (additional scenarios)', () => {
     );
   expect(screen.getAllByText(/RetryBoundary/).length).toBeGreaterThan(0);
   const tryAgainButtons = screen.getAllByText(/Try Again/i);
-  fireEvent.click(tryAgainButtons[0]);
+  const firstButton = tryAgainButtons[0];
+  if (firstButton !== undefined) {
+    fireEvent.click(firstButton);
+  }
     // Unmount old boundary (simulating route/content swap) and mount new safe tree
     unmount();
     render(

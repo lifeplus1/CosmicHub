@@ -92,7 +92,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
       // Handle error with better UX
       setError('Failed to load presets. Please try again.');
       setPresets([]);
-      if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development') {
+  if (typeof process !== 'undefined' && process?.env?.['NODE_ENV'] === 'development') {
         devConsole.error('Error loading user presets:', err);
       }
     } finally {
@@ -146,7 +146,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
       setShowSaveDialog(false);
     } catch (err) {
       setError('Failed to save preset. Please try again.');
-      if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development') {
+  if (typeof process !== 'undefined' && process?.env?.['NODE_ENV'] === 'development') {
         devConsole.error('Error saving preset:', err);
       }
     } finally {
@@ -170,7 +170,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(({
       }
     } catch (err) {
       setError('Failed to delete preset. Please try again.');
-      if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development') {
+  if (typeof process !== 'undefined' && process?.env?.['NODE_ENV'] === 'development') {
         devConsole.error('Error deleting preset:', err);
       }
     } finally {

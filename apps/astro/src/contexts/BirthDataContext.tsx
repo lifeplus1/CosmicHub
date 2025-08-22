@@ -26,10 +26,10 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({ children }
   if (stored !== null) {
         const parsed: unknown = JSON.parse(stored);
         // Validate the data structure
-        if (parsed !== null && parsed !== undefined && typeof parsed === 'object' && 
-            'year' in parsed && typeof (parsed as Record<string, unknown>).year === 'number' && 
-            'month' in parsed && typeof (parsed as Record<string, unknown>).month === 'number' && 
-            'day' in parsed && typeof (parsed as Record<string, unknown>).day === 'number') {
+    if (parsed !== null && parsed !== undefined && typeof parsed === 'object' && 
+      'year' in parsed && typeof (parsed as Record<string, unknown>)['year'] === 'number' && 
+      'month' in parsed && typeof (parsed as Record<string, unknown>)['month'] === 'number' && 
+      'day' in parsed && typeof (parsed as Record<string, unknown>)['day'] === 'number') {
           return parsed as ChartBirthData;
         }
       }

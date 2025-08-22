@@ -19,7 +19,7 @@ function getCurrentEnvironment(): Environment {
   
   // Fallback to Node.js environment
   if (typeof process !== 'undefined') {
-    const nodeEnv = process.env.NODE_ENV;
+    const nodeEnv = process.env?.['NODE_ENV'];
     if (nodeEnv === 'production') return 'production';
     if (nodeEnv === 'test') return 'test';
     return 'development';

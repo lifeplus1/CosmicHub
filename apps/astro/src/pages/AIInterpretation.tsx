@@ -251,30 +251,30 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
       const tagsUnknown = (obj as { tags?: unknown }).tags;
       const confidenceUnknown = (obj as { confidence?: unknown }).confidence;
       return {
-        id: typeof obj.id === 'string' ? obj.id : crypto.randomUUID(),
+        id: typeof obj['id'] === 'string' ? obj['id'] as string : crypto.randomUUID(),
         chartId:
-          typeof obj.chartId === 'string'
-            ? obj.chartId
+          typeof obj['chartId'] === 'string'
+            ? obj['chartId'] as string
             : (fallbackChartId ?? 'unknown-chart'),
         userId:
-          typeof obj.userId === 'string'
-            ? obj.userId
+          typeof obj['userId'] === 'string'
+            ? obj['userId'] as string
             : (fallbackUserId ?? 'unknown-user'),
-        type: typeof obj.type === 'string' ? obj.type : 'general',
+        type: typeof obj['type'] === 'string' ? obj['type'] as string : 'general',
         title:
-          typeof obj.title === 'string' ? obj.title : 'Untitled Interpretation',
-        content: typeof obj.content === 'string' ? obj.content : '',
-        summary: typeof obj.summary === 'string' ? obj.summary : '',
+          typeof obj['title'] === 'string' ? obj['title'] as string : 'Untitled Interpretation',
+        content: typeof obj['content'] === 'string' ? obj['content'] as string : '',
+        summary: typeof obj['summary'] === 'string' ? obj['summary'] as string : '',
         tags: Array.isArray(tagsUnknown) ? (tagsUnknown as string[]) : [],
         confidence:
           typeof confidenceUnknown === 'number' ? confidenceUnknown : 0,
         createdAt:
-          typeof obj.createdAt === 'string'
-            ? obj.createdAt
+          typeof obj['createdAt'] === 'string'
+            ? obj['createdAt'] as string
             : new Date().toISOString(),
         updatedAt:
-          typeof obj.updatedAt === 'string'
-            ? obj.updatedAt
+          typeof obj['updatedAt'] === 'string'
+            ? obj['updatedAt'] as string
             : new Date().toISOString(),
       };
     }
@@ -379,7 +379,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
         </div>
 
         <div
-          className={styles.loading}
+          className={styles['loading']}
           role='status'
           aria-label='Loading interpretations'
         >
@@ -416,7 +416,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
           </Button>
         </div>
 
-        <div className={styles.error} role='alert' aria-live='assertive'>
+  <div className={styles['error']} role='alert' aria-live='assertive'>
           Error loading interpretations: {error.message}
         </div>
       </div>
@@ -452,10 +452,10 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
         </div>
 
         <section
-          className={styles.container}
+          className={styles['container']}
           aria-labelledby='interpretations-heading'
         >
-          <h2 id='interpretations-heading' className={styles.heading}>
+          <h2 id='interpretations-heading' className={styles['heading']}>
             AI-Powered Astrological Insights
           </h2>
 
@@ -475,7 +475,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
             </Suspense>
           </div>
 
-          <div className={styles.empty} role='status' aria-live='polite'>
+          <div className={styles['empty']} role='status' aria-live='polite'>
             <div className='text-center py-8'>
               <div className='w-16 h-16 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto mb-4'>
                 <span className='text-2xl'>🔮</span>
@@ -520,10 +520,10 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
       </div>
 
       <section
-        className={styles.container}
+        className={styles['container']}
         aria-labelledby='interpretations-heading'
       >
-        <h2 id='interpretations-heading' className={styles.heading}>
+        <h2 id='interpretations-heading' className={styles['heading']}>
           AI-Powered Astrological Insights
         </h2>
 
@@ -546,7 +546,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
 
         {/* Existing Interpretations */}
         <Suspense fallback={<Spinner />}>
-          <div className={styles.grid}>
+          <div className={styles['grid']}>
             {interpretations.map(interpretation => (
               <InterpretationCard
                 key={interpretation.id}

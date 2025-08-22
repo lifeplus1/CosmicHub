@@ -14,20 +14,21 @@ interface UpgradePromptProps {
 
 const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(({ isOpen, onClose, feature, requiredTier, trigger = 'feature_access' }) => {
   const tier = COSMICHUB_TIERS[requiredTier];
+  const tierSafe = tier ?? { name: requiredTier, features: [], price: { monthly: 0, yearly: 0 }, description: '' } as const;
 
   const handleUpgrade = useCallback(() => {
-    devConsole.log(`Upgrading to ${tier.name}`);
+    devConsole.log(`Upgrading to ${tierSafe.name}`);
     onClose();
-  }, [tier.name, onClose]);
+  }, [tierSafe.name, onClose]);
 
   const getTriggerMessage = () => {
     switch (trigger) {
       case 'usage_limit':
         return "You've reached your usage limit for this month.";
       case 'feature_access':
-        return `${feature} requires ${tier.name}.`;
+  return `${feature} requires ${tierSafe.name}.`;
       default:
-        return `Upgrade to ${tier.name} to continue.`;
+  return `Upgrade to ${tierSafe.name} to continue.`;
     }
   };
 
@@ -38,9 +39,9 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(({ isOpen, onClos
         <Dialog.Content className="fixed w-full max-w-lg p-6 transform -translate-x-1/2 -translate-y-1/2 border rounded-lg top-1/2 left-1/2 bg-cosmic-blue/80 backdrop-blur-md border-cosmic-silver/20">
           <div className="flex items-center justify-between mb-4">
             <div className="flex flex-col space-y-2">
-              <Dialog.Title className="text-lg font-bold text-cosmic-gold">Upgrade to {tier.name}</Dialog.Title>
+              <Dialog.Title className="text-lg font-bold text-cosmic-gold">Upgrade to {tierSafe.name}</Dialog.Title>
               <span className="px-2 py-1 text-sm text-purple-500 rounded bg-purple-500/20">
-                {tier.price.monthly > 0 ? `$${tier.price.monthly}/month` : 'Free'}
+                {tierSafe.price.monthly > 0 ? `$${tierSafe.price.monthly}/month` : 'Free'}
               </span>
             </div>
             <Dialog.Close asChild>
@@ -59,16 +60,16 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(({ isOpen, onClos
             </div>
 
             <div>
-              <p className="mb-2 font-semibold text-purple-600">{tier.name} includes:</p>
+              <p className="mb-2 font-semibold text-purple-600">{tierSafe.name} includes:</p>
               <ul className="space-y-2">
-                {tier.features.slice(0, 6).map((feature: string, index: number) => (
+                {tierSafe.features.slice(0, 6).map((feature: string, index: number) => (
                   <li key={index} className="flex items-center space-x-2">
                     <FaCheck className="text-green-500" />
                     <span className="text-sm text-cosmic-silver">{feature}</span>
                   </li>
                 ))}
-                {tier.features.length > 6 && (
-                  <li className="text-sm italic text-cosmic-silver/60">+ {tier.features.length - 6} more features</li>
+                {tierSafe.features.length > 6 && (
+                  <li className="text-sm italic text-cosmic-silver/60">+ {tierSafe.features.length - 6} more features</li>
                 )}
               </ul>
             </div>

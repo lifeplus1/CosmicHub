@@ -63,35 +63,36 @@ export function useABTest(config: ABTestConfig): ABTestResult {
     }
 
     // Assign new variant based on weights or equal distribution
-    let selectedVariant: string
-    
-    if (weights.length === variants.length) {
+  let selectedVariant = ''
+
+  if (weights && weights.length === variants.length && weights.length > 0) {
       // Use weighted distribution
       const totalWeight = weights.reduce((sum, weight) => sum + weight, 0)
       const random = Math.random() * totalWeight
       let cumulativeWeight = 0
       
-      selectedVariant = variants[0] // fallback
+      selectedVariant = variants[0] || 'control' // fallback
       for (let i = 0; i < variants.length; i++) {
-        cumulativeWeight += weights[i]
+        const w = weights[i] ?? 0
+        cumulativeWeight += w
         if (random <= cumulativeWeight) {
-          selectedVariant = variants[i]
+          selectedVariant = variants[i] || selectedVariant
           break
         }
       }
     } else {
       // Equal distribution
       const randomIndex = Math.floor(Math.random() * variants.length)
-      selectedVariant = variants[randomIndex]
+      selectedVariant = variants[randomIndex] || variants[0] || 'control'
     }
 
     // Store the assignment
     localStorage.setItem(storageKey, selectedVariant)
     
     return {
-      variant: selectedVariant,
-      isControl: selectedVariant === variants[0],
-      trackEvent: createEventTracker(testName, selectedVariant)
+  variant: selectedVariant,
+  isControl: selectedVariant === variants[0],
+  trackEvent: createEventTracker(testName, selectedVariant)
     }
   }, [testName, variants, weights, enabled])
 
@@ -104,7 +105,14 @@ export function useABTest(config: ABTestConfig): ABTestResult {
 function createEventTracker(testName: string, variant: string) {
   return (eventName: string, properties: ABTestEventProperties = {}) => {
     // Store event in local analytics
-    const events: Array<Record<string, unknown>> = JSON.parse(localStorage.getItem('ab_test_events') || '[]')
+    const raw = localStorage.getItem('ab_test_events') ?? '[]';
+  let events: Array<Record<string, unknown>>;
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      events = Array.isArray(parsed)
+        ? (parsed.filter((v) => typeof v === 'object' && v !== null) as Array<Record<string, unknown>>)
+        : [];
+    } catch { events = []; }
     events.push({
       testName,
       variant,
@@ -117,8 +125,12 @@ function createEventTracker(testName: string, variant: string) {
     // Send to analytics services
     try {
       // Google Analytics (gtag)
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', eventName, {
+      interface GTagFn { (command: string, eventName: string, params: Record<string, unknown>): void }
+      const gtag: GTagFn | undefined = typeof window !== 'undefined'
+        ? (window as unknown as { gtag?: GTagFn }).gtag
+        : undefined;
+      if (gtag) {
+        gtag('event', eventName, {
           custom_parameter_ab_test: `${testName}_${variant}`,
           test_name: testName,
           variant: variant,
@@ -127,8 +139,12 @@ function createEventTracker(testName: string, variant: string) {
       }
 
       // Mixpanel
-      if (typeof window !== 'undefined' && (window as any).mixpanel) {
-        (window as any).mixpanel.track(eventName, {
+  interface Mixpanel { track: (name: string, props: Record<string, unknown>) => void }
+      const mixpanel: Mixpanel | undefined = typeof window !== 'undefined'
+        ? (window as unknown as { mixpanel?: Mixpanel }).mixpanel
+        : undefined;
+      if (mixpanel) {
+        mixpanel.track(eventName, {
           ab_test: testName,
           variant: variant,
           ...properties
@@ -136,8 +152,12 @@ function createEventTracker(testName: string, variant: string) {
       }
 
       // PostHog
-      if (typeof window !== 'undefined' && (window as any).posthog) {
-        (window as any).posthog.capture(eventName, {
+  interface PostHog { capture: (name: string, props: Record<string, unknown>) => void }
+      const posthog: PostHog | undefined = typeof window !== 'undefined'
+        ? (window as unknown as { posthog?: PostHog }).posthog
+        : undefined;
+      if (posthog) {
+        posthog.capture(eventName, {
           $set: { ab_test_group: variant },
           ab_test_name: testName,
           ...properties
@@ -146,32 +166,38 @@ function createEventTracker(testName: string, variant: string) {
 
       // Firebase Analytics (lazy loaded for production)
       if (typeof window !== 'undefined' && import.meta.env.PROD) {
-        import('firebase/analytics').then(({ getAnalytics, logEvent }) => {
-          import('@cosmichub/config/firebase').then(({ app }) => {
-            const analytics = getAnalytics(app);
-            logEvent(analytics, eventName, {
-              ab_test_name: testName,
-              ab_test_variant: variant,
-              ...properties
-            });
-          }).catch(() => {
-            // Firebase not available, skip silently
-          });
-        }).catch(() => {
-          // Firebase Analytics not available, skip silently
-        });
+          Promise.all([
+            import('firebase/analytics'),
+            import('@cosmichub/config/firebase')
+          ]).then(([analyticsMod, firebaseConfig]) => {
+            const modAny = analyticsMod as Record<string, unknown>;
+            const container = (modAny['default'] && typeof modAny['default'] === 'object') ? modAny['default'] as Record<string, unknown> : modAny;
+            const getAnalytics = container['getAnalytics'] as ((app: unknown)=>unknown) | undefined;
+            const logEvent = container['logEvent'] as ((inst: unknown, name: string, params?: Record<string, unknown>)=>void) | undefined;
+            if (!getAnalytics || !logEvent) return;
+            const { app } = firebaseConfig as { app?: unknown };
+            if (!app) return;
+            try {
+              const analyticsInstance = getAnalytics(app);
+              logEvent(analyticsInstance, eventName, {
+                ab_test_name: testName,
+                ab_test_variant: variant,
+                ...properties
+              });
+            } catch {
+              // swallow analytics failures
+            }
+          }).catch(() => { /* silent */ });
       }
 
     } catch (error) {
       if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
         console.warn('Failed to send A/B test analytics:', error);
       }
     }
 
     // Development logging
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
+  if (import.meta.env.DEV) {
       console.log('[A/B Test Event]', {
         test: testName,
         variant,
@@ -193,7 +219,7 @@ export interface ABTestProps {
 
 export function ABTest({ config, children }: ABTestProps) {
   const result = useABTest(config)
-  return children(result) as JSX.Element
+  return children(result) as React.ReactElement
 }
 
 export default useABTest

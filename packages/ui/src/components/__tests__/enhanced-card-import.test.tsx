@@ -1,10 +1,8 @@
 // Quick test to verify all imports work correctly
-import React from 'react';
 import { 
   createComponentTestSuite,
   renderWithEnhancements,
   PerformanceTestRunner,
-  PerformanceReport,
   expect,
   describe,
   it,

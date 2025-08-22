@@ -128,100 +128,109 @@ export const withErrorBoundary = <P extends Record<string, unknown>>(
 };
 
 // Route configuration with lazy loading
+function ensureComponent(key: keyof typeof AstroRoutes) {
+  const entry = AstroRoutes[key];
+  if (!entry) {
+    // Fallback component rendering error state
+    return (() => <div role="alert">Route component "{key}" unavailable</div>);
+  }
+  return entry;
+}
+
 export const astroRouteConfig = [
   {
     path: '/',
-    component: withErrorBoundary(AstroRoutes.Dashboard),
+    component: withErrorBoundary(ensureComponent('Dashboard')),
     preload: true
   },
   {
     path: '/birth-chart',
-    component: withErrorBoundary(AstroRoutes.BirthChart),
+    component: withErrorBoundary(ensureComponent('BirthChart')),
     preload: false
   },
   {
     path: '/synastry',
-    component: withErrorBoundary(AstroRoutes.SynastryChart),
+    component: withErrorBoundary(ensureComponent('SynastryChart')),
     preload: false
   },
   {
     path: '/transits',
-    component: withErrorBoundary(AstroRoutes.TransitChart),
+    component: withErrorBoundary(ensureComponent('TransitChart')),
     preload: false
   },
   {
     path: '/gene-keys',
-    component: withErrorBoundary(AstroRoutes.GeneKeys),
+    component: withErrorBoundary(ensureComponent('GeneKeys')),
     preload: false
   },
   {
     path: '/human-design',
-    component: withErrorBoundary(AstroRoutes.HumanDesign),
+    component: withErrorBoundary(ensureComponent('HumanDesign')),
     preload: false
   },
   {
     path: '/pearl-sequence',
-    component: withErrorBoundary(AstroRoutes.PearlSequence),
+    component: withErrorBoundary(ensureComponent('PearlSequence')),
     preload: false
   },
   {
     path: '/aspects',
-    component: withErrorBoundary(AstroRoutes.AspectAnalysis),
+    component: withErrorBoundary(ensureComponent('AspectAnalysis')),
     preload: false
   },
   {
     path: '/transit-analysis',
-    component: withErrorBoundary(AstroRoutes.TransitAnalysis),
+    component: withErrorBoundary(ensureComponent('TransitAnalysis')),
     preload: false
   },
   {
     path: '/profile',
-    component: withErrorBoundary(AstroRoutes.Profile),
+    component: withErrorBoundary(ensureComponent('Profile')),
     preload: true
   },
   {
     path: '/settings',
-    component: withErrorBoundary(AstroRoutes.Settings),
+    component: withErrorBoundary(ensureComponent('Settings')),
     preload: false
   },
   {
     path: '/login',
-    component: withErrorBoundary(AstroRoutes.Login),
+    component: withErrorBoundary(ensureComponent('Login')),
     preload: true
   },
   {
     path: '/register',
-    component: withErrorBoundary(AstroRoutes.Register),
+    component: withErrorBoundary(ensureComponent('Register')),
     preload: false
   },
   {
     path: '/calculator',
-    component: withErrorBoundary(AstroRoutes.Calculator),
+    component: withErrorBoundary(ensureComponent('Calculator')),
     preload: false
   },
   {
     path: '/numerology',
-    component: withErrorBoundary(AstroRoutes.Numerology),
+    component: withErrorBoundary(ensureComponent('Numerology')),
     preload: false
   },
   {
     path: '/saved-charts',
-    component: withErrorBoundary(AstroRoutes.SavedCharts),
+    component: withErrorBoundary(ensureComponent('SavedCharts')),
     preload: false
   },
   {
     path: '/subscription-success',
-    component: withErrorBoundary(AstroRoutes.SubscriptionSuccess),
+    component: withErrorBoundary(ensureComponent('SubscriptionSuccess')),
     preload: false
   },
   {
     path: '/subscription-cancelled',
-    component: withErrorBoundary(AstroRoutes.SubscriptionCancelled),
+    component: withErrorBoundary(ensureComponent('SubscriptionCancelled')),
     preload: false
   },
   {
     path: '/performance',
-    component: withErrorBoundary(AstroRoutes.PerformanceMonitoring),
+    component: withErrorBoundary(ensureComponent('PerformanceMonitoring')),
     preload: false
   }
 ];

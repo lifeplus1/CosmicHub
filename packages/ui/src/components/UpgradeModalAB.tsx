@@ -114,28 +114,7 @@ export function UpgradeModalAB({ enableABTesting = true, ...props }: UpgradeModa
     }
   }
 
-  const getButtonText = (tier: string) => {
-    const baseText = buttonTest.variant === 'start_trial' ? 'Start Free Trial' : 'Upgrade Now'
-    return `${baseText} - ${tier}`
-  }
-
-  const getPricingDisplay = (price: string, period: string) => {
-    if (pricingTest.variant === 'annual_discount') {
-      const monthlyPrice = parseFloat(price.replace('$', ''))
-      const annualPrice = (monthlyPrice * 12 * 0.8).toFixed(2) // 20% discount
-      const monthlySavings = (monthlyPrice * 0.2).toFixed(2)
-      return {
-        primary: `$${annualPrice}/year`,
-        secondary: `Save $${monthlySavings}/month with annual billing`,
-        badge: '20% OFF'
-      }
-    }
-    return {
-      primary: `${price}${period}`,
-      secondary: 'Cancel anytime',
-      badge: null
-    }
-  }
+  // Removed unused getButtonText / getPricingDisplay helpers (A/B variant logic currently not consuming them)
 
   const headlineContent = getHeadlineContent()
 
@@ -192,7 +171,7 @@ export function UpgradeModalAB({ enableABTesting = true, ...props }: UpgradeModa
           {headlineTest.variant === 'benefit' && (
             <div className="benefit-highlights absolute bottom-20 left-4 right-4 pointer-events-auto" data-testid="benefit-highlights">
               <div className="bg-gradient-to-r from-teal-500 to-blue-600 text-white p-4 rounded-lg">
-                <h3 className="font-bold mb-2">✨ What you'll unlock:</h3>
+                <h3 className="font-bold mb-2">✨ What you&#39;ll unlock:</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="benefit-item">📊 Advanced Charts</div>
                   <div className="benefit-item">🌙 Moon Phases</div>
@@ -234,7 +213,7 @@ export function UpgradeModalAB({ enableABTesting = true, ...props }: UpgradeModa
                   💰 Save over $50/year with annual billing
                 </div>
                 <p className="savings-detail text-yellow-700 text-xs text-center">
-                  That's like getting 2+ months free!
+                  That&#39;s like getting 2+ months free!
                 </p>
               </div>
             </div>

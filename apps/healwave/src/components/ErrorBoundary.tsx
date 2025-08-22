@@ -35,7 +35,7 @@ export class HealWaveErrorBoundary extends Component<HealWaveErrorBoundaryProps,
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState({
       error,
       errorInfo,
@@ -60,7 +60,7 @@ export class HealWaveErrorBoundary extends Component<HealWaveErrorBoundaryProps,
     });
   };
 
-  render(): ReactNode {
+  override render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;

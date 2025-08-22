@@ -62,9 +62,11 @@ describe('serializeAstrologyData round-trip', () => {
     const json = serializeAstrologyData(sampleChart);
     expect(typeof json).toBe('string');
     const parsed = deserializeAstrologyData<AstrologyChart>(json);
-    expect(parsed.planets.length).toBe(2);
-    expect(parsed.planets[0].name).toBe('Sun');
-    expect(parsed.aspects[0].type).toBe('Trine');
+  expect(parsed.planets.length).toBe(2);
+  const firstPlanet = parsed.planets.at(0);
+  expect(firstPlanet && firstPlanet.name).toBe('Sun');
+  const firstAspect = parsed.aspects.at(0);
+  expect(firstAspect && firstAspect.type).toBe('Trine');
   });
 
   it('throws on unknown type', () => {

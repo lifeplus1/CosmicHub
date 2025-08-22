@@ -38,7 +38,9 @@ vi.mock('@cosmichub/subscriptions', () => ({
 // Mock environment variables
 Object.defineProperty(import.meta, 'env', {
   value: {
-    VITE_BACKEND_URL: 'https://astrology-app-0emh.onrender.com',
+  VITE_API_URL: 'https://astrology-app-0emh.onrender.com',
+  // Legacy alias retained for older code paths (should be removed once fully migrated)
+  VITE_BACKEND_URL: 'https://astrology-app-0emh.onrender.com',
     VITE_FIREBASE_API_KEY: 'test-key',
     VITE_FIREBASE_AUTH_DOMAIN: 'test.firebaseapp.com',
     VITE_FIREBASE_PROJECT_ID: 'test-project',

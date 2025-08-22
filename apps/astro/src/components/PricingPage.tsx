@@ -331,13 +331,13 @@ const PricingPage: React.FC = React.memo(() => {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    {isFeatureIncluded(feature, COSMICHUB_TIERS.free.features) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
+                    {isFeatureIncluded(feature, (COSMICHUB_TIERS['free']?.features ?? [])) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    {isFeatureIncluded(feature, COSMICHUB_TIERS.premium.features) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
+                    {isFeatureIncluded(feature, (COSMICHUB_TIERS['premium']?.features ?? [])) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    {isFeatureIncluded(feature, COSMICHUB_TIERS.elite.features) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
+                    {isFeatureIncluded(feature, (COSMICHUB_TIERS['elite']?.features ?? [])) ? <FaCheck className="mx-auto text-green-500" /> : <FaTimes className="mx-auto text-red-500" />}
                   </td>
                 </tr>
               ))}

@@ -312,12 +312,17 @@ class ChartAnalyticsService {
     }
 
     const spans = planetPositions.map((pos, i) => {
-      const nextPos = planetPositions[i + 1] ?? (planetPositions[0] + 360);
+      const first = planetPositions[0];
+      const next = planetPositions[i + 1];
+      const base = (typeof first === 'number' ? first : 0) + 360;
+      const nextPos = typeof next === 'number' ? next : base;
       return nextPos - pos;
     });
 
     const maxSpan = Math.max(...spans);
-    const totalSpan = planetPositions[planetPositions.length - 1] - planetPositions[0];
+  const firstPos = planetPositions[0];
+  const lastPos = planetPositions[planetPositions.length - 1];
+  const totalSpan = (typeof lastPos === 'number' ? lastPos : 0) - (typeof firstPos === 'number' ? firstPos : 0);
 
     if (maxSpan > 120) return ChartShape.Bundle;
     if (totalSpan <= 120) return ChartShape.Bundle;
@@ -371,7 +376,13 @@ class ChartAnalyticsService {
 
       if (planet.house !== null && planet.house !== undefined) {
         houseGroups[planet.house] ??= [];
-        houseGroups[planet.house].push(name);
+        const houseKey = planet.house;
+        if (typeof houseKey === 'number') {
+          if (!Array.isArray(houseGroups[houseKey])) {
+            houseGroups[houseKey] = [];
+          }
+          houseGroups[houseKey].push(name);
+        }
       }
     });
 
@@ -420,9 +431,13 @@ class ChartAnalyticsService {
     for (let i = 0; i < planets.length; i++) {
       for (let j = i + 1; j < planets.length; j++) {
         for (let k = j + 1; k < planets.length; k++) {
-          const [name1, planet1] = planets[i];
-          const [name2, planet2] = planets[j];
-          const [name3, planet3] = planets[k];
+      const tuple1 = planets[i];
+      const tuple2 = planets[j];
+      const tuple3 = planets[k];
+      if (!Array.isArray(tuple1) || !Array.isArray(tuple2) || !Array.isArray(tuple3)) continue;
+      const [name1, planet1] = tuple1;
+      const [name2, planet2] = tuple2;
+      const [name3, planet3] = tuple3;
 
           // Ensure all positions are valid numbers
           // Validate planet positions
@@ -465,9 +480,13 @@ class ChartAnalyticsService {
     for (let i = 0; i < planets.length; i++) {
       for (let j = i + 1; j < planets.length; j++) {
         for (let k = j + 1; k < planets.length; k++) {
-          const [name1, planet1] = planets[i];
-          const [name2, planet2] = planets[j];
-          const [name3, planet3] = planets[k];
+      const t1 = planets[i];
+      const t2 = planets[j];
+      const t3 = planets[k];
+      if (!Array.isArray(t1) || !Array.isArray(t2) || !Array.isArray(t3)) continue;
+      const [name1, planet1] = t1;
+      const [name2, planet2] = t2;
+      const [name3, planet3] = t3;
 
           if (this.isTSquare(planet1.position, planet2.position, planet3.position)) {
             patterns.push({
@@ -557,7 +576,8 @@ class ChartAnalyticsService {
   private getSignFromPosition(position: number): string {
     const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
                    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-    return signs[Math.floor(position / 30)];
+  const idx = Math.floor(position / 30);
+  return (idx >= 0 && idx < signs.length) ? (signs[idx] ?? 'Unknown') : 'Unknown';
   }
 
   /**

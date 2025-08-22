@@ -97,8 +97,8 @@ export const useHealwave = () => {
     
     // Simple personalization based on chart data
     // In a real implementation, this would use complex astrological calculations
-    const sunData = chartData.sun as Record<string, unknown> | undefined;
-    const sunSign = (typeof sunData === 'object' && sunData !== null && typeof sunData.sign === 'string') ? sunData.sign : 'Leo';
+  const sunData = (chartData as Record<string, unknown>)['sun'] as Record<string, unknown> | undefined;
+  const sunSign = (typeof sunData === 'object' && sunData !== null && typeof sunData['sign'] === 'string') ? sunData['sign'] as string : 'Leo';
     const frequencyMap: Record<string, number> = {
       'Aries': 741,     // Throat Chakra - Expression
       'Taurus': 417,    // Sacral Chakra - Creativity

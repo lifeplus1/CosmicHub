@@ -138,15 +138,15 @@ export const UserSettingsWithNotifications: React.FC = () => {
   const raw = notificationManager.status() as unknown as { push?: Record<string, unknown>; background?: Record<string, unknown> };
       const push = raw.push ?? {};
       const background = raw.background ?? {};
-      const permissionStatus = typeof push.permissionStatus === 'string' ? push.permissionStatus : undefined;
+  const permissionStatus = typeof push['permissionStatus'] === 'string' ? push['permissionStatus'] : undefined;
   const pushNotifications = (permissionStatus !== undefined && permissionStatus !== '') ? {
         permissionStatus,
-        activeSubscriptions: typeof push.activeSubscriptions === 'number' ? push.activeSubscriptions : undefined
+  activeSubscriptions: typeof push['activeSubscriptions'] === 'number' ? push['activeSubscriptions'] : undefined
       } : undefined;
-      const isOnline = typeof background.isOnline === 'boolean' ? background.isOnline : undefined;
+  const isOnline = typeof background['isOnline'] === 'boolean' ? background['isOnline'] : undefined;
   const backgroundSync = (isOnline !== undefined) ? {
         isOnline,
-        queuedItems: typeof background.queuedItems === 'number' ? background.queuedItems : undefined
+  queuedItems: typeof background['queuedItems'] === 'number' ? background['queuedItems'] : undefined
       } : undefined;
       setStatus({ pushNotifications, backgroundSync });
     };
@@ -385,15 +385,15 @@ export const useNotifications = (): UseNotificationsReturn => {
   const raw = manager.status() as unknown as { push?: Record<string, unknown>; background?: Record<string, unknown> };
       const push = raw.push ?? {};
       const background = raw.background ?? {};
-      const permVal = typeof push.permissionStatus === 'string' ? push.permissionStatus : undefined;
+  const permVal = typeof push['permissionStatus'] === 'string' ? push['permissionStatus'] : undefined;
   const pushNotifications = (permVal !== undefined && permVal !== '') ? {
         permissionStatus: permVal,
-        activeSubscriptions: typeof push.activeSubscriptions === 'number' ? push.activeSubscriptions : undefined
+  activeSubscriptions: typeof push['activeSubscriptions'] === 'number' ? push['activeSubscriptions'] : undefined
       } : undefined;
-      const onlineVal = typeof background.isOnline === 'boolean' ? background.isOnline : undefined;
+  const onlineVal = typeof background['isOnline'] === 'boolean' ? background['isOnline'] : undefined;
   const backgroundSync = (onlineVal !== undefined) ? {
         isOnline: onlineVal,
-        queuedItems: typeof background.queuedItems === 'number' ? background.queuedItems : undefined
+  queuedItems: typeof background['queuedItems'] === 'number' ? background['queuedItems'] : undefined
       } : undefined;
       setStatus({ pushNotifications, backgroundSync });
     };

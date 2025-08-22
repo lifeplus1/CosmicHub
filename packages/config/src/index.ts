@@ -13,6 +13,15 @@ export * from './hooks/index';
 // Lazy loading (working module)
 export * from './lazy-loading';
 
+// Performance & monitoring
+export * from './performance';
+
+// Firebase integration utilities (selective to avoid name collisions)
+export { app, auth, db, enableFirestoreNetwork, disableFirestoreNetwork, hasAuthAvailable, isEmulator, projectId, getFirebasePerformanceInfo } from './firebase';
+
+// Component architecture (component-library alias)
+export * from './component-library';
+
 // Push notifications and background sync
 export * from './push-notifications';
 export * from './background-sync-enhanced';

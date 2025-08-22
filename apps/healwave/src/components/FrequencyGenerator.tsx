@@ -57,7 +57,10 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
     const nextPreset = presets[nextIndex];
     if (nextPreset) {
       setSelectedPreset(nextPreset);
-      buttons[nextIndex].focus();
+      const btn = buttons[nextIndex];
+      if (btn) {
+        btn.focus();
+      }
     }
   }, [presets, selectedPreset]);
 
@@ -146,7 +149,11 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 min={0}
                 max={100}
                 step={1}
-                onValueChange={([value]) => updateSettings('volume', value)}
+                onValueChange={([value]) => {
+                  if (typeof value === 'number') {
+                    updateSettings('volume', value);
+                  }
+                }}
                 aria-labelledby={volumeLabelId}
                 aria-valuenow={settings.volume}
                 aria-valuemin={0}
@@ -168,7 +175,11 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 min={1}
                 max={60}
                 step={1}
-                onValueChange={([value]) => updateSettings('duration', value)}
+                onValueChange={([value]) => {
+                  if (typeof value === 'number') {
+                    updateSettings('duration', value);
+                  }
+                }}
                 aria-labelledby={durationLabelId}
                 aria-valuenow={settings.duration}
                 aria-valuemin={1}

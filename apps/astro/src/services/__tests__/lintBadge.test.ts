@@ -28,14 +28,14 @@ describe.skip('lint-badge output (slow integration)', () => {
     const badge = JSON.parse(raw) as Record<string, unknown>;
 
     expect(badge).toMatchObject({ schemaVersion: 1, label: 'lint reduction' });
-    expect(typeof badge.message).toBe('string');
-    expect(typeof badge.color).toBe('string');
+  expect(typeof badge['message']).toBe('string');
+  expect(typeof badge['color']).toBe('string');
 
-    const message = badge.message as string;
+  const message = badge['message'] as string;
     // Pattern: "<delta> (<percent>%)" where percent can be negative or positive float
     expect(/^[-]?\d+ \([-]?\d+(?:\.\d+)?%\)$/.test(message)).toBe(true);
 
-    const color = badge.color as string;
+  const color = badge['color'] as string;
     const allowed = ['red', 'orange', 'yellow', 'green', 'brightgreen'];
     expect(allowed.includes(color)).toBe(true);
 

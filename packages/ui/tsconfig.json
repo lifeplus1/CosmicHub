@@ -4,19 +4,41 @@
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
     "outDir": "./dist",
-    "rootDir": "../../",
     "declaration": true,
     "declarationMap": true,
     "noEmit": false,
     "emitDeclarationOnly": false,
     "jsx": "react-jsx",
-  // Standardize lib target (ES2022)
-  "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    "rootDir": "./src",
+    // Standardize lib target (ES2022)
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Skip type checking of external libraries
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    // Override root path mappings to point at compiled outputs of @cosmichub/config
+    "baseUrl": ".",
+    "paths": {
+      "@cosmichub/config": ["../config/dist"],
+      "@cosmichub/config/*": ["../config/dist/*"],
+      "@cosmichub/config/component-architecture": ["../config/dist/component-architecture"],
+      "@cosmichub/config/component-library": ["../config/dist/component-library"],
+      "@cosmichub/config/lazy-loading": ["../config/dist/lazy-loading"],
+      "@cosmichub/config/performance": ["../config/dist/performance"],
+      "@cosmichub/config/firebase": ["../config/dist/firebase"],
+      "@cosmichub/config/hooks": ["../config/dist/hooks/index"],
+      "@cosmichub/config/enhanced-testing": ["../config/dist/enhanced-testing"],
+      "@cosmichub/config/accessibility-testing": ["../config/dist/accessibility-testing"],
+      "@cosmichub/config/push-notifications": ["../config/dist/push-notifications"],
+      "@cosmichub/config/api-result": ["../config/dist/api-result"]
+    }
   },
+  "references": [
+    { "path": "../config" }
+  ],
   "include": [
     "src/**/*",
     "src/vite-env.d.ts",
-    "../config/src/**/*"
+    "src/types/**/*"
   ],
   "exclude": ["dist", "node_modules"]
 }

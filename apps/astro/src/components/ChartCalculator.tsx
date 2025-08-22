@@ -11,6 +11,7 @@ import { saveChart, type SaveChartRequest } from "../services/api";
 import FeatureGuard from "./FeatureGuard";
 import { EducationalTooltip } from "./EducationalTooltip";
 import * as SwitchPrimitive from '@radix-ui/react-switch';
+import { apiConfig } from '../config/environment';
 
 interface FormData {
   year: string;
@@ -171,8 +172,8 @@ const ChartCalculator: React.FC = () => {
     setSuccess("");
 
     try {
-      const endpoint = formData.multiSystem ? '/calculate-multi-system' : '/calculate';
-      const url = `${import.meta.env.VITE_BACKEND_URL}${endpoint}?house_system=${houseSystem}`;
+  const endpoint = formData.multiSystem ? '/calculate-multi-system' : '/calculate';
+  const url = `${apiConfig.baseUrl}${endpoint}?house_system=${houseSystem}`;
       
       const response = await fetch(url, {
         method: "POST",

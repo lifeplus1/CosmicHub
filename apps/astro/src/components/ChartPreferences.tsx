@@ -70,7 +70,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> = function ChartPreferen
         if (isValidUserData(userData)) {
           setPreferences(userData.chartPreferences);
         } else {
-          componentLogger.warn('ChartPreferences', 'Invalid preferences data in Firestore', userData?.chartPreferences);
+          componentLogger.warn('ChartPreferences', 'Invalid preferences data in Firestore', (userData as Record<string, unknown>)?.['chartPreferences']);
           setPreferences(DEFAULT_PREFERENCES);
         }
       }

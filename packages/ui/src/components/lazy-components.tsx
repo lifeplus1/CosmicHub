@@ -9,7 +9,7 @@ import {
   lazyLoadChart,
   lazyLoadModal,
   DefaultLoadingSpinner,
-  SmartPreloader
+  SmartPreloader as _SmartPreloader
 } from '@cosmichub/config/lazy-loading';
 
 // Chart components (heavy libraries)
@@ -215,7 +215,8 @@ export interface SmartPreloadFunctions {
 
 export function useSmartPreloading(): SmartPreloadFunctions {
   // Temporarily disabled due to type conflicts - preloader unused
-  const _preloader = React.useMemo(() => SmartPreloader.getInstance(), []);
+  // Preloader intentionally disabled (kept for future reinstatement)
+  // const _preloader = React.useMemo(() => SmartPreloader.getInstance(), []);
 
   const preloadOnHover = React.useCallback((_elementRef: unknown, _componentImport: unknown, _componentName: unknown) => {
     // Temporarily disabled due to type conflicts

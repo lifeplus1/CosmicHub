@@ -45,7 +45,7 @@ createComponentTestSuite({
   name: 'Enhanced Card',
   defaultProps: {
     'data-testid': 'test-card'
-  } as any,
+  } as const,
   variants: [
     {
       name: 'elevated',
@@ -79,7 +79,7 @@ createComponentTestSuite({
   interactions: [
     {
       name: 'keyboard navigation',
-      test: async (rendered) => {
+  test: async (_rendered: { container?: HTMLElement }) => {
         const user = userEvent.setup();
         const card = screen.getByTestId('test-card');
         
@@ -188,8 +188,11 @@ describe('Interactive Card', () => {
     expect(handleClick).toHaveBeenCalled();
 
     const report = performanceRunner.generateReport();
-    expect(report['card-click']).toBeDefined();
-    expect(report['card-click'].average).toBeLessThan(100);
+    const clickMetrics = report['card-click'];
+    expect(clickMetrics).toBeDefined();
+    if (clickMetrics) {
+      expect(clickMetrics.average).toBeLessThan(100);
+    }
   });
 });
 
@@ -312,7 +315,8 @@ describe('Chart Card', () => {
 
 // Accessibility comprehensive tests
 describe('Card Accessibility', () => {
-  let auditResult: any;
+  interface AuditResult { passed: boolean; level: string; score: number; recommendations: string[] }
+  let auditResult: AuditResult;
 
   beforeEach(async () => {
     const { auditComponent } = useAccessibilityAuditor('AA');
@@ -359,7 +363,7 @@ describe('Card Accessibility', () => {
     
     // All buttons should be focusable
     const buttons = screen.getAllByRole('button');
-    buttons.forEach(button => {
+    buttons.forEach((button: HTMLElement) => {
       expect(AccessibilityTestUtils.FocusManagementAnalyzer.isFocusable(button)).toBe(true);
     });
   });

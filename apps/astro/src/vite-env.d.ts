@@ -2,10 +2,6 @@
 /// <reference types="@testing-library/jest-dom" />
 /// <reference types="vitest/globals" />
 
-interface ImportMetaEnv {
-  readonly VITE_BACKEND_URL: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
+// Deprecated: environment variable typing has moved to env.d.ts
+// This file is retained only for test-related triple-slash references.
+// Do not add new declarations here.

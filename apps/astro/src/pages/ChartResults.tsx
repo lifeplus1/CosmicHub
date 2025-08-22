@@ -169,7 +169,9 @@ const ChartResults: React.FC = () => {
     ];
     if (typeof position !== 'number' || Number.isNaN(position) || position < 0) return 'Unknown';
     const signIndex = Math.floor(position / 30) % 12;
-    return signIndex >= 0 && signIndex < zodiacSigns.length ? zodiacSigns[signIndex] : 'Unknown';
+    return signIndex >= 0 && signIndex < zodiacSigns.length && typeof zodiacSigns[signIndex] === 'string'
+      ? zodiacSigns[signIndex]
+      : 'Unknown';
   };
 
   useEffect(() => {

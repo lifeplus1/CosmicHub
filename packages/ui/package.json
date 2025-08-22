@@ -5,12 +5,15 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -b tsconfig.build.json",
-    "build:packages": "tsc -b tsconfig.build.json",
+    "build": "pnpm run clean && tsc -p tsconfig.build.json",
+    "build:packages": "pnpm run build",
+    "build:safe": "pnpm run clean && tsc -p tsconfig.build.json --skipLibCheck",
+    "build:nochecks": "pnpm run clean && tsc -p tsconfig.nocheck.json",
     "dev": "tsc -b . --watch",
     "clean": "rm -rf dist node_modules/.tmp"
   },
   "dependencies": {
+    "@cosmichub/config": "workspace:*",
     "react-icons": "^4.12.0"
   },
   "peerDependencies": {

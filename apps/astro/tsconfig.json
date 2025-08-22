@@ -34,7 +34,7 @@
       "@cosmichub/frequency": ["../../packages/frequency/src"],
       "@cosmichub/integrations": ["../../packages/integrations/src"],
       "@cosmichub/subscriptions": ["../../packages/subscriptions/src"],
-      "@cosmichub/ui": ["../../packages/ui/src"],
+  "@cosmichub/ui": ["../../packages/ui/dist"],
       "@cosmichub/types": ["../../packages/types/src"]
     }
   },

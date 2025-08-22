@@ -4,26 +4,26 @@
     "passed": 1,
     "failed": 0,
     "skipped": 0,
-    "duration": 6.629000000000019,
+    "duration": 6.195291999999995,
     "coverage": {
-      "overall": 88.64650465798363,
-      "statements": 93.37578341402485,
-      "branches": 82.38039144107809,
-      "functions": 90.37195320849153,
-      "lines": 88.45789056834005
+      "overall": 88.9024508982977,
+      "statements": 87.05132358422343,
+      "branches": 83.59057871101875,
+      "functions": 96.1623615958766,
+      "lines": 88.80553970207201
     },
     "performance": {
-      "averageRenderTime": 5.765375000000063,
-      "maxRenderTime": 5.765375000000063,
-      "totalMemoryUsage": 18440
+      "averageRenderTime": 5.552500000000009,
+      "maxRenderTime": 5.552500000000009,
+      "totalMemoryUsage": 18352
     },
     "accessibility": {
-      "totalViolations": 0,
+      "totalViolations": 1,
       "criticalViolations": 0,
-      "totalWarnings": 1
+      "totalWarnings": 0
     },
     "quality": {
-      "score": 100,
+      "score": 97,
       "grade": "A",
       "recommendations": []
     }
@@ -32,41 +32,46 @@
     {
       "suite": "alpha",
       "status": "passed",
-      "duration": 6.216709000000037,
+      "duration": 5.84741699999995,
       "coverage": {
-        "statements": 93.37578341402485,
-        "branches": 82.38039144107809,
-        "functions": 90.37195320849153,
-        "lines": 88.45789056834005
+        "statements": 87.05132358422343,
+        "branches": 83.59057871101875,
+        "functions": 96.1623615958766,
+        "lines": 88.80553970207201
       },
       "performance": {
-        "renderTime": 5.765375000000063,
+        "renderTime": 5.552500000000009,
         "mountTime": 0,
-        "memoryUsage": 18440
+        "memoryUsage": 18352
       },
       "accessibility": {
-        "violations": [],
-        "warnings": [
+        "violations": [
           {
-            "id": "aria-label",
-            "description": "Consider adding aria-label for better accessibility",
+            "id": "color-contrast",
+            "impact": "moderate",
+            "description": "Text color contrast is insufficient",
             "nodes": 1
           }
-        ]
+        ],
+        "warnings": []
       },
       "errors": [],
       "metadata": {
-        "timestamp": "2025-08-21T17:24:24.190Z",
+        "timestamp": "2025-08-21T19:42:01.976Z",
         "nodeVersion": "v24.4.1",
         "platform": "darwin"
       }
     }
   ],
-  "timestamp": "2025-08-21T17:24:24.195Z",
+  "timestamp": "2025-08-21T19:42:01.978Z",
   "config": {
     "coverage": {
       "threshold": 80,
-      "exclude": ["node_modules", "dist", "**/*.d.ts"]
+      "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.d.ts"
+      ]
     },
     "performance": {
       "maxRenderTime": 16,

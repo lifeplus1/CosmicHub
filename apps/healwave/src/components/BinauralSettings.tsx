@@ -151,7 +151,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
             min={0}
             max={100}
             step={1}
-            onValueChange={([value]) => handleVolumeChange(value)}
+            onValueChange={([value]) => handleVolumeChange(typeof value === 'number' ? value : currentSettings.volume)}
             aria-label="Volume"
             aria-valuenow={currentSettings.volume}
             aria-valuemin={0}
@@ -179,7 +179,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
             min={1}
             max={120}
             step={1}
-            onValueChange={([value]) => handleDurationChange(value)}
+            onValueChange={([value]) => handleDurationChange(typeof value === 'number' ? value : currentSettings.duration)}
             aria-label="Duration"
             aria-valuenow={currentSettings.duration}
             aria-valuemin={1}
@@ -215,7 +215,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
                 min={0}
                 max={30}
                 step={1}
-                onValueChange={([value]) => handleFadeChange('fadeIn', value)}
+                onValueChange={([value]) => handleFadeChange('fadeIn', typeof value === 'number' ? value : currentSettings.fadeIn)}
                 aria-label="Fade In"
                 aria-valuenow={currentSettings.fadeIn}
                 aria-valuemin={0}
@@ -239,7 +239,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
                 min={0}
                 max={30}
                 step={1}
-                onValueChange={([value]) => handleFadeChange('fadeOut', value)}
+                onValueChange={([value]) => handleFadeChange('fadeOut', typeof value === 'number' ? value : currentSettings.fadeOut)}
                 aria-label="Fade Out"
                 aria-valuenow={currentSettings.fadeOut}
                 aria-valuemin={0}
@@ -269,7 +269,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
                   min={20}
                   max={2000}
                   step={1}
-                  onValueChange={([value]) => setCustomFrequency(value)}
+                  onValueChange={([value]) => setCustomFrequency(typeof value === 'number' ? value : customFrequency)}
                   aria-label="Base Frequency"
                   aria-valuenow={customFrequency}
                   aria-valuemin={20}
@@ -297,7 +297,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(({
                   min={0.5}
                   max={100}
                   step={0.5}
-                  onValueChange={([value]) => setBinauralBeat(value)}
+                  onValueChange={([value]) => setBinauralBeat(typeof value === 'number' ? value : binauralBeat)}
                   aria-label="Binaural Beat"
                   aria-valuenow={binauralBeat}
                   aria-valuemin={0.5}

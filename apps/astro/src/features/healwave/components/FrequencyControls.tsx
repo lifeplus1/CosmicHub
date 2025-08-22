@@ -89,7 +89,8 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
                 const nextPreset = presetFrequencies[nextIndex];
                 if (nextPreset !== undefined) {
                   handlePresetSelect(nextPreset.value);
-                  buttons[nextIndex].focus();
+                  const btn = buttons.item(nextIndex);
+                  if (btn !== null) btn.focus();
                 }
               }, [currentFrequency, presetFrequencies, handlePresetSelect])}
             >

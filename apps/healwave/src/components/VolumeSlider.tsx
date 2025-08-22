@@ -11,10 +11,11 @@ const VolumeSlider: React.FC<VolumeSliderProps> = ({ volume, onVolumeChange }) =
 
   const handleVolumeChange = useCallback(
     (newVolume: number[]) => {
-      setCurrentVolume(newVolume[0]);
-      onVolumeChange(newVolume[0]);
+      const v = typeof newVolume[0] === 'number' ? newVolume[0] : currentVolume;
+      setCurrentVolume(v);
+      onVolumeChange(v);
     },
-    [onVolumeChange]
+    [onVolumeChange, currentVolume]
   );
 
   return (

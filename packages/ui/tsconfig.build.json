@@ -1,11 +1,21 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": false,
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./dist"
+  "noEmit": false,
+  "declaration": true,
+  "declarationMap": true,
+  // Emit JS and declarations in a single pass so incremental builds don't
+  // incorrectly skip emitting .d.ts (previous emitDeclarationOnly caused stale state)
+    "outDir": "./dist",
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "preserveSymlinks": true
   },
-  "exclude": ["**/*.test.*", "**/*.spec.*", "dist", "node_modules"]
+  "exclude": [
+    "**/*.test.*", 
+    "**/*.spec.*", 
+    "dist", 
+    "node_modules",
+    "../config/**/*"
+  ]
 }

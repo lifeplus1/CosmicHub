@@ -1,3 +1,4 @@
+// Hook exports
 export {
   usePerformance,
   useOperationTracking,
@@ -8,3 +9,5 @@ export {
   type OperationMetrics,
   type PagePerformanceMetrics,
 } from './usePerformance';
+export { useAnalytics } from './useAnalytics';
+export type { UseAnalyticsReturn } from './useAnalytics';

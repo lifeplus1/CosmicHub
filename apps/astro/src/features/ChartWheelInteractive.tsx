@@ -136,10 +136,10 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       }
       
       // Safe access with type checking
-      const planetObj = planetData as unknown as Record<string, unknown>;
-      const position = typeof planetObj.position === 'number' ? planetObj.position : 0;
-      const retrograde = planetObj.retrograde === true;
-      const speed = typeof planetObj.speed === 'number' ? planetObj.speed : 0;
+  const planetObj = planetData as unknown as Record<string, unknown>;
+      const position = typeof planetObj['position'] === 'number' ? planetObj['position'] as number : 0;
+      const retrograde = planetObj['retrograde'] === true;
+      const speed = typeof planetObj['speed'] === 'number' ? planetObj['speed'] as number : 0;
       
       transformedPlanets[name] = {
         name,
@@ -202,7 +202,11 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       'square': 90, 'sextile': 60, 'quincunx': 150
     };
     const key = aspectType.toLowerCase();
-    return aspectAngles[key] ?? 0;
+    if (Object.prototype.hasOwnProperty.call(aspectAngles, key)) {
+      const val = aspectAngles[key];
+      return typeof val === 'number' ? val : 0;
+    }
+    return 0;
   };
 
   const getAspectStrength = (orb: number): 'strong' | 'medium' | 'weak' => {
@@ -382,10 +386,10 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         .attr('dominant-baseline', 'middle')
         .attr('font-size', '24')
         .attr('font-weight', 'bold')
-        .attr('fill', signColors[index])
+  .attr('fill', (index >= 0 && index < signColors.length && typeof signColors[index] === 'string') ? signColors[index] : '#666666')
         .attr('stroke', '#ffffff')
         .attr('stroke-width', 0.5)
-        .text(signSymbols[index])
+  .text((index >= 0 && index < signSymbols.length && typeof signSymbols[index] === 'string') ? signSymbols[index] : '?')
         .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.3)');
     });
 
@@ -463,8 +467,8 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         .attr('cx', Math.cos(angle) * planetRadius)
         .attr('cy', Math.sin(angle) * planetRadius)
         .attr('r', isSelected ? 25 : 20)
-        .attr('fill', isSelected ? planetColors[name] : '#ffffff')
-        .attr('stroke', planetColors[name] ?? '#333333')
+  .attr('fill', isSelected ? planetColors[name] ?? '#ffffff' : '#ffffff')
+  .attr('stroke', planetColors[name] ?? '#333333')
         .attr('stroke-width', isHighlighted ? 4 : 2)
         .attr('fill-opacity', 0.9)
         .style('filter', isSelected ? 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' : 'none');
@@ -517,7 +521,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
             const tooltipContent = `
               <strong>Transit ${name.charAt(0).toUpperCase() + name.slice(1)}</strong><br/>
               Current Position: ${formatDegree(planet.position)}<br/>
-              Natal Position: ${formatDegree(data.planets[name].position)}
+              Natal Position: ${formatDegree((data.planets[name]?.position ?? 0))}
             `;
             showTooltip(tooltipContent, { 
               pageX: event.pageX, 
@@ -548,7 +552,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
           .text((typeof planetSymbols[name] === 'string' && planetSymbols[name].length > 0) ? planetSymbols[name] : name.slice(0, 1).toUpperCase());
 
         // Connect transit to natal position
-        const natalAngle = (data.planets[name].position - 90) * Math.PI / 180;
+  const natalAngle = (data.planets[name]?.position ?? 0 - 90) * Math.PI / 180;
         g.append('line')
           .attr('x1', Math.cos(natalAngle) * planetRadius)
           .attr('y1', Math.sin(natalAngle) * planetRadius)
@@ -667,7 +671,8 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
                    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
     const degreeInSign = Math.floor(degree % 30);
     const minutes = Math.floor((degree % 1) * 60);
-    return `${degreeInSign}°${minutes.toString().padStart(2, '0')}' ${signs[signIndex]}`;
+    const signName = signs[signIndex] ?? 'Unknown';
+    return `${degreeInSign}°${minutes.toString().padStart(2, '0')}' ${signName}`;
   };
 
   const getSignElement = (sign: string): string => {
@@ -762,7 +767,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       {/* Control Panel */}
-      <div className={styles.controlPanel}>
+  <div className={styles['controlPanel']}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h3 className="text-xl font-semibold text-cosmic-gold">Interactive Natal Chart</h3>
           
@@ -795,7 +800,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
 
         {/* Selection Info */}
         {interactiveState.selectedPlanet !== null && interactiveState.selectedPlanet !== undefined && (
-          <div className={styles.selectionInfo}>
+          <div className={styles['selectionInfo']}>
             <h4 className="text-cosmic-gold font-semibold mb-2">
               Selected: {interactiveState.selectedPlanet.charAt(0).toUpperCase() + interactiveState.selectedPlanet.slice(1)}
             </h4>
@@ -814,28 +819,28 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       </div>
 
       {/* Chart Container */}
-      <div className={styles.chartContainer}>
+  <div className={styles['chartContainer']}>
         <svg 
           ref={svgRef} 
-          className={styles.chartSvg}
+          className={styles['chartSvg']}
         />
         
         {/* Tooltip */}
         <div
           ref={tooltipRef}
-          className={styles.chartTooltip}
+          className={styles['chartTooltip']}
         />
 
         {/* Legend */}
         {Array.isArray(data.aspects) && data.aspects.length > 0 && showAspects === true && (
-          <div className={styles.chartLegend}>
+          <div className={styles['chartLegend']}>
             <div>
               <h5 className="font-semibold text-gray-800 mb-2">Major Aspects ({data.aspects.length})</h5>
               <div className="space-y-1">
                 {Object.entries(chartConstants.aspectColors).map(([type, color]) => (
                   <div key={type} className="flex items-center gap-2">
                     <div 
-                      className={`${styles.aspectLegendLine} aspect-color-${type}`}
+                      className={`${styles['aspectLegendLine']} aspect-color-${type}`}
                       data-aspect-color={color}
                     />
                     <span className="capitalize text-gray-700">{type}</span>

@@ -4,6 +4,7 @@ import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
 import axios from 'axios';
 import { getAuthToken } from '../services/api';
+import { apiConfig } from '../config/environment';
 
 interface PersonalityResult {
   sun_sign: string;
@@ -48,7 +49,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
     setError(null);
     try {
       const token = await getAuthToken();
-      const response = await axios.post(        `${import.meta.env.VITE_BACKEND_URL}/analyze-personality`,
+  const response = await axios.post(`${apiConfig.baseUrl}/analyze-personality`,
         {
           year: parseInt(formData.year),
           month: parseInt(formData.month),

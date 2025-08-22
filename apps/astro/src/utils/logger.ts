@@ -8,7 +8,7 @@ export class Logger {
   }
 
   static debug(message: string, data?: unknown): void {
-  if (typeof globalThis.process !== 'undefined' && globalThis.process.env.NODE_ENV !== 'production') {
+  if (typeof globalThis.process !== 'undefined' && globalThis.process.env['NODE_ENV'] !== 'production') {
        
       console.debug(this.formatMessage('debug', message, data));
     }

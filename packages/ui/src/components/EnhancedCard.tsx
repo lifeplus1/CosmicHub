@@ -169,8 +169,8 @@ export const CardBody: React.FC<CardBodyProps> = ({
     'card__body',
     `card__body--padding-${padding}`,
     scrollable && 'card__body--scrollable',
-    scrollable && styles.bodyScrollable,
-    Boolean(maxHeight) && styles.bodyWithMaxHeight,
+  scrollable && styles['bodyScrollable'],
+  Boolean(maxHeight) && styles['bodyWithMaxHeight'],
     className
   ].filter(Boolean).join(' ');
 
@@ -234,7 +234,7 @@ export const InteractiveCard = forwardRef<HTMLDivElement, CardProps & {
   };
 
   return (
-  <Card {...props} clickable onClick={onClick} onKeyDown={handleKeyDown} />
+  <Card {...props} clickable onClick={onClick ?? (() => {})} onKeyDown={handleKeyDown} />
   );
 });
 
@@ -367,8 +367,8 @@ export const ChartCard: React.FC<ChartCardProps> = ({
     <Card {...props}>
       {Boolean(title) && (
         <Card.Header 
-          title={title}
-          subtitle={description}
+          {...(title ? { title } : {})}
+          {...(description ? { subtitle: description } : {})}
         />
       )}
       <Card.Body>

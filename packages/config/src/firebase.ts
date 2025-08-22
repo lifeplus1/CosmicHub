@@ -11,22 +11,20 @@ import { getFirestore, connectFirestoreEmulator, Firestore, enableNetwork, disab
 
 // Firebase config with environment validation
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env['VITE_FIREBASE_API_KEY'],
+  authDomain: import.meta.env['VITE_FIREBASE_AUTH_DOMAIN'],
+  projectId: import.meta.env['VITE_FIREBASE_PROJECT_ID'],
+  storageBucket: import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'],
+  messagingSenderId: import.meta.env['VITE_FIREBASE_MESSAGING_SENDER_ID'],
+  appId: import.meta.env['VITE_FIREBASE_APP_ID'],
 };
 
 // Local devConsole (kept internal to avoid cross-package dependency)
-/* eslint-disable no-console */
 const devConsole = {
   log: import.meta.env.DEV ? console.log.bind(console) : undefined,
   warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
   error: console.error.bind(console)
 };
-/* eslint-enable no-console */
 
 // Validate required config
 interface MinimalViteEnv {
@@ -60,7 +58,11 @@ const hasFirestoreApp = (instance: unknown): instance is Firestore => {
 try {
   // Check if Firebase app already exists
   const existingApps = getApps();
-  app = existingApps.length > 0 ? existingApps[0] : initializeApp(firebaseConfig);
+  if (existingApps.length > 0 && existingApps[0]) {
+    app = existingApps[0];
+  } else {
+    app = initializeApp(firebaseConfig as Record<string, string>);
+  }
   
   // Initialize services with error handling
   try {
@@ -96,7 +98,7 @@ try {
   }
 
   // Connect to emulators in development
-  if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
+  if (import.meta.env.DEV && import.meta.env['VITE_USE_EMULATOR'] === 'true') {
     let authEmulatorConnected = false;
     let firestoreEmulatorConnected = false;
 
@@ -165,7 +167,7 @@ export { hasAuthAvailable };
 /**
  * Environment utilities
  */
-export const isEmulator = import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true';
+export const isEmulator = import.meta.env.DEV && import.meta.env['VITE_USE_EMULATOR'] === 'true';
 export const isDevelopment = import.meta.env.DEV;
 export const projectId = firebaseConfig.projectId;
 

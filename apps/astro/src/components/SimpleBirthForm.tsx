@@ -42,14 +42,14 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
 
     // Required field validation (explicit empty string checks)
     if (data.birthDate === '') {
-      errors.birthDate = 'Birth date is required';
+      errors['birthDate'] = 'Birth date is required';
     }
     if (data.birthTime === '') {
-      errors.birthTime = 'Birth time is required';
+      errors['birthTime'] = 'Birth time is required';
     }
     const trimmedLocation = data.birthLocation.trim();
     if (trimmedLocation === '') {
-      errors.birthLocation = 'Birth location is required';
+      errors['birthLocation'] = 'Birth location is required';
     }
     
     return errors;
@@ -66,11 +66,12 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
 
     // Check if date is reasonable (between 1900 and current year + 1)
   if (formData.birthDate !== '') {
-      const [yearStr] = formData.birthDate.split('-');
-      const selectedYear = parseInt(yearStr, 10);
+  const [yearStr] = formData.birthDate.split('-');
+  const selectedYearRaw = parseInt(yearStr ?? '', 10);
+  const selectedYear = Number.isFinite(selectedYearRaw) ? selectedYearRaw : 0;
       const currentYear = new Date().getFullYear();
       if (selectedYear < 1900 || selectedYear > currentYear + 1) {
-        errors.birthDate = `Year must be between 1900 and ${currentYear + 1}`;
+  errors['birthDate'] = `Year must be between 1900 and ${currentYear + 1}`;
       }
     }
 
@@ -84,19 +85,22 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
 
   try {
       // Parse the date string explicitly to avoid timezone issues
-      const [yearStr, monthStr, dayStr] = formData.birthDate.split('-');
-      const year = parseInt(yearStr, 10);
-      const month = parseInt(monthStr, 10);
-      const day = parseInt(dayStr, 10);
+  const [yearStr, monthStr, dayStr] = formData.birthDate.split('-');
+  const year = parseInt(yearStr ?? '', 10);
+  const month = parseInt(monthStr ?? '', 10);
+  const day = parseInt(dayStr ?? '', 10);
 
-      const [hours, minutes] = formData.birthTime.split(':').map(Number);
+  const [hoursRaw, minutesRaw] = formData.birthTime.split(':').map(Number);
+  // Ensure narrowed numeric fallbacks (avoid number | undefined union)
+  const hours: number = (typeof hoursRaw === 'number' && Number.isFinite(hoursRaw)) ? hoursRaw : 0;
+  const minutes: number = (typeof minutesRaw === 'number' && Number.isFinite(minutesRaw)) ? minutesRaw : 0;
 
       const chartData: ChartBirthData = {
         year,
         month,
         day,
-        hour: hours,
-        minute: minutes,
+        hour: Number.isFinite(hours) ? hours : 0,
+        minute: Number.isFinite(minutes) ? minutes : 0,
         city: formData.birthLocation.trim(),
       };
 
@@ -240,7 +244,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             value={formData.birthDate}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData(prev => ({...prev, birthDate: e.target.value}))}
             className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
-              typeof validationErrors.birthDate === 'string' && validationErrors.birthDate !== ''
+              typeof validationErrors['birthDate'] === 'string' && validationErrors['birthDate'] !== ''
                 ? 'border-red-500 focus:border-red-400'
                 : 'border-cosmic-purple focus:border-cosmic-gold'
             } transition-colors`}
@@ -248,9 +252,9 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             aria-label="Select your birth date"
             aria-describedby="birth-date-error"
           />
-          {typeof validationErrors.birthDate === 'string' && validationErrors.birthDate !== '' && (
+          {typeof validationErrors['birthDate'] === 'string' && validationErrors['birthDate'] !== '' && (
             <p id="birth-date-error" className="text-red-400 text-sm mt-1" aria-live="polite">
-              ⚠️ {validationErrors.birthDate}
+              ⚠️ {validationErrors['birthDate']}
             </p>
           )}
         </div>
@@ -264,7 +268,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             value={formData.birthTime}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData(prev => ({...prev, birthTime: e.target.value}))}
             className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
-              typeof validationErrors.birthTime === 'string' && validationErrors.birthTime !== ''
+              typeof validationErrors['birthTime'] === 'string' && validationErrors['birthTime'] !== ''
                 ? 'border-red-500 focus:border-red-400'
                 : 'border-cosmic-purple focus:border-cosmic-gold'
             } transition-colors`}
@@ -272,9 +276,9 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             aria-label="Select your birth time"
             aria-describedby="birth-time-error"
           />
-          {typeof validationErrors.birthTime === 'string' && validationErrors.birthTime !== '' && (
+          {typeof validationErrors['birthTime'] === 'string' && validationErrors['birthTime'] !== '' && (
             <p id="birth-time-error" className="text-red-400 text-sm mt-1" aria-live="polite">
-              ⚠️ {validationErrors.birthTime}
+              ⚠️ {validationErrors['birthTime']}
             </p>
           )}
         </div>
@@ -290,7 +294,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
               value={formData.birthLocation}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData(prev => ({...prev, birthLocation: e.target.value}))}
               className={`flex-1 p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
-                typeof validationErrors.birthLocation === 'string' && validationErrors.birthLocation !== ''
+                typeof validationErrors['birthLocation'] === 'string' && validationErrors['birthLocation'] !== ''
                   ? 'border-red-500 focus:border-red-400'
                   : 'border-cosmic-purple focus:border-cosmic-gold'
               } transition-colors`}
@@ -308,9 +312,9 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
               {isDetectingLocation ? '📍...' : '📍 Current'}
             </button>
           </div>
-          {typeof validationErrors.birthLocation === 'string' && validationErrors.birthLocation !== '' && (
+          {typeof validationErrors['birthLocation'] === 'string' && validationErrors['birthLocation'] !== '' && (
             <p id="birth-location-error" className="text-red-400 text-sm mt-1" aria-live="polite">
-              ⚠️ {validationErrors.birthLocation}
+              ⚠️ {validationErrors['birthLocation']}
             </p>
           )}
           <p className="text-cosmic-silver/60 text-sm mt-1">

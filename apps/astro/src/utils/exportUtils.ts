@@ -19,7 +19,8 @@ export const exportTableAsCSV = <T extends Record<string, unknown>>(data: T[], f
   if (data.length === 0) return;
 
   const first = data[0];
-  const headers = Object.keys(first).join(',');
+  if (first === undefined) return; // defensive (length check above, but strict mode)
+  const headers = Object.keys(first as object).join(',');
   const csv = [
     headers,
     ...data.map((row: T) =>
@@ -52,7 +53,8 @@ export const formatDataForExport = <T extends Record<string, unknown>>(data: T[]
   if (data.length === 0) return '';
 
   const first = data[0];
-  const headers = Object.keys(first).join(',');
+  if (first === undefined) return '';
+  const headers = Object.keys(first as object).join(',');
   return [
     headers,
     ...data.map((row: T) =>

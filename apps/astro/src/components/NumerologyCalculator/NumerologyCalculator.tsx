@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useToast } from '../ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Accordion from '@radix-ui/react-accordion';
+import { apiConfig } from '../../config/environment';
 
 interface NumerologyData {
   name: string;
@@ -132,7 +133,7 @@ const NumerologyCalculator: React.FC = () => {
     try {
       const birthDate = `${formData.year}-${String(formData.month).padStart(2, '0')}-${String(formData.day).padStart(2, '0')}`;
       
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/calculate-numerology`, {
+  const response = await fetch(`${apiConfig.baseUrl}/calculate-numerology`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
