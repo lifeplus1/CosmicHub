@@ -6,7 +6,7 @@ groups:
   # ====================================================================================
   # CRITICAL ALERTS - Service Level Indicators (SLIs) and Service Level Objectives (SLOs)
   # ====================================================================================
-  
+
   - name: cosmichub.critical.slo
     rules:
       # SLO: 99.5% availability across all services
@@ -140,7 +140,7 @@ groups:
           action: "Investigate error patterns, check logs and downstream dependencies"
 
   # ====================================================================================
-  # INFO ALERTS - Business and Operational Metrics  
+  # INFO ALERTS - Business and Operational Metrics
   # ====================================================================================
 
   - name: cosmichub.info.business

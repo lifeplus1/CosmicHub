@@ -1,15 +1,9 @@
 #!/bin/bash
-# CosmicHub Monitoring Stack Deployment Script
-# OBS-010: Prometheus alert rules setup
-# This script deploys the complete monitoring infrastructure
 
-set -euo pipefail
+# CosmicHub Prometheus Monitoring Deployment Script
+# Implementation for OBS-010: Prometheus Alert Rules Setup
 
-# Configuration
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-MONITORING_DIR="$SCRIPT_DIR"
-COMPOSE_FILE="$MONITORING_DIR/docker-compose.monitoring.yml"
+set -e
 
 # Colors for output
 RED='\033[0;31m'
@@ -18,391 +12,291 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+# Configuration
+MONITORING_DIR="$(dirname "$0")"
+PROJECT_ROOT="$(dirname "$(dirname "$MONITORING_DIR")")"
+
+print_header() {
+    echo -e "${BLUE}🔍 CosmicHub Monitoring Setup${NC}"
+    echo -e "${BLUE}==============================${NC}"
+    echo
 }
 
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
 }
 
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
 }
 
-# Help function
-show_help() {
-    cat << EOF
-CosmicHub Monitoring Deployment Script
-
-Usage: $0 [COMMAND] [OPTIONS]
-
-Commands:
-  deploy     Deploy the complete monitoring stack
-  update     Update existing monitoring stack
-  stop       Stop monitoring services
-  restart    Restart monitoring services
-  status     Show status of monitoring services
-  validate   Validate configuration files
-  clean      Remove monitoring stack and data
-  logs       Show logs for monitoring services
-
-Options:
-  --env ENV          Environment (development|staging|production) [default: development]
-  --backup           Create backup of existing data before deployment
-  --force            Force deployment without confirmations
-  --help, -h         Show this help message
-
-Examples:
-  $0 deploy --env production --backup
-  $0 validate
-  $0 status
-  $0 logs prometheus
-
-EOF
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
-# Validate prerequisites
 check_prerequisites() {
-    log_info "Checking prerequisites..."
+    print_info "Checking prerequisites..."
     
-    # Check if Docker is running
-    if ! docker info >/dev/null 2>&1; then
-        log_error "Docker is not running or not installed"
+    # Check Docker
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is not installed"
         exit 1
     fi
     
-    # Check if docker-compose is available
-    if ! command -v docker-compose >/dev/null 2>&1; then
-        log_error "docker-compose is not installed"
+    # Check Docker Compose
+    if ! command -v docker-compose &> /dev/null; then
+        print_error "Docker Compose is not installed"
         exit 1
     fi
     
-    # Check if required files exist
-    local required_files=(
-        "$MONITORING_DIR/prometheus/prometheus.yml"
-        "$MONITORING_DIR/prometheus/alert-rules.yml"
-        "$COMPOSE_FILE"
-    )
+    # Check if main services are running
+    if ! docker ps | grep -q cosmichub-backend; then
+        print_warning "CosmicHub backend is not running. Starting monitoring stack only."
+    fi
     
-    for file in "${required_files[@]}"; do
-        if [[ ! -f "$file" ]]; then
-            log_error "Required file not found: $file"
+    print_success "Prerequisites check completed"
+}
+
+setup_environment() {
+    print_info "Setting up environment..."
+    
+    # Create .env.monitoring if it doesn't exist
+    if [ ! -f "$PROJECT_ROOT/.env.monitoring" ]; then
+        cat > "$PROJECT_ROOT/.env.monitoring" << EOF
+# CosmicHub Monitoring Environment Variables
+# Copy this file and update with your actual values
+
+# Slack Integration (Optional)
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+
+# PagerDuty Integration (Optional)
+PAGERDUTY_SERVICE_KEY=your-pagerduty-service-key
+
+# Email Alerts (Optional)
+SMTP_PASSWORD=your-smtp-password
+
+# Redis Authentication (Optional)
+REDIS_PASSWORD=
+
+# Additional Monitoring Settings
+PROMETHEUS_RETENTION_TIME=30d
+PROMETHEUS_RETENTION_SIZE=10GB
+EOF
+        print_warning "Created .env.monitoring file. Please update with your actual values."
+        print_info "Edit $PROJECT_ROOT/.env.monitoring with your notification settings"
+    else
+        print_success "Environment file exists"
+    fi
+}
+
+validate_config() {
+    print_info "Validating Prometheus configuration..."
+    
+    # Use promtool if available, otherwise just basic file checks
+    if command -v promtool &> /dev/null; then
+        promtool check config "$MONITORING_DIR/prometheus/prometheus.yml"
+        promtool check rules "$MONITORING_DIR/prometheus/alert-rules.yml"
+        print_success "Prometheus configuration is valid"
+    else
+        print_warning "promtool not available, skipping config validation"
+        # Basic file existence check
+        if [ -f "$MONITORING_DIR/prometheus/prometheus.yml" ] && [ -f "$MONITORING_DIR/prometheus/alert-rules.yml" ]; then
+            print_success "Configuration files exist"
+        else
+            print_error "Configuration files missing"
             exit 1
         fi
-    done
-    
-    log_success "Prerequisites check completed"
-}
-
-# Validate configuration files
-validate_config() {
-    log_info "Validating configuration files..."
-    
-    # Validate Prometheus configuration
-    log_info "Validating Prometheus configuration..."
-    docker run --rm \
-        -v "$MONITORING_DIR/prometheus:/etc/prometheus:ro" \
-        prom/prometheus:v2.47.0 \
-        promtool check config /etc/prometheus/prometheus.yml
-    
-    # Validate alert rules
-    log_info "Validating alert rules..."
-    docker run --rm \
-        -v "$MONITORING_DIR/prometheus:/etc/prometheus:ro" \
-        prom/prometheus:v2.47.0 \
-        promtool check rules /etc/prometheus/alert-rules.yml
-    
-    log_success "Configuration validation completed"
-}
-
-# Create necessary directories and set permissions
-setup_directories() {
-    log_info "Setting up directories..."
-    
-    # Create data directories
-    local data_dirs=(
-        "$MONITORING_DIR/data/prometheus"
-        "$MONITORING_DIR/data/alertmanager"
-        "$MONITORING_DIR/data/grafana"
-        "$MONITORING_DIR/logs"
-    )
-    
-    for dir in "${data_dirs[@]}"; do
-        mkdir -p "$dir"
-        # Set appropriate permissions
-        sudo chown -R 472:472 "$dir" 2>/dev/null || true  # Grafana user
-    done
-    
-    log_success "Directory setup completed"
-}
-
-# Deploy monitoring stack
-deploy_monitoring() {
-    local env="${1:-development}"
-    local backup="${2:-false}"
-    
-    log_info "Deploying monitoring stack for environment: $env"
-    
-    # Create backup if requested
-    if [[ "$backup" == "true" ]]; then
-        create_backup
     fi
+}
+
+start_monitoring_stack() {
+    print_info "Starting monitoring stack..."
     
-    # Set environment variables
-    export ENVIRONMENT="$env"
-    export COMPOSE_PROJECT_NAME="cosmichub-monitoring"
-    
-    # Deploy services
-    log_info "Starting monitoring services..."
     cd "$PROJECT_ROOT"
     
-    docker-compose -f "$COMPOSE_FILE" up -d
+    # Load environment variables
+    set -a
+    [ -f .env.monitoring ] && source .env.monitoring
+    set +a
     
-    # Wait for services to be healthy
-    log_info "Waiting for services to be ready..."
-    wait_for_services
+    # Start monitoring services
+    docker-compose -f backend/monitoring/docker-compose.monitoring.yml up -d
     
-    # Verify deployment
-    verify_deployment
-    
-    log_success "Monitoring stack deployed successfully!"
-    log_info "Access points:"
-    log_info "  - Prometheus: http://localhost:9090"
-    log_info "  - Alertmanager: http://localhost:9093"
-    log_info "  - Grafana: http://localhost:3001 (admin/admin)"
+    print_success "Monitoring stack started"
 }
 
-# Wait for services to be ready
 wait_for_services() {
-    local max_attempts=30
-    local attempt=1
+    print_info "Waiting for services to be ready..."
     
     local services=(
-        "localhost:9090"  # Prometheus
-        "localhost:9093"  # Alertmanager
-        "localhost:3001"  # Grafana
+        "http://localhost:9090/-/healthy:Prometheus"
+        "http://localhost:9093/-/healthy:Alertmanager"
+        "http://localhost:9121/:Redis Exporter"
+        "http://localhost:9100/metrics:Node Exporter"
     )
     
     for service in "${services[@]}"; do
-        log_info "Waiting for $service to be ready..."
+        IFS=':' read -r url name <<< "$service"
         
-        while [[ $attempt -le $max_attempts ]]; do
-            if curl -f -s "http://$service" >/dev/null 2>&1; then
-                log_success "$service is ready"
+        local attempts=0
+        local max_attempts=30
+        
+        while [ $attempts -lt $max_attempts ]; do
+            if curl -s "$url" > /dev/null 2>&1; then
+                print_success "$name is ready"
                 break
             fi
             
-            if [[ $attempt -eq $max_attempts ]]; then
-                log_warning "$service is not responding after $max_attempts attempts"
-                break
+            attempts=$((attempts + 1))
+            if [ $attempts -eq $max_attempts ]; then
+                print_warning "$name is not responding after $max_attempts attempts"
+            else
+                sleep 2
             fi
-            
-            sleep 2
-            ((attempt++))
         done
-        
-        attempt=1
     done
 }
 
-# Verify deployment
-verify_deployment() {
-    log_info "Verifying deployment..."
+run_health_checks() {
+    print_info "Running health checks..."
     
-    # Check if services are running
-    local services=("prometheus" "alertmanager" "grafana")
+    # Check Prometheus targets
+    local targets_up
+    targets_up=$(curl -s http://localhost:9090/api/v1/targets 2>/dev/null | jq -r '.data.activeTargets[] | select(.health=="up") | .scrapeUrl' 2>/dev/null | wc -l || echo "0")
     
-    for service in "${services[@]}"; do
-        if docker-compose -f "$COMPOSE_FILE" ps "$service" | grep -q "Up"; then
-            log_success "$service is running"
-        else
-            log_error "$service is not running"
-            return 1
-        fi
-    done
-    
-    # Test Prometheus API
-    if curl -f -s "http://localhost:9090/api/v1/status/config" >/dev/null; then
-        log_success "Prometheus API is responding"
+    if [ "$targets_up" -gt 0 ]; then
+        print_success "$targets_up Prometheus targets are healthy"
     else
-        log_warning "Prometheus API is not responding"
+        print_warning "No healthy Prometheus targets found"
     fi
     
-    # Test if alerts are loaded
-    local alert_count
-    alert_count=$(curl -s "http://localhost:9090/api/v1/rules" | jq -r '.data.groups | length' 2>/dev/null || echo "0")
+    # Check alert rules
+    local alert_rules
+    alert_rules=$(curl -s http://localhost:9090/api/v1/rules 2>/dev/null | jq -r '.data.groups[].rules[] | select(.type=="alerting") | .name' 2>/dev/null | wc -l || echo "0")
     
-    if [[ "$alert_count" -gt 0 ]]; then
-        log_success "Alert rules loaded successfully ($alert_count groups)"
+    if [ "$alert_rules" -gt 0 ]; then
+        print_success "$alert_rules alert rules loaded"
     else
-        log_warning "No alert rules found"
-    fi
-    
-    log_success "Deployment verification completed"
-}
-
-# Create backup
-create_backup() {
-    local backup_dir="$MONITORING_DIR/backups/$(date +%Y%m%d_%H%M%S)"
-    log_info "Creating backup in $backup_dir"
-    
-    mkdir -p "$backup_dir"
-    
-    # Backup data directories if they exist
-    if [[ -d "$MONITORING_DIR/data" ]]; then
-        cp -r "$MONITORING_DIR/data" "$backup_dir/"
-        log_success "Data backed up to $backup_dir"
+        print_warning "No alert rules found"
     fi
 }
 
-# Show service status
-show_status() {
-    log_info "Monitoring services status:"
-    docker-compose -f "$COMPOSE_FILE" ps
+show_access_info() {
+    print_info "Monitoring stack is ready!"
+    echo
+    echo -e "${GREEN}📊 Access URLs:${NC}"
+    echo -e "  🔍 Prometheus:     http://localhost:9090"
+    echo -e "  🚨 Alertmanager:   http://localhost:9093"
+    echo -e "  📊 cAdvisor:       http://localhost:8080"
+    echo -e "  🖥️  Node Exporter:  http://localhost:9100/metrics"
+    echo -e "  📦 Redis Exporter: http://localhost:9121"
+    echo
+    echo -e "${BLUE}🔧 Useful Commands:${NC}"
+    echo -e "  View logs:         docker-compose -f backend/monitoring/docker-compose.monitoring.yml logs -f"
+    echo -e "  Stop monitoring:   docker-compose -f backend/monitoring/docker-compose.monitoring.yml down"
+    echo -e "  Restart services:  docker-compose -f backend/monitoring/docker-compose.monitoring.yml restart"
+    echo
+    echo -e "${YELLOW}⚠️  Configuration:${NC}"
+    echo -e "  Update notification settings in: .env.monitoring"
+    echo -e "  Alert rules documentation: backend/monitoring/README.md"
+}
+
+test_alerts() {
+    print_info "Testing alert system..."
     
-    echo ""
-    log_info "Service health checks:"
-    
-    # Prometheus
-    if curl -f -s "http://localhost:9090/-/healthy" >/dev/null 2>&1; then
-        log_success "Prometheus: Healthy"
+    # Test if we can reach Prometheus API
+    if curl -s http://localhost:9090/api/v1/query?query=up > /dev/null; then
+        print_success "Prometheus API is accessible"
     else
-        log_error "Prometheus: Unhealthy or not responding"
+        print_error "Cannot reach Prometheus API"
+        return 1
     fi
     
-    # Alertmanager
-    if curl -f -s "http://localhost:9093/-/healthy" >/dev/null 2>&1; then
-        log_success "Alertmanager: Healthy"
-    else
-        log_error "Alertmanager: Unhealthy or not responding"
-    fi
+    # Show current alerts
+    local active_alerts
+    active_alerts=$(curl -s http://localhost:9090/api/v1/alerts 2>/dev/null | jq -r '.data.alerts[] | select(.state=="firing") | .labels.alertname' 2>/dev/null | wc -l || echo "0")
     
-    # Grafana
-    if curl -f -s "http://localhost:3001/api/health" >/dev/null 2>&1; then
-        log_success "Grafana: Healthy"
+    if [ "$active_alerts" -gt 0 ]; then
+        print_warning "$active_alerts alerts are currently firing"
+        echo "Check Prometheus alerts page: http://localhost:9090/alerts"
     else
-        log_error "Grafana: Unhealthy or not responding"
+        print_success "No alerts currently firing"
     fi
 }
 
-# Show logs
-show_logs() {
-    local service="${1:-}"
-    
-    if [[ -z "$service" ]]; then
-        docker-compose -f "$COMPOSE_FILE" logs --tail=100 -f
-    else
-        docker-compose -f "$COMPOSE_FILE" logs --tail=100 -f "$service"
-    fi
+cleanup() {
+    print_info "Stopping monitoring stack..."
+    cd "$PROJECT_ROOT"
+    docker-compose -f backend/monitoring/docker-compose.monitoring.yml down
+    print_success "Monitoring stack stopped"
 }
 
-# Stop services
-stop_services() {
-    log_info "Stopping monitoring services..."
-    docker-compose -f "$COMPOSE_FILE" down
-    log_success "Services stopped"
+show_help() {
+    echo "CosmicHub Prometheus Monitoring Deployment Script"
+    echo
+    echo "Usage: $0 [COMMAND]"
+    echo
+    echo "Commands:"
+    echo "  start     Start the monitoring stack (default)"
+    echo "  stop      Stop the monitoring stack"
+    echo "  restart   Restart the monitoring stack"
+    echo "  test      Test alert system"
+    echo "  status    Show service status"
+    echo "  help      Show this help message"
+    echo
+    echo "Examples:"
+    echo "  $0                # Start monitoring stack"
+    echo "  $0 start          # Start monitoring stack"
+    echo "  $0 stop           # Stop monitoring stack"
+    echo "  $0 test           # Test alerts"
 }
 
-# Clean up everything
-clean_services() {
-    log_warning "This will remove all monitoring data. Are you sure? (y/N)"
-    read -r response
-    
-    if [[ "$response" =~ ^[Yy]$ ]]; then
-        log_info "Cleaning up monitoring stack..."
-        docker-compose -f "$COMPOSE_FILE" down -v
-        sudo rm -rf "$MONITORING_DIR/data" 2>/dev/null || true
-        log_success "Cleanup completed"
-    else
-        log_info "Cleanup cancelled"
-    fi
-}
-
-# Main function
+# Main execution
 main() {
-    local command="${1:-}"
-    local env="development"
-    local backup=false
-    local force=false
+    print_header
     
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --env)
-                env="$2"
-                shift 2
-                ;;
-            --backup)
-                backup=true
-                shift
-                ;;
-            --force)
-                force=true
-                shift
-                ;;
-            --help|-h)
-                show_help
-                exit 0
-                ;;
-            *)
-                if [[ -z "$command" ]]; then
-                    command="$1"
-                fi
-                shift
-                ;;
-        esac
-    done
-    
-    # Execute command
-    case "$command" in
-        deploy)
+    case "${1:-start}" in
+        start)
             check_prerequisites
-            setup_directories
+            setup_environment
             validate_config
-            deploy_monitoring "$env" "$backup"
-            ;;
-        update)
-            check_prerequisites
-            validate_config
-            log_info "Updating monitoring stack..."
-            docker-compose -f "$COMPOSE_FILE" up -d
+            start_monitoring_stack
             wait_for_services
-            log_success "Update completed"
-            ;;
-        validate)
-            check_prerequisites
-            validate_config
-            ;;
-        status)
-            show_status
-            ;;
-        logs)
-            show_logs "${2:-}"
+            run_health_checks
+            show_access_info
             ;;
         stop)
-            stop_services
+            cleanup
             ;;
         restart)
-            stop_services
-            deploy_monitoring "$env" "$backup"
+            cleanup
+            sleep 3
+            main start
             ;;
-        clean)
-            clean_services
+        test)
+            test_alerts
+            ;;
+        status)
+            cd "$PROJECT_ROOT"
+            docker-compose -f backend/monitoring/docker-compose.monitoring.yml ps
+            ;;
+        help|--help|-h)
+            show_help
             ;;
         *)
-            log_error "Unknown command: $command"
-            echo ""
+            print_error "Unknown command: $1"
             show_help
             exit 1
             ;;
     esac
 }
 
-# Run main function with all arguments
+# Handle script interruption
+trap cleanup EXIT
+
+# Execute main function with all arguments
 main "$@"

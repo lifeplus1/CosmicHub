@@ -1,85 +1,84 @@
-# Docker Compose configuration for CosmicHub monitoring stack
-# Adds Prometheus, Alertmanager, and supporting services to existing infrastructure
+# CosmicHub Monitoring Stack
+# OBS-010: Complete monitoring infrastructure with Prometheus, Alertmanager, and supporting services
+
+version: "3.8"
 
 services:
-  # Prometheus monitoring server
+  # ====================================================================================
+  # CORE MONITORING
+  # ====================================================================================
+
   prometheus:
-    image: prom/prometheus:v2.47.0
+    image: prom/prometheus:v2.45.0
     container_name: cosmichub-prometheus
-    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
-      - ./backend/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./backend/monitoring/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
-      - prometheus-data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
-      - '--storage.tsdb.retention.size=10GB'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.enable-lifecycle'
-      - '--web.enable-admin-api'
-      - '--log.level=info'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=10GB"
+      - "--web.enable-lifecycle"
+      - "--web.enable-admin-api"
     networks:
       - monitoring
-      - cosmichub-network
-    depends_on:
-      - alertmanager
-    labels:
-      - "service=monitoring"
-      - "component=prometheus"
-
-  # Alertmanager for handling alerts
-  alertmanager:
-    image: prom/alertmanager:v0.26.0
-    container_name: cosmichub-alertmanager
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9090/-/healthy",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: cosmichub-alertmanager
     ports:
       - "9093:9093"
     volumes:
-      - ./backend/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-      - alertmanager-data:/alertmanager
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
     command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--storage.path=/alertmanager'
-      - '--web.external-url=http://localhost:9093'
-      - '--log.level=info'
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+      - "--web.external-url=http://localhost:9093"
     networks:
       - monitoring
-    labels:
-      - "service=monitoring" 
-      - "component=alertmanager"
-
-  # Grafana for visualization (optional but recommended)
-  grafana:
-    image: grafana/grafana:10.2.0
-    container_name: cosmichub-grafana
     restart: unless-stopped
-    ports:
-      - "3001:3000"  # Using 3001 to avoid conflicts with main app
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./backend/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-    networks:
-      - monitoring
-    depends_on:
-      - prometheus
-    labels:
-      - "service=monitoring"
-      - "component=grafana"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9093/-/healthy",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Node Exporter for system metrics
+  # ====================================================================================
+  # EXPORTERS
+  # ====================================================================================
+
   node-exporter:
-    image: prom/node-exporter:v1.6.1
+    image: prom/node-exporter:v1.6.0
     container_name: cosmichub-node-exporter
-    restart: unless-stopped
     ports:
       - "9100:9100"
     volumes:
@@ -87,41 +86,123 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
     command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     networks:
       - monitoring
-    labels:
-      - "service=monitoring"
-      - "component=node-exporter"
+    restart: unless-stopped
 
-  # Blackbox exporter for endpoint monitoring
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: cosmichub-cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.52.0
+    container_name: cosmichub-redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      - redis
+
   blackbox-exporter:
     image: prom/blackbox-exporter:v0.24.0
     container_name: cosmichub-blackbox-exporter
-    restart: unless-stopped
     ports:
       - "9115:9115"
     volumes:
-      - ./backend/monitoring/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+      - ./blackbox.yml:/etc/blackbox_exporter/config.yml:ro
     networks:
       - monitoring
-    labels:
-      - "service=monitoring"
-      - "component=blackbox-exporter"
+    restart: unless-stopped
 
-volumes:
-  prometheus-data:
-    driver: local
-  alertmanager-data:
-    driver: local
-  grafana-data:
-    driver: local
+  # ====================================================================================
+  # VISUALIZATION
+  # ====================================================================================
+
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: cosmichub-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-cosmichub123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # ====================================================================================
+  # SUPPORTING SERVICES
+  # ====================================================================================
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7.0-alpine
+    container_name: cosmichub-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    networks:
+      - monitoring
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+# ====================================================================================
+# NETWORKS AND VOLUMES
+# ====================================================================================
 
 networks:
   monitoring:
     driver: bridge
-  cosmichub-network:
-    external: true  # Assumes main CosmicHub network exists
+    name: cosmichub-monitoring
+
+volumes:
+  prometheus_data:
+    driver: local
+    name: cosmichub-prometheus-data
+  alertmanager_data:
+    driver: local
+    name: cosmichub-alertmanager-data
+  grafana_data:
+    driver: local
+    name: cosmichub-grafana-data
+  redis_data:
+    driver: local
+    name: cosmichub-redis-data
