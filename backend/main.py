@@ -271,6 +271,10 @@ else:
     logger.info("Metrics disabled via ENABLE_METRICS env var (initial load)")
 
 from typing import Awaitable, Callable
+# Security headers middleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+from starlette.responses import Response as StarletteResponse
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
