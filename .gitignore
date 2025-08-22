@@ -121,6 +121,7 @@ combined.log
 *.sublime-workspace
 .vs/
 .vetur/
+.eslintcache
 
 # === Testing ===
 coverage/

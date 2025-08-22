@@ -557,9 +557,9 @@ export const CHANNEL_KEYNOTES: Record<string, string> = {
 };
 
 export function getGateLineKeynote(gate: number, line: number): string {
-  return GATE_KEYNOTES[gate]?.[line] || 'Keynote not yet added.';
+  return GATE_KEYNOTES[gate]?.[line] ?? 'Keynote not yet added.';
 }
 
 export function getChannelKeynote(channelId: string): string {
-  return CHANNEL_KEYNOTES[channelId] || 'Channel keynote not available.';
+  return CHANNEL_KEYNOTES[channelId] ?? 'Channel keynote not available.';
 }

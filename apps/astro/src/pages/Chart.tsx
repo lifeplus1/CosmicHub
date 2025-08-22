@@ -23,11 +23,11 @@ function isChartBirthData(data: unknown): data is ChartBirthData {
   const obj = data as Record<string, unknown>;
   return (
   typeof obj['year'] === 'number' && Number.isInteger(obj['year']) &&
-  typeof obj['month'] === 'number' && (obj['month'] as number) >= 1 && (obj['month'] as number) <= 12 &&
-  typeof obj['day'] === 'number' && (obj['day'] as number) >= 1 && (obj['day'] as number) <= 31 &&
-  typeof obj['hour'] === 'number' && (obj['hour'] as number) >= 0 && (obj['hour'] as number) <= 23 &&
-  typeof obj['minute'] === 'number' && (obj['minute'] as number) >= 0 && (obj['minute'] as number) <= 59 &&
-  typeof obj['city'] === 'string' && (obj['city'] as string).length > 0 &&
+  typeof obj['month'] === 'number' && (obj['month']) >= 1 && (obj['month']) <= 12 &&
+  typeof obj['day'] === 'number' && (obj['day']) >= 1 && (obj['day']) <= 31 &&
+  typeof obj['hour'] === 'number' && (obj['hour']) >= 0 && (obj['hour']) <= 23 &&
+  typeof obj['minute'] === 'number' && (obj['minute']) >= 0 && (obj['minute']) <= 59 &&
+  typeof obj['city'] === 'string' && (obj['city']).length > 0 &&
   (obj['lat'] === undefined || typeof obj['lat'] === 'number') &&
   (obj['lon'] === undefined || typeof obj['lon'] === 'number') &&
   (obj['timezone'] === undefined || typeof obj['timezone'] === 'string')

@@ -15,8 +15,8 @@
     "strictPropertyInitialization": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-  "noUncheckedIndexedAccess": true,
-  "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "jsx": "react-jsx",
@@ -26,7 +26,9 @@
     "baseUrl": ".",
     "composite": true,
     "paths": {
-      "@/*": ["./src/*"],
+      // Map shared alias used inside app packages to the astro app source so root-based
+      // tooling (eslint, language server) can resolve imports like '@/services/...'
+      "@/*": ["./apps/astro/src/*"],
       "@cosmichub/auth": ["./packages/auth/src"],
       "@cosmichub/config": ["./packages/config/src"],
       "@cosmichub/frequency": ["./packages/frequency/src"],
@@ -39,13 +41,7 @@
   // Root acts as solution tsconfig only; actual source compilation handled by per-package/app tsconfigs
   // No include to avoid pulling in test/experimental files that cause build noise
   "include": [],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".turbo",
-    "build",
-    "**/*.js"
-  ],
+  "exclude": ["node_modules", "dist", ".turbo", "build", "**/*.js"],
   "references": [
     { "path": "./packages/auth" },
     { "path": "./packages/config" },

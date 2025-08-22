@@ -145,7 +145,7 @@ export const KeyAspects: React.FC<KeyAspectsProps> = React.memo(({
                     <span className="text-sm font-semibold text-cosmic-silver">
                       {formatPlanetName(aspect.person1_planet)} {aspect.aspect} {formatPlanetName(aspect.person2_planet)}
                     </span>
-                    <span className={`${ASPECT_COLOR_CLASS[getAspectColor(aspect.aspect)] || 'bg-gray-500'} text-white px-2 py-1 rounded text-sm`}>
+                    <span className={`${ASPECT_COLOR_CLASS[getAspectColor(aspect.aspect)] ?? 'bg-gray-500'} text-white px-2 py-1 rounded text-sm`}>
                       {aspect.aspect}
                     </span>
                   </div>

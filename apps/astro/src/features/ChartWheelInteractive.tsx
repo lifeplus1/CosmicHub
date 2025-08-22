@@ -137,9 +137,9 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       
       // Safe access with type checking
   const planetObj = planetData as unknown as Record<string, unknown>;
-      const position = typeof planetObj['position'] === 'number' ? planetObj['position'] as number : 0;
+      const position = typeof planetObj['position'] === 'number' ? planetObj['position'] : 0;
       const retrograde = planetObj['retrograde'] === true;
-      const speed = typeof planetObj['speed'] === 'number' ? planetObj['speed'] as number : 0;
+      const speed = typeof planetObj['speed'] === 'number' ? planetObj['speed'] : 0;
       
       transformedPlanets[name] = {
         name,

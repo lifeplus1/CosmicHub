@@ -109,14 +109,14 @@ const isRecord = (v: unknown): v is Record<string, unknown> => {
 
 const hasStringId = (v: unknown): v is { id: string } => {
   if (!isRecord(v)) return false;
-  return typeof (v as Record<string, unknown>)['id'] === 'string';
+  return typeof (v)['id'] === 'string';
 };
 
 const isQuietHours = (v: unknown): v is QuietHours => {
   if (!isRecord(v)) return false;
-  return typeof (v as Record<string, unknown>)['enabled'] === 'boolean' && 
-         typeof (v as Record<string, unknown>)['start'] === 'string' && 
-         typeof (v as Record<string, unknown>)['end'] === 'string';
+  return typeof (v)['enabled'] === 'boolean' && 
+         typeof (v)['start'] === 'string' && 
+         typeof (v)['end'] === 'string';
 };
 
 const isValidFrequency = (v: unknown): v is NotificationFrequency => {
@@ -127,25 +127,25 @@ const isValidFrequency = (v: unknown): v is NotificationFrequency => {
 const isNotificationPreferences = (v: unknown): v is NotificationPreferences => {
   if (!isRecord(v)) return false;
   const {
-    dailyHoroscope,
-    transitAlerts,
-    frequencyReminders,
-    appUpdates,
-    frequency,
-    quietHours
+    dailyHoroscope: _dailyHoroscope,
+    transitAlerts: _transitAlerts,
+    frequencyReminders: _frequencyReminders,
+    appUpdates: _appUpdates,
+    frequency: _frequency,
+    quietHours: _quietHours
   } = v;
   
-  return typeof (v as Record<string, unknown>)['dailyHoroscope'] === 'boolean' &&
-         typeof (v as Record<string, unknown>)['transitAlerts'] === 'boolean' &&
-         typeof (v as Record<string, unknown>)['frequencyReminders'] === 'boolean' &&
-         typeof (v as Record<string, unknown>)['appUpdates'] === 'boolean' &&
-         isValidFrequency((v as Record<string, unknown>)['frequency']) &&
-         isQuietHours((v as Record<string, unknown>)['quietHours']);
+  return typeof (v)['dailyHoroscope'] === 'boolean' &&
+         typeof (v)['transitAlerts'] === 'boolean' &&
+         typeof (v)['frequencyReminders'] === 'boolean' &&
+         typeof (v)['appUpdates'] === 'boolean' &&
+         isValidFrequency((v)['frequency']) &&
+         isQuietHours((v)['quietHours']);
 };
 
 const isSyncMessageData = (v: unknown): v is SyncMessageData => {
   if (!isRecord(v)) return false;
-  const type = (v as Record<string, unknown>)['type'];
+  const type = (v)['type'];
   return typeof type === 'string' &&
          ['cosmichub-sync-chart_synced', 'cosmichub-sync-user_data_synced'].includes(type);
 };
@@ -288,9 +288,9 @@ export class UnifiedNotificationManager {
     const birth = this.getUserBirthData();
     if (birth === null || birth === undefined) return;
     const sun = birth.sunSign !== undefined && birth.sunSign.length > 0 ? birth.sunSign : 'Aries';
-    this.scheduler.scheduleDailyHoroscope(this.userId, sun, '09:00');
-    // Note: TypeScript definition expects 2 args but implementation only accepts userId
-  // @ts-ignore - TypeScript definition and implementation mismatch
+  this.scheduler.scheduleDailyHoroscope(this.userId, sun, '09:00');
+  // Type mismatch between definition & implementation; safe at runtime
+  // @ts-ignore
   this.scheduler.scheduleTransitAlerts(this.userId);
     this.scheduler.scheduleMoonPhases(this.userId);
   }
@@ -361,8 +361,8 @@ export class UnifiedNotificationManager {
       if (raw === null) return null;
 
       const parsed: unknown = JSON.parse(raw);
-  if (!isRecord(parsed) || typeof (parsed as Record<string, unknown>)['sunSign'] !== 'string') return null;
-  return { sunSign: (parsed as Record<string, unknown>)['sunSign'] as string };
+  if (!isRecord(parsed) || typeof (parsed)['sunSign'] !== 'string') return null;
+  return { sunSign: (parsed)['sunSign'] };
     } catch {
       return null;
     }

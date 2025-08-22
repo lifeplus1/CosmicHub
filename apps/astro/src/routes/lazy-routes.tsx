@@ -131,8 +131,12 @@ export const withErrorBoundary = <P extends Record<string, unknown>>(
 function ensureComponent(key: keyof typeof AstroRoutes) {
   const entry = AstroRoutes[key];
   if (!entry) {
-    // Fallback component rendering error state
-    return (() => <div role="alert">Route component "{key}" unavailable</div>);
+    // Fallback component rendering error state with proper display name & escaped quotes
+    const Fallback: React.FC = () => (
+      <div role="alert">Route component &quot;{key}&quot; unavailable</div>
+    );
+    Fallback.displayName = `MissingRoute(${String(key)})`;
+    return Fallback;
   }
   return entry;
 }

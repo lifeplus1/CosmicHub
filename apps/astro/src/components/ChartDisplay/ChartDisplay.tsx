@@ -1,6 +1,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import { serializeAstrologyData, type AstrologyChart } from '@cosmichub/types';
-import { getChartSyncService } from '@/services/chartSyncService';
+import { getChartSyncService } from '../../services/chartSyncService';
+import type { ChartData } from '../../services/api.types';
 import type {
   ChartDisplayPlanet,
   ChartDisplayHouse,
@@ -23,9 +24,9 @@ import {
 import { PlanetTable } from './tables';
 import AspectTable from './tables/AspectTable';
 import { getPlanetSymbol, getSignSymbol, getAsteroidSymbol } from './tables/tableUtils';
-import { fetchChartData } from '@/services/astrologyService';
+import { fetchChartData } from '../../services/astrologyService';
 // Alias the array-based ChartData (planets/houses/aspects as arrays)
-import type { ChartType } from '@/types/astrology.types';
+import type { ChartType } from '../../types/astrology.types';
 import { sampleChartData } from './sampleData';
 import { 
   normalizeChart,
@@ -77,7 +78,7 @@ export interface ExportableChart {
 
 // (Removed unused isChartPlanet / isChartHouse / isChartAspect guards)
 // Legacy type import required for house calculations
-import type { HouseCusp } from '@/types/house-cusp';
+import type { HouseCusp } from '../../types/house-cusp';
 
 // Internal logger shim (no-op to satisfy no-console rule while keeping instrumentation points)
 const log = {
@@ -95,7 +96,6 @@ const calculateHouseForPlanet = (planetPosition: number, houseCusps: HouseCusp[]
   
   // Helper function to convert number to ordinal (1st, 2nd, 3rd, etc.)
   const getOrdinal = (num: number): string => {
-    const suffixes = ['th', 'st', 'nd', 'rd'] as const;
     const v = Math.abs(num) % 100;
     const teen = v >= 11 && v <= 13;
     if (teen) return `${num}th`;
@@ -142,12 +142,12 @@ const calculateHouseForPlanet = (planetPosition: number, houseCusps: HouseCusp[]
 const coercePlanet = (v: unknown): ChartPlanet => {
   const obj = (typeof v === 'object' && v !== null) ? v as Record<string, unknown> : {};
   return {
-    name: typeof obj['name'] === 'string' ? obj['name'] as string : '',
-    sign: typeof obj['sign'] === 'string' ? obj['sign'] as string : '',
-    house: (typeof obj['house'] === 'string' || typeof obj['house'] === 'number') ? obj['house'] as string | number : undefined,
-    degree: typeof obj['degree'] === 'number' ? obj['degree'] as number : 0,
-    position: typeof obj['position'] === 'number' ? obj['position'] as number : undefined,
-    retrograde: typeof obj['retrograde'] === 'boolean' ? obj['retrograde'] as boolean : undefined
+    name: typeof obj['name'] === 'string' ? obj['name'] : '',
+    sign: typeof obj['sign'] === 'string' ? obj['sign'] : '',
+    house: (typeof obj['house'] === 'string' || typeof obj['house'] === 'number') ? obj['house'] : undefined,
+    degree: typeof obj['degree'] === 'number' ? obj['degree'] : 0,
+    position: typeof obj['position'] === 'number' ? obj['position'] : undefined,
+    retrograde: typeof obj['retrograde'] === 'boolean' ? obj['retrograde'] : undefined
   };
 };
 const coerceHouse = (v: unknown): ChartHouse => {
@@ -159,19 +159,19 @@ const coerceHouse = (v: unknown): ChartHouse => {
   return {
     number,
     house: typeof houseRaw === 'number' ? houseRaw : undefined,
-    sign: typeof obj['sign'] === 'string' ? obj['sign'] as string : '',
+    sign: typeof obj['sign'] === 'string' ? obj['sign'] : '',
     cusp: typeof cuspRaw === 'number' ? cuspRaw : 0,
-    ruler: typeof obj['ruler'] === 'string' ? obj['ruler'] as string : undefined
+    ruler: typeof obj['ruler'] === 'string' ? obj['ruler'] : undefined
   };
 };
 const coerceAspect = (v: unknown): ChartAspect => {
   const obj = (typeof v === 'object' && v !== null) ? v as Record<string, unknown> : {};
   return {
-    planet1: typeof obj['planet1'] === 'string' ? obj['planet1'] as string : '',
-    planet2: typeof obj['planet2'] === 'string' ? obj['planet2'] as string : '',
-    type: typeof obj['type'] === 'string' ? obj['type'] as string : '',
-    orb: typeof obj['orb'] === 'number' ? obj['orb'] as number : 0,
-    applying: typeof obj['applying'] === 'string' ? obj['applying'] as string : undefined
+    planet1: typeof obj['planet1'] === 'string' ? obj['planet1'] : '',
+    planet2: typeof obj['planet2'] === 'string' ? obj['planet2'] : '',
+    type: typeof obj['type'] === 'string' ? obj['type'] : '',
+    orb: typeof obj['orb'] === 'number' ? obj['orb'] : 0,
+    applying: typeof obj['applying'] === 'string' ? obj['applying'] : undefined
   };
 };
 
@@ -598,8 +598,12 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                             // Fallback: attempt to parse into expected ChartData shape required by sync service
                             const parsed = JSON.parse(serialized) as unknown;
                             if (parsed !== null && typeof parsed === 'object' && 'planets' in parsed) {
-                              // @ts-expect-error runtime shape may differ; service will validate
-                              await getChartSyncService().syncChart(parsed);
+                              // Ensure the parsed object has all required ChartData properties before passing to syncChart
+                              if ('houses' in parsed && 'aspects' in parsed && 'angles' in parsed && 
+                                  'latitude' in parsed && 'longitude' in parsed && 'timezone' in parsed && 
+                                  'julian_day' in parsed && 'house_system' in parsed) {
+                                await getChartSyncService().syncChart(parsed as ChartData);
+                              }
                             }
                             log.info('Chart data saved successfully');
                           } catch (e) {

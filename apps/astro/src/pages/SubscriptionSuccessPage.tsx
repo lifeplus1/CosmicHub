@@ -76,7 +76,7 @@ export const SubscriptionSuccessPage: React.FC = (): ReactElement => {
       'astro_premium': 'Astrology Premium',
       'cosmic_master': 'Cosmic Master'
     };
-    return tierNames[tier] || tier;
+    return tierNames[tier] ?? tier;
   };
 
   const getTierColor = (tier: string): string => {
@@ -85,7 +85,7 @@ export const SubscriptionSuccessPage: React.FC = (): ReactElement => {
       'astro_premium': 'bg-purple-500',
       'cosmic_master': 'bg-gold-500'
     };
-    return colors[tier] || 'bg-gray-500';
+    return colors[tier] ?? 'bg-gray-500';
   };
 
   if (loading) {

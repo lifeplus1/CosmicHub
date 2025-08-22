@@ -251,30 +251,30 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
       const tagsUnknown = (obj as { tags?: unknown }).tags;
       const confidenceUnknown = (obj as { confidence?: unknown }).confidence;
       return {
-        id: typeof obj['id'] === 'string' ? obj['id'] as string : crypto.randomUUID(),
+        id: typeof obj['id'] === 'string' ? obj['id'] : crypto.randomUUID(),
         chartId:
           typeof obj['chartId'] === 'string'
-            ? obj['chartId'] as string
+            ? obj['chartId']
             : (fallbackChartId ?? 'unknown-chart'),
         userId:
           typeof obj['userId'] === 'string'
-            ? obj['userId'] as string
+            ? obj['userId']
             : (fallbackUserId ?? 'unknown-user'),
-        type: typeof obj['type'] === 'string' ? obj['type'] as string : 'general',
+        type: typeof obj['type'] === 'string' ? obj['type'] : 'general',
         title:
-          typeof obj['title'] === 'string' ? obj['title'] as string : 'Untitled Interpretation',
-        content: typeof obj['content'] === 'string' ? obj['content'] as string : '',
-        summary: typeof obj['summary'] === 'string' ? obj['summary'] as string : '',
+          typeof obj['title'] === 'string' ? obj['title'] : 'Untitled Interpretation',
+        content: typeof obj['content'] === 'string' ? obj['content'] : '',
+        summary: typeof obj['summary'] === 'string' ? obj['summary'] : '',
         tags: Array.isArray(tagsUnknown) ? (tagsUnknown as string[]) : [],
         confidence:
           typeof confidenceUnknown === 'number' ? confidenceUnknown : 0,
         createdAt:
           typeof obj['createdAt'] === 'string'
-            ? obj['createdAt'] as string
+            ? obj['createdAt']
             : new Date().toISOString(),
         updatedAt:
           typeof obj['updatedAt'] === 'string'
-            ? obj['updatedAt'] as string
+            ? obj['updatedAt']
             : new Date().toISOString(),
       };
     }

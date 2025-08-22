@@ -88,7 +88,7 @@ const getDefaultPlanets = (): Record<PlanetName, Planet> => ({
 // Safe env access with bracket notation for strict index signature rules
 const rawApiUrl: string | undefined =
   typeof import.meta.env?.['VITE_API_URL'] === 'string'
-    ? import.meta.env['VITE_API_URL'] as string
+    ? import.meta.env['VITE_API_URL']
     : undefined;
 let resolvedApi = '';
 if (typeof rawApiUrl === 'string') {
@@ -494,8 +494,8 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
   // Planets
   const planets: Record<PlanetName, Planet> = getDefaultPlanets();
   // Use bracket property access (strict index signature compliance)
-  const rawPlanets: BackendChartPlanets | undefined = isChartObject((raw as Record<string, unknown>)['planets'])
-    ? (raw as Record<string, unknown>)['planets'] as BackendChartPlanets
+  const rawPlanets: BackendChartPlanets | undefined = isChartObject((raw)['planets'])
+    ? (raw)['planets'] as BackendChartPlanets
     : undefined;
   if (rawPlanets) {
     for (const [name, value] of Object.entries(rawPlanets)) {
@@ -521,7 +521,7 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
 
   // Houses
   const houses: House[] = [];
-  const rawHouses: BackendChartHouses = (raw as Record<string, unknown>)['houses'] as BackendChartHouses;
+  const rawHouses: BackendChartHouses = (raw)['houses'] as BackendChartHouses;
   if (isChartObject(rawHouses)) {
     for (const [houseKey, houseValue] of Object.entries(rawHouses)) {
       const houseNumber = houseKey.includes('house_') ? parseInt(houseKey.replace('house_', '')) : parseInt(houseKey, 10);
@@ -551,8 +551,8 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
 
   // Aspects
   const aspects: Aspect[] = [];
-  const rawAspects: unknown[] = Array.isArray((raw as Record<string, unknown>)['aspects'])
-    ? (raw as Record<string, unknown>)['aspects'] as unknown[]
+  const rawAspects: unknown[] = Array.isArray((raw)['aspects'])
+    ? (raw)['aspects'] as unknown[]
     : [];
   for (const aspect of rawAspects) {
     if (isChartObject(aspect)) {
@@ -587,9 +587,9 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
 
   const defaultAsc = houses[0]?.cusp ?? 0;
   const defaultMc = houses[9]?.cusp ?? 0;
-  const anglesCandidate = (raw as Record<string, unknown>)['angles'];
+  const anglesCandidate = (raw)['angles'];
   const anglesRaw: Record<string, unknown> | undefined = isChartObject(anglesCandidate)
-    ? anglesCandidate as Record<string, unknown>
+    ? anglesCandidate
     : undefined;
   const angles = anglesRaw &&
     typeof anglesRaw['ascendant'] === 'number' &&
@@ -597,10 +597,10 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
     typeof anglesRaw['descendant'] === 'number' &&
     typeof anglesRaw['imumcoeli'] === 'number'
     ? {
-        ascendant: anglesRaw['ascendant'] as number,
-        midheaven: anglesRaw['midheaven'] as number,
-        descendant: anglesRaw['descendant'] as number,
-        imumcoeli: anglesRaw['imumcoeli'] as number
+        ascendant: anglesRaw['ascendant'],
+        midheaven: anglesRaw['midheaven'],
+        descendant: anglesRaw['descendant'],
+        imumcoeli: anglesRaw['imumcoeli']
       }
     : {
         ascendant: defaultAsc,
@@ -610,11 +610,11 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
       };
 
   // Handle required fields with defaults
-  const latitude = typeof (raw as Record<string, unknown>)['latitude'] === 'number' ? (raw as Record<string, unknown>)['latitude'] as number : 0;
-  const longitude = typeof (raw as Record<string, unknown>)['longitude'] === 'number' ? (raw as Record<string, unknown>)['longitude'] as number : 0;
-  const timezone = typeof (raw as Record<string, unknown>)['timezone'] === 'string' ? (raw as Record<string, unknown>)['timezone'] as string : 'UTC';
-  const julian_day = typeof (raw as Record<string, unknown>)['julian_day'] === 'number' ? (raw as Record<string, unknown>)['julian_day'] as number : 0;
-  const house_system = typeof (raw as Record<string, unknown>)['house_system'] === 'string' ? (raw as Record<string, unknown>)['house_system'] as 'placidus' : 'placidus';
+  const latitude = typeof (raw)['latitude'] === 'number' ? (raw)['latitude'] : 0;
+  const longitude = typeof (raw)['longitude'] === 'number' ? (raw)['longitude'] : 0;
+  const timezone = typeof (raw)['timezone'] === 'string' ? (raw)['timezone'] : 'UTC';
+  const julian_day = typeof (raw)['julian_day'] === 'number' ? (raw)['julian_day'] : 0;
+  const house_system = typeof (raw)['house_system'] === 'string' ? (raw)['house_system'] as 'placidus' : 'placidus';
 
   return {
     planets,

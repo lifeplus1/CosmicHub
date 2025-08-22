@@ -10,7 +10,7 @@ export const getCenterColor = (centerName: string, isActive: boolean): string =>
     'Sacral': isActive ? 'bg-red-400' : 'bg-gray-200',
     'Root': isActive ? 'bg-brown-400' : 'bg-gray-200'
   };
-  return colors[centerName as keyof typeof colors] || 'bg-gray-200';
+  return colors[centerName as keyof typeof colors] ?? 'bg-gray-200';
 };
 
 export const getTypeColor = (type: string): string => {
@@ -21,7 +21,7 @@ export const getTypeColor = (type: string): string => {
     'Projector': 'bg-green-500',
     'Reflector': 'bg-blue-500'
   };
-  return colors[type as keyof typeof colors] || 'bg-gray-500';
+  return colors[type as keyof typeof colors] ?? 'bg-gray-500';
 };
 
 export const getCenterDescription = (centerName: string): string => {
@@ -36,7 +36,7 @@ export const getCenterDescription = (centerName: string): string => {
     'Sacral': 'Center of life force and sexuality. Your creative and reproductive energy.',
     'Root': 'Center of pressure and adrenaline. Your drive to act and survive.'
   };
-  return descriptions[centerName] || 'Energy center in the Human Design system.';
+  return descriptions[centerName] ?? 'Energy center in the Human Design system.';
 };
 
 export const getTypeDescription = (type: string): string => {
@@ -47,5 +47,5 @@ export const getTypeDescription = (type: string): string => {
     'Projector': 'Natural guides and leaders who see the big picture. Make up about 20% of the population. Your role is to wait for recognition and guide others.',
     'Reflector': 'Mirrors of their environment with deep wisdom. Make up about 1% of the population. Your role is to wait a lunar cycle before making decisions.'
   };
-  return descriptions[type] || 'One of the five Human Design types that determines your strategy for life.';
+  return descriptions[type] ?? 'One of the five Human Design types that determines your strategy for life.';
 };

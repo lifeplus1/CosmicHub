@@ -25,19 +25,79 @@ vi.mock('@cosmichub/integrations', () => ({
   }))
 }));
 
-// Mock React Router
-vi.mock('react-router-dom', () => ({
-  BrowserRouter: ({ children }: { children: React.ReactNode }): JSX.Element => <div data-testid="router">{children}</div>,
-  Routes: ({ children }: { children: React.ReactNode }): JSX.Element => <div data-testid="routes">{children}</div>,
-  Route: ({ element }: { element: React.ReactElement }): React.ReactElement => element,
-  useNavigate: vi.fn(() => vi.fn()),
-  useLocation: vi.fn(() => ({ pathname: '/' })),
-  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string } & React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => <a href={to} {...props}>{children}</a>
-}));
+// Mock React Router with proper context providers
+vi.mock('react-router-dom', () => {
+  const mockNavigate = vi.fn();
+  const mockLocation = { pathname: '/', search: '', hash: '', state: null, key: 'default' };
+  
+  return {
+    BrowserRouter: ({ children }: { children: React.ReactNode }): JSX.Element => {
+      // Provide a mock router context
+      return (
+        <div data-testid="router">
+          {React.cloneElement(
+            <MockRouterContext>{children}</MockRouterContext>
+          )}
+        </div>
+      );
+    },
+    Routes: ({ children }: { children: React.ReactNode }): JSX.Element => <div data-testid="routes">{children}</div>,
+    Route: ({ element }: { element: React.ReactElement }): React.ReactElement => element,
+    useNavigate: vi.fn(() => mockNavigate),
+    useLocation: vi.fn(() => mockLocation),
+    useSearchParams: vi.fn(() => [new URLSearchParams(), vi.fn()]),
+    Link: ({ children, to, ...props }: { children: React.ReactNode; to: string } & React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => <a href={to} {...props}>{children}</a>
+  };
+});
 
-// Mock lazy components
+// Mock Router Context Provider to prevent hook errors
+const MockRouterContext: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <div data-testid="mock-router-context">{children}</div>;
+};
+
+// Mock lazy components that might use React Router hooks
 vi.mock('../pages/Dashboard', () => ({
   default: () => <div data-testid="dashboard">Dashboard</div>
+}));
+
+vi.mock('../pages/Login', () => ({
+  default: () => <div data-testid="login">Login</div>
+}));
+
+vi.mock('../pages/SignUp', () => ({
+  default: () => <div data-testid="signup">SignUp</div>
+}));
+
+vi.mock('../pages/Profile', () => ({
+  default: () => <div data-testid="profile">Profile</div>
+}));
+
+vi.mock('../pages/SubscriptionSuccess', () => ({
+  default: () => <div data-testid="subscription-success">SubscriptionSuccess</div>
+}));
+
+vi.mock('../pages/SubscriptionCancel', () => ({
+  default: () => <div data-testid="subscription-cancel">SubscriptionCancel</div>
+}));
+
+vi.mock('../pages/Blog', () => ({
+  default: () => <div data-testid="blog">Blog</div>
+}));
+
+vi.mock('../pages/BlogPost', () => ({
+  default: () => <div data-testid="blog-post">BlogPost</div>
+}));
+
+vi.mock('../pages/Calculator', () => ({
+  default: () => <div data-testid="calculator">Calculator</div>
+}));
+
+vi.mock('../pages/ChartResults', () => ({
+  default: () => <div data-testid="chart-results">ChartResults</div>
+}));
+
+vi.mock('../components/BlogAuthor', () => ({
+  BlogAuthors: () => <div data-testid="blog-authors">BlogAuthors</div>
 }));
 
 vi.mock('../components/Navbar', () => ({

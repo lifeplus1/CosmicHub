@@ -22,5 +22,5 @@ export const getZodiacSign = (position: number): string => {
   const sign = Math.floor(position / 30);
   const deg = position % 30;
   const signIndex = sign % 12;
-  return `${deg.toFixed(2)}° ${zodiacSigns[signIndex] || 'Unknown'}`;
+  return `${deg.toFixed(2)}° ${zodiacSigns[signIndex] ?? 'Unknown'}`;
 };
