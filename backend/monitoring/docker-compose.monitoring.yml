@@ -1,0 +1,127 @@
+# Docker Compose configuration for CosmicHub monitoring stack
+# Adds Prometheus, Alertmanager, and supporting services to existing infrastructure
+
+services:
+  # Prometheus monitoring server
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: cosmichub-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./backend/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./backend/monitoring/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--log.level=info'
+    networks:
+      - monitoring
+      - cosmichub-network
+    depends_on:
+      - alertmanager
+    labels:
+      - "service=monitoring"
+      - "component=prometheus"
+
+  # Alertmanager for handling alerts
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: cosmichub-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./backend/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--log.level=info'
+    networks:
+      - monitoring
+    labels:
+      - "service=monitoring" 
+      - "component=alertmanager"
+
+  # Grafana for visualization (optional but recommended)
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: cosmichub-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"  # Using 3001 to avoid conflicts with main app
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./backend/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    labels:
+      - "service=monitoring"
+      - "component=grafana"
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: cosmichub-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring
+    labels:
+      - "service=monitoring"
+      - "component=node-exporter"
+
+  # Blackbox exporter for endpoint monitoring
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.24.0
+    container_name: cosmichub-blackbox-exporter
+    restart: unless-stopped
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./backend/monitoring/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    networks:
+      - monitoring
+    labels:
+      - "service=monitoring"
+      - "component=blackbox-exporter"
+
+volumes:
+  prometheus-data:
+    driver: local
+  alertmanager-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  monitoring:
+    driver: bridge
+  cosmichub-network:
+    external: true  # Assumes main CosmicHub network exists
