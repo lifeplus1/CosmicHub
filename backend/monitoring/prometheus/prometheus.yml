@@ -1,0 +1,85 @@
+# CosmicHub Prometheus Configuration
+# OBS-010: Production monitoring setup
+# Monitoring backend services with comprehensive scraping configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: "cosmichub-production"
+    environment: "main"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Rules files
+rule_files:
+  - "alert-rules.yml"
+
+# Scrape configuration for CosmicHub services
+scrape_configs:
+  # Primary backend API
+  - job_name: "cosmichub-backend"
+    static_configs:
+      - targets: ["backend:8000"]
+    scrape_interval: 10s
+    metrics_path: /metrics
+    scheme: http
+    params:
+      format: ["prometheus"]
+    scrape_timeout: 9s
+
+  # Ephemeris calculation service
+  - job_name: "ephemeris-server"
+    static_configs:
+      - targets: ["ephemeris:8001"]
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    scrape_timeout: 10s
+
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+    scrape_interval: 30s
+
+  # System metrics via Node Exporter
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+    scrape_interval: 30s
+
+  # Container metrics via cAdvisor
+  - job_name: "cadvisor"
+    static_configs:
+      - targets: ["cadvisor:8080"]
+    scrape_interval: 30s
+
+  # Redis metrics (if available)
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis-exporter:9121"]
+    scrape_interval: 30s
+
+  # Blackbox probing for external health checks
+  - job_name: "blackbox"
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://backend:8000/health
+          - http://ephemeris:8001/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+# Storage and query configuration is handled via command line arguments in Docker Compose

@@ -1,0 +1,89 @@
+# CosmicHub Alertmanager Configuration
+# OBS-010: Alert routing and notification setup
+
+global:
+  smtp_smarthost: "localhost:587"
+  smtp_from: "alerts@cosmichub.com"
+  smtp_auth_username: "alerts@cosmichub.com"
+  smtp_auth_password: "${SMTP_PASSWORD}"
+
+# Routing rules
+route:
+  group_by: ["alertname", "service", "severity"]
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: "web.hook"
+  routes:
+    # Critical alerts go to PagerDuty
+    - match:
+        severity: critical
+      receiver: "pagerduty-critical"
+      group_wait: 5s
+      repeat_interval: 5m
+
+    # Warning alerts go to Slack
+    - match:
+        severity: warning
+      receiver: "slack-warnings"
+      group_wait: 30s
+      repeat_interval: 30m
+
+    # Info alerts go to email
+    - match:
+        severity: info
+      receiver: "email-info"
+      group_wait: 5m
+      repeat_interval: 12h
+
+# Notification receivers
+receivers:
+  - name: "web.hook"
+    webhook_configs:
+      - url: "http://localhost:5001/webhook"
+
+  - name: "pagerduty-critical"
+    pagerduty_configs:
+      - service_key: "${PAGERDUTY_SERVICE_KEY}"
+        description: "CosmicHub Critical Alert: {{ .GroupLabels.alertname }}"
+        details:
+          service: "{{ .GroupLabels.service }}"
+          severity: "{{ .GroupLabels.severity }}"
+          summary: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+
+  - name: "slack-warnings"
+    slack_configs:
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#cosmichub-alerts"
+        title: "CosmicHub Warning Alert"
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Service:* {{ .Labels.service }}
+          *Description:* {{ .Annotations.description }}
+          *Action:* {{ .Annotations.action }}
+          {{ end }}
+        color: "warning"
+
+  - name: "email-info"
+    email_configs:
+      - to: "ops@cosmichub.com"
+        subject: "CosmicHub Info Alert: {{ .GroupLabels.alertname }}"
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Service: {{ .Labels.service }}
+          Description: {{ .Annotations.description }}
+
+          Details:
+          {{ range .Labels.SortedPairs }}{{ .Name }}: {{ .Value }}
+          {{ end }}
+          {{ end }}
+
+# Inhibit rules
+inhibit_rules:
+  - source_match:
+      severity: "critical"
+    target_match:
+      severity: "warning"
+    equal: ["alertname", "service", "instance"]

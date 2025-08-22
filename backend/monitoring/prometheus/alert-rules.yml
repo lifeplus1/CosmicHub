@@ -1,0 +1,195 @@
+# CosmicHub Prometheus Alert Rules
+# OBS-010: Comprehensive monitoring and alerting configuration
+# Aligned with SLO policy: 99.5% availability, <2% error rate, latency thresholds
+
+groups:
+  # ====================================================================================
+  # CRITICAL ALERTS - Service Level Indicators (SLIs) and Service Level Objectives (SLOs)
+  # ====================================================================================
+
+  - name: cosmichub.critical.slo
+    rules:
+      # SLO: 99.5% availability across all services
+      - alert: ServiceAvailabilityBreach
+        expr: |
+          (
+            rate(http_requests_total{status!~"5.."}[5m]) / 
+            rate(http_requests_total[5m])
+          ) * 100 < 99.5
+        for: 2m
+        labels:
+          severity: critical
+          service: cosmichub
+          slo: availability
+          runbook: https://docs.cosmichub.com/runbooks/availability
+        annotations:
+          summary: "Service availability dropped below SLO threshold"
+          description: "{{ $labels.service }} availability is {{ $value | humanizePercentage }}, below the 99.5% SLO threshold for {{ $labels.duration }}."
+          impact: "User-facing service degradation"
+          action: "Investigate failed requests, check backend and ephemeris server health"
+
+      # SLO: Error rate < 2%
+      - alert: ErrorRateSLOBreach
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m]) / 
+            rate(http_requests_total[5m])
+          ) * 100 > 2
+        for: 1m
+        labels:
+          severity: critical
+          service: cosmichub
+          slo: error_rate
+          runbook: https://docs.cosmichub.com/runbooks/error-rate
+        annotations:
+          summary: "Error rate exceeded SLO threshold"
+          description: "{{ $labels.service }} error rate is {{ $value | humanizePercentage }}, exceeding the 2% SLO threshold."
+          impact: "Increased user errors and service instability"
+          action: "Check application logs, database connectivity, and downstream services"
+
+      # SLO: Latency p95 < 2000ms for /calculate endpoint
+      - alert: LatencySLOBreach_Calculate
+        expr: |
+          histogram_quantile(0.95, 
+            sum by(le) (rate(http_request_duration_seconds_bucket{route="/calculate"}[5m]))
+          ) * 1000 > 2000
+        for: 3m
+        labels:
+          severity: critical
+          service: cosmichub
+          slo: latency
+          endpoint: calculate
+          runbook: https://docs.cosmichub.com/runbooks/latency
+        annotations:
+          summary: "Calculate endpoint latency exceeded SLO"
+          description: "P95 latency for /calculate is {{ $value | humanizeDuration }}, exceeding 2000ms SLO."
+          impact: "Slow chart generation affecting user experience"
+          action: "Check ephemeris server performance, database query optimization"
+
+      # Backend service down
+      - alert: BackendServiceDown
+        expr: up{job="cosmichub-backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: backend
+          component: api
+          runbook: https://docs.cosmichub.com/runbooks/service-down
+        annotations:
+          summary: "Backend service is down"
+          description: "CosmicHub backend service {{ $labels.instance }} is unreachable."
+          impact: "Complete service outage - no API functionality"
+          action: "Check service status, restart if necessary, investigate container/process health"
+
+      # Ephemeris service down
+      - alert: EphemerisServiceDown
+        expr: up{job="ephemeris-server"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: ephemeris
+          component: calculations
+          runbook: https://docs.cosmichub.com/runbooks/ephemeris-down
+        annotations:
+          summary: "Ephemeris service is down"
+          description: "Ephemeris calculation service {{ $labels.instance }} is unreachable."
+          impact: "Chart calculations unavailable - core functionality lost"
+          action: "Restart ephemeris service, check container health and dependencies"
+
+  # ====================================================================================
+  # WARNING ALERTS - Performance and Capacity
+  # ====================================================================================
+
+  - name: cosmichub.warning.performance
+    rules:
+      # High response time warning
+      - alert: HighResponseTimeWarning
+        expr: |
+          histogram_quantile(0.95, 
+            sum by(le, route) (rate(http_request_duration_seconds_bucket[5m]))
+          ) * 1000 > 1500
+        for: 5m
+        labels:
+          severity: warning
+          service: cosmichub
+          component: api
+          runbook: https://docs.cosmichub.com/runbooks/performance
+        annotations:
+          summary: "High response times detected"
+          description: "P95 response time for {{ $labels.route }} is {{ $value | humanizeDuration }}, approaching SLO limits."
+          impact: "Performance degradation - user experience impact"
+          action: "Monitor trends, check for resource constraints or inefficient queries"
+
+      # High error rate warning
+      - alert: HighErrorRateWarning
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m]) / 
+            rate(http_requests_total[5m])
+          ) * 100 > 1
+        for: 3m
+        labels:
+          severity: warning
+          service: cosmichub
+          component: api
+          runbook: https://docs.cosmichub.com/runbooks/error-rate
+        annotations:
+          summary: "Elevated error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }}, approaching 2% SLO threshold."
+          impact: "Increased errors - early warning of potential issues"
+          action: "Investigate error patterns, check logs and downstream dependencies"
+
+  # ====================================================================================
+  # INFO ALERTS - Business and Operational Metrics
+  # ====================================================================================
+
+  - name: cosmichub.info.business
+    rules:
+      # High traffic volume
+      - alert: HighTrafficVolume
+        expr: rate(http_requests_total[5m]) > 100
+        for: 10m
+        labels:
+          severity: info
+          service: cosmichub
+          component: traffic
+          business: true
+          runbook: https://docs.cosmichub.com/runbooks/capacity-planning
+        annotations:
+          summary: "High traffic volume detected"
+          description: "Receiving {{ $value | humanize }} requests per second."
+          impact: "Positive - high user engagement"
+          action: "Monitor performance metrics, ensure adequate capacity"
+
+  # ====================================================================================
+  # RECORDING RULES - Pre-computed metrics for dashboards
+  # ====================================================================================
+
+  - name: cosmichub.recording_rules
+    rules:
+      # Availability recording rule
+      - record: cosmichub:availability_rate_5m
+        expr: |
+          (
+            rate(http_requests_total{status!~"5.."}[5m]) / 
+            rate(http_requests_total[5m])
+          ) * 100
+
+      # Error rate recording rule
+      - record: cosmichub:error_rate_5m
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m]) / 
+            rate(http_requests_total[5m])
+          ) * 100
+
+      # Request rate recording rule
+      - record: cosmichub:request_rate_5m
+        expr: rate(http_requests_total[5m])
+
+      # P95 latency recording rule by endpoint
+      - record: cosmichub:latency_p95_5m
+        expr: |
+          histogram_quantile(0.95, 
+            sum by(le, route) (rate(http_request_duration_seconds_bucket[5m]))
+          ) * 1000
