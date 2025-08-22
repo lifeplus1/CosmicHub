@@ -154,7 +154,7 @@
   "homepage": "https://gitlab.com/lifeplus1/CosmicHub#readme",
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "eslint --max-warnings=0"
+      "eslint --no-warn-ignored --max-warnings=0"
     ],
     "*.{md,json,yml,yaml}": [
       "prettier --check"
