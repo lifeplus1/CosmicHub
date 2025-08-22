@@ -26,7 +26,35 @@ class InputValidator:
     def validate_birth_data(birth_data: Dict[str, Any]) -> Dict[str, Any]:
         return SecurityValidator.validate_birth_data(birth_data)
 
-RateLimiter = EnhancedRateLimiter  # Alias for backward compatibility
+class RateLimiter:
+    """Backward compatibility wrapper for EnhancedRateLimiter"""
+    def __init__(self, max_requests: int = 100, window_seconds: int = 60):
+        # Store the old-style parameters
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        # Simple in-memory rate limiting for backward compatibility
+        from collections import defaultdict
+        import time
+        self._requests: Dict[str, List[float]] = defaultdict(list)
+    
+    def is_allowed(self, identifier: str) -> bool:
+        """Check if request is allowed using simple sliding window"""
+        import time
+        now = time.time()
+        
+        # Clean old requests outside the window
+        cutoff = now - self.window_seconds
+        self._requests[identifier] = [
+            req_time for req_time in self._requests[identifier] 
+            if req_time > cutoff
+        ]
+        
+        # Check if under limit
+        if len(self._requests[identifier]) < self.max_requests:
+            self._requests[identifier].append(now)
+            return True
+        
+        return False
 
 class SecurityHeaders:
     """Backward compatibility wrapper for SecurityHeaders"""
