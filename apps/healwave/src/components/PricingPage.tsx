@@ -106,7 +106,7 @@ const PricingPage: React.FC = () => {
                   </ul>
 
                   <button
-                    onClick={() => handleSubscribe(tierSlug)}
+                    onClick={() => { void handleSubscribe(tierSlug); }}
                     disabled={tierSlug === 'free'}
                     className={`w-full py-3 px-4 rounded-lg font-semibold text-lg transition-all duration-200 ${
                       tierSlug === 'free'

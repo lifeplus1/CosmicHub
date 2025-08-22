@@ -37,7 +37,7 @@ const Profile: React.FC = React.memo(() => {
       <UserProfile />
       <div className="max-w-4xl mx-auto pb-8">
         <div className="text-center">
-          <Button onClick={handleSignOut} variant="secondary">
+    <Button onClick={() => { void handleSignOut(); }} variant="secondary">
             Sign Out
           </Button>
         </div>

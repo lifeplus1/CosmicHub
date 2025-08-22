@@ -208,7 +208,7 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+  <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-6">
           {/* Account Details */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>

@@ -60,7 +60,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+  <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
               Email Address

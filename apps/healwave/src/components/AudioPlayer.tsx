@@ -1,11 +1,14 @@
 import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
-/* eslint-disable no-console */
+// eslint-disable-next-line no-console
 const devConsole = {
-  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
-  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
-  error: console.error.bind(console)
+  // eslint-disable-next-line no-console
+  log: (...args: unknown[]) => { if (import.meta.env.DEV) { console.log(...args); } },
+  // eslint-disable-next-line no-console
+  warn: (...args: unknown[]) => { if (import.meta.env.DEV) { console.warn(...args); } },
+  // eslint-disable-next-line no-console
+  error: (...args: unknown[]) => { console.error(...args); }
 };
-/* eslint-enable no-console */
+interface ExtendedWindow extends Window { webkitAudioContext?: typeof AudioContext; AudioContext: typeof AudioContext }
 
 interface AudioPlayerProps {
   frequency?: number;
@@ -33,15 +36,16 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
 
   const initializeAudio = useCallback(async () => {
     try {
-      if (audioContextRef.current == null) {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (audioContextRef.current === null) {
+  const win = window as unknown as ExtendedWindow;
+  const AudioContextClass = (win.AudioContext || win.webkitAudioContext);
         if (AudioContextClass == null) {
           throw new Error('Web Audio API not supported in this browser');
         }
 
         audioContextRef.current = new AudioContextClass();
         
-        if (audioContextRef.current.state === 'suspended') {
+        if (audioContextRef.current !== null && audioContextRef.current.state === 'suspended') {
           await audioContextRef.current.resume();
         }
         
@@ -56,7 +60,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
   }, []);
 
   const createAudioNodes = useCallback(() => {
-    if (audioContextRef.current == null) return;
+  if (audioContextRef.current === null) return;
 
     const context = audioContextRef.current;
 
@@ -123,7 +127,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
           try {
             leftOscillatorRef.current.stop();
             leftOscillatorRef.current.disconnect();
-          } catch (e) {
+          } catch {
             // Oscillator may have already stopped
           }
           leftOscillatorRef.current = null;
@@ -133,7 +137,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
           try {
             rightOscillatorRef.current.stop();
             rightOscillatorRef.current.disconnect();
-          } catch (e) {
+          } catch {
             // Oscillator may have already stopped
           }
           rightOscillatorRef.current = null;
@@ -159,8 +163,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
   }, []);
 
   useEffect(() => {
-    if (isInitialized === false) {
-      initializeAudio();
+  if (isInitialized === false) {
+  // Intentionally fire-and-forget; lifecycle initialization
+  void initializeAudio();
       return;
     }
 
@@ -172,7 +177,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
   }, [isPlaying, isInitialized, createAudioNodes, stopAudio, initializeAudio]);
 
   useEffect(() => {
-    if (isPlaying === false || leftOscillatorRef.current == null || rightOscillatorRef.current == null) return;
+  if (isPlaying === false || leftOscillatorRef.current === null || rightOscillatorRef.current === null) return;
 
     const context = audioContextRef.current;
     if (!context) return;
@@ -185,7 +190,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
   }, [frequency, binauralBeat, isPlaying]);
 
   useEffect(() => {
-    if (isPlaying === false || leftGainRef.current == null || rightGainRef.current == null) return;
+  if (isPlaying === false || leftGainRef.current === null || rightGainRef.current === null) return;
 
     const context = audioContextRef.current;
     if (!context) return;
@@ -197,14 +202,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(({
   useEffect(() => {
     return () => {
       stopAudio();
-      if (audioContextRef.current) {
+  if (audioContextRef.current !== null) {
+  // Close returns a promise; ensure we surface unexpected errors but don't block unmount
   audioContextRef.current.close().catch(devConsole.error);
       }
     };
   }, [stopAudio]);
 
   useEffect(() => {
-    if (error != null && onPlayStateChange != null) {
+  if (error !== null && onPlayStateChange !== undefined) {
       onPlayStateChange(false);
     }
   }, [error, onPlayStateChange]);

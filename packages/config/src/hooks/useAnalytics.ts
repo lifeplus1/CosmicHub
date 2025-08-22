@@ -15,7 +15,7 @@ export function useAnalytics(): UseAnalyticsReturn {
 
   useEffect(() => {
     let isMounted = true;
-    (async () => {
+    void (async () => {
       try {
         const [{ getAnalytics }, { getApp }] = await Promise.all([
           import('firebase/analytics'),
@@ -34,28 +34,28 @@ export function useAnalytics(): UseAnalyticsReturn {
 
   const logEventCb = useCallback<UseAnalyticsReturn['logEvent']>((eventName, eventParams, options) => {
     if (!analytics) return;
-    import('firebase/analytics')
+  void import('firebase/analytics')
       .then(({ logEvent }) => logEvent(analytics, eventName, eventParams, options))
       .catch(() => {});
   }, [analytics]);
 
   const setUserIdCb = useCallback<UseAnalyticsReturn['setUserId']>((userId) => {
     if (!analytics) return;
-    import('firebase/analytics')
+  void import('firebase/analytics')
       .then(({ setUserId }) => setUserId(analytics, userId))
       .catch(() => {});
   }, [analytics]);
 
   const setUserPropertiesCb = useCallback<UseAnalyticsReturn['setUserProperties']>((props) => {
     if (!analytics) return;
-    import('firebase/analytics')
+  void import('firebase/analytics')
       .then(({ setUserProperties }) => setUserProperties(analytics, props))
       .catch(() => {});
   }, [analytics]);
 
   const setCurrentScreenCb = useCallback<UseAnalyticsReturn['setCurrentScreen']>((screen) => {
     if (!analytics) return;
-    import('firebase/analytics')
+  void import('firebase/analytics')
       .then(({ setCurrentScreen }) => setCurrentScreen(analytics, screen))
       .catch(() => {});
   }, [analytics]);

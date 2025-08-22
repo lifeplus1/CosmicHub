@@ -42,6 +42,7 @@ async function registerServiceWorker(): Promise<void> {
       
       // Initialize PWA features
   // Fire-and-forget; internal logic attaches listeners only
+  // Fire-and-forget initialization; internal handlers manage their own errors
   initializePWAFeatures();
       
     } catch (error) {
@@ -71,17 +72,20 @@ function initializePWAFeatures(): void {
   });
   
   // Handle install button click
-  window.addEventListener('install-app', () => { void (async () => {
-    if (deferredPrompt !== null) {
-      try {
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        PWALogger.log(choiceResult.outcome === 'accepted' ? '✅ User accepted the install prompt' : '❌ User dismissed the install prompt');
-      } finally {
-        deferredPrompt = null;
+  window.addEventListener('install-app', () => {
+    // Wrap async operations explicitly; ESLint: no-misused-promises satisfied
+    void (async () => {
+      if (deferredPrompt !== null) {
+        try {
+          deferredPrompt.prompt();
+          const choiceResult = await deferredPrompt.userChoice;
+          PWALogger.log(choiceResult.outcome === 'accepted' ? '✅ User accepted the install prompt' : '❌ User dismissed the install prompt');
+        } finally {
+          deferredPrompt = null;
+        }
       }
-    }
-  })(); });
+    })();
+  });
 }
 
 // Show update notification
@@ -222,9 +226,9 @@ function hideInstallPrompt(): void {
 
 // Register when DOM is loaded
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', registerServiceWorker);
+  document.addEventListener('DOMContentLoaded', () => { void registerServiceWorker(); });
 } else {
-  registerServiceWorker();
+  void registerServiceWorker();
 }
 
 export { registerServiceWorker };

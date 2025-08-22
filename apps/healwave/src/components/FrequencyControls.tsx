@@ -214,7 +214,7 @@ const FrequencyControls = () => {
                 className="w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
               />
               <button
-                onClick={handleSavePreset}
+                onClick={() => { void handleSavePreset(); }}
                 disabled={!presetName.trim()}
                 className="w-full py-3 font-semibold text-white transition-all duration-200 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-500 disabled:to-gray-600 rounded-xl disabled:cursor-not-allowed"
               >

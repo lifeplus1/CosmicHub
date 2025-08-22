@@ -31,14 +31,7 @@ const ChartPreferences: React.FC = React.memo(() => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPreferences, setIsLoadingPreferences] = useState(true);
 
-  // Load user preferences on mount
-  useEffect(() => {
-    if (user?.uid) {
-      loadUserPreferences();
-    } else {
-      setIsLoadingPreferences(false);
-    }
-  }, [user?.uid]);
+  // (moved below loadUserPreferences definition)
 
   const loadUserPreferences = useCallback(async () => {
     if (!user?.uid) return;
@@ -68,6 +61,15 @@ const ChartPreferences: React.FC = React.memo(() => {
       setIsLoadingPreferences(false);
     }
   }, [user?.uid, toast]);
+
+  // Load user preferences on mount (placed after definition to satisfy TS ordering rules)
+  useEffect(() => {
+    if (user?.uid) {
+      void loadUserPreferences();
+    } else {
+      setIsLoadingPreferences(false);
+    }
+  }, [user?.uid, loadUserPreferences]);
 
   const handlePreferenceChange = useCallback((key: keyof ChartPreferencesData, value: any) => {
     setPreferences(prev => ({
@@ -179,7 +181,7 @@ const ChartPreferences: React.FC = React.memo(() => {
 
       <div className="text-center">
         <Button 
-          onClick={handleSavePreferences} 
+          onClick={() => { void handleSavePreferences(); }} 
           variant="primary"
           disabled={isLoading || isLoadingPreferences || !user}
         >

@@ -229,7 +229,7 @@ class PerformanceMonitor {
       if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
         // Dynamic import to avoid issues in environments without Firebase
         // Check if Firebase Performance is available before importing
-        this.tryFirebasePerformanceImport(name, duration, metadata);
+  void this.tryFirebasePerformanceImport(name, duration, metadata);
       }
     } catch (error) {
       // Silently fail if Firebase is not available
@@ -292,7 +292,7 @@ export const reportPerformance = () => {
 // Service Worker Integration Helper
 export const initServiceWorkerPerformanceCache = () => {
   if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-    navigator.serviceWorker.register('/performance-sw.js')
+  void navigator.serviceWorker.register('/performance-sw.js')
       .then(registration => {
         console.log('Performance service worker registered:', registration);
       })

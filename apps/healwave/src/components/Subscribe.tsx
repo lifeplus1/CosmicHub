@@ -69,7 +69,7 @@ const Subscribe: React.FC = () => {
           <p className="text-gray-300">Unlock premium features for an enhanced healing experience.</p>
         </div>
         <button
-          onClick={handleSubscribe}
+          onClick={() => { void handleSubscribe(); }}
           disabled={isLoading}
           className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none"
           aria-label="Subscribe to HealWave Pro"
