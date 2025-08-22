@@ -8,11 +8,24 @@ system and production-ready architecture.
 **Production Ready**: ✅ Both apps fully functional and optimized  
 **Code Quality**: ✅ Phase 2C Complete - TypeScript compilation clean, ESLint configuration
 optimized  
-**Recent Updates**: Build stability achieved, lint configuration fixed with accurate technical debt
-baseline  
+**Documentation**: ✅ Restructured - 89 organized files in numbered directory structure  
 **Build Performance**: 83% improvement (20s → 2s)  
 **Technical Debt**: 953 ESLint errors (accurate baseline post-configuration fix) - Phase 3 roadmap
 available
+
+## 📚 Documentation Structure
+
+**NEW**: All documentation has been consolidated and organized into a numbered directory structure
+for improved navigation:
+
+- **[docs/00-OVERVIEW/](docs/00-OVERVIEW/)** - Project overview and essential context
+- **[docs/01-CURRENT-STATUS/](docs/01-CURRENT-STATUS/)** - Current project state and status
+- **[docs/02-ACTIVE-PRIORITIES/](docs/02-ACTIVE-PRIORITIES/)** - Current work and active tasks
+- **[docs/03-GUIDES/](docs/03-GUIDES/)** - All development and feature guides
+- **[docs/04-ARCHITECTURE/](docs/04-ARCHITECTURE/)** - System design and technical specs
+- **[docs/05-ARCHIVE/](docs/05-ARCHIVE/)** - Historical and completed work
+
+📖 **Start here**: [Documentation Index](docs/00-OVERVIEW/INDEX.md)
 
 ## 🏗️ Architecture
 
@@ -29,7 +42,7 @@ CosmicHub/
 │   └── ui/              # Shared UI components
 ├── backend/             # Python FastAPI backend
 ├── tests/               # Centralized testing (newly organized)
-└── docs/                # Documentation (consolidated)
+└── docs/                # Numbered documentation structure (89 files)
 ```
 
 ## ⚡ Optimized Build System
@@ -188,9 +201,9 @@ Use the Makefile for common tasks:
 
 - Zod schema (`validateChart.ts`) now enforces:
   - Planet position range (0–360)
-  - House array length (1–12) & cusp range (0–360)
-  - Angle value ranges
-  - Safe, forward-compatible aspect/asteroid structures (passthrough for extra fields)
+    - House array length (1–12) & cusp range (0–360)
+    - Angle value ranges
+    - Safe, forward-compatible aspect/asteroid structures (passthrough for extra fields)
 - Accepts partial charts so progressive loading & streaming remain supported.
 - Removed unsafe upstream casts; `ChartDisplay` consumes a unified `ChartLike` + runtime validation.
 
