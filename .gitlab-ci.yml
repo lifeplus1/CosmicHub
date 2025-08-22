@@ -148,8 +148,8 @@ type-check:
     - node scripts/tsc-junit.cjs type-check.log type-check-junit.xml || true
     - if [ "$TYPECHECK_STATUS" -eq 0 ]; then echo "✅ All type checks passed (see type-check.log)"; else echo "❌ Type checks failed (see artifacts)"; fi
     - exit $TYPECHECK_STATUS
-  - echo "Running type error ratchet..."
-  - npm run type-check:ratchet
+    - echo "Running type error ratchet..."
+    - npm run type-check:ratchet
   artifacts:
     when: always
     paths:
@@ -257,21 +257,6 @@ frontend-astro-test:
 frontend-healwave-test:
   image: node:${NODE_VERSION}
   stage: test
-config-package-test:
-  image: node:${NODE_VERSION}
-  stage: test
-  script:
-    - echo "🧪 Running config package tests..."
-    - npm ci --cache .npm --prefer-offline
-    - npm --workspace @cosmichub/config run test:run
-  artifacts:
-    when: always
-    paths:
-      - packages/config/coverage/
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  needs: ["type-check"]
   script:
     - echo "🧪 Running HealWave frontend tests..."
     - cd apps/healwave
@@ -295,7 +280,7 @@ config-package-test:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-# Build Stage
+config-package-test:
 build-astro:
   image: node:${NODE_VERSION}
   stage: build
