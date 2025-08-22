@@ -10,10 +10,26 @@ export const APP_CONFIG = {
 } as const;
 
 // Performance-optimized API config
+const getApiUrl = (): string => {
+  try {
+    // Check Vite environment
+    const viteUrl = typeof import.meta !== 'undefined'
+      ? (import.meta as { env?: { VITE_API_URL?: string } }).env?.['VITE_API_URL']
+      : undefined;
+    
+    // Check Node environment safely
+    const nodeUrl = typeof globalThis !== 'undefined' && 'process' in globalThis
+      ? (globalThis as { process?: { env?: { VITE_API_URL?: string } } }).process?.env?.['VITE_API_URL']
+      : undefined;
+    
+    return viteUrl ?? nodeUrl ?? 'http://localhost:8000';
+  } catch {
+    return 'http://localhost:8000';
+  }
+};
+
 export const API_CONFIG = {
-  baseUrl: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) 
-    || (typeof process !== 'undefined' && process.env?.VITE_API_URL) 
-    || 'http://localhost:8000',
+  baseUrl: getApiUrl(),
   timeout: 30000,
   retryAttempts: 3,
   batchSize: 50, // For efficient data fetching

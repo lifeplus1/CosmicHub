@@ -2,20 +2,48 @@
  * Application configuration management
  */
 
+// Define typed environment interfaces
+interface ViteMetaEnv {
+  readonly MODE?: string;
+  readonly [key: string]: string | boolean | undefined;
+}
+
+interface NodeEnv {
+  readonly NODE_ENV?: string;
+  readonly [key: string]: string | undefined;
+}
+
 // Cross-runtime env accessor (works in Vite browser and Node)
-const viteEnv: any | undefined = (typeof import.meta !== 'undefined' && (import.meta as any).env)
-  ? (import.meta as any).env
-  : undefined;
+const getViteEnv = (): ViteMetaEnv | undefined => {
+  try {
+    return typeof import.meta !== 'undefined' 
+      ? (import.meta as { env?: ViteMetaEnv }).env 
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const getNodeEnv = (): NodeEnv | undefined => {
+  try {
+    return typeof globalThis !== 'undefined' && 'process' in globalThis 
+      ? (globalThis as { process?: { env?: NodeEnv } }).process?.env 
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const viteEnv = getViteEnv();
+const nodeEnv = getNodeEnv();
 
 const getEnv = (key: string, fallback = ''): string => {
   const fromVite = viteEnv?.[key];
-  const fromNode = typeof process !== 'undefined' && process?.env ? process.env[key] : undefined;
-  return (fromVite ?? fromNode ?? fallback) as string;
+  const fromNode = nodeEnv?.[key];
+  return String(fromVite ?? fromNode ?? fallback);
 };
 
-const MODE: string = (viteEnv?.MODE
-  ?? (typeof process !== 'undefined' ? process.env?.NODE_ENV : undefined)
-  ?? 'development') as string;
+const MODE: string = String(viteEnv?.['MODE'] ?? nodeEnv?.['NODE_ENV'] ?? 'development');
 
 export interface AppConfig {
   app: {
@@ -237,7 +265,17 @@ export const validateConfig = (config: AppConfig): boolean => {
   ];
   
   for (const field of requiredFields) {
-    const value = field.split('.').reduce((obj, key) => obj?.[key], config as any);
+    // Safe nested property access with proper typing
+    const path = field.split('.');
+    let value: unknown = config;
+    for (const key of path) {
+      if (typeof value !== 'object' || value === null || !(key in value)) {
+        value = undefined;
+        break;
+      }
+      value = (value as Record<string, unknown>)[key];
+    }
+    
     if (!value) {
       console.error(`Missing required config field: ${field}`);
       return false;
@@ -265,7 +303,7 @@ export const getAppConfig = (appName: string) => {
 
 // Subscription helpers
 export const getSubscriptionPlan = (planId: string): SubscriptionPlan | null => {
-  return config.subscription.plans[planId] || null;
+  return config.subscription.plans[planId] ?? null;
 };
 
 export const getAllPlans = (): SubscriptionPlan[] => {

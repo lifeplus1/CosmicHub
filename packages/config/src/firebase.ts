@@ -10,19 +10,33 @@ import { getAuth, connectAuthEmulator, Auth } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator, Firestore, enableNetwork, disableNetwork } from 'firebase/firestore';
 
 // Firebase config with environment validation
+interface ViteMetaEnv {
+  readonly VITE_FIREBASE_API_KEY?: string;
+  readonly VITE_FIREBASE_AUTH_DOMAIN?: string;
+  readonly VITE_FIREBASE_PROJECT_ID?: string;
+  readonly VITE_FIREBASE_STORAGE_BUCKET?: string;
+  readonly VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
+  readonly VITE_FIREBASE_APP_ID?: string;
+  readonly DEV?: boolean;
+  readonly VITE_USE_EMULATOR?: string;
+  [key: string]: string | boolean | undefined;
+}
+
+const env = import.meta.env as ViteMetaEnv;
+
 const firebaseConfig = {
-  apiKey: import.meta.env['VITE_FIREBASE_API_KEY'],
-  authDomain: import.meta.env['VITE_FIREBASE_AUTH_DOMAIN'],
-  projectId: import.meta.env['VITE_FIREBASE_PROJECT_ID'],
-  storageBucket: import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'],
-  messagingSenderId: import.meta.env['VITE_FIREBASE_MESSAGING_SENDER_ID'],
-  appId: import.meta.env['VITE_FIREBASE_APP_ID'],
+  apiKey: env['VITE_FIREBASE_API_KEY'],
+  authDomain: env['VITE_FIREBASE_AUTH_DOMAIN'],
+  projectId: env['VITE_FIREBASE_PROJECT_ID'],
+  storageBucket: env['VITE_FIREBASE_STORAGE_BUCKET'],
+  messagingSenderId: env['VITE_FIREBASE_MESSAGING_SENDER_ID'],
+  appId: env['VITE_FIREBASE_APP_ID'],
 };
 
 // Local devConsole (kept internal to avoid cross-package dependency)
 const devConsole = {
-  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
-  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
+  log: env.DEV ? console.log.bind(console) : undefined,
+  warn: env.DEV ? console.warn.bind(console) : undefined,
   error: console.error.bind(console)
 };
 
@@ -34,7 +48,7 @@ interface MinimalViteEnv {
   [k: string]: string | undefined;
 }
 const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_PROJECT_ID', 'VITE_FIREBASE_APP_ID'] as const;
-const envRef: MinimalViteEnv = import.meta.env as unknown as MinimalViteEnv;
+const envRef: MinimalViteEnv = env as MinimalViteEnv;
 const missingVars = requiredEnvVars.filter((varName) => {
   const value = envRef[varName];
   return value === undefined || value === null || value === '';
@@ -98,7 +112,7 @@ try {
   }
 
   // Connect to emulators in development
-  if (import.meta.env.DEV && import.meta.env['VITE_USE_EMULATOR'] === 'true') {
+  if (env.DEV && env['VITE_USE_EMULATOR'] === 'true') {
     let authEmulatorConnected = false;
     let firestoreEmulatorConnected = false;
 
@@ -167,8 +181,8 @@ export { hasAuthAvailable };
 /**
  * Environment utilities
  */
-export const isEmulator = import.meta.env.DEV && import.meta.env['VITE_USE_EMULATOR'] === 'true';
-export const isDevelopment = import.meta.env.DEV;
+export const isEmulator = env.DEV && env['VITE_USE_EMULATOR'] === 'true';
+export const isDevelopment = env.DEV;
 export const projectId = firebaseConfig.projectId;
 
 /**
