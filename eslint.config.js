@@ -145,7 +145,7 @@ export default [
       '**/tests/**/*.{ts,tsx}', 
       '**/__tests__/**/*.{ts,tsx}', 
       '**/test/**/*.{ts,tsx}',
-      '**/apps/astro/src/test/setup.ts'
+      'apps/astro/src/test/setup.ts'
     ],
     languageOptions: {
       parser: tsparser,
@@ -155,7 +155,8 @@ export default [
         sourceType: 'module',
         project: [
           'apps/astro/tsconfig.json',
-          'apps/healwave/tsconfig.json'
+          'apps/healwave/tsconfig.json',
+          'packages/types/tsconfig.test.json'
         ]
       }
     },

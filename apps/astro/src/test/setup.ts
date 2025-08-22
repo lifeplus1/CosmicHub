@@ -1,6 +1,8 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 // Mock Web Audio API for testing
 (globalThis as typeof globalThis & { AudioContext: typeof AudioContext }).AudioContext = vi.fn().mockImplementation(() => ({
   createOscillator: vi.fn(() => ({
