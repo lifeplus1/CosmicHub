@@ -345,6 +345,60 @@ class SecurityValidator:
         
         return validated_settings
 
+    # Backward compatibility methods for existing tests
+    @staticmethod
+    def validate_email_bool(email: str) -> bool:
+        """Backward compatibility: validate email and return boolean"""
+        try:
+            SecurityValidator.validate_email(email)
+            return True
+        except HTTPException:
+            return False
+    
+    @staticmethod
+    def validate_birth_data(birth_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Backward compatibility: validate birth data dictionary"""
+        if not isinstance(birth_data, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Birth data must be a dictionary"
+            )
+        
+        validated = {}
+        
+        # Handle date validation
+        if "date" in birth_data:
+            validated["date"] = SecurityValidator.sanitize_string(str(birth_data["date"]), 20)
+            
+        # Handle time validation
+        if "time" in birth_data:
+            validated["time"] = SecurityValidator.sanitize_string(str(birth_data["time"]), 10)
+            
+        # Handle location validation
+        if "location" in birth_data and isinstance(birth_data["location"], dict):
+            location = birth_data["location"]
+            validated_location = {}
+            
+            # Validate coordinates
+            if "lat" in location and "lng" in location:
+                try:
+                    lat, lng = SecurityValidator.validate_coordinates(location["lat"], location["lng"])
+                    validated_location["lat"] = lat
+                    validated_location["lng"] = lng
+                except HTTPException:
+                    pass  # Skip invalid coordinates
+            
+            # Validate location name
+            if "name" in location:
+                try:
+                    validated_location["name"] = SecurityValidator.validate_city_name(str(location["name"]))
+                except HTTPException:
+                    validated_location["name"] = SecurityValidator.sanitize_string(str(location["name"]), 100)
+            
+            validated["location"] = validated_location
+        
+        return validated
+
 
 class SecureBirthData(BaseModel):
     """Enhanced birth data model with comprehensive validation"""

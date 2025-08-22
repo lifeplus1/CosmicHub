@@ -12,8 +12,61 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .csrf import CSRFMiddleware, CSRFProtection
 from .headers import SecurityHeadersMiddleware
-from .rate_limiting import rate_limiter
+from .rate_limiting import rate_limiter, EnhancedRateLimiter
 from .validation import SecurityValidator
+
+# Backward compatibility aliases for existing tests
+class InputValidator:
+    """Backward compatibility wrapper for SecurityValidator"""
+    @staticmethod
+    def validate_email(email: str) -> bool:
+        return SecurityValidator.validate_email_bool(email)
+    
+    @staticmethod
+    def validate_birth_data(birth_data: Dict[str, Any]) -> Dict[str, Any]:
+        return SecurityValidator.validate_birth_data(birth_data)
+
+RateLimiter = EnhancedRateLimiter  # Alias for backward compatibility
+
+class SecurityHeaders:
+    """Backward compatibility wrapper for SecurityHeaders"""
+    @staticmethod
+    def add_security_headers(response: Any) -> Any:
+        """Add security headers to response (backward compatibility)"""
+        # This mimics the old API expected by the tests
+        headers = {
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY", 
+            "X-XSS-Protection": "1; mode=block",
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "Content-Security-Policy": "default-src 'self'",
+        }
+        
+        for header, value in headers.items():
+            response.headers[header] = value
+        
+        return response
+
+def create_rate_limit_key(request: Any, user_id: Optional[str] = None) -> str:
+    """Create rate limit key for backward compatibility"""
+    if user_id:
+        return f"user:{user_id}"
+    
+    # Get client IP
+    client_ip = "unknown"
+    if hasattr(request, 'client') and request.client:
+        client_ip = str(request.client.host)
+    elif hasattr(request, 'headers'):
+        # Check proxy headers
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            client_ip = str(forwarded_for).split(",")[0].strip()
+        else:
+            real_ip = request.headers.get("X-Real-IP")
+            if real_ip:
+                client_ip = str(real_ip)
+    
+    return f"ip:{client_ip}"
 
 
 class SecurityManager:
