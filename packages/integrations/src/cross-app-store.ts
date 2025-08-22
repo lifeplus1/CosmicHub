@@ -4,48 +4,40 @@
  */
 
 // Simple EventEmitter implementation for browser compatibility
+type Listener<T = unknown> = (data: T) => void;
 class SimpleEventEmitter {
-  private events: { [key: string]: Function[] } = {};
+  private events: Record<string, Listener[]> = {};
 
-  on(event: string, callback: Function): void {
-    if (!this.events[event]) {
-      this.events[event] = [];
-    }
-    this.events[event].push(callback);
+  on<T = unknown>(event: string, callback: Listener<T>): void {
+    (this.events[event] ??= []).push(callback as Listener);
   }
 
-  off(event: string, callback: Function): void {
-    if (!this.events[event]) return;
-    this.events[event] = this.events[event].filter(cb => cb !== callback);
+  off<T = unknown>(event: string, callback: Listener<T>): void {
+    const list = this.events[event];
+    if (!list) return;
+    this.events[event] = list.filter(cb => cb !== (callback as Listener));
   }
 
-  emit(event: string, data?: any): void {
-    if (!this.events[event]) return;
-    this.events[event].forEach(callback => callback(data));
+  emit<T = unknown>(event: string, data: T): void {
+    const list = this.events[event];
+    if (!list) return;
+    list.forEach(callback => {
+      try { callback(data); } catch (err) { console.warn('Listener error', err); }
+    });
   }
 }
 
+export interface UserPreferences { [key: string]: unknown }
+export interface ChartData { id: string; data: Record<string, unknown> | null; name: string }
+export interface UserState { id: string; subscription: string; preferences: UserPreferences }
 export interface AppState {
-  user: {
-    id: string;
-    subscription: string;
-    preferences: Record<string, any>;
-  } | null;
-  currentChart: {
-    id: string;
-    data: any;
-    name: string;
-  } | null;
+  user: UserState | null;
+  currentChart: ChartData | null;
   theme: 'light' | 'dark' | 'cosmic';
   activeApp: 'astro' | 'healwave';
 }
 
-export interface CrossAppEvent {
-  type: string;
-  payload: any;
-  source: string;
-  timestamp: number;
-}
+export interface CrossAppEvent<P = unknown> { type: string; payload: P; source: string; timestamp: number }
 
 class CrossAppStore extends SimpleEventEmitter {
   private state: AppState = {
@@ -70,18 +62,18 @@ class CrossAppStore extends SimpleEventEmitter {
 
   // Update user data
   updateUser(user: AppState['user']): void {
-    this.state.user = user;
+    this.state.user = user ?? null;
     this.saveState();
-    this.emit('user:updated', user);
-    this.broadcastEvent('user:updated', user);
+    this.emit('user:updated', this.state.user);
+    this.broadcastEvent('user:updated', this.state.user);
   }
 
   // Update current chart
   updateChart(chart: AppState['currentChart']): void {
-    this.state.currentChart = chart;
+    this.state.currentChart = chart ?? null;
     this.saveState();
-    this.emit('chart:updated', chart);
-    this.broadcastEvent('chart:updated', chart);
+    this.emit('chart:updated', this.state.currentChart);
+    this.broadcastEvent('chart:updated', this.state.currentChart);
   }
 
   // Update theme
@@ -101,7 +93,7 @@ class CrossAppStore extends SimpleEventEmitter {
   }
 
   // Sync chart data from astro to healwave
-  syncChartToHealwave(chartData: any): void {
+  syncChartToHealwave(chartData: ChartData | null): void {
     this.broadcastEvent('chart:sync', chartData);
   }
 
@@ -111,7 +103,7 @@ class CrossAppStore extends SimpleEventEmitter {
   }
 
   // Subscribe to events
-  subscribe(event: string, callback: (data: any) => void): () => void {
+  subscribe<T = unknown>(event: string, callback: Listener<T>): () => void {
     this.on(event, callback);
     return () => this.off(event, callback);
   }
@@ -129,7 +121,8 @@ class CrossAppStore extends SimpleEventEmitter {
     try {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
-        this.state = { ...this.state, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved) as Partial<AppState>;
+        this.state = { ...this.state, ...parsed };
       }
     } catch (error) {
       console.warn('Failed to load cross-app state:', error);
@@ -138,12 +131,12 @@ class CrossAppStore extends SimpleEventEmitter {
 
   private setupStorageListener(): void {
     if (typeof window !== 'undefined') {
-      window.addEventListener('storage', (event) => {
+  window.addEventListener('storage', (event) => {
         if (event.key === this.storageKey && event.newValue) {
           try {
-            const newState = JSON.parse(event.newValue);
-            this.state = newState;
-            this.emit('state:synced', newState);
+    const newState = JSON.parse(event.newValue) as Partial<AppState>;
+    this.state = { ...this.state, ...newState };
+    this.emit('state:synced', this.state);
           } catch (error) {
             console.warn('Failed to sync cross-app state:', error);
           }
@@ -152,8 +145,8 @@ class CrossAppStore extends SimpleEventEmitter {
     }
   }
 
-  private broadcastEvent(type: string, payload: any): void {
-    const event: CrossAppEvent = {
+  private broadcastEvent<P = unknown>(type: string, payload: P): void {
+    const event: CrossAppEvent<P> = {
       type,
       payload,
       source: this.state.activeApp,
@@ -162,8 +155,8 @@ class CrossAppStore extends SimpleEventEmitter {
 
     // Broadcast via localStorage for cross-tab communication
     try {
-      const eventKey = `cosmichub-event-${Date.now()}`;
-      localStorage.setItem(eventKey, JSON.stringify(event));
+  const eventKey = `cosmichub-event-${Date.now()}`;
+  localStorage.setItem(eventKey, JSON.stringify(event));
       
       // Clean up old events
       setTimeout(() => {
@@ -183,7 +176,7 @@ class CrossAppStore extends SimpleEventEmitter {
       activeApp: 'astro'
     };
     this.saveState();
-    this.emit('state:cleared');
+  this.emit('state:cleared', this.state);
   }
 }
 

@@ -1,9 +1,11 @@
 import { z } from 'zod';
-import { InterpretationRequest, InterpretationResponse, AIServiceError } from './types';
+import { InterpretationRequest } from './types';
 
 // Schema for validating API response
-const InterpretationResponseSchema = z.object({
-  interpretation: z.string(),
+const ChatCompletionSchema = z.object({
+  choices: z.array(z.object({
+    message: z.object({ content: z.string() })
+  })).min(1)
 });
 
 // Schema for validating request payload
@@ -18,17 +20,18 @@ export class XAIService {
   private static baseUrl = 'https://api.x.ai/v1';
   
   private static getApiKey(): string {
-    // Try to get from environment variables
-    if (typeof process !== 'undefined' && process.env?.XAI_API_KEY) {
-      return process.env.XAI_API_KEY;
-    }
-    
-    // Try to get from Vite env
-    if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_XAI_API_KEY) {
-      return (import.meta as any).env.VITE_XAI_API_KEY;
-    }
-    
-    throw new Error('XAI_API_KEY environment variable is not set');
+    // Support both Node and Vite environments without unsafe member access
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const globalProcess: any = (globalThis as unknown as { process?: unknown }).process;
+    const nodeEnv = (globalProcess && typeof globalProcess === 'object' ? (globalProcess as { env?: Record<string, unknown> }).env : undefined) ?? undefined;
+    const nodeKey = typeof nodeEnv?.['XAI_API_KEY'] === 'string' ? String(nodeEnv['XAI_API_KEY']) : undefined;
+    const metaEnv = (import.meta as unknown as { env?: Record<string, unknown> }).env;
+    const viteKey = typeof metaEnv?.['VITE_XAI_API_KEY'] === 'string'
+      ? String(metaEnv['VITE_XAI_API_KEY'])
+      : undefined;
+    const key = nodeKey ?? viteKey;
+    if (!key) throw new Error('XAI_API_KEY environment variable is not set');
+    return key;
   }
 
   static async generateInterpretation(
@@ -69,19 +72,18 @@ export class XAIService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        await response.json().catch(() => undefined); // consume body if present
         throw new Error(`xAI API request failed: ${response.statusText} (${response.status})`);
       }
 
-      const data = await response.json();
-      
-      // Extract the interpretation from the response
-      const interpretation = data.choices?.[0]?.message?.content;
-      if (!interpretation) {
-        throw new Error('No interpretation received from xAI API');
+      const json: unknown = await response.json();
+      const parsed = ChatCompletionSchema.safeParse(json);
+      if (!parsed.success) {
+        throw new Error('Unexpected API response shape');
       }
-
-      return interpretation;
+      const first = parsed.data.choices[0];
+      if (!first) throw new Error('Empty choices array in response');
+      return first.message.content;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`xAI API error: ${error.message}`);

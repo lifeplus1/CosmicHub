@@ -6,12 +6,6 @@
  */
 
 import { DesignTokens, ComponentPattern } from '../testing/designSystem';
-// Local relaxed pattern variant types for optimization module (avoids strict mismatch with testing definitions)
-interface PatternVariant {
-  name: string;
-  props: Record<string, string>;
-  required?: boolean;
-}
 
 export interface ComponentIssue {
   id: string;
@@ -46,11 +40,9 @@ export interface ComponentLibraryReport {
 }
 
 export class ComponentLibraryOptimizer {
-  private designTokens: DesignTokens;
   private componentPatterns: Map<string, ComponentPattern>;
 
-  constructor(designTokens: DesignTokens, componentPatterns: ComponentPattern[]) {
-    this.designTokens = designTokens;
+  constructor(_designTokens: DesignTokens, componentPatterns: ComponentPattern[]) {
     this.componentPatterns = new Map(
       componentPatterns.map(pattern => [pattern.name, pattern])
     );
@@ -194,7 +186,7 @@ export class ComponentLibraryOptimizer {
 
     // Missing memoization
     if (code.includes('useEffect') && code.includes('[]')) {
-      const effectCount = (code.match(/useEffect/g) || []).length;
+  const effectCount = (code.match(/useEffect/g) ?? []).length;
       if (effectCount > 2) {
         issues.push({
           id: 'perf-memoization',
@@ -208,9 +200,9 @@ export class ComponentLibraryOptimizer {
     }
 
     // Inline object creation - improved detection
-    const inlineStyleRegex = /style=\{\{[^}]+\}\}/g;
-    const inlineObjectMatches = code.match(inlineStyleRegex);
-    if (inlineObjectMatches && inlineObjectMatches.length > 0) {
+  const inlineStyleRegex = /style=\{\{[^}]+\}\}/g;
+  const inlineObjectMatches = code.match(inlineStyleRegex);
+  if ((inlineObjectMatches ?? []).length > 0) {
       issues.push({
         id: 'perf-inline-objects',
         component: componentName,
@@ -283,41 +275,34 @@ export class ComponentLibraryOptimizer {
 
     // Check required props
     // variants in ComponentPattern are string[] (names). We keep an internal augmented map if needed later.
-    if (Array.isArray((pattern as any).variants)) {
-      (pattern as any).variants.forEach((v: any) => {
-        // Only process if variant is an object with metadata (our extended form)
-        if (v && typeof v === 'object' && v.required && v.props) {
-          Object.keys(v.props).forEach(prop => {
-            if (!code.includes(prop)) {
-              issues.push({
-                id: `pattern-missing-prop-${prop}`,
-                component: componentName,
-                type: 'pattern',
-                severity: 'high',
-                message: `Missing required prop: ${prop}`,
-                fix: `Add ${prop} prop to component interface`
-              });
-            }
-          });
-        }
-      });
-    }
+    // variants is string[] in ComponentPattern; requiredProps enforces requirements
+    pattern.requiredProps?.forEach(prop => {
+      if (!code.includes(prop)) {
+        issues.push({
+          id: `pattern-missing-prop-${prop}`,
+          component: componentName,
+          type: 'pattern',
+          severity: 'high',
+          message: `Missing required prop: ${prop}`,
+          fix: `Add ${prop} prop to component interface`
+        });
+      }
+    });
 
-    // Check accessibility requirements
-    if ((pattern as any).accessibility && Array.isArray((pattern as any).accessibility)) {
-      (pattern as any).accessibility.forEach((requirement: string) => {
-        if (!code.includes(requirement)) {
-          issues.push({
-            id: `pattern-a11y-${requirement}`,
-            component: componentName,
-            type: 'pattern',
-            severity: 'high',
-            message: `Missing accessibility requirement: ${requirement}`,
-            fix: `Implement ${requirement} for pattern compliance`
-          });
-        }
-      });
-    }
+    // Accessibility requirements under pattern.accessibility?.requiredAttributes
+    const a11yReqs = pattern.accessibility?.requiredAttributes ?? [];
+    a11yReqs.forEach(req => {
+      if (!code.includes(req)) {
+        issues.push({
+          id: `pattern-a11y-${req}`,
+          component: componentName,
+          type: 'pattern',
+          severity: 'high',
+          message: `Missing accessibility requirement: ${req}`,
+          fix: `Implement ${req} for pattern compliance`
+        });
+      }
+    });
 
     return issues;
   }

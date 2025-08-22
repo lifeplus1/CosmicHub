@@ -1,24 +1,32 @@
+interface ExtendedWindow extends Window { webkitAudioContext?: typeof AudioContext }
+
+export interface BasicChartData { sun?: { sign?: string } }
+
 export class HealwaveIntegration {
   private audioContext: AudioContext | null = null;
 
   createAudioContext(): AudioContext {
     if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const win = window as ExtendedWindow;
+      const Ctx = window.AudioContext ?? win.webkitAudioContext;
+      if (!Ctx) throw new Error('Web Audio API not supported');
+      this.audioContext = new Ctx();
     }
     return this.audioContext;
   }
 
-  async generateFrequencies(chartData: any): Promise<number[]> {
+  generateFrequencies(chartData: BasicChartData | null | undefined): number[] {
     // Generate healing frequencies based on astrological chart data
     const baseFrequencies = [528, 396, 417, 639, 741, 852, 963]; // Solfeggio frequencies
     
     // Customize based on chart data
-    if (chartData?.sun?.sign) {
+    const sign = chartData?.sun?.sign?.toLowerCase();
+    if (sign) {
       const signIndex = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 
                         'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces']
-                       .indexOf(chartData.sun.sign.toLowerCase());
+                       .indexOf(sign);
       if (signIndex >= 0) {
-        return baseFrequencies.map(freq => freq + (signIndex * 5));
+        return baseFrequencies.map(freq => freq + signIndex * 5);
       }
     }
     
