@@ -32,20 +32,13 @@ export default [
       '**/.storybook/**',
       '**/storybook-static/**',
       '**/scripts/**',
-      '**/*.config.{js,ts,mjs,cjs}',
       '**/postcss.config.*',
       '**/tailwind.config.*',
       '**/vite.config.*',
       '**/vitest.config.*',
-      '**/eslint.config.*',
       
-      // Test files (separate linting if needed)
-      '**/__tests__/**',
-      '**/*.test.{js,ts,tsx}',
-      '**/*.spec.{js,ts,tsx}',
+      // Test setup and utility files that shouldn't be linted
       '**/test-setup.ts',
-      '**/test/**',
-      '**/tests/**',
       '**/test-utils/**',
       
       // Story files (separate linting if needed)
@@ -94,11 +87,13 @@ export default [
     ],
     languageOptions: {
       parser: tsparser,
-      globals: { ...globals.node, ...globals.browser, ...globals.es2020 },
+      globals: { ...globals.node, ...globals.browser, ...globals.es2020, JSX: 'readonly' },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
         project: [
+          'apps/astro/tsconfig.json',
+          'apps/healwave/tsconfig.json',
           'packages/types/tsconfig.test.json',
           'packages/auth/tsconfig.json',
           'packages/ui/tsconfig.json'
