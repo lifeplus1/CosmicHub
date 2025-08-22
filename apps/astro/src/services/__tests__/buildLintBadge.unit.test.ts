@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 // Import the ESM module directly
-import { buildLintBadge } from '../../../../../scripts/lib/build-lint-badge.mjs';
+import { buildLintBadge } from 'build-lint-badge';
 
 describe('buildLintBadge (fast)', () => {
   it('classifies colors across thresholds', (): { color: string }[] => {
