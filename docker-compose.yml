@@ -31,13 +31,19 @@ services:
       - redis
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health', timeout=10)"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:8001/health', timeout=10)",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
 
   backend:
-    build: 
+    build:
       context: ./backend
       cache_from:
         - cosmichub/backend:latest
@@ -60,7 +66,13 @@ services:
       - redis
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=10)"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:8000/health', timeout=10)",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
