@@ -25,7 +25,7 @@ class PWACapabilitiesDetector {
       hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
       hasStandalone:
         window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true,
+        (window.navigator as any).standalone === true, // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       hasPushNotifications: 'PushManager' in window && 'Notification' in window,
       hasBackgroundSync:
         'serviceWorker' in navigator &&
@@ -92,17 +92,15 @@ function initializeMobileEnhancements(): void {
 
   // Web share integration
   if (capabilities.hasWebShare) {
-    window.addEventListener('share-chart', async (_e: any) => {
+    window.addEventListener('share-chart', (_e: Event) => {
       if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'My Cosmic Chart - CosmicHub',
-            text: 'Check out my astrological chart from CosmicHub!',
-            url: window.location.href,
-          });
-        } catch (error) {
+        navigator.share({
+          title: 'My Cosmic Chart - CosmicHub',
+          text: 'Check out my astrological chart from CosmicHub!',
+          url: window.location.href,
+        }).catch((error) => {
           devConsole.log?.('Share cancelled or failed:', error);
-        }
+        });
       }
     });
   }
