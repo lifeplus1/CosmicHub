@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
-import { getStripeServiceOrThrow, StripeSession } from '@cosmichub/integrations';
-
+import {
+  getStripeService,
+  StripeSession,
+} from '@cosmichub/integrations';
 
 const Subscribe: React.FC = () => {
   const { user } = useAuth();
@@ -18,7 +20,10 @@ const Subscribe: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const stripeService = getStripeServiceOrThrow();
+      const stripeService = getStripeService();
+      if (!stripeService) {
+        throw new Error('Stripe service is not available');
+      }
       // Create Stripe checkout session for HealWave Pro
       const successUrl = `${window.location.origin}/pricing/success?tier=premium`;
       const cancelUrl = `${window.location.origin}/pricing/cancel`;

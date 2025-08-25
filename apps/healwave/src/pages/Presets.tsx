@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { devConsole } from '../config/devConsole';
- 
- 
+
 import { AudioSettings, FrequencyPreset } from '@cosmichub/frequency';
 import PresetSelector from '../components/PresetSelector';
 
@@ -18,7 +17,7 @@ const Presets: React.FC = () => {
 
   const handleSelectPreset = (preset: FrequencyPreset): void => {
     // Debug selection (development only)
-    devConsole.log?.('Selected preset:', preset);
+    devConsole.info('Selected preset:', preset);
     setCurrentPreset(preset);
   };
 

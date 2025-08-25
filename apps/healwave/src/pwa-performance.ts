@@ -1,20 +1,19 @@
 /**
-import { devConsole } from '../config/devConsole';
  * Advanced PWA Performance Enhancements for HealWave
  * Builds on existing CosmicHub performance optimizations
  */
 
+import { devConsole } from './config/devConsole';
+
 // Simple logger for PWA performance monitoring using shared devConsole pattern
 // Local lightweight proxy (avoids cross-app import during early init)
- 
- 
 
 class PWALogger {
   static log(message: string, ...args: unknown[]): void {
-    devConsole.log?.(message, ...args);
+    devConsole.info(message, ...args);
   }
   static warn(message: string, ...args: unknown[]): void {
-    devConsole.warn?.(message, ...args);
+    devConsole.warn(message, ...args);
   }
   static error(message: string, ...args: unknown[]): void {
     devConsole.error(message, ...args);
