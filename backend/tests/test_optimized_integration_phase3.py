@@ -11,7 +11,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from utils.optimized_vectorized_integration import (
+from utils.optimized_vectorized_integration import (  # noqa: E402
     OptimizedVectorizedAspectCalculator,
     optimized_calculation_session,
     optimized_synastry_calculation,
@@ -101,7 +101,7 @@ class TestOptimizedVectorizedAspectCalculator:
         )
 
         # Results should be different (at least some values)
-        # Note: They may be similar but shouldn't be identical due to different orb
+        # Note: They may be similar but shouldn't be identical due to different orb  # noqa: E501
         assert result1.shape == result2.shape
 
     def test_batch_processing(self):
@@ -186,13 +186,13 @@ class TestOptimizedVectorizedAspectCalculator:
         assert "expected_memory_usage" in recommendations
 
         # Should recommend caching for large datasets
-        assert recommendations["enable_caching"] == True
+        assert recommendations["enable_caching"] == True  # noqa: E712
 
     def test_fallback_calculation(self):
         """Test fallback calculation when main calculator unavailable."""
         # Disable the main calculator by mocking import failure
         with patch(
-            "utils.optimized_vectorized_integration.VectorizedAspectCalculator",
+            "utils.optimized_vectorized_integration.VectorizedAspectCalculator",  # noqa: E501
             side_effect=ImportError,
         ):
 
@@ -223,7 +223,7 @@ class TestIntegrationFunctions:
         # Check metadata
         metadata = result["metadata"]
         assert metadata["orb"] == 8.0
-        assert metadata["optimization_enabled"] == True
+        assert metadata["optimization_enabled"] == True  # noqa: E712
         assert "cached" in metadata
 
     def test_optimized_calculation_session_context(self):

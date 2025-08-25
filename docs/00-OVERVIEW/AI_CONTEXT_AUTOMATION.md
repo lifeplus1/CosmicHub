@@ -154,11 +154,11 @@ features complete.
 
 ### **Include When Relevant**
 
-4. **`docs/02-ACTIVE-PRIORITIES/MASTER_TASK_LIST.md`** - When working on tasks
-5. **`docs/04-ARCHITECTURE/SYSTEM_ARCHITECTURE.md`** - For technical work
-6. **`docs/03-GUIDES/DEPLOYMENT_GUIDE.md`** - For deployment issues
-7. **`package.json`** - For dependencies and scripts
-8. **`eslint.config.js`** - For code quality issues
+1. **`docs/02-ACTIVE-PRIORITIES/MASTER_TASK_LIST.md`** - When working on tasks
+2. **`docs/04-ARCHITECTURE/SYSTEM_ARCHITECTURE.md`** - For technical work
+3. **`docs/03-GUIDES/DEPLOYMENT_GUIDE.md`** - For deployment issues
+4. **`package.json`** - For dependencies and scripts
+5. **`eslint.config.js`** - For code quality issues
 
 ## 🎯 **AUTOMATION BENEFITS**
 

@@ -25,6 +25,7 @@
   "dependencies": {
     "@cosmichub/auth": "workspace:*",
     "@cosmichub/config": "workspace:*",
+    "@cosmichub/storage": "workspace:*",
     "@cosmichub/subscriptions": "workspace:*",
     "@cosmichub/types": "workspace:*",
     "@cosmichub/ui": "workspace:*",

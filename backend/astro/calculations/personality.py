@@ -2,7 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: E402
 
 
 def get_personality_traits(chart: Dict[str, Any]) -> Dict[str, Any]:

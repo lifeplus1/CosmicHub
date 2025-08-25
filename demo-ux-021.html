@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UX-021 Mobile PWA Demo - CosmicHub</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <!-- Apple-specific PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CosmicHub">
+    
+    <style>
+        /* UX-021 Mobile PWA Enhancement Styles */
+        :root {
+            --vh: 1vh;
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-right: env(safe-area-inset-right);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --safe-area-inset-left: env(safe-area-inset-left);
+            --touch-target-min: 44px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f0f23);
+            color: white;
+            min-height: calc(var(--vh, 1vh) * 100);
+            padding-top: var(--safe-area-inset-top);
+            padding-right: var(--safe-area-inset-right);
+            padding-bottom: var(--safe-area-inset-bottom);
+            padding-left: var(--safe-area-inset-left);
+            -webkit-tap-highlight-color: rgba(124, 58, 237, 0.2);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 20px;
+            color: #22c55e;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-section h2 {
+            color: #a855f7;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .feature-card h3 {
+            color: #06b6d4;
+            margin-bottom: 12px;
+        }
+
+        .touch-button {
+            min-height: var(--touch-target-min);
+            min-width: var(--touch-target-min);
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            margin: 8px;
+            font-size: 16px;
+        }
+
+        .touch-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+        }
+
+        .touch-button:active {
+            transform: scale(0.95);
+        }
+
+        .swipe-demo {
+            background: rgba(124, 58, 237, 0.1);
+            padding: 40px;
+            text-align: center;
+            border-radius: 12px;
+            border: 2px dashed rgba(124, 58, 237, 0.3);
+            margin: 20px 0;
+            touch-action: pan-x;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .platform-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .platform-card {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .capabilities {
+            list-style: none;
+            padding: 0;
+        }
+
+        .capabilities li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .capabilities li:before {
+            content: '✅ ';
+            margin-right: 8px;
+        }
+
+        /* Toast notification styles */
+        .toast {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            z-index: 1000;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .demo-section {
+                padding: 20px;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎧 UX-021 Implementation</h1>
+            <div class="status">✅ COMPLETE</div>
+            <p>Mobile PWA enhancements for CosmicHub platform</p>
+        </header>
+
+        <section class="demo-section">
+            <h2>🎯 Mobile PWA Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>📱 Touch Gestures</h3>
+                    <p>Enhanced touch handling with swipe detection and tap feedback</p>
+                    <div class="swipe-demo" id="swipeDemo">
+                        <p>👆 Try swiping left/right on mobile</p>
+                        <p id="swipeStatus">Swipe to test gesture detection</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🖥️ Platform Detection</h3>
+                    <div class="platform-info">
+                        <div class="platform-card">
+                            <strong>Platform:</strong>
+                            <div id="platformInfo">Detecting...</div>
+                        </div>
+                        <div class="platform-card">
+                            <strong>PWA Status:</strong>
+                            <div id="pwaStatus">Checking...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h3>📐 Viewport Optimization</h3>
+                    <ul class="capabilities">
+                        <li>Safe area support for notched devices</li>
+                        <li>Dynamic viewport height units</li>
+                        <li>Touch target size optimization</li>
+                        <li>Prevent zoom on form inputs</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>⌨️ Enhanced Interactions</h3>
+                    <div>
+                        <button class="touch-button" onclick="showToast('Button tapped!')">
+                            Touch Optimized Button
+                        </button>
+                        <button class="touch-button" onclick="testInstallPrompt()">
+                            Test Install Prompt
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="demo-section">
+            <h2>📊 Implementation Status</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>✅ Completed Features</h3>
+                    <ul class="capabilities">
+                        <li>Mobile gesture handling system</li>
+                        <li>Platform-specific install prompts</li>
+                        <li>Viewport optimization for mobile Safari</li>
+                        <li>Touch target accessibility improvements</li>
+                        <li>CSS mobile-first enhancements</li>
+                        <li>Enhanced PWA service worker integration</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>📱 Platform Support</h3>
+                    <ul class="capabilities">
+                        <li>iOS Safari with safe area support</li>
+                        <li>Android Chrome with PWA features</li>
+                        <li>Desktop browsers with responsive design</li>
+                        <li>Landscape/portrait orientation handling</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast notification container -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // UX-021 Mobile PWA Enhancement JavaScript
+        
+        // Set viewport height custom property
+        function setVH() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        // Platform detection
+        function detectPlatform() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+            const isAndroid = /android/.test(userAgent);
+            const isMobile = isIOS || isAndroid || /mobile/.test(userAgent);
+            
+            const platform = isIOS ? 'iOS' : 
+                           isAndroid ? 'Android' :
+                           isMobile ? 'Mobile' : 'Desktop';
+            
+            document.getElementById('platformInfo').textContent = platform;
+            
+            // Check PWA status
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                               window.navigator.standalone === true;
+            
+            document.getElementById('pwaStatus').textContent = isStandalone ? 'Installed PWA' : 'Browser';
+            
+            return { platform, isStandalone, isMobile };
+        }
+
+        // Conditionally add theme-color meta tags for supported browsers
+        function addThemeColorSupport() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isFirefox = /firefox/.test(userAgent);
+            const isOpera = /opera|opr/.test(userAgent);
+            
+            // Only add theme-color for browsers that support it
+            if (!isFirefox && !isOpera) {
+                const head = document.head;
+                
+                // Primary theme color
+                const themeColor = document.createElement('meta');
+                themeColor.name = 'theme-color';
+                themeColor.content = '#7c3aed';
+                head.appendChild(themeColor);
+                
+                // Light mode theme color
+                const themeColorLight = document.createElement('meta');
+                themeColorLight.name = 'theme-color';
+                themeColorLight.content = '#7c3aed';
+                themeColorLight.media = '(prefers-color-scheme: light)';
+                head.appendChild(themeColorLight);
+                
+                // Dark mode theme color
+                const themeColorDark = document.createElement('meta');
+                themeColorDark.name = 'theme-color';
+                themeColorDark.content = '#1a1a2e';
+                themeColorDark.media = '(prefers-color-scheme: dark)';
+                head.appendChild(themeColorDark);
+                
+                console.log('🎨 Theme color support added for compatible browser');
+            } else {
+                console.log('🎨 Theme color skipped for Firefox/Opera compatibility');
+            }
+        }
+
+        // Touch gesture handling
+        class MobileGestureHandler {
+            constructor() {
+                this.touchStartX = 0;
+                this.touchStartY = 0;
+                this.touchEndX = 0;
+                this.touchEndY = 0;
+                this.minSwipeDistance = 50;
+                this.attachListeners();
+            }
+
+            attachListeners() {
+                document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+                document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
+            }
+
+            handleTouchStart(e) {
+                const touch = e.touches[0];
+                if (!touch) return;
+                
+                this.touchStartX = touch.clientX;
+                this.touchStartY = touch.clientY;
+            }
+
+            handleTouchEnd(e) {
+                const touch = e.changedTouches[0];
+                if (!touch) return;
+
+                this.touchEndX = touch.clientX;
+                this.touchEndY = touch.clientY;
+                this.handleSwipe();
+            }
+
+            handleSwipe() {
+                const deltaX = this.touchEndX - this.touchStartX;
+                const deltaY = this.touchEndY - this.touchStartY;
+                const absDeltaX = Math.abs(deltaX);
+                const absDeltaY = Math.abs(deltaY);
+
+                if (absDeltaX > absDeltaY && absDeltaX > this.minSwipeDistance) {
+                    if (deltaX > 0) {
+                        this.onSwipeRight();
+                    } else {
+                        this.onSwipeLeft();
+                    }
+                }
+            }
+
+            onSwipeLeft() {
+                document.getElementById('swipeStatus').textContent = '← Swiped Left!';
+                setTimeout(() => {
+                    document.getElementById('swipeStatus').textContent = 'Swipe to test gesture detection';
+                }, 2000);
+            }
+
+            onSwipeRight() {
+                document.getElementById('swipeStatus').textContent = 'Swiped Right! →';
+                setTimeout(() => {
+                    document.getElementById('swipeStatus').textContent = 'Swipe to test gesture detection';
+                }, 2000);
+            }
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Install prompt test
+        function testInstallPrompt() {
+            const platform = detectPlatform();
+            
+            if (platform.platform === 'iOS') {
+                showToast('On iOS: Use Safari Share → Add to Home Screen');
+            } else if (platform.isStandalone) {
+                showToast('PWA already installed!');
+            } else {
+                showToast('Install prompt would appear on supported platforms');
+            }
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add theme color support conditionally
+            addThemeColorSupport();
+            
+            // Set initial viewport
+            setVH();
+            
+            // Handle orientation changes and resize
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(setVH, 500);
+            });
+            
+            // Initialize platform detection
+            detectPlatform();
+            
+            // Initialize gesture handling
+            new MobileGestureHandler();
+            
+            // Add mobile-specific body classes
+            const { platform, isMobile } = detectPlatform();
+            if (isMobile) {
+                document.body.classList.add('mobile-device', `platform-${platform.toLowerCase()}`);
+            }
+            
+            console.log('🎧 UX-021 Mobile PWA enhancements initialized');
+        });
+    </script>
+</body>
+</html>

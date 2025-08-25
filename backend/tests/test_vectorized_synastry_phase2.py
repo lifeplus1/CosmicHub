@@ -1,6 +1,6 @@
 """
-Phase 2: Comprehensive unit tests and integration for vectorized synastry calculations.
-Focuses on testing the actual implementation and integration with existing systems.
+Phase 2: Comprehensive unit tests and integration for vectorized synastry calculations.  # noqa: E501
+Focuses on testing the actual implementation and integration with existing systems.  # noqa: E501
 """
 
 import os
@@ -13,8 +13,8 @@ import pytest
 # Add backend to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from utils.aspect_utils import PLANETS, build_aspect_matrix, get_key_aspects
-from utils.vectorized_aspect_utils import (
+from utils.aspect_utils import PLANETS, build_aspect_matrix, get_key_aspects  # noqa: E501, E402
+from utils.vectorized_aspect_utils import (  # noqa: E402
     VectorizedAspectCalculator,
     batch_synastry_analysis,
     build_aspect_matrix_fast,
@@ -195,18 +195,18 @@ class TestVectorizedAspectCalculatorCore:
                     continue
                 elif trad_cell is None or vect_cell is None:
                     pytest.fail(
-                        f"Mismatch at [{i}][{j}]: traditional={trad_cell}, vectorized={vect_cell}"
+                        f"Mismatch at [{i}][{j}]: traditional={trad_cell}, vectorized={vect_cell}"  # noqa: E501
                     )
                 else:
                     # Both have aspects - compare them
                     assert (
                         trad_cell["aspect"] == vect_cell["aspect"]
-                    ), f"Aspect mismatch at [{i}][{j}]: {trad_cell['aspect']} vs {vect_cell['aspect']}"
+                    ), f"Aspect mismatch at [{i}][{j}]: {trad_cell['aspect']} vs {vect_cell['aspect']}"  # noqa: E501
 
                     # Orbs should be very close (within 0.1°)
                     assert (
                         abs(trad_cell["orb"] - vect_cell["orb"]) < 0.1
-                    ), f"Orb mismatch at [{i}][{j}]: {trad_cell['orb']} vs {vect_cell['orb']}"
+                    ), f"Orb mismatch at [{i}][{j}]: {trad_cell['orb']} vs {vect_cell['orb']}"  # noqa: E501
 
     def test_performance_improvement(self):
         """Test that vectorized calculation is faster than traditional."""
@@ -247,7 +247,7 @@ class TestVectorizedAspectCalculatorCore:
 
         improvement_ratio = avg_traditional / avg_vectorized
 
-        print(f"\nPerformance comparison:")
+        print(f"\nPerformance comparison:")  # noqa: F541
         print(f"Traditional: {avg_traditional*1000:.2f}ms")
         print(f"Vectorized:  {avg_vectorized*1000:.2f}ms")
         print(f"Improvement: {improvement_ratio:.2f}x faster")

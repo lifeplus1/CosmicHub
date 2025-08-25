@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
-import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
+import { getAppConfig, isFeatureEnabled, logger } from '@cosmichub/config';
 import { BirthDataProvider } from './contexts/BirthDataContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
@@ -54,7 +54,7 @@ const MainApp: React.FC = React.memo(function MainApp() {
   React.useEffect(() => {
     // Initialize cross-app integration if enabled
     if (isFeatureEnabled('crossAppIntegration')) {
-      console.info('Astrology app initialized with cross-app integration');
+      logger.info('Astrology app initialized with cross-app integration');
     }
   }, []);
 

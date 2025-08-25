@@ -46,14 +46,14 @@ async def test_synastry_endpoint():
                 result = response.json()
                 print("✅ Synastry calculation successful!")
                 print(
-                    f"Overall compatibility: {result['compatibility_analysis']['overall_score']}"
+                    f"Overall compatibility: {result['compatibility_analysis']['overall_score']}"  # noqa: E501
                 )
                 print(f"Number of interaspects: {len(result['interaspects'])}")
                 print(
-                    f"Number of house overlays: {len(result['house_overlays'])}"
+                    f"Number of house overlays: {len(result['house_overlays'])}"  # noqa: E501
                 )
                 print(
-                    f"Relationship purpose: {result['composite_chart']['relationship_purpose']}"
+                    f"Relationship purpose: {result['composite_chart']['relationship_purpose']}"  # noqa: E501
                 )
                 return True
             else:

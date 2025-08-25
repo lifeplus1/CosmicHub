@@ -113,7 +113,7 @@ const ChartCalculator: React.FC = () => {
     },
     onError: (error) => {
       // TODO: Replace with structured logging service
-      // console.error('Error saving chart:', error);
+      // logger.error('Error saving chart:', error);
       setError(`Failed to save chart: ${error.message}`);
     },
   });
@@ -302,7 +302,7 @@ const ChartCalculator: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="e.g., 1990"
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                aria-label="Chart Input Field"
+                aria-label="Birth year"
                 required
                 aria-required="true"
               />
@@ -327,6 +327,7 @@ const ChartCalculator: React.FC = () => {
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
+                aria-label="Birth month (1-12)"
               />
             </div>
             <div className="flex-1">
@@ -349,6 +350,7 @@ const ChartCalculator: React.FC = () => {
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
+                aria-label="Birth day (1-31)"
               />
             </div>
           </div>
@@ -374,6 +376,7 @@ const ChartCalculator: React.FC = () => {
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
+                aria-label="Birth hour (0-23)"
               />
             </div>
             <div className="flex-1">
@@ -396,6 +399,7 @@ const ChartCalculator: React.FC = () => {
                 className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 required
                 aria-required="true"
+                aria-label="Birth minute (0-59)"
               />
             </div>
             <div className="flex-1">
@@ -450,6 +454,7 @@ const ChartCalculator: React.FC = () => {
               className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
               required
               aria-required="true"
+              aria-label="Birth location (e.g., New York, NY, USA)"
             />
           </div>
 

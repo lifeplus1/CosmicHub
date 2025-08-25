@@ -1,0 +1,478 @@
+{
+  "privacy_audit": {
+    "audit_date": "2025-08-25 10:48:41.684481+00:00",
+    "data_elements": [
+      "DataElement(name='firebase_uid', classification=<DataClassification.SENSITIVE: 'sensitive'>, data_type='string', collection_purpose='user_authentication', storage_location='firestore:users/{userId}', retention_period='life_of_account', pseudonymized=True, encrypted_at_rest=True, encrypted_in_transit=True, access_controls=['firebase_auth', 'user_ownership'], data_flows=[<DataFlow.COLLECTION: 'collection'>, <DataFlow.STORAGE: 'storage'>, <DataFlow.PROCESSING: 'processing'>])",
+      "DataElement(name='user_email', classification=<DataClassification.SENSITIVE: 'sensitive'>, data_type='string', collection_purpose='user_identification_communication', storage_location='firestore:users/{userId}', retention_period='life_of_account', pseudonymized=True, encrypted_at_rest=True, encrypted_in_transit=True, access_controls=['firebase_auth', 'user_ownership'], data_flows=[])",
+      "DataElement(name='stripe_customer_id', classification=<DataClassification.RESTRICTED: 'restricted'>, data_type='string', collection_purpose='payment_processing', storage_location='firestore:subscriptions/{userId}', retention_period='life_of_subscription_plus_90d', pseudonymized=False, encrypted_at_rest=True, encrypted_in_transit=True, access_controls=['admin_only', 'stripe_webhook'], data_flows=[])",
+      "DataElement(name='birth_data', classification=<DataClassification.SENSITIVE: 'sensitive'>, data_type='object', collection_purpose='astrology_calculations', storage_location='firestore:users/{userId}/charts/{chartId}', retention_period='life_of_account', pseudonymized=False, encrypted_at_rest=True, encrypted_in_transit=True, access_controls=['user_ownership', 'authenticated_users'], data_flows=[])",
+      "DataElement(name='analytics_events', classification=<DataClassification.INTERNAL: 'internal'>, data_type='object', collection_purpose='usage_analytics_improvement', storage_location='firestore:analytics/{eventId}', retention_period='13_months', pseudonymized=True, encrypted_at_rest=True, encrypted_in_transit=True, access_controls=['admin_read_only'], data_flows=[])",
+      "DataElement(name='rate_limit_counters', classification=<DataClassification.INTERNAL: 'internal'>, data_type='object', collection_purpose='abuse_prevention', storage_location='redis_cache', retention_period='24_hours', pseudonymized=True, encrypted_at_rest=False, encrypted_in_transit=True, access_controls=['backend_service_only'], data_flows=[])",
+      "DataElement(name='application_logs', classification=<DataClassification.SENSITIVE: 'sensitive'>, data_type='text', collection_purpose='debugging_monitoring', storage_location='backend_filesystem', retention_period='30_days', pseudonymized=True, encrypted_at_rest=False, encrypted_in_transit=True, access_controls=['admin_only', 'backend_service'], data_flows=[])"
+    ],
+    "risks_identified": [
+      "PrivacyRisk(risk_id='ENC_application_logs_REST', severity='HIGH', category='encryption', description='application_logs should be encrypted at rest', data_elements=['application_logs'], mitigation_status='OPEN', mitigation_actions=['Enable encryption at rest'])"
+    ],
+    "compliance_score": 90.0,
+    "recommendations": [
+      "Implement comprehensive encryption at rest and in transit for all sensitive data elements",
+      "Consider implementing differential privacy for aggregate analytics data",
+      "Establish automated privacy monitoring and alerting system"
+    ],
+    "pseudonymization_effectiveness": 67.5
+  },
+  "risk_analysis": {
+    "analytics_data": {
+      "risk_level": "very_high",
+      "k_anonymity": 5,
+      "l_diversity": 2.0,
+      "uniqueness_ratio": 1.0,
+      "vulnerable_attributes": [
+        "birth_location",
+        "birth_time"
+      ],
+      "confidence_score": 60.0
+    },
+    "user_profiles": {
+      "risk_level": "very_high",
+      "k_anonymity": 1,
+      "l_diversity": 1.0,
+      "uniqueness_ratio": 1.0,
+      "vulnerable_attributes": [
+        "usage_pattern",
+        "subscription_tier",
+        "age_group"
+      ],
+      "confidence_score": 60.0
+    },
+    "overall_assessment": {
+      "highest_risk_level": "very_high",
+      "total_vulnerable_attributes": 5,
+      "recommendations": [
+        "Reduce uniqueness ratio from 1.00 by generalizing or removing highly unique attributes",
+        "Apply additional anonymization to vulnerable attributes: birth_location, birth_time",
+        "Consider implementing differential privacy for additional protection",
+        "Implement regular re-identification risk monitoring and assessment",
+        "Increase k-anonymity from 1 to at least 5 by generalizing quasi-identifiers or adding noise",
+        "Improve l-diversity from 1.0 to at least 2 by ensuring diverse sensitive attribute values in each group",
+        "Reduce uniqueness ratio from 1.00 by generalizing or removing highly unique attributes",
+        "Apply additional anonymization to vulnerable attributes: usage_pattern, subscription_tier, age_group",
+        "Consider implementing differential privacy for additional protection",
+        "Implement regular re-identification risk monitoring and assessment"
+      ]
+    }
+  },
+  "pseudonymization_test": {
+    "test_cases": [
+      {
+        "user_id": {
+          "original": "user123",
+          "pseudonym_1": "f50872f867d76d1893c75fb70e7dbfd1ea18d41e66724218fb54fd5ef31fe67f",
+          "pseudonym_2": "f50872f867d76d1893c75fb70e7dbfd1ea18d41e66724218fb54fd5ef31fe67f",
+          "pseudonym_different_salt": "916604a5cfe6bd6a24a0d32e274de9a2b08a04b3db49315ef87a57211e7acbca",
+          "consistent": true,
+          "different_salt_produces_different": true
+        },
+        "email": {
+          "original": "test@example.com",
+          "pseudonym_1": "7ef67faef7cca7481b59f6fc180bee0aaa904d1631872abe547197a7bc170a81",
+          "pseudonym_2": "7ef67faef7cca7481b59f6fc180bee0aaa904d1631872abe547197a7bc170a81",
+          "pseudonym_different_salt": "2a7de874800f73db954731651236499334bc264bd479d8a3e6abeb8cc0adeb1c",
+          "consistent": true,
+          "different_salt_produces_different": true
+        }
+      },
+      {
+        "session_id": {
+          "original": "sess_abc123",
+          "pseudonym_1": "39c2e104392c51c26cfe8cebadddb49899e583d15eb7158ff48f288eabe1766a",
+          "pseudonym_2": "39c2e104392c51c26cfe8cebadddb49899e583d15eb7158ff48f288eabe1766a",
+          "pseudonym_different_salt": "89b13acb6c0c60d90a6849f5fb9999eb9062ac6f56566f3e9dab63dc03806e1e",
+          "consistent": true,
+          "different_salt_produces_different": true
+        },
+        "ip_address": {
+          "original": "192.168.1.100",
+          "pseudonym_1": "408c9d348725a61ed3ce37d09c6e3b011c9920b4f5700301f191d41950df6ccf",
+          "pseudonym_2": "408c9d348725a61ed3ce37d09c6e3b011c9920b4f5700301f191d41950df6ccf",
+          "pseudonym_different_salt": "428125f7413f9ed8c4df59a1a30c05d6302b5caea3ea682507ca3d3bc63c4957",
+          "consistent": true,
+          "different_salt_produces_different": true
+        }
+      },
+      {
+        "device_id": {
+          "original": "device_xyz789",
+          "pseudonym_1": "566f67e47074461dc475b38b0a310e25f7ffa820dddbd310cde5604873f37c4f",
+          "pseudonym_2": "566f67e47074461dc475b38b0a310e25f7ffa820dddbd310cde5604873f37c4f",
+          "pseudonym_different_salt": "29c9a08a762556d87a55afb85187ce8f93b346b180c69e46ffe9a494201b2d41",
+          "consistent": true,
+          "different_salt_produces_different": true
+        },
+        "user_agent": {
+          "original": "Mozilla/5.0...",
+          "pseudonym_1": "fc45f2012d3b6906ae6bbb2d23b9ac0bb2fbedf99b8f4f00d26d14ea5a04350f",
+          "pseudonym_2": "fc45f2012d3b6906ae6bbb2d23b9ac0bb2fbedf99b8f4f00d26d14ea5a04350f",
+          "pseudonym_different_salt": "cd58b901cc1cf1e631282f0b381c3ef154ad97e20de15a1bbde30448fd9901e4",
+          "consistent": true,
+          "different_salt_produces_different": true
+        }
+      }
+    ],
+    "consistency_score": 66.66666666666666,
+    "collision_rate": 33.333333333333336,
+    "entropy_score": 99.7607563000114,
+    "overall_effectiveness": 73.28548459333561
+  },
+  "anonymization_evaluation": {
+    "minimal": {
+      "techniques_applied": [
+        "pseudonymization"
+      ],
+      "information_loss": 60.0,
+      "privacy_guarantee": "Identifiers pseudonymized with SHA-256+salt",
+      "anonymized_sample": {
+        "user_id": "e79236cb8f0c0bbfc6dc6dfe1516366bd96a4a8bb41e2a07672ffcadd80b1517",
+        "age": 28,
+        "location": "San Francisco"
+      }
+    },
+    "moderate": {
+      "techniques_applied": [
+        "pseudonymization",
+        "generalization",
+        "noise_addition"
+      ],
+      "information_loss": 80.0,
+      "privacy_guarantee": "Identifiers pseudonymized with SHA-256+salt; Data generalized to reduce granularity; Statistical noise added to numeric values",
+      "anonymized_sample": {
+        "user_id": "e79236cb8f0c0bbfc6dc6dfe1516366bd96a4a8bb41e2a07672ffcadd80b1517",
+        "age": "18-25",
+        "location": "New York"
+      }
+    },
+    "strong": {
+      "techniques_applied": [
+        "pseudonymization",
+        "generalization",
+        "noise_addition",
+        "differential_privacy"
+      ],
+      "information_loss": 80.0,
+      "privacy_guarantee": "Identifiers pseudonymized with SHA-256+salt; (\u03b5=1.0)-differential privacy; Data generalized to reduce granularity; Statistical noise added to numeric values",
+      "anonymized_sample": {
+        "user_id": "e79236cb8f0c0bbfc6dc6dfe1516366bd96a4a8bb41e2a07672ffcadd80b1517",
+        "age": "18-25",
+        "location": "New York"
+      }
+    },
+    "maximum": {
+      "techniques_applied": [
+        "pseudonymization",
+        "generalization",
+        "noise_addition",
+        "differential_privacy",
+        "suppression"
+      ],
+      "information_loss": 83.0,
+      "privacy_guarantee": "Identifiers pseudonymized with SHA-256+salt; (\u03b5=1.0)-differential privacy; Data generalized to reduce granularity; Statistical noise added to numeric values; High-risk attributes suppressed",
+      "anonymized_sample": {
+        "user_id": "e79236cb8f0c0bbfc6dc6dfe1516366bd96a4a8bb41e2a07672ffcadd80b1517",
+        "age": "18-25",
+        "location": "New York"
+      }
+    },
+    "recommendation": {
+      "optimal_level": "moderate",
+      "justification": "Recommended balance of privacy protection and data utility"
+    }
+  },
+  "gdpr_compliance": {
+    "overall_status": "mostly_compliant",
+    "compliance_score": 81.11111111111111,
+    "principle_scores": {
+      "lawfulness": 0.0,
+      "fairness": 100.0,
+      "transparency": 100.0,
+      "purpose_limitation": 100.0,
+      "data_minimization": 100.0,
+      "accuracy": 65.0,
+      "storage_limitation": 100.0,
+      "integrity": 85.0,
+      "accountability": 80.0
+    },
+    "issues_identified": [
+      {
+        "principle": "lawfulness",
+        "severity": "HIGH",
+        "description": "No clear lawful basis for processing firebase_uid",
+        "affected_data": [
+          "firebase_uid"
+        ],
+        "legal_reference": "GDPR Art. 6",
+        "remediation_steps": [
+          "Define clear lawful basis for processing",
+          "Update privacy policy with lawful basis information",
+          "Obtain consent where required"
+        ]
+      },
+      {
+        "principle": "lawfulness",
+        "severity": "HIGH",
+        "description": "No clear lawful basis for processing user_email",
+        "affected_data": [
+          "user_email"
+        ],
+        "legal_reference": "GDPR Art. 6",
+        "remediation_steps": [
+          "Define clear lawful basis for processing",
+          "Update privacy policy with lawful basis information",
+          "Obtain consent where required"
+        ]
+      },
+      {
+        "principle": "lawfulness",
+        "severity": "HIGH",
+        "description": "No clear lawful basis for processing stripe_customer_id",
+        "affected_data": [
+          "stripe_customer_id"
+        ],
+        "legal_reference": "GDPR Art. 6",
+        "remediation_steps": [
+          "Define clear lawful basis for processing",
+          "Update privacy policy with lawful basis information",
+          "Obtain consent where required"
+        ]
+      },
+      {
+        "principle": "lawfulness",
+        "severity": "HIGH",
+        "description": "No clear lawful basis for processing birth_data",
+        "affected_data": [
+          "birth_data"
+        ],
+        "legal_reference": "GDPR Art. 6",
+        "remediation_steps": [
+          "Define clear lawful basis for processing",
+          "Update privacy policy with lawful basis information",
+          "Obtain consent where required"
+        ]
+      },
+      {
+        "principle": "lawfulness",
+        "severity": "HIGH",
+        "description": "No clear lawful basis for processing analytics_events",
+        "affected_data": [
+          "analytics_events"
+        ],
+        "legal_reference": "GDPR Art. 6",
+        "remediation_steps": [
+          "Define clear lawful basis for processing",
+          "Update privacy policy with lawful basis information",
+          "Obtain consent where required"
+        ]
+      },
+      {
+        "principle": "lawfulness",
+        "severity": "HIGH",
+        "description": "No clear lawful basis for processing rate_limit_counters",
+        "affected_data": [
+          "rate_limit_counters"
+        ],
+        "legal_reference": "GDPR Art. 6",
+        "remediation_steps": [
+          "Define clear lawful basis for processing",
+          "Update privacy policy with lawful basis information",
+          "Obtain consent where required"
+        ]
+      },
+      {
+        "principle": "lawfulness",
+        "severity": "HIGH",
+        "description": "No clear lawful basis for processing application_logs",
+        "affected_data": [
+          "application_logs"
+        ],
+        "legal_reference": "GDPR Art. 6",
+        "remediation_steps": [
+          "Define clear lawful basis for processing",
+          "Update privacy policy with lawful basis information",
+          "Obtain consent where required"
+        ]
+      },
+      {
+        "principle": "accuracy",
+        "severity": "MEDIUM",
+        "description": "No timestamp tracking for accuracy of firebase_uid",
+        "affected_data": [
+          "firebase_uid"
+        ],
+        "legal_reference": "GDPR Art. 5.1.d",
+        "remediation_steps": [
+          "Implement data freshness tracking",
+          "Provide user correction mechanisms",
+          "Regular data accuracy reviews"
+        ]
+      },
+      {
+        "principle": "accuracy",
+        "severity": "MEDIUM",
+        "description": "No timestamp tracking for accuracy of user_email",
+        "affected_data": [
+          "user_email"
+        ],
+        "legal_reference": "GDPR Art. 5.1.d",
+        "remediation_steps": [
+          "Implement data freshness tracking",
+          "Provide user correction mechanisms",
+          "Regular data accuracy reviews"
+        ]
+      },
+      {
+        "principle": "accuracy",
+        "severity": "MEDIUM",
+        "description": "No timestamp tracking for accuracy of stripe_customer_id",
+        "affected_data": [
+          "stripe_customer_id"
+        ],
+        "legal_reference": "GDPR Art. 5.1.d",
+        "remediation_steps": [
+          "Implement data freshness tracking",
+          "Provide user correction mechanisms",
+          "Regular data accuracy reviews"
+        ]
+      },
+      {
+        "principle": "accuracy",
+        "severity": "MEDIUM",
+        "description": "No timestamp tracking for accuracy of birth_data",
+        "affected_data": [
+          "birth_data"
+        ],
+        "legal_reference": "GDPR Art. 5.1.d",
+        "remediation_steps": [
+          "Implement data freshness tracking",
+          "Provide user correction mechanisms",
+          "Regular data accuracy reviews"
+        ]
+      },
+      {
+        "principle": "accuracy",
+        "severity": "MEDIUM",
+        "description": "No timestamp tracking for accuracy of analytics_events",
+        "affected_data": [
+          "analytics_events"
+        ],
+        "legal_reference": "GDPR Art. 5.1.d",
+        "remediation_steps": [
+          "Implement data freshness tracking",
+          "Provide user correction mechanisms",
+          "Regular data accuracy reviews"
+        ]
+      },
+      {
+        "principle": "accuracy",
+        "severity": "MEDIUM",
+        "description": "No timestamp tracking for accuracy of rate_limit_counters",
+        "affected_data": [
+          "rate_limit_counters"
+        ],
+        "legal_reference": "GDPR Art. 5.1.d",
+        "remediation_steps": [
+          "Implement data freshness tracking",
+          "Provide user correction mechanisms",
+          "Regular data accuracy reviews"
+        ]
+      },
+      {
+        "principle": "accuracy",
+        "severity": "MEDIUM",
+        "description": "No timestamp tracking for accuracy of application_logs",
+        "affected_data": [
+          "application_logs"
+        ],
+        "legal_reference": "GDPR Art. 5.1.d",
+        "remediation_steps": [
+          "Implement data freshness tracking",
+          "Provide user correction mechanisms",
+          "Regular data accuracy reviews"
+        ]
+      },
+      {
+        "principle": "integrity",
+        "severity": "HIGH",
+        "description": "Sensitive data application_logs not encrypted at rest",
+        "affected_data": [
+          "application_logs"
+        ],
+        "legal_reference": "GDPR Art. 32",
+        "remediation_steps": [
+          "Enable encryption at rest",
+          "Implement key management",
+          "Regular encryption audits"
+        ]
+      },
+      {
+        "principle": "accountability",
+        "severity": "MEDIUM",
+        "description": "Missing documentation: privacy_impact_assessment",
+        "affected_data": [
+          "all"
+        ],
+        "legal_reference": "GDPR Art. 5.2",
+        "remediation_steps": [
+          "Create privacy_impact_assessment documentation",
+          "Implement documentation maintenance process",
+          "Regular compliance audits"
+        ]
+      },
+      {
+        "principle": "accountability",
+        "severity": "MEDIUM",
+        "description": "Missing documentation: consent_records",
+        "affected_data": [
+          "all"
+        ],
+        "legal_reference": "GDPR Art. 5.2",
+        "remediation_steps": [
+          "Create consent_records documentation",
+          "Implement documentation maintenance process",
+          "Regular compliance audits"
+        ]
+      }
+    ],
+    "recommendations": [
+      "Review and document lawful basis for all data processing activities",
+      "Remediate 8 high-severity compliance gaps",
+      "Conduct Data Protection Impact Assessment (DPIA) for high-risk processing",
+      "Implement privacy by design principles in system development",
+      "Establish regular compliance monitoring and review processes",
+      "Train staff on GDPR requirements and data protection best practices"
+    ]
+  },
+  "recommendations": {
+    "immediate_actions": [],
+    "short_term_improvements": [
+      "Implement enhanced anonymization for high-risk data elements",
+      "Improve pseudonymization entropy and consistency",
+      "Implement salt rotation automation",
+      "Deploy automated privacy monitoring system",
+      "Implement k-anonymity enforcement for analytics data",
+      "Create privacy impact assessment templates"
+    ],
+    "long_term_enhancements": [
+      "Implement differential privacy for aggregate analytics",
+      "Deploy privacy-preserving machine learning techniques",
+      "Create user-friendly privacy control dashboard",
+      "Establish privacy by design development standards",
+      "Implement zero-knowledge proof systems for sensitive calculations"
+    ],
+    "policy_updates": [
+      "Update privacy policy with enhanced anonymization descriptions",
+      "Create data retention policy documentation",
+      "Establish privacy incident response procedures",
+      "Document lawful basis assessments for all processing activities"
+    ]
+  },
+  "overall_privacy_score": 72.99043025200045
+}

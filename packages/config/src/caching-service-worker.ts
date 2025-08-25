@@ -57,9 +57,7 @@ export class CacheManager {
   private performance = new Map<string, { hits: number; misses: number; size: number }>();
 
   static getInstance(): CacheManager {
-    if (CacheManager.instance === undefined || CacheManager.instance === null) {
-      CacheManager.instance = new CacheManager();
-    }
+    CacheManager.instance ??= new CacheManager();
     return CacheManager.instance;
   }
 
@@ -138,7 +136,7 @@ export class CacheManager {
     try {
       const networkResponse = await this.fetchWithTimeout(request, strategy.networkTimeoutSeconds);
       
-      if (networkResponse && networkResponse.ok) {
+      if (networkResponse?.ok) {
         await this.putInCache(cache, request, networkResponse.clone(), strategy);
         this.recordCacheMiss(strategy.cacheName!);
         return networkResponse;
@@ -158,7 +156,7 @@ export class CacheManager {
     try {
       const networkResponse = await this.fetchWithTimeout(request, strategy.networkTimeoutSeconds);
       
-      if (networkResponse && networkResponse.ok) {
+      if (networkResponse?.ok) {
         await this.putInCache(cache, request, networkResponse.clone(), strategy);
         return networkResponse;
       }
@@ -196,7 +194,7 @@ export class CacheManager {
     try {
       const networkResponse = await this.fetchWithTimeout(request, strategy.networkTimeoutSeconds);
       
-      if (networkResponse && networkResponse.ok) {
+      if (networkResponse?.ok) {
         await this.putInCache(cache, request, networkResponse.clone(), strategy);
         return networkResponse;
       }
@@ -285,7 +283,7 @@ export class CacheManager {
     try {
       const networkResponse = await fetch(request);
       
-      if (networkResponse && networkResponse.ok) {
+      if (networkResponse?.ok) {
         await this.putInCache(cache, request, networkResponse, strategy);
       }
     } catch (error) {

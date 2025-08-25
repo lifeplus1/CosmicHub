@@ -36,32 +36,44 @@ const MainApp: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen text-white bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className='min-h-screen text-white bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900'>
         <header>
           <Navbar />
         </header>
-        <main className="container px-4 py-8 mx-auto" role="main" aria-label="Main content">
-          <section className="mb-8 text-center" aria-labelledby="app-title">
-            <h1 id="app-title" className="mb-4 text-4xl font-bold">Healwave Frequency Generator</h1>
-            <p className="text-xl text-blue-200">
+        <main
+          className='container px-4 py-8 mx-auto'
+          role='main'
+          aria-label='Main content'
+        >
+          <section className='mb-8 text-center' aria-labelledby='app-title'>
+            <h1 id='app-title' className='mb-4 text-4xl font-bold'>
+              Healwave Frequency Generator
+            </h1>
+            <p className='text-xl text-blue-200'>
               Therapeutic sound frequencies for healing and wellness
             </p>
-            <div className="mt-4">
+            <div className='mt-4'>
               <button
                 onClick={handleOpenAstroApp}
-                className="px-4 py-2 bg-cosmic-gold text-cosmic-dark hover:bg-cosmic-gold/90 rounded-lg transition-colors"
-                aria-label="Open Astrology App in a new tab"
+                className='px-4 py-2 bg-cosmic-gold text-cosmic-dark hover:bg-cosmic-gold/90 rounded-lg transition-colors'
+                aria-label='Open Astrology App in a new tab'
               >
                 Open Astrology App
               </button>
             </div>
           </section>
 
-          <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div></div>}>
+          <Suspense
+            fallback={
+              <div className='flex items-center justify-center p-8'>
+                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500'></div>
+              </div>
+            }
+          >
             <Routes>
-              <Route path="/" element={<FrequencyGenerator />} />
-              <Route path="/presets" element={<Presets />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path='/' element={<FrequencyGenerator />} />
+              <Route path='/presets' element={<Presets />} />
+              <Route path='/profile' element={<Profile />} />
             </Routes>
           </Suspense>
         </main>
@@ -69,11 +81,12 @@ const MainApp: React.FC = () => {
 
         {config.app.environment === 'development' && (
           <div
-            className="fixed p-2 text-xs bg-purple-600 rounded bottom-4 right-4"
-            aria-live="polite"
-            role="status"
+            className='fixed p-2 text-xs bg-purple-600 rounded bottom-4 right-4'
+            aria-live='polite'
+            role='status'
           >
-            App: {config.app.name} | Env: {config.app.environment} | Version: {config.app.version}
+            App: {config.app.name} | Env: {config.app.environment} | Version:{' '}
+            {config.app.version}
           </div>
         )}
       </div>

@@ -7,19 +7,19 @@ import PresetSelector from '../PresetSelector';
 
 // Mock the auth hook first
 vi.mock('@cosmichub/auth', () => ({
-  useAuth: () => ({ 
+  useAuth: () => ({
     user: {
       uid: 'test-user-id',
-      email: 'test@example.com'
-    }
-  })
+      email: 'test@example.com',
+    },
+  }),
 }));
 
 // Mock API functions second
 vi.mock('../../services/api', () => ({
   savePreset: vi.fn(),
   getUserPresets: vi.fn(),
-  deletePreset: vi.fn()
+  deletePreset: vi.fn(),
 }));
 
 // Import mocked functions after mock setup
@@ -36,7 +36,7 @@ describe('PresetSelector', () => {
     volume: 75,
     duration: 30,
     fadeIn: 2,
-    fadeOut: 2
+    fadeOut: 2,
   };
   const mockCurrentPreset: FrequencyPreset = {
     id: 'test-preset',
@@ -44,21 +44,23 @@ describe('PresetSelector', () => {
     category: 'brainwave',
     baseFrequency: 40,
     binauralBeat: 10,
-    description: 'A test preset'
+    description: 'A test preset',
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     // Ensure getUserPresets resolves immediately with an empty array
     mockGetUserPresets.mockResolvedValue(ok([]));
-    mockSavePreset.mockResolvedValue(ok({
-      id: 'saved',
-      name: 'Saved',
-      category: 'brainwave',
-      baseFrequency: 40,
-      binauralBeat: 4,
-      description: 'A saved preset'
-    } as any));
+    mockSavePreset.mockResolvedValue(
+      ok({
+        id: 'saved',
+        name: 'Saved',
+        category: 'brainwave',
+        baseFrequency: 40,
+        binauralBeat: 4,
+        description: 'A saved preset',
+      } as any)
+    );
     mockDeletePreset.mockResolvedValue(ok(null));
   });
 
@@ -71,7 +73,9 @@ describe('PresetSelector', () => {
       />
     );
     // Await for effect-driven updates to settle
-    expect(await screen.findByRole('button', { name: /save current settings/i })).toBeDefined();
+    expect(
+      await screen.findByRole('button', { name: /save current settings/i })
+    ).toBeDefined();
     expect(await screen.findByText('Built-in Presets')).toBeDefined();
     expect(await screen.findByText('Your Presets')).toBeDefined();
   });
@@ -103,14 +107,16 @@ describe('PresetSelector', () => {
     );
 
     // Find and click the Deep Relaxation preset
-    const deepRelaxationPreset = await screen.findByLabelText(/select deep relaxation preset/i);
+    const deepRelaxationPreset = await screen.findByLabelText(
+      /select deep relaxation preset/i
+    );
     await user.click(deepRelaxationPreset);
 
     expect(mockOnSelectPreset).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Deep Relaxation',
         baseFrequency: 40,
-        binauralBeat: 4
+        binauralBeat: 4,
       })
     );
   });
@@ -139,7 +145,9 @@ describe('PresetSelector', () => {
     );
     // Check accessibility attributes after async updates
     expect(await screen.findByLabelText('Frequency Presets')).toBeDefined();
-    expect(await screen.findByRole('button', { name: /save current settings/i })).toBeDefined();
+    expect(
+      await screen.findByRole('button', { name: /save current settings/i })
+    ).toBeDefined();
     expect(await screen.findByText('Built-in Presets')).toBeDefined();
     expect(await screen.findByText('Your Presets')).toBeDefined();
   });

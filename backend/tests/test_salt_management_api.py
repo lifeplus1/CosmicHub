@@ -33,7 +33,7 @@ def test_user_rotation_flow():
     # Create initial salt via background rotation (force create)
     r = client.post("/api/admin/salts/rotate/user/test_user?force=true")
     assert r.status_code == 200
-    # Background task executes after response; ensure state by creating directly if missing
+    # Background task executes after response; ensure state by creating directly if missing  # noqa: E501
     if storage.get_user_salt("test_user") is None:
         storage.create_user_salt("test_user")
 
@@ -43,7 +43,7 @@ def test_user_rotation_flow():
     data2 = r2.json()
     assert data2["had_existing_salt"] is True
 
-    # Audit endpoint should show rotation metadata (rotation_count possibly 0 or 1 depending timing)
+    # Audit endpoint should show rotation metadata (rotation_count possibly 0 or 1 depending timing)  # noqa: E501
     audit = client.get("/api/admin/salts/audit/test_user")
     assert audit.status_code == 200
     a = audit.json()

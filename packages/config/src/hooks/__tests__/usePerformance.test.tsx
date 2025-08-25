@@ -11,7 +11,7 @@ import {
 function renderHook<T>(hook: () => T): { get: () => T } {
   let latest: T;
   function HookConsumer() {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+     
     latest = hook();
     return null;
   }

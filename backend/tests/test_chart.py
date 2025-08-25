@@ -223,7 +223,7 @@ class TestLocationData:
 
     @pytest.mark.slow
     def test_get_location_with_city(self):
-        """Test getting location data with city name (slow test due to geocoding)"""
+        """Test getting location data with city name (slow test due to geocoding)"""  # noqa: E501
         result = get_location("London")
 
         assert isinstance(result, dict)

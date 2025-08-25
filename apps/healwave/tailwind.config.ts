@@ -1,33 +1,30 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
-        'cinzel': ['Cinzel', 'serif'],
-        'playfair': ['Playfair Display', 'serif'],
-        'inter': ['Inter', 'sans-serif'],
+        cinzel: ['Cinzel', 'serif'],
+        playfair: ['Playfair Display', 'serif'],
+        inter: ['Inter', 'sans-serif'],
         'source-sans': ['Source Sans Pro', 'sans-serif'],
       },
       colors: {
-        'cosmic': {
-          'dark': '#0f0f23',
-          'blue': '#1a202c',
-          'purple': '#553c9a',
-          'gold': '#f6ad55',
-          'silver': '#e2e8f0',
-        }
+        cosmic: {
+          dark: '#0f0f23',
+          blue: '#1a202c',
+          purple: '#553c9a',
+          gold: '#f6ad55',
+          silver: '#e2e8f0',
+        },
       },
       backdropBlur: {
-        'lg': '16px',
+        lg: '16px',
       },
       animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'shimmer': 'shimmer 2s linear infinite',
+        float: 'float 6s ease-in-out infinite',
+        shimmer: 'shimmer 2s linear infinite',
       },
       keyframes: {
         float: {
@@ -37,9 +34,9 @@ export default {
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
-        }
-      }
+        },
+      },
     },
   },
   plugins: [],
-} satisfies Config
+} satisfies Config;

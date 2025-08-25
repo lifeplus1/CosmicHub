@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { logger } from '@cosmichub/config';
 
 /**
  * Simple A/B Testing Hook
@@ -44,7 +45,7 @@ export function useABTest(config: ABTestConfig): ABTestResult {
   const result = useMemo(() => {
     if (!enabled || variants.length === 0) {
       return {
-        variant: variants[0] || 'control',
+        variant: variants[0] ?? 'control',
         isControl: true,
         trackEvent: () => {}
       }
@@ -71,19 +72,19 @@ export function useABTest(config: ABTestConfig): ABTestResult {
       const random = Math.random() * totalWeight
       let cumulativeWeight = 0
       
-      selectedVariant = variants[0] || 'control' // fallback
+      selectedVariant = variants[0] ?? 'control' // fallback
       for (let i = 0; i < variants.length; i++) {
         const w = weights[i] ?? 0
         cumulativeWeight += w
         if (random <= cumulativeWeight) {
-          selectedVariant = variants[i] || selectedVariant
+          selectedVariant = variants[i] ?? selectedVariant
           break
         }
       }
     } else {
       // Equal distribution
       const randomIndex = Math.floor(Math.random() * variants.length)
-      selectedVariant = variants[randomIndex] || variants[0] || 'control'
+      selectedVariant = variants[randomIndex] ?? variants[0] ?? 'control'
     }
 
     // Store the assignment
@@ -192,13 +193,13 @@ function createEventTracker(testName: string, variant: string) {
 
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.warn('Failed to send A/B test analytics:', error);
+        logger.warn('Failed to send A/B test analytics:', error);
       }
     }
 
     // Development logging
   if (import.meta.env.DEV) {
-      console.log('[A/B Test Event]', {
+      logger.info('[A/B Test Event]', {
         test: testName,
         variant,
         event: eventName,

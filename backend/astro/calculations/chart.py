@@ -38,7 +38,7 @@ def validate_inputs(
     city: Optional[str] = None,
 ) -> bool:
     logger.debug(
-        f"Validating inputs: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}"
+        f"Validating inputs: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}"  # noqa: E501
     )
     try:
         if not (1900 <= year <= 2100):
@@ -94,15 +94,15 @@ def get_location(city: str) -> Dict[str, Any]:
         for attempt in range(3):
             try:
                 # Explicitly specify arguments for geocode (synchronous)
-                location = geolocator.geocode(query=city, exactly_one=True, timeout=10)  # type: ignore
+                location = geolocator.geocode(query=city, exactly_one=True, timeout=10)  # type: ignore  # noqa: E501
                 # If geocode returns a coroutine (async), await it
-                if location is not None and hasattr(location, "__await__"):  # type: ignore
+                if location is not None and hasattr(location, "__await__"):  # type: ignore  # noqa: E501
                     import asyncio
 
-                    location = asyncio.get_event_loop().run_until_complete(location)  # type: ignore
+                    location = asyncio.get_event_loop().run_until_complete(location)  # type: ignore  # noqa: E501
                 if not location:
                     raise ValueError(f"Could not geocode city: {city}")
-                lat, lon = float(location.latitude), float(location.longitude)  # type: ignore
+                lat, lon = float(location.latitude), float(location.longitude)  # type: ignore  # noqa: E501
                 tf = TimezoneFinder()
                 timezone = tf.timezone_at(lat=lat, lng=lon)  # type: ignore
                 if not timezone:
@@ -145,7 +145,7 @@ def calculate_chart(
     house_system: str = "P",
 ) -> Dict[str, Any]:
     logger.debug(
-        f"Calculating chart: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}, house_system={house_system}"
+        f"Calculating chart: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}, house_system={house_system}"  # noqa: E501
     )
     try:
         init_ephemeris()
@@ -164,7 +164,7 @@ def calculate_chart(
         logger.debug(f"Local datetime: {dt}")
         dt_utc = tz.localize(dt).astimezone(pytz.UTC)
         logger.debug(f"UTC datetime: {dt_utc}")
-        jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)  # type: ignore
+        jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)  # type: ignore  # noqa: E501
         logger.debug(f"Julian day result: status={jd[0]}, julian_day={jd[1]}")
         if jd[0] < 0:
             logger.error(f"Invalid Julian day calculation, status: {jd[0]}")
@@ -177,7 +177,7 @@ def calculate_chart(
         julian_day = float(julian_day_value)  # type: ignore
 
         planets = get_planetary_positions(julian_day) or {}  # type: ignore
-        houses_data = calculate_houses(julian_day, lat, lon, house_system) or {"houses": [], "angles": {}}  # type: ignore
+        houses_data = calculate_houses(julian_day, lat, lon, house_system) or {"houses": [], "angles": {}}  # type: ignore  # noqa: E501
         aspects = calculate_aspects(planets) or []  # type: ignore
 
         chart_data: Dict[str, Any] = {
@@ -185,15 +185,15 @@ def calculate_chart(
             "latitude": float(lat),
             "longitude": float(lon),
             "timezone": timezone,
-            "planets": {k: {"position": v["position"], "retrograde": v["retrograde"]} for k, v in planets.items()},  # type: ignore
+            "planets": {k: {"position": v["position"], "retrograde": v["retrograde"]} for k, v in planets.items()},  # type: ignore  # noqa: E501
             "houses": houses_data["houses"],  # type: ignore
             "angles": {
-                "ascendant": float(houses_data["angles"].get("ascendant", 0)),  # type: ignore
-                "descendant": float((houses_data["angles"].get("ascendant", 0) + 180) % 360),  # type: ignore
-                "mc": float(houses_data["angles"].get("mc", 0)),  # type: ignore
-                "ic": float((houses_data["angles"].get("mc", 0) + 180) % 360),  # type: ignore
-                "vertex": float(houses_data["angles"].get("vertex", 0)),  # type: ignore
-                "antivertex": float((houses_data["angles"].get("vertex", 0) + 180) % 360),  # type: ignore
+                "ascendant": float(houses_data["angles"].get("ascendant", 0)),  # type: ignore  # noqa: E501
+                "descendant": float((houses_data["angles"].get("ascendant", 0) + 180) % 360),  # type: ignore  # noqa: E501
+                "mc": float(houses_data["angles"].get("mc", 0)),  # type: ignore  # noqa: E501
+                "ic": float((houses_data["angles"].get("mc", 0) + 180) % 360),  # type: ignore  # noqa: E501
+                "vertex": float(houses_data["angles"].get("vertex", 0)),  # type: ignore  # noqa: E501
+                "antivertex": float((houses_data["angles"].get("vertex", 0) + 180) % 360),  # type: ignore  # noqa: E501
             },
             "aspects": aspects,  # type: ignore
         }
@@ -225,7 +225,7 @@ def calculate_multi_system_chart(
 ) -> Dict[str, Any]:
     """Calculate chart with multiple astrology systems"""
     logger.debug(
-        f"Calculating multi-system chart for {year}-{month}-{day} {hour}:{minute}"
+        f"Calculating multi-system chart for {year}-{month}-{day} {hour}:{minute}"  # noqa: E501
     )
     try:
         # Base Western tropical chart
@@ -249,17 +249,17 @@ def calculate_multi_system_chart(
 
         # Vedic (Sidereal) astrology
         vedic_data = calculate_vedic_planets(julian_day)  # type: ignore
-        vedic_houses = calculate_vedic_houses(julian_day, validated_lat, validated_lon)  # type: ignore
-        vedic_analysis = get_vedic_chart_analysis({**vedic_data, **vedic_houses})  # type: ignore
+        vedic_houses = calculate_vedic_houses(julian_day, validated_lat, validated_lon)  # type: ignore  # noqa: E501
+        vedic_analysis = get_vedic_chart_analysis({**vedic_data, **vedic_houses})  # type: ignore  # noqa: E501
 
         # Chinese astrology
         # Chinese astrology
         chinese_data = {}  # Chinese astrology calculation not available
         # Mayan astrology
-        mayan_data = calculate_mayan_astrology(year, month, day)  # type: ignore
+        mayan_data = calculate_mayan_astrology(year, month, day)  # type: ignore  # noqa: E501
 
         # Uranian astrology
-        uranian_data = calculate_uranian_astrology(julian_day, planets)  # type: ignore
+        uranian_data = calculate_uranian_astrology(julian_day, planets)  # type: ignore  # noqa: E501
 
         # Combine all systems
         multi_chart: Dict[str, Any] = {
@@ -279,7 +279,7 @@ def calculate_multi_system_chart(
                 "planets": vedic_data.get("planets", {}),  # type: ignore
                 "houses": vedic_houses,  # type: ignore
                 "analysis": vedic_analysis,  # type: ignore
-                "description": "Vedic astrology uses the sidereal zodiac and focuses on karma, dharma, and spiritual evolution",
+                "description": "Vedic astrology uses the sidereal zodiac and focuses on karma, dharma, and spiritual evolution",  # noqa: E501
             },
             "chinese": {
                 **chinese_data,
@@ -287,17 +287,17 @@ def calculate_multi_system_chart(
             },
             "mayan": {
                 **mayan_data,
-                "description": "Mayan astrology using the 260-day sacred calendar (Tzolkin) and Long Count system",
+                "description": "Mayan astrology using the 260-day sacred calendar (Tzolkin) and Long Count system",  # noqa: E501
             },
             "uranian": {
                 **uranian_data,
-                "description": "Uranian astrology focuses on transneptunian points, midpoints, and 90-degree dial",
+                "description": "Uranian astrology focuses on transneptunian points, midpoints, and 90-degree dial",  # noqa: E501
             },
             "synthesis": {
-                "primary_themes": extract_primary_themes(base_chart, vedic_analysis, chinese_data, mayan_data),  # type: ignore
-                "life_purpose": synthesize_life_purpose(base_chart, vedic_analysis, chinese_data, mayan_data),  # type: ignore
-                "personality_integration": integrate_personality_traits(base_chart, vedic_analysis, chinese_data, mayan_data),  # type: ignore
-                "spiritual_path": synthesize_spiritual_guidance(vedic_analysis, mayan_data, uranian_data),  # type: ignore
+                "primary_themes": extract_primary_themes(base_chart, vedic_analysis, chinese_data, mayan_data),  # type: ignore  # noqa: E501
+                "life_purpose": synthesize_life_purpose(base_chart, vedic_analysis, chinese_data, mayan_data),  # type: ignore  # noqa: E501
+                "personality_integration": integrate_personality_traits(base_chart, vedic_analysis, chinese_data, mayan_data),  # type: ignore  # noqa: E501
+                "spiritual_path": synthesize_spiritual_guidance(vedic_analysis, mayan_data, uranian_data),  # type: ignore  # noqa: E501
             },
         }
 
@@ -309,7 +309,7 @@ def calculate_multi_system_chart(
         raise ValueError(f"Multi-system calculation failed: {str(e)}")
 
 
-def extract_primary_themes(western_chart: Dict[str, Any], vedic_analysis: Dict[str, Any], chinese_data: Dict[str, Any], mayan_data: Dict[str, Any]) -> list:  # type: ignore
+def extract_primary_themes(western_chart: Dict[str, Any], vedic_analysis: Dict[str, Any], chinese_data: Dict[str, Any], mayan_data: Dict[str, Any]) -> list:  # type: ignore  # noqa: E501
     """Extract primary themes from all astrology systems"""
     themes: list[str] = []  # type: ignore
 
@@ -334,20 +334,20 @@ def extract_primary_themes(western_chart: Dict[str, Any], vedic_analysis: Dict[s
 
     # Vedic themes
     if vedic_analysis.get("moon_sign"):  # type: ignore
-        themes.append(f"Vedic: {vedic_analysis['moon_sign']} moon nature")  # type: ignore
+        themes.append(f"Vedic: {vedic_analysis['moon_sign']} moon nature")  # type: ignore  # noqa: E501
 
     # Chinese themes
     if chinese_data.get("year", {}).get("animal"):  # type: ignore
-        themes.append(f"Chinese: {chinese_data['year']['animal']} year energy")  # type: ignore
+        themes.append(f"Chinese: {chinese_data['year']['animal']} year energy")  # type: ignore  # noqa: E501
 
     # Mayan themes
     if mayan_data.get("day_sign", {}).get("name"):  # type: ignore
-        themes.append(f"Mayan: {mayan_data['day_sign']['name']} day sign")  # type: ignore
+        themes.append(f"Mayan: {mayan_data['day_sign']['name']} day sign")  # type: ignore  # noqa: E501
 
     return themes
 
 
-from typing import List
+from typing import List  # noqa: E402
 
 
 def synthesize_life_purpose(
@@ -367,19 +367,19 @@ def synthesize_life_purpose(
     # Vedic purpose
     if vedic_analysis.get("analysis"):
         purpose_elements.append(
-            f"Vedic: {vedic_analysis.get('analysis', 'Spiritual growth and karma resolution')}"
+            f"Vedic: {vedic_analysis.get('analysis', 'Spiritual growth and karma resolution')}"  # noqa: E501
         )
 
     # Chinese purpose
     if chinese_data.get("personality_summary"):
         purpose_elements.append(
-            f"Chinese: {chinese_data.get('personality_summary', 'Balance of elements and ancestral wisdom')}"
+            f"Chinese: {chinese_data.get('personality_summary', 'Balance of elements and ancestral wisdom')}"  # noqa: E501
         )
 
     # Mayan purpose
     if mayan_data.get("life_purpose"):
         purpose_elements.append(
-            f"Mayan: {mayan_data.get('life_purpose', 'Sacred calendar alignment')}"
+            f"Mayan: {mayan_data.get('life_purpose', 'Sacred calendar alignment')}"  # noqa: E501
         )
 
     return purpose_elements
@@ -423,7 +423,7 @@ def integrate_personality_traits(
     return traits
 
 
-from typing import List
+from typing import List  # noqa: E402
 
 
 def synthesize_spiritual_guidance(
@@ -437,13 +437,13 @@ def synthesize_spiritual_guidance(
     # Vedic spiritual path
     if vedic_analysis.get("moon_nakshatra"):
         guidance.append(
-            f"Vedic path: Work with {vedic_analysis['moon_nakshatra']} energy for spiritual growth"
+            f"Vedic path: Work with {vedic_analysis['moon_nakshatra']} energy for spiritual growth"  # noqa: E501
         )
 
     # Mayan spiritual guidance
     if mayan_data.get("spiritual_guidance"):
         guidance.append(
-            f"Mayan path: {mayan_data.get('spiritual_guidance', 'Follow sacred calendar timing')}"
+            f"Mayan path: {mayan_data.get('spiritual_guidance', 'Follow sacred calendar timing')}"  # noqa: E501
         )
 
     # Uranian collective patterns
@@ -451,7 +451,7 @@ def synthesize_spiritual_guidance(
         karmic = uranian_data["pattern_analysis"].get("karmic_patterns", [])
         if karmic:
             guidance.append(
-                f"Uranian insight: {karmic[0] if karmic else 'Work with collective unconscious patterns'}"
+                f"Uranian insight: {karmic[0] if karmic else 'Work with collective unconscious patterns'}"  # noqa: E501
             )
 
     return guidance

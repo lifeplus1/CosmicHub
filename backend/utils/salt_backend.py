@@ -1,7 +1,7 @@
 """Salt backend abstraction (persistence adapter scaffold).
 
 Provides a protocol that enables swapping in different storage implementations
-(memory today, Firestore/DB later) without changing API or pseudonymization logic.
+(memory today, Firestore/DB later) without changing API or pseudonymization logic.  # noqa: E501
 
 Usage:
     from utils.salt_backend import get_salt_backend
@@ -68,7 +68,7 @@ class SaltBackendProtocol(Protocol):
 
 
 class InMemorySaltBackend(SaltBackendProtocol):
-    """Adapter around existing in-memory SaltStorage for protocol compliance."""
+    """Adapter around existing in-memory SaltStorage for protocol compliance."""  # noqa: E501
 
     def __init__(self, storage: Optional[SaltStorage] = None):
         self._storage = storage or get_salt_storage()
@@ -77,7 +77,7 @@ class InMemorySaltBackend(SaltBackendProtocol):
     def get_user_salt(self, user_id: str) -> Optional[bytes]:
         return self._storage.get_user_salt(user_id)
 
-    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:
+    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:  # noqa: E501
         return self._storage.create_user_salt(user_id, salt)
 
     def rotate_user_salt(self, user_id: str) -> bytes:
@@ -106,18 +106,18 @@ class InMemorySaltBackend(SaltBackendProtocol):
         return await self._storage.batch_rotate_salts(user_ids, global_types)
 
 
-class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until real impl
-    """Firestore-backed salt storage (currently emulated with in-memory delegate).
+class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until real impl  # noqa: E501
+    """Firestore-backed salt storage (currently emulated with in-memory delegate).  # noqa: E501
 
     Implementation strategy (future):
       * Collection: salts (document id = user_id or global_<type>)
-      * Fields: salt (hex), created_at, last_rotated, rotation_count, next_rotation, previous_salt_hash, salt_type
+      * Fields: salt (hex), created_at, last_rotated, rotation_count, next_rotation, previous_salt_hash, salt_type  # noqa: E501
       * Indexed queries for next_rotation <= now (rotation jobs)
       * Transactions for rotation to avoid concurrent overwrite
       * Optional envelope encryption (KMS) for salt field
 
     Current behavior:
-      * If google.cloud.firestore is unavailable, or feature flag FIRESTORE_SALTS_EMULATE=1, uses in-memory SaltStorage delegate.
+      * If google.cloud.firestore is unavailable, or feature flag FIRESTORE_SALTS_EMULATE=1, uses in-memory SaltStorage delegate.  # noqa: E501
       * Exposes same API so callers are agnostic.
     """
 
@@ -131,7 +131,7 @@ class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until rea
             import google.cloud.firestore  # type: ignore
 
             # Placeholder: real client wiring deferred.
-            self._client: Any = google.cloud.firestore.Client()  # type: ignore[attr-defined]
+            self._client: Any = google.cloud.firestore.Client()  # type: ignore[attr-defined]  # noqa: E501
             # Mark unimplemented operations by raising when used.
             self._emulated = False
         except Exception:
@@ -143,14 +143,14 @@ class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until rea
     def _ensure_delegate(self) -> SaltStorage:
         if self._delegate is None:
             # Real implementation not yet available
-            raise NotImplementedError("Firestore operations not implemented yet")
+            raise NotImplementedError("Firestore operations not implemented yet")  # noqa: E501
         return self._delegate
 
     # User salts
     def get_user_salt(self, user_id: str) -> Optional[bytes]:
         return self._ensure_delegate().get_user_salt(user_id)
 
-    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:
+    def create_user_salt(self, user_id: str, salt: Optional[bytes] = None) -> bytes:  # noqa: E501
         return self._ensure_delegate().create_user_salt(user_id, salt)
 
     def rotate_user_salt(self, user_id: str) -> bytes:
@@ -178,7 +178,7 @@ class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until rea
     async def batch_rotate_salts(
         self, user_ids: List[str], global_types: List[str]
     ) -> BatchRotateResult:
-        return await self._ensure_delegate().batch_rotate_salts(user_ids, global_types)
+        return await self._ensure_delegate().batch_rotate_salts(user_ids, global_types)  # noqa: E501
 
 
 # Singleton cache for adapter

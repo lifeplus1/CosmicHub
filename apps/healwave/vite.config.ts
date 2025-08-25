@@ -4,7 +4,6 @@ import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  
   return {
     plugins: [
       react({
@@ -14,7 +13,7 @@ export default defineConfig(({ mode }) => {
         include: '**/*.{jsx,tsx}',
       }),
     ],
-    
+
     // Path resolution for cleaner imports
     resolve: {
       alias: {
@@ -50,7 +49,7 @@ export default defineConfig(({ mode }) => {
       assetsDir: 'assets',
       sourcemap: mode === 'development',
       minify: 'esbuild', // Faster than terser
-      
+
       // Code splitting and chunk optimization
       rollupOptions: {
         output: {
@@ -58,8 +57,16 @@ export default defineConfig(({ mode }) => {
             // Vendor chunks for better caching
             'react-vendor': ['react', 'react-dom'],
             'router-vendor': ['react-router-dom'],
-            'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-            'radix-vendor': ['@radix-ui/react-slider', '@radix-ui/react-tooltip', '@radix-ui/react-switch'],
+            'firebase-vendor': [
+              'firebase/app',
+              'firebase/auth',
+              'firebase/firestore',
+            ],
+            'radix-vendor': [
+              '@radix-ui/react-slider',
+              '@radix-ui/react-tooltip',
+              '@radix-ui/react-switch',
+            ],
           },
           // Asset naming for long-term caching
           chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -75,7 +82,7 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
-      
+
       // Performance budgets
       chunkSizeWarningLimit: 500,
     },

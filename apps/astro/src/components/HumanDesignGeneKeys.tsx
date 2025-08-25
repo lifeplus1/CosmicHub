@@ -211,7 +211,7 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
                     placeholder="Day"
                     className="cosmic-input"
                     aria-required="true"
-                  />
+                  aria-label="Day" />
                 </div>
                 <div>
                   <label htmlFor="year" className="block mb-2 text-cosmic-gold">Year <span aria-hidden="true">*</span></label>
@@ -226,7 +226,7 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
                     placeholder="Year"
                     className="cosmic-input"
                     aria-required="true"
-                  />
+                  aria-label="Year" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -243,7 +243,7 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
                     placeholder="Hour"
                     className="cosmic-input"
                     aria-required="true"
-                  />
+                  aria-label="Hour" />
                 </div>
                 <div>
                   <label htmlFor="minute" className="block mb-2 text-cosmic-gold">Minute <span aria-hidden="true">*</span></label>
@@ -258,7 +258,7 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
                     placeholder="Minute"
                     className="cosmic-input"
                     aria-required="true"
-                  />
+                  aria-label="Minute" />
                 </div>
               </div>
               <div>
@@ -271,7 +271,7 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
                   placeholder="City, State/Country"
                   className="cosmic-input"
                   aria-required="true"
-                />
+                aria-label="City, State/Country" />
               </div>
               <div>
                 <label htmlFor="timezone" className="block mb-2 text-cosmic-gold">Timezone <span aria-hidden="true">*</span></label>

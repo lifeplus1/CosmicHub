@@ -1,3 +1,4 @@
+import { logger } from '@cosmichub/config';
 // firebase.ts - Consolidated Firebase configuration
 export * from '@cosmichub/config';
-console.log('🔥 Using optimized Firebase configuration from packages/config');
+logger.info('🔥 Using optimized Firebase configuration from packages/config');

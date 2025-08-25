@@ -88,7 +88,7 @@ export default function SaveChart(): React.ReactNode {
               placeholder="1990"
               className="cosmic-input"
               required
-            />
+            aria-label="1990" />
           </div>
           <div>
             <label htmlFor="month" className="block mb-2 text-cosmic-gold">Month *</label>
@@ -103,7 +103,7 @@ export default function SaveChart(): React.ReactNode {
               max="12"
               className="cosmic-input"
               required
-            />
+            aria-label="1" />
           </div>
           <div>
             <label htmlFor="day" className="block mb-2 text-cosmic-gold">Day *</label>
@@ -118,7 +118,7 @@ export default function SaveChart(): React.ReactNode {
               max="31"
               className="cosmic-input"
               required
-            />
+            aria-label="1" />
           </div>
           <div>
             <label htmlFor="hour" className="block mb-2 text-cosmic-gold">Hour (24h) *</label>
@@ -133,7 +133,7 @@ export default function SaveChart(): React.ReactNode {
               max="23"
               className="cosmic-input"
               required
-            />
+            aria-label="12" />
           </div>
           <div>
             <label htmlFor="minute" className="block mb-2 text-cosmic-gold">Minute *</label>
@@ -148,7 +148,7 @@ export default function SaveChart(): React.ReactNode {
               max="59"
               className="cosmic-input"
               required
-            />
+            aria-label="0" />
           </div>
           <div>
             <label htmlFor="city" className="block mb-2 text-cosmic-gold">City *</label>
@@ -160,7 +160,7 @@ export default function SaveChart(): React.ReactNode {
               placeholder="New York"
               className="cosmic-input"
               required
-            />
+            aria-label="New York" />
           </div>
         </div>
         <div>

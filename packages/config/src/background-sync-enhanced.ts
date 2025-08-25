@@ -2,12 +2,11 @@
  * Enhanced Background Sync for CosmicHub
  * Extends the existing service worker with smart sync capabilities
  */
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/require-await */
 
 import { PushNotificationManager } from './push-notifications';
 
 // Local devConsole (avoid cross-package dependency). Non-error methods disabled in production.
-/* eslint-disable no-console */
 const IS_DEV = typeof globalThis !== 'undefined' &&
   typeof (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process !== 'undefined' &&
   (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV !== 'production';
@@ -16,7 +15,6 @@ const devConsole = {
   warn: IS_DEV ? console.warn.bind(console) : undefined,
   error: console.error.bind(console)
 };
-/* eslint-enable no-console */
 
 type JSONValue = string | number | boolean | null | JSONValue[] | { [k: string]: JSONValue };
 export interface SyncQueueItem {
@@ -162,14 +160,14 @@ export class AdvancedBackgroundSync {
 
       // Add authentication if available
       const authToken = localStorage.getItem('cosmichub-auth-token');
-      if (authToken !== null && authToken !== undefined && authToken !== '') {
+  if (authToken !== null && authToken !== undefined && authToken !== '') {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
 
       const requestOptions: RequestInit = {
         method: item.method,
         headers,
-        body: item.method !== 'GET' ? JSON.stringify(item.data) : undefined
+        ...(item.method !== 'GET' && { body: JSON.stringify(item.data) })
       };
 
       const response = await fetch(item.url, requestOptions);
@@ -225,7 +223,7 @@ export class AdvancedBackgroundSync {
       await this.notifyPermanentFailure(item);
     } else {
   const retryDelayRaw = result.retryAfter ?? this.getRetryDelay(item.retryCount);
-  const retryDelay = Number.isFinite(retryDelayRaw) && (retryDelayRaw as number) > 0 ? (retryDelayRaw as number) : 0;
+  const retryDelay = Number.isFinite(retryDelayRaw) && typeof retryDelayRaw === 'number' && retryDelayRaw > 0 ? retryDelayRaw : 0;
       item.nextRetryAt = Date.now() + retryDelay;
   devConsole.warn?.(`⚠️ Sync failed, retrying in ${retryDelay}ms: ${item.type} (${item.id})`);
     }
@@ -235,12 +233,12 @@ export class AdvancedBackgroundSync {
   private async handleChartSyncSuccess(item: SyncQueueItem, result: SyncResult): Promise<void> {
     // Broadcast chart data to other tabs/apps
     this.broadcastMessage('chart_synced', {
-  chartId: (typeof item.data === 'object' && item.data && 'chartId' in item.data) ? (item.data as Record<string, unknown>).chartId : undefined,
+  chartId: (typeof item.data === 'object' && item.data && 'chartId' in item.data) ? (item.data as Record<string, unknown>)['chartId'] : undefined,
   result: result.data as unknown
     });
 
     // Show success notification
-  if (this.pushNotificationManager != null) {
+  if (this.pushNotificationManager) {
       await this.pushNotificationManager.queueNotification({
         title: '📊 Chart Calculation Complete',
         body: 'Your astrology chart has been calculated and synced successfully.',
@@ -250,29 +248,29 @@ export class AdvancedBackgroundSync {
     }
   }
 
-  private async handleUserDataSyncSuccess(item: SyncQueueItem, result: SyncResult): Promise<void> {
+  private async handleUserDataSyncSuccess(_item: SyncQueueItem, result: SyncResult): Promise<void> {
     // Update local storage with synced data
     const userData = result.data as Record<string, unknown> | undefined;
-    if (userData != null) {
+  if (userData) {
       localStorage.setItem('cosmichub-user-data', JSON.stringify(userData));
     }
 
     this.broadcastMessage('user_data_synced', userData);
   }
 
-  private async handleFrequencySyncSuccess(item: SyncQueueItem, result: SyncResult): Promise<void> {
+  private async handleFrequencySyncSuccess(item: SyncQueueItem, _result: SyncResult): Promise<void> {
     // Mark offline actions as synced
   const sessionId = (typeof item.data === 'object' && item.data && 'sessionId' in item.data)
-    ? (item.data as Record<string, unknown>).sessionId
+    ? (item.data as Record<string, unknown>)['sessionId']
     : undefined;
     this.offlineActions
-  .filter(action => typeof action.data === 'object' && action.data !== null && 'sessionId' in action.data && (action.data as Record<string, unknown>).sessionId === sessionId)
+  .filter(action => typeof action.data === 'object' && action.data !== null && 'sessionId' in action.data && (action.data as Record<string, unknown>)['sessionId'] === sessionId)
       .forEach(action => action.synced = true);
 
     this.persistOfflineActions();
 
     // Show success notification
-  if (this.pushNotificationManager != null) {
+  if (this.pushNotificationManager) {
       await this.pushNotificationManager.queueNotification({
         title: '🎧 Session Data Synced',
         body: 'Your frequency therapy session has been saved to your profile.',
@@ -338,7 +336,7 @@ export class AdvancedBackgroundSync {
             try {
               const parsed = JSON.parse(item);
               if (typeof parsed === 'object' && parsed && 'timestamp' in parsed) {
-                const ts = (parsed as Record<string, unknown>).timestamp;
+                const ts = (parsed as Record<string, unknown>)['timestamp'];
                 if (typeof ts === 'number' && Date.now() - ts > 10000) {
                   localStorage.removeItem(key);
                 }

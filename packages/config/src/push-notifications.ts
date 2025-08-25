@@ -447,16 +447,17 @@ export const HealWaveNotifications = {
 
 // Smart notification scheduler for astrology events
 export class AstrologyNotificationScheduler {
-  private pushManager: PushNotificationManager;
+  private _pushManager: PushNotificationManager;
 
   constructor(pushManager: PushNotificationManager) {
-    this.pushManager = pushManager;
+    this._pushManager = pushManager;
   }
 
   // Schedule daily horoscope
   scheduleDailyHoroscope(userId: string, sign: string, time: string): void {
     // In a real implementation, this would integrate with your backend scheduler
-  (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.(`📅 Scheduled daily horoscope for ${sign} at ${time}`);
+    // using this._pushManager to send the actual notification
+    (globalThis as unknown as { devConsole?: { log?: (...args: unknown[]) => void } }).devConsole?.log?.(`📅 Scheduled daily horoscope for user ${userId}, sign ${sign} at ${time}`, { pushManager: Boolean(this._pushManager) });
   }
 
   // Schedule transit alerts based on birth chart

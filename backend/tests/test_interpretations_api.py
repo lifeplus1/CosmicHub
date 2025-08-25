@@ -65,39 +65,39 @@ def mock_ai_interpretation() -> Dict[str, Any]:
         "core_identity": {
             "sun_identity": {
                 "archetype": "The Communicator",
-                "description": "A natural born teacher and communicator with Mercury ruling your cosmic identity.",
+                "description": "A natural born teacher and communicator with Mercury ruling your cosmic identity.",  # noqa: E501
                 "element": "Air",
                 "quality": "Mutable",
             },
             "moon_nature": {
-                "description": "Deep emotional waters with transformative healing abilities.",
+                "description": "Deep emotional waters with transformative healing abilities.",  # noqa: E501
                 "needs": "emotional depth and transformation",
             },
         },
         "life_purpose": {
             "soul_purpose": {
-                "growth_direction": "Learning to communicate deep truths with clarity and compassion."
+                "growth_direction": "Learning to communicate deep truths with clarity and compassion."  # noqa: E501
             },
-            "life_mission": "To bridge the gap between intellectual understanding and emotional wisdom.",
+            "life_mission": "To bridge the gap between intellectual understanding and emotional wisdom.",  # noqa: E501
         },
         "relationship_patterns": {
             "love_style": {
-                "attraction_style": "Drawn to intense, transformative connections that challenge your mind."
+                "attraction_style": "Drawn to intense, transformative connections that challenge your mind."  # noqa: E501
             }
         },
         "career_path": {
             "career_direction": {
-                "natural_calling": "Teaching, writing, counseling, or healing professions that combine intellect with transformation."
+                "natural_calling": "Teaching, writing, counseling, or healing professions that combine intellect with transformation."  # noqa: E501
             }
         },
         "growth_challenges": {
             "saturn_lessons": {
-                "mastery_challenge": "Learning to ground your quick mind with emotional depth and practical application."
+                "mastery_challenge": "Learning to ground your quick mind with emotional depth and practical application."  # noqa: E501
             }
         },
         "spiritual_gifts": {
             "psychic_abilities": {
-                "intuitive_gifts": "Strong mental telepathy and ability to read between the lines of communication."
+                "intuitive_gifts": "Strong mental telepathy and ability to read between the lines of communication."  # noqa: E501
             }
         },
     }
@@ -242,7 +242,7 @@ class TestInterpretationsAPI:
             mock_doc.exists = True
             mock_doc.to_dict.return_value = {
                 "chartId": "chart123",
-                "userId": "test_user_123",  # Must match the authenticated user's uid
+                "userId": "test_user_123",  # Must match the authenticated user's uid  # noqa: E501
                 "type": "natal",
                 "title": "Natal Chart Analysis",
                 "content": "Your chart reveals...",
@@ -280,7 +280,7 @@ class TestInterpretationsAPI:
     def test_get_interpretation_access_denied(
         self, mock_db: Mock, mock_get_user: Mock
     ) -> None:
-        """Test access denied when trying to access another user's interpretation"""
+        """Test access denied when trying to access another user's interpretation"""  # noqa: E501
         mock_get_user.return_value = {
             "uid": "different_user",
             "email": "other@test.com",
@@ -412,7 +412,7 @@ class TestIntegrationWithAIEngine:
 
         # Call the function that should use the AI engine
 
-        # This would normally call generate_interpretation from ai_interpretations.py
+        # This would normally call generate_interpretation from ai_interpretations.py  # noqa: E501
         result = mock_generate(mock_chart_data, "advanced")
 
         # Verify the engine was called

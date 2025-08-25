@@ -3,13 +3,13 @@
  */
 
 import { createComponentLibraryOptimizer } from './componentLibrary';
-/* eslint-disable no-console */
+ 
 const devConsole = {
   log: import.meta.env.DEV ? console.log.bind(console) : undefined,
   warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
   error: console.error.bind(console)
 };
-/* eslint-enable no-console */
+ 
 
 const optimizer = createComponentLibraryOptimizer();
 

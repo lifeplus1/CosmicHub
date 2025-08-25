@@ -209,7 +209,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
                     checked={options.includeInterpretation}
                     onChange={handleOptionChange}
                     className="w-4 h-4 text-purple-500 rounded"
-                  />
+                  aria-label="checkbox input" />
                   <span className="text-cosmic-silver">Include AI Interpretation (Elite Feature)</span>
                 </label>
                 <label className="flex items-center space-x-2">
@@ -219,7 +219,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
                     checked={options.includeAspects}
                     onChange={handleOptionChange}
                     className="w-4 h-4 text-purple-500 rounded"
-                  />
+                  aria-label="checkbox input" />
                   <span className="text-cosmic-silver">Include Detailed Aspects</span>
                 </label>
                 <label className="flex items-center space-x-2">
@@ -229,7 +229,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(({ chartData, birthInfo, 
                     checked={options.includeTransits}
                     onChange={handleOptionChange}
                     className="w-4 h-4 text-purple-500 rounded"
-                  />
+                  aria-label="checkbox input" />
                   <span className="text-cosmic-silver">Include Current Transits (Elite Feature)</span>
                 </label>
               </div>

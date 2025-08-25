@@ -12,7 +12,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from utils.vectorized_memory_optimization import (
+from utils.vectorized_memory_optimization import (  # noqa: E402
     ArrayMemoryPool,
     MemoryMonitor,
     MemoryOptimizedVectorizedCalculator,
@@ -40,7 +40,7 @@ class TestArrayMemoryPool:
 
         # Return array to pool
         success = self.pool.return_array(array1)
-        assert success == True
+        assert success == True  # noqa: E712
 
         # Get array again - should be same array reused
         array2 = self.pool.get_array(shape)
@@ -80,7 +80,7 @@ class TestArrayMemoryPool:
 
         # Get arrays again (should be reused)
         for i in range(3):
-            reused_array = self.pool.get_array((i + 1, i + 1))
+            reused_array = self.pool.get_array((i + 1, i + 1))  # noqa: F841
 
         final_stats = self.pool.pool.get_stats()
         assert (
@@ -179,7 +179,7 @@ class TestMemoryMonitor:
 
         # Start monitoring
         monitor.start_monitoring()
-        start_stats = monitor.get_memory_stats()
+        start_stats = monitor.get_memory_stats()  # noqa: F841
 
         # Allocate some memory
         large_array = np.random.rand(1000, 1000)  # ~8MB
@@ -214,7 +214,7 @@ class TestMemoryOptimizedContextManager:
 
             # Test that calculator is configured correctly
             assert calculator.chunk_size == 10
-            assert calculator.enable_memory_pooling == True
+            assert calculator.enable_memory_pooling == True  # noqa: E712
 
     def test_context_manager_cleanup(self):
         """Test that context manager properly cleans up."""

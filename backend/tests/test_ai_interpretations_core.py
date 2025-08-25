@@ -1,4 +1,4 @@
-"""Focused tests for ai_interpretations module load and callable enumeration."""
+"""Focused tests for ai_interpretations module load and callable enumeration."""  # noqa: E501
 
 from __future__ import annotations
 

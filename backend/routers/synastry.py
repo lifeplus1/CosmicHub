@@ -36,19 +36,23 @@ class Summary(TypedDict):
     advice: List[str]
 
 
-import time
-from datetime import datetime, timezone
-from os import getenv
+import time  # noqa: E402
+from datetime import datetime, timezone  # noqa: E402
+from os import getenv  # noqa: E402
 
-import pytz
-import swisseph as swe
+import pytz  # noqa: E402
+import swisseph as swe  # noqa: E402
 
-from utils.aspect_utils import build_aspect_matrix, get_key_aspects
-from utils.compatibility_utils import (
+from utils.aspect_utils import (  # noqa: E402
+    build_aspect_matrix, get_key_aspects
+)
+from utils.compatibility_utils import (  # noqa: E402
     calculate_compatibility_score,
     generate_relationship_summary,
 )
-from utils.house_overlay_utils import analyze_house_overlays, get_key_overlays
+from utils.house_overlay_utils import (  # noqa: E402
+    analyze_house_overlays, get_key_overlays
+)
 
 # Check if vectorized operations are available
 vectorized_available = False
@@ -69,9 +73,9 @@ try:  # Safe optional import
     if metrics_enabled_flag:
         from prometheus_client import Counter, Histogram  # type: ignore
 
-        SYN_COUNTER = Counter("synastry_requests_total", "Synastry calculation attempts", ["result"])  # type: ignore
-        SYN_LATENCY = Histogram("synastry_generation_seconds", "Synastry calculation latency seconds", buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10))  # type: ignore
-        SYN_CACHE = Counter("synastry_cache_events_total", "Synastry cache events", ["event"])  # type: ignore
+        SYN_COUNTER = Counter("synastry_requests_total", "Synastry calculation attempts", ["result"])  # type: ignore  # noqa: E501
+        SYN_LATENCY = Histogram("synastry_generation_seconds", "Synastry calculation latency seconds", buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10))  # type: ignore  # noqa: E501
+        SYN_CACHE = Counter("synastry_cache_events_total", "Synastry cache events", ["event"])  # type: ignore  # noqa: E501
     else:  # pragma: no cover - disabled path
         SYN_COUNTER = None  # type: ignore
         SYN_LATENCY = None  # type: ignore
@@ -82,7 +86,7 @@ except Exception:  # pragma: no cover - import failure
     SYN_CACHE = None  # type: ignore
 
 # Simple in-memory cache (lightweight; future: unify with Redis service)
-from typing import Any as _Any
+from typing import Any as _Any  # noqa: E402
 
 _syn_cache: dict[str, tuple[float, dict[str, _Any]]] = {}
 _CACHE_TTL = int(getenv("SYNASTRY_CACHE_TTL", "900"))  # 15 min default
@@ -161,7 +165,7 @@ def calculate_planets(
     utc_dt = dt.astimezone(timezone.utc)
 
     # Calculate Julian day
-    jd: float = swe.julday(
+    jd: float = swe.julday(  # type: ignore
         utc_dt.year,
         utc_dt.month,
         utc_dt.day,  # type: ignore
@@ -171,15 +175,15 @@ def calculate_planets(
     # Calculate planetary positions
     planets: Dict[str, float] = {}
     planet_nums: Dict[str, int] = {
-        "sun": swe.SUN,
-        "moon": swe.MOON,
+        "sun": swe.SUN,  # type: ignore
+        "moon": swe.MOON,  # type: ignore
         "mercury": swe.MERCURY,  # type: ignore
-        "venus": swe.VENUS,
-        "mars": swe.MARS,
+        "venus": swe.VENUS,  # type: ignore
+        "mars": swe.MARS,  # type: ignore
         "jupiter": swe.JUPITER,  # type: ignore
-        "saturn": swe.SATURN,
+        "saturn": swe.SATURN,  # type: ignore
         "uranus": swe.URANUS,  # type: ignore
-        "neptune": swe.NEPTUNE,
+        "neptune": swe.NEPTUNE,  # type: ignore
         "pluto": swe.PLUTO,  # type: ignore
     }
 
@@ -188,7 +192,7 @@ def calculate_planets(
         planets[planet_name] = result[0][0]  # Longitude in degrees
 
     # Calculate house cusps (Placidus system)
-    cusps_result = swe.houses(jd, birth_data.latitude, birth_data.longitude, b"P")  # type: ignore
+    cusps_result = swe.houses(jd, birth_data.latitude, birth_data.longitude, b"P")  # type: ignore  # noqa: E501
     cusps: List[float] = list(cusps_result[0])  # type: ignore
 
     return planets, cusps

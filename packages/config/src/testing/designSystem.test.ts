@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { designSystem, DesignConsistencyReport, DesignTokens, ComponentPattern } from './designSystem';
+import { designSystem, DesignConsistencyReport, DesignTokens } from './designSystem';
 
 describe('Design System Validation Suite', () => {
   let designTokens: DesignTokens;

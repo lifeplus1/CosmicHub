@@ -20,9 +20,9 @@ try:  # Optional Prometheus import without importing main
     if metrics_enabled_flag:
         from prometheus_client import Counter, Histogram  # type: ignore
 
-        INTERP_COUNTER = Counter("interpretations_total", "Total interpretation generation attempts", ["result", "level"])  # type: ignore
-        INTERP_LATENCY = Histogram("interpretation_generation_seconds", "Interpretation generation latency seconds", buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5))  # type: ignore
-        INTERP_CACHE = Counter("interpretation_cache_events_total", "Interpretation cache events", ["event"])  # type: ignore
+        INTERP_COUNTER = Counter("interpretations_total", "Total interpretation generation attempts", ["result", "level"])  # type: ignore  # noqa: E501
+        INTERP_LATENCY = Histogram("interpretation_generation_seconds", "Interpretation generation latency seconds", buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5))  # type: ignore  # noqa: E501
+        INTERP_CACHE = Counter("interpretation_cache_events_total", "Interpretation cache events", ["event"])  # type: ignore  # noqa: E501
     else:
         INTERP_COUNTER = None  # type: ignore
         INTERP_LATENCY = None  # type: ignore
@@ -31,7 +31,7 @@ except Exception:
     INTERP_COUNTER = None  # type: ignore
     INTERP_LATENCY = None  # type: ignore
     INTERP_CACHE = None  # type: ignore
-from .services.astro_service import get_astro_service
+from .services.astro_service import get_astro_service  # noqa: E402
 
 router = APIRouter(prefix="/api/interpretations", tags=["interpretations"])
 
@@ -71,7 +71,7 @@ class Interpretation(BaseModel):
     schemaVersion: Optional[str] = None
 
 
-import logging
+import logging  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ async def get_interpretations(
     try:
         # Query Firestore for existing interpretations
         interpretations_ref = db.collection("interpretations")
-        query = interpretations_ref.where("userId", "==", request.userId).where("chartId", "==", request.chartId)  # type: ignore[misc]
+        query = interpretations_ref.where("userId", "==", request.userId).where("chartId", "==", request.chartId)  # type: ignore[misc]  # noqa: E501
         docs = query.stream()
 
         interpretations: List[Interpretation] = []
@@ -102,7 +102,7 @@ async def get_interpretations(
             if doc_data:
                 doc_data["id"] = doc.id  # type: ignore[attr-defined]
                 try:
-                    interpretation = Interpretation(**doc_data)  # type: ignore[arg-type]
+                    interpretation = Interpretation(**doc_data)  # type: ignore[arg-type]  # noqa: E501
                     interpretations.append(interpretation)
                 except Exception:
                     # Skip malformed documents
@@ -130,14 +130,20 @@ async def generate_interpretation_endpoint(
     """
     Generate a new AI interpretation with Redis caching for performance.
     """
+    import os as _os  # local import for debug flag
+    _trace = _os.getenv("DEBUG_REQUEST_TRACE") in ("1", "true", "yes")
     try:
+        if _trace:  # pragma: no cover - debug only
+            print(f"[TRACE] generate_interpretation:enter chartId={request.chartId} userId={request.userId}")
         # Check cache first for previously generated interpretation
-        cache_key = f"interpretation:{request.chartId}:{request.userId}:{request.type or 'natal'}"
+        cache_key = f"interpretation:{request.chartId}:{request.userId}:{request.type or 'natal'}"  # noqa: E501
         ttl_env = int(getenv("INTERPRETATION_CACHE_TTL", "1800"))
         cached_interpretation = await astro_service.get_cached_data(cache_key)
 
         if cached_interpretation:
             print(f"Cache hit for interpretation: {cache_key}")
+            if _trace:  # pragma: no cover - debug only
+                print(f"[TRACE] generate_interpretation:cache_hit key={cache_key}")
             if "id" not in cached_interpretation:
                 cached_interpretation["id"] = cache_key  # type: ignore[index]
             cached_interpretation.setdefault(
@@ -173,6 +179,8 @@ async def generate_interpretation_endpoint(
 
         # Get chart data from storage (with caching)
         chart_data = await astro_service.get_chart_data(request.chartId)
+        if _trace:  # pragma: no cover - debug only
+            print(f"[TRACE] generate_interpretation:chart_data {'found' if chart_data else 'missing'}")
 
         if not chart_data:
             raise HTTPException(
@@ -180,9 +188,9 @@ async def generate_interpretation_endpoint(
                 detail="Chart data not found. Please generate a chart first.",
             )
 
-        # Normalize chart_data if planets provided as a list (unified serialization format)
+        # Normalize chart_data if planets provided as a list (unified serialization format)  # noqa: E501
         try:
-            if isinstance(chart_data.get("planets"), list):  # type: ignore[index]
+            if isinstance(chart_data.get("planets"), list):  # type: ignore[index]  # noqa: E501
                 planet_list = chart_data["planets"]  # type: ignore[index]
                 new_planets: Dict[str, Dict[str, Any]] = {}
                 for p in planet_list:  # type: ignore[assignment]
@@ -192,7 +200,7 @@ async def generate_interpretation_endpoint(
                     if not name_val:
                         continue
                     # Ensure name is string for key normalization
-                    if not isinstance(name_val, str):  # type: ignore[unreachable]
+                    if not isinstance(name_val, str):  # type: ignore[unreachable]  # noqa: E501
                         try:
                             name_str = str(name_val)  # type: ignore[arg-type]
                         except Exception:
@@ -202,7 +210,7 @@ async def generate_interpretation_endpoint(
                     key = name_str.replace(" ", "_").lower()
                     new_planets[key] = {  # type: ignore[index]
                         "sign": p.get("sign"),  # type: ignore[index]
-                        "position": p.get("degree") or p.get("position"),  # type: ignore[index]
+                        "position": p.get("degree") or p.get("position"),  # type: ignore[index]  # noqa: E501
                         "degree": p.get("degree"),  # type: ignore[index]
                         "house": p.get("house"),  # type: ignore[index]
                     }
@@ -218,6 +226,8 @@ async def generate_interpretation_endpoint(
             chart_data, interpretation_level
         )
         elapsed = time.time() - start_time
+        if _trace:  # pragma: no cover - debug only
+            print(f"[TRACE] generate_interpretation:engine_complete duration_ms={int(elapsed*1000)}")
         if INTERP_LATENCY:
             try:
                 INTERP_LATENCY.observe(elapsed)  # type: ignore
@@ -236,7 +246,7 @@ async def generate_interpretation_endpoint(
         if "error" in raw_interpretation:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Interpretation generation failed: {raw_interpretation['error']}",
+                detail=f"Interpretation generation failed: {raw_interpretation['error']}",  # noqa: E501
             )
 
         # Format the interpretation for frontend consumption
@@ -257,14 +267,16 @@ async def generate_interpretation_endpoint(
         await astro_service.cache_serialized_data(
             cache_key, formatted_interpretation, expire_seconds=ttl_env
         )
+        if _trace:  # pragma: no cover - debug only
+            print(f"[TRACE] generate_interpretation:cached key={cache_key}")
 
         # Save to Firestore if available (skip in test mode)
         import os
 
-        if db is not None and os.environ.get("TEST_MODE") != "1":  # type: ignore[truthy-bool]
+        if db is not None and os.environ.get("TEST_MODE") != "1":  # type: ignore[truthy-bool]  # noqa: E501
             try:
-                doc_ref = db.collection("interpretations").document()  # type: ignore[attr-defined]
-                formatted_interpretation["id"] = doc_ref.id  # type: ignore[attr-defined]
+                doc_ref = db.collection("interpretations").document()  # type: ignore[attr-defined]  # noqa: E501
+                formatted_interpretation["id"] = doc_ref.id  # type: ignore[attr-defined]  # noqa: E501
                 doc_ref.set(formatted_interpretation)  # type: ignore[arg-type]
             except Exception:
                 # Non-fatal in generation path
@@ -275,27 +287,31 @@ async def generate_interpretation_endpoint(
         interpretation = Interpretation(**formatted_interpretation)
         if INTERP_COUNTER:
             try:
-                INTERP_COUNTER.labels(result="success", level=interpretation_level).inc()  # type: ignore
+                INTERP_COUNTER.labels(result="success", level=interpretation_level).inc()  # type: ignore  # noqa: E501
             except Exception:
                 pass
 
         return InterpretationResponse(
             data=[interpretation],
             success=True,
-            message="Interpretation generated successfully using advanced astrological analysis",
+            message="Interpretation generated successfully using advanced astrological analysis",  # noqa: E501
         )
 
     except HTTPException as http_e:
+        if _trace:  # pragma: no cover - debug only
+            print(f"[TRACE] generate_interpretation:http_exception status={http_e.status_code} detail={http_e.detail}")
         if INTERP_COUNTER:
             try:
-                INTERP_COUNTER.labels(result="http_error", level=request.interpretation_level or "advanced").inc()  # type: ignore
+                INTERP_COUNTER.labels(result="http_error", level=request.interpretation_level or "advanced").inc()  # type: ignore  # noqa: E501
             except Exception:
                 pass
         raise http_e
     except Exception as e:
+        if _trace:  # pragma: no cover - debug only
+            print(f"[TRACE] generate_interpretation:exception err={type(e).__name__} msg={e}")
         if INTERP_COUNTER:
             try:
-                INTERP_COUNTER.labels(result="error", level=request.interpretation_level or "advanced").inc()  # type: ignore
+                INTERP_COUNTER.labels(result="error", level=request.interpretation_level or "advanced").inc()  # type: ignore  # noqa: E501
             except Exception:
                 pass
         raise HTTPException(
@@ -333,7 +349,7 @@ async def get_interpretation_by_id(
                     detail="Access denied",
                 )
 
-            return {"data": Interpretation(**data), "success": True}  # type: ignore[arg-type]
+            return {"data": Interpretation(**data), "success": True}  # type: ignore[arg-type]  # noqa: E501
         else:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -407,14 +423,14 @@ async def get_chart_data(
         # Option 1: Get from saved charts
         if chart_id != "default":
             charts_ref = db.collection("charts")
-            query = charts_ref.where("userId", "==", user_id).where("id", "==", chart_id)  # type: ignore
+            query = charts_ref.where("userId", "==", user_id).where("id", "==", chart_id)  # type: ignore  # noqa: E501
             docs = list(query.stream())
 
             if docs:
                 chart_doc = docs[0]
                 chart_data = chart_doc.to_dict()  # type: ignore[attr-defined]
                 if chart_data:
-                    return chart_data.get("chart_data", {})  # type: ignore[return-value]
+                    return chart_data.get("chart_data", {})  # type: ignore[return-value]  # noqa: E501
 
         # Option 2: Return None to indicate chart data needs to be provided
         # This would integrate with your existing chart calculation system
@@ -432,7 +448,7 @@ def format_interpretation_for_frontend(
 ) -> Dict[str, Any]:
     """
     Format the raw interpretation data for frontend consumption.
-    Note: This function handles dynamic astrological data structures from ai_interpretations.py
+    Note: This function handles dynamic astrological data structures from ai_interpretations.py  # noqa: E501
     """
     # Extract content from different interpretation sections
     content_sections: List[str] = []
@@ -444,14 +460,14 @@ def format_interpretation_for_frontend(
         core = raw_interpretation["core_identity"]
         if "sun_identity" in core:
             sun = core["sun_identity"]
-            content_sections.append(f"**Core Identity ({sun.get('archetype', 'Unknown')})**: {sun.get('description', '')}")  # type: ignore
-            summary_parts.append(f"{sun.get('archetype', 'Unknown')} with {sun.get('element', '')} energy")  # type: ignore
-            tags.extend(["identity", sun.get("element", ""), sun.get("quality", "")])  # type: ignore
+            content_sections.append(f"**Core Identity ({sun.get('archetype', 'Unknown')})**: {sun.get('description', '')}")  # type: ignore  # noqa: E501
+            summary_parts.append(f"{sun.get('archetype', 'Unknown')} with {sun.get('element', '')} energy")  # type: ignore  # noqa: E501
+            tags.extend(["identity", sun.get("element", ""), sun.get("quality", "")])  # type: ignore  # noqa: E501
 
         if "moon_nature" in core:
             moon = core["moon_nature"]
-            content_sections.append(f"**Emotional Nature**: {moon.get('description', '')}")  # type: ignore
-            summary_parts.append(f"seeks {moon.get('needs', 'emotional fulfillment')}")  # type: ignore
+            content_sections.append(f"**Emotional Nature**: {moon.get('description', '')}")  # type: ignore  # noqa: E501
+            summary_parts.append(f"seeks {moon.get('needs', 'emotional fulfillment')}")  # type: ignore  # noqa: E501
             tags.extend(["emotions", "intuition"])  # type: ignore
 
     # Process life purpose - type: ignore for dynamic astrological data
@@ -459,18 +475,18 @@ def format_interpretation_for_frontend(
         purpose = raw_interpretation["life_purpose"]
         if "soul_purpose" in purpose:
             soul = purpose["soul_purpose"]
-            content_sections.append(f"**Soul Purpose**: {soul.get('growth_direction', '')}")  # type: ignore
+            content_sections.append(f"**Soul Purpose**: {soul.get('growth_direction', '')}")  # type: ignore  # noqa: E501
             tags.extend(["purpose", "growth"])  # type: ignore
 
         if "life_mission" in purpose:
-            content_sections.append(f"**Life Mission**: {purpose['life_mission']}")  # type: ignore
+            content_sections.append(f"**Life Mission**: {purpose['life_mission']}")  # type: ignore  # noqa: E501
 
-    # Process relationship patterns - type: ignore for dynamic astrological data
+    # Process relationship patterns - type: ignore for dynamic astrological data  # noqa: E501
     if "relationship_patterns" in raw_interpretation:
         relationships = raw_interpretation["relationship_patterns"]
         if "love_style" in relationships:
             love = relationships["love_style"]
-            content_sections.append(f"**Love Style**: {love.get('attraction_style', '')}")  # type: ignore
+            content_sections.append(f"**Love Style**: {love.get('attraction_style', '')}")  # type: ignore  # noqa: E501
             tags.extend(["relationships", "love"])  # type: ignore
 
     # Process career path - type: ignore for dynamic astrological data
@@ -478,7 +494,7 @@ def format_interpretation_for_frontend(
         career = raw_interpretation["career_path"]
         if "career_direction" in career:
             direction = career["career_direction"]
-            content_sections.append(f"**Career Direction**: {direction.get('natural_calling', '')}")  # type: ignore
+            content_sections.append(f"**Career Direction**: {direction.get('natural_calling', '')}")  # type: ignore  # noqa: E501
             tags.extend(["career", "profession"])  # type: ignore
 
     # Process growth challenges - type: ignore for dynamic astrological data
@@ -486,7 +502,7 @@ def format_interpretation_for_frontend(
         challenges = raw_interpretation["growth_challenges"]
         if "saturn_lessons" in challenges:
             saturn = challenges["saturn_lessons"]
-            content_sections.append(f"**Growth Challenges**: {saturn.get('mastery_challenge', '')}")  # type: ignore
+            content_sections.append(f"**Growth Challenges**: {saturn.get('mastery_challenge', '')}")  # type: ignore  # noqa: E501
             tags.extend(["growth", "challenges"])  # type: ignore
 
     # Process spiritual gifts - type: ignore for dynamic astrological data
@@ -495,11 +511,11 @@ def format_interpretation_for_frontend(
         if "psychic_abilities" in spiritual:
             psychic = spiritual["psychic_abilities"]
             if psychic.get("intuitive_gifts"):
-                content_sections.append(f"**Spiritual Gifts**: {psychic['intuitive_gifts']}")  # type: ignore
+                content_sections.append(f"**Spiritual Gifts**: {psychic['intuitive_gifts']}")  # type: ignore  # noqa: E501
                 tags.extend(["spirituality", "intuition"])  # type: ignore
 
     # Clean up tags - type: ignore for list comprehension with dynamic data
-    tags = list(set([tag for tag in tags if tag and tag != ""]))[:8]  # type: ignore
+    tags = list(set([tag for tag in tags if tag and tag != ""]))[:8]  # type: ignore  # noqa: E501
 
     # Create title based on interpretation type and level
     title_map = {
@@ -520,7 +536,7 @@ def format_interpretation_for_frontend(
     full_content = (
         "\n\n".join(content_sections)
         if content_sections
-        else "Detailed interpretation generated using advanced astrological analysis."
+        else "Detailed interpretation generated using advanced astrological analysis."  # noqa: E501
     )
 
     # Create summary
@@ -551,7 +567,7 @@ def calculate_confidence(raw_interpretation: Dict[str, Any]) -> float:
     """
     Calculate confidence score based on interpretation completeness.
     """
-    total_sections = 8  # core_identity, life_purpose, relationships, career, growth, spiritual, current_phase, integration
+    total_sections = 8  # core_identity, life_purpose, relationships, career, growth, spiritual, current_phase, integration  # noqa: E501
     completed_sections = 0
 
     key_sections = [

@@ -149,10 +149,18 @@ const HumanDesignModal: React.FC<HumanDesignModalProps> = ({ isOpen, onClose, da
     <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={handleOverlayClick}
-      onKeyDown={(e) => { if (e.key === 'Escape') { onClose(); } }}
+      onKeyDown={(e) => { 
+        if (e.key === 'Escape') { 
+          onClose(); 
+        } else if (e.key === 'Enter' || e.key === ' ') { 
+          e.preventDefault(); 
+          onClose(); 
+        } 
+      }}
       role="dialog"
       aria-modal="true"
-      tabIndex={-1}
+      aria-label={data ? `${data.type === 'gate' ? 'Gate' : 'Channel'} Details` : 'Human Design Details'}
+      tabIndex={0}
     >
       <div className="bg-cosmic-dark border border-cosmic-purple/30 rounded-lg shadow-2xl shadow-cosmic-purple/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {data.type === 'gate' ? renderGateContent(data) : renderChannelContent(data)}

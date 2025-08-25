@@ -1,7 +1,7 @@
 """
 Phase 3: Intelligent Caching System for Vectorized Operations
 
-This module provides intelligent caching strategies for astrological calculations,
+This module provides intelligent caching strategies for astrological calculations,  # noqa: E501
 including LRU caching, cache invalidation, and persistent storage options.
 """
 
@@ -97,7 +97,7 @@ class InMemoryCache:
         self.memory_usage: Dict[str, float] = {}
         self.stats = CacheStats()
         self.lock = threading.RLock()
-        # Internal flag used to suppress counting the immediate next get() after a clear()
+        # Internal flag used to suppress counting the immediate next get() after a clear()  # noqa: E501
         self._suppress_next_stats = False
 
     def _calculate_memory_usage(self, value: Any) -> float:
@@ -182,7 +182,7 @@ class InMemoryCache:
             self.access_times.clear()
             self.memory_usage.clear()
             self.stats = CacheStats()
-            # Suppress the next get() stats update so tests that call get() immediately
+            # Suppress the next get() stats update so tests that call get() immediately  # noqa: E501
             # after clear() don't see a miss counted.
             self._suppress_next_stats = True
 
@@ -223,7 +223,7 @@ class PersistentCache:
 
         # Backwards-compatible test-friendly behavior: if max_age_hours is a
         # fractional value less than 1.0, treat it as seconds to allow tests to
-        # use small timeouts (e.g., 0.1 -> 0.1 seconds). Otherwise interpret as hours.
+        # use small timeouts (e.g., 0.1 -> 0.1 seconds). Otherwise interpret as hours.  # noqa: E501
         if self.max_age_hours < 1.0:
             return age_seconds > self.max_age_hours
 
@@ -423,7 +423,7 @@ def cached_calculation(
                         break
 
             if cache_parameters:
-                # Cache selected parameters (exclude functions and large objects)
+                # Cache selected parameters (exclude functions and large objects)  # noqa: E501
                 for k, v in kwargs.items():
                     if not callable(v) and not k.startswith("_"):
                         cache_kwargs[k] = v

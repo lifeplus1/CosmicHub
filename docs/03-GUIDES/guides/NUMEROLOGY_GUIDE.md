@@ -198,7 +198,7 @@ Special significance for 11, 22, and 33:
 8. **Achievement**: Ambitious, material success, power
 9. **Completion**: Humanitarian, universal love, service
 
-### Master Numbers
+### Master Number Meanings
 
 - **11**: Spiritual illumination, intuitive insights
 - **22**: Master builder, practical visionary

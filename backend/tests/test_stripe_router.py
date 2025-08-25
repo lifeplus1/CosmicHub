@@ -5,23 +5,23 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, Generator, Mapping, TypedDict
 
-# Ensure project root (one level up) is on sys.path so 'backend' absolute imports resolve when stripe_integration re-imports.
+# Ensure project root (one level up) is on sys.path so 'backend' absolute imports resolve when stripe_integration re-imports.  # noqa: E501
 ROOT = Path(__file__).resolve().parent.parent
 PARENT = ROOT.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
-import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
+import pytest  # noqa: E402
+from fastapi import FastAPI  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 
-# Dynamically load stripe_router module to avoid relative import traversal issues when running tests standalone.
-from backend.api.routers import stripe_router as sr  # type: ignore
+# Dynamically load stripe_router module to avoid relative import traversal issues when running tests standalone.  # noqa: E501
+from backend.api.routers import stripe_router as sr  # type: ignore  # noqa: E501, E402
 
 
 @pytest.fixture(scope="module")
 def test_app() -> FastAPI:
-    """Create a dedicated FastAPI app mounting only the stripe router for isolated tests."""
+    """Create a dedicated FastAPI app mounting only the stripe router for isolated tests."""  # noqa: E501
     app = FastAPI()
     app.include_router(sr.router)  # mount /stripe endpoints
 
@@ -50,7 +50,7 @@ class _Plan(TypedDict):
 def patch_subscription_plans(
     monkeypatch: pytest.MonkeyPatch,
 ) -> Dict[str, _Plan]:
-    """Provide deterministic subscription plans with known price IDs for matching in verification logic."""
+    """Provide deterministic subscription plans with known price IDs for matching in verification logic."""  # noqa: E501
     plans: Dict[str, _Plan] = {
         "astro_premium": {
             "price_id": "price_test_premium",
@@ -77,14 +77,14 @@ def patch_subscription_plans(
             "price": 2.99,
         },
     }
-    monkeypatch.setattr(sr, "SUBSCRIPTION_PLANS", plans)  # type: ignore[arg-type]
-    # Also patch original integration dict reference (imported object) if present
+    monkeypatch.setattr(sr, "SUBSCRIPTION_PLANS", plans)  # type: ignore[arg-type]  # noqa: E501
+    # Also patch original integration dict reference (imported object) if present  # noqa: E501
     try:
         import backend.api.stripe_integration as integ  # type: ignore
     except Exception:
         integ = None  # type: ignore
     else:  # only patch if import succeeded
-        monkeypatch.setattr(integ, "SUBSCRIPTION_PLANS", plans)  # type: ignore[arg-type]
+        monkeypatch.setattr(integ, "SUBSCRIPTION_PLANS", plans)  # type: ignore[arg-type]  # noqa: E501
     return plans
 
 
@@ -160,7 +160,7 @@ def test_subscription_status(
 def test_cancel_and_reactivate_subscription(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Provide active status for cancel path and inactive for reactivate path via mutable store
+    # Provide active status for cancel path and inactive for reactivate path via mutable store  # noqa: E501
     state = {"active": True}
 
     async def fake_status(
@@ -175,9 +175,9 @@ def test_cancel_and_reactivate_subscription(
         }
 
     monkeypatch.setattr(sr, "get_user_subscription_status", fake_status)
-    monkeypatch.setattr(sr, "cancel_stripe_subscription", lambda sub_id: None)  # type: ignore[arg-type]
-    monkeypatch.setattr(sr, "reactivate_stripe_subscription", lambda sub_id: None)  # type: ignore[arg-type]
-    monkeypatch.setattr(sr, "update_subscription_cancel_flag", lambda user_id, flag: None)  # type: ignore[arg-type]
+    monkeypatch.setattr(sr, "cancel_stripe_subscription", lambda sub_id: None)  # type: ignore[arg-type]  # noqa: E501
+    monkeypatch.setattr(sr, "reactivate_stripe_subscription", lambda sub_id: None)  # type: ignore[arg-type]  # noqa: E501
+    monkeypatch.setattr(sr, "update_subscription_cancel_flag", lambda user_id, flag: None)  # type: ignore[arg-type]  # noqa: E501
 
     # Cancel
     resp_cancel = client.post("/stripe/cancel-subscription")
@@ -213,11 +213,11 @@ def test_webhook_handler(
         called["handled"] = True
         return {"status": "success"}
 
-    monkeypatch.setattr(sr, "handle_stripe_webhook", fake_handle)  # type: ignore[arg-type]
+    monkeypatch.setattr(sr, "handle_stripe_webhook", fake_handle)  # type: ignore[arg-type]  # noqa: E501
     resp = client.post(
         "/stripe/webhook", content="{}", headers={"stripe-signature": "sig"}
     )
-    # Should accept immediately with received status regardless of processing outcome
+    # Should accept immediately with received status regardless of processing outcome  # noqa: E501
     assert resp.status_code == 200
     assert resp.json()["status"] == "received"
 
@@ -252,13 +252,13 @@ def test_verify_session_success(
 
     # Build fake stripe module with required functions/classes
     stripe_mod = ModuleType("stripe")
-    checkout_ns = types.SimpleNamespace(Session=types.SimpleNamespace(retrieve=lambda sid: _make_session("test-user")))  # type: ignore[arg-type]
-    subscription_ns = types.SimpleNamespace(retrieve=lambda sid: _make_subscription("price_test_premium"))  # type: ignore[arg-type]
+    checkout_ns = types.SimpleNamespace(Session=types.SimpleNamespace(retrieve=lambda sid: _make_session("test-user")))  # type: ignore[arg-type]  # noqa: E501
+    subscription_ns = types.SimpleNamespace(retrieve=lambda sid: _make_subscription("price_test_premium"))  # type: ignore[arg-type]  # noqa: E501
     setattr(stripe_mod, "checkout", checkout_ns)
     setattr(stripe_mod, "Subscription", subscription_ns)
     sys.modules["stripe"] = stripe_mod  # type: ignore[assignment]
 
-    # Patch Firestore client used inside verification (provide minimal interface)
+    # Patch Firestore client used inside verification (provide minimal interface)  # noqa: E501
     class FakeDoc:
         def __init__(self) -> None:
             self._data: Dict[str, Any] = {}
@@ -319,8 +319,8 @@ def test_verify_session_user_mismatch(
     import sys
 
     stripe_mod = ModuleType("stripe")
-    checkout_ns = types.SimpleNamespace(Session=types.SimpleNamespace(retrieve=lambda sid: _make_session("other-user")))  # type: ignore[arg-type]
-    subscription_ns = types.SimpleNamespace(retrieve=lambda sid: _make_subscription("price_test_premium"))  # type: ignore[arg-type]
+    checkout_ns = types.SimpleNamespace(Session=types.SimpleNamespace(retrieve=lambda sid: _make_session("other-user")))  # type: ignore[arg-type]  # noqa: E501
+    subscription_ns = types.SimpleNamespace(retrieve=lambda sid: _make_subscription("price_test_premium"))  # type: ignore[arg-type]  # noqa: E501
     setattr(stripe_mod, "checkout", checkout_ns)
     setattr(stripe_mod, "Subscription", subscription_ns)
     sys.modules["stripe"] = stripe_mod  # type: ignore[assignment]

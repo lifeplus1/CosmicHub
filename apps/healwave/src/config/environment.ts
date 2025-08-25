@@ -1,3 +1,5 @@
+/// <reference types="../vite-env.d.ts" />
+
 /**
  * HealWave Environment Configuration
  * Centralized environment handling for the HealWave app
@@ -16,7 +18,7 @@ function getCurrentEnvironment(): Environment {
     if (mode === 'test') return 'test';
     return 'development';
   }
-  
+
   // Fallback to Node.js environment
   if (typeof process !== 'undefined') {
     const nodeEnv = process.env?.['NODE_ENV'];
@@ -24,14 +26,16 @@ function getCurrentEnvironment(): Environment {
     if (nodeEnv === 'test') return 'test';
     return 'development';
   }
-  
+
   // Default to development
   return 'development';
 }
 
 // Environment helper functions
-export const isDevelopment = () => getCurrentEnvironment() === 'development' || (typeof import.meta !== 'undefined' && import.meta.env.DEV);
-export const isProduction = () => getCurrentEnvironment() === 'production' || (typeof import.meta !== 'undefined' && import.meta.env.PROD);
+export const isDevelopment = () =>
+  getCurrentEnvironment() === 'development' || Boolean(import.meta?.env?.DEV);
+export const isProduction = () =>
+  getCurrentEnvironment() === 'production' || Boolean(import.meta?.env?.PROD);
 export const isTest = () => getCurrentEnvironment() === 'test';
 
 // Development/Production utilities
@@ -43,22 +47,20 @@ export function prodOnly<T>(value: T): T | undefined {
   return isProduction() ? value : undefined;
 }
 
-// Console wrapper that respects environment
-/* eslint-disable no-console */
-export const devConsole = {
-  log: (...args: any[]) => isDevelopment() && console.log(...args),
-  warn: (...args: any[]) => isDevelopment() && console.warn(...args),
-  error: (...args: any[]) => console.error(...args), // Always show errors
-  info: (...args: any[]) => isDevelopment() && console.info(...args),
-};
-/* eslint-enable no-console */
+// Import logger from config
+import { logger } from '@cosmichub/config';
+
+// Create environment-specific logger
+export const devConsole = logger.child({ module: 'HealWaveEnvironment' });
 
 // Feature flags
+// Safely build feature flags without spreading potential any arrays
+const baseDev = isDevelopment();
 export const features = {
-  mockAuth: isDevelopment(),
-  devLogging: isDevelopment(),
-  showDebugInfo: isDevelopment(),
-};
+  mockAuth: baseDev,
+  devLogging: baseDev,
+  showDebugInfo: baseDev,
+} as const;
 
 export default {
   isDevelopment: isDevelopment(),

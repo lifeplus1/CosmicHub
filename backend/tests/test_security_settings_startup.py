@@ -62,7 +62,7 @@ def test_security_headers_added():
 
 def test_create_rate_limit_key_user_hash_stable():
     req = DummyRequest()
-    # Cast to satisfy static type expectations (matches subset of FastAPI Request interface)
+    # Cast to satisfy static type expectations (matches subset of FastAPI Request interface)  # noqa: E501
     key1 = create_rate_limit_key(cast(Any, req), user_id="abc123")
     key2 = create_rate_limit_key(cast(Any, req), user_id="abc123")
     assert key1 == key2 and key1.startswith("user:")

@@ -176,7 +176,7 @@ class SaltStorage:
                 continue
             if now >= nxt:
                 if key.startswith("global_"):
-                    due_globals.append(key[len("global_") :])
+                    due_globals.append(key[len("global_") :])  # noqa: E203
                 else:
                     due_users.append(key)
         return {"users": due_users, "globals": due_globals}

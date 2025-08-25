@@ -79,7 +79,7 @@ createComponentTestSuite({
   interactions: [
     {
       name: 'keyboard navigation',
-  test: async (_rendered: { container?: HTMLElement }) => {
+      test: async () => {
         const user = userEvent.setup();
         const card = screen.getByTestId('test-card');
         

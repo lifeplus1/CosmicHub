@@ -26,7 +26,7 @@ def calculate_houses(
     julian_day: float, lat: float, lon: float, system: str = "P"
 ) -> HousesResult:
     logger.debug(
-        f"Calculating houses for JD: {julian_day}, lat: {lat}, lon: {lon}, system: {system}"
+        f"Calculating houses for JD: {julian_day}, lat: {lat}, lon: {lon}, system: {system}"  # noqa: E501
     )
 
     # Map house system names to bytes literals
@@ -51,14 +51,14 @@ def calculate_houses(
     try:
         # Calculate houses with extended flags for Vertex
         logger.debug(
-            f"Using house system bytes: {system_bytes}, type: {type(system_bytes)}, length: {len(system_bytes)}"
+            f"Using house system bytes: {system_bytes}, type: {type(system_bytes)}, length: {len(system_bytes)}"  # noqa: E501
         )
-        houses_result = swe.houses_ex(julian_day, lat, lon, flags=0, hsys=system_bytes)  # type: ignore
+        houses_result = swe.houses_ex(julian_day, lat, lon, flags=0, hsys=system_bytes)  # type: ignore  # noqa: E501
 
         # Extract cusps and angles with proper type annotations
-        # Swiss Ephemeris returns a tuple of (cusps, ascmc) where both are sequences of floats
-        cusps: List[float] = list(houses_result[0])  # type: ignore  # House cusps (0-11)
-        ascmc: List[float] = list(houses_result[1])  # type: ignore  # Angles: Ascendant (0), MC (1), Vertex (3), etc.
+        # Swiss Ephemeris returns a tuple of (cusps, ascmc) where both are sequences of floats  # noqa: E501
+        cusps: List[float] = list(houses_result[0])  # type: ignore  # House cusps (0-11)  # noqa: E501
+        ascmc: List[float] = list(houses_result[1])  # type: ignore  # Angles: Ascendant (0), MC (1), Vertex (3), etc.  # noqa: E501
 
         houses_data: List[HouseData] = [
             {"house": i + 1, "cusp": float(cusps[i])} for i in range(12)

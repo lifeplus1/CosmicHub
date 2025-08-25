@@ -98,7 +98,7 @@ export function BirthDataInput({ onSubmit, loading = false }: Props) {
           • Birth time should be as accurate as possible
         </Text>
         <Text style={styles.infoText}>
-          • If you don't know the exact time, use 12:00 PM
+          • If you don&apos;t know the exact time, use 12:00 PM
         </Text>
         <Text style={styles.infoText}>
           • Location affects house calculations

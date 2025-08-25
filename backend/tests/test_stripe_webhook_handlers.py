@@ -12,7 +12,7 @@ PARENT = ROOT.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
-import backend.api.stripe_integration as integ  # type: ignore
+import backend.api.stripe_integration as integ  # type: ignore  # noqa: E402
 
 
 class FakeDoc:
@@ -75,7 +75,7 @@ def patch_plans(monkeypatch: pytest.MonkeyPatch) -> Dict[str, Dict[str, Any]]:
             "price": 9.99,
         }
     }
-    monkeypatch.setattr(integ, "SUBSCRIPTION_PLANS", plans)  # type: ignore[arg-type]
+    monkeypatch.setattr(integ, "SUBSCRIPTION_PLANS", plans)  # type: ignore[arg-type]  # noqa: E501
     return plans
 
 
@@ -83,7 +83,7 @@ def patch_plans(monkeypatch: pytest.MonkeyPatch) -> Dict[str, Dict[str, Any]]:
 def patch_stripe(monkeypatch: pytest.MonkeyPatch) -> None:
     stripe_mod = types.SimpleNamespace()
     # Customer.retrieve returns object with metadata firebase_uid
-    setattr(stripe_mod, "Customer", types.SimpleNamespace(retrieve=lambda cid: types.SimpleNamespace(metadata={"firebase_uid": "user1"})))  # type: ignore[arg-type]
+    setattr(stripe_mod, "Customer", types.SimpleNamespace(retrieve=lambda cid: types.SimpleNamespace(metadata={"firebase_uid": "user1"})))  # type: ignore[arg-type]  # noqa: E501
     monkeypatch.setattr(integ, "stripe", stripe_mod)  # type: ignore[arg-type]
 
 
@@ -207,7 +207,7 @@ async def test_handle_webhook_invalid_signature(
                 "path": "/",
                 "headers": [],
             }
-            super().__init__(scope, receive=lambda: None)  # type: ignore[arg-type]
+            super().__init__(scope, receive=lambda: None)  # type: ignore[arg-type]  # noqa: E501
 
         async def body(self) -> bytes:  # noqa: D401
             return b"{}"

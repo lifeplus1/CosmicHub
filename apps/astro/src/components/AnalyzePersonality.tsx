@@ -131,6 +131,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
               placeholder="e.g., 1990"
               className="cosmic-input"
               aria-required="true"
+              aria-label="e.g., 1990"
             />
           </div>
           <div>
@@ -144,7 +145,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
               placeholder="e.g., 1"
               className="cosmic-input"
               aria-required="true"
-            />
+            aria-label="e.g., 1" />
           </div>
           <div>
             <label htmlFor="day" className="block mb-2 text-cosmic-gold">Day <span aria-hidden="true">*</span></label>
@@ -157,7 +158,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
               placeholder="e.g., 1"
               className="cosmic-input"
               aria-required="true"
-            />
+            aria-label="e.g., 1" />
           </div>
           <div>
             <label htmlFor="hour" className="block mb-2 text-cosmic-gold">Hour (24h) <span aria-hidden="true">*</span></label>
@@ -170,7 +171,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
               placeholder="e.g., 12"
               className="cosmic-input"
               aria-required="true"
-            />
+            aria-label="e.g., 12" />
           </div>
           <div>
             <label htmlFor="minute" className="block mb-2 text-cosmic-gold">Minute <span aria-hidden="true">*</span></label>
@@ -183,7 +184,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
               placeholder="e.g., 0"
               className="cosmic-input"
               aria-required="true"
-            />
+            aria-label="e.g., 0" />
           </div>
           <div>
             <label htmlFor="city" className="block mb-2 text-cosmic-gold">City <span aria-hidden="true">*</span></label>
@@ -196,7 +197,7 @@ const AnalyzePersonality: React.FC = React.memo(() => {
               placeholder="e.g., New York"
               className="cosmic-input"
               aria-required="true"
-            />
+            aria-label="e.g., New York" />
           </div>
           <div>
             <label htmlFor="houseSystem" className="block mb-2 text-cosmic-gold">House System <span aria-hidden="true">*</span></label>

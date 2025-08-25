@@ -1,10 +1,104 @@
 /**
  * Service Worker Registration for CosmicHub Astro App
+ * Enhanced with UX-021 Mobile PWA Features
  * Registers the comprehensive service worker system
  */
 
-  // We wrap console usage through devConsole fallback below
+// We wrap console usage through devConsole fallback below
 import { devConsole, isDevelopment } from './config/environment';
+
+// UX-021: Mobile PWA capabilities detection
+interface PWACapabilities {
+  hasTouch: boolean;
+  hasStandalone: boolean;
+  hasPushNotifications: boolean;
+  hasBackgroundSync: boolean;
+  hasWebShare: boolean;
+  hasDeviceMotion: boolean;
+  hasVibration: boolean;
+  platform: 'ios' | 'android' | 'desktop' | 'unknown';
+}
+
+class PWACapabilitiesDetector {
+  static detect(): PWACapabilities {
+    return {
+      hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+      hasStandalone: window.matchMedia('(display-mode: standalone)').matches ||
+                     (window.navigator as any).standalone === true,
+      hasPushNotifications: 'PushManager' in window && 'Notification' in window,
+      hasBackgroundSync: 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype,
+      hasWebShare: 'share' in navigator,
+      hasDeviceMotion: 'DeviceMotionEvent' in window,
+      hasVibration: 'vibrate' in navigator,
+      platform: this.detectPlatform(),
+    };
+  }
+
+  private static detectPlatform(): 'ios' | 'android' | 'desktop' | 'unknown' {
+    const ua = navigator.userAgent.toLowerCase();
+    
+    if (/iphone|ipad|ipod/.test(ua)) {
+      return 'ios';
+    } else if (/android/.test(ua)) {
+      return 'android';
+    } else if (/win|mac|linux/.test(ua) && !('ontouchstart' in window)) {
+      return 'desktop';
+    }
+    
+    return 'unknown';
+  }
+}
+
+// UX-021: Initialize mobile enhancements
+function initializeMobileEnhancements(): void {
+  const capabilities = PWACapabilitiesDetector.detect();
+  
+  // Add CSS classes for platform detection
+  document.documentElement.classList.toggle('has-touch', capabilities.hasTouch);
+  document.documentElement.classList.toggle('is-standalone', capabilities.hasStandalone);
+  document.documentElement.classList.add(`platform-${capabilities.platform}`);
+  
+  // Set up dynamic viewport height for mobile Safari
+  const setViewportHeight = () => {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  };
+  
+  setViewportHeight();
+  window.addEventListener('resize', setViewportHeight);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(setViewportHeight, 100);
+  });
+
+  // Enhanced vibration feedback for touch interactions
+  if (capabilities.hasVibration) {
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.matches('button, .btn, [role="button"]')) {
+        navigator.vibrate([10]); // Short vibration
+      }
+    }, { passive: true });
+  }
+
+  // Web share integration
+  if (capabilities.hasWebShare) {
+    window.addEventListener('share-chart', async (_e: any) => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'My Cosmic Chart - CosmicHub',
+            text: 'Check out my astrological chart from CosmicHub!',
+            url: window.location.href
+          });
+        } catch (error) {
+          devConsole.log?.('Share cancelled or failed:', error);
+        }
+      }
+    });
+  }
+
+  devConsole.log?.('🎯 Mobile PWA enhancements initialized for', capabilities.platform);
+}
 
 // PWA Service Worker Registration
 function registerServiceWorker(): void {
@@ -57,6 +151,9 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 function initializePWAFeatures(): void {
+  // Initialize mobile-specific enhancements first (UX-021)
+  initializeMobileEnhancements();
+  
   // Install prompt handling
   let deferredPrompt: BeforeInstallPromptEvent | null = null;
   
@@ -148,14 +245,38 @@ function showUpdateNotification(): void {
   });
 }
 
-// Show install prompt
+// Show install prompt (Enhanced for UX-021)
 function showInstallPrompt(): void {
+  const capabilities = PWACapabilitiesDetector.detect();
+  
+  // Platform-specific messaging
+  const messages = {
+    ios: {
+      title: 'Add CosmicHub to Home Screen',
+      description: 'Tap the Share button, then "Add to Home Screen" for the best cosmic experience.',
+      action: 'Show Instructions'
+    },
+    android: {
+      title: 'Install CosmicHub App',
+      description: 'Get faster access to your cosmic insights and offline chart viewing.',
+      action: 'Install Now'
+    },
+    desktop: {
+      title: 'Install CosmicHub',
+      description: 'Install for faster loading, offline access, and desktop integration.',
+      action: 'Install App'
+    }
+  } as const;
+
+  const platform = capabilities.platform === 'unknown' ? 'desktop' : capabilities.platform;
+  const message = messages[platform];
+
   // Check if already installed
   if (window.matchMedia('(display-mode: standalone)').matches) {
     return;
   }
   
-  // Create install prompt
+  // Create enhanced install banner
   const installBanner = document.createElement('div');
   installBanner.id = 'pwa-install-banner';
   installBanner.innerHTML = `
@@ -164,20 +285,19 @@ function showInstallPrompt(): void {
       bottom: 20px;
       left: 20px;
       right: 20px;
-      background: rgba(26, 26, 46, 0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(26, 26, 46, 0.98);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border: 1px solid rgba(85, 60, 154, 0.3);
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 20px;
+      padding: 24px;
       z-index: 10000;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
       font-family: system-ui, -apple-system, sans-serif;
-      color: #e2e8f0;
-      max-width: 400px;
-      margin: 0 auto;
+      transform: translateY(100%);
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     ">
-      <div style="display: flex; align-items: center; gap: 15px;">
+      <div style="display: flex; align-items: flex-start; gap: 16px;">
         <div style="
           width: 48px;
           height: 48px;
@@ -187,48 +307,205 @@ function showInstallPrompt(): void {
           align-items: center;
           justify-content: center;
           font-size: 24px;
+          flex-shrink: 0;
         ">🌟</div>
-        <div style="flex: 1;">
-          <h3 style="margin: 0 0 5px 0; font-size: 16px; font-weight: 600;">Install CosmicHub</h3>
-          <p style="margin: 0; font-size: 14px; color: #cbd5e1; line-height: 1.4;">Get the full cosmic experience with faster loading and offline access.</p>
+        <div style="flex: 1; min-width: 0;">
+          <h3 style="margin: 0 0 8px 0; color: white; font-size: 18px; font-weight: 600; line-height: 1.3;">
+            ${message.title}
+          </h3>
+          <p style="margin: 0 0 16px 0; color: #cbd5e1; font-size: 14px; line-height: 1.5;">
+            ${message.description}
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button id="install-app-btn" style="
+              padding: 12px 20px;
+              border-radius: 10px;
+              font-weight: 600;
+              font-size: 14px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              border: none;
+              flex: 1;
+              min-width: 80px;
+              background: linear-gradient(135deg, #553c9a, #f6ad55);
+              color: white;
+            ">${message.action}</button>
+            <button id="dismiss-install-btn" style="
+              padding: 12px 16px;
+              border-radius: 10px;
+              font-weight: 600;
+              font-size: 14px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              background: rgba(255, 255, 255, 0.1);
+              color: #cbd5e1;
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              flex: 1;
+              min-width: 80px;
+            ">Later</button>
+          </div>
         </div>
-      </div>
-      <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button id="install-app-btn" style="
-          flex: 1;
-          background: linear-gradient(135deg, #553c9a, #f6ad55);
-          border: none;
-          color: white;
-          padding: 12px 20px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 14px;
-        ">Install App</button>
-        <button id="dismiss-install-btn" style="
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.2);
-          color: #cbd5e1;
-          padding: 12px 16px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 14px;
-        ">Not Now</button>
       </div>
     </div>
   `;
+
+  // Add animation styles
+  if (!document.querySelector('#pwa-install-styles')) {
+    const styles = document.createElement('style');
+    styles.id = 'pwa-install-styles';
+    styles.textContent = `
+      @keyframes slideUp {
+        to { transform: translateY(0); }
+      }
+      @media (max-width: 480px) {
+        #pwa-install-banner > div {
+          padding: 20px !important;
+          left: 16px !important;
+          right: 16px !important;
+          bottom: 16px !important;
+        }
+      }
+    `;
+    document.head.appendChild(styles);
+  }
   
   document.body.appendChild(installBanner);
   
-  // Handle install button
+  // Handle install button with platform-specific behavior
   document.getElementById('install-app-btn')?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('install-app'));
+    if (capabilities.platform === 'ios') {
+      showIOSInstructions();
+    } else {
+      window.dispatchEvent(new CustomEvent('install-app'));
+    }
     installBanner.remove();
   });
   
   // Handle dismiss button
   document.getElementById('dismiss-install-btn')?.addEventListener('click', () => {
     installBanner.remove();
+  });
+}
+
+// Show iOS installation instructions (UX-021)
+function showIOSInstructions(): void {
+  const modal = document.createElement('div');
+  modal.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    ">
+      <div style="
+        background: white;
+        border-radius: 20px;
+        max-width: 400px;
+        width: 100%;
+        overflow: hidden;
+      ">
+        <div style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 20px 24px;
+          border-bottom: 1px solid #e5e5e5;
+        ">
+          <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">Add to Home Screen</h3>
+          <button class="close-btn" style="
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+          ">×</button>
+        </div>
+        <div style="padding: 24px;">
+          <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
+            <div style="
+              width: 32px;
+              height: 32px;
+              background: #553c9a;
+              color: white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 14px;
+              flex-shrink: 0;
+            ">1</div>
+            <div style="color: #333; font-size: 15px; line-height: 1.5; padding-top: 4px;">
+              Tap the Share button <span style="display: inline-block; margin: 0 4px; font-size: 18px;">⬆️</span> at the bottom of Safari
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
+            <div style="
+              width: 32px;
+              height: 32px;
+              background: #553c9a;
+              color: white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 14px;
+              flex-shrink: 0;
+            ">2</div>
+            <div style="color: #333; font-size: 15px; line-height: 1.5; padding-top: 4px;">
+              Scroll down and tap "Add to Home Screen"
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <div style="
+              width: 32px;
+              height: 32px;
+              background: #553c9a;
+              color: white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 14px;
+              flex-shrink: 0;
+            ">3</div>
+            <div style="color: #333; font-size: 15px; line-height: 1.5; padding-top: 4px;">
+              Tap "Add" to install CosmicHub
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Handle close
+  modal.querySelector('.close-btn')?.addEventListener('click', () => {
+    modal.remove();
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
   });
 }
 

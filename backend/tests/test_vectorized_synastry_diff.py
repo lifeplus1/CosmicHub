@@ -1,4 +1,4 @@
-"""Differential tests ensuring vectorized synastry matches traditional implementation.
+"""Differential tests ensuring vectorized synastry matches traditional implementation.  # noqa: E501
 
 These fast unit-style tests guard against semantic drift between
 `build_aspect_matrix` and `build_aspect_matrix_fast`.
@@ -42,7 +42,7 @@ def test_matrix_exact_match(seed: int):
 
 
 def test_random_distribution_consistency():
-    """Aggregate random sample should produce identical aspect frequency distributions."""
+    """Aggregate random sample should produce identical aspect frequency distributions."""  # noqa: E501
     seeds = list(range(20))
     freq_trad: Dict[str, int] = {}
     freq_vec: Dict[str, int] = {}

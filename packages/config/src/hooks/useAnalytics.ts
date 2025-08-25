@@ -3,9 +3,9 @@ import type { Analytics, AnalyticsCallOptions } from '../firebase/analytics';
 
 export interface UseAnalyticsReturn {
   analytics: Analytics | null;
-  logEvent: (eventName: string, eventParams?: Record<string, any>, options?: AnalyticsCallOptions) => void;
+  logEvent: (eventName: string, eventParams?: Record<string, unknown>, options?: AnalyticsCallOptions) => void;
   setUserId: (userId: string) => void;
-  setUserProperties: (properties: Record<string, any>) => void;
+  setUserProperties: (properties: Record<string, unknown>) => void;
   setCurrentScreen: (screen: string) => void;
   isReady: boolean;
 }
@@ -25,7 +25,7 @@ export function useAnalytics(): UseAnalyticsReturn {
         const instance = getAnalytics(app);
         if (isMounted) setAnalytics(instance);
       } catch (err) {
-        // eslint-disable-next-line no-console
+         
         console.error('Failed to init analytics', err);
       }
     })();

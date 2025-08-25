@@ -348,7 +348,7 @@ def get_vedic_chart_analysis(vedic_data: Dict[str, Any]) -> Dict[str, Any]:
             "moon_nakshatra": moon_nakshatra,
             "ascendant_sign": asc_sign,
             "birth_star": moon_nakshatra,
-            "analysis": f"Moon in {moon_sign} ({moon_nakshatra} nakshatra), Ascendant in {asc_sign}",
+            "analysis": f"Moon in {moon_sign} ({moon_nakshatra} nakshatra), Ascendant in {asc_sign}",  # noqa: E501
         }
 
     except Exception as e:

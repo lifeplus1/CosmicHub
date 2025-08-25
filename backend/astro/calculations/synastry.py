@@ -40,7 +40,7 @@ def get_composite_chart(
 
         return {
             "planets": composite_planets,
-            "description": "Composite chart represents the relationship itself as an entity",
+            "description": "Composite chart represents the relationship itself as an entity",  # noqa: E501
         }
     except Exception as e:
         logger.error(f"Error calculating composite chart: {str(e)}")
@@ -123,38 +123,38 @@ def get_synastry_interpretation(
             "sun",
             "sun",
             "Conjunction",
-        ): "Strong ego connection, similar life purposes, potential for mutual recognition",
+        ): "Strong ego connection, similar life purposes, potential for mutual recognition",  # noqa: E501
         (
             "sun",
             "moon",
             "Conjunction",
-        ): "Deep emotional understanding, man represents woman's ideal, powerful attraction",
+        ): "Deep emotional understanding, man represents woman's ideal, powerful attraction",  # noqa: E501
         (
             "sun",
             "moon",
             "Trine",
-        ): "Natural harmony between masculine and feminine energies, supportive relationship",
+        ): "Natural harmony between masculine and feminine energies, supportive relationship",  # noqa: E501
         (
             "sun",
             "moon",
             "Square",
-        ): "Tension between ego and emotions, challenging but potentially transformative",
+        ): "Tension between ego and emotions, challenging but potentially transformative",  # noqa: E501
         (
             "sun",
             "venus",
             "Conjunction",
-        ): "Strong romantic attraction, appreciation for each other's creativity",
+        ): "Strong romantic attraction, appreciation for each other's creativity",  # noqa: E501
         (
             "sun",
             "mars",
             "Conjunction",
-        ): "Intense physical attraction, potential for conflict or dynamic action together",
+        ): "Intense physical attraction, potential for conflict or dynamic action together",  # noqa: E501
         # Moon aspects
         (
             "moon",
             "moon",
             "Conjunction",
-        ): "Deep emotional understanding, similar emotional needs and responses",
+        ): "Deep emotional understanding, similar emotional needs and responses",  # noqa: E501
         (
             "moon",
             "venus",
@@ -164,7 +164,7 @@ def get_synastry_interpretation(
             "moon",
             "mars",
             "Square",
-        ): "Emotional volatility, passionate but potentially explosive dynamics",
+        ): "Emotional volatility, passionate but potentially explosive dynamics",  # noqa: E501
         # Venus aspects
         (
             "venus",
@@ -186,7 +186,7 @@ def get_synastry_interpretation(
             "mars",
             "mars",
             "Conjunction",
-        ): "Shared drive and energy, potential for both cooperation and competition",
+        ): "Shared drive and energy, potential for both cooperation and competition",  # noqa: E501
         # Mercury aspects
         (
             "mercury",
@@ -235,7 +235,7 @@ def get_synastry_interpretation(
             "mars",
             "pluto",
             "Square",
-        ): "Intense power struggles, transformative but potentially destructive",
+        ): "Intense power struggles, transformative but potentially destructive",  # noqa: E501
     }
 
     # Try to find specific interpretation
@@ -250,16 +250,16 @@ def get_synastry_interpretation(
 
     # Generic interpretation based on aspect
     generic_aspects = {
-        "Conjunction": f"{planet1.title()} and {planet2.title()} blend energies - intense connection",
-        "Trine": f"{planet1.title()} and {planet2.title()} flow harmoniously - supportive aspect",
-        "Sextile": f"{planet1.title()} and {planet2.title()} create opportunities - positive aspect",
-        "Square": f"{planet1.title()} and {planet2.title()} create tension - challenging but growth-oriented",
-        "Opposition": f"{planet1.title()} and {planet2.title()} oppose - need for balance and integration",
+        "Conjunction": f"{planet1.title()} and {planet2.title()} blend energies - intense connection",  # noqa: E501
+        "Trine": f"{planet1.title()} and {planet2.title()} flow harmoniously - supportive aspect",  # noqa: E501
+        "Sextile": f"{planet1.title()} and {planet2.title()} create opportunities - positive aspect",  # noqa: E501
+        "Square": f"{planet1.title()} and {planet2.title()} create tension - challenging but growth-oriented",  # noqa: E501
+        "Opposition": f"{planet1.title()} and {planet2.title()} oppose - need for balance and integration",  # noqa: E501
     }
 
     return generic_aspects.get(
         aspect,
-        f"{planet1.title()} {aspect.lower()} {planet2.title()} - significant connection",
+        f"{planet1.title()} {aspect.lower()} {planet2.title()} - significant connection",  # noqa: E501
     )
 
 
@@ -340,7 +340,7 @@ def analyze_compatibility_score(
 
         # Generate interpretation
         if overall_score >= 80:
-            interpretation = "Excellent compatibility - strong potential for lasting relationship"
+            interpretation = "Excellent compatibility - strong potential for lasting relationship"  # noqa: E501
         elif overall_score >= 70:
             interpretation = (
                 "Very good compatibility - many harmonious aspects"
@@ -354,7 +354,7 @@ def analyze_compatibility_score(
                 "Moderate compatibility - requires work and understanding"
             )
         else:
-            interpretation = "Challenging compatibility - significant effort needed for harmony"
+            interpretation = "Challenging compatibility - significant effort needed for harmony"  # noqa: E501
 
         return {
             "overall_score": round(overall_score, 1),

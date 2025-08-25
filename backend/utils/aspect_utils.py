@@ -27,7 +27,7 @@ class KeyAspectData(TypedDict):
     interpretation: str
 
 
-# Read-only synastry aspect matrix type (10x10 planet grid). Each cell is either
+# Read-only synastry aspect matrix type (10x10 planet grid). Each cell is either  # noqa: E501
 # an AspectData for a detected aspect or None if no aspect within allowed orbs.
 Matrix = Sequence[Sequence[Optional[AspectData]]]
 
@@ -154,16 +154,16 @@ def get_aspect_interpretation(planet1: str, planet2: str, aspect: str) -> str:
     # Basic interpretation templates - can be expanded
     interpretations = {
         ("sun", "moon"): {
-            "conjunction": "Deep emotional harmony and understanding between core selves.",
-            "trine": "Natural flow between ego and emotions, supportive partnership.",
-            "square": "Creative tension between will and feelings, growth through challenges.",
-            "opposition": "Complementary but opposing needs, balance required.",
+            "conjunction": "Deep emotional harmony and understanding between core selves.",  # noqa: E501
+            "trine": "Natural flow between ego and emotions, supportive partnership.",  # noqa: E501
+            "square": "Creative tension between will and feelings, growth through challenges.",  # noqa: E501
+            "opposition": "Complementary but opposing needs, balance required.",  # noqa: E501
         },
         ("venus", "mars"): {
-            "conjunction": "Strong romantic and sexual attraction, passionate connection.",
+            "conjunction": "Strong romantic and sexual attraction, passionate connection.",  # noqa: E501
             "trine": "Harmonious blend of love and desire, natural chemistry.",
-            "square": "Intense attraction with potential conflicts over affection styles.",
-            "opposition": "Magnetic pull with contrasting approaches to love and action.",
+            "square": "Intense attraction with potential conflicts over affection styles.",  # noqa: E501
+            "opposition": "Magnetic pull with contrasting approaches to love and action.",  # noqa: E501
         },
     }
 
@@ -179,4 +179,4 @@ def get_aspect_interpretation(planet1: str, planet2: str, aspect: str) -> str:
     ):
         return interpretations[reverse_key][aspect]
     else:
-        return f"{planet1.title()} {aspect} {planet2.title()}: This aspect brings unique dynamics to the relationship."
+        return f"{planet1.title()} {aspect} {planet2.title()}: This aspect brings unique dynamics to the relationship."  # noqa: E501

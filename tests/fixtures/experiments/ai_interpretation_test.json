@@ -1,0 +1,50 @@
+{
+  "id": "ai_interpretation_length_test",
+  "name": "AI Interpretation Length A/B Test",
+  "hypothesis": "Users prefer more detailed AI interpretations over concise ones, leading to higher engagement and session duration",
+  "description": "Testing two variants of AI interpretation length to optimize user experience. This experiment will help us understand if detailed interpretations provide more value to users or if they prefer shorter, more digestible content.",
+  "metrics": {
+    "primary": "user_engagement_score",
+    "guardrails": ["session_duration", "bounce_rate", "error_rate"],
+    "secondary": ["interpretation_rating", "time_on_page", "scroll_depth"]
+  },
+  "variants": [
+    {
+      "id": "control",
+      "name": "Current (Concise)",
+      "description": "Existing concise interpretation format with 2-3 sentences per aspect",
+      "traffic_percentage": 50,
+      "config": {
+        "max_interpretation_length": 500,
+        "include_examples": false,
+        "interpretation_style": "concise"
+      }
+    },
+    {
+      "id": "detailed",
+      "name": "Detailed Interpretations",
+      "description": "Longer, more detailed interpretations with examples and actionable advice",
+      "traffic_percentage": 50,
+      "config": {
+        "max_interpretation_length": 1500,
+        "include_examples": true,
+        "include_actionable_advice": true,
+        "interpretation_style": "detailed"
+      }
+    }
+  ],
+  "start_date": "2025-09-01T00:00:00Z",
+  "end_date": "2025-09-30T23:59:59Z",
+  "segment": "premium_users",
+  "owner": "experiments@cosmichub.app",
+  "status": "planned",
+  "tags": ["ai", "ux", "interpretation", "engagement", "premium"],
+  "config": {
+    "sample_size": 1000,
+    "statistical_power": 0.8,
+    "significance_level": 0.05,
+    "minimum_detectable_effect": 0.05,
+    "randomization_unit": "user"
+  },
+  "version": 1
+}

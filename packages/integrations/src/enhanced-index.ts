@@ -1,3 +1,18 @@
+// Simple logger for integrations package
+const logger = {
+  info: (message: string, data?: unknown) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[EnhancedIntegrations] ${message}`, data);
+    }
+  },
+  warn: (message: string, data?: unknown) => {
+    console.warn(`[EnhancedIntegrations] ${message}`, data);
+  },
+  error: (message: string, data?: unknown) => {
+    console.error(`[EnhancedIntegrations] ${message}`, data);
+  }
+};
+
 export interface AstrologyChart {
   id: string;
   userId: string;
@@ -87,22 +102,22 @@ export const useCrossAppStore = () => {
         id: crypto.randomUUID(),
         timestamp: Date.now(),
       };
-      console.log("Cross-app notification:", fullNotification);
+      logger.info("Cross-app notification:", fullNotification);
       // In real implementation, this would update global state
     },
     notifications: [] as CrossAppNotification[],
     clearNotifications: () => {
-      console.log("Clearing cross-app notifications");
+      logger.info("Clearing cross-app notifications");
     },
     
     // Shared user data management
     updateUserPreferences: (preferences: Partial<CrossAppUserData['preferences']>) => {
-      console.log("Updating cross-app preferences:", preferences);
+      logger.info("Updating cross-app preferences:", preferences);
     },
     
     // Cross-app feature toggles
     syncAstrologyWithFrequency: (chartData: AstrologyChart, sessionData: HealwaveSession) => {
-      console.log("Syncing astrology chart with frequency session:", { chartData, sessionData });
+      logger.info("Syncing astrology chart with frequency session:", { chartData, sessionData });
       // This would enable features like:
       // - Suggesting frequencies based on current transits
       // - Personalizing frequency sessions based on natal chart
@@ -111,7 +126,7 @@ export const useCrossAppStore = () => {
     
     // Shared premium features
     checkCrossAppFeatureAccess: (feature: keyof CrossAppUserData['crossAppFeatures']) => {
-      console.log(`Checking access to cross-app feature: ${feature}`);
+      logger.info(`Checking access to cross-app feature: ${feature}`);
       return true; // In real implementation, check subscription status
     }
   };

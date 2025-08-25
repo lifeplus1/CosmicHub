@@ -1,22 +1,41 @@
-// Subscription-related types
+import { useState, useCallback } from 'react';
+
+// Simple logger for integrations package
+const logger = {
+  info: (message: string, data?: object | string | number | boolean | null) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Integrations] ${message}`, data);
+    }
+  },
+  warn: (message: string, data?: object | string | number | boolean | null) => {
+    console.warn(`[Integrations] ${message}`, data);
+  },
+  error: (message: string, data?: object | string | number | boolean | null) => {
+    console.error(`[Integrations] ${message}`, data);
+  }
+};
+
 export interface UserSubscription {
-  tier: 'free' | 'premium' | 'elite';
-  status: 'active' | 'canceled' | 'past_due' | 'incomplete';
-  currentPeriodEnd: Date;
-  customerId?: string;
-  subscriptionId?: string;
+  id: string;
+  userId: string;
+  tier: 'Free' | 'Basic' | 'Pro' | 'Enterprise';
+  status: 'active' | 'cancelled' | 'expired' | 'trial';
+  currentPeriodEnd?: Date;
+  cancelAtPeriodEnd?: boolean;
 }
 
 export interface SubscriptionPlan {
   id: string;
   name: string;
-  tier: 'free' | 'premium' | 'elite';
+  tier: 'Free' | 'Basic' | 'Pro' | 'Enterprise';
   price: number;
+  billingPeriod: 'monthly' | 'yearly';
   features: string[];
   limits: {
-    chartsPerMonth?: number;
-    chartStorage?: number;
-    [key: string]: any;
+    chartsPerMonth: number;
+    savedCharts: number;
+    aiInsights: boolean;
+    prioritySupport: boolean;
   };
 }
 
@@ -68,24 +87,34 @@ export interface HealwaveSession {
   personalizedFor?: AstrologyChart;
 }
 
+export interface Notification {
+  id: string;
+  message: string;
+  type: 'info' | 'success' | 'error';
+  timestamp: number;
+}
+
+export interface CrossAppStore {
+  addNotification: (notification: Notification) => void;
+  notifications: Notification[];
+  clearNotifications: () => void;
+}
+
+export const useCrossAppStore = (): CrossAppStore => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  const addNotification = useCallback((notification: Notification): void => {
+    logger.info('Cross-app notification:', notification);
+    setNotifications((prev) => [...prev, notification]);
+  }, []);
+
+  const clearNotifications = useCallback((): void => {
+    setNotifications([]);
+  }, []);
+
+  return { addNotification, notifications, clearNotifications };
+};
+
 export * from './api';
 export * from './ephemeris';
 export * from './stripe';
-export * from './subscriptions';
-export * from './xaiService';
-export * from './types';
-
-// Export both cross-app store implementations with explicit naming
-export { useCrossAppStore } from './cross-app-hooks';
-export { useCrossAppStore as useCrossAppState } from './useCrossAppStore';
-
-// Re-export key Stripe functionality for convenience
-export { 
-  stripeService, 
-  getStripeService, 
-  createStripeService,
-  type StripeSession,
-  type StripeCheckoutParams,
-  type SubscriptionData,
-  type StripeConfig
-} from './stripe';

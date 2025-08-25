@@ -36,7 +36,7 @@ def calculate_compatibility_score(
         matrix: Read-only synastry aspect matrix (Matrix alias).
         overlays: Optional house overlay analysis structure.
     Returns:
-        dict with overall_score, interpretation, and area breakdown (0-100 scaled).
+        dict with overall_score, interpretation, and area breakdown (0-100 scaled).  # noqa: E501
     """
     if overlays is None:
         overlays = {}
@@ -157,28 +157,28 @@ def calculate_area_score(matrix: Matrix, focus_planets: List[str]) -> float:
 def get_compatibility_interpretation(
     score: float, aspect_count: Dict[str, int]
 ) -> str:
-    """Generate interpretation based on compatibility score and aspect patterns."""
+    """Generate interpretation based on compatibility score and aspect patterns."""  # noqa: E501
     if score >= 80:
-        base = "Exceptional compatibility with deep harmony and mutual understanding."
+        base = "Exceptional compatibility with deep harmony and mutual understanding."  # noqa: E501
     elif score >= 65:
         base = (
             "Strong compatibility with good potential for lasting connection."
         )
     elif score >= 50:
-        base = "Moderate compatibility with both harmonious and challenging dynamics."
+        base = "Moderate compatibility with both harmonious and challenging dynamics."  # noqa: E501
     elif score >= 35:
-        base = "Some compatibility challenges requiring conscious effort and compromise."
+        base = "Some compatibility challenges requiring conscious effort and compromise."  # noqa: E501
     else:
-        base = "Significant compatibility challenges that demand dedication and understanding."
+        base = "Significant compatibility challenges that demand dedication and understanding."  # noqa: E501
 
     # Add context based on aspect patterns
     total_aspects = sum(aspect_count.values())
     if total_aspects > 0:
         harmonious_pct = (aspect_count["harmonious"] / total_aspects) * 100
         if harmonious_pct > 60:
-            base += " The abundance of harmonious aspects suggests natural ease and flow."
+            base += " The abundance of harmonious aspects suggests natural ease and flow."  # noqa: E501
         elif aspect_count["challenging"] > aspect_count["harmonious"]:
-            base += " The challenging aspects indicate areas for growth and transformation."
+            base += " The challenging aspects indicate areas for growth and transformation."  # noqa: E501
 
     return base
 

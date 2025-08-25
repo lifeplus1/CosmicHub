@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import {
   createEphemerisClient,
+  type EphemerisClient,
   type EphemerisConfig,
   type PlanetPosition,
   type PlanetName,
@@ -41,7 +42,7 @@ export const ephemerisKeys = {
 /**
  * Hook to get a configured ephemeris client instance
  */
-export const useEphemerisClient = (): ReturnType<typeof createEphemerisClient> =>
+export const useEphemerisClient = (): EphemerisClient =>
   useMemo(() => createEphemerisClient(getEphemerisConfig()), []);
 
 /**

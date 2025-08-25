@@ -16,7 +16,7 @@ def test_backend_import():
 
         # List the available routes
         for route in router.routes:
-            print(f"  - {getattr(route, 'methods', 'N/A')} {getattr(route, 'path', 'N/A')}")  # type: ignore
+            print(f"  - {getattr(route, 'methods', 'N/A')} {getattr(route, 'path', 'N/A')}")  # type: ignore  # noqa: E501
 
         return True
     except Exception as e:
@@ -40,7 +40,7 @@ def test_swisseph():
 
         # Test planet calculation
         result, _ = swe.calc(jd, swe.SUN)  # type: ignore
-        print(f"✓ Sun position on 2025-01-01: {result[0]:.2f}° longitude")  # type: ignore
+        print(f"✓ Sun position on 2025-01-01: {result[0]:.2f}° longitude")  # type: ignore  # noqa: E501
 
         return True
     except Exception as e:
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     print("\n2. Testing transit module import...")
     import_ok = test_backend_import()
 
-    print(f"\n=== Test Results ===")
+    print(f"\n=== Test Results ===")  # noqa: F541
     print(f"SwissEph: {'✓ PASS' if swisseph_ok else '✗ FAIL'}")
     print(f"Transit Module: {'✓ PASS' if import_ok else '✗ FAIL'}")
 

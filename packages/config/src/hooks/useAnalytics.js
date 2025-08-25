@@ -15,7 +15,7 @@ export function useAnalytics() {
                     setAnalytics(instance);
             }
             catch (err) {
-                // eslint-disable-next-line no-console
+                 
                 console.error('Failed to init analytics', err);
             }
         })();

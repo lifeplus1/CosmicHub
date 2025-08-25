@@ -1,60 +1,24 @@
 /**
- * Environment// Environment va// Environment variable configuration interface
-export interface EnvConfig {
-  NODE_ENV: Environment;
-  VITE_API_URL: string;
-  VITE_FIREBASE_PROJECT_ID?: string;
-  VITE_FIREBASE_API_KEY?: string;
-  VITE_FIREBASE_AUTH_DOMAIN?: string;
-  VITE_FIREBASE_STORAGE_BUCKET?: string;
-  VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
-  VITE_FIREBASE_APP_ID?: string;
-  VITE_STRIPE_PUBLISHABLE_KEY?: string;
-  VITE_APP_URL: string;
-  XAI_API_KEY?: string;
-}uration interface
-export interface EnvConfig {
-  NODE_E    try {
-      new URL(appUrl);
-    } catch {
-      errors.push('VITE_APP_URL is not a valid URL');
-    }
-  }vironment;
-  VITE_API_URL: string;
-  VITE_FIREBASE_PROJECT_ID?: string;
-  VITE_FIREBASE_API_KEY?: string;
-  VITE_FIREBASE_AUTH_DOMAIN?: string;
-  VITE_FIREBASE_STORAGE_BUCKET?: string;
-  VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
-  VITE_FIREBASE_APP_ID?: string;
-  VITE_STRIPE_PUBLISHABLE_KEY?: string;
-  VITE_APP_URL: string;
-}n and validation
+ * Environment configuration and validation
  */
+
+/// <reference types="vite/client" />
 
 // Define process for TypeScript
 declare const process: {
   env?: Record<string, string | undefined>;
 } | undefined;
 
-// Define import.meta type for Vite
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface ImportMeta {
-  env: Record<string, string | undefined>;
-}
-
 // Type for environment variables
 type EnvRecord = Record<string, string | undefined>;
 
 // Cross-runtime env accessor (works in Vite browser and Node)
-const viteEnv: EnvRecord | undefined = (typeof import.meta !== 'undefined' && import.meta.env)
-  ? import.meta.env as EnvRecord
-  : undefined;
+const viteEnv: EnvRecord | undefined = import.meta?.env as EnvRecord | undefined;
 
 const getEnv = (key: string, fallback = ''): string => {
   // Type-safe access to environment variables
-  const fromVite = viteEnv ? viteEnv[key] : undefined;
-  const fromNode = typeof process !== 'undefined' && process?.env ? process.env[key] : undefined;
+  const fromVite = viteEnv?.[key];
+  const fromNode = typeof process !== 'undefined' ? process.env?.[key] : undefined;
   return (fromVite ?? fromNode ?? fallback);
 };
 

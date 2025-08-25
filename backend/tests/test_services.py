@@ -41,7 +41,7 @@ def test_stripe_service_session(monkeypatch: pytest.MonkeyPatch) -> None:
     class FakeCheckout(types.SimpleNamespace):
         pass
 
-    fake_checkout = FakeCheckout(Session=types.SimpleNamespace(create=lambda **k: fake_create(**k)))  # type: ignore[arg-type]
+    fake_checkout = FakeCheckout(Session=types.SimpleNamespace(create=lambda **k: fake_create(**k)))  # type: ignore[arg-type]  # noqa: E501
     monkeypatch.setattr(
         stripe_service, "stripe", types.SimpleNamespace(checkout=fake_checkout)
     )

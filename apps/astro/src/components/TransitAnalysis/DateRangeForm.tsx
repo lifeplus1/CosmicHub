@@ -30,6 +30,7 @@ const DateRangeForm: React.FC<DateRangeFormProps> = ({ dateRange, setDateRange }
               value={dateRange.startDate}
               onChange={handleStartDateChange}
               className="cosmic-input"
+              aria-label="date input"
             />
           </div>
           <div>
@@ -42,6 +43,8 @@ const DateRangeForm: React.FC<DateRangeFormProps> = ({ dateRange, setDateRange }
               value={dateRange.endDate}
               onChange={handleEndDateChange}
               className="cosmic-input"
+            aria-label="date input"
+
             />
           </div>
         </div>

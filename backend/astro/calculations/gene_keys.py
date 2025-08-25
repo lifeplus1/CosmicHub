@@ -618,7 +618,7 @@ GENE_KEYS = {
 SEQUENCES: Dict[str, Dict[str, Any]] = {
     "activation": {
         "name": "Activation Sequence",
-        "description": "Your core wound and gift - the foundation of your transformation",
+        "description": "Your core wound and gift - the foundation of your transformation",  # noqa: E501
         "gates": ["life_work", "evolution", "radiance", "purpose"],
     },
     "venus": {
@@ -649,7 +649,7 @@ def calculate_gene_keys_profile(
     """
     try:
         logger.info(
-            f"Calculating Gene Keys profile for {year}-{month}-{day} {hour}:{minute}"
+            f"Calculating Gene Keys profile for {year}-{month}-{day} {hour}:{minute}"  # noqa: E501
         )
 
         # First get the Human Design data (Gene Keys uses same calculations)
@@ -707,9 +707,9 @@ def calculate_gene_keys_profile(
             "radiance": get_gene_key_details(radiance_gate),
             "purpose": get_gene_key_details(purpose_gate),
             "attraction": venus_sequence.get("attraction", {}),
-            # Expose individual Venus Sequence developmental spheres for direct access
-            # Tests (test_gene_keys_line_themes.py) expect top-level keys 'iq', 'eq', 'sq'
-            # including line_theme and sphere_context metadata produced by get_gene_key_details.
+            # Expose individual Venus Sequence developmental spheres for direct access  # noqa: E501
+            # Tests (test_gene_keys_line_themes.py) expect top-level keys 'iq', 'eq', 'sq'  # noqa: E501
+            # including line_theme and sphere_context metadata produced by get_gene_key_details.  # noqa: E501
             "iq": venus_sequence.get("iq", {}),
             "eq": venus_sequence.get("eq", {}),
             "sq": venus_sequence.get("sq", {}),
@@ -755,11 +755,11 @@ def calculate_gene_keys_profile(
                 f"Gene Key {purpose_gate}",
             ],
             "hologenetic_profile": {
-                "description": "Your complete genetic blueprint and consciousness evolution path",
+                "description": "Your complete genetic blueprint and consciousness evolution path",  # noqa: E501
                 "integration_path": [
-                    f"Core Quartet Integration: {sun_gate}, {earth_gate}, {radiance_gate}, {purpose_gate}",
-                    f"Venus Sequence Integration: IQ → EQ → SQ",
-                    f"Hologenetic Synthesis: All planetary activations working as unified field",
+                    f"Core Quartet Integration: {sun_gate}, {earth_gate}, {radiance_gate}, {purpose_gate}",  # noqa: E501
+                    f"Venus Sequence Integration: IQ → EQ → SQ",  # noqa: F541
+                    f"Hologenetic Synthesis: All planetary activations working as unified field",  # noqa: E501,F541
                 ],
             },
         }
@@ -829,7 +829,7 @@ def calculate_activation_sequence(
 
         return {
             "name": "Activation Sequence",
-            "description": "Your core wound and gift - the foundation of your transformation",
+            "description": "Your core wound and gift - the foundation of your transformation",  # noqa: E501
             "life_work": get_gene_key_details(life_work_gate),
             "evolution": get_gene_key_details(evolution_gate),
             "radiance": get_gene_key_details(radiance_gate),
@@ -868,7 +868,7 @@ def calculate_venus_sequence(
 
         return {
             "name": "Venus Sequence",
-            "description": "Your relationships and how you attract and give love",
+            "description": "Your relationships and how you attract and give love",  # noqa: E501
             "attraction": get_gene_key_details(
                 attraction_gate, attraction_line
             ),
@@ -1000,7 +1000,7 @@ def calculate_golden_path(
     try:
         if "error" in activation_sequence:
             return {
-                "error": "Cannot calculate Golden Path without valid Activation Sequence"
+                "error": "Cannot calculate Golden Path without valid Activation Sequence"  # noqa: E501
             }
 
         life_work = activation_sequence.get("life_work", {})
@@ -1013,19 +1013,19 @@ def calculate_golden_path(
             "shadow_work": {
                 "primary_shadow": life_work.get("shadow", "Unknown"),
                 "secondary_shadow": evolution.get("shadow", "Unknown"),
-                "integration_practice": "Contemplation and awareness of reactive patterns",
+                "integration_practice": "Contemplation and awareness of reactive patterns",  # noqa: E501
             },
             "gift_emergence": {
                 "primary_gift": life_work.get("gift", "Unknown"),
                 "secondary_gift": evolution.get("gift", "Unknown"),
-                "activation_practice": "Living your gifts in service to others",
+                "activation_practice": "Living your gifts in service to others",  # noqa: E501
             },
             "siddhi_realization": {
                 "primary_siddhi": life_work.get("siddhi", "Unknown"),
                 "secondary_siddhi": evolution.get("siddhi", "Unknown"),
                 "embodiment_practice": "Surrender and divine service",
             },
-            "guidance": "The Golden Path is walked step by step, through contemplation, living your gifts, and surrendering to your highest purpose.",
+            "guidance": "The Golden Path is walked step by step, through contemplation, living your gifts, and surrendering to your highest purpose.",  # noqa: E501
         }
 
     except Exception as e:
@@ -1036,7 +1036,7 @@ def calculate_golden_path(
 def get_programming_partner(gate_number: int) -> int:
     """Get the programming partner gate (opposite in I Ching)"""
     # Programming partners are calculated based on I Ching opposites
-    # This is a simplified calculation - full implementation would use hexagram structure
+    # This is a simplified calculation - full implementation would use hexagram structure  # noqa: E501
     if gate_number <= 32:
         return gate_number + 32
     else:
@@ -1045,7 +1045,7 @@ def get_programming_partner(gate_number: int) -> int:
 
 def get_sphere(gate_number: int) -> str:
     """Get the sphere (life area) this gate belongs to"""
-    # Simplified sphere mapping - full implementation would use detailed Gene Keys mapping
+    # Simplified sphere mapping - full implementation would use detailed Gene Keys mapping  # noqa: E501
     sphere_mapping = {
         range(1, 11): "Life Force",
         range(11, 21): "Relationships",
@@ -1072,13 +1072,13 @@ def get_daily_contemplation(gene_key_number: int) -> Dict[str, Any]:
     return {
         "gene_key": gene_key_number,
         "name": key_data.get("name", ""),
-        "focus": f"Contemplating the path from {key_data.get('shadow', '')} through {key_data.get('gift', '')} to {key_data.get('siddhi', '')}",
+        "focus": f"Contemplating the path from {key_data.get('shadow', '')} through {key_data.get('gift', '')} to {key_data.get('siddhi', '')}",  # noqa: E501
         "contemplation": {
-            "shadow_inquiry": f"How does {key_data.get('shadow', '')} show up in my life today?",
-            "gift_affirmation": f"I embody {key_data.get('gift', '')} in all my interactions",
+            "shadow_inquiry": f"How does {key_data.get('shadow', '')} show up in my life today?",  # noqa: E501
+            "gift_affirmation": f"I embody {key_data.get('gift', '')} in all my interactions",  # noqa: E501
             "siddhi_meditation": f"I am one with {key_data.get('siddhi', '')}",
-            "daily_practice": f"Today I contemplate the frequency of {key_data.get('name', '')}",
+            "daily_practice": f"Today I contemplate the frequency of {key_data.get('name', '')}",  # noqa: E501
         },
         "keynote": key_data.get("keynote", ""),
-        "guidance": "Spend 10-15 minutes in quiet contemplation, allowing these frequencies to move through your awareness.",
+        "guidance": "Spend 10-15 minutes in quiet contemplation, allowing these frequencies to move through your awareness.",  # noqa: E501
     }

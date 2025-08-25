@@ -1,7 +1,34 @@
 /**
  * Enhanced Performance Monitoring System for CosmicHub
- * Provides comprehensive performance tracking with memory management and external integrations
+ * Provides comprehensive performance tracking with memory ma    // Log in development
+    if (process.env['    // Log in development
+    if (process.env['NODE_ENV'] === 'development') {
+      performanceLogger.info('Page performance metric', {
+        page: pageName,
+        metricType: type,
+        durationMs: Number(duration.toFixed(2)),
+        ...metadata
+      });
+    }_ENV'] === 'development') {
+      if (success) {
+        performanceLogger.info('Operation completed successfully', {
+          operation: operationName,
+          durationMs: Number(duration.toFixed(2)),
+          ...metadata
+        });
+      } else {
+        performanceLogger.error('Operation failed', {
+          operation: operationName,
+          durationMs: Number(duration.toFixed(2)),
+          ...metadata
+        });
+      }
+    }ment and external integrations
  */
+
+import { logger } from './utils/logger';
+
+const performanceLogger = logger.child({ module: 'performance' });
 
 export interface PerformanceMetric {
   name: string;
@@ -79,8 +106,13 @@ class PerformanceMonitor {
     this.sendToFirebasePerformance(componentName, duration, metadata);
 
     // Log in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`📊 [${componentName}] ${metadata.type}: ${duration.toFixed(2)}ms`, metadata);
+    if (process.env['NODE_ENV'] === 'development') {
+      performanceLogger.info('Component performance metric', {
+        component: componentName,
+        metricType: metadata.type,
+        durationMs: Number(duration.toFixed(2)),
+        ...metadata
+      });
     }
   }
 
@@ -101,7 +133,7 @@ class PerformanceMonitor {
       timestamp: Date.now(),
       operationName,
       success,
-      metadata
+      metadata: metadata ?? {}
     };
 
     this.operationMetrics.push(metric);
@@ -111,7 +143,7 @@ class PerformanceMonitor {
     this.sendToFirebasePerformance(operationName, duration, { success, ...metadata });
 
     // Log in development
-    if (process.env.NODE_ENV === 'development') {
+  if (process.env['NODE_ENV'] === 'development') {
       console.log(`⚡ [${operationName}] ${success ? '✅' : '❌'}: ${duration.toFixed(2)}ms`, metadata);
     }
   }
@@ -133,7 +165,7 @@ class PerformanceMonitor {
       timestamp: Date.now(),
       pageName,
       type,
-      metadata
+      metadata: metadata ?? {}
     };
 
     this.pageMetrics.push(metric);
@@ -143,7 +175,7 @@ class PerformanceMonitor {
     this.sendToFirebasePerformance(`${pageName}_${type}`, duration, metadata);
 
     // Log in development
-    if (process.env.NODE_ENV === 'development') {
+  if (process.env['NODE_ENV'] === 'development') {
       console.log(`🌐 [${pageName}] ${type}: ${duration.toFixed(2)}ms`, metadata);
     }
   }
@@ -226,14 +258,14 @@ class PerformanceMonitor {
   ): void {
     try {
       // Only send to Firebase in production and if available
-      if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
+  if (process.env['NODE_ENV'] === 'production' && typeof window !== 'undefined') {
         // Dynamic import to avoid issues in environments without Firebase
         // Check if Firebase Performance is available before importing
   void this.tryFirebasePerformanceImport(name, duration, metadata);
       }
     } catch (error) {
       // Silently fail if Firebase is not available
-      if (process.env.NODE_ENV === 'development') {
+  if (process.env['NODE_ENV'] === 'development') {
         console.log('Firebase Performance Monitoring skipped:', error);
       }
     }
@@ -242,16 +274,16 @@ class PerformanceMonitor {
   private async tryFirebasePerformanceImport(
     name: string, 
     duration: number, 
-    metadata?: Record<string, any>
+    metadata?: MetricMetadata
   ): Promise<void> {
     try {
       // Configure Firebase Performance monitoring
-      if (typeof window !== 'undefined' && import.meta.env.PROD) {
+      if (typeof window !== 'undefined' && process.env['NODE_ENV'] === 'production') {
         // In production, attempt to use Firebase Performance
         const { getPerformance, trace } = await import('firebase/performance');
         
         // Use lazy import for Firebase app
-        const firebaseModule = await import('@cosmichub/config/firebase');
+        const firebaseModule = await import('./firebase');
         const perf = getPerformance(firebaseModule.app);
         const performanceTrace = trace(perf, name);
         
@@ -267,15 +299,17 @@ class PerformanceMonitor {
             performanceTrace.putAttribute(key, String(value));
           });
         }
-      } else if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.log(`[Performance] ${name}: ${duration}ms`, metadata);
+      } else if (process.env['NODE_ENV'] === 'development') {
+        performanceLogger.info('Performance trace recorded', { 
+          operation: name, 
+          durationMs: duration,
+          ...metadata 
+        });
       }
-    } catch (firebaseError) {
+    } catch {
       // Firebase Performance not available or not configured
-      if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.log('Firebase Performance Monitoring not available, skipping trace:', name);
+      if (process.env['NODE_ENV'] === 'development') {
+        performanceLogger.warn('Firebase Performance Monitoring not available, skipping trace', { operation: name });
       }
     }
   }
@@ -291,13 +325,15 @@ export const reportPerformance = () => {
 
 // Service Worker Integration Helper
 export const initServiceWorkerPerformanceCache = () => {
-  if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-  void navigator.serviceWorker.register('/performance-sw.js')
+  if ('serviceWorker' in navigator && process.env['NODE_ENV'] === 'production') {
+    void navigator.serviceWorker.register('/performance-sw.js')
       .then(registration => {
-        console.log('Performance service worker registered:', registration);
+        performanceLogger.info('Performance service worker registered', { registration: registration.scope });
       })
       .catch(error => {
-        console.log('Performance service worker registration failed:', error);
+        performanceLogger.error('Performance service worker registration failed', { 
+          error: error instanceof Error ? error.message : String(error) 
+        });
       });
   }
 };

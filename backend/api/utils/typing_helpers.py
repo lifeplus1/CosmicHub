@@ -1,4 +1,4 @@
-"""Typed helper wrappers to hide dynamically typed SDK calls from stricter checkers.
+"""Typed helper wrappers to hide dynamically typed SDK calls from stricter checkers.  # noqa: E501
 These functions provide explicit return / parameter types so route code avoids
 "partially unknown" diagnostics from Firestore and Stripe libraries.
 """
@@ -14,14 +14,14 @@ def update_subscription_doc(
     user_id: str, field_updates: Mapping[str, Any]
 ) -> None:
     """Update subscription document with typed signature.
-    Hides dynamic Firestore update() return type behind a None return for type safety.
+    Hides dynamic Firestore update() return type behind a None return for type safety.  # noqa: E501
     """
     db = get_firestore_client()
-    db.collection("subscriptions").document(user_id).update(dict(field_updates))  # type: ignore
+    db.collection("subscriptions").document(user_id).update(dict(field_updates))  # type: ignore  # noqa: E501
 
 
 def get_stripe_account() -> dict[str, Any] | Any:
-    """Retrieve Stripe account object (typed as dict|Any to suppress unknown)."""
+    """Retrieve Stripe account object (typed as dict|Any to suppress unknown)."""  # noqa: E501
     import stripe  # local import to avoid mandatory dependency at import time
 
     return stripe.Account.retrieve()  # type: ignore

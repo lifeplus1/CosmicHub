@@ -9,11 +9,11 @@ from utils.salt_storage import get_salt_storage
 client = TestClient(app)
 
 
-def test_reload_applies_env_intervals(monkeypatch):  # type: ignore[no-untyped-def]
+def test_reload_applies_env_intervals(monkeypatch):  # type: ignore[no-untyped-def]  # noqa: E501
     storage = get_salt_storage()
     storage.memory_store.clear()
-    monkeypatch.setenv("USER_SALT_ROTATION_DAYS", "45")  # type: ignore[attr-defined]
-    monkeypatch.setenv("GLOBAL_SALT_ROTATION_DAYS", "10")  # type: ignore[attr-defined]
+    monkeypatch.setenv("USER_SALT_ROTATION_DAYS", "45")  # type: ignore[attr-defined]  # noqa: E501
+    monkeypatch.setenv("GLOBAL_SALT_ROTATION_DAYS", "10")  # type: ignore[attr-defined]  # noqa: E501
     # Call reload endpoint to apply overrides
     r = client.post("/api/admin/salts/reload")
     assert r.status_code == 200
@@ -30,7 +30,7 @@ def test_reload_applies_env_intervals(monkeypatch):  # type: ignore[no-untyped-d
     # next_rotation should be ~45 days from created_at
     from datetime import datetime
 
-    created = datetime.fromisoformat(data["created_at"])  # type: ignore[arg-type]
-    next_rot = datetime.fromisoformat(data["next_rotation"])  # type: ignore[arg-type]
+    created = datetime.fromisoformat(data["created_at"])  # type: ignore[arg-type]  # noqa: E501
+    next_rot = datetime.fromisoformat(data["next_rotation"])  # type: ignore[arg-type]  # noqa: E501
     delta = next_rot - created
     assert 44 <= delta.days <= 46

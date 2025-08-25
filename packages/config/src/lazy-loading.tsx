@@ -373,7 +373,7 @@ export class LazyLoadErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     performanceMonitor.recordMetric('LazyLoadError', 0, {
       error: error.message,
       stack: error.stack,
@@ -385,7 +385,7 @@ export class LazyLoadErrorBoundary extends React.Component<
     this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError && this.state.error !== null) {
       const FallbackComponent = this.props.fallback ?? DefaultErrorFallback;
       return <FallbackComponent error={this.state.error} resetError={this.resetError} />;

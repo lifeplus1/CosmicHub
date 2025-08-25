@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Provide minimal NotificationPermission type for test environment without DOM lib
+type NotificationPermission = 'default' | 'denied' | 'granted';
 import { getNotificationManager } from '../notificationManager.unified';
 
 // Minimal mock for push manager creation coming from @cosmichub/config when running unit tests.

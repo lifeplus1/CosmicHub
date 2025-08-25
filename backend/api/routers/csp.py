@@ -6,7 +6,7 @@ router = APIRouter(prefix="/csp", tags=["csp"])
 
 @router.post("/report")
 async def csp_report(request: Request):
-    """Accept CSP violation reports (report-only). Future: aggregation & metrics."""
+    """Accept CSP violation reports (report-only). Future: aggregation & metrics."""  # noqa: E501
     try:
         _ = await request.json()
     except Exception:

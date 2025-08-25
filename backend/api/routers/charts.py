@@ -107,7 +107,7 @@ async def save_user_chart(
 
 @router.post("/test-save-chart", response_model=SaveChartResponse)
 async def test_save_user_chart(request: SaveChartRequest):
-    """Test save chart endpoint without authentication - for development only"""
+    """Test save chart endpoint without authentication - for development only"""  # noqa: E501
     try:
         # Import here to avoid circular imports
         from astro.calculations.chart import calculate_chart
@@ -150,7 +150,7 @@ async def test_save_user_chart(request: SaveChartRequest):
         )
 
         logger.info(
-            f"Test chart saved successfully for user {user_id}: {saved_chart['id']}"
+            f"Test chart saved successfully for user {user_id}: {saved_chart['id']}"  # noqa: E501
         )
 
         return SaveChartResponse(

@@ -1,3 +1,11 @@
+
+// Simple logger for structured logging
+const logger = {
+  info: (msg, data) => logger.info(`[INFO] ${msg}`, data),
+  warn: (msg, data) => logger.warn(`[WARN] ${msg}`, data),
+  error: (msg, data) => logger.error(`[ERROR] ${msg}`, data),
+  debug: (msg, data) => logger.debug(`[DEBUG] ${msg}`, data)
+};
 /**
  * DEPRECATED (August 2025)
  * Replaced by SubscriptionProvider in `@cosmichub/auth` which integrates with the unified
@@ -71,7 +79,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       }
     } catch (error) {
       // Improved error logging with additional context
-      console.error('Error fetching subscription:', {
+      logger.error('Error fetching subscription:', {
         error,
         userId: user?.uid,
         endpoint: `${import.meta.env.VITE_BACKEND_URL}/stripe/subscription-status`

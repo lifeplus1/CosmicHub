@@ -35,21 +35,29 @@ const Synastry: React.FC = () => {
                   type="text" 
                   placeholder="Name (optional)"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="Name (optional)"
+
                 />
                 <input 
                   type="date" 
                   title="Birth date for Person A"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="date input"
+
                 />
                 <input 
                   type="time" 
                   title="Birth time for Person A"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="time input"
+
                 />
                 <input 
                   type="text" 
                   placeholder="Birth location"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="Birth location"
+
                 />
               </div>
             </div>
@@ -61,21 +69,29 @@ const Synastry: React.FC = () => {
                   type="text" 
                   placeholder="Name (optional)"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="Name (optional)"
+
                 />
                 <input 
                   type="date" 
                   title="Birth date for Person B"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="date input"
+
                 />
                 <input 
                   type="time" 
                   title="Birth time for Person B"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="time input"
+
                 />
                 <input 
                   type="text" 
                   placeholder="Birth location"
                   className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
+                aria-label="Birth location"
+
                 />
               </div>
             </div>

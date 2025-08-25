@@ -9,7 +9,7 @@ PARENT = ROOT.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
-import backend.database as dbmod  # type: ignore
+import backend.database as dbmod  # type: ignore  # noqa: E402
 
 
 class FakeChartDoc:
@@ -126,7 +126,7 @@ def _prepare_firestore(monkeypatch: pytest.MonkeyPatch) -> FakeDB:
     # clear cache for get_firestore_client
     dbmod.get_firestore_client.cache_clear()
     monkeypatch.setattr(dbmod, "db", fake)
-    monkeypatch.setattr(dbmod, "get_firestore_client", lambda: fake)  # type: ignore[arg-type]
+    monkeypatch.setattr(dbmod, "get_firestore_client", lambda: fake)  # type: ignore[arg-type]  # noqa: E501
     return fake
 
 

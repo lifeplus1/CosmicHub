@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
+import { logger } from '@cosmichub/config';
 
 interface Props {
   frequencyType: 'meditation' | 'sleep' | 'focus' | 'creativity' | 'lucid';
@@ -29,25 +30,25 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
   useEffect(() => {
     return sound
       ? () => {
-          sound.unloadAsync();
+          void sound.unloadAsync();
         }
       : undefined;
   }, [sound]);
 
-  const playPauseAudio = async () => {
-    if (sound == null) {
+  const playPauseAudio = async (): Promise<void> => {
+    if (sound === null || sound === undefined) {
       setIsLoading(true);
       try {
         // In a real app, you'd load the actual binaural beat audio files
+        const audioSource = { uri: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' } as const;
         const { sound: newSound } = await Audio.Sound.createAsync(
-          // This would be your binaural beat audio files
-          require('../../assets/audio/binaural-placeholder.mp3'), // You'd need to add this
+          audioSource,
           { shouldPlay: true, volume }
         );
         setSound(newSound);
         setIsPlaying(true);
       } catch (error) {
-        console.error('Error loading audio:', error);
+        logger.error('Error loading audio:', error);
       } finally {
         setIsLoading(false);
       }
@@ -84,6 +85,19 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Safe wrapper functions for button handlers
+  const handlePlayPause = (): void => {
+    void playPauseAudio();
+  };
+
+  const handleStop = (): void => {
+    void stopAudio();
+  };
+
+  const handleVolumeChange = (value: number): void => {
+    void onVolumeChange(value);
+  };
+
   return (
     <View style={[styles.container, { borderColor: info.color }]}>
       <View style={styles.header}>
@@ -97,7 +111,7 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
       <View style={styles.controls}>
         <TouchableOpacity
           style={[styles.playButton, { backgroundColor: info.color }]}
-          onPress={playPauseAudio}
+          onPress={handlePlayPause}
           disabled={isLoading}
         >
           <Text style={styles.playButtonText}>
@@ -105,7 +119,7 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.stopButton} onPress={stopAudio}>
+        <TouchableOpacity style={styles.stopButton} onPress={handleStop}>
           <Text style={styles.stopButtonText}>⏹️</Text>
         </TouchableOpacity>
       </View>
@@ -130,7 +144,7 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
           minimumValue={0}
           maximumValue={1}
           value={volume}
-          onValueChange={onVolumeChange}
+          onValueChange={handleVolumeChange}
           minimumTrackTintColor={info.color}
           maximumTrackTintColor="#333"
           thumbTintColor={info.color}

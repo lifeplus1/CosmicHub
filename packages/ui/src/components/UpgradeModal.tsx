@@ -87,6 +87,14 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
       <div 
         className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            onClose();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Close modal"
       />
       
       {/* Modal */}

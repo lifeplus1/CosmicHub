@@ -11,7 +11,7 @@ PARENT = ROOT.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
-import backend.auth as authmod  # type: ignore
+import backend.auth as authmod  # type: ignore  # noqa: E402
 
 
 class DummyCred:
@@ -25,7 +25,7 @@ async def test_get_current_user_mock_mode(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(authmod, "firebase_available", False)
-    user = await authmod.get_current_user(credentials=None)  # type: ignore[arg-type]
+    user = await authmod.get_current_user(credentials=None)  # type: ignore[arg-type]  # noqa: E501
     assert user["uid"] == "dev-user"
 
 
@@ -44,7 +44,7 @@ async def test_get_current_user_verify_failure(
     monkeypatch.setattr(authmod, "auth", FakeAuth)  # type: ignore[arg-type]
     cred = DummyCred("badtoken")
     with pytest.raises(HTTPException) as exc:
-        await authmod.get_current_user(credentials=cred)  # type: ignore[arg-type]
+        await authmod.get_current_user(credentials=cred)  # type: ignore[arg-type]  # noqa: E501
     assert exc.value.status_code == 401
     assert "Authentication failed" in exc.value.detail
 
@@ -63,5 +63,5 @@ async def test_get_current_user_success(
 
     monkeypatch.setattr(authmod, "auth", FakeAuth)  # type: ignore[arg-type]
     cred = DummyCred("goodtoken")
-    user = await authmod.get_current_user(credentials=cred)  # type: ignore[arg-type]
+    user = await authmod.get_current_user(credentials=cred)  # type: ignore[arg-type]  # noqa: E501
     assert user["uid"] == "real-user"

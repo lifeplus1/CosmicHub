@@ -7,21 +7,21 @@ interface ProgressBarProps {
   className?: string;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ 
-  percentage, 
-  color = 'purple', 
-  className = '' 
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  percentage,
+  color = 'purple',
+  className = '',
 }) => {
   const clampedPercentage = Math.min(100, Math.max(0, Math.round(percentage)));
-  
+
   const colorClasses = {
     purple: 'bg-purple-600',
-    blue: 'bg-blue-600'
+    blue: 'bg-blue-600',
   };
-  
+
   return (
     <div className={`${styles['progress-container']} ${className}`}>
-      <div 
+      <div
         className={`${styles['progress-bar']} ${colorClasses[color]}`}
         data-percentage={clampedPercentage}
       />

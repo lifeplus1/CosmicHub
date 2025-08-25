@@ -82,6 +82,7 @@ const SignUp: React.FC = () => {
               placeholder="Enter your full name"
               className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
               required
+              aria-label="Enter your full name"
             />
           </div>
           <div>
@@ -95,6 +96,8 @@ const SignUp: React.FC = () => {
               placeholder="Enter your email"
               className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
               required
+            aria-label="Enter your email"
+
             />
           </div>
           <div>
@@ -109,6 +112,8 @@ const SignUp: React.FC = () => {
               className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
               required
               minLength={6}
+            aria-label="Create a password"
+
             />
           </div>
           

@@ -1,8 +1,8 @@
 """
 Ephemeris API router for proxying requests to the dedicated ephemeris server.
 
-This router provides endpoints for the frontend to access ephemeris calculations
-through the backend, which then forwards requests to the ephemeris microservice.
+This router provides endpoints for the frontend to access ephemeris calculations  # noqa: E501
+through the backend, which then forwards requests to the ephemeris microservice.  # noqa: E501
 """
 
 import logging

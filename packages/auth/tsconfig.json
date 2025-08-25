@@ -8,11 +8,15 @@
     "declarationMap": true,
     "noEmit": false,
     "jsx": "react-jsx",
-  // Standardize lib to ES2022 (inherits behavior/features from base)
-  "lib": ["ES2022", "DOM", "DOM.Iterable"],
-  // Inherit global types (react, react-dom, node) from tsconfig.base.json to avoid duplication
-  // Add package-specific types via a local global.d.ts if needed instead of here
-  "rootDir": "../../"
+    // Override module resolution for better compatibility
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    // Standardize lib to ES2022 (inherits behavior/features from base)
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Inherit global types (react, react-dom, node) from tsconfig.base.json to avoid duplication
+    // Add package-specific types via a local global.d.ts if needed instead of here
+    "rootDir": "../../"
   },
   "include": [
     "src/**/*",
@@ -22,5 +26,12 @@
   "references": [
     { "path": "../subscriptions" }
   ],
-  "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
+  "exclude": [
+    "dist", 
+    "node_modules", 
+    "**/*.test.*", 
+    "**/*.spec.*",
+    "../config/src/__tests__/**/*",
+    "../config/src/**/*.test.*"
+  ]
 }

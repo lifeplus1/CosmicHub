@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 // WCAG Guidelines implementation
 export interface AccessibilityStandards {
@@ -103,6 +103,12 @@ export class ColorContrastAnalyzer {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
+    
+    // Ensure all values are defined (they should be since we're passing numbers)
+    if (rs === undefined || gs === undefined || bs === undefined) {
+      return 0;
+    }
+    
     return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
   }
 
@@ -125,11 +131,14 @@ export class ColorContrastAnalyzer {
   // Convert hex color to RGB
   private static hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
+    if (!result?.[1] || !result[2] || !result[3]) {
+      return null;
+    }
+    return {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
-    } : null;
+    };
   }
 
   // Get computed color from element
@@ -144,6 +153,9 @@ export class ColorContrastAnalyzer {
   // Check if contrast meets WCAG standards
   static meetsWCAG(contrast: number, level: 'AA' | 'AAA', isLargeText: boolean = false): boolean {
     const standards = WCAG_STANDARDS[level];
+    if (!standards) {
+      return false;
+    }
     const required = isLargeText ? standards.colorContrast.largeText : standards.colorContrast.normalText;
     return contrast >= required;
   }
@@ -180,12 +192,12 @@ export class FocusManagementAnalyzer {
       '[contenteditable]'
     ].join(', ');
 
-    const elements = Array.from(container.querySelectorAll(focusableSelectors)) as HTMLElement[];
+    const elements = Array.from(container.querySelectorAll(focusableSelectors));
     
     // Sort by tabindex
-    return elements.sort((a, b) => {
-      const aTab = parseInt(a.getAttribute('tabindex') || '0');
-      const bTab = parseInt(b.getAttribute('tabindex') || '0');
+    return (elements as HTMLElement[]).sort((a, b) => {
+      const aTab = parseInt(a.getAttribute('tabindex') ?? '0');
+      const bTab = parseInt(b.getAttribute('tabindex') ?? '0');
       
       if (aTab === 0 && bTab === 0) return 0;
       if (aTab === 0) return 1;
@@ -198,9 +210,6 @@ export class FocusManagementAnalyzer {
   static checkFocusTrap(container: HTMLElement): boolean {
     const focusableElements = this.getFocusableElements(container);
     if (focusableElements.length === 0) return false;
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
 
     // Check if Tab from last element focuses first element
     // Check if Shift+Tab from first element focuses last element
@@ -378,11 +387,15 @@ export class AccessibilityAuditor {
   private standards: AccessibilityStandards;
 
   constructor(level: 'AA' | 'AAA' = 'AA') {
-    this.standards = WCAG_STANDARDS[level];
+    const standards = WCAG_STANDARDS[level];
+    if (!standards) {
+      throw new Error(`Invalid WCAG level: ${level}`);
+    }
+    this.standards = standards;
   }
 
   // Main audit function
-  async audit(container: HTMLElement): Promise<AccessibilityAuditResult> {
+  audit(container: HTMLElement): AccessibilityAuditResult {
     const violations: AccessibilityViolation[] = [];
     const warnings: AccessibilityWarning[] = [];
     const recommendations: string[] = [];
@@ -620,13 +633,13 @@ export class AccessibilityAuditor {
 export function useAccessibilityAuditor(level: 'AA' | 'AAA' = 'AA') {
   const auditor = React.useMemo(() => new AccessibilityAuditor(level), [level]);
 
-  const auditElement = React.useCallback(async (element: HTMLElement) => {
-    return await auditor.audit(element);
+  const auditElement = React.useCallback((element: HTMLElement) => {
+    return auditor.audit(element);
   }, [auditor]);
 
-  const auditComponent = React.useCallback(async (testId: string) => {
+  const auditComponent = React.useCallback((testId: string) => {
     const element = screen.getByTestId(testId);
-    return await auditor.audit(element);
+    return auditor.audit(element);
   }, [auditor]);
 
   return { auditElement, auditComponent };

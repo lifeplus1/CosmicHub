@@ -10,7 +10,7 @@ export const getUserTier = (subscription: UserSubscription | null): string => {
   return subscription?.status === 'active' ? subscription.tier : 'free';
 };
 
-export const hasFeatureAccess = (userTier: string, requiredTier: string, tiers: Record<string, any>): boolean => {
+export const hasFeatureAccess = (userTier: string, requiredTier: string, tiers: Record<string, unknown>): boolean => {
   const tierOrder = Object.keys(tiers);
   const userIndex = tierOrder.indexOf(userTier);
   const requiredIndex = tierOrder.indexOf(requiredTier);

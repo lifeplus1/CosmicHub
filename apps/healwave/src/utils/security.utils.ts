@@ -3,11 +3,11 @@
  * Ensures all user inputs are properly sanitized and validated
  */
 
-import type { 
-  BinauralSettingsError, 
-  AudioSettingsConstraints, 
+import type {
+  BinauralSettingsError,
+  AudioSettingsConstraints,
   FrequencyConstraints,
-  InputValidation 
+  InputValidation,
 } from '../types/binaural.types';
 
 export class BinauralSecurityValidator implements InputValidation {
@@ -26,7 +26,10 @@ export class BinauralSecurityValidator implements InputValidation {
   /**
    * Validate numeric inputs against constraints
    */
-  validateNumeric(value: number, constraints: { min: number; max: number }): boolean {
+  validateNumeric(
+    value: number,
+    constraints: { min: number; max: number }
+  ): boolean {
     return (
       typeof value === 'number' &&
       !isNaN(value) &&
@@ -49,14 +52,14 @@ export class BinauralSecurityValidator implements InputValidation {
    * Validate frequency parameters for security
    */
   validateFrequencyInput(
-    frequency: number, 
+    frequency: number,
     constraints: FrequencyConstraints['baseFrequency']
   ): BinauralSettingsError | null {
     if (!this.validateNumeric(frequency, constraints)) {
       return {
         type: 'INVALID_FREQUENCY',
         frequency,
-        constraints
+        constraints,
       };
     }
     return null;
@@ -73,7 +76,7 @@ export class BinauralSecurityValidator implements InputValidation {
       return {
         type: 'INVALID_BEAT',
         beat,
-        constraints
+        constraints,
       };
     }
     return null;
@@ -90,7 +93,7 @@ export class BinauralSecurityValidator implements InputValidation {
       return {
         type: 'INVALID_VOLUME',
         volume,
-        constraints
+        constraints,
       };
     }
     return null;
@@ -99,21 +102,28 @@ export class BinauralSecurityValidator implements InputValidation {
   /**
    * Rate limiting for API calls to prevent abuse
    */
-  private static callCounts = new Map<string, { count: number; lastReset: number }>();
-  
-  static isRateLimited(identifier: string, maxCalls: number = 100, windowMs: number = 60000): boolean {
+  private static callCounts = new Map<
+    string,
+    { count: number; lastReset: number }
+  >();
+
+  static isRateLimited(
+    identifier: string,
+    maxCalls: number = 100,
+    windowMs: number = 60000
+  ): boolean {
     const now = Date.now();
     const existing = this.callCounts.get(identifier);
-    
+
     if (!existing || now - existing.lastReset > windowMs) {
       this.callCounts.set(identifier, { count: 1, lastReset: now });
       return false;
     }
-    
+
     if (existing.count >= maxCalls) {
       return true;
     }
-    
+
     existing.count++;
     return false;
   }
@@ -124,15 +134,22 @@ export class BinauralSecurityValidator implements InputValidation {
  */
 export const useBinauralSecurity = () => {
   const validator = new BinauralSecurityValidator();
-  
+
   return {
-    validateAndSanitize: (input: string) => validator.preventXSS(validator.sanitize(input)),
-    validateFrequency: (freq: number, constraints: FrequencyConstraints['baseFrequency']) => 
-      validator.validateFrequencyInput(freq, constraints),
-    validateBeat: (beat: number, constraints: FrequencyConstraints['binauralBeat']) => 
-      validator.validateBeatInput(beat, constraints),
-    validateVolume: (vol: number, constraints: AudioSettingsConstraints['volume']) => 
-      validator.validateVolumeInput(vol, constraints),
-    isRateLimited: (id: string) => BinauralSecurityValidator.isRateLimited(id)
+    validateAndSanitize: (input: string) =>
+      validator.preventXSS(validator.sanitize(input)),
+    validateFrequency: (
+      freq: number,
+      constraints: FrequencyConstraints['baseFrequency']
+    ) => validator.validateFrequencyInput(freq, constraints),
+    validateBeat: (
+      beat: number,
+      constraints: FrequencyConstraints['binauralBeat']
+    ) => validator.validateBeatInput(beat, constraints),
+    validateVolume: (
+      vol: number,
+      constraints: AudioSettingsConstraints['volume']
+    ) => validator.validateVolumeInput(vol, constraints),
+    isRateLimited: (id: string) => BinauralSecurityValidator.isRateLimited(id),
   };
 };

@@ -16,7 +16,7 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 // Local devConsole (kept internal to avoid cross-package dependency)
-/* eslint-disable no-console */
+ 
 const devConsole = {
     log: import.meta.env.DEV ? console.log.bind(console) : undefined,
     warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
@@ -52,14 +52,14 @@ try {
     catch (authError) {
         devConsole.warn?.('Firebase Auth initialization failed, using fallback:', authError);
         // Create a proxy that warns instead of throwing
-        /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+         
         auth = new Proxy({}, {
             get() {
                 devConsole.warn?.('Firebase Auth not available - using mock auth instead');
                 return undefined;
             }
         });
-        /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
+         
         hasAuthAvailable = false;
     }
     try {
@@ -68,14 +68,14 @@ try {
     catch (dbError) {
         devConsole.warn?.('Firestore initialization failed:', dbError);
         // Create a proxy for Firestore as well
-        /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+         
         db = new Proxy({}, {
             get() {
                 devConsole.warn?.('Firestore not available');
                 return undefined;
             }
         });
-        /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
+         
     }
     // Connect to emulators in development
     if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {

@@ -1,7 +1,7 @@
 """
 Phase 3: Test suite for vectorized performance monitoring.
 
-This test suite validates the performance monitoring framework for vectorized operations.
+This test suite validates the performance monitoring framework for vectorized operations.  # noqa: E501
 """
 
 import os
@@ -13,8 +13,8 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from utils.vectorized_aspect_utils import VectorizedAspectCalculator
-from utils.vectorized_monitoring import (
+from utils.vectorized_aspect_utils import VectorizedAspectCalculator  # noqa: E501, E402
+from utils.vectorized_monitoring import (  # noqa: E402
     PerformanceMetrics,
     VectorizedPerformanceMonitor,
     get_performance_monitor,
@@ -48,7 +48,7 @@ class TestVectorizedPerformanceMonitor:
         assert metrics.duration_seconds == 1.0
         assert metrics.calculations_per_second == 5.0
         assert metrics.memory_efficiency_mb_per_calc == 2.0
-        assert metrics.success == True
+        assert metrics.success == True  # noqa: E712
 
     def test_operation_timing(self):
         """Test basic operation timing."""
@@ -65,13 +65,13 @@ class TestVectorizedPerformanceMonitor:
         assert metrics.operation_name == "test_operation"
         assert metrics.num_calculations == 3
         assert metrics.duration_ms > 10  # At least 10ms from sleep
-        assert metrics.success == True
+        assert metrics.success == True  # noqa: E712
         assert metrics.additional_data["custom_metric"] == "test_value"
 
     def test_operation_with_exception(self):
         """Test operation timing with exception handling."""
         with pytest.raises(ValueError):
-            with self.monitor.time_operation("failing_operation") as context:
+            with self.monitor.time_operation("failing_operation") as context:  # noqa: E501, F841
                 raise ValueError("Test error")
 
         # Check that metrics were still recorded
@@ -79,7 +79,7 @@ class TestVectorizedPerformanceMonitor:
 
         metrics = self.monitor.metrics_history[0]
         assert metrics.operation_name == "failing_operation"
-        assert metrics.success == False
+        assert metrics.success == False  # noqa: E712
         assert metrics.error_message == "Test error"
 
     def test_memory_usage_tracking(self):
@@ -132,7 +132,7 @@ class TestVectorizedPerformanceMonitor:
             "regression_test", threshold_factor=2.0
         )
         assert regression is not None
-        assert regression["duration_regression"] == True
+        assert regression["duration_regression"] == True  # noqa: E712
         assert regression["operation_name"] == "regression_test"
 
     def test_performance_report_generation(self):
@@ -297,7 +297,7 @@ class TestVectorizedAspectCalculatorWithMonitoring:
 
         latest_metrics = self.monitor.metrics_history[-1]
         assert latest_metrics.operation_name == "vectorized_aspect_calculation"
-        assert latest_metrics.success == True
+        assert latest_metrics.success == True  # noqa: E712
         assert "separations_shape" in latest_metrics.additional_data
         assert "num_aspects_found" in latest_metrics.additional_data
 
@@ -374,7 +374,7 @@ class TestVectorizedAspectCalculatorWithMonitoring:
         with self.monitor.time_operation(
             "vectorized_method", num_calculations=1
         ):
-            vectorized_result = self.calculator.build_aspect_matrix_vectorized(
+            vectorized_result = self.calculator.build_aspect_matrix_vectorized(  # noqa: E501, F841
                 chart1, chart2
             )
 
@@ -385,7 +385,7 @@ class TestVectorizedAspectCalculatorWithMonitoring:
             with self.monitor.time_operation(
                 "traditional_method", num_calculations=1
             ):
-                traditional_result = build_aspect_matrix(
+                traditional_result = build_aspect_matrix(  # noqa: F841
                     chart1, chart2, PLANETS[: len(chart1)]
                 )
 

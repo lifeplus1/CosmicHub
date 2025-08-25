@@ -24,9 +24,9 @@ def _reset_storage() -> SaltStorage:  # shared helper mirroring base test file
     return storage
 
 
-def test_status_storage_type_firestone_env(monkeypatch):  # type: ignore[no-untyped-def]
+def test_status_storage_type_firestone_env(monkeypatch):  # type: ignore[no-untyped-def]  # noqa: E501
     _reset_storage()
-    monkeypatch.setenv("SALT_BACKEND", "firestore")  # type: ignore[attr-defined]
+    monkeypatch.setenv("SALT_BACKEND", "firestore")  # type: ignore[attr-defined]  # noqa: E501
     # Refresh backend so env is respected for new instance
     get_salt_backend(refresh=True)
     r = client.get("/api/admin/salts/status")
@@ -36,10 +36,10 @@ def test_status_storage_type_firestone_env(monkeypatch):  # type: ignore[no-unty
     assert body["storage_type"] == "memory"
 
 
-def test_status_rotation_intervals_env_override(monkeypatch):  # type: ignore[no-untyped-def]
+def test_status_rotation_intervals_env_override(monkeypatch):  # type: ignore[no-untyped-def]  # noqa: E501
     _reset_storage()
-    monkeypatch.setenv("USER_SALT_ROTATION_DAYS", "60")  # type: ignore[attr-defined]
-    monkeypatch.setenv("GLOBAL_SALT_ROTATION_DAYS", "15")  # type: ignore[attr-defined]
+    monkeypatch.setenv("USER_SALT_ROTATION_DAYS", "60")  # type: ignore[attr-defined]  # noqa: E501
+    monkeypatch.setenv("GLOBAL_SALT_ROTATION_DAYS", "15")  # type: ignore[attr-defined]  # noqa: E501
     # Force backend refresh so intervals captured
     get_salt_backend(refresh=True)
     r = client.get("/api/admin/salts/status")

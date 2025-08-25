@@ -255,7 +255,7 @@ export class ProductionDeploymentManager {
 
   getCurrentEnvironment(): DeploymentEnvironment | null {
     if (!this.currentEnvironment) return null;
-    return this.environments.get(this.currentEnvironment) || null;
+    return this.environments.get(this.currentEnvironment) ?? null;
   }
 
   async deployToEnvironment(

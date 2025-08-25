@@ -1,0 +1,471 @@
+/**
+ * UX-021: Mobile PWA CSS Enhancements
+ * Comprehensive mobile-first styles for PWA features
+ */
+
+/* Mobile-first viewport and touch optimizations */
+:root {
+  /* Dynamic viewport units for mobile Safari */
+  --vh: 1vh;
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  
+  /* Touch target sizes (WCAG AA compliance) */
+  --touch-target-min: 44px;
+  --touch-spacing-min: 8px;
+  
+  /* Mobile-specific spacing */
+  --mobile-padding: 16px;
+  --mobile-margin: 12px;
+  
+  /* Enhanced tap highlight */
+  --tap-highlight-color: rgba(85, 60, 154, 0.2);
+}
+
+/* Global touch enhancements */
+html.has-touch {
+  /* Prevent text selection on touch devices where inappropriate */
+  -webkit-user-select: none;
+  user-select: none;
+  
+  /* Better touch scrolling - legacy webkit support */
+  scroll-behavior: smooth;
+}
+
+/* Allow text selection for content areas */
+html.has-touch [contenteditable],
+html.has-touch input,
+html.has-touch textarea,
+html.has-touch .selectable-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Enhanced tap targets */
+html.has-touch button,
+html.has-touch .btn,
+html.has-touch [role="button"],
+html.has-touch a,
+html.has-touch input[type="checkbox"],
+html.has-touch input[type="radio"] {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: max(12px, var(--touch-spacing-min));
+  
+  /* Enhanced touch feedback */
+  -webkit-tap-highlight-color: var(--tap-highlight-color);
+  tap-highlight-color: var(--tap-highlight-color);
+  
+  /* Better touch response */
+  touch-action: manipulation;
+  
+  /* Prevent double-tap zoom on buttons */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Standalone mode enhancements */
+html.is-standalone {
+  /* Account for missing browser chrome */
+  --header-offset: var(--safe-area-inset-top);
+  --footer-offset: var(--safe-area-inset-bottom);
+}
+
+html.is-standalone body {
+  /* Ensure content respects safe areas */
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Platform-specific adjustments */
+html.platform-ios {
+  /* iOS-specific touch handling */
+  -webkit-touch-callout: none;
+}
+
+html.platform-ios body {
+  /* Prevent rubber band scrolling */
+  overscroll-behavior-y: none;
+}
+
+html.platform-android {
+  /* Android-specific optimizations */
+  font-feature-settings: "liga" off;
+}
+
+/* Keyboard-aware layouts */
+body.keyboard-open {
+  /* Adjust layout when virtual keyboard is open */
+  --viewport-height: calc(var(--vh, 1vh) * 100 - var(--keyboard-height, 0px));
+}
+
+body.keyboard-open .fixed-bottom {
+  /* Keep bottom elements above keyboard */
+  transform: translateY(calc(-1 * var(--keyboard-height, 0px)));
+  transition: transform 0.3s ease-out;
+}
+
+/* Enhanced mobile form controls */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    /* Larger touch targets */
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 16px; /* Prevent iOS zoom on input focus */
+    border-radius: 12px;
+    
+    /* Better visual feedback */
+    transition: all 0.2s ease;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: rgba(85, 60, 154, 0.5);
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(85, 60, 154, 0.2);
+  }
+}
+
+/* Mobile navigation enhancements */
+.mobile-nav {
+  /* Sticky navigation optimized for touch */
+  position: sticky;
+  top: var(--safe-area-inset-top);
+  z-index: 100;
+  background: rgba(26, 26, 46, 0.95);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-nav-item {
+  /* Enhanced touch targets */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.mobile-nav-item::after {
+  /* Ripple effect placeholder */
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.mobile-nav-item:active::after {
+  width: 100%;
+  height: 100%;
+}
+
+/* Swipeable content areas */
+.swipeable {
+  touch-action: pan-x;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.swipeable:active {
+  cursor: grabbing;
+}
+
+.swipe-indicator {
+  /* Visual feedback for swipeable areas */
+  position: relative;
+  overflow: hidden;
+}
+
+.swipe-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.swipe-indicator.swipe-left::before {
+  animation: swipeLeftIndicator 0.6s ease;
+}
+
+.swipe-indicator.swipe-right::before {
+  animation: swipeRightIndicator 0.6s ease;
+}
+
+@keyframes swipeLeftIndicator {
+  0% { left: 100%; }
+  100% { left: -100%; }
+}
+
+@keyframes swipeRightIndicator {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Mobile-optimized modals and overlays */
+.mobile-modal {
+  /* Full-screen on mobile for better UX */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  
+  /* Smooth slide-up animation */
+  animation: mobileModalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes mobileModalSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.mobile-modal-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a1a2e;
+  border-radius: 20px 20px 0 0;
+  padding: 24px;
+  padding-bottom: calc(24px + var(--safe-area-inset-bottom));
+  max-height: 90vh;
+  overflow-y: auto;
+  
+  /* Pull-to-close indicator */
+  position: relative;
+}
+
+.mobile-modal-content::before {
+  /* Handle for pull-to-close */
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+/* Enhanced button states for mobile */
+.btn-mobile {
+  /* Optimized mobile button */
+  min-height: 48px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #553c9a, #f6ad55);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  /* Ensure accessibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+  /* Prevent selection */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.btn-mobile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(85, 60, 154, 0.3);
+}
+
+.btn-mobile:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(85, 60, 154, 0.4);
+}
+
+.btn-mobile:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading states for mobile interactions */
+.mobile-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.mobile-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: mobileSpinner 0.8s linear infinite;
+}
+
+@keyframes mobileSpinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Pull-to-refresh indicator */
+.pull-to-refresh {
+  position: relative;
+  overflow: hidden;
+}
+
+.pull-indicator {
+  position: absolute;
+  top: -60px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(85, 60, 154, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.pull-indicator.visible {
+  transform: translateY(100%);
+}
+
+.pull-indicator-icon {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #553c9a;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: pullRefreshSpin 1s linear infinite;
+}
+
+@keyframes pullRefreshSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Enhanced mobile typography */
+@media (max-width: 768px) {
+  h1 { font-size: 2rem; line-height: 1.2; margin-bottom: 1rem; }
+  h2 { font-size: 1.5rem; line-height: 1.3; margin-bottom: 0.875rem; }
+  h3 { font-size: 1.25rem; line-height: 1.4; margin-bottom: 0.75rem; }
+  
+  body {
+    font-size: 16px; /* Prevent iOS zoom */
+    line-height: 1.6;
+  }
+  
+  .mobile-text-large {
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  
+  .mobile-text-small {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+/* Gesture feedback indicators */
+.gesture-feedback {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  background: rgba(85, 60, 154, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  transform: scale(0);
+  animation: gesturePopup 0.6s ease;
+}
+
+@keyframes gesturePopup {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* Accessibility enhancements for mobile */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn-mobile {
+    border: 2px solid currentColor;
+  }
+  
+  .mobile-nav-item {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Dark mode optimizations for mobile */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tap-highlight-color: rgba(124, 58, 237, 0.3);
+  }
+}
+
+/* Print styles (hide mobile-specific elements) */
+@media print {
+  .mobile-nav,
+  .mobile-modal,
+  .pull-to-refresh,
+  .gesture-feedback {
+    display: none !important;
+  }
+}

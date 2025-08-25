@@ -11,7 +11,7 @@ PARENT = ROOT.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
-from backend.api.routers import stripe_router as sr  # type: ignore
+from backend.api.routers import stripe_router as sr  # type: ignore  # noqa: E501, E402
 
 
 @pytest.fixture(scope="module")

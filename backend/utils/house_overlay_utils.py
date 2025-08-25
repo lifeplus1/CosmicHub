@@ -45,7 +45,7 @@ def analyze_house_overlays(
     # Person 1's planets in Person 2's houses
     for planet, lon in long1.items():
         house = find_house(lon, cusps2)
-        interp = f"{planet.capitalize()} in {house}th house: {get_house_interpretation(planet, house)}"
+        interp = f"{planet.capitalize()} in {house}th house: {get_house_interpretation(planet, house)}"  # noqa: E501
         overlays["p1_in_p2"][planet] = Overlay(
             planet=planet, house=house, interpretation=interp
         )
@@ -53,7 +53,7 @@ def analyze_house_overlays(
     # Person 2's planets in Person 1's houses
     for planet, lon in long2.items():
         house = find_house(lon, cusps1)
-        interp = f"{planet.capitalize()} in {house}th house: {get_house_interpretation(planet, house)}"
+        interp = f"{planet.capitalize()} in {house}th house: {get_house_interpretation(planet, house)}"  # noqa: E501
         overlays["p2_in_p1"][planet] = Overlay(
             planet=planet, house=house, interpretation=interp
         )

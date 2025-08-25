@@ -3,7 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "./dist",
-  // Inherit rootDir from base (monorepo); no override needed
+    // Inherit rootDir from base (monorepo); no override needed
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -23,23 +23,23 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-  "declarationMap": true,
+    "declarationMap": true,
     "exactOptionalPropertyTypes": false,
     "baseUrl": ".",
     "types": ["react", "react-dom", "node"],
     "paths": {
       "@cosmichub/auth": ["../../packages/auth/src/index.tsx"],
       "@cosmichub/config": ["../../packages/config/src/index.ts"],
-  "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
+      "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
       "@cosmichub/frequency": ["../../packages/frequency/src/index.ts"],
       "@cosmichub/ui": ["../../packages/ui/src/index.ts"],
-  "@cosmichub/integrations": ["../../packages/integrations/src/index.ts"],
-  "@cosmichub/subscriptions": ["../../packages/subscriptions/src/index.ts"]
+      "@cosmichub/integrations": ["../../packages/integrations/src/index.ts"],
+      "@cosmichub/subscriptions": ["../../packages/subscriptions/src/index.ts"]
     }
   },
   "include": ["src"],
   "references": [
-  { "path": "../../packages/subscriptions" },
+    { "path": "../../packages/subscriptions" },
     { "path": "../../packages/auth" },
     { "path": "../../packages/config" },
     { "path": "../../packages/frequency" },

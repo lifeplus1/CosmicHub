@@ -7,10 +7,10 @@ PARENT = ROOT.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
-import pytest
-from fastapi.testclient import TestClient
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 
-from backend.main import app
+from backend.main import app  # noqa: E402
 
 client = TestClient(app)
 
@@ -57,7 +57,7 @@ def test_lunar_transits_date_range_exceeds_limit() -> None:
 
 
 def test_minor_aspects_toggle(monkeypatch: pytest.MonkeyPatch) -> None:
-    # For deterministic behavior monkeypatch calculate_aspect to yield a minor aspect in range
+    # For deterministic behavior monkeypatch calculate_aspect to yield a minor aspect in range  # noqa: E501
     from astro.calculations import transits_clean as tc
 
     calls = {"count": 0}

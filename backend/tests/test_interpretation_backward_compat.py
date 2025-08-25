@@ -51,7 +51,7 @@ def test_interpretation_backward_compat(monkeypatch: MonkeyPatch):
     from api.services.astro_service import _astro_service  # type: ignore
 
     cache_key = f"interpretation:{chart_id}:dev-user:natal"
-    raw_cached = _astro_service.redis_cache._cache.get(cache_key)  # type: ignore[attr-defined]
+    raw_cached = _astro_service.redis_cache._cache.get(cache_key)  # type: ignore[attr-defined]  # noqa: E501
     if raw_cached:
         import json
 

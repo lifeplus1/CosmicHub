@@ -9,7 +9,7 @@ import time
 root = pathlib.Path(__file__).resolve().parent.parent
 if str(root) not in sys.path:
     sys.path.insert(0, str(root))
-from api.routers.calculations import (
+from api.routers.calculations import (  # noqa: E402
     BirthData,
     cache_chart_result,
     clear_expired_cache,

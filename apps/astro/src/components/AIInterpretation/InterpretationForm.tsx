@@ -119,10 +119,10 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       // Log error for debugging (replace with proper logging service in production)
       if (error instanceof Error) {
         // TODO: Replace with structured logging service
-        // console.warn('Interpretation generation failed:', error.message);
+        // logger.warn('Interpretation generation failed:', error.message);
       } else {
         // TODO: Replace with structured logging service  
-        // console.warn('Interpretation generation failed with unknown error');
+        // logger.warn('Interpretation generation failed with unknown error');
       }
       toast({
         title: "Generation Failed",
@@ -177,10 +177,10 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       // Log error for debugging (replace with proper logging service in production)
       if (error instanceof Error) {
         // TODO: Replace with structured logging service
-        // console.warn('Interpretation generation failed:', error.message);
+        // logger.warn('Interpretation generation failed:', error.message);
       } else {
         // TODO: Replace with structured logging service  
-        // console.warn('Interpretation generation failed with unknown error');
+        // logger.warn('Interpretation generation failed with unknown error');
       }
       toast({
         title: "Generation Failed",

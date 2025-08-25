@@ -2,6 +2,14 @@ import { Component, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { Button } from './Button';
 import type { ErrorBoundaryProps, ErrorInfo, ErrorMetrics, BoundaryLevel, LogLevel, AnalyticsService, ErrorReportingService } from './errorTypes';
 
+// Simple logger for UI package
+const logger = {
+  error: (...args: unknown[]) => console.error(...args),
+  warn: (...args: unknown[]) => console.warn(...args),
+  info: (...args: unknown[]) => console.info(...args),
+  debug: (...args: unknown[]) => console.debug(...args),
+};
+
 const ENV_MODE: string = (globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } })
   .process?.env?.NODE_ENV ?? 'development';
 
@@ -127,9 +135,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     if (ENV_MODE === 'development') {
       const emoji = this.getErrorEmoji(logLevel);
       console.group(`${emoji} Error Boundary (${level}): ${name ?? 'Unknown'}`);
-      console.error('Error:', error);
-      console.error('Component Stack:', errorInfo.componentStack);
-      console.error('Full Context:', errorData);
+      logger.error('Error:', error);
+      logger.error('Component Stack:', errorInfo.componentStack);
+      logger.error('Full Context:', errorData);
       console.groupEnd();
     }
 
@@ -156,12 +164,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
 
   private reportError(errorInfo: ErrorInfo): void {
     try { window.errorReportingService?.captureException(errorInfo); }
-    catch (reportingError) { console.error('Failed to report error:', reportingError); }
+    catch (reportingError) { logger.error('Failed to report error:', reportingError); }
   }
 
   private trackErrorMetrics(errorData: ErrorMetrics): void {
     try { window.analytics?.track('Error Boundary Triggered', errorData); }
-    catch (analyticsError) { console.error('Failed to track error metrics:', analyticsError); }
+    catch (analyticsError) { logger.error('Failed to track error metrics:', analyticsError); }
   }
 
   private attemptAutoRecovery(error: Error): void {

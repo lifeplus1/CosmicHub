@@ -187,8 +187,8 @@ found during verification audit and PRIV-004 completion).
 
 ### 🔭 Observability & Reliability
 
-- OBS-010 Prometheus alert rules (Status: BLOCKED – needs OBS-003 & REL-005)
-- OBS-011 Performance metrics dashboard (Status: BACKLOG)
+- ✅ OBS-010 Prometheus alert rules (Status: COMPLETE - August 23, 2025)
+- ✅ OBS-011 Performance metrics dashboard (Status: COMPLETE - August 23, 2025)
 - REL-010 Circuit breaker + exponential backoff helper (Status: BACKLOG)
 - REL-011 Fallback outcome logging normalization (Status: BACKLOG)
 

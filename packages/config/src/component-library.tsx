@@ -2,8 +2,7 @@
  * Minimal stable component architecture exports.
  * Keep lean; extend via new modules (do not bloat this surface).
  */
-import React, { createContext, useContext, useMemo, useRef, useCallback, memo } from 'react';
-import type { ComponentType, ReactNode, ElementType, ReactElement, FC } from 'react';
+import React, { createContext, useContext, useMemo, useRef, useCallback, memo, type ReactNode, type ElementType, type ReactElement, type ComponentType, type FC } from 'react';
 import { logger } from './utils/logger';
 
 // ---------------- Context ----------------
@@ -57,19 +56,13 @@ export interface PolymorphicForwardComponent<TDefault extends ElementType> {
 }
 export function createPolymorphicComponent<TDefault extends ElementType = 'div'>(defaultTag: TDefault, displayName?: string): PolymorphicForwardComponent<TDefault> {
   type AnyElement = ElementType;
-  type ForwardInnerProps<TAs extends AnyElement> = PolymorphicComponentProps<TAs>;
   // Define the inner component with proper generic typing
-  const Inner = <TAs extends AnyElement = TDefault>(
-    { as, ...rest }: ForwardInnerProps<TAs>,
-    ref: React.ComponentPropsWithRef<TAs>['ref']
-  ): ReactElement | null => {
+  const Poly = (({ as, ...rest }: { as?: AnyElement } & Record<string, unknown>) => {
     const Tag: AnyElement = as ?? defaultTag;
-    return React.createElement(Tag, { ref, ...rest });
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Forward = React.forwardRef(Inner as any) as unknown as PolymorphicForwardComponent<TDefault>;
-  Forward.displayName = displayName ?? `Poly(${String(defaultTag)})`;
-  return Forward;
+    return React.createElement(Tag, rest as Record<string, unknown>);
+  }) as unknown as PolymorphicForwardComponent<TDefault>;
+  Poly.displayName = displayName ?? `Poly(${String(defaultTag)})`;
+  return Poly;
 }
 
 // -------------- Performance Analyzer --------------
@@ -97,8 +90,12 @@ export class ComponentPerformanceAnalyzer {
   generateRecommendations(component: string): string[] {
     const a = this.getComponentAnalysis(component);
     const rec: string[] = [];
-  if (a.ComponentRender?.average !== undefined && a.ComponentRender.average > 16) rec.push(`Optimize ${component} render time`);
-  if (a.ComponentMount?.average !== undefined && a.ComponentMount.average > 100) rec.push(`${component} mount is slow`);
+  if (a['ComponentRender']?.average !== undefined && a['ComponentRender'].average > 16) {
+    rec.push(`Optimize ${component} render time`);
+  }
+  if (a['ComponentMount']?.average !== undefined && a['ComponentMount'].average > 100) {
+    rec.push(`${component} mount is slow`);
+  }
     return rec;
   }
 }

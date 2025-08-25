@@ -5,19 +5,31 @@ interface User {
   // Add other user properties as needed
 }
 
+interface Chart {
+  id: string;
+  name: string;
+  data: Record<string, unknown>;
+}
+
+interface Frequency {
+  id: string;
+  value: number;
+  name: string;
+}
+
 interface AppState {
   user: User | undefined;
-  charts: any[];
-  frequencies: any[];
+  charts: Chart[];
+  frequencies: Frequency[];
   loading: boolean;
   error: string | undefined;
 }
 
 type AppAction = 
   | { type: 'SET_USER'; payload: User | undefined }
-  | { type: 'SET_CHARTS'; payload: any[] }
-  | { type: 'ADD_CHART'; payload: any }
-  | { type: 'SET_FREQUENCIES'; payload: any[] }
+  | { type: 'SET_CHARTS'; payload: Chart[] }
+  | { type: 'ADD_CHART'; payload: Chart }
+  | { type: 'SET_FREQUENCIES'; payload: Frequency[] }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | undefined };
 
@@ -52,8 +64,8 @@ interface AppContextType {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
   actions: {
-    setUser: (user: any) => void;
-    addChart: (chart: any) => void;
+    setUser: (user: User | undefined) => void;
+    addChart: (chart: Chart) => void;
     setLoading: (loading: boolean) => void;
     setError: (error: string | undefined) => void;
   };
@@ -65,8 +77,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   const actions = {
-    setUser: (user: any) => dispatch({ type: 'SET_USER', payload: user }),
-    addChart: (chart: any) => dispatch({ type: 'ADD_CHART', payload: chart }),
+    setUser: (user: User | undefined) => dispatch({ type: 'SET_USER', payload: user }),
+    addChart: (chart: Chart) => dispatch({ type: 'ADD_CHART', payload: chart }),
     setLoading: (loading: boolean) => dispatch({ type: 'SET_LOADING', payload: loading }),
     setError: (error: string | undefined) => dispatch({ type: 'SET_ERROR', payload: error }),
   };

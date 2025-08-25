@@ -79,7 +79,7 @@ def test_gene_keys_line_themes_basic() -> None:
 
 
 def test_gene_keys_line_themes_idempotent_same_input() -> None:
-    """Calling endpoint twice with same input should produce consistent line/theme values."""
+    """Calling endpoint twice with same input should produce consistent line/theme values."""  # noqa: E501
     payload: RequestPayload = {
         "year": 1990,
         "month": 6,
@@ -150,7 +150,7 @@ def test_gene_keys_line_themes_idempotent_same_input() -> None:
 def test_gene_keys_line_themes_multiple_cases(
     payload: Dict[str, Any],
 ) -> None:  # payload matches RequestPayload shape
-    """Multiple payloads still produce valid line themes & contexts for IQ/EQ/SQ."""
+    """Multiple payloads still produce valid line themes & contexts for IQ/EQ/SQ."""  # noqa: E501
     resp = client.post("/calculate-gene-keys", json=payload)
     assert resp.status_code == 200, resp.text
     gene_keys = resp.json()["gene_keys"]

@@ -89,6 +89,7 @@ const Login: React.FC = () => {
               className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
               required
               autoComplete="email"
+              aria-label="Enter your email"
             />
           </div>
           <div>
@@ -103,6 +104,8 @@ const Login: React.FC = () => {
               className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
               required
               autoComplete="current-password"
+            aria-label="Enter your password"
+
             />
           </div>
           

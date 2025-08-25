@@ -1,5 +1,0 @@
-# Ignore test files for strict TypeScript rules
-# These files often use mocks with any types for testing purposes
-apps/astro/src/**/__tests__/**/*.ts
-apps/astro/src/**/__tests__/**/*.tsx
-apps/astro/src/test/setup.ts

@@ -179,8 +179,10 @@ export interface UsageLimits {
   resetDate: string;
 }
 
-// Export all types - chart, user, and subscription types will be added in future iterations
+// Export all types - chart, user, subscription, and experiment types
 export * from './astrology.types.js';
 export * from './serialize.js';
 export * from './type-guards.js';
 export * from './utility.js';
+export * from './experiments.js';
+export * from './experiment-validators.js';

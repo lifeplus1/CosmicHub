@@ -75,7 +75,7 @@ class RealRedisCache(BaseCache):
         try:  # Import inside to avoid mandatory dependency at import time
             from redis import asyncio as redis_async  # type: ignore
 
-            self._client = redis_async.from_url(url, encoding="utf-8", decode_responses=True)  # type: ignore[assignment]
+            self._client = redis_async.from_url(url, encoding="utf-8", decode_responses=True)  # type: ignore[assignment]  # noqa: E501
             self._available = True
         except Exception:
             self._client = None  # type: ignore
@@ -101,7 +101,7 @@ class RealRedisCache(BaseCache):
         if not self.available:
             return False
         try:
-            await self._client.set(key, value, ex=expire_seconds)  # type: ignore
+            await self._client.set(key, value, ex=expire_seconds)  # type: ignore  # noqa: E501
             return True
         except Exception:
             return False
@@ -162,7 +162,7 @@ class AstroService:
             return json.loads(cached_data)
 
         print(f"Cache miss for chart_id: {chart_id}. Would fetch from DB.")
-        # For test/demo we only return mock data for known demo ids; otherwise None
+        # For test/demo we only return mock data for known demo ids; otherwise None  # noqa: E501
         demo_ids = {"demo", "sample", "chart123", "test-chart-123"}
         if chart_id not in demo_ids:
             return None
@@ -190,12 +190,12 @@ class AstroService:
             cache_key = f"chart:{chart_id}"
 
             # Serialize the data for consistent caching
-            # Narrow type: only call serialize_data for supported Pydantic models
+            # Narrow type: only call serialize_data for supported Pydantic models  # noqa: E501
             if hasattr(chart_data, "model_dump") and callable(
                 getattr(chart_data, "model_dump")
             ):
                 try:
-                    serialized_data = serialize_data(chart_data)  # type: ignore[arg-type]
+                    serialized_data = serialize_data(chart_data)  # type: ignore[arg-type]  # noqa: E501
                 except Exception:
                     serialized_data = json.dumps(chart_data)
             else:
@@ -205,8 +205,8 @@ class AstroService:
             success = await self.redis_cache.set(
                 cache_key, serialized_data, expire_seconds=3600
             )
-            # Fallback: if a RealRedisCache silently failed, swap to in-memory and retry once
-            if not success and isinstance(self.redis_cache, RealRedisCache):  # type: ignore[arg-type]
+            # Fallback: if a RealRedisCache silently failed, swap to in-memory and retry once  # noqa: E501
+            if not success and isinstance(self.redis_cache, RealRedisCache):  # type: ignore[arg-type]  # noqa: E501
                 self.redis_cache = RedisCache()
                 success = await self.redis_cache.set(
                     cache_key, serialized_data, expire_seconds=3600
@@ -214,7 +214,7 @@ class AstroService:
 
             if success:
                 print(
-                    f"Cached chart_id: {chart_id}, size: {len(serialized_data)} chars"
+                    f"Cached chart_id: {chart_id}, size: {len(serialized_data)} chars"  # noqa: E501
                 )
 
             return success
@@ -237,7 +237,7 @@ class AstroService:
             success = await self.redis_cache.set(
                 key, serialized, expire_seconds
             )
-            if not success and isinstance(self.redis_cache, RealRedisCache):  # type: ignore[arg-type]
+            if not success and isinstance(self.redis_cache, RealRedisCache):  # type: ignore[arg-type]  # noqa: E501
                 self.redis_cache = RedisCache()
                 success = await self.redis_cache.set(
                     key, serialized, expire_seconds

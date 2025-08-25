@@ -1,15 +1,11 @@
-import { useState } from "react";
-/* eslint-disable no-console */
-const devConsole = {
-  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
-  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
-  error: console.error.bind(console)
-};
-/* eslint-enable no-console */
-import { useAuth } from "@cosmichub/auth";
-import { savePreset } from "../services/api";
-import AudioPlayer from "./AudioPlayer";
-import DurationTimer from "./DurationTimer";
+import { useState } from 'react';
+import { devConsole } from '../config/devConsole';
+ 
+ 
+import { useAuth } from '@cosmichub/auth';
+import { savePreset } from '../services/api';
+import AudioPlayer from './AudioPlayer';
+import DurationTimer from './DurationTimer';
 
 /* const PRESETS = {
   solfeggio: [
@@ -125,34 +121,37 @@ const FrequencyControls = () => {
         binauralBeat: binaural,
         description: `Custom preset saved on ${new Date().toLocaleDateString()}`,
         benefits: ['Custom healing frequency'],
-        metadata: { 
+        metadata: {
           duration: duration,
           volume: volume,
-          createdAt: new Date().toISOString()
-        }
+          createdAt: new Date().toISOString(),
+        },
       };
       await savePreset(preset);
       setPresetName('');
       setShowPresets(false);
     } catch (error) {
-  devConsole.error('Failed to save preset:', error);
+      devConsole.error('Failed to save preset:', error);
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className='space-y-8'>
       {/* Preset selectors and controls - assuming truncated code is Tailwind-based, no changes needed */}
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label htmlFor="session-duration" className="block text-sm font-medium text-white/90">
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+        <div className='space-y-2'>
+          <label
+            htmlFor='session-duration'
+            className='block text-sm font-medium text-white/90'
+          >
             Session Duration (minutes)
           </label>
           <select
-            id="session-duration"
+            id='session-duration'
             value={duration}
-            onChange={(e) => setDuration(parseInt(e.target.value))}
-            className="w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+            onChange={e => setDuration(parseInt(e.target.value))}
+            className='w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
           >
             <option value={5}>5 minutes</option>
             <option value={10}>10 minutes</option>
@@ -163,8 +162,8 @@ const FrequencyControls = () => {
             <option value={60}>1 hour</option>
           </select>
         </div>
-        
-        <div className="p-4 border bg-white/5 rounded-xl border-white/20">
+
+        <div className='p-4 border bg-white/5 rounded-xl border-white/20'>
           <DurationTimer
             duration={duration}
             isActive={isPlaying}
@@ -173,8 +172,8 @@ const FrequencyControls = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center space-y-4">
-        <div className="flex space-x-4">
+      <div className='flex flex-col items-center space-y-4'>
+        <div className='flex space-x-4'>
           <button
             onClick={togglePlayback}
             className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center space-x-2 ${
@@ -183,40 +182,47 @@ const FrequencyControls = () => {
                 : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-green-500/25'
             }`}
           >
-            <span className="text-2xl">{isPlaying ? '⏸️' : '▶️'}</span>
+            <span className='text-2xl'>{isPlaying ? '⏸️' : '▶️'}</span>
             <span>{isPlaying ? 'Stop' : 'Start'} Session</span>
           </button>
         </div>
-        
-        <div className="text-sm text-center text-white/70">
-          <p>Current: {frequency}Hz {binaural > 0 && `+ ${binaural}Hz binaural beat`}</p>
-          <p>{duration} minute session • Volume: {Math.round(volume * 100)}%</p>
+
+        <div className='text-sm text-center text-white/70'>
+          <p>
+            Current: {frequency}Hz{' '}
+            {binaural > 0 && `+ ${binaural}Hz binaural beat`}
+          </p>
+          <p>
+            {duration} minute session • Volume: {Math.round(volume * 100)}%
+          </p>
         </div>
       </div>
 
       {user && (
-        <div className="p-6 border bg-white/5 rounded-xl border-white/20">
+        <div className='p-6 border bg-white/5 rounded-xl border-white/20'>
           <button
             onClick={() => setShowPresets(!showPresets)}
-            className="flex items-center justify-between w-full p-3 text-white transition-all duration-200 bg-white/10 rounded-xl hover:bg-white/20"
+            className='flex items-center justify-between w-full p-3 text-white transition-all duration-200 bg-white/10 rounded-xl hover:bg-white/20'
           >
-            <span className="font-semibold">Save Custom Preset</span>
-            <span className="text-xl">{showPresets ? '−' : '+'}</span>
+            <span className='font-semibold'>Save Custom Preset</span>
+            <span className='text-xl'>{showPresets ? '−' : '+'}</span>
           </button>
-          
+
           {showPresets && (
-            <div className="mt-4 space-y-4">
+            <div className='mt-4 space-y-4'>
               <input
-                type="text"
-                placeholder="Enter preset name..."
+                type='text'
+                placeholder='Enter preset name...'
                 value={presetName}
-                onChange={(e) => setPresetName(e.target.value)}
-                className="w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                onChange={e => setPresetName(e.target.value)}
+                className='w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
               />
               <button
-                onClick={() => { void handleSavePreset(); }}
+                onClick={() => {
+                  void handleSavePreset();
+                }}
                 disabled={!presetName.trim()}
-                className="w-full py-3 font-semibold text-white transition-all duration-200 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-500 disabled:to-gray-600 rounded-xl disabled:cursor-not-allowed"
+                className='w-full py-3 font-semibold text-white transition-all duration-200 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-500 disabled:to-gray-600 rounded-xl disabled:cursor-not-allowed'
               >
                 Save Preset
               </button>
@@ -225,7 +231,7 @@ const FrequencyControls = () => {
         </div>
       )}
 
-      <div className="hidden">
+      <div className='hidden'>
         <AudioPlayer
           frequency={frequency}
           volume={volume}

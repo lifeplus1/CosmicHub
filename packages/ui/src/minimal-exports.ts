@@ -17,6 +17,9 @@ export * from './components/Spinner';
 export * from './components/UpgradeModal';
 export * from './components/PerformanceDashboard';
 
+// Accessibility components for ALLY-030
+export * from './components/accessibility/AccessibilityUtils';
+
 // Error handling components
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export * from './components/ErrorBoundaries';

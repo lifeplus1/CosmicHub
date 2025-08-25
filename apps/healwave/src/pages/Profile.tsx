@@ -22,10 +22,21 @@ const Profile: React.FC = React.memo(() => {
 
   if (!user) {
     return (
-      <div className="py-10 text-center">
-        <div className="mx-auto text-4xl text-cosmic-purple animate-spin" aria-hidden="true">🎵</div>
-        <p className="mt-4 text-cosmic-silver">Please sign in to view your profile</p>
-        <Button onClick={() => navigate('/login')} variant="primary" className="mt-4">
+      <div className='py-10 text-center'>
+        <div
+          className='mx-auto text-4xl text-cosmic-purple animate-spin'
+          aria-hidden='true'
+        >
+          🎵
+        </div>
+        <p className='mt-4 text-cosmic-silver'>
+          Please sign in to view your profile
+        </p>
+        <Button
+          onClick={() => navigate('/login')}
+          variant='primary'
+          className='mt-4'
+        >
           Sign In
         </Button>
       </div>
@@ -33,11 +44,16 @@ const Profile: React.FC = React.memo(() => {
   }
 
   return (
-    <div className="min-h-screen bg-cosmic-dark">
+    <div className='min-h-screen bg-cosmic-dark'>
       <UserProfile />
-      <div className="max-w-4xl mx-auto pb-8">
-        <div className="text-center">
-    <Button onClick={() => { void handleSignOut(); }} variant="secondary">
+      <div className='max-w-4xl mx-auto pb-8'>
+        <div className='text-center'>
+          <Button
+            onClick={() => {
+              void handleSignOut();
+            }}
+            variant='secondary'
+          >
             Sign Out
           </Button>
         </div>

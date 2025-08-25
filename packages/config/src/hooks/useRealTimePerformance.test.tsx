@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, cleanup, waitFor } from '@testing-library/react';
 
 // Mock the dynamically imported performance monitor using the same specifier used in the hook
-const updateCallbacks: Array<(r: any) => void> = [];
+const updateCallbacks: Array<(r: any) => void> = [];  // eslint-disable-line no-unused-vars
 
 const initialReport = {
   components: [],
@@ -16,7 +16,7 @@ vi.mock('../performance', () => {
   return {
     performanceMonitor: {
       getPerformanceReport: () => initialReport,
-      enableRealTimeUpdates: (cb: (r: any) => void) => {
+      enableRealTimeUpdates: (cb: (r: any) => void) => {  // eslint-disable-line no-unused-vars
         updateCallbacks.push(cb);
         return () => {
           const idx = updateCallbacks.indexOf(cb);
@@ -29,7 +29,7 @@ vi.mock('../performance', () => {
 
 import { useRealTimePerformance } from './usePerformance';
 
-function HookProbe({ onReport }: { onReport: (r: any) => void }) {
+function HookProbe({ onReport }: { onReport: (r: any) => void }) {  // eslint-disable-line no-unused-vars
   const report = useRealTimePerformance();
   React.useEffect(() => { onReport(report); }, [report, onReport]);
   return null;

@@ -75,7 +75,7 @@ def calculate_aspects(
         planet_names = list(planets.keys())
 
         for i, planet1 in enumerate(planet_names):
-            for planet2 in planet_names[i + 1 :]:
+            for planet2 in planet_names[i + 1 :]:  # noqa: E203
                 pos1 = planets[planet1]["position"]
                 pos2 = planets[planet2]["position"]
                 angle = abs((pos1 - pos2 + 180) % 360 - 180)

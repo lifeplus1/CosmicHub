@@ -3,6 +3,21 @@
  * Enables seamless data sharing between astro and healwave apps
  */
 
+// Simple logger for integrations package
+const logger = {
+  info: (message: string, data?: unknown) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[CrossAppStore] ${message}`, data);
+    }
+  },
+  warn: (message: string, data?: unknown) => {
+    console.warn(`[CrossAppStore] ${message}`, data);
+  },
+  error: (message: string, data?: unknown) => {
+    console.error(`[CrossAppStore] ${message}`, data);
+  }
+};
+
 // Simple EventEmitter implementation for browser compatibility
 type Listener<T = unknown> = (data: T) => void;
 class SimpleEventEmitter {
@@ -22,7 +37,7 @@ class SimpleEventEmitter {
     const list = this.events[event];
     if (!list) return;
     list.forEach(callback => {
-      try { callback(data); } catch (err) { console.warn('Listener error', err); }
+      try { callback(data); } catch (err) { logger.warn('Listener error', err); }
     });
   }
 }
@@ -113,7 +128,7 @@ class CrossAppStore extends SimpleEventEmitter {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.state));
     } catch (error) {
-      console.warn('Failed to save cross-app state:', error);
+      logger.warn('Failed to save cross-app state:', error);
     }
   }
 
@@ -125,7 +140,7 @@ class CrossAppStore extends SimpleEventEmitter {
         this.state = { ...this.state, ...parsed };
       }
     } catch (error) {
-      console.warn('Failed to load cross-app state:', error);
+      logger.warn('Failed to load cross-app state:', error);
     }
   }
 
@@ -138,7 +153,7 @@ class CrossAppStore extends SimpleEventEmitter {
     this.state = { ...this.state, ...newState };
     this.emit('state:synced', this.state);
           } catch (error) {
-            console.warn('Failed to sync cross-app state:', error);
+            logger.warn('Failed to sync cross-app state:', error);
           }
         }
       });
@@ -163,7 +178,7 @@ class CrossAppStore extends SimpleEventEmitter {
         localStorage.removeItem(eventKey);
       }, 5000);
     } catch (error) {
-      console.warn('Failed to broadcast event:', error);
+      logger.warn('Failed to broadcast event:', error);
     }
   }
 

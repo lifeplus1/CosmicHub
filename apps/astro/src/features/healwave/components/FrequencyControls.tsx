@@ -116,7 +116,7 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
                     className="p-3 rounded text-left transition-colors bg-cosmic-dark border border-cosmic-purple text-cosmic-silver hover:bg-cosmic-purple/20"
                     role="radio"
                     aria-checked="false"
-                    tabIndex={-1}
+                    tabIndex={0}
                   >
                     {preset.name}
                   </button>

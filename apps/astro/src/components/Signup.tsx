@@ -174,7 +174,7 @@ const Signup: React.FC = React.memo(() => {
                   placeholder="your@email.com"
                   className="cosmic-input"
                   aria-required="true"
-                />
+                aria-label="your@email.com" />
               </div>
               <div>
                 <label htmlFor="password" className="block mb-2 text-cosmic-gold">Password <span aria-hidden="true">*</span></label>
@@ -187,7 +187,7 @@ const Signup: React.FC = React.memo(() => {
                   placeholder="••••••••"
                   className="cosmic-input"
                   aria-required="true"
-                />
+                aria-label="••••••••" />
               </div>
               <div>
                 <label htmlFor="confirmPassword" className="block mb-2 text-cosmic-gold">Confirm Password <span aria-hidden="true">*</span></label>
@@ -200,7 +200,7 @@ const Signup: React.FC = React.memo(() => {
                   placeholder="••••••••"
                   className="cosmic-input"
                   aria-required="true"
-                />
+                aria-label="••••••••" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -213,7 +213,7 @@ const Signup: React.FC = React.memo(() => {
                     onChange={handleInputChange}
                     placeholder="First Name"
                     className="cosmic-input"
-                  />
+                  aria-label="First Name" />
                 </div>
                 <div>
                   <label htmlFor="lastName" className="block mb-2 text-cosmic-gold">Last Name</label>
@@ -225,7 +225,7 @@ const Signup: React.FC = React.memo(() => {
                     onChange={handleInputChange}
                     placeholder="Last Name"
                     className="cosmic-input"
-                  />
+                  aria-label="Last Name" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -238,7 +238,7 @@ const Signup: React.FC = React.memo(() => {
                     value={formData.dateOfBirth}
                     onChange={handleInputChange}
                     className="cosmic-input"
-                  />
+                  aria-label="date input" />
                 </div>
                 <div>
                   <label htmlFor="timeOfBirth" className="block mb-2 text-cosmic-gold">Time of Birth</label>
@@ -249,7 +249,7 @@ const Signup: React.FC = React.memo(() => {
                     value={formData.timeOfBirth}
                     onChange={handleInputChange}
                     className="cosmic-input"
-                  />
+                  aria-label="time input" />
                 </div>
               </div>
               <div>
@@ -262,7 +262,7 @@ const Signup: React.FC = React.memo(() => {
                   onChange={handleInputChange}
                   placeholder="City, State/Country"
                   className="cosmic-input"
-                />
+                aria-label="City, State/Country" />
               </div>
               <div>
                 <label htmlFor="timezone" className="block mb-2 text-cosmic-gold">Timezone</label>
@@ -325,7 +325,7 @@ const Signup: React.FC = React.memo(() => {
                     checked={formData.notificationPreferences.dailyHoroscope}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
-                  />
+                  aria-label="checkbox input" />
                   <span className="text-cosmic-silver">Daily Horoscope</span>
                 </label>
         <label htmlFor="monthlyForecast" className="flex items-center space-x-2">
@@ -336,7 +336,7 @@ const Signup: React.FC = React.memo(() => {
                     checked={formData.notificationPreferences.monthlyForecast}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
-                  />
+                  aria-label="checkbox input" />
                   <span className="text-cosmic-silver">Monthly Forecast</span>
                 </label>
         <label htmlFor="compatibilityInsights" className="flex items-center space-x-2">
@@ -347,7 +347,7 @@ const Signup: React.FC = React.memo(() => {
                     checked={formData.notificationPreferences.compatibilityInsights}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
-                  />
+                  aria-label="checkbox input" />
                   <span className="text-cosmic-silver">Compatibility Insights</span>
                 </label>
         <label htmlFor="newFeatures" className="flex items-center space-x-2">
@@ -358,7 +358,7 @@ const Signup: React.FC = React.memo(() => {
                     checked={formData.notificationPreferences.newFeatures}
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
-                  />
+                  aria-label="checkbox input" />
                   <span className="text-cosmic-silver">New Features</span>
                 </label>
               </div>
@@ -372,7 +372,7 @@ const Signup: React.FC = React.memo(() => {
                     onChange={handleCheckboxChange}
                     className="w-4 h-4 text-purple-500 rounded"
                     aria-required="true"
-                  />
+                  aria-label="checkbox input" />
                   <label htmlFor="privacyConsent" className="text-sm text-cosmic-silver">
                     I agree to the{' '}
                     <a href="/privacy-policy" className="underline text-cosmic-gold hover:text-cosmic-gold/80">Privacy Policy</a>{' '}

@@ -1,0 +1,30 @@
+{
+  "name": "@cosmichub/storage",
+  "version": "1.0.0",
+  "description": "Offline storage utilities for CosmicHub",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cosmichub/config": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./offline-storage": {
+      "types": "./dist/offline-storage.d.ts",
+      "import": "./dist/offline-storage.js"
+    }
+  }
+}

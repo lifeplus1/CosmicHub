@@ -36,6 +36,7 @@ export default [
       '**/tailwind.config.*',
       '**/vite.config.*',
       '**/vitest.config.*',
+      '**/eslint.config.*',
       
       // Test setup and utility files that shouldn't be linted
       '**/test-setup.ts',
@@ -46,6 +47,9 @@ export default [
       
       // Backend files (Python project, not TypeScript)
       'backend/**',
+      
+      // Shared folder - deprecated legacy files
+      'shared/**',
       
       // Cache and temp files
       '**/.cache/**',
@@ -87,17 +91,11 @@ export default [
     ],
     languageOptions: {
       parser: tsparser,
+      // Include both browser + node so tests using process, window, performance, etc. are covered
       globals: { ...globals.node, ...globals.browser, ...globals.es2020, JSX: 'readonly' },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: [
-          'apps/astro/tsconfig.json',
-          'apps/healwave/tsconfig.json',
-          'packages/types/tsconfig.test.json',
-          'packages/auth/tsconfig.json',
-          'packages/ui/tsconfig.json'
-        ],
         ecmaFeatures: { jsx: true }
       },
     },
@@ -152,12 +150,7 @@ export default [
       globals: { ...globals.browser, ...globals.jest, ...globals.node },
       parserOptions: {
         ecmaVersion: 'latest',
-        sourceType: 'module',
-        project: [
-          'apps/astro/tsconfig.json',
-          'apps/healwave/tsconfig.json',
-          'packages/types/tsconfig.test.json'
-        ]
+        sourceType: 'module'
       }
     },
     plugins: {
@@ -189,19 +182,12 @@ export default [
   ],
     languageOptions: {
       parser: tsparser,
-      globals: { ...globals.browser, ...globals.es2020 },
+  // Allow usage of process, console, Buffer, etc. alongside browser globals
+  globals: { ...globals.browser, ...globals.node, ...globals.es2020 },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: [
-          'apps/astro/tsconfig.json',
-          'apps/healwave/tsconfig.json',
-          'packages/auth/tsconfig.json',
-          'packages/config/tsconfig.json',
-          'packages/integrations/tsconfig.json',
-          'packages/types/tsconfig.json',
-          'packages/ui/tsconfig.json'
-        ],
+        projectService: true,
         ecmaFeatures: { jsx: true }
       },
     },
@@ -258,7 +244,8 @@ export default [
         minimumDescriptionLength: 10
       }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true }],
-      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      // Temporarily downgrade while refactoring widespread logical-or usage
+      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
@@ -273,4 +260,27 @@ export default [
     },
   },
   prettier,
+  // Add explicit JS (non-TS) file support so plugin rules and globals apply uniformly
+  {
+    files: ['**/*.js','**/*.jsx'],
+    languageOptions: {
+      parser: tsparser, // still use @typescript-eslint/parser to unify rules; it handles JS fine
+      globals: { ...globals.browser, ...globals.node, ...globals.es2020 },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+  // No project for plain JS to avoid parsing errors when not in tsconfig include
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      react,
+      'react-hooks': reactHooks,
+      'jsx-a11y': jsxA11y,
+    },
+    rules: {
+      'no-undef': 'error',
+      'no-console': 'off'
+    }
+  }
 ];

@@ -188,6 +188,7 @@ const Numerology: React.FC = () => {
                 placeholder="Enter your full birth name"
                 className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
                 required
+                aria-label="Enter your full birth name"
               />
             </div>
             <div>
@@ -200,6 +201,8 @@ const Numerology: React.FC = () => {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 bg-cosmic-blue/20 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-purple focus:outline-none"
                 required
+              aria-label="date input"
+
               />
             </div>
             

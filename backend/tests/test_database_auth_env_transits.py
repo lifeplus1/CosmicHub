@@ -6,10 +6,10 @@ import pytest
 
 
 def test_database_memory_fallback(monkeypatch: pytest.MonkeyPatch):
-    """Force memory DB mode and exercise save/get/delete/batch/stats functions."""
+    """Force memory DB mode and exercise save/get/delete/batch/stats functions."""  # noqa: E501
     monkeypatch.setenv("DEPLOY_ENVIRONMENT", "development")
     monkeypatch.setenv("FIREBASE_PRIVATE_KEY", "")
-    
+  # noqa: E114, W293
     # Import database module after environment setup
     importlib.reload(sys.modules["backend.database"])  # type: ignore[arg-type]
     import backend.database as dbmod
@@ -76,7 +76,7 @@ async def test_auth_negative_no_token(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("ALLOW_MOCK_AUTH", "0")
     monkeypatch.setenv("DEPLOY_ENVIRONMENT", "production")
     monkeypatch.delenv("FIREBASE_CREDENTIALS", raising=False)
-    # Import should raise ValueError because credentials missing in production with mock disabled
+    # Import should raise ValueError because credentials missing in production with mock disabled  # noqa: E501
     if "backend.auth" in sys.modules:
         del sys.modules["backend.auth"]
     with pytest.raises(ValueError):
@@ -143,7 +143,7 @@ def test_transits_endpoints_small_range(monkeypatch: pytest.MonkeyPatch):
     r = client.post("/api/astro/transits", json=payload)
     assert r.status_code == 200
     data = r.json()
-    assert isinstance(data, list) and len(data) <= 500  # type: ignore[arg-type]
+    assert isinstance(data, list) and len(data) <= 500  # type: ignore[arg-type]  # noqa: E501
 
     lunar_payload: dict[str, object] = {
         "birth_data": payload["birth_data"],

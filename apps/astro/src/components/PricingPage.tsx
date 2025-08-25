@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { devConsole } from '../config/environment';
 import { useAuth, useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
-import { stripeService } from '@cosmichub/integrations';
+import { getStripeServiceOrThrow } from '@cosmichub/integrations';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { FaCheck, FaTimes, FaStar, FaCrown, FaUser, FaChartLine, FaUsers, FaBrain, FaMagic, FaInfinity, FaQuestionCircle, FaHeart, FaCalendarAlt, FaFilePdf, FaSave, FaHeadset } from 'react-icons/fa';
 // Using centralized subscription tiers
@@ -19,7 +19,7 @@ const PricingPage: React.FC = React.memo(() => {
     if (user === null || user === undefined) {
       toast({
         title: 'Authentication Required',
-        description: 'Please sign in to upgrade your plan.',
+        description: 'Please log in to upgrade your plan.',
         status: 'warning',
         duration: 3000,
         isClosable: true,
@@ -27,16 +27,7 @@ const PricingPage: React.FC = React.memo(() => {
       return;
     }
 
-    if (stripeService === undefined || stripeService === null) {
-      toast({
-        title: 'Service Unavailable',
-        description: 'Payment service is currently unavailable. Please try again later.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
+    const stripeService = getStripeServiceOrThrow();
 
     setLoading(tier);
     try {
@@ -215,6 +206,7 @@ const PricingPage: React.FC = React.memo(() => {
               checked={isAnnual}
               onChange={(e) => setIsAnnual(e.target.checked)}
               className="w-5 h-5 text-purple-500 rounded"
+              aria-label="Toggle annual billing"
             />
             <span className="font-medium text-cosmic-silver">Annual Billing</span>
             <span className="px-2 py-1 text-sm text-green-500 rounded bg-green-500/20">Save 20%</span>

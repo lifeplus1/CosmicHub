@@ -5,22 +5,22 @@ import React from 'react';
  */
 
 // Simple EventEmitter implementation for browser compatibility
-class SimpleEventEmitter {
-  private events: { [key: string]: Function[] } = {};
+type EventCallback = (...args: unknown[]) => void;
 
-  on(event: string, callback: Function): void {
-    if (!this.events[event]) {
-      this.events[event] = [];
-    }
+class SimpleEventEmitter {
+  private events: { [key: string]: EventCallback[] } = {};
+
+  on(event: string, callback: EventCallback): void {
+    this.events[event] ??= [];
     this.events[event].push(callback);
   }
 
-  off(event: string, callback: Function): void {
+  off(event: string, callback: EventCallback): void {
     if (!this.events[event]) return;
     this.events[event] = this.events[event].filter(cb => cb !== callback);
   }
 
-  emit(event: string, data?: any): void {
+  emit(event: string, data?: unknown): void {
     if (!this.events[event]) return;
     this.events[event].forEach(callback => callback(data));
   }
@@ -143,9 +143,9 @@ class SubscriptionManager extends SimpleEventEmitter {
   // Get current plan details
   getCurrentPlan(): SubscriptionPlan | null {
     if (!this.currentSubscription) {
-      return this.plans.find(p => p.id === 'free') || null;
+      return this.plans.find(p => p.id === 'free') ?? null;
     }
-    return this.plans.find(p => p.id === this.currentSubscription!.planId) || null;
+    return this.plans.find(p => p.id === this.currentSubscription!.planId) ?? null;
   }
 
   // Check feature access
@@ -181,7 +181,7 @@ class SubscriptionManager extends SimpleEventEmitter {
         canAccess: false,
         reason: `${app} not included in current plan`,
         upgradeRequired: true,
-        requiredPlan: requiredPlan?.id || 'cosmic-ultimate'
+        requiredPlan: requiredPlan?.id ?? 'cosmic-ultimate'
       };
     }
 
@@ -197,7 +197,7 @@ class SubscriptionManager extends SimpleEventEmitter {
         canAccess: false,
         reason: 'Feature not included in current plan',
         upgradeRequired: true,
-        requiredPlan: requiredPlan?.id || 'cosmic-ultimate'
+        requiredPlan: requiredPlan?.id ?? 'cosmic-ultimate'
       };
     }
 
@@ -217,7 +217,7 @@ class SubscriptionManager extends SimpleEventEmitter {
   async createCheckoutSession(planId: string, successUrl: string, cancelUrl: string): Promise<{ url: string }> {
     const plan = this.plans.find(p => p.id === planId);
     
-    if (!plan || !plan.stripePriceId) {
+    if (!plan?.stripePriceId) {
       throw new Error('Invalid plan or missing Stripe price ID');
     }
 
@@ -239,7 +239,7 @@ class SubscriptionManager extends SimpleEventEmitter {
         throw new Error('Failed to create checkout session');
       }
 
-      return await response.json();
+      return await response.json() as { url: string };
     } catch (error) {
       this.emit('subscription:error', error);
       throw error;
@@ -261,7 +261,7 @@ class SubscriptionManager extends SimpleEventEmitter {
         throw new Error('Failed to create portal session');
       }
 
-      return await response.json();
+      return await response.json() as { url: string };
     } catch (error) {
       this.emit('subscription:error', error);
       throw error;
@@ -339,7 +339,7 @@ class SubscriptionManager extends SimpleEventEmitter {
   }
 
   // Subscribe to events
-  subscribe(event: string, callback: (data: any) => void): () => void {
+  subscribe(event: string, callback: (data: unknown) => void): () => void {
     this.on(event, callback);
     return () => this.off(event, callback);
   }
@@ -386,12 +386,12 @@ export const useSubscription = () => {
 
   React.useEffect(() => {
     const unsubscribeUpdated = subscriptionManager.subscribe('subscription:updated', (sub) => {
-      setSubscription(sub);
+      setSubscription(sub as UserSubscription | null);
       setPlan(subscriptionManager.getCurrentPlan());
     });
 
     const unsubscribeLoaded = subscriptionManager.subscribe('subscription:loaded', (sub) => {
-      setSubscription(sub);
+      setSubscription(sub as UserSubscription | null);
       setPlan(subscriptionManager.getCurrentPlan());
     });
 

@@ -5,6 +5,21 @@
 
 import { loadStripe, type Stripe, type StripeError } from '@stripe/stripe-js';
 
+// Simple logger for integrations package
+const logger = {
+  info: (message: string, data?: unknown) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[StripeIntegration] ${message}`, data);
+    }
+  },
+  warn: (message: string, data?: unknown) => {
+    console.warn(`[StripeIntegration] ${message}`, data);
+  },
+  error: (message: string, data?: unknown) => {
+    console.error(`[StripeIntegration] ${message}`, data);
+  }
+};
+
 // Firebase will be injected by the consuming app to avoid dependency issues
 // Minimal surface types for injected Firebase services to avoid `any`
 interface FirestoreDocSnapshot<T = unknown> {
@@ -141,7 +156,7 @@ export class StripeService {
         throw new Error('Failed to initialize Stripe');
       }
     } catch (error) {
-      console.error('Stripe initialization failed:', error);
+      logger.error('Stripe initialization failed:', error);
       throw new Error('Stripe SDK failed to load');
     }
   }
@@ -225,7 +240,7 @@ export class StripeService {
         return { id: sessionId, url: '' };
       }
     } catch (error) {
-          console.error('Stripe checkout error:', error);
+          logger.error('Stripe checkout error:', error);
       
       // Re-throw with user-friendly message
       if (error instanceof Error) {
@@ -263,9 +278,9 @@ export class StripeService {
 
       await firebaseServices.setDoc(userRef, { subscription: subscriptionData }, { merge: true });
       
-          console.log(`Subscription updated for user ${userId}: ${tier} (${isAnnual ? 'annual' : 'monthly'})`);
+          logger.info(`Subscription updated for user ${userId}: ${tier} (${isAnnual ? 'annual' : 'monthly'})`);
     } catch (error) {
-          console.error('Failed to update user subscription:', error);
+          logger.error('Failed to update user subscription:', error);
       throw new Error('Subscription update failed');
     }
   }
@@ -275,7 +290,7 @@ export class StripeService {
    */
   public async getUserSubscription(userId: string): Promise<SubscriptionData | null> {
     if (firebaseServices === null) {
-      console.warn('Firebase services not initialized');
+      logger.warn('Firebase services not initialized');
       return null;
     }
 
@@ -300,7 +315,7 @@ export class StripeService {
       }
       return null;
     } catch (error) {
-          console.error('Failed to get user subscription:', error);
+          logger.error('Failed to get user subscription:', error);
       return null;
     }
   }
@@ -342,7 +357,7 @@ export class StripeService {
       }
       throw new Error('Invalid portal session response');
     } catch (error) {
-      console.error('Portal session error:', error);
+      logger.error('Portal session error:', error);
       throw new Error('Failed to access customer portal');
     }
   }
@@ -352,13 +367,13 @@ export class StripeService {
    */
   public static validateConfig(config: Partial<StripeConfig>): StripeConfig {
   if (config.publicKey === undefined || config.publicKey === null || config.publicKey.trim() === '') {
-      console.warn('Stripe public key not configured. Stripe functionality will be disabled.');
+      logger.warn('Stripe public key not configured. Stripe functionality will be disabled.');
       throw new Error('Stripe public key is required');
     }
 
     // Check if it's a placeholder key
   if (config.publicKey.includes('1234567890') || config.publicKey === 'your_stripe_publishable_key_here') {
-      console.warn('Using placeholder Stripe key. Please configure real Stripe keys for production.');
+      logger.warn('Using placeholder Stripe key. Please configure real Stripe keys for production.');
     }
 
     const defaultCheckoutEndpoint = `${getEnvVar('VITE_API_URL', 'http://localhost:8000')}/api/stripe/create-checkout-session`;
@@ -378,7 +393,7 @@ export class StripeService {
     try {
       const auth = firebaseServices?.getAuth();
   if (!auth?.currentUser) {
-        console.error('No authenticated user found');
+        logger.error('No authenticated user found');
         return false;
       }
 
@@ -393,7 +408,7 @@ export class StripeService {
       });
 
           if (!response.ok) {
-            console.error('Session verification failed');
+            logger.error('Session verification failed');
             return false;
           }
 
@@ -421,7 +436,7 @@ export class StripeService {
 
       return false;
     } catch (error) {
-      console.error('Checkout success handling failed:', error);
+      logger.error('Checkout success handling failed:', error);
       return false;
     }
   }
@@ -449,7 +464,7 @@ export const createStripeService = (config?: Partial<StripeConfig>): StripeServi
 
     return StripeService.getInstance(stripeConfig);
   } catch (error) {
-    console.error('Failed to create Stripe service:', error);
+    logger.error('Failed to create Stripe service:', error);
     throw error;
   }
 };
@@ -462,7 +477,7 @@ export const getStripeService = (): StripeService | null => {
     try {
       defaultStripeService = createStripeService();
     } catch (error) {
-      console.warn('Stripe service not available:', error instanceof Error ? error.message : 'Unknown error');
+      logger.warn('Stripe service not available:', error instanceof Error ? error.message : 'Unknown error');
       return null;
     }
   }
@@ -471,6 +486,19 @@ export const getStripeService = (): StripeService | null => {
 
 /**
  * Convenient alias for the default service (null-safe)
+ * Throws error if service is not initialized
+ */
+export const getStripeServiceOrThrow = (): StripeService => {
+  const service = getStripeService();
+  if (!service) {
+    throw new Error('Stripe service not initialized. Please call createStripeService() first.');
+  }
+  return service;
+};
+
+/**
+ * Convenient alias for the default service (null-safe)
+ * @deprecated Use getStripeServiceOrThrow() for better type safety
  */
 export const stripeService = getStripeService();
 

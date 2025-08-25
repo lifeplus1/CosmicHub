@@ -33,6 +33,7 @@
       "@cosmichub/config": ["./packages/config/src"],
       "@cosmichub/frequency": ["./packages/frequency/src"],
       "@cosmichub/integrations": ["./packages/integrations/src"],
+      "@cosmichub/pwa": ["./packages/pwa/src"],
       "@cosmichub/ui": ["./packages/ui/src"],
       "@cosmichub/types": ["./packages/types/src"],
       "@cosmichub/subscriptions": ["./packages/subscriptions/src"]
@@ -47,6 +48,7 @@
     { "path": "./packages/config" },
     { "path": "./packages/frequency" },
     { "path": "./packages/integrations" },
+    { "path": "./packages/pwa" },
     { "path": "./packages/ui" },
     { "path": "./packages/types" }
   ],

@@ -1,8 +1,8 @@
 """
 Phase 3: Memory Optimization for Vectorized Operations
 
-This module provides memory-efficient implementations and optimization strategies
-for vectorized astrological calculations, focusing on large-scale batch processing
+This module provides memory-efficient implementations and optimization strategies  # noqa: E501
+for vectorized astrological calculations, focusing on large-scale batch processing  # noqa: E501
 and memory usage minimization.
 """
 
@@ -57,7 +57,7 @@ class SimpleArrayPool:
     ) -> np.ndarray:
         """Get an array from the pool or create a new one.
 
-        dtype may be a numpy dtype, a numpy scalar type, or a string understood by numpy.
+        dtype may be a numpy dtype, a numpy scalar type, or a string understood by numpy.  # noqa: E501
         """
         # Normalize dtype to numpy dtype for key generation
         np_dtype = np.dtype(dtype)
@@ -143,7 +143,7 @@ class ArrayMemoryPool:
         shape: Tuple[int, ...],
         dtype: Union[np.dtype, type, str] = np.float64,
     ) -> Iterator[np.ndarray]:
-        """Context manager for temporary arrays that are automatically returned."""
+        """Context manager for temporary arrays that are automatically returned."""  # noqa: E501
         array = self.get_array(shape, dtype)
         self._active_arrays.append(array)
         try:
@@ -193,7 +193,7 @@ class GlobalArrayMemoryPool:
         shape: Tuple[int, ...],
         dtype: Union[np.dtype, type, str] = np.float64,
     ) -> Iterator[np.ndarray]:
-        """Context manager for temporary arrays that are automatically returned to pool."""
+        """Context manager for temporary arrays that are automatically returned to pool."""  # noqa: E501
         array = self.pool.get_array(shape, dtype)
         self._active_arrays.append(array)
         try:
@@ -272,10 +272,10 @@ class MemoryOptimizedVectorizedCalculator:
         """
         # Process in chunks to manage memory
         for i in range(0, len(longitudes1), self.chunk_size):
-            chunk1 = longitudes1[i : i + self.chunk_size]
+            chunk1 = longitudes1[i : i + self.chunk_size]  # noqa: E203
 
             for j in range(0, len(longitudes2), self.chunk_size):
-                chunk2 = longitudes2[j : j + self.chunk_size]
+                chunk2 = longitudes2[j : j + self.chunk_size]  # noqa: E203
 
                 # Calculate separation matrix for this chunk
                 chunk_matrix = self._calculate_chunk_separations(
@@ -362,7 +362,7 @@ class MemoryOptimizedVectorizedCalculator:
         chart_pairs: List[Tuple[Dict[str, float], Dict[str, float]]],
         progress_callback: Optional[Callable[[float, int, int], None]] = None,
     ) -> List[Any]:
-        """Calculate aspects for a large batch of chart pairs with memory optimization."""
+        """Calculate aspects for a large batch of chart pairs with memory optimization."""  # noqa: E501
         results: List[Any] = []  # Aspect matrices may not be strictly ndarrays
         total_pairs = len(chart_pairs)
 

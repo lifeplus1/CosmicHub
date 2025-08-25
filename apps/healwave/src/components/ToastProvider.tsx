@@ -1,5 +1,4 @@
-import React, { createContext, useContext } from 'react';
-import type { ReactNode } from 'react';
+import React, { createContext, useContext, type ReactNode } from 'react';
 
 export interface Toast {
   id: string;
@@ -28,7 +27,7 @@ export const useToast = (): ToastContextType => {
       },
       closeToast: () => {
         // Mock implementation for development
-      }
+      },
     };
   }
   return context;
@@ -38,7 +37,7 @@ export const useToast = (): ToastContextType => {
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const toast = () => {};
   const closeToast = () => {};
-  
+
   return (
     <ToastContext.Provider value={{ toast, closeToast }}>
       {children}
@@ -46,4 +45,5 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
 };
 
+ToastProvider.displayName = 'ToastProvider';
 export default ToastProvider;

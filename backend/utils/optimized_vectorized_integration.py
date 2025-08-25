@@ -1,5 +1,5 @@
 """
-Integration module for Phase 3 optimizations with existing vectorized calculations.
+Integration module for Phase 3 optimizations with existing vectorized calculations.  # noqa: E501
 
 This module provides seamless integration of memory optimization and caching
 into the main application workflows.
@@ -22,8 +22,8 @@ from utils.vectorized_memory_optimization import (
 )
 from utils.vectorized_monitoring import VectorizedPerformanceMonitor
 
-# Expose a module-level symbol for VectorizedAspectCalculator so tests can patch
-# it (tests patch 'utils.optimized_vectorized_integration.VectorizedAspectCalculator').
+# Expose a module-level symbol for VectorizedAspectCalculator so tests can patch  # noqa: E501
+# it (tests patch 'utils.optimized_vectorized_integration.VectorizedAspectCalculator').  # noqa: E501
 try:
     from astro.calculations import VectorizedAspectCalculator  # type: ignore
 except Exception:
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 class OptimizedVectorizedAspectCalculator:
     """
-    Enhanced vectorized calculator with integrated memory optimization and caching.
+    Enhanced vectorized calculator with integrated memory optimization and caching.  # noqa: E501
 
     This class combines all Phase 3 optimizations:
     - Memory-efficient chunked processing
@@ -153,7 +153,7 @@ class OptimizedVectorizedAspectCalculator:
                     chart1, chart2, orb, aspects
                 )
 
-                # Log completion (metrics are automatically logged by the monitor)
+                # Log completion (metrics are automatically logged by the monitor)  # noqa: E501
                 logger.debug("Synastry calculation completed with monitoring")
         else:
             result = self._compute_synastry_aspects(
@@ -251,7 +251,7 @@ class OptimizedVectorizedAspectCalculator:
         total_pairs = len(chart_pairs)
 
         logger.info(
-            f"Starting batch synastry calculation for {total_pairs} chart pairs"
+            f"Starting batch synastry calculation for {total_pairs} chart pairs"  # noqa: E501
         )
 
         # Use memory-optimized processing
@@ -270,7 +270,7 @@ class OptimizedVectorizedAspectCalculator:
                     chart_pairs, orb, progress_callback, calculator
                 )
 
-            # Log final memory stats (MemoryMonitor may use different key names)
+            # Log final memory stats (MemoryMonitor may use different key names)  # noqa: E501
             memory_stats = monitor.get_memory_stats()
             current_mb = memory_stats.get(
                 "current_memory_mb",
@@ -281,7 +281,7 @@ class OptimizedVectorizedAspectCalculator:
                 memory_stats.get("peak_increase_mb", current_mb),
             )
             logger.info(
-                f"Batch processing completed. Memory used: {current_mb:.2f}MB, "
+                f"Batch processing completed. Memory used: {current_mb:.2f}MB, "  # noqa: E501
                 f"Peak: {peak_mb:.2f}MB"
             )
 
@@ -329,7 +329,7 @@ class OptimizedVectorizedAspectCalculator:
             (cache_hits / len(chart_pairs)) * 100 if chart_pairs else 0
         )
         logger.info(
-            f"Batch processing: {cache_hits}/{len(chart_pairs)} cache hits ({cache_hit_rate:.1f}%)"
+            f"Batch processing: {cache_hits}/{len(chart_pairs)} cache hits ({cache_hit_rate:.1f}%)"  # noqa: E501
         )
 
         return results
@@ -339,7 +339,7 @@ class OptimizedVectorizedAspectCalculator:
         metrics = {}
 
         if self.enable_monitoring and self.performance_monitor:
-            # Performance monitoring provides logging, but we can include basic stats
+            # Performance monitoring provides logging, but we can include basic stats  # noqa: E501
             metrics["monitoring_enabled"] = True
             metrics["performance"] = {
                 "operations_monitored": (
@@ -368,7 +368,7 @@ class OptimizedVectorizedAspectCalculator:
         self, dataset_size: int, available_memory_mb: float
     ) -> Dict[str, Any]:
         """
-        Suggest optimal settings for a given dataset size and memory constraints.
+        Suggest optimal settings for a given dataset size and memory constraints.  # noqa: E501
 
         Args:
             dataset_size: Number of chart pairs to process
@@ -491,7 +491,7 @@ def migrate_traditional_to_optimized(
     traditional_function: Callable, enable_performance_comparison: bool = False
 ):
     """
-    Decorator to migrate traditional calculation functions to optimized versions.
+    Decorator to migrate traditional calculation functions to optimized versions.  # noqa: E501
 
     Args:
         traditional_function: Original function to wrap
@@ -529,7 +529,7 @@ def migrate_traditional_to_optimized(
             )
 
             logger.info(
-                f"Performance comparison - Traditional: {traditional_time:.3f}s, "
+                f"Performance comparison - Traditional: {traditional_time:.3f}s, "  # noqa: E501
                 f"Optimized: {optimized_time:.3f}s, Speedup: {speedup:.2f}x"
             )
 

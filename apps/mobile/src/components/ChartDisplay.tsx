@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText, G } from 'react-native-svg';
 import { AstrologyChart, Planet } from '@cosmichub/types';
 
@@ -17,7 +17,7 @@ export function ChartDisplay({ chartData, width = 300, height = 300, title = 'Bi
 
   // This is a simplified version - you'd migrate your existing D3 logic here
   const renderPlanets = () => {
-    if (chartData?.planets == null) return null;
+    if (chartData?.planets === null || chartData?.planets === undefined) return null;
 
     return chartData.planets.map((planet: Planet, index: number) => {
       const angle = (planet.position * Math.PI) / 180;
@@ -88,10 +88,10 @@ export function ChartDisplay({ chartData, width = 300, height = 300, title = 'Bi
       
       <View style={styles.info}>
         <Text style={styles.infoText}>
-          {chartData?.planets != null ? chartData.planets.length : 0} planets • {chartData?.houses != null ? chartData.houses.length : 0} houses
+          {chartData?.planets !== null && chartData?.planets !== undefined ? chartData.planets.length : 0} planets • {chartData?.houses !== null && chartData?.houses !== undefined ? chartData.houses.length : 0} houses
         </Text>
         <Text style={styles.infoText}>
-          {chartData?.aspects != null ? chartData.aspects.length : 0} aspects
+          {chartData?.aspects !== null && chartData?.aspects !== undefined ? chartData.aspects.length : 0} aspects
         </Text>
       </View>
     </View>

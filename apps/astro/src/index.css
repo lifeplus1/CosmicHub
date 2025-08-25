@@ -6,6 +6,171 @@
 @tailwind components;
 @tailwind utilities;
 
+/* UX-021: Mobile PWA enhancements */
+:root {
+  /* Dynamic viewport units for mobile Safari */
+  --vh: 1vh;
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  
+  /* Touch target sizes (WCAG AA compliance) */
+  --touch-target-min: 44px;
+  --touch-spacing-min: 8px;
+  
+  /* Mobile-specific spacing */
+  --mobile-padding: 16px;
+  --mobile-margin: 12px;
+  
+  /* Enhanced tap highlight */
+  --tap-highlight-color: rgba(85, 60, 154, 0.2);
+}
+
+/* Global touch enhancements */
+html.has-touch {
+  /* Prevent text selection on touch devices where inappropriate */
+  -webkit-user-select: none;
+  user-select: none;
+  
+  /* Better touch scrolling - legacy webkit support */
+  scroll-behavior: smooth;
+}
+
+/* Allow text selection for content areas */
+html.has-touch [contenteditable],
+html.has-touch input,
+html.has-touch textarea,
+html.has-touch .selectable-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Enhanced tap targets */
+html.has-touch button,
+html.has-touch .btn,
+html.has-touch [role="button"],
+html.has-touch a,
+html.has-touch input[type="checkbox"],
+html.has-touch input[type="radio"] {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: max(12px, var(--touch-spacing-min));
+  
+  /* Enhanced touch feedback */
+  -webkit-tap-highlight-color: var(--tap-highlight-color);
+  tap-highlight-color: var(--tap-highlight-color);
+  
+  /* Better touch response */
+  touch-action: manipulation;
+  
+  /* Prevent double-tap zoom on buttons */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Standalone mode enhancements */
+html.is-standalone {
+  /* Account for missing browser chrome */
+  --header-offset: var(--safe-area-inset-top);
+  --footer-offset: var(--safe-area-inset-bottom);
+}
+
+html.is-standalone body {
+  /* Ensure content respects safe areas */
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Platform-specific adjustments */
+html.platform-ios {
+  /* iOS-specific touch handling */
+  -webkit-touch-callout: none;
+}
+
+html.platform-ios body {
+  /* Prevent rubber band scrolling */
+  overscroll-behavior-y: none;
+}
+
+html.platform-android {
+  /* Android-specific optimizations */
+  font-feature-settings: "liga" off;
+}
+
+/* Keyboard-aware layouts */
+body.keyboard-open {
+  /* Adjust layout when virtual keyboard is open */
+  --viewport-height: calc(var(--vh, 1vh) * 100 - var(--keyboard-height, 0px));
+}
+
+body.keyboard-open .fixed-bottom {
+  /* Keep bottom elements above keyboard */
+  transform: translateY(calc(-1 * var(--keyboard-height, 0px)));
+  transition: transform 0.3s ease-out;
+}
+
+/* Enhanced mobile form controls */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    /* Larger touch targets */
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 16px; /* Prevent iOS zoom on input focus */
+    border-radius: 12px;
+    
+    /* Better visual feedback */
+    transition: all 0.2s ease;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: rgba(85, 60, 154, 0.5);
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(85, 60, 154, 0.2);
+  }
+  
+  /* Enhanced mobile typography */
+  h1 { font-size: 2rem; line-height: 1.2; margin-bottom: 1rem; }
+  h2 { font-size: 1.5rem; line-height: 1.3; margin-bottom: 0.875rem; }
+  h3 { font-size: 1.25rem; line-height: 1.4; margin-bottom: 0.75rem; }
+  
+  body {
+    font-size: 16px; /* Prevent iOS zoom */
+    line-height: 1.6;
+  }
+}
+
+/* Accessibility enhancements for mobile */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  button,
+  .btn {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Dark mode optimizations for mobile */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tap-highlight-color: rgba(124, 58, 237, 0.3);
+  }
+}
+
 /* Visually hidden utilities (available to screen readers) */
 .sr-only {
   position: absolute;

@@ -1,8 +1,8 @@
 """
 Ephemeris client for communicating with the dedicated ephemeris server.
 
-This module provides async HTTP client functionality to fetch planetary positions
-and ephemeris data from the remote ephemeris server, with Redis caching support.
+This module provides async HTTP client functionality to fetch planetary positions  # noqa: E501
+and ephemeris data from the remote ephemeris server, with Redis caching support.  # noqa: E501
 """
 
 import json
@@ -88,7 +88,7 @@ class EphemerisClient:
         Initialize the ephemeris client.
 
         Args:
-            server_url: Ephemeris server URL (defaults to env var EPHEMERIS_SERVER_URL)
+            server_url: Ephemeris server URL (defaults to env var EPHEMERIS_SERVER_URL)  # noqa: E501
             api_key: API key for authentication (defaults to env var API_KEY)
             redis_url: Redis URL for caching (defaults to env var REDIS_URL)
             timeout: HTTP request timeout in seconds
@@ -116,7 +116,7 @@ class EphemerisClient:
         self.redis_client = None
         if redis_url:
             try:
-                self.redis_client = redis.from_url(redis_url, decode_responses=True)  # type: ignore[attr-defined]
+                self.redis_client = redis.from_url(redis_url, decode_responses=True)  # type: ignore[attr-defined]  # noqa: E501
                 logger.info("Redis client initialized for ephemeris caching")
             except Exception as e:
                 logger.warning(f"Failed to initialize Redis client: {e}")
@@ -318,7 +318,7 @@ async def get_planetary_positions(
 ) -> Dict[str, PlanetPosition]:
     """
     Get all planetary positions for a given Julian Day.
-    This function provides backward compatibility with the existing ephemeris module.
+    This function provides backward compatibility with the existing ephemeris module.  # noqa: E501
 
     Args:
         julian_day: Julian Day Number

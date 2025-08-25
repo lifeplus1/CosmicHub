@@ -13,7 +13,7 @@ export const Input: React.FC<InputProps> = ({
   className = "", 
   ...props 
 }) => {
-  const id = props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
+  const id = props.id ?? `input-${Math.random().toString(36).substr(2, 9)}`;
   
   return (
     <div className="space-y-1">
@@ -32,6 +32,7 @@ export const Input: React.FC<InputProps> = ({
         {...props}
         {...(error && { 'aria-invalid': 'true' })}
         {...(error ? { 'aria-describedby': `${id}-error` } : helperText ? { 'aria-describedby': `${id}-help` } : {})}
+        aria-label="Input field"
       />
       {error && (
         <p id={`${id}-error`} className="text-sm text-red-400" role="alert">

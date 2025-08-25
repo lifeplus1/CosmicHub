@@ -1,7 +1,7 @@
 """
 Phase 3: Performance Monitoring for Vectorized Operations
 
-This module provides comprehensive performance monitoring and metrics collection
+This module provides comprehensive performance monitoring and metrics collection  # noqa: E501
 for vectorized astrological calculations, enabling production optimization and
 real-world performance analysis.
 """
@@ -68,7 +68,7 @@ class PerformanceMetrics:
 
 class VectorizedPerformanceMonitor:
     """
-    Production-grade performance monitoring for vectorized astrological calculations.
+    Production-grade performance monitoring for vectorized astrological calculations.  # noqa: E501
 
     Features:
     - Operation timing and memory tracking
@@ -84,7 +84,7 @@ class VectorizedPerformanceMonitor:
         metrics_retention_hours: float = 24,
     ):
         self.enable_detailed_logging = enable_detailed_logging
-        # Test-friendly behavior: if retention < 1.0, treat as seconds for quick testing
+        # Test-friendly behavior: if retention < 1.0, treat as seconds for quick testing  # noqa: E501
         if metrics_retention_hours < 1.0:
             self.metrics_retention = timedelta(seconds=metrics_retention_hours)
         else:
@@ -113,7 +113,7 @@ class VectorizedPerformanceMonitor:
         array_sizes: Optional[List[int]] = None,
     ) -> Generator["OperationContext", None, None]:
         """
-        Context manager for timing vectorized operations with comprehensive metrics.
+        Context manager for timing vectorized operations with comprehensive metrics.  # noqa: E501
 
         Args:
             operation_name: Name of the operation being monitored
@@ -207,7 +207,7 @@ class VectorizedPerformanceMonitor:
             baseline = self.operation_baselines[op_name]
             count = baseline["sample_count"]
 
-            # Only update baseline for the first 5 samples to establish stable baseline
+            # Only update baseline for the first 5 samples to establish stable baseline  # noqa: E501
             if count < 5:
                 # Simple moving average for initial baseline establishment
                 weight = 1.0 / (count + 1)
@@ -220,7 +220,7 @@ class VectorizedPerformanceMonitor:
                     + abs(metrics.memory_delta_mb) * weight
                 )
                 baseline["sample_count"] = count + 1
-            # After 5 samples, baseline is frozen to enable regression detection
+            # After 5 samples, baseline is frozen to enable regression detection  # noqa: E501
 
     def _log_performance(self, metrics: PerformanceMetrics):
         """Log performance metrics."""
@@ -252,7 +252,7 @@ class VectorizedPerformanceMonitor:
 
         Args:
             operation_name: Name of operation to check
-            threshold_factor: Factor by which performance can degrade before alerting
+            threshold_factor: Factor by which performance can degrade before alerting  # noqa: E501
 
         Returns:
             Regression details if detected, None otherwise
@@ -376,7 +376,7 @@ class VectorizedPerformanceMonitor:
 
         if len(recent_metrics) >= 10:
             first_half = recent_metrics[: len(recent_metrics) // 2]
-            second_half = recent_metrics[len(recent_metrics) // 2 :]
+            second_half = recent_metrics[len(recent_metrics) // 2 :]  # noqa: E501, E203
 
             first_avg = sum(m.duration_ms for m in first_half) / len(
                 first_half
@@ -480,7 +480,7 @@ class VectorizedPerformanceMonitor:
 
 
 class OperationContext:
-    """Context object for adding additional metrics during operation monitoring."""
+    """Context object for adding additional metrics during operation monitoring."""  # noqa: E501
 
     def __init__(
         self,

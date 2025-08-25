@@ -29,7 +29,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const labelId = `${reactId}-label`;
   const listboxId = `${reactId}-listbox`;
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value || '');
+  const [selectedValue, setSelectedValue] = useState(value ?? '');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find(option => option.value === selectedValue);
@@ -64,7 +64,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     <div ref={dropdownRef} className={`relative inline-block w-full ${className}`}>
       {/* Accessible label (visually hidden if not explicitly provided) */}
       <span id={labelId} className="sr-only">
-        {label || placeholder}
+  {label ?? placeholder}
       </span>
       {isOpen ? (
         <button
@@ -145,7 +145,20 @@ export const Dropdown: React.FC<DropdownProps> = ({
                       ? 'text-gray-400 cursor-not-allowed'
                       : 'cursor-pointer bg-blue-100 text-blue-900'
                   }`}
-                  onClick={() => !disabledOpt && handleSelect(option.value)}
+                  tabIndex={0}
+                  onClick={() => {
+                    if (!disabledOpt) {
+                      handleSelect(option.value);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if ((e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      if (!disabledOpt) {
+                        handleSelect(option.value);
+                      }
+                    }
+                  }}
                 >
                   {option.label}
                 </li>
@@ -161,11 +174,17 @@ export const Dropdown: React.FC<DropdownProps> = ({
                       ? 'text-gray-400 cursor-not-allowed'
                       : 'cursor-pointer text-gray-700 hover:bg-gray-100'
                   }`}
-                  onClick={() => !disabledOpt && handleSelect(option.value)}
+                  onClick={() => {
+                    if (!disabledOpt) {
+                      handleSelect(option.value);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      !disabledOpt && handleSelect(option.value);
+                      if (!disabledOpt) {
+                        handleSelect(option.value);
+                      }
                     }
                   }}
                 >

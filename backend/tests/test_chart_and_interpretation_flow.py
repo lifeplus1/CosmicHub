@@ -2,14 +2,14 @@ import os
 from typing import Any
 
 os.environ.setdefault("ENABLE_TRACING", "false")
-from fastapi import status
-from fastapi.testclient import TestClient
+from fastapi import status  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 
-from main import app
+from main import app  # noqa: E402
 
 
-def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[no-any-unimported]
-    """End-to-end (sync via TestClient): save chart then request interpretation; ensures 404 then success after save."""
+def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[no-any-unimported]  # noqa: E501
+    """End-to-end (sync via TestClient): save chart then request interpretation; ensures 404 then success after save."""  # noqa: E501
     monkeypatch.setenv(
         "TEST_MODE", "1"
     )  # Use mock auth  # type: ignore[attr-defined]
@@ -20,11 +20,11 @@ def test_chart_save_and_interpretation_flow(monkeypatch: Any):  # type: ignore[n
         "INTERPRETATION_CACHE_TTL", "120"
     )  # shorter TTL for tests
 
-    # Monkeypatch firebase auth verify to return a deterministic user for unified charts router
+    # Monkeypatch firebase auth verify to return a deterministic user for unified charts router  # noqa: E501
     try:
         from firebase_admin import auth as fb_auth  # type: ignore
 
-        monkeypatch.setattr(fb_auth, "verify_id_token", lambda token: {"uid": "dev-user"})  # type: ignore[attr-defined]
+        monkeypatch.setattr(fb_auth, "verify_id_token", lambda token: {"uid": "dev-user"})  # type: ignore[attr-defined]  # noqa: E501
     except Exception:
         pass
 

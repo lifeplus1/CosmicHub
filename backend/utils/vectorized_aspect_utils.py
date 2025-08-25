@@ -18,7 +18,7 @@ class VectorizedAspectCalculator:
     def calculate_separation_matrix(
         self, long1: Dict[str, float], long2: Dict[str, float]
     ) -> np.ndarray:
-        """Calculate all planet-to-planet separations in one vectorized operation."""
+        """Calculate all planet-to-planet separations in one vectorized operation."""  # noqa: E501
         # Extract longitudes for all planets
         lons1 = np.array([long1.get(p, 0.0) for p in PLANETS])
         lons2 = np.array([long2.get(p, 0.0) for p in PLANETS])
@@ -62,7 +62,7 @@ class VectorizedAspectCalculator:
     def build_aspect_matrix_vectorized(
         self, long1: Dict[str, float], long2: Dict[str, float]
     ) -> List[List[Optional[AspectData]]]:
-        """Vectorized builder (~10x faster) producing a mutable List[List] matrix.
+        """Vectorized builder (~10x faster) producing a mutable List[List] matrix.  # noqa: E501
 
         Although this returns concrete lists for performance reasons, any
         consumer that only reads should type its parameter as Matrix for
@@ -79,8 +79,8 @@ class VectorizedAspectCalculator:
             row: List[Optional[AspectData]] = []
             for j in range(len(PLANETS)):
                 if has_aspect[i, j] and not np.isinf(orbs[i, j]):
-                    aspect_name: str = self.aspect_names[aspect_indices[i, j]]  # type: ignore[index]
-                    aspect_type: str = self._get_aspect_type(aspect_name)  # type: ignore[arg-type]
+                    aspect_name: str = self.aspect_names[aspect_indices[i, j]]  # type: ignore[index]  # noqa: E501
+                    aspect_type: str = self._get_aspect_type(aspect_name)  # type: ignore[arg-type]  # noqa: E501
                     row.append(
                         {
                             "aspect": aspect_name,
@@ -96,7 +96,7 @@ class VectorizedAspectCalculator:
     def batch_compatibility_scores(
         self, chart_pairs: List[Tuple[Dict[str, float], Dict[str, float]]]
     ) -> List[float]:
-        """Calculate compatibility scores for multiple chart pairs in one operation."""
+        """Calculate compatibility scores for multiple chart pairs in one operation."""  # noqa: E501
         scores: List[float] = []
 
         # Process all separations at once
@@ -169,7 +169,7 @@ vectorized_calculator = VectorizedAspectCalculator()
 def build_aspect_matrix_fast(
     long1: Dict[str, float], long2: Dict[str, float]
 ) -> List[List[Optional[AspectData]]]:
-    """Drop-in replacement for build_aspect_matrix with vectorized performance."""
+    """Drop-in replacement for build_aspect_matrix with vectorized performance."""  # noqa: E501
     return vectorized_calculator.build_aspect_matrix_vectorized(long1, long2)
 
 

@@ -25,7 +25,9 @@ describe('AudioPlayer Component Tests', () => {
   beforeAll(() => {
     // Mock AudioContext for test environment
     global.AudioContext = vi.fn().mockImplementation(() => mockAudioContext);
-    vi.mocked(mockAudioContext.createOscillator).mockReturnValue(mockOscillator);
+    vi.mocked(mockAudioContext.createOscillator).mockReturnValue(
+      mockOscillator
+    );
     vi.mocked(mockAudioContext.createGain).mockReturnValue(mockGainNode);
   });
 

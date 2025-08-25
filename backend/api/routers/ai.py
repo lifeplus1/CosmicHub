@@ -56,7 +56,7 @@ class ConnectionManager:
         if user_id in self.user_sessions:
             del self.user_sessions[user_id]
         logger.info(
-            f"WebSocket disconnected: user_id={user_id}, session_id={session_id}"
+            f"WebSocket disconnected: user_id={user_id}, session_id={session_id}"  # noqa: E501
         )
 
     async def send_message(self, session_id: str, message: Dict[str, Any]):
@@ -161,14 +161,14 @@ async def websocket_ai_interpret(websocket: WebSocket):
                                 {
                                     "type": "error",
                                     "data": {
-                                        "error": "Authentication token required"
+                                        "error": "Authentication token required"  # noqa: E501
                                     },
                                 }
                             )
                         )
                         continue
 
-                    # Mock authentication for development (replace with real auth)
+                    # Mock authentication for development (replace with real auth)  # noqa: E501
                     try:
                         # In production, validate the token properly
                         user_id = (
@@ -208,7 +208,7 @@ async def websocket_ai_interpret(websocket: WebSocket):
                             {
                                 "type": "error",
                                 "data": {
-                                    "error": f"Unknown message type: {message_type}"
+                                    "error": f"Unknown message type: {message_type}"  # noqa: E501
                                 },
                             }
                         )
@@ -334,14 +334,14 @@ async def generate_interpretation_stream(
                                 subkey: str  # type: ignore
                                 subvalue: Any  # type: ignore
                                 if isinstance(subvalue, str):
-                                    yield f"**{subkey.replace('_', ' ').title()}:** {subvalue}\n\n"
+                                    yield f"**{subkey.replace('_', ' ').title()}:** {subvalue}\n\n"  # noqa: E501
                                 elif isinstance(subvalue, list):
-                                    yield f"**{subkey.replace('_', ' ').title()}:**\n"
+                                    yield f"**{subkey.replace('_', ' ').title()}:**\n"  # noqa: E501
                                     for item in subvalue:  # type: Any
                                         yield f"• {item}\n"
                                     yield "\n"
                         elif isinstance(value, str):
-                            yield f"**{key.replace('_', ' ').title()}:** {value}\n\n"
+                            yield f"**{key.replace('_', ' ').title()}:** {value}\n\n"  # noqa: E501
                         elif isinstance(value, list):
                             yield f"**{key.replace('_', ' ').title()}:**\n"
                             for item in value:

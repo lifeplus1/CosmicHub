@@ -265,9 +265,8 @@ class AppSettings(BaseSettings):
     def validate_firebase_credentials(cls, v: Optional[str]) -> Optional[str]:
         """Validate Firebase credentials JSON if provided."""
         if v:
+            import json
             try:
-                import json
-
                 cred_data = json.loads(v)
                 required_fields = [
                     "type",
@@ -282,7 +281,8 @@ class AppSettings(BaseSettings):
                 ]
                 if missing_fields:
                     raise ValueError(
-                        f"Firebase credentials missing required fields: {missing_fields}"
+                        f"Firebase credentials missing required fields: "
+                        f"{missing_fields}"
                     )
                 return v
             except json.JSONDecodeError:

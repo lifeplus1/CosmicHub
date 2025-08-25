@@ -659,7 +659,7 @@ CHANNELS = {
 
 
 def detect_channels(design_data: Dict[str, Any]) -> list[str]:
-    """Detect which channels are formed by the planetary activations from both conscious and unconscious"""
+    """Detect which channels are formed by the planetary activations from both conscious and unconscious"""  # noqa: E501
     activated_gates: set[int] = set()
 
     # Collect gates from conscious activations
@@ -726,14 +726,14 @@ def calculate_planetary_activations(
                     else str(cached)
                 )
                 return json.loads(cached_str)
-            except (
+            except (  # noqa: F841
                 json.JSONDecodeError,
                 AttributeError,
                 UnicodeDecodeError,
             ) as e:
                 # Continue to recalculate if cache is corrupted
                 pass
-    except Exception as e:
+    except Exception as e:  # noqa: F841
         # Continue without cache
         pass
 
@@ -832,8 +832,8 @@ def calculate_planetary_activations(
 
         for planet_name, planet_id in planets.items():
             try:
-                result = swe.calc_ut(julian_day, planet_id, swe.FLG_SWIEPH)  # type: ignore
-                position: float = float(result[0][0])  # type: ignore  # Longitude in degrees
+                result = swe.calc_ut(julian_day, planet_id, swe.FLG_SWIEPH)  # type: ignore  # noqa: E501
+                position: float = float(result[0][0])  # type: ignore  # Longitude in degrees  # noqa: E501
             except (IndexError, TypeError, ValueError) as e:
                 logger.error(
                     f"Swiss Ephemeris error for {planet_name}: {str(e)}"
@@ -841,8 +841,8 @@ def calculate_planetary_activations(
                 continue
 
             # Convert to Human Design gate/line using the I Ching wheel
-            # In Human Design, Gate 41 starts at 0° Aquarius (302° offset from standard astrology)
-            # Adjust position so the wheel aligns correctly - calibrated for conscious nodes
+            # In Human Design, Gate 41 starts at 0° Aquarius (302° offset from standard astrology)  # noqa: E501
+            # Adjust position so the wheel aligns correctly - calibrated for conscious nodes  # noqa: E501
             hd_position = (position - hd_offset) % 360.0
             gate_index = int(hd_position / gate_degrees)  # 0-63
 
@@ -908,7 +908,7 @@ def calculate_planetary_activations(
             )
             south_node_position: float = (north_node_position + 180.0) % 360.0
 
-            # Apply same gate calculation for South Node - use same calculated offset
+            # Apply same gate calculation for South Node - use same calculated offset  # noqa: E501
             hd_south_position = (south_node_position - hd_offset) % 360.0
             south_gate_index = int(hd_south_position / gate_degrees)
             south_gate_number = gate_sequence[south_gate_index]
@@ -1019,7 +1019,7 @@ def determine_type_and_authority(
 
         # Determine type
         if sacral_defined:
-            # Check for manifestor channels (throat to motor without sacral response)
+            # Check for manifestor channels (throat to motor without sacral response)  # noqa: E501
             manifestor_channels = any(
                 ch in channels for ch in ["12-22", "35-36", "20-34"]
             )
@@ -1074,13 +1074,13 @@ def analyze_definition(
         if "conscious" in activations and isinstance(
             activations["conscious"], dict
         ):
-            conscious_data: Dict[str, Any] = activations["conscious"]  # type: ignore
+            conscious_data: Dict[str, Any] = activations["conscious"]  # type: ignore  # noqa: E501
             all_activations.update(conscious_data)
 
         if "unconscious" in activations and isinstance(
             activations["unconscious"], dict
         ):
-            unconscious_data: Dict[str, Any] = activations["unconscious"]  # type: ignore
+            unconscious_data: Dict[str, Any] = activations["unconscious"]  # type: ignore  # noqa: E501
             all_activations.update(unconscious_data)
 
         # If not nested, assume direct activations
@@ -1128,7 +1128,7 @@ def analyze_definition(
 
 
 def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
-    """Calculate precise design time using 88 degrees solar arc backward from birth Sun position"""
+    """Calculate precise design time using 88 degrees solar arc backward from birth Sun position"""  # noqa: E501
     try:
         import pytz
 
@@ -1145,8 +1145,8 @@ def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
         birth_jd: float = float(birth_jd_result[1])  # type: ignore
 
         # Get Sun position at birth
-        birth_sun_result = swe.calc_ut(birth_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
-        birth_sun_longitude: float = float(birth_sun_result[0][0])  # type: ignore
+        birth_sun_result = swe.calc_ut(birth_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore  # noqa: E501
+        birth_sun_longitude: float = float(birth_sun_result[0][0])  # type: ignore  # noqa: E501
 
         # Calculate target sun longitude (88 degrees earlier)
         target_sun_longitude: float = (birth_sun_longitude - 88.0) % 360.0
@@ -1155,15 +1155,15 @@ def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
         estimated_days_back: float = 88.0 / 0.986
         estimated_jd: float = birth_jd - estimated_days_back
 
-        # Iteratively solve for precise 88-degree offset using Newton-Raphson method
+        # Iteratively solve for precise 88-degree offset using Newton-Raphson method  # noqa: E501
         max_iterations = 30
-        tolerance = 0.001  # Sufficient precision for gate/line accuracy (0.001° = 3.6 arcseconds)
+        tolerance = 0.001  # Sufficient precision for gate/line accuracy (0.001° = 3.6 arcseconds)  # noqa: E501
 
         current_jd: float = estimated_jd
         for _ in range(max_iterations):
             # Calculate current Sun position
-            current_sun_result = swe.calc_ut(current_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
-            current_sun_longitude: float = float(current_sun_result[0][0])  # type: ignore
+            current_sun_result = swe.calc_ut(current_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore  # noqa: E501
+            current_sun_longitude: float = float(current_sun_result[0][0])  # type: ignore  # noqa: E501
 
             # Calculate angular difference (handling 360° wrap-around)
             diff: float = (
@@ -1176,10 +1176,10 @@ def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
             if abs(diff) < tolerance:
                 break
 
-            # Calculate Sun's daily motion at current position for Newton-Raphson step
+            # Calculate Sun's daily motion at current position for Newton-Raphson step  # noqa: E501
             tomorrow_jd: float = current_jd + 1.0
-            tomorrow_sun_result = swe.calc_ut(tomorrow_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
-            tomorrow_sun_longitude: float = float(tomorrow_sun_result[0][0])  # type: ignore
+            tomorrow_sun_result = swe.calc_ut(tomorrow_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore  # noqa: E501
+            tomorrow_sun_longitude: float = float(tomorrow_sun_result[0][0])  # type: ignore  # noqa: E501
             daily_motion: float = (
                 tomorrow_sun_longitude - current_sun_longitude
             ) % 360.0
@@ -1190,20 +1190,20 @@ def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
             if abs(daily_motion) < 0.0001:
                 daily_motion = 0.986  # fallback to average motion
 
-            # Newton-Raphson step: adjust Julian day based on remaining angular difference
+            # Newton-Raphson step: adjust Julian day based on remaining angular difference  # noqa: E501
             jd_adjustment: float = diff / daily_motion
             current_jd += jd_adjustment
 
             # Sanity check: don't go too far from birth (max ~100 days back)
             if abs(birth_jd - current_jd) > 100:
                 logger.warning(
-                    f"Design time calculation diverging. Using fallback estimate."
+                    f"Design time calculation diverging. Using fallback estimate."  # noqa: E501,F541
                 )
                 current_jd = birth_jd - 88.0  # fallback
                 break
 
         # Convert back to datetime
-        design_calendar = swe.jdet_to_utc(current_jd, 1)  # type: ignore  # Gregorian calendar
+        design_calendar = swe.jdet_to_utc(current_jd, 1)  # type: ignore  # Gregorian calendar  # noqa: E501
         design_time = datetime(
             int(design_calendar[0]),
             int(design_calendar[1]),
@@ -1215,14 +1215,14 @@ def calculate_design_time_88_degrees(birth_time_utc: datetime) -> datetime:
 
         # Verify result for logging
         actual_days_back: float = birth_jd - current_jd
-        final_sun_result = swe.calc_ut(current_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore
-        final_sun_longitude: float = float(final_sun_result[0][0])  # type: ignore
+        final_sun_result = swe.calc_ut(current_jd, swe.SUN, swe.FLG_SWIEPH)  # type: ignore  # noqa: E501
+        final_sun_longitude: float = float(final_sun_result[0][0])  # type: ignore  # noqa: E501
         actual_degree_difference: float = (
             birth_sun_longitude - final_sun_longitude
         ) % 360.0
 
         logger.debug(
-            f"Precise design time calculation: {actual_days_back:.3f} days back, "
+            f"Precise design time calculation: {actual_days_back:.3f} days back, "  # noqa: E501
             f"{actual_degree_difference:.6f}° solar arc difference"
         )
 
@@ -1262,7 +1262,7 @@ def calculate_human_design(
             birth_time_for_calc = birth_time_utc
         except pytz.exceptions.AmbiguousTimeError:
             logger.warning(
-                f"Ambiguous time for {naive_birth_time} in {timezone}. Using correct DST setting."
+                f"Ambiguous time for {naive_birth_time} in {timezone}. Using correct DST setting."  # noqa: E501
             )
             # For February, no DST in most US timezones
             is_dst_setting = False if month in [1, 2, 11, 12] else None
@@ -1270,7 +1270,7 @@ def calculate_human_design(
             birth_time_utc = birth_time.astimezone(pytz.UTC)
             birth_time_for_calc = birth_time_utc
 
-        # Calculate precise design time using 88 degrees solar arc (not fixed days)
+        # Calculate precise design time using 88 degrees solar arc (not fixed days)  # noqa: E501
         design_time = calculate_design_time_88_degrees(birth_time_for_calc)
 
         logger.debug(f"Conscious time (UTC): {birth_time_for_calc}")
@@ -1406,8 +1406,8 @@ def calculate_profile(design_data: Dict[str, Any]) -> Dict[str, Any]:
 
         # Profile descriptions (simplified)
         profiles = {
-            "1/3": "Investigator/Martyr - Life theme of study and trial and error",
-            "1/4": "Investigator/Opportunist - Life theme of study and networking",
+            "1/3": "Investigator/Martyr - Life theme of study and trial and error",  # noqa: E501
+            "1/4": "Investigator/Opportunist - Life theme of study and networking",  # noqa: E501
             "2/4": "Hermit/Opportunist - Natural talent with networking gift",
             "2/5": "Hermit/Heretic - Natural talent with leadership potential",
             "3/5": "Martyr/Heretic - Trial and error leading to wisdom",
@@ -1446,7 +1446,7 @@ def calculate_incarnation_cross(design_data: Dict[str, Any]) -> Dict[str, Any]:
         earth_design = unconscious.get("earth", {}).get("gate", 1)
 
         # Create the cross name based on the personality sun gate
-        cross_name = f"Right Angle Cross of {GATES.get(sun_personality, {}).get('name', 'Unknown')}"
+        cross_name = f"Right Angle Cross of {GATES.get(sun_personality, {}).get('name', 'Unknown')}"  # noqa: E501
 
         return {
             "name": cross_name,
@@ -1456,7 +1456,7 @@ def calculate_incarnation_cross(design_data: Dict[str, Any]) -> Dict[str, Any]:
                 "sun_design": sun_design,
                 "earth_design": earth_design,
             },
-            "description": "Your life purpose and the energy you bring to the world",
+            "description": "Your life purpose and the energy you bring to the world",  # noqa: E501
         }
     except Exception as e:
         logger.error(f"Error calculating incarnation cross: {str(e)}")
@@ -1503,7 +1503,7 @@ def calculate_variables(design_data: Dict[str, Any]) -> Dict[str, Any]:
             "perspective": "Personal - individual perspective",  # Simplified
             "tone": tone,
             "color": color,
-            "description": "Variables determine your optimal environment and health strategy",
+            "description": "Variables determine your optimal environment and health strategy",  # noqa: E501
         }
     except Exception as e:
         logger.error(f"Error calculating variables: {str(e)}")

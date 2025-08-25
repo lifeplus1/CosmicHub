@@ -26,7 +26,7 @@ const NumerologyForm: React.FC<NumerologyFormProps> = ({ formData, setFormData, 
           placeholder="Enter your full name"
           required
           aria-required="true"
-        />
+        aria-label="Enter your full name" />
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div>
@@ -41,7 +41,7 @@ const NumerologyForm: React.FC<NumerologyFormProps> = ({ formData, setFormData, 
             placeholder="Year"
             required
             aria-required="true"
-          />
+          aria-label="Year" />
         </div>
         <div>
           <label htmlFor="month" className="block mb-2 text-cosmic-gold">Month</label>
@@ -57,7 +57,7 @@ const NumerologyForm: React.FC<NumerologyFormProps> = ({ formData, setFormData, 
             placeholder="Month"
             required
             aria-required="true"
-          />
+          aria-label="Month" />
         </div>
         <div>
           <label htmlFor="day" className="block mb-2 text-cosmic-gold">Day</label>
@@ -73,7 +73,7 @@ const NumerologyForm: React.FC<NumerologyFormProps> = ({ formData, setFormData, 
             placeholder="Day"
             required
             aria-required="true"
-          />
+          aria-label="Day" />
         </div>
       </div>
       <button className="cosmic-button" type="submit" aria-label="Calculate Numerology">

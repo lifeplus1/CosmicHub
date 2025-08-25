@@ -164,7 +164,7 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> = React.me
                         role="radio"
                         aria-checked="false"
                         aria-label={`${preset.name} preset (${preset.baseFrequency} Hz)`}
-                        tabIndex={-1}
+                        tabIndex={0}
                       >
                         <div className="font-medium">{preset.name}</div>
                         <div className="text-sm text-gray-600">{preset.baseFrequency} Hz</div>

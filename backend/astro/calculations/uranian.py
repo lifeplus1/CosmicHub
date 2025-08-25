@@ -124,7 +124,7 @@ def calculate_midpoints(planets: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
         planet_names = list(planets.keys())
 
         for i, planet1 in enumerate(planet_names):
-            for planet2 in planet_names[i + 1 :]:
+            for planet2 in planet_names[i + 1 :]:  # noqa: E203
                 if (
                     "position" in planets[planet1]
                     and "position" in planets[planet2]
@@ -169,7 +169,7 @@ def calculate_90_degree_dial(
         body_names = list(all_bodies.keys())
 
         for i, body1 in enumerate(body_names):
-            for body2 in body_names[i + 1 :]:
+            for body2 in body_names[i + 1 :]:  # noqa: E203
                 if (
                     "position" in all_bodies[body1]
                     and "position" in all_bodies[body2]
@@ -267,7 +267,7 @@ def analyze_uranian_patterns(
                         "Pisces",
                     ][segment]
                     analysis["power_concentrations"].append(
-                        f"Strong Uranian influence in {sign_name} - collective unconscious themes"
+                        f"Strong Uranian influence in {sign_name} - collective unconscious themes"  # noqa: E501
                     )
 
         # Analyze Uranian planet themes
@@ -329,8 +329,8 @@ def calculate_uranian_astrology(
             "house_meanings": house_meanings,
             "pattern_analysis": patterns,
             "methodology": {
-                "description": "Uranian astrology uses transneptunian points and midpoint analysis",
-                "focus": "Psychological patterns, collective unconscious, precise timing",
+                "description": "Uranian astrology uses transneptunian points and midpoint analysis",  # noqa: E501
+                "focus": "Psychological patterns, collective unconscious, precise timing",  # noqa: E501
                 "techniques": [
                     "90-degree dial",
                     "Midpoint trees",

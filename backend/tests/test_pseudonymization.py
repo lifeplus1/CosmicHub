@@ -253,7 +253,7 @@ class TestSaltStorageErrorHandling:
 
         # Should handle gracefully
         storage.get_user_salt("corrupted_user")
-        # This will raise an exception due to invalid hex, which is expected behavior
+        # This will raise an exception due to invalid hex, which is expected behavior  # noqa: E501
         # In production, we might want to handle this more gracefully
 
     def test_missing_environment_variables(self):

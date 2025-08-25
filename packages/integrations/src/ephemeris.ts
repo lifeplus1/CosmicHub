@@ -99,7 +99,7 @@ export class EphemerisClient {
     this.config = {
       timeout: 30000,
       ...config,
-      apiKey: config.apiKey || ''
+      apiKey: config.apiKey ?? ''
     };
   }
 
@@ -137,7 +137,7 @@ export class EphemerisClient {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return response.json();
+    return await response.json() as T;
   }
 
   /**
@@ -294,11 +294,25 @@ export function getAstrologicalSign(degrees: number): {
   
   const normalizedDegrees = degrees % 360;
   const signIndex = Math.floor(normalizedDegrees / 30);
+  
+  // Ensure signIndex is within valid bounds
+  const clampedSignIndex = Math.max(0, Math.min(signIndex, signs.length - 1));
+  const sign = signs[clampedSignIndex];
+  
+  if (!sign) {
+    // Fallback to Aries if something goes wrong
+    return {
+      sign: 'Aries',
+      signDegrees: 0,
+      signMinutes: 0,
+    };
+  }
+  
   const signDegrees = normalizedDegrees % 30;
   const signMinutes = (signDegrees % 1) * 60;
   
   return {
-    sign: signs[signIndex],
+    sign,
     signDegrees: Math.floor(signDegrees),
     signMinutes: Math.floor(signMinutes),
   };

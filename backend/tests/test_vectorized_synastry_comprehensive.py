@@ -15,8 +15,8 @@ import pytest
 # Ensure backend package is importable during tests
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from utils.aspect_utils import PLANETS, build_aspect_matrix
-from utils.vectorized_aspect_utils import VectorizedAspectCalculator
+from utils.aspect_utils import PLANETS, build_aspect_matrix  # noqa: E402
+from utils.vectorized_aspect_utils import VectorizedAspectCalculator  # noqa: E501, E402
 
 
 def to_planet_dict(vals: list[float]) -> Dict[str, float]:
@@ -62,7 +62,7 @@ class TestVectorizedAspectCalculator:
         result = self.calculator.calculate_separation_matrix(lons1, lons2)
 
         assert isinstance(result, np.ndarray)
-        # vectorized implementation always returns a square matrix of size len(PLANETS)
+        # vectorized implementation always returns a square matrix of size len(PLANETS)  # noqa: E501
         assert result.shape == (len(PLANETS), len(PLANETS))
 
     def test_find_aspects_vectorized_shapes(self):

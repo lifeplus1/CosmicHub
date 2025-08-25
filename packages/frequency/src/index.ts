@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 /**
  * @fileoverview Shared frequency generation and audio processing utilities
  * Used by both HealWave (standalone) and Astro (astrology-enhanced)
@@ -189,7 +190,7 @@ export class AudioEngine {
       }
     } catch (error) {
       // Ignore cleanup errors, but log them
-      console.warn('Error during audio cleanup:', error);
+      logger.warn('Error during audio cleanup:', error);
     }
   }
 

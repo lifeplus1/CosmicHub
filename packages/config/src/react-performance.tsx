@@ -6,7 +6,7 @@
 // @ts-nocheck
 /* eslint-disable */
 import React, { lazy, Suspense, memo, useCallback } from 'react';
-/* eslint-disable no-console */
+ 
 const devConsole = {
   log: import.meta.env?.DEV ? console.log.bind(console) : undefined,
   warn: import.meta.env?.DEV ? console.warn.bind(console) : undefined,

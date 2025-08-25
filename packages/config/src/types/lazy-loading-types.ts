@@ -3,20 +3,20 @@
  * Provides strong TypeScript typing for dynamic imports and lazy loading
  */
 
-import { ComponentType, ReactNode, FC, ComponentProps } from 'react';
+import { ComponentType, ComponentProps, RefObject } from 'react';
 
 /**
  * Module import result with default export
  */
-export type ImportModule<T extends ComponentType<any>> = {
+export interface ImportModule<T extends ComponentType<any>> {  // eslint-disable-line @typescript-eslint/no-explicit-any
   default: T;
-  [key: string]: any;
-};
+  [key: string]: unknown;
+}
 
 /**
  * Dynamic import function type
  */
-export type ImportFunction<T extends ComponentType<any>> = () => Promise<ImportModule<T>>;
+export type ImportFunction<T extends ComponentType<any>> = () => Promise<ImportModule<T>>;  // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /**
  * Options for lazy component loading
@@ -71,15 +71,15 @@ export interface ProgressiveLoadingResult<T> {
  */
 export interface SmartPreloadFunctions {
   /** Preload a component when the user hovers over an element */
-  preloadOnHover: <T extends ComponentType<any>>(
-    elementRef: React.RefObject<HTMLElement>,
+  preloadOnHover: <T extends ComponentType<any>>(  // eslint-disable-line @typescript-eslint/no-explicit-any
+    elementRef: RefObject<HTMLElement>,
     componentImport: ImportFunction<T>,
     componentName: string
   ) => (() => void) | undefined;
   
   /** Preload a component when an element becomes visible */
-  preloadOnIntersection: <T extends ComponentType<any>>(
-    elementRef: React.RefObject<HTMLElement>,
+  preloadOnIntersection: <T extends ComponentType<any>>(  // eslint-disable-line @typescript-eslint/no-explicit-any
+    elementRef: RefObject<HTMLElement>,
     componentImport: ImportFunction<T>,
     componentName: string
   ) => (() => void) | undefined;
@@ -88,11 +88,11 @@ export interface SmartPreloadFunctions {
 /**
  * Props for the LazyComponentWrapper
  */
-export interface LazyComponentWrapperProps<K extends keyof T, T extends Record<string, any>> {
+export interface LazyComponentWrapperProps<K extends keyof T, T extends Record<string, any>> {  // eslint-disable-line @typescript-eslint/no-explicit-any
   /** Key of the component in the registry */
   componentKey: K;
   /** Props to pass to the loaded component */
-  props?: any;
+  props?: Record<string, unknown>;
   /** Component to show while loading */
   fallback?: ComponentType;
 }
@@ -100,7 +100,7 @@ export interface LazyComponentWrapperProps<K extends keyof T, T extends Record<s
 /**
  * Result of the useDynamicComponent hook
  */
-export interface DynamicComponentResult<T extends ComponentType<any>> {
+export interface DynamicComponentResult<T extends ComponentType<any>> {  // eslint-disable-line @typescript-eslint/no-explicit-any
   /** The loaded component */
   Component: T | null;
   /** Whether loading is in progress */
@@ -112,12 +112,12 @@ export interface DynamicComponentResult<T extends ComponentType<any>> {
 /**
  * Type-safe component registry
  */
-export type ComponentRegistry<T extends Record<string, ImportFunction<ComponentType<any>>>> = T;
+export type ComponentRegistry<T extends Record<string, ImportFunction<ComponentType<any>>>> = T;  // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /**
  * Creates a type-safe lazy component
  */
-export type LazyComponentCreator = <T extends ComponentType<any>>(
+export type LazyComponentCreator = <T extends ComponentType<any>>(  // eslint-disable-line @typescript-eslint/no-explicit-any
   importFn: ImportFunction<T>,
   componentName: string,
   options?: LazyComponentOptions
@@ -126,7 +126,7 @@ export type LazyComponentCreator = <T extends ComponentType<any>>(
 /**
  * Creates a type-safe lazy route
  */
-export type LazyRouteCreator = <T extends ComponentType<any>>(
+export type LazyRouteCreator = <T extends ComponentType<any>>(  // eslint-disable-line @typescript-eslint/no-explicit-any
   importFn: ImportFunction<T>,
   routeName: string
 ) => ComponentType<ComponentProps<T>>;
@@ -134,7 +134,7 @@ export type LazyRouteCreator = <T extends ComponentType<any>>(
 /**
  * Creates a type-safe lazy modal
  */
-export type LazyModalCreator = <T extends ComponentType<any>>(
+export type LazyModalCreator = <T extends ComponentType<any>>(  // eslint-disable-line @typescript-eslint/no-explicit-any
   importFn: ImportFunction<T>,
   modalName: string
 ) => ComponentType<ComponentProps<T>>;
@@ -142,7 +142,7 @@ export type LazyModalCreator = <T extends ComponentType<any>>(
 /**
  * Creates a type-safe lazy chart
  */
-export type LazyChartCreator = <T extends ComponentType<any>>(
+export type LazyChartCreator = <T extends ComponentType<any>>(  // eslint-disable-line @typescript-eslint/no-explicit-any
   importFn: ImportFunction<T>,
   chartName: string
 ) => ComponentType<ComponentProps<T>>;

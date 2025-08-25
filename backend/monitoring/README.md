@@ -26,7 +26,7 @@ This monitoring stack implements comprehensive alerting aligned with our SLO pol
 
 ### Architecture
 
-```
+```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Prometheus    │────│   Alertmanager  │────│     Grafana     │
 │   (Metrics)     │    │    (Alerts)     │    │  (Dashboards)   │
@@ -68,11 +68,11 @@ This monitoring stack implements comprehensive alerting aligned with our SLO pol
 
 | Service       | URL                   | Purpose                    |
 | ------------- | --------------------- | -------------------------- |
-| Prometheus    | http://localhost:9090 | Metrics storage & querying |
-| Alertmanager  | http://localhost:9093 | Alert routing & management |
-| Grafana       | http://localhost:3001 | Dashboards & visualization |
-| Node Exporter | http://localhost:9100 | System metrics             |
-| Blackbox      | http://localhost:9115 | Endpoint monitoring        |
+| Prometheus    | <http://localhost:9090> | Metrics storage & querying |
+| Alertmanager  | <http://localhost:9093> | Alert routing & management |
+| Grafana       | <http://localhost:3001> | Dashboards & visualization |
+| Node Exporter | <http://localhost:9100> | System metrics             |
+| Blackbox      | <http://localhost:9115> | Endpoint monitoring        |
 
 ### Default Credentials
 
@@ -80,7 +80,7 @@ This monitoring stack implements comprehensive alerting aligned with our SLO pol
 
 ## Configuration Files
 
-```
+```text
 backend/monitoring/
 ├── prometheus/
 │   ├── prometheus.yml          # Main Prometheus config
@@ -149,7 +149,7 @@ Ensure your services expose metrics at these endpoints:
 
 ### Backend API (`backend:8000`)
 
-```
+```http
 GET /metrics
 ```
 
@@ -163,7 +163,7 @@ GET /metrics
 
 ### Ephemeris Server (`ephemeris:8001`)
 
-```
+```http
 GET /metrics
 ```
 
@@ -209,20 +209,20 @@ This monitoring setup directly supports our Service Level Objectives:
 
 2. **No metrics appearing**
    - Verify service endpoints are accessible
-   - Check Prometheus targets: http://localhost:9090/targets
+   - Check Prometheus targets: <http://localhost:9090/targets>
    - Review service logs
 
 3. **Alerts not firing**
    - Validate alert rules syntax
-   - Check Prometheus Rules: http://localhost:9090/rules
+   - Check Prometheus Rules: <http://localhost:9090/rules>
    - Verify metric names match your service output
 
 ### Monitoring the Monitoring
 
 The monitoring stack monitors itself:
 
-- Prometheus health: http://localhost:9090/-/healthy
-- Alertmanager health: http://localhost:9093/-/healthy
+- Prometheus health: <http://localhost:9090/-/healthy>
+- Alertmanager health: <http://localhost:9093/-/healthy>
 - Self-monitoring alerts included in alert rules
 
 ## Next Steps

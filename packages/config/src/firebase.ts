@@ -10,27 +10,42 @@ import { getAuth, connectAuthEmulator, Auth } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator, Firestore, enableNetwork, disableNetwork } from 'firebase/firestore';
 
 // Firebase config with environment validation
-interface ViteMetaEnv {
-  readonly VITE_FIREBASE_API_KEY?: string;
-  readonly VITE_FIREBASE_AUTH_DOMAIN?: string;
-  readonly VITE_FIREBASE_PROJECT_ID?: string;
-  readonly VITE_FIREBASE_STORAGE_BUCKET?: string;
-  readonly VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
-  readonly VITE_FIREBASE_APP_ID?: string;
-  readonly DEV?: boolean;
-  readonly VITE_USE_EMULATOR?: string;
-  [key: string]: string | boolean | undefined;
-}
+// Environment access - compatible with both Vite and Node environments
+const getEnvValue = (key: string): string | undefined => {
+  // Fallback to process.env (Node environment) for better compatibility
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key];
+  }
+  return undefined;
+};
 
-const env = import.meta.env as ViteMetaEnv;
+const env = {
+  VITE_FIREBASE_API_KEY: getEnvValue('VITE_FIREBASE_API_KEY'),
+  VITE_FIREBASE_AUTH_DOMAIN: getEnvValue('VITE_FIREBASE_AUTH_DOMAIN'),
+  VITE_FIREBASE_PROJECT_ID: getEnvValue('VITE_FIREBASE_PROJECT_ID'),
+  VITE_FIREBASE_STORAGE_BUCKET: getEnvValue('VITE_FIREBASE_STORAGE_BUCKET'),
+  VITE_FIREBASE_MESSAGING_SENDER_ID: getEnvValue('VITE_FIREBASE_MESSAGING_SENDER_ID'),
+  VITE_FIREBASE_APP_ID: getEnvValue('VITE_FIREBASE_APP_ID'),
+  VITE_USE_EMULATOR: getEnvValue('VITE_USE_EMULATOR'),
+  DEV: getEnvValue('NODE_ENV') !== 'production'
+};
+
+// Validate required config
+interface MinimalViteEnv {
+  VITE_FIREBASE_API_KEY?: string;
+  VITE_FIREBASE_PROJECT_ID?: string;
+  VITE_FIREBASE_APP_ID?: string;
+}
+const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_PROJECT_ID', 'VITE_FIREBASE_APP_ID'] as const;
+const envRef = env as unknown as MinimalViteEnv;
 
 const firebaseConfig = {
-  apiKey: env['VITE_FIREBASE_API_KEY'],
-  authDomain: env['VITE_FIREBASE_AUTH_DOMAIN'],
-  projectId: env['VITE_FIREBASE_PROJECT_ID'],
-  storageBucket: env['VITE_FIREBASE_STORAGE_BUCKET'],
-  messagingSenderId: env['VITE_FIREBASE_MESSAGING_SENDER_ID'],
-  appId: env['VITE_FIREBASE_APP_ID'],
+  apiKey: env.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID,
 };
 
 // Local devConsole (kept internal to avoid cross-package dependency)
@@ -40,15 +55,6 @@ const devConsole = {
   error: console.error.bind(console)
 };
 
-// Validate required config
-interface MinimalViteEnv {
-  VITE_FIREBASE_API_KEY?: string;
-  VITE_FIREBASE_PROJECT_ID?: string;
-  VITE_FIREBASE_APP_ID?: string;
-  [k: string]: string | undefined;
-}
-const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_PROJECT_ID', 'VITE_FIREBASE_APP_ID'] as const;
-const envRef: MinimalViteEnv = env as MinimalViteEnv;
 const missingVars = requiredEnvVars.filter((varName) => {
   const value = envRef[varName];
   return value === undefined || value === null || value === '';

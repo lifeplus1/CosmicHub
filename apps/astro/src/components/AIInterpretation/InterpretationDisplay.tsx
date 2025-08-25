@@ -123,7 +123,7 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
               className="mt-4 text-cosmic-gold hover:text-cosmic-gold/80 transition-colors text-sm font-medium"
               onClick={() => {
                 // TODO: This would typically be handled by parent component
-                // console.log('Show full content for:', interpretation.id);
+                // logger.info('Show full content for:', interpretation.id);
                 // Implement full content display functionality
               }}
             >

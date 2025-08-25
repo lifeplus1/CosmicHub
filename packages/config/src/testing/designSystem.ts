@@ -393,7 +393,8 @@ class DesignSystemEngine {
     const deviations: string[] = [];
     
     // Mock component analysis (in real implementation, this would parse actual component code)
-  const mockAnalysis = this.mockComponentAnalysis(componentName);
+    // componentPath would be used to read and parse the actual file
+    const mockAnalysis = this.mockComponentAnalysis(componentName, componentPath);
     
     // Check color consistency
     if (mockAnalysis.colorsUsed.some(color => !this.isValidDesignToken(color))) {
@@ -467,7 +468,7 @@ class DesignSystemEngine {
   });
   }
 
-  private mockComponentAnalysis(componentName: string): {
+  private mockComponentAnalysis(componentName: string, componentPath: string): {
     colorsUsed: string[];
     spacingUsed: string[];
     fontSizes: string[];
@@ -476,13 +477,15 @@ class DesignSystemEngine {
     usesDesignTokens: number;
   } {
     // Mock analysis results based on component name and known patterns
+    // In real implementation, componentPath would be used to read and parse the actual file
     const isWellDesigned = ['Button', 'Input'].includes(componentName);
+    const isInUIPackage = componentPath.includes('packages/ui/');
     
     return {
       colorsUsed: isWellDesigned ? ['primary.500', 'neutral.100'] : ['#ff0000', 'primary.500'],
       spacingUsed: isWellDesigned ? ['4', '8', '16'] : ['4', '8', '13'],
       fontSizes: isWellDesigned ? ['base', 'lg'] : ['base', '18px'],
-      hasRequiredARIA: isWellDesigned,
+      hasRequiredARIA: isWellDesigned && isInUIPackage,
       followsPattern: isWellDesigned,
       usesDesignTokens: isWellDesigned ? 90 : 60
     };
@@ -590,7 +593,7 @@ class DesignSystemEngine {
   private extractComponentName(path: string): string {
     const parts = path.split('/');
     const filename = parts[parts.length - 1];
-    return filename.replace(/\.(tsx?|jsx?)$/, '');
+    return filename?.replace(/\.(tsx?|jsx?)$/, '') ?? 'Unknown';
   }
 
   getDesignTokens(): DesignTokens {
@@ -618,7 +621,7 @@ class DesignSystemEngine {
 ## Issue Breakdown
 ${Object.entries(
   report.issues.reduce((acc, issue) => {
-    acc[issue.severity] = (acc[issue.severity] || 0) + 1;
+    acc[issue.severity] = (acc[issue.severity] ?? 0) + 1;
     return acc;
   }, {} as Record<string, number>)
 ).map(([severity, count]) => `- **${severity}**: ${count}`).join('\n')}

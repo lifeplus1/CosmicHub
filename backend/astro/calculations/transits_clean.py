@@ -2,7 +2,7 @@
 """
 Enhanced Transit and Lunar Transit Calculation Module
 
-This module implements Grok's comprehensive solution for transit calculations using
+This module implements Grok's comprehensive solution for transit calculations using  # noqa: E501
 PySwissEph, Redis caching, and optimized performance patterns.
 """
 
@@ -283,7 +283,7 @@ def init_swisseph() -> bool:
 def julian_day(dt: datetime) -> float:
     """Convert datetime to Julian Day Number."""
     if swe_available and swe:
-        return swe.julday(dt.year, dt.month, dt.day, dt.hour + dt.minute / 60.0)  # type: ignore
+        return swe.julday(dt.year, dt.month, dt.day, dt.hour + dt.minute / 60.0)  # type: ignore  # noqa: E501
     else:
         # Fallback calculation for testing
         a = (14 - dt.month) // 12
@@ -305,7 +305,7 @@ def calculate_planet_position(jd: float, planet_id: int) -> Tuple[float, bool]:
     """Calculate planet position for given Julian Day."""
     if swe:
         try:
-            result, flag = swe.calc_ut(jd, planet_id, swe.FLG_SWIEPH | swe.FLG_SPEED)  # type: ignore
+            result, flag = swe.calc_ut(jd, planet_id, swe.FLG_SWIEPH | swe.FLG_SPEED)  # type: ignore  # noqa: E501
             longitude = float(result[0])  # type: ignore
             speed = float(result[3])  # type: ignore
             retrograde = speed < 0
@@ -534,7 +534,7 @@ async def calculate_transits(
                         )
 
                         result = TransitResult(
-                            id=f"{transit_planet}_{aspect_info['aspect']}_{natal_planet}_{current_date.strftime('%Y%m%d')}",
+                            id=f"{transit_planet}_{aspect_info['aspect']}_{natal_planet}_{current_date.strftime('%Y%m%d')}",  # noqa: E501
                             planet=str(PLANETS[transit_planet]["name"]),
                             aspect=aspect_info["aspect"],
                             natal_planet=str(PLANETS[natal_planet]["name"]),
@@ -544,7 +544,7 @@ async def calculate_transits(
                             intensity=aspect_info["intensity"],
                             energy=aspect_info["energy"],
                             duration_days=duration_days,
-                            description=f"{PLANETS[transit_planet]['name']} {aspect_info['aspect']} natal {PLANETS[natal_planet]['name']}",
+                            description=f"{PLANETS[transit_planet]['name']} {aspect_info['aspect']} natal {PLANETS[natal_planet]['name']}",  # noqa: E501
                         )
                         results.append(result)
 

@@ -1,13 +1,11 @@
 /*
- Centralized devConsole for HealWave app to eliminate per-file raw console bindings.
- Only errors always log; other methods are development-only.
+ Centralized logger for HealWave app using structured logging.
+ Replaces devConsole with proper logger instance.
 */
-/* eslint-disable no-console */
-export const devConsole = {
-  log: import.meta.env.DEV ? console.log.bind(console) : undefined,
-  warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
-  error: console.error.bind(console)
-};
-/* eslint-enable no-console */
+
+import { logger } from '@cosmichub/config';
+
+// Create HealWave-specific logger
+export const devConsole = logger.child({ module: 'HealWave' });
 
 export type DevConsole = typeof devConsole;

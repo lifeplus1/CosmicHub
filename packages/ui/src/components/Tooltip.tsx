@@ -45,7 +45,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const effectiveDelay = delay ?? context.delayDuration ?? 200;
   
   const [isVisible, setIsVisible] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [timeoutId, setTimeoutId] = useState<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const positionClasses = {
@@ -64,7 +64,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const handleMouseEnter = () => {
     const id = setTimeout(() => setIsVisible(true), effectiveDelay);
-    setTimeoutId(id);
+    setTimeoutId(id as unknown as number);
   };
 
   const handleMouseLeave = () => {

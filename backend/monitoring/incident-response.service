@@ -1,0 +1,33 @@
+[Unit]
+Description=CosmicHub Incident Response System (OBS-012)
+After=network.target
+Requires=network.target
+
+[Service]
+Type=simple
+User=cosmichub
+Group=cosmichub
+WorkingDirectory=/opt/cosmichub
+Environment="PYTHONPATH=/opt/cosmichub"
+EnvironmentFile=/opt/cosmichub/backend/monitoring/.env.incident_response
+ExecStart=/opt/cosmichub/venv/bin/python3 /opt/cosmichub/backend/monitoring/incident_response.py --monitor
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=incident-response
+
+# Resource limits
+LimitNOFILE=1024
+MemoryMax=256M
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/cosmichub/logs
+ReadOnlyPaths=/opt/cosmichub
+
+[Install]
+WantedBy=multi-user.target

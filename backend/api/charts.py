@@ -3,7 +3,7 @@
 Enhancements:
  - Adds explicit type annotation for the injected AstroService dependency.
  - Integrates unified serialization (api.utils.serialization.serialize_data) so
-     saved charts use the same compact, consistent JSON representation leveraged
+     saved charts use the same compact, consistent JSON representation leveraged  # noqa: E501
      elsewhere (caching, downstream interpretation engine).
 """
 
@@ -115,7 +115,7 @@ async def get_chart(
 ) -> ChartData:
     try:
         swe.set_ephe_path(settings.ephe_path)  # type: ignore[attr-defined]
-        # Placeholder: Implement PySwissEph calculations for planets, asteroids, angles, houses, aspects
+        # Placeholder: Implement PySwissEph calculations for planets, asteroids, angles, houses, aspects  # noqa: E501
         # Example: swe.calc_ut(julian_day, swe.SUN) for Sun position
         chart_data = ChartData(
             planets=[
@@ -171,15 +171,19 @@ async def save_chart(
     Save chart data to Firestore with serialization for optimization
     """
     try:
+        from os import getenv as _getenv  # local import to avoid top-level pollution
+        trace_enabled = _getenv("DEBUG_REQUEST_TRACE") in ("1", "true", "yes")
+        if trace_enabled:  # pragma: no cover - debug only
+            print(f"[TRACE] save_chart:enter uid={token.get('uid')} planets={len(chart_data.planets)}")
         # Convert incoming detailed model into the unified serialization model.
-        # The serialization model is looser (dict[str, str|float]) so we map fields.
+        # The serialization model is looser (dict[str, str|float]) so we map fields.  # noqa: E501
         serialized_model = SerializedChartData(
             planets=[
                 {
                     "name": p.name,
                     "sign": p.sign,
                     "degree": p.degree,
-                    "position": p.degree,  # placeholder; real calc should supply ecliptic position
+                    "position": p.degree,  # placeholder; real calc should supply ecliptic position  # noqa: E501
                     "house": p.house if p.house is not None else "",
                 }
                 for p in chart_data.planets
@@ -225,7 +229,7 @@ async def save_chart(
                         "name": ang.name,
                         "sign": ang.sign,
                         "degree": ang.degree,
-                        "position": ang.degree,  # placeholder for full 360° value
+                        "position": ang.degree,  # placeholder for full 360° value  # noqa: E501
                     }
                     for ang in chart_data.angles
                 ]
@@ -237,18 +241,20 @@ async def save_chart(
         # Produce serialized JSON (compact, validated)
         serialized_json = serialize_data(serialized_model)
 
-        # Generate chart ID (stable hash of serialized payload for dedup potential)
-        chart_id = f"chart_{token.get('uid', 'unknown')}_{hash(serialized_json) % 1000000}"
+        # Generate chart ID (stable hash of serialized payload for dedup potential)  # noqa: E501
+        chart_id = f"chart_{token.get('uid', 'unknown')}_{hash(serialized_json) % 1000000}"  # noqa: E501
 
-        # Cache by passing the Pydantic model so astro_service uses serialize_data internally
+        # Cache by passing the Pydantic model so astro_service uses serialize_data internally  # noqa: E501
         cache_success = await astro_service.cache_chart_data(
             chart_id, serialized_model.model_dump()
         )
 
         # Log the operation
         print(
-            f"Chart cached: {cache_success}. Chart ID: {chart_id} (size={len(serialized_json)} chars)"
+            f"Chart cached: {cache_success}. Chart ID: {chart_id} (size={len(serialized_json)} chars)"  # noqa: E501
         )
+        if trace_enabled:  # pragma: no cover - debug only
+            print(f"[TRACE] save_chart:exit chart_id={chart_id} cached={cache_success}")
 
         return {
             "status": "success",

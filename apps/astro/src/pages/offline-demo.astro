@@ -1,0 +1,19 @@
+---
+title: 'Offline Chart Demo - UX-020'
+description: 'Progressive Web App demo showcasing offline chart storage and synchronization'
+---
+
+<div class="min-h-screen">
+  <div id="offline-demo-root"></div>
+</div>
+
+<script>
+  import OfflineChartDemo from '../components/OfflineChartDemo.tsx';
+  import { createRoot } from 'react-dom/client';
+
+  const container = document.getElementById('offline-demo-root');
+  if (container) {
+    const root = createRoot(container);
+    root.render(React.createElement(OfflineChartDemo));
+  }
+</script>

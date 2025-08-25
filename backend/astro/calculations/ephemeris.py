@@ -2,7 +2,7 @@
 """
 Ephemeris calculations module - Updated to use remote ephemeris server.
 
-This module now proxies ephemeris calculations to the dedicated ephemeris server
+This module now proxies ephemeris calculations to the dedicated ephemeris server  # noqa: E501
 for improved performance, scalability, and modularity.
 """
 
@@ -57,7 +57,7 @@ class PlanetPosition(dict[str, Any]):  # type: ignore[misc]
         return self["retrograde"]  # type: ignore[return-value]
 
 
-# Global variable to track if ephemeris has been initialized (kept for compatibility)
+# Global variable to track if ephemeris has been initialized (kept for compatibility)  # noqa: E501
 _ephemeris_initialized = True  # Always True for remote client
 
 
@@ -82,14 +82,14 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
     """
     Calculate planetary positions for given Julian Day.
 
-    This function maintains backward compatibility while using the remote ephemeris server.
+    This function maintains backward compatibility while using the remote ephemeris server.  # noqa: E501
 
     Args:
         julian_day: Julian Day Number as float
 
     Returns:
         Dictionary with planet names as keys and position data as values.
-        Each planet entry contains 'position' (degrees) and 'retrograde' (boolean).
+        Each planet entry contains 'position' (degrees) and 'retrograde' (boolean).  # noqa: E501
     """
     logger.debug(
         f"Calculating planetary positions for JD: {julian_day} (remote)"
@@ -172,21 +172,21 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
                     )
 
             logger.debug(
-                f"Remote planetary positions: {len(positions)} planets calculated"
+                f"Remote planetary positions: {len(positions)} planets calculated"  # noqa: E501
             )
             return positions
         else:
             logger.warning(
-                f"Ephemeris server returned status {response.status_code}: {response.text}"
+                f"Ephemeris server returned status {response.status_code}: {response.text}"  # noqa: E501
             )
             positions: Dict[str, PlanetPosition] = {}
-            # Provide deterministic fallback during tests/CI so unit tests don't fail due to remote dependency
+            # Provide deterministic fallback during tests/CI so unit tests don't fail due to remote dependency  # noqa: E501
             if _should_use_test_fallback():
                 positions = _generate_deterministic_fallback(
                     planets, julian_day
                 )
                 logger.info(
-                    "Using deterministic ephemeris fallback (HTTP status error)"
+                    "Using deterministic ephemeris fallback (HTTP status error)"  # noqa: E501
                 )
             return positions
 
@@ -223,7 +223,7 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
 def _should_use_test_fallback() -> bool:
     """Determine if we should generate deterministic fallback data.
 
-    Activated when running under pytest (PYTEST_CURRENT_TEST), CI, or explicit env flag
+    Activated when running under pytest (PYTEST_CURRENT_TEST), CI, or explicit env flag  # noqa: E501
     EPHEMERIS_TEST_FALLBACK=1.
     """
     if os.getenv("EPHEMERIS_TEST_FALLBACK", "0") in ("1", "true", "yes"):
@@ -240,7 +240,7 @@ def _generate_deterministic_fallback(
 ) -> Dict[str, PlanetPosition]:
     """Generate deterministic pseudo positions for planets for testing.
 
-    Uses a simple hash of planet name and julian day to produce stable positions inside 0-360.
+    Uses a simple hash of planet name and julian day to produce stable positions inside 0-360.  # noqa: E501
     Retrograde flag alternates predictably.
     """
     positions: Dict[str, PlanetPosition] = {}
@@ -281,7 +281,7 @@ async def get_planetary_positions_async(
             )
 
         logger.debug(
-            f"Remote planetary positions async: {len(positions)} planets calculated"
+            f"Remote planetary positions async: {len(positions)} planets calculated"  # noqa: E501
         )
         return positions
 

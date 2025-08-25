@@ -2,30 +2,48 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Auth, User, onAuthStateChanged, signOut as fbSignOut } from 'firebase/auth';
 // Use the single, centralized Firebase app/auth to avoid duplicate registrations
 import { app as sharedApp, auth as sharedAuth, hasAuthAvailable } from '@cosmichub/config/firebase';
+import { logger } from '@cosmichub/config';
+
+// Simple logger for auth module - will write to files in production
+const authLogger = {
+  info: (message: string, data?: unknown) => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.info(`[Auth] ${message}`, data);
+    }
+  },
+  warn: (message: string, data?: unknown) => {
+    logger.warn(`[Auth Warning] ${message}`, data);
+  },
+  error: (message: string, data?: unknown) => {
+    logger.error(`[Auth Error] ${message}`, data);
+  }
+};
 
 // Delegate to centralized Firebase config package
 const app = sharedApp;
-const authInstance: Auth | undefined = sharedAuth as Auth | undefined;
+const authInstance: Auth | undefined = sharedAuth;
 
 // Export auth if initialized; otherwise create a safe mock that doesn't throw
-export const auth: Auth = authInstance || (new Proxy({} as Auth, {
-  get(target, prop) {
+export const auth: Auth = authInstance ?? (new Proxy({}, {
+  get(_target, prop) {
     if (prop === 'currentUser') {
       return null;
     }
     if (prop === 'onAuthStateChanged') {
-      return (callback: any) => {
+      return (callback: (user: User | null) => void) => {
         // Call immediately with null to indicate no user
         callback(null);
         return () => {}; // Return unsubscribe function
       };
     }
-    console.warn('Firebase auth not available - using mock auth instead');
+    if (!hasAuthAvailable) {
+    authLogger.warn('Firebase auth not available - using mock auth instead');
+  }
     return undefined;
   }
 }) as Auth);
 
-console.log('🔥 Firebase Auth initialized:', {
+logger.info('🔥 Firebase Auth initialized:', {
   hasApp: !!app,
 });
 
@@ -46,10 +64,10 @@ const loadMockUserFromStorage = (): User | null => {
   try {
     const stored = sessionStorage.getItem(MOCK_USER_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      return JSON.parse(stored) as User;
     }
   } catch (error) {
-    console.warn('Failed to load mock user from storage:', error);
+    logger.warn('Failed to load mock user from storage:', error);
   }
   return null;
 };
@@ -62,7 +80,7 @@ const saveMockUserToStorage = (user: User | null) => {
       sessionStorage.removeItem(MOCK_USER_KEY);
     }
   } catch (error) {
-    console.warn('Failed to save mock user to storage:', error);
+    logger.warn('Failed to save mock user to storage:', error);
   }
 };
 
@@ -72,7 +90,7 @@ mockUser = loadMockUserFromStorage();
 const notifyAuthStateChange = (user: User | null) => {
   mockUser = user;
   saveMockUserToStorage(user);
-  console.log('🔔 Auth state changed:', user ? `Mock user: ${user.email}` : 'No user');
+  logger.info('🔔 Auth state changed:', user ? `Mock user: ${user.email}` : 'No user');
   authStateListeners.forEach(listener => listener(user));
 };
 
@@ -88,7 +106,7 @@ export const useAuth = (): AuthState => {
       }
       notifyAuthStateChange(null);
     } catch (error) {
-      console.error('Sign out failed:', error);
+      logger.error('Sign out failed:', error);
       // Even if Firebase sign out fails, clear local mock state
       notifyAuthStateChange(null);
     }
@@ -97,18 +115,18 @@ export const useAuth = (): AuthState => {
   useEffect(() => {
     // Prevent duplicate listeners
     if (listenerSetupRef.current) {
-      console.log('🚫 Auth listener already set up, skipping');
+      logger.info('🚫 Auth listener already set up, skipping');
       return;
     }
     listenerSetupRef.current = true;
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🎯 Setting up auth state listener...');
+    if (process.env['NODE_ENV'] === 'development') {
+      logger.info('🎯 Setting up auth state listener...');
     }
     
     // Add to local listeners for mock auth
     const mockAuthListener = (user: User | null) => {
-      console.log('🧪 Mock auth state changed:', user ? user.email : 'null');
+      logger.info('🧪 Mock auth state changed:', user ? user.email : 'null');
       setUser(user);
     };
     authStateListeners.push(mockAuthListener);
@@ -121,8 +139,8 @@ export const useAuth = (): AuthState => {
         unsubscribe = onAuthStateChanged(
           authInstance,
           (currentUser) => {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
+            if (process.env['NODE_ENV'] === 'development') {
+              logger.info('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
             }
             if (currentUser) {
               setUser(currentUser);
@@ -134,28 +152,28 @@ export const useAuth = (): AuthState => {
             }
           },
           (error) => {
-            console.error('Auth state change error:', error);
+            logger.error('Auth state change error:', error);
             setLoading(false);
           }
         );
       } catch (error) {
-        console.warn('Failed to set up auth state listener:', error);
+        logger.warn('Failed to set up auth state listener:', error);
         setLoading(false);
       }
     } else {
-      console.log('🧪 Firebase auth not initialized, using mock auth only');
+      logger.info('🧪 Firebase auth not initialized, using mock auth only');
       setLoading(false);
     }
 
     // Set initial state
     if (mockUser) {
-      console.log('🧪 Using existing mock user state');
+      logger.info('🧪 Using existing mock user state');
       setUser(mockUser);
     }
     setLoading(false);
 
     return () => {
-      console.log('🧹 Cleaning up auth listener');
+      logger.info('🧹 Cleaning up auth listener');
       // Remove from local listeners
       const index = authStateListeners.indexOf(mockAuthListener);
       if (index > -1) {
@@ -184,7 +202,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export async function logIn(email: string, password: string): Promise<User> {
   // Development bypass for testing - remove in production
   if (email === 'test@test.com' && password === 'test123') {
-    console.log('🧪 Using development mock user');
+    logger.info('🧪 Using development mock user');
     const mockUserData = {
       uid: 'mock-user-123',
       email: 'test@test.com',
@@ -213,10 +231,10 @@ export async function logIn(email: string, password: string): Promise<User> {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error) {
-    console.error('Firebase auth failed, trying mock login:', error);
+    logger.error('Firebase auth failed, trying mock login:', error);
     // Fallback to mock for development
     if (email && password) {
-      console.log('🧪 Using fallback mock user for development');
+      logger.info('🧪 Using fallback mock user for development');
       const fallbackMockUser = {
         uid: `mock-${Date.now()}`,
         email: email,
@@ -249,10 +267,10 @@ export async function signUp(email: string, password: string): Promise<User> {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error) {
-    console.error('Firebase sign up failed, using mock:', error);
+    logger.error('Firebase sign up failed, using mock:', error);
     // Fallback to mock for development
     if (email && password) {
-      console.log('🧪 Using mock sign up for development');
+      logger.info('🧪 Using mock sign up for development');
       const mockNewUser = {
         uid: `mock-new-${Date.now()}`,
         email: email,
@@ -286,7 +304,7 @@ export async function logOut(): Promise<void> {
     }
     notifyAuthStateChange(null);
   } catch (error) {
-    console.error('Log out failed:', error);
+    logger.error('Log out failed:', error);
     // Even if Firebase sign out fails, clear local mock state
     notifyAuthStateChange(null);
   }

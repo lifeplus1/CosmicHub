@@ -227,8 +227,8 @@ class QualityAssuranceEngine {
       const slowestIndex = renderTimes.indexOf(Math.max(...renderTimes));
       const fastestIndex = renderTimes.indexOf(Math.min(...renderTimes));
       
-      report.performanceMetrics.slowestComponent = report.componentResults[slowestIndex]?.name || 'Unknown';
-      report.performanceMetrics.fastestComponent = report.componentResults[fastestIndex]?.name || 'Unknown';
+      report.performanceMetrics.slowestComponent = report.componentResults[slowestIndex]?.name ?? 'Unknown';
+      report.performanceMetrics.fastestComponent = report.componentResults[fastestIndex]?.name ?? 'Unknown';
       
       // Accessibility metrics
       report.accessibilityMetrics.componentsWithIssues = report.componentResults.filter(r => r.accessibility < 90).length;
@@ -272,23 +272,33 @@ class QualityAssuranceEngine {
     reliability: number;
     issues: string[];
   }> {
+    // Check cache first for performance optimization
+    const cached = this.testResults.get(componentPath);
+    if (cached) {
+      return Promise.resolve(cached as ReturnType<typeof this.testComponent> extends Promise<infer T> ? T : never);
+    }
+
     const componentName = this.extractComponentName(componentPath);
     const issues: string[] = [];
+    
+    // Get or create component configuration
+    const config = this.componentConfigs.get(componentName) ?? this.createDefaultConfig(componentName);
     
     // Mock testing results - in real implementation, this would run actual tests
     const performance = this.mockPerformanceTest(componentName);
     const accessibility = this.mockAccessibilityTest(componentName);
     const reliability = this.mockReliabilityTest(componentName);
     
-    // Check for common issues
-    if (performance < 16) issues.push('Slow render time detected');
+    // Check for common issues based on configuration
+    const maxRenderTime = config.performance?.maxRenderTime ?? 32;
+    if (performance < maxRenderTime / 2) issues.push('Slow render time detected');
     if (accessibility < 90) issues.push('Accessibility improvements needed');
     if (reliability < 80) issues.push('Add more test coverage');
     
     const qualityScore = Math.round((performance + accessibility + reliability) / 3);
     const grade = this.calculateGrade(qualityScore);
     
-    return Promise.resolve({
+    const testResults = {
       name: componentName,
       path: componentPath,
       qualityScore,
@@ -297,13 +307,18 @@ class QualityAssuranceEngine {
       accessibility: accessibility,
       reliability: reliability,
       issues
-    });
+    };
+
+    // Cache test results for performance optimization
+    this.testResults.set(componentPath, testResults);
+    
+    return Promise.resolve(testResults);
   }
 
   private extractComponentName(path: string): string {
     const parts = path.split('/');
     const filename = parts[parts.length - 1];
-    return filename.replace('.tsx', '').replace('.jsx', '').replace('.ts', '').replace('.js', '');
+    return filename?.replace('.tsx', '').replace('.jsx', '').replace('.ts', '').replace('.js', '') ?? 'Unknown';
   }
 
   private createDefaultConfig(componentName: string): ComponentTestConfig {

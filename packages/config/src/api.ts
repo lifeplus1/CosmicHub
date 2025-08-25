@@ -3,7 +3,7 @@
  */
 
 import { config } from './config';
-import { buildSuccess, parseErrorLike, type StandardApiError } from './utils/api/error';
+import { buildSuccess, type StandardApiError } from './utils/api/error';
 // Local fallback to avoid cross-package rootDir limitations; kept in sync with shared utility type
 type UnknownRecord = Record<string, unknown>;
 
@@ -133,7 +133,7 @@ export class ApiClient {
   private authToken: string | null = null;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || config.api.baseUrl;
+    this.baseUrl = baseUrl ?? config.api.baseUrl;
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
@@ -163,7 +163,7 @@ export class ApiClient {
 
   // Build request headers
   private buildHeaders(options?: RequestOptions): Record<string, string> {
-    const token = this.authToken || this.getStoredToken();
+    const token = this.authToken ?? this.getStoredToken();
     const headers = { ...this.defaultHeaders };
     
     if (token) {
@@ -205,18 +205,6 @@ export class ApiClient {
     return buildSuccess(payload as T, messageVal);
   }
 
-  private parseApiError(e: unknown, status: number): ApiError {
-    if (e instanceof Error) {
-      try {
-        const parsed = JSON.parse(e.message) as unknown;
-        return parseErrorLike(parsed, status.toString());
-      } catch {
-        return parseErrorLike(e, status.toString());
-      }
-    }
-    return parseErrorLike(e, status.toString());
-  }
-
   // Retry logic
   private async withRetry<T>(
     fn: () => Promise<T>,
@@ -252,13 +240,13 @@ export class ApiClient {
   async get<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.withRetry(async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options?.timeout || config.api.timeout);
+      const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? config.api.timeout);
       
       try {
         const response = await fetch(this.buildUrl(endpoint), {
           method: 'GET',
           headers: this.buildHeaders(options),
-          signal: options?.signal || controller.signal
+          signal: options?.signal ?? controller.signal
         });
         
         return this.handleResponse<T>(response);
@@ -271,14 +259,14 @@ export class ApiClient {
   async post<T, B = UnknownRecord>(endpoint: string, data?: B, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.withRetry(async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options?.timeout || config.api.timeout);
+      const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? config.api.timeout);
       
       try {
         const response = await fetch(this.buildUrl(endpoint), {
           method: 'POST',
           headers: this.buildHeaders(options),
           body: data ? JSON.stringify(data) : null,
-          signal: options?.signal || controller.signal
+          signal: options?.signal ?? controller.signal
         });
         
         return this.handleResponse<T>(response);
@@ -291,14 +279,14 @@ export class ApiClient {
   async put<T, B = UnknownRecord>(endpoint: string, data?: B, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.withRetry(async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options?.timeout || config.api.timeout);
+      const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? config.api.timeout);
       
       try {
         const response = await fetch(this.buildUrl(endpoint), {
           method: 'PUT',
           headers: this.buildHeaders(options),
           body: data ? JSON.stringify(data) : null,
-          signal: options?.signal || controller.signal
+          signal: options?.signal ?? controller.signal
         });
         
         return this.handleResponse<T>(response);
@@ -311,13 +299,13 @@ export class ApiClient {
   async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.withRetry(async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options?.timeout || config.api.timeout);
+      const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? config.api.timeout);
       
       try {
         const response = await fetch(this.buildUrl(endpoint), {
           method: 'DELETE',
           headers: this.buildHeaders(options),
-          signal: options?.signal || controller.signal
+          signal: options?.signal ?? controller.signal
         });
         
         return this.handleResponse<T>(response);
@@ -336,14 +324,14 @@ export class ApiClient {
     delete headers['Content-Type']; // Let browser set multipart boundary
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), options?.timeout || config.api.timeout);
+    const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? config.api.timeout);
     
     try {
       const response = await fetch(this.buildUrl(endpoint), {
         method: 'POST',
         headers,
         body: formData,
-        signal: options?.signal || controller.signal
+        signal: options?.signal ?? controller.signal
       });
       
       return this.handleResponse<T>(response);

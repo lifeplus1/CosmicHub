@@ -1,14 +1,14 @@
 """Synthetic journey test (OBS-003)
 
 Purpose: Exercise critical user path to feed latency & success metrics.
-Path: load -> auth (mock or test user) -> fetch chart/transit -> verify response shape.
+Path: load -> auth (mock or test user) -> fetch chart/transit -> verify response shape.  # noqa: E501
 
 Assumptions:
 - FastAPI app exposes /health or root endpoint.
-- Authentication test helper or ability to create a token exists; if not, placeholder used.
+- Authentication test helper or ability to create a token exists; if not, placeholder used.  # noqa: E501
 
 Future Enhancements:
-- Capture timings and emit to metrics (Prometheus push or log JSON line) during test run.
+- Capture timings and emit to metrics (Prometheus push or log JSON line) during test run.  # noqa: E501
 - Parameterize for multiple journey variants.
 """
 
@@ -20,7 +20,7 @@ import httpx
 
 BASE_URL = os.environ.get("TEST_BASE_URL", "http://localhost:8000")
 
-# Placeholder token retrieval (replace with real fixture or helper when available)
+# Placeholder token retrieval (replace with real fixture or helper when available)  # noqa: E501
 TEST_TOKEN = os.environ.get("TEST_AUTH_TOKEN", "test-dev-token")
 
 JOURNEY_STEPS = [
@@ -54,12 +54,12 @@ def test_synthetic_journey_smoke():
             timings[step["name"]] = elapsed
             assert (
                 resp.status_code < 500
-            ), f"Server error at {step['name']} {resp.status_code}: {resp.text}"
-            # Allow 401 for now if auth not wired for test token; treat as soft failure
+            ), f"Server error at {step['name']} {resp.status_code}: {resp.text}"  # noqa: E501
+            # Allow 401 for now if auth not wired for test token; treat as soft failure  # noqa: E501
             if resp.status_code == 401:
                 # Mark but don't fail test until auth fixture implemented
                 print(
-                    f"[WARN] Unauthorized at step {step['name']} (will address once test auth fixture available)"
+                    f"[WARN] Unauthorized at step {step['name']} (will address once test auth fixture available)"  # noqa: E501
                 )
             else:
                 assert resp.status_code in (
@@ -67,7 +67,7 @@ def test_synthetic_journey_smoke():
                     204,
                 ), f"Unexpected status {resp.status_code} at {step['name']}"
 
-    # Basic latency sanity (placeholder thresholds) - adjust once baseline gathered
+    # Basic latency sanity (placeholder thresholds) - adjust once baseline gathered  # noqa: E501
     total_time = sum(timings.values())
     assert (
         total_time < 5

@@ -1,10 +1,9 @@
 // Mobile app configuration
-import { config } from '@cosmichub/config';
 
 export const mobileConfig = {
   // API endpoints - your existing backend will work
   api: {
-    baseUrl: __DEV__ ? 'http://localhost:8000' : 'https://api.cosmichub.app',
+    baseUrl: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://api.cosmichub.app',
     timeout: 30000,
   },
   

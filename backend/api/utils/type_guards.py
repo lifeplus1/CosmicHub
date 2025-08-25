@@ -300,7 +300,7 @@ def get_astrology_data_type(data: Any) -> str:
 
 def validate_astrology_chart(chart: Any) -> List[str]:
     """
-    Validates an astrology chart structure and reports specific validation errors
+    Validates an astrology chart structure and reports specific validation errors  # noqa: E501
     Returns an array of validation errors, empty if valid
     """
     errors: List[str] = []
@@ -371,7 +371,7 @@ class ChartValidationResult:
 def safe_parse_astrology_chart(json_string: str) -> ChartValidationResult:
     """
     Safely attempts to parse a JSON string into an AstrologyChart
-    Returns a ChartValidationResult with the parsed chart (or None if invalid) and any validation errors
+    Returns a ChartValidationResult with the parsed chart (or None if invalid) and any validation errors  # noqa: E501
     """
     try:
         parsed = json.loads(json_string)

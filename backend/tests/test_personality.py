@@ -43,7 +43,7 @@ class TestPersonalityTraits:
         chart = {
             "planets": {
                 "sun": {
-                    "position": 345.0  # 345 degrees = Pisces (11th sign * 30 + 15)
+                    "position": 345.0  # 345 degrees = Pisces (11th sign * 30 + 15)  # noqa: E501
                 }
             }
         }

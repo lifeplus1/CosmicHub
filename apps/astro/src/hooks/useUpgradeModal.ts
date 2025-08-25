@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useSubscription, useAuth } from '@cosmichub/auth';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { stripeService, type StripeSession } from '@cosmichub/integrations';
+import { getStripeServiceOrThrow, type StripeSession } from '@cosmichub/integrations';
 
 export interface UseUpgradeModalReturn {
   isUpgradeModalOpen: boolean;
@@ -41,12 +41,8 @@ export const useUpgradeModal = (options: UpgradeModalOptions = {}): UseUpgradeMo
       closeUpgradeModal();
       return;
     }
-    if (!stripeService) {
-      options.onError?.('Stripe service not available');
-      closeUpgradeModal();
-      return;
-    }
     try {
+      const stripeService = getStripeServiceOrThrow();
       const stripeTier = tier === 'Basic' ? 'premium' : tier === 'Pro' ? 'premium' : 'elite';
       const successUrl = `${window.location.origin}/pricing/success?tier=${stripeTier}`;
       const cancelUrl = `${window.location.origin}/pricing/cancel`;

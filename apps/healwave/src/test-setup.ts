@@ -62,5 +62,5 @@ globalThis.AudioContext ??= vi.fn().mockImplementation(() => ({
   createOscillator: vi.fn(),
   createGain: vi.fn(),
   destination: {},
-  currentTime: 0
+  currentTime: 0,
 }));

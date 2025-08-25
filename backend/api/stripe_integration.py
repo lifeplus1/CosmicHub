@@ -366,7 +366,7 @@ async def handle_subscription_updated(
         )
 
         logger.info(
-            f"Subscription updated for user {firebase_uid}: {subscription['status']}"
+            f"Subscription updated for user {firebase_uid}: {subscription['status']}"  # noqa: E501
         )
 
     except Exception as e:

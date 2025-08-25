@@ -74,7 +74,7 @@ class TestHumanDesignCalculation:
             "mercury": {"gate": 13, "center": "G"},
             "venus": {"gate": 25, "center": "G"},
         }
-        # Provide design_data in the shape expected by analyze_definition / detect_channels
+        # Provide design_data in the shape expected by analyze_definition / detect_channels  # noqa: E501
         design_data: Dict[str, Any] = {
             "conscious": mock_activations,
             "unconscious": {
@@ -132,7 +132,7 @@ class TestHumanDesignTypes:
         # Create mock data for a Manifestor
         centers = {"throat": True, "sacral": False, "motor_connection": True}
 
-        # This is a simplified test - actual implementation would be more complex
+        # This is a simplified test - actual implementation would be more complex  # noqa: E501
         assert isinstance(centers, dict)
 
     def test_generator_type(self):
@@ -140,7 +140,7 @@ class TestHumanDesignTypes:
         # Create mock data for a Generator
         centers = {"throat": False, "sacral": True}
 
-        # This is a simplified test - actual implementation would be more complex
+        # This is a simplified test - actual implementation would be more complex  # noqa: E501
         assert isinstance(centers, dict)
 
 
