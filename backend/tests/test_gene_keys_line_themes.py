@@ -1,18 +1,16 @@
 """Tests for Gene Keys line themes (IQ/EQ/SQ spheres).
 
-Uses FastAPI TestClient for in-process testing (no external server needed).
+Uses direct async calls instead of TestClient to avoid hanging in pytest-asyncio environment.
 """
 
 from __future__ import annotations
 
 from typing import Any, Dict, TypedDict
+from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
 
-from main import app  # FastAPI application
-
-client = TestClient(app)
+from main import calculate_gene_keys_endpoint, BirthData
 
 
 class GeneKey(TypedDict, total=False):
@@ -52,51 +50,60 @@ def _assert_gene_key_fields(sphere: str, data: Dict[str, Any]) -> None:
     ), f"Missing sphere_context for {sphere}"
 
 
-def test_gene_keys_line_themes_basic() -> None:
+@pytest.mark.asyncio
+async def test_gene_keys_line_themes_basic() -> None:
     """Basic response includes line theme + sphere context for IQ/EQ/SQ."""
-    payload: RequestPayload = {
-        "year": 1990,
-        "month": 6,
-        "day": 15,
-        "hour": 14,
-        "minute": 30,
+    payload_data = BirthData(
+        year=1990,
+        month=6,
+        day=15,
+        hour=14,
+        minute=30,
         # Provide lat/lon so geocoding is not required
-        "lat": 40.7128,
-        "lon": -74.0060,
-        "timezone": "America/New_York",
-        "city": "New York",
-    }
+        lat=40.7128,
+        lon=-74.0060,
+        timezone="America/New_York",
+        city="New York",
+    )
 
-    resp = client.post("/calculate-gene-keys", json=payload)
-    assert resp.status_code == 200, resp.text
-    body = resp.json()
-    assert "gene_keys" in body, "gene_keys missing from response"
-    gene_keys = body["gene_keys"]
+    # Mock request for rate limiter
+    mock_request = MagicMock()
+    mock_request.client.host = "127.0.0.1"
+    
+    result = await calculate_gene_keys_endpoint(payload_data, mock_request)
+    
+    assert "gene_keys" in result, "gene_keys missing from response"
+    gene_keys = result["gene_keys"]
 
     for sphere in ("iq", "eq", "sq"):
         assert sphere in gene_keys, f"{sphere} missing in gene_keys"
         _assert_gene_key_fields(sphere, gene_keys[sphere])
 
 
-def test_gene_keys_line_themes_idempotent_same_input() -> None:
+@pytest.mark.asyncio
+async def test_gene_keys_line_themes_idempotent_same_input() -> None:
     """Calling endpoint twice with same input should produce consistent line/theme values."""  # noqa: E501
-    payload: RequestPayload = {
-        "year": 1990,
-        "month": 6,
-        "day": 15,
-        "hour": 14,
-        "minute": 30,
-        "lat": 40.7128,
-        "lon": -74.0060,
-        "timezone": "America/New_York",
-        "city": "New York",
-    }
+    payload_data = BirthData(
+        year=1990,
+        month=6,
+        day=15,
+        hour=14,
+        minute=30,
+        lat=40.7128,
+        lon=-74.0060,
+        timezone="America/New_York",
+        city="New York",
+    )
 
-    first = client.post("/calculate-gene-keys", json=payload)
-    second = client.post("/calculate-gene-keys", json=payload)
-    assert first.status_code == 200 and second.status_code == 200
-    gk1 = first.json()["gene_keys"]
-    gk2 = second.json()["gene_keys"]
+    # Mock request for rate limiter
+    mock_request = MagicMock()
+    mock_request.client.host = "127.0.0.1"
+
+    first_result = await calculate_gene_keys_endpoint(payload_data, mock_request)
+    second_result = await calculate_gene_keys_endpoint(payload_data, mock_request)
+    
+    gk1 = first_result["gene_keys"]
+    gk2 = second_result["gene_keys"]
     for sphere in ("iq", "eq", "sq"):
         assert (
             gk1[sphere]["number"] == gk2[sphere]["number"]
@@ -110,7 +117,7 @@ def test_gene_keys_line_themes_idempotent_same_input() -> None:
 
 
 @pytest.mark.parametrize(
-    "payload",
+    "payload_dict",
     [
         {  # Morning
             "year": 1985,
@@ -147,13 +154,20 @@ def test_gene_keys_line_themes_idempotent_same_input() -> None:
         },
     ],
 )
-def test_gene_keys_line_themes_multiple_cases(
-    payload: Dict[str, Any],
-) -> None:  # payload matches RequestPayload shape
+@pytest.mark.asyncio
+async def test_gene_keys_line_themes_multiple_cases(
+    payload_dict: Dict[str, Any],
+) -> None:
     """Multiple payloads still produce valid line themes & contexts for IQ/EQ/SQ."""  # noqa: E501
-    resp = client.post("/calculate-gene-keys", json=payload)
-    assert resp.status_code == 200, resp.text
-    gene_keys = resp.json()["gene_keys"]
+    payload_data = BirthData(**payload_dict)
+    
+    # Mock request for rate limiter
+    mock_request = MagicMock()
+    mock_request.client.host = "127.0.0.1"
+    
+    result = await calculate_gene_keys_endpoint(payload_data, mock_request)
+    gene_keys = result["gene_keys"]
+    
     for sphere in ("iq", "eq", "sq"):
         assert sphere in gene_keys, f"{sphere} missing"
         _assert_gene_key_fields(sphere, gene_keys[sphere])
