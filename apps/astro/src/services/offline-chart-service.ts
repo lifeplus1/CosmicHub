@@ -5,11 +5,11 @@
 
 import type { ChartData } from '@/types';
 import { OfflineChartStorage, OfflineSyncManager } from '@cosmichub/storage';
-import { 
-  fetchSavedCharts, 
-  saveChart as apiSaveChart, 
+import {
+  fetchSavedCharts,
+  saveChart as apiSaveChart,
   deleteChart as apiDeleteChart,
-  fetchChart as _fetchChart
+  fetchChart as _fetchChart,
 } from './api';
 import type { SaveChartRequest, SavedChart, ChartId } from './api.types';
 
@@ -41,11 +41,11 @@ export class OfflineChartService {
   private storage: OfflineChartStorage;
   private syncManager: OfflineSyncManager;
   private userId: string | null = null;
-  
+
   constructor() {
     this.storage = new OfflineChartStorage();
     this.syncManager = new OfflineSyncManager();
-    
+
     // Initialize service worker communication
     void this.initializeServiceWorker();
   }
@@ -57,10 +57,13 @@ export class OfflineChartService {
     if ('serviceWorker' in navigator) {
       try {
         swRegistration = await navigator.serviceWorker.ready;
-        
+
         // Listen for messages from service worker
-        navigator.serviceWorker.addEventListener('message', this.handleServiceWorkerMessage.bind(this));
-        
+        navigator.serviceWorker.addEventListener(
+          'message',
+          this.handleServiceWorkerMessage.bind(this)
+        );
+
         console.log('🔧 Offline chart service connected to service worker');
       } catch (error) {
         console.error('❌ Failed to connect to service worker:', error);
@@ -73,7 +76,7 @@ export class OfflineChartService {
    */
   private handleServiceWorkerMessage(event: MessageEvent) {
     const { type, payload } = event.data;
-    
+
     switch (type) {
       case 'SYNC_REQUEST':
         void this.syncManager.forceSyncAll();
@@ -105,17 +108,22 @@ export class OfflineChartService {
   /**
    * Save chart with offline support
    */
-  async saveChart(chartData: ChartData, params: ChartCalculationParams): Promise<{ 
-    success: boolean; 
-    chartId: string; 
-    offline?: boolean; 
+  async saveChart(
+    chartData: ChartData,
+    params: ChartCalculationParams
+  ): Promise<{
+    success: boolean;
+    chartId: string;
+    offline?: boolean;
   }> {
     try {
       // Try online save first
       if (navigator.onLine) {
         try {
           // Convert to API format
-          const birthDate = new Date(params.birthData.date + 'T' + params.birthData.time);
+          const birthDate = new Date(
+            params.birthData.date + 'T' + params.birthData.time
+          );
           const saveRequest: SaveChartRequest = {
             year: birthDate.getFullYear(),
             month: birthDate.getMonth() + 1,
@@ -126,17 +134,17 @@ export class OfflineChartService {
             house_system: params.houses ?? 'placidus',
             chart_name: params.name ?? `Chart ${new Date().toISOString()}`,
             lat: params.birthData.location.latitude,
-            lon: params.birthData.location.longitude
+            lon: params.birthData.location.longitude,
           };
-          
+
           const apiResult = await apiSaveChart(saveRequest);
-          
-          if (!apiResult.success ?? !apiResult.data) {
+
+          if (!apiResult.success || !apiResult.data) {
             throw new Error('Save failed');
           }
 
           const chartId = apiResult.data.id;
-          
+
           // Cache successful save locally
           await this.storage.saveChart({
             id: chartId,
@@ -150,7 +158,7 @@ export class OfflineChartService {
             birth_data: params.birthData,
             synced: true,
             offline_created: false,
-            priority: 'medium'
+            priority: 'medium',
           });
 
           // Cache in service worker for faster access
@@ -158,16 +166,19 @@ export class OfflineChartService {
 
           return {
             success: true,
-            chartId
+            chartId,
           };
         } catch (networkError) {
-          console.warn('⚠️ Online save failed, falling back to offline:', networkError);
+          console.warn(
+            '⚠️ Online save failed, falling back to offline:',
+            networkError
+          );
         }
       }
 
       // Offline save
       const chartId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       await this.storage.saveChart({
         id: chartId,
         userId: this.userId ?? 'anonymous',
@@ -180,7 +191,7 @@ export class OfflineChartService {
         birth_data: params.birthData,
         synced: false,
         offline_created: true,
-        priority: 'high'
+        priority: 'high',
       });
 
       // Queue for background sync
@@ -193,15 +204,14 @@ export class OfflineChartService {
         birth_location: `${params.birthData.location.city}, ${params.birthData.location.country}`,
         chart_type: 'natal',
         chart_data: chartData,
-        birth_data: params.birthData
+        birth_data: params.birthData,
       });
-      
+
       return {
         success: true,
         chartId,
-        offline: true
+        offline: true,
       };
-
     } catch (error) {
       console.error('❌ Failed to save chart:', error);
       throw new Error('Failed to save chart');
@@ -220,7 +230,7 @@ export class OfflineChartService {
     try {
       // Load from offline storage first (for now - simplifies implementation)
       const cachedChart = await this.storage.getChart(chartId);
-      
+
       if (cachedChart) {
         // Convert the OfflineChart format to expected format
         const params: ChartCalculationParams = {
@@ -228,7 +238,7 @@ export class OfflineChartService {
           birthData: cachedChart.birth_data as any, // Type conversion needed
           systems: [],
           houses: 'placidus',
-          aspects: []
+          aspects: [],
         };
 
         return {
@@ -238,16 +248,15 @@ export class OfflineChartService {
             name: cachedChart.name,
             createdAt: cachedChart.created_at,
             updatedAt: cachedChart.updated_at,
-            synced: cachedChart.synced
+            synced: cachedChart.synced,
           },
-          fromCache: true
+          fromCache: true,
         };
       }
 
       // If not in cache and online, this would fetch from API
       // For now, throw error if not found locally
       throw new Error('Chart not found in offline storage');
-
     } catch (error) {
       console.error('❌ Failed to load chart:', error);
       throw new Error('Chart not available');
@@ -257,14 +266,16 @@ export class OfflineChartService {
   /**
    * List saved charts with offline support
    */
-  async listCharts(): Promise<Array<{
-    id: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-    synced: boolean;
-    fromCache?: boolean;
-  }>> {
+  async listCharts(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      createdAt: string;
+      updatedAt: string;
+      synced: boolean;
+      fromCache?: boolean;
+    }>
+  > {
     try {
       let onlineCharts: SavedChart[] = [];
       let offlineCharts: any[] = [];
@@ -282,7 +293,9 @@ export class OfflineChartService {
       }
 
       // Get offline charts
-      offlineCharts = await this.storage.getUserCharts(this.userId ?? 'anonymous');
+      offlineCharts = await this.storage.getUserCharts(
+        this.userId ?? 'anonymous'
+      );
 
       // Merge and deduplicate charts (online takes precedence)
       const chartMap = new Map();
@@ -295,7 +308,7 @@ export class OfflineChartService {
           createdAt: chart.created_at,
           updatedAt: chart.updated_at,
           synced: chart.synced,
-          fromCache: true
+          fromCache: true,
         });
       });
 
@@ -307,14 +320,14 @@ export class OfflineChartService {
           createdAt: chart.created_at ?? new Date().toISOString(),
           updatedAt: chart.updated_at ?? new Date().toISOString(),
           synced: true,
-          fromCache: false
+          fromCache: false,
         });
       });
 
-      return Array.from(chartMap.values()).sort((a, b) => 
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      return Array.from(chartMap.values()).sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       );
-
     } catch (error) {
       console.error('❌ Failed to list charts:', error);
       throw new Error('Failed to load chart list');
@@ -324,36 +337,40 @@ export class OfflineChartService {
   /**
    * Delete chart with offline support
    */
-  async deleteChart(chartId: string): Promise<{ success: boolean; offline?: boolean }> {
+  async deleteChart(
+    chartId: string
+  ): Promise<{ success: boolean; offline?: boolean }> {
     try {
       // Try online delete first
       if (navigator.onLine && !chartId.startsWith('offline_')) {
         try {
           const apiResult = await apiDeleteChart(chartId as ChartId);
-          
+
           if (apiResult.success) {
             // Remove from local cache
             await this.storage.deleteChart(chartId);
             return { success: true };
           }
         } catch (networkError) {
-          console.warn('⚠️ Online delete failed, queuing for sync:', networkError);
+          console.warn(
+            '⚠️ Online delete failed, queuing for sync:',
+            networkError
+          );
         }
       }
 
       // For offline charts or when online delete fails
       await this.storage.deleteChart(chartId);
-      
+
       // Queue deletion for sync if it's a real chart ID
       if (!chartId.startsWith('offline_')) {
         await this.storage.addToSyncQueue('delete', { id: chartId });
       }
 
-      return { 
-        success: true, 
-        offline: !navigator.onLine ?? chartId.startsWith('offline_')
+      return {
+        success: true,
+        offline: !navigator.onLine || chartId.startsWith('offline_'),
       };
-
     } catch (error) {
       console.error('❌ Failed to delete chart:', error);
       throw new Error('Failed to delete chart');
@@ -363,17 +380,21 @@ export class OfflineChartService {
   /**
    * Force sync all charts
    */
-  async syncAllCharts(): Promise<{ success: boolean; synced: number; errors: number }> {
+  async syncAllCharts(): Promise<{
+    success: boolean;
+    synced: number;
+    errors: number;
+  }> {
     try {
       const result = await this.syncManager.forceSyncAll();
-      
+
       // Trigger service worker sync
       this.notifyServiceWorker('SYNC_CHARTS');
-      
+
       return {
         success: result.success,
         synced: result.synced_items,
-        errors: result.failed_items
+        errors: result.failed_items,
       };
     } catch (error) {
       console.error('❌ Sync failed:', error);
@@ -414,13 +435,15 @@ export class OfflineChartService {
   /**
    * Import charts from backup
    */
-  async importOfflineCharts(exportData: string): Promise<{ imported: number; errors: number }> {
+  async importOfflineCharts(
+    exportData: string
+  ): Promise<{ imported: number; errors: number }> {
     try {
       const data = JSON.parse(exportData);
       await this.storage.importData(data);
-      return { 
-        imported: data.charts?.length ?? 0, 
-        errors: 0 
+      return {
+        imported: data.charts?.length ?? 0,
+        errors: 0,
       };
     } catch (error) {
       console.error('❌ Failed to import charts:', error);
@@ -431,7 +454,11 @@ export class OfflineChartService {
   /**
    * Queue chart for background sync
    */
-  private queueChartForSync(chartId: string, action: 'save' | 'delete' | 'update', _data: any) {
+  private queueChartForSync(
+    chartId: string,
+    action: 'save' | 'delete' | 'update',
+    _data: any
+  ) {
     // Our sync manager handles this automatically through the sync queue
     // Just log for now
     console.log(`📋 Chart queued for sync: ${action} ${chartId}`);
@@ -443,7 +470,7 @@ export class OfflineChartService {
   private cacheChartInServiceWorker(chartId: string, chartData?: ChartData) {
     this.notifyServiceWorker('CACHE_CHART', {
       chartId,
-      chartData
+      chartData,
     });
   }
 
@@ -477,7 +504,7 @@ export class OfflineChartService {
   }
 
   /**
-   * Subscribe to sync events  
+   * Subscribe to sync events
    * Note: Event subscription not yet implemented in sync manager
    */
   onSyncEvent(_callback: (event: any) => void) {

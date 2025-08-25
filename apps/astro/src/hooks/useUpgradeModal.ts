@@ -1,7 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useSubscription, useAuth } from '@cosmichub/auth';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getStripeServiceOrThrow, type StripeSession } from '@cosmichub/integrations';
+import {
+  getStripeService,
+  type StripeSession,
+} from '@cosmichub/integrations';
 
 export interface UseUpgradeModalReturn {
   isUpgradeModalOpen: boolean;
@@ -19,7 +22,9 @@ interface UpgradeModalOptions {
   onSuccess?: (tier: string) => void;
 }
 
-export const useUpgradeModal = (options: UpgradeModalOptions = {}): UseUpgradeModalReturn => {
+export const useUpgradeModal = (
+  options: UpgradeModalOptions = {}
+): UseUpgradeModalReturn => {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [requiredFeature, setRequiredFeature] = useState<string | undefined>();
   const { userTier } = useSubscription();
@@ -35,39 +40,49 @@ export const useUpgradeModal = (options: UpgradeModalOptions = {}): UseUpgradeMo
     setRequiredFeature(undefined);
   }, []);
 
-  const handleUpgrade = useCallback(async (tier: 'Basic' | 'Pro' | 'Enterprise') => {
-    if (!user) {
-      options.onError?.('User not authenticated');
-      closeUpgradeModal();
-      return;
-    }
-    try {
-      const stripeService = getStripeServiceOrThrow();
-      const stripeTier = tier === 'Basic' ? 'premium' : tier === 'Pro' ? 'premium' : 'elite';
-      const successUrl = `${window.location.origin}/pricing/success?tier=${stripeTier}`;
-      const cancelUrl = `${window.location.origin}/pricing/cancel`;
-      await stripeService.createCheckoutSession({
-        tier: stripeTier,
-        userId: user.uid,
-        isAnnual: true,
-        successUrl,
-        cancelUrl,
-        feature: requiredFeature,
-        metadata: { sourceComponent: 'useUpgradeModal', originalTier: userTier }
-      });
-      await stripeService.updateUserSubscription(user.uid, stripeTier, true);
-      options.onSuccess?.(stripeTier);
-    } catch (err) {
-      options.onError?.('Upgrade failed', err);
-      closeUpgradeModal();
-    }
-  }, [user, userTier, requiredFeature, closeUpgradeModal, options]);
+  const handleUpgrade = useCallback(
+    async (tier: 'Basic' | 'Pro' | 'Enterprise') => {
+      if (!user) {
+        options.onError?.('User not authenticated');
+        closeUpgradeModal();
+        return;
+      }
+      try {
+        const stripeService = getStripeService();
+        if (!stripeService) {
+          throw new Error('Stripe service is not available');
+        }
+        const stripeTier =
+          tier === 'Basic' ? 'premium' : tier === 'Pro' ? 'premium' : 'elite';
+        const successUrl = `${window.location.origin}/pricing/success?tier=${stripeTier}`;
+        const cancelUrl = `${window.location.origin}/pricing/cancel`;
+        await stripeService.createCheckoutSession({
+          tier: stripeTier,
+          userId: user.uid,
+          isAnnual: true,
+          successUrl,
+          cancelUrl,
+          feature: requiredFeature,
+          metadata: {
+            sourceComponent: 'useUpgradeModal',
+            originalTier: userTier,
+          },
+        });
+        await stripeService.updateUserSubscription(user.uid, stripeTier, true);
+        options.onSuccess?.(stripeTier);
+      } catch (err) {
+        options.onError?.('Upgrade failed', err);
+        closeUpgradeModal();
+      }
+    },
+    [user, userTier, requiredFeature, closeUpgradeModal, options]
+  );
 
   return {
     isUpgradeModalOpen,
     requiredFeature,
     openUpgradeModal,
     closeUpgradeModal,
-    handleUpgrade
+    handleUpgrade,
   };
 };
