@@ -73,9 +73,17 @@ def test_database_batch_and_async(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.mark.asyncio
 async def test_auth_negative_no_token(monkeypatch: pytest.MonkeyPatch):
+    # First disable test mode to allow Firebase initialization to be attempted
+    monkeypatch.setenv("TEST_MODE", "0")
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     monkeypatch.setenv("ALLOW_MOCK_AUTH", "0")
     monkeypatch.setenv("DEPLOY_ENVIRONMENT", "production")
     monkeypatch.delenv("FIREBASE_CREDENTIALS", raising=False)
+    # Remove all Firebase credential env vars
+    for key in ["FIREBASE_PRIVATE_KEY", "FIREBASE_PROJECT_ID", "FIREBASE_PRIVATE_KEY_ID",
+                "FIREBASE_CLIENT_EMAIL", "FIREBASE_CLIENT_ID"]:
+        monkeypatch.delenv(key, raising=False)
+    
     # Import should raise ValueError because credentials missing in production with mock disabled  # noqa: E501
     if "backend.auth" in sys.modules:
         del sys.modules["backend.auth"]

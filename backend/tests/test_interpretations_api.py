@@ -7,7 +7,7 @@ Fixed version: Direct async calls to avoid TestClient hanging with async endpoin
 """
 
 from typing import Any, Dict
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -173,10 +173,11 @@ class TestInterpretationsAPI:
             mock_get_chart.return_value = mock_chart_data
             mock_generate.return_value = mock_ai_interpretation
             
-            # Mock astro service
-            mock_astro = MagicMock()
+            # Mock astro service with proper async methods
+            mock_astro = AsyncMock()
             mock_astro.get_cached_data.return_value = None  # No cache hit
             mock_astro.get_chart_data.return_value = mock_chart_data
+            mock_astro.cache_serialized_data.return_value = True
             mock_astro_service.return_value = mock_astro
 
             # Mock Firestore document creation
@@ -212,7 +213,7 @@ class TestInterpretationsAPI:
         
         with patch("api.interpretations.get_astro_service") as mock_astro_service:
             # Mock astro service to return no chart data
-            mock_astro = MagicMock()
+            mock_astro = AsyncMock()
             mock_astro.get_cached_data.return_value = None  # No cache hit
             mock_astro.get_chart_data.return_value = None  # No chart data
             mock_astro_service.return_value = mock_astro
