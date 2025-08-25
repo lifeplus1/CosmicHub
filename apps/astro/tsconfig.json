@@ -29,12 +29,12 @@
     "paths": {
       "@/*": ["./src/*"],
       "@cosmichub/auth": ["../../packages/auth/src"],
-  "@cosmichub/config": ["../../packages/config/dist"],
+      "@cosmichub/config": ["../../packages/config/dist"],
       "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
       "@cosmichub/frequency": ["../../packages/frequency/src"],
       "@cosmichub/integrations": ["../../packages/integrations/src"],
       "@cosmichub/subscriptions": ["../../packages/subscriptions/src"],
-  "@cosmichub/ui": ["../../packages/ui/dist"],
+      "@cosmichub/ui": ["../../packages/ui/dist"],
       "@cosmichub/types": ["../../packages/types/src"]
     }
   },
@@ -46,7 +46,7 @@
     { "path": "../../packages/config" },
     { "path": "../../packages/frequency" },
     { "path": "../../packages/ui" },
-  { "path": "../../packages/integrations" },
-  { "path": "../../packages/types" }
+    { "path": "../../packages/integrations" },
+    { "path": "../../packages/types" }
   ]
 }

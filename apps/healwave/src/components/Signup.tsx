@@ -319,7 +319,9 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 type='password'
                 id='confirmPassword'
                 value={confirmPassword}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setConfirmPassword(e.target.value)
+                }
                 required
                 aria-required='true'
                 className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
@@ -346,7 +348,9 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   type='date'
                   id='dateOfBirth'
                   value={dateOfBirth}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setDateOfBirth(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setDateOfBirth(e.target.value)
+                  }
                   className='w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
                   aria-label='Date of Birth'
                 />
@@ -363,7 +367,9 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                   type='text'
                   id='occupation'
                   value={occupation}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setOccupation(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setOccupation(e.target.value)
+                  }
                   className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
                   placeholder='Your profession'
                   aria-label='Occupation'
@@ -559,7 +565,9 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 <input
                   type='checkbox'
                   checked={healthDisclaimer}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setHealthDisclaimer(e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setHealthDisclaimer(e.target.checked)
+                  }
                   required
                   aria-required='true'
                   className='w-4 h-4 mt-1 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2'
@@ -575,7 +583,9 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
                 <input
                   type='checkbox'
                   checked={privacyConsent}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPrivacyConsent(e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setPrivacyConsent(e.target.checked)
+                  }
                   required
                   aria-required='true'
                   className='w-4 h-4 mt-1 text-purple-500 rounded bg-white/10 border-purple-500/30 focus:ring-purple-500 focus:ring-2'

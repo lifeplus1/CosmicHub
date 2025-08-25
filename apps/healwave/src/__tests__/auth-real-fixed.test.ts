@@ -14,7 +14,7 @@ describe.skipIf(shouldSkipRealTests)(
       // Clean up: log out before each test
       try {
         await logOut();
-  } catch {
+      } catch {
         // Ignore errors during cleanup
       }
     });

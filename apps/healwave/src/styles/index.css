@@ -85,11 +85,14 @@
 
 /* Custom animations */
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), 0 0 40px rgba(139, 92, 246, 0.3);
+    box-shadow:
+      0 0 30px rgba(6, 182, 212, 0.6),
+      0 0 40px rgba(139, 92, 246, 0.3);
   }
 }
 
@@ -98,8 +101,8 @@
 }
 
 /* Improved focus states */
-input[type="number"]:focus,
-input[type="text"]:focus,
+input[type='number']:focus,
+input[type='text']:focus,
 select:focus {
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.3);
 }
@@ -111,7 +114,9 @@ select option {
 }
 
 /* Smooth transitions for all interactive elements */
-button, input, select {
+button,
+input,
+select {
   transition: all 0.2s ease;
 }
 
@@ -175,7 +180,7 @@ button:focus-visible {
 .healwave-mobile {
   /* Use custom viewport height to handle mobile browser chrome */
   min-height: calc(var(--vh, 1vh) * 100);
-  
+
   /* Safe area support for notched devices */
   padding-top: var(--safe-area-inset-top);
   padding-right: var(--safe-area-inset-right);
@@ -185,9 +190,9 @@ button:focus-visible {
 
 /* Enhanced touch targets for mobile */
 .healwave-mobile button,
-.healwave-mobile [role="button"],
-.healwave-mobile input[type="button"],
-.healwave-mobile input[type="submit"],
+.healwave-mobile [role='button'],
+.healwave-mobile input[type='button'],
+.healwave-mobile input[type='submit'],
 .healwave-mobile .touch-target {
   min-height: var(--touch-target-min);
   min-width: var(--touch-target-min);
@@ -302,8 +307,8 @@ button:focus-visible {
 }
 
 .healwave-mobile .modal-content {
-  margin: var(--safe-area-inset-top) var(--safe-area-inset-right) 
-          var(--safe-area-inset-bottom) var(--safe-area-inset-left);
+  margin: var(--safe-area-inset-top) var(--safe-area-inset-right)
+    var(--safe-area-inset-bottom) var(--safe-area-inset-left);
   max-height: calc(var(--vh, 1vh) * 90);
   overflow-y: auto;
 }
@@ -329,9 +334,9 @@ button:focus-visible {
   .healwave-mobile {
     --touch-highlight-color: rgba(124, 58, 237, 0.8);
   }
-  
+
   .healwave-mobile button,
-  .healwave-mobile [role="button"] {
+  .healwave-mobile [role='button'] {
     border: 2px solid currentColor;
   }
 }
@@ -385,7 +390,7 @@ button:focus-visible {
 
 /* Enhanced button press states for mobile */
 .healwave-mobile button:active,
-.healwave-mobile [role="button"]:active {
+.healwave-mobile [role='button']:active {
   transform: scale(0.95);
   transition-duration: 0.1s;
 }

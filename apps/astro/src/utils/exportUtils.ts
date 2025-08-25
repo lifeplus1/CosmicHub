@@ -9,13 +9,20 @@ const serializeValue = (val: unknown): string => {
       return '[object]';
     }
   }
-  if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+  if (
+    typeof val === 'string' ||
+    typeof val === 'number' ||
+    typeof val === 'boolean'
+  ) {
     return String(val);
   }
   return '[unknown]';
 };
 
-export const exportTableAsCSV = <T extends Record<string, unknown>>(data: T[], filename: string): void => {
+export const exportTableAsCSV = <T extends Record<string, unknown>>(
+  data: T[],
+  filename: string
+): void => {
   if (data.length === 0) return;
 
   const first = data[0];
@@ -37,7 +44,11 @@ export const exportTableAsCSV = <T extends Record<string, unknown>>(data: T[], f
   link.click();
 };
 
-export const downloadFile = (content: string, filename: string, mimeType: string = 'text/plain') => {
+export const downloadFile = (
+  content: string,
+  filename: string,
+  mimeType: string = 'text/plain'
+) => {
   const blob = new Blob([content], { type: mimeType });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -45,7 +56,10 @@ export const downloadFile = (content: string, filename: string, mimeType: string
   link.click();
 };
 
-export const formatDataForExport = <T extends Record<string, unknown>>(data: T[], type: 'csv' | 'json' = 'csv'): string => {
+export const formatDataForExport = <T extends Record<string, unknown>>(
+  data: T[],
+  type: 'csv' | 'json' = 'csv'
+): string => {
   if (type === 'json') {
     return JSON.stringify(data, null, 2);
   }

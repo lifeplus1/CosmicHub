@@ -12,7 +12,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ToastProvider>
     <MemoryRouter>
       <AuthProvider>
-        <SubscriptionProvider appType="astro">{children}</SubscriptionProvider>
+        <SubscriptionProvider appType='astro'>{children}</SubscriptionProvider>
       </AuthProvider>
     </MemoryRouter>
   </ToastProvider>
@@ -27,8 +27,8 @@ describe('MultiSystemChart Component', () => {
     minute: 0,
     city: 'New York',
     lat: 40.7128,
-    lon: -74.0060,
-    timezone: 'America/New_York'
+    lon: -74.006,
+    timezone: 'America/New_York',
   };
 
   beforeEach(() => {
@@ -43,13 +43,19 @@ describe('MultiSystemChart Component', () => {
     );
 
     // Check for tab buttons specifically
-    expect(screen.getByRole('tab', { name: /Western Tropical/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Vedic Sidereal/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: /Western Tropical/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: /Vedic Sidereal/i })
+    ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Chinese/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Mayan/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Uranian/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Synthesis/i })).toBeInTheDocument();
-    expect(screen.getByText(/Multi-System Astrological Analysis/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Multi-System Astrological Analysis/i)
+    ).toBeInTheDocument();
   });
 
   it('displays birth information when provided', () => {
@@ -73,7 +79,9 @@ describe('MultiSystemChart Component', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText(/Calculating multi-system chart.../i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Calculating multi-system chart.../i)
+    ).toBeInTheDocument();
   });
 
   it('shows error state when no data is provided', () => {
@@ -84,6 +92,10 @@ describe('MultiSystemChart Component', () => {
     );
 
     expect(screen.getByText(/No Chart Data/i)).toBeInTheDocument();
-    expect(screen.getByText(/Please calculate a chart to see the multi-system analysis/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Please calculate a chart to see the multi-system analysis/i
+      )
+    ).toBeInTheDocument();
   });
 });

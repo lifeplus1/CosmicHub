@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ComponentLibraryOptimizer, createComponentLibraryOptimizer } from './componentLibrary';
+import {
+  ComponentLibraryOptimizer,
+  createComponentLibraryOptimizer,
+} from './componentLibrary';
 
 describe('Component Library Optimization Suite', () => {
   let optimizer: ComponentLibraryOptimizer;
@@ -28,7 +31,9 @@ describe('Component Library Optimization Suite', () => {
       expect(bugIssues[0].message).toMatch(/Undefined function reference: \w+/);
       expect(bugIssues[0].severity).toBe('critical');
 
-      console.log('🐛 Bug detection validated: undefined function references caught');
+      console.log(
+        '🐛 Bug detection validated: undefined function references caught'
+      );
     });
 
     it('should detect missing key props in lists', () => {
@@ -69,7 +74,9 @@ describe('Component Library Optimization Suite', () => {
       expect(memoryIssues.length).toBe(1);
       expect(memoryIssues[0].message).toContain('memory leak');
 
-      console.log('💧 Memory leak detection working: uncleaned listeners caught');
+      console.log(
+        '💧 Memory leak detection working: uncleaned listeners caught'
+      );
     });
   });
 
@@ -85,9 +92,13 @@ describe('Component Library Optimization Suite', () => {
       const a11yIssues = issues.filter(i => i.type === 'accessibility');
 
       expect(a11yIssues.length).toBeGreaterThan(0);
-      expect(a11yIssues.some(i => i.message.includes('accessible label'))).toBe(true);
+      expect(a11yIssues.some(i => i.message.includes('accessible label'))).toBe(
+        true
+      );
 
-      console.log('♿ Accessibility validation working: missing labels detected');
+      console.log(
+        '♿ Accessibility validation working: missing labels detected'
+      );
     });
 
     it('should detect focus management issues', () => {
@@ -104,7 +115,9 @@ describe('Component Library Optimization Suite', () => {
       expect(focusIssues.length).toBe(1);
       expect(focusIssues[0].message).toContain('focus management');
 
-      console.log('🎯 Focus management validation working: missing focus control detected');
+      console.log(
+        '🎯 Focus management validation working: missing focus control detected'
+      );
     });
   });
 
@@ -125,7 +138,9 @@ describe('Component Library Optimization Suite', () => {
       expect(perfIssues.length).toBeGreaterThan(0);
       expect(perfIssues.some(i => i.message.includes('memoizing'))).toBe(true);
 
-      console.log('⚡ Performance analysis working: memoization opportunities detected');
+      console.log(
+        '⚡ Performance analysis working: memoization opportunities detected'
+      );
     });
 
     it('should detect inline object creation', () => {
@@ -145,7 +160,9 @@ describe('Component Library Optimization Suite', () => {
       expect(inlineIssues.length).toBe(1);
       expect(inlineIssues[0].message).toContain('inline object');
 
-      console.log('📦 Inline object detection working: performance issue identified');
+      console.log(
+        '📦 Inline object detection working: performance issue identified'
+      );
     });
   });
 
@@ -165,9 +182,13 @@ describe('Component Library Optimization Suite', () => {
       const designIssues = issues.filter(i => i.type === 'design');
 
       expect(designIssues.length).toBeGreaterThan(0);
-      expect(designIssues.some(i => i.message.includes('Hardcoded colors'))).toBe(true);
+      expect(
+        designIssues.some(i => i.message.includes('Hardcoded colors'))
+      ).toBe(true);
 
-      console.log('🎨 Design system validation working: hardcoded colors detected');
+      console.log(
+        '🎨 Design system validation working: hardcoded colors detected'
+      );
     });
 
     it('should promote design token usage', () => {
@@ -183,12 +204,16 @@ describe('Component Library Optimization Suite', () => {
 
       const issues = optimizer.analyzeComponent(nonCompliantCode, 'Component');
       // Filter for spacing issues for validation
-      const spacingIssues = issues.filter(i => i.id === 'design-hardcoded-spacing');
+      const spacingIssues = issues.filter(
+        i => i.id === 'design-hardcoded-spacing'
+      );
 
       // Make this test more lenient - the analyzer might detect different types of hardcoded values
       expect(issues.length).toBeGreaterThan(0);
       expect(spacingIssues.length).toBeGreaterThanOrEqual(0); // Use the filtered results
-      console.log('📐 Design token promotion working: hardcoded values detected');
+      console.log(
+        '📐 Design token promotion working: hardcoded values detected'
+      );
     });
   });
 
@@ -204,10 +229,18 @@ describe('Component Library Optimization Suite', () => {
       const patternIssues = issues.filter(i => i.type === 'pattern');
       // Analyzer may evolve; ensure test passes if either pattern issues exist OR no pattern issues needed
       if (patternIssues.length === 0) {
-        console.log('🧩 No pattern issues detected (analyzer indicates compliance)');
+        console.log(
+          '🧩 No pattern issues detected (analyzer indicates compliance)'
+        );
       } else {
-        expect(patternIssues.some(i => i.message.toLowerCase().includes('accessibility'))).toBe(true);
-        console.log('🧩 Pattern compliance validation working: missing requirements detected');
+        expect(
+          patternIssues.some(i =>
+            i.message.toLowerCase().includes('accessibility')
+          )
+        ).toBe(true);
+        console.log(
+          '🧩 Pattern compliance validation working: missing requirements detected'
+        );
       }
     });
   });
@@ -230,17 +263,32 @@ describe('Component Library Optimization Suite', () => {
         };
       `;
 
-      const optimization = optimizer.optimizeComponent(componentCode, 'Component');
+      const optimization = optimizer.optimizeComponent(
+        componentCode,
+        'Component'
+      );
 
       expect(optimization.component).toBe('Component');
       expect(optimization.optimizations.accessibilityScore).toBeLessThan(100);
       expect(optimization.suggestions.length).toBeGreaterThan(0);
 
       console.log('💡 Optimization recommendations generated:');
-      console.log('  - Code Quality:', optimization.optimizations.codeReduction + '%');
-      console.log('  - Performance:', optimization.optimizations.performanceGain + '%');
-      console.log('  - Accessibility:', optimization.optimizations.accessibilityScore + '%');
-      console.log('  - Design Compliance:', optimization.optimizations.designCompliance + '%');
+      console.log(
+        '  - Code Quality:',
+        optimization.optimizations.codeReduction + '%'
+      );
+      console.log(
+        '  - Performance:',
+        optimization.optimizations.performanceGain + '%'
+      );
+      console.log(
+        '  - Accessibility:',
+        optimization.optimizations.accessibilityScore + '%'
+      );
+      console.log(
+        '  - Design Compliance:',
+        optimization.optimizations.designCompliance + '%'
+      );
     });
   });
 
@@ -257,7 +305,9 @@ describe('Component Library Optimization Suite', () => {
       expect(fixedCode).not.toContain('handleOptionClick');
       expect(fixedCode).toContain('handleSelect');
 
-      console.log('🔧 Auto-fix working: undefined function references corrected');
+      console.log(
+        '🔧 Auto-fix working: undefined function references corrected'
+      );
     });
 
     it('should auto-fix ARIA boolean values', () => {
@@ -270,7 +320,9 @@ describe('Component Library Optimization Suite', () => {
       const fixedCode = optimizer.autoFixComponent(buggyCode, 'Button');
 
       expect(fixedCode).toContain('aria-expanded={isOpen ? "true" : "false"}');
-      expect(fixedCode).toContain('aria-selected={selected ? "true" : "false"}');
+      expect(fixedCode).toContain(
+        'aria-selected={selected ? "true" : "false"}'
+      );
 
       console.log('✅ Auto-fix working: ARIA values converted to strings');
     });
@@ -291,7 +343,7 @@ describe('Component Library Optimization Suite', () => {
                 </select>
               );
             };
-          `
+          `,
         },
         {
           name: 'Button',
@@ -306,8 +358,8 @@ describe('Component Library Optimization Suite', () => {
                 </button>
               );
             };
-          `
-        }
+          `,
+        },
       ];
 
       const report = optimizer.generateReport(components);
@@ -323,7 +375,9 @@ describe('Component Library Optimization Suite', () => {
       console.log(`  - Total Components: ${report.totalComponents}`);
       console.log(`  - Issues Found: ${report.issuesFound.length}`);
       console.log(`  - Overall Health: ${report.overallHealth}%`);
-      console.log(`  - Design Compliance: ${report.designSystemCompliance.toFixed(1)}%`);
+      console.log(
+        `  - Design Compliance: ${report.designSystemCompliance.toFixed(1)}%`
+      );
       console.log('\n🎯 Top Recommendations:');
       report.recommendations.slice(0, 3).forEach((rec, idx) => {
         console.log(`  ${idx + 1}. ${rec}`);
@@ -345,12 +399,14 @@ describe('Component Library Optimization Suite', () => {
               </button>
             );
           };
-        `
+        `,
       };
 
       const report = optimizer.generateReport([problematicComponent]);
 
-      const criticalIssues = report.issuesFound.filter(i => i.severity === 'critical');
+      const criticalIssues = report.issuesFound.filter(
+        i => i.severity === 'critical'
+      );
       const highIssues = report.issuesFound.filter(i => i.severity === 'high');
       const allIssues = report.issuesFound;
 
@@ -362,7 +418,7 @@ describe('Component Library Optimization Suite', () => {
       console.log(`  - Critical Issues: ${criticalIssues.length}`);
       console.log(`  - High Priority Issues: ${highIssues.length}`);
       console.log(`  - Health Score: ${report.overallHealth}%`);
-      
+
       if (report.overallHealth < 70) {
         console.log('  ⚠️ Component library needs immediate attention!');
       }

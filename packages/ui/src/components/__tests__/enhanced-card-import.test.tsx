@@ -1,19 +1,19 @@
 // Quick test to verify all imports work correctly
-import { 
+import {
   createComponentTestSuite,
   renderWithEnhancements,
   PerformanceTestRunner,
   expect,
   describe,
   it,
-  vi
+  vi,
 } from '@cosmichub/config/enhanced-testing';
 
-import Card, { 
-  InteractiveCard, 
-  LoadingCard, 
-  ErrorCard, 
-  ChartCard 
+import Card, {
+  InteractiveCard,
+  LoadingCard,
+  ErrorCard,
+  ChartCard,
 } from '../EnhancedCard';
 
 // Simple test to verify everything works
@@ -35,8 +35,8 @@ describe('Import Test', () => {
 
   it('can render basic card with header', () => {
     const rendered = renderWithEnhancements(
-      <Card data-testid="test-card">
-        <Card.Header title="Test Title" />
+      <Card data-testid='test-card'>
+        <Card.Header title='Test Title' />
         <Card.Body>Test Content</Card.Body>
       </Card>
     );

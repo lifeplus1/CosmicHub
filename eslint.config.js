@@ -27,7 +27,7 @@ export default [
       '**/lib/**',
       '**/generated/**',
       '**/htmlcov/**',
-      
+
       // Configuration and tooling files that shouldn't be linted
       '**/.storybook/**',
       '**/storybook-static/**',
@@ -37,27 +37,27 @@ export default [
       '**/vite.config.*',
       '**/vitest.config.*',
       '**/eslint.config.*',
-      
+
       // Test setup and utility files that shouldn't be linted
       '**/test-setup.ts',
       '**/test-utils/**',
-      
+
       // Story files (separate linting if needed)
       '**/*.stories.{js,ts,tsx}',
-      
+
       // Backend files (Python project, not TypeScript)
       'backend/**',
-      
+
       // Shared folder - deprecated legacy files
       'shared/**',
-      
+
       // Cache and temp files
       '**/.cache/**',
       '**/tmp/**',
       '**/temp/**',
       '**/cache/**',
       '**/logs/**',
-      
+
       // Additional build artifacts
       '**/storybook-static/**',
       '**/dist/**',
@@ -66,7 +66,7 @@ export default [
       '**/.turbo/**',
       '**/coverage/**',
       '**/htmlcov/**',
-      
+
       // Non-JS files that shouldn't be linted
       '**/*.py',
       '**/*.pyc',
@@ -76,10 +76,10 @@ export default [
       '**/*.json',
       '**/*.yaml',
       '**/*.yml',
-      
+
       // Generated type files
-      '**/*.d.ts'
-    ]
+      '**/*.d.ts',
+    ],
   },
   // Stricter test files configuration with full type-aware rules
   {
@@ -87,16 +87,21 @@ export default [
       '**/*.spec.{ts,tsx,js,jsx}',
       '**/*.test.{ts,tsx,js,jsx}',
       '**/tests/**/*.{ts,tsx,js,jsx}',
-      '**/__tests__/**/*.{ts,tsx,js,jsx}'
+      '**/__tests__/**/*.{ts,tsx,js,jsx}',
     ],
     languageOptions: {
       parser: tsparser,
       // Include both browser + node so tests using process, window, performance, etc. are covered
-      globals: { ...globals.node, ...globals.browser, ...globals.es2020, JSX: 'readonly' },
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+        ...globals.es2020,
+        JSX: 'readonly',
+      },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        ecmaFeatures: { jsx: true }
+        ecmaFeatures: { jsx: true },
       },
     },
     plugins: {
@@ -113,51 +118,57 @@ export default [
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/no-unsafe-return': 'error',
       '@typescript-eslint/no-unsafe-argument': 'error',
-      '@typescript-eslint/strict-boolean-expressions': ['error', {
-        allowString: false,
-        allowNumber: false,
-        allowNullableObject: false,
-        allowNullableBoolean: false,
-        allowNullableString: false,
-        allowNullableNumber: false,
-        allowNullableEnum: false,
-        allowAny: false
-      }],
+      '@typescript-eslint/strict-boolean-expressions': [
+        'error',
+        {
+          allowString: false,
+          allowNumber: false,
+          allowNullableObject: false,
+          allowNullableBoolean: false,
+          allowNullableString: false,
+          allowNullableNumber: false,
+          allowNullableEnum: false,
+          allowAny: false,
+        },
+      ],
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-misused-promises': 'off',
       '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/explicit-function-return-type': ['error', {
-        allowExpressions: true,
-        allowHigherOrderFunctions: true,
-        allowConciseArrowFunctionExpressionsStartingWithVoid: true
-      }],
-      '@typescript-eslint/no-explicit-any': 'warn'
+      '@typescript-eslint/explicit-function-return-type': [
+        'error',
+        {
+          allowExpressions: true,
+          allowHigherOrderFunctions: true,
+          allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+        },
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-  
+
   // Test files with relaxed TypeScript rules
   {
     files: [
-      '**/*.test.{ts,tsx}', 
-      '**/*.spec.{ts,tsx}', 
-      '**/tests/**/*.{ts,tsx}', 
-      '**/__tests__/**/*.{ts,tsx}', 
+      '**/*.test.{ts,tsx}',
+      '**/*.spec.{ts,tsx}',
+      '**/tests/**/*.{ts,tsx}',
+      '**/__tests__/**/*.{ts,tsx}',
       '**/test/**/*.{ts,tsx}',
-      'apps/astro/src/test/setup.ts'
+      'apps/astro/src/test/setup.ts',
     ],
     languageOptions: {
       parser: tsparser,
       globals: { ...globals.browser, ...globals.jest, ...globals.node },
       parserOptions: {
         ecmaVersion: 'latest',
-        sourceType: 'module'
-      }
+        sourceType: 'module',
+      },
     },
     plugins: {
       '@typescript-eslint': tseslint,
-      'react': react,
+      react: react,
       'react-hooks': reactHooks,
-      'jsx-a11y': jsxA11y
+      'jsx-a11y': jsxA11y,
     },
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -167,28 +178,23 @@ export default [
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/strict-boolean-expressions': 'off'
-    }
+      '@typescript-eslint/strict-boolean-expressions': 'off',
+    },
   },
-  
+
   {
-  files: ['apps/**/*.{ts,tsx}','packages/**/*.{ts,tsx}'],
-  // Exclude test/spec files here; they are handled by the earlier, more relaxed test config.
-  ignores: [
-    '**/*.test.*',
-    '**/*.spec.*', 
-    '**/tests/**',
-    '**/__tests__/**'
-  ],
+    files: ['apps/**/*.{ts,tsx}', 'packages/**/*.{ts,tsx}'],
+    // Exclude test/spec files here; they are handled by the earlier, more relaxed test config.
+    ignores: ['**/*.test.*', '**/*.spec.*', '**/tests/**', '**/__tests__/**'],
     languageOptions: {
       parser: tsparser,
-  // Allow usage of process, console, Buffer, etc. alongside browser globals
-  globals: { ...globals.browser, ...globals.node, ...globals.es2020 },
+      // Allow usage of process, console, Buffer, etc. alongside browser globals
+      globals: { ...globals.browser, ...globals.node, ...globals.es2020 },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
         projectService: true,
-        ecmaFeatures: { jsx: true }
+        ecmaFeatures: { jsx: true },
       },
     },
     plugins: {
@@ -198,7 +204,7 @@ export default [
       'jsx-a11y': jsxA11y,
     },
     settings: {
-      react: { version: 'detect' }
+      react: { version: 'detect' },
     },
     rules: {
       ...tseslint.configs['recommended'].rules,
@@ -232,18 +238,31 @@ export default [
       'no-unused-expressions': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
-      'eqeqeq': ['error', 'always'],
-      'curly': ['error', 'all'],
+      eqeqeq: ['error', 'always'],
+      curly: ['error', 'all'],
       '@typescript-eslint/strict-boolean-expressions': 'off',
-      '@typescript-eslint/no-explicit-any': ['warn', { fixToUnknown: false, ignoreRestArgs: false }],
-      '@typescript-eslint/ban-ts-comment': ['error', {
-        'ts-expect-error': 'allow-with-description',
-        'ts-ignore': false,
-        'ts-nocheck': false,
-        'ts-check': false,
-        minimumDescriptionLength: 10
-      }],
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true }],
+      '@typescript-eslint/no-explicit-any': [
+        'warn',
+        { fixToUnknown: false, ignoreRestArgs: false },
+      ],
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        {
+          'ts-expect-error': 'allow-with-description',
+          'ts-ignore': false,
+          'ts-nocheck': false,
+          'ts-check': false,
+          minimumDescriptionLength: 10,
+        },
+      ],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
       // Temporarily downgrade while refactoring widespread logical-or usage
       '@typescript-eslint/prefer-nullish-coalescing': 'warn',
       '@typescript-eslint/prefer-optional-chain': 'error',
@@ -253,24 +272,30 @@ export default [
       'no-restricted-imports': [
         'error',
         {
-          'paths': [{ 'name': 'shared', 'message': 'Do not import from shared/. Use @cosmichub/subscriptions or other packages.' }],
-          'patterns': ['shared/*']
-        }
-      ]
+          paths: [
+            {
+              name: 'shared',
+              message:
+                'Do not import from shared/. Use @cosmichub/subscriptions or other packages.',
+            },
+          ],
+          patterns: ['shared/*'],
+        },
+      ],
     },
   },
   prettier,
   // Add explicit JS (non-TS) file support so plugin rules and globals apply uniformly
   {
-    files: ['**/*.js','**/*.jsx'],
+    files: ['**/*.js', '**/*.jsx'],
     languageOptions: {
       parser: tsparser, // still use @typescript-eslint/parser to unify rules; it handles JS fine
       globals: { ...globals.browser, ...globals.node, ...globals.es2020 },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-  // No project for plain JS to avoid parsing errors when not in tsconfig include
-      }
+        // No project for plain JS to avoid parsing errors when not in tsconfig include
+      },
     },
     plugins: {
       '@typescript-eslint': tseslint,
@@ -280,7 +305,7 @@ export default [
     },
     rules: {
       'no-undef': 'error',
-      'no-console': 'off'
-    }
-  }
+      'no-console': 'off',
+    },
+  },
 ];

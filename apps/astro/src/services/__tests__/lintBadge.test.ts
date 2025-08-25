@@ -10,21 +10,34 @@ import path from 'node:path';
 // Mark as slow to allow filtering; keep for integration coverage.
 describe.skip('lint-badge output (slow integration)', () => {
   it('produces stable schema with expected fields and color logic', () => {
-  // process.cwd() inside vitest for this file is the astro app root; monorepo root is one level up
+    // process.cwd() inside vitest for this file is the astro app root; monorepo root is one level up
     // Walk up until package.json containing lint:badge script is found (monorepo root)
     let root = process.cwd();
-    for (let i = 0; i < 4; i++) { // safety limit
+    for (let i = 0; i < 4; i++) {
+      // safety limit
       const pkgPath = path.join(root, 'package.json');
       try {
         // We use JSON.parse since we're reading a JSON file
-        const pkg = JSON.parse(readFileSync(pkgPath,'utf8')) as { scripts?: Record<string,string> };
-        if (pkg.scripts !== null && pkg.scripts !== undefined && 'lint:badge' in pkg.scripts) break;
-      } catch {/* ignore */}
+        const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
+          scripts?: Record<string, string>;
+        };
+        if (
+          pkg.scripts !== null &&
+          pkg.scripts !== undefined &&
+          'lint:badge' in pkg.scripts
+        )
+          break;
+      } catch {
+        /* ignore */
+      }
       root = path.join(root, '..');
     }
     execSync('node ./scripts/lint-badge.mjs', { cwd: root, stdio: 'pipe' });
 
-    const raw = readFileSync(path.join(root, 'lint-metrics-badge.json'), 'utf8');
+    const raw = readFileSync(
+      path.join(root, 'lint-metrics-badge.json'),
+      'utf8'
+    );
     const badge = JSON.parse(raw) as Record<string, unknown>;
 
     expect(badge).toMatchObject({ schemaVersion: 1, label: 'lint reduction' });
@@ -43,10 +56,14 @@ describe.skip('lint-badge output (slow integration)', () => {
     const pctMatch = message.match(/\((-?\d+(?:\.\d+)?)%\)$/);
     expect(pctMatch).not.toBeNull();
     const pct = Number(pctMatch?.[1]);
-    if (pct !== null && pct !== undefined && pct <= 0) expect(color).toBe('red');
-    else if (pct !== null && pct !== undefined && pct < 25) expect(color).toBe('orange');
-    else if (pct !== null && pct !== undefined && pct < 50) expect(color).toBe('yellow');
-    else if (pct !== null && pct !== undefined && pct < 75) expect(color).toBe('green');
+    if (pct !== null && pct !== undefined && pct <= 0)
+      expect(color).toBe('red');
+    else if (pct !== null && pct !== undefined && pct < 25)
+      expect(color).toBe('orange');
+    else if (pct !== null && pct !== undefined && pct < 50)
+      expect(color).toBe('yellow');
+    else if (pct !== null && pct !== undefined && pct < 75)
+      expect(color).toBe('green');
     else expect(color).toBe('brightgreen');
   });
 });

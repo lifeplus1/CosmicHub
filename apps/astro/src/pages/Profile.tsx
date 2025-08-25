@@ -9,7 +9,9 @@ import { devConsole } from '../config/environment';
 // (Profile page currently does not use tier details directly; removed local subscription import)
 
 // Lazy load heavy components
-const ChartPreferences = React.lazy(() => import('../components/ChartPreferences'));
+const ChartPreferences = React.lazy(
+  () => import('../components/ChartPreferences')
+);
 
 interface UserStats {
   totalCharts: number;
@@ -45,7 +47,7 @@ const Profile: React.FC = React.memo(() => {
   }, [user?.uid, user?.metadata?.creationTime]);
 
   useEffect(() => {
-  void loadUserStats();
+    void loadUserStats();
   }, [loadUserStats]);
 
   const handleSignOut = useCallback(async () => {
@@ -54,21 +56,33 @@ const Profile: React.FC = React.memo(() => {
       toast({ description: 'Signed out successfully', status: 'success' });
       navigate('/login');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'An unknown error occurred';
       devConsole.error('❌ Sign out error:', error);
       toast({
         description: `Error signing out: ${errorMessage}`,
-        status: 'error'
+        status: 'error',
       });
     }
   }, [signOut, navigate, toast]);
 
   if (user === null || user === undefined) {
     return (
-      <div className="py-10 text-center">
-        <div className="mx-auto text-4xl text-cosmic-purple animate-spin" aria-hidden="true">⭐</div>
-        <p className="mt-4 text-cosmic-silver">Please sign in to view your profile</p>
-        <Button onClick={() => navigate('/login')} variant="primary" className="mt-4">
+      <div className='py-10 text-center'>
+        <div
+          className='mx-auto text-4xl text-cosmic-purple animate-spin'
+          aria-hidden='true'
+        >
+          ⭐
+        </div>
+        <p className='mt-4 text-cosmic-silver'>
+          Please sign in to view your profile
+        </p>
+        <Button
+          onClick={() => navigate('/login')}
+          variant='primary'
+          className='mt-4'
+        >
           Sign In
         </Button>
       </div>
@@ -76,98 +90,132 @@ const Profile: React.FC = React.memo(() => {
   }
 
   return (
-    <div className="max-w-4xl py-8 mx-auto">
-      <div className="cosmic-card p-6 rounded-lg shadow-lg bg-cosmic-dark">
-        <div className="flex flex-col items-center mb-6 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6">
-          <div className="flex items-center justify-center w-24 h-24 rounded-full bg-cosmic-blue/30">
-            <FaUser className="text-3xl text-cosmic-silver" aria-hidden="true" />
+    <div className='max-w-4xl py-8 mx-auto'>
+      <div className='cosmic-card p-6 rounded-lg shadow-lg bg-cosmic-dark'>
+        <div className='flex flex-col items-center mb-6 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6'>
+          <div className='flex items-center justify-center w-24 h-24 rounded-full bg-cosmic-blue/30'>
+            <FaUser
+              className='text-3xl text-cosmic-silver'
+              aria-hidden='true'
+            />
           </div>
-          <div className="text-center sm:text-left">
-            <h2 className="text-2xl font-bold text-cosmic-gold">{user.email}</h2>
-            <span className="bg-cosmic-purple/20 text-cosmic-purple px-2 py-1 rounded text-sm font-semibold uppercase">
+          <div className='text-center sm:text-left'>
+            <h2 className='text-2xl font-bold text-cosmic-gold'>
+              {user.email}
+            </h2>
+            <span className='bg-cosmic-purple/20 text-cosmic-purple px-2 py-1 rounded text-sm font-semibold uppercase'>
               Free Tier
             </span>
           </div>
         </div>
 
-        <Tabs.Root defaultValue="overview" className="space-y-6">
-          <Tabs.List className="flex mb-6 border-b border-cosmic-silver/30" aria-label="Profile Tabs">
+        <Tabs.Root defaultValue='overview' className='space-y-6'>
+          <Tabs.List
+            className='flex mb-6 border-b border-cosmic-silver/30'
+            aria-label='Profile Tabs'
+          >
             <Tabs.Trigger
-              value="overview"
-              className="px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple"
+              value='overview'
+              className='px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
             >
               Overview
             </Tabs.Trigger>
             <Tabs.Trigger
-              value="preferences"
-              className="px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple"
+              value='preferences'
+              className='px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
             >
               Preferences
             </Tabs.Trigger>
             <Tabs.Trigger
-              value="account"
-              className="px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple"
+              value='account'
+              className='px-4 py-2 text-cosmic-silver data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
             >
               Account
             </Tabs.Trigger>
           </Tabs.List>
 
-          <Tabs.Content value="overview">
-            <div className="space-y-6">
-              <Card title="Account Overview">
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-cosmic-silver">Email</span>
-                    <span className="text-cosmic-gold">{user.email}</span>
+          <Tabs.Content value='overview'>
+            <div className='space-y-6'>
+              <Card title='Account Overview'>
+                <div className='space-y-4'>
+                  <div className='flex justify-between'>
+                    <span className='text-cosmic-silver'>Email</span>
+                    <span className='text-cosmic-gold'>{user.email}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-cosmic-silver">Account ID</span>
-                    <span className="text-cosmic-gold font-mono text-sm">{user.uid.slice(0, 8)}...</span>
+                  <div className='flex justify-between'>
+                    <span className='text-cosmic-silver'>Account ID</span>
+                    <span className='text-cosmic-gold font-mono text-sm'>
+                      {user.uid.slice(0, 8)}...
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-cosmic-silver">Joined</span>
-                    <span className="text-cosmic-gold">{userStats.joinDate.toLocaleDateString()}</span>
+                  <div className='flex justify-between'>
+                    <span className='text-cosmic-silver'>Joined</span>
+                    <span className='text-cosmic-gold'>
+                      {userStats.joinDate.toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
               </Card>
-              
-              <Card title="Activity Summary">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+              <Card title='Activity Summary'>
+                <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
                   <div>
-                    <p className="text-cosmic-silver">Total Charts</p>
-                    <p className="text-2xl font-bold text-cosmic-gold">{userStats.totalCharts}</p>
+                    <p className='text-cosmic-silver'>Total Charts</p>
+                    <p className='text-2xl font-bold text-cosmic-gold'>
+                      {userStats.totalCharts}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-cosmic-silver">Charts This Month</p>
-                    <p className="text-2xl font-bold text-cosmic-gold">{userStats.chartsThisMonth}</p>
+                    <p className='text-cosmic-silver'>Charts This Month</p>
+                    <p className='text-2xl font-bold text-cosmic-gold'>
+                      {userStats.chartsThisMonth}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-cosmic-silver">Saved Charts</p>
-                    <p className="text-2xl font-bold text-cosmic-gold">{userStats.savedCharts}</p>
+                    <p className='text-cosmic-silver'>Saved Charts</p>
+                    <p className='text-2xl font-bold text-cosmic-gold'>
+                      {userStats.savedCharts}
+                    </p>
                   </div>
                 </div>
               </Card>
             </div>
           </Tabs.Content>
 
-          <Tabs.Content value="preferences">
-            <React.Suspense fallback={<div className="text-cosmic-silver">Loading preferences...</div>}>
+          <Tabs.Content value='preferences'>
+            <React.Suspense
+              fallback={
+                <div className='text-cosmic-silver'>Loading preferences...</div>
+              }
+            >
               <ChartPreferences />
             </React.Suspense>
           </Tabs.Content>
 
-          <Tabs.Content value="account">
-            <Card title="Subscription">
-              <div className="text-center space-y-4">
-                <p className="text-cosmic-silver">You are currently on the Free plan</p>
-                <Button onClick={() => { navigate('/upgrade'); }} variant="primary">
-                  <FaArrowUp className="mr-2" /> Upgrade to Premium
+          <Tabs.Content value='account'>
+            <Card title='Subscription'>
+              <div className='text-center space-y-4'>
+                <p className='text-cosmic-silver'>
+                  You are currently on the Free plan
+                </p>
+                <Button
+                  onClick={() => {
+                    navigate('/upgrade');
+                  }}
+                  variant='primary'
+                >
+                  <FaArrowUp className='mr-2' /> Upgrade to Premium
                 </Button>
               </div>
             </Card>
-            
-            <div className="text-center mt-6">
-              <Button onClick={() => { void handleSignOut(); }} variant="secondary">
+
+            <div className='text-center mt-6'>
+              <Button
+                onClick={() => {
+                  void handleSignOut();
+                }}
+                variant='secondary'
+              >
                 Sign Out
               </Button>
             </div>

@@ -4,11 +4,11 @@ import { AngleTable } from '../';
 
 const sample = [
   { name: 'Ascendant', sign: 'Leo', degree: '15.00' },
-  { name: 'Midheaven', sign: 'Taurus', degree: '02.50' }
+  { name: 'Midheaven', sign: 'Taurus', degree: '02.50' },
 ];
 
 const fallbackSample = [
-  { name: 'UnknownAngle', sign: 'UnknownSign', degree: '10.00' }
+  { name: 'UnknownAngle', sign: 'UnknownSign', degree: '10.00' },
 ];
 
 describe('AngleTable', () => {

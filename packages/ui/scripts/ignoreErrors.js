@@ -8,7 +8,7 @@
 const IGNORED_ERRORS = [
   7016, // Could not find a declaration file for module
   2339, // Property X does not exist
-  2307  // Cannot find module
+  2307, // Cannot find module
 ];
 
 // Main filter function

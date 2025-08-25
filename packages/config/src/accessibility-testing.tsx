@@ -17,7 +17,7 @@ export interface AccessibilityStandards {
   };
   colorContrast: {
     normalText: number; // 4.5:1 for AA, 7:1 for AAA
-    largeText: number;  // 3:1 for AA, 4.5:1 for AAA
+    largeText: number; // 3:1 for AA, 4.5:1 for AAA
   };
   focusManagement: boolean;
   keyboardNavigation: boolean;
@@ -26,40 +26,40 @@ export interface AccessibilityStandards {
 }
 
 const WCAG_STANDARDS: Record<string, AccessibilityStandards> = {
-  'AA': {
+  AA: {
     level: 'AA',
     guidelines: {
       perceivable: true,
       operable: true,
       understandable: true,
-      robust: true
+      robust: true,
     },
     colorContrast: {
       normalText: 4.5,
-      largeText: 3.0
+      largeText: 3.0,
     },
     focusManagement: true,
     keyboardNavigation: true,
     screenReaderSupport: true,
-    semanticHTML: true
+    semanticHTML: true,
   },
-  'AAA': {
+  AAA: {
     level: 'AAA',
     guidelines: {
       perceivable: true,
       operable: true,
       understandable: true,
-      robust: true
+      robust: true,
     },
     colorContrast: {
       normalText: 7.0,
-      largeText: 4.5
+      largeText: 4.5,
     },
     focusManagement: true,
     keyboardNavigation: true,
     screenReaderSupport: true,
-    semanticHTML: true
-  }
+    semanticHTML: true,
+  },
 };
 
 // Accessibility audit result interface
@@ -103,12 +103,12 @@ export class ColorContrastAnalyzer {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
-    
+
     // Ensure all values are defined (they should be since we're passing numbers)
     if (rs === undefined || gs === undefined || bs === undefined) {
       return 0;
     }
-    
+
     return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
   }
 
@@ -116,7 +116,7 @@ export class ColorContrastAnalyzer {
   static calculateContrast(color1: string, color2: string): number {
     const rgb1 = this.hexToRgb(color1);
     const rgb2 = this.hexToRgb(color2);
-    
+
     if (!rgb1 || !rgb2) return 0;
 
     const lum1 = this.getLuminance(rgb1.r, rgb1.g, rgb1.b);
@@ -129,7 +129,9 @@ export class ColorContrastAnalyzer {
   }
 
   // Convert hex color to RGB
-  private static hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  private static hexToRgb(
+    hex: string
+  ): { r: number; g: number; b: number } | null {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     if (!result?.[1] || !result[2] || !result[3]) {
       return null;
@@ -137,26 +139,35 @@ export class ColorContrastAnalyzer {
     return {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
+      b: parseInt(result[3], 16),
     };
   }
 
   // Get computed color from element
-  static getElementColors(element: HTMLElement): { foreground: string; background: string } {
+  static getElementColors(element: HTMLElement): {
+    foreground: string;
+    background: string;
+  } {
     const computedStyle = window.getComputedStyle(element);
     return {
       foreground: computedStyle.color,
-      background: computedStyle.backgroundColor
+      background: computedStyle.backgroundColor,
     };
   }
 
   // Check if contrast meets WCAG standards
-  static meetsWCAG(contrast: number, level: 'AA' | 'AAA', isLargeText: boolean = false): boolean {
+  static meetsWCAG(
+    contrast: number,
+    level: 'AA' | 'AAA',
+    isLargeText: boolean = false
+  ): boolean {
     const standards = WCAG_STANDARDS[level];
     if (!standards) {
       return false;
     }
-    const required = isLargeText ? standards.colorContrast.largeText : standards.colorContrast.normalText;
+    const required = isLargeText
+      ? standards.colorContrast.largeText
+      : standards.colorContrast.normalText;
     return contrast >= required;
   }
 }
@@ -172,12 +183,14 @@ export class FocusManagementAnalyzer {
       'select',
       'textarea',
       '[tabindex]:not([tabindex="-1"])',
-      '[contenteditable]'
+      '[contenteditable]',
     ];
 
-    return focusableSelectors.some(selector => element.matches(selector)) &&
-           !element.hasAttribute('disabled') &&
-           element.tabIndex !== -1;
+    return (
+      focusableSelectors.some(selector => element.matches(selector)) &&
+      !element.hasAttribute('disabled') &&
+      element.tabIndex !== -1
+    );
   }
 
   // Get all focusable elements in order
@@ -189,16 +202,16 @@ export class FocusManagementAnalyzer {
       'select:not([disabled])',
       'textarea:not([disabled])',
       '[tabindex]:not([tabindex="-1"])',
-      '[contenteditable]'
+      '[contenteditable]',
     ].join(', ');
 
     const elements = Array.from(container.querySelectorAll(focusableSelectors));
-    
+
     // Sort by tabindex
     return (elements as HTMLElement[]).sort((a, b) => {
       const aTab = parseInt(a.getAttribute('tabindex') ?? '0');
       const bTab = parseInt(b.getAttribute('tabindex') ?? '0');
-      
+
       if (aTab === 0 && bTab === 0) return 0;
       if (aTab === 0) return 1;
       if (bTab === 0) return -1;
@@ -214,9 +227,11 @@ export class FocusManagementAnalyzer {
     // Check if Tab from last element focuses first element
     // Check if Shift+Tab from first element focuses last element
     // This would require actual browser testing, so we'll check for event listeners
-    return container.hasAttribute('role') && 
-           (container.getAttribute('role') === 'dialog' || 
-            container.getAttribute('role') === 'alertdialog');
+    return (
+      container.hasAttribute('role') &&
+      (container.getAttribute('role') === 'dialog' ||
+        container.getAttribute('role') === 'alertdialog')
+    );
   }
 }
 
@@ -229,11 +244,34 @@ export class SemanticHTMLAnalyzer {
     score: number;
   } {
     const semanticTags = [
-      'header', 'nav', 'main', 'aside', 'section', 'article', 
-      'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'button', 'input', 'select', 'textarea', 'label',
-      'table', 'thead', 'tbody', 'th', 'td', 'caption',
-      'figure', 'figcaption', 'time', 'address'
+      'header',
+      'nav',
+      'main',
+      'aside',
+      'section',
+      'article',
+      'footer',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'button',
+      'input',
+      'select',
+      'textarea',
+      'label',
+      'table',
+      'thead',
+      'tbody',
+      'th',
+      'td',
+      'caption',
+      'figure',
+      'figcaption',
+      'time',
+      'address',
     ];
 
     const nonSemanticTags = ['div', 'span'];
@@ -246,13 +284,17 @@ export class SemanticHTMLAnalyzer {
       const tagName = element.tagName.toLowerCase();
       if (semanticTags.includes(tagName)) {
         semanticElements.push(tagName);
-      } else if (nonSemanticTags.includes(tagName) && !element.getAttribute('role')) {
+      } else if (
+        nonSemanticTags.includes(tagName) &&
+        !element.getAttribute('role')
+      ) {
         nonSemanticElements.push(tagName);
       }
     });
 
     const totalElements = semanticElements.length + nonSemanticElements.length;
-    const score = totalElements > 0 ? (semanticElements.length / totalElements) * 100 : 100;
+    const score =
+      totalElements > 0 ? (semanticElements.length / totalElements) * 100 : 100;
 
     return { semanticElements, nonSemanticElements, score };
   }
@@ -262,7 +304,9 @@ export class SemanticHTMLAnalyzer {
     valid: boolean;
     issues: string[];
   } {
-    const headings = Array.from(container.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+    const headings = Array.from(
+      container.querySelectorAll('h1, h2, h3, h4, h5, h6')
+    );
     const issues: string[] = [];
 
     if (headings.length === 0) {
@@ -272,15 +316,17 @@ export class SemanticHTMLAnalyzer {
     let previousLevel = 0;
     headings.forEach((heading, index) => {
       const level = parseInt(heading.tagName.charAt(1));
-      
+
       if (index === 0 && level !== 1) {
         issues.push('First heading should be h1');
       }
-      
+
       if (level > previousLevel + 1) {
-        issues.push(`Heading level ${level} follows h${previousLevel}, skipping levels`);
+        issues.push(
+          `Heading level ${level} follows h${previousLevel}, skipping levels`
+        );
       }
-      
+
       previousLevel = level;
     });
 
@@ -300,20 +346,32 @@ export class ARIAAnalyzer {
     const recommendations: string[] = [];
 
     // Check for invalid ARIA attributes
-    const ariaElements = Array.from(container.querySelectorAll('[class*="aria-"], [aria-]'));
-    
+    const ariaElements = Array.from(
+      container.querySelectorAll('[class*="aria-"], [aria-]')
+    );
+
     ariaElements.forEach(element => {
       const attributes = Array.from(element.attributes);
-      
+
       attributes.forEach(attr => {
         if (attr.name.startsWith('aria-')) {
           // Check for common ARIA mistakes
-          if (attr.name === 'aria-labelledby' && !document.getElementById(attr.value)) {
-            issues.push(`aria-labelledby references non-existent element: ${attr.value}`);
+          if (
+            attr.name === 'aria-labelledby' &&
+            !document.getElementById(attr.value)
+          ) {
+            issues.push(
+              `aria-labelledby references non-existent element: ${attr.value}`
+            );
           }
-          
-          if (attr.name === 'aria-describedby' && !document.getElementById(attr.value)) {
-            issues.push(`aria-describedby references non-existent element: ${attr.value}`);
+
+          if (
+            attr.name === 'aria-describedby' &&
+            !document.getElementById(attr.value)
+          ) {
+            issues.push(
+              `aria-describedby references non-existent element: ${attr.value}`
+            );
           }
         }
       });
@@ -321,10 +379,11 @@ export class ARIAAnalyzer {
       // Check for missing ARIA labels
       const role = element.getAttribute('role');
       if (role && ['button', 'link', 'tab'].includes(role)) {
-        const hasLabel = element.hasAttribute('aria-label') || 
-                         element.hasAttribute('aria-labelledby') ||
-                         element.textContent?.trim();
-        
+        const hasLabel =
+          element.hasAttribute('aria-label') ||
+          element.hasAttribute('aria-labelledby') ||
+          element.textContent?.trim();
+
         if (!hasLabel) {
           issues.push(`Element with role="${role}" missing accessible name`);
         }
@@ -332,22 +391,28 @@ export class ARIAAnalyzer {
     });
 
     // Check for interactive elements without proper ARIA
-    const interactiveElements = Array.from(container.querySelectorAll(
-      'button, input, select, textarea, [role="button"], [role="link"], [role="tab"]'
-    ));
+    const interactiveElements = Array.from(
+      container.querySelectorAll(
+        'button, input, select, textarea, [role="button"], [role="link"], [role="tab"]'
+      )
+    );
 
     interactiveElements.forEach(element => {
-      if (!element.hasAttribute('aria-label') && 
-          !element.hasAttribute('aria-labelledby') &&
-          !element.textContent?.trim()) {
-        recommendations.push(`Add aria-label to ${element.tagName.toLowerCase()}`);
+      if (
+        !element.hasAttribute('aria-label') &&
+        !element.hasAttribute('aria-labelledby') &&
+        !element.textContent?.trim()
+      ) {
+        recommendations.push(
+          `Add aria-label to ${element.tagName.toLowerCase()}`
+        );
       }
     });
 
     return {
       validARIA: issues.length === 0,
       issues,
-      recommendations
+      recommendations,
     };
   }
 
@@ -368,16 +433,21 @@ export class ARIAAnalyzer {
 
     // Check for ARIA landmarks
     if (container.querySelector('[role="main"]')) foundLandmarks.push('main');
-    if (container.querySelector('[role="navigation"]')) foundLandmarks.push('navigation');
-    if (container.querySelector('[role="banner"]')) foundLandmarks.push('banner');
-    if (container.querySelector('[role="contentinfo"]')) foundLandmarks.push('contentinfo');
+    if (container.querySelector('[role="navigation"]'))
+      foundLandmarks.push('navigation');
+    if (container.querySelector('[role="banner"]'))
+      foundLandmarks.push('banner');
+    if (container.querySelector('[role="contentinfo"]'))
+      foundLandmarks.push('contentinfo');
 
-    const missing = expectedLandmarks.filter(landmark => !foundLandmarks.includes(landmark));
+    const missing = expectedLandmarks.filter(
+      landmark => !foundLandmarks.includes(landmark)
+    );
 
     return {
       hasLandmarks: foundLandmarks.length > 0,
       landmarks: Array.from(new Set(foundLandmarks)),
-      missing
+      missing,
     };
   }
 }
@@ -431,7 +501,7 @@ export class AccessibilityAuditor {
       warnings.push({
         id: 'semantic-html',
         description: `Semantic HTML score: ${semanticResults.score.toFixed(1)}%`,
-        recommendation: 'Use more semantic HTML elements instead of div/span'
+        recommendation: 'Use more semantic HTML elements instead of div/span',
       });
     }
 
@@ -441,14 +511,16 @@ export class AccessibilityAuditor {
     if (ariaResults.validARIA) {
       passedTests++;
     } else {
-      violations.push(...ariaResults.issues.map(issue => ({
-        id: 'aria-violation',
-        severity: 'serious' as const,
-        description: issue,
-        wcagRule: '4.1.2',
-        howToFix: 'Fix ARIA attribute references and add missing labels',
-        impact: 'Screen readers may not work correctly'
-      })));
+      violations.push(
+        ...ariaResults.issues.map(issue => ({
+          id: 'aria-violation',
+          severity: 'serious' as const,
+          description: issue,
+          wcagRule: '4.1.2',
+          howToFix: 'Fix ARIA attribute references and add missing labels',
+          impact: 'Screen readers may not work correctly',
+        }))
+      );
     }
     recommendations.push(...ariaResults.recommendations);
 
@@ -463,15 +535,18 @@ export class AccessibilityAuditor {
 
     // 6. Heading hierarchy checks
     totalTests++;
-    const headingResults = SemanticHTMLAnalyzer.checkHeadingHierarchy(container);
+    const headingResults =
+      SemanticHTMLAnalyzer.checkHeadingHierarchy(container);
     if (headingResults.valid) {
       passedTests++;
     } else {
-      warnings.push(...headingResults.issues.map(issue => ({
-        id: 'heading-hierarchy',
-        description: issue,
-        recommendation: 'Fix heading hierarchy to follow logical order'
-      })));
+      warnings.push(
+        ...headingResults.issues.map(issue => ({
+          id: 'heading-hierarchy',
+          description: issue,
+          recommendation: 'Fix heading hierarchy to follow logical order',
+        }))
+      );
     }
 
     const failedTests = totalTests - passedTests;
@@ -489,8 +564,8 @@ export class AccessibilityAuditor {
         totalTests,
         passedTests,
         failedTests,
-        warningTests
-      }
+        warningTests,
+      },
     };
   }
 
@@ -502,8 +577,10 @@ export class AccessibilityAuditor {
     const textElements = Array.from(container.querySelectorAll('*')).filter(
       (element: Element) => {
         const el = element as HTMLElement;
-        return el.textContent?.trim() && 
-               window.getComputedStyle(el).display !== 'none';
+        return (
+          el.textContent?.trim() &&
+          window.getComputedStyle(el).display !== 'none'
+        );
       }
     ) as HTMLElement[];
 
@@ -512,15 +589,22 @@ export class AccessibilityAuditor {
       const style = window.getComputedStyle(element);
       const fontSize = parseFloat(style.fontSize);
       const fontWeight = style.fontWeight;
-      
-      const isLargeText = fontSize >= 18 || (fontSize >= 14 && fontWeight === 'bold');
-      
+
+      const isLargeText =
+        fontSize >= 18 || (fontSize >= 14 && fontWeight === 'bold');
+
       // This is a simplified check - in reality you'd need to parse CSS colors properly
       if (colors.foreground && colors.background) {
         // Placeholder for actual contrast calculation
         const contrastRatio = 4.5; // This would be calculated properly
-        
-        if (!ColorContrastAnalyzer.meetsWCAG(contrastRatio, this.standards.level, isLargeText)) {
+
+        if (
+          !ColorContrastAnalyzer.meetsWCAG(
+            contrastRatio,
+            this.standards.level,
+            isLargeText
+          )
+        ) {
           violations.push({
             id: 'color-contrast',
             severity: 'serious',
@@ -528,7 +612,8 @@ export class AccessibilityAuditor {
             element,
             wcagRule: '1.4.3',
             howToFix: 'Increase color contrast between text and background',
-            impact: 'Users with visual impairments may not be able to read the text'
+            impact:
+              'Users with visual impairments may not be able to read the text',
           });
         }
       }
@@ -536,7 +621,7 @@ export class AccessibilityAuditor {
 
     return {
       passed: violations.length === 0,
-      violations
+      violations,
     };
   }
 
@@ -548,8 +633,9 @@ export class AccessibilityAuditor {
     const violations: AccessibilityViolation[] = [];
     const warnings: AccessibilityWarning[] = [];
 
-    const focusableElements = FocusManagementAnalyzer.getFocusableElements(container);
-    
+    const focusableElements =
+      FocusManagementAnalyzer.getFocusableElements(container);
+
     // Check for focus indicators
     focusableElements.forEach(element => {
       const style = window.getComputedStyle(element, ':focus');
@@ -558,7 +644,8 @@ export class AccessibilityAuditor {
           id: 'focus-indicator',
           description: 'Element may lack visible focus indicator',
           element,
-          recommendation: 'Ensure focusable elements have visible focus indicators'
+          recommendation:
+            'Ensure focusable elements have visible focus indicators',
         });
       }
     });
@@ -569,14 +656,14 @@ export class AccessibilityAuditor {
       warnings.push({
         id: 'skip-links',
         description: 'Consider adding skip links for keyboard navigation',
-        recommendation: 'Add skip links to main content for keyboard users'
+        recommendation: 'Add skip links to main content for keyboard users',
       });
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      warnings
+      warnings,
     };
   }
 
@@ -591,7 +678,9 @@ export class AccessibilityAuditor {
     const violations: AccessibilityViolation[] = [];
 
     // Check for keyboard traps
-    const modals = container.querySelectorAll('[role="dialog"], [role="alertdialog"]');
+    const modals = container.querySelectorAll(
+      '[role="dialog"], [role="alertdialog"]'
+    );
     modals.forEach(modal => {
       if (!FocusManagementAnalyzer.checkFocusTrap(modal as HTMLElement)) {
         violations.push({
@@ -601,30 +690,33 @@ export class AccessibilityAuditor {
           element: modal as HTMLElement,
           wcagRule: '2.1.2',
           howToFix: 'Implement proper focus trapping in modal dialogs',
-          impact: 'Keyboard users may lose focus context'
+          impact: 'Keyboard users may lose focus context',
         });
       }
     });
 
     // Check for custom interactive elements with proper keyboard support
-    const customInteractive = container.querySelectorAll('[role="button"], [role="link"], [role="tab"]');
+    const customInteractive = container.querySelectorAll(
+      '[role="button"], [role="link"], [role="tab"]'
+    );
     customInteractive.forEach(element => {
       if (!element.hasAttribute('tabindex')) {
         violations.push({
           id: 'keyboard-access',
           severity: 'serious',
-          description: 'Custom interactive element may not be keyboard accessible',
+          description:
+            'Custom interactive element may not be keyboard accessible',
           element: element as HTMLElement,
           wcagRule: '2.1.1',
           howToFix: 'Add tabindex="0" and keyboard event handlers',
-          impact: 'Element cannot be reached by keyboard users'
+          impact: 'Element cannot be reached by keyboard users',
         });
       }
     });
 
     return {
       passed: violations.length === 0,
-      violations
+      violations,
     };
   }
 }
@@ -633,14 +725,20 @@ export class AccessibilityAuditor {
 export function useAccessibilityAuditor(level: 'AA' | 'AAA' = 'AA') {
   const auditor = React.useMemo(() => new AccessibilityAuditor(level), [level]);
 
-  const auditElement = React.useCallback((element: HTMLElement) => {
-    return auditor.audit(element);
-  }, [auditor]);
+  const auditElement = React.useCallback(
+    (element: HTMLElement) => {
+      return auditor.audit(element);
+    },
+    [auditor]
+  );
 
-  const auditComponent = React.useCallback((testId: string) => {
-    const element = screen.getByTestId(testId);
-    return auditor.audit(element);
-  }, [auditor]);
+  const auditComponent = React.useCallback(
+    (testId: string) => {
+      const element = screen.getByTestId(testId);
+      return auditor.audit(element);
+    },
+    [auditor]
+  );
 
   return { auditElement, auditComponent };
 }
@@ -652,5 +750,5 @@ export const AccessibilityTestUtils = {
   SemanticHTMLAnalyzer,
   ARIAAnalyzer,
   AccessibilityAuditor,
-  WCAG_STANDARDS
+  WCAG_STANDARDS,
 };

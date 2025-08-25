@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest';
 // Updated to import from shared config package instead of local deprecated apiResult.ts
-import { ok, fail, toFailure, unwrap, unwrapOr, mapResult, mapSuccess, mapFailure, isSuccess, isFailure } from '@cosmichub/config';
+import {
+  ok,
+  fail,
+  toFailure,
+  unwrap,
+  unwrapOr,
+  mapResult,
+  mapSuccess,
+  mapFailure,
+  isSuccess,
+  isFailure,
+} from '@cosmichub/config';
 import type { ApiResult, ApiFailure } from '@cosmichub/config';
 
 describe('apiResult helpers', () => {
@@ -23,7 +34,9 @@ describe('apiResult helpers', () => {
   });
 
   it('toFailure maps axios 401', () => {
-    const error = { response: { status: 401 } } as unknown as { response: { status: number } };
+    const error = { response: { status: 401 } } as unknown as {
+      response: { status: number };
+    };
     const res = toFailure(error, { defaultMsg: 'x', auth: 'Need auth' });
     expect(res.success).toBe(false);
     if (!res.success) {
@@ -47,12 +60,18 @@ describe('apiResult helpers', () => {
 
   it('mapResult / mapSuccess / mapFailure operate correctly', () => {
     const s = ok(2);
-  const mapped = mapSuccess(s, (v: number) => v * 3);
+    const mapped = mapSuccess(s, (v: number) => v * 3);
     expect(isSuccess(mapped) && mapped.data).toBe(6);
     const failure = fail('oops', '500');
-  const mappedFail = mapFailure(failure, (f: ApiFailure) => fail(f.error + '!', f.code));
+    const mappedFail = mapFailure(failure, (f: ApiFailure) =>
+      fail(f.error + '!', f.code)
+    );
     expect(isFailure(mappedFail) && mappedFail.error.endsWith('!')).toBe(true);
-  const summary = mapResult<number, string>(ok(7), (v: number) => `ok:${v}`, (f: ApiFailure) => f.error);
+    const summary = mapResult<number, string>(
+      ok(7),
+      (v: number) => `ok:${v}`,
+      (f: ApiFailure) => f.error
+    );
     expect(summary).toBe('ok:7'.replace(' ', '')); // ensure exact
   });
 });

@@ -12,9 +12,19 @@ export const options = {
 
 export default function () {
   const payload = JSON.stringify({
-    year: 1990, month: 6, day: 15, hour: 10, minute: 30, city: 'London', timezone: 'Europe/London'
+    year: 1990,
+    month: 6,
+    day: 15,
+    hour: 10,
+    minute: 30,
+    city: 'London',
+    timezone: 'Europe/London',
   });
-  const res = http.post(`${__ENV.BASE_URL || 'http://localhost:8000'}/calculate`, payload, { headers: { 'Content-Type': 'application/json' } });
+  const res = http.post(
+    `${__ENV.BASE_URL || 'http://localhost:8000'}/calculate`,
+    payload,
+    { headers: { 'Content-Type': 'application/json' } }
+  );
   check(res, { 'status 200': r => r.status === 200 });
   sleep(0.3);
 }

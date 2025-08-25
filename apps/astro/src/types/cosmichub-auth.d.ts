@@ -30,7 +30,11 @@ declare module '@cosmichub/auth' {
     hasFeature: (feature: string, app?: 'astro' | 'healwave') => boolean;
     upgradeRequired: (feature: string) => void;
     refreshSubscription: () => Promise<void>;
-    checkUsageLimit?: (limitType: string) => { allowed: boolean; current: number; limit: number };
+    checkUsageLimit?: (limitType: string) => {
+      allowed: boolean;
+      current: number;
+      limit: number;
+    };
   }
 
   export const useSubscription: () => SubscriptionState;

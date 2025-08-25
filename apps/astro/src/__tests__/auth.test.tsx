@@ -5,18 +5,20 @@ import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '@cosmichub/auth';
 
-const TestWrapper = ({ children }: { children: React.ReactNode }): React.ReactElement => (
+const TestWrapper = ({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement => (
   <MemoryRouter>
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <AuthProvider>{children}</AuthProvider>
   </MemoryRouter>
 );
 
 describe('Auth functionality', () => {
   it('provides auth context to children', () => {
     const TestComponent = (): React.ReactElement => <div>Test Component</div>;
-    
+
     render(
       <TestWrapper>
         <TestComponent />

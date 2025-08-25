@@ -15,7 +15,7 @@ export interface ChartBirthData extends UnifiedBirthData {
 // Type guard for ChartBirthData
 export function isChartBirthData(value: unknown): value is ChartBirthData {
   if (value === null || typeof value !== 'object') return false;
-  
+
   const data = value as Partial<ChartBirthData>;
   return (
     typeof data.year === 'number' &&
@@ -27,10 +27,14 @@ export function isChartBirthData(value: unknown): value is ChartBirthData {
     typeof data.lat === 'number' &&
     typeof data.lon === 'number' &&
     typeof data.timezone === 'string' &&
-    data.month >= 1 && data.month <= 12 &&
-    data.day >= 1 && data.day <= 31 &&
-    data.hour >= 0 && data.hour <= 23 &&
-    data.minute >= 0 && data.minute <= 59
+    data.month >= 1 &&
+    data.month <= 12 &&
+    data.day >= 1 &&
+    data.day <= 31 &&
+    data.hour >= 0 &&
+    data.hour <= 23 &&
+    data.minute >= 0 &&
+    data.minute <= 59
   );
 }
 
@@ -46,7 +50,7 @@ export interface StoredBirthData {
 // Type guard for StoredBirthData
 export function isStoredBirthData(value: unknown): value is StoredBirthData {
   if (value === null || typeof value !== 'object') return false;
-  
+
   const data = value as Partial<StoredBirthData>;
   return (
     typeof data.date === 'string' &&

@@ -13,7 +13,7 @@ export const useUsageTracking = () => {
   const [usage, setUsage] = useState<UsageData>({
     chartsThisMonth: 0,
     savedCharts: 0,
-    lastReset: new Date().toISOString().slice(0, 7) // YYYY-MM format
+    lastReset: new Date().toISOString().slice(0, 7), // YYYY-MM format
   });
 
   // Load usage from localStorage on mount
@@ -26,17 +26,29 @@ export const useUsageTracking = () => {
 
     const parsedUsage = safeJsonParse<Partial<UsageData>>(stored, {});
     const currentMonth = new Date().toISOString().slice(0, 7);
-    const lastReset = isNonEmptyString(parsedUsage.lastReset) ? parsedUsage.lastReset : currentMonth;
+    const lastReset = isNonEmptyString(parsedUsage.lastReset)
+      ? parsedUsage.lastReset
+      : currentMonth;
 
     // Build merged usage with sane defaults
     const merged: UsageData = {
-      chartsThisMonth: typeof parsedUsage.chartsThisMonth === 'number' ? parsedUsage.chartsThisMonth : 0,
-      savedCharts: typeof parsedUsage.savedCharts === 'number' ? parsedUsage.savedCharts : 0,
-      lastReset
+      chartsThisMonth:
+        typeof parsedUsage.chartsThisMonth === 'number'
+          ? parsedUsage.chartsThisMonth
+          : 0,
+      savedCharts:
+        typeof parsedUsage.savedCharts === 'number'
+          ? parsedUsage.savedCharts
+          : 0,
+      lastReset,
     };
 
     if (merged.lastReset !== currentMonth) {
-      const resetUsage: UsageData = { ...merged, chartsThisMonth: 0, lastReset: currentMonth };
+      const resetUsage: UsageData = {
+        ...merged,
+        chartsThisMonth: 0,
+        lastReset: currentMonth,
+      };
       setUsage(resetUsage);
       localStorage.setItem(key, JSON.stringify(resetUsage));
     } else {
@@ -59,13 +71,16 @@ export const useUsageTracking = () => {
   }, []);
 
   const decrementSavedChart = useCallback(() => {
-    setUsage(prev => ({ ...prev, savedCharts: Math.max(0, prev.savedCharts - 1) }));
+    setUsage(prev => ({
+      ...prev,
+      savedCharts: Math.max(0, prev.savedCharts - 1),
+    }));
   }, []);
 
   return {
     usage,
     incrementChartCalculation,
     incrementSavedChart,
-    decrementSavedChart
+    decrementSavedChart,
   };
 };

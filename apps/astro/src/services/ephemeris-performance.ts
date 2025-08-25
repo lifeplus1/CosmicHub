@@ -1,6 +1,6 @@
 /**
  * Performance monitoring for ephemeris operations.
- * 
+ *
  * This module provides utilities to monitor cache hit rates, latency,
  * and other performance metrics for the ephemeris service.
  */
@@ -58,8 +58,13 @@ class EphemerisPerformanceMonitor {
     }
 
     // Development logging routed through devConsole to respect global logging policy
-    if (loggingConfig.enableConsole === true && loggingConfig.level === 'debug') {
-      devConsole.log?.(`[Ephemeris] ${operation}: ${latency}ms (cache: ${cacheHit ? 'hit' : 'miss'})`);
+    if (
+      loggingConfig.enableConsole === true &&
+      loggingConfig.level === 'debug'
+    ) {
+      devConsole.log?.(
+        `[Ephemeris] ${operation}: ${latency}ms (cache: ${cacheHit ? 'hit' : 'miss'})`
+      );
     }
   }
 
@@ -69,7 +74,7 @@ class EphemerisPerformanceMonitor {
   getMetrics(): PerformanceMetrics {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    
+
     // Filter to last hour for more relevant metrics
     const recentEntries = this.entries.filter(
       entry => entry.timestamp >= oneHourAgo
@@ -78,12 +83,18 @@ class EphemerisPerformanceMonitor {
     const totalRequests = recentEntries.length;
     const cacheHits = recentEntries.filter(entry => entry.cacheHit).length;
     const cacheMisses = totalRequests - cacheHits;
-    const errors = recentEntries.filter(entry => entry.success === false).length;
-    
-    const totalLatency = recentEntries.reduce((sum, entry) => sum + entry.latency, 0);
+    const errors = recentEntries.filter(
+      entry => entry.success === false
+    ).length;
+
+    const totalLatency = recentEntries.reduce(
+      (sum, entry) => sum + entry.latency,
+      0
+    );
     const averageLatency = totalRequests > 0 ? totalLatency / totalRequests : 0;
-    
-    const cacheHitRate = totalRequests > 0 ? (cacheHits / totalRequests) * 100 : 0;
+
+    const cacheHitRate =
+      totalRequests > 0 ? (cacheHits / totalRequests) * 100 : 0;
 
     return {
       cacheHitRate,
@@ -115,7 +126,7 @@ class EphemerisPerformanceMonitor {
    */
   getSummary(): string {
     const metrics = this.getMetrics();
-    
+
     return [
       `Ephemeris Performance Summary:`,
       `  Total requests: ${metrics.totalRequests}`,
@@ -157,8 +168,15 @@ export function withPerformanceMonitoring<TArgs extends unknown[], TResult>(
     } catch (error) {
       const endTime = performance.now();
       const latency = endTime - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      ephemerisMonitor.recordOperation(operation, latency, cacheHit, false, errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      ephemerisMonitor.recordOperation(
+        operation,
+        latency,
+        cacheHit,
+        false,
+        errorMessage
+      );
       throw error;
     }
   };
@@ -168,7 +186,7 @@ export function withPerformanceMonitoring<TArgs extends unknown[], TResult>(
  * React hook to get real-time performance metrics.
  */
 export function useEphemerisPerformanceMetrics() {
-  const [metrics, setMetrics] = React.useState<PerformanceMetrics>(() => 
+  const [metrics, setMetrics] = React.useState<PerformanceMetrics>(() =>
     ephemerisMonitor.getMetrics()
   );
 

@@ -9,27 +9,18 @@ class PWALogger {
   static log(message: string, ...args: unknown[]): void {
     if (this.isDevelopment) {
       // eslint-disable-next-line no-console
-      console.info(
-        message,
-        ...args
-      );  
+      console.info(message, ...args);
     }
   }
   static warn(message: string, ...args: unknown[]): void {
     if (this.isDevelopment) {
       // eslint-disable-next-line no-console
-      console.warn(
-        message,
-        ...args
-      );  
+      console.warn(message, ...args);
     }
   }
   static error(message: string, ...args: unknown[]): void {
     // eslint-disable-next-line no-console
-    console.error(
-      message,
-      ...args
-    );  
+    console.error(message, ...args);
   }
 }
 
@@ -62,17 +53,23 @@ class PWACapabilitiesDetector {
     const isIOS = /iphone|ipad|ipod/.test(userAgent);
     const isAndroid = /android/.test(userAgent);
     const isMobile = isIOS || isAndroid || /mobile/.test(userAgent);
-    
+
     return {
-      platform: isIOS ? 'ios' as const : 
-                isAndroid ? 'android' as const :
-                isMobile ? 'other' as const : 'desktop' as const,
-      isStandalone: window.matchMedia('(display-mode: standalone)').matches ||
-                    // @ts-expect-error - iOS specific property
-                    window.navigator.standalone === true,
-      supportsInstall: 'serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window,
+      platform: isIOS
+        ? ('ios' as const)
+        : isAndroid
+          ? ('android' as const)
+          : isMobile
+            ? ('other' as const)
+            : ('desktop' as const),
+      isStandalone:
+        window.matchMedia('(display-mode: standalone)').matches ||
+        // @ts-expect-error - iOS specific property
+        window.navigator.standalone === true,
+      supportsInstall:
+        'serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window,
       supportsPush: 'serviceWorker' in navigator && 'PushManager' in window,
-      isMobile
+      isMobile,
     };
   }
 
@@ -110,14 +107,18 @@ class MobileGestureHandler {
   }
 
   private attachListeners(): void {
-    document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
-    document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
+    document.addEventListener('touchstart', this.handleTouchStart.bind(this), {
+      passive: true,
+    });
+    document.addEventListener('touchend', this.handleTouchEnd.bind(this), {
+      passive: true,
+    });
   }
 
   private handleTouchStart(e: TouchEvent): void {
     const touch = e.touches[0];
     if (!touch) return;
-    
+
     this.touchStartX = touch.clientX;
     this.touchStartY = touch.clientY;
     this.touchStartTime = Date.now();
@@ -131,7 +132,7 @@ class MobileGestureHandler {
     this.touchEndY = touch.clientY;
 
     const touchDuration = Date.now() - this.touchStartTime;
-    
+
     if (touchDuration < this.maxTapDuration) {
       this.handleTap();
     } else {
@@ -142,7 +143,10 @@ class MobileGestureHandler {
   private handleTap(): void {
     // Enhanced tap feedback for mobile
     const target = document.elementFromPoint(this.touchEndX, this.touchEndY);
-    if (target instanceof HTMLElement && target.matches('button, [role="button"], a')) {
+    if (
+      target instanceof HTMLElement &&
+      target.matches('button, [role="button"], a')
+    ) {
       target.style.transform = 'scale(0.95)';
       setTimeout(() => {
         target.style.transform = '';
@@ -172,7 +176,7 @@ class MobileGestureHandler {
   }
 
   private onSwipeRight(): void {
-    // Custom event for swipe right - can be used for navigation  
+    // Custom event for swipe right - can be used for navigation
     document.dispatchEvent(new CustomEvent('healwave:swipe-right'));
   }
 }
@@ -202,18 +206,21 @@ class MobileViewportOptimizer {
 
   private preventZoom(): void {
     // Prevent accidental zoom on mobile
-    document.addEventListener('gesturestart', (e) => e.preventDefault());
-    document.addEventListener('gesturechange', (e) => e.preventDefault());
-    
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('gesturechange', e => e.preventDefault());
+
     // Handle viewport meta tag dynamically
-    let viewportMeta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement;
+    let viewportMeta = document.querySelector(
+      'meta[name="viewport"]'
+    ) as HTMLMetaElement;
     if (!viewportMeta) {
       viewportMeta = document.createElement('meta');
       viewportMeta.name = 'viewport';
       document.head.appendChild(viewportMeta);
     }
-    
-    viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+
+    viewportMeta.content =
+      'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
   }
 
   private setupSafeAreaSupport(): void {
@@ -223,15 +230,27 @@ class MobileViewportOptimizer {
     const safeAreaBottom = 'env(safe-area-inset-bottom)';
     const safeAreaLeft = 'env(safe-area-inset-left)';
 
-    document.documentElement.style.setProperty('--safe-area-inset-top', safeAreaTop);
-    document.documentElement.style.setProperty('--safe-area-inset-right', safeAreaRight);
-    document.documentElement.style.setProperty('--safe-area-inset-bottom', safeAreaBottom);
-    document.documentElement.style.setProperty('--safe-area-inset-left', safeAreaLeft);
+    document.documentElement.style.setProperty(
+      '--safe-area-inset-top',
+      safeAreaTop
+    );
+    document.documentElement.style.setProperty(
+      '--safe-area-inset-right',
+      safeAreaRight
+    );
+    document.documentElement.style.setProperty(
+      '--safe-area-inset-bottom',
+      safeAreaBottom
+    );
+    document.documentElement.style.setProperty(
+      '--safe-area-inset-left',
+      safeAreaLeft
+    );
   }
 
   private setupViewportListeners(): void {
     let resizeTimeout: number;
-    
+
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = window.setTimeout(() => {
@@ -253,19 +272,22 @@ class MobileViewportOptimizer {
  */
 function initializeMobileEnhancements(): void {
   const detector = PWACapabilitiesDetector.getInstance();
-  
+
   if (detector.isMobile) {
     PWALogger.log('🎧 Initializing mobile enhancements for HealWave...');
-    
+
     // Initialize gesture handling
     new MobileGestureHandler();
-    
+
     // Initialize viewport optimization
     new MobileViewportOptimizer();
-    
+
     // Add mobile-specific classes
-    document.body.classList.add('healwave-mobile', `healwave-${detector.platform}`);
-    
+    document.body.classList.add(
+      'healwave-mobile',
+      `healwave-${detector.platform}`
+    );
+
     PWALogger.log('✅ Mobile enhancements initialized');
   }
 }
@@ -422,7 +444,7 @@ function showUpdateNotification(): void {
 // Show install prompt
 function showInstallPrompt(): void {
   const detector = PWACapabilitiesDetector.getInstance();
-  
+
   // Check if already installed
   if (detector.isStandalone) {
     return;
@@ -438,19 +460,22 @@ function showInstallPrompt(): void {
   const platformMessages = {
     android: {
       title: 'Install HealWave App',
-      subtitle: 'Get faster access to healing frequencies with enhanced performance and offline capability.',
-      icon: '🎧'
+      subtitle:
+        'Get faster access to healing frequencies with enhanced performance and offline capability.',
+      icon: '🎧',
     },
     desktop: {
       title: 'Install HealWave Desktop App',
-      subtitle: 'Launch HealWave directly from your desktop for a seamless healing experience.',
-      icon: '🖥️'
+      subtitle:
+        'Launch HealWave directly from your desktop for a seamless healing experience.',
+      icon: '🖥️',
     },
     other: {
       title: 'Install HealWave',
-      subtitle: 'Access healing frequencies faster with offline capability and better performance.',
-      icon: '🎧'
-    }
+      subtitle:
+        'Access healing frequencies faster with offline capability and better performance.',
+      icon: '🎧',
+    },
   };
 
   const message = platformMessages[detector.platform] || platformMessages.other;
@@ -655,7 +680,7 @@ function showIOSInstallInstructions(): void {
   });
 
   // Close on backdrop click
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener('click', e => {
     if (e.target === modal) {
       modal.remove();
     }

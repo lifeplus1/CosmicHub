@@ -17,15 +17,6 @@
     "noEmit": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "app/**/*",
-    "src/**/*",
-    "*.ts",
-    "*.tsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".expo"
-  ]
+  "include": ["app/**/*", "src/**/*", "*.ts", "*.tsx"],
+  "exclude": ["node_modules", "dist", ".expo"]
 }

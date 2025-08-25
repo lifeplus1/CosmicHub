@@ -9,7 +9,8 @@ import React from 'react';
 // BUTTON ACCESSIBILITY UTILITIES
 // =============================================================================
 
-export interface AccessibleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface AccessibleButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Force accessible name - will use children if string, otherwise requires explicit aria-label
    */
@@ -52,7 +53,7 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
         onClick({
           ...e,
           type: 'click',
-          button: 0
+          button: 0,
         } as unknown as React.MouseEvent<HTMLButtonElement>);
       }
     }
@@ -62,7 +63,9 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
   // Generate accessible name
   let ariaLabel = accessibleName;
   if (!ariaLabel && isIconOnly) {
-    console.warn('AccessibleButton: Icon-only buttons require accessibleName prop');
+    console.warn(
+      'AccessibleButton: Icon-only buttons require accessibleName prop'
+    );
     ariaLabel = 'Button';
   }
   if (!ariaLabel && typeof children === 'string') {
@@ -70,7 +73,7 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
   }
 
   const isDisabled = Boolean(disabled ?? isLoading);
-  
+
   // Build props conditionally for ARIA attributes
   const buttonProps = {
     ...props,
@@ -79,25 +82,24 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
     disabled: isDisabled,
     onClick: isDisabled ? undefined : onClick,
     onKeyDown: handleKeyDown,
-    ...(isDisabled && { 'aria-disabled': 'true' as const })
+    ...(isDisabled && { 'aria-disabled': 'true' as const }),
   };
-  
-  return (
-    <button {...buttonProps}>
-      {isLoading ? loadingText : children}
-    </button>
-  );
+
+  return <button {...buttonProps}>{isLoading ? loadingText : children}</button>;
 };
 
 // =============================================================================
 // INTERACTIVE DIV UTILITIES
 // =============================================================================
 
-export interface AccessibleClickableProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface AccessibleClickableProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Callback for activation (click or keyboard)
    */
-  onActivate: (e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => void;
+  onActivate: (
+    e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>
+  ) => void;
   /**
    * Accessible name for screen readers
    */
@@ -146,7 +148,7 @@ export const AccessibleClickable: React.FC<AccessibleClickableProps> = ({
   };
 
   const roleValue = role;
-  
+
   // Build props conditionally for ARIA attributes
   const divProps = {
     ...props,
@@ -156,21 +158,18 @@ export const AccessibleClickable: React.FC<AccessibleClickableProps> = ({
     'aria-label': accessibleName,
     onClick: handleClick,
     onKeyDown: handleKeyDown,
-    ...(disabled && { 'aria-disabled': 'true' as const })
+    ...(disabled && { 'aria-disabled': 'true' as const }),
   };
 
-  return (
-    <div {...divProps}>
-      {children}
-    </div>
-  );
+  return <div {...divProps}>{children}</div>;
 };
 
 // =============================================================================
-// INPUT ACCESSIBILITY UTILITIES  
+// INPUT ACCESSIBILITY UTILITIES
 // =============================================================================
 
-export interface AccessibleInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface AccessibleInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   /**
    * Label text (will create hidden label if none visible)
    */
@@ -211,39 +210,40 @@ export const AccessibleInput: React.FC<AccessibleInputProps> = ({
   const inputId = id ?? `input-${uniqueId}`;
   const errorId = error ? `${inputId}-error` : undefined;
   const descId = description ? `${inputId}-desc` : undefined;
-  
+
   // Build props conditionally for ARIA attributes
   const inputProps = {
     ...props,
     id: inputId,
     className: `accessible-input ${error ? 'error' : ''} ${className}`,
-    'aria-describedby': [descId, errorId].filter(Boolean).join(' ') || undefined,
-    ...(error && { 'aria-invalid': 'true' as const })
+    'aria-describedby':
+      [descId, errorId].filter(Boolean).join(' ') || undefined,
+    ...(error && { 'aria-invalid': 'true' as const }),
   };
 
   return (
     <div className={`accessible-input-wrapper ${wrapperClassName}`}>
-      <label 
+      <label
         htmlFor={inputId}
         className={`accessible-input-label ${showLabel ? '' : 'sr-only'}`}
       >
         {label}
       </label>
-      
-      <input {...inputProps} aria-label="Input field" />
-      
+
+      <input {...inputProps} aria-label='Input field' />
+
       {description && (
-        <div id={descId} className="accessible-input-description">
+        <div id={descId} className='accessible-input-description'>
           {description}
         </div>
       )}
-      
+
       {error && (
-        <div 
-          id={errorId} 
-          className="accessible-input-error"
-          role="alert"
-          aria-live="polite"
+        <div
+          id={errorId}
+          className='accessible-input-error'
+          role='alert'
+          aria-live='polite'
         >
           {error}
         </div>
@@ -297,7 +297,7 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
   children,
   description,
   className = '',
-  size = 'md'
+  size = 'md',
 }) => {
   // Generate unique IDs consistently
   const uniqueId = React.useId();
@@ -323,14 +323,18 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
       }
 
       if (e.key === 'Tab') {
-        const focusableElements = Array.from(document.querySelectorAll(
-          '[role="dialog"] button, [role="dialog"] [href], [role="dialog"] input, [role="dialog"] select, [role="dialog"] textarea, [role="dialog"] [tabindex]:not([tabindex="-1"])'
-        ));
-        
+        const focusableElements = Array.from(
+          document.querySelectorAll(
+            '[role="dialog"] button, [role="dialog"] [href], [role="dialog"] input, [role="dialog"] select, [role="dialog"] textarea, [role="dialog"] [tabindex]:not([tabindex="-1"])'
+          )
+        );
+
         if (focusableElements.length === 0) return;
 
         const first = focusableElements[0] as HTMLElement | undefined;
-        const last = focusableElements[focusableElements.length - 1] as HTMLElement | undefined;
+        const last = focusableElements[focusableElements.length - 1] as
+          | HTMLElement
+          | undefined;
 
         if (e.shiftKey && document.activeElement === first) {
           e.preventDefault();
@@ -351,31 +355,40 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div className="accessible-modal-backdrop"
-        onClick={onClose} onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onClose(); } }} tabIndex={0} role="button"
-        aria-hidden="true"
+      <div
+        className='accessible-modal-backdrop'
+        onClick={onClose}
+        onKeyDown={e => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            onClose();
+          }
+        }}
+        tabIndex={0}
+        role='button'
+        aria-hidden='true'
       />
-      
+
       {/* Modal */}
       <div
-        role="dialog"
-        aria-modal="true"
+        role='dialog'
+        aria-modal='true'
         aria-labelledby={titleId}
         aria-describedby={descId}
         className={`accessible-modal accessible-modal-${size} ${className}`}
       >
-        <div className="accessible-modal-content">
+        <div className='accessible-modal-content'>
           {/* Header */}
-          <div className="accessible-modal-header">
-            <h2 id={titleId} className="accessible-modal-title">
+          <div className='accessible-modal-header'>
+            <h2 id={titleId} className='accessible-modal-title'>
               {title}
             </h2>
-            
+
             <AccessibleButton
               isIconOnly
-              accessibleName="Close modal"
+              accessibleName='Close modal'
               onClick={onClose}
-              className="accessible-modal-close"
+              className='accessible-modal-close'
             >
               ✕
             </AccessibleButton>
@@ -383,15 +396,13 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
 
           {/* Description */}
           {description && (
-            <div id={descId} className="accessible-modal-description">
+            <div id={descId} className='accessible-modal-description'>
               {description}
             </div>
           )}
 
           {/* Content */}
-          <div className="accessible-modal-body">
-            {children}
-          </div>
+          <div className='accessible-modal-body'>{children}</div>
         </div>
       </div>
     </>
@@ -419,12 +430,12 @@ export const useKeyboardAccessible = (
   return {
     onKeyDown: handleKeyDown,
     tabIndex: 0,
-    role: 'button' as const
+    role: 'button' as const,
   };
 };
 
 /**
- * Hook for focus management  
+ * Hook for focus management
  */
 export const useFocusManagement = (isActive: boolean) => {
   const ref = React.useRef<HTMLElement>(null);
@@ -586,5 +597,5 @@ export default {
   AccessibleModal,
   useKeyboardAccessible,
   useFocusManagement,
-  accessibilityStyles
+  accessibilityStyles,
 };

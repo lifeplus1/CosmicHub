@@ -79,9 +79,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
               type='email'
               id='email'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
-              aria-label="Email input"
+              aria-label='Email input'
               className='w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'
               placeholder='your@email.com'
             />
@@ -98,9 +98,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
               type='password'
               id='password'
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               required
-              aria-label="Password input"
+              aria-label='Password input'
               className='w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'
               placeholder='••••••••'
             />

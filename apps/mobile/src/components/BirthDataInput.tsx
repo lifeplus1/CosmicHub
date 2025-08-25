@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from 'react-native';
 
 interface BirthDataForm {
   date: string;
@@ -34,17 +41,19 @@ export function BirthDataInput({ onSubmit, loading = false }: Props) {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Birth Information</Text>
-      <Text style={styles.subtitle}>Enter your birth details to generate your chart</Text>
+      <Text style={styles.subtitle}>
+        Enter your birth details to generate your chart
+      </Text>
 
       <View style={styles.form}>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Birth Date</Text>
           <TextInput
             style={styles.input}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#666"
+            placeholder='YYYY-MM-DD'
+            placeholderTextColor='#666'
             value={formData.date}
-            onChangeText={(text) => setFormData({ ...formData, date: text })}
+            onChangeText={text => setFormData({ ...formData, date: text })}
           />
         </View>
 
@@ -52,10 +61,10 @@ export function BirthDataInput({ onSubmit, loading = false }: Props) {
           <Text style={styles.label}>Birth Time</Text>
           <TextInput
             style={styles.input}
-            placeholder="HH:MM (24-hour format)"
-            placeholderTextColor="#666"
+            placeholder='HH:MM (24-hour format)'
+            placeholderTextColor='#666'
             value={formData.time}
-            onChangeText={(text) => setFormData({ ...formData, time: text })}
+            onChangeText={text => setFormData({ ...formData, time: text })}
           />
         </View>
 
@@ -63,10 +72,10 @@ export function BirthDataInput({ onSubmit, loading = false }: Props) {
           <Text style={styles.label}>Birth City</Text>
           <TextInput
             style={styles.input}
-            placeholder="City, Country"
-            placeholderTextColor="#666"
+            placeholder='City, Country'
+            placeholderTextColor='#666'
             value={formData.city}
-            onChangeText={(text) => setFormData({ ...formData, city: text })}
+            onChangeText={text => setFormData({ ...formData, city: text })}
           />
         </View>
 
@@ -74,15 +83,18 @@ export function BirthDataInput({ onSubmit, loading = false }: Props) {
           <Text style={styles.label}>Timezone (Optional)</Text>
           <TextInput
             style={styles.input}
-            placeholder="e.g., America/New_York"
-            placeholderTextColor="#666"
+            placeholder='e.g., America/New_York'
+            placeholderTextColor='#666'
             value={formData.timezone}
-            onChangeText={(text) => setFormData({ ...formData, timezone: text })}
+            onChangeText={text => setFormData({ ...formData, timezone: text })}
           />
         </View>
 
-        <TouchableOpacity 
-          style={[styles.submitButton, loading ? styles.submitButtonDisabled : undefined]}
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            loading ? styles.submitButtonDisabled : undefined,
+          ]}
           onPress={handleSubmit}
           disabled={loading}
         >

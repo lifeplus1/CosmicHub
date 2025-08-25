@@ -11,7 +11,6 @@ import {
 function renderHook<T>(hook: () => T): { get: () => T } {
   let latest: T;
   function HookConsumer() {
-     
     latest = hook();
     return null;
   }
@@ -27,8 +26,12 @@ describe('usePerformance basic timing', () => {
     expect(get().isTracking).toBe(false);
     act(() => get().start());
     expect(get().isTracking).toBe(true);
-    act(() => { get().end(); });
-    await waitFor(() => { expect(get().metrics).not.toBeNull(); });
+    act(() => {
+      get().end();
+    });
+    await waitFor(() => {
+      expect(get().metrics).not.toBeNull();
+    });
     const metrics = get().metrics!;
     expect(typeof metrics.duration).toBe('number');
     expect(metrics.duration).toBeGreaterThanOrEqual(0);
@@ -52,7 +55,7 @@ describe('usePerformance basic timing', () => {
     expect(asyncOp).toHaveBeenCalled();
     expect(resultValue).toBe(42);
     expect(metricsDuration).toBeDefined();
-    expect((metricsDuration ?? 0)).toBeGreaterThan(0);
+    expect(metricsDuration ?? 0).toBeGreaterThan(0);
   });
 });
 
@@ -63,20 +66,36 @@ describe('useOperationTracking', () => {
     const { get } = renderHook(() => useOperationTracking());
     const api = get();
     let id: string = '';
-    act(() => { id = api.startOperation('loadData'); });
-    await waitFor(() => { expect(get().operations.length).toBe(1); });
+    act(() => {
+      id = api.startOperation('loadData');
+    });
+    await waitFor(() => {
+      expect(get().operations.length).toBe(1);
+    });
     act(() => api.endOperation(id));
-    await waitFor(() => { expect(get().operations[0].status).toBe('completed'); });
+    await waitFor(() => {
+      expect(get().operations[0].status).toBe('completed');
+    });
     const op = get().operations[0];
     expect(op.duration).toBeDefined();
   });
 
   it('trackOperation wraps async function success and error', async () => {
     const { get } = renderHook(() => useOperationTracking());
-    const success = await act(async () => get().trackOperation('successOp', async () => 7));
+    const success = await act(async () =>
+      get().trackOperation('successOp', async () => 7)
+    );
     expect(success).toBe(7);
-    await expect(get().trackOperation('failOp', async () => { throw new Error('nope'); })).rejects.toThrow('nope');
-    await waitFor(() => { expect(get().operations.some(o => o.operationName === 'failOp')).toBe(true); });
+    await expect(
+      get().trackOperation('failOp', async () => {
+        throw new Error('nope');
+      })
+    ).rejects.toThrow('nope');
+    await waitFor(() => {
+      expect(get().operations.some(o => o.operationName === 'failOp')).toBe(
+        true
+      );
+    });
     const fail = get().operations.find(o => o.operationName === 'failOp');
     expect(fail?.status).toBe('error');
   });
@@ -86,11 +105,17 @@ describe('usePagePerformance', () => {
   afterEach(() => cleanup());
 
   it('collects basic page metrics when document is complete', () => {
-    Object.defineProperty(document, 'readyState', { configurable: true, get: () => 'complete' });
-    const originalGetEntriesByType = performance.getEntriesByType.bind(performance);
+    Object.defineProperty(document, 'readyState', {
+      configurable: true,
+      get: () => 'complete',
+    });
+    const originalGetEntriesByType =
+      performance.getEntriesByType.bind(performance);
     performance.getEntriesByType = (type: string) => {
       if (type === 'paint') {
-        return [{ name: 'first-contentful-paint', startTime: 12 }] as unknown as PerformanceEntry[];
+        return [
+          { name: 'first-contentful-paint', startTime: 12 },
+        ] as unknown as PerformanceEntry[];
       }
       if (type === 'navigation') {
         return [{ duration: 123 }] as unknown as PerformanceEntry[];
@@ -113,7 +138,7 @@ describe('useMemoryMonitoring', () => {
     (performance as unknown as { memory?: any }).memory = {
       usedJSHeapSize: 1000,
       totalJSHeapSize: 4000,
-      jsHeapSizeLimit: 8000
+      jsHeapSizeLimit: 8000,
     };
     const { get } = renderHook(() => useMemoryMonitoring());
     const { memoryInfo, getMemoryUsagePercentage, formatBytes } = get();

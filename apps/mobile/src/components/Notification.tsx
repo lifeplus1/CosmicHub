@@ -8,7 +8,12 @@ interface Props {
   onDismiss?: () => void;
 }
 
-export function Notification({ title, message, type = 'info', onDismiss }: Props) {
+export function Notification({
+  title,
+  message,
+  type = 'info',
+  onDismiss,
+}: Props) {
   const typeStyles = {
     info: { backgroundColor: '#1a1a2e', borderColor: '#4a90e2' },
     error: { backgroundColor: '#2e1a1a', borderColor: '#e74c3c' },

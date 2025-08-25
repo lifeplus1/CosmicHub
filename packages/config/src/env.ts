@@ -5,21 +5,26 @@
 /// <reference types="vite/client" />
 
 // Define process for TypeScript
-declare const process: {
-  env?: Record<string, string | undefined>;
-} | undefined;
+declare const process:
+  | {
+      env?: Record<string, string | undefined>;
+    }
+  | undefined;
 
 // Type for environment variables
 type EnvRecord = Record<string, string | undefined>;
 
 // Cross-runtime env accessor (works in Vite browser and Node)
-const viteEnv: EnvRecord | undefined = import.meta?.env as EnvRecord | undefined;
+const viteEnv: EnvRecord | undefined = import.meta?.env as
+  | EnvRecord
+  | undefined;
 
 const getEnv = (key: string, fallback = ''): string => {
   // Type-safe access to environment variables
   const fromVite = viteEnv?.[key];
-  const fromNode = typeof process !== 'undefined' ? process.env?.[key] : undefined;
-  return (fromVite ?? fromNode ?? fallback);
+  const fromNode =
+    typeof process !== 'undefined' ? process.env?.[key] : undefined;
+  return fromVite ?? fromNode ?? fallback;
 };
 
 // Environment types
@@ -55,8 +60,8 @@ export interface EnvConfig {
 const requiredEnvVars: Record<Environment, string[]> = {
   development: [
     'VITE_FIREBASE_PROJECT_ID',
-    'VITE_FIREBASE_API_KEY', 
-    'VITE_FIREBASE_AUTH_DOMAIN'
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
   ],
   staging: [
     'VITE_API_URL',
@@ -66,7 +71,7 @@ const requiredEnvVars: Record<Environment, string[]> = {
     'VITE_FIREBASE_STORAGE_BUCKET',
     'VITE_FIREBASE_MESSAGING_SENDER_ID',
     'VITE_FIREBASE_APP_ID',
-    'VITE_STRIPE_PUBLISHABLE_KEY'
+    'VITE_STRIPE_PUBLISHABLE_KEY',
   ],
   production: [
     'VITE_API_URL',
@@ -77,18 +82,24 @@ const requiredEnvVars: Record<Environment, string[]> = {
     'VITE_FIREBASE_MESSAGING_SENDER_ID',
     'VITE_FIREBASE_APP_ID',
     'VITE_STRIPE_PUBLISHABLE_KEY',
-    'VITE_APP_URL'
-  ]
+    'VITE_APP_URL',
+  ],
 };
 
 // Get current environment
 export const getCurrentEnvironment = (): Environment => {
   const env = getEnv('NODE_ENV', 'development') as Environment;
-  return ['development', 'staging', 'production'].includes(env) ? env : 'development';
+  return ['development', 'staging', 'production'].includes(env)
+    ? env
+    : 'development';
 };
 
 // Validate environment variables
-export const validateEnv = (): { isValid: boolean; missing: string[]; errors: string[] } => {
+export const validateEnv = (): {
+  isValid: boolean;
+  missing: string[];
+  errors: string[];
+} => {
   const env = getCurrentEnvironment();
   const required = requiredEnvVars[env];
   const missing: string[] = [];
@@ -104,7 +115,8 @@ export const validateEnv = (): { isValid: boolean; missing: string[]; errors: st
 
   // Validate specific formats
   const firebaseApiKey = getEnv('VITE_FIREBASE_API_KEY');
-  if (firebaseApiKey && firebaseApiKey.length < 10) { // Relaxed for demo values
+  if (firebaseApiKey && firebaseApiKey.length < 10) {
+    // Relaxed for demo values
     errors.push('VITE_FIREBASE_API_KEY appears to be invalid (too short)');
   }
 
@@ -132,7 +144,7 @@ export const validateEnv = (): { isValid: boolean; missing: string[]; errors: st
   return {
     isValid: missing.length === 0 && errors.length === 0,
     missing,
-    errors
+    errors,
   };
 };
 
@@ -142,39 +154,71 @@ export const getEnvConfig = (): Partial<EnvConfig> => {
   // Use VITE_ prefix for environment variables
   const baseConfig = {
     NODE_ENV: env,
-    VITE_API_URL: getEnv('VITE_API_URL') || (
-      env === 'production' 
+    VITE_API_URL:
+      getEnv('VITE_API_URL') ||
+      (env === 'production'
         ? 'https://api.cosmichub.app'
         : env === 'staging'
-        ? 'https://staging-api.cosmichub.app'
-        : 'http://localhost:8000'
-    ),
-    VITE_APP_URL: getEnv('VITE_APP_URL') || (
-      env === 'production'
+          ? 'https://staging-api.cosmichub.app'
+          : 'http://localhost:8000'),
+    VITE_APP_URL:
+      getEnv('VITE_APP_URL') ||
+      (env === 'production'
         ? 'https://cosmichub.app'
         : env === 'staging'
-        ? 'https://staging.cosmichub.app'
-        : 'http://localhost:3000'
-    ),
-    ...(getEnv('VITE_FIREBASE_PROJECT_ID') && { VITE_FIREBASE_PROJECT_ID: getEnv('VITE_FIREBASE_PROJECT_ID') }),
-    ...(getEnv('VITE_FIREBASE_API_KEY') && { VITE_FIREBASE_API_KEY: getEnv('VITE_FIREBASE_API_KEY') }),
-    ...(getEnv('VITE_FIREBASE_AUTH_DOMAIN') && { VITE_FIREBASE_AUTH_DOMAIN: getEnv('VITE_FIREBASE_AUTH_DOMAIN') }),
-    ...(getEnv('VITE_FIREBASE_STORAGE_BUCKET') && { VITE_FIREBASE_STORAGE_BUCKET: getEnv('VITE_FIREBASE_STORAGE_BUCKET') }),
-    ...(getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') && { VITE_FIREBASE_MESSAGING_SENDER_ID: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') }),
-    ...(getEnv('VITE_FIREBASE_APP_ID') && { VITE_FIREBASE_APP_ID: getEnv('VITE_FIREBASE_APP_ID') }),
-    ...(getEnv('VITE_STRIPE_PUBLISHABLE_KEY') && { VITE_STRIPE_PUBLISHABLE_KEY: getEnv('VITE_STRIPE_PUBLISHABLE_KEY') }),
+          ? 'https://staging.cosmichub.app'
+          : 'http://localhost:3000'),
+    ...(getEnv('VITE_FIREBASE_PROJECT_ID') && {
+      VITE_FIREBASE_PROJECT_ID: getEnv('VITE_FIREBASE_PROJECT_ID'),
+    }),
+    ...(getEnv('VITE_FIREBASE_API_KEY') && {
+      VITE_FIREBASE_API_KEY: getEnv('VITE_FIREBASE_API_KEY'),
+    }),
+    ...(getEnv('VITE_FIREBASE_AUTH_DOMAIN') && {
+      VITE_FIREBASE_AUTH_DOMAIN: getEnv('VITE_FIREBASE_AUTH_DOMAIN'),
+    }),
+    ...(getEnv('VITE_FIREBASE_STORAGE_BUCKET') && {
+      VITE_FIREBASE_STORAGE_BUCKET: getEnv('VITE_FIREBASE_STORAGE_BUCKET'),
+    }),
+    ...(getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') && {
+      VITE_FIREBASE_MESSAGING_SENDER_ID: getEnv(
+        'VITE_FIREBASE_MESSAGING_SENDER_ID'
+      ),
+    }),
+    ...(getEnv('VITE_FIREBASE_APP_ID') && {
+      VITE_FIREBASE_APP_ID: getEnv('VITE_FIREBASE_APP_ID'),
+    }),
+    ...(getEnv('VITE_STRIPE_PUBLISHABLE_KEY') && {
+      VITE_STRIPE_PUBLISHABLE_KEY: getEnv('VITE_STRIPE_PUBLISHABLE_KEY'),
+    }),
     ...(getEnv('XAI_API_KEY') && { XAI_API_KEY: getEnv('XAI_API_KEY') }),
     // Deployment-specific environment variables
-    ...(getEnv('MONITORING_API_KEY') && { MONITORING_API_KEY: getEnv('MONITORING_API_KEY') }),
-    ...(getEnv('MONITORING_API_KEY_PROD') && { MONITORING_API_KEY_PROD: getEnv('MONITORING_API_KEY_PROD') }),
-    ...(getEnv('REDIS_PASSWORD') && { REDIS_PASSWORD: getEnv('REDIS_PASSWORD') }),
-    ...(getEnv('REDIS_PASSWORD_PROD') && { REDIS_PASSWORD_PROD: getEnv('REDIS_PASSWORD_PROD') }),
+    ...(getEnv('MONITORING_API_KEY') && {
+      MONITORING_API_KEY: getEnv('MONITORING_API_KEY'),
+    }),
+    ...(getEnv('MONITORING_API_KEY_PROD') && {
+      MONITORING_API_KEY_PROD: getEnv('MONITORING_API_KEY_PROD'),
+    }),
+    ...(getEnv('REDIS_PASSWORD') && {
+      REDIS_PASSWORD: getEnv('REDIS_PASSWORD'),
+    }),
+    ...(getEnv('REDIS_PASSWORD_PROD') && {
+      REDIS_PASSWORD_PROD: getEnv('REDIS_PASSWORD_PROD'),
+    }),
     ...(getEnv('SENTRY_DSN') && { SENTRY_DSN: getEnv('SENTRY_DSN') }),
-    ...(getEnv('SENTRY_DSN_PROD') && { SENTRY_DSN_PROD: getEnv('SENTRY_DSN_PROD') }),
-    ...(getEnv('GA_TRACKING_ID') && { GA_TRACKING_ID: getEnv('GA_TRACKING_ID') }),
-    ...(getEnv('GA_TRACKING_ID_PROD') && { GA_TRACKING_ID_PROD: getEnv('GA_TRACKING_ID_PROD') }),
-    ...(getEnv('VAULT_ENDPOINT') && { VAULT_ENDPOINT: getEnv('VAULT_ENDPOINT') }),
-    ...(getEnv('APP_VERSION') && { APP_VERSION: getEnv('APP_VERSION') })
+    ...(getEnv('SENTRY_DSN_PROD') && {
+      SENTRY_DSN_PROD: getEnv('SENTRY_DSN_PROD'),
+    }),
+    ...(getEnv('GA_TRACKING_ID') && {
+      GA_TRACKING_ID: getEnv('GA_TRACKING_ID'),
+    }),
+    ...(getEnv('GA_TRACKING_ID_PROD') && {
+      GA_TRACKING_ID_PROD: getEnv('GA_TRACKING_ID_PROD'),
+    }),
+    ...(getEnv('VAULT_ENDPOINT') && {
+      VAULT_ENDPOINT: getEnv('VAULT_ENDPOINT'),
+    }),
+    ...(getEnv('APP_VERSION') && { APP_VERSION: getEnv('APP_VERSION') }),
   };
 
   return baseConfig;
@@ -183,7 +227,7 @@ export const getEnvConfig = (): Partial<EnvConfig> => {
 // Environment-specific feature flags
 export const getFeatureFlags = () => {
   const env = getCurrentEnvironment();
-  
+
   return {
     enableDebugMode: env === 'development',
     enableBetaFeatures: env !== 'production',
@@ -193,7 +237,7 @@ export const getFeatureFlags = () => {
     enableErrorReporting: env !== 'development',
     enablePerformanceMonitoring: env === 'production',
     enableMockData: env === 'development',
-    enableTestingMode: env !== 'production'
+    enableTestingMode: env !== 'production',
   };
 };
 
@@ -220,28 +264,35 @@ let validationResult: ReturnType<typeof validateEnv> | null = null;
 
 export const initializeEnv = () => {
   validationResult = validateEnv();
-  
+
   if (!validationResult.isValid) {
     console.group('🚨 Environment Configuration Issues');
-    
+
     if (validationResult.missing.length > 0) {
-      console.error('Missing required environment variables:', validationResult.missing);
+      console.error(
+        'Missing required environment variables:',
+        validationResult.missing
+      );
     }
-    
+
     if (validationResult.errors.length > 0) {
       console.error('Environment validation errors:', validationResult.errors);
     }
-    
+
     console.groupEnd();
-    
+
     // Only throw in production to prevent development issues
     if (isProduction()) {
-      throw new Error('Environment validation failed. Check console for details.');
+      throw new Error(
+        'Environment validation failed. Check console for details.'
+      );
     }
   } else {
-    console.log(`✅ Environment (${getCurrentEnvironment()}) configured successfully`);
+    console.log(
+      `✅ Environment (${getCurrentEnvironment()}) configured successfully`
+    );
   }
-  
+
   return validationResult;
 };
 
@@ -263,5 +314,5 @@ export default {
   isProduction,
   getEnvVar,
   initializeEnv,
-  env
+  env,
 };

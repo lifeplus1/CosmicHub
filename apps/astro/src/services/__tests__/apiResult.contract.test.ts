@@ -9,7 +9,7 @@ import {
   unwrapOr,
   mapResult,
   mapSuccess,
-  mapFailure
+  mapFailure,
 } from '@cosmichub/config';
 import type { ApiResult, NotificationStats } from '@cosmichub/config';
 
@@ -27,7 +27,9 @@ describe('ApiResult contract', () => {
 
   it('unwrap / unwrapOr behaviors', () => {
     expect(unwrap(ok('x'))).toBe('x');
-    expect(unwrapOr(fail('bad') as ApiResult<string>, 'fallback')).toBe('fallback');
+    expect(unwrapOr(fail('bad') as ApiResult<string>, 'fallback')).toBe(
+      'fallback'
+    );
   });
 
   it('map helpers behave', () => {
@@ -35,12 +37,19 @@ describe('ApiResult contract', () => {
     if (isSuccess(tripled)) expect(tripled.data).toBe(6);
     const modified = mapFailure(fail('oops'), f => fail(f.error + '!'));
     if (isFailure(modified)) expect(modified.error.endsWith('!')).toBe(true);
-    const summary = mapResult(ok(5), v => `v:${v}`, f => f.error);
+    const summary = mapResult(
+      ok(5),
+      v => `v:${v}`,
+      f => f.error
+    );
     expect(summary).toBe('v:5');
   });
 
   it('toFailure maps status codes', () => {
-    const notFound = toFailure({ response: { status: 404 } }, { defaultMsg: 'x', notFound: 'nf' });
+    const notFound = toFailure(
+      { response: { status: 404 } },
+      { defaultMsg: 'x', notFound: 'nf' }
+    );
     if (isFailure(notFound)) {
       expect(notFound.code).toBe('404');
       expect(notFound.error).toBe('nf');
@@ -59,7 +68,7 @@ describe('NotificationStats contract', () => {
       totalDelivered: 0,
       totalClicked: 0,
       avgDeliveryTime: 0,
-      errors: 0
+      errors: 0,
     };
     expect(stats.permissionStatus).toBe('default');
   });

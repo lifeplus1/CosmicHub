@@ -5,7 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
-  "outDir": "./dist"
+    "outDir": "./dist"
   },
   "exclude": ["**/*.test.*", "**/*.spec.*", "dist", "node_modules"]
 }

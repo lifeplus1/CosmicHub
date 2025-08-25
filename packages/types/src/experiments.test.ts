@@ -100,7 +100,7 @@ describe('Experiment Schema Validation', () => {
       };
       const result = validateExperiment(invalidExperiment);
       expect(result.success).toBe(false);
-      
+
       if (!result.success) {
         const errors = formatValidationErrors(result);
         expect(errors).toHaveProperty('id');
@@ -153,7 +153,10 @@ describe('Experiment Schema Validation', () => {
     it('should prevent starting experiment without variant configs', () => {
       const experiment = {
         ...validExperiment,
-        variants: validExperiment.variants.map(v => ({ ...v, config: undefined })),
+        variants: validExperiment.variants.map(v => ({
+          ...v,
+          config: undefined,
+        })),
       };
       const result = canStartExperiment(experiment);
       expect(result.success).toBe(false);
@@ -162,8 +165,12 @@ describe('Experiment Schema Validation', () => {
 
   describe('Utility Functions', () => {
     it('should validate experiment ID format', () => {
-      expect(ExperimentValidation.isValidExperimentId('valid_id_123')).toBe(true);
-      expect(ExperimentValidation.isValidExperimentId('invalid id')).toBe(false);
+      expect(ExperimentValidation.isValidExperimentId('valid_id_123')).toBe(
+        true
+      );
+      expect(ExperimentValidation.isValidExperimentId('invalid id')).toBe(
+        false
+      );
       expect(ExperimentValidation.isValidExperimentId('')).toBe(false);
     });
 
@@ -196,9 +203,13 @@ describe('Experiment Schema Validation', () => {
         { traffic_percentage: 60 },
         { traffic_percentage: 60 },
       ];
-      
-      expect(ExperimentValidation.isValidTrafficAllocation(validVariants)).toBe(true);
-      expect(ExperimentValidation.isValidTrafficAllocation(invalidVariants)).toBe(false);
+
+      expect(ExperimentValidation.isValidTrafficAllocation(validVariants)).toBe(
+        true
+      );
+      expect(
+        ExperimentValidation.isValidTrafficAllocation(invalidVariants)
+      ).toBe(false);
     });
   });
 
@@ -209,7 +220,7 @@ describe('Experiment Schema Validation', () => {
         version: undefined,
         config: undefined,
       };
-      
+
       const migrated = ExperimentMigration.migrateV1toV2(v1Experiment);
       expect(migrated.version).toBe(2);
       expect(migrated.config).toBeDefined();
@@ -222,7 +233,7 @@ describe('Experiment Schema Validation', () => {
         version: 1,
         config: undefined,
       };
-      
+
       const migrated = ExperimentMigration.migrate(oldExperiment);
       expect(migrated.version).toBe(2);
     });
@@ -246,7 +257,7 @@ describe('Experiment Schema Validation', () => {
           randomization_unit: 'pageview' as const,
         },
       };
-      
+
       const result = validateExperiment(extremeExperiment);
       expect(result.success).toBe(true);
     });
@@ -261,7 +272,7 @@ describe('Experiment Schema Validation', () => {
           config: {},
         })),
       };
-      
+
       const result = validateExperiment(invalidExperiment);
       expect(result.success).toBe(false);
     });
@@ -301,7 +312,7 @@ describe('Integration with Firestore', () => {
 
   it('should create valid document for Firestore', () => {
     const result = validateExperiment(validExperiment);
-    
+
     if (result.success) {
       // Simulate Firestore document creation
       const doc = {
@@ -309,7 +320,7 @@ describe('Integration with Firestore', () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      
+
       expect(doc.id).toBeTruthy();
       expect(doc.created_at).toBeTruthy();
       expect(doc.updated_at).toBeTruthy();

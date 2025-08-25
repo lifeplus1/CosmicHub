@@ -21,12 +21,15 @@ function fixJSXSyntax(filePath) {
     /(.*?)\s*required\s*\n\s*aria-label="([^"]*)"\s*\n\s*<\/div>/g,
     '$1 required aria-label="$2" />\n          </div>'
   );
-  
+
   // Fix pattern where attributes are split across lines improperly
   content = content.replace(
     /(\s*)(onChange={[^}]*})\s*\n\s*className="[^"]*"\s*\n\s*placeholder="[^"]*"\s*\n\s*required\s*\n\s*aria-label="([^"]*)"\s*\n\s*<\/div>/g,
     (match, indent, onChange, ariaLabel) => {
-      return match.replace(/required\s*\n\s*aria-label="([^"]*)"\s*\n/, `required\n${indent}  aria-label="$1"\n${indent}/>\n`);
+      return match.replace(
+        /required\s*\n\s*aria-label="([^"]*)"\s*\n/,
+        `required\n${indent}  aria-label="$1"\n${indent}/>\n`
+      );
     }
   );
 
@@ -41,13 +44,13 @@ function fixJSXSyntax(filePath) {
     console.log(`✅ Fixed JSX syntax in ${filePath}`);
     return true;
   }
-  
+
   return false;
 }
 
 // Find all TSX files
-const tsxFiles = glob.sync('apps/astro/src/**/*.tsx', { 
-  cwd: '/Users/Chris/Projects/CosmicHub'
+const tsxFiles = glob.sync('apps/astro/src/**/*.tsx', {
+  cwd: '/Users/Chris/Projects/CosmicHub',
 });
 
 let fixedCount = 0;

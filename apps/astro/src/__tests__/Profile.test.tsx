@@ -15,8 +15,8 @@ vi.mock('@cosmichub/auth', () => ({
       uid: 'test-uid-123',
       emailVerified: true,
       metadata: {
-        creationTime: '2024-01-01T00:00:00Z'
-      }
+        creationTime: '2024-01-01T00:00:00Z',
+      },
     },
     signOut: vi.fn(),
   }),
@@ -24,17 +24,27 @@ vi.mock('@cosmichub/auth', () => ({
 
 // Mock UI components
 vi.mock('@cosmichub/ui', () => ({
-  Card: ({ children, title }: { children: React.ReactNode; title?: string }) => (
-    <div data-testid="card">
-      {title !== undefined && title !== null && title !== '' && <h3>{title}</h3>}
+  Card: ({
+    children,
+    title,
+  }: {
+    children: React.ReactNode;
+    title?: string;
+  }) => (
+    <div data-testid='card'>
+      {title !== undefined && title !== null && title !== '' && (
+        <h3>{title}</h3>
+      )}
       {children}
     </div>
   ),
-  Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
-    <button onClick={onClick}>
-      {children}
-    </button>
-  ),
+  Button: ({
+    children,
+    onClick,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+  }) => <button onClick={onClick}>{children}</button>,
 }));
 
 // Mock router
@@ -64,16 +74,20 @@ vi.mock('../components/ChartPreferences', () => ({
 // Mock subscription types (now import from package)
 vi.mock('@cosmichub/subscriptions', () => ({
   COSMICHUB_TIERS: {
-    free: { name: 'Free Explorer' }
-  }
+    free: { name: 'Free Explorer' },
+  },
 }));
 
 // Mock Radix UI Tabs
 vi.mock('@radix-ui/react-tabs', () => ({
   Root: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   List: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Trigger: ({ children }: { children: React.ReactNode }) => <button>{children}</button>,
-  Content: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Trigger: ({ children }: { children: React.ReactNode }) => (
+    <button>{children}</button>
+  ),
+  Content: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock React Icons
@@ -100,11 +114,15 @@ describe('Profile Component', (): void => {
 
   it('displays user email', (): void => {
     render(<Profile />);
-    expect(screen.getAllByText('test@example.com').length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText('test@example.com').length
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('shows account overview', (): void => {
     render(<Profile />);
-    expect(screen.getAllByText('Account Overview').length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText('Account Overview').length
+    ).toBeGreaterThanOrEqual(1);
   });
 });

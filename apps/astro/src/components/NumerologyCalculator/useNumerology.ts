@@ -1,4 +1,9 @@
-import { useState, type FormEvent, type Dispatch, type SetStateAction } from 'react';
+import {
+  useState,
+  type FormEvent,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import { useToast } from '../ToastProvider';
 import type { NumerologyData, NumerologyResult } from './types';
 
@@ -29,22 +34,22 @@ export const useNumerology = (): {
     if (trimmedName.length === 0) {
       toast({
         description: 'Please enter your full name',
-        status: 'error'
+        status: 'error',
       });
       return;
     }
 
     setLoading(true);
     try {
-    const birthDate = `${formData.year}-${String(formData.month).padStart(2, '0')}-${String(formData.day).padStart(2, '0')}`;
+      const birthDate = `${formData.year}-${String(formData.month).padStart(2, '0')}-${String(formData.day).padStart(2, '0')}`;
       const response = await fetch('/api/calculate-numerology', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+          Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
         },
         body: JSON.stringify({
-      name: trimmedName,
+          name: trimmedName,
           birth_date: birthDate,
         }),
       });
@@ -54,19 +59,19 @@ export const useNumerology = (): {
       }
 
       const data: unknown = await response.json();
-  if (data !== null && typeof data === 'object' && 'numerology' in data) {
+      if (data !== null && typeof data === 'object' && 'numerology' in data) {
         setResult((data as NumerologyApiResponse).numerology);
       } else {
         throw new Error('Malformed numerology response');
       }
       toast({
         description: 'Numerology Calculated',
-        status: 'success'
+        status: 'success',
       });
     } catch (err) {
       toast({
         description: err instanceof Error ? err.message : 'Unknown error',
-        status: 'error'
+        status: 'error',
       });
     } finally {
       setLoading(false);

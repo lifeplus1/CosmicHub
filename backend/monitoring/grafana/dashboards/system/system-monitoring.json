@@ -661,11 +661,7 @@
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": [
-    "cosmichub",
-    "system",
-    "infrastructure"
-  ],
+  "tags": ["cosmichub", "system", "infrastructure"],
   "templating": {
     "list": []
   },

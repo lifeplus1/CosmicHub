@@ -15,26 +15,17 @@ export const AstroRoutes: Record<string, ReturnType<typeof lazyLoadRoute>> = {
   ),
 
   // Chart generation routes
-  BirthChart: lazyLoadRoute(
-    () => import('../pages/Chart'),
-    'BirthChart'
-  ),
+  BirthChart: lazyLoadRoute(() => import('../pages/Chart'), 'BirthChart'),
 
   SynastryChart: lazyLoadRoute(
     () => import('../pages/Synastry'),
     'SynastryChart'
   ),
 
-  TransitChart: lazyLoadRoute(
-    () => import('../pages/Chart'),
-    'TransitChart'
-  ),
+  TransitChart: lazyLoadRoute(() => import('../pages/Chart'), 'TransitChart'),
 
   // Advanced features
-  GeneKeys: lazyLoadRoute(
-    () => import('../pages/GeneKeys'),
-    'GeneKeys'
-  ),
+  GeneKeys: lazyLoadRoute(() => import('../pages/GeneKeys'), 'GeneKeys'),
 
   HumanDesign: lazyLoadRoute(
     () => import('../pages/HumanDesign'),
@@ -58,37 +49,19 @@ export const AstroRoutes: Record<string, ReturnType<typeof lazyLoadRoute>> = {
   ),
 
   // User management
-  Profile: lazyLoadRoute(
-    () => import('../pages/Profile'),
-    'Profile'
-  ),
+  Profile: lazyLoadRoute(() => import('../pages/Profile'), 'Profile'),
 
-  Settings: lazyLoadRoute(
-    () => import('../pages/Profile'),
-    'Settings'
-  ),
+  Settings: lazyLoadRoute(() => import('../pages/Profile'), 'Settings'),
 
   // Authentication
-  Login: lazyLoadRoute(
-    () => import('../pages/Login'),
-    'Login'
-  ),
+  Login: lazyLoadRoute(() => import('../pages/Login'), 'Login'),
 
-  Register: lazyLoadRoute(
-    () => import('../pages/SignUp'),
-    'Register'
-  ),
+  Register: lazyLoadRoute(() => import('../pages/SignUp'), 'Register'),
 
   // Additional pages
-  Calculator: lazyLoadRoute(
-    () => import('../pages/Calculator'),
-    'Calculator'
-  ),
+  Calculator: lazyLoadRoute(() => import('../pages/Calculator'), 'Calculator'),
 
-  Numerology: lazyLoadRoute(
-    () => import('../pages/Numerology'),
-    'Numerology'
-  ),
+  Numerology: lazyLoadRoute(() => import('../pages/Numerology'), 'Numerology'),
 
   SavedCharts: lazyLoadRoute(
     () => import('../pages/SavedCharts'),
@@ -108,7 +81,7 @@ export const AstroRoutes: Record<string, ReturnType<typeof lazyLoadRoute>> = {
   PerformanceMonitoring: lazyLoadRoute(
     () => import('../pages/PerformanceMonitoring'),
     'PerformanceMonitoring'
-  )
+  ),
 };
 
 // Lazy loaded components with error boundaries
@@ -133,7 +106,7 @@ function ensureComponent(key: keyof typeof AstroRoutes) {
   if (!entry) {
     // Fallback component rendering error state with proper display name & escaped quotes
     const Fallback: React.FC = () => (
-      <div role="alert">Route component &quot;{key}&quot; unavailable</div>
+      <div role='alert'>Route component &quot;{key}&quot; unavailable</div>
     );
     Fallback.displayName = `MissingRoute(${String(key)})`;
     return Fallback;
@@ -145,96 +118,96 @@ export const astroRouteConfig = [
   {
     path: '/',
     component: withErrorBoundary(ensureComponent('Dashboard')),
-    preload: true
+    preload: true,
   },
   {
     path: '/birth-chart',
     component: withErrorBoundary(ensureComponent('BirthChart')),
-    preload: false
+    preload: false,
   },
   {
     path: '/synastry',
     component: withErrorBoundary(ensureComponent('SynastryChart')),
-    preload: false
+    preload: false,
   },
   {
     path: '/transits',
     component: withErrorBoundary(ensureComponent('TransitChart')),
-    preload: false
+    preload: false,
   },
   {
     path: '/gene-keys',
     component: withErrorBoundary(ensureComponent('GeneKeys')),
-    preload: false
+    preload: false,
   },
   {
     path: '/human-design',
     component: withErrorBoundary(ensureComponent('HumanDesign')),
-    preload: false
+    preload: false,
   },
   {
     path: '/pearl-sequence',
     component: withErrorBoundary(ensureComponent('PearlSequence')),
-    preload: false
+    preload: false,
   },
   {
     path: '/aspects',
     component: withErrorBoundary(ensureComponent('AspectAnalysis')),
-    preload: false
+    preload: false,
   },
   {
     path: '/transit-analysis',
     component: withErrorBoundary(ensureComponent('TransitAnalysis')),
-    preload: false
+    preload: false,
   },
   {
     path: '/profile',
     component: withErrorBoundary(ensureComponent('Profile')),
-    preload: true
+    preload: true,
   },
   {
     path: '/settings',
     component: withErrorBoundary(ensureComponent('Settings')),
-    preload: false
+    preload: false,
   },
   {
     path: '/login',
     component: withErrorBoundary(ensureComponent('Login')),
-    preload: true
+    preload: true,
   },
   {
     path: '/register',
     component: withErrorBoundary(ensureComponent('Register')),
-    preload: false
+    preload: false,
   },
   {
     path: '/calculator',
     component: withErrorBoundary(ensureComponent('Calculator')),
-    preload: false
+    preload: false,
   },
   {
     path: '/numerology',
     component: withErrorBoundary(ensureComponent('Numerology')),
-    preload: false
+    preload: false,
   },
   {
     path: '/saved-charts',
     component: withErrorBoundary(ensureComponent('SavedCharts')),
-    preload: false
+    preload: false,
   },
   {
     path: '/subscription-success',
     component: withErrorBoundary(ensureComponent('SubscriptionSuccess')),
-    preload: false
+    preload: false,
   },
   {
     path: '/subscription-cancelled',
     component: withErrorBoundary(ensureComponent('SubscriptionCancelled')),
-    preload: false
+    preload: false,
   },
   {
     path: '/performance',
     component: withErrorBoundary(ensureComponent('PerformanceMonitoring')),
-    preload: false
-  }
+    preload: false,
+  },
 ];

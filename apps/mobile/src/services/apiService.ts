@@ -53,7 +53,8 @@ let sharedDevConsole: DevConsole | undefined;
 async function getDevConsole(): Promise<DevConsole> {
   if (sharedDevConsole === undefined) {
     try {
-      const mod: typeof import('../../../astro/src/config/environment') = await import('../../../astro/src/config/environment');
+      const mod: typeof import('../../../astro/src/config/environment') =
+        await import('../../../astro/src/config/environment');
       sharedDevConsole = mod.devConsole;
     } catch {
       sharedDevConsole = { error: console.error.bind(console) };
@@ -72,7 +73,7 @@ class MobileApiService {
 
   private setupInterceptors() {
     // Request interceptor to add auth token
-    axios.interceptors.request.use(async (config) => {
+    axios.interceptors.request.use(async config => {
       const user = auth.currentUser;
       if (user) {
         const token = await user.getIdToken();
@@ -83,10 +84,10 @@ class MobileApiService {
 
     // Response interceptor for error handling
     axios.interceptors.response.use(
-      (response) => response,
+      response => response,
       (error: unknown) => {
         if (axios.isAxiosError(error)) {
-          void getDevConsole().then(dc => 
+          void getDevConsole().then(dc =>
             dc.error('API Error:', error.response?.data ?? error.message)
           );
           return Promise.reject(new Error(error.message));
@@ -99,7 +100,10 @@ class MobileApiService {
   // Chart generation - same endpoints as your web app
   async generateChart(birthData: BirthData): Promise<ChartResponse> {
     try {
-      const response = await axios.post(`${this.baseURL}/api/charts/generate`, birthData);
+      const response = await axios.post(
+        `${this.baseURL}/api/charts/generate`,
+        birthData
+      );
       return response.data as ChartResponse;
     } catch (error) {
       throw this.handleError(error);
@@ -107,12 +111,18 @@ class MobileApiService {
   }
 
   // Synastry analysis
-  async calculateSynastry(person1: BirthData, person2: BirthData): Promise<SynastryResponse> {
+  async calculateSynastry(
+    person1: BirthData,
+    person2: BirthData
+  ): Promise<SynastryResponse> {
     try {
-      const response = await axios.post(`${this.baseURL}/api/synastry/calculate`, {
-        person1,
-        person2,
-      });
+      const response = await axios.post(
+        `${this.baseURL}/api/synastry/calculate`,
+        {
+          person1,
+          person2,
+        }
+      );
       return response.data as SynastryResponse;
     } catch (error) {
       throw this.handleError(error);
@@ -120,12 +130,18 @@ class MobileApiService {
   }
 
   // Transit calculations
-  async getTransits(birthData: BirthData, dateRange: DateRange): Promise<TransitResponse> {
+  async getTransits(
+    birthData: BirthData,
+    dateRange: DateRange
+  ): Promise<TransitResponse> {
     try {
-      const response = await axios.post(`${this.baseURL}/api/transits/calculate`, {
-        birthData,
-        dateRange,
-      });
+      const response = await axios.post(
+        `${this.baseURL}/api/transits/calculate`,
+        {
+          birthData,
+          dateRange,
+        }
+      );
       return response.data as TransitResponse;
     } catch (error) {
       throw this.handleError(error);
@@ -135,7 +151,10 @@ class MobileApiService {
   // User data management
   async saveChart(chartData: ChartResponse): Promise<ChartResponse> {
     try {
-      const response = await axios.post(`${this.baseURL}/api/charts/save`, chartData);
+      const response = await axios.post(
+        `${this.baseURL}/api/charts/save`,
+        chartData
+      );
       return response.data as ChartResponse;
     } catch (error) {
       throw this.handleError(error);
@@ -154,7 +173,9 @@ class MobileApiService {
   // HealWave frequency data (if you have backend endpoints for this)
   async getFrequencyPresets(): Promise<FrequencyResponse> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/frequencies/presets`);
+      const response = await axios.get(
+        `${this.baseURL}/api/frequencies/presets`
+      );
       return response.data as FrequencyResponse;
     } catch (error) {
       throw this.handleError(error);
@@ -164,18 +185,21 @@ class MobileApiService {
   private handleError(error: unknown): Error {
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        const errorData = error.response.data as { message?: string } | undefined;
-        const message = errorData?.message ?? `Server Error: ${error.response.status}`;
+        const errorData = error.response.data as
+          | { message?: string }
+          | undefined;
+        const message =
+          errorData?.message ?? `Server Error: ${error.response.status}`;
         return new Error(String(message));
       } else if (error.request) {
         return new Error('Network Error: Unable to reach server');
       }
     }
-    
+
     if (error instanceof Error) {
       return new Error(`Request Error: ${error.message}`);
     }
-    
+
     return new Error('Unknown error occurred');
   }
 }

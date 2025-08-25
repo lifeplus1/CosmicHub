@@ -1,241 +1,285 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HealWave - Offline</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: linear-gradient(
+          135deg,
+          #1a1a2e 0%,
+          #3730a3 50%,
+          #7c3aed 100%
+        );
+        color: #e2e8f0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .offline-container {
+        max-width: 500px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 40px 30px;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      }
+
+      .healing-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 30px;
+        background: linear-gradient(135deg, #7c3aed, #06b6d4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        animation: healingPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes healingPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
         }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #3730a3 50%, #7c3aed 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
+        50% {
+          transform: scale(1.08);
+          opacity: 0.85;
         }
-        
-        .offline-container {
-            max-width: 500px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 40px 30px;
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #cbd5e1;
+        margin-bottom: 30px;
+      }
+
+      .retry-button {
+        background: linear-gradient(135deg, #7c3aed, #06b6d4);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .retry-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+      }
+
+      .features-list {
+        margin-top: 30px;
+        text-align: left;
+      }
+
+      .features-list h3 {
+        color: #06b6d4;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .features-list ul {
+        list-style: none;
+        color: #94a3b8;
+      }
+
+      .features-list li {
+        padding: 5px 0;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .features-list li::before {
+        content: '🎵';
+        position: absolute;
+        left: 0;
+        top: 5px;
+      }
+
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 10px 15px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ef4444;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
         }
-        
-        .healing-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, #7c3aed, #06b6d4);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            animation: healingPulse 2s ease-in-out infinite;
+        51%,
+        100% {
+          opacity: 0.3;
         }
-        
-        @keyframes healingPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.08); opacity: 0.85; }
+      }
+
+      .healing-waves {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: -1;
+      }
+
+      .wave {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(124, 58, 237, 0.1) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        animation: wave 4s ease-in-out infinite;
+      }
+
+      .wave:nth-child(2) {
+        animation-delay: 1s;
+        background: radial-gradient(
+          circle,
+          rgba(6, 182, 212, 0.08) 0%,
+          transparent 70%
+        );
+      }
+
+      .wave:nth-child(3) {
+        animation-delay: 2s;
+        background: radial-gradient(
+          circle,
+          rgba(124, 58, 237, 0.06) 0%,
+          transparent 70%
+        );
+      }
+
+      @keyframes wave {
+        0%,
+        100% {
+          transform: scale(0.8) translate(-50%, -50%);
+          opacity: 0;
         }
-        
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        50% {
+          transform: scale(1.2) translate(-50%, -50%);
+          opacity: 1;
         }
-        
-        p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #cbd5e1;
-            margin-bottom: 30px;
-        }
-        
-        .retry-button {
-            background: linear-gradient(135deg, #7c3aed, #06b6d4);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .retry-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
-        }
-        
-        .features-list {
-            margin-top: 30px;
-            text-align: left;
-        }
-        
-        .features-list h3 {
-            color: #06b6d4;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        
-        .features-list ul {
-            list-style: none;
-            color: #94a3b8;
-        }
-        
-        .features-list li {
-            padding: 5px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .features-list li::before {
-            content: "🎵";
-            position: absolute;
-            left: 0;
-            top: 5px;
-        }
-        
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 10px 15px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ef4444;
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
-        }
-        
-        .healing-waves {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: -1;
-        }
-        
-        .wave {
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: wave 4s ease-in-out infinite;
-        }
-        
-        .wave:nth-child(2) {
-            animation-delay: 1s;
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
-        }
-        
-        .wave:nth-child(3) {
-            animation-delay: 2s;
-            background: radial-gradient(circle, rgba(124, 58, 237, 0.06) 0%, transparent 70%);
-        }
-        
-        @keyframes wave {
-            0%, 100% { transform: scale(0.8) translate(-50%, -50%); opacity: 0; }
-            50% { transform: scale(1.2) translate(-50%, -50%); opacity: 1; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="healing-waves">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
     </div>
-    
+
     <div class="offline-container">
-        <div class="healing-icon">🎧</div>
-        
-        <h1>Healing Frequencies Paused</h1>
-        <p>Your connection to the healing frequencies has been temporarily interrupted. The therapeutic vibrations await your return!</p>
-        
-        <button class="retry-button" onclick="window.location.reload()">
-            Restore Healing Connection
-        </button>
-        
-        <div class="status-indicator">
-            <div class="status-dot"></div>
-            <span>Waiting for internet connection...</span>
-        </div>
-        
-        <div class="features-list">
-            <h3>While you wait, remember:</h3>
-            <ul>
-                <li>Your healing journey continues within</li>
-                <li>Deep breathing creates natural healing frequencies</li>
-                <li>Meditation is always available offline</li>
-                <li>Your wellness settings will be restored</li>
-            </ul>
-        </div>
+      <div class="healing-icon">🎧</div>
+
+      <h1>Healing Frequencies Paused</h1>
+      <p>
+        Your connection to the healing frequencies has been temporarily
+        interrupted. The therapeutic vibrations await your return!
+      </p>
+
+      <button class="retry-button" onclick="window.location.reload()">
+        Restore Healing Connection
+      </button>
+
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Waiting for internet connection...</span>
+      </div>
+
+      <div class="features-list">
+        <h3>While you wait, remember:</h3>
+        <ul>
+          <li>Your healing journey continues within</li>
+          <li>Deep breathing creates natural healing frequencies</li>
+          <li>Meditation is always available offline</li>
+          <li>Your wellness settings will be restored</li>
+        </ul>
+      </div>
     </div>
-    
+
     <script>
-        // Auto-retry when connection is restored
-        window.addEventListener('online', function() {
-            window.location.reload();
-        });
-        
-        // Update status when online
-        function updateConnectionStatus() {
-            const indicator = document.querySelector('.status-indicator');
-            const dot = document.querySelector('.status-dot');
-            const text = indicator.querySelector('span');
-            
-            if (navigator.onLine) {
-                indicator.style.background = 'rgba(34, 197, 94, 0.1)';
-                indicator.style.borderColor = 'rgba(34, 197, 94, 0.3)';
-                dot.style.background = '#22c55e';
-                text.textContent = 'Connection restored! Refreshing...';
-                setTimeout(() => window.location.reload(), 1000);
-            }
+      // Auto-retry when connection is restored
+      window.addEventListener('online', function () {
+        window.location.reload();
+      });
+
+      // Update status when online
+      function updateConnectionStatus() {
+        const indicator = document.querySelector('.status-indicator');
+        const dot = document.querySelector('.status-dot');
+        const text = indicator.querySelector('span');
+
+        if (navigator.onLine) {
+          indicator.style.background = 'rgba(34, 197, 94, 0.1)';
+          indicator.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+          dot.style.background = '#22c55e';
+          text.textContent = 'Connection restored! Refreshing...';
+          setTimeout(() => window.location.reload(), 1000);
         }
-        
-        // Check connection periodically
-        setInterval(updateConnectionStatus, 2000);
-        
-        // Initial check
-        updateConnectionStatus();
+      }
+
+      // Check connection periodically
+      setInterval(updateConnectionStatus, 2000);
+
+      // Initial check
+      updateConnectionStatus();
     </script>
-</body>
+  </body>
 </html>

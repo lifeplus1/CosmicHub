@@ -32,24 +32,36 @@ export default [
     rules: {
       // React Hooks Rules
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+
       // Strict TypeScript Rules
-      '@typescript-eslint/no-unused-vars': ['error', { 
-        varsIgnorePattern: '^_', 
-        argsIgnorePattern: '^_',
-        ignoreRestSiblings: true 
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/explicit-function-return-type': ['error', {
-        allowExpressions: true,
-        allowTypedFunctionExpressions: true,
-        allowHigherOrderFunctions: true,
-      }],
-      '@typescript-eslint/consistent-type-imports': ['error', {
-        prefer: 'type-imports',
-        fixStyle: 'inline-type-imports',
-      }],
+      '@typescript-eslint/explicit-function-return-type': [
+        'error',
+        {
+          allowExpressions: true,
+          allowTypedFunctionExpressions: true,
+          allowHigherOrderFunctions: true,
+        },
+      ],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
@@ -57,14 +69,14 @@ export default [
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
 
-      // Accessibility Rules  
+      // Accessibility Rules
       'jsx-a11y/no-autofocus': 'warn',
       'jsx-a11y/anchor-is-valid': 'error',
       'jsx-a11y/alt-text': 'error',
 
       // Performance Rules
       'react-hooks/exhaustive-deps': 'error',
-      
+
       // Code Quality
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',

@@ -7,6 +7,8 @@ addopts = "--strict-markers --tb=short"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')"
 ]
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"
 
 [tool.flake8]
 max-line-length = 100

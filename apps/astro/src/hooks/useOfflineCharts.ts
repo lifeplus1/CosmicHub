@@ -5,9 +5,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { ChartData } from '@/types';
-import { 
-  offlineChartService, 
-  type ChartCalculationParams 
+import {
+  offlineChartService,
+  type ChartCalculationParams,
 } from '@/services/offline-chart-service';
 
 interface ChartListItem {
@@ -42,13 +42,13 @@ export function useOfflineCharts() {
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
     isOnline: navigator.onLine,
     connectionQuality: 'excellent',
-    lastChecked: Date.now()
+    lastChecked: Date.now(),
   });
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({
     isActive: false,
     pendingItems: 0,
     lastSync: 0,
-    errors: 0
+    errors: 0,
   });
 
   // Load charts
@@ -66,24 +66,28 @@ export function useOfflineCharts() {
   }, []);
 
   // Save chart
-  const saveChart = useCallback(async (
-    chartData: ChartData, 
-    params: ChartCalculationParams
-  ): Promise<{ success: boolean; chartId: string; offline?: boolean }> => {
-    try {
-      setError(null);
-      const result = await offlineChartService.saveChart(chartData, params);
-      
-      // Refresh chart list
-      await loadCharts();
-      
-      return result;
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to save chart';
-      setError(errorMsg);
-      throw new Error(errorMsg);
-    }
-  }, [loadCharts]);
+  const saveChart = useCallback(
+    async (
+      chartData: ChartData,
+      params: ChartCalculationParams
+    ): Promise<{ success: boolean; chartId: string; offline?: boolean }> => {
+      try {
+        setError(null);
+        const result = await offlineChartService.saveChart(chartData, params);
+
+        // Refresh chart list
+        await loadCharts();
+
+        return result;
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to save chart';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
+    },
+    [loadCharts]
+  );
 
   // Load specific chart
   const loadChart = useCallback(async (chartId: string) => {
@@ -91,56 +95,63 @@ export function useOfflineCharts() {
       setError(null);
       return await offlineChartService.loadChart(chartId);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load chart';
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to load chart';
       setError(errorMsg);
       throw new Error(errorMsg);
     }
   }, []);
 
   // Delete chart
-  const deleteChart = useCallback(async (chartId: string): Promise<{
-    success: boolean;
-    offline?: boolean;
-  }> => {
-    try {
-      setError(null);
-      const result = await offlineChartService.deleteChart(chartId);
-      
-      // Refresh chart list
-      await loadCharts();
-      
-      return result;
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to delete chart';
-      setError(errorMsg);
-      throw new Error(errorMsg);
-    }
-  }, [loadCharts]);
+  const deleteChart = useCallback(
+    async (
+      chartId: string
+    ): Promise<{
+      success: boolean;
+      offline?: boolean;
+    }> => {
+      try {
+        setError(null);
+        const result = await offlineChartService.deleteChart(chartId);
+
+        // Refresh chart list
+        await loadCharts();
+
+        return result;
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to delete chart';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
+    },
+    [loadCharts]
+  );
 
   // Force sync all charts
   const syncCharts = useCallback(async () => {
     try {
       setError(null);
       setSyncStatus(prev => ({ ...prev, isActive: true }));
-      
+
       const result = await offlineChartService.syncAllCharts();
-      
+
       setSyncStatus(prev => ({
         ...prev,
         isActive: false,
         lastSync: Date.now(),
-        errors: result.errors
+        errors: result.errors,
       }));
-      
+
       // Refresh charts after sync
       await loadCharts();
-      
+
       return result;
     } catch (err) {
-      setSyncStatus(prev => ({ 
-        ...prev, 
-        isActive: false, 
-        errors: prev.errors + 1 
+      setSyncStatus(prev => ({
+        ...prev,
+        isActive: false,
+        errors: prev.errors + 1,
       }));
       const errorMsg = err instanceof Error ? err.message : 'Sync failed';
       setError(errorMsg);
@@ -158,7 +169,7 @@ export function useOfflineCharts() {
     totalCharts: 0,
     storageUsed: 0,
     storageLimit: 0,
-    cacheSize: 0
+    cacheSize: 0,
   });
 
   const refreshStorageStats = useCallback(async () => {
@@ -169,7 +180,7 @@ export function useOfflineCharts() {
         totalCharts: stats.total_charts,
         storageUsed: stats.storage_quota.used,
         storageLimit: stats.storage_quota.available,
-        cacheSize: stats.storage_quota.used // Using used storage as cache size
+        cacheSize: stats.storage_quota.used, // Using used storage as cache size
       });
     } catch (err) {
       console.warn('Failed to get storage stats:', err);
@@ -183,7 +194,8 @@ export function useOfflineCharts() {
       await loadCharts();
       await refreshStorageStats();
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to clear cache';
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to clear cache';
       setError(errorMsg);
       throw new Error(errorMsg);
     }
@@ -194,34 +206,43 @@ export function useOfflineCharts() {
     try {
       return await offlineChartService.exportOfflineCharts();
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to export charts';
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to export charts';
       setError(errorMsg);
       throw new Error(errorMsg);
     }
   }, []);
 
   // Import charts
-  const importCharts = useCallback(async (exportData: string) => {
-    try {
-      const result = await offlineChartService.importOfflineCharts(exportData);
-      await loadCharts();
-      await refreshStorageStats();
-      return result;
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to import charts';
-      setError(errorMsg);
-      throw new Error(errorMsg);
-    }
-  }, [loadCharts, refreshStorageStats]);
+  const importCharts = useCallback(
+    async (exportData: string) => {
+      try {
+        const result =
+          await offlineChartService.importOfflineCharts(exportData);
+        await loadCharts();
+        await refreshStorageStats();
+        return result;
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to import charts';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
+    },
+    [loadCharts, refreshStorageStats]
+  );
 
   // Check if chart exists locally
-  const hasChartLocally = useCallback(async (chartId: string): Promise<boolean> => {
-    try {
-      return await offlineChartService.hasChartLocally(chartId);
-    } catch {
-      return false;
-    }
-  }, []);
+  const hasChartLocally = useCallback(
+    async (chartId: string): Promise<boolean> => {
+      try {
+        return await offlineChartService.hasChartLocally(chartId);
+      } catch {
+        return false;
+      }
+    },
+    []
+  );
 
   // Setup network and sync status monitoring
   useEffect(() => {
@@ -229,9 +250,13 @@ export function useOfflineCharts() {
       const status = offlineChartService.getNetworkStatus();
       setNetworkStatus({
         isOnline: status.online,
-        connectionQuality: status.connection === 'fast' ? 'excellent' : 
-                         status.connection === 'slow' ? 'poor' : 'offline',
-        lastChecked: Date.now()
+        connectionQuality:
+          status.connection === 'fast'
+            ? 'excellent'
+            : status.connection === 'slow'
+              ? 'poor'
+              : 'offline',
+        lastChecked: Date.now(),
       });
     };
 
@@ -241,7 +266,7 @@ export function useOfflineCharts() {
         isActive: status.sync_in_progress,
         pendingItems: status.pending_items,
         lastSync: status.last_sync ? new Date(status.last_sync).getTime() : 0,
-        errors: 0 // Not provided by current API
+        errors: 0, // Not provided by current API
       });
     };
 
@@ -256,12 +281,12 @@ export function useOfflineCharts() {
     // Listen for network changes
     const handleOnline = () => updateNetworkStatus();
     const handleOffline = () => updateNetworkStatus();
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
     // Subscribe to sync events
-    const unsubscribeSync = offlineChartService.onSyncEvent((event) => {
+    const unsubscribeSync = offlineChartService.onSyncEvent(event => {
       void updateSyncStatus();
       if ((event as { success?: boolean }).success) {
         void loadCharts(); // Refresh charts when sync completes
@@ -309,9 +334,10 @@ export function useOfflineCharts() {
     isSyncing: syncStatus.isActive,
     hasOfflineCharts: charts.some(chart => !chart.synced),
     hasPendingSync: syncStatus.pendingItems > 0,
-    storageUsagePercent: storageStats.storageLimit > 0 
-      ? (storageStats.storageUsed / storageStats.storageLimit) * 100 
-      : 0
+    storageUsagePercent:
+      storageStats.storageLimit > 0
+        ? (storageStats.storageUsed / storageStats.storageLimit) * 100
+        : 0,
   };
 }
 
@@ -322,7 +348,7 @@ export function useNetworkStatus() {
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
     isOnline: navigator.onLine,
     connectionQuality: 'excellent',
-    lastChecked: Date.now()
+    lastChecked: Date.now(),
   });
 
   useEffect(() => {
@@ -330,9 +356,13 @@ export function useNetworkStatus() {
       const status = offlineChartService.getNetworkStatus();
       setNetworkStatus({
         isOnline: status.online,
-        connectionQuality: status.connection === 'fast' ? 'excellent' : 
-                         status.connection === 'slow' ? 'poor' : 'offline',
-        lastChecked: Date.now()
+        connectionQuality:
+          status.connection === 'fast'
+            ? 'excellent'
+            : status.connection === 'slow'
+              ? 'poor'
+              : 'offline',
+        lastChecked: Date.now(),
       });
     };
 
@@ -345,7 +375,7 @@ export function useNetworkStatus() {
     // Network event listeners
     const handleOnline = () => updateStatus();
     const handleOffline = () => updateStatus();
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
@@ -359,7 +389,7 @@ export function useNetworkStatus() {
   return {
     isOnline: networkStatus.isOnline,
     connectionQuality: networkStatus.connectionQuality,
-    lastChecked: networkStatus.lastChecked
+    lastChecked: networkStatus.lastChecked,
   };
 }
 
@@ -371,7 +401,7 @@ export function useSyncStatus() {
     isActive: false,
     pendingItems: 0,
     lastSync: 0,
-    errors: 0
+    errors: 0,
   });
 
   useEffect(() => {
@@ -381,7 +411,7 @@ export function useSyncStatus() {
         isActive: status.sync_in_progress,
         pendingItems: status.pending_items,
         lastSync: status.last_sync ? new Date(status.last_sync).getTime() : 0,
-        errors: 0 // Not provided by current API
+        errors: 0, // Not provided by current API
       });
     };
 
@@ -415,6 +445,6 @@ export function useSyncStatus() {
     pendingItems: syncStatus.pendingItems,
     lastSync: syncStatus.lastSync,
     errors: syncStatus.errors,
-    hasPendingSync: syncStatus.pendingItems > 0
+    hasPendingSync: syncStatus.pendingItems > 0,
   };
 }

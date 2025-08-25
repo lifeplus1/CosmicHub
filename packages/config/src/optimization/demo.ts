@@ -3,13 +3,12 @@
  */
 
 import { createComponentLibraryOptimizer } from './componentLibrary';
- 
+
 const devConsole = {
   log: import.meta.env.DEV ? console.log.bind(console) : undefined,
   warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
-  error: console.error.bind(console)
+  error: console.error.bind(console),
 };
- 
 
 const optimizer = createComponentLibraryOptimizer();
 
@@ -56,15 +55,19 @@ devConsole.log?.('🔍 Analyzing Components...\n');
 const dropdownIssues = optimizer.analyzeComponent(dropdownCode, 'Dropdown');
 devConsole.log?.(`📊 Dropdown: Found ${dropdownIssues.length} issues`);
 dropdownIssues.forEach(issue => {
-  const emoji = { critical: '🚨', high: '⚠️', medium: '📝', low: '💡' }[issue.severity];
+  const emoji = { critical: '🚨', high: '⚠️', medium: '📝', low: '💡' }[
+    issue.severity
+  ];
   devConsole.log?.(`  ${emoji} ${issue.message}`);
 });
 
-// Analyze button  
+// Analyze button
 const buttonIssues = optimizer.analyzeComponent(buttonCode, 'Button');
 devConsole.log?.(`\n� Button: Found ${buttonIssues.length} issues`);
 buttonIssues.forEach(issue => {
-  const emoji = { critical: '🚨', high: '⚠️', medium: '📝', low: '�' }[issue.severity];
+  const emoji = { critical: '🚨', high: '⚠️', medium: '📝', low: '�' }[
+    issue.severity
+  ];
   devConsole.log?.(`  ${emoji} ${issue.message}`);
 });
 
@@ -80,7 +83,7 @@ if (fixedDropdown !== dropdownCode) {
 // Generate report
 const report = optimizer.generateReport([
   { name: 'Dropdown', code: dropdownCode },
-  { name: 'Button', code: buttonCode }
+  { name: 'Button', code: buttonCode },
 ]);
 
 devConsole.log?.('\n📋 Library Report');
@@ -88,7 +91,9 @@ devConsole.log?.('================');
 devConsole.log?.(`Components: ${report.totalComponents}`);
 devConsole.log?.(`Issues: ${report.issuesFound.length}`);
 devConsole.log?.(`Health: ${report.overallHealth}%`);
-devConsole.log?.(`Design Compliance: ${report.designSystemCompliance.toFixed(1)}%`);
+devConsole.log?.(
+  `Design Compliance: ${report.designSystemCompliance.toFixed(1)}%`
+);
 
 devConsole.log?.('\n🎯 Recommendations:');
 report.recommendations.forEach((rec, i) => {

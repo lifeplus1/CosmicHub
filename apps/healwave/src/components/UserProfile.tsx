@@ -111,7 +111,8 @@ const UserProfile: React.FC = React.memo(() => {
     navigate('/upgrade');
   }, [navigate]);
 
-  const currentTier = HEALWAVE_TIERS[userTier.toLowerCase()] ?? HEALWAVE_TIERS['free'];
+  const currentTier =
+    HEALWAVE_TIERS[userTier.toLowerCase()] ?? HEALWAVE_TIERS['free'];
   const sessionUsage: SubscriptionUsage =
     typeof checkUsageLimit === 'function'
       ? (checkUsageLimit('sessionsPerDay') ?? { current: 0, limit: 2 })

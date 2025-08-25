@@ -1,27 +1,73 @@
 /* Progress bar base styles */
-.progress-bar { @apply w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden; }
-.progress-fill { @apply h-2.5 rounded-full transition-all duration-300; }
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden;
+}
+.progress-fill {
+  @apply h-2.5 rounded-full transition-all duration-300;
+}
 
 /* No percentage width utility classes needed; width applied inline in component. */
 /* Discrete width steps (5% increments) to avoid inline style usage */
-.w-step-0 { width:0%; }
-.w-step-5 { width:5%; }
-.w-step-10 { width:10%; }
-.w-step-15 { width:15%; }
-.w-step-20 { width:20%; }
-.w-step-25 { width:25%; }
-.w-step-30 { width:30%; }
-.w-step-35 { width:35%; }
-.w-step-40 { width:40%; }
-.w-step-45 { width:45%; }
-.w-step-50 { width:50%; }
-.w-step-55 { width:55%; }
-.w-step-60 { width:60%; }
-.w-step-65 { width:65%; }
-.w-step-70 { width:70%; }
-.w-step-75 { width:75%; }
-.w-step-80 { width:80%; }
-.w-step-85 { width:85%; }
-.w-step-90 { width:90%; }
-.w-step-95 { width:95%; }
-.w-step-100 { width:100%; }
+.w-step-0 {
+  width: 0%;
+}
+.w-step-5 {
+  width: 5%;
+}
+.w-step-10 {
+  width: 10%;
+}
+.w-step-15 {
+  width: 15%;
+}
+.w-step-20 {
+  width: 20%;
+}
+.w-step-25 {
+  width: 25%;
+}
+.w-step-30 {
+  width: 30%;
+}
+.w-step-35 {
+  width: 35%;
+}
+.w-step-40 {
+  width: 40%;
+}
+.w-step-45 {
+  width: 45%;
+}
+.w-step-50 {
+  width: 50%;
+}
+.w-step-55 {
+  width: 55%;
+}
+.w-step-60 {
+  width: 60%;
+}
+.w-step-65 {
+  width: 65%;
+}
+.w-step-70 {
+  width: 70%;
+}
+.w-step-75 {
+  width: 75%;
+}
+.w-step-80 {
+  width: 80%;
+}
+.w-step-85 {
+  width: 85%;
+}
+.w-step-90 {
+  width: 90%;
+}
+.w-step-95 {
+  width: 95%;
+}
+.w-step-100 {
+  width: 100%;
+}

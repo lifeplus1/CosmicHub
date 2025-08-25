@@ -10,9 +10,12 @@ const logger = {
   warn: (message: string, data?: object | string | number | boolean | null) => {
     console.warn(`[Integrations] ${message}`, data);
   },
-  error: (message: string, data?: object | string | number | boolean | null) => {
+  error: (
+    message: string,
+    data?: object | string | number | boolean | null
+  ) => {
     console.error(`[Integrations] ${message}`, data);
-  }
+  },
 };
 
 export interface UserSubscription {
@@ -105,7 +108,7 @@ export const useCrossAppStore = (): CrossAppStore => {
 
   const addNotification = useCallback((notification: Notification): void => {
     logger.info('Cross-app notification:', notification);
-    setNotifications((prev) => [...prev, notification]);
+    setNotifications(prev => [...prev, notification]);
   }, []);
 
   const clearNotifications = useCallback((): void => {

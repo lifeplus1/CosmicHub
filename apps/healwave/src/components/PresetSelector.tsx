@@ -5,8 +5,7 @@ declare const process:
   | { env?: Record<string, string | undefined>; NODE_ENV?: string }
   | undefined;
 // Allow controlled console usage in development only
- 
- 
+
 // console usage intentionally gated by DEV checks
 import { useAuth } from '@cosmichub/auth';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
@@ -108,7 +107,12 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
     }, [user, loadUserPresets]);
 
     const handleSavePreset = useCallback(async () => {
-  if ((user === null || user === undefined) || newPresetName.trim().length === 0) return; // explicit null/undefined check for eqeqeq
+      if (
+        user === null ||
+        user === undefined ||
+        newPresetName.trim().length === 0
+      )
+        return; // explicit null/undefined check for eqeqeq
 
       try {
         setLoading(true);
@@ -169,11 +173,12 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
 
     const handleDeletePreset = useCallback(
       async (presetId: string) => {
-  if (user === null || user === undefined) return; // explicit null/undefined check
+        if (user === null || user === undefined) return; // explicit null/undefined check
 
-  const confirmDelete = window.confirm('Are you sure you want to delete this preset?');
-  if (confirmDelete === false)
-          return;
+        const confirmDelete = window.confirm(
+          'Are you sure you want to delete this preset?'
+        );
+        if (confirmDelete === false) return;
 
         try {
           setLoading(true);
@@ -215,7 +220,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
         aria-label='Frequency Presets'
       >
         {/* Error Alert */}
-  {error && (
+        {error && (
           <div
             role='alert'
             className='mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg'
@@ -509,9 +514,12 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
                     <>
                       <div>Preset: {currentPreset.name}</div>
                       <div>Base Frequency: {currentPreset.baseFrequency}Hz</div>
-                      {currentPreset.binauralBeat !== undefined && currentPreset.binauralBeat !== 0 && (
-                        <div>Binaural Beat: {currentPreset.binauralBeat}Hz</div>
-                      )}
+                      {currentPreset.binauralBeat !== undefined &&
+                        currentPreset.binauralBeat !== 0 && (
+                          <div>
+                            Binaural Beat: {currentPreset.binauralBeat}Hz
+                          </div>
+                        )}
                     </>
                   ) : (
                     <div>No preset selected</div>

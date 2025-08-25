@@ -4,7 +4,7 @@ import { logger } from '@cosmichub/config';
 
 // Create component-specific logger
 const authLogger = logger.child({ module: 'HealWaveAuth' });
- 
+
 // --- Global fetch wrapper to propagate X-Request-ID & capture in errors ---
 const originalFetch = window.fetch.bind(window);
 window.fetch = async (
@@ -12,7 +12,12 @@ window.fetch = async (
   init?: RequestInit
 ): Promise<Response> => {
   const requestId = crypto.randomUUID();
-  const inputStr = input instanceof URL ? input.toString() : typeof input === 'string' ? input : '[object Request]';
+  const inputStr =
+    input instanceof URL
+      ? input.toString()
+      : typeof input === 'string'
+        ? input
+        : '[object Request]';
   const newInit: RequestInit = {
     ...(init ?? {}),
     headers: {

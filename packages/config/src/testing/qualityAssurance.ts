@@ -60,18 +60,27 @@ class QualityAssuranceEngine {
       component: null as unknown as React.ComponentType<unknown>, // Will be dynamically loaded
       props: { children: 'Test Button' },
       variants: [
-        { name: 'Primary', props: { variant: 'primary', children: 'Primary Button' } },
-        { name: 'Secondary', props: { variant: 'secondary', children: 'Secondary Button' } },
-        { name: 'Disabled', props: { disabled: true, children: 'Disabled Button' } }
+        {
+          name: 'Primary',
+          props: { variant: 'primary', children: 'Primary Button' },
+        },
+        {
+          name: 'Secondary',
+          props: { variant: 'secondary', children: 'Secondary Button' },
+        },
+        {
+          name: 'Disabled',
+          props: { disabled: true, children: 'Disabled Button' },
+        },
       ],
       accessibility: {
         requiredRoles: ['button'],
         requiredLabels: ['button'],
-        keyboardNavigation: true
+        keyboardNavigation: true,
       },
       performance: {
-        maxRenderTime: 16
-      }
+        maxRenderTime: 16,
+      },
     });
 
     // Modal pattern
@@ -82,11 +91,11 @@ class QualityAssuranceEngine {
       accessibility: {
         requiredRoles: ['dialog'],
         requiredLabels: ['modal'],
-        keyboardNavigation: true
+        keyboardNavigation: true,
       },
       performance: {
-        maxRenderTime: 32
-      }
+        maxRenderTime: 32,
+      },
     });
 
     // Form pattern
@@ -97,11 +106,11 @@ class QualityAssuranceEngine {
       accessibility: {
         requiredRoles: ['form'],
         requiredLabels: ['form'],
-        keyboardNavigation: true
+        keyboardNavigation: true,
       },
       performance: {
-        maxRenderTime: 50
-      }
+        maxRenderTime: 50,
+      },
     });
 
     // Input pattern
@@ -112,17 +121,23 @@ class QualityAssuranceEngine {
       variants: [
         { name: 'Text', props: { type: 'text', placeholder: 'Text input' } },
         { name: 'Email', props: { type: 'email', placeholder: 'Email input' } },
-        { name: 'Password', props: { type: 'password', placeholder: 'Password input' } },
-        { name: 'Disabled', props: { disabled: true, placeholder: 'Disabled input' } }
+        {
+          name: 'Password',
+          props: { type: 'password', placeholder: 'Password input' },
+        },
+        {
+          name: 'Disabled',
+          props: { disabled: true, placeholder: 'Disabled input' },
+        },
       ],
       accessibility: {
         requiredRoles: ['textbox'],
         requiredLabels: ['input'],
-        keyboardNavigation: true
+        keyboardNavigation: true,
       },
       performance: {
-        maxRenderTime: 16
-      }
+        maxRenderTime: 16,
+      },
     });
 
     // Dropdown pattern
@@ -133,21 +148,22 @@ class QualityAssuranceEngine {
       variants: [
         { name: 'Single Select', props: { multiple: false } },
         { name: 'Multi Select', props: { multiple: true } },
-        { name: 'Disabled', props: { disabled: true } }
+        { name: 'Disabled', props: { disabled: true } },
       ],
       accessibility: {
         requiredRoles: ['combobox', 'listbox'],
         requiredLabels: ['dropdown', 'select'],
-        keyboardNavigation: true
+        keyboardNavigation: true,
       },
       performance: {
-        maxRenderTime: 25
+        maxRenderTime: 25,
       },
       interactions: [
         {
           name: 'Open Dropdown',
           action: (element: HTMLElement): void => {
-            const trigger = element.querySelector('[role="combobox"]') ?? element;
+            const trigger =
+              element.querySelector('[role="combobox"]') ?? element;
             trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
           },
           expectedResult: (container: HTMLElement): void => {
@@ -156,19 +172,19 @@ class QualityAssuranceEngine {
             if (dropdown) {
               expect(dropdown).toBeInTheDocument();
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
   }
 
   async runAutomatedQA(componentPaths?: string[]): Promise<QAReport> {
-  const qaLogger = logger.child({ module: 'qa', phase: 'run' });
-  qaLogger.info('Starting Automated Quality Assurance Scan');
-    
+    const qaLogger = logger.child({ module: 'qa', phase: 'run' });
+    qaLogger.info('Starting Automated Quality Assurance Scan');
+
     const startTime = performance.now();
-    const components = componentPaths ?? await this.discoverComponents();
-    
+    const components = componentPaths ?? (await this.discoverComponents());
+
     const report: QAReport = {
       timestamp: new Date().toISOString(),
       totalComponents: components.length,
@@ -183,13 +199,13 @@ class QualityAssuranceEngine {
         averageRenderTime: 0,
         slowestComponent: '',
         fastestComponent: '',
-        memoryUsage: 0
+        memoryUsage: 0,
       },
       accessibilityMetrics: {
         totalViolations: 0,
         criticalViolations: 0,
-        componentsWithIssues: 0
-      }
+        componentsWithIssues: 0,
+      },
     };
 
     // Test each component
@@ -198,16 +214,23 @@ class QualityAssuranceEngine {
         const result = await this.testComponent(componentPath);
         report.componentResults.push(result);
         report.testedComponents++;
-        
+
         if (result.qualityScore >= 70) {
           report.passedComponents++;
         } else {
           report.failedComponents++;
         }
-        
-  qaLogger.info('Component tested', { component: result.name, quality: result.qualityScore, grade: result.grade });
+
+        qaLogger.info('Component tested', {
+          component: result.name,
+          quality: result.qualityScore,
+          grade: result.grade,
+        });
       } catch (error) {
-  qaLogger.error('Failed to test component', { path: componentPath, error: error instanceof Error ? error.message : String(error) });
+        qaLogger.error('Failed to test component', {
+          path: componentPath,
+          error: error instanceof Error ? error.message : String(error),
+        });
         report.failedComponents++;
       }
     }
@@ -215,24 +238,29 @@ class QualityAssuranceEngine {
     // Calculate overall metrics
     if (report.componentResults.length > 0) {
       report.averageQualityScore = Math.round(
-        report.componentResults.reduce((sum, r) => sum + r.qualityScore, 0) / report.componentResults.length
+        report.componentResults.reduce((sum, r) => sum + r.qualityScore, 0) /
+          report.componentResults.length
       );
-      
+
       report.overallGrade = this.calculateGrade(report.averageQualityScore);
-      
+
       // Performance metrics
       const renderTimes = report.componentResults.map(r => r.performance);
-      report.performanceMetrics.averageRenderTime = renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length;
-      
+      report.performanceMetrics.averageRenderTime =
+        renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length;
+
       const slowestIndex = renderTimes.indexOf(Math.max(...renderTimes));
       const fastestIndex = renderTimes.indexOf(Math.min(...renderTimes));
-      
-      report.performanceMetrics.slowestComponent = report.componentResults[slowestIndex]?.name ?? 'Unknown';
-      report.performanceMetrics.fastestComponent = report.componentResults[fastestIndex]?.name ?? 'Unknown';
-      
+
+      report.performanceMetrics.slowestComponent =
+        report.componentResults[slowestIndex]?.name ?? 'Unknown';
+      report.performanceMetrics.fastestComponent =
+        report.componentResults[fastestIndex]?.name ?? 'Unknown';
+
       // Accessibility metrics
-      report.accessibilityMetrics.componentsWithIssues = report.componentResults.filter(r => r.accessibility < 90).length;
-      
+      report.accessibilityMetrics.componentsWithIssues =
+        report.componentResults.filter(r => r.accessibility < 90).length;
+
       // Generate recommendations
       report.recommendations = this.generateRecommendations(report);
     }
@@ -243,9 +271,9 @@ class QualityAssuranceEngine {
       overallGrade: report.overallGrade,
       averageQuality: report.averageQualityScore,
       passed: report.passedComponents,
-      total: report.totalComponents
+      total: report.totalComponents,
     });
-    
+
     return report;
   }
 
@@ -258,7 +286,7 @@ class QualityAssuranceEngine {
       'packages/ui/src/components/Input.tsx',
       'apps/astro/src/components/Login.tsx',
       'apps/astro/src/components/Signup.tsx',
-      'apps/healwave/src/components/FrequencyPlayer.tsx'
+      'apps/healwave/src/components/FrequencyPlayer.tsx',
     ]);
   }
 
@@ -275,29 +303,38 @@ class QualityAssuranceEngine {
     // Check cache first for performance optimization
     const cached = this.testResults.get(componentPath);
     if (cached) {
-      return Promise.resolve(cached as ReturnType<typeof this.testComponent> extends Promise<infer T> ? T : never);
+      return Promise.resolve(
+        cached as ReturnType<typeof this.testComponent> extends Promise<infer T>
+          ? T
+          : never
+      );
     }
 
     const componentName = this.extractComponentName(componentPath);
     const issues: string[] = [];
-    
+
     // Get or create component configuration
-    const config = this.componentConfigs.get(componentName) ?? this.createDefaultConfig(componentName);
-    
+    const config =
+      this.componentConfigs.get(componentName) ??
+      this.createDefaultConfig(componentName);
+
     // Mock testing results - in real implementation, this would run actual tests
     const performance = this.mockPerformanceTest(componentName);
     const accessibility = this.mockAccessibilityTest(componentName);
     const reliability = this.mockReliabilityTest(componentName);
-    
+
     // Check for common issues based on configuration
     const maxRenderTime = config.performance?.maxRenderTime ?? 32;
-    if (performance < maxRenderTime / 2) issues.push('Slow render time detected');
+    if (performance < maxRenderTime / 2)
+      issues.push('Slow render time detected');
     if (accessibility < 90) issues.push('Accessibility improvements needed');
     if (reliability < 80) issues.push('Add more test coverage');
-    
-    const qualityScore = Math.round((performance + accessibility + reliability) / 3);
+
+    const qualityScore = Math.round(
+      (performance + accessibility + reliability) / 3
+    );
     const grade = this.calculateGrade(qualityScore);
-    
+
     const testResults = {
       name: componentName,
       path: componentPath,
@@ -306,19 +343,25 @@ class QualityAssuranceEngine {
       performance: performance,
       accessibility: accessibility,
       reliability: reliability,
-      issues
+      issues,
     };
 
     // Cache test results for performance optimization
     this.testResults.set(componentPath, testResults);
-    
+
     return Promise.resolve(testResults);
   }
 
   private extractComponentName(path: string): string {
     const parts = path.split('/');
     const filename = parts[parts.length - 1];
-    return filename?.replace('.tsx', '').replace('.jsx', '').replace('.ts', '').replace('.js', '') ?? 'Unknown';
+    return (
+      filename
+        ?.replace('.tsx', '')
+        .replace('.jsx', '')
+        .replace('.ts', '')
+        .replace('.js', '') ?? 'Unknown'
+    );
   }
 
   private createDefaultConfig(componentName: string): ComponentTestConfig {
@@ -328,11 +371,11 @@ class QualityAssuranceEngine {
       props: {},
       accessibility: {
         requiredRoles: [],
-        requiredLabels: []
+        requiredLabels: [],
       },
       performance: {
-        maxRenderTime: 32
-      }
+        maxRenderTime: 32,
+      },
     };
   }
 
@@ -346,15 +389,24 @@ class QualityAssuranceEngine {
   private mockAccessibilityTest(componentName: string): number {
     // Mock accessibility scores
     const baseScore = 80;
-    const hasAccessibilityFeatures = ['Button', 'Modal', 'Input', 'Dropdown'].includes(componentName);
-    return hasAccessibilityFeatures ? baseScore + 15 + Math.random() * 5 : baseScore + Math.random() * 10;
+    const hasAccessibilityFeatures = [
+      'Button',
+      'Modal',
+      'Input',
+      'Dropdown',
+    ].includes(componentName);
+    return hasAccessibilityFeatures
+      ? baseScore + 15 + Math.random() * 5
+      : baseScore + Math.random() * 10;
   }
 
   private mockReliabilityTest(componentName: string): number {
     // Mock reliability scores
     const baseScore = 75;
     const isWellTested = ['Button', 'Input'].includes(componentName);
-    return isWellTested ? baseScore + 20 + Math.random() * 5 : baseScore + Math.random() * 15;
+    return isWellTested
+      ? baseScore + 20 + Math.random() * 5
+      : baseScore + Math.random() * 15;
   }
 
   private calculateGrade(score: number): string {
@@ -367,28 +419,36 @@ class QualityAssuranceEngine {
 
   private generateRecommendations(report: QAReport): string[] {
     const recommendations: string[] = [];
-    
+
     if (report.averageQualityScore < 80) {
-      recommendations.push('Improve overall component quality to reach 80% threshold');
+      recommendations.push(
+        'Improve overall component quality to reach 80% threshold'
+      );
     }
-    
+
     if (report.performanceMetrics.averageRenderTime > 25) {
       recommendations.push('Optimize component rendering performance');
     }
-    
+
     if (report.accessibilityMetrics.componentsWithIssues > 0) {
-      recommendations.push(`Fix accessibility issues in ${report.accessibilityMetrics.componentsWithIssues} components`);
+      recommendations.push(
+        `Fix accessibility issues in ${report.accessibilityMetrics.componentsWithIssues} components`
+      );
     }
-    
+
     if (report.failedComponents > report.passedComponents) {
       recommendations.push('Increase test coverage and component reliability');
     }
-    
-    const lowScoreComponents = report.componentResults.filter(r => r.qualityScore < 70);
+
+    const lowScoreComponents = report.componentResults.filter(
+      r => r.qualityScore < 70
+    );
     if (lowScoreComponents.length > 0) {
-      recommendations.push(`Priority components needing attention: ${lowScoreComponents.map(c => c.name).join(', ')}`);
+      recommendations.push(
+        `Priority components needing attention: ${lowScoreComponents.map(c => c.name).join(', ')}`
+      );
     }
-    
+
     return recommendations;
   }
 
@@ -412,9 +472,12 @@ class QualityAssuranceEngine {
 - **Total Violations:** ${report.accessibilityMetrics.totalViolations}
 
 ## Component Results
-${report.componentResults.map(r => 
-  `- **${r.name}** (${r.grade}): ${r.qualityScore}% - ${r.issues.length > 0 ? r.issues.join(', ') : 'No issues'}`
-).join('\n')}
+${report.componentResults
+  .map(
+    r =>
+      `- **${r.name}** (${r.grade}): ${r.qualityScore}% - ${r.issues.length > 0 ? r.issues.join(', ') : 'No issues'}`
+  )
+  .join('\n')}
 
 ## Recommendations
 ${report.recommendations.map(r => `- ${r}`).join('\n')}

@@ -94,8 +94,8 @@ export class HealWaveErrorBoundary extends Component<
               </h2>
 
               <p className='text-gray-300 text-sm mb-6'>
-                The healing frequency was interrupted. Let&apos;s restore harmony
-                to your experience.
+                The healing frequency was interrupted. Let&apos;s restore
+                harmony to your experience.
               </p>
 
               {isDevelopment() && this.state.error && (

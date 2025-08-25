@@ -127,7 +127,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(
     }, [frequency, binauralBeat, volume]);
 
     const stopAudio = useCallback(() => {
-  if (audioContextRef.current === null) return;
+      if (audioContextRef.current === null) return;
 
       try {
         const context = audioContextRef.current;
@@ -259,7 +259,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(
         stopAudio();
         if (audioContextRef.current !== null) {
           // Close returns a promise; ensure we surface unexpected errors but don't block unmount
-          audioContextRef.current.close().catch((error) => audioLogger.error('Failed to close audio context', { error }));
+          audioContextRef.current
+            .close()
+            .catch(error =>
+              audioLogger.error('Failed to close audio context', { error })
+            );
         }
       };
     }, [stopAudio]);

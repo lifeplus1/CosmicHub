@@ -45,7 +45,7 @@ describe('Performance Testing Infrastructure Demo', () => {
     const metrics = {
       renderTime: 12.5,
       memoryUsage: 1024,
-      componentCount: 5
+      componentCount: 5,
     };
 
     expect(metrics.renderTime).toBeLessThan(16);

@@ -7,24 +7,9 @@
     "audit_score": 90.0
   },
   "trend_data": {
-    "privacy_score_trend": [
-      73.0,
-      78.5,
-      82.1,
-      92.4
-    ],
-    "risk_trend": [
-      12,
-      8,
-      5,
-      0
-    ],
-    "compliance_trend": [
-      81.1,
-      85.3,
-      88.7,
-      55.0
-    ]
+    "privacy_score_trend": [73.0, 78.5, 82.1, 92.4],
+    "risk_trend": [12, 8, 5, 0],
+    "compliance_trend": [81.1, 85.3, 88.7, 55.0]
   },
   "risk_distribution": {},
   "key_metrics": {

@@ -10,10 +10,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'json-summary'],
       reportsDirectory: 'coverage',
-      exclude: [
-        'node_modules/',
-        '**/*.d.ts'
-      ]
-    }
-  }
+      exclude: ['node_modules/', '**/*.d.ts'],
+    },
+  },
 });

@@ -66,10 +66,10 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Basic birth chart',
       '3 AI interpretations per month',
       'Daily horoscope',
-      'Basic frequencies (healwave)'
+      'Basic frequencies (healwave)',
     ],
     stripePriceId: '',
-    apps: ['astro', 'healwave']
+    apps: ['astro', 'healwave'],
   },
   {
     id: 'astro-pro',
@@ -82,10 +82,10 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Synastry compatibility',
       'Transit predictions',
       'Chart PDF export',
-      'Priority support'
+      'Priority support',
     ],
     stripePriceId: 'price_astro_pro_monthly',
-    apps: ['astro']
+    apps: ['astro'],
   },
   {
     id: 'healwave-pro',
@@ -98,10 +98,10 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Astrological frequency mapping',
       'Session recordings',
       'Advanced binaural beats',
-      'Priority support'
+      'Priority support',
     ],
     stripePriceId: 'price_healwave_pro_monthly',
-    apps: ['healwave']
+    apps: ['healwave'],
   },
   {
     id: 'cosmic-ultimate',
@@ -114,11 +114,11 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Cross-app integration',
       'Exclusive cosmic insights',
       'Early access to new features',
-      'VIP support'
+      'VIP support',
     ],
     stripePriceId: 'price_cosmic_ultimate_monthly',
-    apps: ['astro', 'healwave']
-  }
+    apps: ['astro', 'healwave'],
+  },
 ];
 
 class SubscriptionManager extends SimpleEventEmitter {
@@ -145,59 +145,67 @@ class SubscriptionManager extends SimpleEventEmitter {
     if (!this.currentSubscription) {
       return this.plans.find(p => p.id === 'free') ?? null;
     }
-    return this.plans.find(p => p.id === this.currentSubscription!.planId) ?? null;
+    return (
+      this.plans.find(p => p.id === this.currentSubscription!.planId) ?? null
+    );
   }
 
   // Check feature access
-  checkFeatureAccess(feature: string, app?: 'astro' | 'healwave'): FeatureAccess {
+  checkFeatureAccess(
+    feature: string,
+    app?: 'astro' | 'healwave'
+  ): FeatureAccess {
     const plan = this.getCurrentPlan();
-    
+
     if (!plan) {
       return {
         canAccess: false,
         reason: 'No active plan found',
         upgradeRequired: true,
-        requiredPlan: 'astro-pro'
+        requiredPlan: 'astro-pro',
       };
     }
 
     // Check if subscription is active
-    if (this.currentSubscription && this.currentSubscription.status !== 'active') {
+    if (
+      this.currentSubscription &&
+      this.currentSubscription.status !== 'active'
+    ) {
       return {
         canAccess: false,
         reason: 'Subscription is not active',
         upgradeRequired: true,
-        requiredPlan: plan.id
+        requiredPlan: plan.id,
       };
     }
 
     // Check if app is included in plan
     if (app && !plan.apps.includes(app)) {
-      const requiredPlan = this.plans.find(p => 
-        p.apps.includes(app) && p.features.includes(feature)
+      const requiredPlan = this.plans.find(
+        p => p.apps.includes(app) && p.features.includes(feature)
       );
-      
+
       return {
         canAccess: false,
         reason: `${app} not included in current plan`,
         upgradeRequired: true,
-        requiredPlan: requiredPlan?.id ?? 'cosmic-ultimate'
+        requiredPlan: requiredPlan?.id ?? 'cosmic-ultimate',
       };
     }
 
     // Check if feature is included
     const hasFeature = plan.features.includes(feature);
-    
+
     if (!hasFeature) {
-      const requiredPlan = this.plans.find(p => 
-        p.features.includes(feature) && (!app || p.apps.includes(app))
+      const requiredPlan = this.plans.find(
+        p => p.features.includes(feature) && (!app || p.apps.includes(app))
       );
-      
+
       return {
         canAccess: false,
         reason: 'Feature not included in current plan',
         upgradeRequired: true,
-        requiredPlan: requiredPlan?.id ?? 'cosmic-ultimate'
+        requiredPlan: requiredPlan?.id ?? 'cosmic-ultimate',
       };
     }
 
@@ -209,14 +217,18 @@ class SubscriptionManager extends SimpleEventEmitter {
     if (!currentApp) {
       return this.plans;
     }
-    
+
     return this.plans.filter(plan => plan.apps.includes(currentApp));
   }
 
   // Create Stripe checkout session
-  async createCheckoutSession(planId: string, successUrl: string, cancelUrl: string): Promise<{ url: string }> {
+  async createCheckoutSession(
+    planId: string,
+    successUrl: string,
+    cancelUrl: string
+  ): Promise<{ url: string }> {
     const plan = this.plans.find(p => p.id === planId);
-    
+
     if (!plan?.stripePriceId) {
       throw new Error('Invalid plan or missing Stripe price ID');
     }
@@ -231,15 +243,15 @@ class SubscriptionManager extends SimpleEventEmitter {
           priceId: plan.stripePriceId,
           successUrl,
           cancelUrl,
-          planId
-        })
+          planId,
+        }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to create checkout session');
       }
 
-      return await response.json() as { url: string };
+      return (await response.json()) as { url: string };
     } catch (error) {
       this.emit('subscription:error', error);
       throw error;
@@ -254,14 +266,14 @@ class SubscriptionManager extends SimpleEventEmitter {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ returnUrl })
+        body: JSON.stringify({ returnUrl }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to create portal session');
       }
 
-      return await response.json() as { url: string };
+      return (await response.json()) as { url: string };
     } catch (error) {
       this.emit('subscription:error', error);
       throw error;
@@ -281,8 +293,8 @@ class SubscriptionManager extends SimpleEventEmitter {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          subscriptionId: this.currentSubscription.stripeSubscriptionId
-        })
+          subscriptionId: this.currentSubscription.stripeSubscriptionId,
+        }),
       });
 
       if (!response.ok) {
@@ -313,8 +325,8 @@ class SubscriptionManager extends SimpleEventEmitter {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          subscriptionId: this.currentSubscription.stripeSubscriptionId
-        })
+          subscriptionId: this.currentSubscription.stripeSubscriptionId,
+        }),
       });
 
       if (!response.ok) {
@@ -347,12 +359,18 @@ class SubscriptionManager extends SimpleEventEmitter {
   // Get usage limits for current plan
   getUsageLimits(): Record<string, number> {
     const plan = this.getCurrentPlan();
-    
+
     const limits: Record<string, number> = {
       'ai-interpretations': plan?.id === 'free' ? 3 : -1, // -1 = unlimited
       'chart-exports': plan?.id === 'free' ? 0 : -1,
-      'frequency-sessions': plan?.features.includes('Unlimited frequency sessions') ? -1 : 10,
-      'custom-frequencies': plan?.features.includes('Custom frequency creation') ? -1 : 0
+      'frequency-sessions': plan?.features.includes(
+        'Unlimited frequency sessions'
+      )
+        ? -1
+        : 10,
+      'custom-frequencies': plan?.features.includes('Custom frequency creation')
+        ? -1
+        : 0,
     };
 
     return limits;
@@ -360,12 +378,16 @@ class SubscriptionManager extends SimpleEventEmitter {
 
   // Check if subscription expires soon
   expiresWithin(days: number): boolean {
-    if (!this.currentSubscription || this.currentSubscription.status !== 'active') {
+    if (
+      !this.currentSubscription ||
+      this.currentSubscription.status !== 'active'
+    ) {
       return false;
     }
 
     const daysUntilExpiry = Math.ceil(
-      (this.currentSubscription.currentPeriodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      (this.currentSubscription.currentPeriodEnd.getTime() - Date.now()) /
+        (1000 * 60 * 60 * 24)
     );
 
     return daysUntilExpiry <= days;
@@ -377,23 +399,30 @@ export const subscriptionManager = new SubscriptionManager();
 
 // React hook for subscription management
 export const useSubscription = () => {
-  const [subscription, setSubscription] = React.useState<UserSubscription | null>(
-    subscriptionManager.getCurrentSubscription()
-  );
+  const [subscription, setSubscription] =
+    React.useState<UserSubscription | null>(
+      subscriptionManager.getCurrentSubscription()
+    );
   const [plan, setPlan] = React.useState<SubscriptionPlan | null>(
     subscriptionManager.getCurrentPlan()
   );
 
   React.useEffect(() => {
-    const unsubscribeUpdated = subscriptionManager.subscribe('subscription:updated', (sub) => {
-      setSubscription(sub as UserSubscription | null);
-      setPlan(subscriptionManager.getCurrentPlan());
-    });
+    const unsubscribeUpdated = subscriptionManager.subscribe(
+      'subscription:updated',
+      sub => {
+        setSubscription(sub as UserSubscription | null);
+        setPlan(subscriptionManager.getCurrentPlan());
+      }
+    );
 
-    const unsubscribeLoaded = subscriptionManager.subscribe('subscription:loaded', (sub) => {
-      setSubscription(sub as UserSubscription | null);
-      setPlan(subscriptionManager.getCurrentPlan());
-    });
+    const unsubscribeLoaded = subscriptionManager.subscribe(
+      'subscription:loaded',
+      sub => {
+        setSubscription(sub as UserSubscription | null);
+        setPlan(subscriptionManager.getCurrentPlan());
+      }
+    );
 
     return () => {
       unsubscribeUpdated();
@@ -404,15 +433,22 @@ export const useSubscription = () => {
   return {
     subscription,
     plan,
-    checkFeatureAccess: subscriptionManager.checkFeatureAccess.bind(subscriptionManager),
-    getAvailablePlans: subscriptionManager.getAvailablePlans.bind(subscriptionManager),
-    createCheckoutSession: subscriptionManager.createCheckoutSession.bind(subscriptionManager),
-    createPortalSession: subscriptionManager.createPortalSession.bind(subscriptionManager),
-    cancelSubscription: subscriptionManager.cancelSubscription.bind(subscriptionManager),
-    reactivateSubscription: subscriptionManager.reactivateSubscription.bind(subscriptionManager),
-    getUsageLimits: subscriptionManager.getUsageLimits.bind(subscriptionManager),
+    checkFeatureAccess:
+      subscriptionManager.checkFeatureAccess.bind(subscriptionManager),
+    getAvailablePlans:
+      subscriptionManager.getAvailablePlans.bind(subscriptionManager),
+    createCheckoutSession:
+      subscriptionManager.createCheckoutSession.bind(subscriptionManager),
+    createPortalSession:
+      subscriptionManager.createPortalSession.bind(subscriptionManager),
+    cancelSubscription:
+      subscriptionManager.cancelSubscription.bind(subscriptionManager),
+    reactivateSubscription:
+      subscriptionManager.reactivateSubscription.bind(subscriptionManager),
+    getUsageLimits:
+      subscriptionManager.getUsageLimits.bind(subscriptionManager),
     expiresWithin: subscriptionManager.expiresWithin.bind(subscriptionManager),
-    subscribe: subscriptionManager.subscribe.bind(subscriptionManager)
+    subscribe: subscriptionManager.subscribe.bind(subscriptionManager),
   };
 };
 

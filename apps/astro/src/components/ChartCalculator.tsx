@@ -1,15 +1,15 @@
-import React, { useState, Suspense } from "react";
-import { FaBook, FaInfoCircle } from "react-icons/fa";
+import React, { useState, Suspense } from 'react';
+import { FaBook, FaInfoCircle } from 'react-icons/fa';
 import { useAuth } from '@cosmichub/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChartDisplay } from ".";
-import { MultiSystemChartDisplay } from "./MultiSystemChart";
-import type { MultiSystemChartData } from "./MultiSystemChart/types";
+import { ChartDisplay } from '.';
+import { MultiSystemChartDisplay } from './MultiSystemChart';
+import type { MultiSystemChartData } from './MultiSystemChart/types';
 import type { ChartBirthData } from '@cosmichub/types';
 // ChartDisplay now accepts a loose ChartLike shape; no need for ChartData casts here
-import { saveChart, type SaveChartRequest } from "../services/api";
-import FeatureGuard from "./FeatureGuard";
-import { EducationalTooltip } from "./EducationalTooltip";
+import { saveChart, type SaveChartRequest } from '../services/api';
+import FeatureGuard from './FeatureGuard';
+import { EducationalTooltip } from './EducationalTooltip';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { apiConfig } from '../config/environment';
 
@@ -32,12 +32,15 @@ export interface ExtendedChartData {
   sun?: string;
   moon?: string;
   rising?: string;
-  planets: Record<string, {
-    position: number;
-    house: number;
-    retrograde?: boolean;
-    speed?: number;
-  }>;
+  planets: Record<
+    string,
+    {
+      position: number;
+      house: number;
+      retrograde?: boolean;
+      speed?: number;
+    }
+  >;
   houses: Array<{
     house: number;
     cusp: number;
@@ -64,12 +67,14 @@ export interface ExtendedChartData {
 }
 
 function isExtendedChartData(data: unknown): data is ExtendedChartData {
-  return typeof data === 'object' && 
-         data !== null && 
-         'planets' in data && 
-         'houses' in data && 
-         'aspects' in data && 
-         'asteroids' in data;
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'planets' in data &&
+    'houses' in data &&
+    'aspects' in data &&
+    'asteroids' in data
+  );
 }
 
 // Helper function to convert FormData to ChartBirthData
@@ -80,7 +85,7 @@ function convertToChartBirthData(formData: FormData): ChartBirthData {
     day: parseInt(formData.day),
     hour: parseInt(formData.hour),
     minute: parseInt(formData.minute),
-    city: formData.city
+    city: formData.city,
   };
 }
 
@@ -88,19 +93,21 @@ const ChartCalculator: React.FC = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<FormData>({
-    year: "",
-    month: "",
-    day: "",
-    hour: "",
-    minute: "",
-    city: "",
+    year: '',
+    month: '',
+    day: '',
+    hour: '',
+    minute: '',
+    city: '',
     multiSystem: false,
   });
-  const [houseSystem, setHouseSystem] = useState<string>("P"); // Default to Placidus
-  const [chart, setChart] = useState<ExtendedChartData | MultiSystemChartData | null>(null);
+  const [houseSystem, setHouseSystem] = useState<string>('P'); // Default to Placidus
+  const [chart, setChart] = useState<
+    ExtendedChartData | MultiSystemChartData | null
+  >(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Save chart mutation
@@ -108,10 +115,10 @@ const ChartCalculator: React.FC = () => {
     mutationFn: saveChart,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
-      setSuccess("Chart saved successfully!");
-      void setTimeout(() => setSuccess(""), 3000);
+      setSuccess('Chart saved successfully!');
+      void setTimeout(() => setSuccess(''), 3000);
     },
-    onError: (error) => {
+    onError: error => {
       // TODO: Replace with structured logging service
       // logger.error('Error saving chart:', error);
       setError(`Failed to save chart: ${error.message}`);
@@ -124,16 +131,21 @@ const ChartCalculator: React.FC = () => {
       return;
     }
 
-    const hasRequiredFormData = (
-      typeof formData.year === 'string' && formData.year.length > 0 &&
-      typeof formData.month === 'string' && formData.month.length > 0 &&
-      typeof formData.day === 'string' && formData.day.length > 0 &&
-      typeof formData.hour === 'string' && formData.hour.length > 0 &&
-      typeof formData.minute === 'string' && formData.minute.length > 0 &&
-      typeof formData.city === 'string' && formData.city.length > 0
-    );
+    const hasRequiredFormData =
+      typeof formData.year === 'string' &&
+      formData.year.length > 0 &&
+      typeof formData.month === 'string' &&
+      formData.month.length > 0 &&
+      typeof formData.day === 'string' &&
+      formData.day.length > 0 &&
+      typeof formData.hour === 'string' &&
+      formData.hour.length > 0 &&
+      typeof formData.minute === 'string' &&
+      formData.minute.length > 0 &&
+      typeof formData.city === 'string' &&
+      formData.city.length > 0;
 
-  if ((chart === null || chart === undefined) || !hasRequiredFormData) {
+    if (chart === null || chart === undefined || !hasRequiredFormData) {
       setError('Please generate a chart first before saving');
       return;
     }
@@ -146,7 +158,7 @@ const ChartCalculator: React.FC = () => {
       minute: parseInt(formData.minute),
       city: formData.city,
       house_system: houseSystem,
-      chart_name: `${formData.city} ${formData.year}-${formData.month.padStart(2, '0')}-${formData.day.padStart(2, '0')}`
+      chart_name: `${formData.city} ${formData.year}-${formData.month.padStart(2, '0')}-${formData.day.padStart(2, '0')}`,
     };
 
     saveMutation.mutate(saveData);
@@ -154,31 +166,35 @@ const ChartCalculator: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+  const handleSelectChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ): void => {
     setHouseSystem(e.target.value);
   };
 
   const handleSwitchChange = (checked: boolean): void => {
-    setFormData((prev) => ({ ...prev, multiSystem: checked }));
+    setFormData(prev => ({ ...prev, multiSystem: checked }));
   };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
 
     try {
-  const endpoint = formData.multiSystem ? '/calculate-multi-system' : '/calculate';
-  const url = `${apiConfig.baseUrl}${endpoint}?house_system=${houseSystem}`;
-      
+      const endpoint = formData.multiSystem
+        ? '/calculate-multi-system'
+        : '/calculate';
+      const url = `${apiConfig.baseUrl}${endpoint}?house_system=${houseSystem}`;
+
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           year: parseInt(formData.year),
@@ -194,26 +210,29 @@ const ChartCalculator: React.FC = () => {
         const errorData: unknown = await response.json();
         const isErrorResponse = (data: unknown): data is { detail: string } => {
           return (
-            typeof data === 'object' && 
-            data !== null && 
-            'detail' in data && 
+            typeof data === 'object' &&
+            data !== null &&
+            'detail' in data &&
             typeof data.detail === 'string'
           );
         };
-        
-        const errorMessage = isErrorResponse(errorData) 
-          ? errorData.detail 
-          : "Failed to calculate chart";
+
+        const errorMessage = isErrorResponse(errorData)
+          ? errorData.detail
+          : 'Failed to calculate chart';
         throw new Error(errorMessage);
       }
 
       const data: unknown = await response.json();
       setChart(data as ExtendedChartData | MultiSystemChartData);
-      setSuccess(formData.multiSystem 
-        ? "Multi-system analysis complete with Western, Vedic, Chinese, Mayan, and Uranian astrology" 
-        : "Western tropical chart calculated");
+      setSuccess(
+        formData.multiSystem
+          ? 'Multi-system analysis complete with Western, Vedic, Chinese, Mayan, and Uranian astrology'
+          : 'Western tropical chart calculated'
+      );
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      const errorMessage =
+        err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -226,47 +245,64 @@ const ChartCalculator: React.FC = () => {
   });
 
   return (
-    <div className="container px-4 py-8 mx-auto">
-      <div className="space-y-8">
+    <div className='container px-4 py-8 mx-auto'>
+      <div className='space-y-8'>
         {/* Header */}
-        <div className="text-center">
-          <h2 className="mb-2 text-3xl font-bold text-white">Birth Chart Calculator</h2>
-          <p className="mb-4 text-gray-300">Enter your birth details for accurate astrological insights</p>
-          <div className="inline-flex items-center px-4 py-2 text-sm border rounded-full bg-white/10 text-cyan-300 border-cyan-500/30">
-            <FaInfoCircle className="mr-2" />
+        <div className='text-center'>
+          <h2 className='mb-2 text-3xl font-bold text-white'>
+            Birth Chart Calculator
+          </h2>
+          <p className='mb-4 text-gray-300'>
+            Enter your birth details for accurate astrological insights
+          </p>
+          <div className='inline-flex items-center px-4 py-2 text-sm border rounded-full bg-white/10 text-cyan-300 border-cyan-500/30'>
+            <FaInfoCircle className='mr-2' />
             Pro Tip: Use exact birth time for precise calculations
           </div>
         </div>
 
         {/* Guide Section */}
-        <div className="p-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10">
+        <div className='p-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10'>
           <button
             onClick={() => setIsGuideOpen(!isGuideOpen)}
-            className="flex items-center justify-between w-full font-semibold text-white"
-            aria-controls="guide-content"
+            className='flex items-center justify-between w-full font-semibold text-white'
+            aria-controls='guide-content'
           >
-            <div className="flex items-center space-x-2">
-              <FaBook className="text-cyan-400" />
+            <div className='flex items-center space-x-2'>
+              <FaBook className='text-cyan-400' />
               <span>Astrology Chart Guide</span>
             </div>
             <span>{isGuideOpen ? '−' : '+'}</span>
           </button>
-          
+
           {isGuideOpen && (
-            <div id="guide-content" className="mt-4 space-y-4 text-gray-300">
-              <p>Your natal chart is a snapshot of the sky at your birth moment, revealing personality, strengths, and life path.</p>
-              <div className="space-y-2">
-                <h4 className="font-semibold text-white">Key Components:</h4>
-                <ul className="pl-5 space-y-1 list-disc">
-                  <li><strong>Planets:</strong> Core energies and drives</li>
-                  <li><strong>Signs:</strong> How energies express</li>
-                  <li><strong>Houses:</strong> Life areas affected</li>
-                  <li><strong>Aspects:</strong> Planetary relationships</li>
+            <div id='guide-content' className='mt-4 space-y-4 text-gray-300'>
+              <p>
+                Your natal chart is a snapshot of the sky at your birth moment,
+                revealing personality, strengths, and life path.
+              </p>
+              <div className='space-y-2'>
+                <h4 className='font-semibold text-white'>Key Components:</h4>
+                <ul className='pl-5 space-y-1 list-disc'>
+                  <li>
+                    <strong>Planets:</strong> Core energies and drives
+                  </li>
+                  <li>
+                    <strong>Signs:</strong> How energies express
+                  </li>
+                  <li>
+                    <strong>Houses:</strong> Life areas affected
+                  </li>
+                  <li>
+                    <strong>Aspects:</strong> Planetary relationships
+                  </li>
                 </ul>
               </div>
-              <div className="space-y-2">
-                <h4 className="font-semibold text-white">Multi-System Mode (Premium):</h4>
-                <ul className="pl-5 space-y-1 list-disc">
+              <div className='space-y-2'>
+                <h4 className='font-semibold text-white'>
+                  Multi-System Mode (Premium):
+                </h4>
+                <ul className='pl-5 space-y-1 list-disc'>
                   <li>Western Tropical: Modern psychological</li>
                   <li>Vedic Sidereal: Ancient Indian wisdom</li>
                   <li>Chinese: Elemental cycles</li>
@@ -274,247 +310,284 @@ const ChartCalculator: React.FC = () => {
                   <li>Uranian: Hypothetical planets</li>
                 </ul>
               </div>
-              <p className="text-sm italic">Calculations powered by Swiss Ephemeris for astronomical accuracy.</p>
+              <p className='text-sm italic'>
+                Calculations powered by Swiss Ephemeris for astronomical
+                accuracy.
+              </p>
             </div>
           )}
         </div>
 
         {/* Form */}
-        <form onSubmit={(e) => {
-          handleSubmit(e).catch(() => {
-            // Error handling is done within handleSubmit
-          });
-        }} className="p-6 space-y-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10">
-          <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-            <div className="flex-1">
-              <label htmlFor="birth-year" className="block mb-2 text-sm font-medium text-gold-200">
+        <form
+          onSubmit={e => {
+            handleSubmit(e).catch(() => {
+              // Error handling is done within handleSubmit
+            });
+          }}
+          className='p-6 space-y-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10'
+        >
+          <div className='flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0'>
+            <div className='flex-1'>
+              <label
+                htmlFor='birth-year'
+                className='block mb-2 text-sm font-medium text-gold-200'
+              >
                 Birth Year *
                 <EducationalTooltip
-                  title="Birth Year in Astrology"
-                  description="Your birth year determines generational planets like Uranus, Neptune, and Pluto positions."
+                  title='Birth Year in Astrology'
+                  description='Your birth year determines generational planets like Uranus, Neptune, and Pluto positions.'
                 />
               </label>
               <input
-                type="number"
-                id="birth-year"
-                name="year"
+                type='number'
+                id='birth-year'
+                name='year'
                 value={formData.year}
                 onChange={handleInputChange}
-                placeholder="e.g., 1990"
-                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                aria-label="Birth year"
+                placeholder='e.g., 1990'
+                className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
+                aria-label='Birth year'
                 required
-                aria-required="true"
+                aria-required='true'
               />
             </div>
-            <div className="flex-1">
-              <label htmlFor="birth-month" className="block mb-2 text-sm font-medium text-gold-200">
+            <div className='flex-1'>
+              <label
+                htmlFor='birth-month'
+                className='block mb-2 text-sm font-medium text-gold-200'
+              >
                 Birth Month *
                 <EducationalTooltip
-                  title="Birth Month Significance"
-                  description="Determines your Sun sign, the core of your identity."
+                  title='Birth Month Significance'
+                  description='Determines your Sun sign, the core of your identity.'
                 />
               </label>
               <input
-                type="number"
-                id="birth-month"
-                name="month"
+                type='number'
+                id='birth-month'
+                name='month'
                 value={formData.month}
                 onChange={handleInputChange}
-                placeholder="1-12"
-                min="1"
-                max="12"
-                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                placeholder='1-12'
+                min='1'
+                max='12'
+                className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
                 required
-                aria-required="true"
-                aria-label="Birth month (1-12)"
+                aria-required='true'
+                aria-label='Birth month (1-12)'
               />
             </div>
-            <div className="flex-1">
-              <label htmlFor="birth-day" className="block mb-2 text-sm font-medium text-gold-200">
+            <div className='flex-1'>
+              <label
+                htmlFor='birth-day'
+                className='block mb-2 text-sm font-medium text-gold-200'
+              >
                 Birth Day *
                 <EducationalTooltip
-                  title="Birth Day Nuances"
-                  description="Fine-tunes your Sun sign and can influence Moon position."
+                  title='Birth Day Nuances'
+                  description='Fine-tunes your Sun sign and can influence Moon position.'
                 />
               </label>
               <input
-                type="number"
-                id="birth-day"
-                name="day"
+                type='number'
+                id='birth-day'
+                name='day'
                 value={formData.day}
                 onChange={handleInputChange}
-                placeholder="1-31"
-                min="1"
-                max="31"
-                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                placeholder='1-31'
+                min='1'
+                max='31'
+                className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
                 required
-                aria-required="true"
-                aria-label="Birth day (1-31)"
+                aria-required='true'
+                aria-label='Birth day (1-31)'
               />
             </div>
           </div>
 
-          <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-            <div className="flex-1">
-              <label htmlFor="birth-hour" className="block mb-2 text-sm font-medium text-gold-200">
+          <div className='flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0'>
+            <div className='flex-1'>
+              <label
+                htmlFor='birth-hour'
+                className='block mb-2 text-sm font-medium text-gold-200'
+              >
                 Birth Hour (24h) *
                 <EducationalTooltip
-                  title="Birth Time Precision"
-                  description="Critical for accurate Rising sign and house placements. Use 24-hour format."
+                  title='Birth Time Precision'
+                  description='Critical for accurate Rising sign and house placements. Use 24-hour format.'
                 />
               </label>
               <input
-                type="number"
-                name="hour"
-                id="birth-hour"
+                type='number'
+                name='hour'
+                id='birth-hour'
                 value={formData.hour}
                 onChange={handleInputChange}
-                placeholder="0-23"
-                min="0"
-                max="23"
-                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                placeholder='0-23'
+                min='0'
+                max='23'
+                className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
                 required
-                aria-required="true"
-                aria-label="Birth hour (0-23)"
+                aria-required='true'
+                aria-label='Birth hour (0-23)'
               />
             </div>
-            <div className="flex-1">
-              <label htmlFor="birth-minute" className="block mb-2 text-sm font-medium text-gold-200">
+            <div className='flex-1'>
+              <label
+                htmlFor='birth-minute'
+                className='block mb-2 text-sm font-medium text-gold-200'
+              >
                 Birth Minute *
                 <EducationalTooltip
-                  title="Minute Accuracy"
-                  description="Minutes matter! Even a 4-minute difference can change your Rising sign. Check your birth certificate for exact time."
+                  title='Minute Accuracy'
+                  description='Minutes matter! Even a 4-minute difference can change your Rising sign. Check your birth certificate for exact time.'
                 />
               </label>
               <input
-                type="number"
-                name="minute"
-                id="birth-minute"
+                type='number'
+                name='minute'
+                id='birth-minute'
                 value={formData.minute}
                 onChange={handleInputChange}
-                placeholder="0-59"
-                min="0"
-                max="59"
-                className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                placeholder='0-59'
+                min='0'
+                max='59'
+                className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
                 required
-                aria-required="true"
-                aria-label="Birth minute (0-59)"
+                aria-required='true'
+                aria-label='Birth minute (0-59)'
               />
             </div>
-            <div className="flex-1">
-              <label htmlFor="house-system" className="block mb-2 text-sm font-medium text-gold-200">
+            <div className='flex-1'>
+              <label
+                htmlFor='house-system'
+                className='block mb-2 text-sm font-medium text-gold-200'
+              >
                 House System
                 <EducationalTooltip
-                  title="House Systems Explained"
-                  description="House systems determine how the 12 houses are calculated and can affect interpretation. Each system has different strengths."
+                  title='House Systems Explained'
+                  description='House systems determine how the 12 houses are calculated and can affect interpretation. Each system has different strengths.'
                   examples={[
-                    "Placidus: Most popular, time-based division",
-                    "Equal House: Each house is exactly 30 degrees",
-                    "Whole Sign: Each sign equals one house",
-                    "Koch: Similar to Placidus, handles extreme latitudes better"
+                    'Placidus: Most popular, time-based division',
+                    'Equal House: Each house is exactly 30 degrees',
+                    'Whole Sign: Each sign equals one house',
+                    'Koch: Similar to Placidus, handles extreme latitudes better',
                   ]}
                 />
               </label>
               <select
                 value={houseSystem}
                 onChange={handleSelectChange}
-                id="house-system"
-                aria-label="House System Selection"
-                className="w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                id='house-system'
+                aria-label='House System Selection'
+                className='w-full px-4 py-3 text-white transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
               >
-                <option value="P">Placidus (Most Popular)</option>
-                <option value="E">Equal House</option>
-                <option value="W">Whole Sign (Traditional)</option>
-                <option value="K">Koch</option>
+                <option value='P'>Placidus (Most Popular)</option>
+                <option value='E'>Equal House</option>
+                <option value='W'>Whole Sign (Traditional)</option>
+                <option value='K'>Koch</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label htmlFor="birth-location" className="block mb-2 text-sm font-medium text-gold-200">
+            <label
+              htmlFor='birth-location'
+              className='block mb-2 text-sm font-medium text-gold-200'
+            >
               Birth Location *
               <EducationalTooltip
-                title="Birth Location Importance"
-                description="Your birth location determines time zone and geographical coordinates needed for accurate house calculations and local planetary angles."
+                title='Birth Location Importance'
+                description='Your birth location determines time zone and geographical coordinates needed for accurate house calculations and local planetary angles.'
                 examples={[
-                  "Use the most specific location possible",
-                  "Include city, state/province, and country",
-                  "Different cities can have different astrology"
+                  'Use the most specific location possible',
+                  'Include city, state/province, and country',
+                  'Different cities can have different astrology',
                 ]}
               />
             </label>
             <input
-              type="text"
-              name="city"
-              id="birth-location"
+              type='text'
+              name='city'
+              id='birth-location'
               value={formData.city}
               onChange={handleInputChange}
-              placeholder="e.g., New York, NY, USA"
-              className="w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+              placeholder='e.g., New York, NY, USA'
+              className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
               required
-              aria-required="true"
-              aria-label="Birth location (e.g., New York, NY, USA)"
+              aria-required='true'
+              aria-label='Birth location (e.g., New York, NY, USA)'
             />
           </div>
 
-          <div className="flex items-center space-x-4">
-            <FeatureGuard feature="multi-system" requiredTier="premium">
+          <div className='flex items-center space-x-4'>
+            <FeatureGuard feature='multi-system' requiredTier='premium'>
               <SwitchPrimitive.Root
                 checked={formData.multiSystem}
                 onCheckedChange={handleSwitchChange}
-                className="w-11 h-6 bg-gray-200 rounded-full relative data-[state=checked]:bg-purple-600 outline-none cursor-pointer transition-colors"
-                aria-label="Toggle multi-system mode"
+                className='w-11 h-6 bg-gray-200 rounded-full relative data-[state=checked]:bg-purple-600 outline-none cursor-pointer transition-colors'
+                aria-label='Toggle multi-system mode'
               >
-                <SwitchPrimitive.Thumb
-                  className="block w-5 h-5 bg-white rounded-full shadow-md transform translate-x-0.5 data-[state=checked]:translate-x-5.5 transition-transform"
-                />
+                <SwitchPrimitive.Thumb className='block w-5 h-5 bg-white rounded-full shadow-md transform translate-x-0.5 data-[state=checked]:translate-x-5.5 transition-transform' />
               </SwitchPrimitive.Root>
             </FeatureGuard>
-            <span className="font-medium text-white">
+            <span className='font-medium text-white'>
               Enable Multi-System Analysis
-              <span className="px-2 py-1 ml-2 text-xs text-purple-300 rounded-full bg-purple-500/20">Premium</span>
+              <span className='px-2 py-1 ml-2 text-xs text-purple-300 rounded-full bg-purple-500/20'>
+                Premium
+              </span>
             </span>
           </div>
 
-          {(error !== null && error !== undefined && error.length > 0) && (
-            <div className="p-3 text-sm text-red-200 border rounded-lg bg-red-500/20 border-red-500/50">
+          {error !== null && error !== undefined && error.length > 0 && (
+            <div className='p-3 text-sm text-red-200 border rounded-lg bg-red-500/20 border-red-500/50'>
               {error}
             </div>
           )}
 
-          {(success !== null && success !== undefined && success.length > 0) && (
-            <div className="p-3 text-sm text-green-200 border rounded-lg bg-green-500/20 border-green-500/50">
+          {success !== null && success !== undefined && success.length > 0 && (
+            <div className='p-3 text-sm text-green-200 border rounded-lg bg-green-500/20 border-green-500/50'>
               {success}
             </div>
           )}
 
           <button
-            type="submit"
+            type='submit'
             disabled={loading || !isFormValid}
-            className="w-full py-3 px-4 bg-gradient-to-r from-gold-500 to-yellow-500 hover:from-gold-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none"
+            className='w-full py-3 px-4 bg-gradient-to-r from-gold-500 to-yellow-500 hover:from-gold-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none'
           >
             {loading ? (
-              <div className="flex items-center justify-center">
-                <div className="w-5 h-5 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
-                {formData.multiSystem ? "Calculating Multi-System Chart..." : "Calculating Chart..."}
+              <div className='flex items-center justify-center'>
+                <div className='w-5 h-5 mr-2 border-b-2 border-white rounded-full animate-spin'></div>
+                {formData.multiSystem
+                  ? 'Calculating Multi-System Chart...'
+                  : 'Calculating Chart...'}
               </div>
+            ) : formData.multiSystem ? (
+              '🌟 Calculate Multi-System Chart 🌟'
             ) : (
-              formData.multiSystem ? "🌟 Calculate Multi-System Chart 🌟" : "Calculate Natal Chart"
+              'Calculate Natal Chart'
             )}
           </button>
         </form>
 
         {/* Chart Display */}
-        {(chart !== null && chart !== undefined) && (
+        {chart !== null && chart !== undefined && (
           <div>
             {formData.multiSystem
-              ? ((isExtendedChartData(chart) === false) && (
-                  <MultiSystemChartDisplay birthData={convertToChartBirthData(formData)} showComparison={true} />
-                ))
-              : (isExtendedChartData(chart) === true) && (
+              ? isExtendedChartData(chart) === false && (
+                  <MultiSystemChartDisplay
+                    birthData={convertToChartBirthData(formData)}
+                    showComparison={true}
+                  />
+                )
+              : isExtendedChartData(chart) === true && (
                   <Suspense fallback={<div>Loading chart...</div>}>
-                    <ChartDisplay chart={chart as unknown as Record<string, unknown>} onSaveChart={handleSaveChart} />
+                    <ChartDisplay
+                      chart={chart as unknown as Record<string, unknown>}
+                      onSaveChart={handleSaveChart}
+                    />
                   </Suspense>
                 )}
           </div>
@@ -522,6 +595,6 @@ const ChartCalculator: React.FC = () => {
       </div>
     </div>
   );
-}
+};
 
 export default ChartCalculator;

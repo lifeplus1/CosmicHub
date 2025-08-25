@@ -1,42 +1,53 @@
 # 🔍 Accessibility Audit Report - A11Y-030
-  
+
 > **Generated:** 2025-08-25T09:24:15.376Z  
 > **Status:** ⚠️ ISSUES FOUND  
-> **WCAG Level:** AA  
+> **WCAG Level:** AA
 
 ## 📊 Summary
 
-| Severity | Count | Status |
-|----------|-------|--------|
-| Critical | 8 | ❌ |
-| Major    | 186 | ⚠️ |
-| Minor    | 0 | ✅ |
+| Severity  | Count   | Status    |
+| --------- | ------- | --------- |
+| Critical  | 8       | ❌        |
+| Major     | 186     | ⚠️        |
+| Minor     | 0       | ✅        |
 | **Total** | **194** | ⚠️ REVIEW |
 
 ## 🎯 WCAG 2.1 AA Compliance Status
 
-
 ### ⚠️ WCAG 2.1.1: Click handler missing keyboard support (186 issues)
 
 - **apps/astro/src/components/AIChat.tsx:130** - Click handler missing keyboard support
-- **apps/astro/src/components/AIInterpretation/InterpretationCard.tsx:114** - Click handler missing keyboard support
-- **apps/astro/src/components/AIInterpretation/InterpretationDisplay.tsx:124** - Click handler missing keyboard support
-- **apps/astro/src/components/AIInterpretation/InterpretationForm.tsx:342** - Click handler missing keyboard support
-- **apps/astro/src/components/AIInterpretation/InterpretationForm.tsx:374** - Click handler missing keyboard support
+- **apps/astro/src/components/AIInterpretation/InterpretationCard.tsx:114** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/AIInterpretation/InterpretationDisplay.tsx:124** - Click handler
+  missing keyboard support
+- **apps/astro/src/components/AIInterpretation/InterpretationForm.tsx:342** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/AIInterpretation/InterpretationForm.tsx:374** - Click handler missing
+  keyboard support
 - **apps/astro/src/components/BlogComments.tsx:213** - Click handler missing keyboard support
 - **apps/astro/src/components/BlogComments.tsx:227** - Click handler missing keyboard support
 - **apps/astro/src/components/BlogComments.tsx:267** - Click handler missing keyboard support
 - **apps/astro/src/components/BlogComments.tsx:345** - Click handler missing keyboard support
 - **apps/astro/src/components/ChartCalculator.tsx:244** - Click handler missing keyboard support
-- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:538** - Click handler missing keyboard support
-- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:548** - Click handler missing keyboard support
-- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:558** - Click handler missing keyboard support
-- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:568** - Click handler missing keyboard support
-- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:578** - Click handler missing keyboard support
+- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:538** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:548** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:558** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:568** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:578** - Click handler missing keyboard
+  support
 - **apps/astro/src/components/ChartPreferences.tsx:278** - Click handler missing keyboard support
-- **apps/astro/src/components/EphemerisPerformanceDashboard.tsx:35** - Click handler missing keyboard support
-- **apps/astro/src/components/EphemerisPerformanceDashboard.tsx:42** - Click handler missing keyboard support
-- **apps/astro/src/components/ErrorBoundary.stories.tsx:25** - Click handler missing keyboard support
+- **apps/astro/src/components/EphemerisPerformanceDashboard.tsx:35** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/EphemerisPerformanceDashboard.tsx:42** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/ErrorBoundary.stories.tsx:25** - Click handler missing keyboard
+  support
 - **apps/astro/src/components/ErrorBoundary.tsx:89** - Click handler missing keyboard support
 - **apps/astro/src/components/ErrorBoundary.tsx:95** - Click handler missing keyboard support
 - **apps/astro/src/components/ErrorTestComponent.tsx:28** - Click handler missing keyboard support
@@ -44,21 +55,36 @@
 - **apps/astro/src/components/FeatureGuard.tsx:134** - Click handler missing keyboard support
 - **apps/astro/src/components/FeatureGuard.tsx:232** - Click handler missing keyboard support
 - **apps/astro/src/components/FeatureGuard.tsx:242** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/ActivationSequenceTab.tsx:52** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/CoreQuartetTab.tsx:74** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/GeneKeyDetails.tsx:24** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/GeneKeysChart.tsx:109** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx:30** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx:93** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/PearlSequenceTab.tsx:52** - Click handler missing keyboard support
-- **apps/astro/src/components/GeneKeysChart/VenusSequenceTab.tsx:103** - Click handler missing keyboard support
-- **apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx:165** - Click handler missing keyboard support
-- **apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx:202** - Click handler missing keyboard support
-- **apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx:238** - Click handler missing keyboard support
-- **apps/astro/src/components/HumanDesignChart/HumanDesignChart.tsx:118** - Click handler missing keyboard support
-- **apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx:47** - Click handler missing keyboard support
-- **apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx:105** - Click handler missing keyboard support
-- **apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx:151** - Click handler missing keyboard support
+- **apps/astro/src/components/GeneKeysChart/ActivationSequenceTab.tsx:52** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/GeneKeysChart/CoreQuartetTab.tsx:74** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/GeneKeysChart/GeneKeyDetails.tsx:24** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/GeneKeysChart/GeneKeysChart.tsx:109** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx:30** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx:93** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/GeneKeysChart/PearlSequenceTab.tsx:52** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/GeneKeysChart/VenusSequenceTab.tsx:103** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx:165** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx:202** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx:238** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/HumanDesignChart/HumanDesignChart.tsx:118** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx:47** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx:105** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx:151** - Click handler missing
+  keyboard support
 - **apps/astro/src/components/HumanDesignGeneKeys.tsx:110** - Click handler missing keyboard support
 - **apps/astro/src/components/HumanDesignGeneKeys.tsx:299** - Click handler missing keyboard support
 - **apps/astro/src/components/Login.tsx:90** - Click handler missing keyboard support
@@ -74,11 +100,16 @@
 - **apps/astro/src/components/Navbar.tsx:460** - Click handler missing keyboard support
 - **apps/astro/src/components/Navbar.tsx:472** - Click handler missing keyboard support
 - **apps/astro/src/components/Navbar.tsx:490** - Click handler missing keyboard support
-- **apps/astro/src/components/NotificationSettings.tsx:172** - Click handler missing keyboard support
-- **apps/astro/src/components/NotificationSettings.tsx:179** - Click handler missing keyboard support
-- **apps/astro/src/components/NotificationSettings.tsx:201** - Click handler missing keyboard support
-- **apps/astro/src/components/NotificationSettings.tsx:209** - Click handler missing keyboard support
-- **apps/astro/src/components/NumerologyCalculator/NumerologyCalculator.tsx:309** - Click handler missing keyboard support
+- **apps/astro/src/components/NotificationSettings.tsx:172** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/NotificationSettings.tsx:179** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/NotificationSettings.tsx:201** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/NotificationSettings.tsx:209** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/NumerologyCalculator/NumerologyCalculator.tsx:309** - Click handler
+  missing keyboard support
 - **apps/astro/src/components/OfflineChartDemo.tsx:258** - Click handler missing keyboard support
 - **apps/astro/src/components/OfflineChartDemo.tsx:265** - Click handler missing keyboard support
 - **apps/astro/src/components/OfflineChartDemo.tsx:273** - Click handler missing keyboard support
@@ -92,7 +123,8 @@
 - **apps/astro/src/components/PdfExport.tsx:162** - Click handler missing keyboard support
 - **apps/astro/src/components/PdfExport.tsx:273** - Click handler missing keyboard support
 - **apps/astro/src/components/PdfExport.tsx:280** - Click handler missing keyboard support
-- **apps/astro/src/components/PremiumFeaturesDashboard.tsx:25** - Click handler missing keyboard support
+- **apps/astro/src/components/PremiumFeaturesDashboard.tsx:25** - Click handler missing keyboard
+  support
 - **apps/astro/src/components/PricingPage.tsx:266** - Click handler missing keyboard support
 - **apps/astro/src/components/SimpleBirthForm.tsx:307** - Click handler missing keyboard support
 - **apps/astro/src/components/SocialShare.tsx:125** - Click handler missing keyboard support
@@ -102,15 +134,24 @@
 - **apps/astro/src/components/SocialShare.tsx:201** - Click handler missing keyboard support
 - **apps/astro/src/components/SocialShare.tsx:216** - Click handler missing keyboard support
 - **apps/astro/src/components/SocialShare.tsx:226** - Click handler missing keyboard support
-- **apps/astro/src/components/SynastryAnalysis/SynastryAnalysis.tsx:86** - Click handler missing keyboard support
-- **apps/astro/src/components/SynastryAnalysis/SynastryAnalysis.tsx:144** - Click handler missing keyboard support
-- **apps/astro/src/components/SynastryAnalysis/SynastryAnalysis.tsx:150** - Click handler missing keyboard support
-- **apps/astro/src/components/TransitAnalysis/EphemerisChart.tsx:123** - Click handler missing keyboard support
-- **apps/astro/src/components/TransitAnalysis/EphemerisChartWrapper.tsx:36** - Click handler missing keyboard support
-- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:38** - Click handler missing keyboard support
-- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:48** - Click handler missing keyboard support
-- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:146** - Click handler missing keyboard support
-- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:156** - Click handler missing keyboard support
+- **apps/astro/src/components/SynastryAnalysis/SynastryAnalysis.tsx:86** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/SynastryAnalysis/SynastryAnalysis.tsx:144** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/SynastryAnalysis/SynastryAnalysis.tsx:150** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/TransitAnalysis/EphemerisChart.tsx:123** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/TransitAnalysis/EphemerisChartWrapper.tsx:36** - Click handler missing
+  keyboard support
+- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:38** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:48** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:146** - Click handler missing keyboard
+  support
+- **apps/astro/src/components/TransitAnalysis/TransitsTab.tsx:156** - Click handler missing keyboard
+  support
 - **apps/astro/src/components/UnifiedBirthInput.tsx:177** - Click handler missing keyboard support
 - **apps/astro/src/components/UnifiedBirthInput.tsx:307** - Click handler missing keyboard support
 - **apps/astro/src/components/UnifiedBirthInput.tsx:321** - Click handler missing keyboard support
@@ -130,12 +171,18 @@
 - **apps/healwave/src/components/ChartPreferences.tsx:198** - Click handler missing keyboard support
 - **apps/healwave/src/components/ErrorBoundary.tsx:125** - Click handler missing keyboard support
 - **apps/healwave/src/components/ErrorBoundary.tsx:132** - Click handler missing keyboard support
-- **apps/healwave/src/components/FrequencyControls.tsx:178** - Click handler missing keyboard support
-- **apps/healwave/src/components/FrequencyControls.tsx:204** - Click handler missing keyboard support
-- **apps/healwave/src/components/FrequencyControls.tsx:221** - Click handler missing keyboard support
-- **apps/healwave/src/components/FrequencyGenerator.tsx:256** - Click handler missing keyboard support
-- **apps/healwave/src/components/FrequencyGenerator.tsx:267** - Click handler missing keyboard support
-- **apps/healwave/src/components/HealWaveErrorTestComponent.tsx:30** - Click handler missing keyboard support
+- **apps/healwave/src/components/FrequencyControls.tsx:178** - Click handler missing keyboard
+  support
+- **apps/healwave/src/components/FrequencyControls.tsx:204** - Click handler missing keyboard
+  support
+- **apps/healwave/src/components/FrequencyControls.tsx:221** - Click handler missing keyboard
+  support
+- **apps/healwave/src/components/FrequencyGenerator.tsx:256** - Click handler missing keyboard
+  support
+- **apps/healwave/src/components/FrequencyGenerator.tsx:267** - Click handler missing keyboard
+  support
+- **apps/healwave/src/components/HealWaveErrorTestComponent.tsx:30** - Click handler missing
+  keyboard support
 - **apps/healwave/src/components/Login.tsx:24** - Click handler missing keyboard support
 - **apps/healwave/src/components/Login.tsx:127** - Click handler missing keyboard support
 - **apps/healwave/src/components/Navbar.tsx:70** - Click handler missing keyboard support
@@ -190,35 +237,52 @@
 - **packages/ui/src/components/UpgradeModal.tsx:89** - Click handler missing keyboard support
 - **packages/ui/src/components/UpgradeModal.tsx:105** - Click handler missing keyboard support
 - **packages/ui/src/components/UpgradeModal.tsx:189** - Click handler missing keyboard support
-- **packages/ui/src/components/__tests__/EnhancedCard.test.tsx:127** - Click handler missing keyboard support
-- **packages/ui/src/components/__tests__/EnhancedCard.test.tsx:149** - Click handler missing keyboard support
-- **packages/ui/src/components/__tests__/EnhancedCard.test.tsx:174** - Click handler missing keyboard support
-- **packages/ui/src/components/__tests__/EnhancedCard.test.tsx:443** - Click handler missing keyboard support
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:50** - Click handler missing keyboard support
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:52** - Click handler missing keyboard support
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:355** - Click handler missing keyboard support
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:377** - Click handler missing keyboard support
+- **packages/ui/src/components/**tests**/EnhancedCard.test.tsx:127** - Click handler missing
+  keyboard support
+- **packages/ui/src/components/**tests**/EnhancedCard.test.tsx:149** - Click handler missing
+  keyboard support
+- **packages/ui/src/components/**tests**/EnhancedCard.test.tsx:174** - Click handler missing
+  keyboard support
+- **packages/ui/src/components/**tests**/EnhancedCard.test.tsx:443** - Click handler missing
+  keyboard support
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:50** - Click handler missing
+  keyboard support
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:52** - Click handler missing
+  keyboard support
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:355** - Click handler missing
+  keyboard support
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:377** - Click handler missing
+  keyboard support
 - **packages/ui/src/components/modals/ChartModal.tsx:29** - Click handler missing keyboard support
 - **packages/ui/src/components/modals/ChartModal.tsx:41** - Click handler missing keyboard support
-- **packages/ui/src/components/modals/FrequencyPlayerModal.tsx:19** - Click handler missing keyboard support
+- **packages/ui/src/components/modals/FrequencyPlayerModal.tsx:19** - Click handler missing keyboard
+  support
 - **packages/ui/src/components/modals/ProfileModal.tsx:19** - Click handler missing keyboard support
-- **packages/ui/src/components/modals/SettingsModal.tsx:19** - Click handler missing keyboard support
+- **packages/ui/src/components/modals/SettingsModal.tsx:19** - Click handler missing keyboard
+  support
 - **packages/ui/src/components/modals/ShareModal.tsx:19** - Click handler missing keyboard support
 
 ### ❌ WCAG 4.1.2: Modal missing aria-labelledby or aria-label (7 issues)
 
-- **apps/astro/src/components/AIInterpretation/InterpretationModal.tsx:14** - Modal missing aria-labelledby or aria-label
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing aria-labelledby or aria-label
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing aria-labelledby or aria-label
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing aria-labelledby or aria-label
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing aria-labelledby or aria-label
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing aria-labelledby or aria-label
-- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing aria-labelledby or aria-label
+- **apps/astro/src/components/AIInterpretation/InterpretationModal.tsx:14** - Modal missing
+  aria-labelledby or aria-label
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing
+  aria-labelledby or aria-label
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing
+  aria-labelledby or aria-label
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing
+  aria-labelledby or aria-label
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing
+  aria-labelledby or aria-label
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing
+  aria-labelledby or aria-label
+- **packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327** - Modal missing
+  aria-labelledby or aria-label
 
 ### ❌ WCAG 1.3.1: Input missing label or aria-label (1 issues)
 
-- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:525** - Input missing label or aria-label
-
+- **apps/astro/src/components/ChartDisplay/ChartDisplay.tsx:525** - Input missing label or
+  aria-label
 
 ## 🔧 Implementation Status
 
@@ -226,11 +290,10 @@
 - ✅ Custom accessibility components (VisuallyHidden)
 - ✅ Automated axe-core integration
 - ❌ Critical accessibility issues resolved
-- ⚠️ Major accessibility issues resolved  
+- ⚠️ Major accessibility issues resolved
 - ✅ Minor accessibility improvements completed
 
 ## 📋 Detailed Issues
-
 
 ### 🚨 CRITICAL Issues
 
@@ -281,7 +344,6 @@
 - **File:** `packages/ui/src/components/accessibility/AccessibilityUtils.tsx:327`
 - **WCAG Rule:** 4.1.2
 - **Code:** `role="dialog"`
-
 
 ### ⚠️ MAJOR Issues
 
@@ -1401,8 +1463,6 @@
 - **WCAG Rule:** 2.1.1
 - **Code:** `onClick`
 
-
-
 ## 🎯 Next Steps
 
 - 🚨 **URGENT:** Fix critical accessibility violations immediately
@@ -1413,4 +1473,5 @@
 - 📊 Update CI/CD pipeline with accessibility checks
 
 ---
+
 **A11Y-030 Status:** 🔄 IN PROGRESS

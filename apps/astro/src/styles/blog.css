@@ -83,10 +83,12 @@
 
 /* Newsletter CTA section */
 .newsletter-cta {
-  background: linear-gradient(135deg, 
-    rgba(85, 60, 154, 0.15) 0%, 
-    rgba(26, 32, 44, 0.15) 50%, 
-    rgba(85, 60, 154, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(85, 60, 154, 0.15) 0%,
+    rgba(26, 32, 44, 0.15) 50%,
+    rgba(85, 60, 154, 0.1) 100%
+  );
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }

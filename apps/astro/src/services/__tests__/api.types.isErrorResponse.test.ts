@@ -1,13 +1,31 @@
 import { describe, it, expect } from 'vitest';
-import { isErrorResponse, type ApiResponse, type ApiSuccessResponseBase } from '../../services/api.types';
+import {
+  isErrorResponse,
+  type ApiResponse,
+  type ApiSuccessResponseBase,
+} from '../../services/api.types';
 
-interface Foo { value: number }
-
-function makeSuccess(): ApiSuccessResponseBase<Foo> {
-  return { status: 'success', data: { value: 42 }, timestamp: new Date().toISOString() };
+interface Foo {
+  value: number;
 }
 
-function makeError(status: 'error'|'validation_error'|'not_found'|'unauthorized'|'forbidden'|'server_error'): {
+function makeSuccess(): ApiSuccessResponseBase<Foo> {
+  return {
+    status: 'success',
+    data: { value: 42 },
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function makeError(
+  status:
+    | 'error'
+    | 'validation_error'
+    | 'not_found'
+    | 'unauthorized'
+    | 'forbidden'
+    | 'server_error'
+): {
   status: typeof status;
   timestamp: string;
   error: { code: string; message: string };
@@ -15,7 +33,7 @@ function makeError(status: 'error'|'validation_error'|'not_found'|'unauthorized'
   return {
     status,
     timestamp: new Date().toISOString(),
-    error: { code: 'X', message: 'boom' }
+    error: { code: 'X', message: 'boom' },
   } as const;
 }
 

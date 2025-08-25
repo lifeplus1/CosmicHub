@@ -36,7 +36,7 @@ const RULE = '@typescript-eslint/strict-boolean-expressions';
 const rows = data
   .map(f => ({
     file: f.filePath,
-    messages: (f.messages || []).filter(m => m.ruleId === RULE)
+    messages: (f.messages || []).filter(m => m.ruleId === RULE),
   }))
   .filter(r => r.messages.length > 0)
   .sort((a, b) => b.messages.length - a.messages.length);
@@ -57,6 +57,8 @@ for (const r of rows.slice(0, limit)) {
 if (process.env.JSON) {
   const summary = rows.map(r => ({ file: r.file, count: r.messages.length }));
   process.stdout.write('\nJSON_SUMMARY_BEGIN\n');
-  process.stdout.write(JSON.stringify({ totalViolations, files: summary }, null, 2));
+  process.stdout.write(
+    JSON.stringify({ totalViolations, files: summary }, null, 2)
+  );
   process.stdout.write('\nJSON_SUMMARY_END\n');
 }

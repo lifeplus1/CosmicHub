@@ -16,8 +16,9 @@ import type {
  * Type guard for validating planet data
  */
 export function isPlanet(obj: unknown): obj is Planet {
-  if (obj === null || obj === undefined || typeof obj !== 'object') return false;
-  
+  if (obj === null || obj === undefined || typeof obj !== 'object')
+    return false;
+
   const planet = obj as Planet;
   return (
     typeof planet.name === 'string' &&
@@ -37,8 +38,9 @@ export function isPlanet(obj: unknown): obj is Planet {
  * Type guard for validating house data
  */
 export function isHouse(obj: unknown): obj is House {
-  if (obj === null || obj === undefined || typeof obj !== 'object') return false;
-  
+  if (obj === null || obj === undefined || typeof obj !== 'object')
+    return false;
+
   const house = obj as House;
   return (
     typeof house.number === 'number' &&
@@ -55,8 +57,9 @@ export function isHouse(obj: unknown): obj is House {
  * Type guard for validating aspect data
  */
 export function isAspect(obj: unknown): obj is Aspect {
-  if (obj === null || obj === undefined || typeof obj !== 'object') return false;
-  
+  if (obj === null || obj === undefined || typeof obj !== 'object')
+    return false;
+
   const aspect = obj as Aspect;
   return (
     typeof aspect.aspect_type === 'string' &&
@@ -72,8 +75,9 @@ export function isAspect(obj: unknown): obj is Aspect {
  * Type guard for validating chart angles
  */
 export function isChartAngles(obj: unknown): obj is ChartAngles {
-  if (obj === null || obj === undefined || typeof obj !== 'object') return false;
-  
+  if (obj === null || obj === undefined || typeof obj !== 'object')
+    return false;
+
   const angles = obj as ChartAngles;
   return (
     typeof angles.ascendant === 'number' &&
@@ -87,8 +91,9 @@ export function isChartAngles(obj: unknown): obj is ChartAngles {
  * Type guard for validating complete chart data
  */
 export function isValidChartData(obj: unknown): obj is ChartData {
-  if (obj === null || obj === undefined || typeof obj !== 'object') return false;
-  
+  if (obj === null || obj === undefined || typeof obj !== 'object')
+    return false;
+
   const chart = obj as ChartData;
   return (
     typeof chart.planets === 'object' &&
@@ -111,8 +116,18 @@ export function isValidChartData(obj: unknown): obj is ChartData {
  */
 export function isZodiacSign(value: string): value is ZodiacSign {
   const validSigns: ZodiacSign[] = [
-    'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
-    'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'
+    'aries',
+    'taurus',
+    'gemini',
+    'cancer',
+    'leo',
+    'virgo',
+    'libra',
+    'scorpio',
+    'sagittarius',
+    'capricorn',
+    'aquarius',
+    'pisces',
   ];
   return validSigns.includes(value as ZodiacSign);
 }
@@ -122,8 +137,19 @@ export function isZodiacSign(value: string): value is ZodiacSign {
  */
 export function isPlanetName(value: string): value is PlanetName {
   const validPlanets: PlanetName[] = [
-    'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-    'uranus', 'neptune', 'pluto', 'chiron', 'north_node', 'south_node'
+    'sun',
+    'moon',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
+    'uranus',
+    'neptune',
+    'pluto',
+    'chiron',
+    'north_node',
+    'south_node',
   ];
   return validPlanets.includes(value as PlanetName);
 }
@@ -133,8 +159,13 @@ export function isPlanetName(value: string): value is PlanetName {
  */
 export function isAspectType(value: string): value is AspectType {
   const validAspects: AspectType[] = [
-    'conjunction', 'opposition', 'trine', 'square',
-    'sextile', 'quincunx', 'semisextile'
+    'conjunction',
+    'opposition',
+    'trine',
+    'square',
+    'sextile',
+    'quincunx',
+    'semisextile',
   ];
   return validAspects.includes(value as AspectType);
 }
@@ -142,10 +173,17 @@ export function isAspectType(value: string): value is AspectType {
 /**
  * Validates all required planets are present in chart data
  */
-export function hasRequiredPlanets(planets: Record<PlanetName, Planet>): boolean {
+export function hasRequiredPlanets(
+  planets: Record<PlanetName, Planet>
+): boolean {
   const requiredPlanets: PlanetName[] = [
-    'sun', 'moon', 'mercury', 'venus', 'mars',
-    'jupiter', 'saturn'
+    'sun',
+    'moon',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
   ];
   return requiredPlanets.every(planet => planets[planet] !== undefined);
 }
@@ -155,10 +193,22 @@ export function hasRequiredPlanets(planets: Record<PlanetName, Planet>): boolean
  */
 export function isValidHouseSystem(
   system: string
-): system is 'placidus' | 'koch' | 'equal' | 'whole_sign' | 'regiomontanus' | 'campanus' | 'porphyry' {
+): system is
+  | 'placidus'
+  | 'koch'
+  | 'equal'
+  | 'whole_sign'
+  | 'regiomontanus'
+  | 'campanus'
+  | 'porphyry' {
   const validSystems = [
-    'placidus', 'koch', 'equal', 'whole_sign',
-    'regiomontanus', 'campanus', 'porphyry'
+    'placidus',
+    'koch',
+    'equal',
+    'whole_sign',
+    'regiomontanus',
+    'campanus',
+    'porphyry',
   ];
   return validSystems.includes(system);
 }
@@ -175,7 +225,10 @@ export function calculateDignities(planet: Planet): Planet['dignity'] {
 /**
  * Validates and normalizes aspect orbs
  */
-export function normalizeAspectOrb(orb: number, aspectType: AspectType): number {
+export function normalizeAspectOrb(
+  orb: number,
+  aspectType: AspectType
+): number {
   const maxOrbs: Record<AspectType, number> = {
     conjunction: 10,
     opposition: 10,
@@ -183,8 +236,8 @@ export function normalizeAspectOrb(orb: number, aspectType: AspectType): number 
     square: 8,
     sextile: 6,
     quincunx: 3,
-    semisextile: 3
+    semisextile: 3,
   };
-  
+
   return Math.min(Math.abs(orb), maxOrbs[aspectType]);
 }

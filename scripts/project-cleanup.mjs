@@ -30,7 +30,8 @@ function scanForDeprecatedImports() {
   for (const file of files) {
     try {
       const text = readFileSync(file, 'utf8');
-      if (text.includes('shared/')) offenders.push(file.replace(root + '/', ''));
+      if (text.includes('shared/'))
+        offenders.push(file.replace(root + '/', ''));
     } catch {}
   }
   return offenders;
@@ -38,11 +39,14 @@ function scanForDeprecatedImports() {
 
 function summarizeTierDuplication() {
   // Only the centralized package should remain
-  const locations = [
-    'packages/subscriptions/src/index.ts'
-  ];
+  const locations = ['packages/subscriptions/src/index.ts'];
   const existing = locations.filter(p => {
-    try { readFileSync(join(root, p)); return true; } catch { return false; }
+    try {
+      readFileSync(join(root, p));
+      return true;
+    } catch {
+      return false;
+    }
   });
   return existing;
 }
@@ -54,9 +58,12 @@ console.log('Root:', root);
 // 1. Deprecated imports
 const offenders = scanForDeprecatedImports();
 if (offenders.length) {
-  console.log(`❗ Deprecated path usage detected (shared/): ${offenders.length} files`);
+  console.log(
+    `❗ Deprecated path usage detected (shared/): ${offenders.length} files`
+  );
   offenders.slice(0, 20).forEach(f => console.log('  -', f));
-  if (offenders.length > 20) console.log(`  ...and ${offenders.length - 20} more`);
+  if (offenders.length > 20)
+    console.log(`  ...and ${offenders.length - 20} more`);
 } else {
   console.log('✅ No runtime references to deprecated shared/ path found.');
 }
@@ -64,9 +71,11 @@ if (offenders.length) {
 // 2. Tier duplication
 const tierFiles = summarizeTierDuplication();
 console.log('\n📦 Subscription tier definition files present:');
- tierFiles.forEach(f => console.log('  -', f));
+tierFiles.forEach(f => console.log('  -', f));
 if (tierFiles.length > 1) {
-  console.log('\n➡️  Consolidation recommended: create a single source (e.g., packages/subscriptions)');
+  console.log(
+    '\n➡️  Consolidation recommended: create a single source (e.g., packages/subscriptions)'
+  );
 } else {
   console.log('\n✅ Single source of truth achieved.');
 }

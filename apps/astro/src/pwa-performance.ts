@@ -14,11 +14,13 @@ interface DevConsole {
 function safeLog(message: string): void {
   try {
     // Use dynamic import instead of require for ES modules
-    void import('./config/environment').then(({ devConsole }: { devConsole: DevConsole }) => {
-      devConsole.log?.(message);
-    }).catch(() => {
-      // Fallback - no logging in production
-    });
+    void import('./config/environment')
+      .then(({ devConsole }: { devConsole: DevConsole }) => {
+        devConsole.log?.(message);
+      })
+      .catch(() => {
+        // Fallback - no logging in production
+      });
   } catch {
     // Silent fallback for production
   }
@@ -26,11 +28,13 @@ function safeLog(message: string): void {
 
 function safeWarn(message: string, ...args: unknown[]): void {
   try {
-    void import('./config/environment').then(({ devConsole }: { devConsole: DevConsole }) => {
-      devConsole.warn?.(message, ...args);
-    }).catch(() => {
-      // Fallback - no logging in production
-    });
+    void import('./config/environment')
+      .then(({ devConsole }: { devConsole: DevConsole }) => {
+        devConsole.warn?.(message, ...args);
+      })
+      .catch(() => {
+        // Fallback - no logging in production
+      });
   } catch {
     // Silent fallback for production
   }
@@ -38,11 +42,13 @@ function safeWarn(message: string, ...args: unknown[]): void {
 
 function safeError(message: string, ...args: unknown[]): void {
   try {
-    void import('./config/environment').then(({ devConsole }: { devConsole: DevConsole }) => {
-      devConsole.error?.(message, ...args);
-    }).catch(() => {
-      // Silent fallback - errors logged through devConsole only
-    });
+    void import('./config/environment')
+      .then(({ devConsole }: { devConsole: DevConsole }) => {
+        devConsole.error?.(message, ...args);
+      })
+      .catch(() => {
+        // Silent fallback - errors logged through devConsole only
+      });
   } catch {
     // Silent fallback - errors logged through devConsole only
   }
@@ -57,7 +63,7 @@ export class CriticalResourceManager {
 
   private static readonly FONT_RESOURCES = [
     'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-    'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'
+    'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
   ];
 
   static preloadCriticalResources(): void {
@@ -73,7 +79,9 @@ export class CriticalResourceManager {
     safeLog('🔤 Optimizing font loading...');
 
     // Add font-display: swap to improve loading performance
-    const fontLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"]');
+    const fontLinks = document.querySelectorAll(
+      'link[href*="fonts.googleapis.com"]'
+    );
     fontLinks.forEach(link => {
       const href = link.getAttribute('href');
       const hrefAttr = href ?? '';
@@ -100,7 +108,7 @@ export class CriticalResourceManager {
       'fonts.googleapis.com',
       'fonts.gstatic.com',
       'api.cosmichub.com', // Future API domain
-      'cdn.cosmichub.com'  // Future CDN domain
+      'cdn.cosmichub.com', // Future CDN domain
     ];
 
     dnsPrefetchDomains.forEach(domain => {
@@ -113,7 +121,7 @@ export class CriticalResourceManager {
     // Preconnect to critical third-party origins
     const preconnectDomains = [
       { href: 'https://fonts.googleapis.com', crossorigin: false },
-      { href: 'https://fonts.gstatic.com', crossorigin: true }
+      { href: 'https://fonts.gstatic.com', crossorigin: true },
     ];
 
     preconnectDomains.forEach(({ href, crossorigin }) => {
@@ -153,11 +161,19 @@ interface NetworkInformationFallback {
 export class ConnectionAwareLoader {
   private static getConnection(): NetworkInformationFallback | null {
     if (globalThis?.navigator === null) return null;
-    const nav = navigator as unknown as { connection?: NetworkInformationFallback; mozConnection?: NetworkInformationFallback; webkitConnection?: NetworkInformationFallback };
+    const nav = navigator as unknown as {
+      connection?: NetworkInformationFallback;
+      mozConnection?: NetworkInformationFallback;
+      webkitConnection?: NetworkInformationFallback;
+    };
     return nav.connection ?? nav.mozConnection ?? nav.webkitConnection ?? null;
   }
 
-  static getConnectionInfo(): { effectiveType: string; downlink: number; saveData: boolean } {
+  static getConnectionInfo(): {
+    effectiveType: string;
+    downlink: number;
+    saveData: boolean;
+  } {
     const connection = this.getConnection();
     if (connection === null) {
       return { effectiveType: '4g', downlink: 10, saveData: false };
@@ -172,23 +188,25 @@ export class ConnectionAwareLoader {
 
   static shouldOptimizeForSlowConnection(): boolean {
     const info = this.getConnectionInfo();
-    return ['slow-2g', '2g'].includes(info.effectiveType) || 
-           info.downlink < 1.5 || 
-           info.saveData;
+    return (
+      ['slow-2g', '2g'].includes(info.effectiveType) ||
+      info.downlink < 1.5 ||
+      info.saveData
+    );
   }
 
   static adaptResourceLoading(): void {
     const shouldOptimize = this.shouldOptimizeForSlowConnection();
-    
+
     if (shouldOptimize) {
       safeLog('🐌 Slow connection detected, optimizing resource loading...');
-      
+
       // Reduce image quality
       document.documentElement.style.setProperty('--image-quality', '0.7');
-      
+
       // Disable non-critical animations
       document.documentElement.style.setProperty('--reduce-motion', '1');
-      
+
       // Prioritize critical resources only
       this.prioritizeCriticalOnly();
     } else {
@@ -198,9 +216,11 @@ export class ConnectionAwareLoader {
 
   private static prioritizeCriticalOnly(): void {
     // Cancel non-critical preloads
-    const nonCriticalPreloads = document.querySelectorAll('link[rel="preload"]:not([data-critical])');
+    const nonCriticalPreloads = document.querySelectorAll(
+      'link[rel="preload"]:not([data-critical])'
+    );
     nonCriticalPreloads.forEach(link => link.remove());
-    
+
     // Defer non-critical scripts
     const scripts = document.querySelectorAll('script:not([data-critical])');
     scripts.forEach(script => {
@@ -222,12 +242,13 @@ export class PWAPerformanceMonitor {
   }
 
   static endTiming(label: string): number {
-  const startTime = this.metrics.get(`${label}_start`);
-  if (startTime === null || startTime === undefined) { // explicit null/undefined check for lint
+    const startTime = this.metrics.get(`${label}_start`);
+    if (startTime === null || startTime === undefined) {
+      // explicit null/undefined check for lint
       safeWarn(`No start time found for ${label}`);
       return 0;
     }
-  const duration = performance.now() - startTime;
+    const duration = performance.now() - startTime;
     this.metrics.set(label, duration);
     safeLog(`⏱️ ${label}: ${duration.toFixed(2)}ms`);
     return duration;
@@ -236,10 +257,17 @@ export class PWAPerformanceMonitor {
   static measurePWAMetrics(): void {
     // Measure PWA-specific metrics
 
-  if (globalThis.navigator?.serviceWorker !== null && globalThis.navigator?.serviceWorker !== undefined) {
+    if (
+      globalThis.navigator?.serviceWorker !== null &&
+      globalThis.navigator?.serviceWorker !== undefined
+    ) {
       void navigator.serviceWorker.ready.then(() => {
         const perfObj = globalThis.performance;
-        if (perfObj !== undefined && perfObj !== null && typeof perfObj.now === 'function') {
+        if (
+          perfObj !== undefined &&
+          perfObj !== null &&
+          typeof perfObj.now === 'function'
+        ) {
           const swReadyTime = perfObj.now();
           safeLog(`🔧 Service Worker ready: ${swReadyTime.toFixed(2)}ms`);
         }
@@ -247,10 +275,14 @@ export class PWAPerformanceMonitor {
     }
 
     // Measure app shell loading
-  if (globalThis.window !== null && globalThis.window !== undefined) {
+    if (globalThis.window !== null && globalThis.window !== undefined) {
       window.addEventListener('DOMContentLoaded', () => {
         const perfObj = globalThis.performance;
-        if (perfObj !== undefined && perfObj !== null && typeof perfObj.now === 'function') {
+        if (
+          perfObj !== undefined &&
+          perfObj !== null &&
+          typeof perfObj.now === 'function'
+        ) {
           const domReady = perfObj.now();
           safeLog(`📄 DOM ready: ${domReady.toFixed(2)}ms`);
         }
@@ -265,9 +297,11 @@ export class PWAPerformanceMonitor {
     // Largest Contentful Paint
     if (globalThis.PerformanceObserver !== null) {
       try {
-        const lcpObserver = new PerformanceObserver((list) => {
+        const lcpObserver = new PerformanceObserver(list => {
           const entries = list.getEntries();
-          const lastEntry = entries[entries.length - 1] as PerformanceEntry & { startTime: number };
+          const lastEntry = entries[entries.length - 1] as PerformanceEntry & {
+            startTime: number;
+          };
           const startTime = lastEntry?.startTime;
           if (startTime !== null) {
             safeLog(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
@@ -276,13 +310,16 @@ export class PWAPerformanceMonitor {
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
 
         // First Input Delay
-        const fidObserver = new PerformanceObserver((list) => {
+        const fidObserver = new PerformanceObserver(list => {
           const entries = list.getEntries();
-          entries.forEach((entry) => {
+          entries.forEach(entry => {
             const e = entry as PerformanceEntry & Record<string, unknown>;
             const processingStart = e['processingStart'];
             const startTime = e['startTime'];
-            if (typeof processingStart === 'number' && typeof startTime === 'number') {
+            if (
+              typeof processingStart === 'number' &&
+              typeof startTime === 'number'
+            ) {
               safeLog(`⚡ FID: ${processingStart - startTime}ms`);
             }
           });
@@ -290,10 +327,13 @@ export class PWAPerformanceMonitor {
         fidObserver.observe({ entryTypes: ['first-input'] });
 
         // Cumulative Layout Shift
-        const clsObserver = new PerformanceObserver((list) => {
+        const clsObserver = new PerformanceObserver(list => {
           let clsValue = 0;
-          list.getEntries().forEach((entry) => {
-            const e = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
+          list.getEntries().forEach(entry => {
+            const e = entry as PerformanceEntry & {
+              hadRecentInput: boolean;
+              value: number;
+            };
             const { hadRecentInput, value } = e;
             if (!hadRecentInput) {
               clsValue += value;
@@ -341,7 +381,6 @@ export function initializePWAPerformance(): void {
     PWAPerformanceMonitor.endTiming('pwa_initialization');
 
     safeLog('✅ PWA performance enhancements initialized');
-
   } catch (error) {
     safeError('❌ Failed to initialize PWA performance enhancements:', error);
   }

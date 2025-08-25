@@ -4,7 +4,7 @@ import { HouseTable } from '../';
 
 const sample = [
   { number: 1, sign: 'Aries', cuspDegree: '0.00', planetsInHouse: '' },
-  { number: 2, sign: 'Taurus', cuspDegree: '29.59', planetsInHouse: 'Venus' }
+  { number: 2, sign: 'Taurus', cuspDegree: '29.59', planetsInHouse: 'Venus' },
 ];
 
 describe('HouseTable', () => {

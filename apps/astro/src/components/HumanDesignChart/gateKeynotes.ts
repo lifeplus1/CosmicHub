@@ -9,7 +9,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Inspiration incubation',
     4: 'Externalized artist role',
     5: 'Enduring creative pulse',
-    6: 'Exemplar of originality'
+    6: 'Exemplar of originality',
   },
   2: {
     1: 'Innate receptive orientation',
@@ -17,7 +17,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Adjustment under pressure',
     4: 'Supportive directional influence',
     5: 'Consistency in guidance',
-    6: 'Transpersonal orientation channel'
+    6: 'Transpersonal orientation channel',
   },
   3: {
     1: 'Initial ordering difficulty',
@@ -25,7 +25,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing new arrangements',
     4: 'Accepting ordering chaos',
     5: 'Reliable pattern synthesis',
-    6: 'Ordered transcendence'
+    6: 'Ordered transcendence',
   },
   4: {
     1: 'Mental pressure foundation',
@@ -33,7 +33,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing logical constructs',
     4: 'Formula refinement network',
     5: 'Dependable logic teacher',
-    6: 'Wisdom of logical limits'
+    6: 'Wisdom of logical limits',
   },
   5: {
     1: 'Natural timing awareness',
@@ -41,7 +41,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing temporal patterns',
     4: 'Collective timing support',
     5: 'Consistent flow guidance',
-    6: 'Rhythm field exemplar'
+    6: 'Rhythm field exemplar',
   },
   6: {
     1: 'Emotional friction base',
@@ -49,7 +49,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing connection bonds',
     4: 'Network intimacy bridge',
     5: 'Reliable emotional bond',
-    6: 'Soul mate archetype'
+    6: 'Soul mate archetype',
   },
   7: {
     1: 'Authoritative intent',
@@ -57,7 +57,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Adaptive leadership testing',
     4: 'Strategic network role',
     5: 'Stabilizing influence',
-    6: 'Vision carrier'
+    6: 'Vision carrier',
   },
   8: {
     1: 'Individual contribution spark',
@@ -65,7 +65,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing unique expression',
     4: 'Network inspiration link',
     5: 'Consistent creative flow',
-    6: 'Inspirational exemplar'
+    6: 'Inspirational exemplar',
   },
   9: {
     1: 'Micro-focus beginning',
@@ -73,7 +73,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Refining focus through trial',
     4: 'Focused collaboration',
     5: 'Reliable concentration pattern',
-    6: 'Model of disciplined attention'
+    6: 'Model of disciplined attention',
   },
   10: {
     1: 'Self-love foundation',
@@ -81,7 +81,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing authentic action',
     4: 'Network authenticity link',
     5: 'Consistent self-expression',
-    6: 'Role model authenticity'
+    6: 'Role model authenticity',
   },
   11: {
     1: 'Idea pressure ignition',
@@ -89,7 +89,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing idea validity',
     4: 'Collective idea bridge',
     5: 'Reliable idea teacher',
-    6: 'Transpersonal idea field'
+    6: 'Transpersonal idea field',
   },
   12: {
     1: 'Emotional standstill base',
@@ -97,7 +97,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing emotional sharing',
     4: 'Network mood bridge',
     5: 'Consistent emotional guide',
-    6: 'Transpersonal emotional field'
+    6: 'Transpersonal emotional field',
   },
   13: {
     1: 'Deep listener core',
@@ -105,7 +105,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Experiential storyteller learning',
     4: 'Network memory conduit',
     5: 'Trusted archive presence',
-    6: 'Narrative steward'
+    6: 'Narrative steward',
   },
   14: {
     1: 'Material power base',
@@ -113,7 +113,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing wealth distribution',
     4: 'Network resource link',
     5: 'Reliable abundance guide',
-    6: 'Transpersonal wealth field'
+    6: 'Transpersonal wealth field',
   },
   15: {
     1: 'Extreme moderation base',
@@ -121,7 +121,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing flow patterns',
     4: 'Network rhythm bridge',
     5: 'Consistent flow guide',
-    6: 'Transpersonal rhythm field'
+    6: 'Transpersonal rhythm field',
   },
   16: {
     1: 'Skill preparation base',
@@ -129,7 +129,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing skill application',
     4: 'Network skill bridge',
     5: 'Consistent mastery guide',
-    6: 'Transpersonal skill field'
+    6: 'Transpersonal skill field',
   },
   17: {
     1: 'Opinion foundation',
@@ -137,7 +137,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing opinion validity',
     4: 'Network opinion bridge',
     5: 'Consistent perspective guide',
-    6: 'Transpersonal opinion field'
+    6: 'Transpersonal opinion field',
   },
   18: {
     1: 'Correction pressure base',
@@ -145,7 +145,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing corrective action',
     4: 'Network correction bridge',
     5: 'Consistent improvement guide',
-    6: 'Transpersonal correction field'
+    6: 'Transpersonal correction field',
   },
   19: {
     1: 'Base sensitivity alert',
@@ -153,7 +153,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Calibrating boundaries',
     4: 'Tribal attunement link',
     5: 'Dependable responder',
-    6: 'Transpersonal sensitivity field'
+    6: 'Transpersonal sensitivity field',
   },
   20: {
     1: 'Present moment awareness',
@@ -161,7 +161,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing awareness expression',
     4: 'Network awareness bridge',
     5: 'Consistent awareness guide',
-    6: 'Transpersonal awareness field'
+    6: 'Transpersonal awareness field',
   },
   21: {
     1: 'Control foundation',
@@ -169,7 +169,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing control application',
     4: 'Network control bridge',
     5: 'Consistent control guide',
-    6: 'Transpersonal control field'
+    6: 'Transpersonal control field',
   },
   22: {
     1: 'Grace under pressure',
@@ -177,7 +177,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing graceful response',
     4: 'Network grace bridge',
     5: 'Consistent grace guide',
-    6: 'Transpersonal grace field'
+    6: 'Transpersonal grace field',
   },
   23: {
     1: 'Insight pressure base',
@@ -185,7 +185,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing insight validity',
     4: 'Network insight bridge',
     5: 'Consistent insight guide',
-    6: 'Transpersonal insight field'
+    6: 'Transpersonal insight field',
   },
   24: {
     1: 'Return impulse base',
@@ -193,7 +193,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing return patterns',
     4: 'Network return bridge',
     5: 'Consistent return guide',
-    6: 'Transpersonal return field'
+    6: 'Transpersonal return field',
   },
   25: {
     1: 'Innocence foundation',
@@ -201,7 +201,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing innocent response',
     4: 'Network innocence bridge',
     5: 'Consistent innocence guide',
-    6: 'Transpersonal innocence field'
+    6: 'Transpersonal innocence field',
   },
   26: {
     1: 'Trickster energy base',
@@ -209,7 +209,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing trickster wisdom',
     4: 'Network trickster bridge',
     5: 'Consistent trickster guide',
-    6: 'Transpersonal trickster field'
+    6: 'Transpersonal trickster field',
   },
   27: {
     1: 'Nourishment foundation',
@@ -217,7 +217,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing caring boundaries',
     4: 'Network caring bridge',
     5: 'Consistent caring guide',
-    6: 'Transpersonal caring field'
+    6: 'Transpersonal caring field',
   },
   28: {
     1: 'Struggle foundation',
@@ -225,7 +225,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing struggle value',
     4: 'Network struggle bridge',
     5: 'Consistent struggle guide',
-    6: 'Transpersonal struggle field'
+    6: 'Transpersonal struggle field',
   },
   29: {
     1: 'Commitment foundation',
@@ -233,7 +233,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing commitment depth',
     4: 'Network commitment bridge',
     5: 'Consistent commitment guide',
-    6: 'Transpersonal commitment field'
+    6: 'Transpersonal commitment field',
   },
   30: {
     1: 'Desire foundation',
@@ -241,7 +241,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing desire patterns',
     4: 'Network desire bridge',
     5: 'Consistent desire guide',
-    6: 'Transpersonal desire field'
+    6: 'Transpersonal desire field',
   },
   31: {
     1: 'Leadership foundation',
@@ -249,7 +249,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing leadership style',
     4: 'Network leadership bridge',
     5: 'Consistent leadership guide',
-    6: 'Transpersonal leadership field'
+    6: 'Transpersonal leadership field',
   },
   32: {
     1: 'Endurance foundation',
@@ -257,7 +257,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing endurance limits',
     4: 'Network endurance bridge',
     5: 'Consistent endurance guide',
-    6: 'Transpersonal endurance field'
+    6: 'Transpersonal endurance field',
   },
   33: {
     1: 'Retreat foundation',
@@ -265,7 +265,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing retreat wisdom',
     4: 'Network retreat bridge',
     5: 'Consistent retreat guide',
-    6: 'Transpersonal retreat field'
+    6: 'Transpersonal retreat field',
   },
   34: {
     1: 'Power foundation',
@@ -273,7 +273,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing power application',
     4: 'Network power bridge',
     5: 'Consistent power guide',
-    6: 'Transpersonal power field'
+    6: 'Transpersonal power field',
   },
   35: {
     1: 'Experience foundation',
@@ -281,7 +281,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing experience value',
     4: 'Network experience bridge',
     5: 'Consistent experience guide',
-    6: 'Transpersonal experience field'
+    6: 'Transpersonal experience field',
   },
   36: {
     1: 'Crisis foundation',
@@ -289,7 +289,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing crisis wisdom',
     4: 'Network crisis bridge',
     5: 'Consistent crisis guide',
-    6: 'Transpersonal crisis field'
+    6: 'Transpersonal crisis field',
   },
   37: {
     1: 'Family foundation',
@@ -297,7 +297,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing family bonds',
     4: 'Network family bridge',
     5: 'Consistent family guide',
-    6: 'Transpersonal family field'
+    6: 'Transpersonal family field',
   },
   38: {
     1: 'Core perseverance test',
@@ -305,7 +305,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Adaptive persistence crafting',
     4: 'Cause alliance building',
     5: 'Consistent stand archetype',
-    6: 'Transpersonal meaning fighter'
+    6: 'Transpersonal meaning fighter',
   },
   39: {
     1: 'Provocation spark',
@@ -313,7 +313,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing provocation forms',
     4: 'Community mood catalysis',
     5: 'Reliable pressure release',
-    6: 'Mature catalytic presence'
+    6: 'Mature catalytic presence',
   },
   40: {
     1: 'Foundational will resource',
@@ -321,7 +321,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Refining promises',
     4: 'Group provision role',
     5: 'Consistent will delivery',
-    6: 'Exemplar of balanced work'
+    6: 'Exemplar of balanced work',
   },
   41: {
     1: 'Fantasy foundation',
@@ -329,7 +329,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing fantasy value',
     4: 'Network fantasy bridge',
     5: 'Consistent fantasy guide',
-    6: 'Transpersonal fantasy field'
+    6: 'Transpersonal fantasy field',
   },
   42: {
     1: 'Growth foundation',
@@ -337,7 +337,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing growth patterns',
     4: 'Network growth bridge',
     5: 'Consistent growth guide',
-    6: 'Transpersonal growth field'
+    6: 'Transpersonal growth field',
   },
   43: {
     1: 'Seed insight formation',
@@ -345,7 +345,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Insight resilience testing',
     4: 'Selective sharing network',
     5: 'Confident breakthrough delivery',
-    6: 'Transpersonal mutation voice'
+    6: 'Transpersonal mutation voice',
   },
   44: {
     1: 'Coming together foundation',
@@ -353,7 +353,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing connection value',
     4: 'Network connection bridge',
     5: 'Consistent connection guide',
-    6: 'Transpersonal connection field'
+    6: 'Transpersonal connection field',
   },
   45: {
     1: 'Gathering foundation',
@@ -361,7 +361,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing gathering wisdom',
     4: 'Network gathering bridge',
     5: 'Consistent gathering guide',
-    6: 'Transpersonal gathering field'
+    6: 'Transpersonal gathering field',
   },
   46: {
     1: 'Embodied receptivity base',
@@ -369,7 +369,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Experimenting with form timing',
     4: 'Supportive body wisdom',
     5: 'Reliable embodiment field',
-    6: 'Role model of embodied flow'
+    6: 'Role model of embodied flow',
   },
   47: {
     1: 'Oppression foundation',
@@ -377,7 +377,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing oppression wisdom',
     4: 'Network oppression bridge',
     5: 'Consistent oppression guide',
-    6: 'Transpersonal oppression field'
+    6: 'Transpersonal oppression field',
   },
   48: {
     1: 'Well foundation',
@@ -385,7 +385,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing depth value',
     4: 'Network depth bridge',
     5: 'Consistent depth guide',
-    6: 'Transpersonal depth field'
+    6: 'Transpersonal depth field',
   },
   49: {
     1: 'Revolution foundation',
@@ -393,7 +393,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing revolution wisdom',
     4: 'Network revolution bridge',
     5: 'Consistent revolution guide',
-    6: 'Transpersonal revolution field'
+    6: 'Transpersonal revolution field',
   },
   50: {
     1: 'Cauldron foundation',
@@ -401,7 +401,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing transformation value',
     4: 'Network transformation bridge',
     5: 'Consistent transformation guide',
-    6: 'Transpersonal transformation field'
+    6: 'Transpersonal transformation field',
   },
   51: {
     1: 'Shock foundation',
@@ -409,7 +409,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing shock wisdom',
     4: 'Network shock bridge',
     5: 'Consistent shock guide',
-    6: 'Transpersonal shock field'
+    6: 'Transpersonal shock field',
   },
   52: {
     1: 'Root stillness core',
@@ -417,7 +417,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Stabilizing trial process',
     4: 'Focused support posture',
     5: 'Dependable still point',
-    6: 'Collective anchoring presence'
+    6: 'Collective anchoring presence',
   },
   53: {
     1: 'Development foundation',
@@ -425,7 +425,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing development patterns',
     4: 'Network development bridge',
     5: 'Consistent development guide',
-    6: 'Transpersonal development field'
+    6: 'Transpersonal development field',
   },
   54: {
     1: 'Initiating ambition impulse',
@@ -433,7 +433,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Refining drive through friction',
     4: 'Network ambition bonding',
     5: 'Consistent transformational push',
-    6: 'Transpersonal elevation catalyst'
+    6: 'Transpersonal elevation catalyst',
   },
   55: {
     1: 'Abundance foundation',
@@ -441,7 +441,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing abundance wisdom',
     4: 'Network abundance bridge',
     5: 'Consistent abundance guide',
-    6: 'Transpersonal abundance field'
+    6: 'Transpersonal abundance field',
   },
   56: {
     1: 'Wanderer foundation',
@@ -449,7 +449,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing wanderer wisdom',
     4: 'Network wanderer bridge',
     5: 'Consistent wanderer guide',
-    6: 'Transpersonal wanderer field'
+    6: 'Transpersonal wanderer field',
   },
   57: {
     1: 'Gentle foundation',
@@ -457,7 +457,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing gentle wisdom',
     4: 'Network gentle bridge',
     5: 'Consistent gentle guide',
-    6: 'Transpersonal gentle field'
+    6: 'Transpersonal gentle field',
   },
   58: {
     1: 'Joy pressure ignition',
@@ -465,7 +465,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Calibration of enthusiasm',
     4: 'Collective improvement drive',
     5: 'Sustained vitality field',
-    6: 'Exemplar of corrective joy'
+    6: 'Exemplar of corrective joy',
   },
   59: {
     1: 'Dispersion foundation',
@@ -473,7 +473,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing dispersion wisdom',
     4: 'Network dispersion bridge',
     5: 'Consistent dispersion guide',
-    6: 'Transpersonal dispersion field'
+    6: 'Transpersonal dispersion field',
   },
   60: {
     1: 'Limitation awareness seed',
@@ -481,7 +481,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Adaptive constraint testing',
     4: 'Structured mutation support',
     5: 'Reliable limit alchemy',
-    6: 'Mutation timing exemplar'
+    6: 'Mutation timing exemplar',
   },
   61: {
     1: 'Inner truth ignition',
@@ -489,7 +489,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Questioning pattern refinement',
     4: 'Abstracted insight relay',
     5: 'Consistent pressure for knowing',
-    6: 'Mystery field role model'
+    6: 'Mystery field role model',
   },
   62: {
     1: 'Detail foundation',
@@ -497,7 +497,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing detail value',
     4: 'Network detail bridge',
     5: 'Consistent detail guide',
-    6: 'Transpersonal detail field'
+    6: 'Transpersonal detail field',
   },
   63: {
     1: 'Logical doubt baseline',
@@ -505,7 +505,7 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Iterative doubt testing',
     4: 'Pattern verification networking',
     5: 'Consistent questioning teacher',
-    6: 'Transpersonal logical auditor'
+    6: 'Transpersonal logical auditor',
   },
   64: {
     1: 'Unresolved pattern pressure',
@@ -513,47 +513,47 @@ export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
     3: 'Testing confusion synthesis',
     4: 'Story pattern framing',
     5: 'Reliable abstraction guidance',
-    6: 'Transpersonal synthesis field'
-  }
+    6: 'Transpersonal synthesis field',
+  },
 };
 
 // Channel-specific keynotes based on circuit and theme
 export const CHANNEL_KEYNOTES: Record<string, string> = {
-  "1-8": "Creative inspiration through individual contribution",
-  "2-14": "Directional guidance through resource mastery",
-  "3-60": "Ordering energy through limitation acceptance",
-  "4-63": "Mental clarity through logical doubt",
-  "5-15": "Natural rhythm through extreme moderation",
-  "6-59": "Intimate bonding through dispersive connection",
-  "7-31": "Future leadership through influential direction",
-  "9-52": "Focused determination through concentrated stillness",
-  "10-20": "Authentic awakening through present moment awareness",
-  "10-34": "Individual exploration through powerful conviction",
-  "10-57": "Perfect survival form through intuitive guidance",
-  "11-56": "Curious seeking through stimulating ideas",
-  "12-22": "Social grace through emotional expression",
-  "13-33": "Fellowship witness through retreating memory",
-  "16-48": "Wavelength talent through skill mastery",
-  "17-62": "Organized acceptance through detailed opinions",
-  "18-58": "Corrective judgment through vital improvement",
-  "19-49": "Tribal synthesis through sensitive approach",
-  "20-57": "Penetrating awareness through gentle intuition",
-  "21-45": "Material control through tribal gathering",
-  "23-43": "Individual structuring through breakthrough insight",
-  "24-61": "Awareness thinking through returning mystery",
-  "25-51": "Innocent initiation through shocking spirit",
-  "26-44": "Tribal surrender through trickster meetings",
-  "27-50": "Caring preservation through transformative values",
-  "28-38": "Individual struggle through purposeful opposition",
-  "29-46": "Collective discovery through committed embodiment",
-  "30-41": "Individual recognition through desire fantasy",
-  "32-54": "Tribal transformation through enduring ambition",
-  "34-57": "Individual power through intuitive strength",
-  "35-36": "Collective experience through crisis navigation",
-  "37-40": "Tribal community through family commitment",
-  "39-55": "Individual emotional expression through provocative abundance",
-  "42-53": "Collective maturation through growth development",
-  "47-64": "Mental abstraction through oppressive confusion"
+  '1-8': 'Creative inspiration through individual contribution',
+  '2-14': 'Directional guidance through resource mastery',
+  '3-60': 'Ordering energy through limitation acceptance',
+  '4-63': 'Mental clarity through logical doubt',
+  '5-15': 'Natural rhythm through extreme moderation',
+  '6-59': 'Intimate bonding through dispersive connection',
+  '7-31': 'Future leadership through influential direction',
+  '9-52': 'Focused determination through concentrated stillness',
+  '10-20': 'Authentic awakening through present moment awareness',
+  '10-34': 'Individual exploration through powerful conviction',
+  '10-57': 'Perfect survival form through intuitive guidance',
+  '11-56': 'Curious seeking through stimulating ideas',
+  '12-22': 'Social grace through emotional expression',
+  '13-33': 'Fellowship witness through retreating memory',
+  '16-48': 'Wavelength talent through skill mastery',
+  '17-62': 'Organized acceptance through detailed opinions',
+  '18-58': 'Corrective judgment through vital improvement',
+  '19-49': 'Tribal synthesis through sensitive approach',
+  '20-57': 'Penetrating awareness through gentle intuition',
+  '21-45': 'Material control through tribal gathering',
+  '23-43': 'Individual structuring through breakthrough insight',
+  '24-61': 'Awareness thinking through returning mystery',
+  '25-51': 'Innocent initiation through shocking spirit',
+  '26-44': 'Tribal surrender through trickster meetings',
+  '27-50': 'Caring preservation through transformative values',
+  '28-38': 'Individual struggle through purposeful opposition',
+  '29-46': 'Collective discovery through committed embodiment',
+  '30-41': 'Individual recognition through desire fantasy',
+  '32-54': 'Tribal transformation through enduring ambition',
+  '34-57': 'Individual power through intuitive strength',
+  '35-36': 'Collective experience through crisis navigation',
+  '37-40': 'Tribal community through family commitment',
+  '39-55': 'Individual emotional expression through provocative abundance',
+  '42-53': 'Collective maturation through growth development',
+  '47-64': 'Mental abstraction through oppressive confusion',
 };
 
 export function getGateLineKeynote(gate: number, line: number): string {

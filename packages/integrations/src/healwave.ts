@@ -1,6 +1,10 @@
-interface ExtendedWindow extends Window { webkitAudioContext?: typeof AudioContext }
+interface ExtendedWindow extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
 
-export interface BasicChartData { sun?: { sign?: string } }
+export interface BasicChartData {
+  sun?: { sign?: string };
+}
 
 export class HealwaveIntegration {
   private audioContext: AudioContext | null = null;
@@ -18,22 +22,36 @@ export class HealwaveIntegration {
   generateFrequencies(chartData: BasicChartData | null | undefined): number[] {
     // Generate healing frequencies based on astrological chart data
     const baseFrequencies = [528, 396, 417, 639, 741, 852, 963]; // Solfeggio frequencies
-    
+
     // Customize based on chart data
     const sign = chartData?.sun?.sign?.toLowerCase();
     if (sign) {
-      const signIndex = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 
-                        'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces']
-                       .indexOf(sign);
+      const signIndex = [
+        'aries',
+        'taurus',
+        'gemini',
+        'cancer',
+        'leo',
+        'virgo',
+        'libra',
+        'scorpio',
+        'sagittarius',
+        'capricorn',
+        'aquarius',
+        'pisces',
+      ].indexOf(sign);
       if (signIndex >= 0) {
         return baseFrequencies.map(freq => freq + signIndex * 5);
       }
     }
-    
+
     return baseFrequencies;
   }
 
-  async playFrequency(frequency: number, duration: number = 1000): Promise<void> {
+  async playFrequency(
+    frequency: number,
+    duration: number = 1000
+  ): Promise<void> {
     const context = this.createAudioContext();
     const oscillator = context.createOscillator();
     const gainNode = context.createGain();
@@ -45,7 +63,10 @@ export class HealwaveIntegration {
     oscillator.type = 'sine';
 
     gainNode.gain.setValueAtTime(0.1, context.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + duration / 1000);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      context.currentTime + duration / 1000
+    );
 
     oscillator.start(context.currentTime);
     oscillator.stop(context.currentTime + duration / 1000);

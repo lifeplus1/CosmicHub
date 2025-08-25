@@ -5,9 +5,24 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const PROJECTS = [
-  { name: 'astro', kind: 'vitest', path: 'apps/astro', testCmd: 'pnpm exec vitest run --coverage --silent' },
-  { name: 'types', kind: 'vitest', path: 'packages/types', testCmd: 'pnpm exec vitest run --coverage --silent' },
-  { name: 'backend', kind: 'pytest', path: 'backend', testCmd: 'python3 -m pytest -q --cov=. --cov-report=xml --cov-report=html' }
+  {
+    name: 'astro',
+    kind: 'vitest',
+    path: 'apps/astro',
+    testCmd: 'pnpm exec vitest run --coverage --silent',
+  },
+  {
+    name: 'types',
+    kind: 'vitest',
+    path: 'packages/types',
+    testCmd: 'pnpm exec vitest run --coverage --silent',
+  },
+  {
+    name: 'backend',
+    kind: 'pytest',
+    path: 'backend',
+    testCmd: 'python3 -m pytest -q --cov=. --cov-report=xml --cov-report=html',
+  },
 ];
 
 const BASELINE_FILE = '.coverage-baseline.json';
@@ -16,7 +31,11 @@ const IMPROVEMENT_STEP = 0.25; // bump baseline only when improved by at least t
 
 function run(cmd, cwd) {
   const [bin, ...args] = cmd.split(/\s+/);
-  const res = spawnSync(bin, args, { cwd, stdio: 'inherit', env: { ...process.env, CI: 'true' } });
+  const res = spawnSync(bin, args, {
+    cwd,
+    stdio: 'inherit',
+    env: { ...process.env, CI: 'true' },
+  });
   if (res.status !== 0) {
     console.error(`[coverage-ratchet] Command failed: ${cmd}`);
     process.exit(res.status ?? 1);
@@ -28,10 +47,14 @@ function aggregateCoverage(finalJsonPath) {
     throw new Error(`Coverage file missing: ${finalJsonPath}`);
   }
   const data = JSON.parse(readFileSync(finalJsonPath, 'utf8'));
-  let statementsCovered = 0, statementsTotal = 0;
-  let functionsCovered = 0, functionsTotal = 0;
-  let branchesCovered = 0, branchesTotal = 0;
-  let linesCovered = 0, linesTotal = 0;
+  let statementsCovered = 0,
+    statementsTotal = 0;
+  let functionsCovered = 0,
+    functionsTotal = 0;
+  let branchesCovered = 0,
+    branchesTotal = 0;
+  let linesCovered = 0,
+    linesTotal = 0;
 
   for (const file of Object.values(data)) {
     if (typeof file !== 'object' || file === null) continue;
@@ -51,12 +74,12 @@ function aggregateCoverage(finalJsonPath) {
     linesCovered += sKeys.filter(k => (f.s?.[k] ?? 0) > 0).length;
   }
 
-  const pct = (covered, total) => total === 0 ? 100 : (covered / total) * 100;
+  const pct = (covered, total) => (total === 0 ? 100 : (covered / total) * 100);
   return {
     lines: pct(linesCovered, linesTotal),
     statements: pct(statementsCovered, statementsTotal),
     functions: pct(functionsCovered, functionsTotal),
-    branches: pct(branchesCovered, branchesTotal)
+    branches: pct(branchesCovered, branchesTotal),
   };
 }
 
@@ -90,7 +113,14 @@ for (const p of PROJECTS) {
   if (p.kind === 'vitest') {
     const covPath = join(p.path, 'coverage', 'coverage-final.json');
     const raw = JSON.parse(readFileSync(covPath, 'utf8'));
-    let statementsTotal = 0, statementsCovered = 0, functionsTotal = 0, functionsCovered = 0, branchesTotal = 0, branchesCovered = 0, linesTotal = 0, linesCovered = 0;
+    let statementsTotal = 0,
+      statementsCovered = 0,
+      functionsTotal = 0,
+      functionsCovered = 0,
+      branchesTotal = 0,
+      branchesCovered = 0,
+      linesTotal = 0,
+      linesCovered = 0;
     for (const file of Object.values(raw)) {
       if (typeof file !== 'object' || file === null) continue;
       const f = file;
@@ -108,13 +138,13 @@ for (const p of PROJECTS) {
       linesTotal += sKeys.length;
       linesCovered += sKeys.filter(k => (f.s?.[k] ?? 0) > 0).length;
     }
-    const pct = (c, t) => t === 0 ? 100 : (c / t * 100);
+    const pct = (c, t) => (t === 0 ? 100 : (c / t) * 100);
     const metrics = {
       lines: pct(linesCovered, linesTotal),
       statements: pct(statementsCovered, statementsTotal),
       functions: pct(functionsCovered, functionsTotal),
       branches: pct(branchesCovered, branchesTotal),
-      weight: statementsTotal || 1
+      weight: statementsTotal || 1,
     };
     perProject[p.name] = roundMetrics(metrics);
     weighted.lines += metrics.lines * metrics.weight;
@@ -125,7 +155,9 @@ for (const p of PROJECTS) {
   } else if (p.kind === 'pytest') {
     const xmlPath = join(p.path, 'coverage.xml');
     if (!existsSync(xmlPath)) {
-      console.warn(`[coverage-ratchet] WARNING: backend coverage.xml missing at ${xmlPath}, skipping backend metrics.`);
+      console.warn(
+        `[coverage-ratchet] WARNING: backend coverage.xml missing at ${xmlPath}, skipping backend metrics.`
+      );
       continue;
     }
     const xml = readFileSync(xmlPath, 'utf8');
@@ -134,13 +166,22 @@ for (const p of PROJECTS) {
     const linesValidMatch = xml.match(/lines-valid="([0-9]+)"/);
     const linesCoveredMatch = xml.match(/lines-covered="([0-9]+)"/);
     const linesValid = Number(linesValidMatch?.[1] || 0);
-    const linesCovered = Number(linesCoveredMatch?.[1] || Math.round(linesValid * Number(lineRateMatch?.[1] || 0)));
-    const linePct = linesValid === 0 ? 100 : (linesCovered / linesValid * 100);
+    const linesCovered = Number(
+      linesCoveredMatch?.[1] ||
+        Math.round(linesValid * Number(lineRateMatch?.[1] || 0))
+    );
+    const linePct = linesValid === 0 ? 100 : (linesCovered / linesValid) * 100;
     const branchPct = Number(branchRateMatch?.[1] || 0) * 100;
     // Pytest XML lacks function-level breakdown; approximate functions = linePct
     const funcPct = linePct;
     const weight = linesValid || 1;
-    perProject[p.name] = roundMetrics({ lines: linePct, statements: linePct, functions: funcPct, branches: branchPct, weight });
+    perProject[p.name] = roundMetrics({
+      lines: linePct,
+      statements: linePct,
+      functions: funcPct,
+      branches: branchPct,
+      weight,
+    });
     weighted.lines += linePct * weight;
     weighted.statements += linePct * weight;
     weighted.functions += funcPct * weight;
@@ -152,7 +193,7 @@ const combined = roundMetrics({
   lines: weighted.lines / totalWeight,
   statements: weighted.statements / totalWeight,
   functions: weighted.functions / totalWeight,
-  branches: weighted.branches / totalWeight
+  branches: weighted.branches / totalWeight,
 });
 
 console.log('[coverage-ratchet] Current coverage %', combined);
@@ -165,8 +206,13 @@ if (baseline === null) {
 }
 
 // If baseline lacks project list or projects expanded, refresh baseline once (treat as opt-in expansion)
-if (!baseline.projects || projectNames.some(n => !baseline.projects.includes(n))) {
-  console.log('[coverage-ratchet] Detected project set change. Refreshing baseline to include new projects.');
+if (
+  !baseline.projects ||
+  projectNames.some(n => !baseline.projects.includes(n))
+) {
+  console.log(
+    '[coverage-ratchet] Detected project set change. Refreshing baseline to include new projects.'
+  );
   saveBaseline({ ...combined, projects: projectNames });
   process.exit(0);
 }
@@ -174,13 +220,17 @@ if (!baseline.projects || projectNames.some(n => !baseline.projects.includes(n))
 let fail = false;
 // Allow a tiny floating error tolerance for branch metric (instrumentation drift)
 const FLOAT_TOLERANCE = 0.03; // 0.03 percentage points tolerance
-for (const key of ['lines','statements','functions','branches']) {
+for (const key of ['lines', 'statements', 'functions', 'branches']) {
   if (combined[key] + 1e-6 < baseline[key]) {
     const delta = baseline[key] - combined[key];
     if (key === 'branches' && delta <= FLOAT_TOLERANCE) {
-      console.warn(`[coverage-ratchet] Minor branch fluctuation tolerated (Δ=${delta.toFixed(3)} <= ${FLOAT_TOLERANCE})`);
+      console.warn(
+        `[coverage-ratchet] Minor branch fluctuation tolerated (Δ=${delta.toFixed(3)} <= ${FLOAT_TOLERANCE})`
+      );
     } else {
-      console.error(`[coverage-ratchet] Regression in ${key}: ${combined[key]} < ${baseline[key]}`);
+      console.error(
+        `[coverage-ratchet] Regression in ${key}: ${combined[key]} < ${baseline[key]}`
+      );
       fail = true;
     }
   }
@@ -190,9 +240,15 @@ for (const key of ['lines','statements','functions','branches']) {
 try {
   const outDir = 'metrics';
   if (!existsSync(outDir)) require('fs').mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, 'coverage-projects.json'), JSON.stringify({ perProject, combined }, null, 2));
+  writeFileSync(
+    join(outDir, 'coverage-projects.json'),
+    JSON.stringify({ perProject, combined }, null, 2)
+  );
 } catch (e) {
-  console.warn('[coverage-ratchet] Could not write per-project coverage summary', e.message);
+  console.warn(
+    '[coverage-ratchet] Could not write per-project coverage summary',
+    e.message
+  );
 }
 
 if (fail) {
@@ -202,7 +258,7 @@ if (fail) {
 
 let improved = false;
 const newBaseline = { ...baseline };
-for (const key of ['lines','statements','functions','branches']) {
+for (const key of ['lines', 'statements', 'functions', 'branches']) {
   if (combined[key] >= baseline[key] + IMPROVEMENT_STEP) {
     newBaseline[key] = combined[key];
     improved = true;

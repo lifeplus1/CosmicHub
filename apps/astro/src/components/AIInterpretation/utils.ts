@@ -3,10 +3,13 @@ import type { Interpretation } from './types';
 /**
  * Format interpretation content for display
  */
-export const formatInterpretationContent = (content: string, maxLength?: number): string => {
+export const formatInterpretationContent = (
+  content: string,
+  maxLength?: number
+): string => {
   if (typeof maxLength !== 'number' || maxLength < 1) return content;
-  return content.length > maxLength 
-    ? `${content.substring(0, maxLength)}...` 
+  return content.length > maxLength
+    ? `${content.substring(0, maxLength)}...`
     : content;
 };
 
@@ -24,33 +27,40 @@ export const getConfidenceLevel = (confidence: number): string => {
 /**
  * Sort interpretations by creation date (newest first)
  */
-export const sortInterpretationsByDate = (interpretations: Interpretation[]): Interpretation[] => {
-  return [...interpretations].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+export const sortInterpretationsByDate = (
+  interpretations: Interpretation[]
+): Interpretation[] => {
+  return [...interpretations].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 };
 
 /**
  * Group interpretations by type
  */
-export const groupInterpretationsByType = (interpretations: Interpretation[]): Record<string, Interpretation[]> => {
-  return interpretations.reduce((groups, interpretation) => {
-    const type = interpretation.type;
-    groups[type] ??= [];
-    groups[type].push(interpretation);
-    return groups;
-  }, {} as Record<string, Interpretation[]>);
+export const groupInterpretationsByType = (
+  interpretations: Interpretation[]
+): Record<string, Interpretation[]> => {
+  return interpretations.reduce(
+    (groups, interpretation) => {
+      const type = interpretation.type;
+      groups[type] ??= [];
+      groups[type].push(interpretation);
+      return groups;
+    },
+    {} as Record<string, Interpretation[]>
+  );
 };
 
 /**
  * Filter interpretations by tags
  */
 export const filterInterpretationsByTags = (
-  interpretations: Interpretation[], 
+  interpretations: Interpretation[],
   tags: string[]
 ): Interpretation[] => {
   if (!Array.isArray(tags) || tags.length === 0) return interpretations;
-  
+
   return interpretations.filter(interpretation =>
     tags.some(tag => interpretation.tags.includes(tag))
   );
@@ -61,23 +71,34 @@ export const filterInterpretationsByTags = (
  */
 export const getInterpretationTypeEmoji = (type: string): string => {
   switch (type.toLowerCase()) {
-    case 'natal': return '🌟';
-    case 'transit': return '🌙';
-    case 'synastry': return '💫';
-    case 'composite': return '🌌';
-    case 'solar_return': return '☀️';
-    case 'lunar_return': return '🌙';
-    case 'progression': return '🔄';
-    default: return '✨';
+    case 'natal':
+      return '🌟';
+    case 'transit':
+      return '🌙';
+    case 'synastry':
+      return '💫';
+    case 'composite':
+      return '🌌';
+    case 'solar_return':
+      return '☀️';
+    case 'lunar_return':
+      return '🌙';
+    case 'progression':
+      return '🔄';
+    default:
+      return '✨';
   }
 };
 
 /**
  * Generate interpretation summary from content
  */
-export const generateSummary = (content: string, maxWords: number = 20): string => {
+export const generateSummary = (
+  content: string,
+  maxWords: number = 20
+): string => {
   const words = content.split(' ');
   if (!Array.isArray(words) || words.length <= maxWords) return content;
-  
+
   return words.slice(0, maxWords).join(' ') + '...';
 };

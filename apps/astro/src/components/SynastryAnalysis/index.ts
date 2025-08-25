@@ -9,7 +9,7 @@ export {
   KeyAspects,
   HouseOverlays,
   CompositeChart,
-  RelationshipSummary
+  RelationshipSummary,
 } from './SynastryComponents';
 
 // Types

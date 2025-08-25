@@ -12,7 +12,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    
+
     // Strict mode for modern development
     "strict": true,
     "noImplicitAny": true,
@@ -25,7 +25,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    
+
     // Path mapping for better imports
     "baseUrl": ".",
     "paths": {
@@ -36,7 +36,7 @@
       "@cosmichub/ui": ["../../packages/ui/src"],
       "@cosmichub/integrations": ["../../packages/integrations/src"]
     },
-    
+
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
   },
   "include": [
@@ -44,7 +44,7 @@
     "types",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/*.spec.ts", 
+    "**/*.spec.ts",
     "**/*.spec.tsx"
   ]
 }

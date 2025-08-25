@@ -14,9 +14,9 @@ export interface AdvancedFormProps {
   className?: string;
 }
 
-export const AdvancedForm: FC<AdvancedFormProps> = ({ 
+export const AdvancedForm: FC<AdvancedFormProps> = ({
   onSubmit,
-  className = ''
+  className = '',
 }) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -24,13 +24,13 @@ export const AdvancedForm: FC<AdvancedFormProps> = ({
   };
 
   return (
-    <form 
+    <form
       onSubmit={handleSubmit}
       className={`advanced-form p-4 ${className}`.trim()}
-      aria-label="Advanced form"
+      aria-label='Advanced form'
     >
-      <h3 className="text-lg font-semibold mb-4">Advanced Form</h3>
-      <div className="text-center py-8 text-gray-500">
+      <h3 className='text-lg font-semibold mb-4'>Advanced Form</h3>
+      <div className='text-center py-8 text-gray-500'>
         Advanced form placeholder
       </div>
     </form>

@@ -19,5 +19,5 @@ export {
   createRouteBundle,
   SmartPreloader,
   LazyLoadErrorBoundary,
-  useLazyLoading
+  useLazyLoading,
 } from '../lazy-loading';

@@ -10,14 +10,20 @@ interface Props {
   title?: string;
 }
 
-export function ChartDisplay({ chartData, width = 300, height = 300, title = 'Birth Chart' }: Props) {
+export function ChartDisplay({
+  chartData,
+  width = 300,
+  height = 300,
+  title = 'Birth Chart',
+}: Props) {
   const centerX = width / 2;
   const centerY = height / 2;
   const radius = Math.min(width, height) * 0.4;
 
   // This is a simplified version - you'd migrate your existing D3 logic here
   const renderPlanets = () => {
-    if (chartData?.planets === null || chartData?.planets === undefined) return null;
+    if (chartData?.planets === null || chartData?.planets === undefined)
+      return null;
 
     return chartData.planets.map((planet: Planet, index: number) => {
       const angle = (planet.position * Math.PI) / 180;
@@ -26,13 +32,13 @@ export function ChartDisplay({ chartData, width = 300, height = 300, title = 'Bi
 
       return (
         <G key={planet.name + index}>
-          <Circle cx={x} cy={y} r="4" fill="#fff" />
+          <Circle cx={x} cy={y} r='4' fill='#fff' />
           <SvgText
             x={x}
             y={y - 10}
-            fontSize="10"
-            fill="#ccc"
-            textAnchor="middle"
+            fontSize='10'
+            fill='#ccc'
+            textAnchor='middle'
           >
             {planet.name.substring(0, 2).toUpperCase()}
           </SvgText>
@@ -57,8 +63,8 @@ export function ChartDisplay({ chartData, width = 300, height = 300, title = 'Bi
           y1={y1}
           x2={x2}
           y2={y2}
-          stroke="#4a4a6a"
-          strokeWidth="1"
+          stroke='#4a4a6a'
+          strokeWidth='1'
         />
       );
     }
@@ -74,24 +80,34 @@ export function ChartDisplay({ chartData, width = 300, height = 300, title = 'Bi
           cx={centerX}
           cy={centerY}
           r={radius}
-          fill="none"
-          stroke="#4a4a6a"
-          strokeWidth="2"
+          fill='none'
+          stroke='#4a4a6a'
+          strokeWidth='2'
         />
-        
+
         {/* House divisions */}
         {renderHouses()}
-        
+
         {/* Planets */}
         {renderPlanets()}
       </Svg>
-      
+
       <View style={styles.info}>
         <Text style={styles.infoText}>
-          {chartData?.planets !== null && chartData?.planets !== undefined ? chartData.planets.length : 0} planets • {chartData?.houses !== null && chartData?.houses !== undefined ? chartData.houses.length : 0} houses
+          {chartData?.planets !== null && chartData?.planets !== undefined
+            ? chartData.planets.length
+            : 0}{' '}
+          planets •{' '}
+          {chartData?.houses !== null && chartData?.houses !== undefined
+            ? chartData.houses.length
+            : 0}{' '}
+          houses
         </Text>
         <Text style={styles.infoText}>
-          {chartData?.aspects !== null && chartData?.aspects !== undefined ? chartData.aspects.length : 0} aspects
+          {chartData?.aspects !== null && chartData?.aspects !== undefined
+            ? chartData.aspects.length
+            : 0}{' '}
+          aspects
         </Text>
       </View>
     </View>

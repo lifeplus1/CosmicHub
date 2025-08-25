@@ -12,7 +12,7 @@ const logger = {
   },
   error: (message: string, data?: unknown) => {
     console.error(`[CrossAppHooks] ${message}`, data);
-  }
+  },
 };
 
 export interface Notification {
@@ -33,7 +33,7 @@ export const useCrossAppStore = (): CrossAppStore => {
 
   const addNotification = useCallback((notification: Notification): void => {
     logger.info('Cross-app notification:', notification);
-    setNotifications((prev) => [...prev, notification]);
+    setNotifications(prev => [...prev, notification]);
   }, []);
 
   const clearNotifications = useCallback((): void => {

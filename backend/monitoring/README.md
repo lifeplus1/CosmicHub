@@ -66,8 +66,8 @@ This monitoring stack implements comprehensive alerting aligned with our SLO pol
 
 ## Services & Access Points
 
-| Service       | URL                   | Purpose                    |
-| ------------- | --------------------- | -------------------------- |
+| Service       | URL                     | Purpose                    |
+| ------------- | ----------------------- | -------------------------- |
 | Prometheus    | <http://localhost:9090> | Metrics storage & querying |
 | Alertmanager  | <http://localhost:9093> | Alert routing & management |
 | Grafana       | <http://localhost:3001> | Dashboards & visualization |

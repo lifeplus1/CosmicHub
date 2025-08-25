@@ -7,15 +7,25 @@ import process from 'node:process';
  */
 import { execSync } from 'node:child_process';
 
-function sh(cmd) { return execSync(cmd, { stdio: 'pipe', encoding: 'utf8' }).trim(); }
+function sh(cmd) {
+  return execSync(cmd, { stdio: 'pipe', encoding: 'utf8' }).trim();
+}
 
 let base = process.env.LINT_CHANGED_BASE || 'origin/main';
-try { sh(`git fetch -q ${base.split('/')[0]}`); } catch (err) { /* ignore fetch issues */ }
+try {
+  sh(`git fetch -q ${base.split('/')[0]}`);
+} catch (err) {
+  /* ignore fetch issues */
+}
 
 // Prefer staged files; if none, diff vs base
-let files = sh('git diff --name-only --cached || echo').split('\n').filter(Boolean);
+let files = sh('git diff --name-only --cached || echo')
+  .split('\n')
+  .filter(Boolean);
 if (files.length === 0) {
-  files = sh(`git diff --name-only ${base}...HEAD || echo`).split('\n').filter(Boolean);
+  files = sh(`git diff --name-only ${base}...HEAD || echo`)
+    .split('\n')
+    .filter(Boolean);
 }
 files = files.filter(f => /\.(ts|tsx)$/i.test(f));
 if (!files.length) {
@@ -23,7 +33,7 @@ if (!files.length) {
   process.exit(0);
 }
 
-const batch = files.map(f => f.includes(' ') ? `'${f}'` : f).join(' ');
+const batch = files.map(f => (f.includes(' ') ? `'${f}'` : f)).join(' ');
 const cmd = `npx eslint ${batch} --ext .ts,.tsx --max-warnings=0`;
 console.log('[lint-changed-strict] Running:', cmd);
 try {

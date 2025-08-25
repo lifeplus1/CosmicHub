@@ -5,17 +5,50 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./api-result": { "types": "./dist/api-result.d.ts", "default": "./dist/api-result.js" },
-    "./push-notifications": { "types": "./dist/push-notifications.d.ts", "default": "./dist/push-notifications.js" },
-    "./firebase": { "types": "./dist/firebase.d.ts", "default": "./dist/firebase.js" },
-    "./enhanced-testing": { "types": "./dist/enhanced-testing.d.ts", "default": "./dist/enhanced-testing.js" },
-    "./accessibility-testing": { "types": "./dist/accessibility-testing.d.ts", "default": "./dist/accessibility-testing.js" },
-    "./component-architecture": { "types": "./dist/component-library.d.ts", "default": "./dist/component-library.js" },
-    "./component-library": { "types": "./dist/component-library.d.ts", "default": "./dist/component-library.js" },
-    "./performance": { "types": "./dist/performance.d.ts", "default": "./dist/performance.js" },
-    "./lazy-loading": { "types": "./dist/lazy-loading.d.ts", "default": "./dist/lazy-loading.js" },
-    "./hooks": { "types": "./dist/hooks/index.d.ts", "default": "./dist/hooks/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./api-result": {
+      "types": "./dist/api-result.d.ts",
+      "default": "./dist/api-result.js"
+    },
+    "./push-notifications": {
+      "types": "./dist/push-notifications.d.ts",
+      "default": "./dist/push-notifications.js"
+    },
+    "./firebase": {
+      "types": "./dist/firebase.d.ts",
+      "default": "./dist/firebase.js"
+    },
+    "./enhanced-testing": {
+      "types": "./dist/enhanced-testing.d.ts",
+      "default": "./dist/enhanced-testing.js"
+    },
+    "./accessibility-testing": {
+      "types": "./dist/accessibility-testing.d.ts",
+      "default": "./dist/accessibility-testing.js"
+    },
+    "./component-architecture": {
+      "types": "./dist/component-library.d.ts",
+      "default": "./dist/component-library.js"
+    },
+    "./component-library": {
+      "types": "./dist/component-library.d.ts",
+      "default": "./dist/component-library.js"
+    },
+    "./performance": {
+      "types": "./dist/performance.d.ts",
+      "default": "./dist/performance.js"
+    },
+    "./lazy-loading": {
+      "types": "./dist/lazy-loading.d.ts",
+      "default": "./dist/lazy-loading.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "default": "./dist/hooks/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.runtime.json",

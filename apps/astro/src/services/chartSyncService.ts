@@ -3,14 +3,14 @@
  * Manages live updates, transit tracking, and cross-app chart sharing
  */
 import { Logger } from '../utils/logger';
-import { 
-  type ChartData, 
-  type Planet, 
+import {
+  type ChartData,
+  type Planet,
   type House,
   type PlanetName,
   type Aspect,
   type ChartId,
-  type AspectType
+  type AspectType,
 } from './api.types';
 import { isValidChartData, hasRequiredPlanets } from './validation';
 import { fetchChartData, type ChartBirthData } from './api';
@@ -95,15 +95,27 @@ export interface EventMap {
 type EventCallback<T> = (payload: T) => void;
 
 class TypedEventEmitter {
-  private listeners: Partial<Record<keyof EventMap, EventCallback<EventMap[keyof EventMap]>[]>> = {};
+  private listeners: Partial<
+    Record<keyof EventMap, EventCallback<EventMap[keyof EventMap]>[]>
+  > = {};
 
-  on<K extends keyof EventMap>(event: K, callback: EventCallback<EventMap[K]>): void {
+  on<K extends keyof EventMap>(
+    event: K,
+    callback: EventCallback<EventMap[K]>
+  ): void {
     this.listeners[event] ??= [];
-    this.listeners[event]?.push(callback as EventCallback<EventMap[keyof EventMap]>);
+    this.listeners[event]?.push(
+      callback as EventCallback<EventMap[keyof EventMap]>
+    );
   }
 
-  off<K extends keyof EventMap>(event: K, callback: EventCallback<EventMap[K]>): void {
-    this.listeners[event] = this.listeners[event]?.filter(cb => cb !== callback);
+  off<K extends keyof EventMap>(
+    event: K,
+    callback: EventCallback<EventMap[K]>
+  ): void {
+    this.listeners[event] = this.listeners[event]?.filter(
+      cb => cb !== callback
+    );
   }
 
   emit<K extends keyof EventMap>(event: K, payload: EventMap[K]): void {
@@ -119,7 +131,8 @@ class TypedEventEmitter {
 
 class ChartSyncService extends TypedEventEmitter {
   private charts: Map<ChartId, ChartDataSync> = new Map();
-  private syncIntervals: Map<ChartId, ReturnType<typeof setInterval>> = new Map();
+  private syncIntervals: Map<ChartId, ReturnType<typeof setInterval>> =
+    new Map();
   private transitUpdateInterval: ReturnType<typeof setInterval> | null = null;
   private isOnline = navigator.onLine;
   private pendingUpdates: Map<ChartId, Date> = new Map();
@@ -135,7 +148,10 @@ class ChartSyncService extends TypedEventEmitter {
       this.isOnline = true;
       this.emit('connection-restored', undefined);
       this.processPendingUpdates().catch(error => {
-        Logger.error('Failed to process pending updates', error instanceof Error ? error : new Error(String(error)));
+        Logger.error(
+          'Failed to process pending updates',
+          error instanceof Error ? error : new Error(String(error))
+        );
       });
     });
 
@@ -149,35 +165,44 @@ class ChartSyncService extends TypedEventEmitter {
     // Update transits every minute
     this.transitUpdateInterval = setInterval(() => {
       if (this.isOnline === false) return;
-      
-      this.fetchCurrentTransits().then(currentTransits => {
-        for (const [chartId] of this.charts.entries()) {
-          this.updateTransits(chartId, currentTransits);
-        }
-      }).catch(error => {
-        Logger.error('Failed to update global transits', error instanceof Error ? error : new Error(String(error)));
-      });
+
+      this.fetchCurrentTransits()
+        .then(currentTransits => {
+          for (const [chartId] of this.charts.entries()) {
+            this.updateTransits(chartId, currentTransits);
+          }
+        })
+        .catch(error => {
+          Logger.error(
+            'Failed to update global transits',
+            error instanceof Error ? error : new Error(String(error))
+          );
+        });
     }, 60000); // 1 minute
   }
 
   /**
    * Register a chart for real-time synchronization
    */
-  async registerChart(rawChartId: string, birthData: ChartBirthData, options: ChartSyncOptions = {}): Promise<ChartDataSync> {
+  async registerChart(
+    rawChartId: string,
+    birthData: ChartBirthData,
+    options: ChartSyncOptions = {}
+  ): Promise<ChartDataSync> {
     try {
       const chartId = toChartId(rawChartId);
       const {
         enableTransitUpdates = true,
         enableProgressions = false,
         aspectAlerts = true,
-        updateInterval = 5
+        updateInterval = 5,
       } = options;
 
       // Fetch initial chart data
-  const chartResult: ApiResult<ChartData> = await fetchChartData(birthData);
-  if (!chartResult.success) throw new Error(chartResult.error);
-  const chartData = chartResult.data;
-      
+      const chartResult: ApiResult<ChartData> = await fetchChartData(birthData);
+      if (!chartResult.success) throw new Error(chartResult.error);
+      const chartData = chartResult.data;
+
       if (!isValidChartData(chartData)) {
         throw new Error('Invalid chart data received');
       }
@@ -186,8 +211,12 @@ class ChartSyncService extends TypedEventEmitter {
         throw new Error('Missing required planets in chart data');
       }
 
-      const transitData = enableTransitUpdates ? await this.fetchCurrentTransits() : this.createEmptyTransitData();
-      const progressionData = enableProgressions ? await this.fetchProgressions(birthData) : undefined;
+      const transitData = enableTransitUpdates
+        ? await this.fetchCurrentTransits()
+        : this.createEmptyTransitData();
+      const progressionData = enableProgressions
+        ? await this.fetchProgressions(birthData)
+        : undefined;
 
       const chartSync: ChartDataSync = {
         birthData,
@@ -199,9 +228,9 @@ class ChartSyncService extends TypedEventEmitter {
           updateInterval,
           transitTracking: enableTransitUpdates,
           aspectAlerts,
-          progressionTracking: enableProgressions
+          progressionTracking: enableProgressions,
         },
-        progressionData
+        progressionData,
       };
 
       this.charts.set(chartId, chartSync);
@@ -209,24 +238,30 @@ class ChartSyncService extends TypedEventEmitter {
       // Set up periodic updates
       if (enableTransitUpdates || enableProgressions) {
         const interval = setInterval(() => {
-          this.updateChart(chartId, { 
-            enableTransitUpdates, 
-            enableProgressions, 
-            aspectAlerts 
+          this.updateChart(chartId, {
+            enableTransitUpdates,
+            enableProgressions,
+            aspectAlerts,
           }).catch(err => {
-            Logger.error(`Error updating chart ${chartId}`, err instanceof Error ? err : new Error(String(err)));
+            Logger.error(
+              `Error updating chart ${chartId}`,
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }, updateInterval * 60000);
-        
+
         this.syncIntervals.set(chartId, interval);
       }
 
       this.emit('chart-registered', { chartId, chartSync });
       return chartSync;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-  Logger.error('Failed to register chart', error instanceof Error ? error : undefined);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(
+        'Failed to register chart',
+        error instanceof Error ? error : undefined
+      );
       throw new Error(`Failed to register chart: ${errorMessage}`);
     }
   }
@@ -234,9 +269,15 @@ class ChartSyncService extends TypedEventEmitter {
   /**
    * Update a specific chart
    */
-  private async updateChart(rawChartId: string, options: Pick<ChartSyncOptions, 'enableTransitUpdates' | 'enableProgressions' | 'aspectAlerts'>): Promise<void> {
+  private async updateChart(
+    rawChartId: string,
+    options: Pick<
+      ChartSyncOptions,
+      'enableTransitUpdates' | 'enableProgressions' | 'aspectAlerts'
+    >
+  ): Promise<void> {
     const chartId = toChartId(rawChartId);
-    
+
     if (this.isOnline === false) {
       this.pendingUpdates.set(chartId, new Date());
       return;
@@ -248,7 +289,7 @@ class ChartSyncService extends TypedEventEmitter {
     try {
       const updates: Partial<ChartDataSync> = {
         lastUpdate: new Date(),
-        pendingUpdates: []
+        pendingUpdates: [],
       };
 
       if (options.enableTransitUpdates === true) {
@@ -258,9 +299,9 @@ class ChartSyncService extends TypedEventEmitter {
           chartData.transitData,
           newTransits
         );
-        
+
         updates.transitData = newTransits;
-        
+
         if (options.aspectAlerts === true && aspectEvents.length > 0) {
           aspectEvents.forEach(event => {
             this.emit('aspect-alert', event);
@@ -272,17 +313,21 @@ class ChartSyncService extends TypedEventEmitter {
       if (options.enableProgressions === true) {
         // Update progressions (slower moving, update less frequently)
         const now = new Date();
-        const hoursSinceLastUpdate = (now.getTime() - chartData.lastUpdate.getTime()) / (1000 * 60 * 60);
-        
-        if (hoursSinceLastUpdate >= 24) { // Update progressions daily
-          updates.progressionData = await this.fetchProgressions(chartData.birthData);
+        const hoursSinceLastUpdate =
+          (now.getTime() - chartData.lastUpdate.getTime()) / (1000 * 60 * 60);
+
+        if (hoursSinceLastUpdate >= 24) {
+          // Update progressions daily
+          updates.progressionData = await this.fetchProgressions(
+            chartData.birthData
+          );
         }
       }
 
       // Create new chart data with updates
       const updatedChartData: ChartDataSync = {
         ...chartData,
-        ...updates
+        ...updates,
       };
 
       this.charts.set(chartId, updatedChartData);
@@ -292,27 +337,32 @@ class ChartSyncService extends TypedEventEmitter {
         timestamp: new Date().toISOString(),
         changes: {
           planets: updates.transitData,
-          aspects: []  // Add aspects if needed
-        }
+          aspects: [], // Add aspects if needed
+        },
       });
-
     } catch (error) {
       const syncError: ChartSyncError = {
         chartId,
         errorCode: 'UPDATE_FAILED',
         message: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
-        retryCount: 0
+        retryCount: 0,
       };
       this.emit('sync-error', syncError);
-  Logger.error(`Failed to update chart ${rawChartId}`, error instanceof Error ? error : undefined);
+      Logger.error(
+        `Failed to update chart ${rawChartId}`,
+        error instanceof Error ? error : undefined
+      );
     }
   }
 
   /**
    * Update transits for a specific chart
    */
-  private updateTransits(rawChartId: string, newTransits: Record<PlanetName, Planet>): void {
+  private updateTransits(
+    rawChartId: string,
+    newTransits: Record<PlanetName, Planet>
+  ): void {
     const chartId = toChartId(rawChartId);
     const chartData = this.charts.get(chartId);
     if (chartData === null || chartData === undefined) return;
@@ -322,18 +372,18 @@ class ChartSyncService extends TypedEventEmitter {
       chartData.transitData,
       newTransits
     );
-    
+
     // Create updated chart data
     const updatedChartData: ChartDataSync = {
       ...chartData,
       transitData: newTransits,
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
     };
-    
+
     this.charts.set(chartId, updatedChartData);
-    
+
     this.emit('transit-update', { chartId, transits: newTransits });
-    
+
     if (aspectEvents.length > 0) {
       aspectEvents.forEach(event => {
         this.emit('aspect-alert', event);
@@ -355,27 +405,39 @@ class ChartSyncService extends TypedEventEmitter {
       lat: 0, // Greenwich
       lon: 0,
       timezone: 'UTC',
-      city: 'Greenwich'
+      city: 'Greenwich',
     };
 
     const result: ApiResult<ChartData> = await fetchChartData(transitBirthData);
-  if (!result.success) return this.createEmptyTransitData();
-  const planets = result.data.planets ?? {};
-  // Narrow keys to PlanetName when possible
-  const narrowed: Record<PlanetName, Planet> = {} as Record<PlanetName, Planet>;
-  (Object.keys(planets) as PlanetName[]).forEach(k => { narrowed[k] = planets[k]; });
-  return narrowed;
+    if (!result.success) return this.createEmptyTransitData();
+    const planets = result.data.planets ?? {};
+    // Narrow keys to PlanetName when possible
+    const narrowed: Record<PlanetName, Planet> = {} as Record<
+      PlanetName,
+      Planet
+    >;
+    (Object.keys(planets) as PlanetName[]).forEach(k => {
+      narrowed[k] = planets[k];
+    });
+    return narrowed;
   }
 
   /**
    * Fetch progressed chart positions
    */
-  private async fetchProgressions(birthData: ChartBirthData): Promise<Record<PlanetName, Planet>> {
+  private async fetchProgressions(
+    birthData: ChartBirthData
+  ): Promise<Record<PlanetName, Planet>> {
     // Calculate progressed positions (1 day = 1 year progression)
-    const birthDate = new Date(birthData.year, birthData.month - 1, birthData.day);
+    const birthDate = new Date(
+      birthData.year,
+      birthData.month - 1,
+      birthData.day
+    );
     const now = new Date();
-    const ageInYears = (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-    
+    const ageInYears =
+      (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+
     const progressedDate = new Date(birthDate);
     progressedDate.setDate(progressedDate.getDate() + Math.floor(ageInYears));
 
@@ -383,15 +445,21 @@ class ChartSyncService extends TypedEventEmitter {
       ...birthData,
       year: progressedDate.getFullYear(),
       month: progressedDate.getMonth() + 1,
-      day: progressedDate.getDate()
+      day: progressedDate.getDate(),
     };
 
-    const result: ApiResult<ChartData> = await fetchChartData(progressedBirthData);
-  if (!result.success) return this.createEmptyTransitData();
-  const planets = result.data.planets ?? {};
-  const narrowed: Record<PlanetName, Planet> = {} as Record<PlanetName, Planet>;
-  (Object.keys(planets) as PlanetName[]).forEach(k => { narrowed[k] = planets[k]; });
-  return narrowed;
+    const result: ApiResult<ChartData> =
+      await fetchChartData(progressedBirthData);
+    if (!result.success) return this.createEmptyTransitData();
+    const planets = result.data.planets ?? {};
+    const narrowed: Record<PlanetName, Planet> = {} as Record<
+      PlanetName,
+      Planet
+    >;
+    (Object.keys(planets) as PlanetName[]).forEach(k => {
+      narrowed[k] = planets[k];
+    });
+    return narrowed;
   }
 
   /**
@@ -414,36 +482,42 @@ class ChartSyncService extends TypedEventEmitter {
       natalPlanetNames.forEach(natalPlanet => {
         const natalData = natal.planets[natalPlanet];
         aspectAngles.forEach(aspectAngle => {
-          const currentAngle = Math.abs(transitData.position - natalData.position) % 360;
+          const currentAngle =
+            Math.abs(transitData.position - natalData.position) % 360;
           const currentOrb = Math.min(
             Math.abs(currentAngle - aspectAngle),
             Math.abs(currentAngle - (aspectAngle + 360)),
-            Math.abs((currentAngle + 360) - aspectAngle)
+            Math.abs(currentAngle + 360 - aspectAngle)
           );
 
           if (currentOrb <= maxOrb) {
             const oldTransitData = oldTransits[transitPlanet];
             if (oldTransitData !== null && oldTransitData !== undefined) {
-              const oldAngle = Math.abs(oldTransitData.position - natalData.position) % 360;
+              const oldAngle =
+                Math.abs(oldTransitData.position - natalData.position) % 360;
               const oldOrb = Math.min(
                 Math.abs(oldAngle - aspectAngle),
                 Math.abs(oldAngle - (aspectAngle + 360)),
-                Math.abs((oldAngle + 360) - aspectAngle)
+                Math.abs(oldAngle + 360 - aspectAngle)
               );
 
               try {
                 // Detect if aspect is forming (orb decreasing) or separating (orb increasing)
-                if ((currentOrb < oldOrb) && (currentOrb <= 1)) {
+                if (currentOrb < oldOrb && currentOrb <= 1) {
                   events.push({
                     type: 'aspect-forming',
                     transitPlanet,
                     natalPlanet,
                     aspectType: this.getAspectType(aspectAngle),
                     orb: currentOrb,
-                    exactDate: this.calculateExactAspectDate(transitData, natalData, aspectAngle),
-                    strength: this.getAspectStrengthFromOrb(currentOrb)
+                    exactDate: this.calculateExactAspectDate(
+                      transitData,
+                      natalData,
+                      aspectAngle
+                    ),
+                    strength: this.getAspectStrengthFromOrb(currentOrb),
                   });
-                } else if ((currentOrb > oldOrb) && (oldOrb <= 1)) {
+                } else if (currentOrb > oldOrb && oldOrb <= 1) {
                   events.push({
                     type: 'aspect-separating',
                     transitPlanet,
@@ -451,12 +525,15 @@ class ChartSyncService extends TypedEventEmitter {
                     aspectType: this.getAspectType(aspectAngle),
                     orb: currentOrb,
                     exactDate: new Date(), // Just passed
-                    strength: this.getAspectStrengthFromOrb(currentOrb)
+                    strength: this.getAspectStrengthFromOrb(currentOrb),
                   });
                 }
               } catch (error) {
-                Logger.error(`Failed to process aspect: ${transitPlanet} to ${natalPlanet} at ${aspectAngle}°`, error instanceof Error ? error : undefined);
-                return; // Skip this aspect calculation 
+                Logger.error(
+                  `Failed to process aspect: ${transitPlanet} to ${natalPlanet} at ${aspectAngle}°`,
+                  error instanceof Error ? error : undefined
+                );
+                return; // Skip this aspect calculation
               }
             }
           }
@@ -472,12 +549,19 @@ class ChartSyncService extends TypedEventEmitter {
     aspectAngle: number
   ): 'major' | 'minor' {
     // Major aspects involving luminaries or personal planets are considered major
-    const majorPlanets: PlanetName[] = ['sun', 'moon', 'mercury', 'venus', 'mars'];
+    const majorPlanets: PlanetName[] = [
+      'sun',
+      'moon',
+      'mercury',
+      'venus',
+      'mars',
+    ];
     const majorAspects = [0, 90, 120, 180]; // conjunction, square, trine, opposition
 
     if (
       majorAspects.includes(aspectAngle) &&
-      (majorPlanets.includes(transitPlanet) || majorPlanets.includes(natalPlanet))
+      (majorPlanets.includes(transitPlanet) ||
+        majorPlanets.includes(natalPlanet))
     ) {
       return 'major';
     }
@@ -487,17 +571,21 @@ class ChartSyncService extends TypedEventEmitter {
   /**
    * Calculate when an aspect will be exact
    */
-  private calculateExactAspectDate(transit: Planet, natal: Planet, aspectAngle: number): Date {
+  private calculateExactAspectDate(
+    transit: Planet,
+    natal: Planet,
+    aspectAngle: number
+  ): Date {
     // Simplified calculation - in production, use more accurate ephemeris math
     const speed = typeof transit.speed === 'number' ? transit.speed : 1; // degrees per day
     const currentAngle = Math.abs(transit.position - natal.position) % 360;
     const targetAngle = aspectAngle;
     const angleDifference = Math.abs(currentAngle - targetAngle);
-    
+
     const daysToExact = angleDifference / Math.abs(speed);
     const exactDate = new Date();
     exactDate.setDate(exactDate.getDate() + daysToExact);
-    
+
     return exactDate;
   }
 
@@ -511,9 +599,9 @@ class ChartSyncService extends TypedEventEmitter {
       90: 'square',
       120: 'trine',
       150: 'quincunx',
-      180: 'opposition'
+      180: 'opposition',
     };
-    
+
     const aspectType = aspectMap[angle];
     if (aspectType === null || aspectType === undefined) {
       throw new Error(`Invalid aspect angle: ${angle}`);
@@ -537,7 +625,7 @@ class ChartSyncService extends TypedEventEmitter {
     if (isValidChartData(data)) {
       return data;
     }
-    
+
     throw new Error('Invalid chart data format');
   }
 
@@ -546,29 +634,43 @@ class ChartSyncService extends TypedEventEmitter {
    */
   private createEmptyTransitData(): Record<PlanetName, Planet> {
     const planetNames: PlanetName[] = [
-      'sun', 'moon', 'mercury', 'venus', 'mars',
-      'jupiter', 'saturn', 'uranus', 'neptune',
-      'pluto', 'chiron', 'north_node', 'south_node'
+      'sun',
+      'moon',
+      'mercury',
+      'venus',
+      'mars',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+      'pluto',
+      'chiron',
+      'north_node',
+      'south_node',
     ];
 
-    return planetNames.reduce((acc, name) => {
-      acc[name] = {
-        name,
-        position: 0,
-        sign: 'aries', // Default
-        house: 1,
-        retrograde: false,
-        speed: 0
-      };
-      return acc;
-    }, {} as Record<PlanetName, Planet>);
+    return planetNames.reduce(
+      (acc, name) => {
+        acc[name] = {
+          name,
+          position: 0,
+          sign: 'aries', // Default
+          house: 1,
+          retrograde: false,
+          speed: 0,
+        };
+        return acc;
+      },
+      {} as Record<PlanetName, Planet>
+    );
   }
 
   /**
    * Extract birth data from chart (reverse transformation)
    * @param _chartData Chart data to extract birth data from (currently unused)
    */
-  private getBirthDataFromChart(_chartData: ChartData): ChartBirthData { // TODO: derive from metadata when available
+  private getBirthDataFromChart(_chartData: ChartData): ChartBirthData {
+    // TODO: derive from metadata when available
     // This would extract birth data from chart metadata
     // For now, return a placeholder
     return {
@@ -580,7 +682,7 @@ class ChartSyncService extends TypedEventEmitter {
       lat: 0,
       lon: 0,
       timezone: 'UTC',
-      city: 'Unknown'
+      city: 'Unknown',
     };
   }
 
@@ -590,17 +692,20 @@ class ChartSyncService extends TypedEventEmitter {
   private async processPendingUpdates(): Promise<void> {
     if (this.isOnline === false) return;
 
-  for (const [chartId] of this.pendingUpdates.entries()) {
+    for (const [chartId] of this.pendingUpdates.entries()) {
       // _pendingDate is currently unused but may be used in the future for prioritization
       try {
         await this.updateChart(chartId, {
           enableTransitUpdates: true,
           enableProgressions: true,
-          aspectAlerts: true
+          aspectAlerts: true,
         });
         this.pendingUpdates.delete(chartId);
       } catch (error) {
-  Logger.error(`Failed to process pending update for chart ${chartId}`, error instanceof Error ? error : undefined);
+        Logger.error(
+          `Failed to process pending update for chart ${chartId}`,
+          error instanceof Error ? error : undefined
+        );
       }
     }
   }
@@ -622,11 +727,11 @@ class ChartSyncService extends TypedEventEmitter {
       const chartId = toChartId(
         `chart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       );
-      
+
       if (!isValidChartData(chartData)) {
         throw new Error('Invalid chart data');
       }
-      
+
       // Create a ChartDataSync object
       const chartSync: ChartDataSync = {
         birthData: {
@@ -638,7 +743,7 @@ class ChartSyncService extends TypedEventEmitter {
           lat: chartData.latitude || 0,
           lon: chartData.longitude || 0,
           timezone: chartData.timezone || 'UTC',
-          city: 'Unknown'
+          city: 'Unknown',
         },
         currentData: chartData,
         lastUpdate: new Date(),
@@ -648,20 +753,22 @@ class ChartSyncService extends TypedEventEmitter {
           updateInterval: 5,
           transitTracking: false,
           aspectAlerts: false,
-          progressionTracking: false
-        }
+          progressionTracking: false,
+        },
       };
 
       // Store in memory
       this.charts.set(chartId, chartSync);
-      
+
       this.emit('chart-synced', { chartId, chartData: chartSync });
-      
+
       Logger.info(`Chart synced successfully with ID: ${chartId}`);
       return chartId;
-      
     } catch (error) {
-  Logger.error('Failed to sync chart', error instanceof Error ? error : undefined);
+      Logger.error(
+        'Failed to sync chart',
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -683,7 +790,7 @@ class ChartSyncService extends TypedEventEmitter {
       clearInterval(interval);
       this.syncIntervals.delete(chartId);
     }
-    
+
     this.charts.delete(chartId);
     this.pendingUpdates.delete(chartId);
     this.emit('chart-unregistered', { chartId });
@@ -697,10 +804,10 @@ class ChartSyncService extends TypedEventEmitter {
       this.updateChart(chartId, {
         enableTransitUpdates: true,
         enableProgressions: true,
-        aspectAlerts: true
+        aspectAlerts: true,
       })
     );
-    
+
     await Promise.allSettled(promises);
     this.emit('all-charts-refreshed', undefined);
   }
@@ -724,10 +831,13 @@ class ChartSyncService extends TypedEventEmitter {
    * Clean up resources
    */
   destroy(): void {
-    if (this.transitUpdateInterval !== null && this.transitUpdateInterval !== undefined) {
+    if (
+      this.transitUpdateInterval !== null &&
+      this.transitUpdateInterval !== undefined
+    ) {
       clearInterval(this.transitUpdateInterval);
     }
-    
+
     this.syncIntervals.forEach(interval => clearInterval(interval));
     this.syncIntervals.clear();
     this.charts.clear();

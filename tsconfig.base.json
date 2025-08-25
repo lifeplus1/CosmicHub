@@ -12,7 +12,7 @@
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-  "noUncheckedIndexedAccess": true,
+    "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false,
@@ -23,8 +23,8 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
-  "noUnusedLocals": true,
-  "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "removeComments": false,
     "sourceMap": true,
     "noEmit": true,
@@ -33,20 +33,28 @@
     "types": ["react", "react-dom", "node"],
     "baseUrl": ".",
     "paths": {
-  "@cosmichub/auth": ["packages/auth/src"],
-  "@cosmichub/ui": ["packages/ui/dist"],
+      "@cosmichub/auth": ["packages/auth/src"],
+      "@cosmichub/ui": ["packages/ui/dist"],
       "@cosmichub/frequency": ["packages/frequency/src"],
       "@cosmichub/integrations": ["packages/integrations/src"],
       "@cosmichub/types": ["packages/types/src"],
-  "@cosmichub/subscriptions": ["packages/subscriptions/src"],
-  "@cosmichub/*": ["packages/*/src"],
-  "@cosmichub/config/*": ["packages/config/src/*"],
-  "@cosmichub/config/enhanced-testing": ["packages/config/src/enhanced-testing.tsx"],
-  "@cosmichub/config/accessibility-testing": ["packages/config/src/accessibility-testing.tsx"],
-  "@cosmichub/config/component-architecture": ["packages/config/src/component-library.tsx"],
-  "@cosmichub/config/lazy-loading": ["packages/config/src/lazy-loading.tsx"],
-  "@cosmichub/config/performance": ["packages/config/src/performance.ts"],
-  "@cosmichub/config/firebase": ["packages/config/src/firebase.ts"],
+      "@cosmichub/subscriptions": ["packages/subscriptions/src"],
+      "@cosmichub/*": ["packages/*/src"],
+      "@cosmichub/config/*": ["packages/config/src/*"],
+      "@cosmichub/config/enhanced-testing": [
+        "packages/config/src/enhanced-testing.tsx"
+      ],
+      "@cosmichub/config/accessibility-testing": [
+        "packages/config/src/accessibility-testing.tsx"
+      ],
+      "@cosmichub/config/component-architecture": [
+        "packages/config/src/component-library.tsx"
+      ],
+      "@cosmichub/config/lazy-loading": [
+        "packages/config/src/lazy-loading.tsx"
+      ],
+      "@cosmichub/config/performance": ["packages/config/src/performance.ts"],
+      "@cosmichub/config/firebase": ["packages/config/src/firebase.ts"],
       "@/*": ["./*"],
       "astro/*": ["apps/astro/src/*"],
       "healwave/*": ["apps/healwave/src/*"]

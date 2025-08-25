@@ -29,7 +29,10 @@ const segments = [
   { label: 'HEALWAVE', cmd: 'pnpm run type-check:healwave' },
   // Types package (tests + main)
   { label: 'TYPES:main', cmd: 'tsc -p packages/types/tsconfig.json --noEmit' },
-  { label: 'TYPES:test', cmd: 'tsc -p packages/types/tsconfig.test.json --noEmit' },
+  {
+    label: 'TYPES:test',
+    cmd: 'tsc -p packages/types/tsconfig.test.json --noEmit',
+  },
 ];
 
 for (const { label, cmd } of segments) {
@@ -50,7 +53,9 @@ const totalErrors = errorLines.length;
 
 const fileErrors = {};
 for (const line of errorLines) {
-  const match = line.match(/([^:\s]+\.tsx?|\.ts)\((\d+),(\d+)\)\s*-\s*error\s*TS(\d+):/);
+  const match = line.match(
+    /([^:\s]+\.tsx?|\.ts)\((\d+),(\d+)\)\s*-\s*error\s*TS(\d+):/
+  );
   if (match) {
     const file = match[1];
     fileErrors[file] = (fileErrors[file] || 0) + 1;
@@ -58,16 +63,31 @@ for (const line of errorLines) {
 }
 
 // Derive rudimentary project buckets
-const byProject = { 'apps/astro': 0, 'apps/healwave': 0, 'packages/ui': 0, 'packages/config': 0, 'packages/types': 0 };
+const byProject = {
+  'apps/astro': 0,
+  'apps/healwave': 0,
+  'packages/ui': 0,
+  'packages/config': 0,
+  'packages/types': 0,
+};
 for (const f of Object.keys(fileErrors)) {
   if (f.startsWith('apps/astro')) byProject['apps/astro'] += fileErrors[f];
-  else if (f.startsWith('apps/healwave')) byProject['apps/healwave'] += fileErrors[f];
-  else if (f.startsWith('packages/ui')) byProject['packages/ui'] += fileErrors[f];
-  else if (f.startsWith('packages/config')) byProject['packages/config'] += fileErrors[f];
-  else if (f.startsWith('packages/types')) byProject['packages/types'] += fileErrors[f];
+  else if (f.startsWith('apps/healwave'))
+    byProject['apps/healwave'] += fileErrors[f];
+  else if (f.startsWith('packages/ui'))
+    byProject['packages/ui'] += fileErrors[f];
+  else if (f.startsWith('packages/config'))
+    byProject['packages/config'] += fileErrors[f];
+  else if (f.startsWith('packages/types'))
+    byProject['packages/types'] += fileErrors[f];
 }
 
-const current = { totalErrors, fileErrors, byProject, generatedAt: new Date().toISOString() };
+const current = {
+  totalErrors,
+  fileErrors,
+  byProject,
+  generatedAt: new Date().toISOString(),
+};
 ensureDir(CURRENT_PATH);
 writeFileSync(CURRENT_PATH, JSON.stringify(current, null, 2));
 
@@ -79,8 +99,12 @@ if (existsSync(BASELINE_PATH)) {
 const shouldUpdate = process.env.TYPE_RATCHET_UPDATE === '1';
 
 if (totalErrors > baseline.totalErrors && !shouldUpdate) {
-  console.error(`❌ Type errors increased from ${baseline.totalErrors} to ${totalErrors}`);
-  console.error('Run with TYPE_RATCHET_UPDATE=1 pnpm run type-check:ratchet to refresh baseline intentionally.');
+  console.error(
+    `❌ Type errors increased from ${baseline.totalErrors} to ${totalErrors}`
+  );
+  console.error(
+    'Run with TYPE_RATCHET_UPDATE=1 pnpm run type-check:ratchet to refresh baseline intentionally.'
+  );
   process.exit(1);
 }
 

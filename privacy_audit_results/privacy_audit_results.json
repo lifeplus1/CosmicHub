@@ -27,10 +27,7 @@
       "k_anonymity": 5,
       "l_diversity": 2.0,
       "uniqueness_ratio": 1.0,
-      "vulnerable_attributes": [
-        "birth_location",
-        "birth_time"
-      ],
+      "vulnerable_attributes": ["birth_location", "birth_time"],
       "confidence_score": 60.0
     },
     "user_profiles": {
@@ -126,9 +123,7 @@
   },
   "anonymization_evaluation": {
     "minimal": {
-      "techniques_applied": [
-        "pseudonymization"
-      ],
+      "techniques_applied": ["pseudonymization"],
       "information_loss": 60.0,
       "privacy_guarantee": "Identifiers pseudonymized with SHA-256+salt",
       "anonymized_sample": {
@@ -206,9 +201,7 @@
         "principle": "lawfulness",
         "severity": "HIGH",
         "description": "No clear lawful basis for processing firebase_uid",
-        "affected_data": [
-          "firebase_uid"
-        ],
+        "affected_data": ["firebase_uid"],
         "legal_reference": "GDPR Art. 6",
         "remediation_steps": [
           "Define clear lawful basis for processing",
@@ -220,9 +213,7 @@
         "principle": "lawfulness",
         "severity": "HIGH",
         "description": "No clear lawful basis for processing user_email",
-        "affected_data": [
-          "user_email"
-        ],
+        "affected_data": ["user_email"],
         "legal_reference": "GDPR Art. 6",
         "remediation_steps": [
           "Define clear lawful basis for processing",
@@ -234,9 +225,7 @@
         "principle": "lawfulness",
         "severity": "HIGH",
         "description": "No clear lawful basis for processing stripe_customer_id",
-        "affected_data": [
-          "stripe_customer_id"
-        ],
+        "affected_data": ["stripe_customer_id"],
         "legal_reference": "GDPR Art. 6",
         "remediation_steps": [
           "Define clear lawful basis for processing",
@@ -248,9 +237,7 @@
         "principle": "lawfulness",
         "severity": "HIGH",
         "description": "No clear lawful basis for processing birth_data",
-        "affected_data": [
-          "birth_data"
-        ],
+        "affected_data": ["birth_data"],
         "legal_reference": "GDPR Art. 6",
         "remediation_steps": [
           "Define clear lawful basis for processing",
@@ -262,9 +249,7 @@
         "principle": "lawfulness",
         "severity": "HIGH",
         "description": "No clear lawful basis for processing analytics_events",
-        "affected_data": [
-          "analytics_events"
-        ],
+        "affected_data": ["analytics_events"],
         "legal_reference": "GDPR Art. 6",
         "remediation_steps": [
           "Define clear lawful basis for processing",
@@ -276,9 +261,7 @@
         "principle": "lawfulness",
         "severity": "HIGH",
         "description": "No clear lawful basis for processing rate_limit_counters",
-        "affected_data": [
-          "rate_limit_counters"
-        ],
+        "affected_data": ["rate_limit_counters"],
         "legal_reference": "GDPR Art. 6",
         "remediation_steps": [
           "Define clear lawful basis for processing",
@@ -290,9 +273,7 @@
         "principle": "lawfulness",
         "severity": "HIGH",
         "description": "No clear lawful basis for processing application_logs",
-        "affected_data": [
-          "application_logs"
-        ],
+        "affected_data": ["application_logs"],
         "legal_reference": "GDPR Art. 6",
         "remediation_steps": [
           "Define clear lawful basis for processing",
@@ -304,9 +285,7 @@
         "principle": "accuracy",
         "severity": "MEDIUM",
         "description": "No timestamp tracking for accuracy of firebase_uid",
-        "affected_data": [
-          "firebase_uid"
-        ],
+        "affected_data": ["firebase_uid"],
         "legal_reference": "GDPR Art. 5.1.d",
         "remediation_steps": [
           "Implement data freshness tracking",
@@ -318,9 +297,7 @@
         "principle": "accuracy",
         "severity": "MEDIUM",
         "description": "No timestamp tracking for accuracy of user_email",
-        "affected_data": [
-          "user_email"
-        ],
+        "affected_data": ["user_email"],
         "legal_reference": "GDPR Art. 5.1.d",
         "remediation_steps": [
           "Implement data freshness tracking",
@@ -332,9 +309,7 @@
         "principle": "accuracy",
         "severity": "MEDIUM",
         "description": "No timestamp tracking for accuracy of stripe_customer_id",
-        "affected_data": [
-          "stripe_customer_id"
-        ],
+        "affected_data": ["stripe_customer_id"],
         "legal_reference": "GDPR Art. 5.1.d",
         "remediation_steps": [
           "Implement data freshness tracking",
@@ -346,9 +321,7 @@
         "principle": "accuracy",
         "severity": "MEDIUM",
         "description": "No timestamp tracking for accuracy of birth_data",
-        "affected_data": [
-          "birth_data"
-        ],
+        "affected_data": ["birth_data"],
         "legal_reference": "GDPR Art. 5.1.d",
         "remediation_steps": [
           "Implement data freshness tracking",
@@ -360,9 +333,7 @@
         "principle": "accuracy",
         "severity": "MEDIUM",
         "description": "No timestamp tracking for accuracy of analytics_events",
-        "affected_data": [
-          "analytics_events"
-        ],
+        "affected_data": ["analytics_events"],
         "legal_reference": "GDPR Art. 5.1.d",
         "remediation_steps": [
           "Implement data freshness tracking",
@@ -374,9 +345,7 @@
         "principle": "accuracy",
         "severity": "MEDIUM",
         "description": "No timestamp tracking for accuracy of rate_limit_counters",
-        "affected_data": [
-          "rate_limit_counters"
-        ],
+        "affected_data": ["rate_limit_counters"],
         "legal_reference": "GDPR Art. 5.1.d",
         "remediation_steps": [
           "Implement data freshness tracking",
@@ -388,9 +357,7 @@
         "principle": "accuracy",
         "severity": "MEDIUM",
         "description": "No timestamp tracking for accuracy of application_logs",
-        "affected_data": [
-          "application_logs"
-        ],
+        "affected_data": ["application_logs"],
         "legal_reference": "GDPR Art. 5.1.d",
         "remediation_steps": [
           "Implement data freshness tracking",
@@ -402,9 +369,7 @@
         "principle": "integrity",
         "severity": "HIGH",
         "description": "Sensitive data application_logs not encrypted at rest",
-        "affected_data": [
-          "application_logs"
-        ],
+        "affected_data": ["application_logs"],
         "legal_reference": "GDPR Art. 32",
         "remediation_steps": [
           "Enable encryption at rest",
@@ -416,9 +381,7 @@
         "principle": "accountability",
         "severity": "MEDIUM",
         "description": "Missing documentation: privacy_impact_assessment",
-        "affected_data": [
-          "all"
-        ],
+        "affected_data": ["all"],
         "legal_reference": "GDPR Art. 5.2",
         "remediation_steps": [
           "Create privacy_impact_assessment documentation",
@@ -430,9 +393,7 @@
         "principle": "accountability",
         "severity": "MEDIUM",
         "description": "Missing documentation: consent_records",
-        "affected_data": [
-          "all"
-        ],
+        "affected_data": ["all"],
         "legal_reference": "GDPR Art. 5.2",
         "remediation_steps": [
           "Create consent_records documentation",

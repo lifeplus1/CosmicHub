@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 export default function RootLayout() {
   return (
     <>
-      <StatusBar style="light" backgroundColor="#000014" />
+      <StatusBar style='light' backgroundColor='#000014' />
       <Stack
         screenOptions={{
           headerStyle: {
@@ -16,9 +16,15 @@ export default function RootLayout() {
           },
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'CosmicHub' }} />
-        <Stack.Screen name="astrology" options={{ title: 'Astrology Charts' }} />
-        <Stack.Screen name="healwave" options={{ title: 'Healing Frequencies' }} />
+        <Stack.Screen name='index' options={{ title: 'CosmicHub' }} />
+        <Stack.Screen
+          name='astrology'
+          options={{ title: 'Astrology Charts' }}
+        />
+        <Stack.Screen
+          name='healwave'
+          options={{ title: 'Healing Frequencies' }}
+        />
       </Stack>
     </>
   );

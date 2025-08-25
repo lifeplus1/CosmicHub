@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { toUnifiedBirthData, parseTextBirthData, type UnifiedBirthData, type TextBirthData } from '@cosmichub/types';
+import {
+  toUnifiedBirthData,
+  parseTextBirthData,
+  type UnifiedBirthData,
+  type TextBirthData,
+} from '@cosmichub/types';
 
 describe('Birth Data Converters', () => {
   it('converts UnifiedBirthData through toUnifiedBirthData unchanged', () => {
@@ -12,7 +17,7 @@ describe('Birth Data Converters', () => {
       city: 'London',
       lat: 51.5074,
       lon: -0.1278,
-      timezone: 'Europe/London'
+      timezone: 'Europe/London',
     };
     expect(toUnifiedBirthData(unified)).toEqual(unified);
   });
@@ -22,9 +27,9 @@ describe('Birth Data Converters', () => {
       birth_date: '1990-06-21',
       birth_time: '14:30:00',
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       timezone: 'America/New_York',
-      city: 'New York'
+      city: 'New York',
     };
     const parsed = parseTextBirthData(text);
     expect(parsed).toMatchObject({
@@ -36,7 +41,7 @@ describe('Birth Data Converters', () => {
       city: 'New York',
       lat: 40.7128,
       lon: -74.006,
-      timezone: 'America/New_York'
+      timezone: 'America/New_York',
     });
   });
 
@@ -44,10 +49,17 @@ describe('Birth Data Converters', () => {
     const text: TextBirthData = {
       birth_date: '2000-01-01',
       birth_time: '00:00:00',
-      city: 'Testville'
+      city: 'Testville',
     };
     const unified = toUnifiedBirthData(text);
-    expect(unified).toMatchObject({ year: 2000, month: 1, day: 1, hour: 0, minute: 0, city: 'Testville' });
+    expect(unified).toMatchObject({
+      year: 2000,
+      month: 1,
+      day: 1,
+      hour: 0,
+      minute: 0,
+      city: 'Testville',
+    });
   });
 
   it('throws on unsupported shape', () => {

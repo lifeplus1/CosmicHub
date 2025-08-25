@@ -1,12 +1,14 @@
 # 🧪 Experiment Registry Schema Validator (EXP-010)
 
 > **Status**: ✅ **COMPLETE**  
-> **Implementation**: Full schema validation system with TypeScript types, JSON schema, and CLI validation tools  
+> **Implementation**: Full schema validation system with TypeScript types, JSON schema, and CLI
+> validation tools  
 > **Test Coverage**: 20 passing tests covering all validation scenarios
 
 ## 📋 **Overview**
 
-The Experiment Registry Schema Validator provides a comprehensive validation system for user experiments and configurations in CosmicHub. This implementation includes:
+The Experiment Registry Schema Validator provides a comprehensive validation system for user
+experiments and configurations in CosmicHub. This implementation includes:
 
 - ✅ **Runtime Validation**: TypeScript/Zod-based validation with detailed error messages
 - ✅ **JSON Schema**: Standards-compliant schema for external validation
@@ -96,7 +98,8 @@ node scripts/validate-experiments.mjs path/to/experiments/
 
 ### **3. JSON Schema Validation**
 
-The JSON schema at `schema/experiment-registry.schema.json` can be used with any JSON Schema validator:
+The JSON schema at `schema/experiment-registry.schema.json` can be used with any JSON Schema
+validator:
 
 ```javascript
 import Ajv from 'ajv';
@@ -153,7 +156,7 @@ const v2Experiment = ExperimentMigration.migrateV1toV2(v1ExperimentData);
 ### **Migration Path: V1 → V2**
 
 - **Added**: `config` field with statistical parameters
-- **Added**: `secondary` metrics array  
+- **Added**: `secondary` metrics array
 - **Added**: `tags` for categorization
 - **Default Values**: Statistical power (0.8), significance level (0.05)
 
@@ -199,7 +202,7 @@ cd packages/types
 npm test -- experiments
 
 ✓ Basic Schema Validation (4 tests)
-✓ Validation Functions (4 tests) 
+✓ Validation Functions (4 tests)
 ✓ Business Rules Validation (3 tests)
 ✓ Utility Functions (4 tests)
 ✓ Migration (2 tests)
@@ -240,7 +243,7 @@ npm test -- experiments
     },
     {
       "id": "detailed",
-      "name": "Detailed Interpretations", 
+      "name": "Detailed Interpretations",
       "traffic_percentage": 50,
       "config": {
         "max_interpretation_length": 1500,
@@ -285,7 +288,7 @@ const handleExperimentChange = (experiment: Partial<ExperimentRegistry>) => {
   setValidationState({
     isValid: result.success,
     errors: result.success ? {} : formatValidationErrors(result),
-    warnings: result.success ? (result.warnings || []) : [],
+    warnings: result.success ? result.warnings || [] : [],
     isValidating: false,
   });
 };
@@ -312,7 +315,7 @@ except jsonschema.ValidationError as e:
 // Validate before saving to Firestore
 const saveExperiment = async (experiment: unknown) => {
   const result = validateExperiment(experiment);
-  
+
   if (!result.success) {
     throw new Error(`Invalid experiment: ${result.error.message}`);
   }
@@ -384,4 +387,5 @@ cd packages/types && npm run build
 node -e "console.log(require('./schema/experiment-registry.schema.json'))"
 ```
 
-**Status**: ✅ **EXP-010 Implementation Complete** - Full experiment registry schema validation system operational with comprehensive testing and documentation.
+**Status**: ✅ **EXP-010 Implementation Complete** - Full experiment registry schema validation
+system operational with comprehensive testing and documentation.

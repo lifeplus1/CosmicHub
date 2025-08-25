@@ -4,7 +4,9 @@ import { vi } from 'vitest';
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 // Mock Web Audio API for testing
-(globalThis as typeof globalThis & { AudioContext: typeof AudioContext }).AudioContext = vi.fn().mockImplementation(() => ({
+(
+  globalThis as typeof globalThis & { AudioContext: typeof AudioContext }
+).AudioContext = vi.fn().mockImplementation(() => ({
   createOscillator: vi.fn(() => ({
     frequency: { setValueAtTime: vi.fn() },
     type: 'sine',
@@ -14,7 +16,7 @@ import { vi } from 'vitest';
     disconnect: vi.fn(),
   })),
   createGain: vi.fn(() => ({
-    gain: { 
+    gain: {
       setValueAtTime: vi.fn(),
       linearRampToValueAtTime: vi.fn(),
       exponentialRampToValueAtTime: vi.fn(),
@@ -44,14 +46,20 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock ResizeObserver
-(globalThis as typeof globalThis & { ResizeObserver: typeof ResizeObserver }).ResizeObserver = vi.fn().mockImplementation(() => ({
+(
+  globalThis as typeof globalThis & { ResizeObserver: typeof ResizeObserver }
+).ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
 
 // Mock IntersectionObserver
-(globalThis as typeof globalThis & { IntersectionObserver: typeof IntersectionObserver }).IntersectionObserver = vi.fn().mockImplementation(() => ({
+(
+  globalThis as typeof globalThis & {
+    IntersectionObserver: typeof IntersectionObserver;
+  }
+).IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),

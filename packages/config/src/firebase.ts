@@ -7,7 +7,13 @@
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, Auth } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator, Firestore, enableNetwork, disableNetwork } from 'firebase/firestore';
+import {
+  getFirestore,
+  connectFirestoreEmulator,
+  Firestore,
+  enableNetwork,
+  disableNetwork,
+} from 'firebase/firestore';
 
 // Firebase config with environment validation
 // Environment access - compatible with both Vite and Node environments
@@ -24,10 +30,12 @@ const env = {
   VITE_FIREBASE_AUTH_DOMAIN: getEnvValue('VITE_FIREBASE_AUTH_DOMAIN'),
   VITE_FIREBASE_PROJECT_ID: getEnvValue('VITE_FIREBASE_PROJECT_ID'),
   VITE_FIREBASE_STORAGE_BUCKET: getEnvValue('VITE_FIREBASE_STORAGE_BUCKET'),
-  VITE_FIREBASE_MESSAGING_SENDER_ID: getEnvValue('VITE_FIREBASE_MESSAGING_SENDER_ID'),
+  VITE_FIREBASE_MESSAGING_SENDER_ID: getEnvValue(
+    'VITE_FIREBASE_MESSAGING_SENDER_ID'
+  ),
   VITE_FIREBASE_APP_ID: getEnvValue('VITE_FIREBASE_APP_ID'),
   VITE_USE_EMULATOR: getEnvValue('VITE_USE_EMULATOR'),
-  DEV: getEnvValue('NODE_ENV') !== 'production'
+  DEV: getEnvValue('NODE_ENV') !== 'production',
 };
 
 // Validate required config
@@ -36,7 +44,11 @@ interface MinimalViteEnv {
   VITE_FIREBASE_PROJECT_ID?: string;
   VITE_FIREBASE_APP_ID?: string;
 }
-const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_PROJECT_ID', 'VITE_FIREBASE_APP_ID'] as const;
+const requiredEnvVars = [
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_APP_ID',
+] as const;
 const envRef = env as unknown as MinimalViteEnv;
 
 const firebaseConfig = {
@@ -52,16 +64,18 @@ const firebaseConfig = {
 const devConsole = {
   log: env.DEV ? console.log.bind(console) : undefined,
   warn: env.DEV ? console.warn.bind(console) : undefined,
-  error: console.error.bind(console)
+  error: console.error.bind(console),
 };
 
-const missingVars = requiredEnvVars.filter((varName) => {
+const missingVars = requiredEnvVars.filter(varName => {
   const value = envRef[varName];
   return value === undefined || value === null || value === '';
 });
 
 if (missingVars.length > 0) {
-  devConsole.warn?.(`Missing required Firebase environment variables: ${missingVars.join(', ')}. Using mock auth.`);
+  devConsole.warn?.(
+    `Missing required Firebase environment variables: ${missingVars.join(', ')}. Using mock auth.`
+  );
 }
 
 //Initialize Firebase app (singleton pattern)
@@ -72,7 +86,11 @@ let hasAuthAvailable = false;
 
 // Type guard for Firestore instance presence
 const hasFirestoreApp = (instance: unknown): instance is Firestore => {
-  return typeof instance === 'object' && instance !== null && 'app' in (instance as Record<string, unknown>);
+  return (
+    typeof instance === 'object' &&
+    instance !== null &&
+    'app' in (instance as Record<string, unknown>)
+  );
 };
 
 try {
@@ -83,25 +101,30 @@ try {
   } else {
     app = initializeApp(firebaseConfig as Record<string, string>);
   }
-  
+
   // Initialize services with error handling
   try {
     auth = getAuth(app);
     hasAuthAvailable = true;
   } catch (authError) {
-    devConsole.warn?.('Firebase Auth initialization failed, using fallback:', authError);
+    devConsole.warn?.(
+      'Firebase Auth initialization failed, using fallback:',
+      authError
+    );
     // Create a proxy that warns instead of throwing
     /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
     auth = new Proxy({} as unknown as Auth, {
       get() {
-        devConsole.warn?.('Firebase Auth not available - using mock auth instead');
+        devConsole.warn?.(
+          'Firebase Auth not available - using mock auth instead'
+        );
         return undefined as unknown as never;
-      }
+      },
     }) as Auth;
     /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
     hasAuthAvailable = false;
   }
-  
+
   try {
     db = getFirestore(app);
   } catch (dbError) {
@@ -112,7 +135,7 @@ try {
       get() {
         devConsole.warn?.('Firestore not available');
         return undefined as unknown as never;
-      }
+      },
     }) as Firestore;
     /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
   }
@@ -124,26 +147,32 @@ try {
 
     try {
       if (!authEmulatorConnected && hasAuthAvailable) {
-        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+        connectAuthEmulator(auth, 'http://localhost:9099', {
+          disableWarnings: true,
+        });
         authEmulatorConnected = true;
-  devConsole.log?.('🔥 Firebase Auth emulator connected - development mode');
+        devConsole.log?.(
+          '🔥 Firebase Auth emulator connected - development mode'
+        );
       }
     } catch {
       devConsole.log?.('Auth emulator already connected or unavailable');
     }
 
     try {
-  if (!firestoreEmulatorConnected && hasFirestoreApp(db)) {
+      if (!firestoreEmulatorConnected && hasFirestoreApp(db)) {
         connectFirestoreEmulator(db, 'localhost', 8080);
         firestoreEmulatorConnected = true;
-  devConsole.log?.('🔥 Firestore emulator connected - development mode');
+        devConsole.log?.('🔥 Firestore emulator connected - development mode');
       }
     } catch {
       devConsole.log?.('Firestore emulator already connected or unavailable');
     }
   }
 
-  devConsole.log?.(`🔥 Firebase initialized for project: ${firebaseConfig.projectId}`);
+  devConsole.log?.(
+    `🔥 Firebase initialized for project: ${firebaseConfig.projectId}`
+  );
 } catch (error) {
   devConsole.error('Firebase initialization failed:', error);
   throw error;
@@ -154,7 +183,7 @@ try {
  */
 export const enableFirestoreNetwork = async (): Promise<void> => {
   try {
-  if (hasFirestoreApp(db)) {
+    if (hasFirestoreApp(db)) {
       await enableNetwork(db);
       devConsole.log?.('📡 Firestore network enabled');
     } else {
@@ -167,7 +196,7 @@ export const enableFirestoreNetwork = async (): Promise<void> => {
 
 export const disableFirestoreNetwork = async (): Promise<void> => {
   try {
-  if (hasFirestoreApp(db)) {
+    if (hasFirestoreApp(db)) {
       await disableNetwork(db);
       devConsole.log?.('📡 Firestore network disabled');
     } else {
@@ -199,5 +228,5 @@ export const getFirebasePerformanceInfo = () => ({
   authDomain: firebaseConfig.authDomain,
   isEmulator,
   isDevelopment,
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });

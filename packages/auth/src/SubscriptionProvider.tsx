@@ -1,13 +1,27 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import { useAuth } from './index';
 // Local lightweight logger (avoids depending on config devConsole if not exported)
 const safeLogger = {
-  error: (...args: unknown[]) => { void args.length; },
-  warn: (...args: unknown[]) => { void args.length; }
+  error: (...args: unknown[]) => {
+    void args.length;
+  },
+  warn: (...args: unknown[]) => {
+    void args.length;
+  },
 };
 
 // Re-export types from integrations package
-export type { UserSubscription, SubscriptionPlan } from '@cosmichub/integrations';
+export type {
+  UserSubscription,
+  SubscriptionPlan,
+} from '@cosmichub/integrations';
 
 // Basic shape we rely on from integrations package. (Kept intentionally minimal)
 export interface BasicSubscription {
@@ -20,7 +34,10 @@ export interface BasicSubscription {
 interface SubscriptionManagerLike {
   loadUserSubscription: (user: unknown) => Promise<void>;
   getCurrentSubscription: () => BasicSubscription | null | undefined;
-  checkFeatureAccess: (feature: string, app: 'astro' | 'healwave') => { canAccess: boolean };
+  checkFeatureAccess: (
+    feature: string,
+    app: 'astro' | 'healwave'
+  ) => { canAccess: boolean };
 }
 
 export interface SubscriptionState {
@@ -31,12 +48,18 @@ export interface SubscriptionState {
   hasFeature: (feature: string, app?: 'astro' | 'healwave') => boolean;
   upgradeRequired: (feature: string) => void;
   refreshSubscription: () => Promise<void>;
-  checkUsageLimit?: (limitType: string) => { allowed: boolean; current: number; limit: number };
+  checkUsageLimit?: (limitType: string) => {
+    allowed: boolean;
+    current: number;
+    limit: number;
+  };
 }
 
 type SubscriptionContextType = SubscriptionState;
 
-const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
+const SubscriptionContext = createContext<SubscriptionContextType | undefined>(
+  undefined
+);
 
 interface SubscriptionProviderProps {
   children: ReactNode;
@@ -45,18 +68,21 @@ interface SubscriptionProviderProps {
 
 export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   children,
-  appType
+  appType,
 }) => {
   const { user } = useAuth();
-  const [subscription, setSubscription] = useState<BasicSubscription | null>(null);
+  const [subscription, setSubscription] = useState<BasicSubscription | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [usageData, setUsageData] = useState({
     chartsThisMonth: 0,
-    savedCharts: 0
+    savedCharts: 0,
   });
 
   // Use integrations package for subscription management (runtime loaded)
-  const [subscriptionManager, setSubscriptionManager] = React.useState<SubscriptionManagerLike | null>(null);
+  const [subscriptionManager, setSubscriptionManager] =
+    React.useState<SubscriptionManagerLike | null>(null);
 
   // Lazy-load subscription manager from integrations package; avoid holding on to stale ref
   React.useEffect(() => {
@@ -65,30 +91,39 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       try {
         const mod = await import('@cosmichub/integrations');
         if (!cancelled) {
-          const candidate = (mod as Record<string, unknown>).subscriptionManager ?? (mod as Record<string, unknown>).default;
+          const candidate =
+            (mod as Record<string, unknown>).subscriptionManager ??
+            (mod as Record<string, unknown>).default;
           if (isSubscriptionManager(candidate)) {
             setSubscriptionManager(candidate);
           } else {
-            safeLogger.error('Loaded subscription manager does not match expected interface');
+            safeLogger.error(
+              'Loaded subscription manager does not match expected interface'
+            );
           }
         }
       } catch (e) {
-  safeLogger.error('Failed to load subscription manager', e);
+        safeLogger.error('Failed to load subscription manager', e);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const refreshSubscription = useCallback(async () => {
-  if (user === null || user === undefined) {
+    if (user === null || user === undefined) {
       setSubscription(null);
       setIsLoading(false);
       return;
     }
     setIsLoading(true);
     try {
-  if (subscriptionManager === null) return; // still loading
-  const email: string = typeof (user as { email?: unknown }).email === 'string' ? (user as { email: string }).email : '';
+      if (subscriptionManager === null) return; // still loading
+      const email: string =
+        typeof (user as { email?: unknown }).email === 'string'
+          ? (user as { email: string }).email
+          : '';
       if (email.includes('test')) {
         const mockData = getMockSubscription(email, appType);
         setSubscription(normalizeSubscription(mockData.subscription));
@@ -104,11 +139,11 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       }
       if (appType === 'astro') {
         const usageResponse = await fetch('/api/astro/usage', {
-          headers: { Authorization: `Bearer ${await user.getIdToken()}` }
+          headers: { Authorization: `Bearer ${await user.getIdToken()}` },
         });
         if (usageResponse.ok) {
           const usage: unknown = await usageResponse.json();
-            if (isAstroUsage(usage)) setUsageData(usage);
+          if (isAstroUsage(usage)) setUsageData(usage);
         }
       }
     } catch (error) {
@@ -119,54 +154,68 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     }
   }, [user, subscriptionManager, appType]);
 
-  const hasFeature = useCallback((feature: string, app?: 'astro' | 'healwave'): boolean => {
-  if (subscriptionManager === null) return false;
-  const targetApp: 'astro' | 'healwave' = app ?? appType;
-  const accessResult = subscriptionManager.checkFeatureAccess(feature, targetApp);
-  return accessResult?.canAccess === true;
-  }, [subscriptionManager, appType]);
+  const hasFeature = useCallback(
+    (feature: string, app?: 'astro' | 'healwave'): boolean => {
+      if (subscriptionManager === null) return false;
+      const targetApp: 'astro' | 'healwave' = app ?? appType;
+      const accessResult = subscriptionManager.checkFeatureAccess(
+        feature,
+        targetApp
+      );
+      return accessResult?.canAccess === true;
+    },
+    [subscriptionManager, appType]
+  );
 
-  const upgradeRequired = useCallback((feature: string) => {
-    // App-specific upgrade handling
-    if (appType === 'astro') {
-      // Use astro's upgrade modal system - try multiple possible paths
-      const tryImportUpgradeEvents = async () => {
-        const possiblePaths = [
-          '../../../apps/astro/src/utils/upgradeEvents',
-          '../../apps/astro/src/utils/upgradeEvents'
-        ];
-        
-        for (const path of possiblePaths) {
-          try {
-            const mod: unknown = await import(/* @vite-ignore */ path);
-            const manager = (mod as Record<string, unknown>).upgradeEventManager as { triggerUpgradeRequired?: (f: string) => void } | undefined;
-            if (typeof manager?.triggerUpgradeRequired === 'function') {
-              manager.triggerUpgradeRequired(feature);
+  const upgradeRequired = useCallback(
+    (feature: string) => {
+      // App-specific upgrade handling
+      if (appType === 'astro') {
+        // Use astro's upgrade modal system - try multiple possible paths
+        const tryImportUpgradeEvents = async () => {
+          const possiblePaths = [
+            '../../../apps/astro/src/utils/upgradeEvents',
+            '../../apps/astro/src/utils/upgradeEvents',
+          ];
+
+          for (const path of possiblePaths) {
+            try {
+              const mod: unknown = await import(/* @vite-ignore */ path);
+              const manager = (mod as Record<string, unknown>)
+                .upgradeEventManager as
+                | { triggerUpgradeRequired?: (f: string) => void }
+                | undefined;
+              if (typeof manager?.triggerUpgradeRequired === 'function') {
+                manager.triggerUpgradeRequired(feature);
+              }
+              return;
+            } catch {
+              // Continue to next path
             }
-            return;
-          } catch {
-            // Continue to next path
           }
-        }
-        
-        // Fallback to custom event if direct import fails
-        const event = new CustomEvent('showUpgradeModal', { 
-          detail: { feature, requiredTier: 'premium' } 
+
+          // Fallback to custom event if direct import fails
+          const event = new CustomEvent('showUpgradeModal', {
+            detail: { feature, requiredTier: 'premium' },
+          });
+          window.dispatchEvent(event);
+        };
+
+        tryImportUpgradeEvents().catch(() => {
+          safeLogger.warn(
+            'Upgrade events module not available, using fallback'
+          );
+        });
+      } else {
+        // Use healwave's upgrade modal system
+        const event = new CustomEvent('showUpgradeModal', {
+          detail: { feature, requiredTier: 'pro' },
         });
         window.dispatchEvent(event);
-      };
-      
-      tryImportUpgradeEvents().catch(() => {
-  safeLogger.warn('Upgrade events module not available, using fallback');
-      });
-    } else {
-      // Use healwave's upgrade modal system
-      const event = new CustomEvent('showUpgradeModal', { 
-        detail: { feature, requiredTier: 'pro' } 
-      });
-      window.dispatchEvent(event);
-    }
-  }, [appType]);
+      }
+    },
+    [appType]
+  );
 
   const checkUsageLimit = (limitType: string) => {
     if (appType !== 'astro') {
@@ -176,13 +225,16 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
     const limits = {
       chartsPerMonth: subscription?.tier === 'free' ? 3 : -1,
-      chartStorage: subscription?.tier === 'free' ? 5 : -1
+      chartStorage: subscription?.tier === 'free' ? 5 : -1,
     };
-    
+
     const limit = limits[limitType as keyof typeof limits];
     if (limit === -1) return { allowed: true, current: 0, limit: 0 };
-    
-    const current = limitType === 'chartsPerMonth' ? usageData.chartsThisMonth : usageData.savedCharts;
+
+    const current =
+      limitType === 'chartsPerMonth'
+        ? usageData.chartsThisMonth
+        : usageData.savedCharts;
     return { allowed: current < limit, current, limit };
   };
 
@@ -193,13 +245,13 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
   const value: SubscriptionContextType = {
     subscription,
-  userTier: subscription?.tier ?? 'free',
-  tier: subscription?.tier ?? 'free', // Alias for backwards compatibility
-  isLoading: isLoading === true || subscriptionManager === null,
+    userTier: subscription?.tier ?? 'free',
+    tier: subscription?.tier ?? 'free', // Alias for backwards compatibility
+    isLoading: isLoading === true || subscriptionManager === null,
     hasFeature,
     upgradeRequired,
     refreshSubscription,
-    ...(appType === 'astro' && { checkUsageLimit })
+    ...(appType === 'astro' && { checkUsageLimit }),
   };
 
   return (
@@ -212,36 +264,39 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 export const useSubscription = (): SubscriptionState => {
   const context = useContext(SubscriptionContext);
   if (context === undefined) {
-    throw new Error('useSubscription must be used within a SubscriptionProvider');
+    throw new Error(
+      'useSubscription must be used within a SubscriptionProvider'
+    );
   }
   return context;
 };
 
 // Helper function for mock data
-function getMockSubscription(email: string, _appType: 'astro' | 'healwave') { // appType reserved for future branching
+function getMockSubscription(email: string, _appType: 'astro' | 'healwave') {
+  // appType reserved for future branching
   void _appType; // reference param to avoid unused warning
   const baseData = {
     subscription: {
       status: 'active' as const,
       currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
-    usage: { chartsThisMonth: 0, savedCharts: 0 }
+    usage: { chartsThisMonth: 0, savedCharts: 0 },
   };
 
   if (email === 'free@cosmichub.test') {
     return {
       subscription: { ...baseData.subscription, tier: 'free' },
-      usage: { chartsThisMonth: 2, savedCharts: 1 }
+      usage: { chartsThisMonth: 2, savedCharts: 1 },
     };
   } else if (email === 'premium@cosmichub.test') {
     return {
       subscription: { ...baseData.subscription, tier: 'premium' },
-      usage: { chartsThisMonth: 15, savedCharts: 25 }
+      usage: { chartsThisMonth: 15, savedCharts: 25 },
     };
   } else if (email === 'elite@cosmichub.test') {
     return {
       subscription: { ...baseData.subscription, tier: 'elite' },
-      usage: { chartsThisMonth: 50, savedCharts: 100 }
+      usage: { chartsThisMonth: 50, savedCharts: 100 },
     };
   }
 
@@ -249,12 +304,16 @@ function getMockSubscription(email: string, _appType: 'astro' | 'healwave') { //
 }
 
 // --- Helpers / Type Guards ---
-function isSubscriptionManager(value: unknown): value is SubscriptionManagerLike {
+function isSubscriptionManager(
+  value: unknown
+): value is SubscriptionManagerLike {
   if (value === null || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
-  return typeof v.loadUserSubscription === 'function' &&
+  return (
+    typeof v.loadUserSubscription === 'function' &&
     typeof v.getCurrentSubscription === 'function' &&
-    typeof v.checkFeatureAccess === 'function';
+    typeof v.checkFeatureAccess === 'function'
+  );
 }
 
 function normalizeSubscription(sub: unknown): BasicSubscription | null {
@@ -271,9 +330,14 @@ function normalizeSubscription(sub: unknown): BasicSubscription | null {
   return { tier, status, currentPeriodEnd };
 }
 
-interface AstroUsageShape { chartsThisMonth: number; savedCharts: number }
+interface AstroUsageShape {
+  chartsThisMonth: number;
+  savedCharts: number;
+}
 function isAstroUsage(value: unknown): value is AstroUsageShape {
   if (value === null || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
-  return typeof v.chartsThisMonth === 'number' && typeof v.savedCharts === 'number';
+  return (
+    typeof v.chartsThisMonth === 'number' && typeof v.savedCharts === 'number'
+  );
 }

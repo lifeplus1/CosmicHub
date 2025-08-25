@@ -25,7 +25,8 @@ function validateExperimentsInDirectory(dir) {
     return true;
   }
 
-  const files = fs.readdirSync(dir)
+  const files = fs
+    .readdirSync(dir)
     .filter(file => file.endsWith('.json') && !file.includes('schema'))
     .map(file => path.join(dir, file));
 
@@ -38,14 +39,14 @@ function validateExperimentsInDirectory(dir) {
 
   for (const file of files) {
     console.log(`\nValidating: ${file}`);
-    
+
     try {
       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
       const isValid = validate(data);
 
       if (isValid) {
         console.log(`✅ ${path.basename(file)} - Valid`);
-        
+
         // Additional business rule validations
         const warnings = performBusinessRuleChecks(data);
         if (warnings.length > 0) {
@@ -84,29 +85,43 @@ function performBusinessRuleChecks(experiment) {
   const durationDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
 
   if (durationDays < 7) {
-    warnings.push('Experiment duration is less than 1 week - may not capture weekly patterns');
+    warnings.push(
+      'Experiment duration is less than 1 week - may not capture weekly patterns'
+    );
   } else if (durationDays > 90) {
-    warnings.push('Experiment duration is over 90 days - may be affected by external factors');
+    warnings.push(
+      'Experiment duration is over 90 days - may be affected by external factors'
+    );
   }
 
   // Check for control variant
-  const hasControl = experiment.variants.some(v => 
-    v.id.toLowerCase().includes('control') || 
-    v.id.toLowerCase().includes('baseline')
+  const hasControl = experiment.variants.some(
+    v =>
+      v.id.toLowerCase().includes('control') ||
+      v.id.toLowerCase().includes('baseline')
   );
   if (!hasControl) {
-    warnings.push('No clear control/baseline variant found - consider adding one for comparison');
+    warnings.push(
+      'No clear control/baseline variant found - consider adding one for comparison'
+    );
   }
 
   // Check variant count
   if (experiment.variants.length > 5) {
-    warnings.push(`${experiment.variants.length} variants may be too many for clear results - consider reducing`);
+    warnings.push(
+      `${experiment.variants.length} variants may be too many for clear results - consider reducing`
+    );
   }
 
   // Check traffic allocation balance
-  const totalTraffic = experiment.variants.reduce((sum, v) => sum + v.traffic_percentage, 0);
+  const totalTraffic = experiment.variants.reduce(
+    (sum, v) => sum + v.traffic_percentage,
+    0
+  );
   if (Math.abs(totalTraffic - 100) > 0.01) {
-    warnings.push(`Traffic allocation sums to ${totalTraffic}% instead of 100%`);
+    warnings.push(
+      `Traffic allocation sums to ${totalTraffic}% instead of 100%`
+    );
   }
 
   // Check if experiment is starting in the past
@@ -125,13 +140,16 @@ function main() {
   console.log('==================================');
 
   const args = process.argv.slice(2);
-  const directories = args.length > 0 ? args : [
-    'docs/archive/experiments',
-    'backend/experiments',
-    'apps/astro/experiments',
-    'apps/healwave/experiments',
-    'tests/fixtures/experiments',
-  ];
+  const directories =
+    args.length > 0
+      ? args
+      : [
+          'docs/archive/experiments',
+          'backend/experiments',
+          'apps/astro/experiments',
+          'apps/healwave/experiments',
+          'tests/fixtures/experiments',
+        ];
 
   let allValid = true;
 
@@ -142,7 +160,7 @@ function main() {
   }
 
   console.log('\n' + '='.repeat(50));
-  
+
   if (allValid) {
     console.log('✅ All experiment configurations are valid!');
     process.exit(0);

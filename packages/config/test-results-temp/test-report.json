@@ -67,11 +67,7 @@
   "config": {
     "coverage": {
       "threshold": 80,
-      "exclude": [
-        "node_modules",
-        "dist",
-        "**/*.d.ts"
-      ]
+      "exclude": ["node_modules", "dist", "**/*.d.ts"]
     },
     "performance": {
       "maxRenderTime": 16,

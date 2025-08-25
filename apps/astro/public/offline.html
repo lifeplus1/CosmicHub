@@ -1,200 +1,225 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CosmicHub - Offline</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: linear-gradient(
+          135deg,
+          #1a1a2e 0%,
+          #16213e 50%,
+          #0f172a 100%
+        );
+        color: #e2e8f0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .offline-container {
+        max-width: 500px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 40px 30px;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      }
+
+      .cosmic-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 30px;
+        background: linear-gradient(135deg, #f6ad55, #553c9a);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        animation: cosmicPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes cosmicPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
         }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
+        50% {
+          transform: scale(1.05);
+          opacity: 0.8;
         }
-        
-        .offline-container {
-            max-width: 500px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 40px 30px;
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #f6ad55 0%, #553c9a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #cbd5e1;
+        margin-bottom: 30px;
+      }
+
+      .retry-button {
+        background: linear-gradient(135deg, #553c9a, #f6ad55);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .retry-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(85, 60, 154, 0.3);
+      }
+
+      .features-list {
+        margin-top: 30px;
+        text-align: left;
+      }
+
+      .features-list h3 {
+        color: #f6ad55;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .features-list ul {
+        list-style: none;
+        color: #94a3b8;
+      }
+
+      .features-list li {
+        padding: 5px 0;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .features-list li::before {
+        content: '✨';
+        position: absolute;
+        left: 0;
+        top: 5px;
+      }
+
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 10px 15px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ef4444;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
         }
-        
-        .cosmic-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, #f6ad55, #553c9a);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            animation: cosmicPulse 2s ease-in-out infinite;
+        51%,
+        100% {
+          opacity: 0.3;
         }
-        
-        @keyframes cosmicPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-        }
-        
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, #f6ad55 0%, #553c9a 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #cbd5e1;
-            margin-bottom: 30px;
-        }
-        
-        .retry-button {
-            background: linear-gradient(135deg, #553c9a, #f6ad55);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .retry-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(85, 60, 154, 0.3);
-        }
-        
-        .features-list {
-            margin-top: 30px;
-            text-align: left;
-        }
-        
-        .features-list h3 {
-            color: #f6ad55;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        
-        .features-list ul {
-            list-style: none;
-            color: #94a3b8;
-        }
-        
-        .features-list li {
-            padding: 5px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .features-list li::before {
-            content: "✨";
-            position: absolute;
-            left: 0;
-            top: 5px;
-        }
-        
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 10px 15px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ef4444;
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="offline-container">
-        <div class="cosmic-icon">🌟</div>
-        
-        <h1>You're Offline</h1>
-        <p>Your cosmic connection has been temporarily interrupted. Don't worry - the stars are still aligned!</p>
-        
-        <button class="retry-button" onclick="window.location.reload()">
-            Reconnect to the Cosmos
-        </button>
-        
-        <div class="status-indicator">
-            <div class="status-dot"></div>
-            <span>Waiting for internet connection...</span>
-        </div>
-        
-        <div class="features-list">
-            <h3>While you wait, remember:</h3>
-            <ul>
-                <li>Your birth chart data is always with you</li>
-                <li>Cosmic wisdom transcends digital boundaries</li>
-                <li>The universe is always conspiring in your favor</li>
-                <li>Reconnection will restore full functionality</li>
-            </ul>
-        </div>
+      <div class="cosmic-icon">🌟</div>
+
+      <h1>You're Offline</h1>
+      <p>
+        Your cosmic connection has been temporarily interrupted. Don't worry -
+        the stars are still aligned!
+      </p>
+
+      <button class="retry-button" onclick="window.location.reload()">
+        Reconnect to the Cosmos
+      </button>
+
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Waiting for internet connection...</span>
+      </div>
+
+      <div class="features-list">
+        <h3>While you wait, remember:</h3>
+        <ul>
+          <li>Your birth chart data is always with you</li>
+          <li>Cosmic wisdom transcends digital boundaries</li>
+          <li>The universe is always conspiring in your favor</li>
+          <li>Reconnection will restore full functionality</li>
+        </ul>
+      </div>
     </div>
-    
+
     <script>
-        // Auto-retry when connection is restored
-        window.addEventListener('online', function() {
-            window.location.reload();
-        });
-        
-        // Update status when online
-        function updateConnectionStatus() {
-            const indicator = document.querySelector('.status-indicator');
-            const dot = document.querySelector('.status-dot');
-            const text = indicator.querySelector('span');
-            
-            if (navigator.onLine) {
-                indicator.style.background = 'rgba(34, 197, 94, 0.1)';
-                indicator.style.borderColor = 'rgba(34, 197, 94, 0.3)';
-                dot.style.background = '#22c55e';
-                text.textContent = 'Connection restored! Refreshing...';
-                setTimeout(() => window.location.reload(), 1000);
-            }
+      // Auto-retry when connection is restored
+      window.addEventListener('online', function () {
+        window.location.reload();
+      });
+
+      // Update status when online
+      function updateConnectionStatus() {
+        const indicator = document.querySelector('.status-indicator');
+        const dot = document.querySelector('.status-dot');
+        const text = indicator.querySelector('span');
+
+        if (navigator.onLine) {
+          indicator.style.background = 'rgba(34, 197, 94, 0.1)';
+          indicator.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+          dot.style.background = '#22c55e';
+          text.textContent = 'Connection restored! Refreshing...';
+          setTimeout(() => window.location.reload(), 1000);
         }
-        
-        // Check connection periodically
-        setInterval(updateConnectionStatus, 2000);
-        
-        // Initial check
-        updateConnectionStatus();
+      }
+
+      // Check connection periodically
+      setInterval(updateConnectionStatus, 2000);
+
+      // Initial check
+      updateConnectionStatus();
     </script>
-</body>
+  </body>
 </html>

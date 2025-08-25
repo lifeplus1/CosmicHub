@@ -18,7 +18,8 @@ export interface ProcessedPlanetData extends Omit<PlanetData, 'degree'> {
 /**
  * Processed asteroid data with formatted degree and aspects for display
  */
-export interface ProcessedAsteroidData extends Omit<AsteroidData, 'degree' | 'aspects'> {
+export interface ProcessedAsteroidData
+  extends Omit<AsteroidData, 'degree' | 'aspects'> {
   /** Formatted degree string with decimal precision */
   degree: string;
   /** Formatted aspect string describing aspects to other points */
@@ -92,7 +93,7 @@ export interface ProcessedChartSections {
  */
 export function isProcessedAngleData(obj: unknown): obj is ProcessedAngleData {
   if (obj === null || typeof obj !== 'object') return false;
-  
+
   const angle = obj as ProcessedAngleData;
   return (
     typeof angle.name === 'string' &&
@@ -104,6 +105,8 @@ export function isProcessedAngleData(obj: unknown): obj is ProcessedAngleData {
 /**
  * Type guard to check if an array contains valid ProcessedAngleData
  */
-export function isProcessedAngleDataArray(arr: unknown[]): arr is ProcessedAngleData[] {
+export function isProcessedAngleDataArray(
+  arr: unknown[]
+): arr is ProcessedAngleData[] {
   return arr.length > 0 && isProcessedAngleData(arr[0]);
 }

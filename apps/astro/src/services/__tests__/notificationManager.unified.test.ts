@@ -12,38 +12,38 @@ vi.mock('@cosmichub/config', () => {
     createPushNotificationManager: () => ({
       initialize: vi.fn().mockResolvedValue(true),
       queueNotification,
-	getNotificationStats: (): {
-          totalSubscriptions: number;
-          activeSubscriptions: number;
-          queuedNotifications: number;
-          permissionStatus: NotificationPermission;
-          totalSent: number;
-          totalDelivered: number;
-          totalClicked: number;
-          avgDeliveryTime: number;
-          errors: number;
-        } => ({ 
-        totalSubscriptions: 1, 
-        activeSubscriptions: 1, 
-        queuedNotifications: 0, 
+      getNotificationStats: (): {
+        totalSubscriptions: number;
+        activeSubscriptions: number;
+        queuedNotifications: number;
+        permissionStatus: NotificationPermission;
+        totalSent: number;
+        totalDelivered: number;
+        totalClicked: number;
+        avgDeliveryTime: number;
+        errors: number;
+      } => ({
+        totalSubscriptions: 1,
+        activeSubscriptions: 1,
+        queuedNotifications: 0,
         permissionStatus: 'default' as NotificationPermission,
         totalSent: 0,
         totalDelivered: 0,
         totalClicked: 0,
         avgDeliveryTime: 0,
-        errors: 0
+        errors: 0,
       }),
-      subscribeUser: vi.fn().mockResolvedValue(true)
+      subscribeUser: vi.fn().mockResolvedValue(true),
     }),
-    AstrologyNotificationScheduler: class { 
+    AstrologyNotificationScheduler: class {
       scheduleDailyHoroscope(): void {}
       scheduleTransitAlerts(): void {}
       scheduleMoonPhases(): void {}
     },
     getBackgroundSyncManager: () => ({
       setPushNotificationManager(): void {},
-      getSyncStatus: (): { idle: boolean } => ({ idle: true })
-    })
+      getSyncStatus: (): { idle: boolean } => ({ idle: true }),
+    }),
   };
 });
 
@@ -51,10 +51,16 @@ describe('UnifiedNotificationManager', () => {
   beforeEach((): void => {
     // clear localStorage mock between tests
     (global as any).localStorage = {
-      store: {} as Record<string,string>,
-      getItem(key: string): string | null { return this.store[key] ?? null; },
-      setItem(key: string, val: string): void { this.store[key] = val; },
-      removeItem(key: string): void { delete this.store[key]; }
+      store: {} as Record<string, string>,
+      getItem(key: string): string | null {
+        return this.store[key] ?? null;
+      },
+      setItem(key: string, val: string): void {
+        this.store[key] = val;
+      },
+      removeItem(key: string): void {
+        delete this.store[key];
+      },
     };
   });
 
@@ -96,22 +102,24 @@ describe('UnifiedNotificationManager', () => {
           totalSubscriptions: 2,
           activeSubscriptions: 2,
           queuedNotifications: 1,
-          permissionStatus: 'granted' as NotificationPermission
-        })
+          permissionStatus: 'granted' as NotificationPermission,
+        }),
       }),
-      AstrologyNotificationScheduler: class { 
+      AstrologyNotificationScheduler: class {
         scheduleDailyHoroscope(): void {}
         scheduleTransitAlerts(): void {}
         scheduleMoonPhases(): void {}
       },
       getBackgroundSyncManager: () => ({
         setPushNotificationManager(): void {},
-        getSyncStatus: (): { idle: boolean } => ({ idle: false })
-      })
+        getSyncStatus: (): { idle: boolean } => ({ idle: false }),
+      }),
     }));
 
     // Need to re-import after remock
-    const { getNotificationManager: getNM } = await import('../notificationManager.unified');
+    const { getNotificationManager: getNM } = await import(
+      '../notificationManager.unified'
+    );
     const mgr = getNM();
     await mgr.initialize();
     const status = mgr.status();

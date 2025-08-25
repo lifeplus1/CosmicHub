@@ -1,10 +1,9 @@
-
 // Simple logger for structured logging
 const logger = {
   info: (msg, data) => logger.info(`[INFO] ${msg}`, data),
   warn: (msg, data) => logger.warn(`[WARN] ${msg}`, data),
   error: (msg, data) => logger.error(`[ERROR] ${msg}`, data),
-  debug: (msg, data) => logger.debug(`[DEBUG] ${msg}`, data)
+  debug: (msg, data) => logger.debug(`[DEBUG] ${msg}`, data),
 };
 /**
  * DEPRECATED (August 2025)
@@ -18,12 +17,27 @@ const logger = {
  * Replaced by SubscriptionProvider in `@cosmichub/auth`.
  * Will be removed once no imports remain.
  */
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { useAuth } from './AuthContext';
-import { getUserTier, hasFeatureAccess, COSMICHUB_TIERS, HEALWAVE_TIERS } from '@cosmichub/subscriptions';
+import {
+  getUserTier,
+  hasFeatureAccess,
+  COSMICHUB_TIERS,
+  HEALWAVE_TIERS,
+} from '@cosmichub/subscriptions';
 
 // Minimal local type alias (legacy) – prefer types from auth package elsewhere
-interface UserSubscription { tier: string; status: string; currentPeriodEnd?: string | number | Date; }
+interface UserSubscription {
+  tier: string;
+  status: string;
+  currentPeriodEnd?: string | number | Date;
+}
 
 interface SubscriptionContextType {
   subscription: UserSubscription | null;
@@ -34,19 +48,23 @@ interface SubscriptionContextType {
   refreshSubscription: () => Promise<void>;
 }
 
-const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
+const SubscriptionContext = createContext<SubscriptionContextType | undefined>(
+  undefined
+);
 
 interface SubscriptionProviderProps {
   children: ReactNode;
   appType: 'healwave' | 'cosmichub';
 }
 
-export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ 
-  children, 
-  appType 
+export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
+  children,
+  appType,
 }) => {
   const { user } = useAuth();
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [subscription, setSubscription] = useState<UserSubscription | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   const userTier = getUserTier(subscription);
@@ -61,12 +79,15 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     setIsLoading(true);
     try {
       // Use actual backend API endpoint for subscription status
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/stripe/subscription-status`, {
-        headers: {
-          'Authorization': `Bearer ${await user.getIdToken()}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/stripe/subscription-status`,
+        {
+          headers: {
+            Authorization: `Bearer ${await user.getIdToken()}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -75,14 +96,16 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         // User not found or no subscription
         setSubscription(null);
       } else {
-        throw new Error(`Failed to fetch subscription: ${response.status} - ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch subscription: ${response.status} - ${response.statusText}`
+        );
       }
     } catch (error) {
       // Improved error logging with additional context
       logger.error('Error fetching subscription:', {
         error,
         userId: user?.uid,
-        endpoint: `${import.meta.env.VITE_BACKEND_URL}/stripe/subscription-status`
+        endpoint: `${import.meta.env.VITE_BACKEND_URL}/stripe/subscription-status`,
       });
       setSubscription(null);
     } finally {
@@ -92,7 +115,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
   const hasFeature = (requiredTier: string): boolean => {
     // Import the appropriate tier configuration based on app type
-  const tiers = appType === 'healwave' ? HEALWAVE_TIERS : COSMICHUB_TIERS;
+    const tiers = appType === 'healwave' ? HEALWAVE_TIERS : COSMICHUB_TIERS;
     return hasFeatureAccess(userTier, requiredTier, tiers);
   };
 
@@ -119,7 +142,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     isLoading,
     hasFeature,
     upgradeRequired,
-    refreshSubscription
+    refreshSubscription,
   };
 
   return (
@@ -132,7 +155,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 export const useSubscription = (): SubscriptionContextType => {
   const context = useContext(SubscriptionContext);
   if (context === undefined) {
-    throw new Error('useSubscription must be used within a SubscriptionProvider');
+    throw new Error(
+      'useSubscription must be used within a SubscriptionProvider'
+    );
   }
   return context;
 };

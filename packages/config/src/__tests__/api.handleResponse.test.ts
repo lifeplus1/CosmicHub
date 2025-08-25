@@ -11,7 +11,11 @@ describe('ApiClient.handleResponse integration', () => {
   });
 
   it('returns success with data property', async () => {
-    const mockResp = { ok: true, status: 200, json: async () => ({ data: { value: 42 }, message: 'ok' }) } as Response;
+    const mockResp = {
+      ok: true,
+      status: 200,
+      json: async () => ({ data: { value: 42 }, message: 'ok' }),
+    } as Response;
     global.fetch = vi.fn().mockResolvedValue(mockResp);
     const client = new ApiClient('https://api.test');
     const result = await client.get<{ value: number }>('/test');
@@ -20,7 +24,11 @@ describe('ApiClient.handleResponse integration', () => {
   });
 
   it('returns success when no wrapping data field', async () => {
-    const mockResp = { ok: true, status: 200, json: async () => ({ value: 7 }) } as Response;
+    const mockResp = {
+      ok: true,
+      status: 200,
+      json: async () => ({ value: 7 }),
+    } as Response;
     global.fetch = vi.fn().mockResolvedValue(mockResp);
     const client = new ApiClient('https://api.test');
     const result = await client.get<{ value: number }>('/plain');
@@ -29,7 +37,11 @@ describe('ApiClient.handleResponse integration', () => {
   });
 
   it('throws structured error on non-ok response', async () => {
-    const mockResp = { ok: false, status: 500, json: async () => ({ error: 'boom' }) } as Response;
+    const mockResp = {
+      ok: false,
+      status: 500,
+      json: async () => ({ error: 'boom' }),
+    } as Response;
     global.fetch = vi.fn().mockResolvedValue(mockResp);
     const client = new ApiClient('https://api.test');
     await expect(client.get('/err')).rejects.toBeInstanceOf(Error);

@@ -13,7 +13,11 @@ export function isNumber(value: unknown): value is number {
 }
 
 export function safeJsonParse<T>(raw: string, fallback: T): T {
-  try { return JSON.parse(raw) as T; } catch { return fallback; }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
 }
 
 export type Mutable<T> = { -readonly [K in keyof T]: T[K] };

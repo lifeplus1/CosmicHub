@@ -2,33 +2,38 @@
  * Structured logging utility for CosmicHub
  */
 export class Logger {
-  private static formatMessage(level: string, message: string, data?: unknown): string {
+  private static formatMessage(
+    level: string,
+    message: string,
+    data?: unknown
+  ): string {
     const timestamp = new Date().toISOString();
-  return `[${timestamp}] ${level.toUpperCase()}: ${message}${data !== undefined ? ` - ${JSON.stringify(data)}` : ''}`;
+    return `[${timestamp}] ${level.toUpperCase()}: ${message}${data !== undefined ? ` - ${JSON.stringify(data)}` : ''}`;
   }
 
   static debug(message: string, data?: unknown): void {
-  if (typeof globalThis.process !== 'undefined' && globalThis.process.env['NODE_ENV'] !== 'production') {
-       
+    if (
+      typeof globalThis.process !== 'undefined' &&
+      globalThis.process.env['NODE_ENV'] !== 'production'
+    ) {
       console.debug(this.formatMessage('debug', message, data));
     }
   }
 
   static info(message: string, data?: unknown): void {
-     
     console.info(this.formatMessage('info', message, data));
   }
 
   static warn(message: string, data?: unknown): void {
-     
     console.warn(this.formatMessage('warn', message, data));
   }
 
   static error(message: string, error?: Error): void {
-     
-    console.error(this.formatMessage('error', message, {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    }));
+    console.error(
+      this.formatMessage('error', message, {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      })
+    );
   }
 }

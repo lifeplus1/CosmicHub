@@ -19,15 +19,15 @@ const preview: Preview = {
       default: 'cosmic-dark',
       values: [
         { name: 'cosmic-dark', value: '#0c0f17' },
-        { name: 'light', value: '#ffffff' }
-      ]
+        { name: 'light', value: '#ffffff' },
+      ],
     },
     docs: {
-      source: { type: 'code' }
+      source: { type: 'code' },
     },
     test: {
-      dangerouslyIgnoreUnhandledErrors: true
-    }
+      dangerouslyIgnoreUnhandledErrors: true,
+    },
   },
 };
 

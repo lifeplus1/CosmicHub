@@ -19,7 +19,7 @@ describe('TransitAnalysis Tests', () => {
       intensity: 99.98,
       energy: 'intense',
       duration_days: 3,
-      description: 'Sun conjunction natal Sun'
+      description: 'Sun conjunction natal Sun',
     };
 
     expect(mockTransitData).toHaveProperty('planet', 'Sun');
@@ -32,8 +32,8 @@ describe('TransitAnalysis Tests', () => {
       birth_date: '1990-01-01',
       birth_time: '12:00',
       latitude: 40.7128,
-      longitude: -74.0060,
-      timezone: 'America/New_York'
+      longitude: -74.006,
+      timezone: 'America/New_York',
     };
 
     expect(mockBirthData.birth_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
@@ -54,8 +54,8 @@ describe('TransitAnalysis Tests', () => {
         intensity: 99.98,
         energy: 'intense',
         duration_days: 3,
-        description: 'Sun conjunction natal Sun'
-      }
+        description: 'Sun conjunction natal Sun',
+      },
     ];
 
     expect(Array.isArray(apiResponse)).toBe(true);

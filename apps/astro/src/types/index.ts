@@ -34,12 +34,15 @@ export interface AIInterpretation {
 }
 
 export interface ChartData {
-  planets: Record<string, {
-    position: number;
-    house: number;
-    retrograde?: boolean;
-    speed?: number;
-  }>;
+  planets: Record<
+    string,
+    {
+      position: number;
+      house: number;
+      retrograde?: boolean;
+      speed?: number;
+    }
+  >;
   houses: Array<{
     house: number;
     cusp: number;

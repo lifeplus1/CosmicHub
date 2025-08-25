@@ -4,8 +4,8 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
-  // Emit both JS and type declarations so consuming packages resolve runtime modules
-  "emitDeclarationOnly": false,
+    // Emit both JS and type declarations so consuming packages resolve runtime modules
+    "emitDeclarationOnly": false,
     "outDir": "./dist",
     "skipLibCheck": true
   },

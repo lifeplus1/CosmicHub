@@ -4,14 +4,16 @@ import type { ChartData, PlanetName, Planet } from '../services/api.types';
  * Deterministic stub ChartData factory for examples and tests.
  * Accepts partial overrides for flexibility.
  */
-export function createStubChartData(overrides: Partial<ChartData> = {}): ChartData {
+export function createStubChartData(
+  overrides: Partial<ChartData> = {}
+): ChartData {
   const createPlanet = (name: PlanetName, position: number): Planet => ({
     name,
     position,
     sign: 'aries',
     house: 1,
     retrograde: false,
-    speed: 0
+    speed: 0,
   });
 
   const base: ChartData = {
@@ -28,21 +30,28 @@ export function createStubChartData(overrides: Partial<ChartData> = {}): ChartDa
       pluto: createPlanet('pluto', 270),
       chiron: createPlanet('chiron', 300),
       north_node: createPlanet('north_node', 330),
-      south_node: createPlanet('south_node', 345)
+      south_node: createPlanet('south_node', 345),
     },
     houses: [
       { number: 1, cusp: 0, sign: 'aries' },
-      { number: 2, cusp: 30, sign: 'taurus' }
+      { number: 2, cusp: 30, sign: 'taurus' },
     ],
     aspects: [
-      { aspect_type: 'square', planet1: 'sun', planet2: 'moon', orb: 5, applying: false, exact: false }
+      {
+        aspect_type: 'square',
+        planet1: 'sun',
+        planet2: 'moon',
+        orb: 5,
+        applying: false,
+        exact: false,
+      },
     ],
     angles: { ascendant: 0, midheaven: 90, descendant: 180, imumcoeli: 270 },
     latitude: 0,
     longitude: 0,
     timezone: 'UTC',
     julian_day: 0,
-    house_system: 'placidus'
+    house_system: 'placidus',
   };
 
   return { ...base, ...overrides };

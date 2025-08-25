@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { generateAIInterpretation } from '../../services/api';
 import type { ApiResult } from '../../services/apiResult';
-import type { InterpretationResponse, InterpretationRequest as ApiInterpretationRequest } from '../../services/api.types';
+import type {
+  InterpretationResponse,
+  InterpretationRequest as ApiInterpretationRequest,
+} from '../../services/api.types';
 import { useToast } from '../ToastProvider';
 import { useAIInterpretation } from './useAIInterpretation';
-import type { ChartInterpretationRequest, InterpretationRequest } from './types';
+import type {
+  ChartInterpretationRequest,
+  InterpretationRequest,
+} from './types';
 
 interface InterpretationResult {
   data?: unknown;
@@ -17,17 +23,18 @@ interface InterpretationFormProps {
   mode?: 'chart' | 'direct'; // chart mode uses existing API, direct mode uses new AI service
 }
 
-const InterpretationForm: React.FC<InterpretationFormProps> = ({ 
+const InterpretationForm: React.FC<InterpretationFormProps> = ({
   onInterpretationGenerated,
   chartId,
-  mode = 'direct' // Default to new AI service
+  mode = 'direct', // Default to new AI service
 }) => {
   // Mock user for development - remove auth dependency for now
   const user = { uid: 'mock-user' };
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const { generateInterpretation, interpretation, loading, error } = useAIInterpretation();
-  
+  const { generateInterpretation, interpretation, loading, error } =
+    useAIInterpretation();
+
   const [formData, setFormData] = useState({
     type: 'natal',
     focus: [] as string[],
@@ -36,26 +43,69 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     birthDate: '',
     birthTime: '',
     birthLocation: '',
-    interpretationType: 'general' as 'general' | 'personality' | 'career' | 'relationships'
+    interpretationType: 'general' as
+      | 'general'
+      | 'personality'
+      | 'career'
+      | 'relationships',
   });
 
   const interpretationTypes = [
-    { value: 'natal', label: 'Natal Chart', description: 'Core personality and life path analysis' },
-    { value: 'transit', label: 'Current Transits', description: 'Current planetary influences' },
-    { value: 'synastry', label: 'Relationship Compatibility', description: 'Compare two charts for compatibility' },
-    { value: 'composite', label: 'Composite Chart', description: 'Relationship dynamics and purpose' },
+    {
+      value: 'natal',
+      label: 'Natal Chart',
+      description: 'Core personality and life path analysis',
+    },
+    {
+      value: 'transit',
+      label: 'Current Transits',
+      description: 'Current planetary influences',
+    },
+    {
+      value: 'synastry',
+      label: 'Relationship Compatibility',
+      description: 'Compare two charts for compatibility',
+    },
+    {
+      value: 'composite',
+      label: 'Composite Chart',
+      description: 'Relationship dynamics and purpose',
+    },
   ];
 
   const aiInterpretationTypes = [
-    { value: 'general', label: 'General Reading', description: 'Overall cosmic blueprint and life theme' },
-    { value: 'personality', label: 'Personality Analysis', description: 'Deep dive into character traits and strengths' },
-    { value: 'career', label: 'Career Guidance', description: 'Professional path and natural talents' },
-    { value: 'relationships', label: 'Relationship Insights', description: 'Love compatibility and relationship patterns' }
+    {
+      value: 'general',
+      label: 'General Reading',
+      description: 'Overall cosmic blueprint and life theme',
+    },
+    {
+      value: 'personality',
+      label: 'Personality Analysis',
+      description: 'Deep dive into character traits and strengths',
+    },
+    {
+      value: 'career',
+      label: 'Career Guidance',
+      description: 'Professional path and natural talents',
+    },
+    {
+      value: 'relationships',
+      label: 'Relationship Insights',
+      description: 'Love compatibility and relationship patterns',
+    },
   ];
 
   const focusAreas = [
-    'Personality', 'Career', 'Relationships', 'Life Purpose', 'Challenges', 
-    'Strengths', 'Current Cycle', 'Future Trends', 'Spiritual Growth'
+    'Personality',
+    'Career',
+    'Relationships',
+    'Life Purpose',
+    'Challenges',
+    'Strengths',
+    'Current Cycle',
+    'Future Trends',
+    'Spiritual Growth',
   ];
 
   const handleFocusToggle = (focus: string): void => {
@@ -63,7 +113,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       ...prev,
       focus: prev.focus.includes(focus)
         ? prev.focus.filter(f => f !== focus)
-        : [...prev.focus, focus]
+        : [...prev.focus, focus],
     }));
   };
 
@@ -71,9 +121,9 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     // TODO: Replace with real authentication check when auth is implemented
     if (user?.uid === undefined || user?.uid === null || user?.uid === '') {
       toast({
-        title: "Authentication Required",
-        description: "Please log in to generate interpretations",
-        status: "error",
+        title: 'Authentication Required',
+        description: 'Please log in to generate interpretations',
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -81,7 +131,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     }
 
     setIsGenerating(true);
-    
+
     try {
       const requestData: ChartInterpretationRequest = {
         chartId: chartId ?? 'default',
@@ -94,15 +144,16 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       const trimmedQuestion = formData.question.trim();
       const bodyData = {
         ...requestData,
-        ...(trimmedQuestion !== '' && { question: formData.question })
+        ...(trimmedQuestion !== '' && { question: formData.question }),
       };
 
-  const result: ApiResult<InterpretationResponse> = await generateAIInterpretation(bodyData as ApiInterpretationRequest);
-      
+      const result: ApiResult<InterpretationResponse> =
+        await generateAIInterpretation(bodyData as ApiInterpretationRequest);
+
       toast({
-        title: "Interpretation Generated",
-        description: "Your personalized astrological interpretation is ready",
-        status: "success",
+        title: 'Interpretation Generated',
+        description: 'Your personalized astrological interpretation is ready',
+        status: 'success',
         duration: 3000,
         isClosable: true,
       });
@@ -114,20 +165,22 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       } else {
         throw new Error(result.error);
       }
-
     } catch (error) {
       // Log error for debugging (replace with proper logging service in production)
       if (error instanceof Error) {
         // TODO: Replace with structured logging service
         // logger.warn('Interpretation generation failed:', error.message);
       } else {
-        // TODO: Replace with structured logging service  
+        // TODO: Replace with structured logging service
         // logger.warn('Interpretation generation failed with unknown error');
       }
       toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate interpretation",
-        status: "error",
+        title: 'Generation Failed',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate interpretation',
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -137,11 +190,15 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
   };
 
   const handleDirectGenerate = async (): Promise<void> => {
-    if (formData.birthDate === '' || formData.birthTime === '' || formData.birthLocation === '') {
+    if (
+      formData.birthDate === '' ||
+      formData.birthTime === '' ||
+      formData.birthLocation === ''
+    ) {
       toast({
-        title: "Missing Information",
-        description: "Please provide your birth date, time, and location",
-        status: "error",
+        title: 'Missing Information',
+        description: 'Please provide your birth date, time, and location',
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -154,16 +211,16 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         birthDate: formData.birthDate,
         birthTime: formData.birthTime,
         birthLocation: formData.birthLocation,
-        interpretationType: formData.interpretationType
+        interpretationType: formData.interpretationType,
       };
 
       await generateInterpretation(directRequestData);
-      
+
       if (typeof interpretation === 'string' && interpretation !== '') {
         toast({
-          title: "Interpretation Generated",
-          description: "Your personalized AI interpretation is ready",
-          status: "success",
+          title: 'Interpretation Generated',
+          description: 'Your personalized AI interpretation is ready',
+          status: 'success',
           duration: 3000,
           isClosable: true,
         });
@@ -172,20 +229,22 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
           onInterpretationGenerated({ content: interpretation });
         }
       }
-
     } catch (error) {
       // Log error for debugging (replace with proper logging service in production)
       if (error instanceof Error) {
         // TODO: Replace with structured logging service
         // logger.warn('Interpretation generation failed:', error.message);
       } else {
-        // TODO: Replace with structured logging service  
+        // TODO: Replace with structured logging service
         // logger.warn('Interpretation generation failed with unknown error');
       }
       toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate interpretation",
-        status: "error",
+        title: 'Generation Failed',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate interpretation',
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -201,66 +260,90 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-cosmic-dark/60 backdrop-blur-xl border border-cosmic-silver/20 rounded-xl">
-      <h2 className="text-2xl font-bold text-cosmic-gold mb-6 font-playfair">
+    <div className='max-w-2xl mx-auto p-6 bg-cosmic-dark/60 backdrop-blur-xl border border-cosmic-silver/20 rounded-xl'>
+      <h2 className='text-2xl font-bold text-cosmic-gold mb-6 font-playfair'>
         Generate AI Interpretation
       </h2>
 
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {mode === 'direct' && (
           <>
             {/* Birth Information for Direct AI */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               <div>
-                <label htmlFor="birth-date" className="block text-cosmic-gold font-medium mb-2">
+                <label
+                  htmlFor='birth-date'
+                  className='block text-cosmic-gold font-medium mb-2'
+                >
                   Birth Date
                 </label>
                 <input
-                  id="birth-date"
-                  type="date"
+                  id='birth-date'
+                  type='date'
                   value={formData.birthDate}
-                  onChange={(e): void => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
-                  className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none"
-                  title="Select your birth date"
-                  aria-label="Birth date"
+                  onChange={(e): void =>
+                    setFormData(prev => ({
+                      ...prev,
+                      birthDate: e.target.value,
+                    }))
+                  }
+                  className='w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none'
+                  title='Select your birth date'
+                  aria-label='Birth date'
                 />
               </div>
               <div>
-                <label htmlFor="birth-time" className="block text-cosmic-gold font-medium mb-2">
+                <label
+                  htmlFor='birth-time'
+                  className='block text-cosmic-gold font-medium mb-2'
+                >
                   Birth Time
                 </label>
                 <input
-                  id="birth-time"
-                  type="time"
+                  id='birth-time'
+                  type='time'
                   value={formData.birthTime}
-                  onChange={(e): void => setFormData(prev => ({ ...prev, birthTime: e.target.value }))}
-                  className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none"
-                  title="Select your birth time"
-                  aria-label="Birth time"
+                  onChange={(e): void =>
+                    setFormData(prev => ({
+                      ...prev,
+                      birthTime: e.target.value,
+                    }))
+                  }
+                  className='w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none'
+                  title='Select your birth time'
+                  aria-label='Birth time'
                 />
               </div>
               <div>
-                <label htmlFor="birth-location" className="block text-cosmic-gold font-medium mb-2">
+                <label
+                  htmlFor='birth-location'
+                  className='block text-cosmic-gold font-medium mb-2'
+                >
                   Birth Location
                 </label>
                 <input
-                  id="birth-location"
-                  type="text"
+                  id='birth-location'
+                  type='text'
                   value={formData.birthLocation}
-                  onChange={(e): void => setFormData(prev => ({ ...prev, birthLocation: e.target.value }))}
-                  placeholder="City, Country"
-                  className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none"
+                  onChange={(e): void =>
+                    setFormData(prev => ({
+                      ...prev,
+                      birthLocation: e.target.value,
+                    }))
+                  }
+                  placeholder='City, Country'
+                  className='w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none'
                 />
               </div>
             </div>
 
             {/* Interpretation Focus */}
             <div>
-              <div className="block text-cosmic-gold font-medium mb-3">
+              <div className='block text-cosmic-gold font-medium mb-3'>
                 Interpretation Focus
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {aiInterpretationTypes.map((type) => (
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                {aiInterpretationTypes.map(type => (
                   <label
                     key={type.value}
                     className={`p-4 border rounded-lg cursor-pointer transition-all ${
@@ -270,21 +353,34 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                     }`}
                   >
                     <input
-                      type="radio"
-                      name="interpretationType"
+                      type='radio'
+                      name='interpretationType'
                       value={type.value}
                       checked={formData.interpretationType === type.value}
-                      onChange={(e): void => setFormData(prev => ({ 
-                        ...prev, 
-                        interpretationType: e.target.value as 'general' | 'personality' | 'career' | 'relationships'
-                      }))}
-                      className="sr-only"
+                      onChange={(e): void =>
+                        setFormData(prev => ({
+                          ...prev,
+                          interpretationType: e.target.value as
+                            | 'general'
+                            | 'personality'
+                            | 'career'
+                            | 'relationships',
+                        }))
+                      }
+                      className='sr-only'
                       aria-labelledby={`interpretation-type-${type.value}`}
                       aria-label={`${type.label}: ${type.description}`}
                     />
-                    <div className="text-cosmic-silver">
-                      <div className="font-semibold" id={`interpretation-type-${type.value}`}>{type.label}</div>
-                      <div className="text-sm text-cosmic-silver/70 mt-1">{type.description}</div>
+                    <div className='text-cosmic-silver'>
+                      <div
+                        className='font-semibold'
+                        id={`interpretation-type-${type.value}`}
+                      >
+                        {type.label}
+                      </div>
+                      <div className='text-sm text-cosmic-silver/70 mt-1'>
+                        {type.description}
+                      </div>
                     </div>
                   </label>
                 ))}
@@ -297,11 +393,11 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
           <>
             {/* Interpretation Type */}
             <div>
-              <div className="block text-cosmic-gold font-medium mb-3">
+              <div className='block text-cosmic-gold font-medium mb-3'>
                 Interpretation Type
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {interpretationTypes.map((type) => (
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                {interpretationTypes.map(type => (
                   <label
                     key={type.value}
                     className={`p-4 border rounded-lg cursor-pointer transition-all ${
@@ -311,18 +407,27 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                     }`}
                   >
                     <input
-                      type="radio"
-                      name="type"
+                      type='radio'
+                      name='type'
                       value={type.value}
                       checked={formData.type === type.value}
-                      onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                      className="sr-only"
+                      onChange={e =>
+                        setFormData(prev => ({ ...prev, type: e.target.value }))
+                      }
+                      className='sr-only'
                       aria-labelledby={`chart-type-${type.value}`}
                       aria-label={`${type.label}: ${type.description}`}
                     />
-                    <div className="text-cosmic-silver">
-                      <div className="font-semibold" id={`chart-type-${type.value}`}>{type.label}</div>
-                      <div className="text-sm text-cosmic-silver/70 mt-1">{type.description}</div>
+                    <div className='text-cosmic-silver'>
+                      <div
+                        className='font-semibold'
+                        id={`chart-type-${type.value}`}
+                      >
+                        {type.label}
+                      </div>
+                      <div className='text-sm text-cosmic-silver/70 mt-1'>
+                        {type.description}
+                      </div>
                     </div>
                   </label>
                 ))}
@@ -331,14 +436,14 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
             {/* Focus Areas */}
             <div>
-              <div className="block text-cosmic-gold font-medium mb-3">
+              <div className='block text-cosmic-gold font-medium mb-3'>
                 Focus Areas (Optional)
               </div>
-              <div className="flex flex-wrap gap-2">
-                {focusAreas.map((focus) => (
+              <div className='flex flex-wrap gap-2'>
+                {focusAreas.map(focus => (
                   <button
                     key={focus}
-                    type="button"
+                    type='button'
                     onClick={() => handleFocusToggle(focus)}
                     className={`px-3 py-2 text-sm rounded-full border transition-all ${
                       formData.focus.includes(focus)
@@ -354,15 +459,20 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
             {/* Specific Question */}
             <div>
-              <label htmlFor="specific-question" className="block text-cosmic-gold font-medium mb-3">
+              <label
+                htmlFor='specific-question'
+                className='block text-cosmic-gold font-medium mb-3'
+              >
                 Specific Question (Optional)
               </label>
               <textarea
-                id="specific-question"
+                id='specific-question'
                 value={formData.question}
-                onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
-                placeholder="Ask a specific question about your chart..."
-                className="w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none resize-none"
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, question: e.target.value }))
+                }
+                placeholder='Ask a specific question about your chart...'
+                className='w-full p-3 bg-cosmic-dark/40 border border-cosmic-silver/30 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:border-cosmic-gold focus:outline-none resize-none'
                 rows={3}
               />
             </div>
@@ -379,12 +489,16 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
               });
             }
           }}
-          disabled={isGenerating || loading || (mode === 'chart' && user?.uid === undefined)}
-          className="w-full py-3 px-6 bg-cosmic-gold text-cosmic-dark font-semibold rounded-lg hover:bg-cosmic-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+          disabled={
+            isGenerating ||
+            loading ||
+            (mode === 'chart' && user?.uid === undefined)
+          }
+          className='w-full py-3 px-6 bg-cosmic-gold text-cosmic-dark font-semibold rounded-lg hover:bg-cosmic-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2'
         >
-          {(isGenerating || loading) ? (
+          {isGenerating || loading ? (
             <>
-              <div className="w-5 h-5 border-2 border-cosmic-dark border-t-transparent rounded-full animate-spin" />
+              <div className='w-5 h-5 border-2 border-cosmic-dark border-t-transparent rounded-full animate-spin' />
               <span>Generating...</span>
             </>
           ) : (
@@ -396,21 +510,25 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         </button>
 
         {mode === 'chart' && user?.uid === undefined && (
-          <p className="text-cosmic-silver/70 text-center text-sm">
+          <p className='text-cosmic-silver/70 text-center text-sm'>
             Please log in to generate personalized interpretations
           </p>
         )}
 
         {typeof error === 'string' && error !== '' && (
-          <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400">
+          <div className='p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400'>
             {error}
           </div>
         )}
 
         {typeof interpretation === 'string' && interpretation !== '' && (
-          <div className="p-4 bg-cosmic-purple/10 border border-cosmic-purple/30 rounded-lg">
-            <h3 className="text-cosmic-gold font-semibold mb-2">Your Interpretation:</h3>
-            <p className="text-cosmic-silver whitespace-pre-wrap">{interpretation}</p>
+          <div className='p-4 bg-cosmic-purple/10 border border-cosmic-purple/30 rounded-lg'>
+            <h3 className='text-cosmic-gold font-semibold mb-2'>
+              Your Interpretation:
+            </h3>
+            <p className='text-cosmic-silver whitespace-pre-wrap'>
+              {interpretation}
+            </p>
           </div>
         )}
       </div>

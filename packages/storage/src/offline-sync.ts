@@ -3,13 +3,20 @@
  * Handles synchronization between offline storage and online APIs
  */
 
-import { getOfflineStorage, type OfflineChart, type OfflineSyncItem } from './offline-storage';
+import {
+  getOfflineStorage,
+  type OfflineChart,
+  type OfflineSyncItem,
+} from './offline-storage';
 
 // Simple logger
 const log = {
-  info: (message: string, ...args: unknown[]) => console.log(`🔄 [OfflineSync] ${message}`, ...args),
-  warn: (message: string, ...args: unknown[]) => console.warn(`⚠️ [OfflineSync] ${message}`, ...args),
-  error: (message: string, ...args: unknown[]) => console.error(`❌ [OfflineSync] ${message}`, ...args)
+  info: (message: string, ...args: unknown[]) =>
+    console.log(`🔄 [OfflineSync] ${message}`, ...args),
+  warn: (message: string, ...args: unknown[]) =>
+    console.warn(`⚠️ [OfflineSync] ${message}`, ...args),
+  error: (message: string, ...args: unknown[]) =>
+    console.error(`❌ [OfflineSync] ${message}`, ...args),
 };
 
 export interface SyncResult {
@@ -31,7 +38,7 @@ export class OfflineSyncManager {
   private networkStatus: NetworkStatus = {
     online: navigator.onLine,
     connection: 'fast',
-    lastChecked: new Date().toISOString()
+    lastChecked: new Date().toISOString(),
   };
   private readonly SYNC_INTERVAL_MS = 30000; // 30 seconds
   private syncIntervalId: number | null = null;
@@ -77,13 +84,19 @@ export class OfflineSyncManager {
     }
 
     // Use Network Information API if available
-    const connection = (navigator as unknown as { connection?: { effectiveType?: string } }).connection;
+    const connection = (
+      navigator as unknown as { connection?: { effectiveType?: string } }
+    ).connection;
     if (connection?.effectiveType) {
       const effectiveType = connection.effectiveType;
-      this.networkStatus.connection = ['4g', 'fast'].includes(effectiveType) ? 'fast' : 'slow';
+      this.networkStatus.connection = ['4g', 'fast'].includes(effectiveType)
+        ? 'fast'
+        : 'slow';
     } else {
       // Fallback to online status
-      this.networkStatus.connection = this.networkStatus.online ? 'fast' : 'offline';
+      this.networkStatus.connection = this.networkStatus.online
+        ? 'fast'
+        : 'offline';
     }
   }
 
@@ -125,7 +138,11 @@ export class OfflineSyncManager {
   /**
    * Save chart with offline support
    */
-  public async saveChartWithSync(chartData: unknown, birthData: unknown, userId: string): Promise<string> {
+  public async saveChartWithSync(
+    chartData: unknown,
+    birthData: unknown,
+    userId: string
+  ): Promise<string> {
     const chartId = await this.storage.saveChart({
       userId,
       name: `Chart ${new Date().toLocaleDateString()}`,
@@ -137,7 +154,7 @@ export class OfflineSyncManager {
       birth_data: birthData,
       synced: false,
       offline_created: true,
-      priority: 'high' // New charts are high priority
+      priority: 'high', // New charts are high priority
     });
 
     // Add to sync queue
@@ -145,7 +162,7 @@ export class OfflineSyncManager {
       id: chartId,
       userId,
       chart_data: chartData,
-      birth_data: birthData
+      birth_data: birthData,
     });
 
     // Trigger sync if online
@@ -186,7 +203,10 @@ export class OfflineSyncManager {
   /**
    * Get user charts with offline fallback
    */
-  public async getUserCharts(userId: string, tryOnlineFirst = true): Promise<OfflineChart[]> {
+  public async getUserCharts(
+    userId: string,
+    tryOnlineFirst = true
+  ): Promise<OfflineChart[]> {
     // If offline or user doesn't want online-first, return offline data
     if (!this.networkStatus.online || !tryOnlineFirst) {
       return this.storage.getUserCharts(userId);
@@ -197,7 +217,7 @@ export class OfflineSyncManager {
       // This would integrate with the actual API service
       // For now, return offline data
       const offlineCharts = await this.storage.getUserCharts(userId);
-      
+
       // Trigger background sync to update data
       this.syncOfflineData().catch(error => {
         log.warn('Background sync failed while getting user charts:', error);
@@ -205,7 +225,10 @@ export class OfflineSyncManager {
 
       return offlineCharts;
     } catch (error) {
-      log.warn('Failed to fetch charts online, falling back to offline:', error);
+      log.warn(
+        'Failed to fetch charts online, falling back to offline:',
+        error
+      );
       return this.storage.getUserCharts(userId);
     }
   }
@@ -220,7 +243,7 @@ export class OfflineSyncManager {
         success: false,
         synced_items: 0,
         failed_items: 0,
-        errors: ['Sync already in progress']
+        errors: ['Sync already in progress'],
       };
     }
 
@@ -230,7 +253,7 @@ export class OfflineSyncManager {
         success: false,
         synced_items: 0,
         failed_items: 0,
-        errors: ['Device is offline']
+        errors: ['Device is offline'],
       };
     }
 
@@ -241,7 +264,7 @@ export class OfflineSyncManager {
       success: true,
       synced_items: 0,
       failed_items: 0,
-      errors: []
+      errors: [],
     };
 
     try {
@@ -252,30 +275,34 @@ export class OfflineSyncManager {
         try {
           await this.syncItem(item);
           result.synced_items++;
-          
+
           // Remove successfully synced item
           await this.storage.removeFromSyncQueue(item.id);
-          
+
           // Mark chart as synced if it was a create/update operation
           if (item.action !== 'delete' && item.chart_data.id) {
             await this.storage.markChartAsSynced(item.chart_data.id);
           }
-          
         } catch (error) {
           result.failed_items++;
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          result.errors.push(`Failed to sync ${item.action} for chart ${item.chart_data.id}: ${errorMessage}`);
-          
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          result.errors.push(
+            `Failed to sync ${item.action} for chart ${item.chart_data.id}: ${errorMessage}`
+          );
+
           // Increment attempt count
           const updatedAttempts = item.attempts + 1;
-          
+
           if (updatedAttempts >= item.max_attempts) {
-            log.error(`Max retry attempts reached for sync item ${item.id}, removing from queue`);
+            log.error(
+              `Max retry attempts reached for sync item ${item.id}, removing from queue`
+            );
             await this.storage.removeFromSyncQueue(item.id);
           } else {
             await this.storage.updateSyncItem(item.id, {
               attempts: updatedAttempts,
-              error_message: errorMessage
+              error_message: errorMessage,
             });
           }
         }
@@ -283,14 +310,19 @@ export class OfflineSyncManager {
 
       if (result.failed_items > 0) {
         result.success = false;
-        log.warn(`Sync completed with ${result.failed_items} failures out of ${pendingItems.length} items`);
+        log.warn(
+          `Sync completed with ${result.failed_items} failures out of ${pendingItems.length} items`
+        );
       } else {
-        log.info(`Sync completed successfully: ${result.synced_items} items synced`);
+        log.info(
+          `Sync completed successfully: ${result.synced_items} items synced`
+        );
       }
-
     } catch (error) {
       result.success = false;
-      result.errors.push(error instanceof Error ? error.message : String(error));
+      result.errors.push(
+        error instanceof Error ? error.message : String(error)
+      );
       log.error('Sync process failed:', error);
     } finally {
       this.syncInProgress = false;
@@ -307,7 +339,7 @@ export class OfflineSyncManager {
 
     // In a real implementation, this would call the actual API
     // For now, we'll simulate the API calls
-    
+
     switch (item.action) {
       case 'create':
         await this.syncCreateChart(item);
@@ -383,12 +415,12 @@ export class OfflineSyncManager {
     network_status: NetworkStatus;
   }> {
     const stats = await this.storage.getStorageStats();
-    
+
     return {
       pending_items: stats.pending_sync_items,
       last_sync: stats.last_sync,
       sync_in_progress: this.syncInProgress,
-      network_status: this.getNetworkStatus()
+      network_status: this.getNetworkStatus(),
     };
   }
 
@@ -410,15 +442,26 @@ export const getOfflineSyncManager = (): OfflineSyncManager => {
 };
 
 // Convenience functions
-export const saveChartOfflineWithSync = (chartData: unknown, birthData: unknown, userId: string): Promise<string> => {
-  return getOfflineSyncManager().saveChartWithSync(chartData, birthData, userId);
+export const saveChartOfflineWithSync = (
+  chartData: unknown,
+  birthData: unknown,
+  userId: string
+): Promise<string> => {
+  return getOfflineSyncManager().saveChartWithSync(
+    chartData,
+    birthData,
+    userId
+  );
 };
 
 export const deleteChartOfflineWithSync = (chartId: string): Promise<void> => {
   return getOfflineSyncManager().deleteChartWithSync(chartId);
 };
 
-export const getUserChartsOffline = (userId: string, tryOnlineFirst = true): Promise<OfflineChart[]> => {
+export const getUserChartsOffline = (
+  userId: string,
+  tryOnlineFirst = true
+): Promise<OfflineChart[]> => {
   return getOfflineSyncManager().getUserCharts(userId, tryOnlineFirst);
 };
 

@@ -12,7 +12,7 @@ export * from './birth';
 
 export interface DateRange {
   startDate: string; // ISO format: YYYY-MM-DD
-  endDate: string;   // ISO format: YYYY-MM-DD
+  endDate: string; // ISO format: YYYY-MM-DD
 }
 
 // Transit calculation types
@@ -25,7 +25,13 @@ export interface TransitResult {
   description?: string;
   intensity?: number; // 0-100 scale
   duration?: string;
-  energy?: 'positive' | 'negative' | 'neutral' | 'challenging' | 'supportive' | 'transformative';
+  energy?:
+    | 'positive'
+    | 'negative'
+    | 'neutral'
+    | 'challenging'
+    | 'supportive'
+    | 'transformative';
   impact?: 'Low' | 'Medium' | 'High' | 'Very High';
 }
 
@@ -78,15 +84,15 @@ export interface ApiError {
 }
 
 // Aspect types for calculations
-export type AspectType = 
-  | 'conjunction' 
-  | 'opposition' 
-  | 'trine' 
-  | 'square' 
-  | 'sextile' 
-  | 'quincunx' 
-  | 'semi-sextile' 
-  | 'semi-square' 
+export type AspectType =
+  | 'conjunction'
+  | 'opposition'
+  | 'trine'
+  | 'square'
+  | 'sextile'
+  | 'quincunx'
+  | 'semi-sextile'
+  | 'semi-square'
   | 'sesquiquadrate';
 
 export interface AspectDefinition {
@@ -98,30 +104,30 @@ export interface AspectDefinition {
 }
 
 // Planet types
-export type PlanetName = 
-  | 'sun' 
-  | 'moon' 
-  | 'mercury' 
-  | 'venus' 
-  | 'mars' 
-  | 'jupiter' 
-  | 'saturn' 
-  | 'uranus' 
-  | 'neptune' 
-  | 'pluto' 
-  | 'chiron' 
-  | 'north_node' 
+export type PlanetName =
+  | 'sun'
+  | 'moon'
+  | 'mercury'
+  | 'venus'
+  | 'mars'
+  | 'jupiter'
+  | 'saturn'
+  | 'uranus'
+  | 'neptune'
+  | 'pluto'
+  | 'chiron'
+  | 'north_node'
   | 'south_node';
 
 // Lunar phase types
-export type LunarPhase = 
-  | 'new_moon' 
-  | 'waxing_crescent' 
-  | 'first_quarter' 
-  | 'waxing_gibbous' 
-  | 'full_moon' 
-  | 'waning_gibbous' 
-  | 'last_quarter' 
+export type LunarPhase =
+  | 'new_moon'
+  | 'waxing_crescent'
+  | 'first_quarter'
+  | 'waxing_gibbous'
+  | 'full_moon'
+  | 'waning_gibbous'
+  | 'last_quarter'
   | 'waning_crescent';
 
 export interface LunarPhaseDefinition {

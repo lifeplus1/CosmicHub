@@ -15,7 +15,7 @@ const logger = {
   },
   error: (message: string, data?: unknown) => {
     console.error(`[CrossAppStore] ${message}`, data);
-  }
+  },
 };
 
 // Simple EventEmitter implementation for browser compatibility
@@ -37,14 +37,28 @@ class SimpleEventEmitter {
     const list = this.events[event];
     if (!list) return;
     list.forEach(callback => {
-      try { callback(data); } catch (err) { logger.warn('Listener error', err); }
+      try {
+        callback(data);
+      } catch (err) {
+        logger.warn('Listener error', err);
+      }
     });
   }
 }
 
-export interface UserPreferences { [key: string]: unknown }
-export interface ChartData { id: string; data: Record<string, unknown> | null; name: string }
-export interface UserState { id: string; subscription: string; preferences: UserPreferences }
+export interface UserPreferences {
+  [key: string]: unknown;
+}
+export interface ChartData {
+  id: string;
+  data: Record<string, unknown> | null;
+  name: string;
+}
+export interface UserState {
+  id: string;
+  subscription: string;
+  preferences: UserPreferences;
+}
 export interface AppState {
   user: UserState | null;
   currentChart: ChartData | null;
@@ -52,14 +66,19 @@ export interface AppState {
   activeApp: 'astro' | 'healwave';
 }
 
-export interface CrossAppEvent<P = unknown> { type: string; payload: P; source: string; timestamp: number }
+export interface CrossAppEvent<P = unknown> {
+  type: string;
+  payload: P;
+  source: string;
+  timestamp: number;
+}
 
 class CrossAppStore extends SimpleEventEmitter {
   private state: AppState = {
     user: null,
     currentChart: null,
     theme: 'cosmic',
-    activeApp: 'astro'
+    activeApp: 'astro',
   };
 
   private storageKey = 'cosmichub-cross-app-state';
@@ -146,12 +165,12 @@ class CrossAppStore extends SimpleEventEmitter {
 
   private setupStorageListener(): void {
     if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (event) => {
+      window.addEventListener('storage', event => {
         if (event.key === this.storageKey && event.newValue) {
           try {
-    const newState = JSON.parse(event.newValue) as Partial<AppState>;
-    this.state = { ...this.state, ...newState };
-    this.emit('state:synced', this.state);
+            const newState = JSON.parse(event.newValue) as Partial<AppState>;
+            this.state = { ...this.state, ...newState };
+            this.emit('state:synced', this.state);
           } catch (error) {
             logger.warn('Failed to sync cross-app state:', error);
           }
@@ -165,14 +184,14 @@ class CrossAppStore extends SimpleEventEmitter {
       type,
       payload,
       source: this.state.activeApp,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // Broadcast via localStorage for cross-tab communication
     try {
-  const eventKey = `cosmichub-event-${Date.now()}`;
-  localStorage.setItem(eventKey, JSON.stringify(event));
-      
+      const eventKey = `cosmichub-event-${Date.now()}`;
+      localStorage.setItem(eventKey, JSON.stringify(event));
+
       // Clean up old events
       setTimeout(() => {
         localStorage.removeItem(eventKey);
@@ -188,10 +207,10 @@ class CrossAppStore extends SimpleEventEmitter {
       user: null,
       currentChart: null,
       theme: 'cosmic',
-      activeApp: 'astro'
+      activeApp: 'astro',
     };
     this.saveState();
-  this.emit('state:cleared', this.state);
+    this.emit('state:cleared', this.state);
   }
 }
 

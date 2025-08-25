@@ -1,6 +1,12 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FaCalendarAlt, FaUser, FaTags, FaClock, FaArrowLeft } from 'react-icons/fa';
+import {
+  FaCalendarAlt,
+  FaUser,
+  FaTags,
+  FaClock,
+  FaArrowLeft,
+} from 'react-icons/fa';
 import SocialShare from '../components/SocialShare';
 import BlogComments from '../components/BlogComments';
 import RelatedPosts from '../components/RelatedPosts';
@@ -17,7 +23,12 @@ interface BlogPostData {
   publishedAt: string;
   readTime: number;
   tags: string[];
-  category: 'astrology' | 'numerology' | 'human-design' | 'gene-keys' | 'general';
+  category:
+    | 'astrology'
+    | 'numerology'
+    | 'human-design'
+    | 'gene-keys'
+    | 'general';
   featured?: boolean;
   imageUrl?: string;
 }
@@ -26,7 +37,8 @@ const mockBlogPosts: BlogPostData[] = [
   {
     id: '1',
     title: 'Understanding Your Moon Sign: The Key to Emotional Intelligence',
-    excerpt: 'Discover how your Moon sign influences your emotional patterns, reactions, and inner world. Learn to harness this cosmic wisdom for better self-understanding.',
+    excerpt:
+      'Discover how your Moon sign influences your emotional patterns, reactions, and inner world. Learn to harness this cosmic wisdom for better self-understanding.',
     content: `# Understanding Your Moon Sign: The Key to Emotional Intelligence
 
 Your Moon sign represents your emotional core, subconscious patterns, and instinctive reactions. While your Sun sign shows how you express yourself outwardly, your Moon sign reveals your inner emotional landscape—the part of you that responds automatically to life's experiences.
@@ -113,12 +125,13 @@ Remember, there's no "best" Moon sign—each has its gifts and challenges. The k
     tags: ['moon-sign', 'emotions', 'self-discovery'],
     category: 'astrology',
     featured: true,
-    imageUrl: '/blog-images/moon-sign-guide.jpg'
+    imageUrl: '/blog-images/moon-sign-guide.jpg',
   },
   {
     id: '2',
     title: 'The Power of Venus Return: Love Cycles in Astrology',
-    excerpt: 'Every 19 months, Venus returns to its natal position in your chart. Explore how these cycles influence your relationships and values.',
+    excerpt:
+      'Every 19 months, Venus returns to its natal position in your chart. Explore how these cycles influence your relationships and values.',
     content: `# The Power of Venus Return: Love Cycles in Astrology
 
 Every 19 months, Venus completes a full cycle and returns to the exact position it occupied at the time of your birth. This celestial event, known as a Venus Return, marks a powerful period of renewal in the areas of love, relationships, values, and personal worth.
@@ -250,8 +263,8 @@ Whether you're single, partnered, or somewhere in between, your Venus Return is 
     readTime: 5,
     tags: ['venus', 'relationships', 'cycles'],
     category: 'astrology',
-    imageUrl: '/blog-images/venus-return.jpg'
-  }
+    imageUrl: '/blog-images/venus-return.jpg',
+  },
   // Add more blog posts as needed...
 ];
 
@@ -260,7 +273,7 @@ const categoryColors = {
   numerology: 'from-green-500 to-teal-500',
   'human-design': 'from-orange-500 to-red-500',
   'gene-keys': 'from-pink-500 to-purple-500',
-  general: 'from-gray-500 to-gray-600'
+  general: 'from-gray-500 to-gray-600',
 };
 
 const categoryLabels = {
@@ -268,25 +281,28 @@ const categoryLabels = {
   numerology: 'Numerology',
   'human-design': 'Human Design',
   'gene-keys': 'Gene Keys',
-  general: 'General'
+  general: 'General',
 };
 
 const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  
+
   const post = mockBlogPosts.find(p => p.id === id);
-  
+
   if (!post) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <div className="text-6xl mb-6">🌟</div>
-        <h1 className="text-3xl font-bold text-cosmic-silver mb-4">Post Not Found</h1>
-        <p className="text-cosmic-silver/80 mb-8">
-          The blog post you&apos;re looking for doesn&apos;t exist or has been moved.
+      <div className='max-w-4xl mx-auto px-4 py-16 text-center'>
+        <div className='text-6xl mb-6'>🌟</div>
+        <h1 className='text-3xl font-bold text-cosmic-silver mb-4'>
+          Post Not Found
+        </h1>
+        <p className='text-cosmic-silver/80 mb-8'>
+          The blog post you&apos;re looking for doesn&apos;t exist or has been
+          moved.
         </p>
-        <Link 
-          to="/blog"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-cosmic-purple/30 text-cosmic-gold rounded-lg hover:bg-cosmic-purple/40 transition-colors duration-200"
+        <Link
+          to='/blog'
+          className='inline-flex items-center gap-2 px-6 py-3 bg-cosmic-purple/30 text-cosmic-gold rounded-lg hover:bg-cosmic-purple/40 transition-colors duration-200'
         >
           <FaArrowLeft />
           Back to Blog
@@ -299,85 +315,104 @@ const BlogPost: React.FC = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
   // Simple markdown-like processing for content
   const processContent = (content: string) => {
-    return content
-      .split('\n\n')
-      .map((paragraph, index) => {
-        // Headers
-        if (paragraph.startsWith('# ')) {
-          return (
-            <h1 key={index} className="text-3xl font-bold text-cosmic-gold mb-6 mt-8 first:mt-0 font-cinzel">
-              {paragraph.substring(2)}
-            </h1>
-          );
-        }
-        if (paragraph.startsWith('## ')) {
-          return (
-            <h2 key={index} className="text-2xl font-bold text-cosmic-gold mb-4 mt-6 font-cinzel">
-              {paragraph.substring(3)}
-            </h2>
-          );
-        }
-        if (paragraph.startsWith('### ')) {
-          return (
-            <h3 key={index} className="text-xl font-bold text-cosmic-silver mb-3 mt-4">
-              {paragraph.substring(4)}
-            </h3>
-          );
-        }
-        
-        // Lists
-        if (paragraph.includes('\n- ')) {
-          const items = paragraph.split('\n- ').map((item, i) => {
-            if (i === 0) return item;
-            return item;
-          });
-          
-          return (
-            <div key={index} className="mb-4">
-              {items[0] && <p className="text-cosmic-silver/90 mb-2">{items[0]}</p>}
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                {items.slice(1).map((item, i) => (
-                  <li key={i} className="text-cosmic-silver/90">{item}</li>
-                ))}
-              </ul>
-            </div>
-          );
-        }
-        
-        // Numbered lists
-        if (/^\d+\./.test(paragraph)) {
-          const items = paragraph.split(/\n\d+\.\s/);
-          return (
-            <ol key={index} className="list-decimal list-inside space-y-2 ml-4 mb-4">
-              {items.map((item, i) => (
-                <li key={i} className="text-cosmic-silver/90">{item.replace(/^\d+\.\s/, '')}</li>
-              ))}
-            </ol>
-          );
-        }
-        
-        // Bold text
-        const processedParagraph = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong class="text-cosmic-gold font-semibold">$1</strong>');
-        
-        // Regular paragraphs
+    return content.split('\n\n').map((paragraph, index) => {
+      // Headers
+      if (paragraph.startsWith('# ')) {
         return (
-          <p 
-            key={index} 
-            className="text-cosmic-silver/90 mb-4 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: processedParagraph }}
-          />
+          <h1
+            key={index}
+            className='text-3xl font-bold text-cosmic-gold mb-6 mt-8 first:mt-0 font-cinzel'
+          >
+            {paragraph.substring(2)}
+          </h1>
         );
-      });
+      }
+      if (paragraph.startsWith('## ')) {
+        return (
+          <h2
+            key={index}
+            className='text-2xl font-bold text-cosmic-gold mb-4 mt-6 font-cinzel'
+          >
+            {paragraph.substring(3)}
+          </h2>
+        );
+      }
+      if (paragraph.startsWith('### ')) {
+        return (
+          <h3
+            key={index}
+            className='text-xl font-bold text-cosmic-silver mb-3 mt-4'
+          >
+            {paragraph.substring(4)}
+          </h3>
+        );
+      }
+
+      // Lists
+      if (paragraph.includes('\n- ')) {
+        const items = paragraph.split('\n- ').map((item, i) => {
+          if (i === 0) return item;
+          return item;
+        });
+
+        return (
+          <div key={index} className='mb-4'>
+            {items[0] && (
+              <p className='text-cosmic-silver/90 mb-2'>{items[0]}</p>
+            )}
+            <ul className='list-disc list-inside space-y-2 ml-4'>
+              {items.slice(1).map((item, i) => (
+                <li key={i} className='text-cosmic-silver/90'>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+
+      // Numbered lists
+      if (/^\d+\./.test(paragraph)) {
+        const items = paragraph.split(/\n\d+\.\s/);
+        return (
+          <ol
+            key={index}
+            className='list-decimal list-inside space-y-2 ml-4 mb-4'
+          >
+            {items.map((item, i) => (
+              <li key={i} className='text-cosmic-silver/90'>
+                {item.replace(/^\d+\.\s/, '')}
+              </li>
+            ))}
+          </ol>
+        );
+      }
+
+      // Bold text
+      const processedParagraph = paragraph.replace(
+        /\*\*(.*?)\*\*/g,
+        '<strong class="text-cosmic-gold font-semibold">$1</strong>'
+      );
+
+      // Regular paragraphs
+      return (
+        <p
+          key={index}
+          className='text-cosmic-silver/90 mb-4 leading-relaxed'
+          dangerouslySetInnerHTML={{ __html: processedParagraph }}
+        />
+      );
+    });
   };
 
   return (
-    <article className="max-w-4xl mx-auto px-4 py-8">
+    <article className='max-w-4xl mx-auto px-4 py-8'>
       {/* Floating Social Share */}
       <SocialShare
         url={window.location.href}
@@ -385,14 +420,14 @@ const BlogPost: React.FC = () => {
         description={post.excerpt}
         author={post.author}
         tags={post.tags}
-        variant="floating"
+        variant='floating'
       />
 
       {/* Back button */}
-      <div className="mb-8">
-        <Link 
-          to="/blog"
-          className="inline-flex items-center gap-2 text-cosmic-gold hover:text-cosmic-gold/80 transition-colors duration-200"
+      <div className='mb-8'>
+        <Link
+          to='/blog'
+          className='inline-flex items-center gap-2 text-cosmic-gold hover:text-cosmic-gold/80 transition-colors duration-200'
         >
           <FaArrowLeft />
           Back to Blog
@@ -400,42 +435,44 @@ const BlogPost: React.FC = () => {
       </div>
 
       {/* Header */}
-      <header className="mb-8">
+      <header className='mb-8'>
         {/* Category */}
-        <div className="mb-4">
-          <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${categoryColors[post.category]} shadow-lg`}>
+        <div className='mb-4'>
+          <span
+            className={`inline-block px-3 py-1 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${categoryColors[post.category]} shadow-lg`}
+          >
             {categoryLabels[post.category]}
           </span>
           {post.featured && (
-            <span className="ml-2 px-2 py-1 rounded-full text-xs font-bold text-cosmic-dark bg-cosmic-gold shadow-lg">
+            <span className='ml-2 px-2 py-1 rounded-full text-xs font-bold text-cosmic-dark bg-cosmic-gold shadow-lg'>
               FEATURED
             </span>
           )}
         </div>
 
         {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-bold text-cosmic-silver mb-4 font-cinzel leading-tight">
+        <h1 className='text-4xl md:text-5xl font-bold text-cosmic-silver mb-4 font-cinzel leading-tight'>
           {post.title}
         </h1>
 
         {/* Excerpt */}
-        <p className="text-xl text-cosmic-silver/80 mb-6 leading-relaxed">
+        <p className='text-xl text-cosmic-silver/80 mb-6 leading-relaxed'>
           {post.excerpt}
         </p>
 
         {/* Meta info */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-cosmic-silver/20">
-          <div className="flex items-center gap-6 text-sm text-cosmic-silver/70">
-            <div className="flex items-center gap-2">
-              <FaUser className="w-4 h-4" />
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-cosmic-silver/20'>
+          <div className='flex items-center gap-6 text-sm text-cosmic-silver/70'>
+            <div className='flex items-center gap-2'>
+              <FaUser className='w-4 h-4' />
               <span>{post.author}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <FaCalendarAlt className="w-4 h-4" />
+            <div className='flex items-center gap-2'>
+              <FaCalendarAlt className='w-4 h-4' />
               <span>{formatDate(post.publishedAt)}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <FaClock className="w-4 h-4" />
+            <div className='flex items-center gap-2'>
+              <FaClock className='w-4 h-4' />
               <span>{post.readTime} min read</span>
             </div>
           </div>
@@ -447,40 +484,39 @@ const BlogPost: React.FC = () => {
             description={post.excerpt}
             author={post.author}
             tags={post.tags}
-            variant="compact"
+            variant='compact'
           />
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2">
+        <div className='flex flex-wrap gap-2'>
           {post.tags.map(tag => (
             <Link
               key={tag}
               to={`/blog?tag=${encodeURIComponent(tag)}`}
-              className="flex items-center gap-1 px-3 py-1 bg-cosmic-silver/10 text-cosmic-silver/80 rounded-md hover:bg-cosmic-silver/20 transition-colors duration-200"
+              className='flex items-center gap-1 px-3 py-1 bg-cosmic-silver/10 text-cosmic-silver/80 rounded-md hover:bg-cosmic-silver/20 transition-colors duration-200'
             >
-              <FaTags className="w-3 h-3" />
-              #{tag}
+              <FaTags className='w-3 h-3' />#{tag}
             </Link>
           ))}
         </div>
       </header>
 
       {/* Content */}
-      <div className="prose prose-lg max-w-none">
-        <div className="bg-gradient-to-br from-cosmic-blue/5 to-cosmic-purple/5 rounded-2xl p-8 border border-cosmic-silver/10 blog-content">
+      <div className='prose prose-lg max-w-none'>
+        <div className='bg-gradient-to-br from-cosmic-blue/5 to-cosmic-purple/5 rounded-2xl p-8 border border-cosmic-silver/10 blog-content'>
           {processContent(post.content)}
         </div>
       </div>
 
       {/* Comments */}
-  <BlogComments postId={post.id} />
+      <BlogComments postId={post.id} />
 
       {/* Newsletter Subscription */}
-      <BlogSubscription variant="inline" className="mt-12" />
+      <BlogSubscription variant='inline' className='mt-12' />
 
       {/* Related Posts */}
-      <RelatedPosts 
+      <RelatedPosts
         currentPostId={post.id}
         currentCategory={post.category}
         currentTags={post.tags}
@@ -495,50 +531,59 @@ const BlogPost: React.FC = () => {
         description={post.excerpt}
         author={post.author}
         tags={post.tags}
-        variant="expanded"
+        variant='expanded'
       />
 
       {/* Footer */}
-      <footer className="mt-12 pt-8 border-t border-cosmic-silver/20">
-        <div className="text-center">
-          <p className="text-cosmic-silver/80 mb-4">
+      <footer className='mt-12 pt-8 border-t border-cosmic-silver/20'>
+        <div className='text-center'>
+          <p className='text-cosmic-silver/80 mb-4'>
             Enjoyed this post? Explore more cosmic wisdom on our blog.
           </p>
           <Link
-            to="/blog"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple text-cosmic-dark rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
+            to='/blog'
+            className='inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple text-cosmic-dark rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg'
           >
             Explore More Posts
-            <FaArrowLeft className="rotate-180" />
+            <FaArrowLeft className='rotate-180' />
           </Link>
         </div>
       </footer>
 
       {/* Related posts would go here in a real app */}
-      <div className="mt-16">
-        <h3 className="text-2xl font-bold text-cosmic-gold mb-6 font-cinzel">Continue Reading</h3>
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className='mt-16'>
+        <h3 className='text-2xl font-bold text-cosmic-gold mb-6 font-cinzel'>
+          Continue Reading
+        </h3>
+        <div className='grid md:grid-cols-2 gap-6'>
           {mockBlogPosts
-            .filter(p => p.id !== post.id && (p.category === post.category || p.tags.some(tag => post.tags.includes(tag))))
+            .filter(
+              p =>
+                p.id !== post.id &&
+                (p.category === post.category ||
+                  p.tags.some(tag => post.tags.includes(tag)))
+            )
             .slice(0, 2)
             .map(relatedPost => (
               <Link
                 key={relatedPost.id}
                 to={`/blog/${relatedPost.id}`}
-                className="block bg-cosmic-blue/10 rounded-xl p-6 border border-cosmic-silver/10 hover:border-cosmic-gold/30 transition-all duration-300 hover:shadow-xl"
+                className='block bg-cosmic-blue/10 rounded-xl p-6 border border-cosmic-silver/10 hover:border-cosmic-gold/30 transition-all duration-300 hover:shadow-xl'
               >
-                <div className="mb-2">
-                  <span className={`inline-block px-2 py-1 rounded-md text-xs font-semibold text-white bg-gradient-to-r ${categoryColors[relatedPost.category]}`}>
+                <div className='mb-2'>
+                  <span
+                    className={`inline-block px-2 py-1 rounded-md text-xs font-semibold text-white bg-gradient-to-r ${categoryColors[relatedPost.category]}`}
+                  >
                     {categoryLabels[relatedPost.category]}
                   </span>
                 </div>
-                <h4 className="text-lg font-bold text-cosmic-silver mb-2 hover:text-cosmic-gold transition-colors duration-300">
+                <h4 className='text-lg font-bold text-cosmic-silver mb-2 hover:text-cosmic-gold transition-colors duration-300'>
                   {relatedPost.title}
                 </h4>
-                <p className="text-cosmic-silver/80 text-sm mb-3 line-clamp-2">
+                <p className='text-cosmic-silver/80 text-sm mb-3 line-clamp-2'>
                   {relatedPost.excerpt}
                 </p>
-                <div className="flex items-center justify-between text-xs text-cosmic-silver/60">
+                <div className='flex items-center justify-between text-xs text-cosmic-silver/60'>
                   <span>{relatedPost.author}</span>
                   <span>{relatedPost.readTime} min read</span>
                 </div>

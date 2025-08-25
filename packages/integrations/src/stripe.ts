@@ -17,7 +17,7 @@ const logger = {
   },
   error: (message: string, data?: unknown) => {
     console.error(`[StripeIntegration] ${message}`, data);
-  }
+  },
 };
 
 // Firebase will be injected by the consuming app to avoid dependency issues
@@ -38,33 +38,49 @@ interface FirebaseAuthUser {
   getIdToken(): Promise<string>;
 }
 
-interface FirebaseAuth { currentUser: FirebaseAuthUser | null; }
+interface FirebaseAuth {
+  currentUser: FirebaseAuthUser | null;
+}
 
 interface FirebaseServices {
   getFirestore: () => unknown;
   doc: (db: unknown, collection: string, id: string) => FirestoreDocRef;
-  setDoc: (ref: FirestoreDocRef, data: unknown, options?: { merge?: boolean }) => Promise<void>;
-  getDoc: (ref: FirestoreDocRef) => Promise<FirestoreDocSnapshot<{ subscription?: SubscriptionData }>>;
+  setDoc: (
+    ref: FirestoreDocRef,
+    data: unknown,
+    options?: { merge?: boolean }
+  ) => Promise<void>;
+  getDoc: (
+    ref: FirestoreDocRef
+  ) => Promise<FirestoreDocSnapshot<{ subscription?: SubscriptionData }>>;
   getAuth: () => FirebaseAuth;
 }
 
 let firebaseServices: FirebaseServices | null = null;
 
-export const initializeFirebaseServices = (services: FirebaseServices): void => {
+export const initializeFirebaseServices = (
+  services: FirebaseServices
+): void => {
   firebaseServices = services;
 };
 
 // Type-safe environment access
 const getEnvVar = (key: string, fallback = ''): string => {
   // Attempt to read from process-like env (SSR/build). Avoid direct `process` reference to satisfy no-undef.
-  const proc = (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } }).process;
+  const proc = (
+    globalThis as unknown as {
+      process?: { env?: Record<string, string | undefined> };
+    }
+  ).process;
   const valFromProcess = proc?.env?.[key];
   if (typeof valFromProcess === 'string' && valFromProcess.length > 0) {
     return valFromProcess;
   }
 
   // Vite style import.meta.env
-  const meta = (import.meta as unknown as { env?: Record<string, string | undefined> });
+  const meta = import.meta as unknown as {
+    env?: Record<string, string | undefined>;
+  };
   const valFromMeta = meta.env?.[key];
   if (typeof valFromMeta === 'string' && valFromMeta.length > 0) {
     return valFromMeta;
@@ -119,7 +135,9 @@ export class StripeService {
   public static getInstance(config?: StripeConfig): StripeService {
     if (StripeService.instance === null) {
       if (!config) {
-        throw new Error('StripeService config required for first initialization');
+        throw new Error(
+          'StripeService config required for first initialization'
+        );
       }
       StripeService.instance = new StripeService(config);
     }
@@ -146,7 +164,11 @@ export class StripeService {
   }
 
   private async performInitialization(): Promise<void> {
-  if (this.config.publicKey === undefined || this.config.publicKey === null || this.config.publicKey === '') {
+    if (
+      this.config.publicKey === undefined ||
+      this.config.publicKey === null ||
+      this.config.publicKey === ''
+    ) {
       throw new Error('Stripe public key not configured');
     }
 
@@ -171,17 +193,17 @@ export class StripeService {
     successUrl,
     cancelUrl,
     feature,
-    metadata = {}
+    metadata = {},
   }: StripeCheckoutParams): Promise<StripeSession> {
     await this.initializeStripe();
-    
-  if (this.stripe === null) {
+
+    if (this.stripe === null) {
       throw new Error('Stripe not properly initialized');
     }
 
     // Validate user authentication
     const auth = firebaseServices?.getAuth();
-        if (!auth?.currentUser || auth.currentUser.uid !== userId) {
+    if (!auth?.currentUser || auth.currentUser.uid !== userId) {
       throw new Error('User authentication required for checkout');
     }
 
@@ -197,51 +219,56 @@ export class StripeService {
           ...metadata,
           feature: feature ?? '',
           billingCycle: isAnnual ? 'annual' : 'monthly',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
 
       const response = await fetch(this.config.checkoutEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`
+          Authorization: `Bearer ${await auth.currentUser.getIdToken()}`,
         },
         body: JSON.stringify(checkoutData),
       });
 
       if (!response.ok) {
-            const errorData = (await response
-              .json()
-              .catch(() => ({ error: 'Unknown error' }))) as { error?: string };
-            throw new Error(`Checkout session creation failed: ${errorData.error ?? response.statusText}`);
+        const errorData = (await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }))) as { error?: string };
+        throw new Error(
+          `Checkout session creation failed: ${errorData.error ?? response.statusText}`
+        );
       }
 
-          const checkoutJson = (await response.json()) as unknown;
-          const { sessionId, url } = (typeof checkoutJson === 'object' && checkoutJson && 'sessionId' in checkoutJson)
-            ? (checkoutJson as { sessionId?: string; url?: string })
-            : { sessionId: undefined, url: undefined };
-      
-  if (typeof sessionId !== 'string' || sessionId.length === 0) {
+      const checkoutJson = (await response.json()) as unknown;
+      const { sessionId, url } =
+        typeof checkoutJson === 'object' &&
+        checkoutJson &&
+        'sessionId' in checkoutJson
+          ? (checkoutJson as { sessionId?: string; url?: string })
+          : { sessionId: undefined, url: undefined };
+
+      if (typeof sessionId !== 'string' || sessionId.length === 0) {
         throw new Error('Invalid response: missing sessionId');
       }
 
       // If URL is provided, use it directly; otherwise redirect via Stripe
-  if (typeof url === 'string' && url.length > 0) {
+      if (typeof url === 'string' && url.length > 0) {
         // Direct redirect to Stripe Checkout
         window.location.href = url;
         return { id: sessionId, url };
       } else {
         // Use Stripe.js to redirect
         const { error } = await this.stripe.redirectToCheckout({ sessionId });
-            if (error !== null && error !== undefined) {
+        if (error !== null && error !== undefined) {
           throw new Error(`Stripe redirect failed: ${error.message}`);
         }
         return { id: sessionId, url: '' };
       }
     } catch (error) {
-          logger.error('Stripe checkout error:', error);
-      
+      logger.error('Stripe checkout error:', error);
+
       // Re-throw with user-friendly message
       if (error instanceof Error) {
         throw error;
@@ -255,32 +282,38 @@ export class StripeService {
    * Update user subscription data in Firestore
    */
   public async updateUserSubscription(
-    userId: string, 
-    tier: 'premium' | 'elite', 
+    userId: string,
+    tier: 'premium' | 'elite',
     isAnnual: boolean,
     additionalData: Partial<SubscriptionData> = {}
   ): Promise<void> {
-  if (firebaseServices === null) {
+    if (firebaseServices === null) {
       throw new Error('Firebase services not initialized');
     }
 
     try {
       const db = firebaseServices.getFirestore();
       const userRef = firebaseServices.doc(db, 'users', userId);
-      
+
       const subscriptionData: Partial<SubscriptionData> = {
         tier,
         isAnnual,
         status: 'active',
         updatedAt: new Date(),
-        ...additionalData
+        ...additionalData,
       };
 
-      await firebaseServices.setDoc(userRef, { subscription: subscriptionData }, { merge: true });
-      
-          logger.info(`Subscription updated for user ${userId}: ${tier} (${isAnnual ? 'annual' : 'monthly'})`);
+      await firebaseServices.setDoc(
+        userRef,
+        { subscription: subscriptionData },
+        { merge: true }
+      );
+
+      logger.info(
+        `Subscription updated for user ${userId}: ${tier} (${isAnnual ? 'annual' : 'monthly'})`
+      );
     } catch (error) {
-          logger.error('Failed to update user subscription:', error);
+      logger.error('Failed to update user subscription:', error);
       throw new Error('Subscription update failed');
     }
   }
@@ -288,7 +321,9 @@ export class StripeService {
   /**
    * Get user subscription data from Firestore
    */
-  public async getUserSubscription(userId: string): Promise<SubscriptionData | null> {
+  public async getUserSubscription(
+    userId: string
+  ): Promise<SubscriptionData | null> {
     if (firebaseServices === null) {
       logger.warn('Firebase services not initialized');
       return null;
@@ -298,13 +333,14 @@ export class StripeService {
       const db = firebaseServices.getFirestore();
       const userRef = firebaseServices.doc(db, 'users', userId);
       const userDoc = await firebaseServices.getDoc(userRef);
-      
-  if (!userDoc.exists()) {
+
+      if (!userDoc.exists()) {
         return null;
       }
 
       const userData = userDoc.data();
-      const subscriptionCandidate = (userData as { subscription?: unknown }).subscription;
+      const subscriptionCandidate = (userData as { subscription?: unknown })
+        .subscription;
       if (
         subscriptionCandidate &&
         typeof subscriptionCandidate === 'object' &&
@@ -315,7 +351,7 @@ export class StripeService {
       }
       return null;
     } catch (error) {
-          logger.error('Failed to get user subscription:', error);
+      logger.error('Failed to get user subscription:', error);
       return null;
     }
   }
@@ -323,9 +359,11 @@ export class StripeService {
   /**
    * Create customer portal session for subscription management
    */
-  public async createPortalSession(returnUrl: string): Promise<{ url: string }> {
+  public async createPortalSession(
+    returnUrl: string
+  ): Promise<{ url: string }> {
     const auth = firebaseServices?.getAuth();
-  if (!auth?.currentUser) {
+    if (!auth?.currentUser) {
       throw new Error('User authentication required for portal access');
     }
 
@@ -334,7 +372,7 @@ export class StripeService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`
+          Authorization: `Bearer ${await auth.currentUser.getIdToken()}`,
         },
         body: JSON.stringify({ returnUrl }),
       });
@@ -343,7 +381,9 @@ export class StripeService {
         const errorData = (await response
           .json()
           .catch(() => ({ error: 'Unknown error' }))) as { error?: string };
-        throw new Error(`Portal session creation failed: ${errorData.error ?? response.statusText}`);
+        throw new Error(
+          `Portal session creation failed: ${errorData.error ?? response.statusText}`
+        );
       }
 
       const portalJson: unknown = await response.json();
@@ -366,14 +406,25 @@ export class StripeService {
    * Validate Stripe configuration
    */
   public static validateConfig(config: Partial<StripeConfig>): StripeConfig {
-  if (config.publicKey === undefined || config.publicKey === null || config.publicKey.trim() === '') {
-      logger.warn('Stripe public key not configured. Stripe functionality will be disabled.');
+    if (
+      config.publicKey === undefined ||
+      config.publicKey === null ||
+      config.publicKey.trim() === ''
+    ) {
+      logger.warn(
+        'Stripe public key not configured. Stripe functionality will be disabled.'
+      );
       throw new Error('Stripe public key is required');
     }
 
     // Check if it's a placeholder key
-  if (config.publicKey.includes('1234567890') || config.publicKey === 'your_stripe_publishable_key_here') {
-      logger.warn('Using placeholder Stripe key. Please configure real Stripe keys for production.');
+    if (
+      config.publicKey.includes('1234567890') ||
+      config.publicKey === 'your_stripe_publishable_key_here'
+    ) {
+      logger.warn(
+        'Using placeholder Stripe key. Please configure real Stripe keys for production.'
+      );
     }
 
     const defaultCheckoutEndpoint = `${getEnvVar('VITE_API_URL', 'http://localhost:8000')}/api/stripe/create-checkout-session`;
@@ -381,8 +432,8 @@ export class StripeService {
 
     return {
       publicKey: config.publicKey,
-  checkoutEndpoint: config.checkoutEndpoint ?? defaultCheckoutEndpoint,
-  portalEndpoint: config.portalEndpoint ?? defaultPortalEndpoint
+      checkoutEndpoint: config.checkoutEndpoint ?? defaultCheckoutEndpoint,
+      portalEndpoint: config.portalEndpoint ?? defaultPortalEndpoint,
     };
   }
 
@@ -392,47 +443,55 @@ export class StripeService {
   public async handleCheckoutSuccess(sessionId: string): Promise<boolean> {
     try {
       const auth = firebaseServices?.getAuth();
-  if (!auth?.currentUser) {
+      if (!auth?.currentUser) {
         logger.error('No authenticated user found');
         return false;
       }
 
       // Verify the session and update subscription status
-      const response = await fetch(`${getEnvVar('VITE_API_URL', 'http://localhost:8000')}/api/stripe/verify-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`
-        },
-        body: JSON.stringify({ sessionId }),
-      });
+      const response = await fetch(
+        `${getEnvVar('VITE_API_URL', 'http://localhost:8000')}/api/stripe/verify-session`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${await auth.currentUser.getIdToken()}`,
+          },
+          body: JSON.stringify({ sessionId }),
+        }
+      );
 
-          if (!response.ok) {
-            logger.error('Session verification failed');
-            return false;
-          }
+      if (!response.ok) {
+        logger.error('Session verification failed');
+        return false;
+      }
 
-          const verificationJson: unknown = await response.json();
-          const subscription = (typeof verificationJson === 'object' && verificationJson !== null && 'subscription' in verificationJson)
-            ? (verificationJson as { subscription?: unknown }).subscription
-            : undefined;
-      
-          if (
-            subscription &&
-            typeof subscription === 'object' &&
-            'tier' in subscription &&
-            ((subscription as { tier?: unknown }).tier === 'premium' || (subscription as { tier?: unknown }).tier === 'elite')
-          ) {
-            const tierVal = (subscription as { tier: 'premium' | 'elite' }).tier;
-            const isAnnual = (subscription as { isAnnual?: unknown }).isAnnual === true;
-            await this.updateUserSubscription(
-              auth.currentUser.uid,
-              tierVal,
-              isAnnual,
-              subscription as Partial<SubscriptionData>
-            );
-            return true;
-          }
+      const verificationJson: unknown = await response.json();
+      const subscription =
+        typeof verificationJson === 'object' &&
+        verificationJson !== null &&
+        'subscription' in verificationJson
+          ? (verificationJson as { subscription?: unknown }).subscription
+          : undefined;
+
+      if (
+        subscription &&
+        typeof subscription === 'object' &&
+        'tier' in subscription &&
+        ((subscription as { tier?: unknown }).tier === 'premium' ||
+          (subscription as { tier?: unknown }).tier === 'elite')
+      ) {
+        const tierVal = (subscription as { tier: 'premium' | 'elite' }).tier;
+        const isAnnual =
+          (subscription as { isAnnual?: unknown }).isAnnual === true;
+        await this.updateUserSubscription(
+          auth.currentUser.uid,
+          tierVal,
+          isAnnual,
+          subscription as Partial<SubscriptionData>
+        );
+        return true;
+      }
 
       return false;
     } catch (error) {
@@ -455,11 +514,13 @@ export class StripeService {
  */
 let defaultStripeService: StripeService | null = null;
 
-export const createStripeService = (config?: Partial<StripeConfig>): StripeService => {
+export const createStripeService = (
+  config?: Partial<StripeConfig>
+): StripeService => {
   try {
     const stripeConfig = StripeService.validateConfig({
       publicKey: getEnvVar('VITE_STRIPE_PUBLISHABLE_KEY', ''),
-      ...config
+      ...config,
     });
 
     return StripeService.getInstance(stripeConfig);
@@ -477,7 +538,10 @@ export const getStripeService = (): StripeService | null => {
     try {
       defaultStripeService = createStripeService();
     } catch (error) {
-      logger.warn('Stripe service not available:', error instanceof Error ? error.message : 'Unknown error');
+      logger.warn(
+        'Stripe service not available:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       return null;
     }
   }
@@ -491,7 +555,9 @@ export const getStripeService = (): StripeService | null => {
 export const getStripeServiceOrThrow = (): StripeService => {
   const service = getStripeService();
   if (!service) {
-    throw new Error('Stripe service not initialized. Please call createStripeService() first.');
+    throw new Error(
+      'Stripe service not initialized. Please call createStripeService() first.'
+    );
   }
   return service;
 };
@@ -512,7 +578,10 @@ export const formatPrice = (amount: number, currency = 'USD'): string => {
   }).format(amount);
 };
 
-export const calculateAnnualDiscount = (monthlyPrice: number, discountPercent = 20): number => {
+export const calculateAnnualDiscount = (
+  monthlyPrice: number,
+  discountPercent = 20
+): number => {
   const annualPrice = monthlyPrice * 12;
   const discountAmount = annualPrice * (discountPercent / 100);
   return annualPrice - discountAmount;

@@ -1,14 +1,14 @@
 name: SBOM Generation
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
   workflow_dispatch:
     inputs:
       fail-on-severity:
-        description: 'Comma-separated severities that cause failure (e.g., CRITICAL,HIGH)'
+        description: "Comma-separated severities that cause failure (e.g., CRITICAL,HIGH)"
         required: false
-        default: 'CRITICAL,HIGH'
+        default: "CRITICAL,HIGH"
 
 jobs:
   sbom:
@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install cyclonedx-bom
         run: pip install cyclonedx-bom
       - name: Cache pip

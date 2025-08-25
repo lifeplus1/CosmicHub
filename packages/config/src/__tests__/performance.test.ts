@@ -9,8 +9,8 @@ vi.mock('firebase/performance', () => ({
     start: vi.fn(),
     stop: vi.fn(),
     putMetric: vi.fn(),
-    putAttribute: vi.fn()
-  }))
+    putAttribute: vi.fn(),
+  })),
 }));
 
 describe('PerformanceMonitor', () => {
@@ -19,8 +19,10 @@ describe('PerformanceMonitor', () => {
   });
 
   test('records component metric correctly', () => {
-    performanceMonitor.recordComponentMetric('TestComponent', 100, { type: 'render' });
-    
+    performanceMonitor.recordComponentMetric('TestComponent', 100, {
+      type: 'render',
+    });
+
     const report = performanceMonitor.getPerformanceReport();
     expect(report.components).toHaveLength(1);
     expect(report.components[0].componentName).toBe('TestComponent');
@@ -29,8 +31,10 @@ describe('PerformanceMonitor', () => {
   });
 
   test('records operation metric correctly', () => {
-    performanceMonitor.recordOperationMetric('API_CALL', 250, true, { endpoint: '/api/charts' });
-    
+    performanceMonitor.recordOperationMetric('API_CALL', 250, true, {
+      endpoint: '/api/charts',
+    });
+
     const report = performanceMonitor.getPerformanceReport();
     expect(report.operations).toHaveLength(1);
     expect(report.operations[0].operationName).toBe('API_CALL');
@@ -39,8 +43,10 @@ describe('PerformanceMonitor', () => {
   });
 
   test('records page metric correctly', () => {
-    performanceMonitor.recordPageMetric('Dashboard', 300, 'load', { route: '/' });
-    
+    performanceMonitor.recordPageMetric('Dashboard', 300, 'load', {
+      route: '/',
+    });
+
     const report = performanceMonitor.getPerformanceReport();
     expect(report.pages).toHaveLength(1);
     expect(report.pages[0].pageName).toBe('Dashboard');
@@ -50,13 +56,17 @@ describe('PerformanceMonitor', () => {
 
   test('calculates performance summary correctly', () => {
     // Add some test data
-    performanceMonitor.recordComponentMetric('Component1', 50, { type: 'render' });
-    performanceMonitor.recordComponentMetric('Component2', 150, { type: 'render' });
+    performanceMonitor.recordComponentMetric('Component1', 50, {
+      type: 'render',
+    });
+    performanceMonitor.recordComponentMetric('Component2', 150, {
+      type: 'render',
+    });
     performanceMonitor.recordOperationMetric('SuccessOp', 100, true);
     performanceMonitor.recordOperationMetric('FailedOp', 200, false);
-    
+
     const report = performanceMonitor.getPerformanceReport();
-    
+
     expect(report.summary.totalMetrics).toBe(4);
     expect(report.summary.averageRenderTime).toBe(100); // (50 + 150) / 2
     expect(report.summary.errorRate).toBe(50); // 1 failed out of 2 operations
@@ -65,9 +75,11 @@ describe('PerformanceMonitor', () => {
   test('limits metrics storage to prevent memory issues', () => {
     // Add more than the max limit (assuming 1000 is the limit)
     for (let i = 0; i < 1005; i++) {
-      performanceMonitor.recordComponentMetric(`Component${i}`, 100, { type: 'render' });
+      performanceMonitor.recordComponentMetric(`Component${i}`, 100, {
+        type: 'render',
+      });
     }
-    
+
     const report = performanceMonitor.getPerformanceReport();
     expect(report.components.length).toBeLessThanOrEqual(1000);
   });
@@ -75,28 +87,34 @@ describe('PerformanceMonitor', () => {
   test('enables real-time updates with callback', () => {
     const mockCallback = vi.fn();
     const unsubscribe = performanceMonitor.enableRealTimeUpdates(mockCallback);
-    
+
     // Record a metric
-    performanceMonitor.recordComponentMetric('TestComponent', 100, { type: 'render' });
-    
+    performanceMonitor.recordComponentMetric('TestComponent', 100, {
+      type: 'render',
+    });
+
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    
+
     // Unsubscribe and record another metric
     unsubscribe();
-    performanceMonitor.recordComponentMetric('TestComponent2', 200, { type: 'render' });
-    
+    performanceMonitor.recordComponentMetric('TestComponent2', 200, {
+      type: 'render',
+    });
+
     expect(mockCallback).toHaveBeenCalledTimes(1); // Should not be called again
   });
 
   test('clears metrics correctly', () => {
-    performanceMonitor.recordComponentMetric('TestComponent', 100, { type: 'render' });
+    performanceMonitor.recordComponentMetric('TestComponent', 100, {
+      type: 'render',
+    });
     performanceMonitor.recordOperationMetric('TestOp', 200, true);
-    
+
     let report = performanceMonitor.getPerformanceReport();
     expect(report.summary.totalMetrics).toBe(2);
-    
+
     performanceMonitor.clearMetrics();
-    
+
     report = performanceMonitor.getPerformanceReport();
     expect(report.summary.totalMetrics).toBe(0);
     expect(report.components).toHaveLength(0);
@@ -105,11 +123,13 @@ describe('PerformanceMonitor', () => {
   });
 
   test('calculates performance score correctly', () => {
-    performanceMonitor.recordComponentMetric('FastComponent', 10, { type: 'render' });
+    performanceMonitor.recordComponentMetric('FastComponent', 10, {
+      type: 'render',
+    });
     performanceMonitor.recordOperationMetric('SuccessOp', 50, true);
-    
+
     const metrics = performanceMonitor.getMetrics();
-    
+
     expect(metrics.averageRenderTime).toBe(10);
     expect(metrics.totalMetrics).toBe(2);
     expect(metrics.performanceScore).toBeGreaterThan(90); // Should be high with fast renders and no errors

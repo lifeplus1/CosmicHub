@@ -5,12 +5,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChartDisplay } from '../components';
 import { CosmicLoading } from '../components/CosmicLoading';
 import { saveChart, fetchChartData } from '../services/api';
-import type { SaveChartRequest, SaveChartResponse } from '../services/api.types';
+import type {
+  SaveChartRequest,
+  SaveChartResponse,
+} from '../services/api.types';
 import { devConsole } from '../config/environment';
 
 interface StoredBirthData {
-  date: string;  // "2023-06-15" format
-  time: string;  // "14:30" format
+  date: string; // "2023-06-15" format
+  time: string; // "14:30" format
   location: string;
 }
 
@@ -52,16 +55,18 @@ interface BackendChartResponse {
 // Type guard for BackendChartResponse
 function isBackendChartResponse(data: unknown): data is BackendChartResponse {
   const response = data as BackendChartResponse;
-  return typeof response === 'object' && 
-         response !== null &&
-         (!('planets' in response) || typeof response.planets === 'object') &&
-         (!('houses' in response) || typeof response.houses === 'object') &&
-         (!('aspects' in response) || Array.isArray(response.aspects)) &&
-         (!('latitude' in response) || typeof response.latitude === 'number') &&
-         (!('longitude' in response) || typeof response.longitude === 'number') &&
-         (!('timezone' in response) || typeof response.timezone === 'string') &&
-         (!('julian_day' in response) || typeof response.julian_day === 'number') &&
-         (!('angles' in response) || typeof response.angles === 'object');
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    (!('planets' in response) || typeof response.planets === 'object') &&
+    (!('houses' in response) || typeof response.houses === 'object') &&
+    (!('aspects' in response) || Array.isArray(response.aspects)) &&
+    (!('latitude' in response) || typeof response.latitude === 'number') &&
+    (!('longitude' in response) || typeof response.longitude === 'number') &&
+    (!('timezone' in response) || typeof response.timezone === 'string') &&
+    (!('julian_day' in response) || typeof response.julian_day === 'number') &&
+    (!('angles' in response) || typeof response.angles === 'object')
+  );
 }
 
 interface ExtendedChartData {
@@ -84,7 +89,11 @@ const ChartResults: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Save chart mutation
-  const saveMutation = useMutation<SaveChartResponse, unknown, SaveChartRequest>({
+  const saveMutation = useMutation<
+    SaveChartResponse,
+    unknown,
+    SaveChartRequest
+  >({
     mutationFn: async (payload: SaveChartRequest) => {
       const result = await saveChart(payload);
       if (!result.success) throw new Error(result.error);
@@ -95,10 +104,11 @@ const ChartResults: React.FC = () => {
       void alert('Chart saved successfully!');
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      const message =
+        error instanceof Error ? error.message : 'An unknown error occurred';
       devConsole.error('❌ Error saving chart:', error);
       void alert(`Failed to save chart: ${message}`);
-    }
+    },
   });
 
   const handleSaveChart = () => {
@@ -137,13 +147,13 @@ const ChartResults: React.FC = () => {
       void alert('Invalid birth data format');
       return;
     }
-    
+
     // Convert stored data to the format expected by the backend
     const dateParts = birthData.date.split('-').map(Number);
     const timeParts = birthData.time.split(':').map(Number);
     const [year = 0, month = 1, day = 1] = dateParts;
     const [hour = 0, minute = 0] = timeParts;
-    
+
     const saveData: SaveChartRequest = {
       year,
       month,
@@ -155,7 +165,7 @@ const ChartResults: React.FC = () => {
       chart_name: `${birthData.location} ${birthData.date}`,
       lat: chartData.latitude,
       lon: chartData.longitude,
-      timezone: chartData.timezone
+      timezone: chartData.timezone,
     };
 
     void saveMutation.mutate(saveData);
@@ -164,20 +174,38 @@ const ChartResults: React.FC = () => {
   // Utility function to get zodiac sign from position
   const getZodiacSignName = (position: number): string => {
     const zodiacSigns = [
-      "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-      "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+      'Aries',
+      'Taurus',
+      'Gemini',
+      'Cancer',
+      'Leo',
+      'Virgo',
+      'Libra',
+      'Scorpio',
+      'Sagittarius',
+      'Capricorn',
+      'Aquarius',
+      'Pisces',
     ];
-    if (typeof position !== 'number' || Number.isNaN(position) || position < 0) return 'Unknown';
+    if (typeof position !== 'number' || Number.isNaN(position) || position < 0)
+      return 'Unknown';
     const signIndex = Math.floor(position / 30) % 12;
-    return signIndex >= 0 && signIndex < zodiacSigns.length && typeof zodiacSigns[signIndex] === 'string'
+    return signIndex >= 0 &&
+      signIndex < zodiacSigns.length &&
+      typeof zodiacSigns[signIndex] === 'string'
       ? zodiacSigns[signIndex]
       : 'Unknown';
   };
 
   useEffect(() => {
-    const transformChartData = (backendData: BackendChartResponse): ExtendedChartData => {
+    const transformChartData = (
+      backendData: BackendChartResponse
+    ): ExtendedChartData => {
       // Convert houses object to array format (defensive for missing data)
-      const housesSource: Record<string, BackendHouse> = typeof backendData.houses === 'object' && backendData.houses !== null ? backendData.houses : {};
+      const housesSource: Record<string, BackendHouse> =
+        typeof backendData.houses === 'object' && backendData.houses !== null
+          ? backendData.houses
+          : {};
       const housesArray = Object.entries(housesSource)
         .sort(([a], [b]) => {
           const numA = Number(a.replace('house_', ''));
@@ -189,12 +217,13 @@ const ChartResults: React.FC = () => {
         .map(([key, houseData]) => {
           const numStr = key.replace('house_', '');
           const houseNumber = Number.isNaN(Number(numStr)) ? 0 : Number(numStr);
-          const house = typeof houseData.house === 'number' ? houseData.house : houseNumber;
+          const house =
+            typeof houseData.house === 'number' ? houseData.house : houseNumber;
           return {
             house,
             number: house,
             cusp: houseData.cusp,
-            sign: getZodiacSignName(houseData.cusp)
+            sign: getZodiacSignName(houseData.cusp),
           };
         });
 
@@ -212,7 +241,7 @@ const ChartResults: React.FC = () => {
         longitude,
         timezone,
         julian_day,
-        angles
+        angles,
       };
     };
 
@@ -221,7 +250,9 @@ const ChartResults: React.FC = () => {
         // Get birth data from session storage
         const storedBirthData = sessionStorage.getItem('birthData');
         if (storedBirthData === null || storedBirthData === '') {
-          setError('No birth data found. Please go back and enter your birth information.');
+          setError(
+            'No birth data found. Please go back and enter your birth information.'
+          );
           setLoading(false);
           return;
         }
@@ -248,30 +279,45 @@ const ChartResults: React.FC = () => {
         } catch {
           throw new Error('Invalid birth data format');
         }
-        
-        // Use the API service instead of direct fetch
-  const result = await fetchChartData({
-          year: (Number.isNaN(Number(parsedData.date.split('-')[0])) ? 0 : Number(parsedData.date.split('-')[0])),
-          month: (Number.isNaN(Number(parsedData.date.split('-')[1])) ? 1 : Number(parsedData.date.split('-')[1])),
-          day: (Number.isNaN(Number(parsedData.date.split('-')[2])) ? 1 : Number(parsedData.date.split('-')[2])),
-          hour: (Number.isNaN(Number(parsedData.time.split(':')[0])) ? 0 : Number(parsedData.time.split(':')[0])),
-          minute: (Number.isNaN(Number(parsedData.time.split(':')[1])) ? 0 : Number(parsedData.time.split(':')[1])),
-          city: parsedData.location
-        });
-  if (!result.success) throw new Error(result.error);
-  const rawChart: unknown = result.data;
-  if (!isBackendChartResponse(rawChart)) throw new Error('Invalid chart data received from server');
 
-        // Transform the backend data to frontend format  
+        // Use the API service instead of direct fetch
+        const result = await fetchChartData({
+          year: Number.isNaN(Number(parsedData.date.split('-')[0]))
+            ? 0
+            : Number(parsedData.date.split('-')[0]),
+          month: Number.isNaN(Number(parsedData.date.split('-')[1]))
+            ? 1
+            : Number(parsedData.date.split('-')[1]),
+          day: Number.isNaN(Number(parsedData.date.split('-')[2]))
+            ? 1
+            : Number(parsedData.date.split('-')[2]),
+          hour: Number.isNaN(Number(parsedData.time.split(':')[0]))
+            ? 0
+            : Number(parsedData.time.split(':')[0]),
+          minute: Number.isNaN(Number(parsedData.time.split(':')[1]))
+            ? 0
+            : Number(parsedData.time.split(':')[1]),
+          city: parsedData.location,
+        });
+        if (!result.success) throw new Error(result.error);
+        const rawChart: unknown = result.data;
+        if (!isBackendChartResponse(rawChart))
+          throw new Error('Invalid chart data received from server');
+
+        // Transform the backend data to frontend format
         const transformedChart = transformChartData(rawChart);
         setChartData(transformedChart);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred while calculating the chart');
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'An error occurred while calculating the chart'
+        );
       } finally {
         setLoading(false);
       }
     };
-    
+
     void calculateChart();
   }, []);
 
@@ -281,9 +327,9 @@ const ChartResults: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <CosmicLoading size="lg" message="Calculating your birth chart..." />
-        <p className="text-cosmic-silver mt-4 text-center">
+      <div className='flex flex-col items-center justify-center min-h-[400px]'>
+        <CosmicLoading size='lg' message='Calculating your birth chart...' />
+        <p className='text-cosmic-silver mt-4 text-center'>
           Analyzing planetary positions and aspects...
         </p>
       </div>
@@ -292,15 +338,15 @@ const ChartResults: React.FC = () => {
 
   if (error !== null && error !== '') {
     return (
-      <div className="max-w-2xl mx-auto text-center">
-        <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-red-400 mb-2">
+      <div className='max-w-2xl mx-auto text-center'>
+        <div className='bg-red-900/20 border border-red-500/50 rounded-lg p-6 mb-6'>
+          <h2 className='text-xl font-semibold text-red-400 mb-2'>
             Chart Calculation Error
           </h2>
-          <p className="text-cosmic-silver mb-4">{error}</p>
+          <p className='text-cosmic-silver mb-4'>{error}</p>
           <button
             onClick={handleBackToCalculator}
-            className="bg-cosmic-purple hover:bg-cosmic-purple/80 text-white px-6 py-2 rounded-lg transition-colors"
+            className='bg-cosmic-purple hover:bg-cosmic-purple/80 text-white px-6 py-2 rounded-lg transition-colors'
           >
             Back to Calculator
           </button>
@@ -310,38 +356,35 @@ const ChartResults: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-cosmic-gold mb-4 font-cinzel">
+    <div className='space-y-6'>
+      <div className='text-center'>
+        <h1 className='text-4xl font-bold text-cosmic-gold mb-4 font-cinzel'>
           Your Birth Chart
         </h1>
-        <p className="text-xl text-cosmic-silver/80 font-playfair">
+        <p className='text-xl text-cosmic-silver/80 font-playfair'>
           Explore your cosmic blueprint
         </p>
       </div>
 
       {chartData !== null && (
         <>
-          <div className="flex justify-center mb-6">
+          <div className='flex justify-center mb-6'>
             <button
               onClick={handleBackToCalculator}
-              className="bg-cosmic-purple/20 hover:bg-cosmic-purple/30 text-cosmic-silver border border-cosmic-purple/50 px-4 py-2 rounded-lg transition-colors mr-4"
+              className='bg-cosmic-purple/20 hover:bg-cosmic-purple/30 text-cosmic-silver border border-cosmic-purple/50 px-4 py-2 rounded-lg transition-colors mr-4'
             >
               ← New Chart
             </button>
             <button
               onClick={handleSaveChart}
-              className="bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark px-4 py-2 rounded-lg transition-colors"
+              className='bg-cosmic-gold hover:bg-cosmic-gold/80 text-cosmic-dark px-4 py-2 rounded-lg transition-colors'
             >
               💾 Save Chart
             </button>
           </div>
-          
+
           <Suspense fallback={<CosmicLoading />}>
-            <ChartDisplay
-              chart={chartData}
-              onSaveChart={handleSaveChart}
-            />
+            <ChartDisplay chart={chartData} onSaveChart={handleSaveChart} />
           </Suspense>
         </>
       )}

@@ -19,11 +19,15 @@ describe('ApiResult public surface contract', () => {
     'mapResult',
     'mapSuccess',
     'mapFailure',
-    'silenceLogsForTests'
-  ] as const;  it('includes required ApiResult helper functions', () => {
+    'silenceLogsForTests',
+  ] as const;
+  it('includes required ApiResult helper functions', () => {
     for (const name of expectedFunctionExports) {
       expect(exported, `Missing export: ${name}`).toHaveProperty(name);
-      expect(typeof (exported as any)[name], `Export ${name} should be a function`).toBe('function');
+      expect(
+        typeof (exported as any)[name],
+        `Export ${name} should be a function`
+      ).toBe('function');
     }
     // logger is an object, not a function
     expect(exported).toHaveProperty('logger');
@@ -42,12 +46,33 @@ describe('ApiResult public surface contract', () => {
 
   it('toFailure maps known HTTP status codes to expected codes', () => {
     const { toFailure } = exported as any;
-    const auth = toFailure({ response: { status: 401 } }, { defaultMsg: 'd', auth: 'auth msg' });
-    expect(auth).toMatchObject({ success: false, code: '401', error: 'auth msg' });
-    const notFound = toFailure({ response: { status: 404 } }, { defaultMsg: 'd', notFound: 'nf' });
-    expect(notFound).toMatchObject({ success: false, code: '404', error: 'nf' });
-    const validation = toFailure({ response: { status: 400 } }, { defaultMsg: 'd', validation: 'val' });
-    expect(validation).toMatchObject({ success: false, code: '400', error: 'val' });
+    const auth = toFailure(
+      { response: { status: 401 } },
+      { defaultMsg: 'd', auth: 'auth msg' }
+    );
+    expect(auth).toMatchObject({
+      success: false,
+      code: '401',
+      error: 'auth msg',
+    });
+    const notFound = toFailure(
+      { response: { status: 404 } },
+      { defaultMsg: 'd', notFound: 'nf' }
+    );
+    expect(notFound).toMatchObject({
+      success: false,
+      code: '404',
+      error: 'nf',
+    });
+    const validation = toFailure(
+      { response: { status: 400 } },
+      { defaultMsg: 'd', validation: 'val' }
+    );
+    expect(validation).toMatchObject({
+      success: false,
+      code: '400',
+      error: 'val',
+    });
     const fallback = toFailure(new Error('weird'), { defaultMsg: 'fallback' });
     expect(fallback).toMatchObject({ success: false, error: 'fallback' });
   });

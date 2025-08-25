@@ -8,8 +8,8 @@ export const birthDataSchema = z.object({
     name: z.string().min(1, 'Birth location is required'),
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
-    timezone: z.string().optional()
-  })
+    timezone: z.string().optional(),
+  }),
 });
 
 // User profile validation schema
@@ -17,43 +17,57 @@ export const userProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   birthData: birthDataSchema.optional(),
-  preferences: z.object({
-    chartStyle: z.enum(['western', 'vedic']).default('western'),
-    houseSystem: z.enum(['placidus', 'whole-sign', 'equal']).default('placidus'),
-    notifications: z.boolean().default(true)
-  }).optional()
+  preferences: z
+    .object({
+      chartStyle: z.enum(['western', 'vedic']).default('western'),
+      houseSystem: z
+        .enum(['placidus', 'whole-sign', 'equal'])
+        .default('placidus'),
+      notifications: z.boolean().default(true),
+    })
+    .optional(),
 });
 
 // Chart calculation validation
 export const chartCalculationSchema = z.object({
   birthData: birthDataSchema,
-  chartType: z.enum(['natal', 'transit', 'composite', 'synastry']).default('natal'),
-  options: z.object({
-    includeAspects: z.boolean().default(true),
-    includeMidpoints: z.boolean().default(false),
-    orbs: z.record(z.number()).optional()
-  }).optional()
+  chartType: z
+    .enum(['natal', 'transit', 'composite', 'synastry'])
+    .default('natal'),
+  options: z
+    .object({
+      includeAspects: z.boolean().default(true),
+      includeMidpoints: z.boolean().default(false),
+      orbs: z.record(z.number()).optional(),
+    })
+    .optional(),
 });
 
 // Healwave session validation
 export const healwaveSessionSchema = z.object({
-  frequency: z.number().min(20).max(20000, 'Frequency must be between 20Hz and 20kHz'),
-  duration: z.number().min(1).max(60, 'Duration must be between 1 and 60 minutes'),
+  frequency: z
+    .number()
+    .min(20)
+    .max(20000, 'Frequency must be between 20Hz and 20kHz'),
+  duration: z
+    .number()
+    .min(1)
+    .max(60, 'Duration must be between 1 and 60 minutes'),
   volume: z.number().min(0).max(100, 'Volume must be between 0 and 100'),
-  personalizedFor: z.string().optional() // Chart ID
+  personalizedFor: z.string().optional(), // Chart ID
 });
 
 // Synastry request/response schemas (shared between UI and potential backend alignment)
 export const synastryRequestSchema = z.object({
   person1: birthDataSchema,
-  person2: birthDataSchema
+  person2: birthDataSchema,
 });
 
 export const synastryCompatibilityMetaSchema = z.object({
   planet_weights: z.record(z.number()),
   aspect_scores: z.record(z.number()),
   overlay_bonus_applied: z.number(),
-  aspect_type_counts: z.record(z.number())
+  aspect_type_counts: z.record(z.number()),
 });
 
 export const synastryResponseSchema = z.object({
@@ -61,38 +75,46 @@ export const synastryResponseSchema = z.object({
     overall_score: z.number(),
     interpretation: z.string(),
     breakdown: z.record(z.number()),
-    meta: synastryCompatibilityMetaSchema.optional()
+    meta: synastryCompatibilityMetaSchema.optional(),
   }),
-  interaspects: z.array(z.object({
-    person1_planet: z.string(),
-    person2_planet: z.string(),
-    aspect: z.string(),
-    orb: z.number(),
-    strength: z.string(),
-    interpretation: z.string()
-  })),
-  house_overlays: z.array(z.object({
-    person1_planet: z.string(),
-    person2_house: z.number(),
-    interpretation: z.string()
-  })),
+  interaspects: z.array(
+    z.object({
+      person1_planet: z.string(),
+      person2_planet: z.string(),
+      aspect: z.string(),
+      orb: z.number(),
+      strength: z.string(),
+      interpretation: z.string(),
+    })
+  ),
+  house_overlays: z.array(
+    z.object({
+      person1_planet: z.string(),
+      person2_house: z.number(),
+      interpretation: z.string(),
+    })
+  ),
   composite_chart: z.object({
     midpoint_sun: z.number(),
     midpoint_moon: z.number(),
-    relationship_purpose: z.string()
+    relationship_purpose: z.string(),
   }),
   summary: z.object({
     key_themes: z.array(z.string()),
     strengths: z.array(z.string()),
     challenges: z.array(z.string()),
-    advice: z.array(z.string())
-  })
+    advice: z.array(z.string()),
+  }),
 });
 
 // Form validation helpers
-export type ValidationResult<T> = { data: T; error?: never } | { data?: never; error: z.ZodError<T>['errors'] | string };
+export type ValidationResult<T> =
+  | { data: T; error?: never }
+  | { data?: never; error: z.ZodError<T>['errors'] | string };
 
-export const validateBirthData = (data: unknown): ValidationResult<z.infer<typeof birthDataSchema>> => {
+export const validateBirthData = (
+  data: unknown
+): ValidationResult<z.infer<typeof birthDataSchema>> => {
   try {
     const validated = birthDataSchema.parse(data);
     return { data: validated };
@@ -104,7 +126,9 @@ export const validateBirthData = (data: unknown): ValidationResult<z.infer<typeo
   }
 };
 
-export const validateUserProfile = (data: unknown): ValidationResult<z.infer<typeof userProfileSchema>> => {
+export const validateUserProfile = (
+  data: unknown
+): ValidationResult<z.infer<typeof userProfileSchema>> => {
   try {
     const validated = userProfileSchema.parse(data);
     return { data: validated };
@@ -116,7 +140,9 @@ export const validateUserProfile = (data: unknown): ValidationResult<z.infer<typ
   }
 };
 
-export const validateHealwaveSession = (data: unknown): ValidationResult<z.infer<typeof healwaveSessionSchema>> => {
+export const validateHealwaveSession = (
+  data: unknown
+): ValidationResult<z.infer<typeof healwaveSessionSchema>> => {
   try {
     const validated = healwaveSessionSchema.parse(data);
     return { data: validated };
@@ -172,7 +198,9 @@ export const sanitizeString = (input: string | undefined | null): string => {
   return input.trim().replace(/[<>]/g, '');
 };
 
-export const sanitizeNumericInput = (input: string | undefined | null): number | null => {
+export const sanitizeNumericInput = (
+  input: string | undefined | null
+): number | null => {
   if (input === undefined || input === null || input === '') {
     return null;
   }

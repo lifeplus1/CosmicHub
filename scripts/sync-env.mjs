@@ -28,7 +28,10 @@ function parseEnvFile(filePath) {
     const key = line.slice(0, eq).trim();
     let val = line.slice(eq + 1).trim();
     // strip surrounding quotes if present
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
       val = val.slice(1, -1);
     }
     vars[key] = val;
@@ -90,23 +93,40 @@ function writeIfChanged(filePath, content) {
 function syncForMode(mode) {
   const isProd = mode === 'production';
   // Frontend source files
-  const srcFilePublic = path.join(repoRoot, isProd ? '.env.production' : '.env');
+  const srcFilePublic = path.join(
+    repoRoot,
+    isProd ? '.env.production' : '.env'
+  );
   const srcEnvPublic = parseEnvFile(srcFilePublic);
   const publicVars = pickVitePublic(srcEnvPublic);
 
   // Server source files (merge base + server override if present)
-  const srcFileServerBase = path.join(repoRoot, isProd ? '.env.production' : '.env');
-  const srcFileServerOverride = path.join(repoRoot, isProd ? '.env.production.server' : '.env.server');
+  const srcFileServerBase = path.join(
+    repoRoot,
+    isProd ? '.env.production' : '.env'
+  );
+  const srcFileServerOverride = path.join(
+    repoRoot,
+    isProd ? '.env.production.server' : '.env.server'
+  );
   const baseServerEnv = parseEnvFile(srcFileServerBase);
   const overrideServerEnv = parseEnvFile(srcFileServerOverride);
-  const mergedServerEnv = { ...pickServerOnly(baseServerEnv), ...pickServerOnly(overrideServerEnv) };
+  const mergedServerEnv = {
+    ...pickServerOnly(baseServerEnv),
+    ...pickServerOnly(overrideServerEnv),
+  };
 
-  const header = mode === 'production' ? 'Production env (synced from root/.env.production)'
-                                       : 'Development env (synced from root/.env)';
+  const header =
+    mode === 'production'
+      ? 'Production env (synced from root/.env.production)'
+      : 'Development env (synced from root/.env)';
 
   for (const app of apps) {
     const appDir = path.join(repoRoot, app);
-    const targetFile = path.join(appDir, mode === 'production' ? '.env.production' : '.env');
+    const targetFile = path.join(
+      appDir,
+      mode === 'production' ? '.env.production' : '.env'
+    );
     ensureDir(appDir);
     const wrote = writeIfChanged(targetFile, serializeEnv(publicVars, header));
     if (wrote) console.log(`Updated ${path.relative(repoRoot, targetFile)}`);
@@ -119,13 +139,21 @@ function syncForMode(mode) {
   for (const srv of servers) {
     const srvDir = path.join(repoRoot, srv);
     ensureDir(srvDir);
-    const targetFile = path.join(srvDir, isProd ? '.env.production.server' : '.env');
+    const targetFile = path.join(
+      srvDir,
+      isProd ? '.env.production.server' : '.env'
+    );
     // Optionally filter per-server secrets (avoid copying Firebase creds to ephemeris_server)
     let serverVars = { ...mergedServerEnv };
     if (srv === 'ephemeris_server') {
-      serverVars = Object.fromEntries(Object.entries(serverVars).filter(([k]) => !k.startsWith('FIREBASE_')));
+      serverVars = Object.fromEntries(
+        Object.entries(serverVars).filter(([k]) => !k.startsWith('FIREBASE_'))
+      );
     }
-    const wrote = writeIfChanged(targetFile, serializeEnv(serverVars, serverHeader));
+    const wrote = writeIfChanged(
+      targetFile,
+      serializeEnv(serverVars, serverHeader)
+    );
     if (wrote) console.log(`Updated ${path.relative(repoRoot, targetFile)}`);
   }
 }

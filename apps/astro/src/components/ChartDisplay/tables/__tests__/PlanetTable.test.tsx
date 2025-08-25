@@ -4,11 +4,17 @@ import { PlanetTable } from '../';
 
 const sample = [
   { name: 'Sun', sign: 'Aries', degree: '10.25', house: 1, retrograde: false },
-  { name: 'Moon', sign: 'Taurus', degree: '23.50', house: 2, retrograde: false }
+  {
+    name: 'Moon',
+    sign: 'Taurus',
+    degree: '23.50',
+    house: 2,
+    retrograde: false,
+  },
 ];
 
 const fallbackSample = [
-  { name: 'FooPlanet', sign: 'UnknownSign', degree: '12.00', house: 3 }
+  { name: 'FooPlanet', sign: 'UnknownSign', degree: '12.00', house: 3 },
 ];
 
 describe('PlanetTable', () => {

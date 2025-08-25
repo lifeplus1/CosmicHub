@@ -127,11 +127,9 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
         };
         onSettingsChange(newSettings);
         // Optimistically set volume on engine (no playing state guard available)
-        audioEngine
-          .setVolume(value)
-          .catch((error: unknown) => {
-            devConsole.error('Volume set failed', { error });
-          });
+        audioEngine.setVolume(value).catch((error: unknown) => {
+          devConsole.error('Volume set failed', { error });
+        });
       },
       [currentSettings, onSettingsChange, audioEngine]
     );

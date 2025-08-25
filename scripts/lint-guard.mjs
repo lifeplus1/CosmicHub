@@ -6,28 +6,47 @@ import { readFileSync } from 'node:fs';
 
 const GUARD_RULES = [
   '@typescript-eslint/no-misused-promises',
-  '@typescript-eslint/no-floating-promises'
+  '@typescript-eslint/no-floating-promises',
 ];
 
-const baseline = JSON.parse(readFileSync('.lint-baseline.json','utf8'));
+const baseline = JSON.parse(readFileSync('.lint-baseline.json', 'utf8'));
 for (const r of GUARD_RULES) {
   if ((baseline.rules[r] ?? 0) !== 0) {
-    console.error(`[lint-guard] Expected baseline for ${r} to be 0; found ${baseline.rules[r]}`);
+    console.error(
+      `[lint-guard] Expected baseline for ${r} to be 0; found ${baseline.rules[r]}`
+    );
     process.exit(1);
   }
 }
 
 function runESLint() {
-  const targets = ['apps/astro/src','apps/healwave/src','packages/*/src'].join(' ');
-  const ignorePatterns = ['**/.storybook/**','**/dist/**','**/build/**','**/public/**','**/node_modules/**','**/*.test.*','**/*.spec.*','**/__tests__/**'];
-  const ignore = ignorePatterns.map(p=>`--ignore-pattern "${p}"`).join(' ');
+  const targets = [
+    'apps/astro/src',
+    'apps/healwave/src',
+    'packages/*/src',
+  ].join(' ');
+  const ignorePatterns = [
+    '**/.storybook/**',
+    '**/dist/**',
+    '**/build/**',
+    '**/public/**',
+    '**/node_modules/**',
+    '**/*.test.*',
+    '**/*.spec.*',
+    '**/__tests__/**',
+  ];
+  const ignore = ignorePatterns.map(p => `--ignore-pattern "${p}"`).join(' ');
   let raw;
   try {
-    raw = execSync(`npx eslint ${targets} --ext .ts,.tsx -f json ${ignore}`, { stdio:'pipe', encoding:'utf8', maxBuffer:20*1024*1024 });
+    raw = execSync(`npx eslint ${targets} --ext .ts,.tsx -f json ${ignore}`, {
+      stdio: 'pipe',
+      encoding: 'utf8',
+      maxBuffer: 20 * 1024 * 1024,
+    });
   } catch (e) {
     raw = (e.stdout && e.stdout.toString()) || '[]';
   }
-  return JSON.parse(raw||'[]');
+  return JSON.parse(raw || '[]');
 }
 
 const data = runESLint();
@@ -40,10 +59,10 @@ for (const f of data) {
   }
 }
 
-const offenders = Object.entries(violations).filter(([,count])=>count>0);
+const offenders = Object.entries(violations).filter(([, count]) => count > 0);
 if (offenders.length) {
   console.error('\n[lint-guard] Guard rule violations detected:');
-  for (const [r,c] of offenders) console.error(`  ${r}: ${c}`);
+  for (const [r, c] of offenders) console.error(`  ${r}: ${c}`);
   console.error('\nFix immediately; these rules must remain at zero.');
   process.exit(1);
 }

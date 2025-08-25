@@ -12,5 +12,5 @@ export {
   mapFailure,
   type ApiResult,
   type ApiSuccess,
-  type ApiFailure
+  type ApiFailure,
 } from './utils/api/result';

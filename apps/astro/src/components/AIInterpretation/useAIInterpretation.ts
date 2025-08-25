@@ -26,23 +26,29 @@ interface APIResponse {
 // XAI Service class (temporary inline implementation)
 class XAIService {
   private static baseUrl = xaiConfig.baseUrl;
-  
+
   private static getApiKey(): string {
-    if (xaiConfig.enabled !== true || typeof xaiConfig.apiKey !== 'string' || xaiConfig.apiKey === '') {
+    if (
+      xaiConfig.enabled !== true ||
+      typeof xaiConfig.apiKey !== 'string' ||
+      xaiConfig.apiKey === ''
+    ) {
       throw new Error('XAI API key is not configured');
     }
     return xaiConfig.apiKey;
   }
 
-  static async generateInterpretation(request: InterpretationRequest): Promise<string> {
+  static async generateInterpretation(
+    request: InterpretationRequest
+  ): Promise<string> {
     try {
       const apiKey = this.getApiKey();
       const prompt = this.buildPrompt(request);
-      
+
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -50,12 +56,13 @@ class XAIService {
           messages: [
             {
               role: 'system',
-              content: 'You are an expert astrological interpreter with deep knowledge of cosmic influences, planetary alignments, and their impact on human personality and life path.'
+              content:
+                'You are an expert astrological interpreter with deep knowledge of cosmic influences, planetary alignments, and their impact on human personality and life path.',
             },
             {
               role: 'user',
-              content: prompt
-            }
+              content: prompt,
+            },
           ],
           max_tokens: 500,
           temperature: 0.7,
@@ -63,17 +70,15 @@ class XAIService {
       });
 
       if (!response.ok) {
-        throw new Error(`xAI API request failed: ${response.statusText} (${response.status})`);
+        throw new Error(
+          `xAI API request failed: ${response.statusText} (${response.status})`
+        );
       }
 
       const data: unknown = await response.json();
-      
+
       // Type-safe parsing of API response
-      if (
-        typeof data !== 'object' ||
-        data === null ||
-        !('choices' in data)
-      ) {
+      if (typeof data !== 'object' || data === null || !('choices' in data)) {
         throw new Error('Invalid API response: missing choices array');
       }
 
@@ -116,28 +121,32 @@ class XAIService {
 
   private static buildPrompt(request: InterpretationRequest): string {
     const { birthDate, birthTime, birthLocation, interpretationType } = request;
-    
+
     const prompts = {
       general: `Generate a comprehensive astrological interpretation for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Focus on their cosmic blueprint, planetary influences, and potential for growth.`,
       personality: `Provide a detailed personality analysis based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Highlight key traits, strengths, and communication style.`,
       career: `Analyze the career potential based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Suggest suitable career paths and strengths.`,
-      relationships: `Provide a relationship analysis based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Focus on romantic tendencies and compatibility factors.`
+      relationships: `Provide a relationship analysis based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Focus on romantic tendencies and compatibility factors.`,
     };
 
     return prompts[interpretationType] ?? prompts.general;
   }
 
-  static async generateMockInterpretation(request: InterpretationRequest): Promise<string> {
+  static async generateMockInterpretation(
+    request: InterpretationRequest
+  ): Promise<string> {
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     const interpretations = {
       general: `Based on your birth details (${request.birthDate} at ${request.birthTime} in ${request.birthLocation}), your astrological chart reveals a unique cosmic blueprint. Your planetary positions suggest a dynamic personality with strong intuitive abilities and a natural inclination toward creativity and innovation.`,
       personality: `Your personality profile shows a fascinating blend of traits influenced by your birth chart. Born on ${request.birthDate}, your cosmic signature reveals someone who is naturally empathetic, intellectually curious, and possesses a strong sense of justice.`,
       career: `Career-wise, your astrological profile from ${request.birthLocation} indicates excellent potential in fields that involve creativity, communication, or helping others. Your planetary alignments suggest you would thrive in roles that allow for independence and innovation.`,
-      relationships: `In relationships, your birth chart reveals someone who values deep, meaningful connections. Born at ${request.birthTime} on ${request.birthDate}, your Venus and Mars placements suggest you are both passionate and nurturing in romantic partnerships.`
+      relationships: `In relationships, your birth chart reveals someone who values deep, meaningful connections. Born at ${request.birthTime} on ${request.birthDate}, your Venus and Mars placements suggest you are both passionate and nurturing in romantic partnerships.`,
     };
 
-    return interpretations[request.interpretationType] ?? interpretations.general;
+    return (
+      interpretations[request.interpretationType] ?? interpretations.general
+    );
   }
 }
 
@@ -163,12 +172,15 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
   const generateInterpretation = useCallback(
     async (request: InterpretationRequest) => {
       setError(null);
-      
+
       // Check cache first
       const cacheKey = ['interpretation', JSON.stringify(request)];
       const cachedInterpretation = queryClient.getQueryData<string>(cacheKey);
 
-      if (typeof cachedInterpretation === 'string' && cachedInterpretation !== '') {
+      if (
+        typeof cachedInterpretation === 'string' &&
+        cachedInterpretation !== ''
+      ) {
         setInterpretation(cachedInterpretation);
         return;
       }
@@ -179,16 +191,22 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
         try {
           result = await XAIService.generateInterpretation(request);
         } catch (xaiError) {
-          devConsole.warn('xAI service failed, falling back to mock service:', xaiError);
+          devConsole.warn(
+            'xAI service failed, falling back to mock service:',
+            xaiError
+          );
           result = await XAIService.generateMockInterpretation(request);
         }
-        
+
         setInterpretation(result);
         queryClient.setQueryData(cacheKey, result); // Cache the result
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to generate interpretation';
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Failed to generate interpretation';
         setError(errorMessage);
-  devConsole.error('AI interpretation error:', err);
+        devConsole.error('AI interpretation error:', err);
       }
     },
     [queryClient]

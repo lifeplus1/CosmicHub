@@ -5,7 +5,7 @@
 .pricing-table th {
   text-align: left;
   padding: 12px;
-  border-bottom: 2px solid #4A5568;
+  border-bottom: 2px solid #4a5568;
 }
 .pricing-table td {
   padding: 12px;
@@ -14,5 +14,5 @@
   text-align: center;
 }
 .pricing-table tbody tr {
-  border-bottom: 1px solid #2D3748;
+  border-bottom: 1px solid #2d3748;
 }

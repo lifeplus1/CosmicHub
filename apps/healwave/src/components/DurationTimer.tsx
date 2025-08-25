@@ -65,7 +65,9 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(
 
     // Accessibility and visual enhancements
     const progressPercentage = getProgressPercentage();
-    const progressValue = Number.isFinite(progressPercentage) ? Math.round(progressPercentage) : 0;
+    const progressValue = Number.isFinite(progressPercentage)
+      ? Math.round(progressPercentage)
+      : 0;
     const isCompleted = timeRemaining === 0;
     const statusText = isRunning
       ? '🎵 Session Active'
@@ -162,7 +164,7 @@ const DurationTimer: React.FC<DurationTimerProps> = memo(
               'aria-valuenow': progressValue,
               'aria-valuemin': 0,
               'aria-valuemax': 100,
-              'aria-label': `Session progress ${progressValue} percent`
+              'aria-label': `Session progress ${progressValue} percent`,
             }}
           />
         </div>

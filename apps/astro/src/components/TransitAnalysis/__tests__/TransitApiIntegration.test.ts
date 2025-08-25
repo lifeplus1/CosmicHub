@@ -24,8 +24,8 @@ describe('Transit API Integration Tests', () => {
         intensity: 99.98,
         energy: 'intense',
         duration_days: 3,
-        description: 'Sun conjunction natal Sun'
-      }
+        description: 'Sun conjunction natal Sun',
+      },
     ];
 
     mockFetch.mockResolvedValueOnce({
@@ -39,19 +39,19 @@ describe('Transit API Integration Tests', () => {
         birth_date: '1990-01-01',
         birth_time: '12:00',
         latitude: 40.7128,
-        longitude: -74.0060,
-        timezone: 'America/New_York'
+        longitude: -74.006,
+        timezone: 'America/New_York',
       },
       date_range: {
         start_date: '2025-01-01',
-        end_date: '2025-01-31'
-      }
+        end_date: '2025-01-31',
+      },
     };
 
     const response = await fetch('http://localhost:8000/api/astro/transits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();
@@ -62,7 +62,7 @@ describe('Transit API Integration Tests', () => {
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       })
     );
 
@@ -86,8 +86,8 @@ describe('Transit API Integration Tests', () => {
         degree: 293.91,
         moon_sign: 'Capricorn',
         intensity: 100.0,
-        description: 'Perfect for setting intentions'
-      }
+        description: 'Perfect for setting intentions',
+      },
     ];
 
     mockFetch.mockResolvedValueOnce({
@@ -95,22 +95,25 @@ describe('Transit API Integration Tests', () => {
       json: async () => mockLunarResponse,
     });
 
-    const response = await fetch('http://localhost:8000/api/astro/lunar-transits', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_data: {
-          birth_date: '1990-01-01',
-          birth_time: '12:00',
-          latitude: 40.7128,
-          longitude: -74.0060
-        },
-        date_range: {
-          start_date: '2025-01-01',
-          end_date: '2025-01-31'
-        }
-      })
-    });
+    const response = await fetch(
+      'http://localhost:8000/api/astro/lunar-transits',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          birth_data: {
+            birth_date: '1990-01-01',
+            birth_time: '12:00',
+            latitude: 40.7128,
+            longitude: -74.006,
+          },
+          date_range: {
+            start_date: '2025-01-01',
+            end_date: '2025-01-31',
+          },
+        }),
+      }
+    );
 
     const data = await response.json();
 
@@ -137,13 +140,13 @@ describe('Transit API Integration Tests', () => {
           birth_date: 'invalid-date', // Invalid date format
           birth_time: '12:00',
           latitude: 40.7128,
-          longitude: -74.0060
+          longitude: -74.006,
         },
         date_range: {
           start_date: '2025-01-01',
-          end_date: '2025-01-31'
-        }
-      })
+          end_date: '2025-01-31',
+        },
+      }),
     });
 
     expect(response.ok).toBe(false);
@@ -190,15 +193,15 @@ describe('Transit API Integration Tests', () => {
       intensity: 99.98,
       energy: 'intense',
       duration_days: 3,
-      description: 'Sun conjunction natal Sun'
+      description: 'Sun conjunction natal Sun',
     };
 
     const sampleBirthData: BirthData = {
       birth_date: '1990-01-01',
       birth_time: '12:00',
       latitude: 40.7128,
-      longitude: -74.0060,
-      timezone: 'America/New_York'
+      longitude: -74.006,
+      timezone: 'America/New_York',
     };
 
     // Type validation tests

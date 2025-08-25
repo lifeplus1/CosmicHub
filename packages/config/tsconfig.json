@@ -20,9 +20,9 @@
   },
   "include": ["src/**/*", "vite-env.d.ts"],
   "exclude": [
-    "dist", 
-    "node_modules", 
-    "**/*.test.*", 
+    "dist",
+    "node_modules",
+    "**/*.test.*",
     "**/*.spec.*",
     "src/enhanced-testing.tsx",
     "src/optimization/**",

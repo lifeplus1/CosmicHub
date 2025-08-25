@@ -26,7 +26,10 @@ export interface MultiSystemChartData {
     description?: string;
     ayanamsa?: number;
     analysis?: { moon_sign?: string; analysis?: string };
-    planets?: Record<string, { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }>;
+    planets?: Record<
+      string,
+      { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }
+    >;
   };
   chinese?: {
     description?: string;
@@ -40,18 +43,36 @@ export interface MultiSystemChartData {
   };
   mayan?: {
     description?: string;
-    day_sign?: { symbol?: string; name?: string; meaning?: string; color?: string };
+    day_sign?: {
+      symbol?: string;
+      name?: string;
+      meaning?: string;
+      color?: string;
+    };
     sacred_number?: { number?: number; meaning?: string };
     galactic_signature?: string;
-    wavespell?: { tone?: { name?: string }; position?: number; description?: string };
+    wavespell?: {
+      tone?: { name?: string };
+      position?: number;
+      description?: string;
+    };
     long_count?: { date?: string };
     life_purpose?: string;
     spiritual_guidance?: string;
   };
   uranian?: {
     description?: string;
-    uranian_planets?: Record<string, { symbol?: string; position?: number; meaning?: string }>;
-    dial_aspects?: Array<{ body1?: string; body2?: string; angle?: number; orb?: number; meaning?: string }>;
+    uranian_planets?: Record<
+      string,
+      { symbol?: string; position?: number; meaning?: string }
+    >;
+    dial_aspects?: Array<{
+      body1?: string;
+      body2?: string;
+      angle?: number;
+      orb?: number;
+      meaning?: string;
+    }>;
   };
   synthesis?: {
     primary_themes?: string[];
@@ -80,7 +101,10 @@ export interface VedicChartData {
   description?: string;
   ayanamsa?: number;
   analysis?: { moon_sign?: string; analysis?: string };
-  planets?: Record<string, { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }>;
+  planets?: Record<
+    string,
+    { vedic_sign?: string; nakshatra?: { name?: string; pada?: string } }
+  >;
 }
 
 export interface ChineseChartData {
@@ -96,10 +120,19 @@ export interface ChineseChartData {
 
 export interface MayanChartData {
   description?: string;
-  day_sign?: { symbol?: string; name?: string; meaning?: string; color?: string };
+  day_sign?: {
+    symbol?: string;
+    name?: string;
+    meaning?: string;
+    color?: string;
+  };
   sacred_number?: { number?: number; meaning?: string };
   galactic_signature?: string;
-  wavespell?: { tone?: { name?: string }; position?: number; description?: string };
+  wavespell?: {
+    tone?: { name?: string };
+    position?: number;
+    description?: string;
+  };
   long_count?: { date?: string };
   life_purpose?: string;
   spiritual_guidance?: string;
@@ -107,8 +140,17 @@ export interface MayanChartData {
 
 export interface UranianChartData {
   description?: string;
-  uranian_planets?: Record<string, { symbol?: string; position?: number; meaning?: string }>;
-  dial_aspects?: Array<{ body1?: string; body2?: string; angle?: number; orb?: number; meaning?: string }>;
+  uranian_planets?: Record<
+    string,
+    { symbol?: string; position?: number; meaning?: string }
+  >;
+  dial_aspects?: Array<{
+    body1?: string;
+    body2?: string;
+    angle?: number;
+    orb?: number;
+    meaning?: string;
+  }>;
 }
 
 export interface SynthesisChartData {

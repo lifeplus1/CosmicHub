@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { Link } from 'expo-router';
 
 export default function HealWaveScreen() {
@@ -51,7 +57,9 @@ export default function HealWaveScreen() {
         <View style={styles.features}>
           <Text style={styles.featuresTitle}>Audio Features</Text>
           <View style={styles.featureList}>
-            <Text style={styles.featureItem}>• High-quality binaural beats</Text>
+            <Text style={styles.featureItem}>
+              • High-quality binaural beats
+            </Text>
             <Text style={styles.featureItem}>• Background soundscapes</Text>
             <Text style={styles.featureItem}>• Timer and session tracking</Text>
             <Text style={styles.featureItem}>• Custom frequency mixing</Text>
@@ -59,7 +67,7 @@ export default function HealWaveScreen() {
           </View>
         </View>
 
-        <Link href="/" asChild>
+        <Link href='/' asChild>
           <TouchableOpacity style={styles.backButton}>
             <Text style={styles.backButtonText}>← Back to Home</Text>
           </TouchableOpacity>

@@ -3,7 +3,7 @@ import { logger } from '@cosmichub/config';
 
 // Create component-specific logger
 const chartLogger = logger.child({ module: 'ChartPreferences' });
- 
+
 import { Card, Button } from '@cosmichub/ui';
 import { useToast } from './ToastProvider';
 import { useAuth } from '@cosmichub/auth';
@@ -71,7 +71,10 @@ const ChartPreferences: React.FC = React.memo(() => {
   }, [user?.uid, loadUserPreferences]);
 
   const handlePreferenceChange = useCallback(
-    <K extends keyof ChartPreferencesData>(key: K, value: ChartPreferencesData[K]) => {
+    <K extends keyof ChartPreferencesData>(
+      key: K,
+      value: ChartPreferencesData[K]
+    ) => {
       setPreferences(prev => ({
         ...prev,
         [key]: value,
@@ -129,7 +132,12 @@ const ChartPreferences: React.FC = React.memo(() => {
             <select
               id='theme'
               value={preferences.theme}
-              onChange={e => handlePreferenceChange('theme', e.target.value as ChartPreferencesData['theme'])}
+              onChange={e =>
+                handlePreferenceChange(
+                  'theme',
+                  e.target.value as ChartPreferencesData['theme']
+                )
+              }
               className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
               aria-label='Select theme'
             >
@@ -150,7 +158,10 @@ const ChartPreferences: React.FC = React.memo(() => {
               id='audioQuality'
               value={preferences.audioQuality}
               onChange={e =>
-                handlePreferenceChange('audioQuality', e.target.value as ChartPreferencesData['audioQuality'])
+                handlePreferenceChange(
+                  'audioQuality',
+                  e.target.value as ChartPreferencesData['audioQuality']
+                )
               }
               className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
               aria-label='Select audio quality'
@@ -166,11 +177,11 @@ const ChartPreferences: React.FC = React.memo(() => {
               type='checkbox'
               id='notifications'
               checked={preferences.notifications}
-              onChange={(e) => 
+              onChange={e =>
                 handlePreferenceChange('notifications', e.target.checked)
               }
               className='rounded'
-              aria-label="checkbox input"
+              aria-label='checkbox input'
             />
             <label htmlFor='notifications' className='text-cosmic-silver'>
               Email notifications
@@ -182,11 +193,11 @@ const ChartPreferences: React.FC = React.memo(() => {
               type='checkbox'
               id='sessionReminders'
               checked={preferences.sessionReminders}
-              onChange={(e) => 
+              onChange={e =>
                 handlePreferenceChange('sessionReminders', e.target.checked)
               }
               className='rounded'
-              aria-label="checkbox input"
+              aria-label='checkbox input'
             />
             <label htmlFor='sessionReminders' className='text-cosmic-silver'>
               Session reminders

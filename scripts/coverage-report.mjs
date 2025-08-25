@@ -2,16 +2,27 @@
 import fs from 'fs';
 import path from 'path';
 
-const combinedBaselinePath = path.join(process.cwd(), '.coverage-baseline.json');
-const perProjectPath = path.join(process.cwd(), 'metrics', 'coverage-projects.json');
+const combinedBaselinePath = path.join(
+  process.cwd(),
+  '.coverage-baseline.json'
+);
+const perProjectPath = path.join(
+  process.cwd(),
+  'metrics',
+  'coverage-projects.json'
+);
 if (!fs.existsSync(perProjectPath)) {
   console.error('coverage-projects.json missing. Run coverage-ratchet first.');
   process.exit(0);
 }
 const per = JSON.parse(fs.readFileSync(perProjectPath, 'utf8'));
-const baseline = fs.existsSync(combinedBaselinePath) ? JSON.parse(fs.readFileSync(combinedBaselinePath,'utf8')) : null;
+const baseline = fs.existsSync(combinedBaselinePath)
+  ? JSON.parse(fs.readFileSync(combinedBaselinePath, 'utf8'))
+  : null;
 
-function fmt(n){ return typeof n === 'number' ? n.toFixed(2)+'%' : '-'; }
+function fmt(n) {
+  return typeof n === 'number' ? n.toFixed(2) + '%' : '-';
+}
 let md = '# Coverage Report (Aggregated)\n\n';
 md += 'Combined (weighted):\\n';
 md += `- Lines: ${fmt(per.combined.lines)}\n- Statements: ${fmt(per.combined.statements)}\n- Functions: ${fmt(per.combined.functions)}\n- Branches: ${fmt(per.combined.branches)}\n\n`;

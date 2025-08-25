@@ -30,7 +30,9 @@ const Chart = lazy(() => import('./pages/Chart')); // New dedicated chart page
 const MultiSystemChart = lazy(() => import('./pages/MultiSystemChart')); // Multi-system chart page
 const Profile = lazy(() => import('./pages/Profile'));
 const UpgradeModalDemo = lazy(() => import('./components/UpgradeModalDemo'));
-const PerformanceMonitoring = lazy(() => import('./pages/PerformanceMonitoring'));
+const PerformanceMonitoring = lazy(
+  () => import('./pages/PerformanceMonitoring')
+);
 
 // Placeholder components for missing pages
 const Calculator = lazy(() => import('./pages/Calculator'));
@@ -46,7 +48,11 @@ const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
 const SubscriptionCancel = lazy(() => import('./pages/SubscriptionCancel'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
-const BlogAuthors = lazy(() => import('./components/BlogAuthor').then(module => ({ default: module.BlogAuthors })));
+const BlogAuthors = lazy(() =>
+  import('./components/BlogAuthor').then(module => ({
+    default: module.BlogAuthors,
+  }))
+);
 
 const MainApp: React.FC = React.memo(function MainApp() {
   const config = getAppConfig('astro');
@@ -60,44 +66,56 @@ const MainApp: React.FC = React.memo(function MainApp() {
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="min-h-screen bg-cosmic-dark text-cosmic-silver">
+      <div className='min-h-screen bg-cosmic-dark text-cosmic-silver'>
         <Navbar />
-        <main className="container px-4 py-8 mx-auto">
-          <Suspense fallback={<CosmicLoading size="lg" message="Loading cosmic insights..." />}>
+        <main className='container px-4 py-8 mx-auto'>
+          <Suspense
+            fallback={
+              <CosmicLoading size='lg' message='Loading cosmic insights...' />
+            }
+          >
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/chart" element={<Chart />} />
-              <Route path="/multi-system" element={<MultiSystemChart />} />
-              <Route path="/chart-results" element={<ChartResults />} />
-              <Route path="/calculator" element={<Calculator />} />
-              <Route path="/numerology" element={<Numerology />} />
-              <Route path="/human-design" element={<HumanDesign />} />
-              <Route path="/gene-keys" element={<GeneKeys />} />
-              <Route path="/synastry" element={<Synastry />} />
-              <Route path="/ai-interpretation" element={<AIInterpretation />} />
-              <Route path="/ai-interpretation/:chartId" element={
-                <AIInterpretation />
-              } />
-              <Route path="/saved-charts" element={<SavedCharts />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:id" element={<BlogPost />} />
-              <Route path="/blog/authors" element={<BlogAuthors />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/upgrade-demo" element={<UpgradeModalDemo />} />
-              <Route path="/performance" element={<PerformanceMonitoring />} />
-              <Route path="/pricing/success" element={<SubscriptionSuccess />} />
-              <Route path="/pricing/cancel" element={<SubscriptionCancel />} />
+              <Route path='/' element={<Dashboard />} />
+              <Route path='/chart' element={<Chart />} />
+              <Route path='/multi-system' element={<MultiSystemChart />} />
+              <Route path='/chart-results' element={<ChartResults />} />
+              <Route path='/calculator' element={<Calculator />} />
+              <Route path='/numerology' element={<Numerology />} />
+              <Route path='/human-design' element={<HumanDesign />} />
+              <Route path='/gene-keys' element={<GeneKeys />} />
+              <Route path='/synastry' element={<Synastry />} />
+              <Route path='/ai-interpretation' element={<AIInterpretation />} />
+              <Route
+                path='/ai-interpretation/:chartId'
+                element={<AIInterpretation />}
+              />
+              <Route path='/saved-charts' element={<SavedCharts />} />
+              <Route path='/blog' element={<Blog />} />
+              <Route path='/blog/:id' element={<BlogPost />} />
+              <Route path='/blog/authors' element={<BlogAuthors />} />
+              <Route path='/login' element={<Login />} />
+              <Route path='/signup' element={<SignUp />} />
+              <Route path='/profile' element={<Profile />} />
+              <Route path='/upgrade-demo' element={<UpgradeModalDemo />} />
+              <Route path='/performance' element={<PerformanceMonitoring />} />
+              <Route
+                path='/pricing/success'
+                element={<SubscriptionSuccess />}
+              />
+              <Route path='/pricing/cancel' element={<SubscriptionCancel />} />
             </Routes>
           </Suspense>
         </main>
         <Footer />
-        
+
         {/* Debug info in development */}
         {config.app.environment === 'development' && (
-          <div className="fixed p-2 text-xs rounded bottom-4 right-4 bg-cosmic-purple" aria-hidden="true">
-            App: {config.app.name} | Env: {config.app.environment} | Version: {config.app.version}
+          <div
+            className='fixed p-2 text-xs rounded bottom-4 right-4 bg-cosmic-purple'
+            aria-hidden='true'
+          >
+            App: {config.app.name} | Env: {config.app.environment} | Version:{' '}
+            {config.app.version}
           </div>
         )}
       </div>
@@ -109,8 +127,8 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Tooltip.Provider>
-        <AuthProvider appName="astro">
-          <SubscriptionProvider appType="astro">
+        <AuthProvider appName='astro'>
+          <SubscriptionProvider appType='astro'>
             <BirthDataProvider>
               <UpgradeModalProvider>
                 <ErrorBoundary>
@@ -128,5 +146,5 @@ const App: React.FC = () => {
 
 export default App;
 
-// Suggested Vitest test: 
+// Suggested Vitest test:
 // test('renders with auth', () => { ... });

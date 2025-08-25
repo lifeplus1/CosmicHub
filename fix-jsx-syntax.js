@@ -16,39 +16,36 @@ const filesToFix = [
   'apps/astro/src/pages/Blog.tsx',
   'apps/astro/src/pages/MultiSystemChart.tsx',
   'apps/healwave/src/components/FrequencyControls.tsx',
-  'apps/healwave/src/components/PresetSelector.tsx'
+  'apps/healwave/src/components/PresetSelector.tsx',
 ];
 
 function fixFile(filePath) {
   try {
     console.log(`Fixing: ${filePath}`);
     let content = fs.readFileSync(filePath, 'utf8');
-    
+
     // Pattern 1: onChange={(e) = aria-label="input"> function}
     content = content.replace(
       /onChange=\{([^}]*) = aria-label="[^"]*">\s*([^}]*)\}/g,
       'onChange={$1 => $2}'
     );
-    
+
     // Pattern 2: onChange={e = aria-label="input"> function}
     content = content.replace(
       /onChange=\{([^}=]*) = aria-label="[^"]*">\s*([^}]*)\}/g,
       'onChange={($1) => $2}'
     );
-    
+
     // Pattern 3: / aria-label="input"> to aria-label="input"
-    content = content.replace(
-      /\/ aria-label="([^"]*)">/g,
-      'aria-label="$1"'
-    );
-    
+    content = content.replace(/\/ aria-label="([^"]*)">/g, 'aria-label="$1"');
+
     // Pattern 4: Fix malformed type annotations ChangeEvent<HTMLInputElement aria-label="...">
     content = content.replace(
       /ChangeEvent<HTMLInputElement aria-label="[^"]*">/g,
       'ChangeEvent<HTMLInputElement>'
     );
-    
-    // Pattern 5: Fix onChange={() = aria-label="input"> to onChange={() => 
+
+    // Pattern 5: Fix onChange={() = aria-label="input"> to onChange={() =>
     content = content.replace(
       /onChange=\{[^}]*= aria-label="[^"]*">/g,
       'onChange={() =>'

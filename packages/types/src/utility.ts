@@ -8,7 +8,9 @@
 export type JSONPrimitive = string | number | boolean | null;
 export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
 // Define JSON structures using interfaces with explicit members to satisfy lint rules
-export interface JSONObject { [key: string]: JSONValue }
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
 export type JSONArray = JSONValue[];
 
 // Narrow record types
@@ -24,12 +26,20 @@ export type DeepPartial<T> = {
 export type Brand<T, B extends string> = T & { readonly __brand: B };
 
 // Result discriminated unions
-export interface Ok<T> { ok: true; value: T }
-export interface Err<E = Error> { ok: false; error: E }
+export interface Ok<T> {
+  ok: true;
+  value: T;
+}
+export interface Err<E = Error> {
+  ok: false;
+  error: E;
+}
 export type Result<T, E = Error> = Ok<T> | Err<E>;
 
 // Function helpers
-export type AsyncFn<TArgs extends unknown[] = unknown[], TReturn = unknown> = (...args: TArgs) => Promise<TReturn>;
+export type AsyncFn<TArgs extends unknown[] = unknown[], TReturn = unknown> = (
+  ...args: TArgs
+) => Promise<TReturn>;
 
 // Predicate type
 export type Predicate<T> = (value: unknown) => value is T;

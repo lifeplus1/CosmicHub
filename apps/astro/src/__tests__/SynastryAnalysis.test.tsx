@@ -6,12 +6,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { SynastryAnalysis } from '../components/SynastryAnalysis/SynastryAnalysis';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 
-const TestWrapper = ({ children }: { children: React.ReactNode }): React.ReactElement => (
+const TestWrapper = ({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement => (
   <MemoryRouter>
     <AuthProvider>
-      <SubscriptionProvider appType="astro">
-        {children}
-      </SubscriptionProvider>
+      <SubscriptionProvider appType='astro'>{children}</SubscriptionProvider>
     </AuthProvider>
   </MemoryRouter>
 );
@@ -23,9 +25,9 @@ describe('SynastryAnalysis Component', () => {
     city: 'New York',
     country: 'USA',
     latitude: 40.7128,
-    longitude: -74.0060,
+    longitude: -74.006,
     timezone: 'America/New_York',
-    datetime: '1990-01-01T12:00:00-05:00'
+    datetime: '1990-01-01T12:00:00-05:00',
   };
 
   const mockPerson2 = {
@@ -36,7 +38,7 @@ describe('SynastryAnalysis Component', () => {
     latitude: 34.0522,
     longitude: -118.2437,
     timezone: 'America/Los_Angeles',
-    datetime: '1992-05-15T14:30:00-08:00'
+    datetime: '1992-05-15T14:30:00-08:00',
   };
 
   beforeEach(() => {

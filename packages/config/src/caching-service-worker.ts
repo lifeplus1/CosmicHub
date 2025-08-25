@@ -7,7 +7,12 @@
 export interface CacheStrategy {
   name: string;
   pattern: RegExp | string;
-  strategy: 'cache-first' | 'network-first' | 'stale-while-revalidate' | 'network-only' | 'cache-only';
+  strategy:
+    | 'cache-first'
+    | 'network-first'
+    | 'stale-while-revalidate'
+    | 'network-only'
+    | 'cache-only';
   maxAge?: number;
   maxEntries?: number;
   networkTimeoutSeconds?: number;
@@ -20,7 +25,12 @@ export interface CachePlugin {
   cachedResponseWillBeUsed?: (response: Response) => Promise<Response | null>;
   requestWillFetch?: (request: Request) => Promise<Request>;
   fetchDidFail?: (request: Request, error: Error) => Promise<void>;
-  cacheDidUpdate?: (cacheName: string, request: Request, oldResponse?: Response, newResponse?: Response) => Promise<void>;
+  cacheDidUpdate?: (
+    cacheName: string,
+    request: Request,
+    oldResponse?: Response,
+    newResponse?: Response
+  ) => Promise<void>;
 }
 
 export interface ServiceWorkerConfig {
@@ -54,7 +64,10 @@ export class CacheManager {
   private static instance: CacheManager;
   private strategies = new Map<string, CacheStrategy>();
   private caches = new Map<string, Cache>();
-  private performance = new Map<string, { hits: number; misses: number; size: number }>();
+  private performance = new Map<
+    string,
+    { hits: number; misses: number; size: number }
+  >();
 
   static getInstance(): CacheManager {
     CacheManager.instance ??= new CacheManager();
@@ -66,13 +79,17 @@ export class CacheManager {
 
     for (const strategy of strategies) {
       this.strategies.set(strategy.name, strategy);
-      
+
       if (strategy.cacheName) {
         const cache = await caches.open(strategy.cacheName);
         this.caches.set(strategy.cacheName, cache);
-        
+
         // Initialize performance tracking
-        this.performance.set(strategy.cacheName, { hits: 0, misses: 0, size: 0 });
+        this.performance.set(strategy.cacheName, {
+          hits: 0,
+          misses: 0,
+          size: 0,
+        });
       }
     }
 
@@ -99,7 +116,11 @@ export class CacheManager {
         case 'network-first':
           return await this.networkFirstStrategy(request, cache, strategy);
         case 'stale-while-revalidate':
-          return await this.staleWhileRevalidateStrategy(request, cache, strategy);
+          return await this.staleWhileRevalidateStrategy(
+            request,
+            cache,
+            strategy
+          );
         case 'network-only':
           return await this.networkOnlyStrategy(request);
         case 'cache-only':
@@ -114,30 +135,38 @@ export class CacheManager {
   }
 
   private async cacheFirstStrategy(
-    request: Request | string, 
-    cache: Cache, 
+    request: Request | string,
+    cache: Cache,
     strategy: CacheStrategy
   ): Promise<Response | null> {
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
       this.recordCacheHit(strategy.cacheName!);
-      
+
       // Check if cache is stale
       if (this.isCacheStale(cachedResponse, strategy.maxAge)) {
         // Refresh in background - properly handle the promise
         void this.refreshCacheInBackground(request, cache, strategy);
       }
-      
+
       return cachedResponse;
     }
 
     // Not in cache, try network
     try {
-      const networkResponse = await this.fetchWithTimeout(request, strategy.networkTimeoutSeconds);
-      
+      const networkResponse = await this.fetchWithTimeout(
+        request,
+        strategy.networkTimeoutSeconds
+      );
+
       if (networkResponse?.ok) {
-        await this.putInCache(cache, request, networkResponse.clone(), strategy);
+        await this.putInCache(
+          cache,
+          request,
+          networkResponse.clone(),
+          strategy
+        );
         this.recordCacheMiss(strategy.cacheName!);
         return networkResponse;
       }
@@ -149,15 +178,23 @@ export class CacheManager {
   }
 
   private async networkFirstStrategy(
-    request: Request | string, 
-    cache: Cache, 
+    request: Request | string,
+    cache: Cache,
     strategy: CacheStrategy
   ): Promise<Response | null> {
     try {
-      const networkResponse = await this.fetchWithTimeout(request, strategy.networkTimeoutSeconds);
-      
+      const networkResponse = await this.fetchWithTimeout(
+        request,
+        strategy.networkTimeoutSeconds
+      );
+
       if (networkResponse?.ok) {
-        await this.putInCache(cache, request, networkResponse.clone(), strategy);
+        await this.putInCache(
+          cache,
+          request,
+          networkResponse.clone(),
+          strategy
+        );
         return networkResponse;
       }
     } catch (error) {
@@ -176,15 +213,15 @@ export class CacheManager {
   }
 
   private async staleWhileRevalidateStrategy(
-    request: Request | string, 
-    cache: Cache, 
+    request: Request | string,
+    cache: Cache,
     strategy: CacheStrategy
   ): Promise<Response | null> {
     const cachedResponse = await cache.match(request);
-    
+
     // Always try to revalidate in background
     void this.refreshCacheInBackground(request, cache, strategy);
-    
+
     if (cachedResponse) {
       this.recordCacheHit(strategy.cacheName!);
       return cachedResponse;
@@ -192,10 +229,18 @@ export class CacheManager {
 
     // No cache, wait for network
     try {
-      const networkResponse = await this.fetchWithTimeout(request, strategy.networkTimeoutSeconds);
-      
+      const networkResponse = await this.fetchWithTimeout(
+        request,
+        strategy.networkTimeoutSeconds
+      );
+
       if (networkResponse?.ok) {
-        await this.putInCache(cache, request, networkResponse.clone(), strategy);
+        await this.putInCache(
+          cache,
+          request,
+          networkResponse.clone(),
+          strategy
+        );
         return networkResponse;
       }
     } catch (error) {
@@ -206,7 +251,9 @@ export class CacheManager {
     return null;
   }
 
-  private async networkOnlyStrategy(request: Request | string): Promise<Response | null> {
+  private async networkOnlyStrategy(
+    request: Request | string
+  ): Promise<Response | null> {
     try {
       return await fetch(request);
     } catch (error) {
@@ -215,7 +262,10 @@ export class CacheManager {
     }
   }
 
-  private async cacheOnlyStrategy(request: Request | string, cache: Cache): Promise<Response | null> {
+  private async cacheOnlyStrategy(
+    request: Request | string,
+    cache: Cache
+  ): Promise<Response | null> {
     const cachedResponse = await cache.match(request);
     if (cachedResponse) {
       this.recordCacheHit('cache-only');
@@ -226,15 +276,18 @@ export class CacheManager {
   }
 
   private async fetchWithTimeout(
-    request: Request | string, 
+    request: Request | string,
     timeoutSeconds: number = 5
   ): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutSeconds * 1000);
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      timeoutSeconds * 1000
+    );
 
     try {
       const response = await fetch(request, {
-        signal: controller.signal
+        signal: controller.signal,
       });
       clearTimeout(timeoutId);
       return response;
@@ -245,18 +298,19 @@ export class CacheManager {
   }
 
   private async putInCache(
-    cache: Cache, 
-    request: Request | string, 
-    response: Response, 
+    cache: Cache,
+    request: Request | string,
+    response: Response,
     strategy: CacheStrategy
   ): Promise<void> {
     // Apply cache plugins
     let processedResponse = response;
-    
+
     if (strategy.plugins) {
       for (const plugin of strategy.plugins) {
         if (plugin.cachedResponseWillBeUsed) {
-          const result = await plugin.cachedResponseWillBeUsed(processedResponse);
+          const result =
+            await plugin.cachedResponseWillBeUsed(processedResponse);
           if (result) {
             processedResponse = result;
           }
@@ -265,7 +319,7 @@ export class CacheManager {
     }
 
     await cache.put(request, processedResponse);
-    
+
     // Enforce cache size limits
     if (strategy.maxEntries) {
       await this.enforceCacheSizeLimit(cache, strategy.maxEntries);
@@ -276,13 +330,13 @@ export class CacheManager {
   }
 
   private async refreshCacheInBackground(
-    request: Request | string, 
-    cache: Cache, 
+    request: Request | string,
+    cache: Cache,
     strategy: CacheStrategy
   ): Promise<void> {
     try {
       const networkResponse = await fetch(request);
-      
+
       if (networkResponse?.ok) {
         await this.putInCache(cache, request, networkResponse, strategy);
       }
@@ -308,10 +362,10 @@ export class CacheManager {
   }
 
   private isCacheStale(response: Response, maxAge?: number): boolean {
-  if (maxAge === undefined || maxAge === null || maxAge === 0) return false;
+    if (maxAge === undefined || maxAge === null || maxAge === 0) return false;
 
     const cacheDate = response.headers.get('date');
-  if (cacheDate === null) return true;
+    if (cacheDate === null) return true;
 
     const cacheTime = new Date(cacheDate).getTime();
     const now = Date.now();
@@ -320,13 +374,16 @@ export class CacheManager {
     return age > maxAge * 1000;
   }
 
-  private async enforceCacheSizeLimit(cache: Cache, maxEntries: number): Promise<void> {
+  private async enforceCacheSizeLimit(
+    cache: Cache,
+    maxEntries: number
+  ): Promise<void> {
     const requests = await cache.keys();
-    
+
     if (requests.length > maxEntries) {
       // Remove oldest entries (FIFO)
       const toDelete = requests.slice(0, requests.length - maxEntries);
-      
+
       for (const request of toDelete) {
         await cache.delete(request);
       }
@@ -360,10 +417,14 @@ export class CacheManager {
 
   private async cleanupOldCaches(): Promise<void> {
     const cacheNames = await caches.keys();
-    const currentCacheNames = new Set(Array.from(this.strategies.values()).map(s => s.cacheName).filter(Boolean));
-    
+    const currentCacheNames = new Set(
+      Array.from(this.strategies.values())
+        .map(s => s.cacheName)
+        .filter(Boolean)
+    );
+
     for (const cacheName of cacheNames) {
-  if (!currentCacheNames.has(cacheName)) {
+      if (!currentCacheNames.has(cacheName)) {
         console.log(`🗑️ Deleting old cache: ${cacheName}`);
         await caches.delete(cacheName);
       }
@@ -374,11 +435,11 @@ export class CacheManager {
     const criticalResources = [
       '/manifest.json',
       '/favicon.ico',
-      '/offline.html'
+      '/offline.html',
     ];
 
     const cache = await caches.open('critical-v1');
-    
+
     for (const resource of criticalResources) {
       try {
         const response = await fetch(resource);
@@ -391,31 +452,37 @@ export class CacheManager {
     }
   }
 
-  getCacheStats(): Map<string, { hits: number; misses: number; size: number; hitRate: number }> {
-    const stats = new Map<string, { hits: number; misses: number; size: number; hitRate: number }>();
-    
+  getCacheStats(): Map<
+    string,
+    { hits: number; misses: number; size: number; hitRate: number }
+  > {
+    const stats = new Map<
+      string,
+      { hits: number; misses: number; size: number; hitRate: number }
+    >();
+
     this.performance.forEach((perf, cacheName) => {
       const total = perf.hits + perf.misses;
       const hitRate = total > 0 ? (perf.hits / total) * 100 : 0;
-      
+
       stats.set(cacheName, {
         hits: perf.hits,
         misses: perf.misses,
         size: perf.size,
-        hitRate: parseFloat(hitRate.toFixed(2))
+        hitRate: parseFloat(hitRate.toFixed(2)),
       });
     });
-    
+
     return stats;
   }
 
   async clearAllCaches(): Promise<void> {
     const cacheNames = await caches.keys();
-    
+
     for (const cacheName of cacheNames) {
       await caches.delete(cacheName);
     }
-    
+
     this.caches.clear();
     this.performance.clear();
     console.log('🗑️ All caches cleared');
@@ -469,14 +536,16 @@ export class ServiceWorkerManager {
     console.log('📦 Service Worker installing...');
 
     if ('waitUntil' in event) {
-  (event as unknown as { waitUntil(p: Promise<unknown>): void }).waitUntil(
+      (event as unknown as { waitUntil(p: Promise<unknown>): void }).waitUntil(
         (async () => {
           // Pre-cache offline pages
           const cache = await caches.open('offline-v1');
           await cache.addAll(this.config.offlinePages);
 
           if (this.config.skipWaiting) {
-            await (self as unknown as { skipWaiting(): Promise<void> }).skipWaiting();
+            await (
+              self as unknown as { skipWaiting(): Promise<void> }
+            ).skipWaiting();
           }
         })()
       );
@@ -487,10 +556,12 @@ export class ServiceWorkerManager {
     console.log('🚀 Service Worker activating...');
 
     if ('waitUntil' in event) {
-  (event as unknown as { waitUntil(p: Promise<unknown>): void }).waitUntil(
+      (event as unknown as { waitUntil(p: Promise<unknown>): void }).waitUntil(
         (async () => {
           if (this.config.clientsClaim) {
-            await (self as unknown as { clients: { claim(): Promise<void> } }).clients.claim();
+            await (
+              self as unknown as { clients: { claim(): Promise<void> } }
+            ).clients.claim();
           }
 
           // Clean up old caches
@@ -501,7 +572,10 @@ export class ServiceWorkerManager {
   }
 
   private handleFetch(event: Event): void {
-    const fetchEvent = event as unknown as { request: Request; respondWith(p: Promise<Response>): void };
+    const fetchEvent = event as unknown as {
+      request: Request;
+      respondWith(p: Promise<Response>): void;
+    };
     const request = fetchEvent.request;
 
     // Skip non-GET requests for caching
@@ -510,7 +584,10 @@ export class ServiceWorkerManager {
     }
 
     // Skip cross-origin requests
-  if (typeof request.url !== 'string' || !request.url.startsWith(self.location.origin)) {
+    if (
+      typeof request.url !== 'string' ||
+      !request.url.startsWith(self.location.origin)
+    ) {
       return;
     }
 
@@ -519,14 +596,14 @@ export class ServiceWorkerManager {
         (async () => {
           try {
             const cachedResponse = await this.cacheManager.get(request);
-            
+
             if (cachedResponse) {
               return cachedResponse;
             }
 
             // Fallback to network
             const networkResponse = await fetch(request);
-            
+
             if (networkResponse.ok) {
               return networkResponse;
             }
@@ -535,7 +612,7 @@ export class ServiceWorkerManager {
             if (request.mode === 'navigate') {
               const offlineCache = await caches.open('offline-v1');
               const offlinePage = await offlineCache.match('/offline.html');
-              
+
               if (offlinePage) {
                 return offlinePage;
               }
@@ -549,7 +626,7 @@ export class ServiceWorkerManager {
             if (request.mode === 'navigate') {
               const offlineCache = await caches.open('offline-v1');
               const offlinePage = await offlineCache.match('/offline.html');
-              
+
               if (offlinePage) {
                 return offlinePage;
               }
@@ -569,10 +646,13 @@ export class ServiceWorkerManager {
   }
 
   private handleBackgroundSync(event: Event): void {
-    const syncEvent = event as unknown as { tag: string; waitUntil(p: Promise<unknown>): void };
+    const syncEvent = event as unknown as {
+      tag: string;
+      waitUntil(p: Promise<unknown>): void;
+    };
     const syncConfig = this.backgroundSync.get(syncEvent.tag);
-    
-  if (syncConfig === undefined) {
+
+    if (syncConfig === undefined) {
       return;
     }
 
@@ -585,27 +665,36 @@ export class ServiceWorkerManager {
           while (retries < syncConfig.maxRetries && !success) {
             try {
               const response = await fetch(syncConfig.url, {
-                method: syncConfig.method
+                method: syncConfig.method,
               });
 
               if (response.ok) {
                 success = true;
-                console.log(`✅ Background sync successful: ${syncConfig.name}`);
+                console.log(
+                  `✅ Background sync successful: ${syncConfig.name}`
+                );
               } else {
                 throw new Error(`HTTP ${response.status}`);
               }
             } catch (error) {
               retries++;
-              console.warn(`❌ Background sync failed (attempt ${retries}): ${syncConfig.name}`, error);
+              console.warn(
+                `❌ Background sync failed (attempt ${retries}): ${syncConfig.name}`,
+                error
+              );
 
               if (retries < syncConfig.maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, syncConfig.retryDelay * 1000));
+                await new Promise(resolve =>
+                  setTimeout(resolve, syncConfig.retryDelay * 1000)
+                );
               }
             }
           }
 
           if (success === false) {
-            console.error(`💥 Background sync failed after ${syncConfig.maxRetries} attempts: ${syncConfig.name}`);
+            console.error(
+              `💥 Background sync failed after ${syncConfig.maxRetries} attempts: ${syncConfig.name}`
+            );
           }
         })()
       );
@@ -624,7 +713,10 @@ export class ServiceWorkerManager {
       badge?: unknown;
       data?: unknown;
     }
-    const pushEvent = event as unknown as { data: { json(): unknown } | null; waitUntil(p: Promise<unknown>): void };
+    const pushEvent = event as unknown as {
+      data: { json(): unknown } | null;
+      waitUntil(p: Promise<unknown>): void;
+    };
     if (pushEvent.data === null) {
       return;
     }
@@ -633,19 +725,28 @@ export class ServiceWorkerManager {
       return;
     }
     const payload = raw as PushPayload;
-    const title = typeof payload.title === 'string' ? payload.title : 'Notification';
+    const title =
+      typeof payload.title === 'string' ? payload.title : 'Notification';
     const body = typeof payload.body === 'string' ? payload.body : undefined;
-    const icon = typeof payload.icon === 'string' ? payload.icon : '/icon-192x192.png';
-    const badge = typeof payload.badge === 'string' ? payload.badge : '/badge-72x72.png';
-  const data = payload.data;
+    const icon =
+      typeof payload.icon === 'string' ? payload.icon : '/icon-192x192.png';
+    const badge =
+      typeof payload.badge === 'string' ? payload.badge : '/badge-72x72.png';
+    const data = payload.data;
     if (pushEvent.waitUntil) {
-      const reg = (self as unknown as { registration: { showNotification(t: string, o: NotificationOptions): Promise<void> } }).registration;
+      const reg = (
+        self as unknown as {
+          registration: {
+            showNotification(t: string, o: NotificationOptions): Promise<void>;
+          };
+        }
+      ).registration;
       pushEvent.waitUntil(
         reg.showNotification(title, {
           body,
-            icon,
-            badge,
-            data
+          icon,
+          badge,
+          data,
         })
       );
     }
@@ -654,9 +755,9 @@ export class ServiceWorkerManager {
   private async cleanupOldCaches(): Promise<void> {
     const cacheNames = await caches.keys();
     const currentCacheNames = new Set(Array.from(this.backgroundSync.keys()));
-    
+
     for (const cacheName of cacheNames) {
-  if (!currentCacheNames.has(cacheName)) {
+      if (!currentCacheNames.has(cacheName)) {
         console.log(`🗑️ Deleting old cache: ${cacheName}`);
         await caches.delete(cacheName);
       }
@@ -673,7 +774,7 @@ export const DefaultCacheStrategies: CacheStrategy[] = [
     strategy: 'cache-first',
     maxAge: 86400 * 30, // 30 days
     maxEntries: 100,
-    cacheName: 'static-assets-v1'
+    cacheName: 'static-assets-v1',
   },
 
   // API responses - network first with short cache
@@ -684,7 +785,7 @@ export const DefaultCacheStrategies: CacheStrategy[] = [
     maxAge: 300, // 5 minutes
     maxEntries: 50,
     networkTimeoutSeconds: 5,
-    cacheName: 'api-responses-v1'
+    cacheName: 'api-responses-v1',
   },
 
   // Chart data - stale while revalidate
@@ -694,7 +795,7 @@ export const DefaultCacheStrategies: CacheStrategy[] = [
     strategy: 'stale-while-revalidate',
     maxAge: 3600, // 1 hour
     maxEntries: 25,
-    cacheName: 'chart-data-v1'
+    cacheName: 'chart-data-v1',
   },
 
   // HTML pages - network first with offline fallback
@@ -705,7 +806,7 @@ export const DefaultCacheStrategies: CacheStrategy[] = [
     maxAge: 3600, // 1 hour
     maxEntries: 20,
     networkTimeoutSeconds: 3,
-    cacheName: 'html-pages-v1'
+    cacheName: 'html-pages-v1',
   },
 
   // External fonts - cache first
@@ -715,8 +816,8 @@ export const DefaultCacheStrategies: CacheStrategy[] = [
     strategy: 'cache-first',
     maxAge: 86400 * 365, // 1 year
     maxEntries: 10,
-    cacheName: 'google-fonts-v1'
-  }
+    cacheName: 'google-fonts-v1',
+  },
 ];
 
 // Service worker configuration for CosmicHub
@@ -730,18 +831,28 @@ export const DefaultServiceWorkerConfig: ServiceWorkerConfig = {
       url: '/api/charts/sync',
       method: 'POST',
       maxRetries: 3,
-      retryDelay: 5
-    }
+      retryDelay: 5,
+    },
   ],
   pushNotifications: {
-  publicKey: (globalThis as unknown as { process?: { env?: Record<string,string|undefined> } }).process?.env?.VAPID_PUBLIC_KEY ?? '',
-  privateKey: (globalThis as unknown as { process?: { env?: Record<string,string|undefined> } }).process?.env?.VAPID_PRIVATE_KEY ?? '',
+    publicKey:
+      (
+        globalThis as unknown as {
+          process?: { env?: Record<string, string | undefined> };
+        }
+      ).process?.env?.VAPID_PUBLIC_KEY ?? '',
+    privateKey:
+      (
+        globalThis as unknown as {
+          process?: { env?: Record<string, string | undefined> };
+        }
+      ).process?.env?.VAPID_PRIVATE_KEY ?? '',
     subject: 'mailto:admin@cosmichub.com',
-    enabled: false
+    enabled: false,
   },
   updateStrategy: 'prompt-user',
   skipWaiting: false,
-  clientsClaim: true
+  clientsClaim: true,
 };
 
 // Export utilities
@@ -749,5 +860,5 @@ export const CachingSystem = {
   CacheManager,
   ServiceWorkerManager,
   DefaultCacheStrategies,
-  DefaultServiceWorkerConfig
+  DefaultServiceWorkerConfig,
 };

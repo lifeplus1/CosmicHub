@@ -1,7 +1,20 @@
 import os
 from typing import Any
+import asyncio
 
+# Ensure test mode and tracing disabled BEFORE importing application modules
+os.environ.setdefault("TEST_MODE", "1")
 os.environ.setdefault("ENABLE_TRACING", "false")
+os.environ.setdefault("ALLOW_MOCK_AUTH", "1")
+os.environ.setdefault("ALLOW_MOCK_DB", "1")
+os.environ.setdefault("PYTHONASYNCIODEBUG", "0")
+
+# Explicitly set a fresh event loop policy to avoid reuse issues that can hang with TestClient in strict mode (Python 3.13 + pytest-asyncio)
+try:
+    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())  # type: ignore[arg-type]
+except Exception:
+    pass
+
 from fastapi import status  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 

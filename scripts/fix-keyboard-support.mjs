@@ -8,65 +8,76 @@ const workspaceRoot = process.cwd();
 // Track fixes applied
 let fixesApplied = {
   keyboardSupport: 0,
-  filesModified: 0
+  filesModified: 0,
 };
 
 // Priority files to focus on first (high-traffic user interface components)
 const priorityPatterns = [
   'Navbar',
-  'Modal', 
+  'Modal',
   'Button',
   'Card',
   'Form',
   'Input',
-  'Chart'
+  'Chart',
 ];
 
 // Keyboard support patterns - focus on actual problematic cases
 const keyboardSupportFixes = [
   {
     // Fix div/span elements with onClick that lack keyboard support
-    pattern: /(<(div|span)(?![^>]*onKeyDown)(?![^>]*role="button")(?![^>]*tabIndex)[^>]*onClick={[^}]+}[^>]*>)/g,
+    pattern:
+      /(<(div|span)(?![^>]*onKeyDown)(?![^>]*role="button")(?![^>]*tabIndex)[^>]*onClick={[^}]+}[^>]*>)/g,
     fix: (match, element) => {
       // Add keyboard support with proper role and tabIndex
-      const keyboardHandler = element.includes('onClick={') 
+      const keyboardHandler = element.includes('onClick={')
         ? element.replace(
             /onClick=\{([^}]+)\}/,
-            'onClick={$1} onKeyDown={(e) => { if (e.key === \'Enter\' || e.key === \' \') { e.preventDefault(); ($1)(e); } }} role="button" tabIndex={0}'
+            "onClick={$1} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ($1)(e); } }} role=\"button\" tabIndex={0}"
           )
         : element;
-      
+
       return keyboardHandler;
     },
-    description: 'Add keyboard support to clickable div/span elements'
+    description: 'Add keyboard support to clickable div/span elements',
   },
   {
     // Fix interactive elements missing role and tabIndex
     pattern: /(<(div|span)[^>]*onClick={[^}]+}(?![^>]*role=)[^>]*>)/g,
     fix: (match, element) => {
       if (!element.includes('role=') && !element.includes('tabIndex=')) {
-        return element.replace(/onClick={([^}]+)}/, 'onClick={$1} onKeyDown={(e) => { if (e.key === \'Enter\' || e.key === \' \') { e.preventDefault(); ($1)(e); } }} role="button" tabIndex={0}');
+        return element.replace(
+          /onClick={([^}]+)}/,
+          "onClick={$1} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ($1)(e); } }} role=\"button\" tabIndex={0}"
+        );
       }
       return match;
     },
-    description: 'Add role and tabIndex to interactive elements'
-  }
+    description: 'Add role and tabIndex to interactive elements',
+  },
 ];
 
 function findFiles(dir, extensions = ['.tsx', '.ts', '.jsx', '.js']) {
   const files = [];
-  
+
   function traverse(currentDir) {
     try {
       const entries = readdirSync(currentDir);
-      
+
       for (const entry of entries) {
         const fullPath = join(currentDir, entry);
         const stat = statSync(fullPath);
-        
-        if (stat.isDirectory() && !entry.startsWith('.') && entry !== 'node_modules') {
+
+        if (
+          stat.isDirectory() &&
+          !entry.startsWith('.') &&
+          entry !== 'node_modules'
+        ) {
           traverse(fullPath);
-        } else if (stat.isFile() && extensions.includes(extname(entry).toLowerCase())) {
+        } else if (
+          stat.isFile() &&
+          extensions.includes(extname(entry).toLowerCase())
+        ) {
           files.push(fullPath);
         }
       }
@@ -74,7 +85,7 @@ function findFiles(dir, extensions = ['.tsx', '.ts', '.jsx', '.js']) {
       // Skip directories we can't read
     }
   }
-  
+
   traverse(dir);
   return files;
 }
@@ -89,20 +100,20 @@ function hasProblematicClickHandlers(content) {
   const problematicPatterns = [
     /<(div|span)[^>]*onClick={[^}]+}(?![^>]*onKeyDown)[^>]*>/g,
     /<(div|span)[^>]*onClick={[^}]+}(?![^>]*role="button")[^>]*>/g,
-    /<(div|span)[^>]*onClick={[^}]+}(?![^>]*tabIndex)[^>]*>/g
+    /<(div|span)[^>]*onClick={[^}]+}(?![^>]*tabIndex)[^>]*>/g,
   ];
-  
+
   return problematicPatterns.some(pattern => pattern.test(content));
 }
 
 function applyKeyboardFixes(filePath, content) {
   let modifiedContent = content;
   let hasChanges = false;
-  
+
   for (const fix of keyboardSupportFixes) {
     const originalContent = modifiedContent;
     modifiedContent = modifiedContent.replace(fix.pattern, fix.fix);
-    
+
     if (originalContent !== modifiedContent) {
       hasChanges = true;
       const changeCount = (originalContent.match(fix.pattern) || []).length;
@@ -110,14 +121,14 @@ function applyKeyboardFixes(filePath, content) {
       console.log(`  ✅ ${fix.description}: ${changeCount} fixes`);
     }
   }
-  
+
   return { content: modifiedContent, hasChanges };
 }
 
 function processFile(filePath) {
   try {
     const content = readFileSync(filePath, 'utf8');
-    
+
     // Skip non-React component files
     if (!content.includes('React') && !content.includes('onClick')) {
       return;
@@ -127,12 +138,12 @@ function processFile(filePath) {
     if (!hasProblematicClickHandlers(content)) {
       return;
     }
-    
+
     console.log(`\n🔍 Processing: ${filePath.replace(workspaceRoot, '.')}`);
-    
+
     // Apply keyboard support fixes
     const result = applyKeyboardFixes(filePath, content);
-    
+
     if (result.hasChanges) {
       writeFileSync(filePath, result.content, 'utf8');
       fixesApplied.filesModified++;
@@ -140,7 +151,6 @@ function processFile(filePath) {
     } else {
       console.log(`  ⚪ No keyboard issues found`);
     }
-    
   } catch (error) {
     console.error(`❌ Error processing ${filePath}:`, error.message);
   }
@@ -152,13 +162,14 @@ console.log('=======================================================\n');
 // Find all React component files
 const allFiles = [
   ...findFiles(join(workspaceRoot, 'apps')),
-  ...findFiles(join(workspaceRoot, 'packages'))
-].filter(file => 
-  !file.includes('test') && 
-  !file.includes('spec') && 
-  !file.includes('.stories.') &&
-  !file.includes('node_modules') &&
-  !file.includes('dist')
+  ...findFiles(join(workspaceRoot, 'packages')),
+].filter(
+  file =>
+    !file.includes('test') &&
+    !file.includes('spec') &&
+    !file.includes('.stories.') &&
+    !file.includes('node_modules') &&
+    !file.includes('dist')
 );
 
 // Prioritize high-traffic components first
@@ -178,7 +189,9 @@ console.log('================');
 otherFiles.slice(0, 20).forEach(processFile);
 
 if (otherFiles.length > 20) {
-  console.log(`\n⚠️  ${otherFiles.length - 20} additional files not processed in this batch`);
+  console.log(
+    `\n⚠️  ${otherFiles.length - 20} additional files not processed in this batch`
+  );
   console.log('   Run the script again to continue with remaining files');
 }
 
@@ -195,5 +208,7 @@ if (fixesApplied.filesModified > 0) {
   console.log('💡 Consider manual review of complex interactive elements');
 } else {
   console.log('\n🎉 No problematic click handlers found in this batch!');
-  console.log('✨ Most components already use proper button elements or have keyboard support');
+  console.log(
+    '✨ Most components already use proper button elements or have keyboard support'
+  );
 }

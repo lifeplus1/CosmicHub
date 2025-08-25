@@ -7,17 +7,22 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-  "clean": "rm -rf dist",
-  "test": "vitest run"
+    "clean": "rm -rf dist",
+    "test": "vitest run"
   },
-  "keywords": ["astrology", "types", "typescript", "cosmichub"],
+  "keywords": [
+    "astrology",
+    "types",
+    "typescript",
+    "cosmichub"
+  ],
   "author": "CosmicHub Team",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.0.0",
-  "vitest": "^2.1.4",
-  "@vitest/ui": "^2.1.4",
-  "@vitest/coverage-v8": "^2.1.4"
+    "vitest": "^2.1.4",
+    "@vitest/ui": "^2.1.4",
+    "@vitest/coverage-v8": "^2.1.4"
   },
   "dependencies": {
     "zod": "^3.22.0"

@@ -20,25 +20,27 @@
     "paths": {
       "@cosmichub/config": ["../config/dist"],
       "@cosmichub/config/*": ["../config/dist/*"],
-      "@cosmichub/config/component-architecture": ["../config/dist/component-architecture"],
-      "@cosmichub/config/component-library": ["../config/dist/component-library"],
+      "@cosmichub/config/component-architecture": [
+        "../config/dist/component-architecture"
+      ],
+      "@cosmichub/config/component-library": [
+        "../config/dist/component-library"
+      ],
       "@cosmichub/config/lazy-loading": ["../config/dist/lazy-loading"],
       "@cosmichub/config/performance": ["../config/dist/performance"],
       "@cosmichub/config/firebase": ["../config/dist/firebase"],
       "@cosmichub/config/hooks": ["../config/dist/hooks/index"],
       "@cosmichub/config/enhanced-testing": ["../config/dist/enhanced-testing"],
-      "@cosmichub/config/accessibility-testing": ["../config/dist/accessibility-testing"],
-      "@cosmichub/config/push-notifications": ["../config/dist/push-notifications"],
+      "@cosmichub/config/accessibility-testing": [
+        "../config/dist/accessibility-testing"
+      ],
+      "@cosmichub/config/push-notifications": [
+        "../config/dist/push-notifications"
+      ],
       "@cosmichub/config/api-result": ["../config/dist/api-result"]
     }
   },
-  "references": [
-    { "path": "../config" }
-  ],
-  "include": [
-    "src/**/*",
-    "src/vite-env.d.ts",
-    "src/types/**/*"
-  ],
+  "references": [{ "path": "../config" }],
+  "include": ["src/**/*", "src/vite-env.d.ts", "src/types/**/*"],
   "exclude": ["dist", "node_modules"]
 }

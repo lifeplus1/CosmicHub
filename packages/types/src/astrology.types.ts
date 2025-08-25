@@ -26,17 +26,17 @@ export interface Aspect {
 }
 
 export interface Asteroid {
-    name: string;
-    sign: string;
-    degree: number;
-    house: string;
+  name: string;
+  sign: string;
+  degree: number;
+  house: string;
 }
 
 export interface Angle {
-    name: string;
-    sign: string;
-    degree: number;
-    position: number;
+  name: string;
+  sign: string;
+  degree: number;
+  position: number;
 }
 
 export interface AstrologyChart {

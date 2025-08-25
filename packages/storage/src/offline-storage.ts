@@ -5,20 +5,34 @@
 
 // Simple console logger for this package
 const log = {
-  info: (message: string, ...args: unknown[]) => console.log(`📂 [OfflineStorage] ${message}`, ...args),
-  warn: (message: string, ...args: unknown[]) => console.warn(`⚠️ [OfflineStorage] ${message}`, ...args),
-  error: (message: string, ...args: unknown[]) => console.error(`❌ [OfflineStorage] ${message}`, ...args)
+  info: (message: string, ...args: unknown[]) =>
+    console.log(`📂 [OfflineStorage] ${message}`, ...args),
+  warn: (message: string, ...args: unknown[]) =>
+    console.warn(`⚠️ [OfflineStorage] ${message}`, ...args),
+  error: (message: string, ...args: unknown[]) =>
+    console.error(`❌ [OfflineStorage] ${message}`, ...args),
 };
 
 // Helper function to create proper Error objects from IndexedDB errors
-const createIndexedDBError = (message: string, originalError?: unknown): Error => {
+const createIndexedDBError = (
+  message: string,
+  originalError?: unknown
+): Error => {
   if (originalError instanceof Error) {
     return new Error(`${message}: ${originalError.message}`);
   }
-  if (originalError && typeof originalError === 'object' && 'message' in originalError) {
-    return new Error(`${message}: ${String((originalError as { message: unknown }).message)}`);
+  if (
+    originalError &&
+    typeof originalError === 'object' &&
+    'message' in originalError
+  ) {
+    return new Error(
+      `${message}: ${String((originalError as { message: unknown }).message)}`
+    );
   }
-  const errorDetails = originalError ? JSON.stringify(originalError) : 'Unknown IndexedDB error';
+  const errorDetails = originalError
+    ? JSON.stringify(originalError)
+    : 'Unknown IndexedDB error';
   return new Error(`${message}: ${errorDetails}`);
 };
 
@@ -95,7 +109,11 @@ export class OfflineChartStorage {
 
       request.onerror = () => {
         log.error('Failed to open IndexedDB:', request.error);
-        reject(new Error(`Failed to open IndexedDB: ${request.error?.message ?? 'Unknown error'}`));
+        reject(
+          new Error(
+            `Failed to open IndexedDB: ${request.error?.message ?? 'Unknown error'}`
+          )
+        );
       };
 
       request.onblocked = () => {
@@ -108,23 +126,33 @@ export class OfflineChartStorage {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
-        log.info(`Upgrading IndexedDB from version ${event.oldVersion} to ${event.newVersion}`);
+        log.info(
+          `Upgrading IndexedDB from version ${event.oldVersion} to ${event.newVersion}`
+        );
 
         // Charts object store
         if (!db.objectStoreNames.contains(this.CHARTS_STORE)) {
-          const chartsStore = db.createObjectStore(this.CHARTS_STORE, { keyPath: 'id' });
+          const chartsStore = db.createObjectStore(this.CHARTS_STORE, {
+            keyPath: 'id',
+          });
           chartsStore.createIndex('userId', 'userId', { unique: false });
           chartsStore.createIndex('synced', 'synced', { unique: false });
-          chartsStore.createIndex('last_accessed', 'last_accessed', { unique: false });
+          chartsStore.createIndex('last_accessed', 'last_accessed', {
+            unique: false,
+          });
           chartsStore.createIndex('priority', 'priority', { unique: false });
-          chartsStore.createIndex('created_at', 'created_at', { unique: false });
+          chartsStore.createIndex('created_at', 'created_at', {
+            unique: false,
+          });
         }
 
         // Sync queue object store
         if (!db.objectStoreNames.contains(this.SYNC_STORE)) {
-          const syncStore = db.createObjectStore(this.SYNC_STORE, { keyPath: 'id' });
+          const syncStore = db.createObjectStore(this.SYNC_STORE, {
+            keyPath: 'id',
+          });
           syncStore.createIndex('action', 'action', { unique: false });
           syncStore.createIndex('timestamp', 'timestamp', { unique: false });
           syncStore.createIndex('attempts', 'attempts', { unique: false });
@@ -162,14 +190,17 @@ export class OfflineChartStorage {
       last_accessed: now,
       cache_metadata: {
         size_bytes: this.calculateChartSize(chart),
-        version: 1
-      }
+        version: 1,
+      },
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.CHARTS_STORE], 'readwrite');
+      const transaction = this.db!.transaction(
+        [this.CHARTS_STORE],
+        'readwrite'
+      );
       const store = transaction.objectStore(this.CHARTS_STORE);
-      
+
       transaction.oncomplete = () => {
         log.info(`Chart saved offline: ${chartId}`);
         this.enforceStorageLimits().catch(error => {
@@ -180,7 +211,12 @@ export class OfflineChartStorage {
 
       transaction.onerror = () => {
         log.error('Failed to save chart offline:', transaction.error);
-        reject(createIndexedDBError('Failed to save chart offline', transaction.error));
+        reject(
+          createIndexedDBError(
+            'Failed to save chart offline',
+            transaction.error
+          )
+        );
       };
 
       store.put(offlineChart);
@@ -211,7 +247,12 @@ export class OfflineChartStorage {
 
       request.onerror = () => {
         log.error('Failed to get chart from offline storage:', request.error);
-        reject(createIndexedDBError('Failed to get chart from offline storage', request.error));
+        reject(
+          createIndexedDBError(
+            'Failed to get chart from offline storage',
+            request.error
+          )
+        );
       };
     });
   }
@@ -233,13 +274,25 @@ export class OfflineChartStorage {
       request.onsuccess = () => {
         const charts = (request.result as OfflineChart[]) ?? [];
         // Sort by last accessed (most recent first)
-        charts.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
+        charts.sort(
+          (a, b) =>
+            new Date(b.last_accessed).getTime() -
+            new Date(a.last_accessed).getTime()
+        );
         resolve(charts);
       };
 
       request.onerror = () => {
-        log.error('Failed to get user charts from offline storage:', request.error);
-        reject(createIndexedDBError('Failed to get user charts from offline storage', request.error));
+        log.error(
+          'Failed to get user charts from offline storage:',
+          request.error
+        );
+        reject(
+          createIndexedDBError(
+            'Failed to get user charts from offline storage',
+            request.error
+          )
+        );
       };
     });
   }
@@ -253,17 +306,28 @@ export class OfflineChartStorage {
     }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.CHARTS_STORE], 'readwrite');
+      const transaction = this.db!.transaction(
+        [this.CHARTS_STORE],
+        'readwrite'
+      );
       const store = transaction.objectStore(this.CHARTS_STORE);
-      
+
       transaction.oncomplete = () => {
         log.info(`Chart deleted from offline storage: ${chartId}`);
         resolve();
       };
 
       transaction.onerror = () => {
-        log.error('Failed to delete chart from offline storage:', transaction.error);
-        reject(createIndexedDBError('Failed to delete chart from offline storage', transaction.error));
+        log.error(
+          'Failed to delete chart from offline storage:',
+          transaction.error
+        );
+        reject(
+          createIndexedDBError(
+            'Failed to delete chart from offline storage',
+            transaction.error
+          )
+        );
       };
 
       store.delete(chartId);
@@ -273,7 +337,10 @@ export class OfflineChartStorage {
   /**
    * Add item to sync queue
    */
-  async addToSyncQueue(action: 'create' | 'update' | 'delete', chartData: Partial<OfflineChart>): Promise<void> {
+  async addToSyncQueue(
+    action: 'create' | 'update' | 'delete',
+    chartData: Partial<OfflineChart>
+  ): Promise<void> {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
@@ -284,13 +351,13 @@ export class OfflineChartStorage {
       chart_data: chartData,
       timestamp: Date.now(),
       attempts: 0,
-      max_attempts: 3
+      max_attempts: 3,
     };
 
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([this.SYNC_STORE], 'readwrite');
       const store = transaction.objectStore(this.SYNC_STORE);
-      
+
       transaction.oncomplete = () => {
         log.info(`Added to sync queue: ${action} chart ${chartData.id}`);
         resolve();
@@ -298,7 +365,9 @@ export class OfflineChartStorage {
 
       transaction.onerror = () => {
         log.error('Failed to add to sync queue:', transaction.error);
-        reject(createIndexedDBError('Failed to add to sync queue', transaction.error));
+        reject(
+          createIndexedDBError('Failed to add to sync queue', transaction.error)
+        );
       };
 
       store.put(syncItem);
@@ -327,7 +396,12 @@ export class OfflineChartStorage {
 
       request.onerror = () => {
         log.error('Failed to get pending sync items:', request.error);
-        reject(createIndexedDBError('Failed to get pending sync items', request.error));
+        reject(
+          createIndexedDBError(
+            'Failed to get pending sync items',
+            request.error
+          )
+        );
       };
     });
   }
@@ -343,7 +417,7 @@ export class OfflineChartStorage {
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([this.SYNC_STORE], 'readwrite');
       const store = transaction.objectStore(this.SYNC_STORE);
-      
+
       transaction.oncomplete = () => {
         log.info(`Removed from sync queue: ${syncItemId}`);
         resolve();
@@ -351,7 +425,12 @@ export class OfflineChartStorage {
 
       transaction.onerror = () => {
         log.error('Failed to remove from sync queue:', transaction.error);
-        reject(createIndexedDBError('Failed to remove from sync queue', transaction.error));
+        reject(
+          createIndexedDBError(
+            'Failed to remove from sync queue',
+            transaction.error
+          )
+        );
       };
 
       store.delete(syncItemId);
@@ -361,7 +440,10 @@ export class OfflineChartStorage {
   /**
    * Update sync item (increment attempts, add error message)
    */
-  async updateSyncItem(syncItemId: string, updates: Partial<OfflineSyncItem>): Promise<void> {
+  async updateSyncItem(
+    syncItemId: string,
+    updates: Partial<OfflineSyncItem>
+  ): Promise<void> {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
@@ -369,7 +451,7 @@ export class OfflineChartStorage {
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([this.SYNC_STORE], 'readwrite');
       const store = transaction.objectStore(this.SYNC_STORE);
-      
+
       const getRequest = store.get(syncItemId);
       getRequest.onsuccess = () => {
         const syncItem = getRequest.result as OfflineSyncItem;
@@ -380,19 +462,26 @@ export class OfflineChartStorage {
 
         const updatedItem = { ...syncItem, ...updates };
         const putRequest = store.put(updatedItem);
-        
+
         putRequest.onsuccess = () => {
           log.info(`Updated sync item: ${syncItemId}`);
           resolve();
         };
 
         putRequest.onerror = () => {
-          reject(createIndexedDBError('Failed to update sync item', putRequest.error));
+          reject(
+            createIndexedDBError('Failed to update sync item', putRequest.error)
+          );
         };
       };
 
       getRequest.onerror = () => {
-        reject(createIndexedDBError('Failed to get sync item for update', getRequest.error));
+        reject(
+          createIndexedDBError(
+            'Failed to get sync item for update',
+            getRequest.error
+          )
+        );
       };
     });
   }
@@ -406,9 +495,12 @@ export class OfflineChartStorage {
     }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.CHARTS_STORE], 'readwrite');
+      const transaction = this.db!.transaction(
+        [this.CHARTS_STORE],
+        'readwrite'
+      );
       const store = transaction.objectStore(this.CHARTS_STORE);
-      
+
       const getRequest = store.get(chartId);
       getRequest.onsuccess = () => {
         const chart = getRequest.result as OfflineChart;
@@ -427,12 +519,22 @@ export class OfflineChartStorage {
         };
 
         putRequest.onerror = () => {
-          reject(createIndexedDBError('Failed to mark chart as synced', putRequest.error));
+          reject(
+            createIndexedDBError(
+              'Failed to mark chart as synced',
+              putRequest.error
+            )
+          );
         };
       };
 
       getRequest.onerror = () => {
-        reject(createIndexedDBError('Failed to get chart for sync marking', getRequest.error));
+        reject(
+          createIndexedDBError(
+            'Failed to get chart for sync marking',
+            getRequest.error
+          )
+        );
       };
     });
   }
@@ -448,14 +550,15 @@ export class OfflineChartStorage {
     const [charts, syncItems, quota] = await Promise.all([
       this.getAllCharts(),
       this.getPendingSyncItems(),
-      this.getStorageQuota()
+      this.getStorageQuota(),
     ]);
 
     const syncedCharts = charts.filter(c => c.synced).length;
     const lastSyncTimes = syncItems.map(s => s.timestamp);
-    const lastSync = lastSyncTimes.length > 0 
-      ? new Date(Math.max(...lastSyncTimes)).toISOString()
-      : null;
+    const lastSync =
+      lastSyncTimes.length > 0
+        ? new Date(Math.max(...lastSyncTimes)).toISOString()
+        : null;
 
     return {
       total_charts: charts.length,
@@ -463,7 +566,7 @@ export class OfflineChartStorage {
       unsynced_charts: charts.length - syncedCharts,
       pending_sync_items: syncItems.length,
       storage_quota: quota,
-      last_sync: lastSync
+      last_sync: lastSync,
     };
   }
 
@@ -476,8 +579,11 @@ export class OfflineChartStorage {
     }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.CHARTS_STORE, this.SYNC_STORE], 'readwrite');
-      
+      const transaction = this.db!.transaction(
+        [this.CHARTS_STORE, this.SYNC_STORE],
+        'readwrite'
+      );
+
       transaction.oncomplete = () => {
         log.info('All offline data cleared');
         resolve();
@@ -485,7 +591,12 @@ export class OfflineChartStorage {
 
       transaction.onerror = () => {
         log.error('Failed to clear offline data:', transaction.error);
-        reject(createIndexedDBError('Failed to clear offline data', transaction.error));
+        reject(
+          createIndexedDBError(
+            'Failed to clear offline data',
+            transaction.error
+          )
+        );
       };
 
       transaction.objectStore(this.CHARTS_STORE).clear();
@@ -496,10 +607,13 @@ export class OfflineChartStorage {
   /**
    * Export offline data for backup
    */
-  async exportData(): Promise<{ charts: OfflineChart[]; syncItems: OfflineSyncItem[] }> {
+  async exportData(): Promise<{
+    charts: OfflineChart[];
+    syncItems: OfflineSyncItem[];
+  }> {
     const [charts, syncItems] = await Promise.all([
       this.getAllCharts(),
-      this.getPendingSyncItems()
+      this.getPendingSyncItems(),
     ]);
 
     return { charts, syncItems };
@@ -508,22 +622,32 @@ export class OfflineChartStorage {
   /**
    * Import offline data from backup
    */
-  async importData(data: { charts: OfflineChart[]; syncItems: OfflineSyncItem[] }): Promise<void> {
+  async importData(data: {
+    charts: OfflineChart[];
+    syncItems: OfflineSyncItem[];
+  }): Promise<void> {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.CHARTS_STORE, this.SYNC_STORE], 'readwrite');
-      
+      const transaction = this.db!.transaction(
+        [this.CHARTS_STORE, this.SYNC_STORE],
+        'readwrite'
+      );
+
       transaction.oncomplete = () => {
-        log.info(`Imported ${data.charts.length} charts and ${data.syncItems.length} sync items`);
+        log.info(
+          `Imported ${data.charts.length} charts and ${data.syncItems.length} sync items`
+        );
         resolve();
       };
 
       transaction.onerror = () => {
         log.error('Failed to import data:', transaction.error);
-        reject(createIndexedDBError('Failed to import data', transaction.error));
+        reject(
+          createIndexedDBError('Failed to import data', transaction.error)
+        );
       };
 
       const chartsStore = transaction.objectStore(this.CHARTS_STORE);
@@ -568,7 +692,7 @@ export class OfflineChartStorage {
 
     const transaction = this.db.transaction([this.CHARTS_STORE], 'readwrite');
     const store = transaction.objectStore(this.CHARTS_STORE);
-    
+
     const getRequest = store.get(chartId);
     getRequest.onsuccess = () => {
       const chart = getRequest.result as OfflineChart;
@@ -590,7 +714,7 @@ export class OfflineChartStorage {
         return {
           used,
           available,
-          percentage: Math.round(percentage * 100) / 100
+          percentage: Math.round(percentage * 100) / 100,
         };
       } catch (error) {
         log.warn('Failed to get storage estimate:', error);
@@ -600,7 +724,7 @@ export class OfflineChartStorage {
     return {
       used: 0,
       available: 0,
-      percentage: 0
+      percentage: 0,
     };
   }
 
@@ -614,7 +738,7 @@ export class OfflineChartStorage {
 
   private async enforceStorageLimits(): Promise<void> {
     const charts = await this.getAllCharts();
-    
+
     // Check if we need to evict old charts
     if (charts.length <= this.MAX_CHARTS) {
       return;
@@ -625,17 +749,23 @@ export class OfflineChartStorage {
       const priorityWeight = { low: 1, medium: 2, high: 3 };
       const aPriority = priorityWeight[a.priority];
       const bPriority = priorityWeight[b.priority];
-      
+
       if (aPriority !== bPriority) {
         return aPriority - bPriority;
       }
-      
-      return new Date(a.last_accessed).getTime() - new Date(b.last_accessed).getTime();
+
+      return (
+        new Date(a.last_accessed).getTime() -
+        new Date(b.last_accessed).getTime()
+      );
     });
 
     // Evict excess charts
-    const chartsToEvict = sortedCharts.slice(0, sortedCharts.length - this.MAX_CHARTS);
-    
+    const chartsToEvict = sortedCharts.slice(
+      0,
+      sortedCharts.length - this.MAX_CHARTS
+    );
+
     for (const chart of chartsToEvict) {
       if (!chart.synced) {
         // Don't evict unsynced charts
@@ -660,15 +790,21 @@ export const getOfflineStorage = (): OfflineChartStorage => {
 };
 
 // Convenience functions
-export const saveChartOffline = (chart: Partial<OfflineChart>): Promise<string> => {
+export const saveChartOffline = (
+  chart: Partial<OfflineChart>
+): Promise<string> => {
   return getOfflineStorage().saveChart(chart);
 };
 
-export const getChartOffline = (chartId: string): Promise<OfflineChart | null> => {
+export const getChartOffline = (
+  chartId: string
+): Promise<OfflineChart | null> => {
   return getOfflineStorage().getChart(chartId);
 };
 
-export const getUserChartsOffline = (userId: string): Promise<OfflineChart[]> => {
+export const getUserChartsOffline = (
+  userId: string
+): Promise<OfflineChart[]> => {
   return getOfflineStorage().getUserCharts(userId);
 };
 

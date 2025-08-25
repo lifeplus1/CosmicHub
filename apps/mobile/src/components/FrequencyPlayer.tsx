@@ -10,7 +10,11 @@ interface Props {
   duration?: number;
 }
 
-export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Props) {
+export function FrequencyPlayer({
+  frequencyType,
+  frequency,
+  duration = 600,
+}: Props) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
@@ -40,11 +44,13 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
       setIsLoading(true);
       try {
         // In a real app, you'd load the actual binaural beat audio files
-        const audioSource = { uri: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' } as const;
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          audioSource,
-          { shouldPlay: true, volume }
-        );
+        const audioSource = {
+          uri: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
+        } as const;
+        const { sound: newSound } = await Audio.Sound.createAsync(audioSource, {
+          shouldPlay: true,
+          volume,
+        });
         setSound(newSound);
         setIsPlaying(true);
       } catch (error) {
@@ -127,11 +133,14 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
       <View style={styles.progressSection}>
         <Text style={styles.timeText}>{formatTime(position)}</Text>
         <View style={styles.progressBar}>
-          <View 
+          <View
             style={[
-              styles.progressFill, 
-              { width: `${(position / duration) * 100}%`, backgroundColor: info.color }
-            ]} 
+              styles.progressFill,
+              {
+                width: `${(position / duration) * 100}%`,
+                backgroundColor: info.color,
+              },
+            ]}
           />
         </View>
         <Text style={styles.timeText}>{formatTime(duration)}</Text>
@@ -146,15 +155,16 @@ export function FrequencyPlayer({ frequencyType, frequency, duration = 600 }: Pr
           value={volume}
           onValueChange={handleVolumeChange}
           minimumTrackTintColor={info.color}
-          maximumTrackTintColor="#333"
+          maximumTrackTintColor='#333'
           thumbTintColor={info.color}
         />
         <Text style={styles.volumeText}>{Math.round(volume * 100)}%</Text>
       </View>
 
       <Text style={styles.description}>
-        This frequency is designed to induce {info.name.toLowerCase()} states through 
-        carefully calibrated binaural beats. Use headphones for the best experience.
+        This frequency is designed to induce {info.name.toLowerCase()} states
+        through carefully calibrated binaural beats. Use headphones for the best
+        experience.
       </Text>
     </View>
   );

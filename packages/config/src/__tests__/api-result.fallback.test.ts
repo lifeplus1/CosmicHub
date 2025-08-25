@@ -7,7 +7,9 @@ describe('toFailure fallback + logger.once', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    warnSpy = vi.spyOn(console, 'warn').mockImplementation((): void => { /* silent */ });
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation((): void => {
+      /* silent */
+    });
     logger.setLevel('debug');
   });
 
@@ -21,7 +23,10 @@ describe('toFailure fallback + logger.once', () => {
 
   it('does not warn for mapped status codes', () => {
     warnSpy.mockClear();
-    const mapped = toFailure({ response: { status: 401 } }, { defaultMsg: 'x', auth: 'auth msg' });
+    const mapped = toFailure(
+      { response: { status: 401 } },
+      { defaultMsg: 'x', auth: 'auth msg' }
+    );
     expect(mapped.code).toBe(ErrorCode.AUTH);
     expect(warnSpy).not.toHaveBeenCalled();
   });
@@ -29,7 +34,9 @@ describe('toFailure fallback + logger.once', () => {
 
 describe('logger level filtering', () => {
   it('suppresses info when level set to error', () => {
-    const infoSpy = vi.spyOn(console, 'info').mockImplementation((): void => { /* silent */ });
+    const infoSpy = vi.spyOn(console, 'info').mockImplementation((): void => {
+      /* silent */
+    });
     logger.setLevel('error');
     logger.info('should not appear');
     expect(infoSpy).not.toHaveBeenCalled();

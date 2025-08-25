@@ -4,12 +4,12 @@
  */
 
 import React, { type ComponentType, type JSX } from 'react';
-import { 
+import {
   createLazyComponent,
   lazyLoadChart,
   lazyLoadModal,
   DefaultLoadingSpinner,
-  SmartPreloader as _SmartPreloader
+  SmartPreloader as _SmartPreloader,
 } from '@cosmichub/config/lazy-loading';
 
 // Chart components (heavy libraries)
@@ -68,27 +68,27 @@ export const LazyShareModal = lazyLoadModal(
 export const LazyAdvancedForm = createLazyComponent(
   () => import('./forms/AdvancedForm'),
   'AdvancedForm',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
 export const LazyFrequencyForm = createLazyComponent(
   () => import('./forms/FrequencyForm'),
   'FrequencyForm',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
 export const LazyBirthDataForm = createLazyComponent(
   () => import('./forms/BirthDataForm'),
   'BirthDataForm',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: true // Common form, preload it
+    preload: true, // Common form, preload it
   }
 );
 
@@ -96,27 +96,27 @@ export const LazyBirthDataForm = createLazyComponent(
 export const LazyAnalyticsPanel = createLazyComponent(
   () => import('./analytics/AnalyticsPanel'),
   'AnalyticsPanel',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
 export const LazyReportGenerator = createLazyComponent(
   () => import('./reports/ReportGenerator'),
   'ReportGenerator',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
 export const LazyExportTools = createLazyComponent(
   () => import('./tools/ExportTools'),
   'ExportTools',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
@@ -124,27 +124,27 @@ export const LazyExportTools = createLazyComponent(
 export const LazyEphemerisCalculator = createLazyComponent(
   () => import('./calculators/EphemerisCalculator'),
   'EphemerisCalculator',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
 export const LazyGeneKeysCalculator = createLazyComponent(
   () => import('./calculators/GeneKeysCalculator'),
   'GeneKeysCalculator',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
 export const LazyFrequencyCalculator = createLazyComponent(
   () => import('./calculators/FrequencyCalculator'),
   'FrequencyCalculator',
-  { 
+  {
     loadingComponent: DefaultLoadingSpinner,
-    preload: false 
+    preload: false,
   }
 );
 
@@ -205,7 +205,7 @@ export interface SmartPreloadFunctions {
     componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
     componentName: K
   ) => (() => void) | undefined;
-  
+
   preloadOnIntersection: <K extends keyof LazyComponentPropsMap>(
     elementRef: React.RefObject<HTMLElement>,
     componentImport: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>,
@@ -218,21 +218,35 @@ export function useSmartPreloading(): SmartPreloadFunctions {
   // Preloader intentionally disabled (kept for future reinstatement)
   // const _preloader = React.useMemo(() => SmartPreloader.getInstance(), []);
 
-  const preloadOnHover = React.useCallback((_elementRef: unknown, _componentImport: unknown, _componentName: unknown) => {
-    // Temporarily disabled due to type conflicts
-    return undefined;
-  }, []);
+  const preloadOnHover = React.useCallback(
+    (
+      _elementRef: unknown,
+      _componentImport: unknown,
+      _componentName: unknown
+    ) => {
+      // Temporarily disabled due to type conflicts
+      return undefined;
+    },
+    []
+  );
 
-  const preloadOnIntersection = React.useCallback((_elementRef: unknown, _componentImport: unknown, _componentName: unknown) => {
-    // Temporarily disabled due to type conflicts  
-    return undefined;
-  }, []);
+  const preloadOnIntersection = React.useCallback(
+    (
+      _elementRef: unknown,
+      _componentImport: unknown,
+      _componentName: unknown
+    ) => {
+      // Temporarily disabled due to type conflicts
+      return undefined;
+    },
+    []
+  );
 
   return { preloadOnHover, preloadOnIntersection };
 }
 
 // Component registry for dynamic loading
-export type ComponentRegistryKeys = 
+export type ComponentRegistryKeys =
   // Charts
   | 'astrology-chart'
   | 'frequency-visualizer'
@@ -260,7 +274,9 @@ export type ComponentRegistryKeys =
 
 // Create a type-safe component registry
 export const ComponentRegistry: {
-  [K in ComponentRegistryKeys]: () => Promise<LazyLoadedModule<LazyComponentPropsMap[K]>>;
+  [K in ComponentRegistryKeys]: () => Promise<
+    LazyLoadedModule<LazyComponentPropsMap[K]>
+  >;
 } = {
   // Charts
   'astrology-chart': () => import('./charts/AstrologyChart'),
@@ -289,12 +305,16 @@ export const ComponentRegistry: {
   // Calculators
   'ephemeris-calculator': () => import('./calculators/EphemerisCalculator'),
   'gene-keys-calculator': () => import('./calculators/GeneKeysCalculator'),
-  'frequency-calculator': () => import('./calculators/FrequencyCalculator')
+  'frequency-calculator': () => import('./calculators/FrequencyCalculator'),
 };
 
 // Dynamic component loader
-export function useDynamicComponent<K extends ComponentRegistryKeys>(componentKey: K) {
-  const [Component, setComponent] = React.useState<React.ComponentType<LazyComponentPropsMap[K]> | null>(null);
+export function useDynamicComponent<K extends ComponentRegistryKeys>(
+  componentKey: K
+) {
+  const [Component, setComponent] = React.useState<React.ComponentType<
+    LazyComponentPropsMap[K]
+  > | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | null>(null);
 
@@ -335,17 +355,19 @@ export interface LazyComponentWrapperProps<K extends ComponentRegistryKeys> {
   fallback?: React.ComponentType;
 }
 
-export const LazyComponentWrapper = <K extends ComponentRegistryKeys>({ 
-  componentKey, 
-  props = {} as LazyComponentPropsMap[K], 
-  fallback: Fallback = DefaultLoadingSpinner 
+export const LazyComponentWrapper = <K extends ComponentRegistryKeys>({
+  componentKey,
+  props = {} as LazyComponentPropsMap[K],
+  fallback: Fallback = DefaultLoadingSpinner,
 }: LazyComponentWrapperProps<K>): JSX.Element => {
   const { Component, loading, error } = useDynamicComponent(componentKey);
 
   if (error !== null) {
     return (
-      <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-        <p className="text-red-600 text-sm">Failed to load component: {error.message}</p>
+      <div className='p-4 border border-red-200 rounded-lg bg-red-50'>
+        <p className='text-red-600 text-sm'>
+          Failed to load component: {error.message}
+        </p>
       </div>
     );
   }

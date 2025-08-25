@@ -10,7 +10,11 @@ export const getUserTier = (subscription: UserSubscription | null): string => {
   return subscription?.status === 'active' ? subscription.tier : 'free';
 };
 
-export const hasFeatureAccess = (userTier: string, requiredTier: string, tiers: Record<string, unknown>): boolean => {
+export const hasFeatureAccess = (
+  userTier: string,
+  requiredTier: string,
+  tiers: Record<string, unknown>
+): boolean => {
   const tierOrder = Object.keys(tiers);
   const userIndex = tierOrder.indexOf(userTier);
   const requiredIndex = tierOrder.indexOf(requiredTier);
@@ -19,4 +23,7 @@ export const hasFeatureAccess = (userTier: string, requiredTier: string, tiers: 
 
 // Astro app tier configuration
 // DEPRECATED local tier constants removed – use centralized subscriptions package instead.
-export { COSMICHUB_TIERS as ASTRO_TIERS, HEALWAVE_TIERS } from '@cosmichub/subscriptions';
+export {
+  COSMICHUB_TIERS as ASTRO_TIERS,
+  HEALWAVE_TIERS,
+} from '@cosmichub/subscriptions';

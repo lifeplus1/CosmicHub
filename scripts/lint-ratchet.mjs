@@ -18,7 +18,7 @@ const TRACK_RULES = [
   '@typescript-eslint/no-unsafe-assignment',
   '@typescript-eslint/strict-boolean-expressions',
   '@typescript-eslint/explicit-function-return-type',
-  'eqeqeq'
+  'eqeqeq',
 ];
 
 const root = process.cwd();
@@ -29,7 +29,7 @@ function runESLintJSON() {
   const targets = [
     'apps/astro/src',
     'apps/healwave/src',
-    'packages/*/src'
+    'packages/*/src',
   ].join(' ');
   const ignorePatterns = [
     '**/.storybook/**',
@@ -39,13 +39,17 @@ function runESLintJSON() {
     '**/node_modules/**',
     '**/*.test.*',
     '**/*.spec.*',
-    '**/__tests__/**'
+    '**/__tests__/**',
   ];
-  const ignore = ignorePatterns.map(p=>`--ignore-pattern "${p}"`).join(' ');
+  const ignore = ignorePatterns.map(p => `--ignore-pattern "${p}"`).join(' ');
   const cmd = `npx eslint ${targets} --ext .ts,.tsx -f json ${ignore}`;
   let raw;
   try {
-    raw = execSync(cmd, { stdio: 'pipe', encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 });
+    raw = execSync(cmd, {
+      stdio: 'pipe',
+      encoding: 'utf8',
+      maxBuffer: 20 * 1024 * 1024,
+    });
   } catch (e) {
     // ESLint exits non-zero on errors; still attempt to parse stdout
     raw = (e.stdout && e.stdout.toString()) || '[]';
@@ -70,7 +74,14 @@ const update = process.env.LINT_RATCHET_UPDATE === '1';
 const report = aggregate(runESLintJSON());
 
 if (update || !existsSync(baselinePath)) {
-  writeFileSync(baselinePath, JSON.stringify({ created: new Date().toISOString(), rules: report }, null, 2));
+  writeFileSync(
+    baselinePath,
+    JSON.stringify(
+      { created: new Date().toISOString(), rules: report },
+      null,
+      2
+    )
+  );
   console.log('[lint-ratchet] Baseline updated:', report);
   process.exit(0);
 }
@@ -88,7 +99,9 @@ if (failures.length) {
   for (const f of failures) {
     console.error(`  ${f.rule}: ${f.prev} -> ${f.cur}`);
   }
-  console.error('\nUpdate baseline intentionally with: LINT_RATCHET_UPDATE=1 pnpm run lint:ratchet');
+  console.error(
+    '\nUpdate baseline intentionally with: LINT_RATCHET_UPDATE=1 pnpm run lint:ratchet'
+  );
   process.exit(1);
 }
 

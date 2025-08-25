@@ -35,17 +35,17 @@ const AccordionContext = createContext<{
 
 const AccordionItemContext = createContext<string>('');
 
-export const Accordion: React.FC<AccordionProps> = ({ 
-  type, 
-  collapsible = false, 
-  children, 
-  className = '' 
+export const Accordion: React.FC<AccordionProps> = ({
+  type,
+  collapsible = false,
+  children,
+  className = '',
 }) => {
   const [openItems, setOpenItems] = useState<string[]>([]);
 
   const toggleItem = (value: string) => {
     if (type === 'single') {
-      setOpenItems(prev => 
+      setOpenItems(prev =>
         prev.includes(value) && collapsible ? [] : [value]
       );
     } else {
@@ -59,30 +59,31 @@ export const Accordion: React.FC<AccordionProps> = ({
 
   return (
     <AccordionContext.Provider value={{ openItems, toggleItem, type }}>
-      <div className={`space-y-2 ${className}`}>
-        {children}
-      </div>
+      <div className={`space-y-2 ${className}`}>{children}</div>
     </AccordionContext.Provider>
   );
 };
 
-export const AccordionItem: React.FC<AccordionItemProps> = ({ 
-  value, 
-  children, 
-  className = '' 
+export const AccordionItem: React.FC<AccordionItemProps> = ({
+  value,
+  children,
+  className = '',
 }) => {
   return (
     <AccordionItemContext.Provider value={value}>
-      <div className={`border border-cosmic-purple/30 rounded-lg bg-cosmic-dark/30 ${className}`} data-value={value}>
+      <div
+        className={`border border-cosmic-purple/30 rounded-lg bg-cosmic-dark/30 ${className}`}
+        data-value={value}
+      >
         {children}
       </div>
     </AccordionItemContext.Provider>
   );
 };
 
-export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({ 
-  children, 
-  className = '' 
+export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
+  children,
+  className = '',
 }) => {
   const { openItems, toggleItem } = useContext(AccordionContext);
   const value = useContext(AccordionItemContext);
@@ -94,16 +95,18 @@ export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
       onClick={() => toggleItem(value)}
     >
       {children}
-      <span className={`transition-transform text-cosmic-gold ${isOpen ? 'rotate-180' : ''}`}>
+      <span
+        className={`transition-transform text-cosmic-gold ${isOpen ? 'rotate-180' : ''}`}
+      >
         ▼
       </span>
     </button>
   );
 };
 
-export const AccordionContent: React.FC<AccordionContentProps> = ({ 
-  children, 
-  className = '' 
+export const AccordionContent: React.FC<AccordionContentProps> = ({
+  children,
+  className = '',
 }) => {
   const { openItems } = useContext(AccordionContext);
   const value = useContext(AccordionItemContext);

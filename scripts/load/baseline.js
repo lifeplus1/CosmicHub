@@ -30,13 +30,17 @@ export default function () {
     city: 'London',
     timezone: 'Europe/London',
   });
-  const res = http.post(`${__ENV.BASE_URL || 'http://localhost:8000'}/calculate`, payload, {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const res = http.post(
+    `${__ENV.BASE_URL || 'http://localhost:8000'}/calculate`,
+    payload,
+    {
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
   calcTrend.add(res.timings.duration);
   check(res, {
-    'status 200': (r) => r.status === 200,
-    'has planets': (r) => !!r.json('planets'),
+    'status 200': r => r.status === 200,
+    'has planets': r => !!r.json('planets'),
   });
   sleep(1);
 }

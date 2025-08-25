@@ -11,7 +11,10 @@ import { devConsole } from './config/environment';
 devConsole.log?.('🚀 CosmicHub Frontend Starting...');
 devConsole.log?.('📍 Environment:', import.meta.env.MODE);
 devConsole.log?.('🌐 Base URL:', import.meta.env.BASE_URL);
-devConsole.log?.('⚙️ API URL:', import.meta.env['VITE_API_URL'] ?? 'http://localhost:8001');
+devConsole.log?.(
+  '⚙️ API URL:',
+  import.meta.env['VITE_API_URL'] ?? 'http://localhost:8001'
+);
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -24,19 +27,21 @@ devConsole.log?.('✅ Root element found, mounting React app...');
 const root = createRoot(rootElement);
 root.render(
   // <StrictMode> // Temporarily disabled to prevent infinite reloads
-    <App />
+  <App />
   // </StrictMode>
 );
 
 devConsole.log?.('🎉 React app mounted successfully!');
 
 // Initialize push notifications and background sync
-initializeNotifications().then((success) => {
-  if (success) {
-    devConsole.log?.('🔔 Push notifications initialized');
-  } else {
-    devConsole.warn?.('📵 Push notifications not available');
-  }
-}).catch((error) => {
-  devConsole.warn?.('⚠️ Failed to initialize notifications:', error);
-});
+initializeNotifications()
+  .then(success => {
+    if (success) {
+      devConsole.log?.('🔔 Push notifications initialized');
+    } else {
+      devConsole.warn?.('📵 Push notifications not available');
+    }
+  })
+  .catch(error => {
+    devConsole.warn?.('⚠️ Failed to initialize notifications:', error);
+  });

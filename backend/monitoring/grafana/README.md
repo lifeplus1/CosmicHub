@@ -2,7 +2,8 @@
 
 ## OBS-011: Performance Metrics Dashboard Implementation
 
-This directory contains comprehensive Grafana dashboards for monitoring CosmicHub's performance, infrastructure, and business metrics.
+This directory contains comprehensive Grafana dashboards for monitoring CosmicHub's performance,
+infrastructure, and business metrics.
 
 ## 📊 Dashboard Overview
 
@@ -100,7 +101,7 @@ node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
 # Active users
 cosmichub_active_users_24h
 
-# Chart generation rate  
+# Chart generation rate
 rate(cosmichub_charts_generated_total[1h]) * 3600
 
 # Revenue tracking
@@ -109,12 +110,12 @@ increase(cosmichub_revenue_total[24h])
 
 ## 🎯 SLO Targets
 
-| Metric | Target | Alert Threshold |
-|--------|--------|----------------|
-| Availability | 99.5% | < 99.5% |
-| Error Rate | < 2% | > 2% |
-| Response Time P95 | < 2s | > 2s |
-| Database Latency P95 | < 500ms | > 500ms |
+| Metric               | Target  | Alert Threshold |
+| -------------------- | ------- | --------------- |
+| Availability         | 99.5%   | < 99.5%         |
+| Error Rate           | < 2%    | > 2%            |
+| Response Time P95    | < 2s    | > 2s            |
+| Database Latency P95 | < 500ms | > 500ms         |
 
 ## 🔧 Dashboard Configuration
 
@@ -127,7 +128,7 @@ increase(cosmichub_revenue_total[24h])
 ### Refresh Intervals
 
 - Real-time dashboards: 30s
-- Business metrics: 1m  
+- Business metrics: 1m
 - Historical analysis: 5m
 
 ### Time Ranges
@@ -213,7 +214,7 @@ curl -G http://localhost:9090/api/v1/query_range \
 ### Regular Tasks
 
 - [ ] Review dashboard performance monthly
-- [ ] Update SLO targets quarterly  
+- [ ] Update SLO targets quarterly
 - [ ] Optimize slow queries
 - [ ] Archive old dashboards
 - [ ] Update documentation

@@ -26,9 +26,9 @@ export * from './components/ErrorBoundaries';
 export * from './hooks/useErrorHandling';
 
 // Re-export specific error boundary types for compatibility
-export { 
+export {
   PageErrorBoundary,
-  ComponentErrorBoundary, 
+  ComponentErrorBoundary,
   FormErrorBoundary,
-  withErrorBoundary
+  withErrorBoundary,
 } from './components/ErrorBoundaries';

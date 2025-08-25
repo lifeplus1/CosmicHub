@@ -15,5 +15,5 @@ export const componentLogger = {
   error: (component: string, message: string, ...meta: unknown[]): void => {
     const err = meta.find(m => m instanceof Error);
     Logger.error(`[${component}] ${message}`, err);
-  }
+  },
 };

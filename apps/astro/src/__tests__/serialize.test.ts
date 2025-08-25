@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { serializeAstrologyData, deserializeAstrologyData } from '@cosmichub/types';
-import type { AstrologyChart, UserProfile, NumerologyData } from '@cosmichub/types';
+import {
+  serializeAstrologyData,
+  deserializeAstrologyData,
+} from '@cosmichub/types';
+import type {
+  AstrologyChart,
+  UserProfile,
+  NumerologyData,
+} from '@cosmichub/types';
 
 describe('Serialization and Deserialization', () => {
   let mockChart: AstrologyChart;
@@ -16,7 +23,7 @@ describe('Serialization and Deserialization', () => {
           degree: 23.5,
           position: 233.5,
           house: 'House 5',
-          retrograde: false
+          retrograde: false,
         },
         {
           name: 'Moon',
@@ -24,8 +31,8 @@ describe('Serialization and Deserialization', () => {
           degree: 12.3,
           position: 102.3,
           house: 'House 4',
-          retrograde: false
-        }
+          retrograde: false,
+        },
       ],
       houses: [
         {
@@ -34,7 +41,7 @@ describe('Serialization and Deserialization', () => {
           sign: 'Aries',
           degree: 0,
           cusp: 0,
-          ruler: 'Mars'
+          ruler: 'Mars',
         },
         {
           house: 2,
@@ -42,8 +49,8 @@ describe('Serialization and Deserialization', () => {
           sign: 'Taurus',
           degree: 30,
           cusp: 30,
-          ruler: 'Venus'
-        }
+          ruler: 'Venus',
+        },
       ],
       aspects: [
         {
@@ -51,25 +58,25 @@ describe('Serialization and Deserialization', () => {
           planet2: 'Moon',
           type: 'Trine',
           orb: 2.1,
-          applying: 'separating'
-        }
+          applying: 'separating',
+        },
       ],
       asteroids: [
         {
           name: 'Ceres',
           sign: 'Virgo',
           degree: 15.7,
-          house: 'House 6'
-        }
+          house: 'House 6',
+        },
       ],
       angles: [
         {
           name: 'Ascendant',
           sign: 'Aries',
           degree: 0,
-          position: 0
-        }
-      ]
+          position: 0,
+        },
+      ],
     };
 
     mockUserProfile = {
@@ -77,14 +84,14 @@ describe('Serialization and Deserialization', () => {
       birthData: {
         date: '1990-05-15',
         time: '14:30:00',
-        location: 'New York, NY, USA'
-      }
+        location: 'New York, NY, USA',
+      },
     };
 
     mockNumerology = {
       lifePath: 7,
       destiny: 3,
-      personalYear: 9
+      personalYear: 9,
     };
   });
 
@@ -104,7 +111,7 @@ describe('Serialization and Deserialization', () => {
         houses: [],
         aspects: [],
         asteroids: [],
-        angles: []
+        angles: [],
       };
 
       const serialized = serializeAstrologyData(emptyChart);
@@ -123,19 +130,27 @@ describe('Serialization and Deserialization', () => {
             position: 68.2,
             house: 'House 3',
             retrograde: true,
-            aspects: [{ planet1: 'Mercury', planet2: 'Venus', type: 'Conjunction', orb: 1.5, applying: 'applying' }]
-          }
-        ]
+            aspects: [
+              {
+                planet1: 'Mercury',
+                planet2: 'Venus',
+                type: 'Conjunction',
+                orb: 1.5,
+                applying: 'applying',
+              },
+            ],
+          },
+        ],
       };
 
       const serialized = serializeAstrologyData(chartWithOptionals);
       const deserialized = deserializeAstrologyData<AstrologyChart>(serialized);
-    const firstPlanet = deserialized.planets[0];
-        expect(firstPlanet).toBeDefined();
-        if (firstPlanet !== undefined) {
-          expect(firstPlanet.retrograde).toBe(true);
-          expect(firstPlanet.aspects).toHaveLength(1);
-        }
+      const firstPlanet = deserialized.planets[0];
+      expect(firstPlanet).toBeDefined();
+      if (firstPlanet !== undefined) {
+        expect(firstPlanet.retrograde).toBe(true);
+        expect(firstPlanet.aspects).toHaveLength(1);
+      }
     });
   });
 
@@ -156,8 +171,8 @@ describe('Serialization and Deserialization', () => {
         birthData: {
           date: '1985-12-25',
           time: '23:45:00',
-          location: 'London, UK'
-        }
+          location: 'London, UK',
+        },
       };
 
       const serialized = serializeAstrologyData(profileWithDifferentFormat);
@@ -182,7 +197,7 @@ describe('Serialization and Deserialization', () => {
       const edgeCaseNumerology: NumerologyData = {
         lifePath: 11, // Master number
         destiny: 22, // Master number
-        personalYear: 1
+        personalYear: 1,
       };
 
       const serialized = serializeAstrologyData(edgeCaseNumerology);
@@ -211,7 +226,7 @@ describe('Serialization and Deserialization', () => {
         houses: [],
         aspects: [],
         asteroids: [],
-        angles: []
+        angles: [],
       };
 
       expect(() => {
@@ -223,24 +238,26 @@ describe('Serialization and Deserialization', () => {
   describe('JSON Size Optimization', () => {
     it('should remove undefined values during serialization', () => {
       const chartWithUndefined: any = {
-        planets: [{
-          name: 'Sun',
-          sign: 'Leo',
-          degree: 23.5,
-          position: 233.5,
-          house: 'House 5',
-          retrograde: undefined,
-          aspects: undefined
-        }],
+        planets: [
+          {
+            name: 'Sun',
+            sign: 'Leo',
+            degree: 23.5,
+            position: 233.5,
+            house: 'House 5',
+            retrograde: undefined,
+            aspects: undefined,
+          },
+        ],
         houses: [],
         aspects: [],
         asteroids: [],
-        angles: []
+        angles: [],
       };
 
       const serialized = serializeAstrologyData(chartWithUndefined);
       expect(serialized).not.toContain('undefined');
-      
+
       // The serialized string should contain null instead of undefined
       const parsed = JSON.parse(serialized);
       expect(parsed.planets[0].retrograde).toBe(null);
@@ -257,14 +274,14 @@ describe('Serialization and Deserialization', () => {
     it('should serialize chart data in a format compatible with ChartDisplay', () => {
       const serialized = serializeAstrologyData(mockChart);
       const deserialized = deserializeAstrologyData<AstrologyChart>(serialized);
-      
+
       // Verify that all essential chart display fields are present
       expect(deserialized.planets).toBeDefined();
       expect(deserialized.houses).toBeDefined();
       expect(deserialized.aspects).toBeDefined();
-      
+
       // Verify planet data is complete for rendering
-  const planet0 = deserialized.planets[0];
+      const planet0 = deserialized.planets[0];
       expect(planet0).toBeDefined();
       if (planet0 !== undefined) {
         expect(planet0.name).toBeDefined();
@@ -276,19 +293,21 @@ describe('Serialization and Deserialization', () => {
     it('should maintain precision for degree calculations', () => {
       const preciseChart: AstrologyChart = {
         ...mockChart,
-        planets: [{
-          name: 'Sun',
-          sign: 'Leo',
-          degree: 23.456789123,
-          position: 233.456789123,
-          house: 'House 5'
-        }]
+        planets: [
+          {
+            name: 'Sun',
+            sign: 'Leo',
+            degree: 23.456789123,
+            position: 233.456789123,
+            house: 'House 5',
+          },
+        ],
       };
 
       const serialized = serializeAstrologyData(preciseChart);
       const deserialized = deserializeAstrologyData<AstrologyChart>(serialized);
-      
-  const precise0 = deserialized.planets[0];
+
+      const precise0 = deserialized.planets[0];
       expect(precise0).toBeDefined();
       if (precise0 !== undefined) {
         expect(precise0.degree).toBeCloseTo(23.456789123, 6);

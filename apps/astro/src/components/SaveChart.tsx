@@ -1,33 +1,35 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastProvider';
-import axios, { type AxiosError } from "axios";
+import axios, { type AxiosError } from 'axios';
 import { apiConfig } from '../config/environment';
-import { useAuth } from "@cosmichub/auth";
+import { useAuth } from '@cosmichub/auth';
 
 export default function SaveChart(): React.ReactNode {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    year: "",
-    month: "",
-    day: "",
-    hour: "",
-    minute: "",
-    city: "",
+    year: '',
+    month: '',
+    day: '',
+    hour: '',
+    minute: '',
+    city: '',
   });
-  const [houseSystem, setHouseSystem] = useState("P");
+  const [houseSystem, setHouseSystem] = useState('P');
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   if (!user) {
-    navigate("/login");
+    navigate('/login');
     return null;
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -44,146 +46,177 @@ export default function SaveChart(): React.ReactNode {
           hour: parseInt(formData.hour),
           minute: parseInt(formData.minute),
           city: formData.city,
-          house_system: houseSystem
+          house_system: houseSystem,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast({
-        title: "Chart Saved",
-        description: "Your natal chart has been saved successfully.",
-        status: "success",
+        title: 'Chart Saved',
+        description: 'Your natal chart has been saved successfully.',
+        status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      navigate("/saved-charts");
+      navigate('/saved-charts');
     } catch (error: unknown) {
-      const err = error as AxiosError<{detail?: string}>;
-      const msg = err.response?.data?.detail ?? "Failed to save chart";
+      const err = error as AxiosError<{ detail?: string }>;
+      const msg = err.response?.data?.detail ?? 'Failed to save chart';
       setError(msg);
       toast({
-        title: "Error",
+        title: 'Error',
         description: msg,
-        status: "error",
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
     }
   };
 
-  const isFormValid = (): boolean => Object.values(formData).every((v) => v !== "");
+  const isFormValid = (): boolean =>
+    Object.values(formData).every(v => v !== '');
 
   return (
-    <div className="max-w-2xl p-6 mx-auto cosmic-card">
-      <h1 className="mb-6 text-3xl font-bold text-center text-cosmic-gold font-cinzel">Save Natal Chart</h1>
-      <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(e); }} className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className='max-w-2xl p-6 mx-auto cosmic-card'>
+      <h1 className='mb-6 text-3xl font-bold text-center text-cosmic-gold font-cinzel'>
+        Save Natal Chart
+      </h1>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          void handleSubmit(e);
+        }}
+        className='space-y-6'
+      >
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <div>
-            <label htmlFor="year" className="block mb-2 text-cosmic-gold">Year *</label>
+            <label htmlFor='year' className='block mb-2 text-cosmic-gold'>
+              Year *
+            </label>
             <input
-              id="year"
-              type="number"
-              name="year"
+              id='year'
+              type='number'
+              name='year'
               value={formData.year}
               onChange={handleInputChange}
-              placeholder="1990"
-              className="cosmic-input"
+              placeholder='1990'
+              className='cosmic-input'
               required
-            aria-label="1990" />
+              aria-label='1990'
+            />
           </div>
           <div>
-            <label htmlFor="month" className="block mb-2 text-cosmic-gold">Month *</label>
+            <label htmlFor='month' className='block mb-2 text-cosmic-gold'>
+              Month *
+            </label>
             <input
-              id="month"
-              type="number"
-              name="month"
+              id='month'
+              type='number'
+              name='month'
               value={formData.month}
               onChange={handleInputChange}
-              placeholder="1"
-              min="1"
-              max="12"
-              className="cosmic-input"
+              placeholder='1'
+              min='1'
+              max='12'
+              className='cosmic-input'
               required
-            aria-label="1" />
+              aria-label='1'
+            />
           </div>
           <div>
-            <label htmlFor="day" className="block mb-2 text-cosmic-gold">Day *</label>
+            <label htmlFor='day' className='block mb-2 text-cosmic-gold'>
+              Day *
+            </label>
             <input
-              id="day"
-              type="number"
-              name="day"
+              id='day'
+              type='number'
+              name='day'
               value={formData.day}
               onChange={handleInputChange}
-              placeholder="1"
-              min="1"
-              max="31"
-              className="cosmic-input"
+              placeholder='1'
+              min='1'
+              max='31'
+              className='cosmic-input'
               required
-            aria-label="1" />
+              aria-label='1'
+            />
           </div>
           <div>
-            <label htmlFor="hour" className="block mb-2 text-cosmic-gold">Hour (24h) *</label>
+            <label htmlFor='hour' className='block mb-2 text-cosmic-gold'>
+              Hour (24h) *
+            </label>
             <input
-              id="hour"
-              type="number"
-              name="hour"
+              id='hour'
+              type='number'
+              name='hour'
               value={formData.hour}
               onChange={handleInputChange}
-              placeholder="12"
-              min="0"
-              max="23"
-              className="cosmic-input"
+              placeholder='12'
+              min='0'
+              max='23'
+              className='cosmic-input'
               required
-            aria-label="12" />
+              aria-label='12'
+            />
           </div>
           <div>
-            <label htmlFor="minute" className="block mb-2 text-cosmic-gold">Minute *</label>
+            <label htmlFor='minute' className='block mb-2 text-cosmic-gold'>
+              Minute *
+            </label>
             <input
-              id="minute"
-              type="number"
-              name="minute"
+              id='minute'
+              type='number'
+              name='minute'
               value={formData.minute}
               onChange={handleInputChange}
-              placeholder="0"
-              min="0"
-              max="59"
-              className="cosmic-input"
+              placeholder='0'
+              min='0'
+              max='59'
+              className='cosmic-input'
               required
-            aria-label="0" />
+              aria-label='0'
+            />
           </div>
           <div>
-            <label htmlFor="city" className="block mb-2 text-cosmic-gold">City *</label>
+            <label htmlFor='city' className='block mb-2 text-cosmic-gold'>
+              City *
+            </label>
             <input
-              id="city"
-              name="city"
+              id='city'
+              name='city'
               value={formData.city}
               onChange={handleInputChange}
-              placeholder="New York"
-              className="cosmic-input"
+              placeholder='New York'
+              className='cosmic-input'
               required
-            aria-label="New York" />
+              aria-label='New York'
+            />
           </div>
         </div>
         <div>
-          <label htmlFor="houseSystem" className="block mb-2 text-cosmic-gold">House System *</label>
+          <label htmlFor='houseSystem' className='block mb-2 text-cosmic-gold'>
+            House System *
+          </label>
           <select
-            id="houseSystem"
+            id='houseSystem'
             value={houseSystem}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setHouseSystem(e.target.value)}
-            className="cosmic-input"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setHouseSystem(e.target.value)
+            }
+            className='cosmic-input'
             required
           >
-            <option value="P">Placidus</option>
-            <option value="E">Equal House</option>
+            <option value='P'>Placidus</option>
+            <option value='E'>Equal House</option>
           </select>
         </div>
         <button
-          type="submit"
-          className="w-full cosmic-button"
+          type='submit'
+          className='w-full cosmic-button'
           disabled={!isFormValid()}
         >
           Save Chart
         </button>
-        {error !== null && <p className="text-center text-red-400">{error}</p>}
+        {error !== null && <p className='text-center text-red-400'>{error}</p>}
       </form>
     </div>
   );

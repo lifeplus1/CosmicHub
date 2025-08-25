@@ -10,8 +10,12 @@ export {
   getUserTier,
   hasFeatureAccess,
   getTierLimits,
-  type AstroSubscriptionTier as SubscriptionTier
+  type AstroSubscriptionTier as SubscriptionTier,
 } from '@cosmichub/subscriptions';
 
 export type SubscriptionTierType = 'free' | 'premium' | 'elite';
-export type UsageLimitType = 'chartsPerMonth' | 'chartStorage' | 'synastryAnalyses' | 'aiQueries';
+export type UsageLimitType =
+  | 'chartsPerMonth'
+  | 'chartStorage'
+  | 'synastryAnalyses'
+  | 'aiQueries';

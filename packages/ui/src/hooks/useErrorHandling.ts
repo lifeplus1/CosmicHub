@@ -21,23 +21,26 @@ export function useAsyncError(options: UseAsyncErrorOptions = {}) {
   const [retryCount, setRetryCount] = useState(0);
   const retryTimeoutRef = useRef<number>();
 
-  const handleError = useCallback((error: Error) => {
-    setError(error);
-    onError?.(error);
-  }, [onError]);
+  const handleError = useCallback(
+    (error: Error) => {
+      setError(error);
+      onError?.(error);
+    },
+    [onError]
+  );
 
   const retry = useCallback(() => {
     if (retryCount < maxRetries) {
       setRetryCount(prev => prev + 1);
       setError(null);
-      
+
       // Exponential backoff delay
       const delay = retryDelay * Math.pow(2, retryCount);
-      
+
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
       }
-      
+
       retryTimeoutRef.current = window.setTimeout(() => {
         // The actual retry logic would be implemented by the consumer
       }, delay);
@@ -92,7 +95,7 @@ export function useSafeAsync<T = unknown>(): UseSafeAsyncReturn<T> {
 
   const execute = useCallback(async (asyncFunction: () => Promise<T>) => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-    
+
     try {
       const data = await asyncFunction();
       setState({ data, loading: false, error: null });
@@ -143,14 +146,20 @@ export function useFormErrors() {
     setErrors([]);
   }, []);
 
-  const getFieldError = useCallback((field: string) => {
-    return errors.find(err => err.field === field);
-  }, [errors]);
+  const getFieldError = useCallback(
+    (field: string) => {
+      return errors.find(err => err.field === field);
+    },
+    [errors]
+  );
 
   const hasErrors = errors.length > 0;
-  const hasFieldError = useCallback((field: string) => {
-    return errors.some(err => err.field === field);
-  }, [errors]);
+  const hasFieldError = useCallback(
+    (field: string) => {
+      return errors.some(err => err.field === field);
+    },
+    [errors]
+  );
 
   return {
     errors,
@@ -181,22 +190,22 @@ export function createEnhancedError(
   originalError?: Error
 ): Error {
   const error = new Error(message);
-  
+
   // Add context to error object
   if (context) {
     Object.assign(error, { context });
   }
-  
+
   // Chain original error
   if (originalError) {
     Object.assign(error, { cause: originalError });
   }
-  
+
   // Add stack trace from original error if available
   if (originalError?.stack) {
     error.stack = `${error.stack}\nCaused by: ${originalError.stack}`;
   }
-  
+
   return error;
 }
 
@@ -218,34 +227,42 @@ export function classifyError(error: Error): ErrorType {
   const message = error.message.toLowerCase();
   const stack = error.stack?.toLowerCase() ?? '';
 
-  if (message.includes('network') || message.includes('fetch') || message.includes('timeout')) {
+  if (
+    message.includes('network') ||
+    message.includes('fetch') ||
+    message.includes('timeout')
+  ) {
     return ErrorType.NETWORK;
   }
-  
+
   if (message.includes('validation') || message.includes('invalid')) {
     return ErrorType.VALIDATION;
   }
-  
+
   if (message.includes('unauthorized') || message.includes('authentication')) {
     return ErrorType.AUTHENTICATION;
   }
-  
+
   if (message.includes('forbidden') || message.includes('permission')) {
     return ErrorType.AUTHORIZATION;
   }
-  
+
   if (message.includes('not found') || message.includes('404')) {
     return ErrorType.NOT_FOUND;
   }
-  
-  if (message.includes('server') || message.includes('500') || message.includes('503')) {
+
+  if (
+    message.includes('server') ||
+    message.includes('500') ||
+    message.includes('503')
+  ) {
     return ErrorType.SERVER;
   }
-  
+
   if (stack.includes('render') || stack.includes('component')) {
     return ErrorType.CLIENT;
   }
-  
+
   return ErrorType.UNKNOWN;
 }
 
@@ -268,7 +285,10 @@ export const defaultRetryConfig: RetryConfig = {
   retryableErrors: [ErrorType.NETWORK, ErrorType.SERVER],
 };
 
-export function shouldRetry(error: Error, config: RetryConfig = defaultRetryConfig): boolean {
+export function shouldRetry(
+  error: Error,
+  config: RetryConfig = defaultRetryConfig
+): boolean {
   const errorType = classifyError(error);
   return config.retryableErrors.includes(errorType);
 }
@@ -315,7 +335,7 @@ export function getRecoveryActions(
     case ErrorType.AUTHENTICATION:
       actions.push({
         label: 'Sign In',
-        action: () => window.location.href = '/login',
+        action: () => (window.location.href = '/login'),
         primary: true,
       });
       break;
@@ -331,7 +351,7 @@ export function getRecoveryActions(
     case ErrorType.NOT_FOUND:
       actions.push({
         label: 'Go Home',
-        action: () => window.location.href = '/',
+        action: () => (window.location.href = '/'),
         primary: true,
       });
       break;

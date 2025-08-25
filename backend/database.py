@@ -10,10 +10,14 @@ from functools import lru_cache
 from typing import Any, Dict, List, Optional, cast
 from uuid import uuid4
 
-import firebase_admin
 from dotenv import load_dotenv
-from firebase_admin import credentials, firestore, initialize_app  # type: ignore  # noqa: E501
-from google.cloud.firestore import Query  # type: ignore
+
+# Heavy imports (firebase_admin / firestore) are deferred below unless needed
+firebase_admin = None  # type: ignore
+credentials = None  # type: ignore
+firestore = None  # type: ignore
+initialize_app = None  # type: ignore
+Query = None  # type: ignore
 
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
@@ -35,80 +39,114 @@ UserStats = Dict[str, Any]
 use_memory_db = False
 db = None  # type: ignore
 
+# ---------------------------------------------------------------------------
+# Test Mode / CI Fast-Path
+# If running under pytest (PYTEST_CURRENT_TEST) or explicit TEST_MODE flag,
+# skip all Firebase / Firestore initialization to avoid network latency or
+# library compatibility issues under newer Python versions (e.g. 3.13).
+# This mirrors the behavior in auth.py and ensures deterministic, fast tests.
+# ---------------------------------------------------------------------------
+_IS_TEST_MODE = (
+    os.getenv("PYTEST_CURRENT_TEST") is not None
+    or os.getenv("CI") is not None
+    or os.getenv("TEST_MODE", "0").lower() in ("1", "true", "yes")
+)
+if _IS_TEST_MODE:
+    use_memory_db = True
+    logger.info("[database] TEST_MODE detected - using in-memory store, skipping Firestore imports")
+
 # Initialize Firebase with performance optimizations or fallback to memory store in dev  # noqa: E501
-try:
-    try:
-        firebase_admin.get_app()  # type: ignore[misc]
-        logger.info("Firebase app already initialized")
-        db = firestore.client()
-    except ValueError:
-        # Prefer FIREBASE_CREDENTIALS JSON if available (matches auth.py)
-        creds_json = os.getenv("FIREBASE_CREDENTIALS")
-        if creds_json:
-            try:
-                cred_dict = json.loads(creds_json)
-                cred = credentials.Certificate(cred_dict)  # type: ignore[misc]
-                initialize_app(cred)
-                logger.info(
-                    "Firebase app initialized successfully via FIREBASE_CREDENTIALS JSON"  # noqa: E501
-                )
-                db = firestore.client()
-            except Exception as e:
-                logger.error(
-                    f"Failed to initialize Firebase from FIREBASE_CREDENTIALS: {e}"  # noqa: E501
-                )
-                raise
-        else:
-            private_key = os.getenv("FIREBASE_PRIVATE_KEY")
-            if private_key:
-                cred = credentials.Certificate(
-                    {  # type: ignore[misc]
-                        "type": "service_account",
-                        "project_id": os.getenv("FIREBASE_PROJECT_ID"),
-                        "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-                        "private_key": private_key.replace("\\n", "\n"),
-                        "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
-                        "client_id": os.getenv("FIREBASE_CLIENT_ID"),
-                        "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
-                        "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
-                        "auth_provider_x509_cert_url": os.getenv(
-                            "FIREBASE_AUTH_PROVIDER_X509_CERT_URL"
-                        ),
-                        "client_x509_cert_url": os.getenv(
-                            "FIREBASE_CLIENT_X509_CERT_URL"
-                        ),
-                        "universe_domain": os.getenv(
-                            "FIREBASE_UNIVERSE_DOMAIN"
-                        ),
-                    }
-                )
-                initialize_app(cred)
-                logger.info("Firebase app initialized successfully")
-                db = firestore.client()
-            else:
-                # No credentials available
-                env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
-                allow_mock = os.getenv(
-                    "ALLOW_MOCK_AUTH", "1" if env != "production" else "0"
-                )
-                if allow_mock in ("1", "true", "yes") and env != "production":
-                    use_memory_db = True
-                    logger.warning(
-                        "Firestore credentials not found. Using in-memory database (development only)."  # noqa: E501
-                    )
-                else:
-                    raise ValueError("FIREBASE_PRIVATE_KEY not set")
-except Exception as e:
-    # If anything unexpected happens, only allow fallback in non-production
-    env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
-    if env != "production":
+if not _IS_TEST_MODE:  # Only attempt Firestore init outside test mode
+    # Perform heavy imports only when needed
+    try:  # pragma: no cover - import side effects
+        import firebase_admin  # type: ignore  # noqa: E401
+        from firebase_admin import credentials, firestore, initialize_app  # type: ignore  # noqa: E401,E501
+        from google.cloud.firestore import Query  # type: ignore  # noqa: E401
+    except Exception as imp_err:  # If imports fail, fallback to memory
+        logger.warning(f"Firestore libraries unavailable ({imp_err}); using in-memory store")
         use_memory_db = True
-        logger.warning(
-            f"Falling back to in-memory database due to error: {str(e)}"
-        )
-    else:
-        logger.error(f"Firebase initialization failed: {str(e)}")
-        raise
+        firebase_admin = None  # type: ignore
+        credentials = None  # type: ignore
+        firestore = None  # type: ignore
+        initialize_app = None  # type: ignore
+        Query = None  # type: ignore
+    try:
+        if firebase_admin and credentials and firestore and initialize_app:  # type: ignore
+            try:
+                firebase_admin.get_app()  # type: ignore[misc]
+                logger.info("Firebase app already initialized")
+                db = firestore.client()  # type: ignore[attr-defined]
+            except ValueError:
+                # Prefer FIREBASE_CREDENTIALS JSON if available (matches auth.py)
+                creds_json = os.getenv("FIREBASE_CREDENTIALS")
+                if creds_json:
+                    try:
+                        cred_dict = json.loads(creds_json)
+                        cred = credentials.Certificate(cred_dict)  # type: ignore[misc]
+                        initialize_app(cred)  # type: ignore[misc]
+                        logger.info(
+                            "Firebase app initialized successfully via FIREBASE_CREDENTIALS JSON"  # noqa: E501
+                        )
+                        db = firestore.client()  # type: ignore[attr-defined]
+                    except Exception as e:
+                        logger.error(
+                            f"Failed to initialize Firebase from FIREBASE_CREDENTIALS: {e}"  # noqa: E501
+                        )
+                        raise
+                else:
+                    private_key = os.getenv("FIREBASE_PRIVATE_KEY")
+                    if private_key:
+                        cred = credentials.Certificate(  # type: ignore[misc]
+                            {  # type: ignore[misc]
+                                "type": "service_account",
+                                "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+                                "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+                                "private_key": private_key.replace("\\n", "\n"),
+                                "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+                                "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+                                "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
+                                "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
+                                "auth_provider_x509_cert_url": os.getenv(
+                                    "FIREBASE_AUTH_PROVIDER_X509_CERT_URL"
+                                ),
+                                "client_x509_cert_url": os.getenv(
+                                    "FIREBASE_CLIENT_X509_CERT_URL"
+                                ),
+                                "universe_domain": os.getenv(
+                                    "FIREBASE_UNIVERSE_DOMAIN"
+                                ),
+                            }
+                        )
+                        initialize_app(cred)  # type: ignore[misc]  # type: ignore[misc]
+                        logger.info("Firebase app initialized successfully")
+                        db = firestore.client()  # type: ignore[attr-defined]
+                    else:
+                        # No credentials available
+                        env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
+                        allow_mock = os.getenv(
+                            "ALLOW_MOCK_AUTH", "1" if env != "production" else "0"
+                        )
+                        if allow_mock in ("1", "true", "yes") and env != "production":
+                            use_memory_db = True
+                            logger.warning(
+                                "Firestore credentials not found. Using in-memory database (development only)."  # noqa: E501
+                            )
+                        else:
+                            raise ValueError("FIREBASE_PRIVATE_KEY not set")
+        else:
+            # Imports missing -> memory DB already enabled
+            use_memory_db = True
+    except Exception as e:
+        # If anything unexpected happens, only allow fallback in non-production
+        env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
+        if env != "production":
+            use_memory_db = True
+            logger.warning(
+                f"Falling back to in-memory database due to error: {str(e)}"
+            )
+        else:
+            logger.error(f"Firebase initialization failed: {str(e)}")
+            raise
 
 # In-memory data store structure: { user_id: { chart_id: chart_data } }
 memory_store: Dict[str, Dict[str, ChartData]] = {}
@@ -400,7 +438,7 @@ def get_user_stats(user_id: str) -> UserStats:
             "recent_charts": recent_count,
             "last_accessed": datetime.now().isoformat(),
         }
-        db_client.collection("users").document(user_id).set(
+        db_client.collection("users").document(user_id).set(  # type: ignore[misc]
             {  # type: ignore[misc]
                 "stats": stats,
                 "stats_updated": datetime.now().isoformat(),

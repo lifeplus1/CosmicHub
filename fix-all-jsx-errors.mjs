@@ -13,7 +13,7 @@ const filesToFix = [
   'apps/astro/src/pages/Login.tsx',
   'apps/astro/src/pages/Numerology.tsx',
   'apps/astro/src/pages/SignUp.tsx',
-  'apps/astro/src/pages/Synastry.tsx'
+  'apps/astro/src/pages/Synastry.tsx',
 ];
 
 function fixFile(filePath) {
@@ -21,7 +21,7 @@ function fixFile(filePath) {
     console.log(`Fixing: ${filePath}`);
     let content = fs.readFileSync(filePath, 'utf8');
     let changed = false;
-    
+
     // Pattern 1: Fix / aria-label="..." -> aria-label="..."
     const pattern1 = /(\s+)\/\s+aria-label="([^"]*)">/g;
     if (pattern1.test(content)) {
@@ -29,7 +29,7 @@ function fixFile(filePath) {
       changed = true;
       console.log('  ✓ Fixed: / aria-label pattern');
     }
-    
+
     // Pattern 2: Fix malformed type annotations like ChangeEvent<HTMLInputElement aria-label="...">
     const pattern2 = /ChangeEvent<HTMLInputElement\s+aria-label="[^"]*">/g;
     if (pattern2.test(content)) {
@@ -37,9 +37,10 @@ function fixFile(filePath) {
       changed = true;
       console.log('  ✓ Fixed: malformed type annotation');
     }
-    
+
     // Pattern 3: Move aria-label from inside type to proper attribute position
-    const pattern3 = /onChange=\{([^}]*ChangeEvent<HTMLInputElement)\s+aria-label="([^"]*)"([^}]*)\}/g;
+    const pattern3 =
+      /onChange=\{([^}]*ChangeEvent<HTMLInputElement)\s+aria-label="([^"]*)"([^}]*)\}/g;
     if (pattern3.test(content)) {
       content = content.replace(pattern3, (match, before, label, after) => {
         return `onChange={${before}${after}}\n            aria-label="${label}"`;

@@ -14,7 +14,8 @@ export const cardVariants = cva(
       variant: {
         default: 'bg-slate-900/80 backdrop-blur-sm border-slate-700/50',
         secondary: 'bg-slate-800/50 backdrop-blur-sm border-slate-600/50',
-        cosmic: 'bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 border-purple-500/30',
+        cosmic:
+          'bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 border-purple-500/30',
         glass: 'bg-slate-900/50 backdrop-blur-sm border-slate-700/50',
       },
     },

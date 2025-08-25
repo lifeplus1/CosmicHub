@@ -16,15 +16,25 @@ const minimalHD: HumanDesignData = {
   channels: [],
   gates: [],
   incarnation_cross: { name: 'Cross', description: 'Desc', gates: {} },
-  variables: { description: '', digestion: '', environment: '', awareness: '', perspective: '' },
+  variables: {
+    description: '',
+    digestion: '',
+    environment: '',
+    awareness: '',
+    perspective: '',
+  },
   not_self_theme: 'Frustration',
-  signature: 'Satisfaction'
+  signature: 'Satisfaction',
 };
 
 describe('GatesChannelsTab accessibility', () => {
   it('has no detectable a11y violations (baseline)', async () => {
-    const { container } = render(<GatesChannelsTab humanDesignData={minimalHD} />);
-    const results = await axe(container, { rules: { 'color-contrast': { enabled: false } } });
+    const { container } = render(
+      <GatesChannelsTab humanDesignData={minimalHD} />
+    );
+    const results = await axe(container, {
+      rules: { 'color-contrast': { enabled: false } },
+    });
     expect(results.violations).toEqual([]);
   });
 });

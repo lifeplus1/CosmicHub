@@ -2,27 +2,27 @@
   "folders": [
     {
       "name": "CosmicHub Root",
-      "path": "."
+      "path": ".",
     },
     {
       "name": "Backend",
-      "path": "./backend"
+      "path": "./backend",
     },
     {
       "name": "Astro Frontend",
-      "path": "./frontend/astro"
+      "path": "./frontend/astro",
     },
     {
       "name": "HealWave Frontend",
-      "path": "./frontend/healwave"
-    }
+      "path": "./frontend/healwave",
+    },
   ],
   "settings": {
     "typescript.preferences.importModuleSpecifier": "relative",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit",
-      "source.organizeImports": "explicit"
+      "source.organizeImports": "explicit",
     },
     "python.defaultInterpreterPath": "./backend/.venv/bin/python",
     "python.analysis.typeCheckingMode": "strict",
@@ -31,13 +31,8 @@
     "python.linting.flake8Enabled": true,
     "python.testing.pytestEnabled": true,
     "python.testing.pytestPath": "python",
-    "python.testing.pytestArgs": [
-      "backend/tests"
-    ],
-    "eslint.workingDirectories": [
-      "frontend/astro",
-      "frontend/healwave"
-    ],
+    "python.testing.pytestArgs": ["backend/tests"],
+    "eslint.workingDirectories": ["frontend/astro", "frontend/healwave"],
     "prettier.configPath": "./.prettierrc",
     "files.exclude": {
       "**/node_modules": true,
@@ -46,21 +41,21 @@
       "**/dist": true,
       "**/__pycache__": true,
       "**/.pytest_cache": true,
-      "**/.venv": true
+      "**/.venv": true,
     },
     "search.exclude": {
       "**/node_modules": true,
       "**/dist": true,
       "**/.venv": true,
       "**/coverage": true,
-      "**/htmlcov": true
+      "**/htmlcov": true,
     },
     "emmet.includeLanguages": {
       "typescript": "html",
-      "typescriptreact": "html"
+      "typescriptreact": "html",
     },
     "typescript.updateImportsOnFileMove.enabled": "always",
-    "javascript.updateImportsOnFileMove.enabled": "always"
+    "javascript.updateImportsOnFileMove.enabled": "always",
   },
   "extensions": {
     "recommendations": [
@@ -74,7 +69,7 @@
       "ms-vscode.test-adapter-converter",
       "formulahendry.auto-rename-tag",
       "christian-kohler.path-intellisense",
-      "ms-vscode.vscode-json"
-    ]
-  }
+      "ms-vscode.vscode-json",
+    ],
+  },
 }

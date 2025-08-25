@@ -7,7 +7,7 @@
 const devConsole = {
   log: import.meta.env?.DEV ? console.log.bind(console) : undefined,
   warn: import.meta.env?.DEV ? console.warn.bind(console) : undefined,
-  error: console.error.bind(console)
+  error: console.error.bind(console),
 };
 /* eslint-enable no-console */
 
@@ -161,7 +161,7 @@ export const WebpackOptimizations = {
       // Optimize common imports
       '@cosmichub/ui': require.resolve('@cosmichub/ui/src/index.ts'),
       '@cosmichub/config': require.resolve('@cosmichub/config/src/index.ts'),
-      'react': require.resolve('react'),
+      react: require.resolve('react'),
       'react-dom': require.resolve('react-dom'),
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -213,7 +213,7 @@ export class TreeShakingAnalyzer {
             module: modulePath,
             export: exportName,
             size: this.estimateExportSize(modulePath, exportName),
-            reason: this.getUnusedReason(modulePath, exportName)
+            reason: this.getUnusedReason(modulePath, exportName),
           });
         }
       });
@@ -232,25 +232,26 @@ export class TreeShakingAnalyzer {
 
   private getUnusedReason(modulePath: string, exportName: string): string {
     if (exportName.includes('Test')) return 'Test utility - safe to remove';
-    if (exportName.includes('Dev')) return 'Development utility - safe to remove';
+    if (exportName.includes('Dev'))
+      return 'Development utility - safe to remove';
     if (exportName.includes('Debug')) return 'Debug utility - safe to remove';
     return 'Unused export - verify before removal';
   }
 
-  generateReport(): { 
-    totalUnused: number; 
-    estimatedSavings: number; 
-    recommendations: string[] 
+  generateReport(): {
+    totalUnused: number;
+    estimatedSavings: number;
+    recommendations: string[];
   } {
     const unused = this.getUnusedExports();
     const totalUnused = unused.length;
     const estimatedSavings = unused.reduce((sum, item) => sum + item.size, 0);
-    
+
     const recommendations = [
       `Remove ${totalUnused} unused exports to save ~${estimatedSavings} bytes`,
       'Consider using barrel exports to improve tree shaking',
       'Mark side-effect-free modules in package.json',
-      'Use dynamic imports for large, optional features'
+      'Use dynamic imports for large, optional features',
     ];
 
     return { totalUnused, estimatedSavings, recommendations };
@@ -260,10 +261,14 @@ export class TreeShakingAnalyzer {
 // Bundle size monitoring
 export class BundleSizeMonitor {
   private static instance: BundleSizeMonitor;
-  private sizeHistory: Array<{ timestamp: number; size: number; gzipped: number }> = [];
+  private sizeHistory: Array<{
+    timestamp: number;
+    size: number;
+    gzipped: number;
+  }> = [];
   private thresholds = {
     warning: 200000, // 200kb
-    error: 300000,   // 300kb
+    error: 300000, // 300kb
   };
 
   static getInstance(): BundleSizeMonitor {
@@ -277,7 +282,7 @@ export class BundleSizeMonitor {
     this.sizeHistory.push({
       timestamp: Date.now(),
       size,
-      gzipped
+      gzipped,
     });
 
     // Keep only last 100 entries
@@ -290,9 +295,13 @@ export class BundleSizeMonitor {
 
   private checkThresholds(size: number, gzipped: number): void {
     if (gzipped > this.thresholds.error) {
-      devConsole.error(`🚨 Bundle size exceeded error threshold: ${gzipped} bytes (gzipped)`);
+      devConsole.error(
+        `🚨 Bundle size exceeded error threshold: ${gzipped} bytes (gzipped)`
+      );
     } else if (gzipped > this.thresholds.warning) {
-      devConsole.warn?.(`⚠️ Bundle size exceeded warning threshold: ${gzipped} bytes (gzipped)`);
+      devConsole.warn?.(
+        `⚠️ Bundle size exceeded warning threshold: ${gzipped} bytes (gzipped)`
+      );
     }
   }
 
@@ -304,8 +313,10 @@ export class BundleSizeMonitor {
 
     if (recent.length === 0 || older.length === 0) return 'stable';
 
-    const recentAvg = recent.reduce((sum, entry) => sum + entry.gzipped, 0) / recent.length;
-    const olderAvg = older.reduce((sum, entry) => sum + entry.gzipped, 0) / older.length;
+    const recentAvg =
+      recent.reduce((sum, entry) => sum + entry.gzipped, 0) / recent.length;
+    const olderAvg =
+      older.reduce((sum, entry) => sum + entry.gzipped, 0) / older.length;
 
     const changePercentage = ((recentAvg - olderAvg) / olderAvg) * 100;
 
@@ -340,7 +351,7 @@ export class BundleSizeMonitor {
       currentSize: latest?.gzipped || 0,
       trend,
       recommendations,
-      history: [...this.sizeHistory]
+      history: [...this.sizeHistory],
     };
   }
 }
@@ -356,7 +367,7 @@ export class DependencyAnalyzer {
       size,
       usagePercentage: 0,
       treeshakeable: this.isTreeShakeable(name),
-      alternatives: this.getAlternatives(name)
+      alternatives: this.getAlternatives(name),
     });
   }
 
@@ -368,7 +379,7 @@ export class DependencyAnalyzer {
       'date-fns',
       '@emotion/react',
       'react-router-dom',
-      'framer-motion'
+      'framer-motion',
     ];
 
     return treeShakeableLibs.includes(name) || name.includes('-es');
@@ -376,10 +387,10 @@ export class DependencyAnalyzer {
 
   private getAlternatives(name: string): string[] {
     const alternatives: Record<string, string[]> = {
-      'moment': ['date-fns', 'dayjs', 'luxon'],
-      'lodash': ['lodash-es', 'ramda', 'native JavaScript'],
-      'axios': ['fetch API', 'ky', 'redaxios'],
-      'recharts': ['chart.js', 'd3.js', 'victory'],
+      moment: ['date-fns', 'dayjs', 'luxon'],
+      lodash: ['lodash-es', 'ramda', 'native JavaScript'],
+      axios: ['fetch API', 'ky', 'redaxios'],
+      recharts: ['chart.js', 'd3.js', 'victory'],
       'material-ui': ['chakra-ui', 'ant-design', 'tailwind-ui'],
     };
 
@@ -394,7 +405,7 @@ export class DependencyAnalyzer {
 
   findDuplicates(): DuplicateInfo[] {
     const packageNames = new Map<string, string[]>();
-    
+
     this.dependencies.forEach((dep, key) => {
       const baseName = dep.name.split('@')[0];
       if (!packageNames.has(baseName)) {
@@ -415,7 +426,7 @@ export class DependencyAnalyzer {
           module: baseName,
           instances: versions.length,
           totalSize,
-          locations: versions
+          locations: versions,
         });
       }
     });
@@ -436,7 +447,7 @@ export class DependencyAnalyzer {
           target: dep.name,
           impact: 'high',
           description: `Consider replacing ${dep.name} with lighter alternatives: ${dep.alternatives.join(', ')}`,
-          estimatedSavings: dep.size * 0.7
+          estimatedSavings: dep.size * 0.7,
         });
       }
 
@@ -446,7 +457,7 @@ export class DependencyAnalyzer {
           target: dep.name,
           impact: 'medium',
           description: `${dep.name} is not tree-shakeable - consider lazy loading`,
-          estimatedSavings: dep.size * 0.5
+          estimatedSavings: dep.size * 0.5,
         });
       }
     });
@@ -458,11 +469,13 @@ export class DependencyAnalyzer {
         target: duplicate.module,
         impact: 'high',
         description: `Deduplicate ${duplicate.module} (${duplicate.instances} instances)`,
-        estimatedSavings: duplicate.totalSize * 0.8
+        estimatedSavings: duplicate.totalSize * 0.8,
       });
     });
 
-    return recommendations.sort((a, b) => b.estimatedSavings - a.estimatedSavings);
+    return recommendations.sort(
+      (a, b) => b.estimatedSavings - a.estimatedSavings
+    );
   }
 }
 
@@ -473,7 +486,7 @@ export class ProductionOptimizer {
   private treeShaking = new TreeShakingAnalyzer();
 
   async optimizeBuild(): Promise<BundleAnalysis> {
-  devConsole.log?.('🔍 Analyzing bundle for optimization opportunities...');
+    devConsole.log?.('🔍 Analyzing bundle for optimization opportunities...');
 
     // Analyze current bundle
     const chunks = await this.analyzeChunks();
@@ -483,7 +496,10 @@ export class ProductionOptimizer {
     const recommendations = this.generateRecommendations();
 
     const totalSize = chunks.reduce((sum, chunk) => sum + chunk.size, 0);
-    const gzippedSize = chunks.reduce((sum, chunk) => sum + chunk.gzippedSize, 0);
+    const gzippedSize = chunks.reduce(
+      (sum, chunk) => sum + chunk.gzippedSize,
+      0
+    );
 
     // Record bundle size
     this.bundleMonitor.recordBundleSize(totalSize, gzippedSize);
@@ -495,7 +511,7 @@ export class ProductionOptimizer {
       dependencies,
       duplicates,
       unusedExports,
-      recommendations
+      recommendations,
     };
 
     this.logOptimizationSummary(analysis);
@@ -512,7 +528,7 @@ export class ProductionOptimizer {
         gzippedSize: 45000,
         modules: ['src/main.tsx', 'src/App.tsx'],
         loadTime: 200,
-        cacheable: true
+        cacheable: true,
       },
       {
         name: 'vendors',
@@ -520,7 +536,7 @@ export class ProductionOptimizer {
         gzippedSize: 65000,
         modules: ['react', 'react-dom'],
         loadTime: 300,
-        cacheable: true
+        cacheable: true,
       },
       {
         name: 'ui',
@@ -528,8 +544,8 @@ export class ProductionOptimizer {
         gzippedSize: 28000,
         modules: ['@cosmichub/ui'],
         loadTime: 150,
-        cacheable: true
-      }
+        cacheable: true,
+      },
     ];
   }
 
@@ -550,7 +566,8 @@ export class ProductionOptimizer {
   }
 
   private generateRecommendations(): OptimizationRecommendation[] {
-    const depRecommendations = this.analyzer.generateOptimizationRecommendations();
+    const depRecommendations =
+      this.analyzer.generateOptimizationRecommendations();
     const bundleReport = this.bundleMonitor.generateReport();
     const treeShakingReport = this.treeShaking.generateReport();
 
@@ -562,8 +579,9 @@ export class ProductionOptimizer {
         type: 'split',
         target: 'main bundle',
         impact: 'high',
-        description: 'Bundle size is increasing - implement more aggressive code splitting',
-        estimatedSavings: 50000
+        description:
+          'Bundle size is increasing - implement more aggressive code splitting',
+        estimatedSavings: 50000,
       });
     }
 
@@ -574,7 +592,7 @@ export class ProductionOptimizer {
         target: 'unused exports',
         impact: 'medium',
         description: `Remove ${treeShakingReport.totalUnused} unused exports`,
-        estimatedSavings: treeShakingReport.estimatedSavings
+        estimatedSavings: treeShakingReport.estimatedSavings,
       });
     }
 
@@ -582,19 +600,25 @@ export class ProductionOptimizer {
   }
 
   private logOptimizationSummary(analysis: BundleAnalysis): void {
-  devConsole.log?.('\n📊 Bundle Analysis Summary:');
-  devConsole.log?.(`Total Size: ${(analysis.totalSize / 1024).toFixed(2)} KB`);
-  devConsole.log?.(`Gzipped Size: ${(analysis.gzippedSize / 1024).toFixed(2)} KB`);
-  devConsole.log?.(`Chunks: ${analysis.chunks.length}`);
-  devConsole.log?.(`Dependencies: ${analysis.dependencies.length}`);
-  devConsole.log?.(`Duplicates: ${analysis.duplicates.length}`);
-  devConsole.log?.(`Unused Exports: ${analysis.unusedExports.length}`);
-  devConsole.log?.(`Recommendations: ${analysis.recommendations.length}`);
+    devConsole.log?.('\n📊 Bundle Analysis Summary:');
+    devConsole.log?.(
+      `Total Size: ${(analysis.totalSize / 1024).toFixed(2)} KB`
+    );
+    devConsole.log?.(
+      `Gzipped Size: ${(analysis.gzippedSize / 1024).toFixed(2)} KB`
+    );
+    devConsole.log?.(`Chunks: ${analysis.chunks.length}`);
+    devConsole.log?.(`Dependencies: ${analysis.dependencies.length}`);
+    devConsole.log?.(`Duplicates: ${analysis.duplicates.length}`);
+    devConsole.log?.(`Unused Exports: ${analysis.unusedExports.length}`);
+    devConsole.log?.(`Recommendations: ${analysis.recommendations.length}`);
 
     if (analysis.recommendations.length > 0) {
       devConsole.log?.('\n🎯 Top Optimization Recommendations:');
       analysis.recommendations.slice(0, 5).forEach((rec, index) => {
-        devConsole.log?.(`${index + 1}. ${rec.description} (Save ~${(rec.estimatedSavings / 1024).toFixed(2)} KB)`);
+        devConsole.log?.(
+          `${index + 1}. ${rec.description} (Save ~${(rec.estimatedSavings / 1024).toFixed(2)} KB)`
+        );
       });
     }
   }
@@ -606,5 +630,5 @@ export const BundleOptimization = {
   TreeShakingAnalyzer,
   BundleSizeMonitor,
   DependencyAnalyzer,
-  ProductionOptimizer
+  ProductionOptimizer,
 };

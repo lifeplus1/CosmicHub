@@ -4,12 +4,16 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { designSystem, DesignConsistencyReport, DesignTokens } from './designSystem';
+import {
+  designSystem,
+  DesignConsistencyReport,
+  DesignTokens,
+} from './designSystem';
 
 describe('Design System Validation Suite', () => {
   let designTokens: DesignTokens;
   let consistencyReport: DesignConsistencyReport;
-  
+
   beforeAll(async () => {
     console.log('🎨 Initializing Design System Validation...');
     designTokens = designSystem.getDesignTokens();
@@ -40,15 +44,28 @@ describe('Design System Validation Suite', () => {
       expect(designTokens.spacing).toHaveProperty('8');
       expect(designTokens.spacing).toHaveProperty('16');
 
-      console.log('✅ Design token system validated with comprehensive coverage');
+      console.log(
+        '✅ Design token system validated with comprehensive coverage'
+      );
     });
 
     it('should maintain consistent color scale structure', () => {
       const { primary, secondary, neutral } = designTokens.colors;
-      
+
       // Each color should have a 50-900 scale
-      const expectedShades = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
-      
+      const expectedShades = [
+        '50',
+        '100',
+        '200',
+        '300',
+        '400',
+        '500',
+        '600',
+        '700',
+        '800',
+        '900',
+      ];
+
       expectedShades.forEach(shade => {
         expect(primary).toHaveProperty(shade);
         expect(secondary).toHaveProperty(shade);
@@ -60,12 +77,14 @@ describe('Design System Validation Suite', () => {
       expect(secondary['500']).toMatch(/^#[0-9a-f]{6}$/i);
       expect(neutral['500']).toMatch(/^#[0-9a-f]{6}$/i);
 
-      console.log('🎨 Color scale consistency validated across primary, secondary, and neutral palettes');
+      console.log(
+        '🎨 Color scale consistency validated across primary, secondary, and neutral palettes'
+      );
     });
 
     it('should provide scalable typography system', () => {
       const { fontSizes, fontWeights, lineHeights } = designTokens.typography;
-      
+
       // Font sizes should be in rem units
       Object.values(fontSizes).forEach(size => {
         expect(size).toMatch(/^[\d.]+rem$/);
@@ -84,14 +103,17 @@ describe('Design System Validation Suite', () => {
         expect(height).toBeLessThan(2);
       });
 
-      console.log('📝 Typography system validated with scalable rem units and proper ratios');
+      console.log(
+        '📝 Typography system validated with scalable rem units and proper ratios'
+      );
     });
 
     it('should provide consistent spacing scale', () => {
       const spacingValues = Object.values(designTokens.spacing);
-      
+
       // Spacing should use rem units
-      spacingValues.slice(1).forEach(value => { // Skip '0'
+      spacingValues.slice(1).forEach(value => {
+        // Skip '0'
         expect(value).toMatch(/^[\d.]+rem$/);
       });
 
@@ -101,16 +123,18 @@ describe('Design System Validation Suite', () => {
         expect(numericValues[i]).toBeGreaterThan(numericValues[i - 1]);
       }
 
-      console.log('📏 Spacing system validated with consistent scale and logical progression');
+      console.log(
+        '📏 Spacing system validated with consistent scale and logical progression'
+      );
     });
   });
 
   describe('Component Pattern System', () => {
     it('should define comprehensive component patterns', () => {
       const patterns = designSystem.getAllPatterns();
-      
+
       expect(patterns.length).toBeGreaterThan(0);
-      
+
       // Validate each pattern has required properties
       patterns.forEach(pattern => {
         expect(pattern).toHaveProperty('name');
@@ -124,44 +148,50 @@ describe('Design System Validation Suite', () => {
 
         // Validate accessibility requirements
         expect(Array.isArray(pattern.accessibility.requiredRoles)).toBe(true);
-        expect(Array.isArray(pattern.accessibility.requiredAttributes)).toBe(true);
+        expect(Array.isArray(pattern.accessibility.requiredAttributes)).toBe(
+          true
+        );
         expect(Array.isArray(pattern.accessibility.keyboardSupport)).toBe(true);
       });
 
-      console.log(`🧩 ${patterns.length} component patterns validated with comprehensive specifications`);
+      console.log(
+        `🧩 ${patterns.length} component patterns validated with comprehensive specifications`
+      );
     });
 
     it('should provide pattern-specific guidance', () => {
       const buttonPattern = designSystem.getComponentPattern('Button');
       expect(buttonPattern).toBeDefined();
-      
+
       if (buttonPattern) {
         // Button should be input category
         expect(buttonPattern.category).toBe('input');
-        
+
         // Should have common variants
         expect(buttonPattern.variants).toContain('primary');
         expect(buttonPattern.variants).toContain('secondary');
-        
+
         // Should require children
         expect(buttonPattern.requiredProps).toContain('children');
-        
+
         // Should have accessibility requirements
         expect(buttonPattern.accessibility.requiredRoles).toContain('button');
         expect(buttonPattern.accessibility.keyboardSupport).toContain('Enter');
-        
+
         // Should support interactions
         expect(buttonPattern.interactions.hover).toBe(true);
         expect(buttonPattern.interactions.focus).toBe(true);
       }
 
-      console.log('🔘 Button pattern validated with comprehensive interaction and accessibility specs');
+      console.log(
+        '🔘 Button pattern validated with comprehensive interaction and accessibility specs'
+      );
     });
 
     it('should validate input pattern requirements', () => {
       const inputPattern = designSystem.getComponentPattern('Input');
       expect(inputPattern).toBeDefined();
-      
+
       if (inputPattern) {
         expect(inputPattern.category).toBe('input');
         expect(inputPattern.variants).toContain('text');
@@ -171,23 +201,29 @@ describe('Design System Validation Suite', () => {
         expect(inputPattern.accessibility.keyboardSupport).toContain('Tab');
       }
 
-      console.log('📝 Input pattern validated with proper form control specifications');
+      console.log(
+        '📝 Input pattern validated with proper form control specifications'
+      );
     });
 
     it('should validate modal pattern requirements', () => {
       const modalPattern = designSystem.getComponentPattern('Modal');
       expect(modalPattern).toBeDefined();
-      
+
       if (modalPattern) {
         expect(modalPattern.category).toBe('feedback');
         expect(modalPattern.requiredProps).toContain('isOpen');
         expect(modalPattern.requiredProps).toContain('onClose');
         expect(modalPattern.accessibility.requiredRoles).toContain('dialog');
-        expect(modalPattern.accessibility.requiredAttributes).toContain('aria-modal');
+        expect(modalPattern.accessibility.requiredAttributes).toContain(
+          'aria-modal'
+        );
         expect(modalPattern.accessibility.keyboardSupport).toContain('Escape');
       }
 
-      console.log('🪟 Modal pattern validated with proper dialog specifications');
+      console.log(
+        '🪟 Modal pattern validated with proper dialog specifications'
+      );
     });
   });
 
@@ -198,10 +234,11 @@ describe('Design System Validation Suite', () => {
         'packages/ui/src/components/Input.tsx',
         'packages/ui/src/components/Modal.tsx',
         'packages/ui/src/components/Card.tsx',
-        'packages/ui/src/components/Dropdown.tsx'
+        'packages/ui/src/components/Dropdown.tsx',
       ];
 
-      consistencyReport = await designSystem.analyzeDesignConsistency(mockComponentPaths);
+      consistencyReport =
+        await designSystem.analyzeDesignConsistency(mockComponentPaths);
 
       // Validate report structure
       expect(consistencyReport).toHaveProperty('timestamp');
@@ -221,13 +258,17 @@ describe('Design System Validation Suite', () => {
       expect(Array.isArray(consistencyReport.issues)).toBe(true);
       expect(Array.isArray(consistencyReport.patterns)).toBe(true);
 
-      console.log(`🔍 Design consistency analysis completed: ${consistencyReport.grade} grade (${consistencyReport.overallScore}%)`);
-      console.log(`📊 Found ${consistencyReport.issues.length} design issues across ${consistencyReport.componentsAnalyzed} components`);
+      console.log(
+        `🔍 Design consistency analysis completed: ${consistencyReport.grade} grade (${consistencyReport.overallScore}%)`
+      );
+      console.log(
+        `📊 Found ${consistencyReport.issues.length} design issues across ${consistencyReport.componentsAnalyzed} components`
+      );
     });
 
     it('should categorize and prioritize design issues', () => {
       expect(consistencyReport).toBeDefined();
-      
+
       // Issues should have required properties
       consistencyReport.issues.forEach(issue => {
         expect(issue).toHaveProperty('component');
@@ -238,25 +279,39 @@ describe('Design System Validation Suite', () => {
 
         // Severity should be valid
         expect(['low', 'medium', 'high', 'critical']).toContain(issue.severity);
-        
+
         // Category should be valid
-        expect(['color', 'typography', 'spacing', 'pattern', 'accessibility']).toContain(issue.category);
+        expect([
+          'color',
+          'typography',
+          'spacing',
+          'pattern',
+          'accessibility',
+        ]).toContain(issue.category);
       });
 
       // Issues should be sorted by severity (critical first)
       const severityOrder = ['critical', 'high', 'medium', 'low'];
       for (let i = 1; i < consistencyReport.issues.length; i++) {
-        const currentSeverityIndex = severityOrder.indexOf(consistencyReport.issues[i].severity);
-        const previousSeverityIndex = severityOrder.indexOf(consistencyReport.issues[i - 1].severity);
-        expect(currentSeverityIndex).toBeGreaterThanOrEqual(previousSeverityIndex);
+        const currentSeverityIndex = severityOrder.indexOf(
+          consistencyReport.issues[i].severity
+        );
+        const previousSeverityIndex = severityOrder.indexOf(
+          consistencyReport.issues[i - 1].severity
+        );
+        expect(currentSeverityIndex).toBeGreaterThanOrEqual(
+          previousSeverityIndex
+        );
       }
 
-      console.log('🎯 Design issues properly categorized and prioritized by severity');
+      console.log(
+        '🎯 Design issues properly categorized and prioritized by severity'
+      );
     });
 
     it('should track design token usage', () => {
       expect(consistencyReport.designTokenUsage).toBeDefined();
-      
+
       // Should track major token categories
       expect(consistencyReport.designTokenUsage).toHaveProperty('colors');
       expect(consistencyReport.designTokenUsage).toHaveProperty('spacing');
@@ -272,8 +327,11 @@ describe('Design System Validation Suite', () => {
         expect(typeof usage.inconsistent).toBe('number');
       });
 
-      const { colors, spacing, typography } = consistencyReport.designTokenUsage;
-      console.log(`🎨 Design token usage tracked: Colors (${colors.used} used), Spacing (${spacing.used} used), Typography (${typography.used} used)`);
+      const { colors, spacing, typography } =
+        consistencyReport.designTokenUsage;
+      console.log(
+        `🎨 Design token usage tracked: Colors (${colors.used} used), Spacing (${spacing.used} used), Typography (${typography.used} used)`
+      );
     });
 
     it('should provide actionable recommendations', () => {
@@ -295,7 +353,7 @@ describe('Design System Validation Suite', () => {
 
     it('should generate comprehensive design system report', () => {
       const report = designSystem.generateDesignSystemReport(consistencyReport);
-      
+
       expect(report).toContain('Design System Consistency Report');
       expect(report).toContain('Overall Grade');
       expect(report).toContain('Components Analyzed');
@@ -318,9 +376,10 @@ describe('Design System Validation Suite', () => {
           'packages/ui/src/components/Modal.tsx',
           'packages/ui/src/components/Input.tsx',
           'packages/ui/src/components/Card.tsx',
-          'packages/ui/src/components/Dropdown.tsx'
+          'packages/ui/src/components/Dropdown.tsx',
         ];
-        consistencyReport = await designSystem.analyzeDesignConsistency(mockComponentPaths);
+        consistencyReport =
+          await designSystem.analyzeDesignConsistency(mockComponentPaths);
       }
 
       // Ensure we have a valid consistency report
@@ -329,12 +388,18 @@ describe('Design System Validation Suite', () => {
       expect(consistencyReport.overallScore).toBeLessThanOrEqual(100);
 
       // Critical issues should be addressed
-      const criticalIssues = consistencyReport.issues.filter(issue => issue.severity === 'critical');
+      const criticalIssues = consistencyReport.issues.filter(
+        issue => issue.severity === 'critical'
+      );
       expect(criticalIssues.length).toBeLessThanOrEqual(2); // Allow maximum 2 critical issues
 
-      console.log(`✅ Design consistency standards enforced: ${consistencyReport.overallScore}% score`);
+      console.log(
+        `✅ Design consistency standards enforced: ${consistencyReport.overallScore}% score`
+      );
       if (criticalIssues.length > 0) {
-        console.log(`⚠️ Critical design issues requiring attention: ${criticalIssues.length}`);
+        console.log(
+          `⚠️ Critical design issues requiring attention: ${criticalIssues.length}`
+        );
       }
     });
 
@@ -343,69 +408,101 @@ describe('Design System Validation Suite', () => {
       consistencyReport.patterns.forEach(pattern => {
         expect(pattern.consistency).toBeGreaterThanOrEqual(0);
         expect(pattern.consistency).toBeLessThanOrEqual(100);
-        
+
         // Log pattern compliance
-        const status = pattern.consistency >= 80 ? '✅' : pattern.consistency >= 60 ? '⚠️' : '❌';
-        console.log(`${status} ${pattern.name}: ${pattern.consistency}% consistency`);
+        const status =
+          pattern.consistency >= 80
+            ? '✅'
+            : pattern.consistency >= 60
+              ? '⚠️'
+              : '❌';
+        console.log(
+          `${status} ${pattern.name}: ${pattern.consistency}% consistency`
+        );
       });
 
       // Overall pattern compliance - adjusted to be more realistic
-      const averagePatternConsistency = consistencyReport.patterns.reduce((sum, p) => sum + p.consistency, 0) / consistencyReport.patterns.length;
+      const averagePatternConsistency =
+        consistencyReport.patterns.reduce((sum, p) => sum + p.consistency, 0) /
+        consistencyReport.patterns.length;
       expect(averagePatternConsistency).toBeGreaterThan(40);
 
-      console.log(`🧩 Average pattern compliance: ${averagePatternConsistency.toFixed(1)}%`);
+      console.log(
+        `🧩 Average pattern compliance: ${averagePatternConsistency.toFixed(1)}%`
+      );
     });
 
     it('should validate design token adoption', () => {
       const tokenUsage = consistencyReport.designTokenUsage;
-      
+
       // Colors should have good adoption
-      const colorAdoption = tokenUsage.colors.used / (tokenUsage.colors.used + tokenUsage.colors.unused);
+      const colorAdoption =
+        tokenUsage.colors.used /
+        (tokenUsage.colors.used + tokenUsage.colors.unused);
       expect(colorAdoption).toBeGreaterThan(0.5); // At least 50% adoption
 
       // Spacing should have high adoption
-      const spacingAdoption = tokenUsage.spacing.used / (tokenUsage.spacing.used + tokenUsage.spacing.unused);
+      const spacingAdoption =
+        tokenUsage.spacing.used /
+        (tokenUsage.spacing.used + tokenUsage.spacing.unused);
       expect(spacingAdoption).toBeGreaterThan(0.7); // At least 70% adoption
 
-      console.log(`🎨 Design token adoption: Colors ${(colorAdoption * 100).toFixed(1)}%, Spacing ${(spacingAdoption * 100).toFixed(1)}%`);
+      console.log(
+        `🎨 Design token adoption: Colors ${(colorAdoption * 100).toFixed(1)}%, Spacing ${(spacingAdoption * 100).toFixed(1)}%`
+      );
     });
 
     it('should guide design system improvement', () => {
-      const generateDesignImprovementPlan = (report: DesignConsistencyReport) => {
-        const criticalIssues = report.issues.filter(i => i.severity === 'critical' || i.severity === 'high');
+      const generateDesignImprovementPlan = (
+        report: DesignConsistencyReport
+      ) => {
+        const criticalIssues = report.issues.filter(
+          i => i.severity === 'critical' || i.severity === 'high'
+        );
         const colorIssues = report.issues.filter(i => i.category === 'color');
-        const accessibilityIssues = report.issues.filter(i => i.category === 'accessibility');
-        
+        const accessibilityIssues = report.issues.filter(
+          i => i.category === 'accessibility'
+        );
+
         return {
           immediateActions: [
-            ...(criticalIssues.length > 0 ? [`Address ${criticalIssues.length} critical design issues`] : []),
-            ...(colorIssues.length > 0 ? ['Standardize color usage across components'] : []),
-            'Review and update component documentation'
+            ...(criticalIssues.length > 0
+              ? [`Address ${criticalIssues.length} critical design issues`]
+              : []),
+            ...(colorIssues.length > 0
+              ? ['Standardize color usage across components']
+              : []),
+            'Review and update component documentation',
           ],
           designSystemEnhancements: [
             'Expand design token coverage',
             'Create component composition guidelines',
             'Implement automated design validation',
-            ...(accessibilityIssues.length > 0 ? ['Enhance accessibility pattern compliance'] : [])
+            ...(accessibilityIssues.length > 0
+              ? ['Enhance accessibility pattern compliance']
+              : []),
           ],
           longTermGoals: [
             'Achieve 90%+ design consistency score',
             'Implement design system governance process',
             'Create automated design regression testing',
-            'Establish design system metrics dashboard'
-          ]
+            'Establish design system metrics dashboard',
+          ],
         };
       };
-      
+
       const improvementPlan = generateDesignImprovementPlan(consistencyReport);
-      
+
       expect(improvementPlan).toHaveProperty('immediateActions');
       expect(improvementPlan).toHaveProperty('designSystemEnhancements');
       expect(improvementPlan).toHaveProperty('longTermGoals');
 
       console.log('\n🎯 Design System Improvement Plan:');
       console.log('Immediate Actions:', improvementPlan.immediateActions);
-      console.log('Design System Enhancements:', improvementPlan.designSystemEnhancements);
+      console.log(
+        'Design System Enhancements:',
+        improvementPlan.designSystemEnhancements
+      );
       console.log('Long-term Goals:', improvementPlan.longTermGoals);
     });
   });

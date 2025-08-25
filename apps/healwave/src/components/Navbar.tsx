@@ -11,7 +11,7 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-  } catch {
+    } catch {
       // Use proper error handling instead of console
       alert('Logout failed. Please try again.');
     }

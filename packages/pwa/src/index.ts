@@ -6,5 +6,5 @@ export {
   PWACapabilitiesDetector,
   MobileViewportOptimizer,
   MobilePWAInstaller,
-  MobilePWAFeatures
+  MobilePWAFeatures,
 } from './mobile-enhancements';

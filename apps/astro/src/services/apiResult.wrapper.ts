@@ -10,6 +10,6 @@ export {
   unwrapOr,
   mapResult,
   mapSuccess,
-  mapFailure
+  mapFailure,
 } from '@cosmichub/config';
 export type { ApiResult, ApiSuccess, ApiFailure } from '@cosmichub/config';

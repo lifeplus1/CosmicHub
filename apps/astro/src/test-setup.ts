@@ -17,8 +17,12 @@ vi.mock('firebase/app', () => ({
 vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
   connectAuthEmulator: vi.fn(),
-  signInWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: { uid: 'test-uid' } })),
-  createUserWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: { uid: 'test-uid' } })),
+  signInWithEmailAndPassword: vi.fn(() =>
+    Promise.resolve({ user: { uid: 'test-uid' } })
+  ),
+  createUserWithEmailAndPassword: vi.fn(() =>
+    Promise.resolve({ user: { uid: 'test-uid' } })
+  ),
   signOut: vi.fn(() => Promise.resolve()),
   onAuthStateChanged: vi.fn(() => vi.fn()),
   User: {},
@@ -38,8 +42,16 @@ vi.mock('@cosmichub/auth', () => ({
     loading: false,
     signOut: vi.fn(),
   })),
-  AuthProvider: ({ children }: { children: React.ReactNode }): React.ReactNode => children,
-  SubscriptionProvider: ({ children }: { children: React.ReactNode }): React.ReactNode => children,
+  AuthProvider: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactNode => children,
+  SubscriptionProvider: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactNode => children,
   useSubscription: vi.fn(() => ({
     plan: 'free',
     userTier: 'free',
@@ -57,7 +69,11 @@ vi.mock('./components/ToastProvider', () => ({
   useToast: vi.fn(() => ({
     toast: vi.fn(),
   })),
-  ToastProvider: ({ children }: { children: React.ReactNode }): React.ReactNode => children,
+  ToastProvider: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactNode => children,
 }));
 
 // Mock UI components that may be missing
@@ -65,30 +81,137 @@ vi.mock('@cosmichub/ui', () => ({
   useToast: vi.fn(() => ({
     toast: vi.fn(),
   })),
-  TooltipProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  Tooltip: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  Card: ({ children, className }: { children: React.ReactNode; className?: string }): React.ReactElement => React.createElement('div', { className }, children),
-  CardContent: ({ children, className }: { children: React.ReactNode; className?: string }): React.ReactElement => React.createElement('div', { className }, children),
-  CardHeader: ({ children, className }: { children: React.ReactNode; className?: string }): React.ReactElement => React.createElement('div', { className }, children),
-  CardTitle: ({ children, className }: { children: React.ReactNode; className?: string }): React.ReactElement => React.createElement('h3', { className }, children),
-  Button: ({ children, onClick, className }: { children: React.ReactNode; onClick?: () => void; className?: string }): React.ReactElement => React.createElement('button', { onClick, className }, children),
-  Input: ({ placeholder, value, onChange, className }: { placeholder?: string; value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; className?: string }): React.ReactElement => React.createElement('input', { placeholder, value, onChange, className }),
-  Table: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('table', {}, children),
-  TableBody: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('tbody', {}, children),
-  TableCell: ({ children, className }: { children: React.ReactNode; className?: string }): React.ReactElement => React.createElement('td', { className }, children),
-  TableHead: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('th', {}, children),
-  TableHeader: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('thead', {}, children),
-  TableRow: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('tr', {}, children),
-  Accordion: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  AccordionContent: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  AccordionItem: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  AccordionTrigger: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  Tabs: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  TabsContent: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  TabsList: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  TabsTrigger: ({ children }: { children: React.ReactNode }): React.ReactElement => React.createElement('div', {}, children),
-  UpgradeModal: ({ children, isOpen }: { children?: React.ReactNode; isOpen?: boolean }): React.ReactElement | null => 
-    isOpen === true ? React.createElement('div', { 'data-testid': 'upgrade-modal' }, children ?? 'Upgrade Modal') : null
+  TooltipProvider: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('div', {}, children),
+  Tooltip: ({ children }: { children: React.ReactNode }): React.ReactElement =>
+    React.createElement('div', {}, children),
+  Card: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }): React.ReactElement => React.createElement('div', { className }, children),
+  CardContent: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }): React.ReactElement => React.createElement('div', { className }, children),
+  CardHeader: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }): React.ReactElement => React.createElement('div', { className }, children),
+  CardTitle: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }): React.ReactElement => React.createElement('h3', { className }, children),
+  Button: ({
+    children,
+    onClick,
+    className,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    className?: string;
+  }): React.ReactElement =>
+    React.createElement('button', { onClick, className }, children),
+  Input: ({
+    placeholder,
+    value,
+    onChange,
+    className,
+  }: {
+    placeholder?: string;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    className?: string;
+  }): React.ReactElement =>
+    React.createElement('input', { placeholder, value, onChange, className }),
+  Table: ({ children }: { children: React.ReactNode }): React.ReactElement =>
+    React.createElement('table', {}, children),
+  TableBody: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('tbody', {}, children),
+  TableCell: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }): React.ReactElement => React.createElement('td', { className }, children),
+  TableHead: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('th', {}, children),
+  TableHeader: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('thead', {}, children),
+  TableRow: ({ children }: { children: React.ReactNode }): React.ReactElement =>
+    React.createElement('tr', {}, children),
+  Accordion: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('div', {}, children),
+  AccordionContent: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('div', {}, children),
+  AccordionItem: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('div', {}, children),
+  AccordionTrigger: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('div', {}, children),
+  Tabs: ({ children }: { children: React.ReactNode }): React.ReactElement =>
+    React.createElement('div', {}, children),
+  TabsContent: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('div', {}, children),
+  TabsList: ({ children }: { children: React.ReactNode }): React.ReactElement =>
+    React.createElement('div', {}, children),
+  TabsTrigger: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => React.createElement('div', {}, children),
+  UpgradeModal: ({
+    children,
+    isOpen,
+  }: {
+    children?: React.ReactNode;
+    isOpen?: boolean;
+  }): React.ReactElement | null =>
+    isOpen === true
+      ? React.createElement(
+          'div',
+          { 'data-testid': 'upgrade-modal' },
+          children ?? 'Upgrade Modal'
+        )
+      : null,
 }));
 
 // Mock integrations package

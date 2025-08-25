@@ -52,11 +52,11 @@
   .container {
     padding: 1rem;
   }
-  
+
   .heading {
     font-size: 2rem;
   }
-  
+
   .grid {
     grid-template-columns: 1fr;
     gap: 1rem;

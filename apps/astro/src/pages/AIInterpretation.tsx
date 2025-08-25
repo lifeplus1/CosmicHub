@@ -12,7 +12,12 @@ import { Card, Button } from '@cosmichub/ui';
 import type { Interpretation } from '../components/AIInterpretation/types';
 import { fetchAIInterpretations, fetchSavedCharts } from '../services/api';
 import type { ApiResult } from '../services/apiResult';
-import type { SavedChart, ChartId, UserId, InterpretationResponse } from '../services/api.types';
+import type {
+  SavedChart,
+  ChartId,
+  UserId,
+  InterpretationResponse,
+} from '../services/api.types';
 import styles from './AIInterpretations.module.css';
 
 // Simple Spinner component
@@ -74,7 +79,9 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
       user !== null && user !== undefined && initialChartId === undefined, // explicit undefined check retained
     staleTime: 30 * 1000,
   });
-  const savedCharts: SavedChart[] = (savedChartsResult?.success) ? savedChartsResult.data : [];
+  const savedCharts: SavedChart[] = savedChartsResult?.success
+    ? savedChartsResult.data
+    : [];
 
   // Helper function to format date display
   const formatDate = (dateString: string): string => {
@@ -109,14 +116,16 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
       } else {
         return (
           <div className='text-center p-8'>
-            <div className='text-red-400 mb-4'>Unknown error loading charts</div>
+            <div className='text-red-400 mb-4'>
+              Unknown error loading charts
+            </div>
             <p className='text-cosmic-silver'>Please try again later.</p>
           </div>
         );
       }
     }
 
-  if (!isNonEmptyArray<SavedChart>(savedCharts)) {
+    if (!isNonEmptyArray<SavedChart>(savedCharts)) {
       return (
         <div className='text-center py-16'>
           <div className='w-24 h-24 bg-cosmic-purple/20 rounded-full flex items-center justify-center mx-auto mb-6'>
@@ -218,7 +227,11 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
   const noChartSelected = !isNonEmptyString(selectedChartId);
 
   // Fetch AI interpretations from backend with caching
-  const { data: interpretationsResult, isLoading, error } = useQuery<ApiResult<InterpretationResponse>>({
+  const {
+    data: interpretationsResult,
+    isLoading,
+    error,
+  } = useQuery<ApiResult<InterpretationResponse>>({
     queryKey: ['interpretations', selectedChartId, effectiveUserId],
     queryFn: async () => {
       if (
@@ -262,7 +275,9 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
             : (fallbackUserId ?? 'unknown-user'),
         type: typeof obj['type'] === 'string' ? obj['type'] : 'general',
         title:
-          typeof obj['title'] === 'string' ? obj['title'] : 'Untitled Interpretation',
+          typeof obj['title'] === 'string'
+            ? obj['title']
+            : 'Untitled Interpretation',
         content: typeof obj['content'] === 'string' ? obj['content'] : '',
         summary: typeof obj['summary'] === 'string' ? obj['summary'] : '',
         tags: Array.isArray(tagsUnknown) ? (tagsUnknown as string[]) : [],
@@ -332,7 +347,11 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
 
   // Combine API and Firestore data
   useEffect(() => {
-    if (!isDefined(interpretationsResult) || interpretationsResult.success === false) return;
+    if (
+      !isDefined(interpretationsResult) ||
+      interpretationsResult.success === false
+    )
+      return;
     const apiList = interpretationsResult.data.data ?? [];
     if (!Array.isArray(apiList)) return;
     setInterpretations(prev => {
@@ -416,7 +435,7 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
           </Button>
         </div>
 
-  <div className={styles['error']} role='alert' aria-live='assertive'>
+        <div className={styles['error']} role='alert' aria-live='assertive'>
           Error loading interpretations: {error.message}
         </div>
       </div>

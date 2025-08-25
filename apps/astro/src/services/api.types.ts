@@ -1,6 +1,6 @@
 /**
  * API Type Definitions
- * 
+ *
  * This file contains comprehensive type definitions for API requests and responses,
  * including discriminated unions and branded types for improved type safety.
  */
@@ -32,7 +32,7 @@ export function isInterpretationId(id: string): id is InterpretationId {
 /**
  * API Response Status Union Type - ensures exhaustive handling of responses
  */
-export type ApiResponseStatus = 
+export type ApiResponseStatus =
   | 'success'
   | 'error'
   | 'validation_error'
@@ -166,51 +166,83 @@ export interface ApiCachedResponseType<T> extends ApiResponseBase {
 /**
  * Type guards for response types
  */
-export function isSuccessResponse<T>(response: ApiResponse<T>): response is ApiSuccessResponseBase<T> {
+export function isSuccessResponse<T>(
+  response: ApiResponse<T>
+): response is ApiSuccessResponseBase<T> {
   return response.status === 'success';
 }
 
-export function isErrorResponse<T>(response: ApiResponse<T>): response is ApiErrorResponse {
-  return ['error', 'validation_error', 'not_found', 'unauthorized', 'forbidden', 'server_error'].includes(response.status);
+export function isErrorResponse<T>(
+  response: ApiResponse<T>
+): response is ApiErrorResponse {
+  return [
+    'error',
+    'validation_error',
+    'not_found',
+    'unauthorized',
+    'forbidden',
+    'server_error',
+  ].includes(response.status);
 }
 
 // Convenience helper when only status string is available
 export function isErrorStatus(status: ApiResponseStatus): boolean {
-  return ['error', 'validation_error', 'not_found', 'unauthorized', 'forbidden', 'server_error'].includes(status);
+  return [
+    'error',
+    'validation_error',
+    'not_found',
+    'unauthorized',
+    'forbidden',
+    'server_error',
+  ].includes(status);
 }
 
-export function isValidationError(response: ApiResponse<unknown>): response is ApiValidationErrorResponse {
+export function isValidationError(
+  response: ApiResponse<unknown>
+): response is ApiValidationErrorResponse {
   return response.status === 'validation_error';
 }
 
-export function isNotFoundError(response: ApiResponse<unknown>): response is ApiNotFoundResponse {
+export function isNotFoundError(
+  response: ApiResponse<unknown>
+): response is ApiNotFoundResponse {
   return response.status === 'not_found';
 }
 
-export function isUnauthorizedError(response: ApiResponse<unknown>): response is ApiUnauthorizedResponse {
+export function isUnauthorizedError(
+  response: ApiResponse<unknown>
+): response is ApiUnauthorizedResponse {
   return response.status === 'unauthorized';
 }
 
-export function isForbiddenError(response: ApiResponse<unknown>): response is ApiForbiddenResponse {
+export function isForbiddenError(
+  response: ApiResponse<unknown>
+): response is ApiForbiddenResponse {
   return response.status === 'forbidden';
 }
 
-export function isServerError(response: ApiResponse<unknown>): response is ApiServerErrorResponse {
+export function isServerError(
+  response: ApiResponse<unknown>
+): response is ApiServerErrorResponse {
   return response.status === 'server_error';
 }
 
-export function isCachedResponse<T>(response: ApiResponse<T>): response is ApiCachedResponseType<T> {
+export function isCachedResponse<T>(
+  response: ApiResponse<T>
+): response is ApiCachedResponseType<T> {
   return response.status === 'cached';
 }
 
-export function isPartialResponse<T>(response: ApiResponse<T>): response is ApiPartialResponseType<T> {
+export function isPartialResponse<T>(
+  response: ApiResponse<T>
+): response is ApiPartialResponseType<T> {
   return response.status === 'partial';
 }
 
 /**
  * Union type of all possible API responses
  */
-export type ApiErrorResponse = 
+export type ApiErrorResponse =
   | ApiValidationErrorResponse
   | ApiNotFoundResponse
   | ApiUnauthorizedResponse
@@ -218,9 +250,9 @@ export type ApiErrorResponse =
   | ApiServerErrorResponse
   | ApiGenericErrorResponse;
 
-export type ApiResponse<T> = 
+export type ApiResponse<T> =
   | ApiSuccessResponseBase<T>
-  | ApiErrorResponse 
+  | ApiErrorResponse
   | ApiPartialResponseType<T>
   | ApiCachedResponseType<T>;
 
@@ -229,7 +261,7 @@ export type ApiResponse<T> =
 /**
  * Chart Types with Improved Type Safety
  */
-export type PlanetName = 
+export type PlanetName =
   | 'sun'
   | 'moon'
   | 'mercury'
@@ -244,7 +276,7 @@ export type PlanetName =
   | 'north_node'
   | 'south_node';
 
-export type ZodiacSign = 
+export type ZodiacSign =
   | 'aries'
   | 'taurus'
   | 'gemini'
@@ -275,7 +307,7 @@ export interface House {
   sign: ZodiacSign;
 }
 
-export type AspectType = 
+export type AspectType =
   | 'conjunction'
   | 'opposition'
   | 'trine'
@@ -312,7 +344,14 @@ export interface ChartData {
   longitude: number;
   timezone: string;
   julian_day: number;
-  house_system: 'placidus' | 'koch' | 'equal' | 'whole_sign' | 'regiomontanus' | 'campanus' | 'porphyry';
+  house_system:
+    | 'placidus'
+    | 'koch'
+    | 'equal'
+    | 'whole_sign'
+    | 'regiomontanus'
+    | 'campanus'
+    | 'porphyry';
   sidereal?: {
     ayanamsa: 'lahiri' | 'raman' | 'krishnamurti' | 'fagan_bradley';
     offset: number;
@@ -363,12 +402,12 @@ export interface SaveChartResponse {
 /**
  * Interpretation Types with Enhanced Type Safety
  */
-export type InterpretationType = 
-  | 'natal' 
-  | 'transit' 
-  | 'synastry' 
-  | 'composite' 
-  | 'solar_return' 
+export type InterpretationType =
+  | 'natal'
+  | 'transit'
+  | 'synastry'
+  | 'composite'
+  | 'solar_return'
   | 'progression'
   | 'solar_arc'
   | 'lunar_return'
@@ -445,7 +484,8 @@ export interface InterpretationRequest {
   };
 }
 
-export interface InterpretationResponse extends ApiSuccessResponseBase<Interpretation[]> {
+export interface InterpretationResponse
+  extends ApiSuccessResponseBase<Interpretation[]> {
   meta: {
     total: number;
     processing_time: number;
@@ -478,7 +518,10 @@ export class ApiError extends Error {
 }
 
 export class AuthenticationError extends ApiError {
-  constructor(message = 'Authentication failed', details?: Record<string, unknown>) {
+  constructor(
+    message = 'Authentication failed',
+    details?: Record<string, unknown>
+  ) {
     super(message, 'AUTH_ERROR', 401, details);
     this.name = 'AuthenticationError';
   }
@@ -506,7 +549,10 @@ export class ForbiddenError extends ApiError {
 }
 
 export class ServerError extends ApiError {
-  constructor(message = 'Internal server error', details?: Record<string, unknown>) {
+  constructor(
+    message = 'Internal server error',
+    details?: Record<string, unknown>
+  ) {
     super(message, 'SERVER_ERROR', 500, details);
     this.name = 'ServerError';
   }

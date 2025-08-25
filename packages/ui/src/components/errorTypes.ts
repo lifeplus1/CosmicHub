@@ -22,12 +22,23 @@ export interface ErrorInfo extends ErrorMetrics {
   sessionId: string | undefined;
 }
 
-export interface ErrorReportingService { captureException(error: ErrorInfo): void; }
-export interface AnalyticsService { track(eventName: string, data: ErrorMetrics): void; }
+export interface ErrorReportingService {
+  captureException(error: ErrorInfo): void;
+}
+export interface AnalyticsService {
+  track(eventName: string, data: ErrorMetrics): void;
+}
 
 export interface ErrorBoundaryProps {
   children: React.ReactNode;
-  fallback?: React.ReactNode | ((error: Error, errorInfo: ErrorInfo, retry: () => void) => React.ReactNode) | undefined;
+  fallback?:
+    | React.ReactNode
+    | ((
+        error: Error,
+        errorInfo: ErrorInfo,
+        retry: () => void
+      ) => React.ReactNode)
+    | undefined;
   onError?: ((error: Error, errorInfo: ErrorInfo) => void) | undefined;
   resetKeys?: Array<string | number> | undefined;
   resetOnPropsChange?: boolean | undefined;

@@ -1,6 +1,12 @@
 // NOTE: Legacy helper kept only for backward compatibility with deprecated AuthContext.
 // Legacy helper (deprecated Aug 2025)
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { User, Auth, onAuthStateChanged } from 'firebase/auth';
 
 export interface AuthContextType {
@@ -10,8 +16,15 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function createAuthContext(auth: Auth): { AuthProvider: React.FC<{ children: ReactNode }>; useAuth: () => AuthContextType } {
-  function AuthProvider({ children }: { children: ReactNode }): React.JSX.Element {
+export function createAuthContext(auth: Auth): {
+  AuthProvider: React.FC<{ children: ReactNode }>;
+  useAuth: () => AuthContextType;
+} {
+  function AuthProvider({
+    children,
+  }: {
+    children: ReactNode;
+  }): React.JSX.Element {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 

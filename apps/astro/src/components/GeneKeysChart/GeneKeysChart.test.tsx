@@ -27,7 +27,7 @@ describe('GeneKeysChart', () => {
     city: 'New York',
     timezone: 'America/New_York',
     lat: 40.7128,
-    lon: -74.0060,
+    lon: -74.006,
   };
 
   beforeEach(() => {
@@ -38,16 +38,22 @@ describe('GeneKeysChart', () => {
     render(<GeneKeysChart birthData={mockBirthData} />);
 
     // The component shows loading message during calculation
-    expect(screen.getByText(/Calculating your Gene Keys profile/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Calculating your Gene Keys profile/i)
+    ).toBeInTheDocument();
   });
 
   it('displays loading state', () => {
     render(<GeneKeysChart birthData={mockBirthData} />);
 
     // During calculation, it shows loading message with spinner
-    expect(screen.getByText(/Calculating your Gene Keys profile/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Calculating your Gene Keys profile/i)
+    ).toBeInTheDocument();
     // Check for the loading spinner container
-    const loadingContainer = screen.getByText(/Calculating your Gene Keys profile/i).closest('div');
+    const loadingContainer = screen
+      .getByText(/Calculating your Gene Keys profile/i)
+      .closest('div');
     expect(loadingContainer).toBeInTheDocument();
   });
 
@@ -55,7 +61,9 @@ describe('GeneKeysChart', () => {
     render(<GeneKeysChart />);
 
     // When no birth data, shows instruction message
-  const messages = screen.getAllByText(/Enter your birth information to calculate your Gene Keys profile/i);
-  expect(messages.length).toBeGreaterThan(0);
+    const messages = screen.getAllByText(
+      /Enter your birth information to calculate your Gene Keys profile/i
+    );
+    expect(messages.length).toBeGreaterThan(0);
   });
 });

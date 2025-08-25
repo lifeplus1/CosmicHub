@@ -20,8 +20,10 @@ export const HealwaveRoutes = {
 };
 
 // Lazy loaded components with error boundaries
-export const withErrorBoundary = (Component: React.ComponentType<Record<string, unknown>>) => {
-  const Wrapped: React.FC<Record<string, unknown>> = (props) => (
+export const withErrorBoundary = (
+  Component: React.ComponentType<Record<string, unknown>>
+) => {
+  const Wrapped: React.FC<Record<string, unknown>> = props => (
     <LazyLoadErrorBoundary>
       <Component {...props} />
     </LazyLoadErrorBoundary>

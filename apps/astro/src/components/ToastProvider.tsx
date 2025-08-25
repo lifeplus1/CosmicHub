@@ -23,17 +23,19 @@ export const useToast = (): ToastContextType => {
     // Return a mock implementation to prevent compilation errors
     return {
       toast: () => devConsole.log('Toast provider not available'),
-      closeToast: () => devConsole.log('Toast provider not available')
+      closeToast: () => devConsole.log('Toast provider not available'),
     };
   }
   return context;
 };
 
 // Simple provider implementation
-export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ToastProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const toast = () => {};
   const closeToast = () => {};
-  
+
   return (
     <ToastContext.Provider value={{ toast, closeToast }}>
       {children}

@@ -23,29 +23,29 @@ const meta: Meta<typeof ChartDisplay> = {
         rules: [
           {
             id: 'region',
-            enabled: true
+            enabled: true,
           },
           {
             id: 'aria-roles',
-            enabled: true
-          }
-        ]
-      }
-    }
+            enabled: true,
+          },
+        ],
+      },
+    },
   },
   decorators: [
     (Story: ComponentType): JSX.Element => (
       <QueryClientProvider client={queryClient}>
-        <div 
-          className="storybook-wrapper" 
-          role="region" 
-          aria-label="Chart display story"
+        <div
+          className='storybook-wrapper'
+          role='region'
+          aria-label='Chart display story'
         >
           <Story />
         </div>
       </QueryClientProvider>
-    )
-  ]
+    ),
+  ],
 };
 export default meta;
 
@@ -56,7 +56,7 @@ export default meta;
 export const Sample: Readonly<Story> = {
   args: {
     chart: sampleChartData,
-    chartType: 'natal' satisfies ChartType
+    chartType: 'natal' satisfies ChartType,
   },
   // Type safety provided by StoryBook - no runtime check needed
   play: async ({ canvasElement }): Promise<void> => {
@@ -65,7 +65,7 @@ export const Sample: Readonly<Story> = {
     if (element) {
       element.setAttribute('tabindex', '0');
     }
-  }
+  },
 };
 
 /**
@@ -79,66 +79,66 @@ export const Empty: Readonly<Story> = {
         rules: [
           {
             id: 'region',
-            enabled: true
-          }
-        ]
-      }
-    }
+            enabled: true,
+          },
+        ],
+      },
+    },
   },
   args: {
     chart: null,
-    chartType: 'natal' satisfies ChartType
-  }
+    chartType: 'natal' satisfies ChartType,
+  },
 };
 
 const customChartData: Readonly<ChartLike> = {
   planets: [
-    { 
-      name: 'Sun', 
-      sign: 'Leo', 
-      degree: 3, 
-      position: 123, 
-      house: 10
+    {
+      name: 'Sun',
+      sign: 'Leo',
+      degree: 3,
+      position: 123,
+      house: 10,
     },
-    { 
-      name: 'Moon', 
-      sign: 'Taurus', 
-      degree: 15, 
-      position: 45, 
-      house: 7
-    }
+    {
+      name: 'Moon',
+      sign: 'Taurus',
+      degree: 15,
+      position: 45,
+      house: 7,
+    },
   ],
   houses: [
-    { 
-      number: 1, 
-      sign: 'Aries', 
-      cusp: 0, 
-      house: 1
+    {
+      number: 1,
+      sign: 'Aries',
+      cusp: 0,
+      house: 1,
     },
-    { 
-      number: 2, 
-      sign: 'Taurus', 
-      cusp: 30, 
-      house: 2
-    }
+    {
+      number: 2,
+      sign: 'Taurus',
+      cusp: 30,
+      house: 2,
+    },
   ],
   aspects: [
-    { 
+    {
       planet1: 'Sun',
       planet2: 'Moon',
       type: 'Conjunction',
       orb: 2,
-      applying: 'Applying'
-    }
+      applying: 'Applying',
+    },
   ],
   angles: [
     {
       name: 'Ascendant',
       sign: 'Aries',
       degree: 0,
-      position: 0
-    }
-  ]
+      position: 0,
+    },
+  ],
 };
 
 /**
@@ -152,14 +152,14 @@ export const CustomData: Readonly<Story> = {
         rules: [
           {
             id: 'region',
-            enabled: true
-          }
-        ]
-      }
-    }
+            enabled: true,
+          },
+        ],
+      },
+    },
   },
   args: {
     chart: customChartData,
-    chartType: 'natal' satisfies ChartType
-  }
+    chartType: 'natal' satisfies ChartType,
+  },
 };

@@ -391,23 +391,30 @@ class UserEnrichmentMiddleware(BaseHTTPMiddleware):
 from typing import Any  # noqa: E402
 from typing import Any as _Any  # noqa: E402
 
-try:  # Optional redis dependency
-    import redis  # type: ignore
-
-    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-    logger.info(f"Connecting to Redis at: {redis_url}")
-    redis_client: _Any | None = redis.Redis.from_url(redis_url)  # type: ignore[attr-defined]  # noqa: E501
-    # Test the connection
-    redis_client.ping()
-    logger.info("Redis connection successful")
-except Exception as e:  # pragma: no cover - fallback path
-    logger.warning(
-        f"Redis connection failed: {e}. Falling back to in-memory rate limiting."  # noqa: E501
-    )
-    redis_client = None
+if os.getenv("TEST_MODE", "0").lower() in ("1", "true", "yes"):
+    # Skip Redis entirely in test mode for speed & determinism
+    redis_client = None  # type: ignore
     from collections import defaultdict
-
     rate_limit_store: Dict[tuple[str, str], List[float]] = defaultdict(list)
+    logger.info("[TEST_MODE] Skipping Redis connection; using in-memory rate limiting")
+else:
+    try:  # Optional redis dependency
+        import redis  # type: ignore
+
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        logger.info(f"Connecting to Redis at: {redis_url}")
+        redis_client: _Any | None = redis.Redis.from_url(redis_url, socket_connect_timeout=0.5, socket_timeout=0.5)  # type: ignore[attr-defined]  # noqa: E501
+        # Test the connection (fast timeout configured)
+        redis_client.ping()
+        logger.info("Redis connection successful")
+    except Exception as e:  # pragma: no cover - fallback path
+        logger.warning(
+            f"Redis connection failed: {e}. Falling back to in-memory rate limiting."  # noqa: E501
+        )
+        redis_client = None
+        from collections import defaultdict
+
+        rate_limit_store: Dict[tuple[str, str], List[float]] = defaultdict(list)
 
 RATE_LIMIT = 1000  # requests - increased for development
 RATE_PERIOD = 60  # seconds
@@ -852,9 +859,11 @@ async def root_health():
 
 
 from api import (  # noqa: E402
-    charts as unified_charts,  # unified serialization chart endpoints (/charts/save)  # noqa: E501
+    charts,  # consolidated charts endpoints
 )
-from api import salt_management  # admin salt endpoints  # noqa: E402
+from api import (  # noqa: E402
+    salt_management,  # admin salt endpoints  # noqa: E502
+)
 from api import (  # noqa: E402
     interpretations,
 )
@@ -863,7 +872,6 @@ from api import (  # noqa: E402
 # Import API routers (local path)
 from api.routers import (  # noqa: E402
     ai,
-    charts,
     csp_router,
     ephemeris,
     presets,
@@ -877,10 +885,7 @@ app.include_router(ai.router)
 app.include_router(presets.router)
 app.include_router(subscriptions.router)
 app.include_router(ephemeris.router, prefix="/api")
-app.include_router(charts.router, prefix="/api")  # legacy charts (save-chart)
-app.include_router(
-    unified_charts.router, prefix="/api"
-)  # unified serialized charts (save)
+app.include_router(charts.router, prefix="/api")  # consolidated charts router
 app.include_router(interpretations.router)  # AI Interpretations router
 app.include_router(
     transits_clean.router, prefix="/api/astro", tags=["transits"]

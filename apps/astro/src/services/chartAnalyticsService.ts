@@ -29,7 +29,10 @@ function isAspect(value: unknown): value is Aspect {
   );
 }
 
-function forEachAspect(chartData: ChartData, cb: (aspect: Aspect) => void): void {
+function forEachAspect(
+  chartData: ChartData,
+  cb: (aspect: Aspect) => void
+): void {
   const aspects = chartData.aspects;
   if (Array.isArray(aspects)) {
     for (const aspect of aspects) {
@@ -43,7 +46,14 @@ function forEachAspect(chartData: ChartData, cb: (aspect: Aspect) => void): void
 export interface ChartPattern {
   id: string;
   name: string;
-  type: 'stellium' | 'grand-trine' | 'grand-cross' | 't-square' | 'yod' | 'kite' | 'mystic-rectangle';
+  type:
+    | 'stellium'
+    | 'grand-trine'
+    | 'grand-cross'
+    | 't-square'
+    | 'yod'
+    | 'kite'
+    | 'mystic-rectangle';
   planets: string[];
   houses?: number[];
   signs?: string[];
@@ -92,7 +102,7 @@ export enum ChartShape {
   Bundle = 'Bundle',
   Bowl = 'Bowl',
   Locomotive = 'Locomotive',
-  Splash = 'Splash'
+  Splash = 'Splash',
 }
 
 export enum Element {
@@ -100,19 +110,22 @@ export enum Element {
   Earth = 'Earth',
   Air = 'Air',
   Water = 'Water',
-  Unknown = 'Unknown'
+  Unknown = 'Unknown',
 }
 
 export enum Quality {
   Cardinal = 'Cardinal',
   Fixed = 'Fixed',
   Mutable = 'Mutable',
-  Unknown = 'Unknown'
+  Unknown = 'Unknown',
 }
 
 class ChartAnalyticsService {
   private analysisCache: Map<string, ChartAnalysis> = new Map();
-  private patternRecognizers: Map<string, (chart: ChartData) => ChartPattern[]> = new Map();
+  private patternRecognizers: Map<
+    string,
+    (chart: ChartData) => ChartPattern[]
+  > = new Map();
 
   constructor() {
     this.initializePatternRecognizers();
@@ -121,7 +134,11 @@ class ChartAnalyticsService {
   /**
    * Perform comprehensive chart analysis
    */
-  analyzeChart(chartId: string, chartData: ChartData, transitData?: Record<string, Planet>): ChartAnalysis {
+  analyzeChart(
+    chartId: string,
+    chartData: ChartData,
+    transitData?: Record<string, Planet>
+  ): ChartAnalysis {
     const analysis: ChartAnalysis = {
       chartId,
       dominantElement: this.calculateDominantElement(chartData),
@@ -132,12 +149,15 @@ class ChartAnalyticsService {
       strengths: this.identifyStrengths(chartData),
       challenges: this.identifyChallenges(chartData),
       lifeThemes: this.extractLifeThemes(chartData),
-      currentTransitHighlights: transitData !== undefined ? this.analyzeCurrentTransits(chartData, transitData) : [],
+      currentTransitHighlights:
+        transitData !== undefined
+          ? this.analyzeCurrentTransits(chartData, transitData)
+          : [],
       upcomingEvents: [], // Would be populated with ephemeris calculations
       energyLevel: this.calculateEnergyLevel(chartData, transitData),
       emotionalClimate: this.assessEmotionalClimate(chartData, transitData),
       recommendations: this.generateRecommendations(chartData, transitData),
-      lastAnalyzed: new Date()
+      lastAnalyzed: new Date(),
     };
 
     this.analysisCache.set(chartId, analysis);
@@ -158,7 +178,7 @@ class ChartAnalyticsService {
       strength: 85,
       source: 'Sun',
       description: this.getSunSignDescription(sunSign),
-      development: this.getSunSignDevelopment(sunSign)
+      development: this.getSunSignDevelopment(sunSign),
     });
 
     // Moon sign insights
@@ -169,7 +189,7 @@ class ChartAnalyticsService {
       strength: 80,
       source: 'Moon',
       description: this.getMoonSignDescription(moonSign),
-      development: this.getMoonSignDevelopment(moonSign)
+      development: this.getMoonSignDevelopment(moonSign),
     });
 
     // Rising sign insights
@@ -180,7 +200,7 @@ class ChartAnalyticsService {
       strength: 75,
       source: 'Ascendant',
       description: this.getRisingSignDescription(risingSign),
-      development: this.getRisingSignDevelopment(risingSign)
+      development: this.getRisingSignDevelopment(risingSign),
     });
 
     // Add more insights based on planetary placements and aspects
@@ -198,9 +218,9 @@ class ChartAnalyticsService {
       [Element.Earth]: 0,
       [Element.Air]: 0,
       [Element.Water]: 0,
-      [Element.Unknown]: 0
+      [Element.Unknown]: 0,
     };
-    
+
     Object.values(chartData.planets).forEach(planet => {
       const sign = this.getSignFromPosition(planet.position);
       const element = this.getElementFromSign(sign);
@@ -212,11 +232,11 @@ class ChartAnalyticsService {
       const elementKey = key as Element;
       return elementKey !== Element.Unknown;
     });
-    
+
     if (validElements.length === 0) {
       return Element.Unknown;
     }
-    
+
     return validElements.reduce((a, b) => {
       const aKey = a[0] as Element;
       const bKey = b[0] as Element;
@@ -232,9 +252,9 @@ class ChartAnalyticsService {
       [Quality.Cardinal]: 0,
       [Quality.Fixed]: 0,
       [Quality.Mutable]: 0,
-      [Quality.Unknown]: 0
+      [Quality.Unknown]: 0,
     };
-    
+
     Object.values(chartData.planets).forEach(planet => {
       const sign = this.getSignFromPosition(planet.position);
       const quality = this.getQualityFromSign(sign);
@@ -246,11 +266,11 @@ class ChartAnalyticsService {
       const qualityKey = key as Quality;
       return qualityKey !== Quality.Unknown;
     });
-    
+
     if (validQualities.length === 0) {
       return Quality.Unknown;
     }
-    
+
     return validQualities.reduce((a, b) => {
       const aKey = a[0] as Quality;
       const bKey = b[0] as Quality;
@@ -265,22 +285,30 @@ class ChartAnalyticsService {
     const planetScores: Record<string, number> = {};
 
     // Score planets based on various factors
-  getPlanetEntries(chartData).forEach(([name, planet]) => {
+    getPlanetEntries(chartData).forEach(([name, planet]) => {
       let score = 0;
 
       // Angular houses get higher scores
       const houseNumber = planet.house;
-      if (typeof houseNumber === 'number' && Number.isFinite(houseNumber) && [1, 4, 7, 10].includes(houseNumber)) {
+      if (
+        typeof houseNumber === 'number' &&
+        Number.isFinite(houseNumber) &&
+        [1, 4, 7, 10].includes(houseNumber)
+      ) {
         score += 3;
       }
 
       // Exact aspects add to score
-      forEachAspect(chartData, (aspect) => {
+      forEachAspect(chartData, aspect => {
         // Only natal aspects considered here (transit aspects would be supplied separately)
         const p1 = aspect.planet1;
         const p2 = aspect.planet2;
         const orb = aspect.orb;
-        if ((p1 === name || p2 === name) && typeof orb === 'number' && Number.isFinite(orb)) {
+        if (
+          (p1 === name || p2 === name) &&
+          typeof orb === 'number' &&
+          Number.isFinite(orb)
+        ) {
           if (orb < 1) score += 2;
           else if (orb < 3) score += 1;
         }
@@ -295,18 +323,22 @@ class ChartAnalyticsService {
       planetScores[name] = score;
     });
 
-    return Object.entries(planetScores).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+    return Object.entries(planetScores).reduce((a, b) =>
+      a[1] > b[1] ? a : b
+    )[0];
   }
 
   /**
    * Determine overall chart shape/pattern
    */
   private determineChartShape(chartData: ChartData): ChartShape {
-  const planetPositions = getPlanetEntries(chartData)
-    .map(([, p]) => p.position)
-    .filter((pos): pos is number => typeof pos === 'number' && Number.isFinite(pos))
-    .sort((a, b) => a - b);
-    
+    const planetPositions = getPlanetEntries(chartData)
+      .map(([, p]) => p.position)
+      .filter(
+        (pos): pos is number => typeof pos === 'number' && Number.isFinite(pos)
+      )
+      .sort((a, b) => a - b);
+
     if (planetPositions.length <= 1) {
       return ChartShape.Undefined;
     }
@@ -320,9 +352,11 @@ class ChartAnalyticsService {
     });
 
     const maxSpan = Math.max(...spans);
-  const firstPos = planetPositions[0];
-  const lastPos = planetPositions[planetPositions.length - 1];
-  const totalSpan = (typeof lastPos === 'number' ? lastPos : 0) - (typeof firstPos === 'number' ? firstPos : 0);
+    const firstPos = planetPositions[0];
+    const lastPos = planetPositions[planetPositions.length - 1];
+    const totalSpan =
+      (typeof lastPos === 'number' ? lastPos : 0) -
+      (typeof firstPos === 'number' ? firstPos : 0);
 
     if (maxSpan > 120) return ChartShape.Bundle;
     if (totalSpan <= 120) return ChartShape.Bundle;
@@ -336,9 +370,15 @@ class ChartAnalyticsService {
    */
   private initializePatternRecognizers(): void {
     this.patternRecognizers.set('stellium', this.detectStelliums.bind(this));
-    this.patternRecognizers.set('grand-trine', this.detectGrandTrines.bind(this));
+    this.patternRecognizers.set(
+      'grand-trine',
+      this.detectGrandTrines.bind(this)
+    );
     this.patternRecognizers.set('t-square', this.detectTSquares.bind(this));
-    this.patternRecognizers.set('grand-cross', this.detectGrandCrosses.bind(this));
+    this.patternRecognizers.set(
+      'grand-cross',
+      this.detectGrandCrosses.bind(this)
+    );
     this.patternRecognizers.set('yod', this.detectYods.bind(this));
   }
 
@@ -348,7 +388,7 @@ class ChartAnalyticsService {
   private detectPatterns(chartData: ChartData): ChartPattern[] {
     const patterns: ChartPattern[] = [];
 
-    this.patternRecognizers.forEach((recognizer) => {
+    this.patternRecognizers.forEach(recognizer => {
       try {
         const detectedPatterns = recognizer(chartData);
         patterns.push(...detectedPatterns);
@@ -369,7 +409,7 @@ class ChartAnalyticsService {
     const houseGroups: Record<number, string[]> = {};
 
     // Group planets by sign and house
-  getPlanetEntries(chartData).forEach(([name, planet]) => {
+    getPlanetEntries(chartData).forEach(([name, planet]) => {
       const sign = this.getSignFromPosition(planet.position);
       signGroups[sign] ??= [];
       signGroups[sign].push(name);
@@ -397,7 +437,7 @@ class ChartAnalyticsService {
           signs: [sign],
           strength: Math.min(100, planets.length * 20),
           interpretation: `Strong emphasis on ${sign} energy and characteristics`,
-          keywords: [`${sign} focus`, 'concentrated energy', 'specialization']
+          keywords: [`${sign} focus`, 'concentrated energy', 'specialization'],
         });
       }
     });
@@ -413,7 +453,7 @@ class ChartAnalyticsService {
           houses: [parseInt(house)],
           strength: Math.min(100, planets.length * 20),
           interpretation: `Major life focus in House ${house} themes`,
-          keywords: [`House ${house} emphasis`, 'life theme concentration']
+          keywords: [`House ${house} emphasis`, 'life theme concentration'],
         });
       }
     });
@@ -426,24 +466,31 @@ class ChartAnalyticsService {
    */
   private detectGrandTrines(chartData: ChartData): ChartPattern[] {
     const patterns: ChartPattern[] = [];
-  const planets = getPlanetEntries(chartData);
+    const planets = getPlanetEntries(chartData);
 
     for (let i = 0; i < planets.length; i++) {
       for (let j = i + 1; j < planets.length; j++) {
         for (let k = j + 1; k < planets.length; k++) {
-      const tuple1 = planets[i];
-      const tuple2 = planets[j];
-      const tuple3 = planets[k];
-      if (!Array.isArray(tuple1) || !Array.isArray(tuple2) || !Array.isArray(tuple3)) continue;
-      const [name1, planet1] = tuple1;
-      const [name2, planet2] = tuple2;
-      const [name3, planet3] = tuple3;
+          const tuple1 = planets[i];
+          const tuple2 = planets[j];
+          const tuple3 = planets[k];
+          if (
+            !Array.isArray(tuple1) ||
+            !Array.isArray(tuple2) ||
+            !Array.isArray(tuple3)
+          )
+            continue;
+          const [name1, planet1] = tuple1;
+          const [name2, planet2] = tuple2;
+          const [name3, planet3] = tuple3;
 
           // Ensure all positions are valid numbers
           // Validate planet positions
-          if (!this.isValidPosition(planet1.position) || 
-              !this.isValidPosition(planet2.position) || 
-              !this.isValidPosition(planet3.position)) {
+          if (
+            !this.isValidPosition(planet1.position) ||
+            !this.isValidPosition(planet2.position) ||
+            !this.isValidPosition(planet3.position)
+          ) {
             continue;
           }
 
@@ -460,7 +507,7 @@ class ChartAnalyticsService {
               planets: [name1, name2, name3],
               strength: 85,
               interpretation: `Natural talent and easy flow of ${element} energy`,
-              keywords: [`${element} harmony`, 'natural gifts', 'easy flow']
+              keywords: [`${element} harmony`, 'natural gifts', 'easy flow'],
             });
           }
         }
@@ -475,28 +522,37 @@ class ChartAnalyticsService {
    */
   private detectTSquares(chartData: ChartData): ChartPattern[] {
     const patterns: ChartPattern[] = [];
-  const planets = getPlanetEntries(chartData);
+    const planets = getPlanetEntries(chartData);
 
     for (let i = 0; i < planets.length; i++) {
       for (let j = i + 1; j < planets.length; j++) {
         for (let k = j + 1; k < planets.length; k++) {
-      const t1 = planets[i];
-      const t2 = planets[j];
-      const t3 = planets[k];
-      if (!Array.isArray(t1) || !Array.isArray(t2) || !Array.isArray(t3)) continue;
-      const [name1, planet1] = t1;
-      const [name2, planet2] = t2;
-      const [name3, planet3] = t3;
+          const t1 = planets[i];
+          const t2 = planets[j];
+          const t3 = planets[k];
+          if (!Array.isArray(t1) || !Array.isArray(t2) || !Array.isArray(t3))
+            continue;
+          const [name1, planet1] = t1;
+          const [name2, planet2] = t2;
+          const [name3, planet3] = t3;
 
-          if (this.isTSquare(planet1.position, planet2.position, planet3.position)) {
+          if (
+            this.isTSquare(planet1.position, planet2.position, planet3.position)
+          ) {
             patterns.push({
               id: `t-square-${name1}-${name2}-${name3}`,
               name: 'T-Square',
               type: 't-square',
               planets: [name1, name2, name3],
               strength: 80,
-              interpretation: 'Dynamic tension that creates motivation and drive',
-              keywords: ['tension', 'motivation', 'achievement drive', 'challenge']
+              interpretation:
+                'Dynamic tension that creates motivation and drive',
+              keywords: [
+                'tension',
+                'motivation',
+                'achievement drive',
+                'challenge',
+              ],
             });
           }
         }
@@ -510,7 +566,6 @@ class ChartAnalyticsService {
    * Detect Grand Crosses
    */
   private detectGrandCrosses(chartData: ChartData): ChartPattern[] {
-     
     const _chartData = chartData;
     // Implementation for grand cross detection
     return [];
@@ -520,7 +575,6 @@ class ChartAnalyticsService {
    * Detect Yods (Finger of God)
    */
   private detectYods(chartData: ChartData): ChartPattern[] {
-     
     const _chartData = chartData;
     // Implementation for yod detection
     return [];
@@ -529,28 +583,41 @@ class ChartAnalyticsService {
   /**
    * Helper method to check if three planets form a grand trine
    */
-  private isGrandTrine(pos1: number, pos2: number, pos3: number, orb = 8): boolean {
+  private isGrandTrine(
+    pos1: number,
+    pos2: number,
+    pos3: number,
+    orb = 8
+  ): boolean {
     const angles = [
       this.normalizeAngle(Math.abs(pos1 - pos2)),
       this.normalizeAngle(Math.abs(pos2 - pos3)),
-      this.normalizeAngle(Math.abs(pos3 - pos1))
+      this.normalizeAngle(Math.abs(pos3 - pos1)),
     ];
 
-    return angles.every(angle => Math.abs(angle - 120) <= orb || Math.abs(angle - 240) <= orb);
+    return angles.every(
+      angle => Math.abs(angle - 120) <= orb || Math.abs(angle - 240) <= orb
+    );
   }
 
   /**
    * Helper method to check if three planets form a T-square
    */
-  private isTSquare(pos1: number, pos2: number, pos3: number, orb = 8): boolean {
+  private isTSquare(
+    pos1: number,
+    pos2: number,
+    pos3: number,
+    orb = 8
+  ): boolean {
     const angles = [
       this.normalizeAngle(Math.abs(pos1 - pos2)),
       this.normalizeAngle(Math.abs(pos2 - pos3)),
-      this.normalizeAngle(Math.abs(pos3 - pos1))
+      this.normalizeAngle(Math.abs(pos3 - pos1)),
     ];
 
     const hasOpposition = angles.some(angle => Math.abs(angle - 180) <= orb);
-    const hasSquares = angles.filter(angle => Math.abs(angle - 90) <= orb).length >= 2;
+    const hasSquares =
+      angles.filter(angle => Math.abs(angle - 90) <= orb).length >= 2;
 
     return hasOpposition && hasSquares;
   }
@@ -574,10 +641,24 @@ class ChartAnalyticsService {
    * Get zodiac sign from position
    */
   private getSignFromPosition(position: number): string {
-    const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-                   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-  const idx = Math.floor(position / 30);
-  return (idx >= 0 && idx < signs.length) ? (signs[idx] ?? 'Unknown') : 'Unknown';
+    const signs = [
+      'Aries',
+      'Taurus',
+      'Gemini',
+      'Cancer',
+      'Leo',
+      'Virgo',
+      'Libra',
+      'Scorpio',
+      'Sagittarius',
+      'Capricorn',
+      'Aquarius',
+      'Pisces',
+    ];
+    const idx = Math.floor(position / 30);
+    return idx >= 0 && idx < signs.length
+      ? (signs[idx] ?? 'Unknown')
+      : 'Unknown';
   }
 
   /**
@@ -585,9 +666,18 @@ class ChartAnalyticsService {
    */
   private getElementFromSign(sign: string): Element {
     const elements: Record<string, Element> = {
-      Aries: Element.Fire, Taurus: Element.Earth, Gemini: Element.Air, Cancer: Element.Water,
-      Leo: Element.Fire, Virgo: Element.Earth, Libra: Element.Air, Scorpio: Element.Water,
-      Sagittarius: Element.Fire, Capricorn: Element.Earth, Aquarius: Element.Air, Pisces: Element.Water
+      Aries: Element.Fire,
+      Taurus: Element.Earth,
+      Gemini: Element.Air,
+      Cancer: Element.Water,
+      Leo: Element.Fire,
+      Virgo: Element.Earth,
+      Libra: Element.Air,
+      Scorpio: Element.Water,
+      Sagittarius: Element.Fire,
+      Capricorn: Element.Earth,
+      Aquarius: Element.Air,
+      Pisces: Element.Water,
     };
     return elements[sign] ?? Element.Unknown;
   }
@@ -605,70 +695,99 @@ class ChartAnalyticsService {
    */
   private getQualityFromSign(sign: string): Quality {
     const qualities: Record<string, Quality> = {
-      Aries: Quality.Cardinal, Taurus: Quality.Fixed, Gemini: Quality.Mutable, Cancer: Quality.Cardinal,
-      Leo: Quality.Fixed, Virgo: Quality.Mutable, Libra: Quality.Cardinal, Scorpio: Quality.Fixed,
-      Sagittarius: Quality.Mutable, Capricorn: Quality.Cardinal, Aquarius: Quality.Fixed, Pisces: Quality.Mutable
+      Aries: Quality.Cardinal,
+      Taurus: Quality.Fixed,
+      Gemini: Quality.Mutable,
+      Cancer: Quality.Cardinal,
+      Leo: Quality.Fixed,
+      Virgo: Quality.Mutable,
+      Libra: Quality.Cardinal,
+      Scorpio: Quality.Fixed,
+      Sagittarius: Quality.Mutable,
+      Capricorn: Quality.Cardinal,
+      Aquarius: Quality.Fixed,
+      Pisces: Quality.Mutable,
     };
     return qualities[sign] ?? Quality.Unknown;
   }
 
   // Additional methods for analysis (implementations would be expanded)
   private identifyStrengths(chartData: ChartData): string[] {
-     
     const _chartData = chartData;
-    return ['Leadership abilities', 'Creative expression', 'Emotional intelligence'];
+    return [
+      'Leadership abilities',
+      'Creative expression',
+      'Emotional intelligence',
+    ];
   }
 
   private identifyChallenges(chartData: ChartData): string[] {
-     
     const _chartData = chartData;
-    return ['Impatience with details', 'Tendency to overthink', 'Need for more self-confidence'];
+    return [
+      'Impatience with details',
+      'Tendency to overthink',
+      'Need for more self-confidence',
+    ];
   }
 
   private extractLifeThemes(chartData: ChartData): string[] {
-     
     const _chartData = chartData;
-    return ['Personal transformation', 'Creative self-expression', 'Service to others'];
+    return [
+      'Personal transformation',
+      'Creative self-expression',
+      'Service to others',
+    ];
   }
 
-  private analyzeCurrentTransits(natalChart: ChartData, transits: Record<string, Planet>): string[] {
-     
+  private analyzeCurrentTransits(
+    natalChart: ChartData,
+    transits: Record<string, Planet>
+  ): string[] {
     const _natalChart = natalChart;
-     
+
     const _transits = transits;
-    return ['Jupiter enhancing optimism', 'Saturn encouraging discipline', 'Mercury improving communication'];
+    return [
+      'Jupiter enhancing optimism',
+      'Saturn encouraging discipline',
+      'Mercury improving communication',
+    ];
   }
 
-  private calculateEnergyLevel(chartData: ChartData, transitData?: Record<string, Planet>): number {
-     
+  private calculateEnergyLevel(
+    chartData: ChartData,
+    transitData?: Record<string, Planet>
+  ): number {
     const _chartData = chartData;
-     
+
     const _transitData = transitData;
     return 75; // Placeholder - would calculate based on current planetary energies
   }
 
-  private assessEmotionalClimate(chartData: ChartData, transitData?: Record<string, Planet>): string {
-     
+  private assessEmotionalClimate(
+    chartData: ChartData,
+    transitData?: Record<string, Planet>
+  ): string {
     const _chartData = chartData;
-     
+
     const _transitData = transitData;
     return 'Optimistic with creative potential';
   }
 
-  private generateRecommendations(chartData: ChartData, transitData?: Record<string, Planet>): string[] {
-     
+  private generateRecommendations(
+    chartData: ChartData,
+    transitData?: Record<string, Planet>
+  ): string[] {
     const _chartData = chartData;
-     
+
     const _transitData = transitData;
     return [
       'Focus on creative projects this month',
       'Practice patience in communications',
-      'Take time for self-reflection and meditation'
+      'Take time for self-reflection and meditation',
     ];
   }
 
   private analyzePlanetaryInsights(chartData: ChartData): PersonalityInsight[] {
-     
     const _chartData = chartData;
     // Placeholder - would analyze each planet's placement and aspects
     return [];
@@ -684,31 +803,26 @@ class ChartAnalyticsService {
   }
 
   private getSunSignDevelopment(sign: string): string {
-     
     const _sign = sign;
     return 'Focus on authentic self-expression and leadership development';
   }
 
   private getMoonSignDescription(sign: string): string {
-     
     const _sign = sign;
     return 'Your emotional nature and inner world tendencies';
   }
 
   private getMoonSignDevelopment(sign: string): string {
-     
     const _sign = sign;
     return 'Develop emotional intelligence and intuitive abilities';
   }
 
   private getRisingSignDescription(sign: string): string {
-     
     const _sign = sign;
     return 'Your natural approach to life and first impressions';
   }
 
   private getRisingSignDevelopment(sign: string): string {
-     
     const _sign = sign;
     return 'Cultivate your natural presentation and social skills';
   }

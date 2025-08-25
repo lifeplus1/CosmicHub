@@ -18,18 +18,12 @@
     // Add package-specific types via a local global.d.ts if needed instead of here
     "rootDir": "../../"
   },
-  "include": [
-    "src/**/*",
-    "../config/src/**/*",
-    "../integrations/src/**/*"
-  ],
-  "references": [
-    { "path": "../subscriptions" }
-  ],
+  "include": ["src/**/*", "../config/src/**/*", "../integrations/src/**/*"],
+  "references": [{ "path": "../subscriptions" }],
   "exclude": [
-    "dist", 
-    "node_modules", 
-    "**/*.test.*", 
+    "dist",
+    "node_modules",
+    "**/*.test.*",
     "**/*.spec.*",
     "../config/src/__tests__/**/*",
     "../config/src/**/*.test.*"

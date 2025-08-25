@@ -14,7 +14,7 @@ vi.mock('firebase/analytics', () => ({
   logEvent: (...args: any[]) => logEventMock(...args),
   setUserId: (...args: any[]) => setUserIdMock(...args),
   setUserProperties: (...args: any[]) => setUserPropertiesMock(...args),
-  setCurrentScreen: (...args: any[]) => setCurrentScreenMock(...args)
+  setCurrentScreen: (...args: any[]) => setCurrentScreenMock(...args),
 }));
 
 describe('useAnalytics', () => {
@@ -42,10 +42,10 @@ describe('useAnalytics', () => {
   it('sets user id and properties', async () => {
     const { result } = renderHook(() => useAnalytics());
     await waitFor(() => expect(result.current.isReady).toBe(true));
-  act(() => result.current.setUserId('user123'));
-  await waitFor(() => expect(setUserIdMock).toHaveBeenCalled());
-  act(() => result.current.setUserProperties({ plan: 'pro' }));
-  await waitFor(() => expect(setUserPropertiesMock).toHaveBeenCalled());
+    act(() => result.current.setUserId('user123'));
+    await waitFor(() => expect(setUserIdMock).toHaveBeenCalled());
+    act(() => result.current.setUserProperties({ plan: 'pro' }));
+    await waitFor(() => expect(setUserPropertiesMock).toHaveBeenCalled());
   });
 
   it('sets current screen', async () => {

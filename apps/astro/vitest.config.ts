@@ -4,14 +4,18 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react({
-    jsxRuntime: 'classic'
-  })],
+  plugins: [
+    react({
+      jsxRuntime: 'classic',
+    }),
+  ],
   define: {
     'import.meta.env.VITE_FIREBASE_API_KEY': '"test-api-key"',
-    'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': '"test-project.firebaseapp.com"',
+    'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN':
+      '"test-project.firebaseapp.com"',
     'import.meta.env.VITE_FIREBASE_PROJECT_ID': '"test-project"',
-    'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': '"test-project.appspot.com"',
+    'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET':
+      '"test-project.appspot.com"',
     'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': '"123456789"',
     'import.meta.env.VITE_FIREBASE_APP_ID': '"1:123456789:web:test-app-id"',
     'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': '"G-TEST123"',
@@ -67,11 +71,17 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@cosmichub/frequency': path.resolve(__dirname, '../../packages/frequency/src'),
+      '@cosmichub/frequency': path.resolve(
+        __dirname,
+        '../../packages/frequency/src'
+      ),
       '@cosmichub/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@cosmichub/config': path.resolve(__dirname, '../../packages/config/src'),
       '@cosmichub/ui': path.resolve(__dirname, '../../packages/ui/src'),
-      '@cosmichub/integrations': path.resolve(__dirname, '../../packages/integrations/src'),
+      '@cosmichub/integrations': path.resolve(
+        __dirname,
+        '../../packages/integrations/src'
+      ),
     },
   },
 });

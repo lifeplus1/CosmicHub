@@ -24,10 +24,12 @@ export const useHealwave = () => {
     volume: 50,
     duration: 10,
     timeRemaining: 0,
-    sessions: []
+    sessions: [],
   });
 
-  const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
+  const [intervalId, setIntervalId] = useState<ReturnType<
+    typeof setInterval
+  > | null>(null);
 
   const setFrequency = useCallback((frequency: number) => {
     setState(prev => ({ ...prev, currentFrequency: frequency }));
@@ -48,14 +50,14 @@ export const useHealwave = () => {
       frequency: state.currentFrequency,
       duration: state.duration,
       startTime: new Date(),
-      isActive: true
+      isActive: true,
     };
 
     setState(prev => ({
       ...prev,
       isPlaying: true,
       timeRemaining: prev.duration * 60,
-      sessions: [newSession, ...prev.sessions]
+      sessions: [newSession, ...prev.sessions],
     }));
 
     const timer = setInterval(() => {
@@ -92,30 +94,43 @@ export const useHealwave = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
-  const getPersonalizedFrequency = useCallback((chartData?: Record<string, unknown>): number => {
-    if (chartData === null || chartData === undefined || typeof chartData !== 'object') return 528; // Default to 528 Hz (Love frequency)
-    
-    // Simple personalization based on chart data
-    // In a real implementation, this would use complex astrological calculations
-  const sunData = (chartData)['sun'] as Record<string, unknown> | undefined;
-  const sunSign = (typeof sunData === 'object' && sunData !== null && typeof sunData['sign'] === 'string') ? sunData['sign'] : 'Leo';
-    const frequencyMap: Record<string, number> = {
-      'Aries': 741,     // Throat Chakra - Expression
-      'Taurus': 417,    // Sacral Chakra - Creativity
-      'Gemini': 852,    // Third Eye - Communication
-      'Cancer': 639,    // Heart Chakra - Emotions
-      'Leo': 528,       // Solar Plexus - Confidence
-      'Virgo': 396,     // Root Chakra - Grounding
-      'Libra': 639,     // Heart Chakra - Balance
-      'Scorpio': 741,   // Throat Chakra - Transformation
-      'Sagittarius': 963, // Crown Chakra - Wisdom
-      'Capricorn': 396, // Root Chakra - Structure
-      'Aquarius': 852,  // Third Eye - Innovation
-      'Pisces': 963     // Crown Chakra - Spirituality
-    };
+  const getPersonalizedFrequency = useCallback(
+    (chartData?: Record<string, unknown>): number => {
+      if (
+        chartData === null ||
+        chartData === undefined ||
+        typeof chartData !== 'object'
+      )
+        return 528; // Default to 528 Hz (Love frequency)
 
-    return frequencyMap[sunSign] ?? 528;
-  }, []);
+      // Simple personalization based on chart data
+      // In a real implementation, this would use complex astrological calculations
+      const sunData = chartData['sun'] as Record<string, unknown> | undefined;
+      const sunSign =
+        typeof sunData === 'object' &&
+        sunData !== null &&
+        typeof sunData['sign'] === 'string'
+          ? sunData['sign']
+          : 'Leo';
+      const frequencyMap: Record<string, number> = {
+        Aries: 741, // Throat Chakra - Expression
+        Taurus: 417, // Sacral Chakra - Creativity
+        Gemini: 852, // Third Eye - Communication
+        Cancer: 639, // Heart Chakra - Emotions
+        Leo: 528, // Solar Plexus - Confidence
+        Virgo: 396, // Root Chakra - Grounding
+        Libra: 639, // Heart Chakra - Balance
+        Scorpio: 741, // Throat Chakra - Transformation
+        Sagittarius: 963, // Crown Chakra - Wisdom
+        Capricorn: 396, // Root Chakra - Structure
+        Aquarius: 852, // Third Eye - Innovation
+        Pisces: 963, // Crown Chakra - Spirituality
+      };
+
+      return frequencyMap[sunSign] ?? 528;
+    },
+    []
+  );
 
   useEffect(() => {
     return () => {
@@ -140,6 +155,6 @@ export const useHealwave = () => {
     stopSession,
     togglePlayPause,
     formatTime,
-    getPersonalizedFrequency
+    getPersonalizedFrequency,
   };
 };

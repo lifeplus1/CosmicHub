@@ -10,7 +10,7 @@ describe('CoreNumbersTab', () => {
     life_path: {
       number: 7,
       meaning: 'You are a spiritual seeker with deep analytical abilities.',
-      components: { month: 1, day: 15, year: 1990 }
+      components: { month: 1, day: 15, year: 1990 },
     },
     destiny: {
       number: 5,

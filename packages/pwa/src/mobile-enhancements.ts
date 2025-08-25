@@ -59,34 +59,48 @@ class MobileGestureHandler {
 
   private setupEventListeners(): void {
     // Passive touch events for better performance
-    this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
-    this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
-    this.element.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: true });
+    this.element.addEventListener(
+      'touchstart',
+      this.handleTouchStart.bind(this),
+      { passive: true }
+    );
+    this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), {
+      passive: true,
+    });
+    this.element.addEventListener(
+      'touchmove',
+      this.handleTouchMove.bind(this),
+      { passive: true }
+    );
 
     // Double tap handling
     let tapCount = 0;
     let singleTapTimer: ReturnType<typeof setTimeout> | null = null;
 
-    this.element.addEventListener('touchend', (e: TouchEvent) => {
-      tapCount++;
-      if (tapCount === 1) {
-        singleTapTimer = setTimeout(() => {
+    this.element.addEventListener(
+      'touchend',
+      (e: TouchEvent) => {
+        tapCount++;
+        if (tapCount === 1) {
+          singleTapTimer = setTimeout(() => {
+            tapCount = 0;
+          }, 300);
+        } else if (tapCount === 2) {
+          if (singleTapTimer) {
+            clearTimeout(singleTapTimer);
+          }
           tapCount = 0;
-        }, 300);
-      } else if (tapCount === 2) {
-        if (singleTapTimer) {
-          clearTimeout(singleTapTimer);
+          this.callbacks.doubleTap.forEach(callback => callback(e));
         }
-        tapCount = 0;
-        this.callbacks.doubleTap.forEach(callback => callback(e));
-      }
-    }, { passive: true });
+      },
+      { passive: true }
+    );
   }
 
   private handleTouchStart(e: TouchEvent): void {
     const touch = e.touches[0];
     if (!touch) return;
-    
+
     this.startX = touch.clientX;
     this.startY = touch.clientY;
     this.startTime = Date.now();
@@ -114,7 +128,7 @@ class MobileGestureHandler {
 
     const touch = e.changedTouches[0];
     if (!touch) return;
-    
+
     const deltaX = touch.clientX - this.startX;
     const deltaY = touch.clientY - this.startY;
     const deltaTime = Date.now() - this.startTime;
@@ -181,10 +195,14 @@ class PWACapabilitiesDetector {
   static detect(): PWACapabilities {
     return {
       hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-      hasStandalone: window.matchMedia('(display-mode: standalone)').matches ||
-                     (window.navigator as Navigator & { standalone?: boolean }).standalone === true,
+      hasStandalone:
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as Navigator & { standalone?: boolean })
+          .standalone === true,
       hasPushNotifications: 'PushManager' in window && 'Notification' in window,
-      hasBackgroundSync: 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype,
+      hasBackgroundSync:
+        'serviceWorker' in navigator &&
+        'sync' in window.ServiceWorkerRegistration.prototype,
       hasWebShare: 'share' in navigator,
       hasDeviceMotion: 'DeviceMotionEvent' in window,
       hasVibration: 'vibrate' in navigator,
@@ -194,7 +212,7 @@ class PWACapabilitiesDetector {
 
   private static detectPlatform(): 'ios' | 'android' | 'desktop' | 'unknown' {
     const ua = navigator.userAgent.toLowerCase();
-    
+
     if (/iphone|ipad|ipod/.test(ua)) {
       return 'ios';
     } else if (/android/.test(ua)) {
@@ -202,7 +220,7 @@ class PWACapabilitiesDetector {
     } else if (/win|mac|linux/.test(ua) && !('ontouchstart' in window)) {
       return 'desktop';
     }
-    
+
     return 'unknown';
   }
 }
@@ -213,7 +231,8 @@ class MobileViewportOptimizer {
   private static isKeyboardOpen = false;
 
   static initialize(): void {
-    this.initialViewportHeight = window.visualViewport?.height ?? window.innerHeight;
+    this.initialViewportHeight =
+      window.visualViewport?.height ?? window.innerHeight;
     this.setupViewportHandlers();
     this.optimizeForMobile();
   }
@@ -242,48 +261,59 @@ class MobileViewportOptimizer {
   private static handleViewportResize(): void {
     const currentHeight = window.visualViewport?.height ?? window.innerHeight;
     const heightDiff = this.initialViewportHeight - currentHeight;
-    
+
     // Detect if keyboard is likely open (height reduced by more than 150px)
     const keyboardOpen = heightDiff > 150;
-    
+
     if (keyboardOpen !== this.isKeyboardOpen) {
       this.isKeyboardOpen = keyboardOpen;
       document.body.classList.toggle('keyboard-open', keyboardOpen);
-      
+
       // Emit custom event
-      window.dispatchEvent(new CustomEvent('keyboardToggle', {
-        detail: { isOpen: keyboardOpen, heightDiff }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('keyboardToggle', {
+          detail: { isOpen: keyboardOpen, heightDiff },
+        })
+      );
     }
   }
 
   private static handleOrientationChange(): void {
     // Force viewport recalculation after orientation change
-    this.initialViewportHeight = window.visualViewport?.height ?? window.innerHeight;
-    
+    this.initialViewportHeight =
+      window.visualViewport?.height ?? window.innerHeight;
+
     // Emit custom event
-    window.dispatchEvent(new CustomEvent('orientationChanged', {
-      detail: { 
-        orientation: screen.orientation?.angle || 0,
-        height: this.initialViewportHeight 
-      }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('orientationChanged', {
+        detail: {
+          orientation: screen.orientation?.angle || 0,
+          height: this.initialViewportHeight,
+        },
+      })
+    );
   }
 
   private static optimizeForMobile(): void {
     // Add mobile-specific CSS classes
     const capabilities = PWACapabilitiesDetector.detect();
-    
-    document.documentElement.classList.toggle('has-touch', capabilities.hasTouch);
-    document.documentElement.classList.toggle('is-standalone', capabilities.hasStandalone);
+
+    document.documentElement.classList.toggle(
+      'has-touch',
+      capabilities.hasTouch
+    );
+    document.documentElement.classList.toggle(
+      'is-standalone',
+      capabilities.hasStandalone
+    );
     document.documentElement.classList.add(`platform-${capabilities.platform}`);
-    
+
     // Set CSS custom properties for dynamic viewport units
     const setViewportHeight = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
-    
+
     setViewportHeight();
     window.addEventListener('resize', setViewportHeight);
     window.addEventListener('orientationchange', () => {
@@ -304,10 +334,10 @@ class MobilePWAInstaller {
   }
 
   private static setupInstallPromptHandling(): void {
-    window.addEventListener('beforeinstallprompt', (e) => {
+    window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       this.deferredPrompt = e as BeforeInstallPromptEvent;
-      
+
       // Show custom install prompt after user engagement
       this.scheduleInstallPrompt();
     });
@@ -316,7 +346,7 @@ class MobilePWAInstaller {
       console.log('PWA was installed');
       this.deferredPrompt = null;
       this.trackInstallSuccess();
-      
+
       // Show success message
       this.showInstallSuccessMessage();
     });
@@ -334,7 +364,7 @@ class MobilePWAInstaller {
       setTimeout(() => {
         this.showEnhancedInstallPrompt();
       }, 2000); // Delay to ensure user is engaged
-      
+
       // Remove listeners after first trigger
       engagementEvents.forEach(event => {
         document.removeEventListener(event, triggerPrompt);
@@ -342,39 +372,43 @@ class MobilePWAInstaller {
     };
 
     engagementEvents.forEach(event => {
-      document.addEventListener(event, triggerPrompt, { once: true, passive: true });
+      document.addEventListener(event, triggerPrompt, {
+        once: true,
+        passive: true,
+      });
     });
   }
 
   private static showEnhancedInstallPrompt(): void {
     const capabilities = PWACapabilitiesDetector.detect();
-    
+
     // Platform-specific messaging
     const messages = {
       ios: {
         title: 'Add CosmicHub to Home Screen',
-        description: 'Tap the Share button, then "Add to Home Screen" for the best experience.',
-        action: 'Show Instructions'
+        description:
+          'Tap the Share button, then "Add to Home Screen" for the best experience.',
+        action: 'Show Instructions',
       },
       android: {
         title: 'Install CosmicHub App',
         description: 'Get faster access and offline features with our app.',
-        action: 'Install Now'
+        action: 'Install Now',
       },
       desktop: {
         title: 'Install CosmicHub',
         description: 'Install for faster loading and desktop integration.',
-        action: 'Install App'
+        action: 'Install App',
       },
       unknown: {
         title: 'Install CosmicHub',
         description: 'Install for faster loading and offline features.',
-        action: 'Install App'
-      }
+        action: 'Install App',
+      },
     };
 
     const message = messages[capabilities.platform];
-    
+
     // Create enhanced install banner
     const banner = this.createInstallBanner(message);
     document.body.appendChild(banner);
@@ -385,7 +419,7 @@ class MobilePWAInstaller {
   private static createInstallBanner(message: InstallMessage): HTMLElement {
     const banner = document.createElement('div');
     banner.className = 'pwa-install-banner-enhanced';
-    
+
     banner.innerHTML = `
       <div class="install-banner-content">
         <div class="install-banner-icon">
@@ -410,8 +444,12 @@ class MobilePWAInstaller {
     this.injectInstallBannerStyles();
 
     // Setup event handlers
-    const installBtn = banner.querySelector('.install-btn.primary') as HTMLButtonElement;
-    const laterBtn = banner.querySelector('.install-btn.secondary') as HTMLButtonElement;
+    const installBtn = banner.querySelector(
+      '.install-btn.primary'
+    ) as HTMLButtonElement;
+    const laterBtn = banner.querySelector(
+      '.install-btn.secondary'
+    ) as HTMLButtonElement;
 
     installBtn.addEventListener('click', () => {
       this.handleInstallClick();
@@ -567,7 +605,7 @@ class MobilePWAInstaller {
       this.showIOSInstructions();
     } else if (this.deferredPrompt) {
       void this.deferredPrompt.prompt();
-      void this.deferredPrompt.userChoice.then((choiceResult) => {
+      void this.deferredPrompt.userChoice.then(choiceResult => {
         if (choiceResult.outcome === 'accepted') {
           this.trackInstallSuccess();
         } else {
@@ -581,7 +619,7 @@ class MobilePWAInstaller {
   private static showIOSInstructions(): void {
     const modal = document.createElement('div');
     modal.className = 'ios-install-modal';
-    
+
     modal.innerHTML = `
       <div class="ios-install-content">
         <div class="ios-install-header">
@@ -615,7 +653,7 @@ class MobilePWAInstaller {
       modal.remove();
     });
 
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener('click', e => {
       if (e.target === modal) {
         modal.remove();
       }
@@ -834,7 +872,7 @@ class MobilePWAFeatures {
 
   static initialize(): void {
     this.capabilities = PWACapabilitiesDetector.detect();
-    
+
     // Initialize mobile-specific features based on capabilities
     this.setupPlatformFeatures();
     MobileViewportOptimizer.initialize();
@@ -863,25 +901,31 @@ class MobilePWAFeatures {
 
   private static setupVibrationFeedback(): void {
     // Add subtle vibration feedback to button presses
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.matches('button, .btn, [role="button"]')) {
-        navigator.vibrate([10]); // Short vibration
-      }
-    }, { passive: true });
+    document.addEventListener(
+      'click',
+      e => {
+        const target = e.target as HTMLElement;
+        if (target.matches('button, .btn, [role="button"]')) {
+          navigator.vibrate([10]); // Short vibration
+        }
+      },
+      { passive: true }
+    );
   }
 
   private static setupWebShare(): void {
     // Enhance share functionality with native sharing
     window.addEventListener('share-chart', () => {
       if (navigator.share) {
-        void navigator.share({
-          title: 'My Cosmic Chart - CosmicHub',
-          text: 'Check out my astrological chart from CosmicHub!',
-          url: window.location.href
-        }).catch(error => {
-          console.log('Share cancelled or failed:', error);
-        });
+        void navigator
+          .share({
+            title: 'My Cosmic Chart - CosmicHub',
+            text: 'Check out my astrological chart from CosmicHub!',
+            url: window.location.href,
+          })
+          .catch(error => {
+            console.log('Share cancelled or failed:', error);
+          });
       }
     });
   }
@@ -890,22 +934,23 @@ class MobilePWAFeatures {
     // Setup shake gesture for refresh functionality
     let lastShake = 0;
     const shakeThreshold = 15;
-    
-    window.addEventListener('devicemotion', (e) => {
+
+    window.addEventListener('devicemotion', e => {
       const acceleration = e.accelerationIncludingGravity;
       if (!acceleration) return;
 
       const { x, y, z } = acceleration;
       if (x === null || y === null || z === null) return;
-      
+
       const totalAcceleration = Math.sqrt(x * x + y * y + z * z);
-      
+
       if (totalAcceleration > shakeThreshold) {
         const now = Date.now();
-        if (now - lastShake > 1000) { // Prevent rapid shake triggers
+        if (now - lastShake > 1000) {
+          // Prevent rapid shake triggers
           lastShake = now;
           window.dispatchEvent(new CustomEvent('shake-gesture'));
-          
+
           if (this.capabilities.hasVibration) {
             navigator.vibrate([100, 50, 100]); // Shake feedback pattern
           }
@@ -938,11 +983,15 @@ class MobilePWAFeatures {
     );
 
     // Disable rubber band scrolling where inappropriate
-    document.body.addEventListener('touchmove', (e) => {
-      if (e.target === document.body) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+    document.body.addEventListener(
+      'touchmove',
+      e => {
+        if (e.target === document.body) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
   }
 
   private static setupAndroidEnhancements(): void {
@@ -1000,7 +1049,4 @@ export {
   MobilePWAFeatures,
 };
 
-export type {
-  PWACapabilities,
-  TouchEventWithCoords
-};
+export type { PWACapabilities, TouchEventWithCoords };

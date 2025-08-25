@@ -11,15 +11,15 @@
  * and help prevent runtime errors by validating data structures.
  */
 
-import type { 
-  AstrologyChart, 
-  Planet, 
-  House, 
-  Aspect, 
-  Asteroid, 
+import type {
+  AstrologyChart,
+  Planet,
+  House,
+  Aspect,
+  Asteroid,
   Angle,
   UserProfile,
-  NumerologyData
+  NumerologyData,
 } from './astrology.types';
 
 /**
@@ -29,17 +29,18 @@ export function isPlanet(value: unknown): value is Planet {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   return (
-  typeof obj['name'] === 'string' &&
-  typeof obj['sign'] === 'string' &&
-  typeof obj['degree'] === 'number' &&
-  typeof obj['position'] === 'number' &&
-  typeof obj['house'] === 'string' &&
-  (obj['retrograde'] === undefined || typeof obj['retrograde'] === 'boolean') &&
-  (obj['aspects'] === undefined || Array.isArray(obj['aspects']))
+    typeof obj['name'] === 'string' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['position'] === 'number' &&
+    typeof obj['house'] === 'string' &&
+    (obj['retrograde'] === undefined ||
+      typeof obj['retrograde'] === 'boolean') &&
+    (obj['aspects'] === undefined || Array.isArray(obj['aspects']))
   );
 }
 
@@ -50,16 +51,16 @@ export function isHouse(value: unknown): value is House {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   return (
-  typeof obj['house'] === 'number' &&
-  typeof obj['number'] === 'number' &&
-  typeof obj['sign'] === 'string' &&
-  typeof obj['degree'] === 'number' &&
-  typeof obj['cusp'] === 'number' &&
-  typeof obj['ruler'] === 'string'
+    typeof obj['house'] === 'number' &&
+    typeof obj['number'] === 'number' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['cusp'] === 'number' &&
+    typeof obj['ruler'] === 'string'
   );
 }
 
@@ -70,15 +71,15 @@ export function isAspect(value: unknown): value is Aspect {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   return (
-  typeof obj['planet1'] === 'string' &&
-  typeof obj['planet2'] === 'string' &&
-  typeof obj['type'] === 'string' &&
-  typeof obj['orb'] === 'number' &&
-  typeof obj['applying'] === 'string'
+    typeof obj['planet1'] === 'string' &&
+    typeof obj['planet2'] === 'string' &&
+    typeof obj['type'] === 'string' &&
+    typeof obj['orb'] === 'number' &&
+    typeof obj['applying'] === 'string'
   );
 }
 
@@ -89,14 +90,14 @@ export function isAsteroid(value: unknown): value is Asteroid {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   return (
-  typeof obj['name'] === 'string' &&
-  typeof obj['sign'] === 'string' &&
-  typeof obj['degree'] === 'number' &&
-  typeof obj['house'] === 'string'
+    typeof obj['name'] === 'string' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['house'] === 'string'
   );
 }
 
@@ -107,14 +108,14 @@ export function isAngle(value: unknown): value is Angle {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   return (
-  typeof obj['name'] === 'string' &&
-  typeof obj['sign'] === 'string' &&
-  typeof obj['degree'] === 'number' &&
-  typeof obj['position'] === 'number'
+    typeof obj['name'] === 'string' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['position'] === 'number'
   );
 }
 
@@ -126,33 +127,35 @@ export function isAstrologyChart(value: unknown): value is AstrologyChart {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   // Check for required arrays
-  if (!Array.isArray(obj['planets']) || 
-      !Array.isArray(obj['houses']) || 
-      !Array.isArray(obj['aspects']) || 
-      !Array.isArray(obj['asteroids']) || 
-      !Array.isArray(obj['angles'])) {
+  if (
+    !Array.isArray(obj['planets']) ||
+    !Array.isArray(obj['houses']) ||
+    !Array.isArray(obj['aspects']) ||
+    !Array.isArray(obj['asteroids']) ||
+    !Array.isArray(obj['angles'])
+  ) {
     return false;
   }
-  
+
   // Validate each planet
   if (!obj['planets'].every(isPlanet)) return false;
-  
+
   // Validate each house
   if (!obj['houses'].every(isHouse)) return false;
-  
+
   // Validate each aspect
   if (!obj['aspects'].every(isAspect)) return false;
-  
+
   // Validate each asteroid
   if (!obj['asteroids'].every(isAsteroid)) return false;
-  
+
   // Validate each angle
   if (!obj['angles'].every(isAngle)) return false;
-  
+
   return true;
 }
 
@@ -163,24 +166,28 @@ export function isUserProfile(value: unknown): value is UserProfile {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   if (typeof obj['userId'] !== 'string') {
     return false;
   }
-  
+
   // Check birthData structure
-  if (obj['birthData'] === null || obj['birthData'] === undefined || typeof obj['birthData'] !== 'object') {
+  if (
+    obj['birthData'] === null ||
+    obj['birthData'] === undefined ||
+    typeof obj['birthData'] !== 'object'
+  ) {
     return false;
   }
-  
+
   const birthData = obj['birthData'] as Record<string, unknown>;
-  
+
   return (
-  typeof birthData['date'] === 'string' &&
-  typeof birthData['time'] === 'string' &&
-  typeof birthData['location'] === 'string'
+    typeof birthData['date'] === 'string' &&
+    typeof birthData['time'] === 'string' &&
+    typeof birthData['location'] === 'string'
   );
 }
 
@@ -191,13 +198,13 @@ export function isNumerologyData(value: unknown): value is NumerologyData {
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-  
+
   const obj = value as Record<string, unknown>;
-  
+
   return (
-  typeof obj['lifePath'] === 'number' &&
-  typeof obj['destiny'] === 'number' &&
-  typeof obj['personalYear'] === 'number'
+    typeof obj['lifePath'] === 'number' &&
+    typeof obj['destiny'] === 'number' &&
+    typeof obj['personalYear'] === 'number'
   );
 }
 
@@ -220,7 +227,9 @@ export function getAstrologyDataType(
 export function isAstrologyData(
   value: unknown
 ): value is AstrologyChart | UserProfile | NumerologyData {
-  return isAstrologyChart(value) || isUserProfile(value) || isNumerologyData(value);
+  return (
+    isAstrologyChart(value) || isUserProfile(value) || isNumerologyData(value)
+  );
 }
 
 /**
@@ -229,13 +238,13 @@ export function isAstrologyData(
  */
 export function validateAstrologyChart(chart: unknown): string[] {
   const errors: string[] = [];
-  
+
   if (chart === null || chart === undefined || typeof chart !== 'object') {
     return ['Chart must be an object'];
   }
-  
+
   const obj = chart as Record<string, unknown>;
-  
+
   // Check required properties
   if (!Array.isArray(obj['planets'])) {
     errors.push('Chart is missing planets array');
@@ -249,7 +258,7 @@ export function validateAstrologyChart(chart: unknown): string[] {
       }
     });
   }
-  
+
   if (!Array.isArray(obj['houses'])) {
     errors.push('Chart is missing houses array');
   } else if (obj['houses'].length !== 12) {
@@ -262,7 +271,7 @@ export function validateAstrologyChart(chart: unknown): string[] {
       }
     });
   }
-  
+
   if (!Array.isArray(obj['aspects'])) {
     errors.push('Chart is missing aspects array');
   } else {
@@ -273,7 +282,7 @@ export function validateAstrologyChart(chart: unknown): string[] {
       }
     });
   }
-  
+
   if (!Array.isArray(obj['asteroids'])) {
     errors.push('Chart is missing asteroids array');
   } else {
@@ -284,7 +293,7 @@ export function validateAstrologyChart(chart: unknown): string[] {
       }
     });
   }
-  
+
   if (!Array.isArray(obj['angles'])) {
     errors.push('Chart is missing angles array');
   } else {
@@ -295,7 +304,7 @@ export function validateAstrologyChart(chart: unknown): string[] {
       }
     });
   }
-  
+
   return errors;
 }
 
@@ -303,22 +312,27 @@ export function validateAstrologyChart(chart: unknown): string[] {
  * Safely attempts to parse a JSON string into an AstrologyChart
  * @returns A tuple with the parsed chart (or null if invalid) and any validation errors
  */
-export function safeParseAstrologyChart(jsonString: string): [AstrologyChart | null, string[]] {
+export function safeParseAstrologyChart(
+  jsonString: string
+): [AstrologyChart | null, string[]] {
   try {
     const parsed = JSON.parse(jsonString) as Record<string, unknown>;
     const validationErrors = validateAstrologyChart(parsed);
-    
+
     if (validationErrors.length > 0) {
       return [null, validationErrors];
     }
-    
+
     // Only cast to AstrologyChart if it has passed validation
     if (isAstrologyChart(parsed)) {
       return [parsed, []];
     }
-    
+
     return [null, ['Invalid chart data structure']];
   } catch (error) {
-    return [null, [(error instanceof Error) ? error.message : 'Unknown parsing error']];
+    return [
+      null,
+      [error instanceof Error ? error.message : 'Unknown parsing error'],
+    ];
   }
 }

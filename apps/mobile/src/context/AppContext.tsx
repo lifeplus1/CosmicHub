@@ -25,7 +25,7 @@ interface AppState {
   error: string | undefined;
 }
 
-type AppAction = 
+type AppAction =
   | { type: 'SET_USER'; payload: User | undefined }
   | { type: 'SET_CHARTS'; payload: Chart[] }
   | { type: 'ADD_CHART'; payload: Chart }
@@ -77,10 +77,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   const actions = {
-    setUser: (user: User | undefined) => dispatch({ type: 'SET_USER', payload: user }),
+    setUser: (user: User | undefined) =>
+      dispatch({ type: 'SET_USER', payload: user }),
     addChart: (chart: Chart) => dispatch({ type: 'ADD_CHART', payload: chart }),
-    setLoading: (loading: boolean) => dispatch({ type: 'SET_LOADING', payload: loading }),
-    setError: (error: string | undefined) => dispatch({ type: 'SET_ERROR', payload: error }),
+    setLoading: (loading: boolean) =>
+      dispatch({ type: 'SET_LOADING', payload: loading }),
+    setError: (error: string | undefined) =>
+      dispatch({ type: 'SET_ERROR', payload: error }),
   };
 
   return (

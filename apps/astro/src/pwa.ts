@@ -23,10 +23,13 @@ class PWACapabilitiesDetector {
   static detect(): PWACapabilities {
     return {
       hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-      hasStandalone: window.matchMedia('(display-mode: standalone)').matches ||
-                     (window.navigator as any).standalone === true,
+      hasStandalone:
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true,
       hasPushNotifications: 'PushManager' in window && 'Notification' in window,
-      hasBackgroundSync: 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype,
+      hasBackgroundSync:
+        'serviceWorker' in navigator &&
+        'sync' in window.ServiceWorkerRegistration.prototype,
       hasWebShare: 'share' in navigator,
       hasDeviceMotion: 'DeviceMotionEvent' in window,
       hasVibration: 'vibrate' in navigator,
@@ -36,7 +39,7 @@ class PWACapabilitiesDetector {
 
   private static detectPlatform(): 'ios' | 'android' | 'desktop' | 'unknown' {
     const ua = navigator.userAgent.toLowerCase();
-    
+
     if (/iphone|ipad|ipod/.test(ua)) {
       return 'ios';
     } else if (/android/.test(ua)) {
@@ -44,7 +47,7 @@ class PWACapabilitiesDetector {
     } else if (/win|mac|linux/.test(ua) && !('ontouchstart' in window)) {
       return 'desktop';
     }
-    
+
     return 'unknown';
   }
 }
@@ -52,18 +55,21 @@ class PWACapabilitiesDetector {
 // UX-021: Initialize mobile enhancements
 function initializeMobileEnhancements(): void {
   const capabilities = PWACapabilitiesDetector.detect();
-  
+
   // Add CSS classes for platform detection
   document.documentElement.classList.toggle('has-touch', capabilities.hasTouch);
-  document.documentElement.classList.toggle('is-standalone', capabilities.hasStandalone);
+  document.documentElement.classList.toggle(
+    'is-standalone',
+    capabilities.hasStandalone
+  );
   document.documentElement.classList.add(`platform-${capabilities.platform}`);
-  
+
   // Set up dynamic viewport height for mobile Safari
   const setViewportHeight = () => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   };
-  
+
   setViewportHeight();
   window.addEventListener('resize', setViewportHeight);
   window.addEventListener('orientationchange', () => {
@@ -72,12 +78,16 @@ function initializeMobileEnhancements(): void {
 
   // Enhanced vibration feedback for touch interactions
   if (capabilities.hasVibration) {
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.matches('button, .btn, [role="button"]')) {
-        navigator.vibrate([10]); // Short vibration
-      }
-    }, { passive: true });
+    document.addEventListener(
+      'click',
+      e => {
+        const target = e.target as HTMLElement;
+        if (target.matches('button, .btn, [role="button"]')) {
+          navigator.vibrate([10]); // Short vibration
+        }
+      },
+      { passive: true }
+    );
   }
 
   // Web share integration
@@ -88,7 +98,7 @@ function initializeMobileEnhancements(): void {
           await navigator.share({
             title: 'My Cosmic Chart - CosmicHub',
             text: 'Check out my astrological chart from CosmicHub!',
-            url: window.location.href
+            url: window.location.href,
           });
         } catch (error) {
           devConsole.log?.('Share cancelled or failed:', error);
@@ -97,14 +107,19 @@ function initializeMobileEnhancements(): void {
     });
   }
 
-  devConsole.log?.('🎯 Mobile PWA enhancements initialized for', capabilities.platform);
+  devConsole.log?.(
+    '🎯 Mobile PWA enhancements initialized for',
+    capabilities.platform
+  );
 }
 
 // PWA Service Worker Registration
 function registerServiceWorker(): void {
   // Only register the service worker in production. Vite HMR + SW in dev can cause reload loops.
   if (!import.meta.env.PROD) {
-    devConsole.warn?.('⚠️ Skipping Service Worker registration in development to avoid HMR reload loops');
+    devConsole.warn?.(
+      '⚠️ Skipping Service Worker registration in development to avoid HMR reload loops'
+    );
     return;
   }
 
@@ -112,14 +127,18 @@ function registerServiceWorker(): void {
     try {
       devConsole.log?.('🔧 Registering Service Worker...');
 
-      void navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .then((registration) => {
+      void navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then(registration => {
           // Handle updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (
+                  newWorker.state === 'installed' &&
+                  navigator.serviceWorker.controller
+                ) {
                   // New content is available, show update notification
                   showUpdateNotification();
                 }
@@ -127,17 +146,25 @@ function registerServiceWorker(): void {
             }
           });
           // Check for updates periodically (production only)
-          if (typeof globalThis !== 'undefined' && typeof globalThis.setInterval === 'function') {
-            globalThis.setInterval(() => { void registration.update(); }, 60000); // Check every minute
+          if (
+            typeof globalThis !== 'undefined' &&
+            typeof globalThis.setInterval === 'function'
+          ) {
+            globalThis.setInterval(() => {
+              void registration.update();
+            }, 60000); // Check every minute
           }
           devConsole.log?.('✅ Service Worker registered successfully');
           initializePWAFeatures();
         })
-        .catch((error) => {
+        .catch(error => {
           devConsole.error('❌ Service Worker registration failed:', error);
         });
     } catch (error) {
-      devConsole.error('❌ Service Worker registration failed (outer try/catch):', error);
+      devConsole.error(
+        '❌ Service Worker registration failed (outer try/catch):',
+        error
+      );
     }
   } else {
     devConsole.warn?.('⚠️ Service Worker not supported');
@@ -153,10 +180,10 @@ interface BeforeInstallPromptEvent extends Event {
 function initializePWAFeatures(): void {
   // Initialize mobile-specific enhancements first (UX-021)
   initializeMobileEnhancements();
-  
+
   // Install prompt handling
   let deferredPrompt: BeforeInstallPromptEvent | null = null;
-  
+
   if (typeof window !== 'undefined') {
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       e.preventDefault();
@@ -164,7 +191,7 @@ function initializePWAFeatures(): void {
       showInstallPrompt();
     });
   }
-  
+
   // App installed handler
   if (typeof window !== 'undefined') {
     window.addEventListener('appinstalled', () => {
@@ -173,7 +200,7 @@ function initializePWAFeatures(): void {
       deferredPrompt = null;
     });
   }
-  
+
   // Handle install button click
   if (typeof window !== 'undefined') {
     window.addEventListener('install-app', () => {
@@ -231,51 +258,57 @@ function showUpdateNotification(): void {
       ">✕</button>
     </div>
   `;
-  
+
   document.body.appendChild(updateBanner);
-  
+
   // Handle update button
   document.getElementById('update-app-btn')?.addEventListener('click', () => {
     window.location.reload();
   });
-  
+
   // Handle dismiss button
-  document.getElementById('dismiss-update-btn')?.addEventListener('click', () => {
-    updateBanner.remove();
-  });
+  document
+    .getElementById('dismiss-update-btn')
+    ?.addEventListener('click', () => {
+      updateBanner.remove();
+    });
 }
 
 // Show install prompt (Enhanced for UX-021)
 function showInstallPrompt(): void {
   const capabilities = PWACapabilitiesDetector.detect();
-  
+
   // Platform-specific messaging
   const messages = {
     ios: {
       title: 'Add CosmicHub to Home Screen',
-      description: 'Tap the Share button, then "Add to Home Screen" for the best cosmic experience.',
-      action: 'Show Instructions'
+      description:
+        'Tap the Share button, then "Add to Home Screen" for the best cosmic experience.',
+      action: 'Show Instructions',
     },
     android: {
       title: 'Install CosmicHub App',
-      description: 'Get faster access to your cosmic insights and offline chart viewing.',
-      action: 'Install Now'
+      description:
+        'Get faster access to your cosmic insights and offline chart viewing.',
+      action: 'Install Now',
     },
     desktop: {
       title: 'Install CosmicHub',
-      description: 'Install for faster loading, offline access, and desktop integration.',
-      action: 'Install App'
-    }
+      description:
+        'Install for faster loading, offline access, and desktop integration.',
+      action: 'Install App',
+    },
   } as const;
 
-  const platform = capabilities.platform === 'unknown' ? 'desktop' : capabilities.platform;
+  const platform =
+    capabilities.platform === 'unknown' ? 'desktop' : capabilities.platform;
   const message = messages[platform];
 
   // Check if already installed
   if (window.matchMedia('(display-mode: standalone)').matches) {
     return;
   }
-  
+
   // Create enhanced install banner
   const installBanner = document.createElement('div');
   installBanner.id = 'pwa-install-banner';
@@ -368,9 +401,9 @@ function showInstallPrompt(): void {
     `;
     document.head.appendChild(styles);
   }
-  
+
   document.body.appendChild(installBanner);
-  
+
   // Handle install button with platform-specific behavior
   document.getElementById('install-app-btn')?.addEventListener('click', () => {
     if (capabilities.platform === 'ios') {
@@ -380,11 +413,13 @@ function showInstallPrompt(): void {
     }
     installBanner.remove();
   });
-  
+
   // Handle dismiss button
-  document.getElementById('dismiss-install-btn')?.addEventListener('click', () => {
-    installBanner.remove();
-  });
+  document
+    .getElementById('dismiss-install-btn')
+    ?.addEventListener('click', () => {
+      installBanner.remove();
+    });
 }
 
 // Show iOS installation instructions (UX-021)
@@ -502,7 +537,7 @@ function showIOSInstructions(): void {
     modal.remove();
   });
 
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener('click', e => {
     if (e.target === modal) {
       modal.remove();
     }
@@ -527,17 +562,23 @@ if (import.meta.env.PROD) {
 } else {
   const unregisterInDev = () => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations()
-        .then((regs) => {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then(regs => {
           if (regs.length > 0) {
-            devConsole.warn?.(`🧹 Unregistering ${regs.length} service worker(s) in development`);
+            devConsole.warn?.(
+              `🧹 Unregistering ${regs.length} service worker(s) in development`
+            );
           }
           // Unregister all registrations in parallel
           void Promise.all(regs.map(r => r.unregister().catch(() => false)));
         })
-        .catch((error) => {
+        .catch(error => {
           if (isDevelopment()) {
-            devConsole.error('Failed to fetch service worker registrations for unregister', error);
+            devConsole.error(
+              'Failed to fetch service worker registrations for unregister',
+              error
+            );
           }
         });
     }

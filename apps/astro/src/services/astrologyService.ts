@@ -4,7 +4,10 @@ import { getAuth } from 'firebase/auth';
 import type { ChartData, ChartType } from '@/types/astrology.types';
 import { config } from '@cosmichub/config'; // Shared API config from packages/config
 
-export const fetchChartData = async (userId: string, chartType: ChartType): Promise<ChartData> => {
+export const fetchChartData = async (
+  userId: string,
+  chartType: ChartType
+): Promise<ChartData> => {
   const auth = getAuth();
   const user = auth.currentUser;
   const token = user ? await user.getIdToken() : null;
@@ -12,13 +15,16 @@ export const fetchChartData = async (userId: string, chartType: ChartType): Prom
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(`${config.api.baseUrl}/api/charts/${chartType}/${userId}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
+  const response = await fetch(
+    `${config.api.baseUrl}/api/charts/${chartType}/${userId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   if (response.ok === false) {
     throw new Error(`Failed to fetch chart data: ${response.statusText}`);

@@ -6,7 +6,13 @@ declare module '@cosmichub/frequency' {
   export interface FrequencyPreset {
     readonly id: string;
     readonly name: string;
-    readonly category: 'solfeggio' | 'rife' | 'brainwave' | 'planetary' | 'chakra' | 'custom';
+    readonly category:
+      | 'solfeggio'
+      | 'rife'
+      | 'brainwave'
+      | 'planetary'
+      | 'chakra'
+      | 'custom';
     readonly baseFrequency: number;
     readonly binauralBeat?: number;
     readonly description?: string;
@@ -17,7 +23,7 @@ declare module '@cosmichub/frequency' {
   export interface AudioSettings {
     readonly volume: number;
     readonly duration: number; // in minutes
-    readonly fadeIn: number;  // in seconds
+    readonly fadeIn: number; // in seconds
     readonly fadeOut: number; // in seconds
   }
 
@@ -34,7 +40,10 @@ declare module '@cosmichub/frequency' {
 
   export class AudioEngine {
     constructor();
-    public startFrequency(preset: FrequencyPreset, settings: AudioSettings): Promise<void>;
+    public startFrequency(
+      preset: FrequencyPreset,
+      settings: AudioSettings
+    ): Promise<void>;
     public stopFrequency(): void;
     public getState(): AudioEngineState;
     public setVolume(volume: number): Promise<void>;
@@ -49,9 +58,17 @@ declare module '@cosmichub/frequency' {
 
   // Helper functions
   export function getAllPresets(): readonly FrequencyPreset[];
-  export function getPresetsByCategory(category: FrequencyPreset['category']): readonly FrequencyPreset[];
+  export function getPresetsByCategory(
+    category: FrequencyPreset['category']
+  ): readonly FrequencyPreset[];
   export function getPresetById(id: string): FrequencyPreset | undefined;
-  export function getPresetsByBenefits(benefit: string): readonly FrequencyPreset[];
-  export function isValidFrequencyPreset(preset: unknown): preset is FrequencyPreset;
-  export function isValidAudioSettings(settings: unknown): settings is AudioSettings;
+  export function getPresetsByBenefits(
+    benefit: string
+  ): readonly FrequencyPreset[];
+  export function isValidFrequencyPreset(
+    preset: unknown
+  ): preset is FrequencyPreset;
+  export function isValidAudioSettings(
+    settings: unknown
+  ): settings is AudioSettings;
 }

@@ -22,9 +22,11 @@ export const VisuallyHidden: React.FC<VisuallyHiddenProps> = ({
   as: Component = 'span',
   children,
   focusable = false,
-  className = ''
+  className = '',
 }) => {
-  const classes = [baseClass, focusable ? focusableClass : '', className].filter(Boolean).join(' ');
+  const classes = [baseClass, focusable ? focusableClass : '', className]
+    .filter(Boolean)
+    .join(' ');
   return <Component className={classes}>{children}</Component>;
 };
 

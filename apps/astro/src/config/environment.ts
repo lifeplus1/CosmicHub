@@ -3,16 +3,32 @@ import { z } from 'zod';
 // Environment validation schema
 const envSchema = z.object({
   VITE_FIREBASE_API_KEY: z.string().min(1, 'Firebase API key is required'),
-  VITE_FIREBASE_AUTH_DOMAIN: z.string().min(1, 'Firebase auth domain is required'),
-  VITE_FIREBASE_PROJECT_ID: z.string().min(1, 'Firebase project ID is required'),
-  VITE_FIREBASE_STORAGE_BUCKET: z.string().min(1, 'Firebase storage bucket is required'),
-  VITE_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1, 'Firebase messaging sender ID is required'),
+  VITE_FIREBASE_AUTH_DOMAIN: z
+    .string()
+    .min(1, 'Firebase auth domain is required'),
+  VITE_FIREBASE_PROJECT_ID: z
+    .string()
+    .min(1, 'Firebase project ID is required'),
+  VITE_FIREBASE_STORAGE_BUCKET: z
+    .string()
+    .min(1, 'Firebase storage bucket is required'),
+  VITE_FIREBASE_MESSAGING_SENDER_ID: z
+    .string()
+    .min(1, 'Firebase messaging sender ID is required'),
   VITE_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
   VITE_API_URL: z.string().url().optional(),
   VITE_XAI_API_KEY: z.string().optional(),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  VITE_ENABLE_ANALYTICS: z.string().transform(val => val === 'true').optional(),
-  VITE_ENABLE_ERROR_REPORTING: z.string().transform(val => val === 'true').optional(),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
+  VITE_ENABLE_ANALYTICS: z
+    .string()
+    .transform(val => val === 'true')
+    .optional(),
+  VITE_ENABLE_ERROR_REPORTING: z
+    .string()
+    .transform(val => val === 'true')
+    .optional(),
 });
 
 // Validate environment variables
@@ -21,7 +37,7 @@ function validateEnvironment() {
     return envSchema.parse(import.meta.env);
   } catch (error) {
     // Use raw console.error here intentionally (bootstrapping prior to devConsole creation)
-     
+
     console.error('Environment validation failed:', error);
     throw new Error('Invalid environment configuration');
   }
@@ -77,7 +93,10 @@ export const xaiConfig = {
   baseUrl: 'https://api.x.ai/v1',
   model: 'grok-beta',
   timeout: 30000,
-  enabled: env.VITE_XAI_API_KEY !== null && env.VITE_XAI_API_KEY !== undefined && env.VITE_XAI_API_KEY !== '',
+  enabled:
+    env.VITE_XAI_API_KEY !== null &&
+    env.VITE_XAI_API_KEY !== undefined &&
+    env.VITE_XAI_API_KEY !== '',
 };
 
 // Logging configuration
@@ -110,7 +129,7 @@ export const performanceConfig = {
 // Development utilities
 // Dev logging abstraction (silences in production except errors)
 // Wrapped in factory to support tree-shaking and easier future extension (e.g., remote logging)
- 
+
 interface DevConsole {
   log: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
@@ -127,7 +146,6 @@ const makeDevConsole = (): DevConsole => ({
   debug: isDevelopment() ? console.debug.bind(console) : noop,
   error: console.error.bind(console), // Always surface errors
 });
- 
 
 export const devConsole = makeDevConsole();
 

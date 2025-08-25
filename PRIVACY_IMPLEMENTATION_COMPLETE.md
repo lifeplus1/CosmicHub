@@ -139,7 +139,7 @@ This document commemorates the completion of CosmicHub's comprehensive privacy i
 
 ### **Core Privacy Modules**
 
-```
+```text
 backend/
 ├── privacy/                          # Complete privacy framework
 │   ├── audit.py                     # Core privacy auditor  

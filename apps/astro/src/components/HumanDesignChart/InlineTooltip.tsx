@@ -13,28 +13,35 @@ const InlineTooltip: React.FC<InlineTooltipProps> = ({
   content,
   position = 'top',
   delay = 300,
-  className = ''
+  className = '',
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [timeoutId, setTimeoutId] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const positionClasses = {
     top: 'bottom-full left-1/2 transform -translate-x-1/2 mb-2',
     bottom: 'top-full left-1/2 transform -translate-x-1/2 mt-2',
     left: 'right-full top-1/2 transform -translate-y-1/2 mr-2',
-    right: 'left-full top-1/2 transform -translate-y-1/2 ml-2'
+    right: 'left-full top-1/2 transform -translate-y-1/2 ml-2',
   };
 
   const arrowClasses = {
     top: 'top-full left-1/2 transform -translate-x-1/2 border-t-cosmic-dark border-t-4 border-x-transparent border-x-4 border-b-0',
-    bottom: 'bottom-full left-1/2 transform -translate-x-1/2 border-b-cosmic-dark border-b-4 border-x-transparent border-x-4 border-t-0',
+    bottom:
+      'bottom-full left-1/2 transform -translate-x-1/2 border-b-cosmic-dark border-b-4 border-x-transparent border-x-4 border-t-0',
     left: 'left-full top-1/2 transform -translate-y-1/2 border-l-cosmic-dark border-l-4 border-y-transparent border-y-4 border-r-0',
-    right: 'right-full top-1/2 transform -translate-y-1/2 border-r-cosmic-dark border-r-4 border-y-transparent border-y-4 border-l-0'
+    right:
+      'right-full top-1/2 transform -translate-y-1/2 border-r-cosmic-dark border-r-4 border-y-transparent border-y-4 border-l-0',
   };
 
   const handleMouseEnter = () => {
-  const id: ReturnType<typeof setTimeout> = setTimeout(() => setIsVisible(true), delay);
+    const id: ReturnType<typeof setTimeout> = setTimeout(
+      () => setIsVisible(true),
+      delay
+    );
     setTimeoutId(id);
   };
 
@@ -47,8 +54,8 @@ const InlineTooltip: React.FC<InlineTooltipProps> = ({
   };
 
   return (
-    <div 
-      className="relative"
+    <div
+      className='relative'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
@@ -64,8 +71,8 @@ const InlineTooltip: React.FC<InlineTooltipProps> = ({
             ${positionClasses[position]}
             ${className}
           `}
-          role="tooltip"
-          aria-live="polite"
+          role='tooltip'
+          aria-live='polite'
         >
           {content}
           <div className={`absolute ${arrowClasses[position]}`} />

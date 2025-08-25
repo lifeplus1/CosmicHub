@@ -16,7 +16,7 @@ const want = new Set([
   'enhanced-testing.d.ts',
   'accessibility-testing.d.ts',
   'index.d.ts', // when inside firebase/ subdirectory
-  'analytics.d.ts'
+  'analytics.d.ts',
 ]);
 
 // Always mirror hooks directory (types live beside source and are needed for subpath export)

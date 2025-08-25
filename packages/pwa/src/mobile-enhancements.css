@@ -11,15 +11,15 @@
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
-  
+
   /* Touch target sizes (WCAG AA compliance) */
   --touch-target-min: 44px;
   --touch-spacing-min: 8px;
-  
+
   /* Mobile-specific spacing */
   --mobile-padding: 16px;
   --mobile-margin: 12px;
-  
+
   /* Enhanced tap highlight */
   --tap-highlight-color: rgba(85, 60, 154, 0.2);
 }
@@ -29,7 +29,7 @@ html.has-touch {
   /* Prevent text selection on touch devices where inappropriate */
   -webkit-user-select: none;
   user-select: none;
-  
+
   /* Better touch scrolling - legacy webkit support */
   scroll-behavior: smooth;
 }
@@ -46,21 +46,21 @@ html.has-touch .selectable-text {
 /* Enhanced tap targets */
 html.has-touch button,
 html.has-touch .btn,
-html.has-touch [role="button"],
+html.has-touch [role='button'],
 html.has-touch a,
-html.has-touch input[type="checkbox"],
-html.has-touch input[type="radio"] {
+html.has-touch input[type='checkbox'],
+html.has-touch input[type='radio'] {
   min-height: var(--touch-target-min);
   min-width: var(--touch-target-min);
   padding: max(12px, var(--touch-spacing-min));
-  
+
   /* Enhanced touch feedback */
   -webkit-tap-highlight-color: var(--tap-highlight-color);
   tap-highlight-color: var(--tap-highlight-color);
-  
+
   /* Better touch response */
   touch-action: manipulation;
-  
+
   /* Prevent double-tap zoom on buttons */
   -webkit-user-select: none;
   user-select: none;
@@ -94,7 +94,7 @@ html.platform-ios body {
 
 html.platform-android {
   /* Android-specific optimizations */
-  font-feature-settings: "liga" off;
+  font-feature-settings: 'liga' off;
 }
 
 /* Keyboard-aware layouts */
@@ -119,7 +119,7 @@ body.keyboard-open .fixed-bottom {
     padding: 12px 16px;
     font-size: 16px; /* Prevent iOS zoom on input focus */
     border-radius: 12px;
-    
+
     /* Better visual feedback */
     transition: all 0.2s ease;
     border: 2px solid rgba(255, 255, 255, 0.1);
@@ -222,13 +222,21 @@ body.keyboard-open .fixed-bottom {
 }
 
 @keyframes swipeLeftIndicator {
-  0% { left: 100%; }
-  100% { left: -100%; }
+  0% {
+    left: 100%;
+  }
+  100% {
+    left: -100%;
+  }
 }
 
 @keyframes swipeRightIndicator {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 /* Mobile-optimized modals and overlays */
@@ -243,7 +251,7 @@ body.keyboard-open .fixed-bottom {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   z-index: 1000;
-  
+
   /* Smooth slide-up animation */
   animation: mobileModalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -270,7 +278,7 @@ body.keyboard-open .fixed-bottom {
   padding-bottom: calc(24px + var(--safe-area-inset-bottom));
   max-height: 90vh;
   overflow-y: auto;
-  
+
   /* Pull-to-close indicator */
   position: relative;
 }
@@ -301,13 +309,13 @@ body.keyboard-open .fixed-bottom {
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   /* Ensure accessibility */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  
+
   /* Prevent selection */
   -webkit-user-select: none;
   user-select: none;
@@ -351,7 +359,9 @@ body.keyboard-open .fixed-bottom {
 }
 
 @keyframes mobileSpinner {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Pull-to-refresh indicator */
@@ -387,25 +397,39 @@ body.keyboard-open .fixed-bottom {
 }
 
 @keyframes pullRefreshSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Enhanced mobile typography */
 @media (max-width: 768px) {
-  h1 { font-size: 2rem; line-height: 1.2; margin-bottom: 1rem; }
-  h2 { font-size: 1.5rem; line-height: 1.3; margin-bottom: 0.875rem; }
-  h3 { font-size: 1.25rem; line-height: 1.4; margin-bottom: 0.75rem; }
-  
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    margin-bottom: 0.875rem;
+  }
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
   body {
     font-size: 16px; /* Prevent iOS zoom */
     line-height: 1.6;
   }
-  
+
   .mobile-text-large {
     font-size: 18px;
     line-height: 1.5;
   }
-  
+
   .mobile-text-small {
     font-size: 14px;
     line-height: 1.4;
@@ -428,9 +452,18 @@ body.keyboard-open .fixed-bottom {
 }
 
 @keyframes gesturePopup {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0); opacity: 0; }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
 }
 
 /* Accessibility enhancements for mobile */
@@ -447,7 +480,7 @@ body.keyboard-open .fixed-bottom {
   .btn-mobile {
     border: 2px solid currentColor;
   }
-  
+
   .mobile-nav-item {
     border: 1px solid rgba(255, 255, 255, 0.3);
   }

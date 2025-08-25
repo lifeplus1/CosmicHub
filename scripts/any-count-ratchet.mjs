@@ -14,7 +14,7 @@ async function walk(dir) {
   for (const e of ents) {
     const full = join(dir, e.name);
     if (SKIP.some(s => full.includes(s))) continue;
-    if (e.isDirectory()) files.push(...await walk(full));
+    if (e.isDirectory()) files.push(...(await walk(full)));
     else if (/\.(ts|tsx|mts|cts|js|jsx)$/.test(e.name)) files.push(full);
   }
   return files;
@@ -22,20 +22,32 @@ async function walk(dir) {
 
 async function countAny(file) {
   const text = await fs.readFile(file, 'utf8');
-  let c = 0; while (RGX.exec(text)) c++; return c;
+  let c = 0;
+  while (RGX.exec(text)) c++;
+  return c;
 }
 
 async function main() {
-  const files = (await Promise.all(SCAN_DIRS.map(d => walk(join(ROOT, d))))).flat();
-  let total = 0; for (const f of files) total += await countAny(f);
+  const files = (
+    await Promise.all(SCAN_DIRS.map(d => walk(join(ROOT, d))))
+  ).flat();
+  let total = 0;
+  for (const f of files) total += await countAny(f);
   await fs.mkdir(join(ROOT, 'metrics'), { recursive: true });
-  let baseline; try { baseline = JSON.parse(await fs.readFile(BASELINE, 'utf8')); } catch { baseline = { anyCount: total }; }
+  let baseline;
+  try {
+    baseline = JSON.parse(await fs.readFile(BASELINE, 'utf8'));
+  } catch {
+    baseline = { anyCount: total };
+  }
   if (typeof baseline.anyCount !== 'number') baseline.anyCount = total;
   if (total > baseline.anyCount) {
     console.error(`❌ any count increased: ${baseline.anyCount} -> ${total}`);
     process.exit(1);
   } else if (total < baseline.anyCount) {
-    console.log(`✅ any reduced: ${baseline.anyCount} -> ${total} (baseline updated)`);
+    console.log(
+      `✅ any reduced: ${baseline.anyCount} -> ${total} (baseline updated)`
+    );
     baseline.anyCount = total;
     await fs.writeFile(BASELINE, JSON.stringify(baseline, null, 2));
   } else {
@@ -46,4 +58,7 @@ async function main() {
   }
 }
 
-main().catch(err => { console.error('[any-ratchet] failure', err); process.exit(1); });
+main().catch(err => {
+  console.error('[any-ratchet] failure', err);
+  process.exit(1);
+});

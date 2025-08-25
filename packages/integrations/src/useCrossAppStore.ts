@@ -17,8 +17,9 @@ export const useCrossAppStore = () => {
     updateTheme: crossAppStore.updateTheme.bind(crossAppStore),
     setActiveApp: crossAppStore.setActiveApp.bind(crossAppStore),
     syncChartToHealwave: crossAppStore.syncChartToHealwave.bind(crossAppStore),
-    syncFrequenciesToAstro: crossAppStore.syncFrequenciesToAstro.bind(crossAppStore),
+    syncFrequenciesToAstro:
+      crossAppStore.syncFrequenciesToAstro.bind(crossAppStore),
     subscribe: crossAppStore.subscribe.bind(crossAppStore),
-    clear: crossAppStore.clear.bind(crossAppStore)
+    clear: crossAppStore.clear.bind(crossAppStore),
   };
 };

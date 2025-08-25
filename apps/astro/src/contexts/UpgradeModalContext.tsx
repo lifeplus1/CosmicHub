@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react';
 
 export interface UpgradeModalContextType {
   isOpen: boolean;
@@ -7,7 +13,9 @@ export interface UpgradeModalContextType {
   closeUpgradeModal: () => void;
 }
 
-const UpgradeModalContext = createContext<UpgradeModalContextType | undefined>(undefined);
+const UpgradeModalContext = createContext<UpgradeModalContextType | undefined>(
+  undefined
+);
 
 export interface UpgradeModalProviderProps {
   children: ReactNode;
@@ -16,7 +24,9 @@ export interface UpgradeModalProviderProps {
 /**
  * Provider for managing upgrade modal state globally across the app
  */
-export const UpgradeModalProvider: React.FC<UpgradeModalProviderProps> = ({ children }) => {
+export const UpgradeModalProvider: React.FC<UpgradeModalProviderProps> = ({
+  children,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [feature, setFeature] = useState<string | undefined>();
 
@@ -34,7 +44,7 @@ export const UpgradeModalProvider: React.FC<UpgradeModalProviderProps> = ({ chil
     isOpen,
     feature,
     openUpgradeModal,
-    closeUpgradeModal
+    closeUpgradeModal,
   };
 
   return (

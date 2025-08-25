@@ -12,116 +12,152 @@ vi.mock('@cosmichub/config', () => ({
     app: {
       name: 'astro',
       environment: 'test',
-      version: '1.0.0'
-    }
+      version: '1.0.0',
+    },
   })),
-  isFeatureEnabled: vi.fn(() => false)
+  isFeatureEnabled: vi.fn(() => false),
 }));
 
 // Mock the integrations module
 vi.mock('@cosmichub/integrations', () => ({
   useCrossAppStore: vi.fn(() => ({
-    addNotification: vi.fn()
-  }))
+    addNotification: vi.fn(),
+  })),
 }));
 
 // Mock React Router with proper context providers
 vi.mock('react-router-dom', () => {
   const mockNavigate = vi.fn();
-  const mockLocation = { pathname: '/', search: '', hash: '', state: null, key: 'default' };
-  
+  const mockLocation = {
+    pathname: '/',
+    search: '',
+    hash: '',
+    state: null,
+    key: 'default',
+  };
+
   return {
-    BrowserRouter: ({ children }: { children: React.ReactNode }): JSX.Element => {
+    BrowserRouter: ({
+      children,
+    }: {
+      children: React.ReactNode;
+    }): JSX.Element => {
       // Provide a mock router context
       return (
-        <div data-testid="router">
+        <div data-testid='router'>
           {React.cloneElement(
             <MockRouterContext>{children}</MockRouterContext>
           )}
         </div>
       );
     },
-    Routes: ({ children }: { children: React.ReactNode }): JSX.Element => <div data-testid="routes">{children}</div>,
-    Route: ({ element }: { element: React.ReactElement }): React.ReactElement => element,
+    Routes: ({ children }: { children: React.ReactNode }): JSX.Element => (
+      <div data-testid='routes'>{children}</div>
+    ),
+    Route: ({ element }: { element: React.ReactElement }): React.ReactElement =>
+      element,
     useNavigate: vi.fn(() => mockNavigate),
     useLocation: vi.fn(() => mockLocation),
     useSearchParams: vi.fn(() => [new URLSearchParams(), vi.fn()]),
-    Link: ({ children, to, ...props }: { children: React.ReactNode; to: string } & React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => <a href={to} {...props}>{children}</a>
+    Link: ({
+      children,
+      to,
+      ...props
+    }: {
+      children: React.ReactNode;
+      to: string;
+    } & React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => (
+      <a href={to} {...props}>
+        {children}
+      </a>
+    ),
   };
 });
 
 // Mock Router Context Provider to prevent hook errors
-const MockRouterContext: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <div data-testid="mock-router-context">{children}</div>;
+const MockRouterContext: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  return <div data-testid='mock-router-context'>{children}</div>;
 };
 
 // Mock lazy components that might use React Router hooks
 vi.mock('../pages/Dashboard', () => ({
-  default: () => <div data-testid="dashboard">Dashboard</div>
+  default: () => <div data-testid='dashboard'>Dashboard</div>,
 }));
 
 vi.mock('../pages/Login', () => ({
-  default: () => <div data-testid="login">Login</div>
+  default: () => <div data-testid='login'>Login</div>,
 }));
 
 vi.mock('../pages/SignUp', () => ({
-  default: () => <div data-testid="signup">SignUp</div>
+  default: () => <div data-testid='signup'>SignUp</div>,
 }));
 
 vi.mock('../pages/Profile', () => ({
-  default: () => <div data-testid="profile">Profile</div>
+  default: () => <div data-testid='profile'>Profile</div>,
 }));
 
 vi.mock('../pages/SubscriptionSuccess', () => ({
-  default: () => <div data-testid="subscription-success">SubscriptionSuccess</div>
+  default: () => (
+    <div data-testid='subscription-success'>SubscriptionSuccess</div>
+  ),
 }));
 
 vi.mock('../pages/SubscriptionCancel', () => ({
-  default: () => <div data-testid="subscription-cancel">SubscriptionCancel</div>
+  default: () => (
+    <div data-testid='subscription-cancel'>SubscriptionCancel</div>
+  ),
 }));
 
 vi.mock('../pages/Blog', () => ({
-  default: () => <div data-testid="blog">Blog</div>
+  default: () => <div data-testid='blog'>Blog</div>,
 }));
 
 vi.mock('../pages/BlogPost', () => ({
-  default: () => <div data-testid="blog-post">BlogPost</div>
+  default: () => <div data-testid='blog-post'>BlogPost</div>,
 }));
 
 vi.mock('../pages/Calculator', () => ({
-  default: () => <div data-testid="calculator">Calculator</div>
+  default: () => <div data-testid='calculator'>Calculator</div>,
 }));
 
 vi.mock('../pages/ChartResults', () => ({
-  default: () => <div data-testid="chart-results">ChartResults</div>
+  default: () => <div data-testid='chart-results'>ChartResults</div>,
 }));
 
 vi.mock('../components/BlogAuthor', () => ({
-  BlogAuthors: () => <div data-testid="blog-authors">BlogAuthors</div>
+  BlogAuthors: () => <div data-testid='blog-authors'>BlogAuthors</div>,
 }));
 
 vi.mock('../components/Navbar', () => ({
-  default: () => <nav data-testid="navbar" role="navigation" aria-label="Main navigation">Navbar</nav>
+  default: () => (
+    <nav data-testid='navbar' role='navigation' aria-label='Main navigation'>
+      Navbar
+    </nav>
+  ),
 }));
 
 vi.mock('../components/Footer', () => ({
-  default: () => <footer data-testid="footer">Footer</footer>
+  default: () => <footer data-testid='footer'>Footer</footer>,
 }));
 
 describe('App Component', (): void => {
   test('renders with auth provider and main structure', (): void => {
     render(
-      <AuthProvider appName="astro">
+      <AuthProvider appName='astro'>
         <App />
       </AuthProvider>
     );
 
     // Check for main navigation
-    expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument();
-    
+    expect(
+      screen.getByRole('navigation', { name: /main navigation/i })
+    ).toBeInTheDocument();
+
     // Check for router structure
     expect(screen.getByTestId('router')).toBeInTheDocument();
-    
+
     // Check for main components
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
     expect(screen.getByTestId('footer')).toBeInTheDocument();
@@ -129,7 +165,7 @@ describe('App Component', (): void => {
 
   test('applies correct accessibility attributes', (): void => {
     render(
-      <AuthProvider appName="astro">
+      <AuthProvider appName='astro'>
         <App />
       </AuthProvider>
     );
@@ -140,7 +176,7 @@ describe('App Component', (): void => {
 
   test('handles authentication context properly', (): void => {
     const { container } = render(
-      <AuthProvider appName="astro">
+      <AuthProvider appName='astro'>
         <App />
       </AuthProvider>
     );
@@ -151,7 +187,7 @@ describe('App Component', (): void => {
 
   test('renders cosmic loading component for lazy routes', async (): Promise<void> => {
     render(
-      <AuthProvider appName="astro">
+      <AuthProvider appName='astro'>
         <App />
       </AuthProvider>
     );

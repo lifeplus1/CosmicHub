@@ -1,7 +1,10 @@
 /* Font Variables for CosmicHub */
 :root {
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-heading: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-primary:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading:
+    'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
 }
 
 /* Base font styles */

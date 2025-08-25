@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { Link } from 'expo-router';
 
 export default function HomeScreen() {
@@ -12,20 +18,22 @@ export default function HomeScreen() {
         </Text>
 
         <View style={styles.appGrid}>
-          <Link href="/astrology" asChild>
+          <Link href='/astrology' asChild>
             <TouchableOpacity style={[styles.appCard, styles.astrologyCard]}>
               <Text style={styles.appCardTitle}>🌟 Astrology</Text>
               <Text style={styles.appCardDescription}>
-                Generate detailed birth charts, synastry analysis, and cosmic insights
+                Generate detailed birth charts, synastry analysis, and cosmic
+                insights
               </Text>
             </TouchableOpacity>
           </Link>
 
-          <Link href="/healwave" asChild>
+          <Link href='/healwave' asChild>
             <TouchableOpacity style={[styles.appCard, styles.healwaveCard]}>
               <Text style={styles.appCardTitle}>🎵 HealWave</Text>
               <Text style={styles.appCardDescription}>
-                Binaural beats and healing frequencies for meditation and wellness
+                Binaural beats and healing frequencies for meditation and
+                wellness
               </Text>
             </TouchableOpacity>
           </Link>
@@ -34,9 +42,13 @@ export default function HomeScreen() {
         <View style={styles.features}>
           <Text style={styles.featuresTitle}>Features</Text>
           <View style={styles.featureList}>
-            <Text style={styles.featureItem}>• Multi-system chart calculations</Text>
+            <Text style={styles.featureItem}>
+              • Multi-system chart calculations
+            </Text>
             <Text style={styles.featureItem}>• AI-powered interpretations</Text>
-            <Text style={styles.featureItem}>• Synastry compatibility analysis</Text>
+            <Text style={styles.featureItem}>
+              • Synastry compatibility analysis
+            </Text>
             <Text style={styles.featureItem}>• Healing frequency library</Text>
             <Text style={styles.featureItem}>• Cloud synchronization</Text>
           </View>

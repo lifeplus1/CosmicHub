@@ -7,7 +7,7 @@ interface SystemsTabProps {
 }
 
 const SystemsTab: React.FC<SystemsTabProps> = ({ systems }) => (
-  <div className="p-4">
+  <div className='p-4'>
     <SystemsDisplay systems={systems} />
   </div>
 );

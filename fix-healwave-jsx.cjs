@@ -10,7 +10,7 @@ const filesToFix = [
   'apps/healwave/src/components/FrequencyGenerator.tsx',
   'apps/healwave/src/components/Login.tsx',
   'apps/healwave/src/components/PresetSelector.tsx',
-  'apps/healwave/src/components/Signup.tsx'
+  'apps/healwave/src/components/Signup.tsx',
 ];
 
 function fixFile(filePath) {
@@ -18,7 +18,7 @@ function fixFile(filePath) {
     console.log(`Fixing: ${filePath}`);
     let content = fs.readFileSync(filePath, 'utf8');
     let changed = false;
-    
+
     // Pattern 1: onChange={() = aria-label="radio input"> to onChange={() =>
     const pattern1 = /onChange=\{\(\)\s*=\s*aria-label="[^"]*">\s*([^}]*)\}/g;
     if (pattern1.test(content)) {
@@ -26,15 +26,16 @@ function fixFile(filePath) {
       changed = true;
       console.log('  ✓ Fixed: onChange={() = aria-label pattern');
     }
-    
+
     // Pattern 2: onChange={e = aria-label="input"> to onChange={(e) =>
-    const pattern2 = /onChange=\{([^}=\s]*)\s*=\s*aria-label="[^"]*">\s*([^}]*)\}/g;
+    const pattern2 =
+      /onChange=\{([^}=\s]*)\s*=\s*aria-label="[^"]*">\s*([^}]*)\}/g;
     if (pattern2.test(content)) {
       content = content.replace(pattern2, 'onChange={($1) => $2}');
       changed = true;
       console.log('  ✓ Fixed: onChange={e = aria-label pattern');
     }
-    
+
     // Pattern 3: Fix malformed type annotations like ChangeEvent<HTMLInputElement aria-label="text input">
     const pattern3 = /ChangeEvent<HTMLInputElement\s+aria-label="[^"]*">/g;
     if (pattern3.test(content)) {
@@ -42,7 +43,7 @@ function fixFile(filePath) {
       changed = true;
       console.log('  ✓ Fixed: malformed type annotation');
     }
-    
+
     // Pattern 4: Clean up any stray aria-label attributes that are in the wrong place
     const pattern4 = /\s+aria-label="[^"]*">\s*([^}]+)}/g;
     if (pattern4.test(content)) {

@@ -302,7 +302,7 @@
 - ✅ **Core Schema**: Complete TypeScript/Zod schema with 20+ validation rules
 - ✅ **JSON Schema**: Standards-compliant JSON schema for external tools
 - ✅ **Validation Functions**: Runtime validation with business rule checking
-- ✅ **Error Handling**: User-friendly error messages and warnings system  
+- ✅ **Error Handling**: User-friendly error messages and warnings system
 - ✅ **Migration System**: Automatic version detection and migration utilities
 - ✅ **CLI Tool**: `scripts/validate-experiments.mjs` for development workflow
 - ✅ **Test Suite**: 20 comprehensive tests covering all scenarios
@@ -331,7 +331,7 @@
 **Impact:**
 
 - **Development**: Prevents invalid experiment configurations at development time
-- **Data Quality**: Ensures consistent experiment structure across platform  
+- **Data Quality**: Ensures consistent experiment structure across platform
 - **User Experience**: Clear validation feedback improves experiment creation workflow
 - **Maintenance**: Automated validation reduces manual review and debugging time
 - **Scalability**: Schema versioning enables safe platform evolution
@@ -523,20 +523,24 @@ backoff.
 - **Assignee:** TBD
 - **Due Date:** Sprint Buffer/Maintenance Window
 
-**Description:** Investigate and resolve timeout issue in test environment when Firebase auth dependency is injected during HTTP request processing.
+**Description:** Investigate and resolve timeout issue in test environment when Firebase auth
+dependency is injected during HTTP request processing.
 
 **Background:**
 
-During test execution of `test_chart_save_and_interpretation_flow`, the system hangs for 10+ seconds during HTTP POST request to `/api/charts/save`. Investigation revealed:
+During test execution of `test_chart_save_and_interpretation_flow`, the system hangs for 10+ seconds
+during HTTP POST request to `/api/charts/save`. Investigation revealed:
 
 - ✅ **Redis hanging issue completely resolved** via REL-010 circuit breaker implementation
 - ✅ App startup and module initialization work perfectly
 - ✅ TestClient creation succeeds without issues
-- ❌ **Hang occurs during HTTP request dependency injection**, specifically in `verify_id_token_dependency`
+- ❌ **Hang occurs during HTTP request dependency injection**, specifically in
+  `verify_id_token_dependency`
 
 **Root Cause Analysis:**
 
-The hang appears to be in the Firebase auth verification process (`auth.verify_id_token(token_str)`) during test execution, likely due to:
+The hang appears to be in the Firebase auth verification process (`auth.verify_id_token(token_str)`)
+during test execution, likely due to:
 
 - Mock Firebase auth configuration timing out
 - Network calls to Firebase Auth servers in test environment
@@ -564,7 +568,7 @@ The hang appears to be in the Firebase auth verification process (`auth.verify_i
 ```bash
 # Current behavior:
 === Simple Debug Test ===
-✓ App starts successfully 
+✓ App starts successfully
 ✓ TestClient created
 🔍 About to make POST request...
 ❌ Request timed out after 10 seconds  # <- Issue here

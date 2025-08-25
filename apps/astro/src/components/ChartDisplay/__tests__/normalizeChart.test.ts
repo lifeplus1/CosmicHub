@@ -1,8 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeChart, isChartLike, hasChartContent, getSignFromDegree, getRulerFromSign, getAspectOrb, type ChartLike } from '../normalizeChart';
+import {
+  normalizeChart,
+  isChartLike,
+  hasChartContent,
+  getSignFromDegree,
+  getRulerFromSign,
+  getAspectOrb,
+  type ChartLike,
+} from '../normalizeChart';
 
 // Helper to deeply clone via JSON for immutability checks
-const clone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj)) as T;
+const clone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj)) as T;
 
 describe('normalizeChart utilities', () => {
   it('identifies a loose chart-like object', () => {
@@ -21,7 +29,12 @@ describe('normalizeChart utilities', () => {
   });
 
   it('normalizes record-shaped planets into array form with derived sign + degree', () => {
-    const raw: ChartLike = { planets: { sun: { position: 150.5 }, moon: { degree: 33.2, sign: 'Taurus' } } };
+    const raw: ChartLike = {
+      planets: {
+        sun: { position: 150.5 },
+        moon: { degree: 33.2, sign: 'Taurus' },
+      },
+    };
     const { planets } = normalizeChart(raw);
     const sun = planets.find(p => p.name === 'Sun');
     const moon = planets.find(p => p.name === 'Moon');
@@ -33,10 +46,15 @@ describe('normalizeChart utilities', () => {
   });
 
   it('derives rulers and degrees for houses', () => {
-    const raw: ChartLike = { houses: [ { number: 1, cusp: 12 }, { number: 2, cusp: 47 } ] };
+    const raw: ChartLike = {
+      houses: [
+        { number: 1, cusp: 12 },
+        { number: 2, cusp: 47 },
+      ],
+    };
     const { houses } = normalizeChart(raw);
-  const h0 = houses[0];
-  const h1 = houses[1];
+    const h0 = houses[0];
+    const h1 = houses[1];
     expect(h0).toBeDefined();
     expect(h1).toBeDefined();
     if (h0 !== undefined) {
@@ -49,7 +67,12 @@ describe('normalizeChart utilities', () => {
   });
 
   it('parses aspect orb intelligently and applies default when missing', () => {
-    const raw: ChartLike = { aspects: [ { planet1: 'Sun', planet2: 'Moon', type: 'Conjunction', orb: '5.2' }, { planet1: 'Venus', planet2: 'Mars', type: 'Square' } ] };
+    const raw: ChartLike = {
+      aspects: [
+        { planet1: 'Sun', planet2: 'Moon', type: 'Conjunction', orb: '5.2' },
+        { planet1: 'Venus', planet2: 'Mars', type: 'Square' },
+      ],
+    };
     const { aspects } = normalizeChart(raw);
     const conj = aspects.find(a => a.type === 'Conjunction');
     const square = aspects.find(a => a.type === 'Square');

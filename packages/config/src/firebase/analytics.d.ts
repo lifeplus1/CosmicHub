@@ -6,10 +6,20 @@ export type { Analytics, AnalyticsCallOptions };
  * evolve implementation (or swap providers) without breaking APIs.
  */
 export interface AnalyticsService {
-    logEvent: (eventName: string, eventParams?: Record<string, unknown>, options?: AnalyticsCallOptions) => void;
-    setCurrentScreen: (screenName: string, options?: AnalyticsCallOptions) => void;
-    setUserId: (userId: string, options?: AnalyticsCallOptions) => void;
-    setUserProperties: (properties: Record<string, unknown>, options?: AnalyticsCallOptions) => void;
+  logEvent: (
+    eventName: string,
+    eventParams?: Record<string, unknown>,
+    options?: AnalyticsCallOptions
+  ) => void;
+  setCurrentScreen: (
+    screenName: string,
+    options?: AnalyticsCallOptions
+  ) => void;
+  setUserId: (userId: string, options?: AnalyticsCallOptions) => void;
+  setUserProperties: (
+    properties: Record<string, unknown>,
+    options?: AnalyticsCallOptions
+  ) => void;
 }
 export type GetAnalyticsFn = (app?: unknown) => Promise<Analytics> | Analytics;
 export declare const createNoopAnalytics: () => AnalyticsService;

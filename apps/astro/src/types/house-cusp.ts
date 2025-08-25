@@ -2,18 +2,18 @@
  * Strongly-typed definitions for house cusp data in chart calculations
  */
 
-export type ZodiacSign = 
+export type ZodiacSign =
   | 'aries'
-  | 'taurus' 
-  | 'gemini' 
-  | 'cancer' 
-  | 'leo' 
-  | 'virgo' 
-  | 'libra' 
-  | 'scorpio' 
-  | 'sagittarius' 
-  | 'capricorn' 
-  | 'aquarius' 
+  | 'taurus'
+  | 'gemini'
+  | 'cancer'
+  | 'leo'
+  | 'virgo'
+  | 'libra'
+  | 'scorpio'
+  | 'sagittarius'
+  | 'capricorn'
+  | 'aquarius'
   | 'pisces';
 
 export interface HouseCusp {
@@ -35,14 +35,16 @@ export interface HouseCusp {
  * Type guard to check if an object is a valid HouseCusp
  */
 export function isHouseCusp(obj: unknown): obj is HouseCusp {
-  if (obj === null || obj === undefined || typeof obj !== 'object') return false;
-  
+  if (obj === null || obj === undefined || typeof obj !== 'object')
+    return false;
+
   const houseCusp = obj as HouseCusp;
   return (
-    (typeof houseCusp.house === 'number' || typeof houseCusp.number === 'number') &&
-    (typeof houseCusp.cusp === 'number' || 
-     typeof houseCusp.degree === 'number' || 
-     typeof houseCusp.degree === 'string')
+    (typeof houseCusp.house === 'number' ||
+      typeof houseCusp.number === 'number') &&
+    (typeof houseCusp.cusp === 'number' ||
+      typeof houseCusp.degree === 'number' ||
+      typeof houseCusp.degree === 'string')
   );
 }
 

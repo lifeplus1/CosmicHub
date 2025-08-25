@@ -29,7 +29,7 @@ const EXCLUDE_PATTERNS = [
   'scripts',
   '*.config.',
   'README.md',
-  '.log'
+  '.log',
 ];
 
 // Console patterns to replace
@@ -37,28 +37,28 @@ const CONSOLE_PATTERNS = [
   {
     pattern: /console\.log\s*\(/g,
     replacement: 'logger.info(',
-    severity: 'info'
+    severity: 'info',
   },
   {
     pattern: /console\.warn\s*\(/g,
     replacement: 'logger.warn(',
-    severity: 'warn'
+    severity: 'warn',
   },
   {
     pattern: /console\.error\s*\(/g,
     replacement: 'logger.error(',
-    severity: 'error'
+    severity: 'error',
   },
   {
     pattern: /console\.info\s*\(/g,
     replacement: 'logger.info(',
-    severity: 'info'
+    severity: 'info',
   },
   {
     pattern: /console\.debug\s*\(/g,
     replacement: 'logger.debug(',
-    severity: 'debug'
-  }
+    severity: 'debug',
+  },
 ];
 
 // Dev console patterns (legitimate patterns to preserve)
@@ -69,14 +69,15 @@ const DEV_CONSOLE_PATTERNS = [
   'devConsole.info',
   '.bind(console)',
   'console.log.bind(console)',
-  'console.warn.bind(console)', 
-  'console.error.bind(console)'
+  'console.warn.bind(console)',
+  'console.error.bind(console)',
 ];
 
 function shouldExclude(filePath) {
-  return EXCLUDE_PATTERNS.some(pattern => 
-    filePath.includes(pattern) || 
-    filePath.match(new RegExp(pattern.replace('*', '.*')))
+  return EXCLUDE_PATTERNS.some(
+    pattern =>
+      filePath.includes(pattern) ||
+      filePath.match(new RegExp(pattern.replace('*', '.*')))
   );
 }
 
@@ -98,13 +99,16 @@ function processFile(filePath) {
     }
 
     // Check if file has console statements to replace
-    const hasConsole = CONSOLE_PATTERNS.some(({ pattern }) => pattern.test(content));
+    const hasConsole = CONSOLE_PATTERNS.some(({ pattern }) =>
+      pattern.test(content)
+    );
     if (!hasConsole) {
       return { processed: false, reason: 'no-console' };
     }
 
     // Add logger import if not present and if we're going to make changes
-    const hasLoggerImport = content.includes('logger') && 
+    const hasLoggerImport =
+      content.includes('logger') &&
       (content.includes('import') || content.includes('require'));
 
     if (!hasLoggerImport) {
@@ -113,7 +117,8 @@ function processFile(filePath) {
       if (filePath.includes('packages/')) {
         loggerImport = "import { logger } from '../utils/logger';\n";
       } else if (filePath.includes('apps/')) {
-        loggerImport = "import { logger } from '@cosmichub/config/src/utils/logger';\n";
+        loggerImport =
+          "import { logger } from '@cosmichub/config/src/utils/logger';\n";
       } else {
         // Fallback: create simple logger
         loggerImport = `
@@ -130,7 +135,10 @@ const logger = {
       // Insert after existing imports or at the beginning
       const importMatch = content.match(/^((?:import.*\n)*)/m);
       if (importMatch) {
-        newContent = content.replace(importMatch[0], importMatch[0] + loggerImport);
+        newContent = content.replace(
+          importMatch[0],
+          importMatch[0] + loggerImport
+        );
       } else {
         newContent = loggerImport + content;
       }
@@ -149,12 +157,13 @@ const logger = {
 
     if (hasChanges) {
       fs.writeFileSync(filePath, newContent);
-      console.log(`✅ Processed ${filePath} (${consoleCount} console statements replaced)`);
+      console.log(
+        `✅ Processed ${filePath} (${consoleCount} console statements replaced)`
+      );
       return { processed: true, consoleCount };
     }
 
     return { processed: false, reason: 'no-changes' };
-
   } catch (error) {
     console.error(`❌ Error processing ${filePath}:`, error.message);
     return { processed: false, reason: 'error', error: error.message };
@@ -163,11 +172,11 @@ const logger = {
 
 function walkDirectory(dir, callback) {
   const files = fs.readdirSync(dir);
-  
+
   files.forEach(file => {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
-    
+
     if (stat.isDirectory()) {
       if (!shouldExclude(filePath)) {
         walkDirectory(filePath, callback);
@@ -185,16 +194,16 @@ function main() {
   const startTime = Date.now();
   console.log('🚀 Starting console statement replacement...');
   console.log('📁 Processing workspace:', process.cwd());
-  
+
   let totalFiles = 0;
   let processedFiles = 0;
   let totalConsoleReplacements = 0;
   let skippedFiles = { devConsole: 0, noConsole: 0, error: 0 };
 
-  walkDirectory(process.cwd(), (filePath) => {
+  walkDirectory(process.cwd(), filePath => {
     totalFiles++;
     const result = processFile(filePath);
-    
+
     if (result.processed) {
       processedFiles++;
       totalConsoleReplacements += result.consoleCount || 0;
@@ -204,7 +213,7 @@ function main() {
   });
 
   const duration = Date.now() - startTime;
-  
+
   console.log('\n📊 Summary:');
   console.log(`⏱️  Duration: ${duration}ms`);
   console.log(`📁 Total files scanned: ${totalFiles}`);

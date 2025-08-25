@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import FeatureGuard from '../FeatureGuard';
 
 vi.mock('react-router-dom', () => ({
-  useNavigate: () => vi.fn()
+  useNavigate: () => vi.fn(),
 }));
 
 vi.mock('@cosmichub/auth', () => ({
@@ -12,17 +12,25 @@ vi.mock('@cosmichub/auth', () => ({
   useSubscription: () => ({
     userTier: 'free',
     hasFeature: () => false,
-  })
+  }),
 }));
 
 describe('FeatureGuard', () => {
   it('renders upgrade card when feature not available', () => {
-    render(<FeatureGuard requiredTier="premium" feature="ai_interpretation"><div>Hidden</div></FeatureGuard>);
-  expect(screen.getAllByText(/Upgrade/i).length).toBeGreaterThan(0);
+    render(
+      <FeatureGuard requiredTier='premium' feature='ai_interpretation'>
+        <div>Hidden</div>
+      </FeatureGuard>
+    );
+    expect(screen.getAllByText(/Upgrade/i).length).toBeGreaterThan(0);
   });
 
   it('shows preview content blurred', () => {
-    const { container } = render(<FeatureGuard requiredTier="premium" feature="ai_interpretation"><div data-testid="preview-content">Content</div></FeatureGuard>);
+    const { container } = render(
+      <FeatureGuard requiredTier='premium' feature='ai_interpretation'>
+        <div data-testid='preview-content'>Content</div>
+      </FeatureGuard>
+    );
     const blurContainer = container.querySelector('.blur-lg');
     expect(blurContainer).not.toBeNull();
   });

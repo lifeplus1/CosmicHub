@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { Link } from 'expo-router';
 
 export default function AstrologyScreen() {
@@ -52,7 +58,7 @@ export default function AstrologyScreen() {
           </View>
         </View>
 
-        <Link href="/" asChild>
+        <Link href='/' asChild>
           <TouchableOpacity style={styles.backButton}>
             <Text style={styles.backButtonText}>← Back to Home</Text>
           </TouchableOpacity>

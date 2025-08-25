@@ -28,7 +28,7 @@ describe('ChartDisplay', () => {
       houses: [],
       aspects: [],
       asteroids: [],
-      angles: { ascendant: 0 }
+      angles: { ascendant: 0 },
     };
 
     render(
@@ -47,7 +47,9 @@ describe('ChartDisplay', () => {
       </QueryClientProvider>
     );
 
-  // Component shows sample data, ensure at least one chart analysis header rendered
-  expect(screen.getAllByText(/Chart Analysis/).length).toBeGreaterThanOrEqual(1);
+    // Component shows sample data, ensure at least one chart analysis header rendered
+    expect(screen.getAllByText(/Chart Analysis/).length).toBeGreaterThanOrEqual(
+      1
+    );
   });
 });

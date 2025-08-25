@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { devConsole } from '../config/devConsole';
- 
- 
+
 import { useAuth } from '@cosmichub/auth';
 import { savePreset } from '../services/api';
 import AudioPlayer from './AudioPlayer';

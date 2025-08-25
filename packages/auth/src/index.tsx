@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Auth, User, onAuthStateChanged, signOut as fbSignOut } from 'firebase/auth';
+import {
+  Auth,
+  User,
+  onAuthStateChanged,
+  signOut as fbSignOut,
+} from 'firebase/auth';
 // Use the single, centralized Firebase app/auth to avoid duplicate registrations
-import { app as sharedApp, auth as sharedAuth, hasAuthAvailable } from '@cosmichub/config/firebase';
+import {
+  app as sharedApp,
+  auth as sharedAuth,
+  hasAuthAvailable,
+} from '@cosmichub/config/firebase';
 import { logger } from '@cosmichub/config';
 
 // Simple logger for auth module - will write to files in production
@@ -16,7 +25,7 @@ const authLogger = {
   },
   error: (message: string, data?: unknown) => {
     logger.error(`[Auth Error] ${message}`, data);
-  }
+  },
 };
 
 // Delegate to centralized Firebase config package
@@ -24,24 +33,31 @@ const app = sharedApp;
 const authInstance: Auth | undefined = sharedAuth;
 
 // Export auth if initialized; otherwise create a safe mock that doesn't throw
-export const auth: Auth = authInstance ?? (new Proxy({}, {
-  get(_target, prop) {
-    if (prop === 'currentUser') {
-      return null;
+export const auth: Auth =
+  authInstance ??
+  (new Proxy(
+    {},
+    {
+      get(_target, prop) {
+        if (prop === 'currentUser') {
+          return null;
+        }
+        if (prop === 'onAuthStateChanged') {
+          return (callback: (user: User | null) => void) => {
+            // Call immediately with null to indicate no user
+            callback(null);
+            return () => {}; // Return unsubscribe function
+          };
+        }
+        if (!hasAuthAvailable) {
+          authLogger.warn(
+            'Firebase auth not available - using mock auth instead'
+          );
+        }
+        return undefined;
+      },
     }
-    if (prop === 'onAuthStateChanged') {
-      return (callback: (user: User | null) => void) => {
-        // Call immediately with null to indicate no user
-        callback(null);
-        return () => {}; // Return unsubscribe function
-      };
-    }
-    if (!hasAuthAvailable) {
-    authLogger.warn('Firebase auth not available - using mock auth instead');
-  }
-    return undefined;
-  }
-}) as Auth);
+  ) as Auth);
 
 logger.info('🔥 Firebase Auth initialized:', {
   hasApp: !!app,
@@ -90,7 +106,10 @@ mockUser = loadMockUserFromStorage();
 const notifyAuthStateChange = (user: User | null) => {
   mockUser = user;
   saveMockUserToStorage(user);
-  logger.info('🔔 Auth state changed:', user ? `Mock user: ${user.email}` : 'No user');
+  logger.info(
+    '🔔 Auth state changed:',
+    user ? `Mock user: ${user.email}` : 'No user'
+  );
   authStateListeners.forEach(listener => listener(user));
 };
 
@@ -119,28 +138,31 @@ export const useAuth = (): AuthState => {
       return;
     }
     listenerSetupRef.current = true;
-    
+
     if (process.env['NODE_ENV'] === 'development') {
       logger.info('🎯 Setting up auth state listener...');
     }
-    
+
     // Add to local listeners for mock auth
     const mockAuthListener = (user: User | null) => {
       logger.info('🧪 Mock auth state changed:', user ? user.email : 'null');
       setUser(user);
     };
     authStateListeners.push(mockAuthListener);
-    
-  let unsubscribe: (() => void) | undefined;
-    
+
+    let unsubscribe: (() => void) | undefined;
+
     // Only listen to Firebase auth changes if auth is properly initialized
-  if (authInstance && hasAuthAvailable) {
+    if (authInstance && hasAuthAvailable) {
       try {
         unsubscribe = onAuthStateChanged(
           authInstance,
-          (currentUser) => {
+          currentUser => {
             if (process.env['NODE_ENV'] === 'development') {
-              logger.info('🔥 Firebase auth state changed:', currentUser ? 'User signed in' : 'No user');
+              logger.info(
+                '🔥 Firebase auth state changed:',
+                currentUser ? 'User signed in' : 'No user'
+              );
             }
             if (currentUser) {
               setUser(currentUser);
@@ -151,7 +173,7 @@ export const useAuth = (): AuthState => {
               setLoading(false);
             }
           },
-          (error) => {
+          error => {
             logger.error('Auth state change error:', error);
             setLoading(false);
           }
@@ -214,21 +236,25 @@ export async function logIn(email: string, password: string): Promise<User> {
       isAnonymous: false,
       metadata: {
         creationTime: new Date().toISOString(),
-        lastSignInTime: new Date().toISOString()
+        lastSignInTime: new Date().toISOString(),
       },
       providerData: [],
       refreshToken: 'mock-refresh-token',
-      tenantId: null
+      tenantId: null,
     } as unknown as User;
-    
+
     // Notify all auth state listeners
     notifyAuthStateChange(mockUserData);
     return mockUserData;
   }
-  
+
   try {
     const { signInWithEmailAndPassword } = await import('firebase/auth');
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return userCredential.user;
   } catch (error) {
     logger.error('Firebase auth failed, trying mock login:', error);
@@ -246,13 +272,13 @@ export async function logIn(email: string, password: string): Promise<User> {
         isAnonymous: false,
         metadata: {
           creationTime: new Date().toISOString(),
-          lastSignInTime: new Date().toISOString()
+          lastSignInTime: new Date().toISOString(),
         },
         providerData: [],
         refreshToken: 'mock-refresh-token',
-        tenantId: null
+        tenantId: null,
       } as unknown as User;
-      
+
       // Notify all auth state listeners
       notifyAuthStateChange(fallbackMockUser);
       return fallbackMockUser;
@@ -264,7 +290,11 @@ export async function logIn(email: string, password: string): Promise<User> {
 export async function signUp(email: string, password: string): Promise<User> {
   try {
     const { createUserWithEmailAndPassword } = await import('firebase/auth');
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return userCredential.user;
   } catch (error) {
     logger.error('Firebase sign up failed, using mock:', error);
@@ -282,13 +312,13 @@ export async function signUp(email: string, password: string): Promise<User> {
         isAnonymous: false,
         metadata: {
           creationTime: new Date().toISOString(),
-          lastSignInTime: new Date().toISOString()
+          lastSignInTime: new Date().toISOString(),
         },
         providerData: [],
         refreshToken: 'mock-refresh-token',
-        tenantId: null
+        tenantId: null,
       } as unknown as User;
-      
+
       // Notify all auth state listeners
       notifyAuthStateChange(mockNewUser);
       return mockNewUser;
@@ -311,6 +341,10 @@ export async function logOut(): Promise<void> {
 }
 
 // Export consolidated subscription provider
-export { SubscriptionProvider, useSubscription, type SubscriptionState } from './SubscriptionProvider';
+export {
+  SubscriptionProvider,
+  useSubscription,
+  type SubscriptionState,
+} from './SubscriptionProvider';
 
 export * from 'firebase/auth';

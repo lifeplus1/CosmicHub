@@ -11,7 +11,7 @@ export interface TransitBirthData {
 
 export interface DateRange {
   startDate: string; // ISO format: YYYY-MM-DD
-  endDate: string;   // ISO format: YYYY-MM-DD
+  endDate: string; // ISO format: YYYY-MM-DD
 }
 
 // Enhanced transit result interface

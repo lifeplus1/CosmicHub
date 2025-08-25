@@ -13,7 +13,7 @@ class UpgradeEventManager {
 
   subscribe(listener: (event: UpgradeRequiredEvent) => void): () => void {
     this.listeners.push(listener);
-    
+
     // Return unsubscribe function
     return () => {
       const index = this.listeners.indexOf(listener);
