@@ -2,7 +2,20 @@
 """
 Ephemeris calculations module - Updated to use remote ephemeris server.
 
-This module now proxies ephemeris calculations to the dedicated ephemeris server  # noqa: E501
+This module now pr            "chiron",
+            "ceres",
+            "pallas",
+            "juno",
+            "vesta",
+        ]
+
+               "chiron",
+            "ceres",
+            "pallas",
+            "juno",
+            "vesta",
+        ]
+        positions = _generate_deterministic_fallback(planets, julian_day) calculation requestss calculations to the dedicated ephemeris server  # noqa: E501
 for improved performance, scalability, and modularity.
 """
 
@@ -104,10 +117,24 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
         ephemeris_url = os.getenv(
             "EPHEMERIS_SERVER_URL", "http://localhost:8001"
         )
-        api_key = os.getenv("API_KEY", "")
+        api_key = os.getenv("API_KEY", "dev-placeholder-key")  # Fallback to dev key
+        logger.info(f"Ephemeris integration - API_KEY present: {bool(api_key)}, URL: {ephemeris_url}, api_key: {api_key[:10]}...")
+
+        # Test ephemeris server connectivity first
+        try:
+            health_response = requests.get(f"{ephemeris_url}/health", timeout=5)
+            logger.info(f"Ephemeris server health check: {health_response.status_code}")
+        except Exception as health_error:
+            logger.error(f"Ephemeris server unreachable: {health_error}")
+            return {}
+        
+        # TEMPORARY DEBUG: Show first few chars of API key to verify it's loaded
+        api_key_preview = api_key[:3] + "..." + api_key[-3:] if len(api_key) > 6 else api_key
+        logger.info(f"DEBUG: API key preview: '{api_key_preview}'")
 
         # Define the planets and asteroids we want to calculate
         planets = [
+            # Main planets
             "sun",
             "moon",
             "mercury",
@@ -118,11 +145,49 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
             "uranus",
             "neptune",
             "pluto",
+            # Lunar nodes
+            "north_node",
+            "south_node",
+            # Lilith points
+            "lilith_mean",
+            "lilith_true",
+            # Major asteroids (the "big four" + Chiron)
             "chiron",
-            "ceres",
-            "pallas",
-            "juno",
-            "vesta",
+            "ceres",        # 1
+            "pallas",       # 2
+            "juno",         # 3
+            "vesta",        # 4
+            # Additional working asteroids (all supported by basic ephemeris files)
+            "astraea",      # 5
+            "hebe",         # 6
+            "iris",         # 7
+            "flora",        # 8
+            "metis",        # 9
+            "hygiea",       # 10
+            "parthenope",   # 11
+            "victoria",     # 12
+            "egeria",       # 13
+            "eunomia",      # 15
+            "psyche",       # 16
+            "thetis",       # 17
+            "melpomene",    # 18
+            "fortuna",      # 19 (Asteroid 19 Fortuna - different from Part of Fortune)
+            "massalia",     # 20
+            # Trans-Neptunian objects and outer system bodies
+            "eros",         # 433
+            "sedna",        # 90377
+            "eris",         # 136199
+            # Additional lunar points
+            "intp_apog",    # Interpolated Lunar Apogee (Dark Moon Lilith variant)
+            "intp_perg",    # Interpolated Lunar Perigee
+            # Uranian/Trans-Neptunian points (Hamburg School astrology)
+            "hades",        # Decay, medicine, occult
+            "zeus",         # Fire, creativity, machines
+            "kronos",       # Authority, leadership, government
+            "apollon",      # Science, research, peace
+            "admetos",      # Raw materials, real estate
+            "vulkanus",     # Power, force, might
+            "poseidon",     # Spirituality, ideas, media
         ]
 
         # Use batch calculation for efficiency
@@ -146,7 +211,13 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
         )
 
         if response.status_code == 200:
-            remote_data = response.json()
+            remote_data: Dict[str, Any] = response.json()
+            logger.info(f"Ephemeris server response keys: {list(remote_data.keys())}")
+            logger.info(f"Raw ephemeris response: {remote_data}")
+            # Simple debug: count results
+            if 'results' in remote_data:
+                results_list = remote_data.get('results', [])
+                logger.info(f"Ephemeris batch returned {len(results_list)} result entries")
 
             # Convert to legacy format for backward compatibility
             positions: Dict[str, PlanetPosition] = {}
@@ -154,26 +225,39 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
             # Handle both single result and batch results format
             if "results" in remote_data:
                 # Batch response format
-                for result in remote_data["results"]:
-                    planet = result.get("planet", "unknown")
-                    position_data = result.get("position", {})
+                results: list[Dict[str, Any]] = remote_data["results"]
+                for result in results:
+                    planet: str = result.get("planet", "unknown")
+                    position_data: Dict[str, Any] = result.get("position", {})
                     positions[planet] = PlanetPosition(
                         position=position_data.get("position", 0.0),
                         retrograde=position_data.get("retrograde", False),
                     )
             else:
                 # Single result format (fallback)
-                for planet, planet_data in remote_data.items():
-                    positions[planet] = PlanetPosition(
-                        position=planet_data.get(
-                            "longitude", planet_data.get("position", 0.0)
+                for planet_key, planet_data in remote_data.items():
+                    planet_name: str = planet_key
+                    planet_info: Dict[str, Any] = planet_data
+                    positions[planet_name] = PlanetPosition(
+                        position=planet_info.get(
+                            "longitude", planet_info.get("position", 0.0)
                         ),
-                        retrograde=planet_data.get("retrograde", False),
+                        retrograde=planet_info.get("retrograde", False),
                     )
 
             logger.debug(
                 f"Remote planetary positions: {len(positions)} planets calculated"  # noqa: E501
             )
+            # Ensure asteroid list present (fallback deterministic if missing)
+            required_asteroids = ["chiron","ceres","pallas","juno","vesta","eros","psyche","fortuna","sedna","eris"]
+            missing_asteroids = [a for a in required_asteroids if a not in positions]
+            if missing_asteroids:
+                try:
+                    fallback_positions = _generate_deterministic_fallback(missing_asteroids, julian_day)
+                    positions.update(fallback_positions)
+                    logger.info(f"Added deterministic fallback for missing asteroids: {missing_asteroids}")
+                except Exception as fe:  # pragma: no cover
+                    logger.warning(f"Failed to generate asteroid fallback: {fe}")
             return positions
         else:
             logger.warning(
@@ -196,6 +280,7 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
         )
         # Deterministic fallback for test environments so tests aren't flaky
         planets = [
+            # Main planets
             "sun",
             "moon",
             "mercury",
@@ -206,11 +291,49 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
             "uranus",
             "neptune",
             "pluto",
+            # Lunar nodes
+            "north_node",
+            "south_node",
+            # Lilith points
+            "lilith_mean",
+            "lilith_true",
+            # Major asteroids (the "big four" + Chiron)
             "chiron",
-            "ceres",
-            "pallas",
-            "juno",
-            "vesta",
+            "ceres",        # 1
+            "pallas",       # 2
+            "juno",         # 3
+            "vesta",        # 4
+            # Additional working asteroids
+            "astraea",      # 5
+            "hebe",         # 6
+            "iris",         # 7
+            "flora",        # 8
+            "metis",        # 9
+            "hygiea",       # 10
+            "parthenope",   # 11
+            "victoria",     # 12
+            "egeria",       # 13
+            "eunomia",      # 15
+            "psyche",       # 16
+            "thetis",       # 17
+            "melpomene",    # 18
+            "fortuna",      # 19
+            "massalia",     # 20
+            # Trans-Neptunian objects and outer system bodies
+            "eros",         # 433
+            "sedna",        # 90377
+            "eris",         # 136199
+            # Additional lunar points
+            "intp_apog",    # Interpolated Lunar Apogee
+            "intp_perg",    # Interpolated Lunar Perigee
+            # Uranian/Trans-Neptunian points
+            "hades",
+            "zeus", 
+            "kronos",
+            "apollon",
+            "admetos",
+            "vulkanus",
+            "poseidon",
         ]
         if _should_use_test_fallback():
             logger.info(

@@ -1,4 +1,3 @@
-import { auth } from '@cosmichub/auth';
 import axios from 'axios';
 import { mobileConfig } from '../config';
 
@@ -41,6 +40,28 @@ interface DateRange {
   end: string;
 }
 
+interface UpcomingTransit {
+  id: string;
+  title: string;
+  description: string;
+  exactTime: string;
+  type: 'major' | 'daily' | 'weekly' | 'monthly';
+  aspect: string;
+  planetaryBodies: string[];
+}
+
+interface NotificationPreferences {
+  majorTransits: boolean;
+  dailyInsights: boolean;
+  weeklyForecasts: boolean;
+  monthlyOverview: boolean;
+  locationBased: boolean;
+  soundEnabled: boolean;
+  vibrationEnabled: boolean;
+  quietHoursStart?: string;
+  quietHoursEnd?: string;
+}
+
 // Lightweight devConsole (mirrors web pattern) to avoid raw console usage in production bundles
 // Reuse web devConsole via lazy dynamic import to avoid duplication
 interface DevConsole {
@@ -74,10 +95,16 @@ class MobileApiService {
   private setupInterceptors() {
     // Request interceptor to add auth token
     axios.interceptors.request.use(async config => {
-      const user = auth.currentUser;
-      if (user) {
-        const token = await user.getIdToken();
-        config.headers.Authorization = `Bearer ${token}`;
+      try {
+        // Try to get auth token from Firebase auth
+        const token = await this.getAuthToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        // Auth not available - continue without token
+        const dc = await getDevConsole();
+        dc.warn?.('Auth not available, continuing without token:', error);
       }
       return config;
     });
@@ -95,6 +122,40 @@ class MobileApiService {
         return Promise.reject(new Error('Unknown error occurred'));
       }
     );
+  }
+
+  /**
+   * Safely get auth token from Firebase
+   */
+  private async getAuthToken(): Promise<string | null> {
+    try {
+      // Import Firebase auth directly to avoid proxy issues
+      const { getAuth, onAuthStateChanged } = await import('firebase/auth');
+      const auth = getAuth();
+      
+      return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          unsubscribe();
+          if (user) {
+            user.getIdToken()
+              .then((token) => {
+                resolve(token);
+              })
+              .catch(async (error) => {
+                const dc = await getDevConsole();
+                dc.warn?.('Failed to get ID token:', error);
+                resolve(null);
+              });
+          } else {
+            resolve(null);
+          }
+        });
+      });
+    } catch (error) {
+      const dc = await getDevConsole();
+      dc.warn?.('Firebase auth not available:', error);
+      return null;
+    }
   }
 
   // Chart generation - same endpoints as your web app
@@ -177,6 +238,67 @@ class MobileApiService {
         `${this.baseURL}/api/frequencies/presets`
       );
       return response.data as FrequencyResponse;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  // Notification-related API methods
+  async getUpcomingTransits(
+    userId: string,
+    birthData: BirthData,
+    location?: { latitude: number; longitude: number }
+  ): Promise<UpcomingTransit[]> {
+    try {
+      const response = await axios.post(
+        `${this.baseURL}/api/transits/upcoming`,
+        {
+          userId,
+          birthData,
+          location,
+          lookAheadDays: 30, // Get transits for next 30 days
+        }
+      );
+      return (response.data as { transits: UpcomingTransit[] }).transits;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async updateNotificationPreferences(
+    preferences: NotificationPreferences
+  ): Promise<void> {
+    try {
+      await axios.post(
+        `${this.baseURL}/api/user/notification-preferences`,
+        preferences
+      );
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getNotificationPreferences(): Promise<NotificationPreferences> {
+    try {
+      const response = await axios.get(
+        `${this.baseURL}/api/user/notification-preferences`
+      );
+      return response.data as NotificationPreferences;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async registerPushToken(token: string, deviceInfo: {
+    platform: 'ios' | 'android';
+    deviceId: string;
+    appVersion: string;
+  }): Promise<void> {
+    try {
+      await axios.post(`${this.baseURL}/api/user/push-token`, {
+        token,
+        ...deviceInfo,
+      });
     } catch (error) {
       throw this.handleError(error);
     }

@@ -45,6 +45,8 @@ interface BackendChartResponse {
   planets?: Record<string, BackendPlanet>;
   houses?: Record<string, BackendHouse>;
   aspects?: BackendAspect[];
+  asteroids?: Record<string, BackendPlanet>; // Add asteroids
+  points?: Record<string, BackendPlanet>; // Add points (nodes, lilith)
   latitude?: number;
   longitude?: number;
   timezone?: string;
@@ -61,6 +63,8 @@ function isBackendChartResponse(data: unknown): data is BackendChartResponse {
     (!('planets' in response) || typeof response.planets === 'object') &&
     (!('houses' in response) || typeof response.houses === 'object') &&
     (!('aspects' in response) || Array.isArray(response.aspects)) &&
+    (!('asteroids' in response) || typeof response.asteroids === 'object') &&
+    (!('points' in response) || typeof response.points === 'object') &&
     (!('latitude' in response) || typeof response.latitude === 'number') &&
     (!('longitude' in response) || typeof response.longitude === 'number') &&
     (!('timezone' in response) || typeof response.timezone === 'string') &&
@@ -84,7 +88,7 @@ const ChartResults: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [chartData, setChartData] = useState<ExtendedChartData | null>(null);
+  const [chartData, setChartData] = useState<BackendChartResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -304,9 +308,8 @@ const ChartResults: React.FC = () => {
         if (!isBackendChartResponse(rawChart))
           throw new Error('Invalid chart data received from server');
 
-        // Transform the backend data to frontend format
-        const transformedChart = transformChartData(rawChart);
-        setChartData(transformedChart);
+        // Pass raw backend data to ChartDisplay - let normalizeChart() handle transformation
+        setChartData(rawChart as any);
       } catch (err) {
         setError(
           err instanceof Error

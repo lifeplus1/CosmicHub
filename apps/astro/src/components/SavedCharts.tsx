@@ -1,8 +1,8 @@
 import React, { useState, type JSX } from 'react';
 
 // Fallback date formatter with better error handling
-const formatDate = (date: string | Date | undefined | null): string => {
-  if (date === null || date === undefined || date === '') return 'Unknown';
+const formatDate = (date: string | null | undefined): string => {
+  if (date == null || date === '') return 'Unknown';
   try {
     const d = typeof date === 'string' ? new Date(date) : date;
     // Check if date is valid

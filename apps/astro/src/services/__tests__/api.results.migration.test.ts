@@ -2,13 +2,29 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as api from '../api';
 import axios from 'axios';
 
-vi.mock('axios');
+// Mock axios and its create method
+vi.mock('axios', () => {
+  const mockAxios = {
+    post: vi.fn(),
+    get: vi.fn(),
+    delete: vi.fn(),
+    patch: vi.fn(),
+    create: vi.fn(() => ({
+      interceptors: {
+        request: { use: vi.fn() },
+        response: { use: vi.fn() }
+      }
+    })),
+  };
+  return { default: mockAxios };
+});
 
 const mockedAxios = axios as unknown as {
   post: ReturnType<typeof vi.fn>;
   get: ReturnType<typeof vi.fn>;
   delete: ReturnType<typeof vi.fn>;
   patch: ReturnType<typeof vi.fn>;
+  create: ReturnType<typeof vi.fn>;
 };
 
 // Basic token mock
@@ -19,6 +35,11 @@ vi.mock('@cosmichub/config/firebase', () => ({
   auth: {
     currentUser: { getIdToken: vi.fn().mockResolvedValue('test-token') },
   },
+}));
+
+// Mock CSRF service
+vi.mock('../csrf', () => ({
+  getHeaders: vi.fn().mockResolvedValue({ 'X-CSRF-Token': 'mock-csrf-token' })
 }));
 
 // Helper to build axios response

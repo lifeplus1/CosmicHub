@@ -3,11 +3,13 @@ import {
   normalizeChart,
   isChartLike,
   hasChartContent,
-  getSignFromDegree,
-  getRulerFromSign,
   getAspectOrb,
   type ChartLike,
 } from '../normalizeChart';
+import { getSignFromDegreesCapitalized, getRulerFromSign } from '../../../utils/astrologyUtils';
+
+// Helper functions to match the expected test interface
+const getSignFromDegree = getSignFromDegreesCapitalized;
 
 // Helper to deeply clone via JSON for immutability checks
 const clone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj)) as T;
@@ -59,7 +61,7 @@ describe('normalizeChart utilities', () => {
     expect(h1).toBeDefined();
     if (h0 !== undefined) {
       expect(h0.degree).toBe(12 % 30);
-      expect(h0.ruler).toBe(getRulerFromSign(h0.sign));
+      expect(h0.ruler).toBe(getRulerFromSign(h0.sign.toLowerCase() as any));
     }
     if (h1 !== undefined) {
       expect(h1.degree).toBe(47 % 30);

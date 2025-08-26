@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { devConsole } from '../config/environment';
 import { Card, Button } from '@cosmichub/ui';
 import { MultiSystemChartDisplay } from '../components/MultiSystemChart';
+import type { MultiSystemChartData } from '../components/MultiSystemChart/types';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
+import { fetchChart } from '../services/api';
 import type { ChartBirthData } from '../services/api';
 
 const MultiSystemChart: React.FC = () => {
@@ -12,10 +14,52 @@ const MultiSystemChart: React.FC = () => {
     'western',
     'vedic',
   ]);
+  const [chartData, setChartData] = useState<MultiSystemChartData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch multi-system chart data when birth data is available
+  useEffect(() => {
+    const fetchMultiSystemChart = async () => {
+      if (!birthData || !isDataValid) {
+        setChartData(null);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        devConsole.log?.('🌟 Fetching multi-system chart data...', birthData);
+        
+        // Call the multi-system chart API using the fetchChart service
+        const result = await fetchChart(birthData);
+        
+        if (result.success) {
+          devConsole.log?.('✅ Multi-system chart data received:', result.data);
+          
+          // The backend returns the multi-system data directly, not wrapped in a MultiSystemResponse
+          // So we need to cast the response data to MultiSystemChartData
+          setChartData(result.data as unknown as MultiSystemChartData);
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to calculate multi-system chart';
+        devConsole.error('❌ Error fetching multi-system chart:', error);
+        setError(errorMessage);
+        setChartData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMultiSystemChart();
+  }, [birthData, isDataValid]);
 
   const handleBirthDataSubmit = (data: ChartBirthData): void => {
     // Birth data is already set in context by SimpleBirthForm
-    // No navigation needed - stay on this page and show the multi-system charts
+    // The useEffect above will automatically trigger the API call
     devConsole.log?.('🧭 Multi-system chart birth data submitted', data);
   };
 
@@ -134,10 +178,51 @@ const MultiSystemChart: React.FC = () => {
           {/* Chart Comparison */}
           {selectedSystems.length > 0 && (
             <Card title='Chart Comparison'>
-              <MultiSystemChartDisplay
-                birthData={birthData}
-                showComparison={true}
-              />
+              {/* Show loading state */}
+              {isLoading && (
+                <div className='flex items-center justify-center p-8'>
+                  <div className='w-6 h-6 border-b-2 border-cosmic-purple rounded-full animate-spin mr-3'></div>
+                  <span className='text-cosmic-silver'>Calculating multi-system chart...</span>
+                </div>
+              )}
+              
+              {/* Show error state */}
+              {error && !isLoading && (
+                <div className='p-6 border border-red-500 rounded-md bg-red-900/50'>
+                  <div className='text-center'>
+                    <h3 className='font-bold text-red-400 mb-2'>Calculation Error</h3>
+                    <p className='text-cosmic-silver/70'>{error}</p>
+                    <Button 
+                      onClick={() => window.location.reload()} 
+                      variant='secondary' 
+                      className='mt-3'
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Show chart when data is available */}
+              {chartData && !isLoading && !error && (
+                <MultiSystemChartDisplay
+                  chartData={chartData}
+                  birthData={birthData}
+                  showComparison={true}
+                />
+              )}
+              
+              {/* Show placeholder when no data and no loading/error */}
+              {!chartData && !isLoading && !error && (
+                <div className='p-6 border border-yellow-500 rounded-md bg-yellow-900/50'>
+                  <div className='text-center'>
+                    <h3 className='font-bold text-cosmic-silver'>No Chart Data</h3>
+                    <p className='text-cosmic-silver/70'>
+                      Waiting for chart calculation...
+                    </p>
+                  </div>
+                </div>
+              )}
             </Card>
           )}
 

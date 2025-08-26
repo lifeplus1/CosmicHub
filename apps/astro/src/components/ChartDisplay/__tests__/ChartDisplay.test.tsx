@@ -6,7 +6,7 @@ import ChartDisplay from '../ChartDisplay';
 
 // Mock the astrologyService module
 vi.mock('@/services/astrologyService', () => ({
-  fetchChartData: vi.fn(),
+  fetchSavedChart: vi.fn(),
 }));
 
 const queryClient = new QueryClient({

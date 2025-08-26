@@ -330,7 +330,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
             )}
             <div className='flex flex-col sm:flex-row gap-3 justify-center'>
               {!maxRetriesReached && (
-                <Button onClick={this.handleRetry} variant='primary' size='sm'>
+                <Button onClick={this.handleRetry} variant='default' size='sm'>
                   Try Again
                 </Button>
               )}

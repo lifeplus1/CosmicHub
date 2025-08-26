@@ -215,7 +215,7 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
           <div className='text-center'>
             <Button
               onClick={onPlayPause}
-              variant={isPlaying ? 'secondary' : 'primary'}
+              variant={isPlaying ? 'secondary' : 'default'}
             >
               {isPlaying ? 'Pause Session' : 'Start Session'}
             </Button>

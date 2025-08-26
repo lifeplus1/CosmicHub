@@ -97,9 +97,23 @@ type NumerologyDataValidated = z.infer<typeof NumerologySchema>;
 const removeUndefinedReplacer = (_key: string, value: unknown): unknown =>
   value === undefined ? null : value;
 
-// Serialization function
+// Size optimization helper: remove null/undefined fields before serialization
+export function optimizeForSerialization<T extends Record<string, unknown>>(data: T): Partial<T> {
+  const optimized: Partial<T> = {};
+  
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== null && value !== undefined && value !== '') {
+      optimized[key as keyof T] = value as T[keyof T];
+    }
+  }
+  
+  return optimized;
+}
+
+// Enhanced serialization with optimization options
 export function serializeAstrologyData(
-  data: AstrologyChart | UserProfile | NumerologyData
+  data: AstrologyChart | UserProfile | NumerologyData,
+  options: { optimize?: boolean } = {}
 ): string {
   try {
     let validatedData:
@@ -107,12 +121,17 @@ export function serializeAstrologyData(
       | ProfileDataValidated
       | NumerologyDataValidated;
 
-    if (isAstrologyChart(data)) {
-      validatedData = ChartSchema.parse(data);
-    } else if (isUserProfile(data)) {
-      validatedData = ProfileSchema.parse(data);
-    } else if (isNumerologyData(data)) {
-      validatedData = NumerologySchema.parse(data);
+    // Apply optimization before validation if requested
+    const processedData = options.optimize 
+      ? optimizeForSerialization(data as unknown as Record<string, unknown>) 
+      : data;
+
+    if (isAstrologyChart(processedData)) {
+      validatedData = ChartSchema.parse(processedData);
+    } else if (isUserProfile(processedData)) {
+      validatedData = ProfileSchema.parse(processedData);
+    } else if (isNumerologyData(processedData)) {
+      validatedData = NumerologySchema.parse(processedData);
     } else {
       throw new Error('Unknown data type for serialization');
     }

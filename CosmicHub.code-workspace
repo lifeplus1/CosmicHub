@@ -10,11 +10,11 @@
     },
     {
       "name": "Astro Frontend",
-      "path": "./frontend/astro",
+      "path": "./apps/astro",
     },
     {
       "name": "HealWave Frontend",
-      "path": "./frontend/healwave",
+      "path": "./apps/healwave",
     },
   ],
   "settings": {
@@ -32,7 +32,7 @@
     "python.testing.pytestEnabled": true,
     "python.testing.pytestPath": "python",
     "python.testing.pytestArgs": ["backend/tests"],
-    "eslint.workingDirectories": ["frontend/astro", "frontend/healwave"],
+    "eslint.workingDirectories": ["apps/astro", "apps/healwave"],
     "prettier.configPath": "./.prettierrc",
     "files.exclude": {
       "**/node_modules": true,

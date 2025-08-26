@@ -1,6 +1,6 @@
 /**
  * Offline Storage for Chart Data
- * Provides IndexedDB storage for chart data with sync capabilities
+ * Provides IndexedDB storage with enhanced serialization for chart data with sync capabilities
  */
 
 // Simple console logger for this package

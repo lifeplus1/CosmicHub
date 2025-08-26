@@ -4,6 +4,15 @@ from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
+# Constants
+ZODIAC_SIGNS = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+]
+
+# Base epoch for calculations
+J2000_EPOCH = 2451545.0
+
 # Uranian planets (transneptunian points)
 URANIAN_PLANETS: Dict[str, Dict[str, Any]] = {
     "cupido": {
@@ -78,6 +87,10 @@ def calculate_uranian_planets_positions(
     julian_day: float,
 ) -> Dict[str, Dict[str, Any]]:
     """Calculate positions of Uranian/transneptunian planets"""
+    if julian_day <= 0:
+        logger.error(f"Invalid julian_day: {julian_day}")
+        return {}
+        
     try:
         # These are hypothetical planets used in Hamburg School astrology
         # Using approximated calculation since not all are in Swiss Ephemeris
@@ -85,14 +98,13 @@ def calculate_uranian_planets_positions(
         positions: Dict[str, Dict[str, Any]] = {}
 
         # Calculate approximate positions based on mean motions
-        # Base positions (fictional starting points for demonstration)
-        base_epoch = 2451545.0  # J2000.0
-        days_since_epoch = julian_day - base_epoch
+        days_since_epoch = julian_day - J2000_EPOCH
 
         for planet, data in URANIAN_PLANETS.items():
             # Simple calculation: base position + (days * daily motion)
             # In real implementation, these would use proper ephemeris data
-            base_position = hash(planet) % 360  # Fictional base position
+            # Use a deterministic seed based on planet name instead of hash()
+            base_position = sum(ord(c) for c in planet) % 360  # Deterministic base position
             daily_motion = (
                 data["speed"] / 365.25
             )  # Convert annual to daily motion
@@ -111,26 +123,35 @@ def calculate_uranian_planets_positions(
         logger.debug(f"Uranian planets calculated: {positions}")
         return positions
 
-    except Exception as e:
+    except (TypeError, ValueError) as e:
         logger.error(f"Error calculating Uranian planets: {str(e)}")
+        return {}
+    except Exception as e:
+        logger.error(f"Unexpected error calculating Uranian planets: {str(e)}")
         return {}
 
 
 def calculate_midpoints(planets: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     """Calculate midpoints between planets"""
+    if not planets:
+        logger.warning("No planets provided for midpoint calculation")
+        return {}
+        
     try:
         midpoints: Dict[str, Dict[str, Any]] = {}
-
         planet_names = list(planets.keys())
 
         for i, planet1 in enumerate(planet_names):
             for planet2 in planet_names[i + 1 :]:  # noqa: E203
+                planet1_data = planets.get(planet1, {})
+                planet2_data = planets.get(planet2, {})
+                
                 if (
-                    "position" in planets[planet1]
-                    and "position" in planets[planet2]
+                    "position" in planet1_data
+                    and "position" in planet2_data
                 ):
-                    pos1 = planets[planet1]["position"]
-                    pos2 = planets[planet2]["position"]
+                    pos1 = planet1_data["position"]
+                    pos2 = planet2_data["position"]
 
                     # Calculate midpoint (shortest arc)
                     diff = abs(pos1 - pos2)
@@ -151,8 +172,11 @@ def calculate_midpoints(planets: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
 
         return midpoints
 
-    except Exception as e:
+    except (TypeError, ValueError, KeyError) as e:
         logger.error(f"Error calculating midpoints: {str(e)}")
+        return {}
+    except Exception as e:
+        logger.error(f"Unexpected error calculating midpoints: {str(e)}")
         return {}
 
 
@@ -228,12 +252,11 @@ def analyze_uranian_patterns(
 ) -> Dict[str, Any]:
     """Analyze Uranian astrological patterns"""
     try:
-        analysis: Dict[str, List[str]] = {
-            "dominant_themes": [],
-            "power_concentrations": [],
-            "hidden_influences": [],
-            "karmic_patterns": [],
-        }
+        # Use local variables to avoid repeated dict access
+        dominant_themes: List[str] = []
+        power_concentrations: List[str] = []
+        hidden_influences: List[str] = []
+        karmic_patterns: List[str] = []
 
         # Check for concentrations of Uranian planets
         uranian_positions = [
@@ -252,52 +275,51 @@ def analyze_uranian_patterns(
             # Find concentrated areas
             for segment, count in segments.items():
                 if count >= 3:
-                    sign_name = [
-                        "Aries",
-                        "Taurus",
-                        "Gemini",
-                        "Cancer",
-                        "Leo",
-                        "Virgo",
-                        "Libra",
-                        "Scorpio",
-                        "Sagittarius",
-                        "Capricorn",
-                        "Aquarius",
-                        "Pisces",
-                    ][segment]
-                    analysis["power_concentrations"].append(
-                        f"Strong Uranian influence in {sign_name} - collective unconscious themes"  # noqa: E501
-                    )
+                    if 0 <= segment < len(ZODIAC_SIGNS):
+                        sign_name = ZODIAC_SIGNS[segment]
+                        power_concentrations.append(
+                            f"Strong Uranian influence in {sign_name} - collective unconscious themes"  # noqa: E501
+                        )
 
         # Analyze Uranian planet themes
         for planet, data in uranian_planets.items():
+            if not isinstance(data, dict) or "meaning" not in data:
+                continue
+                
             if planet == "hades":
-                analysis["hidden_influences"].append(
+                hidden_influences.append(
                     f"Hades influence: {data['meaning']}"
                 )
             elif planet == "kronos":
-                analysis["dominant_themes"].append(
+                dominant_themes.append(
                     f"Kronos influence: {data['meaning']}"
                 )
             elif planet == "poseidon":
-                analysis["karmic_patterns"].append(
+                karmic_patterns.append(
                     f"Poseidon influence: {data['meaning']}"
                 )
 
         # Analyze key midpoints
         key_midpoints = ["sun_moon", "sun_mercury", "moon_mercury"]
         for mp in key_midpoints:
-            if mp in midpoints:
-                analysis["dominant_themes"].append(
+            if mp in midpoints and "meaning" in midpoints[mp]:
+                dominant_themes.append(
                     f"Active {mp} midpoint: {midpoints[mp]['meaning']}"
                 )
 
-        return analysis
+        return {
+            "dominant_themes": dominant_themes,
+            "power_concentrations": power_concentrations,
+            "hidden_influences": hidden_influences,
+            "karmic_patterns": karmic_patterns,
+        }
 
-    except Exception as e:
+    except (TypeError, ValueError, KeyError) as e:
         logger.error(f"Error in Uranian analysis: {str(e)}")
-        return {"error": "Analysis failed"}
+        return {"error": "Analysis failed", "details": str(e)}
+    except Exception as e:
+        logger.error(f"Unexpected error in Uranian analysis: {str(e)}")
+        return {"error": "Analysis failed", "details": str(e)}
 
 
 def calculate_uranian_astrology(

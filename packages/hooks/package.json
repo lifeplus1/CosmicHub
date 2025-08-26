@@ -1,0 +1,38 @@
+{
+  "name": "@cosmichub/hooks",
+  "version": "1.0.0",
+  "description": "Shared React hooks for CosmicHub applications",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings=0",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@types/react": "^18.3.0",
+    "@vitest/ui": "^2.1.4",
+    "eslint": "^9.33.0",
+    "jsdom": "^25.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.4"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}

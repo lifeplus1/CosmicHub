@@ -2,414 +2,162 @@
 @tailwind components;
 @tailwind utilities;
 
-/* UX-021: Mobile PWA Enhancements - CSS Custom Properties */
+/* Custom CSS Variables */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  /* Mobile PWA Enhancement Variables */
-  --vh: 1vh; /* Real viewport height unit, updated by JS */
+  --vh: 1vh;
   --safe-area-inset-top: env(safe-area-inset-top);
   --safe-area-inset-right: env(safe-area-inset-right);
   --safe-area-inset-bottom: env(safe-area-inset-bottom);
   --safe-area-inset-left: env(safe-area-inset-left);
-  --touch-target-min: 44px; /* Minimum touch target size */
+  --touch-target-min: 44px;
   --app-header-height: 60px;
   --app-bottom-nav-height: 80px;
+  
+  /* Universal theme colors (works in all browsers) */
+  --theme-primary: #7c3aed;
+  --theme-primary-dark: #553c9a;
+  --theme-secondary: #8b5cf6;
+  --theme-accent: #06b6d4;
+  
+  /* Color scheme support */
+  color-scheme: dark light;
 }
 
-/* Custom slider styling */
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-}
-
-/* DurationTimer Component Styles */
-.duration-timer-progress-bar {
-  transform-origin: left center;
-  transform: scaleX(var(--progress-scale, 0));
-}
-
-.slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
-}
-
-.slider::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-}
-
-.slider::-webkit-slider-track {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  height: 4px;
-}
-
-.slider::-moz-range-track {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  height: 4px;
-}
-
-/* Glassmorphism effects */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Custom animations */
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+/* Browser-specific theme color support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --theme-primary: #7c3aed;
+    --theme-background: #0f0f23;
   }
-  50% {
-    box-shadow:
-      0 0 30px rgba(6, 182, 212, 0.6),
-      0 0 40px rgba(139, 92, 246, 0.3);
-  }
-}
-
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Improved focus states */
-input[type='number']:focus,
-input[type='text']:focus,
-select:focus {
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.3);
-}
-
-/* Dark theme for select options */
-select option {
-  background-color: #1f2937;
-  color: white;
-}
-
-/* Smooth transitions for all interactive elements */
-button,
-input,
-select {
-  transition: all 0.2s ease;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+    --theme-primary: #8b5cf6;
+    --theme-background: #ffffff;
   }
 }
 
-/* UX-021: Mobile PWA Enhancements - Comprehensive Mobile Styling */
+@layer components {
+  /* Glassmorphism effects */
+  .glass {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  }
 
-/* Mobile viewport and safe area handling */
-.healwave-mobile {
-  /* Use custom viewport height to handle mobile browser chrome */
-  min-height: calc(var(--vh, 1vh) * 100);
+  /* Custom slider styling */
+  .slider {
+    @apply appearance-none bg-transparent cursor-pointer;
+  }
 
-  /* Safe area support for notched devices */
-  padding-top: var(--safe-area-inset-top);
-  padding-right: var(--safe-area-inset-right);
-  padding-bottom: var(--safe-area-inset-bottom);
-  padding-left: var(--safe-area-inset-left);
-}
+  .slider::-webkit-slider-thumb {
+    @apply appearance-none h-5 w-5 rounded-full cursor-pointer border-2 border-white/20 transition-all duration-200;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  }
 
-/* Enhanced touch targets for mobile */
-.healwave-mobile button,
-.healwave-mobile [role='button'],
-.healwave-mobile input[type='button'],
-.healwave-mobile input[type='submit'],
-.healwave-mobile .touch-target {
-  min-height: var(--touch-target-min);
-  min-width: var(--touch-target-min);
-  padding: max(12px, calc(var(--touch-target-min) - 20px) / 2) 16px;
-}
+  .slider::-webkit-slider-thumb:hover {
+    @apply scale-110;
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+  }
 
-/* Enhanced tap highlights for iOS */
-.healwave-mobile * {
-  -webkit-tap-highlight-color: rgba(124, 58, 237, 0.2);
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
+  .slider::-webkit-slider-track {
+    @apply bg-white/20 rounded-lg h-1;
+  }
 
-.healwave-mobile input,
-.healwave-mobile textarea,
-.healwave-mobile [contenteditable] {
-  -webkit-user-select: text;
-  user-select: text;
-}
+  .slider::-moz-range-thumb {
+    @apply h-5 w-5 rounded-full cursor-pointer border-2 border-white/20 transition-all duration-200;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  }
 
-/* Prevent zoom on form inputs */
-.healwave-mobile input,
-.healwave-mobile select,
-.healwave-mobile textarea {
-  font-size: 16px; /* Prevents zoom on iOS */
-  transform: translateZ(0); /* Force hardware acceleration */
-}
+  .slider::-moz-range-track {
+    @apply bg-white/20 rounded-lg h-1;
+  }
 
-/* Smooth momentum scrolling */
-.healwave-mobile .scroll-container {
-  overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
+  /* Enhanced touch targets for mobile */
+  .touch-target {
+    @apply min-h-11 min-w-11 p-3;
+  }
 
-/* Platform-specific styles */
-.healwave-ios {
-  /* iOS-specific styling */
-  -webkit-appearance: none;
-}
+  /* Pulse glow animation */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
 
-.healwave-ios .slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-}
+  /* Mobile optimizations */
+  .healwave-mobile {
+    min-height: calc(var(--vh, 1vh) * 100);
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+  }
 
-.healwave-android {
-  /* Android-specific styling */
-  /* Ensure proper touch feedback */
-}
-
-.healwave-android *:focus {
-  outline: 2px solid rgba(124, 58, 237, 0.5);
-  outline-offset: 2px;
-}
-
-/* Mobile-optimized controls */
-.healwave-mobile .slider {
-  height: 44px; /* Larger touch target */
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-}
-
-.healwave-mobile .slider::-webkit-slider-track {
-  height: 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.healwave-mobile .slider::-webkit-slider-thumb {
-  appearance: none;
-  height: 24px;
-  width: 24px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-  margin-top: -8px;
-}
-
-/* Mobile keyboard awareness */
-.healwave-mobile.keyboard-visible {
-  /* Adjust layout when mobile keyboard is visible */
-  min-height: calc(var(--vh, 1vh) * 50);
-}
-
-.healwave-mobile .form-container {
-  /* Ensure forms are visible above keyboard */
-  padding-bottom: calc(env(keyboard-inset-height, 0px) + 20px);
-}
-
-/* Mobile navigation improvements */
-.healwave-mobile .nav-button {
-  min-height: 48px;
-  min-width: 48px;
-  touch-action: manipulation;
-}
-
-/* Pull-to-refresh styling */
-.healwave-mobile .content-wrapper {
-  overscroll-behavior-y: contain;
-}
-
-/* Mobile modal and overlay improvements */
-.healwave-mobile .modal-overlay {
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-
-.healwave-mobile .modal-content {
-  margin: var(--safe-area-inset-top) var(--safe-area-inset-right)
-    var(--safe-area-inset-bottom) var(--safe-area-inset-left);
-  max-height: calc(var(--vh, 1vh) * 90);
-  overflow-y: auto;
-}
-
-/* Mobile-optimized loading states */
-.healwave-mobile .loading-spinner {
-  /* Ensure loading indicators are visible and appropriately sized */
-  min-height: var(--touch-target-min);
-  min-width: var(--touch-target-min);
-}
-
-/* Accessibility improvements for mobile */
-@media (prefers-reduced-motion: reduce) {
   .healwave-mobile * {
+    -webkit-tap-highlight-color: rgba(124, 58, 237, 0.2);
+    -webkit-touch-callout: none;
+  }
+
+  .healwave-mobile input,
+  .healwave-mobile textarea,
+  .healwave-mobile [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+@layer utilities {
+  /* Custom animations */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), 0 0 40px rgba(139, 92, 246, 0.3);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(0px); 
+    }
+    50% { 
+      transform: translateY(-20px); 
+    }
+  }
+
+  @keyframes shimmer {
+    0% { 
+      background-position: -200% 0; 
+    }
+    100% { 
+      background-position: 200% 0; 
+    }
+  }
+
+  /* Utility classes */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+
+  .gpu-accelerated {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-@media (prefers-contrast: high) {
-  .healwave-mobile {
-    --touch-highlight-color: rgba(124, 58, 237, 0.8);
-  }
-
-  .healwave-mobile button,
-  .healwave-mobile [role='button'] {
-    border: 2px solid currentColor;
-  }
-}
-
-/* Mobile-first responsive typography */
-.healwave-mobile h1 {
-  font-size: clamp(1.8rem, 4vw, 3.2rem);
-  line-height: 1.2;
-}
-
-.healwave-mobile h2 {
-  font-size: clamp(1.4rem, 3vw, 2.4rem);
-  line-height: 1.3;
-}
-
-.healwave-mobile h3 {
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-  line-height: 1.4;
-}
-
-.healwave-mobile p,
-.healwave-mobile span {
-  font-size: clamp(0.9rem, 2vw, 1rem);
-  line-height: 1.6;
-}
-
-/* Mobile-specific utilities */
-.healwave-mobile .hide-on-mobile {
-  display: none;
-}
-
-.healwave-mobile .mobile-only {
-  display: block;
-}
-
-/* Default: hide mobile-only elements */
-.mobile-only {
-  display: none;
-}
-
-/* Touch gesture feedback */
-.healwave-mobile .swipe-area {
-  touch-action: pan-x;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.healwave-mobile .swipe-area.swiping {
-  transition: transform 0.1s ease-out;
-}
-
-/* Enhanced button press states for mobile */
-.healwave-mobile button:active,
-.healwave-mobile [role='button']:active {
-  transform: scale(0.95);
-  transition-duration: 0.1s;
-}
-
-/* Improved focus indicators for mobile accessibility */
-.healwave-mobile *:focus-visible {
-  outline: 3px solid rgba(124, 58, 237, 0.8);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* Optimize for mobile performance */
-.healwave-mobile * {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-.healwave-mobile .gpu-accelerated {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  will-change: transform;
 }

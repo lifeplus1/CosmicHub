@@ -1,3 +1,4 @@
+/// <reference types="../env.d.ts" />
 import { z } from 'zod';
 
 // Environment validation schema

@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      // Map shared alias used inside app packages to the astro app source so root-based
+      // tooling (eslint, language server) can resolve imports like '@/services/...'
+      "@/*": ["./apps/astro/src/*"],
+      "@cosmichub/auth": ["./packages/auth/src"],
+      "@cosmichub/config": ["./packages/config/src"],
+      "@cosmichub/frequency": ["./packages/frequency/src"],
+      "@cosmichub/hooks": ["./packages/hooks/src"],
+      "@cosmichub/integrations": ["./packages/integrations/src"],
+      "@cosmichub/pwa": ["./packages/pwa/src"],
+      "@cosmichub/ui": ["./packages/ui/src"],
+      "@cosmichub/types": ["./packages/types/src"],
+      "@cosmichub/subscriptions": ["./packages/subscriptions/src"]
+    }
+  },
+  "include": [
+    "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx", 
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".turbo",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/tests/**",
+    "**/__tests__/**"
+  ]
+}

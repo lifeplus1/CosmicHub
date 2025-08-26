@@ -83,27 +83,27 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
       () => ({
         purple: {
           bg: 'bg-purple-500',
-          border: 'border-purple-500 bg-purple-50 text-purple-700',
+          border: 'border-purple-400 bg-purple-500/20 text-purple-300',
         },
         blue: {
           bg: 'bg-blue-500',
-          border: 'border-blue-500 bg-blue-50 text-blue-700',
+          border: 'border-blue-400 bg-blue-500/20 text-blue-300',
         },
         green: {
           bg: 'bg-green-500',
-          border: 'border-green-500 bg-green-50 text-green-700',
+          border: 'border-green-400 bg-green-500/20 text-green-300',
         },
         yellow: {
           bg: 'bg-yellow-500',
-          border: 'border-yellow-500 bg-yellow-50 text-yellow-700',
+          border: 'border-yellow-400 bg-yellow-500/20 text-yellow-300',
         },
         red: {
           bg: 'bg-red-500',
-          border: 'border-red-500 bg-red-50 text-red-700',
+          border: 'border-red-400 bg-red-500/20 text-red-300',
         },
         gray: {
           bg: 'bg-gray-500',
-          border: 'border-gray-500 bg-gray-50 text-gray-700',
+          border: 'border-gray-400 bg-gray-500/20 text-gray-300',
         },
       }),
       []
@@ -171,19 +171,19 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
 
     return (
       <div
-        className='p-6 space-y-6 bg-white border border-gray-200 rounded-lg'
+        className='p-6 space-y-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl'
         role='region'
         aria-label='Binaural Settings'
       >
         <div className='flex items-center justify-between'>
-          <h3 className='text-lg font-semibold text-gray-900'>
+          <h3 className='text-lg font-semibold text-white'>
             🎵 Binaural Settings
           </h3>
           {advancedMode ? (
             <button
               type='button'
               onClick={() => setAdvancedMode(prev => !prev)}
-              className='text-sm font-medium text-blue-600 hover:text-blue-700'
+              className='text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors'
               aria-pressed='true'
               aria-expanded='true'
               aria-controls='binaural-advanced-section'
@@ -194,7 +194,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
             <button
               type='button'
               onClick={() => setAdvancedMode(prev => !prev)}
-              className='text-sm font-medium text-blue-600 hover:text-blue-700'
+              className='text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors'
               aria-pressed='false'
               aria-expanded='false'
               aria-controls='binaural-advanced-section'
@@ -209,7 +209,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
           <div>
             <label
               htmlFor='volume-slider'
-              className='block mb-2 text-sm font-medium text-gray-700'
+              className='block mb-2 text-sm font-medium text-white/90'
             >
               Volume: {currentSettings.volume}%
             </label>
@@ -230,15 +230,15 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
               aria-valuemin={0}
               aria-valuemax={100}
             >
-              <Slider.Track className='relative flex-grow h-2 bg-gray-200 rounded-lg'>
-                <Slider.Range className='absolute h-2 bg-gray-600 rounded-lg' />
+              <Slider.Track className='relative flex-grow h-2 bg-white/20 rounded-lg'>
+                <Slider.Range className='absolute h-2 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-lg' />
               </Slider.Track>
               <Slider.Thumb
-                className='block w-5 h-5 bg-white rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500'
+                className='block w-5 h-5 bg-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400'
                 aria-label='Volume thumb'
               />
             </Slider.Root>
-            <div className='flex justify-between mt-1 text-xs text-gray-500'>
+            <div className='flex justify-between mt-1 text-xs text-white/60'>
               <span>Silent</span>
               <span>Maximum</span>
             </div>
@@ -247,7 +247,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
           <div>
             <label
               htmlFor='duration-slider'
-              className='block mb-2 text-sm font-medium text-gray-700'
+              className='block mb-2 text-sm font-medium text-white/90'
             >
               Session Duration: {currentSettings.duration} minutes
             </label>
@@ -268,15 +268,15 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
               aria-valuemin={1}
               aria-valuemax={120}
             >
-              <Slider.Track className='relative flex-grow h-2 bg-gray-200 rounded-lg'>
-                <Slider.Range className='absolute h-2 bg-gray-600 rounded-lg' />
+              <Slider.Track className='relative flex-grow h-2 bg-white/20 rounded-lg'>
+                <Slider.Range className='absolute h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg' />
               </Slider.Track>
               <Slider.Thumb
-                className='block w-5 h-5 bg-white rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500'
+                className='block w-5 h-5 bg-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400'
                 aria-label='Duration thumb'
               />
             </Slider.Root>
-            <div className='flex justify-between mt-1 text-xs text-gray-500'>
+            <div className='flex justify-between mt-1 text-xs text-white/60'>
               <span>1 min</span>
               <span>2 hours</span>
             </div>
@@ -287,16 +287,16 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
         {advancedMode && (
           <div
             id='binaural-advanced-section'
-            className='pt-4 space-y-4 border-t border-gray-200'
+            className='pt-4 space-y-4 border-t border-white/20'
           >
-            <h4 className='font-medium text-gray-900'>🔧 Advanced Controls</h4>
+            <h4 className='font-medium text-white'>🔧 Advanced Controls</h4>
 
             {/* Fade Settings */}
             <div className='grid grid-cols-2 gap-4'>
               <div>
                 <label
                   htmlFor='fade-in-slider'
-                  className='block mb-2 text-sm font-medium text-gray-700'
+                  className='block mb-2 text-sm font-medium text-white/90'
                 >
                   Fade In: {currentSettings.fadeIn}s
                 </label>
@@ -318,11 +318,11 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                   aria-valuemin={0}
                   aria-valuemax={30}
                 >
-                  <Slider.Track className='relative flex-grow h-2 bg-gray-200 rounded-lg'>
-                    <Slider.Range className='absolute h-2 bg-gray-600 rounded-lg' />
+                  <Slider.Track className='relative flex-grow h-2 bg-white/20 rounded-lg'>
+                    <Slider.Range className='absolute h-2 bg-gradient-to-r from-green-400 to-emerald-400 rounded-lg' />
                   </Slider.Track>
                   <Slider.Thumb
-                    className='block w-5 h-5 bg-white rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    className='block w-5 h-5 bg-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400'
                     aria-label='Fade In thumb'
                   />
                 </Slider.Root>
@@ -331,7 +331,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
               <div>
                 <label
                   htmlFor='fade-out-slider'
-                  className='block mb-2 text-sm font-medium text-gray-700'
+                  className='block mb-2 text-sm font-medium text-white/90'
                 >
                   Fade Out: {currentSettings.fadeOut}s
                 </label>
@@ -355,11 +355,11 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                   aria-valuemin={0}
                   aria-valuemax={30}
                 >
-                  <Slider.Track className='relative flex-grow h-2 bg-gray-200 rounded-lg'>
-                    <Slider.Range className='absolute h-2 bg-gray-600 rounded-lg' />
+                  <Slider.Track className='relative flex-grow h-2 bg-white/20 rounded-lg'>
+                    <Slider.Range className='absolute h-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-lg' />
                   </Slider.Track>
                   <Slider.Thumb
-                    className='block w-5 h-5 bg-white rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    className='block w-5 h-5 bg-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-400'
                     aria-label='Fade Out thumb'
                   />
                 </Slider.Root>
@@ -367,8 +367,8 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
             </div>
 
             {/* Custom Frequency Creation */}
-            <div className='p-4 space-y-4 rounded-lg bg-gray-50'>
-              <h5 className='font-medium text-gray-900'>
+            <div className='p-4 space-y-4 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10'>
+              <h5 className='font-medium text-white'>
                 🎛️ Create Custom Frequency
               </h5>
 
@@ -376,7 +376,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                 <div>
                   <label
                     htmlFor='base-frequency'
-                    className='block mb-2 text-sm font-medium text-gray-700'
+                    className='block mb-2 text-sm font-medium text-white/90'
                   >
                     Base Frequency: {customFrequency} Hz
                   </label>
@@ -397,15 +397,15 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                     aria-valuemin={20}
                     aria-valuemax={2000}
                   >
-                    <Slider.Track className='relative flex-grow h-2 bg-gray-200 rounded-lg'>
-                      <Slider.Range className='absolute h-2 bg-gray-600 rounded-lg' />
+                    <Slider.Track className='relative flex-grow h-2 bg-white/20 rounded-lg'>
+                      <Slider.Range className='absolute h-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-lg' />
                     </Slider.Track>
                     <Slider.Thumb
-                      className='block w-5 h-5 bg-white rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500'
+                      className='block w-5 h-5 bg-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400'
                       aria-label='Base Frequency thumb'
                     />
                   </Slider.Root>
-                  <div className='flex justify-between mt-1 text-xs text-gray-500'>
+                  <div className='flex justify-between mt-1 text-xs text-white/60'>
                     <span>20 Hz</span>
                     <span>2000 Hz</span>
                   </div>
@@ -414,7 +414,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                 <div>
                   <label
                     htmlFor='binaural-beat'
-                    className='block mb-2 text-sm font-medium text-gray-700'
+                    className='block mb-2 text-sm font-medium text-white/90'
                   >
                     Binaural Beat: {binauralBeat} Hz
                   </label>
@@ -435,15 +435,15 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                     aria-valuemin={0.5}
                     aria-valuemax={100}
                   >
-                    <Slider.Track className='relative flex-grow h-2 bg-gray-200 rounded-lg'>
-                      <Slider.Range className='absolute h-2 bg-gray-600 rounded-lg' />
+                    <Slider.Track className='relative flex-grow h-2 bg-white/20 rounded-lg'>
+                      <Slider.Range className='absolute h-2 bg-gradient-to-r from-pink-400 to-purple-400 rounded-lg' />
                     </Slider.Track>
                     <Slider.Thumb
-                      className='block w-5 h-5 bg-white rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500'
+                      className='block w-5 h-5 bg-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-pink-400'
                       aria-label='Binaural Beat thumb'
                     />
                   </Slider.Root>
-                  <div className='flex justify-between mt-1 text-xs text-gray-500'>
+                  <div className='flex justify-between mt-1 text-xs text-white/60'>
                     <span>0.5 Hz</span>
                     <span>100 Hz</span>
                   </div>
@@ -463,11 +463,11 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                         className={`w-3 h-3 rounded-full ${getColorClass(currentRange.color)}`}
                         aria-label={currentRange.name}
                       />
-                      <span className='text-sm font-medium text-gray-700'>
+                      <span className='text-sm font-medium text-white/90'>
                         {currentRange.name}
                       </span>
                       {currentRange.key !== 'custom' && (
-                        <span className='text-xs text-gray-500'>
+                        <span className='text-xs text-white/60'>
                           ({currentRange.min}-{currentRange.max} Hz range)
                         </span>
                       )}
@@ -475,7 +475,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
                     <Tooltip.Content
-                      className='p-2 bg-white border rounded shadow'
+                      className='p-2 bg-black/90 backdrop-blur-sm border border-white/20 rounded shadow-xl text-white text-sm'
                       side='top'
                     >
                       Range info and benefits
@@ -502,7 +502,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                       className={`px-2 py-1 text-xs rounded border transition-colors ${
                         currentRange.key === key
                           ? getBorderColorClass(range.color)
-                          : 'border-gray-300 hover:border-gray-400'
+                          : 'border-white/30 text-white/70 hover:border-white/50 hover:bg-white/5'
                       }`}
                       aria-label={`Select ${range.name}`}
                     >
@@ -516,14 +516,14 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                   <Tooltip.Trigger asChild>
                     <button
                       onClick={createCustomPreset}
-                      className='w-full px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                      className='w-full px-4 py-2 font-medium text-white transition-all bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg hover:from-cyan-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-transparent shadow-lg hover:shadow-cyan-500/25'
                     >
                       🎵 Create Custom Frequency
                     </button>
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
                     <Tooltip.Content
-                      className='p-2 bg-white border rounded shadow'
+                      className='p-2 bg-black/90 backdrop-blur-sm border border-white/20 rounded shadow-xl text-white text-sm'
                       side='top'
                     >
                       Premium: Save custom presets with subscription
@@ -536,20 +536,20 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
         )}
 
         {/* Tips Section */}
-        <div className='p-4 rounded-lg bg-blue-50'>
-          <h5 className='mb-2 font-medium text-blue-900'>
+        <div className='p-4 rounded-lg bg-cyan-500/10 backdrop-blur-sm border border-cyan-400/20'>
+          <h5 className='mb-2 font-medium text-cyan-300'>
             💡 Tips for Best Results
           </h5>
-          <ul className='space-y-1 text-sm text-blue-800'>
+          <ul className='space-y-1 text-sm text-cyan-200/90'>
             <li>• Use headphones for proper binaural effect</li>
             <li>• Start with lower volumes and gradually increase</li>
             <li>• Delta waves (0.5-4 Hz) are best for sleep</li>
             <li>• Theta waves (4-8 Hz) enhance meditation</li>
             <li>• Alpha waves (8-14 Hz) promote relaxation</li>
           </ul>
-          <p className='mt-2 text-sm text-blue-800'>
+          <p className='mt-2 text-sm text-cyan-200/90'>
             Try our Astro app for astrology-tied frequencies!{' '}
-            <a href='/astro' className='underline hover:text-blue-600'>
+            <a href='/astro' className='text-cyan-400 hover:text-cyan-300 underline transition-colors'>
               Learn more
             </a>
           </p>

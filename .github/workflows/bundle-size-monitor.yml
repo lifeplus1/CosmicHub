@@ -1,0 +1,118 @@
+name: Bundle Size Monitor
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/**/*.ts"
+      - "apps/**/*.tsx"
+      - "packages/**/*.ts"
+      - "packages/**/*.tsx"
+      - "*.json"
+      - "apps/*/vite.config.ts"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "apps/**/*.ts"
+      - "apps/**/*.tsx"
+      - "packages/**/*.ts"
+      - "packages/**/*.tsx"
+      - "*.json"
+      - "apps/*/vite.config.ts"
+
+jobs:
+  bundle-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for size comparison
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build apps with bundle analysis
+        run: |
+          pnpm run build:astro
+          pnpm run build:healwave
+        env:
+          ANALYZE: true
+
+      - name: Analyze bundle sizes
+        run: node scripts/bundle-size-monitor.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check bundle size limits
+        run: node scripts/bundle-size-check.mjs
+        env:
+          BUNDLE_SIZE_LIMIT_KB: 300
+          BUNDLE_SIZE_DELTA_LIMIT_KB: 30
+
+      - name: Upload bundle analysis artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-analysis
+          path: |
+            metrics/bundle-*.json
+            apps/*/dist/report.html
+          retention-days: 30
+
+      - name: Comment bundle size changes on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+              const reportPath = path.join(process.cwd(), 'metrics/bundle-size-report.json');
+              if (fs.existsSync(reportPath)) {
+                const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                
+                const comment = `
+                ## 📦 Bundle Size Analysis
+                
+                | App | Current Size | Previous Size | Change | Status |
+                |-----|-------------|---------------|--------|--------|
+                ${report.apps.map(app => 
+                  `| ${app.name} | ${app.currentSize} | ${app.previousSize} | ${app.change} | ${app.status} |`
+                ).join('\n')}
+                
+                **Total Change**: ${report.totalChange}
+                
+                ${report.warnings.length > 0 ? 
+                  `### ⚠️ Warnings\n${report.warnings.map(w => `- ${w}`).join('\n')}` : 
+                  '✅ All bundle size checks passed'}
+                
+                <details>
+                <summary>🔍 Detailed Analysis</summary>
+                
+                ${report.recommendations.map(rec => `- ${rec}`).join('\n')}
+                </details>
+                `;
+                
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            } catch (error) {
+              console.log('Bundle size report not found or invalid:', error.message);
+            }

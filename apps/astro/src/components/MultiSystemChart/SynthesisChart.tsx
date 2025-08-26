@@ -14,12 +14,12 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
 
   return (
     <div className='flex flex-col space-y-4'>
-      <div className='cosmic-card bg-gradient-to-br from-white/95 to-cyan-50/95'>
-        <div className='p-4 text-gray-800'>
-          <h3 className='mb-4 font-bold text-teal-700 text-md'>
+      <div className='cosmic-card bg-gradient-to-br from-teal-900/20 to-cyan-900/20 border border-teal-500/30'>
+        <div className='p-4'>
+          <h3 className='mb-4 font-bold text-teal-400 text-md'>
             Integrated Analysis
           </h3>
-          <p className='mb-4 text-sm text-cosmic-silver/70'>
+          <p className='mb-4 text-sm text-cosmic-silver'>
             Synthesis of insights from all astrological traditions
           </p>
 
@@ -34,7 +34,7 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
                   {(data.primary_themes ?? []).map((theme, idx) => (
                     <span
                       key={idx}
-                      className='p-2 border rounded-md border-cosmic-silver/30'
+                      className='p-2 border rounded-md border-teal-400/30 bg-teal-900/20 text-cosmic-silver'
                     >
                       {theme}
                     </span>
@@ -53,10 +53,10 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
                   {(data.life_purpose ?? []).map((purpose, idx) => (
                     <div
                       key={idx}
-                      className='flex p-4 space-x-4 border border-blue-500 rounded-md bg-blue-900/50'
+                      className='flex p-4 space-x-4 border border-blue-500/50 rounded-md bg-blue-900/30'
                     >
-                      <span className='text-xl text-blue-500'>ℹ️</span>
-                      <p className='text-cosmic-silver/70'>{purpose}</p>
+                      <span className='text-xl text-blue-400'>ℹ️</span>
+                      <p className='text-cosmic-silver'>{purpose}</p>
                     </div>
                   ))}
                 </div>
@@ -73,14 +73,14 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
                   {Object.entries(data.personality_integration ?? {}).map(
                     ([aspect, traits]: [string, string[]]) => (
                       <div key={aspect}>
-                        <p className='mb-2 font-bold capitalize'>
+                        <p className='mb-2 font-bold capitalize text-cosmic-silver'>
                           {aspect.replace('_', ' ')}:
                         </p>
                         <div className='flex flex-col space-y-1'>
                           {(traits ?? []).map((trait, idx) => (
                             <p
                               key={idx}
-                              className='text-sm text-cosmic-silver/70'
+                              className='text-sm text-cosmic-silver/80'
                             >
                               {trait}
                             </p>
@@ -103,10 +103,10 @@ const SynthesisChart: React.FC<Props> = ({ data }) => {
                   {(data.spiritual_path ?? []).map((guidance, idx) => (
                     <div
                       key={idx}
-                      className='flex p-4 space-x-4 border border-green-500 rounded-md bg-green-900/50'
+                      className='flex p-4 space-x-4 border border-green-500/50 rounded-md bg-green-900/30'
                     >
-                      <span className='text-xl text-green-500'>✅</span>
-                      <p className='text-cosmic-silver/70'>{guidance}</p>
+                      <span className='text-xl text-green-400'>✅</span>
+                      <p className='text-cosmic-silver'>{guidance}</p>
                     </div>
                   ))}
                 </div>

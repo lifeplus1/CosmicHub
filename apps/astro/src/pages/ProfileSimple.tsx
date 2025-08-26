@@ -66,7 +66,7 @@ const ProfileSimple: React.FC = (): ReactElement => {
           <p className='text-cosmic-silver'>Free Tier</p>
           <Button
             onClick={() => navigate('/upgrade')}
-            variant='primary'
+            variant='default'
             aria-label='Upgrade to Premium subscription for additional features.'
           >
             Upgrade to Premium

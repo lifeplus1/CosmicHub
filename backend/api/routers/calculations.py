@@ -112,6 +112,8 @@ class ChartResponse(BaseModel):
     planets: Dict[str, Any]
     houses: Dict[str, Any]
     aspects: List[Any]
+    asteroids: Optional[Dict[str, Any]] = None  # Add asteroids field
+    points: Optional[Dict[str, Any]] = None  # Add points field for lunar nodes and Lilith
     angles: Optional[Dict[str, Any]] = None
     systems: Optional[Dict[str, Any]] = None
     latitude: Optional[float] = None
@@ -170,6 +172,8 @@ async def calculate_chart_endpoint(
             planets=chart.get("planets", {}),
             houses=houses_data,
             aspects=chart.get("aspects", []),
+            asteroids=chart.get("asteroids", {}),  # Include asteroids in response
+            points=chart.get("points", {}),  # Include points in response
             angles=chart.get("angles"),
             systems=chart.get("systems") if "systems" in chart else None,
             latitude=chart.get(
@@ -433,11 +437,7 @@ def generate_cache_key(
 
 # Type-only imports for static analysis
 # Type checking imports
-if TYPE_CHECKING:
-    from utils.vectorized_composite_utils import (
-        VectorizedChartData as TypedVectorizedChartData,
-        create_vectorized_composite_calculator as typed_create_vectorized_composite_calculator,
-    )
+# (No type-only imports currently needed)
 
 # Initialize with None as defaults
 VectorizedChartData = None  # type: ignore[assignment]

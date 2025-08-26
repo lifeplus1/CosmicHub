@@ -4,6 +4,34 @@
  */
 
 import type { ChartData, Planet, Aspect } from './api.types';
+import { 
+  getSignFromDegreesCapitalized, 
+  getElementFromSign as getElementFromSignUtil, 
+  getQualityFromSign as getQualityFromSignUtil,
+  isValidPosition,
+  normalizeAngle,
+  getSignFromDegrees
+} from '../utils/astrologyUtils';
+
+// Helper functions to bridge between centralized utils and service-specific types
+function convertElementToEnum(elementString: 'fire' | 'earth' | 'air' | 'water'): Element {
+  switch (elementString) {
+    case 'fire': return Element.Fire;
+    case 'earth': return Element.Earth;
+    case 'air': return Element.Air;
+    case 'water': return Element.Water;
+    default: return Element.Unknown;
+  }
+}
+
+function convertQualityToEnum(qualityString: 'cardinal' | 'fixed' | 'mutable'): Quality {
+  switch (qualityString) {
+    case 'cardinal': return Quality.Cardinal;
+    case 'fixed': return Quality.Fixed;
+    case 'mutable': return Quality.Mutable;
+    default: return Quality.Unknown;
+  }
+}
 // NOTE: We intentionally import only types from api.types to avoid runtime coupling.
 
 // Internal utility types & helpers
@@ -172,7 +200,7 @@ class ChartAnalyticsService {
 
     // Sun sign insights
     const sunPosition = chartData.planets.sun?.position ?? 0;
-    const sunSign = this.getSignFromPosition(sunPosition);
+    const sunSign = getSignFromDegreesCapitalized(sunPosition);
     insights.push({
       trait: `${sunSign} Core Identity`,
       strength: 85,
@@ -183,7 +211,7 @@ class ChartAnalyticsService {
 
     // Moon sign insights
     const moonPosition = chartData.planets.moon?.position ?? 0;
-    const moonSign = this.getSignFromPosition(moonPosition);
+    const moonSign = getSignFromDegreesCapitalized(moonPosition);
     insights.push({
       trait: `${moonSign} Emotional Nature`,
       strength: 80,
@@ -194,7 +222,7 @@ class ChartAnalyticsService {
 
     // Rising sign insights
     const ascendant = chartData.angles?.ascendant ?? 0;
-    const risingSign = this.getSignFromPosition(ascendant);
+    const risingSign = getSignFromDegreesCapitalized(ascendant);
     insights.push({
       trait: `${risingSign} Outer Persona`,
       strength: 75,
@@ -222,8 +250,8 @@ class ChartAnalyticsService {
     };
 
     Object.values(chartData.planets).forEach(planet => {
-      const sign = this.getSignFromPosition(planet.position);
-      const element = this.getElementFromSign(sign);
+      const sign = getSignFromDegrees(planet.position);
+      const element = convertElementToEnum(getElementFromSignUtil(sign));
       elementCounts[element]++;
     });
 
@@ -256,8 +284,8 @@ class ChartAnalyticsService {
     };
 
     Object.values(chartData.planets).forEach(planet => {
-      const sign = this.getSignFromPosition(planet.position);
-      const quality = this.getQualityFromSign(sign);
+      const sign = getSignFromDegrees(planet.position);
+      const quality = convertQualityToEnum(getQualityFromSignUtil(sign));
       qualityCounts[quality]++;
     });
 
@@ -410,7 +438,7 @@ class ChartAnalyticsService {
 
     // Group planets by sign and house
     getPlanetEntries(chartData).forEach(([name, planet]) => {
-      const sign = this.getSignFromPosition(planet.position);
+      const sign = getSignFromDegreesCapitalized(planet.position);
       signGroups[sign] ??= [];
       signGroups[sign].push(name);
 
@@ -487,9 +515,9 @@ class ChartAnalyticsService {
           // Ensure all positions are valid numbers
           // Validate planet positions
           if (
-            !this.isValidPosition(planet1.position) ||
-            !this.isValidPosition(planet2.position) ||
-            !this.isValidPosition(planet3.position)
+            !isValidPosition(planet1.position) ||
+            !isValidPosition(planet2.position) ||
+            !isValidPosition(planet3.position)
           ) {
             continue;
           }
@@ -499,7 +527,7 @@ class ChartAnalyticsService {
           const pos3 = planet3.position;
 
           if (this.isGrandTrine(pos1, pos2, pos3)) {
-            const element = this.getElementFromPosition(pos1);
+            const element = convertElementToEnum(getElementFromSignUtil(getSignFromDegrees(pos1)));
             patterns.push({
               id: `grand-trine-${name1}-${name2}-${name3}`,
               name: `${element} Grand Trine`,
@@ -590,9 +618,9 @@ class ChartAnalyticsService {
     orb = 8
   ): boolean {
     const angles = [
-      this.normalizeAngle(Math.abs(pos1 - pos2)),
-      this.normalizeAngle(Math.abs(pos2 - pos3)),
-      this.normalizeAngle(Math.abs(pos3 - pos1)),
+      normalizeAngle(Math.abs(pos1 - pos2)),
+      normalizeAngle(Math.abs(pos2 - pos3)),
+      normalizeAngle(Math.abs(pos3 - pos1)),
     ];
 
     return angles.every(
@@ -610,9 +638,9 @@ class ChartAnalyticsService {
     orb = 8
   ): boolean {
     const angles = [
-      this.normalizeAngle(Math.abs(pos1 - pos2)),
-      this.normalizeAngle(Math.abs(pos2 - pos3)),
-      this.normalizeAngle(Math.abs(pos3 - pos1)),
+      normalizeAngle(Math.abs(pos1 - pos2)),
+      normalizeAngle(Math.abs(pos2 - pos3)),
+      normalizeAngle(Math.abs(pos3 - pos1)),
     ];
 
     const hasOpposition = angles.some(angle => Math.abs(angle - 180) <= orb);
@@ -620,95 +648,6 @@ class ChartAnalyticsService {
       angles.filter(angle => Math.abs(angle - 90) <= orb).length >= 2;
 
     return hasOpposition && hasSquares;
-  }
-
-  /**
-   * Normalize angle to 0-180 range
-   */
-  private normalizeAngle(angle: number): number {
-    angle = angle % 360;
-    return angle > 180 ? 360 - angle : angle;
-  }
-
-  /**
-   * Check if a position value is valid
-   */
-  private isValidPosition(position: unknown): position is number {
-    return typeof position === 'number' && Number.isFinite(position);
-  }
-
-  /**
-   * Get zodiac sign from position
-   */
-  private getSignFromPosition(position: number): string {
-    const signs = [
-      'Aries',
-      'Taurus',
-      'Gemini',
-      'Cancer',
-      'Leo',
-      'Virgo',
-      'Libra',
-      'Scorpio',
-      'Sagittarius',
-      'Capricorn',
-      'Aquarius',
-      'Pisces',
-    ];
-    const idx = Math.floor(position / 30);
-    return idx >= 0 && idx < signs.length
-      ? (signs[idx] ?? 'Unknown')
-      : 'Unknown';
-  }
-
-  /**
-   * Get element from sign
-   */
-  private getElementFromSign(sign: string): Element {
-    const elements: Record<string, Element> = {
-      Aries: Element.Fire,
-      Taurus: Element.Earth,
-      Gemini: Element.Air,
-      Cancer: Element.Water,
-      Leo: Element.Fire,
-      Virgo: Element.Earth,
-      Libra: Element.Air,
-      Scorpio: Element.Water,
-      Sagittarius: Element.Fire,
-      Capricorn: Element.Earth,
-      Aquarius: Element.Air,
-      Pisces: Element.Water,
-    };
-    return elements[sign] ?? Element.Unknown;
-  }
-
-  /**
-   * Get element from position
-   */
-  private getElementFromPosition(position: number): string {
-    const sign = this.getSignFromPosition(position);
-    return this.getElementFromSign(sign);
-  }
-
-  /**
-   * Get quality from sign
-   */
-  private getQualityFromSign(sign: string): Quality {
-    const qualities: Record<string, Quality> = {
-      Aries: Quality.Cardinal,
-      Taurus: Quality.Fixed,
-      Gemini: Quality.Mutable,
-      Cancer: Quality.Cardinal,
-      Leo: Quality.Fixed,
-      Virgo: Quality.Mutable,
-      Libra: Quality.Cardinal,
-      Scorpio: Quality.Fixed,
-      Sagittarius: Quality.Mutable,
-      Capricorn: Quality.Cardinal,
-      Aquarius: Quality.Fixed,
-      Pisces: Quality.Mutable,
-    };
-    return qualities[sign] ?? Quality.Unknown;
   }
 
   // Additional methods for analysis (implementations would be expanded)

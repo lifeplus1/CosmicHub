@@ -8,6 +8,7 @@ import {
   TableRow,
 } from '@cosmichub/ui';
 import { getPlanetSymbol, getAspectSymbol } from './tableUtils';
+import { AstroSymbol } from '../AstroSymbol';
 
 export interface AspectRow {
   planet1: string;
@@ -39,25 +40,34 @@ const AspectTable: React.FC<{ data: AspectRow[] }> = ({ data }) => {
           <TableRow key={`aspect-${item.planet1}-${item.planet2}-${index}`}>
             <TableCell>
               <span className='flex items-center gap-2'>
-                <span className='text-cosmic-gold text-xl' title={item.planet1}>
-                  {getPlanetSymbol(item.planet1)}
-                </span>
+                <AstroSymbol 
+                  symbol={getPlanetSymbol(item.planet1)}
+                  size="md"
+                  title={item.planet1}
+                  className="text-cosmic-gold"
+                />
                 <span>{item.planet1}</span>
               </span>
             </TableCell>
             <TableCell>
               <span className='flex items-center gap-2'>
-                <span className='text-cosmic-gold text-xl' title={item.planet2}>
-                  {getPlanetSymbol(item.planet2)}
-                </span>
+                <AstroSymbol 
+                  symbol={getPlanetSymbol(item.planet2)}
+                  size="md"
+                  title={item.planet2}
+                  className="text-cosmic-gold"
+                />
                 <span>{item.planet2}</span>
               </span>
             </TableCell>
             <TableCell>
               <span className='flex items-center gap-2'>
-                <span className='text-cosmic-gold text-xl' title={item.type}>
-                  {getAspectSymbol(item.type)}
-                </span>
+                <AstroSymbol 
+                  symbol={getAspectSymbol(item.type)}
+                  size="md"
+                  title={item.type}
+                  className="text-cosmic-gold"
+                />
                 <span className='text-cosmic-gold font-medium'>
                   {item.type}
                 </span>

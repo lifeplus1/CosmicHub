@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useMemo, ReactNode } from 'react';
 
 interface User {
   id: string;
@@ -76,7 +76,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  const actions = {
+  // Memoized actions object to prevent unnecessary re-renders
+  const actions = useMemo(() => ({
     setUser: (user: User | undefined) =>
       dispatch({ type: 'SET_USER', payload: user }),
     addChart: (chart: Chart) => dispatch({ type: 'ADD_CHART', payload: chart }),
@@ -84,10 +85,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_LOADING', payload: loading }),
     setError: (error: string | undefined) =>
       dispatch({ type: 'SET_ERROR', payload: error }),
-  };
+  }), []);
+
+  // Memoized context value
+  const contextValue = useMemo(() => ({
+    state,
+    dispatch,
+    actions,
+  }), [state, dispatch, actions]);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, actions }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

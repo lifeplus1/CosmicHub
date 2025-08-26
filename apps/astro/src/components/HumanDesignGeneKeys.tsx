@@ -23,7 +23,7 @@ interface FormData {
   timezone: string;
 }
 
-const HumanDesignGeneKeys: React.FC = React.memo(() => {
+const HumanDesignGeneKeys: React.FC = () => {
   const [birthData, setBirthData] = useState<ChartBirthData | null>(null);
   const [showCalculation, setShowCalculation] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -38,13 +38,10 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setFormData(prev => ({ ...prev, [name]: value }));
-    },
-    []
-  );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleCalculate = useCallback(() => {
     const requiredFields = ['year', 'month', 'day', 'hour', 'minute', 'city'];
@@ -392,7 +389,7 @@ const HumanDesignGeneKeys: React.FC = React.memo(() => {
       </div>
     </div>
   );
-});
+};
 
 HumanDesignGeneKeys.displayName = 'HumanDesignGeneKeys';
 

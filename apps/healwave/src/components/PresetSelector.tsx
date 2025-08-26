@@ -10,6 +10,7 @@ declare const process:
 import { useAuth } from '@cosmichub/auth';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
 import { savePreset, getUserPresets, deletePreset } from '../services/api';
+import { ProgressiveLoading, ErrorMessage } from '@cosmichub/ui';
 
 interface PresetSelectorProps {
   onSelectPreset: (preset: FrequencyPreset) => void;
@@ -219,30 +220,29 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
         role='region'
         aria-label='Frequency Presets'
       >
-        {/* Error Alert */}
+        {/* Enhanced Error Alert */}
         {error && (
-          <div
-            role='alert'
-            className='mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg'
-            aria-live='polite'
-          >
-            {error}
-            <button
-              onClick={() => setError(null)}
-              className='ml-2 text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1'
-              aria-label='Dismiss error'
-            >
-              ✕
-            </button>
-          </div>
+          <ErrorMessage
+            error={error}
+            onRetry={() => {
+              setError(null);
+              if (user) {
+                void loadUserPresets();
+              }
+            }}
+            onDismiss={() => setError(null)}
+            retryText="Retry Loading"
+            className="mb-4"
+            dismissible={true}
+          />
         )}
 
         <div className='preset-header flex items-center justify-between mb-6'>
-          <h3 className='text-lg font-semibold'>Frequency Presets</h3>
+          <h3 className='text-xl font-semibold text-white font-inter'>Frequency Presets</h3>
           {user && (
             <button
               onClick={() => setShowSaveDialog(true)}
-              className='px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+              className='px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-lg font-medium transition-all hover:from-cyan-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed'
               disabled={loading}
               aria-describedby='save-preset-help'
             >
@@ -261,16 +261,16 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
         >
           <h4
             id='builtin-presets-heading'
-            className='mb-3 font-medium text-gray-700 text-md'
+            className='mb-4 text-lg font-medium text-white/90'
           >
             Built-in Presets
           </h4>
-          <div className='grid gap-3' role='list'>
+          <div className='grid gap-4' role='list'>
             {builtInPresets.map(preset => (
               <div
                 key={preset.id}
                 role='listitem'
-                className='p-4 transition-colors border rounded-lg cursor-pointer preset-card bg-gray-50 hover:bg-gray-100 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-1'
+                className='p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl cursor-pointer preset-card hover:bg-white/10 hover:border-white/20 focus-within:ring-2 focus-within:ring-cyan-400 focus-within:ring-offset-2 focus-within:ring-offset-transparent transition-all duration-200'
                 onClick={() => {
                   onSelectPreset(preset);
                 }}
@@ -285,16 +285,20 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
               >
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>
-                    <h5 className='font-medium text-gray-900'>{preset.name}</h5>
-                    <p className='mt-1 text-sm text-gray-600'>
+                    <h5 className='font-semibold text-white'>{preset.name}</h5>
+                    <p className='mt-1 text-sm text-white/70'>
                       {preset.description}
                     </p>
                     <div
-                      className='mt-2 text-xs text-gray-500'
+                      className='mt-3 flex items-center gap-4 text-xs text-cyan-400'
                       aria-label={`Base frequency ${preset.baseFrequency} hertz, binaural beat ${preset.binauralBeat} hertz`}
                     >
-                      Base: {preset.baseFrequency}Hz | Beat:{' '}
-                      {preset.binauralBeat}Hz
+                      <span className='bg-cyan-500/20 px-2 py-1 rounded-md'>
+                        Base: {preset.baseFrequency}Hz
+                      </span>
+                      <span className='bg-purple-500/20 px-2 py-1 rounded-md'>
+                        Beat: {preset.binauralBeat}Hz
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -311,41 +315,17 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
           >
             <h4
               id='user-presets-heading'
-              className='mb-3 font-medium text-gray-700 text-md'
+              className='mb-3 font-medium text-white text-md'
             >
               Your Presets
             </h4>
             {loading && presets.length === 0 ? (
-              <div
-                className='py-4 text-center text-gray-500'
-                role='status'
-                aria-live='polite'
-              >
-                <span className='sr-only'>Loading presets...</span>
-                <div className='inline-flex items-center'>
-                  <svg
-                    className='animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500'
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                  >
-                    <circle
-                      className='opacity-25'
-                      cx='12'
-                      cy='12'
-                      r='10'
-                      stroke='currentColor'
-                      strokeWidth='4'
-                    ></circle>
-                    <path
-                      className='opacity-75'
-                      fill='currentColor'
-                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                    ></path>
-                  </svg>
-                  Loading presets...
-                </div>
-              </div>
+              <ProgressiveLoading
+                stage={loading ? 'processing' : 'complete'}
+                message="Loading your custom frequency presets..."
+                showProgress={true}
+                className="py-4"
+              />
             ) : presets.length === 0 ? (
               <div className='py-4 text-center text-gray-500'>
                 No saved presets yet. Save your current settings to create your
@@ -357,7 +337,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
                   <div
                     key={preset.id}
                     role='listitem'
-                    className='p-4 transition-colors bg-white border rounded-lg preset-card hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-1'
+                    className='p-4 transition-colors bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg preset-card hover:bg-white/10 hover:border-white/30 focus-within:ring-2 focus-within:ring-cyan-400 focus-within:ring-offset-1'
                   >
                     <div className='flex items-start justify-between'>
                       <div
@@ -374,7 +354,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
                         tabIndex={0}
                         aria-label={`Select ${preset.name} preset${preset.description ? `: ${preset.description}` : ''}`}
                       >
-                        <h5 className='font-medium text-gray-900'>
+                        <h5 className='font-medium text-white'>
                           {preset.name}
                         </h5>
                         {preset.description && (
@@ -439,24 +419,27 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
               }
             }}
           >
-            <div className='p-6 bg-white rounded-lg w-96 max-w-90vw'>
-              <h3 id='save-preset-title' className='mb-4 text-lg font-semibold'>
-                Save Preset
-              </h3>
+            <div className='p-6 bg-black/80 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl w-96 max-w-90vw'>
+              <div className='flex items-center justify-between mb-6'>
+                <h3 id='save-preset-title' className='text-lg font-semibold text-white'>
+                  Save Preset
+                </h3>
+              </div>
 
-              <div className='mb-4'>
-                <label
-                  htmlFor='preset-name'
-                  className='block mb-2 text-sm font-medium text-gray-700'
-                >
-                  Preset Name *
-                </label>
+              <div className='space-y-4'>
+                <div className='mb-4'>
+                  <label
+                    htmlFor='preset-name'
+                    className='block mb-2 text-sm font-medium text-white/90'
+                  >
+                    Preset Name *
+                  </label>
                 <input
                   id='preset-name'
                   type='text'
                   value={newPresetName}
                   onChange={e => setNewPresetName(e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  className='w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors'
                   placeholder='Enter preset name...'
                   maxLength={50}
                   required
@@ -466,7 +449,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
                 />
                 <div
                   id='preset-name-help'
-                  className='mt-1 text-xs text-gray-500'
+                  className='mt-1 text-xs text-white/60'
                 >
                   Required. Maximum 50 characters.
                 </div>
@@ -475,7 +458,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
               <div className='mb-4'>
                 <label
                   htmlFor='preset-description'
-                  className='block mb-2 text-sm font-medium text-gray-700'
+                  className='block mb-2 text-sm font-medium text-white/90'
                 >
                   Description (optional)
                 </label>
@@ -561,6 +544,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
               </div>
             </div>
           </div>
+        </div>
         )}
       </div>
     );

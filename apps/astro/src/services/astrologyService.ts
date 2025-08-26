@@ -4,7 +4,7 @@ import { getAuth } from 'firebase/auth';
 import type { ChartData, ChartType } from '@/types/astrology.types';
 import { config } from '@cosmichub/config'; // Shared API config from packages/config
 
-export const fetchChartData = async (
+export const fetchSavedChart = async (
   userId: string,
   chartType: ChartType
 ): Promise<ChartData> => {

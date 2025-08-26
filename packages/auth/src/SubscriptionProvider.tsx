@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 import { useAuth } from './index';
@@ -243,7 +244,8 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     void refreshSubscription();
   }, [refreshSubscription]);
 
-  const value: SubscriptionContextType = {
+  // Memoized context value to prevent unnecessary re-renders  
+  const contextValue = useMemo<SubscriptionState>(() => ({
     subscription,
     userTier: subscription?.tier ?? 'free',
     tier: subscription?.tier ?? 'free', // Alias for backwards compatibility
@@ -252,10 +254,19 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     upgradeRequired,
     refreshSubscription,
     ...(appType === 'astro' && { checkUsageLimit }),
-  };
+  }), [
+    subscription,
+    isLoading,
+    subscriptionManager,
+    hasFeature,
+    upgradeRequired,
+    refreshSubscription,
+    appType,
+    checkUsageLimit, // Function depends on usageData internally
+  ]);
 
   return (
-    <SubscriptionContext.Provider value={value}>
+    <SubscriptionContext.Provider value={contextValue}>
       {children}
     </SubscriptionContext.Provider>
   );

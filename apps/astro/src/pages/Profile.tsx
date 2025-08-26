@@ -80,7 +80,7 @@ const Profile: React.FC = React.memo(() => {
         </p>
         <Button
           onClick={() => navigate('/login')}
-          variant='primary'
+          variant='default'
           className='mt-4'
         >
           Sign In
@@ -202,7 +202,7 @@ const Profile: React.FC = React.memo(() => {
                   onClick={() => {
                     navigate('/upgrade');
                   }}
-                  variant='primary'
+                  variant='default'
                 >
                   <FaArrowUp className='mr-2' /> Upgrade to Premium
                 </Button>

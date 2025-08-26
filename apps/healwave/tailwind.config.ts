@@ -1,7 +1,12 @@
 import type { Config } from 'tailwindcss';
 
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './index.html', 
+    './src/**/*.{js,ts,jsx,tsx}',
+    // Include node_modules for Radix UI styles
+    './node_modules/@radix-ui/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -25,6 +30,7 @@ export default {
       animation: {
         float: 'float 6s ease-in-out infinite',
         shimmer: 'shimmer 2s linear infinite',
+        'spin': 'spin 1s linear infinite',
       },
       keyframes: {
         float: {
@@ -34,6 +40,10 @@ export default {
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
+        },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         },
       },
     },

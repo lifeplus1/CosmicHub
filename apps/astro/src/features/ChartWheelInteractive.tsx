@@ -1046,7 +1046,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
             <Button
               onClick={toggleTransits}
               variant={
-                interactiveState.showTransits === true ? 'primary' : 'secondary'
+                interactiveState.showTransits === true ? 'default' : 'secondary'
               }
               className='text-sm'
             >

@@ -29,7 +29,7 @@ const ErrorTestComponent: React.FC<ErrorTestComponentProps> = ({
 
         <Button
           onClick={() => setShouldThrowError(true)}
-          variant='primary'
+          variant='default'
           size='sm'
           className='bg-red-600 hover:bg-red-700 text-white border-red-600'
         >

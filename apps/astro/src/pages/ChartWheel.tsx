@@ -279,7 +279,7 @@ const ChartWheelPage: React.FC = () => {
 
               <div className='space-y-2'>
                 <Button
-                  variant='primary'
+                  variant='default'
                   className='w-full'
                   onClick={handleSubmit}
                 >

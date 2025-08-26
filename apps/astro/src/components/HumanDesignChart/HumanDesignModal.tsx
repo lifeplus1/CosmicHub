@@ -33,7 +33,7 @@ const HumanDesignModal: React.FC<HumanDesignModalProps> = ({
   onClose,
   data,
 }) => {
-  if (!isOpen || !data) return null;
+  if (!isOpen || data == null) return null;
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -180,7 +180,7 @@ const HumanDesignModal: React.FC<HumanDesignModalProps> = ({
       role='dialog'
       aria-modal='true'
       aria-label={
-        data
+        data != null
           ? `${data.type === 'gate' ? 'Gate' : 'Channel'} Details`
           : 'Human Design Details'
       }

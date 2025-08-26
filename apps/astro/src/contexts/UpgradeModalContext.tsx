@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 
@@ -40,15 +41,16 @@ export const UpgradeModalProvider: React.FC<UpgradeModalProviderProps> = ({
     setFeature(undefined);
   }, []);
 
-  const value: UpgradeModalContextType = {
+  // Memoized context value - prevents unnecessary re-renders
+  const contextValue = useMemo<UpgradeModalContextType>(() => ({
     isOpen,
     feature,
     openUpgradeModal,
     closeUpgradeModal,
-  };
+  }), [isOpen, feature, openUpgradeModal, closeUpgradeModal]);
 
   return (
-    <UpgradeModalContext.Provider value={value}>
+    <UpgradeModalContext.Provider value={contextValue}>
       {children}
     </UpgradeModalContext.Provider>
   );

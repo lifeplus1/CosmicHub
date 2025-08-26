@@ -15,12 +15,48 @@ class PlanetName(str, Enum):
     URANUS = "uranus"
     NEPTUNE = "neptune"
     PLUTO = "pluto"
-    # Asteroids
+    # Lunar Nodes (Essential for professional astrology)
+    NORTH_NODE = "north_node"
+    SOUTH_NODE = "south_node"
+    # Major Asteroids (supported by basic ephemeris files)
     CHIRON = "chiron"
     CERES = "ceres"
     PALLAS = "pallas"
     JUNO = "juno"
     VESTA = "vesta"
+        # Additional Professional Bodies
+    LILITH_MEAN = "lilith_mean"  # Mean Black Moon Lilith
+    LILITH_TRUE = "lilith_true"  # True Black Moon Lilith
+    # Minor Asteroids
+    HYGIEA = "hygiea"
+    EROS = "eros"
+    PSYCHE = "psyche"
+    ASTRAEA = "astraea"          # Asteroid 5 Astraea (basic ephemeris support)
+    HEBE = "hebe"                # 6
+    IRIS = "iris"                # 7
+    FLORA = "flora"              # 8
+    METIS = "metis"              # 9
+    PARTHENOPE = "parthenope"    # 11
+    VICTORIA = "victoria"        # 12
+    EGERIA = "egeria"            # 13
+    EUNOMIA = "eunomia"          # 15
+    THETIS = "thetis"            # 17
+    MELPOMENE = "melpomene"      # 18
+    FORTUNA = "fortuna"          # 19
+    MASSALIA = "massalia"        # 20
+    SEDNA = "sedna"
+    ERIS = "eris"
+    # Additional Lunar Points
+    INTP_APOG = "intp_apog"      # Interpolated Lunar Apogee (Dark Moon Lilith variant)
+    INTP_PERG = "intp_perg"      # Interpolated Lunar Perigee
+    # Uranian/Trans-Neptunian Points (Hamburg School astrology)
+    HADES = "hades"              # Decay, medicine, occult, underground
+    ZEUS = "zeus"                # Fire, creativity, machines, energy
+    KRONOS = "kronos"            # Authority, leadership, government
+    APOLLON = "apollon"          # Science, research, peace, wisdom
+    ADMETOS = "admetos"          # Raw materials, real estate, depth
+    VULKANUS = "vulkanus"        # Power, force, might, intensity
+    POSEIDON = "poseidon"        # Spirituality, ideas, media, enlightenment
 
 class PlanetPosition(BaseModel):
     """Position data for a planetary body."""

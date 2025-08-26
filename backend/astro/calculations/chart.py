@@ -11,7 +11,7 @@ from geopy.geocoders import Nominatim  # type: ignore
 from timezonefinder import TimezoneFinder  # type: ignore
 
 from .aspects import calculate_aspects
-from .ephemeris import get_planetary_positions, init_ephemeris
+from .ephemeris import get_planetary_positions, init_ephemeris, PlanetPosition
 from .house_systems import calculate_houses
 from .mayan import calculate_mayan_astrology
 from .uranian import calculate_uranian_astrology
@@ -177,16 +177,133 @@ def calculate_chart(
         julian_day = float(julian_day_value)  # type: ignore
 
         planets = get_planetary_positions(julian_day) or {}  # type: ignore
+        logger.info(f"Chart calculation - got {len(planets)} planets from ephemeris: {list(planets.keys())}")
         houses_data = calculate_houses(julian_day, lat, lon, house_system) or {"houses": [], "angles": {}}  # type: ignore  # noqa: E501
+        
+        # Separate planets, asteroids, and points
+        main_planets: Dict[str, PlanetPosition] = {}
+        asteroids: Dict[str, Dict[str, Any]] = {}
+        points: Dict[str, Dict[str, Any]] = {}
+        asteroid_names = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'hygiea', 'eros', 'psyche', 'fortuna', 'sedna', 'eris']  # Include all supported asteroids
+        point_names = ['north_node', 'south_node', 'lilith_mean', 'lilith_true', 'vertex', 'antivertex']
+        
+        for name, data in planets.items():
+            if name in asteroid_names:
+                asteroids[name] = {
+                    "position": data["position"],
+                    "retrograde": data["retrograde"]
+                }
+                logger.info(f"Found asteroid {name}: position={data['position']}, retrograde={data['retrograde']}")
+            elif name in point_names:
+                points[name] = {
+                    "position": data["position"],
+                    "retrograde": data["retrograde"]
+                }
+                logger.info(f"Found point {name}: position={data['position']}, retrograde={data['retrograde']}")
+            else:
+                main_planets[name] = data
+        
+        logger.info(f"Separated {len(main_planets)} main planets, {len(asteroids)} asteroids, and {len(points)} points")
+        
+        # Add vertex and antivertex from angles to points if not already present from ephemeris
+        if 'vertex' not in points and 'vertex' in houses_data["angles"]:
+            vertex_pos = float(houses_data["angles"]["vertex"])
+            points['vertex'] = {
+                "position": vertex_pos,
+                "retrograde": False  # Vertex is never retrograde
+            }
+            logger.info(f"Added vertex from angles: position={vertex_pos}")
+            
+        if 'antivertex' not in points:
+            # Calculate antivertex as vertex + 180°
+            vertex_pos = houses_data["angles"].get("vertex", 0)
+            antivertex_pos = float((vertex_pos + 180) % 360)
+            points['antivertex'] = {
+                "position": antivertex_pos,
+                "retrograde": False  # Antivertex is never retrograde
+            }
+            logger.info(f"Added antivertex from angles: position={antivertex_pos}")
+        
+        logger.info(f"Final points after adding vertex/antivertex: {list(points.keys())}")
+        
+        # Calculate Part of Fortune (Fortuna)
+        # Part of Fortune = Ascendant + Moon - Sun (for day charts)
+        # Part of Fortune = Ascendant + Sun - Moon (for night charts)
+        try:
+            sun_pos = float(planets.get('sun', {}).get('position', 0))
+            moon_pos = float(planets.get('moon', {}).get('position', 0))
+            asc_pos = float(houses_data["angles"].get("ascendant", 0))  # type: ignore
+            
+            # Determine if it's a day or night chart (Sun above or below horizon)
+            # If Sun is in houses 7-12 (below ASC-DSC axis), it's a night chart
+            sun_asc_diff = (sun_pos - asc_pos) % 360
+            is_day_chart = sun_asc_diff <= 180
+            
+            if is_day_chart:
+                # Day formula: ASC + Moon - Sun
+                fortuna_pos = (asc_pos + moon_pos - sun_pos) % 360
+            else:
+                # Night formula: ASC + Sun - Moon  
+                fortuna_pos = (asc_pos + sun_pos - moon_pos) % 360
+            
+            points['part_of_fortune'] = {
+                "position": fortuna_pos,
+                "retrograde": False  # Part of Fortune is never retrograde
+            }
+            logger.info(f"Added Part of Fortune: position={fortuna_pos:.2f}° ({'day' if is_day_chart else 'night'} chart)")
+            
+        except Exception as e:
+            logger.warning(f"Failed to calculate Part of Fortune: {e}")
+        
+        # Debug: Log what we got from ephemeris
+        logger.info(f"DEBUG: Raw planets from ephemeris: {list(planets.keys())}")
+        logger.info(f"DEBUG: Point names we're looking for: {point_names}")
+        for point_name in point_names:
+            if point_name in planets:
+                logger.info(f"DEBUG: Found {point_name} in ephemeris data: {planets[point_name]}")
+            else:
+                logger.info(f"DEBUG: Missing {point_name} from ephemeris data")
+        logger.info(f"DEBUG: Raw planets from ephemeris: {list(planets.keys())}")
+        logger.info(f"DEBUG: Points found: {list(points.keys())}")
+        logger.info(f"DEBUG: Asteroids found: {list(asteroids.keys())}")
+        
         aspects = calculate_aspects(planets) or []  # type: ignore
+
+        # Enrich houses with sign information (0° Aries = 0, each 30° per sign)
+        def degree_to_sign(deg: float) -> str:
+            names = [
+                "aries","taurus","gemini","cancer","leo","virgo",
+                "libra","scorpio","sagittarius","capricorn","aquarius","pisces"
+            ]
+            try:
+                return names[int((deg % 360) // 30)]
+            except Exception:
+                return "aries"
+        # Build object map style houses with sign for compatibility
+        enriched_houses_map: Dict[str, Dict[str, Any]] = {}
+        for h in houses_data["houses"]:  # type: ignore
+            cusp_val = h.get("cusp", 0)
+            try:
+                cusp_deg = float(cusp_val)  # type: ignore[arg-type]
+            except Exception:
+                cusp_deg = 0.0
+            house_no = h.get("house", 0)
+            if 1 <= house_no <= 12:
+                enriched_houses_map[f"house_{house_no}"] = {
+                    "house": house_no,
+                    "cusp": cusp_deg,
+                    "sign": degree_to_sign(cusp_deg),
+                }
 
         chart_data: Dict[str, Any] = {
             "julian_day": float(julian_day),
             "latitude": float(lat),
             "longitude": float(lon),
             "timezone": timezone,
-            "planets": {k: {"position": v["position"], "retrograde": v["retrograde"]} for k, v in planets.items()},  # type: ignore  # noqa: E501
-            "houses": houses_data["houses"],  # type: ignore
+            "planets": {k: {"position": v["position"], "retrograde": v["retrograde"]} for k, v in main_planets.items()},  # type: ignore  # noqa: E501
+            "asteroids": asteroids,  # Add asteroids to chart data
+            "points": points,  # Add points (nodes, lilith) to chart data
+            "houses": enriched_houses_map,  # type: ignore
             "angles": {
                 "ascendant": float(houses_data["angles"].get("ascendant", 0)),  # type: ignore  # noqa: E501
                 "descendant": float((houses_data["angles"].get("ascendant", 0) + 180) % 360),  # type: ignore  # noqa: E501
@@ -194,6 +311,7 @@ def calculate_chart(
                 "ic": float((houses_data["angles"].get("mc", 0) + 180) % 360),  # type: ignore  # noqa: E501
                 "vertex": float(houses_data["angles"].get("vertex", 0)),  # type: ignore  # noqa: E501
                 "antivertex": float((houses_data["angles"].get("vertex", 0) + 180) % 360),  # type: ignore  # noqa: E501
+                "part_of_fortune": float(points.get("part_of_fortune", {}).get("position", 0)),  # type: ignore  # noqa: E501
             },
             "aspects": aspects,  # type: ignore
         }

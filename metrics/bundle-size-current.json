@@ -1,0 +1,72 @@
+{
+  "apps": [
+    {
+      "name": "astro",
+      "totalSize": 13248,
+      "totalSizeKB": 13,
+      "gzippedSize": 9272,
+      "gzippedSizeKB": 9,
+      "chunks": [
+        {
+          "name": "sw.js",
+          "size": 12551,
+          "sizeKB": 12,
+          "gzippedKB": 9,
+          "type": "js"
+        },
+        {
+          "name": "fonts.css",
+          "size": 697,
+          "sizeKB": 1,
+          "gzippedKB": 0,
+          "type": "css"
+        }
+      ],
+      "threshold": {
+        "warning": 250,
+        "error": 300,
+        "delta": 30
+      },
+      "status": "✅ OK",
+      "previousSize": "N/A",
+      "change": "BASELINE",
+      "changeKB": 0,
+      "currentSize": "13KB"
+    },
+    {
+      "name": "healwave",
+      "totalSize": 4026,
+      "totalSizeKB": 4,
+      "gzippedSize": 2818,
+      "gzippedSizeKB": 3,
+      "chunks": [
+        {
+          "name": "sw.js",
+          "size": 4026,
+          "sizeKB": 4,
+          "gzippedKB": 3,
+          "type": "js"
+        }
+      ],
+      "threshold": {
+        "warning": 200,
+        "error": 250,
+        "delta": 30
+      },
+      "status": "✅ OK",
+      "previousSize": "N/A",
+      "change": "BASELINE",
+      "changeKB": 0,
+      "currentSize": "4KB"
+    }
+  ],
+  "totalChange": 0,
+  "warnings": [],
+  "recommendations": [
+    "Use `pnpm run build:astro:analyze` to generate detailed bundle analysis",
+    "Monitor large dependencies with bundle-analyzer webpack plugin",
+    "Consider using dynamic imports for optional features",
+    "Enable tree-shaking in production builds"
+  ],
+  "timestamp": "2025-08-26T15:11:21.400Z"
+}

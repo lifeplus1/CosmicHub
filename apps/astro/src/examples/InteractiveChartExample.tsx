@@ -122,7 +122,7 @@ export const InteractiveChartExample: React.FC = () => {
               void handleRegisterChart();
             }}
             disabled={chartRegistered}
-            variant={chartRegistered ? 'secondary' : 'primary'}
+            variant={chartRegistered ? 'secondary' : 'default'}
             className='w-full'
           >
             {chartRegistered ? '✅ Chart Registered' : '🔄 Register Chart'}

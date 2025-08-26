@@ -204,7 +204,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
                         ? 'bg-cosmic-purple hover:bg-cosmic-purple-dark'
                         : 'bg-cosmic-blue hover:bg-cosmic-blue-dark'
                     } ${isCurrentTier ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    variant='primary'
+                    variant='default'
                   >
                     {isCurrentTier ? 'Current Plan' : `Upgrade to ${tier.name}`}
                   </Button>

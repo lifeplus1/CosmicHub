@@ -15,7 +15,19 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@cosmichub/auth": ["../../packages/auth/src"],
+      "@cosmichub/config": ["../../packages/config/src"],
+      "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
+      "@cosmichub/frequency": ["../../packages/frequency/src"],
+      "@cosmichub/integrations": ["../../packages/integrations/src"],
+      "@cosmichub/subscriptions": ["../../packages/subscriptions/src"],
+      "@cosmichub/ui": ["../../packages/ui/src"],
+      "@cosmichub/types": ["../../packages/types/src"]
+    }
   },
   "include": ["app/**/*", "src/**/*", "*.ts", "*.tsx"],
   "exclude": ["node_modules", "dist", ".expo"]

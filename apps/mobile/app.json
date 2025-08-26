@@ -15,7 +15,16 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cosmichub.mobile"
+      "bundleIdentifier": "com.cosmichub.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "CosmicHub uses the camera to capture and share your astrological charts.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "CosmicHub uses your location to provide accurate astrological calculations and location-based transit notifications.",
+        "NSLocationWhenInUseUsageDescription": "CosmicHub uses your location to provide accurate astrological calculations and location-based transit notifications.",
+        "NSFaceIDUsageDescription": "CosmicHub uses Face ID for secure authentication and to protect your personal astrological data.",
+        "NSMicrophoneUsageDescription": "CosmicHub may use the microphone for video sharing features."
+      },
+      "associatedDomains": ["applinks:cosmichub.app"],
+      "supportsWatchOS": true
     },
     "android": {
       "adaptiveIcon": {
@@ -23,17 +32,80 @@
         "backgroundColor": "#000014"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.cosmichub.mobile"
+      "package": "com.cosmichub.mobile",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "cosmichub.app"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#4a90e2",
+          "sounds": ["./assets/notification.wav"]
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "CosmicHub uses your location to provide accurate astrological calculations and location-based transit notifications."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "CosmicHub uses the camera to capture and share your astrological charts."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "CosmicHub uses Face ID for secure authentication and to protect your personal astrological data."
+        }
+      ]
+    ],
     "extra": {
       "router": {
         "origin": false
+      },
+      "eas": {
+        "projectId": "cosmichub-mobile-project"
       }
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#4a90e2",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "#{unread_notifications} new notifications"
     }
   }
 }

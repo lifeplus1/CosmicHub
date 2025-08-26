@@ -8,6 +8,7 @@ import {
   TableRow,
 } from '@cosmichub/ui';
 import { getPlanetSymbol, getSignSymbol } from './tableUtils';
+import { AstroSymbol } from '../AstroSymbol';
 
 export interface AngleRow {
   name: string;
@@ -31,17 +32,23 @@ const AngleTable: React.FC<{ data: AngleRow[] }> = ({ data }) => {
           <TableRow key={`angle-${item.name}-${index}`}>
             <TableCell className='font-medium'>
               <span className='flex items-center gap-2'>
-                <span className='text-cosmic-gold text-xl' title={item.name}>
-                  {getPlanetSymbol(item.name)}
-                </span>
+                <AstroSymbol 
+                  symbol={getPlanetSymbol(item.name)}
+                  size="md"
+                  title={item.name}
+                  className="text-cosmic-gold"
+                />
                 <span>{item.name}</span>
               </span>
             </TableCell>
             <TableCell>
               <span className='text-cosmic-gold font-medium flex items-center gap-2'>
-                <span className='text-lg' title={item.sign}>
-                  {getSignSymbol(item.sign)}
-                </span>
+                <AstroSymbol 
+                  symbol={getSignSymbol(item.sign)}
+                  size="md"
+                  title={item.sign}
+                  className="text-cosmic-gold"
+                />
                 <span>{item.sign}</span>
               </span>
             </TableCell>

@@ -60,6 +60,7 @@ export default {
           purple: '#553c9a',
           gold: '#f6ad55',
           silver: '#e2e8f0',
+          red: '#dc2626',
         },
       },
       backdropBlur: {

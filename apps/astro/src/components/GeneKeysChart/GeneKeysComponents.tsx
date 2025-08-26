@@ -136,7 +136,7 @@ GeneKeyItem.displayName = 'GeneKeyItem';
 
 // Memoized Gene Key details component
 export const GeneKeyDetails = memo<GeneKeyDetailsProps>(({ selectedKey }) => {
-  if (selectedKey === null || selectedKey === undefined) {
+  if (selectedKey == null) {
     return (
       <div className='flex p-4 space-x-4 border border-blue-500 rounded-md bg-blue-900/50'>
         <span className='text-xl text-blue-500'>ℹ️</span>

@@ -17,11 +17,10 @@ const VenusSequenceTab: React.FC<VenusSequenceTabProps> = React.memo(
 
     // Check if we have the individual Venus sequence components
     if (
-      (geneKeysData.attraction === null ||
-        geneKeysData.attraction === undefined) &&
-      (geneKeysData.iq === null || geneKeysData.iq === undefined) &&
-      (geneKeysData.eq === null || geneKeysData.eq === undefined) &&
-      (geneKeysData.sq === null || geneKeysData.sq === undefined)
+      geneKeysData.attraction == null &&
+      geneKeysData.iq == null &&
+      geneKeysData.eq == null &&
+      geneKeysData.sq == null
     ) {
       return (
         <div className='flex items-center justify-center h-64'>
@@ -61,13 +60,10 @@ const VenusSequenceTab: React.FC<VenusSequenceTabProps> = React.memo(
         icon: '✨',
         color: 'violet',
       },
-    ].filter(item => item.key !== null && item.key !== undefined); // Only include items that have data
+    ].filter(item => item.key != null); // Only include items that have data
 
     // Add Core Wound if it exists
-    if (
-      geneKeysData.core_wound !== null &&
-      geneKeysData.core_wound !== undefined
-    ) {
+    if (geneKeysData.core_wound != null) {
       venusKeys.push({
         key: geneKeysData.core_wound,
         title: 'Core Wound',
@@ -101,7 +97,7 @@ const VenusSequenceTab: React.FC<VenusSequenceTabProps> = React.memo(
         {/* Gene Keys Grid */}
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
           {venusKeys.map((item, index) => {
-            if (item.key === null || item.key === undefined) {
+            if (item.key == null) {
               return null;
             }
 

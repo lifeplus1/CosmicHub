@@ -6,13 +6,17 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - EPHEMERIS_URL=http://ephemeris:8001
-      - CORS_ORIGINS=http://localhost:5174,http://localhost:3000
+      EPHEMERIS_URL: http://ephemeris:8001
+      EPHEMERIS_SERVER_URL: http://ephemeris:8001
+      CORS_ORIGINS: "http://localhost:5174,http://localhost:5175,http://localhost:3000"
+      DISABLE_CSRF: "1"
+      TEST_MODE: "1"
+      API_KEY: dev-ephemeris-key
     depends_on:
       - ephemeris
     volumes:
       - ./backend:/app
-      - ./backend/ephe:/app/ephe
+      - ./ephe:/app/ephe
     restart: unless-stopped
 
   ephemeris:
@@ -22,9 +26,10 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - EPHE_PATH=/app/ephe
+      EPHE_PATH: /app/ephe
+      API_KEY: dev-ephemeris-key
     volumes:
-      - ./backend/ephe:/app/ephe
+      - ./ephe:/app/ephe
     restart: unless-stopped
 
   frontend:
@@ -34,7 +39,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      VITE_API_URL: http://localhost:8000
     depends_on:
       - backend
     volumes:

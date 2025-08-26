@@ -20,11 +20,48 @@ SATURN: Final[int] = 6
 URANUS: Final[int] = 7
 NEPTUNE: Final[int] = 8
 PLUTO: Final[int] = 9
+# Lunar Nodes
+NORTH_NODE: Final[int] = 10  # Mean North Node
+SOUTH_NODE: Final[int] = 11  # Mean South Node  
+# Black Moon Lilith
+LILITH_MEAN: Final[int] = 12  # Mean Black Moon Lilith
+LILITH_TRUE: Final[int] = 13  # True Black Moon Lilith
+# Asteroids
 CHIRON: Final[int] = 15
 CERES: Final[int] = 17
 PALLAS: Final[int] = 18
 JUNO: Final[int] = 19
 VESTA: Final[int] = 20
+# Additional asteroids (using direct asteroid numbers for basic ephemeris support)
+HYGIEA: Final[int] = 10     # Asteroid 10 Hygiea
+EROS: Final[int] = 433      # Asteroid 433 Eros (may need additional files)
+PSYCHE: Final[int] = 16     # Asteroid 16 Psyche
+ASTRAEA: Final[int] = 5     # Asteroid 5 Astraea (replaces fortuna for basic file support)
+HEBE: Final[int] = 6        # Asteroid 6 Hebe
+IRIS: Final[int] = 7        # Asteroid 7 Iris
+FLORA: Final[int] = 8       # Asteroid 8 Flora
+METIS: Final[int] = 9       # Asteroid 9 Metis
+PARTHENOPE: Final[int] = 11 # Asteroid 11 Parthenope
+VICTORIA: Final[int] = 12   # Asteroid 12 Victoria
+EGERIA: Final[int] = 13     # Asteroid 13 Egeria
+EUNOMIA: Final[int] = 15    # Asteroid 15 Eunomia
+THETIS: Final[int] = 17     # Asteroid 17 Thetis
+MELPOMENE: Final[int] = 18  # Asteroid 18 Melpomene
+FORTUNA: Final[int] = 19    # Asteroid 19 Fortuna
+MASSALIA: Final[int] = 20   # Asteroid 20 Massalia
+SEDNA: Final[int] = 90377   # Trans-Neptunian object 90377 Sedna (may need additional files)
+ERIS: Final[int] = 136199   # Dwarf planet 136199 Eris (may need additional files)
+# Additional lunar points
+INTP_APOG: Final[int] = 21  # Interpolated Lunar Apogee (Dark Moon Lilith variant)
+INTP_PERG: Final[int] = 22  # Interpolated Lunar Perigee
+# Uranian/Trans-Neptunian points (Hamburg School astrology)
+HADES: Final[int] = 40      # Decay, medicine, occult, underground
+ZEUS: Final[int] = 41       # Fire, creativity, machines, energy
+KRONOS: Final[int] = 42     # Authority, leadership, government
+APOLLON: Final[int] = 43    # Science, research, peace, wisdom
+ADMETOS: Final[int] = 44    # Raw materials, real estate, depth
+VULKANUS: Final[int] = 45   # Power, force, might, intensity
+POSEIDON: Final[int] = 46   # Spirituality, ideas, media, enlightenment
 
 # Mapping of planet names to Swiss Ephemeris body constants
 PLANET_MAPPING: Final[Dict[str, int]] = {
@@ -38,11 +75,45 @@ PLANET_MAPPING: Final[Dict[str, int]] = {
     "uranus": URANUS,
     "neptune": NEPTUNE,
     "pluto": PLUTO,
+    "north_node": NORTH_NODE,
+    "south_node": SOUTH_NODE, 
+    "lilith_mean": LILITH_MEAN,
+    "lilith_true": LILITH_TRUE,
     "chiron": CHIRON,
     "ceres": CERES,
     "pallas": PALLAS,
     "juno": JUNO,
     "vesta": VESTA,
+    # Minor asteroids
+    "hygiea": HYGIEA,        # 10
+    "eros": EROS,            # 433
+    "psyche": PSYCHE,        # 16
+    "astraea": ASTRAEA,      # 5 - basic ephemeris support
+    "hebe": HEBE,            # 6
+    "iris": IRIS,            # 7
+    "flora": FLORA,          # 8
+    "metis": METIS,          # 9
+    "parthenope": PARTHENOPE, # 11
+    "victoria": VICTORIA,    # 12
+    "egeria": EGERIA,        # 13
+    "eunomia": EUNOMIA,      # 15
+    "thetis": THETIS,        # 17
+    "melpomene": MELPOMENE,  # 18
+    "fortuna": FORTUNA,      # 19
+    "massalia": MASSALIA,    # 20
+    "sedna": SEDNA,
+    "eris": ERIS,
+    # Additional lunar points
+    "intp_apog": INTP_APOG,  # Interpolated Lunar Apogee
+    "intp_perg": INTP_PERG,  # Interpolated Lunar Perigee
+    # Uranian/Trans-Neptunian points (Hamburg School astrology)
+    "hades": HADES,          # Decay, medicine, occult
+    "zeus": ZEUS,            # Fire, creativity, machines
+    "kronos": KRONOS,        # Authority, leadership, government
+    "apollon": APOLLON,      # Science, research, peace
+    "admetos": ADMETOS,      # Raw materials, real estate
+    "vulkanus": VULKANUS,    # Power, force, might
+    "poseidon": POSEIDON,    # Spirituality, ideas, media
 }
 
 class EphemerisService:

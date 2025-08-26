@@ -1,4 +1,16 @@
-import { logger } from '../utils/logger';
+// Simple logger for frequency package
+const logger = {
+  warn: (message: string, error?: unknown) => {
+    console.warn('[FrequencyEngine]', message, error ?? '');
+  },
+  error: (message: string, error?: unknown) => {
+    console.error('[FrequencyEngine]', message, error ?? '');
+  },
+  info: (message: string) => {
+    console.info('[FrequencyEngine]', message);
+  }
+};
+
 /**
  * @fileoverview Shared frequency generation and audio processing utilities
  * Used by both HealWave (standalone) and Astro (astrology-enhanced)

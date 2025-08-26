@@ -7,8 +7,10 @@ import {
   type ChartBirthData,
 } from '@cosmichub/types';
 import { auth } from '@cosmichub/config/firebase';
+import { csrfService, apiRequest, apiJsonRequest } from './csrfService';
 import type { GeneKeysData } from '../components/GeneKeysChart/types';
 import type { HumanDesignData } from '../components/HumanDesignChart/types';
+import { isPlanetForDisplay } from '../utils/celestialBodyCategorization';
 import {
   type Planet,
   type House,
@@ -30,6 +32,14 @@ import {
   NotFoundError,
   ValidationError,
 } from './api.types';
+import { 
+  getSignFromDegrees, 
+  calculateHousePosition, 
+  isValidPosition,
+  normalizeAngle,
+  getRulerFromSign,
+  isZodiacSign
+} from '../utils/astrologyUtils';
 
 // Backend response transformation types and helpers
 interface BackendChartPlanet {
@@ -55,24 +65,6 @@ const isChartObject = (v: unknown): v is Record<string, unknown> =>
 const coerceChartNumber = (v: unknown, fallback = 0): number =>
   typeof v === 'number' && Number.isFinite(v) ? v : fallback;
 
-const ZODIAC_SIGNS: readonly ZodiacSign[] = [
-  'aries',
-  'taurus',
-  'gemini',
-  'cancer',
-  'leo',
-  'virgo',
-  'libra',
-  'scorpio',
-  'sagittarius',
-  'capricorn',
-  'aquarius',
-  'pisces',
-];
-
-const isZodiacSign = (v: unknown): v is ZodiacSign =>
-  typeof v === 'string' && ZODIAC_SIGNS.includes(v as ZodiacSign);
-
 const PLANET_NAMES: readonly PlanetName[] = [
   'sun',
   'moon',
@@ -97,7 +89,7 @@ export * from './api.types';
 // Re-export local ApiResult for consumers
 export type { ApiResult } from '@cosmichub/config';
 
-const getDefaultPlanets = (): Record<PlanetName, Planet> => ({
+const getDefaultPlanets = (): Partial<Record<PlanetName, Planet>> => ({
   sun: {
     name: 'sun',
     position: 0,
@@ -178,30 +170,8 @@ const getDefaultPlanets = (): Record<PlanetName, Planet> => ({
     sign: 'aries',
     house: 1,
   },
-  chiron: {
-    name: 'chiron',
-    position: 0,
-    retrograde: false,
-    speed: 0,
-    sign: 'aries',
-    house: 1,
-  },
-  north_node: {
-    name: 'north_node',
-    position: 0,
-    retrograde: false,
-    speed: 0,
-    sign: 'aries',
-    house: 1,
-  },
-  south_node: {
-    name: 'south_node',
-    position: 0,
-    retrograde: false,
-    speed: 0,
-    sign: 'aries',
-    house: 1,
-  },
+  // Remove Chiron - it will be handled as a major asteroid
+  // Remove nodes - they will be handled as points
 });
 
 // Narrow import.meta.env access to avoid implicit any
@@ -233,7 +203,7 @@ export const getAuthToken = async (): Promise<string | null> => {
   const user = auth.currentUser;
 
   // In development, allow mock authentication
-  if (import.meta.env.DEV === true && (user === null || user === undefined)) {
+  if (import.meta.env.DEV === true && user == null) {
     devConsole.log?.('🧪 Using development mock token');
     return 'mock-dev-token';
   }
@@ -260,7 +230,7 @@ type AuthHeaders = Record<string, string>;
 const getAuthHeaders = async (): Promise<AuthHeaders> => {
   devConsole.log?.('📝 Creating auth headers...');
   const token = await getAuthToken();
-  if (token === null || token === undefined) {
+  if (token == null) {
     devConsole.error('❌ Authentication required but no token available');
     throw new AuthenticationError('Authentication required');
   }
@@ -270,6 +240,63 @@ const getAuthHeaders = async (): Promise<AuthHeaders> => {
     'Content-Type': 'application/json',
   };
 };
+
+// CSRF-protected axios request helper
+const createCsrfAxios = () => {
+  const instance = axios.create({
+    baseURL: BACKEND_URL,
+    withCredentials: true,
+  });
+
+  // Request interceptor to add CSRF token
+  instance.interceptors.request.use(async (config) => {
+    try {
+      const csrfHeaders = await csrfService.getHeaders();
+      // Properly merge headers using axios Headers API
+      Object.keys(csrfHeaders).forEach(key => {
+        config.headers.set(key, csrfHeaders[key]);
+      });
+      return config;
+    } catch (error) {
+      devConsole.error('Failed to add CSRF token to request:', error);
+      return Promise.reject(error);
+    }
+  });
+
+  // Response interceptor to handle CSRF token refresh
+  instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (error.response?.status === 403 && 
+          error.response?.data?.detail?.includes?.('CSRF')) {
+        devConsole.warn('CSRF token expired, clearing cache and retrying...');
+        csrfService.clearToken();
+        
+        // Retry the request once with fresh token
+        const originalRequest = error.config;
+        if (!originalRequest._retry) {
+          originalRequest._retry = true;
+          try {
+            const csrfHeaders = await csrfService.getHeaders();
+            // Properly set headers for retry request
+            Object.keys(csrfHeaders).forEach(key => {
+              originalRequest.headers.set(key, csrfHeaders[key]);
+            });
+            return instance(originalRequest);
+          } catch (retryError) {
+            return Promise.reject(retryError);
+          }
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return instance;
+};
+
+// Global CSRF-protected axios instance
+const csrfAxios = createCsrfAxios();
 
 // API Functions for Saved Charts
 export const fetchSavedCharts = async (): Promise<ApiResult<SavedChart[]>> => {
@@ -427,14 +454,14 @@ export interface MultiSystemResponse {
 
 export const fetchChart = async (
   data: ChartBirthData
-): Promise<ApiResult<MultiSystemResponse>> => {
+): Promise<ApiResult<any>> => {
   devConsole.log?.('🔮 Fetching chart data...');
   devConsole.log?.('📊 Chart data input:', data);
   try {
     const headers = await getAuthHeaders();
-    devConsole.log?.('📡 Making chart request to /calculate-multi-system');
-    const { data: responseData } = await axios.post<MultiSystemResponse>(
-      `${BACKEND_URL}/calculate-multi-system`,
+    devConsole.log?.('📡 Making chart request to /api/calculations/multi-system-chart');
+    const { data: responseData } = await csrfAxios.post<any>(
+      '/api/calculations/multi-system-chart',
       data,
       { headers }
     );
@@ -669,11 +696,11 @@ export const fetchChartData = async (
 export type { ChartBirthData };
 
 // Transform backend response to match ChartData interface safely
-const transformBackendResponse = (backendResponse: unknown): ChartData => {
+export const transformBackendResponse = (backendResponse: unknown): ChartData => {
   if (!isChartObject(backendResponse)) {
     // Return a default chart with all required planets
     return {
-      planets: getDefaultPlanets(),
+      planets: getDefaultPlanets() as Record<PlanetName, Planet>,
       houses: [],
       aspects: [],
       angles: { ascendant: 0, midheaven: 0, descendant: 180, imumcoeli: 180 },
@@ -687,36 +714,102 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
 
   const raw = backendResponse;
 
-  // Planets
-  const planets: Record<PlanetName, Planet> = getDefaultPlanets();
+  // Import categorization system to prevent misclassification
+  // (Already imported at top of file)
+
+  // Planets (ONLY traditional + modern planets, NO asteroids like Chiron)
+  const planets: Partial<Record<PlanetName, Planet>> = getDefaultPlanets();
+  
+  // Remove asteroids that may have been included in default planets
+  Object.keys(planets).forEach(name => {
+    if (!isPlanetForDisplay(name)) {
+      delete planets[name as PlanetName];
+    }
+  });
+  
+  // First extract house cusps for planet house calculations
+  let houseCusps: number[] = [];
+  console.log('🏠 Extracting house cusps from raw data...');
+  const rawHousesForCusps: BackendChartHouses = raw['houses'] as BackendChartHouses;
+  if (Array.isArray(rawHousesForCusps)) {
+    houseCusps = rawHousesForCusps.map((h, idx) => {
+      if (typeof h === 'object' && h !== null && 'cusp' in h) {
+        return coerceChartNumber((h as any).cusp, idx * 30);
+      }
+      return coerceChartNumber(h, idx * 30);
+    });
+  } else if (isChartObject(rawHousesForCusps)) {
+    const tempHouses: Array<{ number: number; cusp: number }> = [];
+    for (const [houseKey, houseValue] of Object.entries(rawHousesForCusps)) {
+      const houseNumber = houseKey.includes('house_')
+        ? parseInt(houseKey.replace('house_', ''))
+        : parseInt(houseKey, 10);
+      if (Number.isNaN(houseNumber) || houseNumber < 1 || houseNumber > 12) continue;
+      
+      let cusp = 0;
+      if (typeof houseValue === 'number') {
+        cusp = houseValue;
+      } else if (isChartObject(houseValue)) {
+        cusp = coerceChartNumber(houseValue.cusp, 0);
+      }
+      tempHouses.push({ number: houseNumber, cusp });
+    }
+    tempHouses.sort((a, b) => a.number - b.number);
+    houseCusps = tempHouses.map(h => h.cusp);
+  }
+  
   // Use bracket property access (strict index signature compliance)
-  const rawPlanets: BackendChartPlanets | undefined = isChartObject(
-    raw['planets']
-  )
-    ? (raw['planets'] as BackendChartPlanets)
-    : undefined;
-  if (rawPlanets) {
+  const rawPlanetsCandidate = raw['planets'];
+  // Case 1: Object map (expected from /calculate endpoint)
+  if (isChartObject(rawPlanetsCandidate) && !Array.isArray(rawPlanetsCandidate)) {
+    const rawPlanets: BackendChartPlanets = rawPlanetsCandidate as BackendChartPlanets;
     for (const [name, value] of Object.entries(rawPlanets)) {
       if (isChartObject(value) && isPlanetName(name)) {
+        if (!isPlanetForDisplay(name)) continue; // Skip asteroids/points in planet map
         const p = value as BackendChartPlanet;
-        const position =
-          typeof p.position === 'number'
-            ? p.position
-            : typeof p.longitude === 'number'
-              ? p.longitude
-              : 0;
-        const planetName = name;
-        planets[planetName] = {
-          name: planetName,
-          position,
-          retrograde: Boolean(p.retrograde),
-          speed: typeof p.speed === 'number' ? p.speed : 0,
-          sign: p.sign ?? 'aries',
-          house: typeof p.house === 'number' ? p.house : 1,
-          dignity: p.dignity,
-          essential_dignity: p.essential_dignity,
+        const position = typeof p.position === 'number'
+          ? p.position
+          : typeof p.longitude === 'number'
+            ? p.longitude
+            : 0;
+        const sign = p.sign ?? getSignFromDegrees(position);
+        const house = typeof p.house === 'number' ? p.house : calculateHousePosition(position, houseCusps);
+        planets[name] = {
+          name: name as PlanetName,
+            position,
+            retrograde: Boolean(p.retrograde),
+            speed: typeof p.speed === 'number' ? p.speed : 0,
+            sign,
+            house,
+            dignity: p.dignity,
+            essential_dignity: p.essential_dignity,
         };
       }
+    }
+  }
+  // Case 2: Array list (returned by legacy /api/charts endpoints)
+  else if (Array.isArray(rawPlanetsCandidate)) {
+    for (const item of rawPlanetsCandidate) {
+      if (!isChartObject(item)) continue;
+      const nameRaw = (item as any).name;
+      if (!isPlanetName(nameRaw)) continue;
+      if (!isPlanetForDisplay(nameRaw)) continue;
+      const degree = typeof (item as any).degree === 'number' ? (item as any).degree : 0;
+      const position = typeof (item as any).position === 'number' ? (item as any).position : degree;
+      const sign = typeof (item as any).sign === 'string' && isZodiacSign((item as any).sign)
+        ? (item as any).sign
+        : getSignFromDegrees(position);
+      const house = typeof (item as any).house === 'number'
+        ? (item as any).house
+        : calculateHousePosition(position, houseCusps);
+      planets[nameRaw] = {
+        name: nameRaw,
+        position,
+        retrograde: Boolean((item as any).retrograde),
+        speed: typeof (item as any).speed === 'number' ? (item as any).speed : 0,
+        sign,
+        house,
+      };
     }
   }
 
@@ -762,33 +855,108 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
   }
 
   // Aspects
+  console.log('🔗 Processing aspects from backend...', raw['aspects']);
+  // Handle aspects with robust backend field mapping
   const aspects: Aspect[] = [];
   const rawAspects: unknown[] = Array.isArray(raw['aspects'])
     ? (raw['aspects'] as unknown[])
     : [];
+  console.log(`📊 Found ${rawAspects.length} raw aspects`);
+  
   for (const aspect of rawAspects) {
-    if (isChartObject(aspect)) {
-      const { aspect_type, planet1, planet2, orb, applying, exact, power } =
-        aspect as unknown as Aspect;
-
-      if (
-        isZodiacSign(planet1) &&
-        isZodiacSign(planet2) &&
-        typeof orb === 'number' &&
-        typeof applying === 'boolean'
-      ) {
-        aspects.push({
-          aspect_type,
-          planet1,
-          planet2,
-          orb,
-          applying,
-          exact: exact ?? false,
-          power: typeof power === 'number' ? power : undefined,
-        });
-      }
+    if (!isChartObject(aspect)) continue;
+    const a = aspect as any;
+    // Shape A: point1/point2 + aspect (new backend)
+    if (a.point1 && a.point2 && a.aspect && typeof a.orb === 'number') {
+      aspects.push({
+        aspect_type: a.aspect,
+        planet1: a.point1,
+        planet2: a.point2,
+        orb: a.orb,
+        applying: Boolean(a.applying),
+        exact: Boolean(a.exact),
+        power: typeof a.power === 'number' ? a.power : undefined,
+      });
+      continue;
+    }
+    // Shape B: planet1/planet2 + type (legacy charts endpoint mock)
+    if (a.planet1 && a.planet2 && a.type && typeof a.orb === 'number') {
+      aspects.push({
+        aspect_type: a.type,
+        planet1: a.planet1,
+        planet2: a.planet2,
+        orb: a.orb,
+        applying: Boolean(a.applying),
+        exact: Boolean(a.exact),
+        power: typeof a.power === 'number' ? a.power : undefined,
+      });
+      continue;
     }
   }
+  console.log(`🎯 Final aspects count: ${aspects.length}`);
+
+  // Process asteroids if they exist in the backend response
+  console.log('🌌 Processing asteroids from backend...', raw['asteroids']);
+  const major_asteroids: Record<string, Planet> = {};
+  const minor_asteroids: Record<string, Planet> = {};
+  const rawAsteroids = raw['asteroids'];
+  if (rawAsteroids && typeof rawAsteroids === 'object') {
+    // Define major asteroids
+    const majorAsteroidNames = ['chiron', 'ceres', 'pallas', 'juno', 'vesta'];
+    
+    Object.entries(rawAsteroids as Record<string, any>).forEach(([name, asteroidData]) => {
+      if (asteroidData && typeof asteroidData === 'object') {
+        const position = typeof asteroidData.position === 'number' ? asteroidData.position : 0;
+        const asteroid: Planet = {
+          name: name as PlanetName, // Cast to PlanetName
+          position,
+          retrograde: Boolean(asteroidData.retrograde),
+          speed: typeof asteroidData.speed === 'number' ? asteroidData.speed : 0,
+          sign: asteroidData.sign ?? getSignFromDegrees(position),
+          house: typeof asteroidData.house === 'number' 
+            ? asteroidData.house 
+            : calculateHousePosition(position, houseCusps),
+        };
+        
+        // Split into major and minor asteroids
+        if (majorAsteroidNames.includes(name.toLowerCase())) {
+          major_asteroids[name] = asteroid;
+          console.log(`� Added MAJOR asteroid ${name}: ${position}° → ${asteroid.sign} (House ${asteroid.house})`);
+        } else {
+          minor_asteroids[name] = asteroid;
+          console.log(`🌌 Added minor asteroid ${name}: ${position}° → ${asteroid.sign} (House ${asteroid.house})`);
+        }
+      }
+    });
+  }
+  console.log(`🌟 Final major asteroids count: ${Object.keys(major_asteroids).length}`);
+  console.log(`🌌 Final minor asteroids count: ${Object.keys(minor_asteroids).length}`);
+
+  // Process points (lunar nodes, lilith, etc.) if they exist in the backend response
+  console.log('📍 Processing points from backend...', raw['points']);
+  const points: Record<string, Planet> = {};
+  const rawPoints = raw['points'];
+  if (rawPoints && typeof rawPoints === 'object') {
+    Object.entries(rawPoints as Record<string, any>).forEach(([name, pointData]) => {
+      if (pointData && typeof pointData === 'object') {
+        const position = typeof pointData.position === 'number' ? pointData.position : 0;
+        const point: Planet = {
+          name: name as PlanetName, // Cast to PlanetName
+          position,
+          retrograde: Boolean(pointData.retrograde),
+          speed: typeof pointData.speed === 'number' ? pointData.speed : 0,
+          sign: pointData.sign ?? getSignFromDegrees(position),
+          house: typeof pointData.house === 'number' 
+            ? pointData.house 
+            : calculateHousePosition(position, houseCusps),
+        };
+        
+        points[name] = point;
+        console.log(`📍 Added point ${name}: ${position}° → ${point.sign} (House ${point.house})`);
+      }
+    });
+  }
+  console.log(`📍 Final points count: ${Object.keys(points).length}`);
 
   const defaultAsc = houses[0]?.cusp ?? 0;
   const defaultMc = houses[9]?.cusp ?? 0;
@@ -798,17 +966,22 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
   )
     ? anglesCandidate
     : undefined;
+  console.log('📐 Processing angles from backend...', anglesRaw);
   const angles =
     anglesRaw &&
     typeof anglesRaw['ascendant'] === 'number' &&
-    typeof anglesRaw['midheaven'] === 'number' &&
+    typeof anglesRaw['mc'] === 'number' &&
     typeof anglesRaw['descendant'] === 'number' &&
-    typeof anglesRaw['imumcoeli'] === 'number'
+    typeof anglesRaw['ic'] === 'number'
       ? {
           ascendant: anglesRaw['ascendant'],
-          midheaven: anglesRaw['midheaven'],
+          midheaven: anglesRaw['mc'], // Backend uses 'mc' for midheaven
           descendant: anglesRaw['descendant'],
-          imumcoeli: anglesRaw['imumcoeli'],
+          imumcoeli: anglesRaw['ic'], // Backend uses 'ic' for imum coeli
+          // Add additional angles if available
+          vertex: typeof anglesRaw['vertex'] === 'number' ? anglesRaw['vertex'] : undefined,
+          antivertex: typeof anglesRaw['antivertex'] === 'number' ? anglesRaw['antivertex'] : undefined,
+          part_of_fortune: typeof anglesRaw['part_of_fortune'] === 'number' ? anglesRaw['part_of_fortune'] : undefined,
         }
       : {
           ascendant: defaultAsc,
@@ -830,16 +1003,20 @@ const transformBackendResponse = (backendResponse: unknown): ChartData => {
       : 'placidus';
 
   return {
-    planets,
+    planets: planets as Record<PlanetName, Planet>,
     houses: houses.sort((a, b) => a.number - b.number),
-    aspects,
+    aspects, // Now properly transformed aspects
+    asteroids: { ...major_asteroids, ...minor_asteroids }, // Combine major and minor asteroids
+    points, // Add points (nodes, lilith, etc.)
     angles,
     latitude,
     longitude,
     timezone,
     julian_day,
     house_system,
-  };
+    // CRITICAL FIX: Preserve raw backend data for ChartDisplay normalizeChart
+    ...({ __raw_backend_response: raw } as any), // Pass through original backend response
+  } as ChartData;
 };
 
 export const fetchNatalChart = async (

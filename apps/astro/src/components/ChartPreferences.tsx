@@ -370,7 +370,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> =
             onClick={() => {
               void handleSavePreferences();
             }}
-            variant='primary'
+            variant='default'
             disabled={saveButtonDisabled}
             aria-disabled={saveButtonDisabled}
             aria-busy={isLoading}

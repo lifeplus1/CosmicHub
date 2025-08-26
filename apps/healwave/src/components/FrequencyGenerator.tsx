@@ -140,11 +140,11 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
                     <label
-                      className={`p-3 rounded-lg border text-left transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 ${
-                        isSelected
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                        className={`p-3 rounded-lg border text-left transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-cyan-400 ${
+                          isSelected
+                            ? 'border-cyan-400 bg-cyan-500/20 backdrop-blur-sm'
+                            : 'border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                        }`}
                     >
                       <input
                         type='radio'
@@ -155,18 +155,18 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                         value={preset.id}
                         aria-label={`${preset.name} preset (${preset.baseFrequency} Hz)`}
                       />
-                      <div className='font-medium'>{preset.name}</div>
-                      <div className='text-sm text-gray-600'>
+                      <div className='font-medium text-white'>{preset.name}</div>
+                      <div className='text-sm text-cyan-300'>
                         {preset.baseFrequency} Hz
                       </div>
-                      <div className='mt-1 text-xs text-gray-500'>
+                      <div className='mt-1 text-xs text-white/70'>
                         {preset.description}
                       </div>
                     </label>
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
                     <Tooltip.Content
-                      className='p-2 bg-white border rounded shadow'
+                      className='p-2 bg-black/90 backdrop-blur-sm border border-white/20 rounded shadow-xl text-white text-sm'
                       side='top'
                     >
                       Premium: Unlock more presets with subscription
@@ -181,13 +181,13 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
 
       {/* Controls */}
       {selectedPreset && (
-        <div className='p-4 mb-6 border border-gray-200 rounded-lg'>
-          <h4 className='mb-3 font-semibold'>Session Settings</h4>
+        <div className='p-4 mb-6 border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg'>
+          <h4 className='mb-3 font-semibold text-white'>Session Settings</h4>
 
           <div className='grid grid-cols-2 gap-4'>
             <div>
               <div
-                className='block mb-1 text-sm font-medium'
+                className='block mb-1 text-sm font-medium text-white/90'
                 id={volumeLabelId}
               >
                 Volume (%)
@@ -208,17 +208,17 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 aria-valuemin={0}
                 aria-valuemax={100}
               >
-                <Slider.Track className='relative flex-grow h-1 bg-gray-200 rounded-full'>
-                  <Slider.Range className='absolute h-1 bg-blue-500 rounded-full' />
+                <Slider.Track className='relative flex-grow h-1 bg-white/20 rounded-full'>
+                  <Slider.Range className='absolute h-1 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full' />
                 </Slider.Track>
-                <Slider.Thumb className='block w-4 h-4 bg-white border-2 border-blue-500 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500' />
+                <Slider.Thumb className='block w-4 h-4 bg-white border-2 border-cyan-400 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-400' />
               </Slider.Root>
-              <span className='text-sm text-gray-600'>{settings.volume}%</span>
+              <span className='text-sm text-white/70'>{settings.volume}%</span>
             </div>
 
             <div>
               <div
-                className='block mb-1 text-sm font-medium'
+                className='block mb-1 text-sm font-medium text-white/90'
                 id={durationLabelId}
               >
                 Duration (minutes)
@@ -239,12 +239,12 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 aria-valuemin={1}
                 aria-valuemax={60}
               >
-                <Slider.Track className='relative flex-grow h-1 bg-gray-200 rounded-full'>
-                  <Slider.Range className='absolute h-1 bg-blue-500 rounded-full' />
+                <Slider.Track className='relative flex-grow h-1 bg-white/20 rounded-full'>
+                  <Slider.Range className='absolute h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full' />
                 </Slider.Track>
-                <Slider.Thumb className='block w-4 h-4 bg-white border-2 border-blue-500 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500' />
+                <Slider.Thumb className='block w-4 h-4 bg-white border-2 border-purple-400 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400' />
               </Slider.Root>
-              <span className='text-sm text-gray-600'>
+              <span className='text-sm text-white/70'>
                 {settings.duration} min
               </span>
             </div>
@@ -257,7 +257,7 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 void handlePlay();
               }}
               disabled={isPlaying || !selectedPreset}
-              className='px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='px-4 py-2 text-white bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg hover:from-cyan-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all shadow-lg hover:shadow-cyan-500/25'
             >
               {isPlaying ? 'Playing...' : 'Start Session'}
             </button>
@@ -266,7 +266,7 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
               type='button'
               onClick={handleStop}
               disabled={!isPlaying}
-              className='px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+              className='px-4 py-2 text-white bg-gradient-to-r from-red-500 to-pink-500 rounded-lg hover:from-red-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-400 transition-all shadow-lg hover:shadow-red-500/25'
             >
               Stop
             </button>
@@ -276,12 +276,12 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
 
       {/* Frequency Info */}
       {selectedPreset && (
-        <div className='p-4 border border-gray-200 rounded-lg bg-gray-50'>
-          <h4 className='mb-2 font-semibold'>About {selectedPreset.name}</h4>
-          <p className='text-sm text-gray-700 mb-2'>
+        <div className='p-4 border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg'>
+          <h4 className='mb-2 font-semibold text-white'>About {selectedPreset.name}</h4>
+          <p className='text-sm text-white/80 mb-2'>
             {selectedPreset.description}
           </p>
-          <div className='text-xs text-gray-600'>
+          <div className='text-xs text-white/60'>
             <div>Frequency: {selectedPreset.baseFrequency} Hz</div>
             <div>Category: {selectedPreset.category}</div>
             {selectedPreset.binauralBeat && (
@@ -289,7 +289,7 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
             )}
             {selectedPreset.benefits && (
               <div className='mt-2'>
-                <strong>Benefits:</strong>
+                <strong className='text-cyan-300'>Benefits:</strong>
                 <ul className='list-disc list-inside mt-1'>
                   {selectedPreset.benefits.map((benefit, index) => (
                     <li key={index}>{benefit}</li>

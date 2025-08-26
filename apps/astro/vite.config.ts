@@ -2,6 +2,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// Allow overriding dev port to prevent silent fallback; default 5174
+const DEV_PORT = Number(process.env.VITE_PORT || 5174);
+
 export default defineConfig({
   plugins: [
     react({
@@ -76,16 +79,16 @@ export default defineConfig({
   },
 
   server: {
-    port: 5174, // Swapped: astro now on 5174
+    port: DEV_PORT,
+    strictPort: true, // Fail fast if port in use instead of auto-incrementing (prevents CORS mismatch)
     host: true,
     cors: true,
     hmr: {
-      port: 5174,
+      port: DEV_PORT,
       host: 'localhost',
     },
     proxy: {
       '/api': {
-        // Proxy API calls to backend during development
         target: process.env.VITE_API_URL || 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
@@ -94,7 +97,7 @@ export default defineConfig({
   },
 
   preview: {
-    port: 5174,
+    port: DEV_PORT,
     host: true,
   },
 

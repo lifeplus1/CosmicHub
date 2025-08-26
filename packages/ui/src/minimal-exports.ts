@@ -17,13 +17,18 @@ export * from './components/Spinner';
 export * from './components/UpgradeModal';
 export * from './components/PerformanceDashboard';
 
+// UX Enhancement components
+export * from './components/LoadingStates';
+export * from './components/ErrorHandling';
+export * from './components/MobileResponsive';
+export * from './components/UserFeedback';
+
 // Accessibility components for ALLY-030
 export * from './components/accessibility/AccessibilityUtils';
 
 // Error handling components
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export * from './components/ErrorBoundaries';
-export * from './hooks/useErrorHandling';
 
 // Re-export specific error boundary types for compatibility
 export {

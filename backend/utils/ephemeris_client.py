@@ -342,6 +342,10 @@ async def get_planetary_positions(
         "pallas",
         "juno",
         "vesta",
+        "north_node",
+        "south_node",
+        "lilith_mean",
+        "lilith_true",
     ]
 
     async with EphemerisClient() as client:

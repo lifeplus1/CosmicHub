@@ -332,6 +332,7 @@ export interface ChartAngles {
   descendant: number;
   imumcoeli: number;
   vertex?: number;
+  antivertex?: number; // Add antivertex
   part_of_fortune?: number;
 }
 
@@ -339,6 +340,8 @@ export interface ChartData {
   planets: Record<PlanetName, Planet>;
   houses: House[];
   aspects: Aspect[];
+  asteroids?: Record<string, Planet>; // Add optional asteroids field
+  points?: Record<string, Planet>; // Add optional points field (lunar nodes, lilith, etc.)
   angles: ChartAngles;
   latitude: number;
   longitude: number;
