@@ -1,7 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { mobileIntegrationService, MobileFeatureStatus } from './src/services/mobileIntegrationService';
+import {
+  mobileIntegrationService,
+  MobileFeatureStatus,
+} from './src/services/mobileIntegrationService';
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
@@ -25,7 +28,7 @@ export default function App() {
 
       // Handle app launch authentication if biometrics are available
       const authSuccess = await mobileIntegrationService.handleAppLaunch();
-      
+
       if (!authSuccess) {
         Alert.alert(
           'Authentication Required',
@@ -36,7 +39,8 @@ export default function App() {
       }
 
       // Check if user needs to complete mobile onboarding
-      const hasCompletedOnboarding = await mobileIntegrationService.hasCompletedMobileOnboarding();
+      const hasCompletedOnboarding =
+        await mobileIntegrationService.hasCompletedMobileOnboarding();
       if (!hasCompletedOnboarding) {
         // Show onboarding screens here
         console.log('User needs to complete mobile onboarding');
@@ -53,14 +57,16 @@ export default function App() {
     }
   };
 
-  const getStatusIcon = (enabled: boolean) => enabled ? '✅' : '❌';
+  const getStatusIcon = (enabled: boolean) => (enabled ? '✅' : '❌');
 
   if (!isReady) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>🌟 Initializing CosmicHub</Text>
-        <Text style={styles.subtitle}>Setting up your cosmic mobile experience...</Text>
-        <StatusBar style="auto" />
+        <Text style={styles.subtitle}>
+          Setting up your cosmic mobile experience...
+        </Text>
+        <StatusBar style='auto' />
       </View>
     );
   }
@@ -69,34 +75,34 @@ export default function App() {
     <View style={styles.container}>
       <Text style={styles.title}>🌟 CosmicHub Mobile</Text>
       <Text style={styles.subtitle}>MOB-002: Mobile-Specific Features</Text>
-      
+
       <View style={styles.featuresContainer}>
         <Text style={styles.sectionTitle}>📱 Mobile Features Status</Text>
-        
+
         <View style={styles.featureRow}>
           <Text style={styles.featureText}>
             {getStatusIcon(featureStatus.notifications)} Push Notifications
           </Text>
         </View>
-        
+
         <View style={styles.featureRow}>
           <Text style={styles.featureText}>
             {getStatusIcon(featureStatus.location)} Location Services
           </Text>
         </View>
-        
+
         <View style={styles.featureRow}>
           <Text style={styles.featureText}>
             {getStatusIcon(featureStatus.biometrics)} Biometric Authentication
           </Text>
         </View>
-        
+
         <View style={styles.featureRow}>
           <Text style={styles.featureText}>
             {getStatusIcon(featureStatus.widgets)} Widgets
           </Text>
         </View>
-        
+
         <View style={styles.featureRow}>
           <Text style={styles.featureText}>
             {getStatusIcon(featureStatus.camera)} Camera & Sharing
@@ -106,7 +112,7 @@ export default function App() {
 
       <View style={styles.implementedContainer}>
         <Text style={styles.sectionTitle}>🚀 Implemented Features</Text>
-        
+
         <Text style={styles.implementedText}>
           • 🔔 Push notifications for transits and daily insights
         </Text>
@@ -130,7 +136,7 @@ export default function App() {
         </Text>
       </View>
 
-      <StatusBar style="auto" />
+      <StatusBar style='auto' />
     </View>
   );
 }

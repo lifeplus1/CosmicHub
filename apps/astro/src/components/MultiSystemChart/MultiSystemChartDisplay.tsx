@@ -22,7 +22,10 @@ class ChartErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback?: React.ReactNode },
   { hasError: boolean; error?: Error }
 > {
-  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+  constructor(props: {
+    children: React.ReactNode;
+    fallback?: React.ReactNode;
+  }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -37,21 +40,27 @@ class ChartErrorBoundary extends React.Component<
 
   override render() {
     if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className='cosmic-card bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-500/30'>
-          <div className='p-6 text-center'>
-            <h3 className='font-bold text-red-400 mb-2'>Chart Display Error</h3>
-            <p className='text-cosmic-silver/70 text-sm'>
-              There was an error displaying this chart section.
-            </p>
-            <button
-              onClick={() => this.setState({ hasError: false, error: undefined })}
-              className='mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm'
-            >
-              Try Again
-            </button>
+      return (
+        this.props.fallback || (
+          <div className='cosmic-card bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-500/30'>
+            <div className='p-6 text-center'>
+              <h3 className='font-bold text-red-400 mb-2'>
+                Chart Display Error
+              </h3>
+              <p className='text-cosmic-silver/70 text-sm'>
+                There was an error displaying this chart section.
+              </p>
+              <button
+                onClick={() =>
+                  this.setState({ hasError: false, error: undefined })
+                }
+                className='mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm'
+              >
+                Try Again
+              </button>
+            </div>
           </div>
-        </div>
+        )
       );
     }
     return this.props.children;
@@ -65,7 +74,6 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
   showComparison: _showComparison = false,
   isLoading = false,
 }) => {
-
   if (isLoading) {
     return (
       <div className='cosmic-card p-6 rounded-lg'>
@@ -128,16 +136,21 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
                   <>
                     <p className='text-cosmic-silver'>
                       <strong>Coordinates:</strong>{' '}
-                      {typeof displayData.birth_info.location.latitude === 'number' 
+                      {typeof displayData.birth_info.location.latitude ===
+                      'number'
                         ? displayData.birth_info.location.latitude.toFixed(2)
-                        : 'N/A'}°,{' '}
-                      {typeof displayData.birth_info.location.longitude === 'number' 
+                        : 'N/A'}
+                      °,{' '}
+                      {typeof displayData.birth_info.location.longitude ===
+                      'number'
                         ? displayData.birth_info.location.longitude.toFixed(2)
-                        : 'N/A'}°
+                        : 'N/A'}
+                      °
                     </p>
                     <p className='text-cosmic-silver'>
                       <strong>Timezone:</strong>{' '}
-                      {displayData.birth_info.location.timezone || 'Auto-detected'}
+                      {displayData.birth_info.location.timezone ||
+                        'Auto-detected'}
                     </p>
                   </>
                 )}
@@ -192,31 +205,31 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
               <WesternChart data={displayData.western_tropical} />
             </ChartErrorBoundary>
           </Tabs.Content>
-          
+
           <Tabs.Content value='vedic' className='pt-4'>
             <ChartErrorBoundary>
               <VedicChart data={displayData.vedic_sidereal ?? {}} />
             </ChartErrorBoundary>
           </Tabs.Content>
-          
+
           <Tabs.Content value='chinese' className='pt-4'>
             <ChartErrorBoundary>
               <ChineseChart data={displayData.chinese ?? {}} />
             </ChartErrorBoundary>
           </Tabs.Content>
-          
+
           <Tabs.Content value='mayan' className='pt-4'>
             <ChartErrorBoundary>
               <MayanChart data={displayData.mayan ?? {}} />
             </ChartErrorBoundary>
           </Tabs.Content>
-          
+
           <Tabs.Content value='uranian' className='pt-4'>
             <ChartErrorBoundary>
               <UranianChart data={displayData.uranian ?? {}} />
             </ChartErrorBoundary>
           </Tabs.Content>
-          
+
           <Tabs.Content value='synthesis' className='pt-4'>
             <ChartErrorBoundary>
               <SynthesisChart data={displayData.synthesis ?? {}} />

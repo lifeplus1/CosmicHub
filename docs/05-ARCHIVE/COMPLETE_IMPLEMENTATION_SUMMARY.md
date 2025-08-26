@@ -9,7 +9,7 @@
    - Created AstroSymbol component for consistent rendering
    - Added CSS classes for different symbol sizes
 
-2. **Uranian Points Button Toggle Issue** ✅  
+2. **Uranian Points Button Toggle Issue** ✅
    - Fixed incorrect table toggling (Uranian Points button was controlling Angles table)
    - Added proper filtering using getCelestialBodyCategory
    - Separated Angles (always visible) from Uranian Points (settings-controlled)
@@ -56,7 +56,7 @@
 - **📊 Separate View**: Distinct focused tables per category with proper filtering
 - **Shared Components**: renderAspectTable used by both views (DRY principle)
 
-### User Experience  
+### User Experience
 
 - **Responsive Design**: Works great on mobile and desktop
 - **Progressive Disclosure**: Collapse unneeded sections
@@ -67,13 +67,13 @@
 
 ### Before vs After
 
-| Metric | Before | After | Improvement |
-|--------|--------|--------|-------------|
-| **Code Duplication** | High (duplicate aspect tables) | None | 100% reduction |
-| **Mobile UX** | Poor (long scrolling) | Excellent (collapsible) | Major improvement |
-| **Bug Count** | 6 major issues | 0 | All resolved |
-| **View Logic** | Confusing/identical | Clear separation | Complete redesign |
-| **Maintenance** | Multi-location edits | Single source of truth | Much easier |
+| Metric               | Before                         | After                   | Improvement       |
+| -------------------- | ------------------------------ | ----------------------- | ----------------- |
+| **Code Duplication** | High (duplicate aspect tables) | None                    | 100% reduction    |
+| **Mobile UX**        | Poor (long scrolling)          | Excellent (collapsible) | Major improvement |
+| **Bug Count**        | 6 major issues                 | 0                       | All resolved      |
+| **View Logic**       | Confusing/identical            | Clear separation        | Complete redesign |
+| **Maintenance**      | Multi-location edits           | Single source of truth  | Much easier       |
 
 ### Files Impact
 
@@ -88,7 +88,7 @@
 
 - ✅ **Proper astrological symbols** instead of emoji
 - ✅ **All celestial bodies display** (not just 11 asteroids)
-- ✅ **Correct table toggling** (Uranian Points works properly)  
+- ✅ **Correct table toggling** (Uranian Points works properly)
 - ✅ **Accurate aspect motion** (applying/separating fixed)
 - ✅ **House occupants shown** (which planets in each house)
 - ✅ **Mobile-friendly interface** (collapsible sections)
@@ -105,7 +105,7 @@
 The new architecture enables easy addition of:
 
 - State persistence for expanded sections
-- Copy-to-clipboard functions  
+- Copy-to-clipboard functions
 - Enhanced tooltips and interactions
 - Keyboard navigation shortcuts
 - Export functions per table
@@ -113,4 +113,6 @@ The new architecture enables easy addition of:
 
 ## ✨ **Result: Production-Ready Astrological Chart Display**
 
-The component now provides a professional, user-friendly interface for viewing complex astrological chart data with proper symbols, accurate calculations, and excellent mobile experience. All original issues resolved with significant UX improvements added.
+The component now provides a professional, user-friendly interface for viewing complex astrological
+chart data with proper symbols, accurate calculations, and excellent mobile experience. All original
+issues resolved with significant UX improvements added.

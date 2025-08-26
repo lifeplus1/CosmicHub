@@ -46,7 +46,7 @@ export class LocationService {
         console.error('Background location task error:', error);
         return;
       }
-      
+
       if (data && typeof data === 'object' && 'locations' in data) {
         const locations = data.locations as Location.LocationObject[];
         if (locations && locations.length > 0) {
@@ -77,7 +77,7 @@ export class LocationService {
         console.log('Location services initialized');
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.error('Failed to initialize location services:', error);
@@ -121,7 +121,8 @@ export class LocationService {
       if (status !== Location.PermissionStatus.GRANTED) return false;
 
       if (this.preferences.allowBackgroundLocation) {
-        const backgroundStatus = await Location.requestBackgroundPermissionsAsync();
+        const backgroundStatus =
+          await Location.requestBackgroundPermissionsAsync();
         if (backgroundStatus.status !== Location.PermissionStatus.GRANTED) {
           console.warn('Background location permission not granted');
         }
@@ -129,7 +130,9 @@ export class LocationService {
 
       await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
         accuracy: this.getLocationAccuracy(),
-        distanceInterval: this.preferences.significantLocationChangesOnly ? 100 : 10,
+        distanceInterval: this.preferences.significantLocationChangesOnly
+          ? 100
+          : 10,
         deferredUpdatesInterval: 60000, // 1 minute
         foregroundService: {
           notificationTitle: 'CosmicHub Location Service',
@@ -171,9 +174,11 @@ export class LocationService {
   /**
    * Update preferences
    */
-  async updatePreferences(newPreferences: Partial<LocationPreferences>): Promise<void> {
+  async updatePreferences(
+    newPreferences: Partial<LocationPreferences>
+  ): Promise<void> {
     this.preferences = { ...this.preferences, ...newPreferences };
-    
+
     // Restart tracking if needed
     if (this.isTracking && this.preferences.enableLocationServices) {
       await this.stopLocationTracking();
@@ -193,7 +198,9 @@ export class LocationService {
   /**
    * Process location update from background task
    */
-  private async processLocationUpdate(location: Location.LocationObject): Promise<void> {
+  private async processLocationUpdate(
+    location: Location.LocationObject
+  ): Promise<void> {
     const locationData: LocationData = {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -213,12 +220,14 @@ export class LocationService {
   /**
    * Check for location-based astrological events
    */
-  private async checkLocationBasedEvents(location: LocationData): Promise<void> {
+  private async checkLocationBasedEvents(
+    location: LocationData
+  ): Promise<void> {
     try {
       // This would normally query the API for location-specific events
       // For now, we'll just log the location update
       console.log('Checking location-based events for:', location);
-      
+
       // Example: Send notification for significant location change
       if (this.shouldNotifyForLocation(location)) {
         await notificationService.scheduleNotification(
@@ -238,7 +247,7 @@ export class LocationService {
    */
   private shouldNotifyForLocation(location: LocationData): boolean {
     if (!this.currentLocation) return true;
-    
+
     // Calculate distance from previous location
     const distance = this.calculateDistance(
       this.currentLocation.latitude,
@@ -253,17 +262,22 @@ export class LocationService {
   /**
    * Calculate distance between two coordinates in meters
    */
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
     const R = 6371e3; // Earth's radius in meters
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
   }

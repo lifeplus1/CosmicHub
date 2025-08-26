@@ -22,7 +22,7 @@ node scripts/tree-shaking-analyzer.mjs --cleanup-mode
 **Priority Files (High Impact)**:
 
 1. `packages/types/src/*.ts` - 53 unused exports
-2. `packages/ui/src/components/*.tsx` - 125+ unused exports  
+2. `packages/ui/src/components/*.tsx` - 125+ unused exports
 3. `packages/config/src/*.ts` - 200+ unused exports
 4. `apps/astro/src/utils/*.ts` - 150+ unused exports
 
@@ -211,5 +211,5 @@ node scripts/bundle-comparison.mjs --baseline --after-cleanup
 
 ---
 
-*Implementation Plan created August 26, 2025*  
-*CosmicHub Performance Optimization Team*
+_Implementation Plan created August 26, 2025_  
+_CosmicHub Performance Optimization Team_

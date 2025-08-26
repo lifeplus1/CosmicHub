@@ -11,7 +11,9 @@ const ChineseChart: React.FC<Props> = ({ data }) => {
     return (
       <div className='cosmic-card bg-gradient-to-br from-red-900/20 to-pink-900/20 border border-red-500/30'>
         <div className='p-6 text-center'>
-          <p className='text-cosmic-silver'>No Chinese astrology data available</p>
+          <p className='text-cosmic-silver'>
+            No Chinese astrology data available
+          </p>
           <p className='text-cosmic-silver/60 text-sm mt-2'>
             Please calculate a chart to see Chinese Four Pillars analysis
           </p>
@@ -21,16 +23,32 @@ const ChineseChart: React.FC<Props> = ({ data }) => {
   }
 
   // Safe data extraction with fallbacks
-  const description = safeGet(data, 'description', 'Chinese Astrology Four Pillars Analysis');
+  const description = safeGet(
+    data,
+    'description',
+    'Chinese Astrology Four Pillars Analysis'
+  );
   const yearElement = safeGet(data, 'year.element', 'Unknown');
   const yearAnimal = safeGet(data, 'year.animal', 'Unknown');
   const monthAnimal = safeGet(data, 'month.animal', 'Unknown');
   const dayAnimal = safeGet(data, 'day.animal', 'Unknown');
   const hourAnimal = safeGet(data, 'hour.animal', 'Unknown');
   const fourPillars = safeGet(data, 'four_pillars', 'Not available');
-  const elementsAnalysis = safeGet(data, 'elements_analysis.analysis', 'Elements analysis not available');
-  const yearTraits = safeGet(data, 'year.traits', 'Personality traits not available');
-  const personalitySummary = safeGet(data, 'personality_summary', 'Summary not available');
+  const elementsAnalysis = safeGet(
+    data,
+    'elements_analysis.analysis',
+    'Elements analysis not available'
+  );
+  const yearTraits = safeGet(
+    data,
+    'year.traits',
+    'Personality traits not available'
+  );
+  const personalitySummary = safeGet(
+    data,
+    'personality_summary',
+    'Summary not available'
+  );
 
   return (
     <div className='flex flex-col space-y-4'>
@@ -66,21 +84,29 @@ const ChineseChart: React.FC<Props> = ({ data }) => {
               <p className='mb-2 font-mono text-sm text-cosmic-silver/80 bg-red-900/10 p-2 rounded'>
                 {fourPillars}
               </p>
-              <p className='mb-2 font-bold text-cosmic-silver'>Elemental Balance</p>
-              <p className='text-sm text-cosmic-silver/80'>{elementsAnalysis}</p>
+              <p className='mb-2 font-bold text-cosmic-silver'>
+                Elemental Balance
+              </p>
+              <p className='text-sm text-cosmic-silver/80'>
+                {elementsAnalysis}
+              </p>
             </div>
           </div>
 
           <div className='space-y-4'>
             <div>
-              <p className='mb-2 font-bold text-cosmic-silver'>Personality Traits</p>
+              <p className='mb-2 font-bold text-cosmic-silver'>
+                Personality Traits
+              </p>
               <p className='mb-4 text-sm text-cosmic-silver/80 bg-red-900/10 p-3 rounded'>
                 {yearTraits}
               </p>
             </div>
 
             <div>
-              <p className='mb-2 font-bold text-cosmic-silver'>Overall Summary</p>
+              <p className='mb-2 font-bold text-cosmic-silver'>
+                Overall Summary
+              </p>
               <p className='text-sm text-cosmic-silver/80 bg-red-900/10 p-3 rounded'>
                 {personalitySummary}
               </p>

@@ -6,7 +6,14 @@ import { getAuthToken } from '../services/api';
 import { useToast } from './ToastProvider';
 import { apiConfig } from '../config/environment';
 import { AI001Service } from '../services/ai-001-enhanced';
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '@cosmichub/ui';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Button,
+  Badge,
+} from '@cosmichub/ui';
 
 interface ChatResponse {
   choices: { message: { content: string } }[];
@@ -95,22 +102,25 @@ export default function AIChat(): React.ReactElement {
 
       if (aiMode === 'ai001') {
         // Enhanced AI-001 processing
-        const enhancedResponse = await AI001Service.generateComprehensiveAnalysis({
-          chartData: {}, // Would need chart data from context
-          userId: user?.uid ?? '',
-          analysisType: 'comprehensive',
-          preferences: {
-            focusAreas: selectedFeatures,
-          },
-        });
+        const enhancedResponse =
+          await AI001Service.generateComprehensiveAnalysis({
+            chartData: {}, // Would need chart data from context
+            userId: user?.uid ?? '',
+            analysisType: 'comprehensive',
+            preferences: {
+              focusAreas: selectedFeatures,
+            },
+          });
 
         // Convert AI-001 response to chat format
         chatResponse = {
-          choices: [{
-            message: {
-              content: `🚀 **AI-001 Enhanced Analysis**\n\n${enhancedResponse.summary}\n\n**Key Insights:**\n• ${enhancedResponse.transits.length} upcoming transits identified\n• ${enhancedResponse.growth.length} growth opportunities found\n• Multi-system synthesis: ${enhancedResponse.synthesis.commonThemes.join(', ')}\n• ${enhancedResponse.patterns.length} significant patterns detected`
-            }
-          }]
+          choices: [
+            {
+              message: {
+                content: `🚀 **AI-001 Enhanced Analysis**\n\n${enhancedResponse.summary}\n\n**Key Insights:**\n• ${enhancedResponse.transits.length} upcoming transits identified\n• ${enhancedResponse.growth.length} growth opportunities found\n• Multi-system synthesis: ${enhancedResponse.synthesis.commonThemes.join(', ')}\n• ${enhancedResponse.patterns.length} significant patterns detected`,
+              },
+            },
+          ],
         };
       } else {
         // Standard chat processing
@@ -150,10 +160,12 @@ export default function AIChat(): React.ReactElement {
 
       setResponse(chatResponse);
       toast({
-        title: aiMode === 'ai001' ? 'AI-001 Analysis Complete' : 'Response Received',
-        description: aiMode === 'ai001' 
-          ? 'Advanced AI analysis has been generated successfully'
-          : 'Your AI response has been generated successfully',
+        title:
+          aiMode === 'ai001' ? 'AI-001 Analysis Complete' : 'Response Received',
+        description:
+          aiMode === 'ai001'
+            ? 'Advanced AI analysis has been generated successfully'
+            : 'Your AI response has been generated successfully',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -195,13 +207,13 @@ export default function AIChat(): React.ReactElement {
       aria-label='AI Astrology Chat Interface'
       className='max-w-4xl p-6 mx-auto text-white border shadow-2xl bg-cosmic-dark/80 backdrop-blur-xl border-cosmic-gold/20 rounded-xl'
     >
-      <div className="mb-6">
+      <div className='mb-6'>
         <h1 className='text-2xl font-bold text-center text-cosmic-gold mb-2'>
           AI Astrology Chat
         </h1>
-        
+
         {/* AI Mode Toggle */}
-        <div className="flex justify-center gap-2 mb-4">
+        <div className='flex justify-center gap-2 mb-4'>
           <Button
             onClick={() => setAiMode('chat')}
             className={`${aiMode === 'chat' ? 'bg-cosmic-gold text-cosmic-dark' : 'bg-cosmic-dark/50 text-cosmic-silver'} transition-colors`}
@@ -218,21 +230,25 @@ export default function AIChat(): React.ReactElement {
 
         {/* AI-001 Feature Selection */}
         {aiMode === 'ai001' && (
-          <Card className="cosmic-glass border-cosmic-purple/30 mb-4">
+          <Card className='cosmic-glass border-cosmic-purple/30 mb-4'>
             <CardHeader>
-              <CardTitle className="text-lg text-cosmic-gold">🚀 AI-001 Features</CardTitle>
-              <p className="text-cosmic-silver/80 text-sm">
+              <CardTitle className='text-lg text-cosmic-gold'>
+                🚀 AI-001 Features
+              </CardTitle>
+              <p className='text-cosmic-silver/80 text-sm'>
                 Select advanced AI capabilities to include in your analysis
               </p>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                {ai001Features.map((feature) => (
+              <div className='grid grid-cols-2 gap-3'>
+                {ai001Features.map(feature => (
                   <button
                     key={feature.id}
                     onClick={() => {
                       if (selectedFeatures.includes(feature.id)) {
-                        setSelectedFeatures(prev => prev.filter(f => f !== feature.id));
+                        setSelectedFeatures(prev =>
+                          prev.filter(f => f !== feature.id)
+                        );
                       } else {
                         setSelectedFeatures(prev => [...prev, feature.id]);
                       }
@@ -243,11 +259,15 @@ export default function AIChat(): React.ReactElement {
                         : 'border-cosmic-purple/30 bg-cosmic-purple/5 text-cosmic-silver hover:border-cosmic-purple/50'
                     }`}
                   >
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg">{feature.icon}</span>
+                    <div className='flex items-start gap-2'>
+                      <span className='text-lg'>{feature.icon}</span>
                       <div>
-                        <div className="font-medium text-sm">{feature.name}</div>
-                        <div className="text-xs opacity-80">{feature.description}</div>
+                        <div className='font-medium text-sm'>
+                          {feature.name}
+                        </div>
+                        <div className='text-xs opacity-80'>
+                          {feature.description}
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -257,11 +277,10 @@ export default function AIChat(): React.ReactElement {
           </Card>
         )}
 
-        <p className="text-cosmic-silver/70 text-center text-sm">
-          {aiMode === 'chat' 
+        <p className='text-cosmic-silver/70 text-center text-sm'>
+          {aiMode === 'chat'
             ? 'Ask questions about your astrological chart'
-            : 'Get comprehensive AI-001 enhanced analysis with predictive insights'
-          }
+            : 'Get comprehensive AI-001 enhanced analysis with predictive insights'}
         </p>
       </div>
 
@@ -279,9 +298,10 @@ export default function AIChat(): React.ReactElement {
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>): void =>
               setMessage(e.target.value)
             }
-            placeholder={aiMode === 'ai001' 
-              ? 'Request AI-001 enhanced analysis (e.g., "Analyze my upcoming year for growth opportunities")...'
-              : 'Ask about your chart...'
+            placeholder={
+              aiMode === 'ai001'
+                ? 'Request AI-001 enhanced analysis (e.g., "Analyze my upcoming year for growth opportunities")...'
+                : 'Ask about your chart...'
             }
             className='w-full p-3 text-white border rounded-lg resize-none bg-cosmic-dark border-cosmic-gold/30 placeholder-cosmic-silver focus:border-cosmic-gold focus:outline-none'
             rows={4}
@@ -291,10 +311,9 @@ export default function AIChat(): React.ReactElement {
             id='ai-message-help'
             className='mt-1 text-sm text-cosmic-silver/70'
           >
-            {aiMode === 'ai001' 
+            {aiMode === 'ai001'
               ? 'Request comprehensive AI-001 analysis with predictive timing, growth coaching, and pattern recognition'
-              : 'Ask questions about your astrological chart or request interpretations'
-            }
+              : 'Ask questions about your astrological chart or request interpretations'}
           </div>
         </div>
         <button
@@ -339,10 +358,12 @@ export default function AIChat(): React.ReactElement {
           response.choices[0].message.content.length > 0 && (
             <Card className='mt-4 cosmic-glass border-cosmic-purple/30'>
               <CardHeader>
-                <CardTitle className="text-lg text-cosmic-gold flex items-center gap-2">
-                  {aiMode === 'ai001' ? '🚀 AI-001 Enhanced Response' : '🤖 AI Response'}
+                <CardTitle className='text-lg text-cosmic-gold flex items-center gap-2'>
+                  {aiMode === 'ai001'
+                    ? '🚀 AI-001 Enhanced Response'
+                    : '🤖 AI Response'}
                   {aiMode === 'ai001' && (
-                    <Badge className="bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30">
+                    <Badge className='bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30'>
                       Next-Gen AI
                     </Badge>
                   )}

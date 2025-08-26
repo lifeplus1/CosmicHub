@@ -32,31 +32,36 @@ export const CollapsibleTable: React.FC<CollapsibleTableProps> = ({
   className = '',
 }) => {
   return (
-    <AccordionItem value={value} className={`cosmic-glass border-cosmic-purple/30 ${className}`}>
-      <AccordionTrigger className="hover:bg-cosmic-purple/10 rounded-t-lg px-6 py-4">
-        <div className="flex items-center justify-between w-full mr-4">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">{icon}</span>
+    <AccordionItem
+      value={value}
+      className={`cosmic-glass border-cosmic-purple/30 ${className}`}
+    >
+      <AccordionTrigger className='hover:bg-cosmic-purple/10 rounded-t-lg px-6 py-4'>
+        <div className='flex items-center justify-between w-full mr-4'>
+          <div className='flex items-center gap-3'>
+            <span className='text-2xl'>{icon}</span>
             <div>
-              <h3 className="text-lg font-semibold text-cosmic-gold text-left">
+              <h3 className='text-lg font-semibold text-cosmic-gold text-left'>
                 {title}
               </h3>
               {subtitle && (
-                <p className="text-sm text-cosmic-silver/70 text-left">{subtitle}</p>
+                <p className='text-sm text-cosmic-silver/70 text-left'>
+                  {subtitle}
+                </p>
               )}
             </div>
           </div>
           {count !== undefined && (
-            <div className="bg-cosmic-purple/20 px-3 py-1 rounded-full border border-cosmic-purple/30">
-              <span className="text-cosmic-gold font-medium text-sm">{count}</span>
+            <div className='bg-cosmic-purple/20 px-3 py-1 rounded-full border border-cosmic-purple/30'>
+              <span className='text-cosmic-gold font-medium text-sm'>
+                {count}
+              </span>
             </div>
           )}
         </div>
       </AccordionTrigger>
-      <AccordionContent className="p-0">
-        <div className="border-t border-cosmic-purple/20">
-          {children}
-        </div>
+      <AccordionContent className='p-0'>
+        <div className='border-t border-cosmic-purple/20'>{children}</div>
       </AccordionContent>
     </AccordionItem>
   );

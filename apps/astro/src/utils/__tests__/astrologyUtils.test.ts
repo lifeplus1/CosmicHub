@@ -1,6 +1,6 @@
 /**
  * Comprehensive Unit Tests for Astrology Utilities
- * 
+ *
  * Tests all functions in the centralized astrologyUtils module to ensure
  * consistent and correct astrological calculations across the application.
  */
@@ -13,37 +13,36 @@ import {
   getDegreeWithinSign,
   getAstrologicalSign,
   calculateHousePosition,
-  
+
   // Element/Quality/Ruler functions
   getElementFromSign,
   getQualityFromSign,
   getRulerFromSign,
-  
+
   // Angle utilities
   normalizeAngle,
   angleDifference,
-  
+
   // Validation functions
   isValidPosition,
   isZodiacSign,
   isHouseNumber,
-  
+
   // Format functions
   formatPlanetPosition,
-  
+
   // Constants
   ZODIAC_SIGNS,
   ZODIAC_SIGNS_CAPITALIZED,
   SIGN_ELEMENTS,
   SIGN_QUALITIES,
   SIGN_RULERS,
-  
+
   // Types
   type ZodiacSign,
 } from '../astrologyUtils';
 
 describe('Astrology Utilities', () => {
-  
   describe('Constants', () => {
     it('should have 12 zodiac signs', () => {
       expect(ZODIAC_SIGNS).toHaveLength(12);
@@ -54,7 +53,9 @@ describe('Astrology Utilities', () => {
       expect(Object.keys(SIGN_ELEMENTS)).toHaveLength(12);
       ZODIAC_SIGNS.forEach(sign => {
         expect(SIGN_ELEMENTS[sign]).toBeDefined();
-        expect(['fire', 'earth', 'air', 'water']).toContain(SIGN_ELEMENTS[sign]);
+        expect(['fire', 'earth', 'air', 'water']).toContain(
+          SIGN_ELEMENTS[sign]
+        );
       });
     });
 
@@ -62,7 +63,9 @@ describe('Astrology Utilities', () => {
       expect(Object.keys(SIGN_QUALITIES)).toHaveLength(12);
       ZODIAC_SIGNS.forEach(sign => {
         expect(SIGN_QUALITIES[sign]).toBeDefined();
-        expect(['cardinal', 'fixed', 'mutable']).toContain(SIGN_QUALITIES[sign]);
+        expect(['cardinal', 'fixed', 'mutable']).toContain(
+          SIGN_QUALITIES[sign]
+        );
       });
     });
 
@@ -77,24 +80,24 @@ describe('Astrology Utilities', () => {
 
   describe('getSignFromDegrees', () => {
     it('should correctly identify signs at exact boundaries', () => {
-      expect(getSignFromDegrees(0)).toBe('aries');     // 0° Aries
-      expect(getSignFromDegrees(30)).toBe('taurus');   // 0° Taurus
-      expect(getSignFromDegrees(60)).toBe('gemini');   // 0° Gemini
-      expect(getSignFromDegrees(90)).toBe('cancer');   // 0° Cancer
-      expect(getSignFromDegrees(120)).toBe('leo');     // 0° Leo
-      expect(getSignFromDegrees(150)).toBe('virgo');   // 0° Virgo
-      expect(getSignFromDegrees(180)).toBe('libra');   // 0° Libra
+      expect(getSignFromDegrees(0)).toBe('aries'); // 0° Aries
+      expect(getSignFromDegrees(30)).toBe('taurus'); // 0° Taurus
+      expect(getSignFromDegrees(60)).toBe('gemini'); // 0° Gemini
+      expect(getSignFromDegrees(90)).toBe('cancer'); // 0° Cancer
+      expect(getSignFromDegrees(120)).toBe('leo'); // 0° Leo
+      expect(getSignFromDegrees(150)).toBe('virgo'); // 0° Virgo
+      expect(getSignFromDegrees(180)).toBe('libra'); // 0° Libra
       expect(getSignFromDegrees(210)).toBe('scorpio'); // 0° Scorpio
       expect(getSignFromDegrees(240)).toBe('sagittarius'); // 0° Sagittarius
-      expect(getSignFromDegrees(270)).toBe('capricorn');   // 0° Capricorn
-      expect(getSignFromDegrees(300)).toBe('aquarius');    // 0° Aquarius
-      expect(getSignFromDegrees(330)).toBe('pisces');      // 0° Pisces
+      expect(getSignFromDegrees(270)).toBe('capricorn'); // 0° Capricorn
+      expect(getSignFromDegrees(300)).toBe('aquarius'); // 0° Aquarius
+      expect(getSignFromDegrees(330)).toBe('pisces'); // 0° Pisces
     });
 
     it('should correctly identify signs in the middle of ranges', () => {
-      expect(getSignFromDegrees(15)).toBe('aries');    // 15° Aries
-      expect(getSignFromDegrees(45)).toBe('taurus');   // 15° Taurus
-      expect(getSignFromDegrees(195)).toBe('libra');   // 15° Libra
+      expect(getSignFromDegrees(15)).toBe('aries'); // 15° Aries
+      expect(getSignFromDegrees(45)).toBe('taurus'); // 15° Taurus
+      expect(getSignFromDegrees(195)).toBe('libra'); // 15° Libra
       expect(getSignFromDegrees(285)).toBe('capricorn'); // 15° Capricorn
     });
 
@@ -105,20 +108,20 @@ describe('Astrology Utilities', () => {
     });
 
     it('should normalize negative degrees', () => {
-      expect(getSignFromDegrees(-30)).toBe('pisces');  // -30° = 330°
+      expect(getSignFromDegrees(-30)).toBe('pisces'); // -30° = 330°
       expect(getSignFromDegrees(-60)).toBe('aquarius'); // -60° = 300°
-      expect(getSignFromDegrees(-1)).toBe('pisces');   // -1° = 359°
+      expect(getSignFromDegrees(-1)).toBe('pisces'); // -1° = 359°
     });
 
     it('should normalize degrees over 360', () => {
-      expect(getSignFromDegrees(360)).toBe('aries');   // 360° = 0°
-      expect(getSignFromDegrees(390)).toBe('taurus');  // 390° = 30°
-      expect(getSignFromDegrees(720)).toBe('aries');   // 720° = 0°
+      expect(getSignFromDegrees(360)).toBe('aries'); // 360° = 0°
+      expect(getSignFromDegrees(390)).toBe('taurus'); // 390° = 30°
+      expect(getSignFromDegrees(720)).toBe('aries'); // 720° = 0°
     });
 
     it('should handle large positive and negative values', () => {
-      expect(getSignFromDegrees(1080)).toBe('aries');  // 1080° = 0°
-      expect(getSignFromDegrees(-720)).toBe('aries');  // -720° = 0°
+      expect(getSignFromDegrees(1080)).toBe('aries'); // 1080° = 0°
+      expect(getSignFromDegrees(-720)).toBe('aries'); // -720° = 0°
     });
   });
 
@@ -141,7 +144,7 @@ describe('Astrology Utilities', () => {
       expect(getDegreeWithinSign(0)).toBe(0);
       expect(getDegreeWithinSign(15)).toBe(15);
       expect(getDegreeWithinSign(29.99)).toBeCloseTo(29.99);
-      expect(getDegreeWithinSign(30)).toBe(0);  // Start of next sign
+      expect(getDegreeWithinSign(30)).toBe(0); // Start of next sign
       expect(getDegreeWithinSign(45)).toBe(15); // 15° into Taurus
     });
 
@@ -187,25 +190,29 @@ describe('Astrology Utilities', () => {
   });
 
   describe('calculateHousePosition', () => {
-    const standardCusps = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+    const standardCusps = [
+      0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330,
+    ];
 
     it('should calculate correct house positions', () => {
-      expect(calculateHousePosition(15, standardCusps)).toBe(1);  // 15° in House 1
-      expect(calculateHousePosition(45, standardCusps)).toBe(2);  // 45° in House 2
+      expect(calculateHousePosition(15, standardCusps)).toBe(1); // 15° in House 1
+      expect(calculateHousePosition(45, standardCusps)).toBe(2); // 45° in House 2
       expect(calculateHousePosition(195, standardCusps)).toBe(7); // 195° in House 7 (between 180° and 210°)
     });
 
     it('should handle positions at exact cusps', () => {
-      expect(calculateHousePosition(0, standardCusps)).toBe(1);   // Exactly on 1st cusp
-      expect(calculateHousePosition(30, standardCusps)).toBe(2);  // Exactly on 2nd cusp
+      expect(calculateHousePosition(0, standardCusps)).toBe(1); // Exactly on 1st cusp
+      expect(calculateHousePosition(30, standardCusps)).toBe(2); // Exactly on 2nd cusp
       expect(calculateHousePosition(180, standardCusps)).toBe(7); // Exactly on 7th cusp
     });
 
     it('should handle crossing 0 degrees (Ascendant/Midheaven axis)', () => {
-      const cuspsWithCrossing = [350, 20, 50, 80, 110, 140, 170, 200, 230, 260, 290, 320];
+      const cuspsWithCrossing = [
+        350, 20, 50, 80, 110, 140, 170, 200, 230, 260, 290, 320,
+      ];
       expect(calculateHousePosition(355, cuspsWithCrossing)).toBe(1); // 355° in House 1
-      expect(calculateHousePosition(5, cuspsWithCrossing)).toBe(1);   // 5° in House 1
-      expect(calculateHousePosition(25, cuspsWithCrossing)).toBe(2);  // 25° in House 2
+      expect(calculateHousePosition(5, cuspsWithCrossing)).toBe(1); // 5° in House 1
+      expect(calculateHousePosition(25, cuspsWithCrossing)).toBe(2); // 25° in House 2
     });
 
     it('should handle empty or invalid cusp arrays', () => {
@@ -214,7 +221,20 @@ describe('Astrology Utilities', () => {
     });
 
     it('should handle invalid cusp values', () => {
-      const invalidCusps = [0, 30, undefined, 90, null, 150, 180, 210, 240, 270, 300, 330] as any;
+      const invalidCusps = [
+        0,
+        30,
+        undefined,
+        90,
+        null,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+      ] as any;
       // Should still work for valid cusps and skip invalid ones
       const result = calculateHousePosition(15, invalidCusps);
       expect(result).toBeGreaterThanOrEqual(1);
@@ -223,7 +243,7 @@ describe('Astrology Utilities', () => {
 
     it('should normalize planet positions', () => {
       expect(calculateHousePosition(-15, standardCusps)).toBe(12); // -15° = 345°, in House 12
-      expect(calculateHousePosition(375, standardCusps)).toBe(1);  // 375° = 15°, in House 1
+      expect(calculateHousePosition(375, standardCusps)).toBe(1); // 375° = 15°, in House 1
     });
   });
 
@@ -320,7 +340,7 @@ describe('Astrology Utilities', () => {
     });
 
     it('should handle large values', () => {
-      expect(normalizeAngle(1080)).toBe(0);  // 3 full rotations
+      expect(normalizeAngle(1080)).toBe(0); // 3 full rotations
       expect(normalizeAngle(-1080)).toBe(0); // -3 full rotations
     });
   });
@@ -333,8 +353,8 @@ describe('Astrology Utilities', () => {
     });
 
     it('should take shortest path across 0°', () => {
-      expect(angleDifference(350, 10)).toBe(20);   // 20° clockwise
-      expect(angleDifference(10, 350)).toBe(-20);  // 20° counter-clockwise
+      expect(angleDifference(350, 10)).toBe(20); // 20° clockwise
+      expect(angleDifference(10, 350)).toBe(-20); // 20° counter-clockwise
     });
 
     it('should handle exactly opposite angles', () => {
@@ -346,7 +366,7 @@ describe('Astrology Utilities', () => {
     it('should return values in -180 to 180 range', () => {
       const result1 = angleDifference(10, 350);
       const result2 = angleDifference(350, 10);
-      
+
       expect(result1).toBeGreaterThanOrEqual(-180);
       expect(result1).toBeLessThanOrEqual(180);
       expect(result2).toBeGreaterThanOrEqual(-180);
@@ -445,12 +465,12 @@ describe('Astrology Utilities', () => {
   describe('Integration Tests', () => {
     it('should maintain consistency across related functions', () => {
       const testDegree = 45.75; // 15° 45' Taurus
-      
+
       const sign = getSignFromDegrees(testDegree);
       const capitalizedSign = getSignFromDegreesCapitalized(testDegree);
       const degreeInSign = getDegreeWithinSign(testDegree);
       const detailedSign = getAstrologicalSign(testDegree);
-      
+
       expect(sign).toBe('taurus');
       expect(capitalizedSign).toBe('Taurus');
       expect(degreeInSign).toBeCloseTo(15.75);
@@ -466,7 +486,7 @@ describe('Astrology Utilities', () => {
         const element = getElementFromSign(sign);
         const quality = getQualityFromSign(sign);
         const ruler = getRulerFromSign(sign);
-        
+
         expect(ZODIAC_SIGNS).toContain(sign);
         expect(['fire', 'earth', 'air', 'water']).toContain(element);
         expect(['cardinal', 'fixed', 'mutable']).toContain(quality);
@@ -477,15 +497,17 @@ describe('Astrology Utilities', () => {
 
     it('should handle complete astrological calculations', () => {
       const planetDegree = 135.25; // 15° 15' Leo
-      const houseCusps = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
-      
+      const houseCusps = [
+        0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330,
+      ];
+
       const sign = getSignFromDegrees(planetDegree);
       const house = calculateHousePosition(planetDegree, houseCusps);
       const element = getElementFromSign(sign);
       const quality = getQualityFromSign(sign);
       const ruler = getRulerFromSign(sign);
       const formatted = formatPlanetPosition(planetDegree);
-      
+
       expect(sign).toBe('leo');
       expect(house).toBe(5); // Leo naturally rules 5th house
       expect(element).toBe('fire');
@@ -501,7 +523,7 @@ describe('Astrology Utilities', () => {
         Number.MAX_SAFE_INTEGER,
         -Number.MAX_SAFE_INTEGER,
         1e10,
-        -1e10
+        -1e10,
       ];
 
       extremeValues.forEach(value => {

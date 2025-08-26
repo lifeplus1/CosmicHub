@@ -1,15 +1,22 @@
 // AI-001 Enhanced Components - Next-Generation UI for Advanced AI Features
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '@cosmichub/ui';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Button,
+  Badge,
+} from '@cosmichub/ui';
 import { ProgressBar } from '../ui/ProgressBar';
-import { 
-  TransitPrediction, 
-  PersonalGrowthInsight, 
-  MultiSystemInterpretation, 
+import {
+  TransitPrediction,
+  PersonalGrowthInsight,
+  MultiSystemInterpretation,
   ChartPattern,
   useAI001Analysis,
   useTransitPredictions,
-  useGrowthInsights
+  useGrowthInsights,
 } from '../../services/ai-001-enhanced';
 
 interface AI001DashboardProps {
@@ -27,32 +34,34 @@ export const AI001Dashboard: React.FC<AI001DashboardProps> = ({
   userId,
   className = '',
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'transits' | 'growth' | 'synthesis' | 'patterns'>('overview');
-  
-  const { 
-    data: comprehensiveAnalysis, 
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'transits' | 'growth' | 'synthesis' | 'patterns'
+  >('overview');
+
+  const {
+    data: comprehensiveAnalysis,
     isLoading: isLoadingComprehensive,
-    error: comprehensiveError 
+    error: comprehensiveError,
   } = useAI001Analysis(chartData, userId);
 
-  const { 
-    data: transits, 
-    isLoading: isLoadingTransits 
-  } = useTransitPredictions(chartData);
+  const { data: transits, isLoading: isLoadingTransits } =
+    useTransitPredictions(chartData);
 
-  const { 
-    data: growthInsights, 
-    isLoading: isLoadingGrowth 
-  } = useGrowthInsights(chartData);
+  const { data: growthInsights, isLoading: isLoadingGrowth } =
+    useGrowthInsights(chartData);
 
   if (isLoadingComprehensive) {
     return (
       <Card className={`cosmic-glass border-cosmic-purple/30 ${className}`}>
-        <CardContent className="p-8 text-center">
-          <div className="animate-pulse space-y-4">
-            <div className="w-16 h-16 bg-cosmic-purple/30 rounded-full mx-auto"></div>
-            <h3 className="text-lg text-cosmic-gold">Generating AI-001 Analysis...</h3>
-            <p className="text-cosmic-silver/70">Advanced AI processing your cosmic blueprint</p>
+        <CardContent className='p-8 text-center'>
+          <div className='animate-pulse space-y-4'>
+            <div className='w-16 h-16 bg-cosmic-purple/30 rounded-full mx-auto'></div>
+            <h3 className='text-lg text-cosmic-gold'>
+              Generating AI-001 Analysis...
+            </h3>
+            <p className='text-cosmic-silver/70'>
+              Advanced AI processing your cosmic blueprint
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -62,12 +71,14 @@ export const AI001Dashboard: React.FC<AI001DashboardProps> = ({
   if (comprehensiveError) {
     return (
       <Card className={`cosmic-glass border-red-500/30 ${className}`}>
-        <CardContent className="p-8 text-center">
-          <h3 className="text-lg text-red-400 mb-4">Analysis Error</h3>
-          <p className="text-cosmic-silver/70">Unable to generate AI-001 analysis. Please try again.</p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 bg-cosmic-purple hover:bg-cosmic-purple/80"
+        <CardContent className='p-8 text-center'>
+          <h3 className='text-lg text-red-400 mb-4'>Analysis Error</h3>
+          <p className='text-cosmic-silver/70'>
+            Unable to generate AI-001 analysis. Please try again.
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            className='mt-4 bg-cosmic-purple hover:bg-cosmic-purple/80'
           >
             Retry Analysis
           </Button>
@@ -79,30 +90,30 @@ export const AI001Dashboard: React.FC<AI001DashboardProps> = ({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* AI-001 Header */}
-      <Card className="cosmic-glass border-cosmic-gold/30">
-        <CardHeader className="bg-gradient-to-r from-cosmic-purple/20 to-cosmic-blue/20 border-b border-cosmic-gold/30">
-          <CardTitle className="text-2xl text-cosmic-gold flex items-center gap-3">
+      <Card className='cosmic-glass border-cosmic-gold/30'>
+        <CardHeader className='bg-gradient-to-r from-cosmic-purple/20 to-cosmic-blue/20 border-b border-cosmic-gold/30'>
+          <CardTitle className='text-2xl text-cosmic-gold flex items-center gap-3'>
             🚀 AI-001 Enhanced Analysis
-            <Badge className="bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30">
+            <Badge className='bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30'>
               Next-Gen AI
             </Badge>
           </CardTitle>
-          <p className="text-cosmic-silver/80 mt-2">
-            Advanced astrological insights powered by predictive analysis, growth coaching, 
-            and multi-system synthesis
+          <p className='text-cosmic-silver/80 mt-2'>
+            Advanced astrological insights powered by predictive analysis,
+            growth coaching, and multi-system synthesis
           </p>
         </CardHeader>
       </Card>
 
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className='flex flex-wrap gap-2'>
         {[
           { id: 'overview', label: '📊 Overview', icon: '📊' },
           { id: 'transits', label: '🌟 Transits', icon: '🌟' },
           { id: 'growth', label: '🌱 Growth', icon: '🌱' },
           { id: 'synthesis', label: '🌍 Synthesis', icon: '🌍' },
           { id: 'patterns', label: '🔮 Patterns', icon: '🔮' },
-        ].map((tab) => (
+        ].map(tab => (
           <Button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
@@ -120,37 +131,27 @@ export const AI001Dashboard: React.FC<AI001DashboardProps> = ({
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <OverviewTab 
-          analysis={comprehensiveAnalysis} 
+        <OverviewTab
+          analysis={comprehensiveAnalysis}
           transits={transits}
           growthInsights={growthInsights}
         />
       )}
-      
+
       {activeTab === 'transits' && (
-        <TransitsTab 
-          transits={transits} 
-          isLoading={isLoadingTransits} 
-        />
+        <TransitsTab transits={transits} isLoading={isLoadingTransits} />
       )}
-      
+
       {activeTab === 'growth' && (
-        <GrowthTab 
-          insights={growthInsights} 
-          isLoading={isLoadingGrowth} 
-        />
+        <GrowthTab insights={growthInsights} isLoading={isLoadingGrowth} />
       )}
-      
+
       {activeTab === 'synthesis' && (
-        <SynthesisTab 
-          synthesis={comprehensiveAnalysis?.synthesis} 
-        />
+        <SynthesisTab synthesis={comprehensiveAnalysis?.synthesis} />
       )}
-      
+
       {activeTab === 'patterns' && (
-        <PatternsTab 
-          patterns={comprehensiveAnalysis?.patterns} 
-        />
+        <PatternsTab patterns={comprehensiveAnalysis?.patterns} />
       )}
     </div>
   );
@@ -172,46 +173,52 @@ interface OverviewTabProps {
   growthInsights?: PersonalGrowthInsight[];
 }
 
-const OverviewTab: React.FC<OverviewTabProps> = ({ 
-  analysis, 
-  transits, 
-  growthInsights 
+const OverviewTab: React.FC<OverviewTabProps> = ({
+  analysis,
+  transits,
+  growthInsights,
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
       {/* Executive Summary */}
       {analysis?.summary && (
-        <Card className="cosmic-glass border-cosmic-gold/30 md:col-span-2 lg:col-span-3">
+        <Card className='cosmic-glass border-cosmic-gold/30 md:col-span-2 lg:col-span-3'>
           <CardHeader>
-            <CardTitle className="text-xl text-cosmic-gold">📋 Executive Summary</CardTitle>
+            <CardTitle className='text-xl text-cosmic-gold'>
+              📋 Executive Summary
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-cosmic-silver leading-relaxed">{analysis.summary}</p>
+            <p className='text-cosmic-silver leading-relaxed'>
+              {analysis.summary}
+            </p>
           </CardContent>
         </Card>
       )}
 
       {/* Upcoming Transits Preview */}
-      <Card className="cosmic-glass border-cosmic-purple/30">
+      <Card className='cosmic-glass border-cosmic-purple/30'>
         <CardHeader>
-          <CardTitle className="text-lg text-cosmic-gold">🌟 Next Major Transit</CardTitle>
+          <CardTitle className='text-lg text-cosmic-gold'>
+            🌟 Next Major Transit
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {transits && transits.length > 0 ? (
             <div>
-              <h4 className="font-semibold text-cosmic-silver mb-2">
+              <h4 className='font-semibold text-cosmic-silver mb-2'>
                 {transits[0]?.transitType ?? 'Loading...'}
               </h4>
-              <p className="text-sm text-cosmic-silver/80 mb-2">
+              <p className='text-sm text-cosmic-silver/80 mb-2'>
                 {transits[0]?.exactDate ?? 'Date pending...'}
               </p>
-              <p className="text-cosmic-silver text-sm">
+              <p className='text-cosmic-silver text-sm'>
                 {transits[0]?.theme ?? 'Theme loading...'}
               </p>
-              <Badge 
+              <Badge
                 className={`mt-2 ${
-                  transits[0]?.influence === 'major' 
-                    ? 'bg-red-500/20 text-red-400' 
+                  transits[0]?.influence === 'major'
+                    ? 'bg-red-500/20 text-red-400'
                     : 'bg-yellow-500/20 text-yellow-400'
                 }`}
               >
@@ -219,61 +226,66 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
               </Badge>
             </div>
           ) : (
-            <p className="text-cosmic-silver/60">No upcoming transits</p>
+            <p className='text-cosmic-silver/60'>No upcoming transits</p>
           )}
         </CardContent>
       </Card>
 
       {/* Growth Focus */}
-      <Card className="cosmic-glass border-cosmic-green/30">
+      <Card className='cosmic-glass border-cosmic-green/30'>
         <CardHeader>
-          <CardTitle className="text-lg text-cosmic-gold">🌱 Current Growth Focus</CardTitle>
+          <CardTitle className='text-lg text-cosmic-gold'>
+            🌱 Current Growth Focus
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {growthInsights && growthInsights.length > 0 ? (
             <div>
-              <h4 className="font-semibold text-cosmic-silver mb-2">
+              <h4 className='font-semibold text-cosmic-silver mb-2'>
                 {growthInsights[0]?.title ?? 'Loading...'}
               </h4>
-              <p className="text-sm text-cosmic-silver/80 mb-2">
+              <p className='text-sm text-cosmic-silver/80 mb-2'>
                 {growthInsights[0]?.currentPhase ?? 'Phase loading...'}
               </p>
-              <div className="flex items-center gap-2">
-                <ProgressBar 
+              <div className='flex items-center gap-2'>
+                <ProgressBar
                   progress={growthInsights[0]?.metrics?.progress ?? 0}
-                  className="flex-1"
+                  className='flex-1'
                 />
-                <span className="text-xs text-cosmic-silver">
+                <span className='text-xs text-cosmic-silver'>
                   {growthInsights[0]?.metrics?.progress ?? 0}%
                 </span>
               </div>
             </div>
           ) : (
-            <p className="text-cosmic-silver/60">Loading growth insights...</p>
+            <p className='text-cosmic-silver/60'>Loading growth insights...</p>
           )}
         </CardContent>
       </Card>
 
       {/* Pattern Highlights */}
-      <Card className="cosmic-glass border-cosmic-blue/30">
+      <Card className='cosmic-glass border-cosmic-blue/30'>
         <CardHeader>
-          <CardTitle className="text-lg text-cosmic-gold">🔮 Key Pattern</CardTitle>
+          <CardTitle className='text-lg text-cosmic-gold'>
+            🔮 Key Pattern
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {analysis?.patterns && analysis.patterns.length > 0 ? (
             <div>
-              <h4 className="font-semibold text-cosmic-silver mb-2">
+              <h4 className='font-semibold text-cosmic-silver mb-2'>
                 {analysis.patterns[0]?.patternType ?? 'Loading...'}
               </h4>
-              <p className="text-sm text-cosmic-silver/80 mb-2">
-                {analysis.patterns[0]?.significance ?? 'Significance loading...'}
+              <p className='text-sm text-cosmic-silver/80 mb-2'>
+                {analysis.patterns[0]?.significance ??
+                  'Significance loading...'}
               </p>
-              <Badge className="bg-cosmic-blue/20 text-cosmic-blue">
+              <Badge className='bg-cosmic-blue/20 text-cosmic-blue'>
                 {analysis.patterns[0]?.evolutionStage ?? 'unknown'}
               </Badge>
             </div>
           ) : (
-            <p className="text-cosmic-silver/60">Analyzing patterns...</p>
+            <p className='text-cosmic-silver/60'>Analyzing patterns...</p>
           )}
         </CardContent>
       </Card>
@@ -293,26 +305,30 @@ interface TransitsTabProps {
 const TransitsTab: React.FC<TransitsTabProps> = ({ transits, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <div className="animate-spin w-8 h-8 border-2 border-cosmic-purple border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-cosmic-silver/70">Calculating transit predictions...</p>
+      <div className='text-center py-8'>
+        <div className='animate-spin w-8 h-8 border-2 border-cosmic-purple border-t-transparent rounded-full mx-auto mb-4'></div>
+        <p className='text-cosmic-silver/70'>
+          Calculating transit predictions...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="cosmic-glass border-cosmic-purple/30">
+    <div className='space-y-6'>
+      <Card className='cosmic-glass border-cosmic-purple/30'>
         <CardHeader>
-          <CardTitle className="text-xl text-cosmic-gold">🌟 Predictive Transit Analysis</CardTitle>
-          <p className="text-cosmic-silver/80">
+          <CardTitle className='text-xl text-cosmic-gold'>
+            🌟 Predictive Transit Analysis
+          </CardTitle>
+          <p className='text-cosmic-silver/80'>
             AI-powered timing recommendations for the next 12 months
           </p>
         </CardHeader>
       </Card>
 
-      <div className="grid gap-4">
-        {transits?.map((transit) => (
+      <div className='grid gap-4'>
+        {transits?.map(transit => (
           <TransitCard key={transit.id} transit={transit} />
         ))}
       </div>
@@ -332,26 +348,28 @@ interface GrowthTabProps {
 const GrowthTab: React.FC<GrowthTabProps> = ({ insights, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <div className="animate-spin w-8 h-8 border-2 border-cosmic-green border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-cosmic-silver/70">Generating growth insights...</p>
+      <div className='text-center py-8'>
+        <div className='animate-spin w-8 h-8 border-2 border-cosmic-green border-t-transparent rounded-full mx-auto mb-4'></div>
+        <p className='text-cosmic-silver/70'>Generating growth insights...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="cosmic-glass border-cosmic-green/30">
+    <div className='space-y-6'>
+      <Card className='cosmic-glass border-cosmic-green/30'>
         <CardHeader>
-          <CardTitle className="text-xl text-cosmic-gold">🌱 Personal Growth Coaching</CardTitle>
-          <p className="text-cosmic-silver/80">
+          <CardTitle className='text-xl text-cosmic-gold'>
+            🌱 Personal Growth Coaching
+          </CardTitle>
+          <p className='text-cosmic-silver/80'>
             AI-driven developmental insights tailored to your cosmic blueprint
           </p>
         </CardHeader>
       </Card>
 
-      <div className="grid gap-4">
-        {insights?.map((insight) => (
+      <div className='grid gap-4'>
+        {insights?.map(insight => (
           <GrowthInsightCard key={insight.id} insight={insight} />
         ))}
       </div>
@@ -371,53 +389,61 @@ const TransitCard: React.FC<TransitCardProps> = ({ transit }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card className="cosmic-glass border-cosmic-purple/30">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
+    <Card className='cosmic-glass border-cosmic-purple/30'>
+      <CardContent className='p-6'>
+        <div className='flex items-start justify-between mb-4'>
           <div>
-            <h3 className="text-lg font-semibold text-cosmic-silver">
+            <h3 className='text-lg font-semibold text-cosmic-silver'>
               {transit.transitType}
             </h3>
-            <p className="text-cosmic-gold text-sm">
+            <p className='text-cosmic-gold text-sm'>
               {transit.exactDate} • {transit.theme}
             </p>
           </div>
-          <Badge 
+          <Badge
             className={`${
-              transit.influence === 'major' 
-                ? 'bg-red-500/20 text-red-400 border-red-500/30' 
+              transit.influence === 'major'
+                ? 'bg-red-500/20 text-red-400 border-red-500/30'
                 : transit.influence === 'moderate'
-                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                  ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                  : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
             }`}
           >
             {transit.influence}
           </Badge>
         </div>
 
-        <div className="space-y-3">
+        <div className='space-y-3'>
           <div>
-            <h4 className="text-cosmic-gold text-sm font-medium mb-1">Opportunities</h4>
-            <ul className="text-cosmic-silver/80 text-sm space-y-1">
-              {transit.opportunities.slice(0, expanded ? undefined : 2).map((opp, idx) => (
-                <li key={idx}>• {opp}</li>
-              ))}
+            <h4 className='text-cosmic-gold text-sm font-medium mb-1'>
+              Opportunities
+            </h4>
+            <ul className='text-cosmic-silver/80 text-sm space-y-1'>
+              {transit.opportunities
+                .slice(0, expanded ? undefined : 2)
+                .map((opp, idx) => (
+                  <li key={idx}>• {opp}</li>
+                ))}
             </ul>
           </div>
 
           {expanded && (
             <>
               <div>
-                <h4 className="text-cosmic-gold text-sm font-medium mb-1">Recommendations</h4>
-                <ul className="text-cosmic-silver/80 text-sm space-y-1">
+                <h4 className='text-cosmic-gold text-sm font-medium mb-1'>
+                  Recommendations
+                </h4>
+                <ul className='text-cosmic-silver/80 text-sm space-y-1'>
                   {transit.recommendations.map((rec, idx) => (
                     <li key={idx}>• {rec}</li>
                   ))}
                 </ul>
               </div>
-              
-              <div className="flex items-center justify-between text-xs text-cosmic-silver/60">
-                <span>Duration: {transit.duration.start} - {transit.duration.end}</span>
+
+              <div className='flex items-center justify-between text-xs text-cosmic-silver/60'>
+                <span>
+                  Duration: {transit.duration.start} - {transit.duration.end}
+                </span>
                 <span>Confidence: {Math.round(transit.confidence * 100)}%</span>
               </div>
             </>
@@ -426,9 +452,9 @@ const TransitCard: React.FC<TransitCardProps> = ({ transit }) => {
 
         <Button
           onClick={() => setExpanded(!expanded)}
-          variant="secondary"
-          size="sm"
-          className="mt-4 text-cosmic-purple hover:text-cosmic-gold"
+          variant='secondary'
+          size='sm'
+          className='mt-4 text-cosmic-purple hover:text-cosmic-gold'
         >
           {expanded ? 'Show Less' : 'Show More'}
         </Button>
@@ -450,18 +476,21 @@ const GrowthInsightCard: React.FC<GrowthInsightCardProps> = ({ insight }) => {
       physical: 'text-green-400 bg-green-500/20 border-green-500/30',
       social: 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30',
     };
-    return colors[category as keyof typeof colors] || 'text-cosmic-silver bg-cosmic-silver/20';
+    return (
+      colors[category as keyof typeof colors] ||
+      'text-cosmic-silver bg-cosmic-silver/20'
+    );
   };
 
   return (
-    <Card className="cosmic-glass border-cosmic-green/30">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
+    <Card className='cosmic-glass border-cosmic-green/30'>
+      <CardContent className='p-6'>
+        <div className='flex items-start justify-between mb-4'>
           <div>
-            <h3 className="text-lg font-semibold text-cosmic-silver">
+            <h3 className='text-lg font-semibold text-cosmic-silver'>
               {insight.title}
             </h3>
-            <p className="text-cosmic-silver/70 text-sm mt-1">
+            <p className='text-cosmic-silver/70 text-sm mt-1'>
               {insight.currentPhase}
             </p>
           </div>
@@ -470,32 +499,34 @@ const GrowthInsightCard: React.FC<GrowthInsightCardProps> = ({ insight }) => {
           </Badge>
         </div>
 
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {/* Progress Bar */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-cosmic-gold text-sm">Progress</span>
-              <span className="text-cosmic-silver text-sm">
+            <div className='flex justify-between items-center mb-2'>
+              <span className='text-cosmic-gold text-sm'>Progress</span>
+              <span className='text-cosmic-silver text-sm'>
                 {insight.metrics.progress}%
               </span>
             </div>
-            <ProgressBar 
+            <ProgressBar
               progress={insight.metrics.progress}
-              className="w-full"
+              className='w-full'
             />
           </div>
 
           {/* Next Steps */}
           <div>
-            <h4 className="text-cosmic-gold text-sm font-medium mb-2">Next Steps</h4>
-            <ul className="text-cosmic-silver/80 text-sm space-y-1">
+            <h4 className='text-cosmic-gold text-sm font-medium mb-2'>
+              Next Steps
+            </h4>
+            <ul className='text-cosmic-silver/80 text-sm space-y-1'>
               {insight.nextSteps.slice(0, 3).map((step, idx) => (
                 <li key={idx}>• {step}</li>
               ))}
             </ul>
           </div>
 
-          <div className="flex justify-between items-center text-xs text-cosmic-silver/60">
+          <div className='flex justify-between items-center text-xs text-cosmic-silver/60'>
             <span>Timeline: {insight.timeframe}</span>
             <span>Difficulty: {insight.metrics.difficulty}/100</span>
           </div>
@@ -509,41 +540,56 @@ const GrowthInsightCard: React.FC<GrowthInsightCardProps> = ({ insight }) => {
 // Synthesis and Patterns Tabs (Simplified for now)
 // =============================================================================
 
-const SynthesisTab: React.FC<{ synthesis?: MultiSystemInterpretation }> = ({ synthesis }) => (
-  <Card className="cosmic-glass border-cosmic-blue/30">
+const SynthesisTab: React.FC<{ synthesis?: MultiSystemInterpretation }> = ({
+  synthesis,
+}) => (
+  <Card className='cosmic-glass border-cosmic-blue/30'>
     <CardHeader>
-      <CardTitle className="text-xl text-cosmic-gold">🌍 Multi-System Synthesis</CardTitle>
+      <CardTitle className='text-xl text-cosmic-gold'>
+        🌍 Multi-System Synthesis
+      </CardTitle>
     </CardHeader>
     <CardContent>
       {synthesis ? (
-        <div className="space-y-4">
-          <p className="text-cosmic-silver">{synthesis.synthesis}</p>
+        <div className='space-y-4'>
+          <p className='text-cosmic-silver'>{synthesis.synthesis}</p>
           {/* Add more synthesis content here */}
         </div>
       ) : (
-        <p className="text-cosmic-silver/60">Synthesizing cross-cultural insights...</p>
+        <p className='text-cosmic-silver/60'>
+          Synthesizing cross-cultural insights...
+        </p>
       )}
     </CardContent>
   </Card>
 );
 
 const PatternsTab: React.FC<{ patterns?: ChartPattern[] }> = ({ patterns }) => (
-  <Card className="cosmic-glass border-cosmic-purple/30">
+  <Card className='cosmic-glass border-cosmic-purple/30'>
     <CardHeader>
-      <CardTitle className="text-xl text-cosmic-gold">🔮 Advanced Pattern Recognition</CardTitle>
+      <CardTitle className='text-xl text-cosmic-gold'>
+        🔮 Advanced Pattern Recognition
+      </CardTitle>
     </CardHeader>
     <CardContent>
       {patterns && patterns.length > 0 ? (
-        <div className="space-y-4">
-          {patterns.map((pattern) => (
-            <div key={pattern.id} className="border-l-4 border-cosmic-purple pl-4">
-              <h4 className="font-semibold text-cosmic-silver">{pattern.patternType}</h4>
-              <p className="text-cosmic-silver/80 text-sm">{pattern.significance}</p>
+        <div className='space-y-4'>
+          {patterns.map(pattern => (
+            <div
+              key={pattern.id}
+              className='border-l-4 border-cosmic-purple pl-4'
+            >
+              <h4 className='font-semibold text-cosmic-silver'>
+                {pattern.patternType}
+              </h4>
+              <p className='text-cosmic-silver/80 text-sm'>
+                {pattern.significance}
+              </p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-cosmic-silver/60">Analyzing chart patterns...</p>
+        <p className='text-cosmic-silver/60'>Analyzing chart patterns...</p>
       )}
     </CardContent>
   </Card>

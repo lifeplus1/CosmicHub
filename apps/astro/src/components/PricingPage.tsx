@@ -52,7 +52,8 @@ const PricingPage: React.FC = React.memo(() => {
       if (!stripeService) {
         toast({
           title: 'Service Error',
-          description: 'Stripe service is not available. Please try again later.',
+          description:
+            'Stripe service is not available. Please try again later.',
           status: 'error',
           duration: 5000,
           isClosable: true,

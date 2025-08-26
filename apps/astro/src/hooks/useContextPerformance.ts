@@ -27,7 +27,7 @@ export function useContextPerformance(
 ): ContextMetrics | null {
   const renderStartTime = useRef<number>(0);
   const lastDependenciesRef = useRef<readonly unknown[]>(dependencies);
-  
+
   if (!enabled) return null;
 
   // Track render start
@@ -60,12 +60,12 @@ export function useContextPerformance(
 
     // Check for unnecessary re-renders (dependencies didn't change)
     if (
-      metrics.renderCount > 1 && 
+      metrics.renderCount > 1 &&
       arraysEqual(lastDependenciesRef.current, dependencies)
     ) {
       console.warn(
         `🚨 Unnecessary re-render in ${contextName} context (${renderDuration.toFixed(2)}ms). ` +
-        'Dependencies did not change but context re-rendered.'
+          'Dependencies did not change but context re-rendered.'
       );
     }
 
@@ -111,17 +111,19 @@ export function clearContextMetrics(): void {
  */
 export function generatePerformanceReport(): string {
   const metrics = getAllContextMetrics();
-  
+
   if (metrics.length === 0) {
     return 'No context performance data available.';
   }
 
-  const sortedMetrics = metrics.sort((a, b) => b.averageRenderTime - a.averageRenderTime);
-  
+  const sortedMetrics = metrics.sort(
+    (a, b) => b.averageRenderTime - a.averageRenderTime
+  );
+
   let report = '📊 Context Performance Report\n';
   report += '================================\n\n';
-  
-  sortedMetrics.forEach((metric) => {
+
+  sortedMetrics.forEach(metric => {
     const uptime = Date.now() - metric.startTime;
     report += `🔧 ${metric.name}:\n`;
     report += `  • Renders: ${metric.renderCount}\n`;
@@ -133,15 +135,17 @@ export function generatePerformanceReport(): string {
   });
 
   // Add warnings for problematic contexts
-  const problematicContexts = sortedMetrics.filter(m => 
-    m.averageRenderTime > 5 || m.renderCount / ((Date.now() - m.startTime) / 1000) > 5
+  const problematicContexts = sortedMetrics.filter(
+    m =>
+      m.averageRenderTime > 5 ||
+      m.renderCount / ((Date.now() - m.startTime) / 1000) > 5
   );
 
   if (problematicContexts.length > 0) {
     report += '⚠️  Performance Warnings:\n';
     report += '=========================\n\n';
-    
-    problematicContexts.forEach((metric) => {
+
+    problematicContexts.forEach(metric => {
       if (metric.averageRenderTime > 5) {
         report += `• ${metric.name}: Slow renders (${metric.averageRenderTime.toFixed(2)}ms avg)\n`;
       }

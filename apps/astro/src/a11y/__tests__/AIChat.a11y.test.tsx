@@ -14,11 +14,9 @@ vi.mock('../../services/api', () => ({
 
 vi.mock('axios', () => ({
   default: {
-    post: vi
-      .fn()
-      .mockResolvedValue({
-        data: { choices: [{ message: { content: 'Hi' } }] },
-      }),
+    post: vi.fn().mockResolvedValue({
+      data: { choices: [{ message: { content: 'Hi' } }] },
+    }),
   },
 }));
 

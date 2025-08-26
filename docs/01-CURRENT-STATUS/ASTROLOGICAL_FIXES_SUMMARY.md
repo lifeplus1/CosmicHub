@@ -4,8 +4,7 @@
 
 ### 1. ✅ FIXED: Astrological Font Implementation
 
-**Problem**: Emoji symbols not displaying properly for astrological symbols
-**Solution**:
+**Problem**: Emoji symbols not displaying properly for astrological symbols **Solution**:
 
 - Added Kairon Semiserif font (Google Fonts) for proper astrological symbol display
 - Created `AstroSymbol` component with proper font classes
@@ -20,10 +19,10 @@
 - `apps/astro/src/components/ChartDisplay/tables/tableUtils.ts` - Cleaned up symbol mappings
 - `apps/astro/src/components/ChartDisplay/tables/*.tsx` - Updated all table components
 
-### 2. ✅ FIXED: Uranian Points Button Toggle Issue  
+### 2. ✅ FIXED: Uranian Points Button Toggle Issue
 
-**Problem**: "Uranian Points" button was incorrectly toggling the Angles table instead of Uranian Points
-**Solution**:
+**Problem**: "Uranian Points" button was incorrectly toggling the Angles table instead of Uranian
+Points **Solution**:
 
 - Fixed table conditional rendering logic in ChartDisplay.tsx
 - Separated Angles table (always visible) from Uranian Points table (controlled by settings)
@@ -36,8 +35,7 @@
 
 ### 3. ✅ FIXED: Minor Asteroids Display Issue
 
-**Problem**: Only 11 asteroids displaying, very few minor asteroids shown
-**Solution**:
+**Problem**: Only 11 asteroids displaying, very few minor asteroids shown **Solution**:
 
 - Enabled `minorAsteroids` setting by default in AstrologySettings
 - Improved celestial body filtering logic in CelestialBodiesTable
@@ -46,7 +44,8 @@
 
 **Files Modified**:
 
-- `apps/astro/src/components/ChartDisplay/AstrologySettings.tsx` - Enabled minor asteroids by default
+- `apps/astro/src/components/ChartDisplay/AstrologySettings.tsx` - Enabled minor asteroids by
+  default
 - `apps/astro/src/components/ChartDisplay/tables/CelestialBodiesTable.tsx` - Enhanced filtering
 
 ### 4. ✅ NEW: Collapsible Tables UI/UX Enhancement
@@ -63,13 +62,14 @@
 **Files Modified**:
 
 - `apps/astro/src/components/ChartDisplay/CollapsibleTable.tsx` - New collapsible table wrapper
-- `apps/astro/src/components/ChartDisplay/ChartDisplay.tsx` - Updated both unified and separate views
+- `apps/astro/src/components/ChartDisplay/ChartDisplay.tsx` - Updated both unified and separate
+  views
 - Added Accordion, AccordionItem, AccordionTrigger, AccordionContent imports
 
 **Benefits**:
 
 - **Space Efficiency**: Users can collapse unneeded sections
-- **Mobile Friendly**: Much better experience on smaller screens  
+- **Mobile Friendly**: Much better experience on smaller screens
 - **Focus Mode**: Expand only relevant sections for study
 - **Visual Organization**: Clear hierarchy with icons and counts
 - **State Persistence**: Remembers which sections were expanded (planned)
@@ -79,11 +79,11 @@
 ### AstroSymbol Component
 
 ```tsx
-<AstroSymbol 
+<AstroSymbol
   symbol={getPlanetSymbol(planet.name)}
-  size="md" // sm, md, lg, xl
+  size='md' // sm, md, lg, xl
   title={planet.name}
-  className="text-cosmic-gold"
+  className='text-cosmic-gold'
 />
 ```
 
@@ -140,7 +140,7 @@ Users now have granular control over celestial body display:
 
 ## Future Enhancements
 
-1. Add local font files as backup for offline use  
+1. Add local font files as backup for offline use
 2. Implement symbol preference settings (Unicode vs. text abbreviations)
 3. Add more detailed tooltips with symbol meanings
 4. Consider custom astrological symbol set for maximum compatibility

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
-import {
-  getStripeService,
-  StripeSession,
-} from '@cosmichub/integrations';
+import { getStripeService, StripeSession } from '@cosmichub/integrations';
 
 const Subscribe: React.FC = () => {
   const { user } = useAuth();

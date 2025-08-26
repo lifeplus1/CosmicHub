@@ -96,7 +96,10 @@ export class MobileIntegrationService {
    */
   private async savePreferences(): Promise<void> {
     try {
-      await AsyncStorage.setItem('integration_preferences', JSON.stringify(this.preferences));
+      await AsyncStorage.setItem(
+        'integration_preferences',
+        JSON.stringify(this.preferences)
+      );
     } catch (error) {
       console.error('Failed to save integration preferences:', error);
       throw error;
@@ -106,7 +109,9 @@ export class MobileIntegrationService {
   /**
    * Update integration preferences
    */
-  async updatePreferences(newPreferences: Partial<IntegrationPreferences>): Promise<void> {
+  async updatePreferences(
+    newPreferences: Partial<IntegrationPreferences>
+  ): Promise<void> {
     this.preferences = { ...this.preferences, ...newPreferences };
     await this.savePreferences();
     await this.initializeServices();
@@ -159,7 +164,9 @@ export class MobileIntegrationService {
   /**
    * Schedule notifications for transits
    */
-  private async scheduleTransitNotifications(transits: Record<string, unknown>): Promise<void> {
+  private async scheduleTransitNotifications(
+    transits: Record<string, unknown>
+  ): Promise<void> {
     try {
       await notificationService.scheduleDailyTransit(
         'Daily Cosmic Forecast',
@@ -188,9 +195,12 @@ export class MobileIntegrationService {
             longitude: location.longitude,
           },
         };
-        
+
         // Store updated chart data
-        await AsyncStorage.setItem('location_based_chart', JSON.stringify(updatedChart));
+        await AsyncStorage.setItem(
+          'location_based_chart',
+          JSON.stringify(updatedChart)
+        );
       }
     } catch (error) {
       console.error('Failed to update location-based data:', error);
@@ -203,7 +213,8 @@ export class MobileIntegrationService {
   getDailyHoroscopeData(): Promise<Record<string, unknown>> {
     return Promise.resolve({
       date: new Date().toISOString(),
-      forecast: 'Your cosmic energies are aligned for growth and transformation.',
+      forecast:
+        'Your cosmic energies are aligned for growth and transformation.',
       majorTransits: [],
       recommendations: ['Focus on communication', 'Practice mindfulness'],
     });
@@ -217,7 +228,8 @@ export class MobileIntegrationService {
       week: `Week of ${new Date().toISOString().split('T')[0]}`,
       themes: ['Transformation', 'Communication', 'Relationships'],
       keyDates: [],
-      overview: 'This week brings opportunities for personal growth and deeper connections.',
+      overview:
+        'This week brings opportunities for personal growth and deeper connections.',
     });
   }
 
@@ -276,7 +288,9 @@ export class MobileIntegrationService {
    */
   async hasCompletedMobileOnboarding(): Promise<boolean> {
     try {
-      const completed = await AsyncStorage.getItem('mobile_onboarding_completed');
+      const completed = await AsyncStorage.getItem(
+        'mobile_onboarding_completed'
+      );
       return completed === 'true';
     } catch (error) {
       console.error('Failed to check onboarding status:', error);

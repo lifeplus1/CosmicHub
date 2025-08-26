@@ -23,7 +23,8 @@ describe('validateChart', () => {
   });
 
   it('rejects houses array longer than 12', () => {
-    const houses = Array.from({ length: 16 }, (_, i) => ({ // Changed to 16 since schema allows up to 15
+    const houses = Array.from({ length: 16 }, (_, i) => ({
+      // Changed to 16 since schema allows up to 15
       number: i + 1,
       cusp: i * 10,
       sign: 'Aries',
@@ -32,7 +33,8 @@ describe('validateChart', () => {
     expect(result).toBeNull();
   });
 
-  it('accepts house with cusp > 360', () => { // Changed test since schema no longer restricts cusp values
+  it('accepts house with cusp > 360', () => {
+    // Changed test since schema no longer restricts cusp values
     const houses = [{ number: 1, cusp: 400, sign: 'Aries' }];
     const result = validateChart({ houses });
     expect(result).not.toBeNull();

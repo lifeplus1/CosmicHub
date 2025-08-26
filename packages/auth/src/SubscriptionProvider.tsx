@@ -244,26 +244,29 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     void refreshSubscription();
   }, [refreshSubscription]);
 
-  // Memoized context value to prevent unnecessary re-renders  
-  const contextValue = useMemo<SubscriptionState>(() => ({
-    subscription,
-    userTier: subscription?.tier ?? 'free',
-    tier: subscription?.tier ?? 'free', // Alias for backwards compatibility
-    isLoading: isLoading === true || subscriptionManager === null,
-    hasFeature,
-    upgradeRequired,
-    refreshSubscription,
-    ...(appType === 'astro' && { checkUsageLimit }),
-  }), [
-    subscription,
-    isLoading,
-    subscriptionManager,
-    hasFeature,
-    upgradeRequired,
-    refreshSubscription,
-    appType,
-    checkUsageLimit, // Function depends on usageData internally
-  ]);
+  // Memoized context value to prevent unnecessary re-renders
+  const contextValue = useMemo<SubscriptionState>(
+    () => ({
+      subscription,
+      userTier: subscription?.tier ?? 'free',
+      tier: subscription?.tier ?? 'free', // Alias for backwards compatibility
+      isLoading: isLoading === true || subscriptionManager === null,
+      hasFeature,
+      upgradeRequired,
+      refreshSubscription,
+      ...(appType === 'astro' && { checkUsageLimit }),
+    }),
+    [
+      subscription,
+      isLoading,
+      subscriptionManager,
+      hasFeature,
+      upgradeRequired,
+      refreshSubscription,
+      appType,
+      checkUsageLimit, // Function depends on usageData internally
+    ]
+  );
 
   return (
     <SubscriptionContext.Provider value={contextValue}>

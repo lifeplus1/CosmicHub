@@ -8,7 +8,9 @@ import { cn } from '../utils/cn';
 
 // Responsive breakpoint detection hook
 export const useBreakpoint = () => {
-  const [breakpoint, setBreakpoint] = useState<'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'>('md');
+  const [breakpoint, setBreakpoint] = useState<
+    'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  >('md');
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
@@ -17,7 +19,7 @@ export const useBreakpoint = () => {
     const checkBreakpoint = () => {
       const width = window.innerWidth;
       let currentBreakpoint: typeof breakpoint;
-      
+
       if (width < 480) {
         currentBreakpoint = 'xs';
       } else if (width < 640) {
@@ -31,7 +33,7 @@ export const useBreakpoint = () => {
       } else {
         currentBreakpoint = '2xl';
       }
-      
+
       setBreakpoint(currentBreakpoint);
       setIsMobile(width < 768);
       setIsTablet(width >= 768 && width < 1024);
@@ -40,7 +42,7 @@ export const useBreakpoint = () => {
 
     checkBreakpoint();
     window.addEventListener('resize', checkBreakpoint);
-    
+
     return () => window.removeEventListener('resize', checkBreakpoint);
   }, []);
 
@@ -153,13 +155,15 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
       5: 'grid-cols-5',
       6: 'grid-cols-6',
     };
-    
+
     const prefix = breakpoint === 'xs' ? '' : `${breakpoint}:`;
     return `${prefix}${colClasses[count] ?? `grid-cols-${count}`}`;
   };
 
   const gridColsClasses = Object.entries(cols)
-    .map(([breakpoint, count]) => count ? getGridCols(breakpoint as keyof typeof cols, count) : '')
+    .map(([breakpoint, count]) =>
+      count ? getGridCols(breakpoint as keyof typeof cols, count) : ''
+    )
     .filter(Boolean)
     .join(' ');
 
@@ -203,24 +207,27 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   showHandle = true,
 }) => {
   const { isMobile } = useBreakpoint();
-  
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
-    
+
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
 
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (closeOnBackdrop && e.target === e.currentTarget) {
-      onClose();
-    }
-  }, [closeOnBackdrop, onClose]);
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (closeOnBackdrop && e.target === e.currentTarget) {
+        onClose();
+      }
+    },
+    [closeOnBackdrop, onClose]
+  );
 
   const getPositionClasses = () => {
     switch (position) {
@@ -272,7 +279,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           <div
             className='absolute inset-0 bg-black/50 backdrop-blur-sm'
             onClick={handleBackdropClick}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === 'Escape' && closeOnBackdrop) {
                 onClose();
               }
@@ -282,17 +289,28 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             aria-label='Close modal'
           />
         )}
-        <div className={cn('relative bg-cosmic-dark border border-cosmic-silver/30 rounded-xl max-w-md w-full mx-4', className)}>
+        <div
+          className={cn(
+            'relative bg-cosmic-dark border border-cosmic-silver/30 rounded-xl max-w-md w-full mx-4',
+            className
+          )}
+        >
           {title && (
             <div className='flex items-center justify-between p-4 border-b border-cosmic-silver/20'>
-              <h2 className='text-lg font-semibold text-cosmic-gold'>{title}</h2>
+              <h2 className='text-lg font-semibold text-cosmic-gold'>
+                {title}
+              </h2>
               <button
                 type='button'
                 onClick={onClose}
                 className='text-cosmic-silver hover:text-cosmic-gold focus:outline-none'
                 aria-label='Close modal'
               >
-                <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20'>
+                <svg
+                  className='w-5 h-5'
+                  fill='currentColor'
+                  viewBox='0 0 20 20'
+                >
                   <path
                     fillRule='evenodd'
                     d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
@@ -302,9 +320,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
               </button>
             </div>
           )}
-          <div className='p-4'>
-            {children}
-          </div>
+          <div className='p-4'>{children}</div>
         </div>
       </div>
     );
@@ -323,7 +339,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
         <div
           className='absolute inset-0 bg-black/50 backdrop-blur-sm'
           onClick={handleBackdropClick}
-          onKeyDown={(e) => {
+          onKeyDown={e => {
             if (e.key === 'Escape' && closeOnBackdrop) {
               onClose();
             }
@@ -333,7 +349,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           aria-label='Close drawer'
         />
       )}
-      
+
       <div
         className={cn(
           'relative bg-cosmic-dark border border-cosmic-silver/30 transform transition-transform duration-300 ease-out',
@@ -348,7 +364,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             <div className='w-10 h-1 bg-cosmic-silver/40 rounded-full' />
           </div>
         )}
-        
+
         {/* Header */}
         {title && (
           <div className='flex items-center justify-between p-4 border-b border-cosmic-silver/20'>
@@ -369,17 +385,17 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             </button>
           </div>
         )}
-        
+
         {/* Content */}
-        <div className={cn(
-          'overflow-y-auto',
-          position === 'bottom' && 'max-h-[85vh]',
-          position === 'top' && 'max-h-[85vh]',
-          (position === 'left' || position === 'right') && 'h-full'
-        )}>
-          <div className='p-4 pb-safe'>
-            {children}
-          </div>
+        <div
+          className={cn(
+            'overflow-y-auto',
+            position === 'bottom' && 'max-h-[85vh]',
+            position === 'top' && 'max-h-[85vh]',
+            (position === 'left' || position === 'right') && 'h-full'
+          )}
+        >
+          <div className='p-4 pb-safe'>{children}</div>
         </div>
       </div>
     </div>
@@ -387,7 +403,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
 };
 
 // Touch-optimized button
-export interface TouchButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface TouchButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
@@ -409,21 +426,26 @@ export const TouchButton: React.FC<TouchButtonProps> = ({
   ...props
 }) => {
   const { isMobile } = useBreakpoint();
-  
-  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    // Add haptic feedback for mobile devices (if supported)
-    if (haptic && isMobile && 'vibrate' in navigator) {
-      navigator.vibrate(10); // Short vibration
-    }
-    
-    if (onClick && !loading && !disabled) {
-      onClick(e);
-    }
-  }, [haptic, isMobile, onClick, loading, disabled]);
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Add haptic feedback for mobile devices (if supported)
+      if (haptic && isMobile && 'vibrate' in navigator) {
+        navigator.vibrate(10); // Short vibration
+      }
+
+      if (onClick && !loading && !disabled) {
+        onClick(e);
+      }
+    },
+    [haptic, isMobile, onClick, loading, disabled]
+  );
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-white hover:from-cosmic-purple/80 hover:to-cosmic-blue/80',
-    secondary: 'bg-cosmic-silver/20 text-cosmic-silver border border-cosmic-silver/30 hover:bg-cosmic-silver/30',
+    primary:
+      'bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-white hover:from-cosmic-purple/80 hover:to-cosmic-blue/80',
+    secondary:
+      'bg-cosmic-silver/20 text-cosmic-silver border border-cosmic-silver/30 hover:bg-cosmic-silver/30',
     ghost: 'text-cosmic-silver hover:bg-cosmic-silver/10',
     danger: 'bg-red-600 text-white hover:bg-red-700',
   };
@@ -481,23 +503,25 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
   weight = 'normal',
   responsive = true,
 }) => {
-  const sizeClasses = responsive ? {
-    xs: 'text-xs sm:text-sm',
-    sm: 'text-sm sm:text-base',
-    md: 'text-base sm:text-lg',
-    lg: 'text-lg sm:text-xl lg:text-2xl',
-    xl: 'text-xl sm:text-2xl lg:text-3xl',
-    '2xl': 'text-2xl sm:text-3xl lg:text-4xl',
-    '3xl': 'text-3xl sm:text-4xl lg:text-5xl',
-  } : {
-    xs: 'text-xs',
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-    '2xl': 'text-2xl',
-    '3xl': 'text-3xl',
-  };
+  const sizeClasses = responsive
+    ? {
+        xs: 'text-xs sm:text-sm',
+        sm: 'text-sm sm:text-base',
+        md: 'text-base sm:text-lg',
+        lg: 'text-lg sm:text-xl lg:text-2xl',
+        xl: 'text-xl sm:text-2xl lg:text-3xl',
+        '2xl': 'text-2xl sm:text-3xl lg:text-4xl',
+        '3xl': 'text-3xl sm:text-4xl lg:text-5xl',
+      }
+    : {
+        xs: 'text-xs',
+        sm: 'text-sm',
+        md: 'text-base',
+        lg: 'text-lg',
+        xl: 'text-xl',
+        '2xl': 'text-2xl',
+        '3xl': 'text-3xl',
+      };
 
   const weightClasses = {
     normal: 'font-normal',
@@ -508,11 +532,7 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
 
   return (
     <Component
-      className={cn(
-        sizeClasses[size],
-        weightClasses[weight],
-        className
-      )}
+      className={cn(sizeClasses[size], weightClasses[weight], className)}
     >
       {children}
     </Component>
@@ -540,7 +560,7 @@ export const MobileCard: React.FC<MobileCardProps> = ({
   footer,
 }) => {
   const { isMobile } = useBreakpoint();
-  
+
   const paddingClasses = {
     none: '',
     sm: isMobile ? 'p-3' : 'p-4',
@@ -553,25 +573,20 @@ export const MobileCard: React.FC<MobileCardProps> = ({
       className={cn(
         'bg-cosmic-dark/50 border border-cosmic-silver/20 backdrop-blur-sm',
         isMobile ? 'rounded-lg' : 'rounded-xl',
-        interactive && 'hover:bg-cosmic-dark/60 transition-colors cursor-pointer',
+        interactive &&
+          'hover:bg-cosmic-dark/60 transition-colors cursor-pointer',
         loading && 'animate-pulse',
         className
       )}
     >
       {header && (
-        <div className='border-b border-cosmic-silver/20 p-4'>
-          {header}
-        </div>
+        <div className='border-b border-cosmic-silver/20 p-4'>{header}</div>
       )}
-      
-      <div className={paddingClasses[padding]}>
-        {children}
-      </div>
-      
+
+      <div className={paddingClasses[padding]}>{children}</div>
+
       {footer && (
-        <div className='border-t border-cosmic-silver/20 p-4'>
-          {footer}
-        </div>
+        <div className='border-t border-cosmic-silver/20 p-4'>{footer}</div>
       )}
     </div>
   );

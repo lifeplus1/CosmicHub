@@ -2,11 +2,11 @@
  * MultiSystemChart utilities - optimized and error-resistant
  * Eliminates redundant symbol mappings and expensive proxy objects
  */
-import { 
-  getCelestialSymbol, 
-  getZodiacSymbol, 
+import {
+  getCelestialSymbol,
+  getZodiacSymbol,
   getAspectSymbol,
-  formatDegreePosition 
+  formatDegreePosition,
 } from '../../services/symbolService';
 
 // Re-export centralized functions for backward compatibility
@@ -16,15 +16,34 @@ export const getSignSymbol = getZodiacSymbol;
 // Optimized symbol lookups - replacing expensive proxy objects with efficient lookups
 export const planetSymbols: Record<string, string> = {
   // Pre-cached common symbols for performance
-  sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂',
-  jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇',
-  chiron: '⚷', ceres: '⚳', pallas: '⚴', juno: '⚵', vesta: '⚶'
+  sun: '☉',
+  moon: '☽',
+  mercury: '☿',
+  venus: '♀',
+  mars: '♂',
+  jupiter: '♃',
+  saturn: '♄',
+  uranus: '♅',
+  neptune: '♆',
+  pluto: '♇',
+  chiron: '⚷',
+  ceres: '⚳',
+  pallas: '⚴',
+  juno: '⚵',
+  vesta: '⚶',
 };
 
 export const aspectSymbols: Record<string, string> = {
   // Pre-cached common aspects for performance
-  conjunction: '☌', opposition: '☍', trine: '△', square: '□', sextile: '⚹',
-  quincunx: '⚻', semisextile: '⚺', semisquare: '∠', sesquiquadrate: '⚼'
+  conjunction: '☌',
+  opposition: '☍',
+  trine: '△',
+  square: '□',
+  sextile: '⚹',
+  quincunx: '⚻',
+  semisextile: '⚺',
+  semisquare: '∠',
+  sesquiquadrate: '⚼',
 };
 
 // Helper functions with fallback to centralized service
@@ -39,14 +58,16 @@ export const getAspectSymbolSafe = (key: string): string => {
 // Enhanced zodiac position formatter with comprehensive error handling
 export const getZodiacSign = (position: number): string => {
   // Comprehensive input validation
-  if (typeof position !== 'number' || 
-      isNaN(position) || 
-      !isFinite(position) || 
-      position < 0 || 
-      position >= 360) {
+  if (
+    typeof position !== 'number' ||
+    isNaN(position) ||
+    !isFinite(position) ||
+    position < 0 ||
+    position >= 360
+  ) {
     return 'Invalid Position';
   }
-  
+
   try {
     return formatDegreePosition(position);
   } catch (error) {
@@ -56,7 +77,9 @@ export const getZodiacSign = (position: number): string => {
 };
 
 // Safe data validation utilities
-export const isValidChartData = (data: unknown): data is Record<string, any> => {
+export const isValidChartData = (
+  data: unknown
+): data is Record<string, any> => {
   return data !== null && data !== undefined && typeof data === 'object';
 };
 
@@ -64,14 +87,18 @@ export const safeGet = <T>(obj: any, path: string, defaultValue: T): T => {
   try {
     const keys = path.split('.');
     let result = obj;
-    
+
     for (const key of keys) {
-      if (result === null || result === undefined || typeof result !== 'object') {
+      if (
+        result === null ||
+        result === undefined ||
+        typeof result !== 'object'
+      ) {
         return defaultValue;
       }
       result = result[key];
     }
-    
+
     return result !== undefined ? result : defaultValue;
   } catch {
     return defaultValue;

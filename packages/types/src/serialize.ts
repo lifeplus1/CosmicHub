@@ -98,15 +98,17 @@ const removeUndefinedReplacer = (_key: string, value: unknown): unknown =>
   value === undefined ? null : value;
 
 // Size optimization helper: remove null/undefined fields before serialization
-export function optimizeForSerialization<T extends Record<string, unknown>>(data: T): Partial<T> {
+export function optimizeForSerialization<T extends Record<string, unknown>>(
+  data: T
+): Partial<T> {
   const optimized: Partial<T> = {};
-  
+
   for (const [key, value] of Object.entries(data)) {
     if (value !== null && value !== undefined && value !== '') {
       optimized[key as keyof T] = value as T[keyof T];
     }
   }
-  
+
   return optimized;
 }
 
@@ -122,8 +124,8 @@ export function serializeAstrologyData(
       | NumerologyDataValidated;
 
     // Apply optimization before validation if requested
-    const processedData = options.optimize 
-      ? optimizeForSerialization(data as unknown as Record<string, unknown>) 
+    const processedData = options.optimize
+      ? optimizeForSerialization(data as unknown as Record<string, unknown>)
       : data;
 
     if (isAstrologyChart(processedData)) {

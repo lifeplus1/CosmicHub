@@ -377,9 +377,7 @@ export class ExperimentMigration {
   /**
    * Validate migration configuration
    */
-  static validateMigration(
-    data: unknown
-  ): ValidationResult<{
+  static validateMigration(data: unknown): ValidationResult<{
     from_version: number;
     to_version: number;
     experiment_ids?: string[];

@@ -46,15 +46,18 @@ const PlanetTable: React.FC<{ data: PlanetRow[] }> = ({ data }) => {
             <TableCell className='font-medium'>
               <Tooltip content={getPlanetInterpretation(item.name, item.sign)}>
                 <span className='cursor-help flex items-center gap-2'>
-                  <AstroSymbol 
+                  <AstroSymbol
                     symbol={getPlanetSymbol(item.name)}
-                    size="md"
+                    size='md'
                     title={item.name}
-                    className="text-cosmic-gold"
+                    className='text-cosmic-gold'
                   />
                   <span>{item.name}</span>
                   {item.retrograde && (
-                    <span className='text-cosmic-red font-bold text-lg' title='Retrograde'>
+                    <span
+                      className='text-cosmic-red font-bold text-lg'
+                      title='Retrograde'
+                    >
                       ℞
                     </span>
                   )}
@@ -79,18 +82,24 @@ const PlanetTable: React.FC<{ data: PlanetRow[] }> = ({ data }) => {
             <TableCell>{item.house}</TableCell>
             <TableCell>{item.degree}°</TableCell>
             <TableCell>
-              <div className="flex items-center gap-1">
-                <span className={`${
-                  item.retrograde 
-                    ? "text-cosmic-red font-bold text-lg" 
-                    : "text-cosmic-gold opacity-60"
-                }`}>
-                  {item.retrograde ? "℞" : "D"}
+              <div className='flex items-center gap-1'>
+                <span
+                  className={`${
+                    item.retrograde
+                      ? 'text-cosmic-red font-bold text-lg'
+                      : 'text-cosmic-gold opacity-60'
+                  }`}
+                >
+                  {item.retrograde ? '℞' : 'D'}
                 </span>
-                <span className={`text-xs ${
-                  item.retrograde ? "text-cosmic-red" : "text-cosmic-silver opacity-60"
-                }`}>
-                  {item.retrograde ? "Retrograde" : "Direct"}
+                <span
+                  className={`text-xs ${
+                    item.retrograde
+                      ? 'text-cosmic-red'
+                      : 'text-cosmic-silver opacity-60'
+                  }`}
+                >
+                  {item.retrograde ? 'Retrograde' : 'Direct'}
                 </span>
               </div>
             </TableCell>

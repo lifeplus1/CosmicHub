@@ -140,11 +140,11 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
                     <label
-                        className={`p-3 rounded-lg border text-left transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-cyan-400 ${
-                          isSelected
-                            ? 'border-cyan-400 bg-cyan-500/20 backdrop-blur-sm'
-                            : 'border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10'
-                        }`}
+                      className={`p-3 rounded-lg border text-left transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-cyan-400 ${
+                        isSelected
+                          ? 'border-cyan-400 bg-cyan-500/20 backdrop-blur-sm'
+                          : 'border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                      }`}
                     >
                       <input
                         type='radio'
@@ -155,7 +155,9 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                         value={preset.id}
                         aria-label={`${preset.name} preset (${preset.baseFrequency} Hz)`}
                       />
-                      <div className='font-medium text-white'>{preset.name}</div>
+                      <div className='font-medium text-white'>
+                        {preset.name}
+                      </div>
                       <div className='text-sm text-cyan-300'>
                         {preset.baseFrequency} Hz
                       </div>
@@ -277,7 +279,9 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
       {/* Frequency Info */}
       {selectedPreset && (
         <div className='p-4 border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg'>
-          <h4 className='mb-2 font-semibold text-white'>About {selectedPreset.name}</h4>
+          <h4 className='mb-2 font-semibold text-white'>
+            About {selectedPreset.name}
+          </h4>
           <p className='text-sm text-white/80 mb-2'>
             {selectedPreset.description}
           </p>

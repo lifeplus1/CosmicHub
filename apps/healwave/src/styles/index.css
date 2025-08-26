@@ -12,13 +12,13 @@
   --touch-target-min: 44px;
   --app-header-height: 60px;
   --app-bottom-nav-height: 80px;
-  
+
   /* Universal theme colors (works in all browsers) */
   --theme-primary: #7c3aed;
   --theme-primary-dark: #553c9a;
   --theme-secondary: #8b5cf6;
   --theme-accent: #06b6d4;
-  
+
   /* Color scheme support */
   color-scheme: dark light;
 }
@@ -110,29 +110,33 @@
 @layer utilities {
   /* Custom animations */
   @keyframes pulse-glow {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
     }
     50% {
-      box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), 0 0 40px rgba(139, 92, 246, 0.3);
+      box-shadow:
+        0 0 30px rgba(6, 182, 212, 0.6),
+        0 0 40px rgba(139, 92, 246, 0.3);
     }
   }
 
   @keyframes float {
-    0%, 100% { 
-      transform: translateY(0px); 
+    0%,
+    100% {
+      transform: translateY(0px);
     }
-    50% { 
-      transform: translateY(-20px); 
+    50% {
+      transform: translateY(-20px);
     }
   }
 
   @keyframes shimmer {
-    0% { 
-      background-position: -200% 0; 
+    0% {
+      background-position: -200% 0;
     }
-    100% { 
-      background-position: 200% 0; 
+    100% {
+      background-position: 200% 0;
     }
   }
 

@@ -1,1 +1,1 @@
-import './src/components/PresetSelector.tsx'
+import './src/components/PresetSelector.tsx';

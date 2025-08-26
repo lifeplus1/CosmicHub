@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss';
 
 export default {
   content: [
-    './index.html', 
+    './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
     // Include node_modules for Radix UI styles
     './node_modules/@radix-ui/**/*.{js,ts,jsx,tsx}',
@@ -30,7 +30,7 @@ export default {
       animation: {
         float: 'float 6s ease-in-out infinite',
         shimmer: 'shimmer 2s linear infinite',
-        'spin': 'spin 1s linear infinite',
+        spin: 'spin 1s linear infinite',
       },
       keyframes: {
         float: {

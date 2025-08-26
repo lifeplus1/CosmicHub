@@ -9,6 +9,43 @@ vi.mock('@/services/astrologyService', () => ({
   fetchSavedChart: vi.fn(),
 }));
 
+// Mock the UI components
+vi.mock('@cosmichub/ui', () => ({
+  ErrorBoundary: ({ children, name, level }: any) => (
+    <div data-testid={`error-boundary-${name}`}>{children}</div>
+  ),
+  TooltipProvider: ({ children }: any) => (
+    <div data-testid="tooltip-provider">{children}</div>
+  ),
+  Tooltip: ({ children, content }: any) => (
+    <div title={content}>{children}</div>
+  ),
+  Card: ({ children, className }: any) => (
+    <div className={className}>{children}</div>
+  ),
+  CardHeader: ({ children }: any) => <div>{children}</div>,
+  CardTitle: ({ children }: any) => <h2>{children}</h2>,
+  CardContent: ({ children }: any) => <div>{children}</div>,
+  Input: ({ placeholder, value, onChange }: any) => (
+    <input placeholder={placeholder} value={value} onChange={onChange} />
+  ),
+  Button: ({ children, variant, size, onClick }: any) => (
+    <button data-variant={variant} data-size={size} onClick={onClick}>
+      {children}
+    </button>
+  ),
+  Tabs: ({ children, defaultValue }: any) => (
+    <div data-default-value={defaultValue}>{children}</div>
+  ),
+  TabsList: ({ children }: any) => <div>{children}</div>,
+  TabsTrigger: ({ children, value }: any) => (
+    <button data-value={value}>{children}</button>
+  ),
+  TabsContent: ({ children, value }: any) => (
+    <div data-value={value}>{children}</div>
+  ),
+}));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

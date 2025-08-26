@@ -59,10 +59,10 @@ export class CameraService {
       // Camera permissions would typically be handled by the Camera component
       // For now, we assume permissions are handled at the component level
       console.log('Camera permissions should be handled by Camera component');
-      
+
       // Request media library permissions for saving photos
       const mediaLibraryStatus = await MediaLibrary.requestPermissionsAsync();
-      
+
       if (mediaLibraryStatus.status !== MediaLibrary.PermissionStatus.GRANTED) {
         console.warn('Media library permission not granted');
         return false;
@@ -99,8 +99,12 @@ export class CameraService {
 
     try {
       const options = {
-        quality: this.preferences.preferredQuality === 'high' ? 1 : 
-                this.preferences.preferredQuality === 'medium' ? 0.7 : 0.3,
+        quality:
+          this.preferences.preferredQuality === 'high'
+            ? 1
+            : this.preferences.preferredQuality === 'medium'
+              ? 0.7
+              : 0.3,
         base64: this.preferences.includeBase64,
         exif: this.preferences.includeExif,
       };
@@ -124,15 +128,22 @@ export class CameraService {
   /**
    * Save photo to device gallery
    */
-  async saveToGallery(photoUri: string, albumName: string = 'CosmicHub'): Promise<boolean> {
+  async saveToGallery(
+    photoUri: string,
+    albumName: string = 'CosmicHub'
+  ): Promise<boolean> {
     try {
       // Create asset from photo
       const asset = await MediaLibrary.createAssetAsync(photoUri);
-      
+
       // Try to find or create album
       let album = await MediaLibrary.getAlbumAsync(albumName);
       if (!album) {
-        album = await MediaLibrary.createAlbumAsync(albumName, undefined, false);
+        album = await MediaLibrary.createAlbumAsync(
+          albumName,
+          undefined,
+          false
+        );
       }
 
       // Add asset to album
@@ -174,7 +185,10 @@ export class CameraService {
   /**
    * Add watermark to photo (simplified)
    */
-  addWatermark(photoUri: string, watermarkText: string): Promise<string | null> {
+  addWatermark(
+    photoUri: string,
+    watermarkText: string
+  ): Promise<string | null> {
     try {
       // In a real implementation, this would use a library like react-native-image-editor
       // For now, just return the original URI
@@ -203,7 +217,9 @@ export class CameraService {
   /**
    * Update camera preferences
    */
-  async updatePreferences(newPreferences: Partial<CameraPreferences>): Promise<void> {
+  async updatePreferences(
+    newPreferences: Partial<CameraPreferences>
+  ): Promise<void> {
     this.preferences = { ...this.preferences, ...newPreferences };
     await this.savePreferences();
   }
@@ -235,7 +251,10 @@ export class CameraService {
    */
   private async savePreferences(): Promise<void> {
     try {
-      await AsyncStorage.setItem('camera_preferences', JSON.stringify(this.preferences));
+      await AsyncStorage.setItem(
+        'camera_preferences',
+        JSON.stringify(this.preferences)
+      );
     } catch (error) {
       console.error('Failed to save camera preferences:', error);
     }

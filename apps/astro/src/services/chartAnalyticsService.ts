@@ -4,32 +4,45 @@
  */
 
 import type { ChartData, Planet, Aspect } from './api.types';
-import { 
-  getSignFromDegreesCapitalized, 
-  getElementFromSign as getElementFromSignUtil, 
+import {
+  getSignFromDegreesCapitalized,
+  getElementFromSign as getElementFromSignUtil,
   getQualityFromSign as getQualityFromSignUtil,
   isValidPosition,
   normalizeAngle,
-  getSignFromDegrees
+  getSignFromDegrees,
 } from '../utils/astrologyUtils';
 
 // Helper functions to bridge between centralized utils and service-specific types
-function convertElementToEnum(elementString: 'fire' | 'earth' | 'air' | 'water'): Element {
+function convertElementToEnum(
+  elementString: 'fire' | 'earth' | 'air' | 'water'
+): Element {
   switch (elementString) {
-    case 'fire': return Element.Fire;
-    case 'earth': return Element.Earth;
-    case 'air': return Element.Air;
-    case 'water': return Element.Water;
-    default: return Element.Unknown;
+    case 'fire':
+      return Element.Fire;
+    case 'earth':
+      return Element.Earth;
+    case 'air':
+      return Element.Air;
+    case 'water':
+      return Element.Water;
+    default:
+      return Element.Unknown;
   }
 }
 
-function convertQualityToEnum(qualityString: 'cardinal' | 'fixed' | 'mutable'): Quality {
+function convertQualityToEnum(
+  qualityString: 'cardinal' | 'fixed' | 'mutable'
+): Quality {
   switch (qualityString) {
-    case 'cardinal': return Quality.Cardinal;
-    case 'fixed': return Quality.Fixed;
-    case 'mutable': return Quality.Mutable;
-    default: return Quality.Unknown;
+    case 'cardinal':
+      return Quality.Cardinal;
+    case 'fixed':
+      return Quality.Fixed;
+    case 'mutable':
+      return Quality.Mutable;
+    default:
+      return Quality.Unknown;
   }
 }
 // NOTE: We intentionally import only types from api.types to avoid runtime coupling.
@@ -527,7 +540,9 @@ class ChartAnalyticsService {
           const pos3 = planet3.position;
 
           if (this.isGrandTrine(pos1, pos2, pos3)) {
-            const element = convertElementToEnum(getElementFromSignUtil(getSignFromDegrees(pos1)));
+            const element = convertElementToEnum(
+              getElementFromSignUtil(getSignFromDegrees(pos1))
+            );
             patterns.push({
               id: `grand-trine-${name1}-${name2}-${name3}`,
               name: `${element} Grand Trine`,

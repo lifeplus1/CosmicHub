@@ -49,12 +49,18 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
   // State management
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingStage, setLoadingStage] = useState<LoadingStage>('initializing');
+  const [loadingStage, setLoadingStage] =
+    useState<LoadingStage>('initializing');
   const [error, setError] = useState<EnhancedError | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-  
+
   // Toast notifications
-  const { success, error: showError, info, loading: showLoading } = useToastHelpers();
+  const {
+    success,
+    error: showError,
+    info,
+    loading: showLoading,
+  } = useToastHelpers();
 
   // Simulate API call with different stages
   const fetchChartData = async (showToast = false): Promise<ChartData> => {
@@ -65,23 +71,25 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
     // Stage 1: Initializing
     setLoadingStage('initializing');
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     // Stage 2: Processing
     setLoadingStage('processing');
     await new Promise(resolve => setTimeout(resolve, 1200));
-    
+
     // Stage 3: Finalizing
     setLoadingStage('finalizing');
     await new Promise(resolve => setTimeout(resolve, 600));
-    
+
     // Simulate occasional failures for demo
     if (Math.random() < 0.2) {
-      throw new Error('Network connection failed. Please check your internet connection.');
+      throw new Error(
+        'Network connection failed. Please check your internet connection.'
+      );
     }
-    
+
     // Stage 4: Complete
     setLoadingStage('complete');
-    
+
     // Mock data
     const mockData: ChartData = {
       id: chartId ?? 'demo-chart',
@@ -96,7 +104,7 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
       ],
       lastUpdated: new Date(),
     };
-    
+
     return mockData;
   };
 
@@ -105,18 +113,21 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       const data = await fetchChartData(showToast);
       setChartData(data);
       setLastRefresh(new Date());
-      
+
       if (showToast) {
-        success('Chart Updated', 'Latest astrological data loaded successfully');
+        success(
+          'Chart Updated',
+          'Latest astrological data loaded successfully'
+        );
       }
-      
     } catch (err) {
       const enhancedError: EnhancedError = {
-        message: err instanceof Error ? err.message : 'Failed to load chart data',
+        message:
+          err instanceof Error ? err.message : 'Failed to load chart data',
         type: 'network',
         severity: 'error',
         timestamp: new Date(),
@@ -130,19 +141,22 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
           {
             label: 'Use Cached Data',
             action: () => {
-              info('Using Cached Data', 'Displaying previously saved chart information');
+              info(
+                'Using Cached Data',
+                'Displaying previously saved chart information'
+              );
               // In real app, load from cache
             },
           },
         ],
       };
-      
+
       setError(enhancedError);
-      
+
       if (showToast) {
         showError('Failed to Load Chart', enhancedError.message);
       }
-      
+
       if (onError && err instanceof Error) {
         onError(err);
       }
@@ -159,11 +173,11 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
   // Auto-refresh setup
   useEffect(() => {
     if (!autoRefresh) return;
-    
+
     const interval = setInterval(() => {
       void loadChart(false);
     }, refreshInterval);
-    
+
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval]);
 
@@ -172,7 +186,7 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
     if (!lastRefresh) return 'Never';
     const now = new Date();
     const diff = Math.floor((now.getTime() - lastRefresh.getTime()) / 1000);
-    
+
     if (diff < 60) return `${diff}s ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     return `${Math.floor(diff / 3600)}h ago`;
@@ -188,14 +202,17 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
   if (loading && !chartData) {
     return (
       <ResponsiveContainer className={className}>
-        <MobileCard padding="lg">
+        <MobileCard padding='lg'>
           <ProgressiveLoading
             stage={loadingStage}
             message={
-              loadingStage === 'initializing' ? 'Connecting to ephemeris server...' :
-              loadingStage === 'processing' ? 'Calculating planetary positions...' :
-              loadingStage === 'finalizing' ? 'Preparing chart display...' :
-              'Chart ready!'
+              loadingStage === 'initializing'
+                ? 'Connecting to ephemeris server...'
+                : loadingStage === 'processing'
+                  ? 'Calculating planetary positions...'
+                  : loadingStage === 'finalizing'
+                    ? 'Preparing chart display...'
+                    : 'Chart ready!'
             }
             showProgress
           />
@@ -208,7 +225,7 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
   if (error && !chartData) {
     return (
       <ResponsiveContainer className={className}>
-        <MobileCard padding="lg">
+        <MobileCard padding='lg'>
           <ErrorMessage
             error={error}
             onRetry={() => loadChart(true)}
@@ -223,32 +240,32 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
   // Main content
   return (
     <ResponsiveContainer className={className}>
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {/* Header with status */}
         <MobileCard>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
             <div>
-              <h1 className="text-xl font-semibold text-cosmic-gold">
+              <h1 className='text-xl font-semibold text-cosmic-gold'>
                 {chartData?.title ?? 'Loading Chart...'}
               </h1>
               {chartData?.description && (
-                <p className="text-cosmic-silver/80 text-sm mt-1">
+                <p className='text-cosmic-silver/80 text-sm mt-1'>
                   {chartData.description}
                 </p>
               )}
             </div>
-            
-            <div className="flex items-center gap-3">
+
+            <div className='flex items-center gap-3'>
               <StatusIndicator
                 status={loading ? 'loading' : error ? 'error' : 'success'}
                 message={`Updated ${getTimeSinceRefresh()}`}
                 inline
-                size="sm"
+                size='sm'
               />
-              
+
               <TouchButton
-                variant="secondary"
-                size="sm"
+                variant='secondary'
+                size='sm'
                 onClick={() => void loadChart(true)}
                 loading={loading}
                 haptic
@@ -261,10 +278,7 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
 
         {/* Chart content */}
         {chartData && (
-          <ResponsiveGrid
-            cols={{ xs: 1, sm: 1, md: 2, lg: 3 }}
-            gap="md"
-          >
+          <ResponsiveGrid cols={{ xs: 1, sm: 1, md: 2, lg: 3 }} gap='md'>
             {chartData.data.map((item, index) => (
               <MobileCard
                 key={item.label}
@@ -274,34 +288,37 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
                   loading && 'opacity-50'
                 )}
               >
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {/* Label */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-cosmic-silver">
+                  <div className='flex items-center justify-between'>
+                    <h3 className='font-medium text-cosmic-silver'>
                       {item.label}
                     </h3>
-                    <span className="text-sm text-cosmic-gold font-semibold">
+                    <span className='text-sm text-cosmic-gold font-semibold'>
                       {item.value}%
                     </span>
                   </div>
-                  
+
                   {/* Progress visualization */}
-                  <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className='w-full bg-gray-700 rounded-full h-2'>
                     <div
                       className={cn(
                         'h-full rounded-full transition-all duration-500 ease-out',
                         getProgressWidthClass(item.value),
-                        item.value > 75 ? 'bg-green-500' :
-                        item.value > 50 ? 'bg-yellow-500' :
-                        item.value > 25 ? 'bg-orange-500' :
-                        'bg-red-500'
+                        item.value > 75
+                          ? 'bg-green-500'
+                          : item.value > 50
+                            ? 'bg-yellow-500'
+                            : item.value > 25
+                              ? 'bg-orange-500'
+                              : 'bg-red-500'
                       )}
                       data-progress={item.value}
                     />
                   </div>
-                  
+
                   {/* Additional info */}
-                  <div className="text-xs text-cosmic-silver/60">
+                  <div className='text-xs text-cosmic-silver/60'>
                     Position #{index + 1} • Influence Level
                   </div>
                 </div>
@@ -312,8 +329,8 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
 
         {/* Footer with auto-refresh status */}
         {autoRefresh && (
-          <MobileCard padding="sm">
-            <div className="flex items-center justify-between text-xs text-cosmic-silver/60">
+          <MobileCard padding='sm'>
+            <div className='flex items-center justify-between text-xs text-cosmic-silver/60'>
               <span>Auto-refresh enabled</span>
               <span>Every {Math.round(refreshInterval / 1000)}s</span>
             </div>

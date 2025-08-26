@@ -2,7 +2,12 @@ import React from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Accordion from '@radix-ui/react-accordion';
 import type { WesternChartData } from './types';
-import { getPlanetSymbolSafe, getAspectSymbolSafe, getZodiacSign, isValidChartData } from './utils';
+import {
+  getPlanetSymbolSafe,
+  getAspectSymbolSafe,
+  getZodiacSign,
+  isValidChartData,
+} from './utils';
 
 interface Props {
   data?: WesternChartData;
@@ -58,17 +63,26 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                     <table className='w-full table-auto'>
                       <thead>
                         <tr>
-                          <th className='px-4 py-2 text-left min-w-32'>Planet</th>
-                          <th className='px-4 py-2 text-left min-w-48'>Position</th>
-                          <th className='px-4 py-2 text-left min-w-24'>Retrograde</th>
+                          <th className='px-4 py-2 text-left min-w-32'>
+                            Planet
+                          </th>
+                          <th className='px-4 py-2 text-left min-w-48'>
+                            Position
+                          </th>
+                          <th className='px-4 py-2 text-left min-w-24'>
+                            Retrograde
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {planetEntries.map(([planet, info]) => {
                           // Safe property access with validation
-                          const position = typeof info?.position === 'number' ? info.position : 0;
+                          const position =
+                            typeof info?.position === 'number'
+                              ? info.position
+                              : 0;
                           const retrograde = Boolean(info?.retrograde);
-                          
+
                           return (
                             <tr key={planet}>
                               <td className='px-4 py-2 border-b border-cosmic-gold/20'>
@@ -90,7 +104,9 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                                     ℞
                                   </span>
                                 ) : (
-                                  <span className='text-cosmic-silver/60'>—</span>
+                                  <span className='text-cosmic-silver/60'>
+                                    —
+                                  </span>
                                 )}
                               </td>
                             </tr>
@@ -126,8 +142,12 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                     <table className='w-full table-auto'>
                       <thead>
                         <tr>
-                          <th className='px-4 py-2 text-left min-w-32'>Aspect Type</th>
-                          <th className='px-4 py-2 text-left min-w-40'>Planets</th>
+                          <th className='px-4 py-2 text-left min-w-32'>
+                            Aspect Type
+                          </th>
+                          <th className='px-4 py-2 text-left min-w-40'>
+                            Planets
+                          </th>
                           <th className='px-4 py-2 text-left min-w-24'>Orb</th>
                         </tr>
                       </thead>
@@ -137,7 +157,8 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                           const aspectType = aspect?.aspect || 'Unknown';
                           const point1 = aspect?.point1 || 'Unknown';
                           const point2 = aspect?.point2 || 'Unknown';
-                          const orb = typeof aspect?.orb === 'number' ? aspect.orb : 0;
+                          const orb =
+                            typeof aspect?.orb === 'number' ? aspect.orb : 0;
                           const isExact = Boolean(aspect?.exact);
                           const point1Sign = aspect?.point1_sign || '';
                           const point2Sign = aspect?.point2_sign || '';
@@ -162,9 +183,11 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                                 </span>
                                 {(point1Sign || point2Sign) && (
                                   <p className='text-sm text-cosmic-silver/70'>
-                                    {point1Sign && `${point1Sign}${point1House ? ` (H${point1House})` : ''}`}
+                                    {point1Sign &&
+                                      `${point1Sign}${point1House ? ` (H${point1House})` : ''}`}
                                     {point1Sign && point2Sign && ' - '}
-                                    {point2Sign && `${point2Sign}${point2House ? ` (H${point2House})` : ''}`}
+                                    {point2Sign &&
+                                      `${point2Sign}${point2House ? ` (H${point2House})` : ''}`}
                                   </p>
                                 )}
                               </td>

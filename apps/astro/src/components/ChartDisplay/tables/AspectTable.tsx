@@ -40,33 +40,33 @@ const AspectTable: React.FC<{ data: AspectRow[] }> = ({ data }) => {
           <TableRow key={`aspect-${item.planet1}-${item.planet2}-${index}`}>
             <TableCell>
               <span className='flex items-center gap-2'>
-                <AstroSymbol 
+                <AstroSymbol
                   symbol={getPlanetSymbol(item.planet1)}
-                  size="md"
+                  size='md'
                   title={item.planet1}
-                  className="text-cosmic-gold"
+                  className='text-cosmic-gold'
                 />
                 <span>{item.planet1}</span>
               </span>
             </TableCell>
             <TableCell>
               <span className='flex items-center gap-2'>
-                <AstroSymbol 
+                <AstroSymbol
                   symbol={getPlanetSymbol(item.planet2)}
-                  size="md"
+                  size='md'
                   title={item.planet2}
-                  className="text-cosmic-gold"
+                  className='text-cosmic-gold'
                 />
                 <span>{item.planet2}</span>
               </span>
             </TableCell>
             <TableCell>
               <span className='flex items-center gap-2'>
-                <AstroSymbol 
+                <AstroSymbol
                   symbol={getAspectSymbol(item.type)}
-                  size="md"
+                  size='md'
                   title={item.type}
-                  className="text-cosmic-gold"
+                  className='text-cosmic-gold'
                 />
                 <span className='text-cosmic-gold font-medium'>
                   {item.type}

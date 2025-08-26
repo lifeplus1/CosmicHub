@@ -21,12 +21,9 @@ const saveTimeouts = new Map<string, NodeJS.Timeout>();
 /**
  * Debounced save to storage
  */
-export function debouncedSave<T>(
-  data: T,
-  config: PersistenceConfig
-): void {
+export function debouncedSave<T>(data: T, config: PersistenceConfig): void {
   const { key, storage = 'localStorage', debounceMs = 300 } = config;
-  
+
   // Clear existing timeout
   const existingTimeout = saveTimeouts.get(key);
   if (existingTimeout) {
@@ -36,13 +33,14 @@ export function debouncedSave<T>(
   // Set new timeout
   const timeoutId = setTimeout(() => {
     try {
-      const storageObj = storage === 'sessionStorage' ? sessionStorage : localStorage;
+      const storageObj =
+        storage === 'sessionStorage' ? sessionStorage : localStorage;
       const persistenceState: PersistenceState<T> = {
         value: data,
         timestamp: Date.now(),
         version: '1.0',
       };
-      
+
       storageObj.setItem(key, JSON.stringify(persistenceState));
       console.log(`✅ Saved ${key} to ${storage}:`, data);
     } catch (error) {
@@ -65,13 +63,14 @@ export function loadFromStorage<T>(
   const { key, storage = 'localStorage' } = config;
 
   try {
-    const storageObj = storage === 'sessionStorage' ? sessionStorage : localStorage;
+    const storageObj =
+      storage === 'sessionStorage' ? sessionStorage : localStorage;
     const stored = storageObj.getItem(key);
-    
+
     if (!stored) return null;
 
     const parsed: unknown = JSON.parse(stored);
-    
+
     // Handle both old format (direct data) and new format (with metadata)
     let data: unknown;
     if (parsed && typeof parsed === 'object' && 'value' in parsed) {
@@ -100,9 +99,10 @@ export function loadFromStorage<T>(
  */
 export function clearStorage(config: PersistenceConfig): void {
   const { key, storage = 'localStorage' } = config;
-  
+
   try {
-    const storageObj = storage === 'sessionStorage' ? sessionStorage : localStorage;
+    const storageObj =
+      storage === 'sessionStorage' ? sessionStorage : localStorage;
     storageObj.removeItem(key);
     console.log(`🗑️ Cleared ${key} from ${storage}`);
   } catch (error) {
@@ -120,9 +120,12 @@ export function clearStorage(config: PersistenceConfig): void {
 /**
  * Check if storage is available
  */
-export function isStorageAvailable(storage: 'localStorage' | 'sessionStorage' = 'localStorage'): boolean {
+export function isStorageAvailable(
+  storage: 'localStorage' | 'sessionStorage' = 'localStorage'
+): boolean {
   try {
-    const storageObj = storage === 'sessionStorage' ? sessionStorage : localStorage;
+    const storageObj =
+      storage === 'sessionStorage' ? sessionStorage : localStorage;
     const test = '__storage_test__';
     storageObj.setItem(test, 'test');
     storageObj.removeItem(test);
@@ -135,7 +138,9 @@ export function isStorageAvailable(storage: 'localStorage' | 'sessionStorage' = 
 /**
  * Get storage usage info (for debugging)
  */
-export function getStorageInfo(storage: 'localStorage' | 'sessionStorage' = 'localStorage'): {
+export function getStorageInfo(
+  storage: 'localStorage' | 'sessionStorage' = 'localStorage'
+): {
   available: boolean;
   used: number;
   remaining: number;
@@ -146,10 +151,11 @@ export function getStorageInfo(storage: 'localStorage' | 'sessionStorage' = 'loc
   }
 
   try {
-    const storageObj = storage === 'sessionStorage' ? sessionStorage : localStorage;
+    const storageObj =
+      storage === 'sessionStorage' ? sessionStorage : localStorage;
     const keys = Object.keys(storageObj);
     const used = JSON.stringify(storageObj).length;
-    
+
     // Rough estimate of remaining space (5MB typical limit)
     const limit = 5 * 1024 * 1024; // 5MB in bytes
     const remaining = Math.max(0, limit - used);

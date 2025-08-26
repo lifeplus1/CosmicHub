@@ -13,7 +13,9 @@ const VedicChart: React.FC<Props> = ({ data }) => {
     return (
       <div className='cosmic-card bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-orange-500/30'>
         <div className='p-6 text-center'>
-          <p className='text-cosmic-silver'>No Vedic astrology data available</p>
+          <p className='text-cosmic-silver'>
+            No Vedic astrology data available
+          </p>
           <p className='text-cosmic-silver/60 text-sm mt-2'>
             Please calculate a chart to see Vedic sidereal analysis
           </p>
@@ -23,12 +25,16 @@ const VedicChart: React.FC<Props> = ({ data }) => {
   }
 
   // Safe data extraction with fallbacks
-  const description = safeGet(data, 'description', 'Vedic Sidereal Astrology Analysis');
+  const description = safeGet(
+    data,
+    'description',
+    'Vedic Sidereal Astrology Analysis'
+  );
   const ayanamsa = safeGet(data, 'ayanamsa', 0) as number;
   const moonSign = safeGet(data, 'analysis.moon_sign', 'Not calculated');
   const analysis = safeGet(data, 'analysis.analysis', 'Analysis not available');
   const planets = safeGet(data, 'planets', {});
-  
+
   const planetEntries = Object.entries(planets);
 
   return (
@@ -77,24 +83,43 @@ const VedicChart: React.FC<Props> = ({ data }) => {
                     <table className='w-full text-sm table-auto'>
                       <thead>
                         <tr>
-                          <th className='py-2 text-left text-cosmic-silver border-b border-orange-300/20'>Planet</th>
-                          <th className='py-2 text-left text-cosmic-silver border-b border-orange-300/20'>Sign</th>
-                          <th className='py-2 text-left text-cosmic-silver border-b border-orange-300/20'>Nakshatra</th>
+                          <th className='py-2 text-left text-cosmic-silver border-b border-orange-300/20'>
+                            Planet
+                          </th>
+                          <th className='py-2 text-left text-cosmic-silver border-b border-orange-300/20'>
+                            Sign
+                          </th>
+                          <th className='py-2 text-left text-cosmic-silver border-b border-orange-300/20'>
+                            Nakshatra
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {planetEntries.map(([planet, info]) => {
                           // Safe property access with validation
-                          const vedicSign = safeGet(info, 'vedic_sign', 'Unknown');
-                          const nakshatraName = safeGet(info, 'nakshatra.name', 'Unknown');
+                          const vedicSign = safeGet(
+                            info,
+                            'vedic_sign',
+                            'Unknown'
+                          );
+                          const nakshatraName = safeGet(
+                            info,
+                            'nakshatra.name',
+                            'Unknown'
+                          );
                           const pada = safeGet(info, 'nakshatra.pada', 'N/A');
-                          
+
                           return (
-                            <tr key={planet} className='border-b border-orange-300/10'>
+                            <tr
+                              key={planet}
+                              className='border-b border-orange-300/10'
+                            >
                               <td className='py-2 font-medium capitalize text-cosmic-silver'>
                                 {planet.replace('_', ' ')}
                               </td>
-                              <td className='py-2 text-cosmic-silver/80'>{vedicSign}</td>
+                              <td className='py-2 text-cosmic-silver/80'>
+                                {vedicSign}
+                              </td>
                               <td className='py-2 text-cosmic-silver/80'>
                                 {nakshatraName}
                                 {pada !== 'N/A' && ` (Pada ${pada})`}

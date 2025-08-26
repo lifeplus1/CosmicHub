@@ -38,14 +38,14 @@ describe('BirthDataContext Optimizations', () => {
   it('should provide birth data context with memoized values', () => {
     const TestComponent = () => {
       const { birthData, isDataValid, setBirthData } = useBirthData();
-      
+
       return (
         <div>
-          <span data-testid="is-valid">{isDataValid.toString()}</span>
-          <span data-testid="has-data">{birthData ? 'yes' : 'no'}</span>
-          <button 
+          <span data-testid='is-valid'>{isDataValid.toString()}</span>
+          <span data-testid='has-data'>{birthData ? 'yes' : 'no'}</span>
+          <button
             onClick={() => setBirthData(mockBirthData)}
-            data-testid="set-data"
+            data-testid='set-data'
           >
             Set Data
           </button>
@@ -64,17 +64,17 @@ describe('BirthDataContext Optimizations', () => {
     expect(screen.getByTestId('is-valid')).toHaveTextContent('false');
   });
 
-  it('should update birth data and validation state correctly', async () => {
+  it('should update birth data and validation state correctly', () => {
     const TestComponent = () => {
       const { birthData, isDataValid, setBirthData } = useBirthData();
-      
+
       return (
         <div>
-          <span data-testid="is-valid">{isDataValid.toString()}</span>
-          <span data-testid="has-data">{birthData ? 'yes' : 'no'}</span>
-          <button 
+          <span data-testid='update-test-is-valid'>{String(isDataValid)}</span>
+          <span data-testid='update-test-has-data'>{birthData ? 'yes' : 'no'}</span>
+          <button
             onClick={() => setBirthData(mockBirthData)}
-            data-testid="set-data"
+            data-testid='update-test-set-data'
           >
             Set Data
           </button>
@@ -89,37 +89,34 @@ describe('BirthDataContext Optimizations', () => {
     );
 
     // Set birth data
-    const setButton = screen.getByTestId('set-data');
+    const setButton = screen.getByTestId('update-test-set-data');
     act(() => {
       setButton.click();
     });
 
     // Should now have valid data
-    expect(screen.getByTestId('has-data')).toHaveTextContent('yes');
-    expect(screen.getByTestId('is-valid')).toHaveTextContent('true');
+    expect(screen.getByTestId('update-test-has-data')).toHaveTextContent('yes');
+    expect(screen.getByTestId('update-test-is-valid')).toHaveTextContent('true');
   });
 
   it('should use useCallback for functions to prevent unnecessary re-renders', () => {
     let renderCount = 0;
-    
+
     const TestComponent = () => {
       const { setBirthData, clearBirthData } = useBirthData();
       renderCount++;
-      
+
       // Functions should be stable between renders
       return (
         <div>
-          <span data-testid="render-count">{renderCount}</span>
-          <button 
+          <span data-testid='callback-test-render-count'>{renderCount}</span>
+          <button
             onClick={() => setBirthData(mockBirthData)}
-            data-testid="set-data"
+            data-testid='callback-test-set-data'
           >
             Set Data
           </button>
-          <button 
-            onClick={clearBirthData}
-            data-testid="clear-data"
-          >
+          <button onClick={clearBirthData} data-testid='callback-test-clear-data'>
             Clear Data
           </button>
         </div>
@@ -135,15 +132,15 @@ describe('BirthDataContext Optimizations', () => {
     );
 
     // Should render once initially
-    expect(screen.getByTestId('render-count')).toHaveTextContent('1');
+    expect(screen.getByTestId('callback-test-render-count')).toHaveTextContent('1');
 
     // Setting data should cause a re-render
-    const setButton = screen.getByTestId('set-data');
+    const setButton = screen.getByTestId('callback-test-set-data');
     act(() => {
       setButton.click();
     });
 
-    expect(screen.getByTestId('render-count')).toHaveTextContent('2');
+    expect(screen.getByTestId('callback-test-render-count')).toHaveTextContent('2');
   });
 
   it('should validate birth data correctly', () => {

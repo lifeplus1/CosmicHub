@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ButtonVariant = 
+export type ButtonVariant =
   | 'default'
   | 'destructive'
   | 'outline'
@@ -23,13 +23,18 @@ export interface ButtonProps {
 
 const getVariantClasses = (variant: ButtonVariant = 'default'): string => {
   const variants = {
-    default: 'bg-cosmic-purple text-cosmic-gold hover:bg-cosmic-purple/80 shadow-lg shadow-cosmic-purple/20',
+    default:
+      'bg-cosmic-purple text-cosmic-gold hover:bg-cosmic-purple/80 shadow-lg shadow-cosmic-purple/20',
     destructive: 'bg-red-600 text-white hover:bg-red-700',
-    outline: 'border border-cosmic-purple/30 bg-transparent text-cosmic-silver hover:bg-cosmic-purple/10 hover:text-cosmic-gold',
-    secondary: 'bg-cosmic-dark/50 border border-cosmic-purple/30 text-cosmic-silver hover:bg-cosmic-purple/20 hover:text-cosmic-gold',
-    ghost: 'text-cosmic-silver hover:bg-cosmic-purple/10 hover:text-cosmic-gold',
+    outline:
+      'border border-cosmic-purple/30 bg-transparent text-cosmic-silver hover:bg-cosmic-purple/10 hover:text-cosmic-gold',
+    secondary:
+      'bg-cosmic-dark/50 border border-cosmic-purple/30 text-cosmic-silver hover:bg-cosmic-purple/20 hover:text-cosmic-gold',
+    ghost:
+      'text-cosmic-silver hover:bg-cosmic-purple/10 hover:text-cosmic-gold',
     link: 'text-cosmic-gold underline-offset-4 hover:underline',
-    cosmic: 'bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-cosmic-gold hover:from-cosmic-purple/80 hover:to-cosmic-blue/80 shadow-lg shadow-cosmic-purple/20',
+    cosmic:
+      'bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-cosmic-gold hover:from-cosmic-purple/80 hover:to-cosmic-blue/80 shadow-lg shadow-cosmic-purple/20',
   };
   return variants[variant];
 };
@@ -54,11 +59,12 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-cosmic-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cosmic-purple focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
-  
+  const baseClasses =
+    'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-cosmic-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cosmic-purple focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+
   const variantClasses = getVariantClasses(variant);
   const sizeClasses = getSizeClasses(size);
-  
+
   const combinedClasses = [baseClasses, variantClasses, sizeClasses, className]
     .filter(Boolean)
     .join(' ');

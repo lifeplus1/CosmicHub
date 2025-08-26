@@ -42,12 +42,15 @@ export const UpgradeModalProvider: React.FC<UpgradeModalProviderProps> = ({
   }, []);
 
   // Memoized context value - prevents unnecessary re-renders
-  const contextValue = useMemo<UpgradeModalContextType>(() => ({
-    isOpen,
-    feature,
-    openUpgradeModal,
-    closeUpgradeModal,
-  }), [isOpen, feature, openUpgradeModal, closeUpgradeModal]);
+  const contextValue = useMemo<UpgradeModalContextType>(
+    () => ({
+      isOpen,
+      feature,
+      openUpgradeModal,
+      closeUpgradeModal,
+    }),
+    [isOpen, feature, openUpgradeModal, closeUpgradeModal]
+  );
 
   return (
     <UpgradeModalContext.Provider value={contextValue}>

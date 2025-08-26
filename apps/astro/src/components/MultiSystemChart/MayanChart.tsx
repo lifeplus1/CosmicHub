@@ -25,7 +25,9 @@ const MayanChart: React.FC<Props> = ({ data }) => {
 
           <div className='grid grid-cols-2 gap-4 mb-4'>
             <div>
-              <p className='mb-2 font-bold text-cosmic-silver'>Tzolk&apos;in Signature</p>
+              <p className='mb-2 font-bold text-cosmic-silver'>
+                Tzolk&apos;in Signature
+              </p>
               <p className='mb-2 text-2xl text-green-400'>
                 {data.sacred_number?.number} {data.day_sign?.name}
               </p>
@@ -45,20 +47,34 @@ const MayanChart: React.FC<Props> = ({ data }) => {
                 <strong>Tone:</strong> {data.wavespell?.tone?.name} (
                 {data.wavespell?.position})
               </p>
-              <p className='mb-4 text-sm text-cosmic-silver/80'>{data.wavespell?.description}</p>
+              <p className='mb-4 text-sm text-cosmic-silver/80'>
+                {data.wavespell?.description}
+              </p>
               <p className='mb-2 font-bold text-cosmic-silver'>Long Count</p>
-              <p className='font-mono text-sm text-cosmic-silver/80'>{data.long_count?.date}</p>
+              <p className='font-mono text-sm text-cosmic-silver/80'>
+                {data.long_count?.date}
+              </p>
             </div>
           </div>
 
-          <p className='mb-2 font-bold text-cosmic-silver'>Galactic Signature</p>
-          <p className='mb-4 text-sm text-cosmic-silver/80'>{data.galactic_signature}</p>
+          <p className='mb-2 font-bold text-cosmic-silver'>
+            Galactic Signature
+          </p>
+          <p className='mb-4 text-sm text-cosmic-silver/80'>
+            {data.galactic_signature}
+          </p>
 
           <p className='mb-2 font-bold text-cosmic-silver'>Life Purpose</p>
-          <p className='mb-4 text-sm text-cosmic-silver/80'>{data.life_purpose}</p>
+          <p className='mb-4 text-sm text-cosmic-silver/80'>
+            {data.life_purpose}
+          </p>
 
-          <p className='mb-2 font-bold text-cosmic-silver'>Spiritual Guidance</p>
-          <p className='text-sm text-cosmic-silver/80'>{data.spiritual_guidance}</p>
+          <p className='mb-2 font-bold text-cosmic-silver'>
+            Spiritual Guidance
+          </p>
+          <p className='text-sm text-cosmic-silver/80'>
+            {data.spiritual_guidance}
+          </p>
         </div>
       </div>
     </div>

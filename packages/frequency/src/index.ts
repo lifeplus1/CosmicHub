@@ -8,7 +8,7 @@ const logger = {
   },
   info: (message: string) => {
     console.info('[FrequencyEngine]', message);
-  }
+  },
 };
 
 /**

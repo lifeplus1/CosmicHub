@@ -32,7 +32,9 @@ console.log('  ✅ Hook processing logs visible in console');
 console.log('  ✅ No data loss compared to before hook integration');
 
 console.log('\n📊 INTEGRATION STATUS SUMMARY:');
-console.log('  ✅ useChartProcessing hook: Built and tested (26/26 tests passing)');
+console.log(
+  '  ✅ useChartProcessing hook: Built and tested (26/26 tests passing)'
+);
 console.log('  ✅ Chart.tsx integration: Complete with proper data flow');
 console.log('  ✅ TypeScript compilation: Successful with no errors');
 console.log('  ✅ Development server: Running and ready for testing');
@@ -41,7 +43,9 @@ console.log('  ✅ Critical data flow issue: SOLVED');
 console.log('\n🚀 NEXT STEPS:');
 console.log('1. Manual browser testing (use instructions above)');
 console.log('2. Test with saved charts to verify fallback logic');
-console.log('3. Test with new chart calculations to verify raw backend processing');
+console.log(
+  '3. Test with new chart calculations to verify raw backend processing'
+);
 console.log('4. Verify all asteroid/uranian points are visible');
 console.log('5. Proceed with feature testing on stable foundation');
 

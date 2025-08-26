@@ -29,7 +29,7 @@ class CSRFTokenService {
         method: 'GET',
         credentials: 'include',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 
@@ -51,9 +51,11 @@ class CSRFTokenService {
   /**
    * Get headers with CSRF token for API requests
    */
-  async getHeaders(additionalHeaders: Record<string, string> = {}): Promise<Record<string, string>> {
+  async getHeaders(
+    additionalHeaders: Record<string, string> = {}
+  ): Promise<Record<string, string>> {
     const token = await this.getToken();
-    
+
     return {
       'Content-Type': 'application/json',
       'X-CSRF-Token': token,
@@ -64,9 +66,14 @@ class CSRFTokenService {
   /**
    * Make an authenticated API request with CSRF token
    */
-  async request(endpoint: string, options: RequestInit = {}): Promise<Response> {
-    const headers = await this.getHeaders(options.headers as Record<string, string> || {});
-    
+  async request(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    const headers = await this.getHeaders(
+      (options.headers as Record<string, string>) || {}
+    );
+
     const requestOptions: RequestInit = {
       ...options,
       headers,
@@ -75,13 +82,17 @@ class CSRFTokenService {
 
     // Retry logic for expired tokens
     let response = await fetch(`${this.API_BASE}${endpoint}`, requestOptions);
-    
+
     // If we get a 403, the token might be expired - try once more with fresh token
     if (response.status === 403) {
-      console.warn('CSRF token may be expired, fetching new token and retrying...');
+      console.warn(
+        'CSRF token may be expired, fetching new token and retrying...'
+      );
       this.token = null; // Force token refresh
-      const freshHeaders = await this.getHeaders(options.headers as Record<string, string> || {});
-      
+      const freshHeaders = await this.getHeaders(
+        (options.headers as Record<string, string>) || {}
+      );
+
       response = await fetch(`${this.API_BASE}${endpoint}`, {
         ...requestOptions,
         headers: freshHeaders,
@@ -106,19 +117,27 @@ export const csrfService = new CSRFTokenService();
 /**
  * Utility function for making CSRF-protected API calls
  */
-export async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
+export async function apiRequest(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<Response> {
   return csrfService.request(endpoint, options);
 }
 
 /**
  * Utility function for making CSRF-protected JSON API calls
  */
-export async function apiJsonRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function apiJsonRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
   const response = await apiRequest(endpoint, options);
-  
+
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `API request failed: ${response.status} ${response.statusText}`
+    );
   }
-  
+
   return response.json();
 }

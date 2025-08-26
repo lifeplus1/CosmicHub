@@ -33,10 +33,10 @@ const MainApp: React.FC = () => {
     const updateTheme = (e: MediaQueryListEvent | MediaQueryList) => {
       const isDark = e.matches;
       setThemeColor(isDark ? '#7c3aed' : '#8b5cf6');
-      
+
       // Update CSS custom property for cross-browser support
       document.documentElement.style.setProperty(
-        '--theme-primary', 
+        '--theme-primary',
         isDark ? '#7c3aed' : '#8b5cf6'
       );
     };
@@ -130,10 +130,12 @@ const MainApp: React.FC = () => {
               App: <span className='text-cyan-400'>{config.app.name}</span>
             </div>
             <div className='text-purple-200'>
-              Env: <span className='text-cyan-400'>{config.app.environment}</span>
+              Env:{' '}
+              <span className='text-cyan-400'>{config.app.environment}</span>
             </div>
             <div className='text-purple-200'>
-              Version: <span className='text-cyan-400'>{config.app.version}</span>
+              Version:{' '}
+              <span className='text-cyan-400'>{config.app.version}</span>
             </div>
           </div>
         )}

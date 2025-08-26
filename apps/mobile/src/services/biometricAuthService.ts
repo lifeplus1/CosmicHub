@@ -53,10 +53,10 @@ class BiometricAuthService {
     try {
       // Load saved preferences
       await this.loadPreferences();
-      
+
       // Check if biometric authentication is available
       const capabilities = await this.getCapabilities();
-      
+
       if (!capabilities.isAvailable) {
         console.log('Biometric authentication not available on this device');
         this.preferences.enabled = false;
@@ -78,7 +78,8 @@ class BiometricAuthService {
     try {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      const supportedTypes =
+        await LocalAuthentication.supportedAuthenticationTypesAsync();
       const securityLevel = await LocalAuthentication.getEnrolledLevelAsync();
 
       return {
@@ -103,22 +104,35 @@ class BiometricAuthService {
   /**
    * Authenticate user using biometrics
    */
-  async authenticate(options: BiometricAuthOptions = {}): Promise<BiometricAuthResult> {
+  async authenticate(
+    options: BiometricAuthOptions = {}
+  ): Promise<BiometricAuthResult> {
     try {
       if (!this.preferences.enabled) {
-        return { success: false, error: 'Biometric authentication is disabled' };
+        return {
+          success: false,
+          error: 'Biometric authentication is disabled',
+        };
       }
 
       const capabilities = await this.getCapabilities();
       if (!capabilities.isAvailable) {
-        return { success: false, error: 'Biometric authentication not available' };
+        return {
+          success: false,
+          error: 'Biometric authentication not available',
+        };
       }
 
       const authOptions: LocalAuthentication.LocalAuthenticationOptions = {
-        promptMessage: options.promptMessage ?? 'Authenticate to access CosmicHub',
+        promptMessage:
+          options.promptMessage ?? 'Authenticate to access CosmicHub',
         cancelLabel: options.cancelLabel ?? 'Cancel',
-        fallbackLabel: options.fallbackLabel ?? (this.preferences.allowFallbackToPasscode ? 'Use Passcode' : ''),
-        disableDeviceFallback: options.disableDeviceFallback ?? !this.preferences.allowFallbackToPasscode,
+        fallbackLabel:
+          options.fallbackLabel ??
+          (this.preferences.allowFallbackToPasscode ? 'Use Passcode' : ''),
+        disableDeviceFallback:
+          options.disableDeviceFallback ??
+          !this.preferences.allowFallbackToPasscode,
       };
 
       const result = await LocalAuthentication.authenticateAsync(authOptions);
@@ -127,7 +141,7 @@ class BiometricAuthService {
         this.isAuthenticated = true;
         this.lastAuthTime = Date.now();
         this.startAutoLockTimer();
-        
+
         return { success: true };
       } else {
         const error = 'Biometric authentication failed';
@@ -137,9 +151,12 @@ class BiometricAuthService {
       }
     } catch (error) {
       console.error('Biometric authentication error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown authentication error'
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Unknown authentication error',
       };
     }
   }
@@ -168,12 +185,16 @@ class BiometricAuthService {
    * Authenticate for app launch
    */
   async authenticateForAppLaunch(): Promise<BiometricAuthResult> {
-    if (!this.preferences.requireForAppLaunch || this.isCurrentlyAuthenticated()) {
+    if (
+      !this.preferences.requireForAppLaunch ||
+      this.isCurrentlyAuthenticated()
+    ) {
       return { success: true };
     }
 
     return this.authenticate({
-      promptMessage: 'Welcome back! Authenticate to access your cosmic insights',
+      promptMessage:
+        'Welcome back! Authenticate to access your cosmic insights',
       cancelLabel: 'Exit App',
     });
   }
@@ -181,8 +202,13 @@ class BiometricAuthService {
   /**
    * Authenticate for sensitive data access
    */
-  async authenticateForSensitiveData(context: string): Promise<BiometricAuthResult> {
-    if (!this.preferences.requireForSensitiveData || this.isCurrentlyAuthenticated()) {
+  async authenticateForSensitiveData(
+    context: string
+  ): Promise<BiometricAuthResult> {
+    if (
+      !this.preferences.requireForSensitiveData ||
+      this.isCurrentlyAuthenticated()
+    ) {
       return { success: true };
     }
 
@@ -199,7 +225,7 @@ class BiometricAuthService {
       return { success: true };
     }
 
-    const promptMessage = amount 
+    const promptMessage = amount
       ? `Authenticate to complete payment of ${amount}`
       : 'Authenticate to complete payment';
 
@@ -233,7 +259,7 @@ class BiometricAuthService {
    */
   private startAutoLockTimer(): void {
     this.clearAutoLockTimer();
-    
+
     const timeoutMs = this.preferences.autoLockTimeout * 60 * 1000;
     this.lockTimeout = setTimeout(() => {
       this.logout();
@@ -253,9 +279,11 @@ class BiometricAuthService {
   /**
    * Update biometric preferences
    */
-  async updatePreferences(newPreferences: Partial<BiometricPreferences>): Promise<void> {
+  async updatePreferences(
+    newPreferences: Partial<BiometricPreferences>
+  ): Promise<void> {
     this.preferences = { ...this.preferences, ...newPreferences };
-    
+
     // Apply changes
     if (!newPreferences.enabled) {
       this.logout();
@@ -275,7 +303,9 @@ class BiometricAuthService {
   /**
    * Check if biometric type is supported
    */
-  async isBiometricTypeSupported(type: LocalAuthentication.AuthenticationType): Promise<boolean> {
+  async isBiometricTypeSupported(
+    type: LocalAuthentication.AuthenticationType
+  ): Promise<boolean> {
     const capabilities = await this.getCapabilities();
     return capabilities.supportedTypes.includes(type);
   }
@@ -304,7 +334,7 @@ class BiometricAuthService {
     name: string;
   }> {
     const capabilities = await this.getCapabilities();
-    
+
     if (capabilities.supportedTypes.length === 0) {
       return { type: null, name: 'None Available' };
     }
@@ -338,7 +368,7 @@ class BiometricAuthService {
    */
   async promptForBiometricSetup(): Promise<void> {
     const capabilities = await this.getCapabilities();
-    
+
     if (!capabilities.hasHardware) {
       // Device doesn't support biometrics
       return;
@@ -370,7 +400,10 @@ class BiometricAuthService {
    */
   private async savePreferences(): Promise<void> {
     try {
-      await AsyncStorage.setItem('biometric_preferences', JSON.stringify(this.preferences));
+      await AsyncStorage.setItem(
+        'biometric_preferences',
+        JSON.stringify(this.preferences)
+      );
     } catch (error) {
       console.error('Failed to save biometric preferences:', error);
     }

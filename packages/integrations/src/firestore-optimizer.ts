@@ -1,6 +1,6 @@
 /**
  * Firestore Performance Optimizer - PERF-001 Implementation
- * 
+ *
  * Analyzes and optimizes Firestore read patterns, implements intelligent
  * caching, and provides adaptive query optimization.
  */
@@ -8,8 +8,16 @@
 // Simple console wrapper for development logging
 const isDev = process.env.NODE_ENV === 'development';
 const devConsole = {
-  log: isDev ? console.log.bind(console) : (): void => { /* no-op */ },
-  warn: isDev ? console.warn.bind(console) : (): void => { /* no-op */ },
+  log: isDev
+    ? console.log.bind(console)
+    : (): void => {
+        /* no-op */
+      },
+  warn: isDev
+    ? console.warn.bind(console)
+    : (): void => {
+        /* no-op */
+      },
   error: console.error.bind(console),
 };
 
@@ -43,7 +51,7 @@ class FirestorePerformanceOptimizer {
     hits: 0,
     misses: 0,
     invalidations: 0,
-    size: 0
+    size: 0,
   };
 
   private readCounter = 0;
@@ -78,7 +86,7 @@ class FirestorePerformanceOptimizer {
         frequency: 1,
         averageReads: readCount,
         cacheability: this.assessCacheability(querySignature),
-        optimization: this.suggestOptimization(querySignature, readCount)
+        optimization: this.suggestOptimization(querySignature, readCount),
       });
     }
 
@@ -99,8 +107,9 @@ class FirestorePerformanceOptimizer {
     recommendations: string[];
     optimizations: QueryOptimization[];
   } {
-    const patterns = Array.from(this.readMetrics.values())
-      .sort((a, b) => b.frequency - a.frequency);
+    const patterns = Array.from(this.readMetrics.values()).sort(
+      (a, b) => b.frequency - a.frequency
+    );
 
     const hotspotQueries = patterns
       .filter(p => p.frequency > 10 || p.averageReads > 50)
@@ -113,11 +122,15 @@ class FirestorePerformanceOptimizer {
 
     const metrics: FirestoreReadMetrics = {
       queryCount: this.readCounter,
-      totalReads: patterns.reduce((sum, p) => sum + (p.frequency * p.averageReads), 0),
+      totalReads: patterns.reduce(
+        (sum, p) => sum + p.frequency * p.averageReads,
+        0
+      ),
       cacheHits: this.cacheStats.hits,
-      averageLatency: this.readCounter > 0 ? this.totalLatency / this.readCounter : 0,
+      averageLatency:
+        this.readCounter > 0 ? this.totalLatency / this.readCounter : 0,
       hotspotQueries,
-      inefficientPatterns
+      inefficientPatterns,
     };
 
     const optimizations = patterns
@@ -132,19 +145,30 @@ class FirestorePerformanceOptimizer {
   /**
    * Assess how cacheable a query pattern is
    */
-  private assessCacheability(querySignature: string): 'high' | 'medium' | 'low' {
+  private assessCacheability(
+    querySignature: string
+  ): 'high' | 'medium' | 'low' {
     // Static data queries are highly cacheable
-    if (querySignature.includes('user_charts') || querySignature.includes('interpretations')) {
+    if (
+      querySignature.includes('user_charts') ||
+      querySignature.includes('interpretations')
+    ) {
       return 'high';
     }
 
     // Ephemeris data is moderately cacheable (changes daily)
-    if (querySignature.includes('ephemeris') || querySignature.includes('positions')) {
+    if (
+      querySignature.includes('ephemeris') ||
+      querySignature.includes('positions')
+    ) {
       return 'medium';
     }
 
     // Real-time data is less cacheable
-    if (querySignature.includes('realtime') || querySignature.includes('notifications')) {
+    if (
+      querySignature.includes('realtime') ||
+      querySignature.includes('notifications')
+    ) {
       return 'low';
     }
 
@@ -154,24 +178,30 @@ class FirestorePerformanceOptimizer {
   /**
    * Suggest optimization for a query pattern
    */
-  private suggestOptimization(querySignature: string, readCount: number): QueryOptimization | null {
+  private suggestOptimization(
+    querySignature: string,
+    readCount: number
+  ): QueryOptimization | null {
     // Suggest batching for multiple single-document reads
     if (querySignature.includes('where_id_==') && readCount > 10) {
       return {
         original: querySignature,
         optimized: querySignature.replace('where_id_==', 'where_id_in'),
         improvement: 'Batch multiple document reads into single query',
-        estimatedSavings: Math.floor(readCount * 0.8) // ~80% reduction in reads
+        estimatedSavings: Math.floor(readCount * 0.8), // ~80% reduction in reads
       };
     }
 
     // Suggest composite indexes for complex queries
-    if (querySignature.includes('where_') && querySignature.includes('order_by')) {
+    if (
+      querySignature.includes('where_') &&
+      querySignature.includes('order_by')
+    ) {
       return {
         original: querySignature,
         optimized: `${querySignature} [composite_index_recommended]`,
         improvement: 'Add composite index to improve query performance',
-        estimatedSavings: readCount / 2 // ~50% performance improvement
+        estimatedSavings: readCount / 2, // ~50% performance improvement
       };
     }
 
@@ -181,7 +211,7 @@ class FirestorePerformanceOptimizer {
         original: querySignature,
         optimized: `${querySignature}.limit(25).startAfter(cursor)`,
         improvement: 'Implement pagination to reduce read count',
-        estimatedSavings: Math.floor(readCount * 0.75) // ~75% reduction
+        estimatedSavings: Math.floor(readCount * 0.75), // ~75% reduction
       };
     }
 
@@ -198,7 +228,8 @@ class FirestorePerformanceOptimizer {
     const recommendations: string[] = [];
 
     // Cache hit rate recommendations
-    const cacheHitRate = metrics.cacheHits / (metrics.cacheHits + this.cacheStats.misses) * 100;
+    const cacheHitRate =
+      (metrics.cacheHits / (metrics.cacheHits + this.cacheStats.misses)) * 100;
     if (cacheHitRate < 60) {
       recommendations.push(
         `Cache hit rate is ${cacheHitRate.toFixed(1)}% - implement more aggressive caching for frequently accessed data`
@@ -222,14 +253,21 @@ class FirestorePerformanceOptimizer {
     }
 
     // Specific pattern recommendations
-    const userChartQueries = patterns.filter(p => p.query.includes('user_charts'));
-    if (userChartQueries.length > 0 && userChartQueries.some(q => q.cacheability === 'low')) {
+    const userChartQueries = patterns.filter(p =>
+      p.query.includes('user_charts')
+    );
+    if (
+      userChartQueries.length > 0 &&
+      userChartQueries.some(q => q.cacheability === 'low')
+    ) {
       recommendations.push(
         'User chart queries should be cached aggressively - implement local storage with TTL'
       );
     }
 
-    const ephemerisQueries = patterns.filter(p => p.query.includes('ephemeris'));
+    const ephemerisQueries = patterns.filter(p =>
+      p.query.includes('ephemeris')
+    );
     if (ephemerisQueries.length > 0) {
       recommendations.push(
         'Ephemeris queries are frequent - implement daily batch caching for planetary positions'
@@ -253,7 +291,7 @@ class FirestorePerformanceOptimizer {
     const total = this.cacheStats.hits + this.cacheStats.misses;
     return {
       ...this.cacheStats,
-      hitRate: total > 0 ? (this.cacheStats.hits / total) * 100 : 0
+      hitRate: total > 0 ? (this.cacheStats.hits / total) * 100 : 0,
     };
   }
 
@@ -278,7 +316,9 @@ class FirestorePerformanceOptimizer {
     devConsole.log?.(`Total queries: ${analysis.metrics.queryCount}`);
     devConsole.log?.(`Total reads: ${analysis.metrics.totalReads}`);
     devConsole.log?.(`Cache hits: ${analysis.metrics.cacheHits}`);
-    devConsole.log?.(`Average latency: ${analysis.metrics.averageLatency.toFixed(1)}ms`);
+    devConsole.log?.(
+      `Average latency: ${analysis.metrics.averageLatency.toFixed(1)}ms`
+    );
 
     if (analysis.metrics.hotspotQueries.length > 0) {
       devConsole.log?.('\n🔥 Hotspot queries:');
@@ -297,7 +337,9 @@ class FirestorePerformanceOptimizer {
     if (analysis.optimizations.length > 0) {
       devConsole.log?.('\n⚡ Optimization opportunities:');
       analysis.optimizations.forEach(opt => {
-        devConsole.log?.(`  • ${opt.improvement} (Save ~${opt.estimatedSavings} reads)`);
+        devConsole.log?.(
+          `  • ${opt.improvement} (Save ~${opt.estimatedSavings} reads)`
+        );
       });
     }
   }
@@ -316,26 +358,26 @@ export function withFirestoreTracking<TArgs extends unknown[], TResult>(
 ): (...args: TArgs) => Promise<TResult> {
   return async (...args: TArgs): Promise<TResult> => {
     const startTime = performance.now();
-    
+
     try {
       const result = await fn(...args);
       const endTime = performance.now();
       const latency = endTime - startTime;
-      
+
       // Extract read count from result if possible
       const readCount = readCountExtractor ? readCountExtractor(result) : 1;
-      
+
       // Track the operation
       firestoreOptimizer.trackRead(querySignature, readCount, latency, false);
-      
+
       return result;
     } catch (error) {
       const endTime = performance.now();
       const latency = endTime - startTime;
-      
+
       // Track failed operations too
       firestoreOptimizer.trackRead(querySignature, 0, latency, false);
-      
+
       throw error;
     }
   };
@@ -374,25 +416,33 @@ export class OptimizedFirestoreQuery {
       executor,
       () => this.estimatedReads
     );
-    
+
     return wrappedExecutor();
   }
 
   getOptimizationSuggestions(): string[] {
     const suggestions: string[] = [];
-    
-    if (this.querySignature.includes('where_') && this.querySignature.includes('order_by')) {
+
+    if (
+      this.querySignature.includes('where_') &&
+      this.querySignature.includes('order_by')
+    ) {
       suggestions.push('Consider creating a composite index for this query');
     }
-    
+
     if (!this.querySignature.includes('limit_') && this.estimatedReads > 25) {
       suggestions.push('Consider adding a limit to reduce read count');
     }
-    
-    if (this.querySignature.includes('user_charts') || this.querySignature.includes('interpretations')) {
-      suggestions.push('This query result is highly cacheable - implement local caching');
+
+    if (
+      this.querySignature.includes('user_charts') ||
+      this.querySignature.includes('interpretations')
+    ) {
+      suggestions.push(
+        'This query result is highly cacheable - implement local caching'
+      );
     }
-    
+
     return suggestions;
   }
 }

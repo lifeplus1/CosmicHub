@@ -23,13 +23,14 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
     const [selectedKey, setSelectedKey] = useState<GeneKey | null>(null);
     const { toast } = useToast();
 
-  const handleCalculate = useCallback(async () => {
-    if (birthData == null) {
-      return;
-    }
+    const handleCalculate = useCallback(async () => {
+      if (birthData == null) {
+        return;
+      }
 
-    setLoading(true);
-    setError(null);      try {
+      setLoading(true);
+      setError(null);
+      try {
         const result: ApiResult<GeneKeysData> =
           await calculateGeneKeys(birthData);
         if (result.success) {
@@ -98,24 +99,25 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
               <div className='w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full opacity-60 animate-pulse'></div>
             </div>
           </div>
-          
+
           {/* Progressive loading message */}
           <div className='space-y-2'>
             <p className='text-lg font-medium text-cosmic-silver'>
               Calculating your Gene Keys profile...
             </p>
             <p className='text-sm text-cosmic-silver/70 max-w-md mx-auto'>
-              Analyzing your birth chart to determine your genetic blueprint and higher purpose
+              Analyzing your birth chart to determine your genetic blueprint and
+              higher purpose
             </p>
           </div>
-          
+
           {/* Loading progress dots */}
           <div className='flex justify-center space-x-2'>
             <div className='w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0ms]'></div>
             <div className='w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:150ms]'></div>
             <div className='w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:300ms]'></div>
           </div>
-          
+
           {/* Estimated time */}
           <div className='text-xs text-cosmic-silver/50'>
             This usually takes 15-30 seconds
@@ -132,14 +134,15 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
         if (error.toLowerCase().includes('validation')) return '⚠️';
         return '❌';
       };
-      
+
       const getErrorType = () => {
         if (error.toLowerCase().includes('network')) return 'Connection Error';
         if (error.toLowerCase().includes('timeout')) return 'Timeout Error';
-        if (error.toLowerCase().includes('validation')) return 'Data Validation Error';
+        if (error.toLowerCase().includes('validation'))
+          return 'Data Validation Error';
         return 'Calculation Error';
       };
-      
+
       const getErrorSuggestion = () => {
         if (error.toLowerCase().includes('network')) {
           return 'Please check your internet connection and try again.';
@@ -152,15 +155,13 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
         }
         return 'An unexpected error occurred. Please try again.';
       };
-      
+
       return (
         <div className='p-6 border border-red-500/30 rounded-lg bg-red-900/10 backdrop-blur-sm'>
           <div className='flex items-start gap-4'>
             {/* Error icon */}
-            <div className='flex-shrink-0 text-2xl'>
-              {getErrorIcon()}
-            </div>
-            
+            <div className='flex-shrink-0 text-2xl'>{getErrorIcon()}</div>
+
             {/* Error content */}
             <div className='flex-1 space-y-3'>
               <div className='space-y-1'>
@@ -171,7 +172,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
                   {getErrorSuggestion()}
                 </p>
               </div>
-              
+
               {/* Technical error message */}
               <details className='text-xs'>
                 <summary className='cursor-pointer text-red-300/80 hover:text-red-300'>
@@ -181,7 +182,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
                   {error}
                 </div>
               </details>
-              
+
               {/* Action buttons */}
               <div className='flex flex-wrap gap-2 pt-2'>
                 <button
@@ -194,7 +195,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
                 >
                   🔄 Try Again
                 </button>
-                
+
                 <button
                   type='button'
                   onClick={() => setError(null)}
@@ -217,51 +218,64 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
           <div className='mx-auto w-20 h-20 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center'>
             <div className='text-3xl'>🗝️</div>
           </div>
-          
+
           {/* Empty state content */}
           <div className='space-y-3'>
             <h3 className='text-xl font-semibold text-cosmic-gold'>
               Discover Your Gene Keys
             </h3>
             <p className='text-cosmic-silver/80 max-w-md mx-auto'>
-              Enter your birth information to calculate your Gene Keys profile and unlock insights into your genetic blueprint and higher purpose
+              Enter your birth information to calculate your Gene Keys profile
+              and unlock insights into your genetic blueprint and higher purpose
             </p>
           </div>
-          
+
           {/* Call to action */}
           {typeof onCalculate === 'function' && (
             <div className='space-y-3'>
-              <button 
-                className='cosmic-button px-6 py-3 text-base font-medium' 
+              <button
+                className='cosmic-button px-6 py-3 text-base font-medium'
                 onClick={handleEmptyCalculate}
               >
                 ✨ Calculate Gene Keys
               </button>
-              
+
               <p className='text-xs text-cosmic-silver/50'>
                 Uses sample data for demonstration
               </p>
             </div>
           )}
-          
+
           {/* Benefits preview */}
           <div className='mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto'>
             <div className='p-3 bg-cosmic-dark/30 rounded-lg border border-cosmic-silver/10'>
               <div className='text-lg mb-1'>🧬</div>
-              <div className='text-sm font-medium text-cosmic-silver'>Genetic Blueprint</div>
-              <div className='text-xs text-cosmic-silver/60'>Your core essence</div>
+              <div className='text-sm font-medium text-cosmic-silver'>
+                Genetic Blueprint
+              </div>
+              <div className='text-xs text-cosmic-silver/60'>
+                Your core essence
+              </div>
             </div>
-            
+
             <div className='p-3 bg-cosmic-dark/30 rounded-lg border border-cosmic-silver/10'>
               <div className='text-lg mb-1'>🎯</div>
-              <div className='text-sm font-medium text-cosmic-silver'>Life Purpose</div>
-              <div className='text-xs text-cosmic-silver/60'>Your highest calling</div>
+              <div className='text-sm font-medium text-cosmic-silver'>
+                Life Purpose
+              </div>
+              <div className='text-xs text-cosmic-silver/60'>
+                Your highest calling
+              </div>
             </div>
-            
+
             <div className='p-3 bg-cosmic-dark/30 rounded-lg border border-cosmic-silver/10'>
               <div className='text-lg mb-1'>💎</div>
-              <div className='text-sm font-medium text-cosmic-silver'>Hidden Gifts</div>
-              <div className='text-xs text-cosmic-silver/60'>Your unique talents</div>
+              <div className='text-sm font-medium text-cosmic-silver'>
+                Hidden Gifts
+              </div>
+              <div className='text-xs text-cosmic-silver/60'>
+                Your unique talents
+              </div>
             </div>
           </div>
         </div>

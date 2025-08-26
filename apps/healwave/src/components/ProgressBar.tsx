@@ -37,12 +37,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   return (
     <div className={cn('space-y-1', className)}>
       {showPercentage && (
-        <div className="flex justify-between text-sm text-white/70">
+        <div className='flex justify-between text-sm text-white/70'>
           <span>Progress</span>
           <span>{clampedPercentage}%</span>
         </div>
       )}
-      
+
       <Progress.Root
         className={cn(
           'relative overflow-hidden bg-white/10 rounded-full',

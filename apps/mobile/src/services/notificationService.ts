@@ -3,13 +3,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
-  handleNotification: () => Promise.resolve({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: () =>
+    Promise.resolve({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
 });
 
 export interface NotificationPreferences {
@@ -78,7 +79,10 @@ export class NotificationService {
    */
   private async savePreferences(): Promise<void> {
     try {
-      await AsyncStorage.setItem('notification_preferences', JSON.stringify(this.preferences));
+      await AsyncStorage.setItem(
+        'notification_preferences',
+        JSON.stringify(this.preferences)
+      );
     } catch (error) {
       console.error('Failed to save notification preferences:', error);
     }
@@ -94,7 +98,7 @@ export class NotificationService {
     data?: Record<string, unknown>
   ): Promise<string> {
     const trigger = triggerDate ? null : null; // Use null for immediate, or configure properly
-    
+
     return await Notifications.scheduleNotificationAsync({
       content: {
         title,
@@ -145,7 +149,9 @@ export class NotificationService {
   /**
    * Update notification preferences
    */
-  async updatePreferences(newPreferences: Partial<NotificationPreferences>): Promise<void> {
+  async updatePreferences(
+    newPreferences: Partial<NotificationPreferences>
+  ): Promise<void> {
     this.preferences = { ...this.preferences, ...newPreferences };
     await this.savePreferences();
   }

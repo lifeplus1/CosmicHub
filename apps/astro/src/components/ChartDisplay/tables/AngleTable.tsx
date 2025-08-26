@@ -32,22 +32,22 @@ const AngleTable: React.FC<{ data: AngleRow[] }> = ({ data }) => {
           <TableRow key={`angle-${item.name}-${index}`}>
             <TableCell className='font-medium'>
               <span className='flex items-center gap-2'>
-                <AstroSymbol 
+                <AstroSymbol
                   symbol={getPlanetSymbol(item.name)}
-                  size="md"
+                  size='md'
                   title={item.name}
-                  className="text-cosmic-gold"
+                  className='text-cosmic-gold'
                 />
                 <span>{item.name}</span>
               </span>
             </TableCell>
             <TableCell>
               <span className='text-cosmic-gold font-medium flex items-center gap-2'>
-                <AstroSymbol 
+                <AstroSymbol
                   symbol={getSignSymbol(item.sign)}
-                  size="md"
+                  size='md'
                   title={item.sign}
-                  className="text-cosmic-gold"
+                  className='text-cosmic-gold'
                 />
                 <span>{item.sign}</span>
               </span>

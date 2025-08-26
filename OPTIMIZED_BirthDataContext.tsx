@@ -71,7 +71,7 @@ const debouncedSave = (key: string, data: ChartBirthData | null) => {
   if (saveTimeoutId) {
     clearTimeout(saveTimeoutId);
   }
-  
+
   saveTimeoutId = setTimeout(() => {
     try {
       if (data !== null && data !== undefined) {
@@ -125,13 +125,16 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({
   }, [setBirthData]);
 
   // Memoized context value - prevents unnecessary re-renders
-  const contextValue = useMemo<BirthDataContextType>(() => ({
-    birthData,
-    setBirthData,
-    clearBirthData,
-    isDataValid,
-    lastUpdated,
-  }), [birthData, setBirthData, clearBirthData, isDataValid, lastUpdated]);
+  const contextValue = useMemo<BirthDataContextType>(
+    () => ({
+      birthData,
+      setBirthData,
+      clearBirthData,
+      isDataValid,
+      lastUpdated,
+    }),
+    [birthData, setBirthData, clearBirthData, isDataValid, lastUpdated]
+  );
 
   return (
     <BirthDataContext.Provider value={contextValue}>

@@ -1,6 +1,6 @@
 /**
  * useAIInterpretationManager Hook - Comprehensive AI Interpretation Management
- * 
+ *
  * Provides enterprise-grade AI interpretation management with:
  * - Multi-level caching (memory, IndexedDB, server)
  * - Complex state normalization from different sources
@@ -8,7 +8,7 @@
  * - Advanced error recovery and fallback mechanisms
  * - Cross-component state management
  * - Performance monitoring and optimization
- * 
+ *
  * This hook consolidates all AI interpretation logic that was previously
  * scattered across components and provides a unified management interface.
  */
@@ -19,7 +19,12 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 export interface AIInterpretationRequest {
   chartId: string;
   userId: string;
-  interpretationType: 'general' | 'personality' | 'career' | 'relationships' | 'advanced';
+  interpretationType:
+    | 'general'
+    | 'personality'
+    | 'career'
+    | 'relationships'
+    | 'advanced';
   chartData?: Record<string, unknown>;
   userPreferences?: Record<string, unknown>;
   priority?: 'low' | 'normal' | 'high';
@@ -120,18 +125,20 @@ export function useAIInterpretationManager(
     const initIndexedDB = async () => {
       try {
         const request = indexedDB.open('CosmicHubInterpretations', 1);
-        
-        request.onupgradeneeded = (event) => {
+
+        request.onupgradeneeded = event => {
           const db = (event.target as IDBOpenDBRequest).result;
           if (!db.objectStoreNames.contains('interpretations')) {
-            const store = db.createObjectStore('interpretations', { keyPath: 'id' });
+            const store = db.createObjectStore('interpretations', {
+              keyPath: 'id',
+            });
             store.createIndex('chartId', 'chartId', { unique: false });
             store.createIndex('userId', 'userId', { unique: false });
             store.createIndex('createdAt', 'createdAt', { unique: false });
           }
         };
 
-        request.onsuccess = (event) => {
+        request.onsuccess = event => {
           const db = (event.target as IDBOpenDBRequest).result;
           setState(prev => ({
             ...prev,
@@ -155,160 +162,177 @@ export function useAIInterpretationManager(
     return `interpretation:${request.chartId}:${request.userId}:${request.interpretationType}`;
   }, []);
 
-  const getCachedInterpretation = useCallback(async (
-    request: AIInterpretationRequest
-  ): Promise<AIInterpretation | null> => {
-    if (!enableCache) return null;
+  const getCachedInterpretation = useCallback(
+    async (
+      request: AIInterpretationRequest
+    ): Promise<AIInterpretation | null> => {
+      if (!enableCache) return null;
 
-    const key = cacheKey(request);
+      const key = cacheKey(request);
 
-    // Check memory cache first
-    const memoryHit = state.cache.memory.get(key);
-    if (memoryHit) {
-      performanceRef.current.cacheHits++;
-      return memoryHit;
-    }
-
-    // Check server cache
-    const serverHit = state.cache.serverCache.get(key);
-    if (serverHit && serverHit.expiry > Date.now()) {
-      performanceRef.current.cacheHits++;
-      // Promote to memory cache
-      state.cache.memory.set(key, serverHit.data);
-      return serverHit.data;
-    }
-
-    // Check IndexedDB cache
-    if (state.cache.indexedDB && enableIndexedDB) {
-      try {
-        const transaction = state.cache.indexedDB.transaction(['interpretations'], 'readonly');
-        const store = transaction.objectStore('interpretations');
-        const dbRequest = store.get(key);
-        
-        return new Promise((resolve) => {
-          dbRequest.onsuccess = () => {
-            if (dbRequest.result) {
-              performanceRef.current.cacheHits++;
-              // Promote to memory cache
-              state.cache.memory.set(key, dbRequest.result);
-              resolve(dbRequest.result);
-            } else {
-              resolve(null);
-            }
-          };
-          dbRequest.onerror = () => resolve(null);
-        });
-      } catch (error) {
-        console.warn('IndexedDB cache read failed:', error);
+      // Check memory cache first
+      const memoryHit = state.cache.memory.get(key);
+      if (memoryHit) {
+        performanceRef.current.cacheHits++;
+        return memoryHit;
       }
-    }
 
-    return null;
-  }, [enableCache, enableIndexedDB, state.cache, cacheKey]);
-
-  const setCachedInterpretation = useCallback(async (
-    request: AIInterpretationRequest,
-    interpretation: AIInterpretation
-  ): Promise<void> => {
-    if (!enableCache) return;
-
-    const key = cacheKey(request);
-
-    // Set memory cache
-    state.cache.memory.set(key, interpretation);
-
-    // Set server cache with expiry
-    state.cache.serverCache.set(key, {
-      data: interpretation,
-      expiry: Date.now() + cacheExpiry,
-    });
-
-    // Set IndexedDB cache
-    if (state.cache.indexedDB && enableIndexedDB) {
-      try {
-        const transaction = state.cache.indexedDB.transaction(['interpretations'], 'readwrite');
-        const store = transaction.objectStore('interpretations');
-        store.put({ ...interpretation, cacheKey: key });
-      } catch (error) {
-        console.warn('IndexedDB cache write failed:', error);
+      // Check server cache
+      const serverHit = state.cache.serverCache.get(key);
+      if (serverHit && serverHit.expiry > Date.now()) {
+        performanceRef.current.cacheHits++;
+        // Promote to memory cache
+        state.cache.memory.set(key, serverHit.data);
+        return serverHit.data;
       }
-    }
-  }, [enableCache, enableIndexedDB, state.cache, cacheKey, cacheExpiry]);
 
-  // API call utilities
-  const callInterpretationAPI = useCallback(async (
-    request: AIInterpretationRequest
-  ): Promise<AIInterpretation> => {
-    const startTime = Date.now();
-    performanceRef.current.totalRequests++;
+      // Check IndexedDB cache
+      if (state.cache.indexedDB && enableIndexedDB) {
+        try {
+          const transaction = state.cache.indexedDB.transaction(
+            ['interpretations'],
+            'readonly'
+          );
+          const store = transaction.objectStore('interpretations');
+          const dbRequest = store.get(key);
 
-    try {
-      // Try primary API endpoint
-      const response = await fetch('/api/interpretations/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chartId: request.chartId,
-          userId: request.userId,
-          type: request.interpretationType,
-          chartData: request.chartData,
-          userPreferences: request.userPreferences,
-        }),
+          return new Promise(resolve => {
+            dbRequest.onsuccess = () => {
+              if (dbRequest.result) {
+                performanceRef.current.cacheHits++;
+                // Promote to memory cache
+                state.cache.memory.set(key, dbRequest.result);
+                resolve(dbRequest.result);
+              } else {
+                resolve(null);
+              }
+            };
+            dbRequest.onerror = () => resolve(null);
+          });
+        } catch (error) {
+          console.warn('IndexedDB cache read failed:', error);
+        }
+      }
+
+      return null;
+    },
+    [enableCache, enableIndexedDB, state.cache, cacheKey]
+  );
+
+  const setCachedInterpretation = useCallback(
+    async (
+      request: AIInterpretationRequest,
+      interpretation: AIInterpretation
+    ): Promise<void> => {
+      if (!enableCache) return;
+
+      const key = cacheKey(request);
+
+      // Set memory cache
+      state.cache.memory.set(key, interpretation);
+
+      // Set server cache with expiry
+      state.cache.serverCache.set(key, {
+        data: interpretation,
+        expiry: Date.now() + cacheExpiry,
       });
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      // Set IndexedDB cache
+      if (state.cache.indexedDB && enableIndexedDB) {
+        try {
+          const transaction = state.cache.indexedDB.transaction(
+            ['interpretations'],
+            'readwrite'
+          );
+          const store = transaction.objectStore('interpretations');
+          store.put({ ...interpretation, cacheKey: key });
+        } catch (error) {
+          console.warn('IndexedDB cache write failed:', error);
+        }
       }
+    },
+    [enableCache, enableIndexedDB, state.cache, cacheKey, cacheExpiry]
+  );
 
-      const data = await response.json();
-      
-      if (!data.success || !data.data || data.data.length === 0) {
-        throw new Error('Invalid API response format');
-      }
+  // API call utilities
+  const callInterpretationAPI = useCallback(
+    async (request: AIInterpretationRequest): Promise<AIInterpretation> => {
+      const startTime = Date.now();
+      performanceRef.current.totalRequests++;
 
-      const interpretation = data.data[0] as AIInterpretation;
-      
-      // Record performance metrics
-      const responseTime = Date.now() - startTime;
-      performanceRef.current.responseTimes.push(responseTime);
-      
-      // Keep only last 100 response times for average calculation
-      if (performanceRef.current.responseTimes.length > 100) {
-        performanceRef.current.responseTimes.shift();
-      }
+      try {
+        // Try primary API endpoint
+        const response = await fetch('/api/interpretations/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chartId: request.chartId,
+            userId: request.userId,
+            type: request.interpretationType,
+            chartData: request.chartData,
+            userPreferences: request.userPreferences,
+          }),
+        });
 
-      return interpretation;
-    } catch (error) {
-      performanceRef.current.errors++;
-      
-      if (fallbackToMock) {
-        // Fallback to mock interpretation
-        const mockInterpretation: AIInterpretation = {
-          id: `mock-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          chartId: request.chartId,
-          userId: request.userId,
-          type: request.interpretationType,
-          title: `${request.interpretationType.charAt(0).toUpperCase() + request.interpretationType.slice(1)} Interpretation`,
-          content: generateMockInterpretationContent(request.interpretationType),
-          summary: `A comprehensive ${request.interpretationType} analysis based on your birth chart.`,
-          confidence: 0.75,
-          tags: [request.interpretationType, 'generated', 'fallback'],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          metadata: { source: 'mock', fallback: true },
-        };
+        if (!response.ok) {
+          throw new Error(
+            `API request failed: ${response.status} ${response.statusText}`
+          );
+        }
 
+        const data = await response.json();
+
+        if (!data.success || !data.data || data.data.length === 0) {
+          throw new Error('Invalid API response format');
+        }
+
+        const interpretation = data.data[0] as AIInterpretation;
+
+        // Record performance metrics
         const responseTime = Date.now() - startTime;
         performanceRef.current.responseTimes.push(responseTime);
-        
-        return mockInterpretation;
-      }
 
-      throw error;
-    }
-  }, [fallbackToMock]);
+        // Keep only last 100 response times for average calculation
+        if (performanceRef.current.responseTimes.length > 100) {
+          performanceRef.current.responseTimes.shift();
+        }
+
+        return interpretation;
+      } catch (error) {
+        performanceRef.current.errors++;
+
+        if (fallbackToMock) {
+          // Fallback to mock interpretation
+          const mockInterpretation: AIInterpretation = {
+            id: `mock-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            chartId: request.chartId,
+            userId: request.userId,
+            type: request.interpretationType,
+            title: `${request.interpretationType.charAt(0).toUpperCase() + request.interpretationType.slice(1)} Interpretation`,
+            content: generateMockInterpretationContent(
+              request.interpretationType
+            ),
+            summary: `A comprehensive ${request.interpretationType} analysis based on your birth chart.`,
+            confidence: 0.75,
+            tags: [request.interpretationType, 'generated', 'fallback'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            metadata: { source: 'mock', fallback: true },
+          };
+
+          const responseTime = Date.now() - startTime;
+          performanceRef.current.responseTimes.push(responseTime);
+
+          return mockInterpretation;
+        }
+
+        throw error;
+      }
+    },
+    [fallbackToMock]
+  );
 
   // Queue processing
   const processQueue = useCallback(async (): Promise<void> => {
@@ -322,7 +346,7 @@ export function useAIInterpretationManager(
         setState(prev => ({ ...prev, processingQueue: false }));
         return;
       }
-      
+
       // Check cache first
       const cachedResult = await getCachedInterpretation(request);
       if (cachedResult) {
@@ -337,7 +361,7 @@ export function useAIInterpretationManager(
 
       // Call API
       const result = await callInterpretationAPI(request);
-      
+
       // Cache the result
       await setCachedInterpretation(request, result);
 
@@ -351,10 +375,10 @@ export function useAIInterpretationManager(
 
       // Process next item in queue
       setTimeout(() => void processQueue(), 100);
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
       setState(prev => ({
         ...prev,
         queue: prev.queue.slice(1),
@@ -362,7 +386,13 @@ export function useAIInterpretationManager(
         error: errorMessage,
       }));
     }
-  }, [state.processingQueue, state.queue, getCachedInterpretation, callInterpretationAPI, setCachedInterpretation]);
+  }, [
+    state.processingQueue,
+    state.queue,
+    getCachedInterpretation,
+    callInterpretationAPI,
+    setCachedInterpretation,
+  ]);
 
   // Auto-process queue when items are added
   useEffect(() => {
@@ -372,29 +402,38 @@ export function useAIInterpretationManager(
   }, [state.queue, state.processingQueue, processQueue]);
 
   // Public API methods
-  const requestInterpretation = useCallback((request: AIInterpretationRequest): void => {
-    if (state.queue.length >= maxQueueSize) {
+  const requestInterpretation = useCallback(
+    (request: AIInterpretationRequest): void => {
+      if (state.queue.length >= maxQueueSize) {
+        setState(prev => ({
+          ...prev,
+          error: `Queue is full (max ${maxQueueSize} items). Please wait for current requests to complete.`,
+        }));
+        return;
+      }
+
       setState(prev => ({
         ...prev,
-        error: `Queue is full (max ${maxQueueSize} items). Please wait for current requests to complete.`,
+        queue: [...prev.queue, request],
+        error: null,
       }));
-      return;
-    }
+    },
+    [state.queue.length, maxQueueSize]
+  );
 
-    setState(prev => ({
-      ...prev,
-      queue: [...prev.queue, request],
-      error: null,
-    }));
-  }, [state.queue.length, maxQueueSize]);
+  const getInterpretationById = useCallback(
+    (id: string): AIInterpretation | null => {
+      return state.interpretations.find(interp => interp.id === id) || null;
+    },
+    [state.interpretations]
+  );
 
-  const getInterpretationById = useCallback((id: string): AIInterpretation | null => {
-    return state.interpretations.find(interp => interp.id === id) || null;
-  }, [state.interpretations]);
-
-  const getInterpretationsByChart = useCallback((chartId: string): AIInterpretation[] => {
-    return state.interpretations.filter(interp => interp.chartId === chartId);
-  }, [state.interpretations]);
+  const getInterpretationsByChart = useCallback(
+    (chartId: string): AIInterpretation[] => {
+      return state.interpretations.filter(interp => interp.chartId === chartId);
+    },
+    [state.interpretations]
+  );
 
   const clearInterpretations = useCallback((): void => {
     setState(prev => ({
@@ -402,7 +441,7 @@ export function useAIInterpretationManager(
       interpretations: [],
       error: null,
     }));
-    
+
     // Clear caches
     if (enableCache) {
       state.cache.memory.clear();
@@ -414,11 +453,14 @@ export function useAIInterpretationManager(
     if (enableCache) {
       state.cache.memory.clear();
       state.cache.serverCache.clear();
-      
+
       // Clear IndexedDB cache
       if (state.cache.indexedDB && enableIndexedDB) {
         try {
-          const transaction = state.cache.indexedDB.transaction(['interpretations'], 'readwrite');
+          const transaction = state.cache.indexedDB.transaction(
+            ['interpretations'],
+            'readwrite'
+          );
           const store = transaction.objectStore('interpretations');
           store.clear();
         } catch (error) {
@@ -430,14 +472,18 @@ export function useAIInterpretationManager(
 
   // Performance metrics calculation
   const performanceMetrics = useMemo(() => {
-    const { totalRequests, cacheHits, responseTimes, errors } = performanceRef.current;
-    
-    const averageResponseTime = responseTimes.length > 0
-      ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
-      : 0;
-    
+    const { totalRequests, cacheHits, responseTimes, errors } =
+      performanceRef.current;
+
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) /
+          responseTimes.length
+        : 0;
+
     const errorRate = totalRequests > 0 ? (errors / totalRequests) * 100 : 0;
-    const cacheHitRate = totalRequests > 0 ? (cacheHits / totalRequests) * 100 : 0;
+    const cacheHitRate =
+      totalRequests > 0 ? (cacheHits / totalRequests) * 100 : 0;
 
     return {
       totalRequests,
@@ -478,11 +524,16 @@ export function useAIInterpretationManager(
 // Helper function to generate mock interpretation content
 function generateMockInterpretationContent(type: string): string {
   const mockContent = {
-    general: 'Your birth chart reveals a unique cosmic blueprint with powerful planetary influences that shape your personality and life path. The positions of celestial bodies at your birth create a fascinating narrative of potential and growth.',
-    personality: 'Your personality profile shows a complex blend of traits influenced by your planetary placements. You possess natural leadership qualities combined with deep empathy and intuitive understanding of others.',
-    career: 'Career-wise, your astrological profile indicates excellent potential in fields that involve creativity, communication, or helping others. Your planetary alignments suggest you thrive in roles that allow independence and innovation.',
-    relationships: 'In relationships, your birth chart reveals someone who values deep, meaningful connections. Your Venus and Mars placements suggest you are both passionate and nurturing in romantic partnerships.',
-    advanced: 'This advanced interpretation combines multiple astrological techniques to provide deep insights into your soul\'s purpose, karmic patterns, and evolutionary path. Your chart shows significant spiritual gifts and transformative potential.',
+    general:
+      'Your birth chart reveals a unique cosmic blueprint with powerful planetary influences that shape your personality and life path. The positions of celestial bodies at your birth create a fascinating narrative of potential and growth.',
+    personality:
+      'Your personality profile shows a complex blend of traits influenced by your planetary placements. You possess natural leadership qualities combined with deep empathy and intuitive understanding of others.',
+    career:
+      'Career-wise, your astrological profile indicates excellent potential in fields that involve creativity, communication, or helping others. Your planetary alignments suggest you thrive in roles that allow independence and innovation.',
+    relationships:
+      'In relationships, your birth chart reveals someone who values deep, meaningful connections. Your Venus and Mars placements suggest you are both passionate and nurturing in romantic partnerships.',
+    advanced:
+      "This advanced interpretation combines multiple astrological techniques to provide deep insights into your soul's purpose, karmic patterns, and evolutionary path. Your chart shows significant spiritual gifts and transformative potential.",
   };
 
   return mockContent[type as keyof typeof mockContent] || mockContent.general;

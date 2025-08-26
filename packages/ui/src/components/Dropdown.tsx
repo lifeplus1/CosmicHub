@@ -65,16 +65,22 @@ export const Dropdown: React.FC<DropdownProps> = ({
     }
   };
 
-  const baseClasses = 'w-full px-3 py-2 text-left rounded-md border text-sm ring-offset-cosmic-dark focus:outline-none focus:ring-2 focus:ring-cosmic-purple focus:ring-offset-2 transition-colors';
-  const errorClasses = error 
-    ? 'border-red-500 bg-cosmic-dark text-cosmic-silver' 
+  const baseClasses =
+    'w-full px-3 py-2 text-left rounded-md border text-sm ring-offset-cosmic-dark focus:outline-none focus:ring-2 focus:ring-cosmic-purple focus:ring-offset-2 transition-colors';
+  const errorClasses = error
+    ? 'border-red-500 bg-cosmic-dark text-cosmic-silver'
     : 'border-cosmic-purple/30 bg-cosmic-dark text-cosmic-silver hover:border-cosmic-purple/50';
-  const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+  const disabledClasses = disabled
+    ? 'opacity-50 cursor-not-allowed'
+    : 'cursor-pointer';
 
   return (
     <div className={`space-y-1 ${className}`}>
       {label && (
-        <label htmlFor={labelId} className='block text-sm font-medium text-cosmic-silver'>
+        <label
+          htmlFor={labelId}
+          className='block text-sm font-medium text-cosmic-silver'
+        >
           {label}
         </label>
       )}
@@ -87,11 +93,17 @@ export const Dropdown: React.FC<DropdownProps> = ({
           onKeyDown={handleKeyDown}
           disabled={disabled}
           aria-haspopup='listbox'
-          {...(isOpen ? { 'aria-expanded': 'true' } : { 'aria-expanded': 'false' })}
+          {...(isOpen
+            ? { 'aria-expanded': 'true' }
+            : { 'aria-expanded': 'false' })}
           aria-labelledby={labelId}
           aria-controls={listboxId}
         >
-          <span className={selectedOption ? 'text-cosmic-silver' : 'text-cosmic-silver/50'}>
+          <span
+            className={
+              selectedOption ? 'text-cosmic-silver' : 'text-cosmic-silver/50'
+            }
+          >
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <svg
@@ -100,7 +112,12 @@ export const Dropdown: React.FC<DropdownProps> = ({
             stroke='currentColor'
             viewBox='0 0 24 24'
           >
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M19 9l-7 7-7-7' />
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='2'
+              d='M19 9l-7 7-7-7'
+            />
           </svg>
         </button>
 
@@ -136,7 +153,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                         handleSelect(option.value);
                       }
                     }
-                  }
+                  },
                 };
 
                 if (selected) {
@@ -150,8 +167,16 @@ export const Dropdown: React.FC<DropdownProps> = ({
                     >
                       <div className='flex items-center justify-between'>
                         <span>{option.label}</span>
-                        <svg className='w-4 h-4 text-cosmic-gold' fill='currentColor' viewBox='0 0 20 20'>
-                          <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
+                        <svg
+                          className='w-4 h-4 text-cosmic-gold'
+                          fill='currentColor'
+                          viewBox='0 0 20 20'
+                        >
+                          <path
+                            fillRule='evenodd'
+                            d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                            clipRule='evenodd'
+                          />
                         </svg>
                       </div>
                     </li>

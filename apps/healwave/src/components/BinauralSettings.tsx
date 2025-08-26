@@ -549,7 +549,10 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
           </ul>
           <p className='mt-2 text-sm text-cyan-200/90'>
             Try our Astro app for astrology-tied frequencies!{' '}
-            <a href='/astro' className='text-cyan-400 hover:text-cyan-300 underline transition-colors'>
+            <a
+              href='/astro'
+              className='text-cyan-400 hover:text-cyan-300 underline transition-colors'
+            >
               Learn more
             </a>
           </p>

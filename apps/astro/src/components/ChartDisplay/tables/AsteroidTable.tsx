@@ -18,7 +18,7 @@ export interface AsteroidRow {
 
 const AsteroidTable: React.FC<{ data: AsteroidRow[] }> = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) return null;
-  
+
   return (
     <Table aria-describedby='asteroid-table-caption'>
       <caption id='asteroid-table-caption' className='sr-only'>
@@ -37,10 +37,7 @@ const AsteroidTable: React.FC<{ data: AsteroidRow[] }> = ({ data }) => {
           <TableRow key={`asteroid-${item.name}-${index}`}>
             <TableCell className='font-medium'>
               <span className='flex items-center gap-2'>
-                <span
-                  className='text-cosmic-gold text-lg'
-                  title={item.name}
-                >
+                <span className='text-cosmic-gold text-lg' title={item.name}>
                   {getAsteroidSymbol(item.name)}
                 </span>
                 <span>{item.name}</span>

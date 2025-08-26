@@ -9588,9 +9588,7 @@
     "totalQueries": 0,
     "averageLatency": 0,
     "cacheHitRate": 0,
-    "recommendations": [
-      "Enable Firestore performance tracking to see metrics"
-    ]
+    "recommendations": ["Enable Firestore performance tracking to see metrics"]
   },
   "concurrency": {
     "timestamp": "2025-08-26T15:11:31.702Z",
@@ -9598,18 +9596,14 @@
     "utilizationPercent": 0,
     "averageLatency": 0,
     "successRate": 100,
-    "recommendations": [
-      "Enable concurrency monitoring to see real metrics"
-    ]
+    "recommendations": ["Enable concurrency monitoring to see real metrics"]
   },
   "cache": {
     "timestamp": "2025-08-26T15:11:31.702Z",
     "memoryHitRate": 0,
     "diskHitRate": 0,
     "totalSize": 0,
-    "recommendations": [
-      "Enable enhanced caching to see performance metrics"
-    ]
+    "recommendations": ["Enable enhanced caching to see performance metrics"]
   },
   "summary": {
     "overallScore": 80,

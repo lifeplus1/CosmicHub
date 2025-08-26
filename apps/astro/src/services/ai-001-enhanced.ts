@@ -67,7 +67,12 @@ export interface ChartPattern {
 export interface AI001Request {
   chartData: any;
   userId: string;
-  analysisType: 'transits' | 'growth' | 'synthesis' | 'patterns' | 'comprehensive';
+  analysisType:
+    | 'transits'
+    | 'growth'
+    | 'synthesis'
+    | 'patterns'
+    | 'comprehensive';
   preferences?: {
     timeRange?: string;
     focusAreas?: string[];
@@ -160,9 +165,7 @@ export class AI001Service {
   }
 
   // 5. COMPREHENSIVE AI-001 ANALYSIS
-  static async generateComprehensiveAnalysis(
-    request: AI001Request
-  ): Promise<{
+  static async generateComprehensiveAnalysis(request: AI001Request): Promise<{
     transits: TransitPrediction[];
     growth: PersonalGrowthInsight[];
     synthesis: MultiSystemInterpretation;
@@ -254,7 +257,7 @@ Format as JSON array with structured transit objects.`;
 
   private static buildGrowthPrompt(chartData: any, goals?: string[]): string {
     const goalsText = goals?.length ? `Current goals: ${goals.join(', ')}` : '';
-    
+
     return `
 Provide personal growth coaching based on this astrological profile:
 
@@ -274,7 +277,10 @@ Analyze and provide:
 Focus on actionable, empowering guidance.`;
   }
 
-  private static buildSynthesisPrompt(chartData: any, systems: string[]): string {
+  private static buildSynthesisPrompt(
+    chartData: any,
+    systems: string[]
+  ): string {
     return `
 Synthesize astrological insights across multiple systems: ${systems.join(', ')}
 
@@ -292,8 +298,11 @@ Provide:
 Bridge traditional wisdom with modern understanding.`;
   }
 
-  private static buildPatternPrompt(chartData: any, historical?: any[]): string {
-    const historicalText = historical?.length 
+  private static buildPatternPrompt(
+    chartData: any,
+    historical?: any[]
+  ): string {
+    const historicalText = historical?.length
       ? `Historical patterns: ${JSON.stringify(historical, null, 2)}`
       : '';
 
@@ -325,7 +334,9 @@ Provide deep pattern recognition insights.`;
     return this.generateMockTransitPredictions({}, '12months');
   }
 
-  private static parseGrowthResponse(response: string): PersonalGrowthInsight[] {
+  private static parseGrowthResponse(
+    response: string
+  ): PersonalGrowthInsight[] {
     return this.generateMockGrowthInsights({});
   }
 
@@ -406,7 +417,9 @@ Provide deep pattern recognition insights.`;
     ];
   }
 
-  private static generateMockGrowthInsights(chartData: any): PersonalGrowthInsight[] {
+  private static generateMockGrowthInsights(
+    chartData: any
+  ): PersonalGrowthInsight[] {
     return [
       {
         id: 'growth-1',
@@ -454,7 +467,8 @@ Provide deep pattern recognition insights.`;
     return {
       id: 'synthesis-1',
       systems: systems as any,
-      synthesis: 'Your chart reveals a fascinating blend of Eastern and Western astrological wisdom, highlighting your role as a bridge between different philosophical approaches to life.',
+      synthesis:
+        'Your chart reveals a fascinating blend of Eastern and Western astrological wisdom, highlighting your role as a bridge between different philosophical approaches to life.',
       commonThemes: [
         'Strong leadership potential',
         'Deep intuitive abilities',
@@ -470,7 +484,8 @@ Provide deep pattern recognition insights.`;
         'Timing of major life events varies between systems',
         'Different emphasis on material vs spiritual success',
       ],
-      integratedGuidance: 'Your path involves integrating personal ambition with spiritual service, using your natural diplomatic abilities to create harmony in challenging situations.',
+      integratedGuidance:
+        'Your path involves integrating personal ambition with spiritual service, using your natural diplomatic abilities to create harmony in challenging situations.',
     };
   }
 
@@ -493,7 +508,12 @@ Provide deep pattern recognition insights.`;
         significance: 'Relationships are central to life purpose and growth',
         frequency: 0.08, // 8% of population
         evolutionStage: 'integrating',
-        lifeAreas: ['Partnerships', 'Public relations', 'Counseling', 'Diplomacy'],
+        lifeAreas: [
+          'Partnerships',
+          'Public relations',
+          'Counseling',
+          'Diplomacy',
+        ],
         activationPeriods: ['Age 24-28', 'Age 38-42', 'Age 52-56'],
       },
     ];
@@ -532,10 +552,14 @@ export const useAI001Analysis = (chartData: any, userId: string) => {
   });
 };
 
-export const useTransitPredictions = (chartData: any, timeRange = '12months') => {
+export const useTransitPredictions = (
+  chartData: any,
+  timeRange = '12months'
+) => {
   return useQuery({
     queryKey: ['ai001-transits', chartData?.id, timeRange],
-    queryFn: () => AI001Service.generateTransitPredictions(chartData, timeRange),
+    queryFn: () =>
+      AI001Service.generateTransitPredictions(chartData, timeRange),
     enabled: !!chartData,
     staleTime: 1000 * 60 * 60 * 12, // 12 hours
   });

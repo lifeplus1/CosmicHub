@@ -486,7 +486,9 @@ html {
   line-height: 1;
   display: inline-block;
   font-size: 1.2em;
-  font-feature-settings: "liga" on, "calt" on;
+  font-feature-settings:
+    'liga' on,
+    'calt' on;
 }
 
 .astro-symbol-sm {

@@ -132,16 +132,17 @@ class MobileApiService {
       // Import Firebase auth directly to avoid proxy issues
       const { getAuth, onAuthStateChanged } = await import('firebase/auth');
       const auth = getAuth();
-      
-      return new Promise((resolve) => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+
+      return new Promise(resolve => {
+        const unsubscribe = onAuthStateChanged(auth, user => {
           unsubscribe();
           if (user) {
-            user.getIdToken()
-              .then((token) => {
+            user
+              .getIdToken()
+              .then(token => {
                 resolve(token);
               })
-              .catch(async (error) => {
+              .catch(async error => {
                 const dc = await getDevConsole();
                 dc.warn?.('Failed to get ID token:', error);
                 resolve(null);
@@ -289,11 +290,14 @@ class MobileApiService {
     }
   }
 
-  async registerPushToken(token: string, deviceInfo: {
-    platform: 'ios' | 'android';
-    deviceId: string;
-    appVersion: string;
-  }): Promise<void> {
+  async registerPushToken(
+    token: string,
+    deviceInfo: {
+      platform: 'ios' | 'android';
+      deviceId: string;
+      appVersion: string;
+    }
+  ): Promise<void> {
     try {
       await axios.post(`${this.baseURL}/api/user/push-token`, {
         token,

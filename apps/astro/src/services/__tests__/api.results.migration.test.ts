@@ -12,8 +12,8 @@ vi.mock('axios', () => {
     create: vi.fn(() => ({
       interceptors: {
         request: { use: vi.fn() },
-        response: { use: vi.fn() }
-      }
+        response: { use: vi.fn() },
+      },
     })),
   };
   return { default: mockAxios };
@@ -39,7 +39,7 @@ vi.mock('@cosmichub/config/firebase', () => ({
 
 // Mock CSRF service
 vi.mock('../csrf', () => ({
-  getHeaders: vi.fn().mockResolvedValue({ 'X-CSRF-Token': 'mock-csrf-token' })
+  getHeaders: vi.fn().mockResolvedValue({ 'X-CSRF-Token': 'mock-csrf-token' }),
 }));
 
 // Helper to build axios response

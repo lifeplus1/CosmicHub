@@ -50,7 +50,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   // Memoized remove notification function (declared first to use in addNotification)
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(notif => notif.id !== id));
-    
+
     // Clear any pending timeout
     const timeoutId = timeoutRefs.current.get(id);
     if (timeoutId) {
@@ -60,41 +60,47 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   }, []);
 
   // Memoized add notification function
-  const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newNotification = { ...notification, id };
+  const addNotification = useCallback(
+    (notification: Omit<Notification, 'id'>) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const newNotification = { ...notification, id };
 
-    setNotifications(prev => [...prev, newNotification]);
+      setNotifications(prev => [...prev, newNotification]);
 
-    // Auto-remove notification after duration (default 5 seconds)
-    const duration = notification.duration ?? 5000;
-    if (duration > 0) {
-      const timeoutId = setTimeout(() => {
-        removeNotification(id);
-      }, duration);
-      
-      timeoutRefs.current.set(id, timeoutId);
-    }
+      // Auto-remove notification after duration (default 5 seconds)
+      const duration = notification.duration ?? 5000;
+      if (duration > 0) {
+        const timeoutId = setTimeout(() => {
+          removeNotification(id);
+        }, duration);
 
-    return id;
-  }, [removeNotification]);
+        timeoutRefs.current.set(id, timeoutId);
+      }
+
+      return id;
+    },
+    [removeNotification]
+  );
 
   // Memoized clear all function
   const clearAllNotifications = useCallback(() => {
     setNotifications([]);
-    
+
     // Clear all timeouts
     timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
     timeoutRefs.current.clear();
   }, []);
 
   // Memoized context value
-  const contextValue = useMemo<NotificationContextType>(() => ({
-    notifications,
-    addNotification,
-    removeNotification,
-    clearAllNotifications,
-  }), [notifications, addNotification, removeNotification, clearAllNotifications]);
+  const contextValue = useMemo<NotificationContextType>(
+    () => ({
+      notifications,
+      addNotification,
+      removeNotification,
+      clearAllNotifications,
+    }),
+    [notifications, addNotification, removeNotification, clearAllNotifications]
+  );
 
   return (
     <NotificationContext.Provider value={contextValue}>

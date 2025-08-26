@@ -122,37 +122,37 @@ function normalizeName(name: string): string {
 // Main symbol lookup functions
 export function getCelestialSymbol(name: string): string {
   if (!name) return '●';
-  
+
   const normalized = normalizeName(name);
   const symbol = CORE_CELESTIAL_SYMBOLS[normalized];
-  
+
   if (symbol) return symbol;
-  
+
   // Fallback for common variations
   const variations = [
     normalized.replace('node', ''),
     normalized.replace('lilith', ''),
     normalized.replace('part', '').replace('of', ''),
   ];
-  
+
   for (const variation of variations) {
     const fallbackSymbol = CORE_CELESTIAL_SYMBOLS[variation];
     if (fallbackSymbol) return fallbackSymbol;
   }
-  
+
   return '●'; // Default fallback
 }
 
 export function getZodiacSymbol(sign: string): string {
   if (!sign) return '○';
-  
+
   const normalized = normalizeName(sign);
   return ZODIAC_SYMBOLS[normalized] || '○';
 }
 
 export function getAspectSymbol(aspect: string): string {
   if (!aspect) return '◇';
-  
+
   const normalized = normalizeName(aspect);
   return ASPECT_SYMBOLS_MAP[normalized] || '◇';
 }
@@ -160,16 +160,26 @@ export function getAspectSymbol(aspect: string): string {
 // Utility functions for formatting degrees/positions
 export function formatDegreePosition(position: number): string {
   if (typeof position !== 'number' || isNaN(position)) return 'N/A';
-  
+
   const zodiacSigns = [
-    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+    'Aries',
+    'Taurus',
+    'Gemini',
+    'Cancer',
+    'Leo',
+    'Virgo',
+    'Libra',
+    'Scorpio',
+    'Sagittarius',
+    'Capricorn',
+    'Aquarius',
+    'Pisces',
   ];
-  
+
   const sign = Math.floor(position / 30) % 12;
   const degree = position % 30;
   const minutes = Math.floor((degree % 1) * 60);
-  
+
   return `${Math.floor(degree)}°${String(minutes).padStart(2, '0')}' ${zodiacSigns[sign]}`;
 }
 
@@ -181,17 +191,17 @@ export const AspectSymbols = ASPECT_SYMBOLS_MAP;
 // Element-based color mapping
 export function getElementColor(sign: string): string {
   const normalized = normalizeName(sign);
-  
+
   const fireSign = ['aries', 'leo', 'sagittarius'].includes(normalized);
   const earthSign = ['taurus', 'virgo', 'capricorn'].includes(normalized);
   const airSign = ['gemini', 'libra', 'aquarius'].includes(normalized);
   const waterSign = ['cancer', 'scorpio', 'pisces'].includes(normalized);
-  
+
   if (fireSign) return 'text-red-400';
   if (earthSign) return 'text-green-400';
   if (airSign) return 'text-yellow-400';
   if (waterSign) return 'text-blue-400';
-  
+
   return 'text-cosmic-silver';
 }
 

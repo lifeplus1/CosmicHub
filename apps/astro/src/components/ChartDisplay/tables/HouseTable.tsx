@@ -40,32 +40,41 @@ const HouseTable: React.FC<{ data: HouseRow[] }> = ({ data }) => {
               return 'Unknown';
             }
           })();
-          
+
           return (
             <TableRow key={`house-${item.number}-${index}`}>
               <TableCell className='font-medium'>{item.number}</TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <span className='text-xl text-cosmic-gold font-mono' title={item.sign}>
+                <div className='flex items-center gap-2'>
+                  <span
+                    className='text-xl text-cosmic-gold font-mono'
+                    title={item.sign}
+                  >
                     {getSignSymbol(item.sign)}
                   </span>
-                  <span className="capitalize">{item.sign}</span>
+                  <span className='capitalize'>{item.sign}</span>
                 </div>
               </TableCell>
               <TableCell>{item.cuspDegree}°</TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <AstroSymbol 
+                <div className='flex items-center gap-2'>
+                  <AstroSymbol
                     symbol={getPlanetSymbol(ruler)}
-                    size="md"
+                    size='md'
                     title={ruler}
-                    className="text-cosmic-gold"
+                    className='text-cosmic-gold'
                   />
-                  <span className="capitalize">{ruler}</span>
+                  <span className='capitalize'>{ruler}</span>
                 </div>
               </TableCell>
               <TableCell>
-                <span className={item.planetsInHouse === 'None' ? 'text-cosmic-silver opacity-60' : 'text-cosmic-gold'}>
+                <span
+                  className={
+                    item.planetsInHouse === 'None'
+                      ? 'text-cosmic-silver opacity-60'
+                      : 'text-cosmic-gold'
+                  }
+                >
                   {item.planetsInHouse}
                 </span>
               </TableCell>

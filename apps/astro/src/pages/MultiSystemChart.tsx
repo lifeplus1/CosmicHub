@@ -28,16 +28,16 @@ const MultiSystemChart: React.FC = () => {
 
       setIsLoading(true);
       setError(null);
-      
+
       try {
         devConsole.log?.('🌟 Fetching multi-system chart data...', birthData);
-        
+
         // Call the multi-system chart API using the fetchChart service
         const result = await fetchChart(birthData);
-        
+
         if (result.success) {
           devConsole.log?.('✅ Multi-system chart data received:', result.data);
-          
+
           // The backend returns the multi-system data directly, not wrapped in a MultiSystemResponse
           // So we need to cast the response data to MultiSystemChartData
           setChartData(result.data as unknown as MultiSystemChartData);
@@ -45,7 +45,10 @@ const MultiSystemChart: React.FC = () => {
           throw new Error(result.error);
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to calculate multi-system chart';
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to calculate multi-system chart';
         devConsole.error('❌ Error fetching multi-system chart:', error);
         setError(errorMessage);
         setChartData(null);
@@ -182,19 +185,23 @@ const MultiSystemChart: React.FC = () => {
               {isLoading && (
                 <div className='flex items-center justify-center p-8'>
                   <div className='w-6 h-6 border-b-2 border-cosmic-purple rounded-full animate-spin mr-3'></div>
-                  <span className='text-cosmic-silver'>Calculating multi-system chart...</span>
+                  <span className='text-cosmic-silver'>
+                    Calculating multi-system chart...
+                  </span>
                 </div>
               )}
-              
+
               {/* Show error state */}
               {error && !isLoading && (
                 <div className='p-6 border border-red-500 rounded-md bg-red-900/50'>
                   <div className='text-center'>
-                    <h3 className='font-bold text-red-400 mb-2'>Calculation Error</h3>
+                    <h3 className='font-bold text-red-400 mb-2'>
+                      Calculation Error
+                    </h3>
                     <p className='text-cosmic-silver/70'>{error}</p>
-                    <Button 
-                      onClick={() => window.location.reload()} 
-                      variant='secondary' 
+                    <Button
+                      onClick={() => window.location.reload()}
+                      variant='secondary'
                       className='mt-3'
                     >
                       Try Again
@@ -211,12 +218,14 @@ const MultiSystemChart: React.FC = () => {
                   showComparison={true}
                 />
               )}
-              
+
               {/* Show placeholder when no data and no loading/error */}
               {!chartData && !isLoading && !error && (
                 <div className='p-6 border border-yellow-500 rounded-md bg-yellow-900/50'>
                   <div className='text-center'>
-                    <h3 className='font-bold text-cosmic-silver'>No Chart Data</h3>
+                    <h3 className='font-bold text-cosmic-silver'>
+                      No Chart Data
+                    </h3>
                     <p className='text-cosmic-silver/70'>
                       Waiting for chart calculation...
                     </p>

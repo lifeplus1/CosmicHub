@@ -74,11 +74,11 @@ export const ProgressiveLoading: React.FC<ProgressiveLoadingProps> = ({
 
   useEffect(() => {
     const startTime = Date.now();
-    
+
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;
       setElapsedTime(elapsed);
-      
+
       if (elapsed > timeout && stage !== 'complete') {
         setShowTimeoutWarning(true);
       }
@@ -111,7 +111,12 @@ export const ProgressiveLoading: React.FC<ProgressiveLoadingProps> = ({
   const currentMessage = message ?? stageMessages[stage];
 
   return (
-    <div className={cn('flex flex-col items-center justify-center space-y-6', className)}>
+    <div
+      className={cn(
+        'flex flex-col items-center justify-center space-y-6',
+        className
+      )}
+    >
       {/* Main spinner */}
       <div className='relative'>
         <LoadingSpinner size='lg' />
@@ -126,7 +131,7 @@ export const ProgressiveLoading: React.FC<ProgressiveLoadingProps> = ({
           <div
             className='bg-gradient-to-r from-cosmic-purple to-cosmic-blue h-full rounded-full transition-all duration-500 ease-out'
             data-progress={currentProgress}
-            ref={(el) => {
+            ref={el => {
               if (el) {
                 el.style.width = `${currentProgress}%`;
               }
@@ -190,11 +195,9 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
           </div>
         </div>
       )}
-      
-      {showImage && (
-        <div className='bg-gray-600 rounded-lg h-48 w-full' />
-      )}
-      
+
+      {showImage && <div className='bg-gray-600 rounded-lg h-48 w-full' />}
+
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}
@@ -226,10 +229,15 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 }) => {
   return (
     <div className={cn('relative', className)}>
-      <div className={cn('transition-all duration-200', loading && blur && 'blur-sm opacity-60')}>
+      <div
+        className={cn(
+          'transition-all duration-200',
+          loading && blur && 'blur-sm opacity-60'
+        )}
+      >
         {children}
       </div>
-      
+
       {loading && (
         <div className='absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50'>
           <div className='bg-cosmic-dark/90 backdrop-blur border border-cosmic-silver/30 rounded-lg p-6 text-center'>
@@ -262,7 +270,12 @@ export const InlineLoading: React.FC<InlineLoadingProps> = ({
     return (
       <div className={cn('flex items-center gap-2', className)}>
         <LoadingSpinner size={size === 'sm' ? 'xs' : 'sm'} />
-        <span className={cn('text-cosmic-silver', size === 'sm' ? 'text-sm' : 'text-base')}>
+        <span
+          className={cn(
+            'text-cosmic-silver',
+            size === 'sm' ? 'text-sm' : 'text-base'
+          )}
+        >
           {loadingText}
         </span>
       </div>
@@ -289,10 +302,12 @@ export const LoadingCard: React.FC<LoadingCardProps> = ({
   bodyLines = 3,
 }) => {
   return (
-    <div className={cn(
-      'bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg overflow-hidden',
-      className
-    )}>
+    <div
+      className={cn(
+        'bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg overflow-hidden',
+        className
+      )}
+    >
       {showHeader && (
         <div className='bg-cosmic-purple/10 p-4 border-b border-cosmic-silver/20'>
           <div className='animate-pulse space-y-2'>
@@ -308,13 +323,13 @@ export const LoadingCard: React.FC<LoadingCardProps> = ({
           </div>
         </div>
       )}
-      
+
       <div className='p-4'>
         <div className='animate-pulse space-y-3'>
           {showImage && (
             <div className='bg-cosmic-silver/20 rounded-lg h-32 w-full' />
           )}
-          
+
           {Array.from({ length: bodyLines }).map((_, i) => (
             <div
               key={i}

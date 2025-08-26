@@ -27,7 +27,11 @@ import {
   AccordionContent,
 } from '@cosmichub/ui';
 // Extracted table components (barrel export)
-import { PlanetTable, CelestialBodiesTable, convertToCelestialBodies } from './tables';
+import {
+  PlanetTable,
+  CelestialBodiesTable,
+  convertToCelestialBodies,
+} from './tables';
 import AspectTable from './tables/AspectTable';
 import HouseTable, { type HouseRow } from './tables/HouseTable';
 import AngleTable, { type AngleRow } from './tables/AngleTable';
@@ -55,13 +59,17 @@ import {
   type ChartLike,
   getAspectOrb,
 } from './normalizeChart';
-import { 
+import {
   getRulerFromSign,
   getSignFromDegreesCapitalized,
-  getSignFromDegrees
+  getSignFromDegrees,
 } from '../../utils/astrologyUtils';
 import { validateChart } from './validateChart';
-import { AstrologySettingsPanel, type AstrologySettings, defaultAstrologySettings } from './AstrologySettings';
+import {
+  AstrologySettingsPanel,
+  type AstrologySettings,
+  defaultAstrologySettings,
+} from './AstrologySettings';
 import { CollapsibleTable } from './CollapsibleTable';
 import { ViewSpecificSettings } from './ViewSpecificSettings';
 import { getCelestialBodyCategory } from '../../utils/celestialBodyCategorization';
@@ -450,21 +458,25 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
   const [useUnifiedView, setUseUnifiedView] = useState(true); // Start with unified view
   const [showSettings, setShowSettings] = useState(false);
   const [showAI001, setShowAI001] = useState(false); // AI-001 enhanced features toggle
-  
+
   // Professional astrology settings with persistence and error handling
-  const [astrologySettings, setAstrologySettings] = useState<AstrologySettings>(() => {
-    try {
-      const savedSettings = localStorage.getItem('cosmichub-astrology-settings');
-      if (savedSettings) {
-        const parsed = JSON.parse(savedSettings);
-        // Merge with defaults to handle version updates
-        return { ...defaultAstrologySettings, ...parsed };
+  const [astrologySettings, setAstrologySettings] = useState<AstrologySettings>(
+    () => {
+      try {
+        const savedSettings = localStorage.getItem(
+          'cosmichub-astrology-settings'
+        );
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          // Merge with defaults to handle version updates
+          return { ...defaultAstrologySettings, ...parsed };
+        }
+      } catch (error) {
+        console.warn('Failed to load saved astrology settings:', error);
       }
-    } catch (error) {
-      console.warn('Failed to load saved astrology settings:', error);
+      return defaultAstrologySettings;
     }
-    return defaultAstrologySettings;
-  });
+  );
 
   // Persist expanded table sections for better UX
   const [expandedSections, setExpandedSections] = useState<string[]>(() => {
@@ -481,11 +493,14 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     }
   });
 
-  // Persist settings and expanded sections changes 
+  // Persist settings and expanded sections changes
   const handleSettingsChange = (newSettings: AstrologySettings) => {
     try {
       setAstrologySettings(newSettings);
-      localStorage.setItem('cosmichub-astrology-settings', JSON.stringify(newSettings));
+      localStorage.setItem(
+        'cosmichub-astrology-settings',
+        JSON.stringify(newSettings)
+      );
     } catch (error) {
       console.warn('Failed to save astrology settings:', error);
       // Still update state even if saving fails
@@ -496,7 +511,10 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
   const handleExpandedSectionsChange = (newExpandedSections: string[]) => {
     try {
       setExpandedSections(newExpandedSections);
-      localStorage.setItem('cosmichub-expanded-sections', JSON.stringify(newExpandedSections));
+      localStorage.setItem(
+        'cosmichub-expanded-sections',
+        JSON.stringify(newExpandedSections)
+      );
     } catch (error) {
       console.warn('Failed to save expanded sections:', error);
       // Still update state even if saving fails
@@ -516,7 +534,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       if (chartId == null || chartId === '') {
         throw new Error('Missing chartId');
       }
-      
+
       try {
         return await fetchSavedChart(chartId, chartType);
       } catch (err) {
@@ -535,13 +553,16 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       // Retry up to 2 times for network errors, but not for validation errors
       if (failureCount < 2) {
         const errorMessage = error?.message || '';
-        return !errorMessage.includes('Missing chartId') && !errorMessage.includes('validation');
+        return (
+          !errorMessage.includes('Missing chartId') &&
+          !errorMessage.includes('validation')
+        );
       }
       return false;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,   // 10 minutes (was cacheTime)
+    gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
   });
 
   // Use provided chart or fetched chart data - memoize to prevent unnecessary re-renders
@@ -551,7 +572,10 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
     console.log('🔄 ChartDisplay: chartData useMemo triggered');
     console.log('  - chart prop:', chart ? 'provided' : 'null');
-    console.log('  - fetchedChartData:', fetchedChartData ? 'available' : 'null');
+    console.log(
+      '  - fetchedChartData:',
+      fetchedChartData ? 'available' : 'null'
+    );
     console.log('  - providedData:', providedData ? 'available' : 'null');
 
     // Explicit check for valid data
@@ -560,15 +584,22 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       providedData === undefined ||
       typeof providedData !== 'object'
     ) {
-      console.log('🚨 ChartDisplay: No valid chart data found, using sample data');
+      console.log(
+        '🚨 ChartDisplay: No valid chart data found, using sample data'
+      );
       log.warn('No valid chart data found, using sample data');
       return sampleData;
     }
 
-    console.log('🔍 ChartDisplay: Checking data structure...', { isChartLike: isChartLike(providedData), hasContent: hasChartContent(providedData) });
-    
+    console.log('🔍 ChartDisplay: Checking data structure...', {
+      isChartLike: isChartLike(providedData),
+      hasContent: hasChartContent(providedData),
+    });
+
     if (!isChartLike(providedData) || !hasChartContent(providedData)) {
-      console.log('🚨 ChartDisplay: Invalid chart data structure, using sample data');
+      console.log(
+        '🚨 ChartDisplay: Invalid chart data structure, using sample data'
+      );
       log.warn('Invalid chart data structure, using sample data');
       return sampleData;
     }
@@ -576,12 +607,17 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     console.log('🔍 ChartDisplay: Validating chart...');
     const validatedChart = validateChart(providedData);
     if (validatedChart === null || typeof validatedChart !== 'object') {
-      console.log('🚨 ChartDisplay: Chart validation failed, using sample data');
+      console.log(
+        '🚨 ChartDisplay: Chart validation failed, using sample data'
+      );
       log.warn('Chart validation failed, using sample data');
       return sampleData;
     }
 
-    console.log('✅ ChartDisplay: Using real chart data, first planet:', Object.entries(validatedChart.planets || {})[0]);
+    console.log(
+      '✅ ChartDisplay: Using real chart data, first planet:',
+      Object.entries(validatedChart.planets || {})[0]
+    );
 
     return validatedChart;
     // deps: changes only when caller supplies new chart ref or fetch returns new data
@@ -625,11 +661,24 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       const isValidArray = <T,>(arr: unknown): arr is T[] => Array.isArray(arr);
 
       // Separate main planets from points based on categorization
-      const allBodies = isValidArray<ChartDisplayPlanet>(allBodiesArray) ? allBodiesArray : [];
+      const allBodies = isValidArray<ChartDisplayPlanet>(allBodiesArray)
+        ? allBodiesArray
+        : [];
       const mainPlanets: ChartDisplayPlanet[] = [];
       const points: ChartDisplayPlanet[] = [];
-      
-      const planetNames = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+
+      const planetNames = [
+        'sun',
+        'moon',
+        'mercury',
+        'venus',
+        'mars',
+        'jupiter',
+        'saturn',
+        'uranus',
+        'neptune',
+        'pluto',
+      ];
       allBodies.forEach(body => {
         if (planetNames.includes(body.name.toLowerCase())) {
           mainPlanets.push(body);
@@ -709,11 +758,19 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
           housesArray[idx]?.cusp ?? 0;
         if (a.name === 'Ascendant' && housesArray.length >= 1) {
           const pos = matchHouse('Ascendant', 0);
-          return { ...a, sign: getSignFromDegreesCapitalized(pos), degree: pos % 30 };
+          return {
+            ...a,
+            sign: getSignFromDegreesCapitalized(pos),
+            degree: pos % 30,
+          };
         }
         if (a.name?.toLowerCase() === 'mc' && housesArray.length >= 10) {
           const pos = housesArray[9]?.cusp ?? 0;
-          return { ...a, sign: getSignFromDegreesCapitalized(pos), degree: pos % 30 };
+          return {
+            ...a,
+            sign: getSignFromDegreesCapitalized(pos),
+            degree: pos % 30,
+          };
         }
         return a;
       });
@@ -795,9 +852,13 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
         aspect: aspect.type,
         aspectType: aspect.type.toLowerCase() as any,
         orb: aspect.orb,
-        strength: (Math.abs(aspect.orb) < 1 ? 'exact' : 
-                 Math.abs(aspect.orb) < 2 ? 'strong' : 
-                 Math.abs(aspect.orb) < 4 ? 'moderate' : 'weak') as 'exact' | 'strong' | 'moderate' | 'weak',
+        strength: (Math.abs(aspect.orb) < 1
+          ? 'exact'
+          : Math.abs(aspect.orb) < 2
+            ? 'strong'
+            : Math.abs(aspect.orb) < 4
+              ? 'moderate'
+              : 'weak') as 'exact' | 'strong' | 'moderate' | 'weak',
         applying: (() => {
           if (typeof aspect.applying === 'boolean') {
             return aspect.applying;
@@ -808,10 +869,16 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
           }
           return Math.abs(aspect.orb) < 3;
         })(),
-        isMajor: ['conjunction', 'opposition', 'trine', 'square', 'sextile'].includes(aspect.type.toLowerCase()),
-        angularDifference: Math.abs(aspect.orb)
+        isMajor: [
+          'conjunction',
+          'opposition',
+          'trine',
+          'square',
+          'sextile',
+        ].includes(aspect.type.toLowerCase()),
+        angularDifference: Math.abs(aspect.orb),
       };
-      
+
       return mappedAspect;
     });
   }, [processedSections.aspects]);
@@ -838,27 +905,32 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                 <div className='w-8 h-8 bg-gradient-to-r from-cosmic-purple to-cosmic-blue rounded-full opacity-60 animate-pulse'></div>
               </div>
             </div>
-            
+
             {/* Loading message */}
             <div className='text-center space-y-2'>
               <div className='text-lg font-medium text-cosmic-silver'>
                 Calculating celestial positions...
               </div>
               <div className='text-sm text-cosmic-silver/70 max-w-md'>
-                Connecting to ephemeris server and processing {astrologySettings?.celestialBodies?.minorAsteroids ? '28+' : '11+'} celestial bodies
+                Connecting to ephemeris server and processing{' '}
+                {astrologySettings?.celestialBodies?.minorAsteroids
+                  ? '28+'
+                  : '11+'}{' '}
+                celestial bodies
               </div>
             </div>
-            
+
             {/* Progress dots */}
             <div className='flex space-x-2'>
               <div className='w-2 h-2 bg-cosmic-purple rounded-full animate-bounce [animation-delay:0ms]'></div>
               <div className='w-2 h-2 bg-cosmic-purple rounded-full animate-bounce [animation-delay:150ms]'></div>
               <div className='w-2 h-2 bg-cosmic-purple rounded-full animate-bounce [animation-delay:300ms]'></div>
             </div>
-            
+
             {/* Timeout warning */}
             <div className='text-xs text-cosmic-silver/50 text-center max-w-sm'>
-              This may take a moment for complex charts with many celestial bodies
+              This may take a moment for complex charts with many celestial
+              bodies
             </div>
           </div>
         </CardContent>
@@ -877,12 +949,17 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       return 'Unknown error occurred';
     };
 
-    const getErrorType = (err: unknown): 'network' | 'data' | 'calculation' | 'unknown' => {
+    const getErrorType = (
+      err: unknown
+    ): 'network' | 'data' | 'calculation' | 'unknown' => {
       if (err instanceof Error) {
         if (err.message.includes('Network') || err.message.includes('fetch')) {
           return 'network';
         }
-        if (err.message.includes('calculation') || err.message.includes('ephemeris')) {
+        if (
+          err.message.includes('calculation') ||
+          err.message.includes('ephemeris')
+        ) {
           return 'calculation';
         }
         if (err.message.includes('data') || err.message.includes('parse')) {
@@ -921,7 +998,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
               <div className='text-sm text-red-600 text-center mb-4'>
                 {errorMessage}
               </div>
-              
+
               <div className='flex flex-col sm:flex-row gap-3 items-center'>
                 <Button
                   onClick={() => window.location.reload()}
@@ -930,21 +1007,23 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                 >
                   🔄 Retry Loading
                 </Button>
-                
+
                 {errorType === 'network' && (
                   <div className='text-xs text-red-500 text-center max-w-md'>
-                    Check your internet connection and ensure the ephemeris server is running on port 8001
+                    Check your internet connection and ensure the ephemeris
+                    server is running on port 8001
                   </div>
                 )}
-                
+
                 {errorType === 'calculation' && (
                   <div className='text-xs text-red-500 text-center max-w-md'>
-                    Astrological calculation services may be temporarily unavailable. Try again in a moment.
+                    Astrological calculation services may be temporarily
+                    unavailable. Try again in a moment.
                   </div>
                 )}
               </div>
             </div>
-            
+
             {/* Error Details for Development */}
             {process.env.NODE_ENV === 'development' && (
               <details className='mt-4'>
@@ -1020,623 +1099,733 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
   return (
     <ErrorBoundary
-      name="ChartDisplay"
-      level="component"
+      name='ChartDisplay'
+      level='component'
       onError={(error, errorInfo) => {
         console.error('Chart display error:', error, errorInfo);
       }}
     >
       <TooltipProvider>
         <div role='region' aria-label='Astrology chart data'>
-        <Card className='w-full max-w-6xl mx-auto cosmic-glass border border-cosmic-purple/30 rounded-xl'>
-          <CardHeader className='bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-cosmic-gold rounded-t-xl'>
-            <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-              <CardTitle className='text-2xl font-bold text-cosmic-gold'>
-                ✨ {chartType.charAt(0).toUpperCase() + chartType.slice(1)}{' '}
-                Chart Analysis
-              </CardTitle>
-              <div className='flex items-center gap-3'>
-                <Input
-                  placeholder='🔍 Search planets, signs, aspects...'
-                  value={searchTerm}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
-                    setSearchTerm(e.target.value)
-                  }
-                  className='w-full sm:w-64 bg-cosmic-dark/30 border-cosmic-purple/30 text-cosmic-silver placeholder-cosmic-silver/60'
-                  aria-label='Search chart data'
-                  aria-describedby='chart-search-hint'
-                />
-                <span id='chart-search-hint' className='sr-only'>
-                  Type to filter rows across all tables by planet, sign, aspect
-                  or house
-                </span>
-                <div className='flex gap-2'>
-                  <Tooltip content='Share Chart'>
-                    <Button
-                      variant='default'
-                      onClick={() => {
-                        void shareChart(chartData);
-                      }}
-                      className='text-xs px-3 py-1'
-                      aria-label='Share chart'
-                    >
-                      📤 Share
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content='Export as JSON'>
-                    <Button
-                      variant='secondary'
-                      onClick={() => exportChartData(chartData, 'json')}
-                      className='text-xs px-3 py-1'
-                      aria-label='Export chart data as JSON'
-                    >
-                      JSON
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content='Export as CSV'>
-                    <Button
-                      variant='secondary'
-                      onClick={() => exportChartData(chartData, 'csv')}
-                      className='text-xs px-3 py-1'
-                      aria-label='Export chart data as CSV'
-                    >
-                      CSV
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content='Export as Text'>
-                    <Button
-                      variant='secondary'
-                      onClick={() => exportChartData(chartData, 'txt')}
-                      className='text-xs px-3 py-1'
-                      aria-label='Export chart data as text'
-                    >
-                      TXT
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content='Save to Firestore'>
-                    <Button
-                      variant='default'
-                      onClick={() => {
-                        void (async (): Promise<void> => {
-                          try {
-                            if (typeof onSaveChart === 'function') {
-                              await onSaveChart(chartData);
-                              return;
-                            }
-                            const astroChart: AstrologyChart = {
-                              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                              planets: Array.isArray(chartData.planets)
-                                ? chartData.planets
-                                : [],
-                              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                              houses: Array.isArray(chartData.houses)
-                                ? chartData.houses
-                                : [],
-                              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                              aspects: Array.isArray(chartData.aspects)
-                                ? chartData.aspects
-                                : [],
-                              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                              asteroids: Array.isArray(chartData.asteroids)
-                                ? chartData.asteroids
-                                : [],
-                              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                              angles: Array.isArray(chartData.angles)
-                                ? chartData.angles
-                                : [],
-                            };
-                            const serialized =
-                              serializeAstrologyData(astroChart);
-                            // Fallback: attempt to parse into expected ChartData shape required by sync service
-                            const parsed = JSON.parse(serialized) as unknown;
-                            if (
-                              parsed !== null &&
-                              typeof parsed === 'object' &&
-                              'planets' in parsed
-                            ) {
-                              // Ensure the parsed object has all required ChartData properties before passing to syncChart
-                              if (
-                                'houses' in parsed &&
-                                'aspects' in parsed &&
-                                'angles' in parsed &&
-                                'latitude' in parsed &&
-                                'longitude' in parsed &&
-                                'timezone' in parsed &&
-                                'julian_day' in parsed &&
-                                'house_system' in parsed
-                              ) {
-                                await getChartSyncService().syncChart(
-                                  parsed as ChartData
-                                );
+          <Card className='w-full max-w-6xl mx-auto cosmic-glass border border-cosmic-purple/30 rounded-xl'>
+            <CardHeader className='bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-cosmic-gold rounded-t-xl'>
+              <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+                <CardTitle className='text-2xl font-bold text-cosmic-gold'>
+                  ✨ {chartType.charAt(0).toUpperCase() + chartType.slice(1)}{' '}
+                  Chart Analysis
+                </CardTitle>
+                <div className='flex items-center gap-3'>
+                  <Input
+                    placeholder='🔍 Search planets, signs, aspects...'
+                    value={searchTerm}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                      setSearchTerm(e.target.value)
+                    }
+                    className='w-full sm:w-64 bg-cosmic-dark/30 border-cosmic-purple/30 text-cosmic-silver placeholder-cosmic-silver/60'
+                    aria-label='Search chart data'
+                    aria-describedby='chart-search-hint'
+                  />
+                  <span id='chart-search-hint' className='sr-only'>
+                    Type to filter rows across all tables by planet, sign,
+                    aspect or house
+                  </span>
+                  <div className='flex gap-2'>
+                    <Tooltip content='Share Chart'>
+                      <Button
+                        variant='default'
+                        onClick={() => {
+                          void shareChart(chartData);
+                        }}
+                        className='text-xs px-3 py-1'
+                        aria-label='Share chart'
+                      >
+                        📤 Share
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content='Export as JSON'>
+                      <Button
+                        variant='secondary'
+                        onClick={() => exportChartData(chartData, 'json')}
+                        className='text-xs px-3 py-1'
+                        aria-label='Export chart data as JSON'
+                      >
+                        JSON
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content='Export as CSV'>
+                      <Button
+                        variant='secondary'
+                        onClick={() => exportChartData(chartData, 'csv')}
+                        className='text-xs px-3 py-1'
+                        aria-label='Export chart data as CSV'
+                      >
+                        CSV
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content='Export as Text'>
+                      <Button
+                        variant='secondary'
+                        onClick={() => exportChartData(chartData, 'txt')}
+                        className='text-xs px-3 py-1'
+                        aria-label='Export chart data as text'
+                      >
+                        TXT
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content='Save to Firestore'>
+                      <Button
+                        variant='default'
+                        onClick={() => {
+                          void (async (): Promise<void> => {
+                            try {
+                              if (typeof onSaveChart === 'function') {
+                                await onSaveChart(chartData);
+                                return;
                               }
+                              const astroChart: AstrologyChart = {
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                                planets: Array.isArray(chartData.planets)
+                                  ? chartData.planets
+                                  : [],
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                                houses: Array.isArray(chartData.houses)
+                                  ? chartData.houses
+                                  : [],
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                                aspects: Array.isArray(chartData.aspects)
+                                  ? chartData.aspects
+                                  : [],
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                                asteroids: Array.isArray(chartData.asteroids)
+                                  ? chartData.asteroids
+                                  : [],
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                                angles: Array.isArray(chartData.angles)
+                                  ? chartData.angles
+                                  : [],
+                              };
+                              const serialized =
+                                serializeAstrologyData(astroChart);
+                              // Fallback: attempt to parse into expected ChartData shape required by sync service
+                              const parsed = JSON.parse(serialized) as unknown;
+                              if (
+                                parsed !== null &&
+                                typeof parsed === 'object' &&
+                                'planets' in parsed
+                              ) {
+                                // Ensure the parsed object has all required ChartData properties before passing to syncChart
+                                if (
+                                  'houses' in parsed &&
+                                  'aspects' in parsed &&
+                                  'angles' in parsed &&
+                                  'latitude' in parsed &&
+                                  'longitude' in parsed &&
+                                  'timezone' in parsed &&
+                                  'julian_day' in parsed &&
+                                  'house_system' in parsed
+                                ) {
+                                  await getChartSyncService().syncChart(
+                                    parsed as ChartData
+                                  );
+                                }
+                              }
+                              log.info('Chart data saved successfully');
+                            } catch (e) {
+                              log.error('Failed to save chart', e);
                             }
-                            log.info('Chart data saved successfully');
-                          } catch (e) {
-                            log.error('Failed to save chart', e);
-                          }
-                        })();
-                      }}
-                      className='text-xs px-3 py-1'
-                      aria-label='Save chart data'
-                    >
-                      💾 Save
-                    </Button>
-                  </Tooltip>
+                          })();
+                        }}
+                        className='text-xs px-3 py-1'
+                        aria-label='Save chart data'
+                      >
+                        💾 Save
+                      </Button>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className='p-6 space-y-8 text-cosmic-silver'>
-            {/* Use cosmic theme */}
-            {/* Enhanced Overview Cards */}
-            <div
-              className='grid grid-cols-2 md:grid-cols-4 gap-4'
-              aria-live='polite'
-            >
-              <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
-                <CardContent className='p-4 text-center'>
-                  <div className='text-3xl font-bold text-cosmic-gold'>
-                    {processedSections.planets.length}
-                  </div>
-                  <div className='text-sm text-cosmic-silver font-medium'>
-                    🪐 Planets
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
-                <CardContent className='p-4 text-center'>
-                  <div className='text-3xl font-bold text-cosmic-gold'>
-                    {processedSections.asteroids.length}
-                  </div>
-                  <div className='text-sm text-cosmic-silver font-medium'>
-                    ☄️ Asteroids
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
-                <CardContent className='p-4 text-center'>
-                  <div className='text-3xl font-bold text-cosmic-gold'>
-                    {processedSections.houses.length}
-                  </div>
-                  <div className='text-sm text-cosmic-silver font-medium'>
-                    🏠 Houses
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
-                <CardContent className='p-4 text-center'>
-                  <div className='text-3xl font-bold text-cosmic-gold'>
-                    {processedSections.aspects.length}
-                  </div>
-                  <div className='text-sm text-cosmic-silver font-medium'>
-                    🔗 Aspects
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* View Toggle */}
-            <div className='flex justify-center mb-6'>
-              <div className='bg-cosmic-purple/20 rounded-lg p-1 border border-cosmic-purple/30'>
-                <button
-                  onClick={() => setUseUnifiedView(true)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    useUnifiedView
-                      ? 'bg-cosmic-gold text-cosmic-dark shadow-md'
-                      : 'text-cosmic-silver hover:text-cosmic-gold'
-                  }`}
-                >
-                  🌌 Unified View
-                </button>
-                <button
-                  onClick={() => setUseUnifiedView(false)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    !useUnifiedView
-                      ? 'bg-cosmic-gold text-cosmic-dark shadow-md'
-                      : 'text-cosmic-silver hover:text-cosmic-gold'
-                  }`}
-                >
-                  📊 Separate Tables
-                </button>
+            </CardHeader>
+            <CardContent className='p-6 space-y-8 text-cosmic-silver'>
+              {/* Use cosmic theme */}
+              {/* Enhanced Overview Cards */}
+              <div
+                className='grid grid-cols-2 md:grid-cols-4 gap-4'
+                aria-live='polite'
+              >
+                <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
+                  <CardContent className='p-4 text-center'>
+                    <div className='text-3xl font-bold text-cosmic-gold'>
+                      {processedSections.planets.length}
+                    </div>
+                    <div className='text-sm text-cosmic-silver font-medium'>
+                      🪐 Planets
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
+                  <CardContent className='p-4 text-center'>
+                    <div className='text-3xl font-bold text-cosmic-gold'>
+                      {processedSections.asteroids.length}
+                    </div>
+                    <div className='text-sm text-cosmic-silver font-medium'>
+                      ☄️ Asteroids
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
+                  <CardContent className='p-4 text-center'>
+                    <div className='text-3xl font-bold text-cosmic-gold'>
+                      {processedSections.houses.length}
+                    </div>
+                    <div className='text-sm text-cosmic-silver font-medium'>
+                      🏠 Houses
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className='cosmic-glass border-cosmic-purple/30 hover:bg-cosmic-purple/10 transition-all duration-200'>
+                  <CardContent className='p-4 text-center'>
+                    <div className='text-3xl font-bold text-cosmic-gold'>
+                      {processedSections.aspects.length}
+                    </div>
+                    <div className='text-sm text-cosmic-silver font-medium'>
+                      🔗 Aspects
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
+              {/* View Toggle */}
+              <div className='flex justify-center mb-6'>
+                <div className='bg-cosmic-purple/20 rounded-lg p-1 border border-cosmic-purple/30'>
+                  <button
+                    onClick={() => setUseUnifiedView(true)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      useUnifiedView
+                        ? 'bg-cosmic-gold text-cosmic-dark shadow-md'
+                        : 'text-cosmic-silver hover:text-cosmic-gold'
+                    }`}
+                  >
+                    🌌 Unified View
+                  </button>
+                  <button
+                    onClick={() => setUseUnifiedView(false)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      !useUnifiedView
+                        ? 'bg-cosmic-gold text-cosmic-dark shadow-md'
+                        : 'text-cosmic-silver hover:text-cosmic-gold'
+                    }`}
+                  >
+                    📊 Separate Tables
+                  </button>
+                </div>
+              </div>
+              {/* View-Specific Professional Astrology Settings Panel */}
+              <div className='mb-6'>
+                <ViewSpecificSettings
+                  settings={astrologySettings}
+                  onSettingsChange={handleSettingsChange}
+                  isOpen={showSettings}
+                  onToggle={() => setShowSettings(!showSettings)}
+                  isUnifiedView={useUnifiedView}
+                />
+              </div>
+              {/* Create reusable aspect table component to avoid duplication */}
+              {(() => {
+                // Shared aspect table logic
+                const renderAspectTable = () => {
+                  if (
+                    !astrologySettings.displayOptions.showAspectGrid ||
+                    processedSections.aspects.length === 0
+                  ) {
+                    return null;
+                  }
 
-            {/* View-Specific Professional Astrology Settings Panel */}
-            <div className="mb-6">
-              <ViewSpecificSettings
-                settings={astrologySettings}
-                onSettingsChange={handleSettingsChange}
-                isOpen={showSettings}
-                onToggle={() => setShowSettings(!showSettings)}
-                isUnifiedView={useUnifiedView}
-              />
-            </div>
+                  return (
+                    <Card className='cosmic-glass border-cosmic-purple/30'>
+                      <CardHeader className='bg-cosmic-purple/20 border-b border-cosmic-purple/30'>
+                        <CardTitle className='text-xl text-cosmic-gold flex items-center gap-2'>
+                          ⚹ Planetary Aspects
+                          {astrologySettings.displayOptions
+                            .showMinorAspects && (
+                            <span className='text-sm text-cosmic-silver font-normal'>
+                              (Including Minor Aspects)
+                            </span>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className='p-6'>
+                        <EnhancedAspectTable
+                          aspects={enhancedAspects}
+                          includeMinorAspects={
+                            astrologySettings.displayOptions.showMinorAspects
+                          }
+                          maxMajorOrb={astrologySettings.orbs.major}
+                          maxMinorOrb={astrologySettings.orbs.minor}
+                        />
+                      </CardContent>
+                    </Card>
+                  );
+                };
 
-            {/* Create reusable aspect table component to avoid duplication */}
-            {(() => {
-              // Shared aspect table logic 
-              const renderAspectTable = () => {
-                if (!astrologySettings.displayOptions.showAspectGrid || processedSections.aspects.length === 0) {
-                  return null;
-                }
+                // Conditional Rendering: Unified View vs Separate Tables
+                return useUnifiedView ? (
+                  // UNIFIED VIEW: Single comprehensive table with all celestial bodies
+                  <Accordion type='multiple' className='space-y-6'>
+                    <CollapsibleTable
+                      value='unified-celestial'
+                      title='Complete Chart Analysis'
+                      icon='🌌'
+                      subtitle='All celestial bodies, houses, and chart angles in one comprehensive view'
+                      count={
+                        processedSections.planets.length +
+                        processedSections.asteroids.length +
+                        processedSections.angles.length
+                      }
+                    >
+                      <div className='p-6'>
+                        <CelestialBodiesTable
+                          bodies={convertToCelestialBodies({
+                            planets: processedSections.planets,
+                            asteroids: processedSections.asteroids,
+                            points: processedSections.points,
+                            angles: (() => {
+                              const angleObj = {
+                                ascendant: 0,
+                                midheaven: 0,
+                                descendant: 0,
+                                imumcoeli: 0,
+                                vertex: undefined as number | undefined,
+                                antivertex: undefined as number | undefined,
+                                part_of_fortune: undefined as
+                                  | number
+                                  | undefined,
+                              };
 
-                return (
-                  <Card className='cosmic-glass border-cosmic-purple/30'>
-                    <CardHeader className='bg-cosmic-purple/20 border-b border-cosmic-purple/30'>
-                      <CardTitle className='text-xl text-cosmic-gold flex items-center gap-2'>
-                        ⚹ Planetary Aspects
-                        {astrologySettings.displayOptions.showMinorAspects && (
-                          <span className='text-sm text-cosmic-silver font-normal'>
-                            (Including Minor Aspects)
-                          </span>
+                              processedSections.angles.forEach(angle => {
+                                const name = angle.name.toLowerCase();
+                                const position =
+                                  typeof angle.position === 'number'
+                                    ? angle.position
+                                    : 0;
+
+                                if (name === 'ascendant')
+                                  angleObj.ascendant = position;
+                                else if (name === 'midheaven' || name === 'mc')
+                                  angleObj.midheaven = position;
+                                else if (name === 'descendant')
+                                  angleObj.descendant = position;
+                                else if (name === 'imumcoeli' || name === 'ic')
+                                  angleObj.imumcoeli = position;
+                                else if (name === 'vertex')
+                                  angleObj.vertex = position;
+                                else if (name === 'antivertex')
+                                  angleObj.antivertex = position;
+                                else if (name === 'part_of_fortune')
+                                  angleObj.part_of_fortune = position;
+                              });
+
+                              return angleObj;
+                            })(),
+                            houses: processedSections.houses,
+                          })}
+                          showHouseRulers={true}
+                          settings={astrologySettings}
+                        />
+                      </div>
+                    </CollapsibleTable>
+
+                    {/* Shared aspect table */}
+                    {renderAspectTable() && (
+                      <CollapsibleTable
+                        value='unified-aspects'
+                        title='Planetary Aspects'
+                        icon='⚹'
+                        subtitle={
+                          astrologySettings.displayOptions.showMinorAspects
+                            ? 'Including minor aspects'
+                            : 'Major aspects only'
+                        }
+                        count={processedSections.aspects.length}
+                      >
+                        <div className='p-6'>
+                          <EnhancedAspectTable
+                            aspects={enhancedAspects}
+                            includeMinorAspects={
+                              astrologySettings.displayOptions.showMinorAspects
+                            }
+                            maxMajorOrb={astrologySettings.orbs.major}
+                            maxMinorOrb={astrologySettings.orbs.minor}
+                          />
+                        </div>
+                      </CollapsibleTable>
+                    )}
+                  </Accordion>
+                ) : (
+                  // SEPARATE VIEW: Distinct focused tables for each celestial body category
+                  <Accordion type='multiple' className='space-y-4'>
+                    {/* Planets Only */}
+                    {processedSections.planets.length > 0 && (
+                      <CollapsibleTable
+                        value='planets'
+                        title='Traditional & Modern Planets'
+                        icon='🪐'
+                        count={processedSections.planets.length}
+                      >
+                        <PlanetTable
+                          data={processedSections.planets.map(p => ({
+                            name: p.name,
+                            sign: p.sign,
+                            house: ((): number => {
+                              const raw = p.house;
+                              if (typeof raw === 'number') return raw;
+                              const parsed = parseInt(
+                                String(raw).replace(/[^0-9]/g, ''),
+                                10
+                              );
+                              return Number.isNaN(parsed) ? 0 : parsed;
+                            })(),
+                            degree:
+                              typeof p.degree === 'number'
+                                ? p.degree.toFixed(2)
+                                : String(p.degree),
+                            position: p.position,
+                            retrograde: p.retrograde,
+                          }))}
+                        />
+                      </CollapsibleTable>
+                    )}
+
+                    {/* Houses with Occupants */}
+                    <CollapsibleTable
+                      value='houses'
+                      title='House Cusps & Occupants'
+                      icon='🏠'
+                      subtitle='Shows which celestial bodies occupy each house'
+                      count={processedSections.houses.length}
+                    >
+                      <HouseTable
+                        data={processedSections.houses.map(
+                          (house): HouseRow => {
+                            const planetsInHouse: string[] = [];
+
+                            // Check all celestial bodies in this house
+                            [
+                              ...processedSections.planets,
+                              ...processedSections.asteroids,
+                              ...processedSections.points,
+                            ].forEach(body => {
+                              const bodyHouse =
+                                typeof body.house === 'number'
+                                  ? body.house
+                                  : parseInt(
+                                      String(body.house).replace(/[^0-9]/g, ''),
+                                      10
+                                    );
+                              if (bodyHouse === house.house) {
+                                planetsInHouse.push(body.name);
+                              }
+                            });
+
+                            return {
+                              number: house.house,
+                              sign: house.sign,
+                              cuspDegree: `${house.degree.toFixed(2)}`,
+                              planetsInHouse:
+                                planetsInHouse.length > 0
+                                  ? planetsInHouse.join(', ')
+                                  : 'Empty',
+                            };
+                          }
                         )}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className='p-6'>
-                      <EnhancedAspectTable
-                        aspects={enhancedAspects}
-                        includeMinorAspects={astrologySettings.displayOptions.showMinorAspects}
-                        maxMajorOrb={astrologySettings.orbs.major}
-                        maxMinorOrb={astrologySettings.orbs.minor}
+                      />
+                    </CollapsibleTable>
+
+                    {/* Asteroids & Minor Bodies */}
+                    {processedSections.asteroids.length > 0 && (
+                      <CollapsibleTable
+                        value='asteroids'
+                        title='Asteroids & Minor Bodies'
+                        icon='☄️'
+                        subtitle={
+                          astrologySettings.celestialBodies.minorAsteroids
+                            ? 'Including minor asteroids'
+                            : 'Major asteroids only'
+                        }
+                        count={processedSections.asteroids.length}
+                      >
+                        <AsteroidTable
+                          data={processedSections.asteroids.map(
+                            (asteroid): AsteroidRow => ({
+                              name: asteroid.name,
+                              sign: asteroid.sign,
+                              degree: asteroid.degree.toString(),
+                              house: asteroid.house,
+                            })
+                          )}
+                        />
+                      </CollapsibleTable>
+                    )}
+
+                    {/* Chart Angles */}
+                    {processedSections.angles.length > 0 && (
+                      <CollapsibleTable
+                        value='angles'
+                        title='Chart Angles'
+                        icon='📐'
+                        subtitle='Fundamental chart structure points'
+                        count={processedSections.angles.length}
+                      >
+                        <AngleTable
+                          data={processedSections.angles.map(
+                            (angle): AngleRow => ({
+                              name: angle.name,
+                              sign: angle.sign,
+                              degree:
+                                typeof angle.degree === 'number'
+                                  ? angle.degree.toFixed(2)
+                                  : String(angle.degree),
+                            })
+                          )}
+                        />
+                      </CollapsibleTable>
+                    )}
+
+                    {/* Lunar Nodes - Only when enabled */}
+                    {astrologySettings.celestialBodies.lunarNodes &&
+                      processedSections.points.length > 0 && (
+                        <CollapsibleTable
+                          value='lunar-nodes'
+                          title='Lunar Nodes'
+                          icon='☊'
+                          subtitle='North Node, South Node'
+                          count={
+                            processedSections.points.filter(point => {
+                              const category = getCelestialBodyCategory(
+                                point.name
+                              );
+                              return category === 'lunar_nodes';
+                            }).length
+                          }
+                        >
+                          <PlanetTable
+                            data={processedSections.points
+                              .filter(point => {
+                                const category = getCelestialBodyCategory(
+                                  point.name
+                                );
+                                return category === 'lunar_nodes';
+                              })
+                              .map(
+                                (point): PlanetRow => ({
+                                  name: point.name,
+                                  sign: point.sign,
+                                  house: parseInt(point.house) || 1,
+                                  degree:
+                                    typeof point.degree === 'number'
+                                      ? point.degree.toFixed(2)
+                                      : String(point.degree),
+                                  position: point.position,
+                                  retrograde: point.retrograde,
+                                })
+                              )}
+                          />
+                        </CollapsibleTable>
+                      )}
+
+                    {/* Lilith Points - Only when enabled */}
+                    {astrologySettings.celestialBodies.lilithPoints &&
+                      processedSections.points.length > 0 && (
+                        <CollapsibleTable
+                          value='lilith-points'
+                          title='Lilith Points'
+                          icon='⚸'
+                          subtitle='Mean Lilith, True Lilith'
+                          count={
+                            processedSections.points.filter(point => {
+                              const category = getCelestialBodyCategory(
+                                point.name
+                              );
+                              return category === 'lilith_points';
+                            }).length
+                          }
+                        >
+                          <PlanetTable
+                            data={processedSections.points
+                              .filter(point => {
+                                const category = getCelestialBodyCategory(
+                                  point.name
+                                );
+                                return category === 'lilith_points';
+                              })
+                              .map(
+                                (point): PlanetRow => ({
+                                  name: point.name,
+                                  sign: point.sign,
+                                  house: parseInt(point.house) || 1,
+                                  degree:
+                                    typeof point.degree === 'number'
+                                      ? point.degree.toFixed(2)
+                                      : String(point.degree),
+                                  position: point.position,
+                                  retrograde: point.retrograde,
+                                })
+                              )}
+                          />
+                        </CollapsibleTable>
+                      )}
+
+                    {/* Special Points - Only when enabled */}
+                    {astrologySettings.celestialBodies.specialPoints &&
+                      processedSections.points.length > 0 && (
+                        <CollapsibleTable
+                          value='special-points'
+                          title='Special Points'
+                          icon='◊'
+                          subtitle='Vertex, Antivertex, Part of Fortune'
+                          count={
+                            processedSections.points.filter(point => {
+                              const category = getCelestialBodyCategory(
+                                point.name
+                              );
+                              return category === 'special_points';
+                            }).length
+                          }
+                        >
+                          <PlanetTable
+                            data={processedSections.points
+                              .filter(point => {
+                                const category = getCelestialBodyCategory(
+                                  point.name
+                                );
+                                return category === 'special_points';
+                              })
+                              .map(
+                                (point): PlanetRow => ({
+                                  name: point.name,
+                                  sign: point.sign,
+                                  house: parseInt(point.house) || 1,
+                                  degree:
+                                    typeof point.degree === 'number'
+                                      ? point.degree.toFixed(2)
+                                      : String(point.degree),
+                                  position: point.position,
+                                  retrograde: point.retrograde,
+                                })
+                              )}
+                          />
+                        </CollapsibleTable>
+                      )}
+
+                    {/* Uranian Points - Only when enabled */}
+                    {astrologySettings.celestialBodies.hypotheticalPoints &&
+                      processedSections.points.length > 0 && (
+                        <CollapsibleTable
+                          value='uranian-points'
+                          title='Uranian Points'
+                          icon='🔮'
+                          subtitle='Hamburg School Hypothetical Bodies'
+                          count={
+                            processedSections.points.filter(point => {
+                              const category = getCelestialBodyCategory(
+                                point.name
+                              );
+                              return category === 'hypothetical';
+                            }).length
+                          }
+                        >
+                          <PlanetTable
+                            data={processedSections.points
+                              .filter(point => {
+                                const category = getCelestialBodyCategory(
+                                  point.name
+                                );
+                                return category === 'hypothetical';
+                              })
+                              .map(
+                                (point): PlanetRow => ({
+                                  name: point.name,
+                                  sign: point.sign,
+                                  house: parseInt(point.house) || 1,
+                                  degree:
+                                    typeof point.degree === 'number'
+                                      ? point.degree.toFixed(2)
+                                      : String(point.degree),
+                                  position: point.position,
+                                  retrograde: point.retrograde,
+                                })
+                              )}
+                          />
+                        </CollapsibleTable>
+                      )}
+
+                    {/* Shared aspect table */}
+                    {renderAspectTable() && (
+                      <CollapsibleTable
+                        value='aspects'
+                        title='Planetary Aspects'
+                        icon='⚹'
+                        subtitle={
+                          astrologySettings.displayOptions.showMinorAspects
+                            ? 'Including minor aspects'
+                            : 'Major aspects only'
+                        }
+                        count={processedSections.aspects.length}
+                      >
+                        <div className='p-6'>
+                          <EnhancedAspectTable
+                            aspects={enhancedAspects}
+                            includeMinorAspects={
+                              astrologySettings.displayOptions.showMinorAspects
+                            }
+                            maxMajorOrb={astrologySettings.orbs.major}
+                            maxMinorOrb={astrologySettings.orbs.minor}
+                          />
+                        </div>
+                      </CollapsibleTable>
+                    )}
+                  </Accordion>
+                );
+              })()}{' '}
+              {/* AI-001 ENHANCED FEATURES */}
+              {chartId && (
+                <Card className='cosmic-glass border-cosmic-gold/30 mt-8'>
+                  <CardHeader className='bg-gradient-to-r from-cosmic-gold/10 to-cosmic-purple/10 border-b border-cosmic-gold/30'>
+                    <div className='flex items-center justify-between'>
+                      <div>
+                        <CardTitle className='text-xl text-cosmic-gold flex items-center gap-2'>
+                          🚀 AI-001 Enhanced Analysis
+                          <Badge className='bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30 text-xs'>
+                            Next-Gen AI
+                          </Badge>
+                        </CardTitle>
+                        <p className='text-cosmic-silver/80 text-sm mt-1'>
+                          Advanced astrological insights with predictive
+                          analysis, growth coaching, and multi-system synthesis
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => setShowAI001(!showAI001)}
+                        variant='secondary'
+                        className='text-cosmic-gold hover:bg-cosmic-gold/10'
+                      >
+                        {showAI001 ? '🔽 Hide AI-001' : '🔼 Show AI-001'}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  {showAI001 && (
+                    <CardContent className='p-0'>
+                      <AI001Dashboard
+                        chartData={chart}
+                        userId={chartId} // Using chartId as user identifier for demo
+                        className='p-6'
                       />
                     </CardContent>
-                  </Card>
-                );
-              };
-
-              // Conditional Rendering: Unified View vs Separate Tables
-              return useUnifiedView ? (
-                // UNIFIED VIEW: Single comprehensive table with all celestial bodies
-                <Accordion type="multiple" className="space-y-6">
-                  <CollapsibleTable
-                    value="unified-celestial"
-                    title="Complete Chart Analysis"
-                    icon="🌌"
-                    subtitle="All celestial bodies, houses, and chart angles in one comprehensive view"
-                    count={processedSections.planets.length + processedSections.asteroids.length + processedSections.angles.length}
-                  >
-                    <div className="p-6">
-                      <CelestialBodiesTable
-                        bodies={convertToCelestialBodies({
-                          planets: processedSections.planets,
-                          asteroids: processedSections.asteroids,
-                          points: processedSections.points,
-                          angles: (() => {
-                            const angleObj = {
-                              ascendant: 0,
-                              midheaven: 0,
-                              descendant: 0,
-                              imumcoeli: 0,
-                              vertex: undefined as number | undefined,
-                              antivertex: undefined as number | undefined,
-                              part_of_fortune: undefined as number | undefined,
-                            };
-                            
-                            processedSections.angles.forEach(angle => {
-                              const name = angle.name.toLowerCase();
-                              const position = typeof angle.position === 'number' ? angle.position : 0;
-                              
-                              if (name === 'ascendant') angleObj.ascendant = position;
-                              else if (name === 'midheaven' || name === 'mc') angleObj.midheaven = position;
-                              else if (name === 'descendant') angleObj.descendant = position;
-                              else if (name === 'imumcoeli' || name === 'ic') angleObj.imumcoeli = position;
-                              else if (name === 'vertex') angleObj.vertex = position;
-                              else if (name === 'antivertex') angleObj.antivertex = position;
-                              else if (name === 'part_of_fortune') angleObj.part_of_fortune = position;
-                            });
-                            
-                            return angleObj;
-                          })(),
-                          houses: processedSections.houses,
-                        })}
-                        showHouseRulers={true}
-                        settings={astrologySettings}
-                      />
-                    </div>
-                  </CollapsibleTable>
-
-                  {/* Shared aspect table */}
-                  {renderAspectTable() && (
-                    <CollapsibleTable
-                      value="unified-aspects"
-                      title="Planetary Aspects"
-                      icon="⚹"
-                      subtitle={astrologySettings.displayOptions.showMinorAspects ? "Including minor aspects" : "Major aspects only"}
-                      count={processedSections.aspects.length}
-                    >
-                      <div className="p-6">
-                        <EnhancedAspectTable
-                          aspects={enhancedAspects}
-                          includeMinorAspects={astrologySettings.displayOptions.showMinorAspects}
-                          maxMajorOrb={astrologySettings.orbs.major}
-                          maxMinorOrb={astrologySettings.orbs.minor}
-                        />
-                      </div>
-                    </CollapsibleTable>
                   )}
-                </Accordion>
-              ) : (
-                // SEPARATE VIEW: Distinct focused tables for each celestial body category
-                <Accordion type="multiple" className="space-y-4">
-                  {/* Planets Only */}
-                  {processedSections.planets.length > 0 && (
-                    <CollapsibleTable
-                      value="planets"
-                      title="Traditional & Modern Planets"
-                      icon="🪐"
-                      count={processedSections.planets.length}
-                    >
-                      <PlanetTable
-                        data={processedSections.planets.map(p => ({
-                          name: p.name,
-                          sign: p.sign,
-                          house: ((): number => {
-                            const raw = p.house;
-                            if (typeof raw === 'number') return raw;
-                            const parsed = parseInt(String(raw).replace(/[^0-9]/g, ''), 10);
-                            return Number.isNaN(parsed) ? 0 : parsed;
-                          })(),
-                          degree: typeof p.degree === 'number' ? p.degree.toFixed(2) : String(p.degree),
-                          position: p.position,
-                          retrograde: p.retrograde,
-                        }))}
-                      />
-                    </CollapsibleTable>
-                  )}
-
-                  {/* Houses with Occupants */}
-                  <CollapsibleTable
-                    value="houses"
-                    title="House Cusps & Occupants"
-                    icon="🏠"
-                    subtitle="Shows which celestial bodies occupy each house"
-                    count={processedSections.houses.length}
-                  >
-                    <HouseTable
-                      data={processedSections.houses.map((house): HouseRow => {
-                        const planetsInHouse: string[] = [];
-                        
-                        // Check all celestial bodies in this house
-                        [...processedSections.planets, ...processedSections.asteroids, ...processedSections.points].forEach(body => {
-                          const bodyHouse = typeof body.house === 'number' ? 
-                            body.house : 
-                            parseInt(String(body.house).replace(/[^0-9]/g, ''), 10);
-                          if (bodyHouse === house.house) {
-                            planetsInHouse.push(body.name);
-                          }
-                        });
-                        
-                        return {
-                          number: house.house,
-                          sign: house.sign,
-                          cuspDegree: `${house.degree.toFixed(2)}`,
-                          planetsInHouse: planetsInHouse.length > 0 ? planetsInHouse.join(', ') : 'Empty'
-                        };
-                      })}
-                    />
-                  </CollapsibleTable>
-
-                  {/* Asteroids & Minor Bodies */}
-                  {processedSections.asteroids.length > 0 && (
-                    <CollapsibleTable
-                      value="asteroids"
-                      title="Asteroids & Minor Bodies"
-                      icon="☄️"
-                      subtitle={astrologySettings.celestialBodies.minorAsteroids ? "Including minor asteroids" : "Major asteroids only"}
-                      count={processedSections.asteroids.length}
-                    >
-                      <AsteroidTable
-                        data={processedSections.asteroids.map((asteroid): AsteroidRow => ({
-                          name: asteroid.name,
-                          sign: asteroid.sign,
-                          degree: asteroid.degree.toString(),
-                          house: asteroid.house
-                        }))}
-                      />
-                    </CollapsibleTable>
-                  )}
-
-                  {/* Chart Angles */}
-                  {processedSections.angles.length > 0 && (
-                    <CollapsibleTable
-                      value="angles"
-                      title="Chart Angles"
-                      icon="📐"
-                      subtitle="Fundamental chart structure points"
-                      count={processedSections.angles.length}
-                    >
-                      <AngleTable
-                        data={processedSections.angles.map((angle): AngleRow => ({
-                          name: angle.name,
-                          sign: angle.sign,
-                          degree: typeof angle.degree === 'number' ? angle.degree.toFixed(2) : String(angle.degree)
-                        }))}
-                      />
-                    </CollapsibleTable>
-                  )}
-
-                  {/* Lunar Nodes - Only when enabled */}
-                  {astrologySettings.celestialBodies.lunarNodes && processedSections.points.length > 0 && (
-                    <CollapsibleTable
-                      value="lunar-nodes"
-                      title="Lunar Nodes"
-                      icon="☊"
-                      subtitle="North Node, South Node"
-                      count={processedSections.points.filter(point => {
-                        const category = getCelestialBodyCategory(point.name);
-                        return category === 'lunar_nodes';
-                      }).length}
-                    >
-                      <PlanetTable
-                        data={processedSections.points
-                          .filter(point => {
-                            const category = getCelestialBodyCategory(point.name);
-                            return category === 'lunar_nodes';
-                          })
-                          .map((point): PlanetRow => ({
-                            name: point.name,
-                            sign: point.sign,
-                            house: parseInt(point.house) || 1,
-                            degree: typeof point.degree === 'number' ? point.degree.toFixed(2) : String(point.degree),
-                            position: point.position,
-                            retrograde: point.retrograde,
-                          }))}
-                      />
-                    </CollapsibleTable>
-                  )}
-
-                  {/* Lilith Points - Only when enabled */}
-                  {astrologySettings.celestialBodies.lilithPoints && processedSections.points.length > 0 && (
-                    <CollapsibleTable
-                      value="lilith-points"
-                      title="Lilith Points"
-                      icon="⚸"
-                      subtitle="Mean Lilith, True Lilith"
-                      count={processedSections.points.filter(point => {
-                        const category = getCelestialBodyCategory(point.name);
-                        return category === 'lilith_points';
-                      }).length}
-                    >
-                      <PlanetTable
-                        data={processedSections.points
-                          .filter(point => {
-                            const category = getCelestialBodyCategory(point.name);
-                            return category === 'lilith_points';
-                          })
-                          .map((point): PlanetRow => ({
-                            name: point.name,
-                            sign: point.sign,
-                            house: parseInt(point.house) || 1,
-                            degree: typeof point.degree === 'number' ? point.degree.toFixed(2) : String(point.degree),
-                            position: point.position,
-                            retrograde: point.retrograde,
-                          }))}
-                      />
-                    </CollapsibleTable>
-                  )}
-
-                  {/* Special Points - Only when enabled */}
-                  {astrologySettings.celestialBodies.specialPoints && processedSections.points.length > 0 && (
-                    <CollapsibleTable
-                      value="special-points"
-                      title="Special Points"
-                      icon="◊"
-                      subtitle="Vertex, Antivertex, Part of Fortune"
-                      count={processedSections.points.filter(point => {
-                        const category = getCelestialBodyCategory(point.name);
-                        return category === 'special_points';
-                      }).length}
-                    >
-                      <PlanetTable
-                        data={processedSections.points
-                          .filter(point => {
-                            const category = getCelestialBodyCategory(point.name);
-                            return category === 'special_points';
-                          })
-                          .map((point): PlanetRow => ({
-                            name: point.name,
-                            sign: point.sign,
-                            house: parseInt(point.house) || 1,
-                            degree: typeof point.degree === 'number' ? point.degree.toFixed(2) : String(point.degree),
-                            position: point.position,
-                            retrograde: point.retrograde,
-                          }))}
-                      />
-                    </CollapsibleTable>
-                  )}
-
-                  {/* Uranian Points - Only when enabled */}
-                  {astrologySettings.celestialBodies.hypotheticalPoints && processedSections.points.length > 0 && (
-                    <CollapsibleTable
-                      value="uranian-points"
-                      title="Uranian Points"
-                      icon="🔮"
-                      subtitle="Hamburg School Hypothetical Bodies"
-                      count={processedSections.points.filter(point => {
-                        const category = getCelestialBodyCategory(point.name);
-                        return category === 'hypothetical';
-                      }).length}
-                    >
-                      <PlanetTable
-                        data={processedSections.points
-                          .filter(point => {
-                            const category = getCelestialBodyCategory(point.name);
-                            return category === 'hypothetical';
-                          })
-                          .map((point): PlanetRow => ({
-                            name: point.name,
-                            sign: point.sign,
-                            house: parseInt(point.house) || 1,
-                            degree: typeof point.degree === 'number' ? point.degree.toFixed(2) : String(point.degree),
-                            position: point.position,
-                            retrograde: point.retrograde,
-                          }))}
-                      />
-                    </CollapsibleTable>
-                  )}
-
-                  {/* Shared aspect table */}
-                  {renderAspectTable() && (
-                    <CollapsibleTable
-                      value="aspects"
-                      title="Planetary Aspects"
-                      icon="⚹"
-                      subtitle={astrologySettings.displayOptions.showMinorAspects ? "Including minor aspects" : "Major aspects only"}
-                      count={processedSections.aspects.length}
-                    >
-                      <div className="p-6">
-                        <EnhancedAspectTable
-                          aspects={enhancedAspects}
-                          includeMinorAspects={astrologySettings.displayOptions.showMinorAspects}
-                          maxMajorOrb={astrologySettings.orbs.major}
-                          maxMinorOrb={astrologySettings.orbs.minor}
-                        />
-                      </div>
-                    </CollapsibleTable>
-                  )}
-                </Accordion>
-              );
-            })()}            {/* AI-001 ENHANCED FEATURES */}
-            {chartId && (
-              <Card className='cosmic-glass border-cosmic-gold/30 mt-8'>
-                <CardHeader className='bg-gradient-to-r from-cosmic-gold/10 to-cosmic-purple/10 border-b border-cosmic-gold/30'>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className='text-xl text-cosmic-gold flex items-center gap-2'>
-                        🚀 AI-001 Enhanced Analysis
-                        <Badge className="bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30 text-xs">
-                          Next-Gen AI
-                        </Badge>
-                      </CardTitle>
-                      <p className="text-cosmic-silver/80 text-sm mt-1">
-                        Advanced astrological insights with predictive analysis, growth coaching, and multi-system synthesis
-                      </p>
-                    </div>
-                    <Button
-                      onClick={() => setShowAI001(!showAI001)}
-                      variant="secondary"
-                      className="text-cosmic-gold hover:bg-cosmic-gold/10"
-                    >
-                      {showAI001 ? '🔽 Hide AI-001' : '🔼 Show AI-001'}
-                    </Button>
-                  </div>
-                </CardHeader>
-                {showAI001 && (
-                  <CardContent className='p-0'>
-                    <AI001Dashboard
-                      chartData={chart}
-                      userId={chartId} // Using chartId as user identifier for demo
-                      className="p-6"
-                    />
-                  </CardContent>
-                )}
-              </Card>
-            )}
-
-          </CardContent>
-        </Card>
-      </div>
-    </TooltipProvider>
+                </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </TooltipProvider>
     </ErrorBoundary>
   );
 };

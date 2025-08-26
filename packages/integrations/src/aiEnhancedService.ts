@@ -4,59 +4,85 @@ import { z } from 'zod';
 const TransitAnalysisSchema = z.object({
   transitType: z.enum(['current', 'upcoming', 'past']),
   timeframe: z.enum(['week', 'month', 'quarter', 'year']),
-  focusAreas: z.array(z.enum(['career', 'relationships', 'health', 'spirituality', 'finances'])),
-  timing: z.object({
-    exactDate: z.string(),
-    influence_period: z.object({
-      start: z.string(),
-      peak: z.string(),
-      end: z.string()
+  focusAreas: z.array(
+    z.enum(['career', 'relationships', 'health', 'spirituality', 'finances'])
+  ),
+  timing: z
+    .object({
+      exactDate: z.string(),
+      influence_period: z.object({
+        start: z.string(),
+        peak: z.string(),
+        end: z.string(),
+      }),
     })
-  }).optional()
+    .optional(),
 });
 
 const ChatQuestionSchema = z.object({
   question: z.string().min(5).max(1000),
   context: z.object({
     chartData: z.any().optional(),
-    previousMessages: z.array(z.object({
-      role: z.enum(['user', 'assistant']),
-      content: z.string()
-    })).optional(),
-    userProfile: z.object({
-      birthDate: z.string(),
-      birthTime: z.string(),
-      birthLocation: z.string()
-    }).optional()
-  })
+    previousMessages: z
+      .array(
+        z.object({
+          role: z.enum(['user', 'assistant']),
+          content: z.string(),
+        })
+      )
+      .optional(),
+    userProfile: z
+      .object({
+        birthDate: z.string(),
+        birthTime: z.string(),
+        birthLocation: z.string(),
+      })
+      .optional(),
+  }),
 });
 
 const MultiSystemSynthesisSchema = z.object({
   systems: z.array(z.enum(['western', 'vedic', 'chinese', 'mayan', 'uranian'])),
-  synthesisType: z.enum(['personality', 'life_path', 'relationships', 'career', 'spiritual']),
+  synthesisType: z.enum([
+    'personality',
+    'life_path',
+    'relationships',
+    'career',
+    'spiritual',
+  ]),
   chartData: z.any(),
-  depth: z.enum(['basic', 'intermediate', 'advanced'])
+  depth: z.enum(['basic', 'intermediate', 'advanced']),
 });
 
 const PersonalGrowthSchema = z.object({
-  growthArea: z.enum(['emotional_intelligence', 'leadership', 'creativity', 'relationships', 'spiritual_development']),
+  growthArea: z.enum([
+    'emotional_intelligence',
+    'leadership',
+    'creativity',
+    'relationships',
+    'spiritual_development',
+  ]),
   currentChallenges: z.array(z.string()),
   goals: z.array(z.string()),
   timeframe: z.enum(['immediate', 'short_term', 'long_term']),
-  chartData: z.any()
+  chartData: z.any(),
 });
 
 const PatternRecognitionSchema = z.object({
   chartCollection: z.array(z.any()),
-  patternTypes: z.array(z.enum(['personality', 'life_events', 'relationships', 'career', 'health'])),
+  patternTypes: z.array(
+    z.enum(['personality', 'life_events', 'relationships', 'career', 'health'])
+  ),
   analysisDepth: z.enum(['surface', 'deep', 'comprehensive']),
-  userId: z.string()
+  userId: z.string(),
 });
 
 export interface TransitAnalysisRequest {
   transitType: 'current' | 'upcoming' | 'past';
   timeframe: 'week' | 'month' | 'quarter' | 'year';
-  focusAreas: Array<'career' | 'relationships' | 'health' | 'spirituality' | 'finances'>;
+  focusAreas: Array<
+    'career' | 'relationships' | 'health' | 'spirituality' | 'finances'
+  >;
   chartData: any;
   birthData: {
     date: string;
@@ -83,13 +109,23 @@ export interface ChatQuestionRequest {
 
 export interface MultiSystemSynthesisRequest {
   systems: Array<'western' | 'vedic' | 'chinese' | 'mayan' | 'uranian'>;
-  synthesisType: 'personality' | 'life_path' | 'relationships' | 'career' | 'spiritual';
+  synthesisType:
+    | 'personality'
+    | 'life_path'
+    | 'relationships'
+    | 'career'
+    | 'spiritual';
   chartData: any;
   depth: 'basic' | 'intermediate' | 'advanced';
 }
 
 export interface PersonalGrowthRequest {
-  growthArea: 'emotional_intelligence' | 'leadership' | 'creativity' | 'relationships' | 'spiritual_development';
+  growthArea:
+    | 'emotional_intelligence'
+    | 'leadership'
+    | 'creativity'
+    | 'relationships'
+    | 'spiritual_development';
   currentChallenges: string[];
   goals: string[];
   timeframe: 'immediate' | 'short_term' | 'long_term';
@@ -98,7 +134,9 @@ export interface PersonalGrowthRequest {
 
 export interface PatternRecognitionRequest {
   chartCollection: any[];
-  patternTypes: Array<'personality' | 'life_events' | 'relationships' | 'career' | 'health'>;
+  patternTypes: Array<
+    'personality' | 'life_events' | 'relationships' | 'career' | 'health'
+  >;
   analysisDepth: 'surface' | 'deep' | 'comprehensive';
   userId: string;
 }
@@ -112,17 +150,23 @@ export class AIEnhancedService {
 
   private static getApiKey(): string {
     // Support both Node and Vite environments
-    const globalProcess: any = (globalThis as unknown as { process?: unknown }).process;
-    const nodeEnv = (globalProcess && typeof globalProcess === 'object'
-      ? (globalProcess as { env?: Record<string, unknown> }).env
-      : undefined) ?? undefined;
-    const nodeKey = typeof nodeEnv?.['XAI_API_KEY'] === 'string' 
-      ? String(nodeEnv['XAI_API_KEY']) 
-      : undefined;
-    const metaEnv = (import.meta as unknown as { env?: Record<string, unknown> }).env;
-    const viteKey = typeof metaEnv?.['VITE_XAI_API_KEY'] === 'string' 
-      ? String(metaEnv['VITE_XAI_API_KEY']) 
-      : undefined;
+    const globalProcess: any = (globalThis as unknown as { process?: unknown })
+      .process;
+    const nodeEnv =
+      (globalProcess && typeof globalProcess === 'object'
+        ? (globalProcess as { env?: Record<string, unknown> }).env
+        : undefined) ?? undefined;
+    const nodeKey =
+      typeof nodeEnv?.['XAI_API_KEY'] === 'string'
+        ? String(nodeEnv['XAI_API_KEY'])
+        : undefined;
+    const metaEnv = (
+      import.meta as unknown as { env?: Record<string, unknown> }
+    ).env;
+    const viteKey =
+      typeof metaEnv?.['VITE_XAI_API_KEY'] === 'string'
+        ? String(metaEnv['VITE_XAI_API_KEY'])
+        : undefined;
     const key = nodeKey ?? viteKey;
     if (!key) throw new Error('XAI_API_KEY environment variable is not set');
     return key;
@@ -131,18 +175,24 @@ export class AIEnhancedService {
   /**
    * Feature 1: Predictive Transit Analysis with AI-Powered Timing Recommendations
    */
-  static async generateTransitAnalysis(request: TransitAnalysisRequest): Promise<string> {
+  static async generateTransitAnalysis(
+    request: TransitAnalysisRequest
+  ): Promise<string> {
     try {
       TransitAnalysisSchema.parse(request);
     } catch (error) {
-      throw new Error(`Invalid transit analysis request: ${error instanceof Error ? error.message : 'Unknown validation error'}`);
+      throw new Error(
+        `Invalid transit analysis request: ${error instanceof Error ? error.message : 'Unknown validation error'}`
+      );
     }
 
     const prompt = this.buildTransitAnalysisPrompt(request);
     return this.makeAIRequest(prompt, 'transit-analysis');
   }
 
-  private static buildTransitAnalysisPrompt(request: TransitAnalysisRequest): string {
+  private static buildTransitAnalysisPrompt(
+    request: TransitAnalysisRequest
+  ): string {
     const { transitType, timeframe, focusAreas, birthData } = request;
 
     return `As an expert astrologer specializing in predictive transit analysis, provide detailed timing insights for someone born on ${birthData.date} at ${birthData.time} in ${birthData.location}.
@@ -168,11 +218,15 @@ Focus on practical, actionable timing recommendations that help optimize life de
   /**
    * Feature 2: Custom AI Question Answering System (Chat-based Astrology Insights)
    */
-  static async answerAstrologyQuestion(request: ChatQuestionRequest): Promise<string> {
+  static async answerAstrologyQuestion(
+    request: ChatQuestionRequest
+  ): Promise<string> {
     try {
       ChatQuestionSchema.parse(request);
     } catch (error) {
-      throw new Error(`Invalid chat question request: ${error instanceof Error ? error.message : 'Unknown validation error'}`);
+      throw new Error(
+        `Invalid chat question request: ${error instanceof Error ? error.message : 'Unknown validation error'}`
+      );
     }
 
     const prompt = this.buildChatPrompt(request);
@@ -181,14 +235,15 @@ Focus on practical, actionable timing recommendations that help optimize life de
 
   private static buildChatPrompt(request: ChatQuestionRequest): string {
     const { question, context } = request;
-    
+
     let contextInfo = '';
     if (context.userProfile) {
       contextInfo += `\nUser Birth Data: ${context.userProfile.birthDate} at ${context.userProfile.birthTime} in ${context.userProfile.birthLocation}`;
     }
-    
+
     if (context.chartData) {
-      contextInfo += '\nChart data is available for specific planetary positions and aspects.';
+      contextInfo +=
+        '\nChart data is available for specific planetary positions and aspects.';
     }
 
     if (context.previousMessages && context.previousMessages.length > 0) {
@@ -217,29 +272,42 @@ Make your response conversational, insightful, and personally relevant. Draw fro
   /**
    * Feature 3: Multi-System AI Synthesis (Cross-Cultural Interpretation Fusion)
    */
-  static async generateMultiSystemSynthesis(request: MultiSystemSynthesisRequest): Promise<string> {
+  static async generateMultiSystemSynthesis(
+    request: MultiSystemSynthesisRequest
+  ): Promise<string> {
     try {
       MultiSystemSynthesisSchema.parse(request);
     } catch (error) {
-      throw new Error(`Invalid multi-system synthesis request: ${error instanceof Error ? error.message : 'Unknown validation error'}`);
+      throw new Error(
+        `Invalid multi-system synthesis request: ${error instanceof Error ? error.message : 'Unknown validation error'}`
+      );
     }
 
     const prompt = this.buildMultiSystemPrompt(request);
     return this.makeAIRequest(prompt, 'multi-system-synthesis');
   }
 
-  private static buildMultiSystemPrompt(request: MultiSystemSynthesisRequest): string {
+  private static buildMultiSystemPrompt(
+    request: MultiSystemSynthesisRequest
+  ): string {
     const { systems, synthesisType, depth } = request;
 
     const systemDescriptions = {
-      western: 'Western Tropical Astrology with zodiac signs, houses, and planetary aspects',
-      vedic: 'Vedic Sidereal Astrology with nakshatras, dashas, and karmic influences',
-      chinese: 'Chinese Astrology with animal signs, elements, and Four Pillars analysis',
-      mayan: 'Mayan Sacred Calendar with Tzolkin energies and spiritual guidance',
-      uranian: 'Uranian Astrology with transneptunian points and sensitive degree analysis'
+      western:
+        'Western Tropical Astrology with zodiac signs, houses, and planetary aspects',
+      vedic:
+        'Vedic Sidereal Astrology with nakshatras, dashas, and karmic influences',
+      chinese:
+        'Chinese Astrology with animal signs, elements, and Four Pillars analysis',
+      mayan:
+        'Mayan Sacred Calendar with Tzolkin energies and spiritual guidance',
+      uranian:
+        'Uranian Astrology with transneptunian points and sensitive degree analysis',
     };
 
-    const includedSystems = systems.map(s => systemDescriptions[s]).join('\n- ');
+    const includedSystems = systems
+      .map(s => systemDescriptions[s])
+      .join('\n- ');
 
     return `As a master astrologer with expertise in multiple astrological traditions, create a ${depth} synthesis analysis for ${synthesisType} using these systems:
 
@@ -264,18 +332,24 @@ Create a ${depth}-level analysis that respects each tradition while revealing de
   /**
    * Feature 4: Personal Growth Coaching with AI-Driven Developmental Insights
    */
-  static async generatePersonalGrowthCoaching(request: PersonalGrowthRequest): Promise<string> {
+  static async generatePersonalGrowthCoaching(
+    request: PersonalGrowthRequest
+  ): Promise<string> {
     try {
       PersonalGrowthSchema.parse(request);
     } catch (error) {
-      throw new Error(`Invalid personal growth request: ${error instanceof Error ? error.message : 'Unknown validation error'}`);
+      throw new Error(
+        `Invalid personal growth request: ${error instanceof Error ? error.message : 'Unknown validation error'}`
+      );
     }
 
     const prompt = this.buildGrowthCoachingPrompt(request);
     return this.makeAIRequest(prompt, 'personal-growth');
   }
 
-  private static buildGrowthCoachingPrompt(request: PersonalGrowthRequest): string {
+  private static buildGrowthCoachingPrompt(
+    request: PersonalGrowthRequest
+  ): string {
     const { growthArea, currentChallenges, goals, timeframe } = request;
 
     return `As an expert astrological life coach, provide developmental guidance for ${growthArea.replace('_', ' ')} growth:
@@ -306,18 +380,24 @@ Create a personalized development plan that combines practical psychology with a
   /**
    * Feature 5: Advanced Pattern Recognition Across User Chart Collections
    */
-  static async analyzePatterns(request: PatternRecognitionRequest): Promise<string> {
+  static async analyzePatterns(
+    request: PatternRecognitionRequest
+  ): Promise<string> {
     try {
       PatternRecognitionSchema.parse(request);
     } catch (error) {
-      throw new Error(`Invalid pattern recognition request: ${error instanceof Error ? error.message : 'Unknown validation error'}`);
+      throw new Error(
+        `Invalid pattern recognition request: ${error instanceof Error ? error.message : 'Unknown validation error'}`
+      );
     }
 
     const prompt = this.buildPatternAnalysisPrompt(request);
     return this.makeAIRequest(prompt, 'pattern-recognition');
   }
 
-  private static buildPatternAnalysisPrompt(request: PatternRecognitionRequest): string {
+  private static buildPatternAnalysisPrompt(
+    request: PatternRecognitionRequest
+  ): string {
     const { patternTypes, analysisDepth, chartCollection } = request;
 
     return `As an expert astrological pattern analyst, examine this collection of ${chartCollection.length} charts to identify significant patterns:
@@ -348,14 +428,17 @@ Note: Respect privacy - provide general pattern insights without identifying spe
   /**
    * Core AI Request Handler
    */
-  private static async makeAIRequest(prompt: string, requestType: string): Promise<string> {
+  private static async makeAIRequest(
+    prompt: string,
+    requestType: string
+  ): Promise<string> {
     try {
       const apiKey = this.getApiKey();
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -363,30 +446,39 @@ Note: Respect privacy - provide general pattern insights without identifying spe
           messages: [
             {
               role: 'system',
-              content: 'You are an advanced astrological AI system with deep expertise in predictive analysis, multi-system synthesis, personal development, and pattern recognition. Provide detailed, accurate, and actionable insights while maintaining a professional yet accessible tone.'
+              content:
+                'You are an advanced astrological AI system with deep expertise in predictive analysis, multi-system synthesis, personal development, and pattern recognition. Provide detailed, accurate, and actionable insights while maintaining a professional yet accessible tone.',
             },
             {
               role: 'user',
-              content: prompt
-            }
+              content: prompt,
+            },
           ],
           max_tokens: 1000,
           temperature: 0.7,
-          top_p: 0.9
+          top_p: 0.9,
         }),
       });
 
       if (!response.ok) {
         await response.json().catch(() => undefined);
-        throw new Error(`xAI API request failed: ${response.statusText} (${response.status})`);
+        throw new Error(
+          `xAI API request failed: ${response.statusText} (${response.status})`
+        );
       }
 
       const json: unknown = await response.json();
-      const parsed = z.object({
-        choices: z.array(z.object({
-          message: z.object({ content: z.string() })
-        })).min(1)
-      }).safeParse(json);
+      const parsed = z
+        .object({
+          choices: z
+            .array(
+              z.object({
+                message: z.object({ content: z.string() }),
+              })
+            )
+            .min(1),
+        })
+        .safeParse(json);
 
       if (!parsed.success) {
         throw new Error('Unexpected API response shape');
@@ -394,11 +486,13 @@ Note: Respect privacy - provide general pattern insights without identifying spe
 
       const first = parsed.data.choices[0];
       if (!first) throw new Error('Empty choices array in response');
-      
+
       return first.message.content;
     } catch (error) {
       if (error instanceof Error) {
-        throw new Error(`Enhanced AI Service error (${requestType}): ${error.message}`);
+        throw new Error(
+          `Enhanced AI Service error (${requestType}): ${error.message}`
+        );
       }
       throw new Error(`Failed to process ${requestType} request`);
     }
@@ -407,7 +501,10 @@ Note: Respect privacy - provide general pattern insights without identifying spe
   /**
    * Fallback to Mock Service for Development/Testing
    */
-  static async generateMockResponse(requestType: string, request: any): Promise<string> {
+  static async generateMockResponse(
+    requestType: string,
+    request: any
+  ): Promise<string> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -529,9 +626,12 @@ This chart collection represents a group with shared spiritual mission around ${
 🎯 **Predictive Patterns**: 
 The group shows strong indicators for significant breakthroughs in ${new Date().getFullYear() + 1}-${new Date().getFullYear() + 2}, particularly in areas of creative expression and spiritual service.
 
-This collection represents powerful change agents with aligned soul purposes.`
+This collection represents powerful change agents with aligned soul purposes.`,
     };
 
-    return mockResponses[requestType as keyof typeof mockResponses] || 'Advanced AI analysis completed successfully. Enhanced insights generated based on your request.';
+    return (
+      mockResponses[requestType as keyof typeof mockResponses] ||
+      'Advanced AI analysis completed successfully. Enhanced insights generated based on your request.'
+    );
   }
 }

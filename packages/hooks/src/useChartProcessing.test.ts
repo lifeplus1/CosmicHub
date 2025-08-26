@@ -1,9 +1,9 @@
 /**
  * Tests for useChartProcessing hook
- * 
+ *
  * Validates the critical data flow fixes:
  * 1. Handles new calculations with __raw_backend_response
- * 2. Handles saved charts without __raw_backend_response  
+ * 2. Handles saved charts without __raw_backend_response
  * 3. Properly categorizes asteroids, points, and planets
  * 4. Provides debug information for troubleshooting
  */
@@ -37,7 +37,7 @@ describe('useChartProcessing', () => {
         },
       };
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(newCalculationData, { enableDebug: false })
       );
 
@@ -55,7 +55,7 @@ describe('useChartProcessing', () => {
         birth_data: { name: 'Test' },
       };
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(savedChartData, { enableDebug: false })
       );
 
@@ -70,7 +70,7 @@ describe('useChartProcessing', () => {
         aspects: [],
       };
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(directChartData, { enableDebug: false })
       );
 
@@ -103,52 +103,73 @@ describe('useChartProcessing', () => {
         transpluto: { position: 315 },
       },
       houses: [
-        { cusp: 0 }, { cusp: 30 }, { cusp: 60 }, { cusp: 90 },
-        { cusp: 120 }, { cusp: 150 }, { cusp: 180 }, { cusp: 210 },
-        { cusp: 240 }, { cusp: 270 }, { cusp: 300 }, { cusp: 330 }
+        { cusp: 0 },
+        { cusp: 30 },
+        { cusp: 60 },
+        { cusp: 90 },
+        { cusp: 120 },
+        { cusp: 150 },
+        { cusp: 180 },
+        { cusp: 210 },
+        { cusp: 240 },
+        { cusp: 270 },
+        { cusp: 300 },
+        { cusp: 330 },
       ],
-      aspects: [
-        { planet1: 'sun', planet2: 'moon', type: 'trine', orb: 2.5 }
-      ],
+      aspects: [{ planet1: 'sun', planet2: 'moon', type: 'trine', orb: 2.5 }],
     };
 
     it('should correctly categorize main planets', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(sampleBackendData, { enableDebug: false })
       );
 
       expect(result.current.planets).toHaveLength(2);
-      expect(result.current.planets.map(p => p.name.toLowerCase())).toContain('sun');
-      expect(result.current.planets.map(p => p.name.toLowerCase())).toContain('moon');
-      
-      const sun = result.current.planets.find(p => p.name.toLowerCase() === 'sun');
+      expect(result.current.planets.map(p => p.name.toLowerCase())).toContain(
+        'sun'
+      );
+      expect(result.current.planets.map(p => p.name.toLowerCase())).toContain(
+        'moon'
+      );
+
+      const sun = result.current.planets.find(
+        p => p.name.toLowerCase() === 'sun'
+      );
       expect(sun).toBeDefined();
       expect(sun?.position).toBe(30);
       expect(sun?.retrograde).toBe(false);
     });
 
     it('should correctly categorize asteroids', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(sampleBackendData, { enableDebug: false })
       );
 
       expect(result.current.asteroids).toHaveLength(3);
-      expect(result.current.asteroids.map(a => a.name.toLowerCase())).toContain('ceres');
-      expect(result.current.asteroids.map(a => a.name.toLowerCase())).toContain('pallas');
-      expect(result.current.asteroids.map(a => a.name.toLowerCase())).toContain('juno');
-      
-      const pallas = result.current.asteroids.find(a => a.name.toLowerCase() === 'pallas');
+      expect(result.current.asteroids.map(a => a.name.toLowerCase())).toContain(
+        'ceres'
+      );
+      expect(result.current.asteroids.map(a => a.name.toLowerCase())).toContain(
+        'pallas'
+      );
+      expect(result.current.asteroids.map(a => a.name.toLowerCase())).toContain(
+        'juno'
+      );
+
+      const pallas = result.current.asteroids.find(
+        a => a.name.toLowerCase() === 'pallas'
+      );
       expect(pallas).toBeDefined();
       expect(pallas?.position).toBe(90);
     });
 
     it('should correctly categorize points (nodes, lilith, uranian, hypothetical)', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(sampleBackendData, { enableDebug: false })
       );
 
       expect(result.current.points).toHaveLength(6); // 3 points + 2 uranian + 1 hypothetical
-      
+
       const pointNames = result.current.points.map(p => p.name.toLowerCase());
       expect(pointNames).toContain('north_node');
       expect(pointNames).toContain('south_node');
@@ -159,28 +180,28 @@ describe('useChartProcessing', () => {
     });
 
     it('should process houses correctly', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(sampleBackendData, { enableDebug: false })
       );
 
       expect(result.current.houses).toHaveLength(12);
-      
+
       const firstHouse = result.current.houses.find(h => h.house === 1);
       expect(firstHouse).toBeDefined();
       expect(firstHouse?.cusp).toBe(0);
-      
+
       const seventhHouse = result.current.houses.find(h => h.house === 7);
       expect(seventhHouse).toBeDefined();
       expect(seventhHouse?.cusp).toBe(180);
     });
 
     it('should process aspects correctly', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(sampleBackendData, { enableDebug: false })
       );
 
       expect(result.current.aspects).toHaveLength(1);
-      
+
       const trine = result.current.aspects[0];
       expect(trine).toBeDefined();
       expect(trine?.planet1).toBe('sun');
@@ -192,23 +213,23 @@ describe('useChartProcessing', () => {
 
   describe('Edge Cases & Error Handling', () => {
     it('should handle null/undefined data gracefully', () => {
-      const { result: nullResult } = renderHook(() => 
+      const { result: nullResult } = renderHook(() =>
         useChartProcessing(null, { enableDebug: false })
       );
-      
+
       expect(nullResult.current.source).toBe('unknown');
       expect(nullResult.current.planets).toHaveLength(0);
       expect(nullResult.current.asteroids).toHaveLength(0);
 
-      const { result: undefinedResult } = renderHook(() => 
+      const { result: undefinedResult } = renderHook(() =>
         useChartProcessing(undefined, { enableDebug: false })
       );
-      
+
       expect(undefinedResult.current.source).toBe('unknown');
     });
 
     it('should handle invalid data types gracefully', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing('invalid string data', { enableDebug: false })
       );
 
@@ -218,7 +239,7 @@ describe('useChartProcessing', () => {
     });
 
     it('should handle empty objects gracefully', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing({}, { enableDebug: false })
       );
 
@@ -243,7 +264,7 @@ describe('useChartProcessing', () => {
         houses: [null, { cusp: 30 }], // mixed valid/invalid houses
       };
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(malformedData, { enableDebug: false })
       );
 
@@ -263,7 +284,7 @@ describe('useChartProcessing', () => {
         houses: [{ cusp: 0 }],
       };
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(testData, { enableDebug: false })
       );
 
@@ -278,17 +299,16 @@ describe('useChartProcessing', () => {
     it('should enable debug logging when requested', () => {
       const testData = { planets: { sun: { position: 30 } } };
 
-      renderHook(() => 
-        useChartProcessing(testData, { enableDebug: true })
-      );
+      renderHook(() => useChartProcessing(testData, { enableDebug: true }));
 
       // Verify debug logs were called
       expect(mockConsole.log).toHaveBeenCalled();
-      
+
       // Check for specific debug messages
       const logCalls = mockConsole.log.mock.calls.flat();
-      const hasProcessingMessage = logCalls.some(call => 
-        typeof call === 'string' && call.includes('🔧 useChartProcessing')
+      const hasProcessingMessage = logCalls.some(
+        call =>
+          typeof call === 'string' && call.includes('🔧 useChartProcessing')
       );
       expect(hasProcessingMessage).toBe(true);
     });
@@ -340,43 +360,50 @@ describe('useChartProcessing', () => {
       // This is the exact structure from test_final_fix.mjs
       const testBackendResponse = {
         planets: {
-          'sun': { position: 30, retrograde: false },
-          'moon': { position: 150, retrograde: false }
+          sun: { position: 30, retrograde: false },
+          moon: { position: 150, retrograde: false },
         },
         asteroids: {
-          'ceres': { position: 45, retrograde: false },
-          'pallas': { position: 90, retrograde: true },
-          'juno': { position: 180, retrograde: false }
+          ceres: { position: 45, retrograde: false },
+          pallas: { position: 90, retrograde: true },
+          juno: { position: 180, retrograde: false },
         },
         points: {
-          'north_node': { position: 120 },
-          'south_node': { position: 300 },
-          'lilith_mean': { position: 200 }
+          north_node: { position: 120 },
+          south_node: { position: 300 },
+          lilith_mean: { position: 200 },
         },
         uranian: {
-          'cupido': { position: 75 },
-          'hades': { position: 225 }
+          cupido: { position: 75 },
+          hades: { position: 225 },
         },
         hypothetical_points: {
-          'transpluto': { position: 315 }
+          transpluto: { position: 315 },
         },
         houses: [
-          { cusp: 0 }, { cusp: 30 }, { cusp: 60 }, { cusp: 90 },
-          { cusp: 120 }, { cusp: 150 }, { cusp: 180 }, { cusp: 210 },
-          { cusp: 240 }, { cusp: 270 }, { cusp: 300 }, { cusp: 330 }
+          { cusp: 0 },
+          { cusp: 30 },
+          { cusp: 60 },
+          { cusp: 90 },
+          { cusp: 120 },
+          { cusp: 150 },
+          { cusp: 180 },
+          { cusp: 210 },
+          { cusp: 240 },
+          { cusp: 270 },
+          { cusp: 300 },
+          { cusp: 330 },
         ],
-        aspects: [
-          { planet1: 'sun', planet2: 'moon', type: 'trine', orb: 2.5 }
-        ]
+        aspects: [{ planet1: 'sun', planet2: 'moon', type: 'trine', orb: 2.5 }],
       };
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(testBackendResponse, { enableDebug: false })
       );
 
       // Validate the expected categorization from the test file
       expect(result.current.planets).toHaveLength(2); // sun, moon
-      expect(result.current.asteroids).toHaveLength(3); // ceres, pallas, juno  
+      expect(result.current.asteroids).toHaveLength(3); // ceres, pallas, juno
       expect(result.current.points).toHaveLength(6); // 3 points + 2 uranian + 1 hypothetical
       expect(result.current.houses).toHaveLength(12);
       expect(result.current.aspects).toHaveLength(1);
@@ -386,9 +413,11 @@ describe('useChartProcessing', () => {
       expect(planetNames).toContain('sun');
       expect(planetNames).toContain('moon');
 
-      const asteroidNames = result.current.asteroids.map(a => a.name.toLowerCase());
+      const asteroidNames = result.current.asteroids.map(a =>
+        a.name.toLowerCase()
+      );
       expect(asteroidNames).toContain('ceres');
-      expect(asteroidNames).toContain('pallas'); 
+      expect(asteroidNames).toContain('pallas');
       expect(asteroidNames).toContain('juno');
 
       const pointNames = result.current.points.map(p => p.name.toLowerCase());
@@ -407,10 +436,10 @@ describe('useChartProcessing', () => {
           points: { north_node: { position: 120 } },
           houses: [{ cusp: 0 }],
           aspects: [],
-        }
+        },
       };
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useChartProcessing(savedChartResponse, { enableDebug: false })
       );
 

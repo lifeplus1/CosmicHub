@@ -26,10 +26,16 @@
 
 ```tsx
 // Add to each table header
-<div className="flex items-center gap-2">
-  <Button size="sm" variant="ghost">📋 Copy Table</Button>
-  <Button size="sm" variant="ghost">📊 Export CSV</Button>
-  <Button size="sm" variant="ghost">🔍 Focus View</Button>
+<div className='flex items-center gap-2'>
+  <Button size='sm' variant='ghost'>
+    📋 Copy Table
+  </Button>
+  <Button size='sm' variant='ghost'>
+    📊 Export CSV
+  </Button>
+  <Button size='sm' variant='ghost'>
+    🔍 Focus View
+  </Button>
 </div>
 ```
 
@@ -49,7 +55,7 @@
 ### 4. Visual Improvements
 
 - Progress bars showing aspect strength
-- Color coding for different celestial body types  
+- Color coding for different celestial body types
 - Visual indicators for retrograde motion
 - Chart-specific theming
 
@@ -78,7 +84,7 @@
 2. **Quick Copy Functions**:
 
    ```tsx
-   const copyTableToClipboard = (tableData) => {
+   const copyTableToClipboard = tableData => {
      const text = tableData.map(row => Object.values(row).join('\t')).join('\n');
      navigator.clipboard.writeText(text);
    };
@@ -96,9 +102,9 @@
 
    ```tsx
    useKeyboardShortcuts({
-     'KeyP': () => toggleSection('planets'),
-     'KeyH': () => toggleSection('houses'),
-     'KeyA': () => toggleSection('aspects'),
+     KeyP: () => toggleSection('planets'),
+     KeyH: () => toggleSection('houses'),
+     KeyA: () => toggleSection('aspects'),
    });
    ```
 
@@ -125,4 +131,5 @@
 - 🔄 **Mobile Optimizations** - Touch gestures
 - 🔄 **Performance Optimizations** - Virtual scrolling
 
-The collapsible tables implementation provides immediate value and sets the foundation for additional enhancements!
+The collapsible tables implementation provides immediate value and sets the foundation for
+additional enhancements!

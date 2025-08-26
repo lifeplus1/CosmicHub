@@ -55,15 +55,21 @@ const SavedCharts: React.FC = () => {
 
   const handleViewChart = (chart: SavedChart) => {
     console.log('🔄 Storing chart in sessionStorage:', chart);
-    
+
     // Try multiple approaches to ensure data persistence
     sessionStorage.setItem('selectedChart', JSON.stringify(chart));
     localStorage.setItem('tempSelectedChart', JSON.stringify(chart));
-    
-    console.log('✅ Chart stored, confirming storage:', sessionStorage.getItem('selectedChart'));
-    console.log('✅ Chart stored in localStorage too:', localStorage.getItem('tempSelectedChart'));
+
+    console.log(
+      '✅ Chart stored, confirming storage:',
+      sessionStorage.getItem('selectedChart')
+    );
+    console.log(
+      '✅ Chart stored in localStorage too:',
+      localStorage.getItem('tempSelectedChart')
+    );
     console.log('🔄 Navigating to /chart');
-    
+
     // Add a small delay to ensure storage is written
     setTimeout(() => {
       navigate('/chart');

@@ -7,21 +7,21 @@ interface AstroSymbolProps {
   title?: string;
 }
 
-export const AstroSymbol: React.FC<AstroSymbolProps> = ({ 
-  symbol, 
-  size = 'md', 
+export const AstroSymbol: React.FC<AstroSymbolProps> = ({
+  symbol,
+  size = 'md',
   className = '',
-  title 
+  title,
 }) => {
   const sizeClass = {
     sm: 'astro-symbol-sm',
     md: 'astro-symbol',
     lg: 'astro-symbol-lg',
-    xl: 'astro-symbol-xl'
+    xl: 'astro-symbol-xl',
   }[size];
 
   return (
-    <span 
+    <span
       className={`${sizeClass} ${className}`}
       title={title}
       aria-label={title}

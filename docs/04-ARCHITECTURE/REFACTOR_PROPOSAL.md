@@ -3,7 +3,7 @@
 ## Current Issues
 
 1. Multiple sign calculation functions
-2. Multiple house calculation functions  
+2. Multiple house calculation functions
 3. Redundant transformation layers
 4. Saved charts re-processed unnecessarily
 5. Validation happening after transformation instead of before
@@ -27,12 +27,12 @@ export const AstrologyUtils = {
 ```typescript
 export class ChartProcessor {
   // Process raw backend data OR saved chart data
-  static process(rawData: unknown, source: 'api' | 'saved'): ProcessedChart
-  
+  static process(rawData: unknown, source: 'api' | 'saved'): ProcessedChart;
+
   // Handle both cases with single logic
-  private static transformPlanets(planets: any, houses: any[]): Planet[]
-  private static transformAspects(aspects: any[]): Aspect[]
-  private static transformAngles(angles: any): ChartAngles
+  private static transformPlanets(planets: any, houses: any[]): Planet[];
+  private static transformAspects(aspects: any[]): Aspect[];
+  private static transformAngles(angles: any): ChartAngles;
 }
 ```
 
@@ -56,14 +56,14 @@ Saved Data → Normalization → Validation → Display (fails → sample data)
 // Only process if data structure has changed
 const processedChart = ChartProcessor.process(data, {
   skipIfAlreadyProcessed: true,
-  source: isFromAPI ? 'api' : 'saved'
-})
+  source: isFromAPI ? 'api' : 'saved',
+});
 ```
 
 ## Benefits
 
 - ✅ Single source of truth for calculations
-- ✅ Saved charts work reliably  
+- ✅ Saved charts work reliably
 - ✅ Easier to maintain and debug
 - ✅ Better performance (less redundant processing)
 - ✅ More predictable data flow
@@ -71,5 +71,5 @@ const processedChart = ChartProcessor.process(data, {
 ## Implementation Priority
 
 1. **High**: Fix saved chart loading (immediate user issue)
-2. **Medium**: Consolidate calculation functions  
+2. **Medium**: Consolidate calculation functions
 3. **Low**: Full architectural refactor

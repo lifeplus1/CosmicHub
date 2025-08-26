@@ -1,6 +1,6 @@
 /**
  * useStateValidation Hook - Comprehensive State Validation Management
- * 
+ *
  * Provides enterprise-grade state validation with:
  * - Centralized validation logic for birth data, chart data, and user inputs
  * - Type guards with detailed error messages
@@ -8,7 +8,7 @@
  * - Progressive validation patterns for complex forms
  * - Real-time validation feedback
  * - Custom validation rules and business logic
- * 
+ *
  * This hook consolidates all validation logic that was previously
  * scattered across contexts and components.
  */
@@ -60,7 +60,7 @@ export interface BirthData {
   timezone?: string;
 }
 
-// Chart data validation types  
+// Chart data validation types
 export interface ChartData {
   planets?: Record<string, any>;
   houses?: any[];
@@ -103,346 +103,412 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
   const cacheRef = useRef<ValidationCache>({});
 
   // Generate cache key for validation
-  const getCacheKey = useCallback((data: any, rules: ValidationRule[]): string => {
-    const dataHash = JSON.stringify(data);
-    const rulesHash = rules.map(r => r.name).join(',');
-    return `${dataHash}-${rulesHash}`;
-  }, []);
+  const getCacheKey = useCallback(
+    (data: any, rules: ValidationRule[]): string => {
+      const dataHash = JSON.stringify(data);
+      const rulesHash = rules.map(r => r.name).join(',');
+      return `${dataHash}-${rulesHash}`;
+    },
+    []
+  );
 
   // Get cached validation result
-  const getCachedResult = useCallback((cacheKey: string): ValidationResult | null => {
-    if (!enableCache) return null;
+  const getCachedResult = useCallback(
+    (cacheKey: string): ValidationResult | null => {
+      if (!enableCache) return null;
 
-    const cached = cacheRef.current[cacheKey];
-    if (cached && cached.expiry > Date.now()) {
-      return cached.result;
-    }
+      const cached = cacheRef.current[cacheKey];
+      if (cached && cached.expiry > Date.now()) {
+        return cached.result;
+      }
 
-    // Clean expired cache entries
-    if (cached && cached.expiry <= Date.now()) {
-      delete cacheRef.current[cacheKey];
-    }
+      // Clean expired cache entries
+      if (cached && cached.expiry <= Date.now()) {
+        delete cacheRef.current[cacheKey];
+      }
 
-    return null;
-  }, [enableCache]);
+      return null;
+    },
+    [enableCache]
+  );
 
   // Set cached validation result
-  const setCachedResult = useCallback((cacheKey: string, result: ValidationResult): void => {
-    if (!enableCache) return;
+  const setCachedResult = useCallback(
+    (cacheKey: string, result: ValidationResult): void => {
+      if (!enableCache) return;
 
-    cacheRef.current[cacheKey] = {
-      result,
-      timestamp: Date.now(),
-      expiry: Date.now() + cacheExpiry,
-    };
-  }, [enableCache, cacheExpiry]);
+      cacheRef.current[cacheKey] = {
+        result,
+        timestamp: Date.now(),
+        expiry: Date.now() + cacheExpiry,
+      };
+    },
+    [enableCache, cacheExpiry]
+  );
 
   // Core validation engine
-  const validateWithRules = useCallback(async <T>(
-    data: T,
-    rules: ValidationRule<T>[],
-    fieldName: string = 'data'
-  ): Promise<ValidationResult> => {
-    const errors: ValidationError[] = [];
-    const warnings: ValidationError[] = [];
-    const info: ValidationError[] = [];
+  const validateWithRules = useCallback(
+    async <T>(
+      data: T,
+      rules: ValidationRule<T>[],
+      fieldName: string = 'data'
+    ): Promise<ValidationResult> => {
+      const errors: ValidationError[] = [];
+      const warnings: ValidationError[] = [];
+      const info: ValidationError[] = [];
 
-    for (const rule of rules) {
-      try {
-        let isValid: boolean;
-        
-        if (rule.async && enableAsyncValidation) {
-          isValid = await rule.validator(data);
-        } else {
-          isValid = rule.validator(data) as boolean;
-        }
+      for (const rule of rules) {
+        try {
+          let isValid: boolean;
 
-        if (!isValid) {
-          const error: ValidationError = {
+          if (rule.async && enableAsyncValidation) {
+            isValid = await rule.validator(data);
+          } else {
+            isValid = rule.validator(data) as boolean;
+          }
+
+          if (!isValid) {
+            const error: ValidationError = {
+              field: fieldName,
+              rule: rule.name,
+              message: rule.message,
+              severity: rule.severity,
+              value: data,
+            };
+
+            switch (rule.severity) {
+              case 'error':
+                errors.push(error);
+                break;
+              case 'warning':
+                warnings.push(error);
+                break;
+              case 'info':
+                info.push(error);
+                break;
+            }
+          }
+        } catch (error) {
+          errors.push({
             field: fieldName,
             rule: rule.name,
-            message: rule.message,
-            severity: rule.severity,
+            message: `Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            severity: 'error',
             value: data,
-          };
-
-          switch (rule.severity) {
-            case 'error':
-              errors.push(error);
-              break;
-            case 'warning':
-              warnings.push(error);
-              break;
-            case 'info':
-              info.push(error);
-              break;
-          }
+          });
         }
-      } catch (error) {
-        errors.push({
-          field: fieldName,
-          rule: rule.name,
-          message: `Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          severity: 'error',
-          value: data,
-        });
       }
-    }
 
-    return {
-      isValid: errors.length === 0 && (strictMode ? warnings.length === 0 : true),
-      errors,
-      warnings,
-      info,
-    };
-  }, [enableAsyncValidation, strictMode]);
+      return {
+        isValid:
+          errors.length === 0 && (strictMode ? warnings.length === 0 : true),
+        errors,
+        warnings,
+        info,
+      };
+    },
+    [enableAsyncValidation, strictMode]
+  );
 
   // Birth data validation rules
-  const birthDataRules: ValidationRule<BirthData>[] = useMemo(() => [
-    {
-      name: 'required_fields',
-      validator: (data) => {
-        return !!(data && 
-          typeof data.year === 'number' && 
-          typeof data.month === 'number' && 
-          typeof data.day === 'number' && 
-          typeof data.hour === 'number' && 
-          typeof data.minute === 'number' && 
-          typeof data.city === 'string' && 
-          data.city.trim().length > 0
-        );
+  const birthDataRules: ValidationRule<BirthData>[] = useMemo(
+    () => [
+      {
+        name: 'required_fields',
+        validator: data => {
+          return !!(
+            data &&
+            typeof data.year === 'number' &&
+            typeof data.month === 'number' &&
+            typeof data.day === 'number' &&
+            typeof data.hour === 'number' &&
+            typeof data.minute === 'number' &&
+            typeof data.city === 'string' &&
+            data.city.trim().length > 0
+          );
+        },
+        message:
+          'All required fields must be provided (year, month, day, hour, minute, city)',
+        severity: 'error',
       },
-      message: 'All required fields must be provided (year, month, day, hour, minute, city)',
-      severity: 'error',
-    },
-    {
-      name: 'valid_year',
-      validator: (data) => {
-        if (!data || typeof data.year !== 'number') return false;
-        const currentYear = new Date().getFullYear();
-        return data.year >= 1900 && data.year <= currentYear + 1;
+      {
+        name: 'valid_year',
+        validator: data => {
+          if (!data || typeof data.year !== 'number') return false;
+          const currentYear = new Date().getFullYear();
+          return data.year >= 1900 && data.year <= currentYear + 1;
+        },
+        message: 'Year must be between 1900 and current year + 1',
+        severity: 'error',
       },
-      message: 'Year must be between 1900 and current year + 1',
-      severity: 'error',
-    },
-    {
-      name: 'valid_month',
-      validator: (data) => {
-        if (!data || typeof data.month !== 'number') return false;
-        return data.month >= 1 && data.month <= 12;
+      {
+        name: 'valid_month',
+        validator: data => {
+          if (!data || typeof data.month !== 'number') return false;
+          return data.month >= 1 && data.month <= 12;
+        },
+        message: 'Month must be between 1 and 12',
+        severity: 'error',
       },
-      message: 'Month must be between 1 and 12',
-      severity: 'error',
-    },
-    {
-      name: 'valid_day',
-      validator: (data) => {
-        if (!data || typeof data.day !== 'number' || typeof data.month !== 'number' || typeof data.year !== 'number') {
-          return false;
-        }
-        
-        // Check day range based on month and year
-        const daysInMonth = new Date(data.year, data.month, 0).getDate();
-        return data.day >= 1 && data.day <= daysInMonth;
+      {
+        name: 'valid_day',
+        validator: data => {
+          if (
+            !data ||
+            typeof data.day !== 'number' ||
+            typeof data.month !== 'number' ||
+            typeof data.year !== 'number'
+          ) {
+            return false;
+          }
+
+          // Check day range based on month and year
+          const daysInMonth = new Date(data.year, data.month, 0).getDate();
+          return data.day >= 1 && data.day <= daysInMonth;
+        },
+        message: 'Day must be valid for the given month and year',
+        severity: 'error',
       },
-      message: 'Day must be valid for the given month and year',
-      severity: 'error',
-    },
-    {
-      name: 'valid_hour',
-      validator: (data) => {
-        if (!data || typeof data.hour !== 'number') return false;
-        return data.hour >= 0 && data.hour <= 23;
+      {
+        name: 'valid_hour',
+        validator: data => {
+          if (!data || typeof data.hour !== 'number') return false;
+          return data.hour >= 0 && data.hour <= 23;
+        },
+        message: 'Hour must be between 0 and 23',
+        severity: 'error',
       },
-      message: 'Hour must be between 0 and 23',
-      severity: 'error',
-    },
-    {
-      name: 'valid_minute',
-      validator: (data) => {
-        if (!data || typeof data.minute !== 'number') return false;
-        return data.minute >= 0 && data.minute <= 59;
+      {
+        name: 'valid_minute',
+        validator: data => {
+          if (!data || typeof data.minute !== 'number') return false;
+          return data.minute >= 0 && data.minute <= 59;
+        },
+        message: 'Minute must be between 0 and 59',
+        severity: 'error',
       },
-      message: 'Minute must be between 0 and 59',
-      severity: 'error',
-    },
-    {
-      name: 'valid_coordinates',
-      validator: (data) => {
-        if (!data) return true; // Optional coordinates
-        
-        const hasLat = typeof data.lat === 'number';
-        const hasLon = typeof data.lon === 'number';
-        
-        // Both or neither
-        if (hasLat !== hasLon) return false;
-        
-        if (hasLat && hasLon) {
-          return data.lat! >= -90 && data.lat! <= 90 && 
-                 data.lon! >= -180 && data.lon! <= 180;
-        }
-        
-        return true;
-      },
-      message: 'Coordinates must be valid latitude (-90 to 90) and longitude (-180 to 180)',
-      severity: 'warning',
-    },
-    {
-      name: 'city_length',
-      validator: (data) => {
-        if (!data || typeof data.city !== 'string') return false;
-        return data.city.trim().length >= 2 && data.city.trim().length <= 100;
-      },
-      message: 'City name must be between 2 and 100 characters',
-      severity: 'error',
-    },
-    {
-      name: 'future_date_warning',
-      validator: (data) => {
-        if (!data || typeof data.year !== 'number' || typeof data.month !== 'number' || typeof data.day !== 'number') {
+      {
+        name: 'valid_coordinates',
+        validator: data => {
+          if (!data) return true; // Optional coordinates
+
+          const hasLat = typeof data.lat === 'number';
+          const hasLon = typeof data.lon === 'number';
+
+          // Both or neither
+          if (hasLat !== hasLon) return false;
+
+          if (hasLat && hasLon) {
+            return (
+              data.lat! >= -90 &&
+              data.lat! <= 90 &&
+              data.lon! >= -180 &&
+              data.lon! <= 180
+            );
+          }
+
           return true;
-        }
-        
-        const birthDate = new Date(data.year, data.month - 1, data.day);
-        const today = new Date();
-        today.setHours(23, 59, 59, 999); // End of today
-        
-        return birthDate <= today;
+        },
+        message:
+          'Coordinates must be valid latitude (-90 to 90) and longitude (-180 to 180)',
+        severity: 'warning',
       },
-      message: 'Birth date appears to be in the future',
-      severity: 'warning',
-    },
-    ...customRules.filter(rule => rule.name.startsWith('birth_')),
-  ], [customRules]);
+      {
+        name: 'city_length',
+        validator: data => {
+          if (!data || typeof data.city !== 'string') return false;
+          return data.city.trim().length >= 2 && data.city.trim().length <= 100;
+        },
+        message: 'City name must be between 2 and 100 characters',
+        severity: 'error',
+      },
+      {
+        name: 'future_date_warning',
+        validator: data => {
+          if (
+            !data ||
+            typeof data.year !== 'number' ||
+            typeof data.month !== 'number' ||
+            typeof data.day !== 'number'
+          ) {
+            return true;
+          }
+
+          const birthDate = new Date(data.year, data.month - 1, data.day);
+          const today = new Date();
+          today.setHours(23, 59, 59, 999); // End of today
+
+          return birthDate <= today;
+        },
+        message: 'Birth date appears to be in the future',
+        severity: 'warning',
+      },
+      ...customRules.filter(rule => rule.name.startsWith('birth_')),
+    ],
+    [customRules]
+  );
 
   // Chart data validation rules
-  const chartDataRules: ValidationRule<ChartData>[] = useMemo(() => [
-    {
-      name: 'has_planets',
-      validator: (data) => {
-        return !!(data && data.planets && typeof data.planets === 'object' && 
-                 Object.keys(data.planets).length > 0);
+  const chartDataRules: ValidationRule<ChartData>[] = useMemo(
+    () => [
+      {
+        name: 'has_planets',
+        validator: data => {
+          return !!(
+            data &&
+            data.planets &&
+            typeof data.planets === 'object' &&
+            Object.keys(data.planets).length > 0
+          );
+        },
+        message: 'Chart data must contain planets information',
+        severity: 'error',
       },
-      message: 'Chart data must contain planets information',
-      severity: 'error',
-    },
-    {
-      name: 'has_houses',
-      validator: (data) => {
-        return !!(data && data.houses && Array.isArray(data.houses) && 
-                 data.houses.length > 0);
+      {
+        name: 'has_houses',
+        validator: data => {
+          return !!(
+            data &&
+            data.houses &&
+            Array.isArray(data.houses) &&
+            data.houses.length > 0
+          );
+        },
+        message: 'Chart data must contain houses information',
+        severity: 'error',
       },
-      message: 'Chart data must contain houses information',
-      severity: 'error',
-    },
-    {
-      name: 'valid_planet_data',
-      validator: (data) => {
-        if (!data || !data.planets) return false;
-        
-        return Object.values(data.planets).every(planet => {
-          if (!planet || typeof planet !== 'object') return false;
-          return typeof (planet as any).position === 'number' &&
-                 (planet as any).position >= 0 && (planet as any).position < 360;
-        });
+      {
+        name: 'valid_planet_data',
+        validator: data => {
+          if (!data || !data.planets) return false;
+
+          return Object.values(data.planets).every(planet => {
+            if (!planet || typeof planet !== 'object') return false;
+            return (
+              typeof (planet as any).position === 'number' &&
+              (planet as any).position >= 0 &&
+              (planet as any).position < 360
+            );
+          });
+        },
+        message: 'All planets must have valid position data (0-360 degrees)',
+        severity: 'error',
       },
-      message: 'All planets must have valid position data (0-360 degrees)',
-      severity: 'error',
-    },
-    {
-      name: 'sufficient_houses',
-      validator: (data) => {
-        if (!data || !data.houses || !Array.isArray(data.houses)) return false;
-        return data.houses.length >= 12;
+      {
+        name: 'sufficient_houses',
+        validator: data => {
+          if (!data || !data.houses || !Array.isArray(data.houses))
+            return false;
+          return data.houses.length >= 12;
+        },
+        message: 'Chart should have at least 12 houses',
+        severity: 'warning',
       },
-      message: 'Chart should have at least 12 houses',
-      severity: 'warning',
-    },
-    {
-      name: 'has_aspects',
-      validator: (data) => {
-        return !!(data && data.aspects && Array.isArray(data.aspects));
+      {
+        name: 'has_aspects',
+        validator: data => {
+          return !!(data && data.aspects && Array.isArray(data.aspects));
+        },
+        message: 'Chart data should contain aspects information',
+        severity: 'info',
       },
-      message: 'Chart data should contain aspects information',
-      severity: 'info',
-    },
-    ...customRules.filter(rule => rule.name.startsWith('chart_')),
-  ], [customRules]);
+      ...customRules.filter(rule => rule.name.startsWith('chart_')),
+    ],
+    [customRules]
+  );
 
   // Generic validation function
-  const validateData = useCallback(async <T>(
-    data: T,
-    rules: ValidationRule<T>[],
-    fieldName: string = 'data'
-  ): Promise<ValidationResult> => {
-    setValidationState(prev => ({
-      ...prev,
-      isValidating: true,
-      validationCount: prev.validationCount + 1,
-    }));
-
-    try {
-      // Check cache first
-      const cacheKey = getCacheKey(data, rules);
-      const cachedResult = getCachedResult(cacheKey);
-      
-      if (cachedResult) {
-        return cachedResult;
-      }
-
-      // Perform validation
-      const result = await validateWithRules(data, rules, fieldName);
-      
-      // Cache result
-      setCachedResult(cacheKey, result);
-      
-      return result;
-    } finally {
+  const validateData = useCallback(
+    async <T>(
+      data: T,
+      rules: ValidationRule<T>[],
+      fieldName: string = 'data'
+    ): Promise<ValidationResult> => {
       setValidationState(prev => ({
         ...prev,
-        isValidating: false,
-        lastValidation: Date.now(),
+        isValidating: true,
+        validationCount: prev.validationCount + 1,
       }));
-    }
-  }, [getCacheKey, getCachedResult, setCachedResult, validateWithRules]);
+
+      try {
+        // Check cache first
+        const cacheKey = getCacheKey(data, rules);
+        const cachedResult = getCachedResult(cacheKey);
+
+        if (cachedResult) {
+          return cachedResult;
+        }
+
+        // Perform validation
+        const result = await validateWithRules(data, rules, fieldName);
+
+        // Cache result
+        setCachedResult(cacheKey, result);
+
+        return result;
+      } finally {
+        setValidationState(prev => ({
+          ...prev,
+          isValidating: false,
+          lastValidation: Date.now(),
+        }));
+      }
+    },
+    [getCacheKey, getCachedResult, setCachedResult, validateWithRules]
+  );
 
   // Specific validation methods
-  const validateBirthData = useCallback(async (data: BirthData): Promise<ValidationResult> => {
-    return validateData(data, birthDataRules, 'birthData');
-  }, [validateData, birthDataRules]);
+  const validateBirthData = useCallback(
+    async (data: BirthData): Promise<ValidationResult> => {
+      return validateData(data, birthDataRules, 'birthData');
+    },
+    [validateData, birthDataRules]
+  );
 
-  const validateChartData = useCallback(async (data: ChartData): Promise<ValidationResult> => {
-    return validateData(data, chartDataRules, 'chartData');
-  }, [validateData, chartDataRules]);
+  const validateChartData = useCallback(
+    async (data: ChartData): Promise<ValidationResult> => {
+      return validateData(data, chartDataRules, 'chartData');
+    },
+    [validateData, chartDataRules]
+  );
 
   // Progressive validation for forms
-  const validateField = useCallback(async <T>(
-    fieldName: string,
-    value: T,
-    fieldRules: ValidationRule<T>[]
-  ): Promise<ValidationResult> => {
-    return validateData(value, fieldRules, fieldName);
-  }, [validateData]);
+  const validateField = useCallback(
+    async <T>(
+      fieldName: string,
+      value: T,
+      fieldRules: ValidationRule<T>[]
+    ): Promise<ValidationResult> => {
+      return validateData(value, fieldRules, fieldName);
+    },
+    [validateData]
+  );
 
   // Type guards
   const isBirthData = useCallback((data: unknown): data is BirthData => {
     if (!data || typeof data !== 'object') return false;
     const obj = data as Record<string, unknown>;
-    
-    return typeof obj.year === 'number' &&
-           typeof obj.month === 'number' &&
-           typeof obj.day === 'number' &&
-           typeof obj.hour === 'number' &&
-           typeof obj.minute === 'number' &&
-           typeof obj.city === 'string';
+
+    return (
+      typeof obj.year === 'number' &&
+      typeof obj.month === 'number' &&
+      typeof obj.day === 'number' &&
+      typeof obj.hour === 'number' &&
+      typeof obj.minute === 'number' &&
+      typeof obj.city === 'string'
+    );
   }, []);
 
   const isChartData = useCallback((data: unknown): data is ChartData => {
     if (!data || typeof data !== 'object') return false;
     const obj = data as Record<string, unknown>;
-    
-    return (obj.planets !== undefined || obj.houses !== undefined || 
-            obj.aspects !== undefined || obj.asteroids !== undefined);
+
+    return (
+      obj.planets !== undefined ||
+      obj.houses !== undefined ||
+      obj.aspects !== undefined ||
+      obj.asteroids !== undefined
+    );
   }, []);
 
   // Cache management
@@ -452,40 +518,54 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
 
   const getCacheStats = useCallback(() => {
     const entries = Object.entries(cacheRef.current);
-    const activeEntries = entries.filter(([, value]) => value.expiry > Date.now());
+    const activeEntries = entries.filter(
+      ([, value]) => value.expiry > Date.now()
+    );
     const expiredEntries = entries.length - activeEntries.length;
-    
+
     return {
       totalEntries: entries.length,
       activeEntries: activeEntries.length,
       expiredEntries,
-      cacheHitRatio: validationState.validationCount > 0 ? 
-        (validationState.validationCount - activeEntries.length) / validationState.validationCount : 0,
+      cacheHitRatio:
+        validationState.validationCount > 0
+          ? (validationState.validationCount - activeEntries.length) /
+            validationState.validationCount
+          : 0,
     };
   }, [validationState.validationCount]);
 
   // Validation summary helper
-  const getValidationSummary = useCallback((result: ValidationResult): string => {
-    const parts = [];
-    
-    if (result.errors.length > 0) {
-      parts.push(`${result.errors.length} error${result.errors.length !== 1 ? 's' : ''}`);
-    }
-    
-    if (result.warnings.length > 0) {
-      parts.push(`${result.warnings.length} warning${result.warnings.length !== 1 ? 's' : ''}`);
-    }
-    
-    if (result.info.length > 0) {
-      parts.push(`${result.info.length} info message${result.info.length !== 1 ? 's' : ''}`);
-    }
-    
-    if (parts.length === 0) {
-      return 'All validations passed';
-    }
-    
-    return parts.join(', ');
-  }, []);
+  const getValidationSummary = useCallback(
+    (result: ValidationResult): string => {
+      const parts = [];
+
+      if (result.errors.length > 0) {
+        parts.push(
+          `${result.errors.length} error${result.errors.length !== 1 ? 's' : ''}`
+        );
+      }
+
+      if (result.warnings.length > 0) {
+        parts.push(
+          `${result.warnings.length} warning${result.warnings.length !== 1 ? 's' : ''}`
+        );
+      }
+
+      if (result.info.length > 0) {
+        parts.push(
+          `${result.info.length} info message${result.info.length !== 1 ? 's' : ''}`
+        );
+      }
+
+      if (parts.length === 0) {
+        return 'All validations passed';
+      }
+
+      return parts.join(', ');
+    },
+    []
+  );
 
   return {
     // Core validation methods

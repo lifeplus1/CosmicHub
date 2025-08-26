@@ -88,7 +88,7 @@ describe('useAIInterpretationManager', () => {
     });
 
     it('should reject request when queue is full', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ maxQueueSize: 1 })
       );
 
@@ -126,7 +126,7 @@ describe('useAIInterpretationManager', () => {
       // Mock API failure
       (global.fetch as any).mockRejectedValue(new Error('API Error'));
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ fallbackToMock: true })
       );
 
@@ -141,9 +141,12 @@ describe('useAIInterpretationManager', () => {
       });
 
       // Wait for queue processing
-      await waitFor(() => {
-        expect(result.current.interpretations).toHaveLength(1);
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(result.current.interpretations).toHaveLength(1);
+        },
+        { timeout: 5000 }
+      );
 
       const interpretation = result.current.interpretations[0];
       expect(interpretation).toBeDefined();
@@ -190,9 +193,12 @@ describe('useAIInterpretationManager', () => {
         result.current.requestInterpretation(request);
       });
 
-      await waitFor(() => {
-        expect(result.current.interpretations).toHaveLength(1);
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(result.current.interpretations).toHaveLength(1);
+        },
+        { timeout: 5000 }
+      );
 
       const interpretation = result.current.interpretations[0];
       expect(interpretation).toBeDefined();
@@ -229,7 +235,7 @@ describe('useAIInterpretationManager', () => {
     it('should return interpretation by ID', async () => {
       (global.fetch as any).mockRejectedValue(new Error('API Error'));
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ fallbackToMock: true })
       );
 
@@ -249,15 +255,17 @@ describe('useAIInterpretationManager', () => {
 
       const interpretation = result.current.interpretations[0];
       expect(interpretation).toBeDefined();
-      const retrievedInterpretation = result.current.getInterpretationById(interpretation!.id);
-      
+      const retrievedInterpretation = result.current.getInterpretationById(
+        interpretation!.id
+      );
+
       expect(retrievedInterpretation).toEqual(interpretation);
     });
 
     it('should return interpretations by chart ID', async () => {
       (global.fetch as any).mockRejectedValue(new Error('API Error'));
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ fallbackToMock: true })
       );
 
@@ -294,22 +302,26 @@ describe('useAIInterpretationManager', () => {
         expect(result.current.interpretations).toHaveLength(2);
       });
 
-      const chartInterpretations = result.current.getInterpretationsByChart('test-chart-1');
+      const chartInterpretations =
+        result.current.getInterpretationsByChart('test-chart-1');
       expect(chartInterpretations).toHaveLength(2);
-      expect(chartInterpretations.every(i => i.chartId === 'test-chart-1')).toBe(true);
+      expect(
+        chartInterpretations.every(i => i.chartId === 'test-chart-1')
+      ).toBe(true);
     });
 
     it('should return null for non-existent interpretation ID', () => {
       const { result } = renderHook(() => useAIInterpretationManager());
-      
-      const retrievedInterpretation = result.current.getInterpretationById('non-existent-id');
+
+      const retrievedInterpretation =
+        result.current.getInterpretationById('non-existent-id');
       expect(retrievedInterpretation).toBe(null);
     });
   });
 
   describe('performance monitoring', () => {
     it('should provide performance metrics when enabled', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ enablePerformanceMonitoring: true })
       );
 
@@ -324,7 +336,7 @@ describe('useAIInterpretationManager', () => {
     });
 
     it('should not provide performance metrics when disabled', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ enablePerformanceMonitoring: false })
       );
 
@@ -336,11 +348,16 @@ describe('useAIInterpretationManager', () => {
     it('should handle different interpretation types', async () => {
       (global.fetch as any).mockRejectedValue(new Error('API Error'));
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ fallbackToMock: true })
       );
 
-      const types = ['general', 'personality', 'career', 'relationships'] as const;
+      const types = [
+        'general',
+        'personality',
+        'career',
+        'relationships',
+      ] as const;
 
       // Request all types
       types.forEach(type => {
@@ -353,12 +370,17 @@ describe('useAIInterpretationManager', () => {
         });
       });
 
-      await waitFor(() => {
-        expect(result.current.interpretations).toHaveLength(4);
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(result.current.interpretations).toHaveLength(4);
+        },
+        { timeout: 10000 }
+      );
 
       // Verify all types are present
-      const interpretationTypes = result.current.interpretations.map(i => i.type);
+      const interpretationTypes = result.current.interpretations.map(
+        i => i.type
+      );
       types.forEach(type => {
         expect(interpretationTypes).toContain(type);
       });
@@ -369,7 +391,7 @@ describe('useAIInterpretationManager', () => {
     it('should handle API errors gracefully when fallback is disabled', async () => {
       (global.fetch as any).mockRejectedValue(new Error('API Error'));
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ fallbackToMock: false })
       );
 
@@ -395,7 +417,7 @@ describe('useAIInterpretationManager', () => {
     it('should clear all interpretations', async () => {
       (global.fetch as any).mockRejectedValue(new Error('API Error'));
 
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useAIInterpretationManager({ fallbackToMock: true })
       );
 

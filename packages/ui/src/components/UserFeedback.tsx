@@ -18,7 +18,13 @@ export interface ToastNotification {
     onClick: () => void;
   };
   dismissible?: boolean;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+  position?:
+    | 'top-right'
+    | 'top-left'
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'top-center'
+    | 'bottom-center';
 }
 
 // Toast context
@@ -53,31 +59,34 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 }) => {
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
-  const addToast = useCallback((toastData: Omit<ToastNotification, 'id'>) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const toast: ToastNotification = {
-      id,
-      duration: 5000,
-      dismissible: true,
-      position: defaultPosition,
-      ...toastData,
-    };
+  const addToast = useCallback(
+    (toastData: Omit<ToastNotification, 'id'>) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const toast: ToastNotification = {
+        id,
+        duration: 5000,
+        dismissible: true,
+        position: defaultPosition,
+        ...toastData,
+      };
 
-    setToasts(prev => {
-      const newToasts = [toast, ...prev];
-      // Limit number of toasts
-      return newToasts.slice(0, maxToasts);
-    });
+      setToasts(prev => {
+        const newToasts = [toast, ...prev];
+        // Limit number of toasts
+        return newToasts.slice(0, maxToasts);
+      });
 
-    // Auto-remove toast after duration
-    if (toast.duration && toast.duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, toast.duration);
-    }
+      // Auto-remove toast after duration
+      if (toast.duration && toast.duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, toast.duration);
+      }
 
-    return id;
-  }, [defaultPosition, maxToasts]);
+      return id;
+    },
+    [defaultPosition, maxToasts]
+  );
 
   const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
@@ -88,7 +97,9 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast, clearToasts }}>
+    <ToastContext.Provider
+      value={{ toasts, addToast, removeToast, clearToasts }}
+    >
       {children}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>
@@ -101,14 +112,20 @@ interface ToastContainerProps {
   onRemove: (id: string) => void;
 }
 
-const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => {
+const ToastContainer: React.FC<ToastContainerProps> = ({
+  toasts,
+  onRemove,
+}) => {
   // Group toasts by position
-  const toastsByPosition = toasts.reduce((acc, toast) => {
-    const position = toast.position ?? 'top-right';
-    acc[position] ??= [];
-    acc[position].push(toast);
-    return acc;
-  }, {} as Record<string, ToastNotification[]>);
+  const toastsByPosition = toasts.reduce(
+    (acc, toast) => {
+      const position = toast.position ?? 'top-right';
+      acc[position] ??= [];
+      acc[position].push(toast);
+      return acc;
+    },
+    {} as Record<string, ToastNotification[]>
+  );
 
   const getPositionClasses = (position: ToastNotification['position']) => {
     switch (position) {
@@ -304,8 +321,11 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
       {toast.duration && toast.duration > 0 && !isPaused && (
         <div className='mt-2 h-1 bg-black/20 rounded-full overflow-hidden'>
           <div
-            className={cn('h-full rounded-full transition-all ease-linear', colors.icon.replace('text-', 'bg-'))}
-            ref={(el) => {
+            className={cn(
+              'h-full rounded-full transition-all ease-linear',
+              colors.icon.replace('text-', 'bg-')
+            )}
+            ref={el => {
               if (el && toast.duration) {
                 el.style.animation = `toast-progress ${toast.duration}ms linear`;
                 el.style.transformOrigin = 'left';
@@ -403,13 +423,24 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         {showIcon && (
           <div className={config.color}>
             {config.icon === 'loading' ? (
-              <div className={cn('border-2 border-current border-t-transparent rounded-full animate-spin', iconSizes[size])} />
+              <div
+                className={cn(
+                  'border-2 border-current border-t-transparent rounded-full animate-spin',
+                  iconSizes[size]
+                )}
+              />
             ) : (
               <span className='text-base'>{config.icon}</span>
             )}
           </div>
         )}
-        <span className={cn('font-medium', config.color, sizeClasses[size].split(' ')[0])}>
+        <span
+          className={cn(
+            'font-medium',
+            config.color,
+            sizeClasses[size].split(' ')[0]
+          )}
+        >
           {displayMessage}
         </span>
       </div>
@@ -429,15 +460,18 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       {showIcon && (
         <div className={config.color}>
           {config.icon === 'loading' ? (
-            <div className={cn('border-2 border-current border-t-transparent rounded-full animate-spin', iconSizes[size])} />
+            <div
+              className={cn(
+                'border-2 border-current border-t-transparent rounded-full animate-spin',
+                iconSizes[size]
+              )}
+            />
           ) : (
             <span className='text-base'>{config.icon}</span>
           )}
         </div>
       )}
-      <span className={cn('font-medium', config.color)}>
-        {displayMessage}
-      </span>
+      <span className={cn('font-medium', config.color)}>{displayMessage}</span>
     </div>
   );
 };
@@ -500,7 +534,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       )}
 
       {/* Progress bar */}
-      <div className={cn('bg-gray-700 rounded-full overflow-hidden', sizeClasses[size])}>
+      <div
+        className={cn(
+          'bg-gray-700 rounded-full overflow-hidden',
+          sizeClasses[size]
+        )}
+      >
         <div
           className={cn(
             'rounded-full transition-all duration-300 ease-out',
@@ -508,11 +547,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
             animated && 'transition-all duration-300',
             indeterminate && 'animate-pulse'
           )}
-          ref={(el) => {
+          ref={el => {
             if (el) {
               el.style.width = indeterminate ? '100%' : `${percentage}%`;
               if (indeterminate) {
-                el.style.animation = 'progress-indeterminate 2s ease-in-out infinite';
+                el.style.animation =
+                  'progress-indeterminate 2s ease-in-out infinite';
               }
             }
           }}
@@ -536,6 +576,12 @@ export const useToastHelpers = () => {
     info: (title: string, message?: string) =>
       addToast({ title, message, type: 'info' }),
     loading: (title: string, message?: string) =>
-      addToast({ title, message, type: 'loading', duration: 0, dismissible: false }),
+      addToast({
+        title,
+        message,
+        type: 'loading',
+        duration: 0,
+        dismissible: false,
+      }),
   };
 };

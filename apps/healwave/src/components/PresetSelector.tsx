@@ -231,14 +231,16 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
               }
             }}
             onDismiss={() => setError(null)}
-            retryText="Retry Loading"
-            className="mb-4"
+            retryText='Retry Loading'
+            className='mb-4'
             dismissible={true}
           />
         )}
 
         <div className='preset-header flex items-center justify-between mb-6'>
-          <h3 className='text-xl font-semibold text-white font-inter'>Frequency Presets</h3>
+          <h3 className='text-xl font-semibold text-white font-inter'>
+            Frequency Presets
+          </h3>
           {user && (
             <button
               onClick={() => setShowSaveDialog(true)}
@@ -322,9 +324,9 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
             {loading && presets.length === 0 ? (
               <ProgressiveLoading
                 stage={loading ? 'processing' : 'complete'}
-                message="Loading your custom frequency presets..."
+                message='Loading your custom frequency presets...'
                 showProgress={true}
-                className="py-4"
+                className='py-4'
               />
             ) : presets.length === 0 ? (
               <div className='py-4 text-center text-gray-500'>
@@ -421,7 +423,10 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
           >
             <div className='p-6 bg-black/80 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl w-96 max-w-90vw'>
               <div className='flex items-center justify-between mb-6'>
-                <h3 id='save-preset-title' className='text-lg font-semibold text-white'>
+                <h3
+                  id='save-preset-title'
+                  className='text-lg font-semibold text-white'
+                >
                   Save Preset
                 </h3>
               </div>
@@ -434,117 +439,119 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
                   >
                     Preset Name *
                   </label>
-                <input
-                  id='preset-name'
-                  type='text'
-                  value={newPresetName}
-                  onChange={e => setNewPresetName(e.target.value)}
-                  className='w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors'
-                  placeholder='Enter preset name...'
-                  maxLength={50}
-                  required
-                  aria-describedby='preset-name-help'
-                  aria-label='Preset Name'
-                  autoFocus
-                />
-                <div
-                  id='preset-name-help'
-                  className='mt-1 text-xs text-white/60'
-                >
-                  Required. Maximum 50 characters.
-                </div>
-              </div>
-
-              <div className='mb-4'>
-                <label
-                  htmlFor='preset-description'
-                  className='block mb-2 text-sm font-medium text-white/90'
-                >
-                  Description (optional)
-                </label>
-                <textarea
-                  id='preset-description'
-                  value={newPresetDescription}
-                  onChange={e => setNewPresetDescription(e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                  placeholder='Describe what this preset is for...'
-                  rows={3}
-                  maxLength={200}
-                  aria-describedby='preset-description-help'
-                  aria-label='Description'
-                />
-                <div
-                  id='preset-description-help'
-                  className='mt-1 text-xs text-gray-500'
-                >
-                  Optional. Maximum 200 characters.
-                </div>
-              </div>
-
-              <div
-                className='p-3 mb-4 rounded-lg bg-gray-50'
-                role='region'
-                aria-labelledby='current-settings-title'
-              >
-                <h4
-                  id='current-settings-title'
-                  className='mb-2 text-sm font-medium text-gray-700'
-                >
-                  Current Settings:
-                </h4>
-                <div className='text-sm text-gray-600'>
-                  {currentPreset ? (
-                    <>
-                      <div>Preset: {currentPreset.name}</div>
-                      <div>Base Frequency: {currentPreset.baseFrequency}Hz</div>
-                      {currentPreset.binauralBeat !== undefined &&
-                        currentPreset.binauralBeat !== 0 && (
-                          <div>
-                            Binaural Beat: {currentPreset.binauralBeat}Hz
-                          </div>
-                        )}
-                    </>
-                  ) : (
-                    <div>No preset selected</div>
-                  )}
-                  <div>Volume: {Math.round(currentSettings.volume)}%</div>
-                  <div>
-                    Duration: {formatDuration(currentSettings.duration)}
+                  <input
+                    id='preset-name'
+                    type='text'
+                    value={newPresetName}
+                    onChange={e => setNewPresetName(e.target.value)}
+                    className='w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors'
+                    placeholder='Enter preset name...'
+                    maxLength={50}
+                    required
+                    aria-describedby='preset-name-help'
+                    aria-label='Preset Name'
+                    autoFocus
+                  />
+                  <div
+                    id='preset-name-help'
+                    className='mt-1 text-xs text-white/60'
+                  >
+                    Required. Maximum 50 characters.
                   </div>
                 </div>
-              </div>
 
-              <div className='flex gap-3'>
-                <button
-                  onClick={() => {
-                    setShowSaveDialog(false);
-                    setNewPresetName('');
-                    setNewPresetDescription('');
-                  }}
-                  className='flex-1 px-4 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50'
-                  disabled={loading}
+                <div className='mb-4'>
+                  <label
+                    htmlFor='preset-description'
+                    className='block mb-2 text-sm font-medium text-white/90'
+                  >
+                    Description (optional)
+                  </label>
+                  <textarea
+                    id='preset-description'
+                    value={newPresetDescription}
+                    onChange={e => setNewPresetDescription(e.target.value)}
+                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                    placeholder='Describe what this preset is for...'
+                    rows={3}
+                    maxLength={200}
+                    aria-describedby='preset-description-help'
+                    aria-label='Description'
+                  />
+                  <div
+                    id='preset-description-help'
+                    className='mt-1 text-xs text-gray-500'
+                  >
+                    Optional. Maximum 200 characters.
+                  </div>
+                </div>
+
+                <div
+                  className='p-3 mb-4 rounded-lg bg-gray-50'
+                  role='region'
+                  aria-labelledby='current-settings-title'
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    void handleSavePreset();
-                  }}
-                  className='flex-1 px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50'
-                  disabled={loading || !newPresetName.trim()}
-                  aria-describedby='save-button-help'
-                >
-                  {loading ? 'Saving...' : 'Save Preset'}
-                </button>
-                <div id='save-button-help' className='sr-only'>
-                  {!newPresetName.trim()
-                    ? 'Enter a preset name to enable saving'
-                    : 'Save your current settings as a new preset'}
+                  <h4
+                    id='current-settings-title'
+                    className='mb-2 text-sm font-medium text-gray-700'
+                  >
+                    Current Settings:
+                  </h4>
+                  <div className='text-sm text-gray-600'>
+                    {currentPreset ? (
+                      <>
+                        <div>Preset: {currentPreset.name}</div>
+                        <div>
+                          Base Frequency: {currentPreset.baseFrequency}Hz
+                        </div>
+                        {currentPreset.binauralBeat !== undefined &&
+                          currentPreset.binauralBeat !== 0 && (
+                            <div>
+                              Binaural Beat: {currentPreset.binauralBeat}Hz
+                            </div>
+                          )}
+                      </>
+                    ) : (
+                      <div>No preset selected</div>
+                    )}
+                    <div>Volume: {Math.round(currentSettings.volume)}%</div>
+                    <div>
+                      Duration: {formatDuration(currentSettings.duration)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className='flex gap-3'>
+                  <button
+                    onClick={() => {
+                      setShowSaveDialog(false);
+                      setNewPresetName('');
+                      setNewPresetDescription('');
+                    }}
+                    className='flex-1 px-4 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50'
+                    disabled={loading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      void handleSavePreset();
+                    }}
+                    className='flex-1 px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50'
+                    disabled={loading || !newPresetName.trim()}
+                    aria-describedby='save-button-help'
+                  >
+                    {loading ? 'Saving...' : 'Save Preset'}
+                  </button>
+                  <div id='save-button-help' className='sr-only'>
+                    {!newPresetName.trim()
+                      ? 'Enter a preset name to enable saving'
+                      : 'Save your current settings as a new preset'}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         )}
       </div>
     );

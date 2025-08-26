@@ -69,7 +69,7 @@ cd /Users/Chris/Projects/CosmicHub
 # Build for iOS
 ./scripts/build-mobile-app.sh ios --production
 
-# Build for Android  
+# Build for Android
 ./scripts/build-mobile-app.sh android --production
 
 # Or build both
@@ -203,7 +203,9 @@ cd ..
 
 ## 📞 **Ready to Deploy?**
 
-The mobile app is ready for production deployment. The core functionality is complete, and while there are some TypeScript lint warnings, these don't prevent app store submission or affect user experience.
+The mobile app is ready for production deployment. The core functionality is complete, and while
+there are some TypeScript lint warnings, these don't prevent app store submission or affect user
+experience.
 
 **Next Command to Run**:
 

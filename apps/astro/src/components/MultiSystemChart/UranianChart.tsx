@@ -45,9 +45,15 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                 <table className='w-full text-sm table-auto'>
                   <thead>
                     <tr>
-                      <th className='py-2 text-left text-cosmic-silver'>Planet</th>
-                      <th className='py-2 text-left text-cosmic-silver'>Position</th>
-                      <th className='py-2 text-left text-cosmic-silver'>Meaning</th>
+                      <th className='py-2 text-left text-cosmic-silver'>
+                        Planet
+                      </th>
+                      <th className='py-2 text-left text-cosmic-silver'>
+                        Position
+                      </th>
+                      <th className='py-2 text-left text-cosmic-silver'>
+                        Meaning
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -56,7 +62,9 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                         <tr key={planet}>
                           <td className='py-2'>
                             <div className='flex'>
-                              <span className='text-indigo-400'>{info.symbol}</span>
+                              <span className='text-indigo-400'>
+                                {info.symbol}
+                              </span>
                               <span className='ml-2 font-medium text-cosmic-silver'>
                                 {planet.charAt(0).toUpperCase() +
                                   planet.slice(1)}
@@ -64,9 +72,13 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                             </div>
                           </td>
                           <td className='py-2 font-mono text-cosmic-silver/80'>
-                            {info.position != null ? `${info.position.toFixed(2)}°` : 'N/A'}
+                            {info.position != null
+                              ? `${info.position.toFixed(2)}°`
+                              : 'N/A'}
                           </td>
-                          <td className='py-2 text-xs text-cosmic-silver/70'>{info.meaning}</td>
+                          <td className='py-2 text-xs text-cosmic-silver/70'>
+                            {info.meaning}
+                          </td>
                         </tr>
                       )
                     )}
@@ -84,25 +96,39 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                 <table className='w-full text-sm table-auto'>
                   <thead>
                     <tr>
-                      <th className='py-2 text-left text-cosmic-silver'>Bodies</th>
-                      <th className='py-2 text-left text-cosmic-silver'>Aspect</th>
+                      <th className='py-2 text-left text-cosmic-silver'>
+                        Bodies
+                      </th>
+                      <th className='py-2 text-left text-cosmic-silver'>
+                        Aspect
+                      </th>
                       <th className='py-2 text-left text-cosmic-silver'>Orb</th>
-                      <th className='py-2 text-left text-cosmic-silver'>Meaning</th>
+                      <th className='py-2 text-left text-cosmic-silver'>
+                        Meaning
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {(data.dial_aspects ?? [])
                       .slice(0, MAX_DIAL_ASPECTS)
-                      .map((aspect) => (
-                        <tr key={`${aspect.body1}-${aspect.body2}-${aspect.angle}`}>
+                      .map(aspect => (
+                        <tr
+                          key={`${aspect.body1}-${aspect.body2}-${aspect.angle}`}
+                        >
                           <td className='py-2 text-sm text-cosmic-silver/80'>
                             {aspect.body1} - {aspect.body2}
                           </td>
-                          <td className='py-2 text-cosmic-silver/80'>{aspect.angle}°</td>
                           <td className='py-2 text-cosmic-silver/80'>
-                            {aspect.orb != null ? `${aspect.orb.toFixed(2)}°` : 'N/A'}
+                            {aspect.angle}°
                           </td>
-                          <td className='py-2 text-xs text-cosmic-silver/70'>{aspect.meaning}</td>
+                          <td className='py-2 text-cosmic-silver/80'>
+                            {aspect.orb != null
+                              ? `${aspect.orb.toFixed(2)}°`
+                              : 'N/A'}
+                          </td>
+                          <td className='py-2 text-xs text-cosmic-silver/70'>
+                            {aspect.meaning}
+                          </td>
                         </tr>
                       ))}
                   </tbody>

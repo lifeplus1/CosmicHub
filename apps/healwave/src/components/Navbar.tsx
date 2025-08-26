@@ -70,22 +70,20 @@ const Navbar: React.FC = () => {
                         <div className='text-sm font-medium text-white'>
                           {user.email?.split('@')[0] ?? 'User'}
                         </div>
-                        <div className='text-xs text-cyan-300'>Authenticated</div>
+                        <div className='text-xs text-cyan-300'>
+                          Authenticated
+                        </div>
                       </div>
                       <ChevronDownIcon className='w-4 h-4 text-white/70' />
                     </button>
                   </DropdownMenu.Trigger>
-                  
+
                   <DropdownMenu.Portal>
                     <DropdownMenu.Content className='min-w-[200px] bg-black/90 backdrop-blur-lg border border-white/20 rounded-lg p-2 shadow-xl'>
-                      <DropdownMenu.Item 
-                        className='flex items-center px-3 py-2 text-sm text-white rounded-md hover:bg-white/10 cursor-pointer transition-colors focus:outline-none focus:bg-white/10'
-                      >
+                      <DropdownMenu.Item className='flex items-center px-3 py-2 text-sm text-white rounded-md hover:bg-white/10 cursor-pointer transition-colors focus:outline-none focus:bg-white/10'>
                         Profile Settings
                       </DropdownMenu.Item>
-                      <DropdownMenu.Item 
-                        className='flex items-center px-3 py-2 text-sm text-white rounded-md hover:bg-white/10 cursor-pointer transition-colors focus:outline-none focus:bg-white/10'
-                      >
+                      <DropdownMenu.Item className='flex items-center px-3 py-2 text-sm text-white rounded-md hover:bg-white/10 cursor-pointer transition-colors focus:outline-none focus:bg-white/10'>
                         My Presets
                       </DropdownMenu.Item>
                       <DropdownMenu.Separator className='h-px my-2 bg-white/20' />

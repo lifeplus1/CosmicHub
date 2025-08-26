@@ -1,6 +1,6 @@
 /**
  * Enhanced Ephemeris Caching Layer - PERF-001 Implementation
- * 
+ *
  * Implements intelligent multi-tier caching for ephemeris data with
  * predictive preloading and adaptive cache management.
  */
@@ -10,8 +10,16 @@ import { firestoreOptimizer } from './firestore-optimizer';
 // Simple console wrapper for development logging
 const isDev = process.env.NODE_ENV === 'development';
 const devConsole = {
-  log: isDev ? console.log.bind(console) : (): void => { /* no-op */ },
-  warn: isDev ? console.warn.bind(console) : (): void => { /* no-op */ },
+  log: isDev
+    ? console.log.bind(console)
+    : (): void => {
+        /* no-op */
+      },
+  warn: isDev
+    ? console.warn.bind(console)
+    : (): void => {
+        /* no-op */
+      },
   error: console.error.bind(console),
 };
 
@@ -62,7 +70,7 @@ class EnhancedEphemerisCache {
     diskMisses: 0,
     evictions: 0,
     totalSize: 0,
-    hitRate: 0
+    hitRate: 0,
   };
 
   private predictiveQueue: PredictiveRequest[] = [];
@@ -82,7 +90,9 @@ class EnhancedEphemerisCache {
           new URL('./compression-worker.js', import.meta.url)
         );
       } catch {
-        devConsole.warn('Compression worker not available, using synchronous compression');
+        devConsole.warn(
+          'Compression worker not available, using synchronous compression'
+        );
       }
     }
   }
@@ -95,7 +105,7 @@ class EnhancedEphemerisCache {
 
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('EphemerisCache', 1);
-      
+
       request.onerror = () => {
         devConsole.error('Failed to open IndexedDB for ephemeris cache');
         reject(new Error('IndexedDB failed to open'));
@@ -107,9 +117,9 @@ class EnhancedEphemerisCache {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         if (!db.objectStoreNames.contains('ephemeris')) {
           const store = db.createObjectStore('ephemeris', { keyPath: 'key' });
           store.createIndex('expiresAt', 'expiresAt');
@@ -122,14 +132,21 @@ class EnhancedEphemerisCache {
 
   private startMaintenanceTasks(): void {
     // Cleanup expired entries every 10 minutes
-    setInterval(() => { void this.cleanupExpiredEntries(); }, 10 * 60 * 1000);
-    
+    setInterval(
+      () => {
+        void this.cleanupExpiredEntries();
+      },
+      10 * 60 * 1000
+    );
+
     // Update statistics every minute
     setInterval(() => this.updateStatistics(), 60 * 1000);
-    
+
     // Process predictive queue every 30 seconds
-    setInterval(() => { void this.processPredictiveQueue(); }, 30 * 1000);
-    
+    setInterval(() => {
+      void this.processPredictiveQueue();
+    }, 30 * 1000);
+
     // Analyze access patterns every hour
     setInterval(() => this.analyzeAccessPatterns(), 60 * 60 * 1000);
   }
@@ -148,10 +165,10 @@ class EnhancedEphemerisCache {
       memoryEntry.lastAccessed = Date.now();
       this.stats.memoryHits++;
       this.updateHitRate();
-      
+
       // Track for Firestore optimization
       firestoreOptimizer.trackRead(`ephemeris_cache_${key}`, 0, 5, true);
-      
+
       return memoryEntry.data;
     }
 
@@ -164,18 +181,18 @@ class EnhancedEphemerisCache {
       await this.promoteToMemory(diskEntry);
       this.stats.diskHits++;
       this.updateHitRate();
-      
+
       firestoreOptimizer.trackRead(`ephemeris_cache_${key}`, 0, 15, true);
-      
+
       return diskEntry.data;
     }
 
     this.stats.diskMisses++;
     this.updateHitRate();
-    
+
     // Cache miss - trigger predictive loading
     this.triggerPredictiveLoading(key);
-    
+
     return null;
   }
 
@@ -190,13 +207,15 @@ class EnhancedEphemerisCache {
     // Compress data if enabled
     let processedData = data;
     let compressed = false;
-    
+
     if (this.config.compressionEnabled) {
       try {
         processedData = await this.compressData(data);
         compressed = true;
       } catch (error) {
-        devConsole.warn?.('Failed to compress cache data, storing uncompressed');
+        devConsole.warn?.(
+          'Failed to compress cache data, storing uncompressed'
+        );
         processedData = data;
       }
     }
@@ -209,16 +228,18 @@ class EnhancedEphemerisCache {
       accessCount: 1,
       lastAccessed: now,
       size: this.estimateSize(processedData),
-      compressed
+      compressed,
     };
 
     // Store in memory cache
     await this.setMemoryEntry(entry);
-    
+
     // Store in disk cache for persistence
     await this.setDiskEntry(entry);
-    
-    devConsole.log?.(`Cached ephemeris data: ${key} (${entry.size} bytes, TTL: ${ttlHours || this.config.defaultTTLHours}h)`);
+
+    devConsole.log?.(
+      `Cached ephemeris data: ${key} (${entry.size} bytes, TTL: ${ttlHours || this.config.defaultTTLHours}h)`
+    );
   }
 
   private async setMemoryEntry(entry: CacheEntry): Promise<void> {
@@ -235,11 +256,14 @@ class EnhancedEphemerisCache {
     if (!this.diskCache) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.diskCache!.transaction(['ephemeris'], 'readwrite');
+      const transaction = this.diskCache!.transaction(
+        ['ephemeris'],
+        'readwrite'
+      );
       const store = transaction.objectStore('ephemeris');
-      
+
       const request = store.put(entry);
-      
+
       request.onsuccess = () => resolve();
       request.onerror = () => {
         devConsole.error?.('Failed to store in disk cache:', request.error);
@@ -252,16 +276,19 @@ class EnhancedEphemerisCache {
     if (!this.diskCache) return null;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.diskCache!.transaction(['ephemeris'], 'readonly');
+      const transaction = this.diskCache!.transaction(
+        ['ephemeris'],
+        'readonly'
+      );
       const store = transaction.objectStore('ephemeris');
-      
+
       const request = store.get(key);
-      
+
       request.onsuccess = () => {
         const entry = request.result as CacheEntry;
         resolve(entry || null);
       };
-      
+
       request.onerror = () => {
         devConsole.error?.('Failed to read from disk cache:', request.error);
         reject(request.error);
@@ -283,7 +310,7 @@ class EnhancedEphemerisCache {
 
     entry.accessCount++;
     entry.lastAccessed = Date.now();
-    
+
     await this.setMemoryEntry(entry);
   }
 
@@ -292,7 +319,9 @@ class EnhancedEphemerisCache {
     return currentSizeMB > this.config.memoryLimitMB;
   }
 
-  private async evictLeastValuable(cacheType: 'memory' | 'disk'): Promise<void> {
+  private async evictLeastValuable(
+    cacheType: 'memory' | 'disk'
+  ): Promise<void> {
     const cache = cacheType === 'memory' ? this.memoryCache : null;
     if (!cache || cache.size === 0) return;
 
@@ -303,7 +332,7 @@ class EnhancedEphemerisCache {
     for (const entry of cache.values()) {
       const ageHours = (Date.now() - entry.lastAccessed) / (1000 * 60 * 60);
       const score = entry.accessCount / (ageHours + 1); // Lower score = less valuable
-      
+
       if (score < lowestScore) {
         lowestScore = score;
         leastValuable = entry;
@@ -314,8 +343,10 @@ class EnhancedEphemerisCache {
       cache.delete(leastValuable.key);
       this.stats.totalSize -= leastValuable.size;
       this.stats.evictions++;
-      
-      devConsole.log?.(`Evicted cache entry: ${leastValuable.key} (score: ${lowestScore.toFixed(2)})`);
+
+      devConsole.log?.(
+        `Evicted cache entry: ${leastValuable.key} (score: ${lowestScore.toFixed(2)})`
+      );
     }
   }
 
@@ -326,12 +357,12 @@ class EnhancedEphemerisCache {
   private recordAccess(key: string): void {
     const pattern = this.accessPatterns.get(key) || [];
     pattern.push(Date.now());
-    
+
     // Keep only last 100 accesses
     if (pattern.length > 100) {
       pattern.splice(0, pattern.length - 100);
     }
-    
+
     this.accessPatterns.set(key, pattern);
   }
 
@@ -340,7 +371,7 @@ class EnhancedEphemerisCache {
     const julianDayMatch = key.match(/julian[_-](\d+(?:\.\d+)?)/i);
     if (julianDayMatch) {
       const julianDay = parseFloat(julianDayMatch[1]);
-      
+
       // Predict nearby dates that might be needed
       for (let offset = 1; offset <= this.config.predictiveDays; offset++) {
         this.queuePredictiveRequest(julianDay + offset, 'medium');
@@ -349,14 +380,20 @@ class EnhancedEphemerisCache {
     }
   }
 
-  private queuePredictiveRequest(julianDay: number, priority: 'high' | 'medium' | 'low'): void {
-    const existing = this.predictiveQueue.find(req => 
-      Math.abs(req.julianDay - julianDay) < 0.1
+  private queuePredictiveRequest(
+    julianDay: number,
+    priority: 'high' | 'medium' | 'low'
+  ): void {
+    const existing = this.predictiveQueue.find(
+      req => Math.abs(req.julianDay - julianDay) < 0.1
     );
-    
+
     if (existing) {
       // Upgrade priority if higher
-      if (priority === 'high' || (priority === 'medium' && existing.priority === 'low')) {
+      if (
+        priority === 'high' ||
+        (priority === 'medium' && existing.priority === 'low')
+      ) {
         existing.priority = priority;
       }
     } else {
@@ -364,7 +401,7 @@ class EnhancedEphemerisCache {
         julianDay,
         priority,
         estimatedUsage: this.estimateUsage(julianDay),
-        requestTime: Date.now()
+        requestTime: Date.now(),
       });
     }
   }
@@ -374,7 +411,7 @@ class EnhancedEphemerisCache {
     const now = new Date();
     const currentJulian = this.dateToJulianDay(now);
     const daysDiff = Math.abs(julianDay - currentJulian);
-    
+
     // Recent dates are more likely to be accessed
     if (daysDiff <= 7) return 0.9;
     if (daysDiff <= 30) return 0.6;
@@ -385,12 +422,23 @@ class EnhancedEphemerisCache {
   private dateToJulianDay(date: Date): number {
     const a = Math.floor((14 - (date.getMonth() + 1)) / 12);
     const y = date.getFullYear() + 4800 - a;
-    const m = (date.getMonth() + 1) + 12 * a - 3;
-    
-    const jd = date.getDate() + Math.floor((153 * m + 2) / 5) + 365 * y + 
-               Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-    
-    return jd + (date.getHours() - 12) / 24 + date.getMinutes() / 1440 + date.getSeconds() / 86400;
+    const m = date.getMonth() + 1 + 12 * a - 3;
+
+    const jd =
+      date.getDate() +
+      Math.floor((153 * m + 2) / 5) +
+      365 * y +
+      Math.floor(y / 4) -
+      Math.floor(y / 100) +
+      Math.floor(y / 400) -
+      32045;
+
+    return (
+      jd +
+      (date.getHours() - 12) / 24 +
+      date.getMinutes() / 1440 +
+      date.getSeconds() / 86400
+    );
   }
 
   private async processPredictiveQueue(): Promise<void> {
@@ -406,13 +454,14 @@ class EnhancedEphemerisCache {
 
     // Process up to 5 requests per cycle
     const batch = this.predictiveQueue.splice(0, 5);
-    
+
     for (const request of batch) {
       try {
         // This would trigger the actual ephemeris data fetch
         // Implementation depends on your specific ephemeris API
-        devConsole.log?.(`Predictive loading for Julian Day ${request.julianDay} (${request.priority} priority)`);
-        
+        devConsole.log?.(
+          `Predictive loading for Julian Day ${request.julianDay} (${request.priority} priority)`
+        );
       } catch (error) {
         devConsole.error?.('Predictive loading failed:', error);
       }
@@ -421,29 +470,44 @@ class EnhancedEphemerisCache {
 
   private analyzeAccessPatterns(): void {
     devConsole.log?.('Analyzing ephemeris access patterns...');
-    
-    const patternAnalysis = new Map<string, { frequency: number; recency: number; regularity: number }>();
-    
+
+    const patternAnalysis = new Map<
+      string,
+      { frequency: number; recency: number; regularity: number }
+    >();
+
     for (const [key, accesses] of this.accessPatterns.entries()) {
       if (accesses.length < 2) continue;
-      
+
       const now = Date.now();
       const frequency = accesses.length;
       const recency = (now - Math.max(...accesses)) / (1000 * 60 * 60); // Hours since last access
-      
+
       // Calculate regularity (lower variance in intervals = more regular)
       const intervals = accesses.slice(1).map((time, i) => time - accesses[i]);
-      const avgInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
-      const variance = intervals.reduce((sum, interval) => sum + Math.pow(interval - avgInterval, 2), 0) / intervals.length;
+      const avgInterval =
+        intervals.reduce((sum, interval) => sum + interval, 0) /
+        intervals.length;
+      const variance =
+        intervals.reduce(
+          (sum, interval) => sum + Math.pow(interval - avgInterval, 2),
+          0
+        ) / intervals.length;
       const regularity = 1 / (1 + Math.sqrt(variance) / avgInterval); // 0-1, higher = more regular
-      
+
       patternAnalysis.set(key, { frequency, recency, regularity });
     }
-    
+
     // Identify patterns that should be cached more aggressively
     for (const [key, analysis] of patternAnalysis.entries()) {
-      if (analysis.frequency > 10 && analysis.recency < 24 && analysis.regularity > 0.7) {
-        devConsole.log?.(`High-value pattern detected: ${key} - consider longer TTL`);
+      if (
+        analysis.frequency > 10 &&
+        analysis.recency < 24 &&
+        analysis.regularity > 0.7
+      ) {
+        devConsole.log?.(
+          `High-value pattern detected: ${key} - consider longer TTL`
+        );
       }
     }
   }
@@ -456,7 +520,7 @@ class EnhancedEphemerisCache {
 
     return new Promise((resolve, reject) => {
       const id = Math.random().toString(36);
-      
+
       const handleMessage = (event: MessageEvent) => {
         if (event.data.id === id) {
           this.compressionWorker!.removeEventListener('message', handleMessage);
@@ -481,7 +545,7 @@ class EnhancedEphemerisCache {
 
     return new Promise((resolve, reject) => {
       const id = Math.random().toString(36);
-      
+
       const handleMessage = (event: MessageEvent) => {
         if (event.data.id === id) {
           this.compressionWorker!.removeEventListener('message', handleMessage);
@@ -494,7 +558,11 @@ class EnhancedEphemerisCache {
       };
 
       this.compressionWorker.addEventListener('message', handleMessage);
-      this.compressionWorker.postMessage({ id, action: 'decompress', data: compressedData });
+      this.compressionWorker.postMessage({
+        id,
+        action: 'decompress',
+        data: compressedData,
+      });
     });
   }
 
@@ -517,7 +585,8 @@ class EnhancedEphemerisCache {
 
   private updateHitRate(): void {
     const totalRequests = this.stats.memoryHits + this.stats.memoryMisses;
-    this.stats.hitRate = totalRequests > 0 ? (this.stats.memoryHits / totalRequests) * 100 : 0;
+    this.stats.hitRate =
+      totalRequests > 0 ? (this.stats.memoryHits / totalRequests) * 100 : 0;
   }
 
   private async cleanupExpiredEntries(): Promise<void> {
@@ -535,12 +604,15 @@ class EnhancedEphemerisCache {
 
     // Clean disk cache
     if (this.diskCache) {
-      const transaction = this.diskCache.transaction(['ephemeris'], 'readwrite');
+      const transaction = this.diskCache.transaction(
+        ['ephemeris'],
+        'readwrite'
+      );
       const store = transaction.objectStore('ephemeris');
       const index = store.index('expiresAt');
-      
+
       const request = index.openCursor(IDBKeyRange.upperBound(now));
-      
+
       request.onsuccess = () => {
         const cursor = request.result;
         if (cursor) {
@@ -559,8 +631,10 @@ class EnhancedEphemerisCache {
   private updateStatistics(): void {
     // Update cache statistics
     this.updateHitRate();
-    
-    devConsole.log?.(`Cache stats: ${this.stats.memoryHits} hits, ${this.stats.memoryMisses} misses, ${this.stats.hitRate.toFixed(1)}% hit rate`);
+
+    devConsole.log?.(
+      `Cache stats: ${this.stats.memoryHits} hits, ${this.stats.memoryMisses} misses, ${this.stats.hitRate.toFixed(1)}% hit rate`
+    );
   }
 
   /**
@@ -582,11 +656,14 @@ class EnhancedEphemerisCache {
       diskMisses: 0,
       evictions: 0,
       totalSize: 0,
-      hitRate: 0
+      hitRate: 0,
     };
 
     if (this.diskCache) {
-      const transaction = this.diskCache.transaction(['ephemeris'], 'readwrite');
+      const transaction = this.diskCache.transaction(
+        ['ephemeris'],
+        'readwrite'
+      );
       const store = transaction.objectStore('ephemeris');
       await store.clear();
     }
@@ -602,17 +679,19 @@ const DEFAULT_CONFIG: EphemerisCacheConfig = {
   defaultTTLHours: 24,
   predictiveDays: 7,
   preloadThreshold: 0.7,
-  compressionEnabled: true
+  compressionEnabled: true,
 };
 
 // Global cache instance
 let globalCache: EnhancedEphemerisCache | null = null;
 
-export function getEphemerisCache(config?: Partial<EphemerisCacheConfig>): EnhancedEphemerisCache {
+export function getEphemerisCache(
+  config?: Partial<EphemerisCacheConfig>
+): EnhancedEphemerisCache {
   if (!globalCache) {
     globalCache = new EnhancedEphemerisCache({
       ...DEFAULT_CONFIG,
-      ...config
+      ...config,
     });
   }
   return globalCache;

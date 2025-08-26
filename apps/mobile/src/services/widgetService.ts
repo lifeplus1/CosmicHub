@@ -33,7 +33,7 @@ class WidgetService {
     try {
       await this.loadPreferences();
       await this.setupWidgetData();
-      
+
       console.log('Widget service initialized successfully');
       return true;
     } catch (error) {
@@ -73,7 +73,7 @@ class WidgetService {
     };
 
     await this.saveWidgetData(widgetData);
-    
+
     // Update platform-specific widget
     if (Platform.OS === 'ios') {
       await this.updateiOSWidget(widgetData);
@@ -108,7 +108,7 @@ class WidgetService {
     };
 
     await this.saveWidgetData(widgetData);
-    
+
     if (Platform.OS === 'ios') {
       await this.updateiOSWidget(widgetData);
     } else if (Platform.OS === 'android') {
@@ -138,7 +138,7 @@ class WidgetService {
     };
 
     await this.saveWidgetData(widgetData);
-    
+
     if (Platform.OS === 'ios') {
       await this.updateiOSWidget(widgetData);
     } else if (Platform.OS === 'android') {
@@ -154,14 +154,14 @@ class WidgetService {
       // For iOS, we would use WidgetKit or Today Extension
       // This requires native iOS code or specific libraries
       // For now, we'll store the data that can be accessed by the widget extension
-      
+
       await AsyncStorage.setItem(`widget_${data.id}`, JSON.stringify(data));
-      
+
       // In a full implementation, you would use:
       // - WidgetKit APIs to update the widget timeline
       // - SharedDefaults (App Groups) to share data between app and widget
       // - Background App Refresh to update widget data
-      
+
       console.log(`iOS widget updated: ${data.id}`);
     } catch (error) {
       console.error('Error updating iOS widget:', error);
@@ -176,14 +176,14 @@ class WidgetService {
       // For Android, we would use RemoteViews and AppWidgetManager
       // This requires native Android code
       // Store data that can be accessed by the Android widget provider
-      
+
       await AsyncStorage.setItem(`widget_${data.id}`, JSON.stringify(data));
-      
+
       // In a full implementation, you would use:
       // - AppWidgetProvider to handle widget updates
       // - RemoteViews to update widget layout
       // - AlarmManager or JobScheduler for periodic updates
-      
+
       console.log(`Android widget updated: ${data.id}`);
     } catch (error) {
       console.error('Error updating Android widget:', error);
@@ -198,9 +198,9 @@ class WidgetService {
     // In a full implementation, this would use:
     // - iOS: BGTaskScheduler or silent push notifications
     // - Android: AlarmManager, JobScheduler, or WorkManager
-    
+
     const updateInterval = this.getUpdateIntervalMs();
-    
+
     // For now, just log the scheduling
     console.log(`Widget updates scheduled every ${updateInterval}ms`);
   }
@@ -225,7 +225,10 @@ class WidgetService {
    */
   private async saveWidgetData(data: WidgetData): Promise<void> {
     try {
-      await AsyncStorage.setItem(`widget_data_${data.id}`, JSON.stringify(data));
+      await AsyncStorage.setItem(
+        `widget_data_${data.id}`,
+        JSON.stringify(data)
+      );
     } catch (error) {
       console.error('Error saving widget data:', error);
     }
@@ -237,7 +240,7 @@ class WidgetService {
   async getWidgetData(widgetId: string): Promise<WidgetData | null> {
     try {
       const stored = await AsyncStorage.getItem(`widget_data_${widgetId}`);
-      return stored ? JSON.parse(stored) as WidgetData : null;
+      return stored ? (JSON.parse(stored) as WidgetData) : null;
     } catch (error) {
       console.error('Error getting widget data:', error);
       return null;
@@ -253,7 +256,8 @@ class WidgetService {
     if (!existingHoroscope) {
       await this.updateDailyHoroscopeWidget({
         sign: 'Your Sign',
-        dailyMessage: 'Welcome to CosmicHub! Open the app to get your personalized daily horoscope.',
+        dailyMessage:
+          'Welcome to CosmicHub! Open the app to get your personalized daily horoscope.',
       });
     }
 
@@ -283,10 +287,12 @@ class WidgetService {
   /**
    * Update widget preferences
    */
-  async updatePreferences(newPreferences: Partial<WidgetPreferences>): Promise<void> {
+  async updatePreferences(
+    newPreferences: Partial<WidgetPreferences>
+  ): Promise<void> {
     this.preferences = { ...this.preferences, ...newPreferences };
     await this.savePreferences();
-    
+
     // Reschedule updates if frequency changed
     if (newPreferences.updateFrequency) {
       this.scheduleWidgetUpdates();
@@ -311,7 +317,9 @@ class WidgetService {
         if (this.isValidWidgetPreferences(parsedPreferences)) {
           this.preferences = { ...this.preferences, ...parsedPreferences };
         } else {
-          console.warn('Invalid widget preferences found in storage, using defaults');
+          console.warn(
+            'Invalid widget preferences found in storage, using defaults'
+          );
         }
       }
     } catch (error) {
@@ -324,7 +332,10 @@ class WidgetService {
    */
   private async savePreferences(): Promise<void> {
     try {
-      await AsyncStorage.setItem('widget_preferences', JSON.stringify(this.preferences));
+      await AsyncStorage.setItem(
+        'widget_preferences',
+        JSON.stringify(this.preferences)
+      );
     } catch (error) {
       console.error('Failed to save widget preferences:', error);
     }
@@ -412,27 +423,41 @@ class WidgetService {
   /**
    * Validate widget preferences object
    */
-  private isValidWidgetPreferences(value: unknown): value is Partial<WidgetPreferences> {
+  private isValidWidgetPreferences(
+    value: unknown
+  ): value is Partial<WidgetPreferences> {
     if (value === null || value === undefined || typeof value !== 'object') {
       return false;
     }
 
     const prefs = value as Record<string, unknown>;
-    
+
     // Check optional boolean fields
-    if (prefs.enableDailyHoroscope !== undefined && typeof prefs.enableDailyHoroscope !== 'boolean') {
+    if (
+      prefs.enableDailyHoroscope !== undefined &&
+      typeof prefs.enableDailyHoroscope !== 'boolean'
+    ) {
       return false;
     }
-    
-    if (prefs.enableTransitAlerts !== undefined && typeof prefs.enableTransitAlerts !== 'boolean') {
+
+    if (
+      prefs.enableTransitAlerts !== undefined &&
+      typeof prefs.enableTransitAlerts !== 'boolean'
+    ) {
       return false;
     }
-    
-    if (prefs.enableMoonPhase !== undefined && typeof prefs.enableMoonPhase !== 'boolean') {
+
+    if (
+      prefs.enableMoonPhase !== undefined &&
+      typeof prefs.enableMoonPhase !== 'boolean'
+    ) {
       return false;
     }
-    
-    if (prefs.showPersonalizedContent !== undefined && typeof prefs.showPersonalizedContent !== 'boolean') {
+
+    if (
+      prefs.showPersonalizedContent !== undefined &&
+      typeof prefs.showPersonalizedContent !== 'boolean'
+    ) {
       return false;
     }
 

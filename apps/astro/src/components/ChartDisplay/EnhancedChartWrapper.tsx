@@ -37,19 +37,24 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
     if (err instanceof Error) {
       setError(err);
     } else {
-      setError(new Error('An unexpected error occurred while calculating the chart'));
+      setError(
+        new Error('An unexpected error occurred while calculating the chart')
+      );
     }
   }, []);
 
   // Enhanced success feedback
-  const handleChartCalculated = useCallback((data: ChartData) => {
-    setChartData(data);
-    setError(null);
-    
-    if (onChartCalculated) {
-      onChartCalculated(data);
-    }
-  }, [onChartCalculated]);
+  const handleChartCalculated = useCallback(
+    (data: ChartData) => {
+      setChartData(data);
+      setError(null);
+
+      if (onChartCalculated) {
+        onChartCalculated(data);
+      }
+    },
+    [onChartCalculated]
+  );
 
   // Calculate chart from birth data
   useEffect(() => {
@@ -62,7 +67,7 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
         setError(null);
 
         const result = await fetchChartData(birthData!);
-        
+
         if (!result.success) {
           throw new Error(result.error || 'Failed to calculate chart');
         }
@@ -82,7 +87,7 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   // Error retry handler
   const handleRetry = useCallback(() => {
     setError(null);
-    
+
     if (birthData) {
       const calculateChart = async () => {
         try {
@@ -90,7 +95,7 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
           setError(null);
 
           const result = await fetchChartData(birthData);
-          
+
           if (!result.success) {
             throw new Error(result.error || 'Failed to calculate chart');
           }
@@ -112,15 +117,15 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   if (isLoading) {
     return (
       <div className={className}>
-        <Card className="w-full max-w-4xl mx-auto">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center justify-center py-12 space-y-6">
-              <LoadingSpinner size="lg" color="cosmic" />
-              <div className="text-center space-y-2">
-                <div className="text-lg font-medium">
+        <Card className='w-full max-w-4xl mx-auto'>
+          <CardContent className='p-6'>
+            <div className='flex flex-col items-center justify-center py-12 space-y-6'>
+              <LoadingSpinner size='lg' color='cosmic' />
+              <div className='text-center space-y-2'>
+                <div className='text-lg font-medium'>
                   Calculating celestial positions...
                 </div>
-                <div className="text-sm text-gray-600 max-w-md">
+                <div className='text-sm text-gray-600 max-w-md'>
                   Processing birth data and generating astrological chart
                 </div>
               </div>
@@ -135,20 +140,16 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   if (error) {
     return (
       <div className={className}>
-        <Card className="w-full max-w-4xl mx-auto border-red-200">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <div className="text-red-600 text-lg font-medium">
+        <Card className='w-full max-w-4xl mx-auto border-red-200'>
+          <CardContent className='p-6'>
+            <div className='flex flex-col items-center justify-center py-12 space-y-4'>
+              <div className='text-red-600 text-lg font-medium'>
                 Chart Calculation Error
               </div>
-              <div className="text-red-600 text-sm text-center max-w-md">
+              <div className='text-red-600 text-sm text-center max-w-md'>
                 {error.message}
               </div>
-              <Button
-                onClick={handleRetry}
-                variant="default"
-                className="mt-4"
-              >
+              <Button onClick={handleRetry} variant='default' className='mt-4'>
                 🔄 Retry Calculation
               </Button>
             </div>
@@ -160,7 +161,7 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
 
   return (
     <div className={className}>
-      <div className="min-h-[600px]">
+      <div className='min-h-[600px]'>
         <ChartDisplay
           chart={chartData}
           chartId={savedChartId}

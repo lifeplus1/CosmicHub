@@ -100,8 +100,8 @@ const Chart: React.FC = () => {
   const isLoadingFromSavedRef = useRef(false);
 
   // 🚀 NEW: Use the chart processing hook to handle the critical data flow issue
-  const processedChart = useChartProcessing(chartData, { 
-    enableDebug: true 
+  const processedChart = useChartProcessing(chartData, {
+    enableDebug: true,
   });
 
   componentLogger.info('Chart', 'Chart processing hook result', {
@@ -110,55 +110,67 @@ const Chart: React.FC = () => {
     planetsCount: processedChart.planets.length,
     asteroidsCount: processedChart.asteroids.length,
     pointsCount: processedChart.points.length,
-    debug: processedChart.debug
+    debug: processedChart.debug,
   });
 
   // Check for saved chart in sessionStorage on component mount
   useEffect(() => {
     let savedChartData = sessionStorage.getItem('selectedChart');
     let storageType = 'sessionStorage';
-    
+
     // Fallback to localStorage if sessionStorage is empty
     if (!savedChartData) {
       savedChartData = localStorage.getItem('tempSelectedChart');
       storageType = 'localStorage';
     }
-    
-    componentLogger.info('Chart', `Checking ${storageType} for selectedChart`, savedChartData);
-    
+
+    componentLogger.info(
+      'Chart',
+      `Checking ${storageType} for selectedChart`,
+      savedChartData
+    );
+
     if (savedChartData) {
       try {
         const savedChart = JSON.parse(savedChartData);
         componentLogger.info('Chart', 'Parsed saved chart:', savedChart);
-        
+
         // If we have saved chart data, use it directly and set birth data from it
         if (savedChart.chart_data && savedChart.birth_data) {
-          componentLogger.info('Chart', 'Found chart_data and birth_data, using saved chart');
+          componentLogger.info(
+            'Chart',
+            'Found chart_data and birth_data, using saved chart'
+          );
           console.log('🔄 Processing saved chart data...');
-          
+
           // Check if saved chart data needs transformation (missing sign/house fields)
           const chartData = savedChart.chart_data;
           const firstPlanet = Object.values(chartData.planets || {})[0] as any;
-          const needsTransformation = firstPlanet && (!firstPlanet.sign || !firstPlanet.house);
-          
+          const needsTransformation =
+            firstPlanet && (!firstPlanet.sign || !firstPlanet.house);
+
           console.log('🔍 Saved chart analysis:', {
             needsTransformation,
-            firstPlanet: firstPlanet ? {
-              name: firstPlanet.name,
-              position: firstPlanet.position, 
-              hasSign: !!firstPlanet.sign,
-              hasHouse: !!firstPlanet.house
-            } : 'no planets'
+            firstPlanet: firstPlanet
+              ? {
+                  name: firstPlanet.name,
+                  position: firstPlanet.position,
+                  hasSign: !!firstPlanet.sign,
+                  hasHouse: !!firstPlanet.house,
+                }
+              : 'no planets',
           });
 
           isLoadingFromSavedRef.current = true;
-          
+
           const applySavedChartData = async () => {
             if (needsTransformation) {
               console.log('🔄 Applying transformation to saved chart data...');
               try {
                 // Apply the same transformation as fresh API data
-                const { transformBackendResponse } = await import('../services/api');
+                const { transformBackendResponse } = await import(
+                  '../services/api'
+                );
                 const transformedData = transformBackendResponse(chartData);
                 console.log('✅ Saved chart transformation complete');
                 setChartData(transformedData);
@@ -167,29 +179,43 @@ const Chart: React.FC = () => {
                 setChartData(chartData); // Fall back to original
               }
             } else {
-              console.log('✅ Saved chart already has sign/house data, using as-is');
+              console.log(
+                '✅ Saved chart already has sign/house data, using as-is'
+              );
               setChartData(chartData);
             }
           };
-          
+
           applySavedChartData();
           setBirthData(savedChart.birth_data);
-          
+
           // Clear the storage after using it
           sessionStorage.removeItem('selectedChart');
           localStorage.removeItem('tempSelectedChart');
-          
-          componentLogger.info('Chart', 'Loaded chart from saved data', savedChart);
+
+          componentLogger.info(
+            'Chart',
+            'Loaded chart from saved data',
+            savedChart
+          );
           return;
         } else {
-          componentLogger.warn('Chart', 'Saved chart missing chart_data or birth_data:', {
-            hasChartData: !!savedChart.chart_data,
-            hasBirthData: !!savedChart.birth_data,
-            chartKeys: Object.keys(savedChart)
-          });
+          componentLogger.warn(
+            'Chart',
+            'Saved chart missing chart_data or birth_data:',
+            {
+              hasChartData: !!savedChart.chart_data,
+              hasBirthData: !!savedChart.birth_data,
+              chartKeys: Object.keys(savedChart),
+            }
+          );
         }
       } catch (err) {
-        componentLogger.error('Chart', `Failed to parse saved chart from ${storageType}`, err);
+        componentLogger.error(
+          'Chart',
+          `Failed to parse saved chart from ${storageType}`,
+          err
+        );
         sessionStorage.removeItem('selectedChart');
         localStorage.removeItem('tempSelectedChart');
       }
@@ -242,10 +268,14 @@ const Chart: React.FC = () => {
     componentLogger.info('Chart', 'Chart calculation useEffect triggered', {
       hasBirthData: birthData != null,
       hasChartData: chartData !== null,
-      isLoadingFromSaved: isLoadingFromSavedRef.current
+      isLoadingFromSaved: isLoadingFromSavedRef.current,
     });
-    
-    if (birthData != null && chartData === null && !isLoadingFromSavedRef.current) {
+
+    if (
+      birthData != null &&
+      chartData === null &&
+      !isLoadingFromSavedRef.current
+    ) {
       componentLogger.info('Chart', 'Triggering chart calculation');
       void calculateChartData();
     } else {
@@ -408,52 +438,69 @@ const Chart: React.FC = () => {
           {/* Chart visualization */}
           <Card className='p-6'>
             <h2 className='text-xl font-semibold mb-4'>
-              Your Natal Chart 
+              Your Natal Chart
               <span className='text-sm text-gray-500 ml-2'>
-                ({processedChart.source === 'new_calculation' ? 'Fresh Calculation' : 'Saved Chart'})
+                (
+                {processedChart.source === 'new_calculation'
+                  ? 'Fresh Calculation'
+                  : 'Saved Chart'}
+                )
               </span>
             </h2>
-            
+
             {/* 🚀 CRITICAL FIX: Pass processed chart data, not raw chartData */}
-            <ChartDisplay 
-              chart={{
-                planets: Object.fromEntries(
-                  processedChart.planets.map((p: any) => [p.name, { 
-                    position: p.position, 
-                    retrograde: p.retrograde || false,
-                    sign: p.sign,
-                    degree: p.degree,
-                    house: p.house
-                  }])
-                ),
-                asteroids: Object.fromEntries(
-                  processedChart.asteroids.map((a: any) => [a.name, { 
-                    position: a.position, 
-                    retrograde: a.retrograde || false,
-                    sign: a.sign,
-                    degree: a.degree,
-                    house: a.house
-                  }])
-                ),
-                points: Object.fromEntries(
-                  processedChart.points.map((p: any) => [p.name, { 
-                    position: p.position, 
-                    retrograde: p.retrograde || false,
-                    sign: p.sign,
-                    degree: p.degree,
-                    house: p.house
-                  }])
-                ),
-                houses: processedChart.houses.map((h: any) => ({ cusp: h.cusp })),
-                aspects: processedChart.aspects.map((a: any) => ({
-                  planet1: a.planet1,
-                  planet2: a.planet2,
-                  type: a.type,
-                  orb: a.orb
-                }))
-              } as ChartLike} 
+            <ChartDisplay
+              chart={
+                {
+                  planets: Object.fromEntries(
+                    processedChart.planets.map((p: any) => [
+                      p.name,
+                      {
+                        position: p.position,
+                        retrograde: p.retrograde || false,
+                        sign: p.sign,
+                        degree: p.degree,
+                        house: p.house,
+                      },
+                    ])
+                  ),
+                  asteroids: Object.fromEntries(
+                    processedChart.asteroids.map((a: any) => [
+                      a.name,
+                      {
+                        position: a.position,
+                        retrograde: a.retrograde || false,
+                        sign: a.sign,
+                        degree: a.degree,
+                        house: a.house,
+                      },
+                    ])
+                  ),
+                  points: Object.fromEntries(
+                    processedChart.points.map((p: any) => [
+                      p.name,
+                      {
+                        position: p.position,
+                        retrograde: p.retrograde || false,
+                        sign: p.sign,
+                        degree: p.degree,
+                        house: p.house,
+                      },
+                    ])
+                  ),
+                  houses: processedChart.houses.map((h: any) => ({
+                    cusp: h.cusp,
+                  })),
+                  aspects: processedChart.aspects.map((a: any) => ({
+                    planet1: a.planet1,
+                    planet2: a.planet2,
+                    type: a.type,
+                    orb: a.orb,
+                  })),
+                } as ChartLike
+              }
             />
-            
+
             {/* Debug info for development */}
             {process.env.NODE_ENV === 'development' && (
               <details className='mt-4 p-4 bg-gray-50 rounded'>
@@ -461,13 +508,29 @@ const Chart: React.FC = () => {
                   🔧 Chart Processing Debug Info
                 </summary>
                 <div className='mt-2 text-xs'>
-                  <div><strong>Source:</strong> {processedChart.source}</div>
-                  <div><strong>Has Raw Backend:</strong> {String(processedChart.hasRawBackend)}</div>
-                  <div><strong>Planets:</strong> {processedChart.planets.length}</div>
-                  <div><strong>Asteroids:</strong> {processedChart.asteroids.length}</div>
-                  <div><strong>Points:</strong> {processedChart.points.length}</div>
-                  <div><strong>Houses:</strong> {processedChart.houses.length}</div>
-                  <div><strong>Aspects:</strong> {processedChart.aspects.length}</div>
+                  <div>
+                    <strong>Source:</strong> {processedChart.source}
+                  </div>
+                  <div>
+                    <strong>Has Raw Backend:</strong>{' '}
+                    {String(processedChart.hasRawBackend)}
+                  </div>
+                  <div>
+                    <strong>Planets:</strong> {processedChart.planets.length}
+                  </div>
+                  <div>
+                    <strong>Asteroids:</strong>{' '}
+                    {processedChart.asteroids.length}
+                  </div>
+                  <div>
+                    <strong>Points:</strong> {processedChart.points.length}
+                  </div>
+                  <div>
+                    <strong>Houses:</strong> {processedChart.houses.length}
+                  </div>
+                  <div>
+                    <strong>Aspects:</strong> {processedChart.aspects.length}
+                  </div>
                 </div>
               </details>
             )}

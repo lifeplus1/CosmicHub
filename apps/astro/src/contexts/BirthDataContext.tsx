@@ -8,7 +8,11 @@ import React, {
 } from 'react';
 import { devConsole } from '../config/environment';
 import type { ChartBirthData } from '@cosmichub/types';
-import { loadFromStorage, debouncedSave, clearStorage } from '../utils/contextPersistence';
+import {
+  loadFromStorage,
+  debouncedSave,
+  clearStorage,
+} from '../utils/contextPersistence';
 import { useContextPerformance } from '../hooks/useContextPerformance';
 
 interface BirthDataContextType {
@@ -86,7 +90,7 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({
   const setBirthData = useCallback((data: ChartBirthData | null) => {
     setBirthDataState(data);
     setLastUpdated(Date.now());
-    
+
     if (data) {
       debouncedSave(data, { key: STORAGE_KEY });
     } else {
@@ -99,13 +103,16 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({
   }, [setBirthData]);
 
   // Memoized context value - prevents unnecessary re-renders
-  const contextValue = useMemo<BirthDataContextType>(() => ({
-    birthData,
-    setBirthData,
-    clearBirthData,
-    isDataValid,
-    lastUpdated,
-  }), [birthData, setBirthData, clearBirthData, isDataValid, lastUpdated]);
+  const contextValue = useMemo<BirthDataContextType>(
+    () => ({
+      birthData,
+      setBirthData,
+      clearBirthData,
+      isDataValid,
+      lastUpdated,
+    }),
+    [birthData, setBirthData, clearBirthData, isDataValid, lastUpdated]
+  );
 
   // Performance monitoring in development
   useContextPerformance('BirthData', [birthData, isDataValid, lastUpdated]);

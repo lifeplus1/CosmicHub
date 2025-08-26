@@ -94,13 +94,15 @@ function initializeMobileEnhancements(): void {
   if (capabilities.hasWebShare) {
     window.addEventListener('share-chart', (_e: Event) => {
       if (navigator.share) {
-        navigator.share({
-          title: 'My Cosmic Chart - CosmicHub',
-          text: 'Check out my astrological chart from CosmicHub!',
-          url: window.location.href,
-        }).catch((error) => {
-          devConsole.log?.('Share cancelled or failed:', error);
-        });
+        navigator
+          .share({
+            title: 'My Cosmic Chart - CosmicHub',
+            text: 'Check out my astrological chart from CosmicHub!',
+            url: window.location.href,
+          })
+          .catch(error => {
+            devConsole.log?.('Share cancelled or failed:', error);
+          });
       }
     });
   }

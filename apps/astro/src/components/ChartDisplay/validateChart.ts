@@ -33,7 +33,7 @@ const aspectSchema = z
 const anglesSchema = z
   .object({
     ascendant: z.number().optional(), // Remove max(360) constraint
-    midheaven: z.number().optional(), // Remove max(360) constraint  
+    midheaven: z.number().optional(), // Remove max(360) constraint
     descendant: z.number().optional(), // Remove max(360) constraint
     imumcoeli: z.number().optional(), // Remove max(360) constraint
   })
@@ -70,9 +70,14 @@ export function validateChart(input: unknown): ValidChartLike | null {
   if (!parsed.success) {
     console.log('🚨 validateChart: Schema validation failed:');
     parsed.error.issues.forEach((issue, index) => {
-      console.log(`  ${index + 1}. Path: ${issue.path.join('.')} - ${issue.message}`);
+      console.log(
+        `  ${index + 1}. Path: ${issue.path.join('.')} - ${issue.message}`
+      );
     });
-    console.log('🚨 validateChart: Input data keys:', Object.keys(input as any));
+    console.log(
+      '🚨 validateChart: Input data keys:',
+      Object.keys(input as any)
+    );
     return null;
   }
   console.log('✅ validateChart: Validation passed');

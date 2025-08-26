@@ -18,15 +18,11 @@ export const StatefulAccordion: React.FC<StatefulAccordionProps> = ({
 }) => {
   // The Accordion component from @cosmichub/ui manages its own state internally
   // We need to create a controlled version that syncs with our external state
-  
+
   // For now, we'll use the built-in Accordion and handle state at the parent level
   // This is a simplification - in a full implementation we'd need to modify the Accordion component
   return (
-    <Accordion 
-      type={type} 
-      collapsible={true} 
-      className={className}
-    >
+    <Accordion type={type} collapsible={true} className={className}>
       {children}
     </Accordion>
   );
