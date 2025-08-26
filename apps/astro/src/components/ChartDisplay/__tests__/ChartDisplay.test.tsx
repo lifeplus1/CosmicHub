@@ -73,7 +73,7 @@ describe('ChartDisplay', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText(/Chart Analysis/)).toBeDefined();
+    expect(screen.getByText(/Natal Chart Analysis/)).toBeDefined();
   });
 
   it('displays content when no chart is provided', () => {
