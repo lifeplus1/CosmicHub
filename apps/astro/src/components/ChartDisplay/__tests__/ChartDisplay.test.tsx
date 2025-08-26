@@ -11,39 +11,32 @@ vi.mock('@/services/astrologyService', () => ({
 
 // Mock the UI components
 vi.mock('@cosmichub/ui', () => ({
-  ErrorBoundary: ({ children, name, level }: any) => (
-    <div data-testid={`error-boundary-${name}`}>{children}</div>
-  ),
-  TooltipProvider: ({ children }: any) => (
-    <div data-testid="tooltip-provider">{children}</div>
-  ),
-  Tooltip: ({ children, content }: any) => (
-    <div title={content}>{children}</div>
-  ),
-  Card: ({ children, className }: any) => (
-    <div className={className}>{children}</div>
-  ),
-  CardHeader: ({ children }: any) => <div>{children}</div>,
-  CardTitle: ({ children }: any) => <h2>{children}</h2>,
-  CardContent: ({ children }: any) => <div>{children}</div>,
-  Input: ({ placeholder, value, onChange }: any) => (
-    <input placeholder={placeholder} value={value} onChange={onChange} />
-  ),
-  Button: ({ children, variant, size, onClick }: any) => (
-    <button data-variant={variant} data-size={size} onClick={onClick}>
-      {children}
-    </button>
-  ),
-  Tabs: ({ children, defaultValue }: any) => (
-    <div data-default-value={defaultValue}>{children}</div>
-  ),
-  TabsList: ({ children }: any) => <div>{children}</div>,
-  TabsTrigger: ({ children, value }: any) => (
-    <button data-value={value}>{children}</button>
-  ),
-  TabsContent: ({ children, value }: any) => (
-    <div data-value={value}>{children}</div>
-  ),
+  ErrorBoundary: ({ children, fallback }: { children: React.ReactNode; fallback?: React.ComponentType<any> }) => {
+    try {
+      return <div data-testid="error-boundary">{children}</div>;
+    } catch (error) {
+      const FallbackComponent = fallback;
+      return FallbackComponent ? <FallbackComponent /> : <div data-testid="error-fallback">Error occurred</div>;
+    }
+  },
+  TooltipProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip-provider">{children}</div>,
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="card" className={className}>{children}</div>,
+  CardContent: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="card-content" className={className}>{children}</div>,
+  CardHeader: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="card-header" className={className}>{children}</div>,
+  CardTitle: ({ children, className }: { children: React.ReactNode; className?: string }) => <h3 data-testid="card-title" className={className}>{children}</h3>,
+  Input: ({ className, ...props }: any) => <input data-testid="input" className={className} {...props} />,
+  Button: ({ children, className, variant, ...props }: any) => <button data-testid="button" className={className} {...props}>{children}</button>,
+  Tooltip: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip">{children}</div>,
+  TooltipContent: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
+  TooltipTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip-trigger">{children}</div>,
+  Tabs: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="tabs" className={className}>{children}</div>,
+  TabsContent: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="tabs-content" className={className}>{children}</div>,
+  TabsList: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="tabs-list" className={className}>{children}</div>,
+  TabsTrigger: ({ children, value, className }: { children: React.ReactNode; value?: string; className?: string }) => <button data-testid="tabs-trigger" data-value={value} className={className}>{children}</button>,
+  Accordion: ({ children, type, className }: { children: React.ReactNode; type?: string; className?: string }) => <div data-testid="accordion" data-type={type} className={className}>{children}</div>,
+  AccordionContent: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="accordion-content" className={className}>{children}</div>,
+  AccordionItem: ({ children, value, className }: { children: React.ReactNode; value?: string; className?: string }) => <div data-testid="accordion-item" data-value={value} className={className}>{children}</div>,
+  AccordionTrigger: ({ children, className }: { children: React.ReactNode; className?: string }) => <button data-testid="accordion-trigger" className={className}>{children}</button>
 }));
 
 const queryClient = new QueryClient({
