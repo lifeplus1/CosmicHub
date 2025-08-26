@@ -36,7 +36,13 @@ vi.mock('@cosmichub/ui', () => ({
   Accordion: ({ children, type, className }: { children: React.ReactNode; type?: string; className?: string }) => <div data-testid="accordion" data-type={type} className={className}>{children}</div>,
   AccordionContent: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="accordion-content" className={className}>{children}</div>,
   AccordionItem: ({ children, value, className }: { children: React.ReactNode; value?: string; className?: string }) => <div data-testid="accordion-item" data-value={value} className={className}>{children}</div>,
-  AccordionTrigger: ({ children, className }: { children: React.ReactNode; className?: string }) => <button data-testid="accordion-trigger" className={className}>{children}</button>
+  AccordionTrigger: ({ children, className }: { children: React.ReactNode; className?: string }) => <button data-testid="accordion-trigger" className={className}>{children}</button>,
+  Table: ({ children, className }: { children: React.ReactNode; className?: string }) => <table data-testid="table" className={className}>{children}</table>,
+  TableHeader: ({ children, className }: { children: React.ReactNode; className?: string }) => <thead data-testid="table-header" className={className}>{children}</thead>,
+  TableBody: ({ children, className }: { children: React.ReactNode; className?: string }) => <tbody data-testid="table-body" className={className}>{children}</tbody>,
+  TableRow: ({ children, className }: { children: React.ReactNode; className?: string }) => <tr data-testid="table-row" className={className}>{children}</tr>,
+  TableHead: ({ children, className }: { children: React.ReactNode; className?: string }) => <th data-testid="table-head" className={className}>{children}</th>,
+  TableCell: ({ children, className }: { children: React.ReactNode; className?: string }) => <td data-testid="table-cell" className={className}>{children}</td>
 }));
 
 const queryClient = new QueryClient({
