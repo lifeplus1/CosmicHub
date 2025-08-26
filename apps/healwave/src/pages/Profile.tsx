@@ -34,7 +34,7 @@ const Profile: React.FC = React.memo(() => {
         </p>
         <Button
           onClick={() => navigate('/login')}
-          variant='primary'
+          variant='default'
           className='mt-4'
         >
           Sign In

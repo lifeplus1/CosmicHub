@@ -211,7 +211,7 @@ const ChartPreferences: React.FC = React.memo(() => {
           onClick={() => {
             void handleSavePreferences();
           }}
-          variant='primary'
+          variant='default'
           disabled={isLoading || isLoadingPreferences || !user}
         >
           {isLoading ? 'Saving...' : 'Save Preferences'}
