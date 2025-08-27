@@ -132,7 +132,10 @@ const OfflineChartDemo: React.FC = () => {
   const handleLoadChart = async (chartId: string) => {
     try {
       const chart = await loadChart(chartId);
-      setSelectedChart(chart);
+      setSelectedChart({
+        ...chart,
+        metadata: (chart.metadata as Record<string, unknown>) || {}
+      });
     } catch (err) {
       alert(
         `Failed to load chart: ${err instanceof Error ? err.message : 'Unknown error'}`
@@ -443,8 +446,8 @@ const OfflineChartDemo: React.FC = () => {
             <div className='flex items-center justify-between mb-6'>
               <h2 className='text-2xl font-bold text-white'>
                 📈 Chart Details:{' '}
-                {selectedChart.metadata.name
-                  ? String(selectedChart.metadata.name)
+                {typeof selectedChart.metadata.name === 'string' 
+                  ? selectedChart.metadata.name
                   : 'Unknown'}
               </h2>
               <button

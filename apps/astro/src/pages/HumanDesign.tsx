@@ -41,7 +41,7 @@ const HumanDesign: React.FC = () => {
     coordinates: string;
     timezone: string;
   } | null => {
-    if (birthInfo == null) return null;
+    if (birthInfo === null || birthInfo === undefined) return null;
 
     // Parse the ISO string more carefully to preserve the original date
     const consciousTime = birthInfo.conscious_time;
@@ -79,7 +79,7 @@ const HumanDesign: React.FC = () => {
       </div>
 
       {/* Birth Data Input - Only show if no data */}
-      {birthData == null && (
+      {birthData === null && (
         <SimpleBirthForm
           title='Enter Birth Data for Human Design'
           submitButtonText='Generate Human Design Chart'
@@ -89,7 +89,7 @@ const HumanDesign: React.FC = () => {
       )}
 
       {/* Human Design Chart Display */}
-      {birthData != null && isDataValid === true && (
+      {birthData !== null && isDataValid === true && (
         <div className='space-y-6'>
           {/* Control Panel */}
           <Card title='Chart Controls'>
@@ -126,7 +126,7 @@ const HumanDesign: React.FC = () => {
           {/* Birth Information */}
           <Card title='Birth Information'>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-              {humanDesignData?.birth_info != null ? (
+              {humanDesignData?.birth_info !== null && humanDesignData?.birth_info !== undefined ? (
                 // Show birth info from Human Design calculation result
                 (() => {
                   const birthInfo = formatBirthInfo(humanDesignData.birth_info);

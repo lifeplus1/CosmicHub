@@ -11,7 +11,6 @@ import {
   formatValidationErrors,
   canStartExperiment,
   ExperimentValidation,
-  ExperimentMigration,
 } from './experiment-validators.js';
 
 describe('Experiment Schema Validation', () => {
@@ -221,7 +220,7 @@ describe('Experiment Schema Validation', () => {
         config: undefined,
       };
 
-      const migrated = ExperimentMigration.migrateV1toV2(v1Experiment);
+      const migrated = ExperimentValidation.migrateV1toV2(v1Experiment);
       expect(migrated.version).toBe(2);
       expect(migrated.config).toBeDefined();
       expect(migrated.config?.statistical_power).toBe(0.8);

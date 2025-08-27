@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-export interface ProfileModalProps {
+interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
 }

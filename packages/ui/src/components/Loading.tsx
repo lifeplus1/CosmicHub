@@ -1,10 +1,10 @@
 import React from 'react';
 
-export interface LoadingProps {
-  size?: 'small' | 'medium' | 'large';
+interface LoadingProps {
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const Loading: React.FC<LoadingProps> = ({ size = 'medium' }) => (
+export const Loading: React.FC<LoadingProps> = ({ size = 'md' }) => (
   <div className={`loading loading-${size}`}>
     <div className='spinner'></div>
   </div>

@@ -1,35 +1,31 @@
 // apps/astro/src/types/astrology.types.ts
 
-export interface PlanetData {
-  name: string;
+export interface Planet {
   sign: string;
   house: number;
   degree: number;
   aspects: Array<{ type: string; target: string; orb: number }>;
 }
 
-export interface AsteroidData {
-  name: string;
+export interface TransitPlanet {
   sign: string;
   house: number;
   degree: number;
   aspects: Array<{ type: string; target: string; orb: number }>;
 }
 
-export interface AngleData {
-  name: string;
+export interface Asteroid {
   sign: string;
   degree: number;
 }
 
-export interface HouseData {
-  number: number;
+export interface House {
   sign: string;
   cusp: number;
   planets: string[];
 }
 
-export interface AspectData {
+export interface Aspect {
   planet1: string;
   planet2: string;
   type: string;
@@ -38,11 +34,8 @@ export interface AspectData {
 }
 
 export interface ChartData {
-  planets: PlanetData[];
-  asteroids: AsteroidData[];
-  angles: AngleData[];
-  houses: HouseData[];
-  aspects: AspectData[];
+  asteroids: Asteroid[];
+  angles: Asteroid[]; // Using Asteroid temporarily as AngleData is similar
+  houses: House[];
+  aspects: Aspect[];
 }
-
-export type ChartType = 'natal' | 'transit' | 'synastry';

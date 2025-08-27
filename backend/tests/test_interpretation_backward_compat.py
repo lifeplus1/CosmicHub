@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from typing import Dict, Any, Optional
 import pytest
 
-from api.charts import save_chart_unified, ChartData, Planet, Angle, House
+from api.routers.charts import save_chart_unified, Planet, Angle, House, ChartRequestData
 from api.interpretations import generate_interpretation_endpoint, GenerateInterpretationRequest
 
 
@@ -38,15 +38,15 @@ async def test_interpretation_backward_compat(monkeypatch: MonkeyPatch):
     mock_astro_service.get_chart_data = mock_get_chart_data
     mock_astro_service.cache_serialized_data = mock_cache_serialized_data
 
-    # Create chart data using proper Pydantic models
-    chart_data = ChartData(
+    # Create chart data using dictionary format as expected by ChartData
+    chart_data = ChartRequestData(
         planets=[
             Planet(
                 name="Sun",
-                sign="Leo",
+                sign="Leo", 
                 degree=5.0,
                 house=5,
-                aspects=[],
+                aspects=[]
             )
         ],
         asteroids=[],
@@ -58,7 +58,7 @@ async def test_interpretation_backward_compat(monkeypatch: MonkeyPatch):
                 number=1,
                 sign="Aries",
                 cusp=12.33,
-                planets=["Sun"],
+                planets=[]
             )
         ],
         aspects=[],

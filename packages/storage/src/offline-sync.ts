@@ -19,14 +19,14 @@ const log = {
     console.error(`❌ [OfflineSync] ${message}`, ...args),
 };
 
-export interface SyncResult {
+interface SyncResult {
   success: boolean;
   synced_items: number;
   failed_items: number;
   errors: string[];
 }
 
-export interface NetworkStatus {
+interface NetworkStatus {
   online: boolean;
   connection: 'fast' | 'slow' | 'offline';
   lastChecked: string;
@@ -442,29 +442,10 @@ export const getOfflineSyncManager = (): OfflineSyncManager => {
 };
 
 // Convenience functions
-export const saveChartOfflineWithSync = (
-  chartData: unknown,
-  birthData: unknown,
-  userId: string
-): Promise<string> => {
-  return getOfflineSyncManager().saveChartWithSync(
-    chartData,
-    birthData,
-    userId
-  );
 };
 
-export const deleteChartOfflineWithSync = (chartId: string): Promise<void> => {
-  return getOfflineSyncManager().deleteChartWithSync(chartId);
 };
 
-export const getUserChartsOffline = (
-  userId: string,
-  tryOnlineFirst = true
-): Promise<OfflineChart[]> => {
-  return getOfflineSyncManager().getUserCharts(userId, tryOnlineFirst);
 };
 
-export const forceSyncOfflineData = (): Promise<SyncResult> => {
-  return getOfflineSyncManager().forceSyncAll();
 };

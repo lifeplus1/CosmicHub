@@ -16,21 +16,15 @@ import type {
  * Type guard for validating planet data
  */
 export function isPlanet(obj: unknown): obj is Planet {
-  if (obj === null || obj === undefined || typeof obj !== 'object')
-    return false;
-
-  const planet = obj as Planet;
+  if (obj === null || typeof obj !== 'object') return false;
+  const p = obj as Planet;
   return (
-    typeof planet.name === 'string' &&
-    typeof planet.position === 'number' &&
-    planet.position >= 0 &&
-    planet.position < 360 &&
-    typeof planet.sign === 'string' &&
-    typeof planet.house === 'number' &&
-    planet.house >= 1 &&
-    planet.house <= 12 &&
-    typeof planet.retrograde === 'boolean' &&
-    typeof planet.speed === 'number'
+    typeof p.name === 'string' &&
+    typeof p.position === 'number' && p.position >= 0 && p.position < 360 &&
+    typeof p.sign === 'string' &&
+    typeof p.house === 'number' && p.house >= 1 && p.house <= 12 &&
+    typeof p.retrograde === 'boolean' &&
+    typeof p.speed === 'number'
   );
 }
 
@@ -38,18 +32,12 @@ export function isPlanet(obj: unknown): obj is Planet {
  * Type guard for validating house data
  */
 export function isHouse(obj: unknown): obj is House {
-  if (obj === null || obj === undefined || typeof obj !== 'object')
-    return false;
-
-  const house = obj as House;
+  if (obj === null || typeof obj !== 'object') return false;
+  const h = obj as House;
   return (
-    typeof house.number === 'number' &&
-    house.number >= 1 &&
-    house.number <= 12 &&
-    typeof house.cusp === 'number' &&
-    house.cusp >= 0 &&
-    house.cusp < 360 &&
-    typeof house.sign === 'string'
+    typeof h.number === 'number' && h.number >= 1 && h.number <= 12 &&
+    typeof h.cusp === 'number' && h.cusp >= 0 && h.cusp < 360 &&
+    typeof h.sign === 'string'
   );
 }
 
@@ -57,17 +45,15 @@ export function isHouse(obj: unknown): obj is House {
  * Type guard for validating aspect data
  */
 export function isAspect(obj: unknown): obj is Aspect {
-  if (obj === null || obj === undefined || typeof obj !== 'object')
-    return false;
-
-  const aspect = obj as Aspect;
+  if (obj === null || typeof obj !== 'object') return false;
+  const a = obj as Aspect;
   return (
-    typeof aspect.aspect_type === 'string' &&
-    typeof aspect.planet1 === 'string' &&
-    typeof aspect.planet2 === 'string' &&
-    typeof aspect.orb === 'number' &&
-    typeof aspect.applying === 'boolean' &&
-    typeof aspect.exact === 'boolean'
+    typeof a.aspect_type === 'string' &&
+    typeof a.planet1 === 'string' &&
+    typeof a.planet2 === 'string' &&
+    typeof a.orb === 'number' &&
+    typeof a.applying === 'boolean' &&
+    typeof a.exact === 'boolean'
   );
 }
 
@@ -75,15 +61,13 @@ export function isAspect(obj: unknown): obj is Aspect {
  * Type guard for validating chart angles
  */
 export function isChartAngles(obj: unknown): obj is ChartAngles {
-  if (obj === null || obj === undefined || typeof obj !== 'object')
-    return false;
-
-  const angles = obj as ChartAngles;
+  if (obj === null || typeof obj !== 'object') return false;
+  const ang = obj as ChartAngles;
   return (
-    typeof angles.ascendant === 'number' &&
-    typeof angles.midheaven === 'number' &&
-    typeof angles.descendant === 'number' &&
-    typeof angles.imumcoeli === 'number'
+    typeof ang.ascendant === 'number' &&
+    typeof ang.midheaven === 'number' &&
+    typeof ang.descendant === 'number' &&
+    typeof ang.imumcoeli === 'number'
   );
 }
 
@@ -136,38 +120,18 @@ export function isZodiacSign(value: string): value is ZodiacSign {
  * Type guard for planet names
  */
 export function isPlanetName(value: string): value is PlanetName {
-  const validPlanets: PlanetName[] = [
-    'sun',
-    'moon',
-    'mercury',
-    'venus',
-    'mars',
-    'jupiter',
-    'saturn',
-    'uranus',
-    'neptune',
-    'pluto',
-    'chiron',
-    'north_node',
-    'south_node',
+  const list: PlanetName[] = [
+    'sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','chiron','north_node','south_node'
   ];
-  return validPlanets.includes(value as PlanetName);
+  return list.includes(value as PlanetName);
 }
 
 /**
  * Type guard for aspect types
  */
 export function isAspectType(value: string): value is AspectType {
-  const validAspects: AspectType[] = [
-    'conjunction',
-    'opposition',
-    'trine',
-    'square',
-    'sextile',
-    'quincunx',
-    'semisextile',
-  ];
-  return validAspects.includes(value as AspectType);
+  const list: AspectType[] = ['conjunction','opposition','trine','square','sextile','quincunx','semisextile'];
+  return list.includes(value as AspectType);
 }
 
 /**
@@ -191,53 +155,22 @@ export function hasRequiredPlanets(
 /**
  * Validates house system is supported
  */
-export function isValidHouseSystem(
-  system: string
-): system is
-  | 'placidus'
-  | 'koch'
-  | 'equal'
-  | 'whole_sign'
-  | 'regiomontanus'
-  | 'campanus'
-  | 'porphyry' {
-  const validSystems = [
-    'placidus',
-    'koch',
-    'equal',
-    'whole_sign',
-    'regiomontanus',
-    'campanus',
-    'porphyry',
-  ];
-  return validSystems.includes(system);
+export function isValidHouseSystem(system: string): system is ChartData['house_system'] {
+  const list = ['placidus','koch','equal','whole_sign','regiomontanus','campanus','porphyry'];
+  return list.includes(system);
 }
 
 /**
  * Calculates dignities for a planet
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function calculateDignities(planet: Planet): Planet['dignity'] {
-  // Implement dignity calculation logic
-  return undefined; // Placeholder
+ 
+export function calculateDignities(_planet: Planet): Planet['dignity'] {
+  return undefined; // placeholder implementation
 }
 
 /**
  * Validates and normalizes aspect orbs
  */
-export function normalizeAspectOrb(
-  orb: number,
-  aspectType: AspectType
-): number {
-  const maxOrbs: Record<AspectType, number> = {
-    conjunction: 10,
-    opposition: 10,
-    trine: 8,
-    square: 8,
-    sextile: 6,
-    quincunx: 3,
-    semisextile: 3,
-  };
-
-  return Math.min(Math.abs(orb), maxOrbs[aspectType]);
+export function normalizeAspectOrb(value: unknown, fallback = 0): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }

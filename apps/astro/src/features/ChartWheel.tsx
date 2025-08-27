@@ -1,13 +1,32 @@
 import React, { useEffect, useRef, memo, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchChartData,
-  type ChartBirthData,
-  type ChartData as APIChartData,
-} from '../services/api';
-import type { ApiResult } from '../services/apiResult';
+import { fetchChartData } from '../services/api';
+import type { ExtendedBirthData } from '../contexts/BirthDataContext';
+import { useCanonicalBirthData } from '../hooks/useCanonicalBirthData';
 import { Button } from '@cosmichub/ui';
+
+// Define ChartBirthData to match TextBirthData from @cosmichub/types
+interface ChartBirthData {
+  birth_date: string;
+  birth_time: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  city?: string;
+  [extra: string]: unknown;
+}
+
+interface APIChartData {
+  planets: Record<string, unknown>;
+  houses: unknown[];
+  aspects?: unknown[];
+  angles?: Record<string, number>;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  julian_day?: number;
+}
 
 // Enhanced TypeScript interfaces
 interface BackendPlanet {
@@ -80,7 +99,7 @@ interface BackendChartResponse {
 }
 
 interface ChartWheelProps {
-  birthData?: ChartBirthData;
+  birthData?: ChartBirthData | ExtendedBirthData;
   chartData?: ChartData; // Add pre-transformed chart data prop
   showAspects?: boolean;
   showAnimation?: boolean;
@@ -88,7 +107,7 @@ interface ChartWheelProps {
 
 // Enhanced ChartWheel component with aspects and animations
 const ChartWheel: React.FC<ChartWheelProps> = ({
-  birthData,
+  birthData: _birthData,
   chartData: preTransformedData,
   showAspects = true,
   showAnimation = true,
@@ -97,24 +116,26 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Fetch chart data from backend using the /calculate endpoint (only if no pre-transformed data)
+  const canonicalBirthData = useCanonicalBirthData();
   const {
     data: fetchedData,
     isLoading,
     error,
     refetch,
   } = useQuery<ChartData>({
-    queryKey: ['chartData', birthData],
-    queryFn: async () => {
-      if (birthData === null || birthData === undefined)
-        throw new Error('Birth data required');
-      const result: ApiResult<APIChartData> = await fetchChartData(birthData);
-      if (!result.success) throw new Error(result.error);
-      return transformAPIResponseToChartData(result.data);
+    queryKey: ['chartData', canonicalBirthData?.birth_date || canonicalBirthData?.city || 'default'],
+    queryFn: async (): Promise<ChartData> => {
+      if (!canonicalBirthData) throw new Error('Birth data required');
+      const result = await fetchChartData(canonicalBirthData);
+      if (!result || typeof result !== 'object' || !('success' in result) || !result.success) {
+        throw new Error('Failed to fetch chart data');
+      }
+      if (!result.data || typeof result.data !== 'object') {
+        throw new Error('Invalid chart data format');
+      }
+      return transformAPIResponseToChartData(result.data as APIChartData);
     },
-    enabled:
-      birthData !== null &&
-      birthData !== undefined &&
-      preTransformedData === null,
+    enabled: !!canonicalBirthData && preTransformedData === null,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     retry: 2,
@@ -132,7 +153,15 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     const planets = apiData.planets ?? {};
     Object.entries(planets).forEach(([name, planetData]) => {
       if (planetData === null || planetData === undefined) return;
-      if (typeof planetData.position !== 'number') return;
+      
+      // Type guard for planet data
+      function isValidPlanetData(data: unknown): data is { position: number; retrograde?: boolean; speed?: number } {
+        if (typeof data !== 'object' || data === null) return false;
+        const planet = data as Record<string, unknown>;
+        return typeof planet.position === 'number';
+      }
+      
+      if (!isValidPlanetData(planetData)) return;
 
       transformedPlanets[name] = {
         name,

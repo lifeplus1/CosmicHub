@@ -6,20 +6,18 @@
 import React, { useState } from 'react';
 import { cn } from '../utils/cn';
 
-// Error severity levels
-export type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
-
-// Error types for better user experience
+// Error domain types -------------------------------------------------------
 export type ErrorType =
   | 'network'
-  | 'validation'
   | 'authentication'
   | 'authorization'
+  | 'validation'
   | 'calculation'
   | 'timeout'
   | 'unknown';
 
-// Enhanced error interface
+export type ErrorSeverity = 'critical' | 'error' | 'warning' | 'info';
+
 export interface EnhancedError {
   message: string;
   type?: ErrorType;
@@ -35,9 +33,8 @@ export interface EnhancedError {
   }>;
 }
 
-// Error message component
 export interface ErrorMessageProps {
-  error: EnhancedError | Error | string;
+  error: string | Error | EnhancedError;
   className?: string;
   showDetails?: boolean;
   showTimestamp?: boolean;
@@ -315,14 +312,14 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   );
 };
 
-// Error boundary fallback component
-export interface ErrorFallbackProps {
+// Error boundary fallback component ---------------------------------------
+export interface ErrorBoundaryFallbackProps {
   error: Error;
   resetError: () => void;
   className?: string;
 }
 
-export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
+export const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
   error,
   resetError,
   className,
@@ -335,14 +332,8 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     timestamp: new Date(),
     retryable: true,
     recoveryActions: [
-      {
-        label: 'Reload Page',
-        action: () => window.location.reload(),
-      },
-      {
-        label: 'Go Back',
-        action: () => window.history.back(),
-      },
+      { label: 'Reload Page', action: () => window.location.reload() },
+      { label: 'Go Back', action: () => window.history.back() },
     ],
   };
 
@@ -368,11 +359,11 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   );
 };
 
-// Toast notification for errors
+// Toast notification for errors -------------------------------------------
 export interface ErrorToastProps {
-  error: EnhancedError | Error | string;
+  error: string | Error | EnhancedError;
   onClose: () => void;
-  duration?: number; // Auto-close after duration (ms), 0 for manual close
+  duration?: number; // 0 = manual close
   className?: string;
 }
 
@@ -388,28 +379,29 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
     if (duration > 0) {
       const timer = setTimeout(() => {
         setIsVisible(false);
-        setTimeout(onClose, 300); // Wait for fade out animation
+        setTimeout(onClose, 300);
       }, duration);
-
       return () => clearTimeout(timer);
     }
     return undefined;
   }, [duration, onClose]);
 
-  const normalizedError =
+  const normalizedError: EnhancedError =
     typeof error === 'string'
       ? {
           message: error,
-          type: 'unknown' as ErrorType,
-          severity: 'error' as ErrorSeverity,
+          type: 'unknown',
+          severity: 'error',
+          timestamp: new Date(),
         }
       : error instanceof Error
         ? {
             message: error.message,
             type: getErrorTypeFromMessage(error.message),
-            severity: 'error' as ErrorSeverity,
+            severity: 'error',
+            timestamp: new Date(),
           }
-        : error;
+        : { ...error, timestamp: error.timestamp ?? new Date() };
 
   const colors = getSeverityColors(normalizedError.severity ?? 'error');
 
@@ -435,13 +427,11 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
               normalizedError.severity ?? 'error'
             )}
           </div>
-
           <div className='flex-1 min-w-0'>
             <div className={cn('text-sm font-medium', colors.text)}>
               {normalizedError.message}
             </div>
           </div>
-
           <button
             type='button'
             onClick={() => {
@@ -466,8 +456,8 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
   );
 };
 
-// Utility functions
-function getErrorTypeFromMessage(message: string): ErrorType {
+// Utility functions -------------------------------------------------------
+export function getErrorTypeFromMessage(message: string): ErrorType {
   const lowercaseMessage = message.toLowerCase();
 
   if (
@@ -507,7 +497,7 @@ function getErrorTypeFromMessage(message: string): ErrorType {
   return 'unknown';
 }
 
-function isRetryableError(message: string): boolean {
+export function isRetryableError(message: string): boolean {
   const lowercaseMessage = message.toLowerCase();
 
   // Network errors are usually retryable
@@ -551,7 +541,7 @@ function isRetryableError(message: string): boolean {
   return true;
 }
 
-function getSeverityColors(severity: ErrorSeverity) {
+export function getSeverityColors(severity: ErrorSeverity) {
   switch (severity) {
     case 'critical':
       return {
@@ -591,7 +581,7 @@ function getSeverityColors(severity: ErrorSeverity) {
   }
 }
 
-function getErrorIcon(type: ErrorType, severity: ErrorSeverity): string {
+export function getErrorIcon(type: ErrorType, severity: ErrorSeverity): string {
   if (severity === 'critical') return '🔥';
   if (severity === 'error') {
     switch (type) {
@@ -614,3 +604,5 @@ function getErrorIcon(type: ErrorType, severity: ErrorSeverity): string {
   if (severity === 'warning') return '⚠️';
   return 'ℹ️';
 }
+
+

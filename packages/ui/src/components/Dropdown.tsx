@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, useId } from 'react';
 
-export interface DropdownOption {
+interface DropdownOption {
   value: string;
   label: string;
   disabled?: boolean;
 }
 
-export interface DropdownProps {
+interface DropdownProps {
   options: DropdownOption[];
   value?: string;
   placeholder?: string;

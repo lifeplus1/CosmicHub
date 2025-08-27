@@ -129,10 +129,10 @@ describe('PresetSelector', () => {
         currentPreset={mockCurrentPreset}
       />
     );
-
-    // Should show loading initially - use getAllByText for multiple matches
-    const loadingEls = await screen.findAllByText('Loading presets...');
-    expect(loadingEls.length).toBeGreaterThan(0);
+    // ProgressiveLoading message currently: 'Loading your custom frequency presets...'
+    expect(
+      await screen.findByText('Loading your custom frequency presets...')
+    ).toBeDefined();
   });
 
   it('has proper accessibility attributes', async () => {

@@ -1,0 +1,42 @@
+{
+  "name": "@cosmichub/analytics",
+  "version": "1.0.0",
+  "description": "Comprehensive user analytics and tracking for CosmicHub",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings=25",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "analytics",
+    "tracking",
+    "mixpanel",
+    "posthog",
+    "google-analytics"
+  ]
+}

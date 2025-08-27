@@ -2,14 +2,12 @@
  * Share Modal Component
  */
 
-import React from 'react';
-
-export interface ShareModalProps {
+interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
+export const ShareModal = ({ isOpen, onClose }: ShareModalProps) => {
   if (!isOpen) return null;
 
   return (

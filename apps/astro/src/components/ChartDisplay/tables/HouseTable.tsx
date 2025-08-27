@@ -11,12 +11,14 @@ import { getPlanetSymbol, getSignSymbol } from './tableUtils';
 import { AstroSymbol } from '../AstroSymbol';
 import { getRulerFromSign } from '../../../utils/astrologyUtils';
 
-export interface HouseRow {
+interface HouseRow {
   number: number;
   sign: string;
   cuspDegree: string;
   planetsInHouse: string;
 }
+
+export type { HouseRow };
 
 const HouseTable: React.FC<{ data: HouseRow[] }> = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) return null;
@@ -35,7 +37,7 @@ const HouseTable: React.FC<{ data: HouseRow[] }> = ({ data }) => {
         {data.map((item, index) => {
           const ruler = (() => {
             try {
-              return getRulerFromSign(item.sign.toLowerCase() as any);
+              return getRulerFromSign(item.sign.toLowerCase() as 'aries' | 'taurus' | 'gemini' | 'cancer' | 'leo' | 'virgo' | 'libra' | 'scorpio' | 'sagittarius' | 'capricorn' | 'aquarius' | 'pisces');
             } catch {
               return 'Unknown';
             }

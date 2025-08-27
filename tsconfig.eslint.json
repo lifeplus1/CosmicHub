@@ -20,7 +20,7 @@
   },
   "include": [
     "apps/*/src/**/*.ts",
-    "apps/*/src/**/*.tsx",
+    "apps/*/src/**/*.tsx", 
     "packages/*/src/**/*.ts",
     "packages/*/src/**/*.tsx"
   ],

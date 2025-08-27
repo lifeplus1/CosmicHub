@@ -1,58 +1,52 @@
+// COMPLETE REWRITE: Previous file was structurally corrupted (missing component wrappers,
+// orphaned code blocks). This version provides clean, typed boundary helpers.
 import React, { ReactNode } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 import type { ErrorInfo as BoundaryErrorInfo } from './errorTypes';
 
-/**
- * Page-level error boundary for critical application errors
- */
-interface PageErrorBoundaryProps {
+/** Page-level error boundary */
+export interface PageErrorBoundaryProps {
   children: ReactNode;
-  pageName?: string | undefined;
-  onError?: ((error: Error, errorInfo: BoundaryErrorInfo) => void) | undefined;
+  pageName?: string;
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
+  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
-export function PageErrorBoundary({
+export const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = ({
   children,
   pageName,
   onError,
-}: PageErrorBoundaryProps) {
-  const nameProps = pageName !== undefined ? { name: pageName } : {};
+  fallback,
+}) => {
+  const nameProps = pageName ? { name: pageName } : {};
   return (
     <ErrorBoundary
       level='page'
-      resetOnPropsChange={true}
+      resetOnPropsChange
+      fallback={fallback}
       {...nameProps}
       {...(onError ? { onError } : {})}
     >
       {children}
     </ErrorBoundary>
   );
-}
+};
 
-/**
- * Section-level error boundary for isolated component groups
- */
-interface SectionErrorBoundaryProps {
+/** Section-level error boundary */
+export interface SectionErrorBoundaryProps {
   children: ReactNode;
-  sectionName?: string | undefined;
-  fallback?:
-    | ReactNode
-    | ((
-        error: Error,
-        errorInfo: BoundaryErrorInfo,
-        retry: () => void
-      ) => ReactNode)
-    | undefined;
-  onError?: ((error: Error, errorInfo: BoundaryErrorInfo) => void) | undefined;
+  sectionName?: string;
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
+  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
-export function SectionErrorBoundary({
+export const SectionErrorBoundary: React.FC<SectionErrorBoundaryProps> = ({
   children,
   sectionName,
-  fallback,
   onError,
-}: SectionErrorBoundaryProps) {
-  const nameProps = sectionName !== undefined ? { name: sectionName } : {};
+  fallback,
+}) => {
+  const nameProps = sectionName ? { name: sectionName } : {};
   return (
     <ErrorBoundary
       level='section'
@@ -63,34 +57,25 @@ export function SectionErrorBoundary({
       {children}
     </ErrorBoundary>
   );
-}
+};
 
-/**
- * Component-level error boundary for individual components
- */
-interface ComponentErrorBoundaryProps {
+/** Component-level error boundary */
+export interface ComponentErrorBoundaryProps {
   children: ReactNode;
-  componentName?: string | undefined;
-  fallback?:
-    | ReactNode
-    | ((
-        error: Error,
-        errorInfo: BoundaryErrorInfo,
-        retry: () => void
-      ) => ReactNode)
-    | undefined;
-  onError?: ((error: Error, errorInfo: BoundaryErrorInfo) => void) | undefined;
-  resetKeys?: Array<string | number> | undefined;
+  componentName?: string;
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
+  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
+  resetKeys?: Array<string | number>;
 }
 
-export function ComponentErrorBoundary({
+export const ComponentErrorBoundary: React.FC<ComponentErrorBoundaryProps> = ({
   children,
   componentName,
-  fallback,
   onError,
+  fallback,
   resetKeys,
-}: ComponentErrorBoundaryProps) {
-  const nameProps = componentName !== undefined ? { name: componentName } : {};
+}) => {
+  const nameProps = componentName ? { name: componentName } : {};
   return (
     <ErrorBoundary
       level='component'
@@ -102,80 +87,88 @@ export function ComponentErrorBoundary({
       {children}
     </ErrorBoundary>
   );
-}
+};
 
-/**
- * Async operation error boundary with loading states
- */
-interface AsyncErrorBoundaryProps {
+/** Async operation boundary */
+export interface AsyncErrorBoundaryProps {
   children: ReactNode;
-  operationName?: string | undefined;
-  loadingFallback?: ReactNode | undefined;
-  errorFallback?:
-    | ReactNode
-    | ((
-        error: Error,
-        errorInfo: BoundaryErrorInfo,
-        retry: () => void
-      ) => ReactNode)
-    | undefined;
-  onError?: ((error: Error, errorInfo: BoundaryErrorInfo) => void) | undefined;
+  operationName?: string;
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
+  loadingFallback?: ReactNode;
+  errorFallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
-export function AsyncErrorBoundary({
+export const AsyncErrorBoundary: React.FC<AsyncErrorBoundaryProps> = ({
   children,
   operationName,
-  loadingFallback: _loadingFallback,
-  errorFallback,
   onError,
-}: AsyncErrorBoundaryProps) {
-  const asyncFallback = errorFallback ?? (
-    <div className='p-4 bg-cosmic-dark/50 rounded-lg border border-cosmic-silver/20 text-center'>
-      <div className='text-amber-400 mb-2'>⚠️</div>
-      <p className='text-cosmic-silver text-sm'>
-        Failed to load {operationName ?? 'content'}
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className='mt-2 px-3 py-1 bg-cosmic-purple text-white text-sm rounded hover:bg-cosmic-purple/80'
-      >
-        Retry
-      </button>
-    </div>
-  );
+  loadingFallback,
+  errorFallback,
+}) => {
+  const fallback =
+    errorFallback ??
+    ((error: Error, _info: BoundaryErrorInfo, retry: () => void) => (
+      <div className='p-4 bg-cosmic-dark/50 rounded-lg border border-cosmic-silver/20 text-center'>
+        <div className='text-amber-400 mb-2'>⚠️</div>
+        <p className='text-cosmic-silver text-sm'>
+          Failed to load {operationName ?? 'content'}
+        </p>
+        <div className='flex justify-center gap-2 mt-3'>
+          <button
+            onClick={retry}
+            className='px-3 py-1 bg-cosmic-purple text-white text-xs rounded hover:bg-cosmic-purple/80'
+          >
+            Retry
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className='px-3 py-1 border border-cosmic-silver/30 text-cosmic-silver text-xs rounded hover:bg-cosmic-silver/10'
+          >
+            Reload
+          </button>
+        </div>
+        {loadingFallback && (
+          <div className='mt-4 text-xs text-cosmic-silver/60'>
+            {loadingFallback}
+          </div>
+        )}
+        {error.message && (
+          <div className='mt-3 text-[10px] text-red-400/70 break-all'>
+            {error.message}
+          </div>
+        )}
+      </div>
+    ));
+
   const nameProps = operationName
     ? { name: `async-${operationName}` }
     : { name: 'async-operation' };
   return (
     <ErrorBoundary
       level='component'
-      fallback={asyncFallback}
+      fallback={fallback as AsyncErrorBoundaryProps['errorFallback']}
       {...nameProps}
       {...(onError ? { onError } : {})}
     >
       {children}
     </ErrorBoundary>
   );
-}
+};
 
-/**
- * Form error boundary with validation error handling
- */
-interface FormErrorBoundaryProps {
+/** Form boundary */
+export interface FormErrorBoundaryProps {
   children: ReactNode;
-  formName?: string | undefined;
-  onError?: ((error: Error, errorInfo: BoundaryErrorInfo) => void) | undefined;
+  formName?: string;
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
 }
 
-export function FormErrorBoundary({
+export const FormErrorBoundary: React.FC<FormErrorBoundaryProps> = ({
   children,
   formName,
   onError,
-}: FormErrorBoundaryProps) {
-  const formFallback = (
-    _error: Error,
-    _errorInfo: unknown,
-    retry: () => void
+}) => {
+  const fallback = (
+    error: Error, _info: BoundaryErrorInfo, retry: () => void
   ) => (
     <div className='p-4 bg-red-500/10 border border-red-500/20 rounded-lg'>
       <div className='text-red-400 mb-2'>📝</div>
@@ -197,41 +190,42 @@ export function FormErrorBoundary({
           Refresh
         </button>
       </div>
+      {error.message && (
+        <div className='mt-3 text-xs text-red-400/70 break-all'>
+          {error.message}
+        </div>
+      )}
     </div>
   );
   const nameProps = formName ? { name: `form-${formName}` } : { name: 'form' };
   return (
     <ErrorBoundary
       level='component'
-      fallback={formFallback}
+      fallback={fallback}
       {...nameProps}
       {...(onError ? { onError } : {})}
     >
       {children}
     </ErrorBoundary>
   );
-}
+};
 
-/**
- * Chart/visualization error boundary
- */
-interface ChartErrorBoundaryProps {
+/** Chart / visualization boundary */
+export interface ChartErrorBoundaryProps {
   children: ReactNode;
-  chartType?: string | undefined;
-  onError?: ((error: Error, errorInfo: BoundaryErrorInfo) => void) | undefined;
+  chartType?: string;
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
 }
 
-export function ChartErrorBoundary({
+export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = ({
   children,
   chartType,
   onError,
-}: ChartErrorBoundaryProps) {
-  const chartFallback = (
-    _error: Error,
-    _errorInfo: unknown,
-    retry: () => void
+}) => {
+  const fallback = (
+    error: Error, _info: BoundaryErrorInfo, retry: () => void
   ) => {
-    const msg = _error?.message ?? '';
+    const msg = error.message ?? '';
     const isChunkError =
       msg.includes('Loading chunk') || msg.includes('Loading CSS chunk');
     if (isChunkError) {
@@ -273,74 +267,45 @@ export function ChartErrorBoundary({
             Reload
           </button>
         </div>
+        {error.message && (
+          <div className='mt-3 text-xs text-red-400/70 break-all'>
+            {error.message}
+          </div>
+        )}
       </div>
     );
   };
-  const nameProps = chartType
-    ? { name: `chart-${chartType}` }
-    : { name: 'chart' };
+  const nameProps = chartType ? { name: `chart-${chartType}` } : { name: 'chart' };
   return (
     <ErrorBoundary
       level='component'
-      fallback={chartFallback}
+      fallback={fallback}
       {...nameProps}
       {...(onError ? { onError } : {})}
     >
       {children}
     </ErrorBoundary>
   );
-}
+};
 
-/**
- * HOC for wrapping components with error boundaries
- */
-export function withErrorBoundary<T extends object>(
-  Component: React.ComponentType<T>,
-  options: {
-    level?: 'page' | 'section' | 'component';
-    name?: string | undefined;
-    fallback?: ReactNode;
-    onError?:
-      | ((error: Error, errorInfo: BoundaryErrorInfo) => void)
-      | undefined;
-  } = {}
-) {
-  const { level = 'component', name, fallback, onError } = options;
-  const nameProps = name ? { name } : {};
-  const WrappedComponent = (props: T) => (
-    <ErrorBoundary
-      level={level}
-      fallback={fallback}
-      {...nameProps}
-      {...(onError ? { onError } : {})}
-    >
-      <Component {...props} />
-    </ErrorBoundary>
-  );
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName ?? Component.name})`;
-  return WrappedComponent;
-}
-
-/**
- * Error boundary for lazy-loaded components
- */
-interface LazyErrorBoundaryProps {
+/** Lazy-loaded components boundary */
+export interface LazyErrorBoundaryProps {
   children: ReactNode;
-  componentName?: string | undefined;
-  loadingFallback?: ReactNode | undefined;
+  componentName?: string;
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
+  loadingFallback?: ReactNode;
 }
 
-export function LazyErrorBoundary({
+export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({
   children,
   componentName,
-  loadingFallback: _loadingFallback,
-}: LazyErrorBoundaryProps) {
-  const lazyFallback = (
-    _error: Error,
-    _errorInfo: unknown,
-    retry: () => void
+  onError,
+  loadingFallback,
+}) => {
+  const fallback = (
+    error: Error, _info: BoundaryErrorInfo, retry: () => void
   ) => {
-    const msg = _error?.message ?? '';
+    const msg = error.message ?? '';
     const isChunkError =
       msg.includes('Loading chunk') || msg.includes('Loading CSS chunk');
     if (isChunkError) {
@@ -382,6 +347,16 @@ export function LazyErrorBoundary({
             Reload
           </button>
         </div>
+        {loadingFallback && (
+          <div className='mt-4 text-xs text-cosmic-silver/60'>
+            {loadingFallback}
+          </div>
+        )}
+        {error.message && (
+          <div className='mt-3 text-[10px] text-red-400/70 break-all'>
+            {error.message}
+          </div>
+        )}
       </div>
     );
   };
@@ -389,8 +364,52 @@ export function LazyErrorBoundary({
     ? { name: `lazy-${componentName}` }
     : { name: 'lazy-component' };
   return (
-    <ErrorBoundary level='component' fallback={lazyFallback} {...nameProps}>
+    <ErrorBoundary
+      level='component'
+      fallback={fallback}
+      {...nameProps}
+      {...(onError ? { onError } : {})}
+    >
       {children}
     </ErrorBoundary>
   );
+};
+
+/** Generic HOC wrapper */
+export interface WithErrorBoundaryOptions {
+  level?: 'page' | 'section' | 'component';
+  name?: string;
+  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
+  onError?: (error: Error, info: BoundaryErrorInfo) => void;
 }
+
+export function withErrorBoundary<T extends object>(
+  Component: React.ComponentType<T>,
+  options: WithErrorBoundaryOptions = {}
+): React.FC<T> {
+  const { level = 'component', name, fallback, onError } = options;
+  const nameProps = name ? { name } : {};
+  const Wrapped: React.FC<T> = props => (
+    <ErrorBoundary
+      level={level}
+      fallback={fallback}
+      {...nameProps}
+      {...(onError ? { onError } : {})}
+    >
+      <Component {...props} />
+    </ErrorBoundary>
+  );
+  Wrapped.displayName = `withErrorBoundary(${Component.displayName ?? Component.name ?? 'Component'})`;
+  return Wrapped;
+}
+
+export default {
+  PageErrorBoundary,
+  SectionErrorBoundary,
+  ComponentErrorBoundary,
+  AsyncErrorBoundary,
+  FormErrorBoundary,
+  ChartErrorBoundary,
+  LazyErrorBoundary,
+  withErrorBoundary,
+};

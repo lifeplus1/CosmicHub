@@ -2,7 +2,7 @@ import React, { useState, type JSX } from 'react';
 
 // Fallback date formatter with better error handling
 const formatDate = (date: string | null | undefined): string => {
-  if (date == null || date === '') return 'Unknown';
+  if (date === null || date === undefined || date === '') return 'Unknown';
   try {
     const d = typeof date === 'string' ? new Date(date) : date;
     // Check if date is valid

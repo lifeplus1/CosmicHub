@@ -1,8 +1,25 @@
 /**
- * UX-021: Mobile PWA Enhancements
+ * UX-021: Mobile PWA Enhancements (Legacy)
  * Enhanced mobile-specific PWA features including touch interactions,
- * viewport optimization, and platform-specific behaviors
+ * viewport optimization, and platform-specific behaviors.
+ *
+ * @deprecated This legacy module will be removed in a future release. Prefer using
+ * `detectRuntimeCapabilities`, `initMobileUX`, and shared UI helpers (`showUpdateBanner`, `showInstallBanner`).
+ * Only keep this while migrating any remaining gesture or advanced mobile behaviors.
  */
+// Emit a one‑time deprecation warning in development (guard SSR)
+interface DeprecatedFlagWindow extends Window { __PWA_MOBILE_ENH_DEPR__?: boolean }
+(() => {
+  try {
+    if (typeof window !== 'undefined' && (process?.env?.NODE_ENV ?? 'development') !== 'production') {
+      const g = window as DeprecatedFlagWindow;
+      if (!g.__PWA_MOBILE_ENH_DEPR__) {
+        g.__PWA_MOBILE_ENH_DEPR__ = true;
+        console.warn('[@cosmichub/pwa] mobile-enhancements.ts is deprecated; migrate to new shared mobile + ui modules.');
+      }
+    }
+  } catch { /* ignore */ }
+})();
 
 // Touch interaction enhancements
 interface TouchEventWithCoords extends TouchEvent {

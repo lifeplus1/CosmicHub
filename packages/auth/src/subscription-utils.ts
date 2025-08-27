@@ -1,6 +1,6 @@
 export interface UserSubscription {
-  tier: 'free' | 'premium' | 'elite';
   status: 'active' | 'canceled' | 'past_due' | 'incomplete';
+  tier: string;
   currentPeriodEnd: Date;
   customerId?: string;
   subscriptionId?: string;

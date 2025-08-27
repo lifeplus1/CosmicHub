@@ -1,24 +1,24 @@
 import React, { useState, createContext, useContext } from 'react';
 
-export interface AccordionProps {
+interface AccordionProps {
   type: 'single' | 'multiple';
   collapsible?: boolean;
   children: React.ReactNode;
   className?: string;
 }
 
-export interface AccordionItemProps {
+interface AccordionItemProps {
   value: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export interface AccordionTriggerProps {
+interface AccordionTriggerProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface AccordionContentProps {
+interface AccordionContentProps {
   children: React.ReactNode;
   className?: string;
 }

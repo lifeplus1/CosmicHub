@@ -6,11 +6,13 @@ export interface Success<T> {
   data: T;
   message?: string;
 }
+
 export interface Failure {
   success: false;
   error: string;
   code?: string;
 }
+
 export type ApiResult<T> = Success<T> | Failure;
 
 export const ok = <T>(data: T, message?: string): Success<T> => ({

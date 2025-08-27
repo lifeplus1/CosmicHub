@@ -25,14 +25,15 @@ const queryClient = new QueryClient({
 });
 
 const Dashboard = lazy(() => import('./pages/Dashboard')); // Lazy load for performance
-const ChartResults = lazy(() => import('./pages/ChartResults'));
 const Chart = lazy(() => import('./pages/Chart')); // New dedicated chart page
+const UnifiedChart = lazy(() => import('./pages/UnifiedChart')); // Unified chart page
 const MultiSystemChart = lazy(() => import('./pages/MultiSystemChart')); // Multi-system chart page
 const Profile = lazy(() => import('./pages/Profile'));
 const UpgradeModalDemo = lazy(() => import('./components/UpgradeModalDemo'));
 const PerformanceMonitoring = lazy(
   () => import('./pages/PerformanceMonitoring')
 );
+const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
 
 // Placeholder components for missing pages
 const Calculator = lazy(() => import('./pages/Calculator'));
@@ -76,9 +77,8 @@ const MainApp: React.FC = React.memo(function MainApp() {
           >
             <Routes>
               <Route path='/' element={<Dashboard />} />
-              <Route path='/chart' element={<Chart />} />
+              <Route path='/chart' element={<UnifiedChart />} />
               <Route path='/multi-system' element={<MultiSystemChart />} />
-              <Route path='/chart-results' element={<ChartResults />} />
               <Route path='/calculator' element={<Calculator />} />
               <Route path='/numerology' element={<Numerology />} />
               <Route path='/human-design' element={<HumanDesign />} />
@@ -98,6 +98,7 @@ const MainApp: React.FC = React.memo(function MainApp() {
               <Route path='/profile' element={<Profile />} />
               <Route path='/upgrade-demo' element={<UpgradeModalDemo />} />
               <Route path='/performance' element={<PerformanceMonitoring />} />
+              <Route path='/analytics' element={<AnalyticsDashboard />} />
               <Route
                 path='/pricing/success'
                 element={<SubscriptionSuccess />}

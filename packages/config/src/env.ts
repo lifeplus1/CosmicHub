@@ -28,11 +28,10 @@ const getEnv = (key: string, fallback = ''): string => {
 };
 
 // Environment types
-export type Environment = 'development' | 'staging' | 'production';
+type Environment = 'development' | 'staging' | 'production';
 
 // Environment variable schema
-export interface EnvConfig {
-  NODE_ENV: Environment;
+interface EnvironmentVariables {
   VITE_API_URL: string;
   VITE_FIREBASE_PROJECT_ID?: string;
   VITE_FIREBASE_API_KEY?: string;
@@ -87,15 +86,15 @@ const requiredEnvVars: Record<Environment, string[]> = {
 };
 
 // Get current environment
-export const getCurrentEnvironment = (): Environment => {
-  const env = getEnv('NODE_ENV', 'development') as Environment;
+const getCurrentEnvironment = (): Environment => {
+  const env = getEnv('NODE_ENV', 'development');
   return ['development', 'staging', 'production'].includes(env)
-    ? env
+    ? (env as Environment)
     : 'development';
 };
 
 // Validate environment variables
-export const validateEnv = (): {
+const validateEnvironmentVariables = (): {
   isValid: boolean;
   missing: string[];
   errors: string[];
@@ -149,8 +148,6 @@ export const validateEnv = (): {
 };
 
 // Get environment configuration with defaults
-export const getEnvConfig = (): Partial<EnvConfig> => {
-  const env = getCurrentEnvironment();
   // Use VITE_ prefix for environment variables
   const baseConfig = {
     NODE_ENV: env,
@@ -225,8 +222,6 @@ export const getEnvConfig = (): Partial<EnvConfig> => {
 };
 
 // Environment-specific feature flags
-export const getFeatureFlags = () => {
-  const env = getCurrentEnvironment();
 
   return {
     enableDebugMode: env === 'development',
@@ -243,8 +238,6 @@ export const getFeatureFlags = () => {
 
 // Utility functions
 export const isDevelopment = () => getCurrentEnvironment() === 'development';
-export const isStaging = () => getCurrentEnvironment() === 'staging';
-export const isProduction = () => getCurrentEnvironment() === 'production';
 
 // Safe environment getter with fallbacks
 export const getEnvVar = (key: keyof EnvConfig, fallback?: string): string => {
@@ -261,9 +254,6 @@ export const getEnvVar = (key: keyof EnvConfig, fallback?: string): string => {
 
 // Initialize and validate environment on import
 let validationResult: ReturnType<typeof validateEnv> | null = null;
-
-export const initializeEnv = () => {
-  validationResult = validateEnv();
 
   if (!validationResult.isValid) {
     console.group('🚨 Environment Configuration Issues');
@@ -297,7 +287,6 @@ export const initializeEnv = () => {
 };
 
 // Export current environment config
-export const env = getEnvConfig();
 
 // Auto-initialize in browser environment
 if (typeof window !== 'undefined') {

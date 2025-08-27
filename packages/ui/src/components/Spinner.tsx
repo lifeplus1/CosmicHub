@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface SpinnerProps {
+interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   color?: 'primary' | 'secondary' | 'white';
   className?: string;

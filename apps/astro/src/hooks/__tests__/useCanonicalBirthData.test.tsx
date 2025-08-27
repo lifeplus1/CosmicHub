@@ -1,0 +1,43 @@
+import { renderHook, act } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { BirthDataProvider, useBirthData } from '../../contexts/BirthDataContext';
+import { useCanonicalBirthData } from '../useCanonicalBirthData';
+
+const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <BirthDataProvider>{children}</BirthDataProvider>
+);
+
+describe('useCanonicalBirthData', () => {
+  it('returns null when no birth data set', () => {
+    const { result } = renderHook(() => useCanonicalBirthData(), { wrapper });
+    expect(result.current).toBeNull();
+  });
+
+  it('returns canonical data when extended birth data provided', () => {
+    const { result: combined } = renderHook(
+      () => {
+        const bd = useBirthData();
+        const canonical = useCanonicalBirthData();
+        return { bd, canonical };
+      },
+      { wrapper }
+    );
+    act(() => {
+      combined.current.bd.setBirthData({
+        year: 2000,
+        month: 1,
+        day: 2,
+        hour: 3,
+        minute: 4,
+        lat: 10,
+        lon: 20,
+        city: 'Test City',
+        timezone: 'UTC'
+      } as any);
+    });
+    // After state update canonical should reflect values
+    expect(combined.current.canonical).not.toBeNull();
+    expect(combined.current.canonical?.birth_date).toBe('2000-01-02');
+    expect(combined.current.canonical?.birth_time).toBe('03:04');
+  });
+});

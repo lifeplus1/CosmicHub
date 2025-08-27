@@ -4,41 +4,14 @@ import { useRealTimePerformance } from '@cosmichub/config/hooks';
 import { Card } from './Card';
 import { Badge } from './Badge';
 
-export interface PerformanceDashboardProps {
-  className?: string;
+interface PerformanceDashboardProps {
   showDetailedMetrics?: boolean;
+  className?: string;
 }
 
-interface MetricDisplay {
-  name: string;
-  value: number;
-  rating: 'good' | 'needs-improvement' | 'poor';
-  unit: string;
-  description: string;
-}
-
-interface ComponentMetric {
-  componentName: string;
-  type: string;
-  duration: number;
-}
-
-interface OperationMetric {
-  operationName: string;
-  duration: number;
-  success: boolean;
-  metadata?: {
-    label?: string;
-  };
-}
-
-/**
- * Enhanced Performance Dashboard component for monitoring Core Web Vitals and app performance
- * Now with real-time updates and comprehensive metrics display
- */
 export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
-  className = '',
   showDetailedMetrics = false,
+  className = '',
 }) => {
   const report = useRealTimePerformance();
   const vitalsData = React.useMemo(() => {

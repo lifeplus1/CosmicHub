@@ -5,7 +5,7 @@
 
 import React from 'react';
 
-export interface ChartModalProps {
+interface ChartModalProps {
   isOpen: boolean;
   onClose: () => void;
   chartType?: 'astrology' | 'frequency' | 'transit' | 'synastry';

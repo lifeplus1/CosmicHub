@@ -29,7 +29,7 @@ const GeneKeys: React.FC = () => {
       </div>
 
       {/* Birth Data Input - Only show if no data */}
-      {birthData == null && (
+      {birthData === null && (
         <SimpleBirthForm
           title='Enter Birth Data for Gene Keys'
           submitButtonText='Generate Gene Keys Profile'
@@ -39,7 +39,7 @@ const GeneKeys: React.FC = () => {
       )}
 
       {/* Gene Keys Chart Display */}
-      {birthData != null && isDataValid && (
+      {birthData !== null && isDataValid && (
         <div className='space-y-6'>
           {/* Control Panel */}
           <Card title='Chart Controls'>
@@ -95,8 +95,8 @@ const GeneKeys: React.FC = () => {
                   Coordinates
                 </div>
                 <div className='text-cosmic-silver text-sm'>
-                  {birthData.lat != null && birthData.lon != null
-                    ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
+                  {birthData.lat !== null && birthData.lon !== null
+                    ? `${birthData.lat!.toFixed(2)}°, ${birthData.lon!.toFixed(2)}°`
                     : 'Auto-detected'}
                 </div>
               </div>

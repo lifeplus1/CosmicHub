@@ -1,0 +1,732 @@
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+
+> cosmichub@1.0.0 lint
+> pnpm run lint:astro && pnpm run lint:healwave && pnpm run lint:types && pnpm run lint:backend && pnpm run lint:fail-usage
+
+
+> cosmichub@1.0.0 lint:astro /Users/Chris/Projects/CosmicHub
+> eslint apps/astro/src --ext .ts,.tsx --max-warnings=2 --config eslint.config.js
+
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/__tests__/chart-data-conversion.test.ts
+  25:22  error  'sign' is defined but never used  no-unused-vars
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/AI001/AI001Dashboard.tsx
+   23:14  warning  Unexpected any. Specify a different type                                                                                                       @typescript-eslint/no-explicit-any
+  119:41  error    Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<"transits" | "overview" | "growth" | "synthesis" | "patterns">`  @typescript-eslint/no-unsafe-argument
+  119:51  warning  Unexpected any. Specify a different type                                                                                                       @typescript-eslint/no-explicit-any
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/AstrologySettings.tsx
+  131:7   error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  131:47  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  151:15  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  157:36  error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  157:67  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  173:15  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  184:40  error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  184:72  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  197:40  error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  197:72  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  208:15  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  280:15  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  434:15  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  462:15  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/ChartDisplay.tsx
+   25:3   error    'AccordionItem' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+   26:3   error    'AccordionTrigger' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   27:3   error    'AccordionContent' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   35:8   error    'AspectTable' is defined but never used. Allowed unused vars must match /^_/u                              @typescript-eslint/no-unused-vars
+   42:10  error    'useAI001Analysis' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   44:3   error    'getPlanetSymbol' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   45:3   error    'getSignSymbol' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+   46:3   error    'getAsteroidSymbol' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   47:3   error    'getAspectSymbol' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   51:10  error    'fetchChartData' is defined but never used. Allowed unused vars must match /^_/u                           @typescript-eslint/no-unused-vars
+   69:3   error    'AstrologySettingsPanel' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+  470:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  472:11  error    Unsafe return of a value of type `any`                                                                     @typescript-eslint/no-unsafe-return
+  482:10  error    'expandedSections' is assigned a value but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+  486:9   error    Unsafe return of a value of type `any`                                                                     @typescript-eslint/no-unsafe-return
+  511:9   error    'handleExpandedSectionsChange' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  530:5   error    'refetch' is assigned a value but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+  534:19  error    Expected '===' and instead saw '=='                                                                        eqeqeq
+  547:13  error    Expected '===' and instead saw '=='                                                                        eqeqeq
+  548:15  error    Expected '!==' and instead saw '!='                                                                        eqeqeq
+  619:45  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  722:18  error    Expected '===' and instead saw '=='                                                                        eqeqeq
+  848:51  error    'index' is defined but never used. Allowed unused args must match /^_/u                                    @typescript-eslint/no-unused-vars
+  853:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  853:50  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  855:19  error    This assertion is unnecessary since it does not change the type of the expression                          @typescript-eslint/no-unnecessary-type-assertion
+  941:13  error    Expected '!==' and instead saw '!='                                                                        eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/EnhancedChartWrapper.tsx
+   28:3   error  'autoSave' is assigned a value but never used. Allowed unused args must match /^_/u                                                                                 @typescript-eslint/no-unused-vars
+   29:3   error  'showMobileSettings' is assigned a value but never used. Allowed unused args must match /^_/u                                                                       @typescript-eslint/no-unused-vars
+   84:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  112:7   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  168:48  error  Async arrow function has no 'await' expression                                                                                                                      @typescript-eslint/require-await
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/StatefulAccordion.tsx
+  14:3  error  'value' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+  15:3  error  'onValueChange' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/ViewSpecificSettings.tsx
+   30:7   error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+   30:47  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   58:17  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+   64:38  error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+   64:69  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   80:17  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+   91:42  error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+   91:74  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  104:42  error    Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  104:74  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  122:17  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  127:21  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  145:21  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  163:21  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  229:19  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  393:19  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+  433:19  error    A form label must be associated with a control  jsx-a11y/label-has-associated-control
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/__tests__/ChartDisplay.test.tsx
+  17:14  error  'error' is defined but never used    no-unused-vars
+  28:35  error  'variant' is defined but never used  no-unused-vars
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/normalizeChart.ts
+    8:28  error    'ArrayChartData' is defined but never used. Allowed unused vars must match /^_/u                                @typescript-eslint/no-unused-vars
+    9:28  error    'RecordChartData' is defined but never used. Allowed unused vars must match /^_/u                               @typescript-eslint/no-unused-vars
+  134:10  error    'toPlanetArray' is defined but never used. Allowed unused vars must match /^_/u                                 @typescript-eslint/no-unused-vars
+  175:10  error    'toHouseArray' is defined but never used. Allowed unused vars must match /^_/u                                  @typescript-eslint/no-unused-vars
+  192:26  error    Unsafe argument of type `any` assigned to a parameter of type `ZodiacSign`                                      @typescript-eslint/no-unsafe-argument
+  192:66  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  201:10  error    'toAspectArray' is defined but never used. Allowed unused vars must match /^_/u                                 @typescript-eslint/no-unused-vars
+  238:10  error    'toAsteroidArray' is defined but never used. Allowed unused vars must match /^_/u                               @typescript-eslint/no-unused-vars
+  287:10  error    'toAngleArray' is defined but never used. Allowed unused vars must match /^_/u                                  @typescript-eslint/no-unused-vars
+  316:10  error    'toPointArray' is defined but never used. Allowed unused vars must match /^_/u                                  @typescript-eslint/no-unused-vars
+  378:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  378:31  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  378:36  error    Unsafe member access .__raw_backend_response on an `any` value                                                  @typescript-eslint/no-unsafe-member-access
+  378:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  383:15  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  383:20  error    Unsafe member access .__raw_backend_response on an `any` value                                                  @typescript-eslint/no-unsafe-member-access
+  388:17  error    Unsafe argument of type `any` assigned to a parameter of type `{}`                                              @typescript-eslint/no-unsafe-argument
+  392:17  error    Unsafe member access .asteroids on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  396:17  error    Unsafe member access .points on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  400:58  error    Unsafe argument of type `any` assigned to a parameter of type `{}`                                              @typescript-eslint/no-unsafe-argument
+  403:24  error    Unsafe member access .planets on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  404:17  error    Unsafe member access .planets on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  408:24  error    Unsafe member access .asteroids on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  409:17  error    Unsafe member access .asteroids on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  413:24  error    Unsafe member access .points on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  414:17  error    Unsafe member access .points on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  419:7   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  419:7   error    'houseData' is never reassigned. Use 'const' instead                                                            prefer-const
+  419:31  error    Unsafe member access .houses on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  423:31  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  425:13  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  425:33  error    Unsafe member access .cusp on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  425:59  error    Unsafe member access .cusp on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  429:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  430:33  error    Unsafe argument of type `any` assigned to a parameter of type `number`                                          @typescript-eslint/no-unsafe-argument
+  431:37  error    Unsafe argument of type `any` assigned to a parameter of type `number`                                          @typescript-eslint/no-unsafe-argument
+  432:33  error    Unsafe argument of type `any` assigned to a parameter of type `ZodiacSign`                                      @typescript-eslint/no-unsafe-argument
+  432:51  error    Unsafe argument of type `any` assigned to a parameter of type `number`                                          @typescript-eslint/no-unsafe-argument
+  432:60  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  436:20  error    Unsafe argument of type `any` assigned to a parameter of type `ArrayLike<unknown> | { [s: string]: unknown; }`  @typescript-eslint/no-unsafe-argument
+  436:63  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  438:13  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  438:33  error    Unsafe member access .cusp on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  438:59  error    Unsafe member access .cusp on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  442:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  443:33  error    Unsafe argument of type `any` assigned to a parameter of type `number`                                          @typescript-eslint/no-unsafe-argument
+  444:37  error    Unsafe argument of type `any` assigned to a parameter of type `number`                                          @typescript-eslint/no-unsafe-argument
+  445:33  error    Unsafe argument of type `any` assigned to a parameter of type `ZodiacSign`                                      @typescript-eslint/no-unsafe-argument
+  445:51  error    Unsafe argument of type `any` assigned to a parameter of type `number`                                          @typescript-eslint/no-unsafe-argument
+  445:60  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  456:19  error    Unsafe member access .asteroids on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  456:51  error    Unsafe member access .asteroids on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  457:11  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  457:39  error    Unsafe member access .asteroids on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  458:20  error    Unsafe argument of type `any` assigned to a parameter of type `ArrayLike<unknown> | { [s: string]: unknown; }`  @typescript-eslint/no-unsafe-argument
+  458:67  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  462:21  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  464:33  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  488:11  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  488:39  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  488:55  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  489:36  error    Unsafe member access .retrograde on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  497:19  error    Unsafe member access .points on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  497:48  error    Unsafe member access .points on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  498:11  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  498:36  error    Unsafe member access .points on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  499:20  error    Unsafe argument of type `any` assigned to a parameter of type `ArrayLike<unknown> | { [s: string]: unknown; }`  @typescript-eslint/no-unsafe-argument
+  499:64  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  503:21  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  505:33  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  519:11  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  519:39  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  519:55  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  520:36  error    Unsafe member access .retrograde on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  530:21  error    Unsafe member access [fieldName] on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  530:54  error    Unsafe member access [fieldName] on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  531:22  error    Unsafe argument of type `any` assigned to a parameter of type `ArrayLike<unknown> | { [s: string]: unknown; }`  @typescript-eslint/no-unsafe-argument
+  531:34  error    Unsafe member access [fieldName] on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  532:33  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  536:25  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  538:37  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  552:15  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  552:43  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  552:59  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  553:40  error    Unsafe member access .retrograde on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  564:19  error    Unsafe member access .planets on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  564:49  error    Unsafe member access .planets on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  565:11  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  565:37  error    Unsafe member access .planets on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  566:20  error    Unsafe argument of type `any` assigned to a parameter of type `ArrayLike<unknown> | { [s: string]: unknown; }`  @typescript-eslint/no-unsafe-argument
+  566:65  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  570:21  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  572:33  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  586:11  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  586:39  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  586:55  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  587:36  error    Unsafe member access .retrograde on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  596:33  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  597:5   error    Unsafe call of a(n) `any` typed value                                                                           @typescript-eslint/no-unsafe-call
+  597:17  error    Unsafe member access .aspects on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  597:42  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  600:34  error    Unsafe member access .planet1 on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  600:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  601:34  error    Unsafe member access .planet2 on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  601:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  602:31  error    Unsafe member access .type on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  602:36  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  603:30  error    Unsafe member access .orb on an `any` value                                                                     @typescript-eslint/no-unsafe-member-access
+  604:35  error    Unsafe member access .applying on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  604:44  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  612:19  error    Unsafe member access .angles on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  612:48  error    Unsafe member access .angles on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  613:20  error    Unsafe argument of type `any` assigned to a parameter of type `ArrayLike<unknown> | { [s: string]: unknown; }`  @typescript-eslint/no-unsafe-argument
+  613:32  error    Unsafe member access .angles on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  614:35  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/tables/CelestialBodiesTable.tsx
+  158:22  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  227:9   error    Unexpected lexical declaration in case block                                                                    no-case-declarations
+  259:55  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  260:55  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  271:7   warning  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
+  346:31  error    Unsafe argument of type `any` assigned to a parameter of type `ZodiacSign`                                      @typescript-eslint/no-unsafe-argument
+  346:58  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  404:13  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  405:15  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  406:12  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  416:12  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  424:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  424:22  error    Unsafe member access .name on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  425:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  425:22  error    Unsafe member access .sign on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  426:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  426:23  error    Unsafe member access .house on an `any` value                                                                   @typescript-eslint/no-unsafe-member-access
+  427:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  427:26  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  428:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  428:24  error    Unsafe member access .degree on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  429:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  429:28  error    Unsafe member access .retrograde on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  430:43  error    Unsafe argument of type `any` assigned to a parameter of type `string`                                          @typescript-eslint/no-unsafe-argument
+  430:50  error    Unsafe member access .name on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  439:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  439:24  error    Unsafe member access .name on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  440:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  440:24  error    Unsafe member access .sign on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  441:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  441:25  error    Unsafe member access .house on an `any` value                                                                   @typescript-eslint/no-unsafe-member-access
+  442:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  442:28  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  443:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  443:26  error    Unsafe member access .degree on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  444:43  error    Unsafe argument of type `any` assigned to a parameter of type `string`                                          @typescript-eslint/no-unsafe-argument
+  444:52  error    Unsafe member access .name on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  453:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  453:21  error    Unsafe member access .name on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  454:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  454:21  error    Unsafe member access .sign on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  455:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  455:22  error    Unsafe member access .house on an `any` value                                                                   @typescript-eslint/no-unsafe-member-access
+  456:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  456:25  error    Unsafe member access .position on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  457:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  457:23  error    Unsafe member access .degree on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  458:9   error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  458:27  error    Unsafe member access .retrograde on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  459:43  error    Unsafe argument of type `any` assigned to a parameter of type `string`                                          @typescript-eslint/no-unsafe-argument
+  459:49  error    Unsafe member access .name on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  497:13  error    Unsafe argument of type `any[]` assigned to a parameter of type `number[]`                                      @typescript-eslint/no-unsafe-argument
+  497:40  error    Unsafe return of a value of type `any`                                                                          @typescript-eslint/no-unsafe-return
+  497:42  error    Unsafe member access .cusp on an `any` value                                                                    @typescript-eslint/no-unsafe-member-access
+  497:48  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+  514:38  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  517:19  error    Unsafe member access [pointName] on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  518:17  error    Unsafe assignment of an `any` value                                                                             @typescript-eslint/no-unsafe-assignment
+  518:34  error    Unsafe member access [pointName] on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  525:35  error    Unsafe member access .number on an `any` value                                                                  @typescript-eslint/no-unsafe-member-access
+  525:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/tables/EnhancedAspectTable.tsx
+  72:7  error  'getAspectStrength' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/tables/HouseTable.tsx
+  38:39  error    Unsafe argument of type `any` assigned to a parameter of type `ZodiacSign`  @typescript-eslint/no-unsafe-argument
+  38:66  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/tables/tableUtils_clean.ts
+  168:31  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  172:33  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  172:57  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/validateChart.ts
+  79:19  error    Unsafe argument of type `any` assigned to a parameter of type `{}`  @typescript-eslint/no-unsafe-argument
+  79:28  warning  Unexpected any. Specify a different type                            @typescript-eslint/no-explicit-any
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/GeneKeysChart/CoreQuartetTab.tsx
+  68:26  error  Expected '===' and instead saw '=='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/GeneKeysChart/GeneKeysChart.tsx
+  27:21  error  Expected '===' and instead saw '=='  eqeqeq
+  85:21  error  Expected '!==' and instead saw '!='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx
+  139:19  error  Expected '===' and instead saw '=='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/GeneKeysChart/VenusSequenceTab.tsx
+   20:31  error  Expected '===' and instead saw '=='  eqeqeq
+   21:23  error  Expected '===' and instead saw '=='  eqeqeq
+   22:23  error  Expected '===' and instead saw '=='  eqeqeq
+   23:23  error  Expected '===' and instead saw '=='  eqeqeq
+   63:31  error  Expected '!==' and instead saw '!='  eqeqeq
+   66:33  error  Expected '!==' and instead saw '!='  eqeqeq
+  100:26  error  Expected '===' and instead saw '=='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/HumanDesignChart/HumanDesignChart.tsx
+  39:19  error  Expected '===' and instead saw '=='  eqeqeq
+  84:19  error  Expected '!==' and instead saw '!='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx
+   36:23  error  Expected '===' and instead saw '=='  eqeqeq
+  183:14  error  Expected '!==' and instead saw '!='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/MultiSystemChart/MultiSystemChartDisplay.tsx
+   44:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  152:65  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/MultiSystemChart/UranianChart.tsx
+   75:44  error  Expected '!==' and instead saw '!='  eqeqeq
+  125:41  error  Expected '!==' and instead saw '!='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/MultiSystemChart/VedicChart.tsx
+  125:62  error  Invalid type "never" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/MultiSystemChart/WesternChart.tsx
+  163:66  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  164:66  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  165:68  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  166:68  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/MultiSystemChart/utils.ts
+   51:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   55:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   82:27  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+   86:33  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+   89:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+   99:7   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+   99:23  error    Unsafe member access [key] on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  102:5   error    Unsafe return of a value of type `any`                                                                     @typescript-eslint/no-unsafe-return
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/OfflineChartDemo.tsx
+  447:28  error  'selectedChart.metadata.name' will use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/components/SavedCharts.tsx
+  5:12  error  Expected '===' and instead saw '=='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/contexts/BirthDataContext.tsx
+  9:10  error  'devConsole' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/contexts/NotificationContext.tsx
+  48:42  error  'NodeJS' is not defined  no-undef
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/hooks/useContextPerformance.ts
+  36:3   error    React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  42:5   warning  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read                @typescript-eslint/prefer-nullish-coalescing
+  85:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                     @typescript-eslint/prefer-nullish-coalescing
+  99:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                     @typescript-eslint/prefer-nullish-coalescing
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/pages/Chart.tsx
+  135:15  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  139:24  error    Unsafe member access .chart_data on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  139:49  error    Unsafe member access .birth_data on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  147:17  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  147:40  error    Unsafe member access .chart_data on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  148:17  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  148:45  error    Unsafe argument of type `any` assigned to a parameter of type `{ [s: string]: unknown; } | ArrayLike<unknown>`                                                      @typescript-eslint/no-unsafe-argument
+  148:55  error    Unsafe member access .planets on an `any` value                                                                                                                     @typescript-eslint/no-unsafe-member-access
+  148:63  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  148:76  warning  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  149:17  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  150:42  error    Unsafe member access .sign on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  150:63  error    Unsafe member access .house on an `any` value                                                                                                                       @typescript-eslint/no-unsafe-member-access
+  153:13  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  156:19  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  156:37  error    Unsafe member access .name on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  157:19  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  157:41  error    Unsafe member access .position on an `any` value                                                                                                                    @typescript-eslint/no-unsafe-member-access
+  158:42  error    Unsafe member access .sign on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  159:43  error    Unsafe member access .house on an `any` value                                                                                                                       @typescript-eslint/no-unsafe-member-access
+  179:30  error    Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<ChartData | null>`                                                                    @typescript-eslint/no-unsafe-argument
+  185:28  error    Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<ChartData | null>`                                                                    @typescript-eslint/no-unsafe-argument
+  189:11  error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  190:24  error    Unsafe argument of type `any` assigned to a parameter of type `UnifiedBirthData | null`                                                                             @typescript-eslint/no-unsafe-argument
+  190:35  error    Unsafe member access .birth_data on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  207:42  error    Unsafe member access .chart_data on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  208:42  error    Unsafe member access .birth_data on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  209:38  error    Unsafe argument of type `any` assigned to a parameter of type `{}`                                                                                                  @typescript-eslint/no-unsafe-argument
+  235:19  error    Expected '===' and instead saw '=='                                                                                                                                 eqeqeq
+  269:31  error    Expected '!==' and instead saw '!='                                                                                                                                 eqeqeq
+  275:17  error    Expected '!==' and instead saw '!='                                                                                                                                 eqeqeq
+  288:19  error    Expected '!==' and instead saw '!='                                                                                                                                 eqeqeq
+  300:19  error    Expected '===' and instead saw '=='                                                                                                                                 eqeqeq
+  323:17  error    Expected '===' and instead saw '=='                                                                                                                                 eqeqeq
+  456:52  warning  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  457:25  error    Unsafe member access .name on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  459:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  459:37  error    Unsafe member access .position on an `any` value                                                                                                                    @typescript-eslint/no-unsafe-member-access
+  460:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  460:39  error    Unsafe member access .retrograde on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  460:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  461:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  461:33  error    Unsafe member access .sign on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  462:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  462:35  error    Unsafe member access .degree on an `any` value                                                                                                                      @typescript-eslint/no-unsafe-member-access
+  463:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  463:34  error    Unsafe member access .house on an `any` value                                                                                                                       @typescript-eslint/no-unsafe-member-access
+  468:54  warning  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  469:25  error    Unsafe member access .name on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  471:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  471:37  error    Unsafe member access .position on an `any` value                                                                                                                    @typescript-eslint/no-unsafe-member-access
+  472:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  472:39  error    Unsafe member access .retrograde on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  472:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  473:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  473:33  error    Unsafe member access .sign on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  474:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  474:35  error    Unsafe member access .degree on an `any` value                                                                                                                      @typescript-eslint/no-unsafe-member-access
+  475:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  475:34  error    Unsafe member access .house on an `any` value                                                                                                                       @typescript-eslint/no-unsafe-member-access
+  480:51  warning  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  481:25  error    Unsafe member access .name on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  483:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  483:37  error    Unsafe member access .position on an `any` value                                                                                                                    @typescript-eslint/no-unsafe-member-access
+  484:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  484:39  error    Unsafe member access .retrograde on an `any` value                                                                                                                  @typescript-eslint/no-unsafe-member-access
+  484:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  485:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  485:33  error    Unsafe member access .sign on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  486:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  486:35  error    Unsafe member access .degree on an `any` value                                                                                                                      @typescript-eslint/no-unsafe-member-access
+  487:25  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  487:34  error    Unsafe member access .house on an `any` value                                                                                                                       @typescript-eslint/no-unsafe-member-access
+  491:57  warning  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  492:21  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  492:29  error    Unsafe member access .cusp on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  494:59  warning  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  495:21  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  495:32  error    Unsafe member access .planet1 on an `any` value                                                                                                                     @typescript-eslint/no-unsafe-member-access
+  496:21  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  496:32  error    Unsafe member access .planet2 on an `any` value                                                                                                                     @typescript-eslint/no-unsafe-member-access
+  497:21  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  497:29  error    Unsafe member access .type on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  498:21  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  498:28  error    Unsafe member access .orb on an `any` value                                                                                                                         @typescript-eslint/no-unsafe-member-access
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/pages/ChartResults.tsx
+  205:11  error    'transformChartData' is assigned a value but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+  312:22  error    Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<BackendChartResponse | null>`  @typescript-eslint/no-unsafe-argument
+  312:34  warning  Unexpected any. Specify a different type                                                                     @typescript-eslint/no-explicit-any
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/pages/GeneKeys.tsx
+  32:18  error  Expected '===' and instead saw '=='  eqeqeq
+  42:18  error  Expected '!==' and instead saw '!='  eqeqeq
+  98:34  error  Expected '!==' and instead saw '!='  eqeqeq
+  98:59  error  Expected '!==' and instead saw '!='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/pages/HumanDesign.tsx
+   44:19  error  Expected '===' and instead saw '=='  eqeqeq
+   82:18  error  Expected '===' and instead saw '=='  eqeqeq
+   92:18  error  Expected '!==' and instead saw '!='  eqeqeq
+  129:44  error  Expected '!==' and instead saw '!='  eqeqeq
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/pages/MultiSystemChart.tsx
+   9:1  error  '../services/api' import is duplicated                                                                                                                              no-duplicate-imports
+  60:5  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/services/__tests__/api-transformation.test.ts
+  24:46  error  'houseCusps' is defined but never used  no-unused-vars
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/services/ai-001-enhanced.ts
+   68:14  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+   93:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  112:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  131:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  150:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  151:24  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  187:7   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  229:11  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  230:5   error    Unsafe return of a value of type `any`                                                                     @typescript-eslint/no-unsafe-return
+  230:17  error    Unsafe member access .choices on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+  230:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  237:48  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  242:28  error    Unsafe member access .planets on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+  245:28  error    Unsafe member access .houses on an `any` value                                                             @typescript-eslint/no-unsafe-member-access
+  258:47  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  281:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  302:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  303:18  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  332:39  error    'response' is defined but never used. Allowed unused args must match /^_/u                                 @typescript-eslint/no-unused-vars
+  338:5   error    'response' is defined but never used. Allowed unused args must match /^_/u                                 @typescript-eslint/no-unused-vars
+  350:39  error    'response' is defined but never used. Allowed unused args must match /^_/u                                 @typescript-eslint/no-unused-vars
+  359:5   error    'chartData' is defined but never used. Allowed unused args must match /^_/u                                @typescript-eslint/no-unused-vars
+  359:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  360:5   error    'timeRange' is defined but never used. Allowed unused args must match /^_/u                                @typescript-eslint/no-unused-vars
+  421:5   error    'chartData' is defined but never used. Allowed unused args must match /^_/u                                @typescript-eslint/no-unused-vars
+  421:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  464:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  469:7   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  469:27  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  492:39  error    'chartData' is defined but never used. Allowed unused args must match /^_/u                                @typescript-eslint/no-unused-vars
+  492:50  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  522:3   error    Static async method 'generateExecutiveSummary' has no 'await' expression                                   @typescript-eslint/require-await
+  522:49  error    'data' is defined but never used. Allowed unused args must match /^_/u                                     @typescript-eslint/no-unused-vars
+  527:16  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  538:45  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  539:9   error    'queryClient' is assigned a value but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  542:58  error    Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  545:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  556:14  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  560:45  error    Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  568:46  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  570:43  error    Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/services/api.ts
+    10:23  error    'apiRequest' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+    10:35  error    'apiJsonRequest' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+    38:3   error    'isValidPosition' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+    39:3   error    'normalizeAngle' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+    40:3   error    'getRulerFromSign' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   206:44  error    Expected '===' and instead saw '=='                                                      eqeqeq
+   233:13  error    Expected '===' and instead saw '=='                                                      eqeqeq
+   262:14  error    Expected the Promise rejection reason to be an Error                                     @typescript-eslint/prefer-promise-reject-errors
+   271:15  error    Unsafe member access .response on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   272:9   error    Unsafe call of a(n) `any` typed value                                                    @typescript-eslint/no-unsafe-call
+   272:15  error    Unsafe member access .response on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   278:15  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   278:39  error    Unsafe member access .config on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   279:30  error    Unsafe member access ._retry on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   280:27  error    Unsafe member access ._retry on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   285:15  error    Unsafe call of a(n) `any` typed value                                                    @typescript-eslint/no-unsafe-call
+   285:31  error    Unsafe member access .headers on an `any` value                                          @typescript-eslint/no-unsafe-member-access
+   287:29  error    Unsafe argument of type `any` assigned to a parameter of type `AxiosRequestConfig<any>`  @typescript-eslint/no-unsafe-argument
+   289:20  error    Expected the Promise rejection reason to be an Error                                     @typescript-eslint/prefer-promise-reject-errors
+   293:14  error    Expected the Promise rejection reason to be an Error                                     @typescript-eslint/prefer-promise-reject-errors
+   459:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   467:19  error    Unsafe object destructuring of a property with an `any` value                            @typescript-eslint/no-unsafe-assignment
+   467:57  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   745:40  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   745:45  error    Unsafe member access .cusp on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   795:17  error    This assertion is unnecessary since it does not change the type of the expression        @typescript-eslint/no-unnecessary-type-assertion
+   811:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   811:32  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   811:37  error    Unsafe member access .name on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   814:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   815:25  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   815:30  error    Unsafe member access .degree on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   815:61  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   815:66  error    Unsafe member access .degree on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   816:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   817:25  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   817:30  error    Unsafe member access .position on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   818:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   818:27  error    Unsafe member access .position on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   820:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   821:25  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   821:30  error    Unsafe member access .sign on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   822:31  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   822:36  error    Unsafe member access .sign on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   823:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   823:27  error    Unsafe member access .sign on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   824:32  error    Unsafe argument of type `any` assigned to a parameter of type `number`                   @typescript-eslint/no-unsafe-argument
+   825:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   826:25  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   826:30  error    Unsafe member access .house on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   827:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   827:27  error    Unsafe member access .house on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   828:36  error    Unsafe argument of type `any` assigned to a parameter of type `number`                   @typescript-eslint/no-unsafe-argument
+   831:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   832:38  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   832:43  error    Unsafe member access .retrograde on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+   833:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   834:27  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   834:32  error    Unsafe member access .speed on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   834:62  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   834:67  error    Unsafe member access .speed on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   835:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   836:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   893:11  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   893:25  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   895:11  error    Unsafe member access .point1 on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   895:23  error    Unsafe member access .point2 on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   895:35  error    Unsafe member access .aspect on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   895:54  error    Unsafe member access .orb on an `any` value                                              @typescript-eslint/no-unsafe-member-access
+   897:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   897:24  error    Unsafe member access .aspect on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   898:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   898:20  error    Unsafe member access .point1 on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   899:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   899:20  error    Unsafe member access .point2 on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   900:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   900:16  error    Unsafe member access .orb on an `any` value                                              @typescript-eslint/no-unsafe-member-access
+   901:29  error    Unsafe member access .applying on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   902:26  error    Unsafe member access .exact on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   903:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   903:25  error    Unsafe member access .power on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   903:48  error    Unsafe member access .power on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   908:11  error    Unsafe member access .planet1 on an `any` value                                          @typescript-eslint/no-unsafe-member-access
+   908:24  error    Unsafe member access .planet2 on an `any` value                                          @typescript-eslint/no-unsafe-member-access
+   908:37  error    Unsafe member access .type on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   908:54  error    Unsafe member access .orb on an `any` value                                              @typescript-eslint/no-unsafe-member-access
+   910:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   910:24  error    Unsafe member access .type on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   911:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   911:20  error    Unsafe member access .planet1 on an `any` value                                          @typescript-eslint/no-unsafe-member-access
+   912:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   912:20  error    Unsafe member access .planet2 on an `any` value                                          @typescript-eslint/no-unsafe-member-access
+   913:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   913:16  error    Unsafe member access .orb on an `any` value                                              @typescript-eslint/no-unsafe-member-access
+   914:29  error    Unsafe member access .applying on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   915:26  error    Unsafe member access .exact on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   916:9   error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   916:25  error    Unsafe member access .power on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   916:48  error    Unsafe member access .power on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   932:51  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   935:17  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   936:33  error    Unsafe member access .position on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   937:30  error    Unsafe member access .position on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   941:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   942:46  error    Unsafe member access .retrograde on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+   943:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   944:35  error    Unsafe member access .speed on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   944:69  error    Unsafe member access .speed on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   945:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   945:32  error    Unsafe member access .sign on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   945:59  error    Unsafe argument of type `any` assigned to a parameter of type `number`                   @typescript-eslint/no-unsafe-argument
+   946:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   947:35  error    Unsafe member access .house on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   948:32  error    Unsafe member access .house on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   949:42  error    Unsafe argument of type `any` assigned to a parameter of type `number`                   @typescript-eslint/no-unsafe-argument
+   980:48  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   983:17  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   984:30  error    Unsafe member access .position on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   984:64  error    Unsafe member access .position on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   987:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   988:43  error    Unsafe member access .retrograde on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+   989:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   989:37  error    Unsafe member access .speed on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   989:68  error    Unsafe member access .speed on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   990:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   990:29  error    Unsafe member access .sign on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+   990:56  error    Unsafe argument of type `any` assigned to a parameter of type `number`                   @typescript-eslint/no-unsafe-argument
+   991:13  error    Unsafe assignment of an `any` value                                                      @typescript-eslint/no-unsafe-assignment
+   992:32  error    Unsafe member access .house on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   993:29  error    Unsafe member access .house on an `any` value                                            @typescript-eslint/no-unsafe-member-access
+   994:42  error    Unsafe argument of type `any` assigned to a parameter of type `number`                   @typescript-eslint/no-unsafe-argument
+  1073:44  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/services/csrfService.ts
+   40:13  error  Unsafe assignment of an `any` value              @typescript-eslint/no-unsafe-assignment
+  142:3   error  Unsafe return of a value of type `Promise<any>`  @typescript-eslint/no-unsafe-return
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/services/offline-chart-service.ts
+   78:11  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+   85:22  error    Unsafe member access .chartId on an `any` value                                                                            @typescript-eslint/no-unsafe-member-access
+   86:42  error    Unsafe argument of type `any` assigned to a parameter of type `string`                                                     @typescript-eslint/no-unsafe-argument
+   86:50  error    Unsafe member access .chartId on an `any` value                                                                            @typescript-eslint/no-unsafe-member-access
+   95:55  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+   97:49  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  227:15  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  238:11  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  238:48  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  281:26  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  305:28  error    Unsafe member access .id on an `any` value                                                                                 @typescript-eslint/no-unsafe-member-access
+  306:11  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  306:21  error    Unsafe member access .id on an `any` value                                                                                 @typescript-eslint/no-unsafe-member-access
+  307:11  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  307:23  error    Unsafe member access .name on an `any` value                                                                               @typescript-eslint/no-unsafe-member-access
+  308:11  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  308:28  error    Unsafe member access .created_at on an `any` value                                                                         @typescript-eslint/no-unsafe-member-access
+  309:11  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  309:28  error    Unsafe member access .updated_at on an `any` value                                                                         @typescript-eslint/no-unsafe-member-access
+  310:11  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  310:25  error    Unsafe member access .synced on an `any` value                                                                             @typescript-eslint/no-unsafe-member-access
+  327:7   error    Unsafe return of a value of type `any[]`                                                                                   @typescript-eslint/no-unsafe-return
+  329:20  error    Unsafe argument of type `any` assigned to a parameter of type `string | number | Date`                                     @typescript-eslint/no-unsafe-argument
+  329:22  error    Unsafe member access .updatedAt on an `any` value                                                                          @typescript-eslint/no-unsafe-member-access
+  329:54  error    Unsafe argument of type `any` assigned to a parameter of type `string | number | Date`                                     @typescript-eslint/no-unsafe-argument
+  329:56  error    Unsafe member access .updatedAt on an `any` value                                                                          @typescript-eslint/no-unsafe-member-access
+  442:13  error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  443:37  error    Unsafe argument of type `any` assigned to a parameter of type `{ charts: OfflineChart[]; syncItems: OfflineSyncItem[]; }`  @typescript-eslint/no-unsafe-argument
+  445:9   error    Unsafe assignment of an `any` value                                                                                        @typescript-eslint/no-unsafe-assignment
+  445:24  error    Unsafe member access .charts on an `any` value                                                                             @typescript-eslint/no-unsafe-member-access
+  460:12  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  500:45  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  510:34  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  524:31  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  525:35  error    Unsafe argument of type `any` assigned to a parameter of type `string | null`                                              @typescript-eslint/no-unsafe-argument
+  525:41  error    Unsafe member access .uid on an `any` value                                                                                @typescript-eslint/no-unsafe-member-access
+  529:18  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  529:23  error    Unsafe member access .auth on an `any` value                                                                               @typescript-eslint/no-unsafe-member-access
+  530:5   error    Unsafe call of a(n) `any` typed value                                                                                      @typescript-eslint/no-unsafe-call
+  530:16  warning  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  530:21  error    Unsafe member access .auth on an `any` value                                                                               @typescript-eslint/no-unsafe-member-access
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/services/symbolService.ts
+  150:37  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  157:41  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/utils/astrologyUtils.ts
+  115:34  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  126:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  151:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  183:7   error    'normalizedPosition' is never reassigned. Use 'const' instead                                              prefer-const
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/utils/celestialBodyCategorization.ts
+  192:48  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  229:26  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  230:49  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  231:62  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  246:7   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  249:7   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  260:67  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  261:19  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  272:67  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  273:19  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  284:67  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  285:19  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/utils/contextPersistence.ts
+  19:38  error  'NodeJS' is not defined  no-undef
+
+✖ 630 problems (493 errors, 137 warnings)
+  4 errors and 0 warnings potentially fixable with the `--fix` option.
+
+ ELIFECYCLE  Command failed with exit code 1.

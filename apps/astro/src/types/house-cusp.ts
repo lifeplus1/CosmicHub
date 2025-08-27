@@ -2,23 +2,7 @@
  * Strongly-typed definitions for house cusp data in chart calculations
  */
 
-export type ZodiacSign =
-  | 'aries'
-  | 'taurus'
-  | 'gemini'
-  | 'cancer'
-  | 'leo'
-  | 'virgo'
-  | 'libra'
-  | 'scorpio'
-  | 'sagittarius'
-  | 'capricorn'
-  | 'aquarius'
-  | 'pisces';
-
 export interface HouseCusp {
-  /** House number (1-12) */
-  house?: number;
   /** Alternative field for house number */
   number?: number;
   /** Zodiac sign of the house cusp */
@@ -34,23 +18,18 @@ export interface HouseCusp {
 /**
  * Type guard to check if an object is a valid HouseCusp
  */
-export function isHouseCusp(obj: unknown): obj is HouseCusp {
-  if (obj === null || obj === undefined || typeof obj !== 'object')
-    return false;
-
-  const houseCusp = obj as HouseCusp;
+export const isHouseCusp = (obj: unknown): obj is HouseCusp => {
   return (
-    (typeof houseCusp.house === 'number' ||
-      typeof houseCusp.number === 'number') &&
-    (typeof houseCusp.cusp === 'number' ||
-      typeof houseCusp.degree === 'number' ||
-      typeof houseCusp.degree === 'string')
+    typeof obj === 'object' &&
+    obj !== null &&
+    (typeof (obj as HouseCusp).number === 'number' ||
+     typeof (obj as HouseCusp).cusp === 'number')
   );
-}
+};
 
 /**
  * Type guard to check if an array contains valid HouseCusps
  */
-export function isHouseCuspArray(arr: unknown[]): arr is HouseCusp[] {
-  return arr.length > 0 && isHouseCusp(arr[0]);
-}
+export const isHouseCuspArray = (arr: unknown): arr is HouseCusp[] => {
+  return Array.isArray(arr) && arr.every(isHouseCusp);
+};

@@ -25,15 +25,16 @@ const VedicChart: React.FC<Props> = ({ data }) => {
   }
 
   // Safe data extraction with fallbacks
+  const dataRecord = data as unknown as Record<string, unknown>;
   const description = safeGet(
-    data,
+    dataRecord,
     'description',
     'Vedic Sidereal Astrology Analysis'
   );
-  const ayanamsa = safeGet(data, 'ayanamsa', 0) as number;
-  const moonSign = safeGet(data, 'analysis.moon_sign', 'Not calculated');
-  const analysis = safeGet(data, 'analysis.analysis', 'Analysis not available');
-  const planets = safeGet(data, 'planets', {});
+  const ayanamsa = safeGet(dataRecord, 'ayanamsa', 0) as number;
+  const moonSign = safeGet(dataRecord, 'analysis.moon_sign', 'Not calculated');
+  const analysis = safeGet(dataRecord, 'analysis.analysis', 'Analysis not available');
+  const planets = safeGet(dataRecord, 'planets', {});
 
   const planetEntries = Object.entries(planets);
 
@@ -97,17 +98,18 @@ const VedicChart: React.FC<Props> = ({ data }) => {
                       <tbody>
                         {planetEntries.map(([planet, info]) => {
                           // Safe property access with validation
+                          const infoRecord = info as Record<string, unknown>;
                           const vedicSign = safeGet(
-                            info,
+                            infoRecord,
                             'vedic_sign',
                             'Unknown'
                           );
                           const nakshatraName = safeGet(
-                            info,
+                            infoRecord,
                             'nakshatra.name',
                             'Unknown'
                           );
-                          const pada = safeGet(info, 'nakshatra.pada', 'N/A');
+                          const pada = safeGet(infoRecord, 'nakshatra.pada', 'N/A') as string;
 
                           return (
                             <tr

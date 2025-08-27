@@ -46,7 +46,8 @@
     { "path": "../../packages/config" },
     { "path": "../../packages/frequency" },
     { "path": "../../packages/ui" },
-    { "path": "../../packages/integrations" },
-    { "path": "../../packages/types" }
+  { "path": "../../packages/integrations" },
+  { "path": "../../packages/types" },
+  { "path": "../../packages/analytics" }
   ]
 }

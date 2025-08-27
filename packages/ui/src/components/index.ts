@@ -1,28 +1,16 @@
 export { Button } from './Button';
 export { Card } from './Card';
-export { Modal } from './Modal';
-export { Loading } from './Loading';
 export * from './lazy-components';
-export { PerformanceDashboard } from './PerformanceDashboard';
 export { default as EnhancedCard } from './EnhancedCard';
 
 // UX Enhancement Components
 export {
-  LoadingSpinner,
   ProgressiveLoading,
-  SkeletonLoader,
   LoadingOverlay,
-  InlineLoading,
-  LoadingCard,
 } from './LoadingStates';
 
 export {
   ErrorMessage,
-  ErrorFallback,
-  ErrorToast,
-  type EnhancedError,
-  type ErrorSeverity,
-  type ErrorType,
 } from './ErrorHandling';
 
 export {
@@ -31,7 +19,6 @@ export {
   ResponsiveGrid,
   MobileDrawer,
   TouchButton,
-  ResponsiveText,
   MobileCard,
 } from './MobileResponsive';
 
@@ -41,5 +28,26 @@ export {
   useToastHelpers,
   StatusIndicator,
   ProgressBar,
-  type ToastNotification,
 } from './UserFeedback';
+
+// UX-002: Advanced Animation System
+export {
+  StaggerAnimation,
+  MorphingButton,
+  FloatingActionButton,
+  ParallaxContainer,
+  AttentionAnimation,
+  SmoothProgress,
+  TiltCard,
+} from './AnimationSystem';
+
+// UX-002: Micro-Interaction Components
+export {
+  InteractiveRating,
+  RippleButton,
+  MagneticHover,
+  ElasticInteraction,
+  AnimatedTooltip,
+  PulseOnChange,
+  CountUp,
+} from './MicroInteractions';

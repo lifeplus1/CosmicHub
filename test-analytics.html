@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>CosmicHub Analytics System Test</h1>
+    
+    <div class="test-section info">
+        <h2>System Status</h2>
+        <p>Backend API: <span id="backend-status">Checking...</span></p>
+        <p>Analytics Package: <span id="package-status">Checking...</span></p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Analytics Events</h2>
+        <button onclick="testChartCalculation()">Test Chart Calculation Event</button>
+        <button onclick="testPageView()">Test Page View Event</button>
+        <button onclick="testUserAction()">Test User Action Event</button>
+        <button onclick="testError()">Test Error Event</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Dashboard Data</h2>
+        <button onclick="getDashboardOverview()">Get Dashboard Overview</button>
+        <button onclick="getEventMetrics()">Get Event Metrics</button>
+        <button onclick="getChartStats()">Get Chart Statistics</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script type="module">
+        const API_BASE = 'http://localhost:8002/analytics';
+        const results = document.getElementById('results');
+        
+        function log(message) {
+            results.textContent += new Date().toISOString() + ': ' + message + '\n';
+        }
+
+        // Check system status
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                document.getElementById('backend-status').textContent = 'Online ✅';
+                document.getElementById('package-status').textContent = 'Ready ✅';
+                log('Analytics system is online');
+            } catch (error) {
+                document.getElementById('backend-status').textContent = 'Offline ❌';
+                document.getElementById('package-status').textContent = 'Error ❌';
+                log('Error: ' + error.message);
+            }
+        }
+
+        // Test functions
+        window.testChartCalculation = async function() {
+            try {
+                const event = {
+                    eventType: 'chart_calculation',
+                    eventData: {
+                        chartType: 'natal',
+                        calculationTime: Math.random() * 1000,
+                        success: true,
+                        aspectsCount: 15
+                    },
+                    userId: 'test_user_' + Date.now(),
+                    sessionId: 'session_' + Date.now(),
+                    platform: 'web'
+                };
+
+                const response = await fetch(`${API_BASE}/event`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(event)
+                });
+
+                const result = await response.json();
+                log('Chart calculation event created: ' + JSON.stringify(result, null, 2));
+            } catch (error) {
+                log('Error creating chart event: ' + error.message);
+            }
+        };
+
+        window.testPageView = async function() {
+            try {
+                const event = {
+                    eventType: 'page_view',
+                    eventData: {
+                        page: '/chart',
+                        referrer: '/dashboard',
+                        loadTime: Math.random() * 500
+                    },
+                    userId: 'test_user_' + Date.now(),
+                    sessionId: 'session_' + Date.now(),
+                    platform: 'web'
+                };
+
+                const response = await fetch(`${API_BASE}/event`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(event)
+                });
+
+                const result = await response.json();
+                log('Page view event created: ' + JSON.stringify(result, null, 2));
+            } catch (error) {
+                log('Error creating page view event: ' + error.message);
+            }
+        };
+
+        window.testUserAction = async function() {
+            try {
+                const event = {
+                    eventType: 'user_action',
+                    eventData: {
+                        action: 'button_click',
+                        element: 'calculate_chart',
+                        value: 'natal_chart'
+                    },
+                    userId: 'test_user_' + Date.now(),
+                    sessionId: 'session_' + Date.now(),
+                    platform: 'web'
+                };
+
+                const response = await fetch(`${API_BASE}/event`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(event)
+                });
+
+                const result = await response.json();
+                log('User action event created: ' + JSON.stringify(result, null, 2));
+            } catch (error) {
+                log('Error creating user action event: ' + error.message);
+            }
+        };
+
+        window.testError = async function() {
+            try {
+                const event = {
+                    eventType: 'error',
+                    eventData: {
+                        errorType: 'calculation_error',
+                        errorMessage: 'Invalid birth date',
+                        stackTrace: 'Error: Invalid date at calculateChart...'
+                    },
+                    userId: 'test_user_' + Date.now(),
+                    sessionId: 'session_' + Date.now(),
+                    platform: 'web'
+                };
+
+                const response = await fetch(`${API_BASE}/event`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(event)
+                });
+
+                const result = await response.json();
+                log('Error event created: ' + JSON.stringify(result, null, 2));
+            } catch (error) {
+                log('Error creating error event: ' + error.message);
+            }
+        };
+
+        window.getDashboardOverview = async function() {
+            try {
+                const response = await fetch(`${API_BASE}/dashboard/overview`);
+                const data = await response.json();
+                log('Dashboard overview: ' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                log('Error getting dashboard overview: ' + error.message);
+            }
+        };
+
+        window.getEventMetrics = async function() {
+            try {
+                const response = await fetch(`${API_BASE}/events/metrics`);
+                const data = await response.json();
+                log('Event metrics: ' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                log('Error getting event metrics: ' + error.message);
+            }
+        };
+
+        window.getChartStats = async function() {
+            try {
+                const response = await fetch(`${API_BASE}/events/chart-stats`);
+                const data = await response.json();
+                log('Chart statistics: ' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                log('Error getting chart stats: ' + error.message);
+            }
+        };
+
+        // Initialize
+        checkStatus();
+    </script>
+</body>
+</html>

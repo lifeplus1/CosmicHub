@@ -1,7 +1,8 @@
 import type { ComponentType } from 'react';
 
-// Base interface for component modules
-export interface LazyLoadedModule<T = unknown> {
+// Base interface for component modules (generic module import shape)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface LazyLoadedModule<T = any> {
   default: ComponentType<T>;
   [key: string]: unknown;
 }

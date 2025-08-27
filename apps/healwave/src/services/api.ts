@@ -1,4 +1,4 @@
-import { getIdToken } from 'firebase/auth';
+import { getIdToken, type User, type Auth } from 'firebase/auth';
 import { auth } from '@cosmichub/auth';
 import { FrequencyPreset } from '@cosmichub/frequency';
 import {
@@ -18,11 +18,31 @@ async function parseJsonSafe<T>(resp: Response): Promise<T> {
   return data as T; // caller will validate
 }
 
+// Centralized, type-safe accessor for current user to avoid repeated
+// @typescript-eslint/no-unsafe-* lint rule triggers if the auth import
+// is inferred as `any` in certain build edge cases.
+function getSafeCurrentUser(): User | null {
+  // If types resolve correctly, auth is already an Auth; otherwise assert.
+  const a = auth as unknown as Auth | undefined;
+  if (a && typeof a === 'object') {
+    try {
+      return a.currentUser ?? null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export async function savePreset(
   preset: FrequencyPreset
 ): Promise<ApiResult<FrequencyPreset>> {
   try {
-    const token = await getIdToken(auth.currentUser!);
+  const user = getSafeCurrentUser();
+    if (!user) {
+      return fail(ErrorCode.AUTH, 'User not authenticated');
+    }
+    const token = await getIdToken(user);
     const response = await fetch(
       'https://your-render-domain.com/healwave/presets',
       {
@@ -60,7 +80,11 @@ export async function savePreset(
 
 export async function getPresets(): Promise<ApiResult<FrequencyPreset[]>> {
   try {
-    const token = await getIdToken(auth.currentUser!);
+  const user = getSafeCurrentUser();
+    if (!user) {
+      return fail(ErrorCode.AUTH, 'User not authenticated');
+    }
+    const token = await getIdToken(user);
     const response = await fetch(
       'https://your-render-domain.com/healwave/presets',
       {
@@ -99,7 +123,11 @@ export async function getUserPresets(): Promise<ApiResult<FrequencyPreset[]>> {
 
 export async function deletePreset(presetId: string): Promise<ApiResult<null>> {
   try {
-    const token = await getIdToken(auth.currentUser!);
+  const user = getSafeCurrentUser();
+    if (!user) {
+      return fail(ErrorCode.AUTH, 'User not authenticated');
+    }
+    const token = await getIdToken(user);
     const response = await fetch(
       `https://your-render-domain.com/healwave/presets/${presetId}`,
       {

@@ -127,6 +127,12 @@ def _prepare_firestore(monkeypatch: pytest.MonkeyPatch) -> FakeDB:
     dbmod.get_firestore_client.cache_clear()
     monkeypatch.setattr(dbmod, "db", fake)
     monkeypatch.setattr(dbmod, "get_firestore_client", lambda: fake)  # type: ignore[arg-type]  # noqa: E501
+    
+    # Mock Query class for DESCENDING attribute
+    class MockQuery:
+        DESCENDING = "DESCENDING"
+    
+    monkeypatch.setattr(dbmod, "Query", MockQuery)
     return fake
 
 

@@ -49,8 +49,8 @@ eas whoami
 
 ### **Step 2: Create App Store Accounts** (1 day)
 
-- **Apple Developer Account**: $99/year - https://developer.apple.com
-- **Google Play Console**: $25 one-time - https://play.google.com/console
+- **Apple Developer Account**: $99/year - <https://developer.apple.com>
+- **Google Play Console**: $25 one-time - <https://play.google.com/console>
 - Create app listings in both stores
 
 ### **Step 3: Generate Assets** (2-3 hours)
@@ -69,7 +69,7 @@ cd /Users/Chris/Projects/CosmicHub
 # Build for iOS
 ./scripts/build-mobile-app.sh ios --production
 
-# Build for Android
+# Build for Android  
 ./scripts/build-mobile-app.sh android --production
 
 # Or build both
@@ -203,9 +203,7 @@ cd ..
 
 ## 📞 **Ready to Deploy?**
 
-The mobile app is ready for production deployment. The core functionality is complete, and while
-there are some TypeScript lint warnings, these don't prevent app store submission or affect user
-experience.
+The mobile app is ready for production deployment. The core functionality is complete, and while there are some TypeScript lint warnings, these don't prevent app store submission or affect user experience.
 
 **Next Command to Run**:
 

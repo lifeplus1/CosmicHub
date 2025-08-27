@@ -28,7 +28,7 @@ export const TooltipProvider: React.FC<TooltipProviderProps> = ({
   );
 };
 
-export interface TooltipProps {
+interface TooltipProps {
   children: React.ReactNode;
   content: string;
   position?: 'top' | 'bottom' | 'left' | 'right';

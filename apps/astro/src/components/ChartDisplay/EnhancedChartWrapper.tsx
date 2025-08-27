@@ -4,75 +4,90 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Button, Card, CardContent, LoadingSpinner } from '@cosmichub/ui';
+import { Button, Card, CardContent } from '@cosmichub/ui';
 import { ChartDisplay } from './ChartDisplay';
 import type { ChartData } from '../../services/api.types';
 import type { ChartBirthData } from '@cosmichub/types';
-import { fetchChartData } from '../../services/api';
+import type { ExtendedBirthData } from '../../contexts/BirthDataContext';
+import { useCanonicalBirthData } from '../../hooks/useCanonicalBirthData';
+import type { ApiResult } from '@cosmichub/config';
 import type { ChartLike } from './normalizeChart';
 
 export interface EnhancedChartWrapperProps {
-  birthData?: ChartBirthData;
+  birthData?: ChartBirthData | ExtendedBirthData;
   savedChartId?: string;
   onChartCalculated?: (data: ChartData) => void;
   className?: string;
-  autoSave?: boolean;
-  showMobileSettings?: boolean;
+  autoSave?: boolean; // reserved for future enhanced UX features
+  showMobileSettings?: boolean; // reserved for future settings panel
+  /** Optional injection for testing (defaults to fetchChartData) */
+  fetchFn?: (data: ChartBirthData) => Promise<ApiResult<ChartData>>;
 }
+
 
 export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   birthData,
   savedChartId,
   onChartCalculated,
   className,
-  autoSave = true,
-  showMobileSettings = true,
+  autoSave: _autoSave = true,
+  showMobileSettings: _showMobileSettings = true,
+  fetchFn,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [chartData, setChartData] = useState<ChartLike | null>(null);
+  const [fetchImpl, setFetchImpl] = useState<typeof fetchFn | null>(null);
+  const canonicalBirthData = useCanonicalBirthData();
 
-  // Enhanced error handling
   const handleError = useCallback((err: unknown) => {
     if (err instanceof Error) {
       setError(err);
     } else {
-      setError(
-        new Error('An unexpected error occurred while calculating the chart')
-      );
+      setError(new Error('An unexpected error occurred while calculating the chart'));
     }
   }, []);
 
-  // Enhanced success feedback
   const handleChartCalculated = useCallback(
     (data: ChartData) => {
-      setChartData(data);
+  // Wrap backend response so ChartDisplay normalization can detect original shape
+  setChartData({ __raw_backend_response: data } as unknown as ChartLike);
       setError(null);
-
-      if (onChartCalculated) {
-        onChartCalculated(data);
-      }
+      onChartCalculated?.(data);
     },
     [onChartCalculated]
   );
 
-  // Calculate chart from birth data
+  // Lazy-load fetch implementation if not injected
   useEffect(() => {
-    if (!birthData && !savedChartId) return;
+    if (!fetchFn && !fetchImpl) {
+      import('../../services/api')
+        .then(mod => {
+          // Only set if still needed
+          if (!fetchFn) {
+            setFetchImpl(() => mod.fetchChartData);
+          }
+        })
+        .catch(err => {
+          handleError(err);
+        });
+    }
+  }, [fetchFn, fetchImpl, handleError]);
+
+  useEffect(() => {
+  if (!birthData && !savedChartId) return;
     if (savedChartId) return; // ChartDisplay will handle saved charts
 
     const calculateChart = async () => {
       try {
         setIsLoading(true);
         setError(null);
-
-        const result = await fetchChartData(birthData!);
-
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to calculate chart');
-        }
-
-        setChartData(result.data);
+  if (!canonicalBirthData) return;
+  const impl = fetchFn ?? fetchImpl;
+  if (!impl) return; // still loading dynamic import
+  const result = await impl(canonicalBirthData);
+        if (!result.success) throw new Error(result.error || 'Failed to calculate chart');
+  setChartData({ __raw_backend_response: result.data } as unknown as ChartLike);
         handleChartCalculated(result.data);
       } catch (err) {
         handleError(err);
@@ -81,53 +96,46 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
       }
     };
 
-    calculateChart();
-  }, [birthData, savedChartId, handleError, handleChartCalculated]);
+    void calculateChart();
+  }, [birthData, savedChartId, handleError, handleChartCalculated, canonicalBirthData, fetchFn, fetchImpl]);
 
-  // Error retry handler
   const handleRetry = useCallback(() => {
     setError(null);
+  if (!birthData || !canonicalBirthData) return;
+    const calculateChart = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+    const impl = fetchFn ?? fetchImpl;
+    if (!impl) return;
+    const result = await impl(canonicalBirthData);
+        if (!result.success) throw new Error(result.error || 'Failed to calculate chart');
+  setChartData({ __raw_backend_response: result.data } as unknown as ChartLike);
+        handleChartCalculated(result.data);
+      } catch (err) {
+        handleError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    void calculateChart();
+  }, [birthData, handleError, handleChartCalculated, canonicalBirthData, fetchFn, fetchImpl]);
 
-    if (birthData) {
-      const calculateChart = async () => {
-        try {
-          setIsLoading(true);
-          setError(null);
-
-          const result = await fetchChartData(birthData);
-
-          if (!result.success) {
-            throw new Error(result.error || 'Failed to calculate chart');
-          }
-
-          setChartData(result.data);
-          handleChartCalculated(result.data);
-        } catch (err) {
-          handleError(err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      calculateChart();
-    }
-  }, [birthData, handleError, handleChartCalculated]);
-
-  // Loading state
   if (isLoading) {
     return (
       <div className={className}>
         <Card className='w-full max-w-4xl mx-auto'>
           <CardContent className='p-6'>
             <div className='flex flex-col items-center justify-center py-12 space-y-6'>
-              <LoadingSpinner size='lg' color='cosmic' />
+              <div className='relative'>
+                <div className='w-16 h-16 border-4 border-cosmic-purple/30 border-t-cosmic-purple rounded-full animate-spin'></div>
+                <div className='absolute inset-0 flex items-center justify-center'>
+                  <div className='w-8 h-8 bg-gradient-to-r from-cosmic-purple to-cosmic-blue rounded-full opacity-60 animate-pulse'></div>
+                </div>
+              </div>
               <div className='text-center space-y-2'>
-                <div className='text-lg font-medium'>
-                  Calculating celestial positions...
-                </div>
-                <div className='text-sm text-gray-600 max-w-md'>
-                  Processing birth data and generating astrological chart
-                </div>
+                <div className='text-lg font-medium'>Calculating celestial positions...</div>
+                <div className='text-sm text-gray-600 max-w-md'>Processing birth data and generating astrological chart</div>
               </div>
             </div>
           </CardContent>
@@ -136,19 +144,14 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className={className}>
         <Card className='w-full max-w-4xl mx-auto border-red-200'>
           <CardContent className='p-6'>
             <div className='flex flex-col items-center justify-center py-12 space-y-4'>
-              <div className='text-red-600 text-lg font-medium'>
-                Chart Calculation Error
-              </div>
-              <div className='text-red-600 text-sm text-center max-w-md'>
-                {error.message}
-              </div>
+              <div className='text-red-600 text-lg font-medium'>Chart Calculation Error</div>
+              <div className='text-red-600 text-sm text-center max-w-md'>{error.message}</div>
               <Button onClick={handleRetry} variant='default' className='mt-4'>
                 🔄 Retry Calculation
               </Button>
@@ -165,8 +168,7 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
         <ChartDisplay
           chart={chartData}
           chartId={savedChartId}
-          onSaveChart={async (data: ChartLike) => {
-            // Optional: Add save confirmation or feedback
+          onSaveChart={(data: ChartLike) => {
             console.log('Chart saved:', data);
           }}
         />
@@ -175,5 +177,4 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   );
 };
 
-// Export enhanced version as default for easy migration
 export default EnhancedChartWrapper;

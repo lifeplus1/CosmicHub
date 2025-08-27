@@ -1,0 +1,209 @@
+{
+  "version": "1.0.0",
+  "generated": "2025-08-27T07:55:03.923Z",
+  "totalBatches": 7,
+  "estimatedFiles": 406,
+  "executionOrder": {
+    "stage1": [
+      "agent-4-astro-services-types",
+      "agent-5-ui-package",
+      "agent-6-config-package",
+      "agent-1-astro-components",
+      "agent-2-astro-features"
+    ],
+    "stage2": [
+      "agent-3-astro-pages-context",
+      "agent-7-apps-small-packages"
+    ]
+  },
+  "conflictMatrix": {
+    "agent-1-astro-components": {
+      "agent-1-astro-components": "self",
+      "agent-2-astro-features": "dependent",
+      "agent-3-astro-pages-context": "dependent",
+      "agent-4-astro-services-types": "safe",
+      "agent-5-ui-package": "safe",
+      "agent-6-config-package": "safe",
+      "agent-7-apps-small-packages": "safe"
+    },
+    "agent-2-astro-features": {
+      "agent-1-astro-components": "dependent",
+      "agent-2-astro-features": "self",
+      "agent-3-astro-pages-context": "safe",
+      "agent-4-astro-services-types": "safe",
+      "agent-5-ui-package": "safe",
+      "agent-6-config-package": "safe",
+      "agent-7-apps-small-packages": "safe"
+    },
+    "agent-3-astro-pages-context": {
+      "agent-1-astro-components": "dependent",
+      "agent-2-astro-features": "safe",
+      "agent-3-astro-pages-context": "self",
+      "agent-4-astro-services-types": "safe",
+      "agent-5-ui-package": "safe",
+      "agent-6-config-package": "safe",
+      "agent-7-apps-small-packages": "safe"
+    },
+    "agent-4-astro-services-types": {
+      "agent-1-astro-components": "safe",
+      "agent-2-astro-features": "safe",
+      "agent-3-astro-pages-context": "safe",
+      "agent-4-astro-services-types": "self",
+      "agent-5-ui-package": "safe",
+      "agent-6-config-package": "safe",
+      "agent-7-apps-small-packages": "dependent"
+    },
+    "agent-5-ui-package": {
+      "agent-1-astro-components": "safe",
+      "agent-2-astro-features": "safe",
+      "agent-3-astro-pages-context": "safe",
+      "agent-4-astro-services-types": "safe",
+      "agent-5-ui-package": "self",
+      "agent-6-config-package": "safe",
+      "agent-7-apps-small-packages": "dependent"
+    },
+    "agent-6-config-package": {
+      "agent-1-astro-components": "safe",
+      "agent-2-astro-features": "safe",
+      "agent-3-astro-pages-context": "safe",
+      "agent-4-astro-services-types": "safe",
+      "agent-5-ui-package": "safe",
+      "agent-6-config-package": "self",
+      "agent-7-apps-small-packages": "dependent"
+    },
+    "agent-7-apps-small-packages": {
+      "agent-1-astro-components": "safe",
+      "agent-2-astro-features": "safe",
+      "agent-3-astro-pages-context": "safe",
+      "agent-4-astro-services-types": "dependent",
+      "agent-5-ui-package": "dependent",
+      "agent-6-config-package": "dependent",
+      "agent-7-apps-small-packages": "self"
+    }
+  },
+  "batches": [
+    {
+      "id": "agent-1-astro-components",
+      "agent": "ComponentFixAgent",
+      "name": "Astro Components",
+      "priority": 3,
+      "estimatedFiles": 65,
+      "dependencies": [],
+      "conflictRisk": "low",
+      "targets": [
+        "apps/astro/src/components"
+      ]
+    },
+    {
+      "id": "agent-2-astro-features",
+      "agent": "FeatureFixAgent",
+      "name": "Astro Features",
+      "priority": 3,
+      "estimatedFiles": 25,
+      "dependencies": [
+        "agent-1-astro-components"
+      ],
+      "conflictRisk": "low",
+      "targets": [
+        "apps/astro/src/features"
+      ]
+    },
+    {
+      "id": "agent-3-astro-pages-context",
+      "agent": "PagesContextAgent",
+      "name": "Astro Pages & Context",
+      "priority": 2,
+      "estimatedFiles": 70,
+      "dependencies": [
+        "agent-1-astro-components"
+      ],
+      "conflictRisk": "medium",
+      "targets": [
+        "apps/astro/src/pages",
+        "apps/astro/src/contexts",
+        "apps/astro/src/hooks"
+      ]
+    },
+    {
+      "id": "agent-4-astro-services-types",
+      "agent": "ServicesTypesAgent",
+      "name": "Astro Services & Types",
+      "priority": 1,
+      "estimatedFiles": 65,
+      "dependencies": [],
+      "conflictRisk": "high",
+      "targets": [
+        "apps/astro/src/services",
+        "apps/astro/src/types",
+        "apps/astro/src/config"
+      ]
+    },
+    {
+      "id": "agent-5-ui-package",
+      "agent": "UIPackageAgent",
+      "name": "UI Package",
+      "priority": 2,
+      "estimatedFiles": 54,
+      "dependencies": [],
+      "conflictRisk": "high",
+      "targets": [
+        "packages/ui/src"
+      ]
+    },
+    {
+      "id": "agent-6-config-package",
+      "agent": "ConfigPackageAgent",
+      "name": "Config Package",
+      "priority": 1,
+      "estimatedFiles": 48,
+      "dependencies": [],
+      "conflictRisk": "high",
+      "targets": [
+        "packages/config/src"
+      ]
+    },
+    {
+      "id": "agent-7-apps-small-packages",
+      "agent": "AppsPackagesAgent",
+      "name": "Apps & Small Packages",
+      "priority": 4,
+      "estimatedFiles": 79,
+      "dependencies": [
+        "agent-4-astro-services-types",
+        "agent-5-ui-package",
+        "agent-6-config-package"
+      ],
+      "conflictRisk": "medium",
+      "targets": [
+        "apps/healwave/src",
+        "apps/mobile/src",
+        "packages/auth/src",
+        "packages/frequency/src",
+        "packages/hooks/src",
+        "packages/integrations/src",
+        "packages/pwa/src",
+        "packages/storage/src",
+        "packages/subscriptions/src",
+        "packages/types/src"
+      ]
+    }
+  ],
+  "coordinationRules": {
+    "high-conflict-agents": [
+      "agent-4-astro-services-types",
+      "agent-5-ui-package",
+      "agent-6-config-package"
+    ],
+    "sequential-execution": [
+      "agent-4-astro-services-types",
+      "agent-5-ui-package"
+    ],
+    "parallel-safe": [
+      "agent-1-astro-components",
+      "agent-2-astro-features"
+    ],
+    "final-stage": [
+      "agent-7-apps-small-packages"
+    ]
+  }
+}

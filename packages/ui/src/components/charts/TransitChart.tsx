@@ -5,19 +5,20 @@
 
 import React from 'react';
 
-export interface TransitChartProps {
-  date?: string;
+interface TransitChartProps {
+  date: string;
   location?: string;
   aspects?: string[];
   className?: string;
 }
 
 export const TransitChart: React.FC<TransitChartProps> = ({
-  date = new Date().toISOString().split('T')[0],
-  location = '',
-  aspects = [],
+  date,
+  location,
+  aspects,
   className = '',
 }) => {
+
   return (
     <div className={`transit-chart ${className}`}>
       <div className='chart-container p-4 border rounded-lg'>
@@ -31,7 +32,7 @@ export const TransitChart: React.FC<TransitChartProps> = ({
             Transit chart visualization placeholder
           </span>
         </div>
-        {aspects.length > 0 && (
+        {aspects && aspects.length > 0 && (
           <div className='aspects-list'>
             <h4 className='font-medium mb-2'>Current Aspects:</h4>
             <ul className='text-sm space-y-1'>

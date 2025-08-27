@@ -37,7 +37,7 @@ class CSRFTokenService {
         throw new Error(`Failed to fetch CSRF token: ${response.status}`);
       }
 
-      const data: CSRFTokenResponse = await response.json();
+      const data = await response.json() as CSRFTokenResponse;
       this.token = data.csrf_token;
       this.tokenExpiry = now + data.expires_in;
 
@@ -139,5 +139,5 @@ export async function apiJsonRequest<T>(
     );
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 }

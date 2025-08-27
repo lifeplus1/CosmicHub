@@ -11,23 +11,23 @@ import { getAspectSymbol, getPlanetSymbol } from './tableUtils';
 import { AstroSymbol } from '../AstroSymbol';
 
 // Enhanced aspect types including minor aspects
-export type AspectType =
+type AspectType =
   | 'conjunction'
   | 'opposition'
   | 'trine'
   | 'square'
-  | 'sextile' // Major
+  | 'sextile'
   | 'semisextile'
   | 'semisquare'
   | 'sesquiquadrate'
-  | 'quincunx' // Minor
+  | 'quincunx'
   | 'quintile'
   | 'biquintile'
   | 'septile'
   | 'novile'
-  | 'decile'; // Harmonic
+  | 'decile';
 
-export interface EnhancedAspect {
+interface EnhancedAspect {
   planet1: string;
   planet2: string;
   aspect: string;
@@ -40,6 +40,8 @@ export interface EnhancedAspect {
   interpretation?: string;
 }
 
+export type { AspectType, EnhancedAspect };
+
 interface EnhancedAspectTableProps {
   aspects: EnhancedAspect[];
   includeMinorAspects: boolean;
@@ -47,7 +49,12 @@ interface EnhancedAspectTableProps {
   maxMinorOrb: number;
 }
 
-// Aspect definitions with their degrees and harmonic significance
+const EnhancedAspectTable: React.FC<EnhancedAspectTableProps> = ({
+  aspects,
+  includeMinorAspects,
+  maxMajorOrb,
+  maxMinorOrb,
+}) => {
 const ASPECT_DEFINITIONS: Record<
   AspectType,
   { degrees: number; harmonic: number; isHard: boolean }
@@ -69,7 +76,7 @@ const ASPECT_DEFINITIONS: Record<
 };
 
 // Calculate aspect strength based on orb
-const getAspectStrength = (
+const _getAspectStrength = (
   orb: number,
   maxOrb: number
 ): EnhancedAspect['strength'] => {
@@ -92,12 +99,6 @@ const getAspectColor = (aspect: EnhancedAspect): string => {
   }
 };
 
-export const EnhancedAspectTable: React.FC<EnhancedAspectTableProps> = ({
-  aspects,
-  includeMinorAspects,
-  maxMajorOrb,
-  maxMinorOrb,
-}) => {
   // Filter aspects based on settings
   const filteredAspects = aspects.filter(aspect => {
     if (!includeMinorAspects && !aspect.isMajor) return false;

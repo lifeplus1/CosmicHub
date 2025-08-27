@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { cn } from '../utils/cn';
 
 // Base loading spinner with cosmic theme
-export interface LoadingSpinnerProps {
+interface LoadingSpinnerProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   color?: 'primary' | 'secondary' | 'cosmic' | 'white';
   className?: string;
@@ -52,8 +52,10 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 };
 
 // Progressive loading with stages
+type LoadingStage = 'initializing' | 'processing' | 'finalizing' | 'complete';
+
 export interface ProgressiveLoadingProps {
-  stage: 'initializing' | 'processing' | 'finalizing' | 'complete';
+  stage: LoadingStage;
   message?: string;
   progress?: number; // 0-100
   className?: string;
@@ -93,14 +95,14 @@ export const ProgressiveLoading: React.FC<ProgressiveLoadingProps> = ({
     }
   }, [stage]);
 
-  const stageMessages = {
+  const stageMessages: Record<LoadingStage, string> = {
     initializing: 'Initializing...',
     processing: 'Processing data...',
     finalizing: 'Finalizing results...',
     complete: 'Complete!',
   };
 
-  const stageProgress = {
+  const stageProgress: Record<LoadingStage, number> = {
     initializing: 25,
     processing: 50,
     finalizing: 75,
@@ -171,17 +173,17 @@ export const ProgressiveLoading: React.FC<ProgressiveLoadingProps> = ({
 };
 
 // Skeleton loading for content areas
-export interface SkeletonLoaderProps {
+export interface ContentSkeletonProps {
   lines?: number;
   className?: string;
   showAvatar?: boolean;
   showImage?: boolean;
 }
 
-export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
-  lines = 3,
+export const ContentSkeleton: React.FC<ContentSkeletonProps> = ({
+  lines = 4,
   className,
-  showAvatar = false,
+  showAvatar = true,
   showImage = false,
 }) => {
   return (
@@ -251,7 +253,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 };
 
 // Inline loading for buttons and small areas
-export interface InlineLoadingProps {
+export interface InlineLoaderProps {
   loading: boolean;
   children: React.ReactNode;
   loadingText?: string;
@@ -259,12 +261,12 @@ export interface InlineLoadingProps {
   size?: 'sm' | 'md';
 }
 
-export const InlineLoading: React.FC<InlineLoadingProps> = ({
+export const InlineLoader: React.FC<InlineLoaderProps> = ({
   loading,
   children,
   loadingText = 'Loading...',
   className,
-  size = 'sm',
+  size = 'md',
 }) => {
   if (loading) {
     return (
@@ -286,7 +288,7 @@ export const InlineLoading: React.FC<InlineLoadingProps> = ({
 };
 
 // Card loading state with shimmer effect
-export interface LoadingCardProps {
+export interface CardSkeletonProps {
   className?: string;
   showHeader?: boolean;
   showImage?: boolean;
@@ -294,12 +296,12 @@ export interface LoadingCardProps {
   bodyLines?: number;
 }
 
-export const LoadingCard: React.FC<LoadingCardProps> = ({
+export const CardSkeleton: React.FC<CardSkeletonProps> = ({
   className,
   showHeader = true,
   showImage = false,
-  headerLines = 1,
-  bodyLines = 3,
+  headerLines = 2,
+  bodyLines = 5,
 }) => {
   return (
     <div
@@ -343,4 +345,13 @@ export const LoadingCard: React.FC<LoadingCardProps> = ({
       </div>
     </div>
   );
+};
+
+export default {
+  LoadingSpinner,
+  ProgressiveLoading,
+  ContentSkeleton,
+  LoadingOverlay,
+  InlineLoader,
+  CardSkeleton,
 };

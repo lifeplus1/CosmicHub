@@ -17,6 +17,7 @@ import {
   getRulerFromSign,
   getSignFromDegrees,
   calculateHousePosition,
+  ZodiacSign,
 } from '../../../utils/astrologyUtils';
 import { AstrologySettings } from '../AstrologySettings';
 import {
@@ -26,7 +27,7 @@ import {
 import { AstroSymbol } from '../AstroSymbol';
 
 // Unified celestial body interface
-export interface CelestialBody {
+interface CelestialBody {
   name: string;
   symbol?: string;
   position?: number; // degrees 0-360
@@ -155,7 +156,7 @@ function getSymbolForBody(body: CelestialBody): string {
   const asteroidSymbol = getAsteroidSymbol(body.name);
   if (asteroidSymbol !== '●') return asteroidSymbol;
 
-  return body.symbol || '●';
+  return body.symbol ?? '●';
 }
 
 function CelestialBodiesTable({
@@ -221,7 +222,7 @@ function CelestialBodiesTable({
       case 'angles':
         console.log(`🔍 ${body.name}: angles always shown`);
         return true; // Always show angles as they're fundamental chart structure
-      default:
+      default: {
         console.log(`🔍 ${body.name}: fallback to legacy settings`);
         // Fallback to legacy settings for backward compatibility
         const bodyName = body.name.toLowerCase();
@@ -235,6 +236,7 @@ function CelestialBodiesTable({
           return settings.celestialBodies.asteroids;
         if (body.category === 'points') return settings.celestialBodies.points;
         return true;
+      }
     }
   });
 
@@ -256,8 +258,8 @@ function CelestialBodiesTable({
     if (catA !== catB) return catA - catB;
 
     // Then sort within category
-    const orderA = BODY_ORDER_WITHIN_CATEGORY[a.name] || 999;
-    const orderB = BODY_ORDER_WITHIN_CATEGORY[b.name] || 999;
+    const orderA = BODY_ORDER_WITHIN_CATEGORY[a.name] ?? 999;
+    const orderB = BODY_ORDER_WITHIN_CATEGORY[b.name] ?? 999;
     if (orderA !== orderB) return orderA - orderB;
 
     // Finally alphabetical
@@ -268,7 +270,7 @@ function CelestialBodiesTable({
   const groupedBodies = sortedBodies.reduce(
     (groups, body) => {
       const category = body.category;
-      if (!groups[category]) groups[category] = [];
+      groups[category] ??= [];
       groups[category].push(body);
       return groups;
     },
@@ -280,7 +282,7 @@ function CelestialBodiesTable({
       {Object.entries(groupedBodies).map(([category, categoryBodies]) => (
         <div key={category} className='space-y-2'>
           <h3 className='text-lg font-semibold text-cosmic-gold border-b border-cosmic-gold/30 pb-1'>
-            {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] ||
+            {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] ??
               `${category.charAt(0).toUpperCase() + category.slice(1)}`}
           </h3>
 
@@ -343,7 +345,7 @@ function CelestialBodiesTable({
                         {(() => {
                           try {
                             const ruler = getRulerFromSign(
-                              body.sign.toLowerCase() as any
+                              body.sign.toLowerCase() as ZodiacSign
                             );
                             const rulerSymbol = getPlanetSymbol(ruler);
                             return (
@@ -399,11 +401,46 @@ function CelestialBodiesTable({
   );
 }
 
+// Type interfaces for conversion function
+interface PlanetInput {
+  name: string;
+  sign: string;
+  house: string;
+  position?: number;
+  degree?: number;
+  retrograde?: boolean;
+}
+
+interface AsteroidInput {
+  name: string;
+  sign: string;
+  house: string;
+  position?: number;
+  degree?: number;
+}
+
+interface PointInput {
+  name: string;
+  sign: string;
+  house: string;
+  position?: number;
+  degree?: number;
+  retrograde?: boolean;
+}
+
+interface HouseInput {
+  number?: number;
+  cusp: number;
+  vertex?: number;
+  antivertex?: number;
+  part_of_fortune?: number;
+}
+
 // Helper function to convert existing data structures to CelestialBody format
 export function convertToCelestialBodies(chartData: {
-  planets?: any[];
-  asteroids?: any[];
-  points?: any[]; // Add points support
+  planets?: PlanetInput[];
+  asteroids?: AsteroidInput[];
+  points?: PointInput[];
   angles?: {
     ascendant: number;
     midheaven: number;
@@ -413,7 +450,7 @@ export function convertToCelestialBodies(chartData: {
     antivertex?: number;
     part_of_fortune?: number;
   };
-  houses?: any[];
+  houses?: HouseInput[];
 }): CelestialBody[] {
   const bodies: CelestialBody[] = [];
 
@@ -494,7 +531,7 @@ export function convertToCelestialBodies(chartData: {
           sign: getSignFromDegrees(angle.position),
           house: calculateHousePosition(
             angle.position,
-            chartData.houses?.map(h => h.cusp) || []
+            chartData.houses?.map(h => h.cusp) ?? []
           ).toString(),
           position: angle.position,
           degree: angle.position % 30, // Position within sign
@@ -511,9 +548,9 @@ export function convertToCelestialBodies(chartData: {
 
   // Extract additional points from houses (Vertex, Antivertex, Part of Fortune)
   if (chartData.houses) {
-    chartData.houses.forEach((house: any) => {
+    chartData.houses.forEach(house => {
       // Check if house data contains special points
-      ['vertex', 'antivertex', 'part_of_fortune'].forEach(pointName => {
+      (['vertex', 'antivertex', 'part_of_fortune'] as const).forEach(pointName => {
         if (house[pointName] !== undefined) {
           const position = house[pointName];
           if (typeof position === 'number') {
@@ -522,7 +559,7 @@ export function convertToCelestialBodies(chartData: {
                 .replace('_', ' ')
                 .replace(/\b\w/g, l => l.toUpperCase()),
               sign: '', // Will be calculated from position
-              house: String(house.number || '--'),
+              house: String(house.number ?? '--'),
               position,
               category: 'points',
             });

@@ -27,7 +27,7 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
   ) => {
     onSettingsChange({
       ...settings,
-      [category]: { ...(settings[category] as any), ...updates },
+      [category]: { ...(settings[category] as Record<string, unknown>), ...updates },
     });
   };
 
@@ -55,13 +55,19 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
               {/* House System */}
               <div className='mb-4'>
-                <label className='block text-sm font-medium text-cosmic-silver mb-2'>
+                <label 
+                  htmlFor="house-system-select-view"
+                  className='block text-sm font-medium text-cosmic-silver mb-2'
+                >
                   House System
                 </label>
                 <select
+                  id="house-system-select-view"
                   value={settings.houseSystem}
                   onChange={e =>
-                    updateSettings({ houseSystem: e.target.value as any })
+                    updateSettings({ 
+                      houseSystem: e.target.value as AstrologySettings['houseSystem']
+                    })
                   }
                   aria-label='House System Selection'
                   className='w-full px-3 py-2 bg-cosmic-dark/60 border border-cosmic-purple/30 rounded-md text-cosmic-silver focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50'
@@ -76,10 +82,10 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
               </div>
 
               {/* Zodiac System */}
-              <div>
-                <label className='block text-sm font-medium text-cosmic-silver mb-2'>
+              <fieldset>
+                <legend className='block text-sm font-medium text-cosmic-silver mb-2'>
                   Zodiac System
-                </label>
+                </legend>
                 <div className='flex gap-4'>
                   <label className='flex items-center'>
                     <input
@@ -88,7 +94,9 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                       value='tropical'
                       checked={settings.zodiacSystem === 'tropical'}
                       onChange={e =>
-                        updateSettings({ zodiacSystem: e.target.value as any })
+                        updateSettings({ 
+                          zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                        })
                       }
                       className='mr-2'
                     />
@@ -101,14 +109,16 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                       value='sidereal'
                       checked={settings.zodiacSystem === 'sidereal'}
                       onChange={e =>
-                        updateSettings({ zodiacSystem: e.target.value as any })
+                        updateSettings({ 
+                          zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                        })
                       }
                       className='mr-2'
                     />
                     <span className='text-cosmic-silver'>Sidereal</span>
                   </label>
                 </div>
-              </div>
+              </fieldset>
             </div>
 
             {/* Aspect Settings - Both Views */}
@@ -118,16 +128,20 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
               </h3>
 
               {/* Orb Settings */}
-              <div className='mb-4'>
-                <label className='block text-sm font-medium text-cosmic-silver mb-2'>
+              <fieldset className='mb-4'>
+                <legend className='block text-sm font-medium text-cosmic-silver mb-2'>
                   Orb Tolerances (degrees)
-                </label>
+                </legend>
                 <div className='grid grid-cols-3 gap-3'>
                   <div>
-                    <label className='block text-xs text-cosmic-silver/70 mb-1'>
+                    <label 
+                      htmlFor="major-orbs-view"
+                      className='block text-xs text-cosmic-silver/70 mb-1'
+                    >
                       Major
                     </label>
                     <input
+                      id="major-orbs-view"
                       type='number'
                       min='1'
                       max='15'
@@ -142,10 +156,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                     />
                   </div>
                   <div>
-                    <label className='block text-xs text-cosmic-silver/70 mb-1'>
+                    <label 
+                      htmlFor="minor-orbs-view"
+                      className='block text-xs text-cosmic-silver/70 mb-1'
+                    >
                       Minor
                     </label>
                     <input
+                      id="minor-orbs-view"
                       type='number'
                       min='1'
                       max='10'
@@ -160,10 +178,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                     />
                   </div>
                   <div>
-                    <label className='block text-xs text-cosmic-silver/70 mb-1'>
+                    <label 
+                      htmlFor="luminaries-orbs-view"
+                      className='block text-xs text-cosmic-silver/70 mb-1'
+                    >
                       Luminaries
                     </label>
                     <input
+                      id="luminaries-orbs-view"
                       type='number'
                       min='1'
                       max='20'
@@ -178,7 +200,7 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                     />
                   </div>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Display Options for Aspects */}
               <div className='grid grid-cols-2 gap-3'>
@@ -226,9 +248,13 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
                 {/* Celestial Bodies - All affect the unified table */}
                 <div>
-                  <label className='block text-sm font-medium text-cosmic-silver mb-3'>
-                    Celestial Bodies to Include
-                  </label>
+                  <div 
+                    className='block text-sm font-medium text-cosmic-silver mb-3'
+                    role="group"
+                    aria-labelledby="celestial-bodies-heading"
+                  >
+                    <span id="celestial-bodies-heading">Celestial Bodies to Include</span>
+                  </div>
 
                   <div className='grid grid-cols-2 gap-2 text-sm'>
                     <label className='flex items-center'>
@@ -390,9 +416,13 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
                 {/* Table Visibility Controls */}
                 <div>
-                  <label className='block text-sm font-medium text-cosmic-silver mb-3'>
-                    Table Visibility Controls
-                  </label>
+                  <div 
+                    className='block text-sm font-medium text-cosmic-silver mb-3'
+                    role="group"
+                    aria-labelledby="table-visibility-heading"
+                  >
+                    <span id="table-visibility-heading">Table Visibility Controls</span>
+                  </div>
 
                   <div className='space-y-2'>
                     <label className='flex items-center justify-between p-2 bg-cosmic-purple/10 rounded-md'>
@@ -430,9 +460,13 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
                 {/* Basic Display Options */}
                 <div className='mt-4'>
-                  <label className='block text-sm font-medium text-cosmic-silver mb-2'>
-                    Display Preferences
-                  </label>
+                  <div 
+                    className='block text-sm font-medium text-cosmic-silver mb-2'
+                    role="group"
+                    aria-labelledby="display-preferences-heading"
+                  >
+                    <span id="display-preferences-heading">Display Preferences</span>
+                  </div>
                   <div className='grid grid-cols-2 gap-2 text-sm'>
                     <label className='flex items-center'>
                       <input

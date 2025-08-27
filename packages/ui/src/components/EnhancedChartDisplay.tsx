@@ -1,66 +1,42 @@
 /**
  * Enhanced Chart Display Component
- * Demonstrates UX enhancements: loading states, error handling, mobile responsiveness
+ * (Reconstructed) – Demonstrates loading stages, error handling and responsiveness.
  */
-
 import React, { useState, useEffect } from 'react';
-import {
-  ProgressiveLoading,
-  ErrorMessage,
-  ResponsiveContainer,
-  TouchButton,
-  ResponsiveGrid,
-  MobileCard,
-  useToastHelpers,
-  StatusIndicator,
-  type EnhancedError,
-} from './index';
 import { cn } from '../utils/cn';
+import { ProgressiveLoading } from './LoadingStates';
+import { ErrorMessage, type EnhancedError } from './ErrorHandling';
+import { ResponsiveContainer, ResponsiveGrid, MobileCard, TouchButton } from './MobileResponsive';
+import { StatusIndicator, useToastHelpers } from './UserFeedback';
+// (Merged above) - EnhancedError type already available via type-only import if needed
 
-// Mock data types for demonstration
 interface ChartData {
   id: string;
   title: string;
   description: string;
-  data: Array<{
-    label: string;
-    value: number;
-  }>;
+  data: Array<{ label: string; value: number }>;
   lastUpdated: Date;
 }
 
-interface EnhancedChartDisplayProps {
+export interface EnhancedChartDisplayProps {
   chartId?: string;
   autoRefresh?: boolean;
-  refreshInterval?: number;
+  refreshInterval?: number; // ms
   className?: string;
   onError?: (error: Error) => void;
 }
 
 type LoadingStage = 'initializing' | 'processing' | 'finalizing' | 'complete';
 
-export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
-  chartId,
-  autoRefresh = false,
-  refreshInterval = 30000,
-  className,
-  onError,
-}) => {
-  // State management
+export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = (props) => {
+  const { chartId, autoRefresh = false, refreshInterval = 30_000, className, onError } = props;
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingStage, setLoadingStage] =
-    useState<LoadingStage>('initializing');
+  const [loadingStage, setLoadingStage] = useState<LoadingStage>('initializing');
   const [error, setError] = useState<EnhancedError | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-  // Toast notifications
-  const {
-    success,
-    error: showError,
-    info,
-    loading: showLoading,
-  } = useToastHelpers();
+  const { success, error: showError, info, loading: showLoading } = useToastHelpers();
 
   // Simulate API call with different stages
   const fetchChartData = async (showToast = false): Promise<ChartData> => {
@@ -154,7 +130,7 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
       setError(enhancedError);
 
       if (showToast) {
-        showError('Failed to Load Chart', enhancedError.message);
+  showError('Failed to Load Chart', String(enhancedError.message));
       }
 
       if (onError && err instanceof Error) {
@@ -166,18 +142,12 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
   };
 
   // Initial load
-  useEffect(() => {
-    void loadChart();
-  }, [chartId]);
+  useEffect(() => { void loadChart(); }, [chartId]);
 
   // Auto-refresh setup
   useEffect(() => {
     if (!autoRefresh) return;
-
-    const interval = setInterval(() => {
-      void loadChart(false);
-    }, refreshInterval);
-
+    const interval = setInterval(() => { void loadChart(false); }, refreshInterval);
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval]);
 
@@ -194,7 +164,7 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
 
   // Get appropriate width class for progress bar based on percentage
   const getProgressWidthClass = (value: number): string => {
-    const roundedValue = Math.round(value / 5) * 5; // Round to nearest 5
+    const roundedValue = Math.round(value / 5) * 5;
     return `w-step-${Math.min(100, Math.max(0, roundedValue))}`;
   };
 
@@ -340,3 +310,5 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = ({
     </ResponsiveContainer>
   );
 };
+
+export default EnhancedChartDisplay;

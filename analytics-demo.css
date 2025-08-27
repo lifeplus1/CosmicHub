@@ -1,0 +1,36 @@
+/* Analytics Demo Styles (refactored for Tailwind + Radix integration)
+	 - Keep only bespoke patterns not easily expressed with utilities
+	 - Use CSS variables expected to be provided by Tailwind theme extension
+*/
+
+:root {
+	--demo-surface: theme(colors.neutral.50, #f8f9fa);
+	--demo-border: rgba(0,0,0,0.08);
+	--demo-radius: 0.75rem;
+	--demo-accent-start: var(--color-primary, #667eea);
+	--demo-accent-end: var(--color-accent, #764ba2);
+	--demo-success-start: #48bb78;
+	--demo-success-end: #38a169;
+}
+
+@layer components {
+	.demo-section { @apply rounded-xl p-6 bg-white dark:bg-neutral-900 border border-neutral-200/70 dark:border-neutral-700 shadow-sm transition-transform; }
+	.demo-section:hover { @apply -translate-y-0.5; }
+	.metric-card { @apply flex justify-between items-center p-4 rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-200/70 dark:border-neutral-700; }
+	.stat-card { @apply rounded-xl p-5 text-center text-white bg-gradient-to-br from-emerald-500 to-emerald-600 shadow; }
+	.stat-number { @apply text-3xl font-bold mb-1; }
+	.stat-label { @apply text-xs uppercase tracking-wide opacity-80; }
+	.button-group { @apply grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4; }
+	.results-container { @apply bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4 max-h-96 overflow-y-auto font-mono text-xs leading-relaxed; }
+	.log-entry { @apply mb-2 p-2 rounded-md border-l-4; }
+	.log-success { @apply bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500; }
+	.log-error { @apply bg-rose-50 dark:bg-rose-900/30 border-rose-500; }
+	.log-info { @apply bg-sky-50 dark:bg-sky-900/30 border-sky-500; }
+	.real-time-badge { @apply inline-block bg-emerald-500 text-white px-2 py-1 rounded-full text-[10px] font-semibold tracking-wide uppercase; }
+	.timestamp { @apply text-neutral-500 dark:text-neutral-400 text-[11px]; }
+	.status-indicator { @apply h-3 w-3 rounded-full inline-block; }
+	.status-online { @apply bg-emerald-500; }
+	.status-offline { @apply bg-rose-500; }
+	.status-checking { @apply bg-amber-500 animate-pulse; }
+	.btn-full { @apply w-full mt-2; }
+}

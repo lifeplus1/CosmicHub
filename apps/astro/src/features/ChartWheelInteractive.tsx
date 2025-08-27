@@ -1,8 +1,3 @@
-/**
- * Advanced Interactive Chart Wheel with Real-Time Features
- * Enhanced version with tooltips, animations, and real-time updates
- */
-
 import React, {
   useEffect,
   useRef,
@@ -13,41 +8,73 @@ import React, {
 } from 'react';
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
-import { fetchChartData, type ChartBirthData } from '../services/api';
-import type { ApiResult } from '../services/apiResult';
+import { fetchChartData } from '../services/api';
+import type { ExtendedBirthData } from '../contexts/BirthDataContext';
+import { useCanonicalBirthData } from '../hooks/useCanonicalBirthData';
+import type { ApiResult as _ApiResult } from '../services/apiResult';
 import { Button } from '@cosmichub/ui';
 import styles from './ChartWheelInteractive.module.css';
 
+// Local interface definitions to avoid import issues
+interface ChartBirthData {
+  birth_date: string;
+  birth_time: string;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  city: string;
+}
+
+interface APIChartData {
+  planets: Record<string, unknown>;
+  houses: unknown[];
+  aspects?: unknown[];
+  angles?: Record<string, number>;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  julian_day?: number;
+}
+
 import type {
-  AspectType,
-  Planet as APIPlanet,
-  House as APIHouse,
-  Aspect as APIAspect,
-  ChartData as APIChartData,
+  Planet as _APIPlanet,
+  House as _APIHouse,
 } from '../services/api.types';
 
-// Enhanced interfaces for interactivity that extend API types
-interface Planet
-  extends Omit<APIPlanet, 'dignity' | 'essential_dignity' | 'sign' | 'name'> {
+// Local type definitions 
+type AspectType = 
+  | 'conjunction'
+  | 'opposition'
+  | 'trine'
+  | 'square'
+  | 'sextile'
+  | 'quincunx';
+
+// Enhanced interfaces for interactivity
+interface Planet {
   name: string;
+  position: number;
+  retrograde?: boolean;
+  speed?: number;
+  house?: number;
   color?: string;
 }
 
-interface House extends Omit<APIHouse, 'sign'> {
+interface House {
+  number: number;
+  cusp: number;
   sign: string;
   planets?: string[];
 }
-
-export interface Aspect
-  extends Omit<
-    APIAspect,
-    'aspect_type' | 'power' | 'planet1' | 'planet2' | 'exact'
-  > {
+// Local Aspect interface for interactive layer
+interface Aspect {
   planet1: string;
   planet2: string;
   angle: number;
   type: AspectType;
   strength: 'strong' | 'medium' | 'weak';
+  orb: number;
+  applying?: boolean;
   exact?: boolean;
 }
 
@@ -72,7 +99,7 @@ interface InteractiveState {
 }
 
 interface ChartWheelInteractiveProps {
-  birthData?: ChartBirthData;
+  birthData?: ChartBirthData | ExtendedBirthData;
   chartData?: ChartData;
   showAspects?: boolean;
   showAnimation?: boolean;
@@ -83,7 +110,7 @@ interface ChartWheelInteractiveProps {
 }
 
 const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
-  birthData,
+  birthData: _birthData,
   chartData: preTransformedData,
   showAspects = true,
   showAnimation = true,
@@ -105,49 +132,53 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
   });
 
   // Fetch natal chart data
+  const canonicalBirthData = useCanonicalBirthData();
   const {
     data: fetchedData,
     isLoading,
     error,
     refetch,
   } = useQuery<ChartData>({
-    queryKey: ['chartData', birthData],
-    queryFn: async () => {
-      if (birthData === null || birthData === undefined)
-        throw new Error('Birth data required');
-      const result: ApiResult<APIChartData> = await fetchChartData(birthData);
-      if (!result.success) throw new Error(result.error);
-      return transformAPIResponseToChartData(result.data);
+  queryKey: ['chartData', canonicalBirthData?.birth_date || canonicalBirthData?.city || 'default'],
+    queryFn: async (): Promise<ChartData> => {
+      if (!canonicalBirthData) throw new Error('Birth data required');
+      const result = await fetchChartData(canonicalBirthData);
+      if (!result || typeof result !== 'object' || !('success' in result) || !result.success) {
+        throw new Error('Failed to fetch chart data');
+      }
+      if (!result.data || typeof result.data !== 'object') {
+        throw new Error('Invalid chart data format');
+      }
+      return transformAPIResponseToChartData(result.data as APIChartData);
     },
-    enabled:
-      birthData !== null &&
-      birthData !== undefined &&
-      preTransformedData === null,
+    enabled: !!canonicalBirthData && preTransformedData === null,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 2,
   });
 
   // Fetch real-time transit data
-  const { data: transitData } = useQuery<Record<string, Planet>>({
+  const { data: transitData } = useQuery<Record<string, unknown>>({
     queryKey: ['transitData'],
-    queryFn: async () => {
+    queryFn: async (): Promise<Record<string, unknown>> => {
       const currentTime = new Date();
       const transitBirthData: ChartBirthData = {
-        year: currentTime.getFullYear(),
-        month: currentTime.getMonth() + 1,
-        day: currentTime.getDate(),
-        hour: currentTime.getHours(),
-        minute: currentTime.getMinutes(),
-        lat: 0, // Use chart location or default
-        lon: 0,
+        birth_date: `${currentTime.getFullYear()}-${String(currentTime.getMonth()+1).padStart(2,'0')}-${String(currentTime.getDate()).padStart(2,'0')}`,
+        birth_time: `${String(currentTime.getHours()).padStart(2,'0')}:${String(currentTime.getMinutes()).padStart(2,'0')}`,
+        latitude: 0,
+        longitude: 0,
         timezone: 'UTC',
         city: 'Greenwich',
       };
-      const result: ApiResult<APIChartData> =
-        await fetchChartData(transitBirthData);
-      if (!result.success) return {};
-      return result.data.planets ?? {};
+      const result = await fetchChartData(transitBirthData);
+      if (!result || typeof result !== 'object' || !('success' in result) || !result.success) {
+        return {};
+      }
+      if (!result.data || typeof result.data !== 'object') {
+        return {};
+      }
+      const apiData = result.data as APIChartData;
+      return apiData.planets ?? {};
     },
     enabled: realTimeUpdates === true && interactiveState.showTransits === true,
     refetchInterval: 60000, // Update every minute
@@ -190,14 +221,27 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       };
     });
 
-    const transformedHouses: House[] = (apiData.houses ?? []).map(
-      houseData => ({
-        number: houseData.number,
-        cusp: houseData.cusp,
-        sign: houseData.sign,
-        planets: [],
-      })
-    );
+    const transformedHouses: House[] = [];
+    if (Array.isArray(apiData.houses)) {
+      apiData.houses.forEach((houseData) => {
+        if (
+          typeof houseData === 'object' &&
+          houseData !== null &&
+          'number' in houseData &&
+          'cusp' in houseData
+        ) {
+          const house = houseData as { number: unknown; cusp: unknown; sign: unknown };
+          if (typeof house.number === 'number' && typeof house.cusp === 'number') {
+            transformedHouses.push({
+              number: house.number,
+              cusp: house.cusp,
+              sign: typeof house.sign === 'string' ? house.sign : 'Unknown',
+              planets: [],
+            });
+          }
+        }
+      });
+    }
 
     // Add planets to houses
     Object.entries(transformedPlanets).forEach(([planetName, planet]) => {
@@ -208,22 +252,50 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       }
     });
 
-    const transformedAspects = (apiData.aspects ?? []).map(aspect => ({
-      planet1: aspect.planet1,
-      planet2: aspect.planet2,
-      angle: getAspectAngle(aspect.aspect_type),
-      orb: aspect.orb,
-      type: aspect.aspect_type,
-      applying: aspect.applying,
-      strength: getAspectStrength(aspect.orb),
-    }));
+    const transformedAspects: Aspect[] = [];
+    if (Array.isArray(apiData.aspects)) {
+      apiData.aspects.forEach((aspectData) => {
+        if (
+          typeof aspectData === 'object' &&
+          aspectData !== null &&
+          'planet1' in aspectData &&
+          'planet2' in aspectData &&
+          'aspect_type' in aspectData &&
+          'orb' in aspectData
+        ) {
+          const aspect = aspectData as { 
+            planet1: unknown; 
+            planet2: unknown; 
+            aspect_type: unknown; 
+            orb: unknown; 
+            applying: unknown; 
+          };
+          if (
+            typeof aspect.planet1 === 'string' &&
+            typeof aspect.planet2 === 'string' &&
+            typeof aspect.aspect_type === 'string' &&
+            typeof aspect.orb === 'number'
+          ) {
+            transformedAspects.push({
+              planet1: aspect.planet1,
+              planet2: aspect.planet2,
+              angle: getAspectAngle(aspect.aspect_type),
+              orb: aspect.orb,
+              type: aspect.aspect_type as AspectType,
+              applying: aspect.applying === true,
+              strength: getAspectStrength(aspect.orb),
+            });
+          }
+        }
+      });
+    }
 
     return {
       planets: transformedPlanets,
       houses: transformedHouses.sort((a, b) => a.number - b.number),
       aspects: transformedAspects,
       angles: apiData.angles,
-      transits: transitData,
+      transits: undefined, // Don't include transitData in transformation
       latitude: apiData.latitude ?? 0,
       longitude: apiData.longitude ?? 0,
       timezone: apiData.timezone ?? 'UTC',
@@ -694,10 +766,21 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
       transitData !== null &&
       transitData !== undefined
     ) {
-      Object.entries(transitData).forEach(([name, planet]) => {
+      Object.entries(transitData).forEach(([name, planetData]) => {
         const natalPlanet = data.planets[name];
         if (natalPlanet === undefined || natalPlanet === null) return; // Only show transits for natal planets
 
+        // Type guard for planet data
+        if (
+          typeof planetData !== 'object' ||
+          planetData === null ||
+          !('position' in planetData) ||
+          typeof planetData.position !== 'number'
+        ) {
+          return;
+        }
+
+        const planet = planetData as { position: number };
         const angle = ((planet.position - 90) * Math.PI) / 180;
 
         const transitGroup = g

@@ -261,7 +261,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(
           // Close returns a promise; ensure we surface unexpected errors but don't block unmount
           audioContextRef.current
             .close()
-            .catch(error =>
+            .catch((error: Error) =>
               audioLogger.error('Failed to close audio context', { error })
             );
         }

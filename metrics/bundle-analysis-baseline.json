@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-08-27T03:25:55.947Z",
+  "phase": "baseline",
+  "bundles": {
+    "astro": {
+      "totalSize": 12540832,
+      "fileCount": 131,
+      "jsSize": 1640278,
+      "cssSize": 92905,
+      "assets": 10807649
+    },
+    "healwave": {
+      "totalSize": 960710,
+      "fileCount": 30,
+      "jsSize": 890888,
+      "cssSize": 47551,
+      "assets": 22271
+    }
+  },
+  "buildTime": 22173
+}

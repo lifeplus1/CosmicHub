@@ -128,7 +128,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
       if (onSubmit !== undefined && onSubmit !== null) {
         onSubmit(chartData);
       } else {
-        navigate(navigateTo ?? '/chart-results');
+        navigate(navigateTo ?? '/chart?calculate=true');
       }
     } catch (error) {
       const errorMessage =

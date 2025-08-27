@@ -117,7 +117,7 @@ const processedChart = useChartProcessing(chartData, { enableDebug: true });
 
 **Expected Console Output**:
 
-```
+```text
 🔧 useChartProcessing - Processing new chart data...
 Chart processing hook result: {
   source: 'new_calculation',
@@ -162,4 +162,4 @@ feature testing:
 - **Isolated, testable logic** for reliable development
 - **Zero breaking changes** to existing functionality
 
-**🚀 Your CosmicHub application now has bulletproof chart data processing! 🚀**
+## 🚀 Your CosmicHub application now has bulletproof chart data processing! 🚀

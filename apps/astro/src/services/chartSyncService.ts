@@ -13,7 +13,8 @@ import {
   type AspectType,
 } from './api.types';
 import { isValidChartData, hasRequiredPlanets } from './validation';
-import { fetchChartData, type ChartBirthData } from './api';
+import { fetchChartData } from './api';
+import type { ChartBirthData } from '@cosmichub/types';
 import type { ApiResult } from '@cosmichub/config';
 
 // Utility function to convert string to ChartId with validation
@@ -26,7 +27,6 @@ function toChartId(id: string): ChartId {
 
 // Event payload types for strong typing
 export interface ChartUpdateEvent {
-  chartId: ChartId;
   timestamp: string;
   changes: {
     planets?: Partial<Record<PlanetName, Planet>>;
@@ -45,7 +45,6 @@ export interface ChartSyncError {
 }
 
 export interface AspectEvent {
-  type: 'aspect-forming' | 'aspect-separating';
   transitPlanet: PlanetName;
   natalPlanet: PlanetName;
   aspectType: AspectType;
@@ -69,7 +68,6 @@ export interface ChartDataSync {
   progressionData?: Record<PlanetName, Planet>;
 }
 
-// Typed event emitter
 export interface ChartSyncOptions {
   enableTransitUpdates?: boolean;
   enableProgressions?: boolean;
@@ -79,13 +77,13 @@ export interface ChartSyncOptions {
 
 // Public event map (exported for external subscription typing)
 export interface EventMap {
-  'chart-update': ChartUpdateEvent;
   'sync-error': ChartSyncError;
   'aspect-alert': AspectEvent;
   'connection-lost': undefined;
   'connection-restored': undefined;
   'chart-registered': { chartId: ChartId; chartSync: ChartDataSync };
   'chart-synced': { chartId: ChartId; chartData: ChartDataSync };
+  'chart-update': { chartId: ChartId; timestamp: string; changes: ChartUpdateEvent['changes'] };
   'chart-unregistered': { chartId: ChartId };
   'all-charts-refreshed': undefined;
   'transit-update': { chartId: ChartId; transits: Record<PlanetName, Planet> };
@@ -199,7 +197,7 @@ class ChartSyncService extends TypedEventEmitter {
       } = options;
 
       // Fetch initial chart data
-      const chartResult: ApiResult<ChartData> = await fetchChartData(birthData);
+  const chartResult: ApiResult<ChartData> = await fetchChartData(birthData);
       if (!chartResult.success) throw new Error(chartResult.error);
       const chartData = chartResult.data;
 
@@ -397,13 +395,10 @@ class ChartSyncService extends TypedEventEmitter {
   private async fetchCurrentTransits(): Promise<Record<PlanetName, Planet>> {
     const now = new Date();
     const transitBirthData: ChartBirthData = {
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
-      day: now.getDate(),
-      hour: now.getHours(),
-      minute: now.getMinutes(),
-      lat: 0, // Greenwich
-      lon: 0,
+      birth_date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
+      birth_time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+      latitude: 0,
+      longitude: 0,
       timezone: 'UTC',
       city: 'Greenwich',
     };
@@ -429,11 +424,8 @@ class ChartSyncService extends TypedEventEmitter {
     birthData: ChartBirthData
   ): Promise<Record<PlanetName, Planet>> {
     // Calculate progressed positions (1 day = 1 year progression)
-    const birthDate = new Date(
-      birthData.year,
-      birthData.month - 1,
-      birthData.day
-    );
+  const [by, bm, bd] = (birthData.birth_date ?? '1970-01-01').split('-').map(n => parseInt(n,10));
+  const birthDate = new Date(by || 1970, (bm || 1) - 1, bd || 1);
     const now = new Date();
     const ageInYears =
       (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
@@ -442,10 +434,12 @@ class ChartSyncService extends TypedEventEmitter {
     progressedDate.setDate(progressedDate.getDate() + Math.floor(ageInYears));
 
     const progressedBirthData: ChartBirthData = {
-      ...birthData,
-      year: progressedDate.getFullYear(),
-      month: progressedDate.getMonth() + 1,
-      day: progressedDate.getDate(),
+      birth_date: `${progressedDate.getFullYear()}-${String(progressedDate.getMonth()+1).padStart(2,'0')}-${String(progressedDate.getDate()).padStart(2,'0')}`,
+      birth_time: birthData.birth_time,
+      latitude: birthData.latitude,
+      longitude: birthData.longitude,
+      city: birthData.city,
+      timezone: birthData.timezone,
     };
 
     const result: ApiResult<ChartData> =
@@ -505,7 +499,6 @@ class ChartSyncService extends TypedEventEmitter {
                 // Detect if aspect is forming (orb decreasing) or separating (orb increasing)
                 if (currentOrb < oldOrb && currentOrb <= 1) {
                   events.push({
-                    type: 'aspect-forming',
                     transitPlanet,
                     natalPlanet,
                     aspectType: this.getAspectType(aspectAngle),
@@ -519,7 +512,6 @@ class ChartSyncService extends TypedEventEmitter {
                   });
                 } else if (currentOrb > oldOrb && oldOrb <= 1) {
                   events.push({
-                    type: 'aspect-separating',
                     transitPlanet,
                     natalPlanet,
                     aspectType: this.getAspectType(aspectAngle),
@@ -674,13 +666,10 @@ class ChartSyncService extends TypedEventEmitter {
     // This would extract birth data from chart metadata
     // For now, return a placeholder
     return {
-      year: 1990,
-      month: 1,
-      day: 1,
-      hour: 12,
-      minute: 0,
-      lat: 0,
-      lon: 0,
+      birth_date: '1990-01-01',
+      birth_time: '12:00',
+      latitude: 0,
+      longitude: 0,
       timezone: 'UTC',
       city: 'Unknown',
     };
@@ -735,13 +724,10 @@ class ChartSyncService extends TypedEventEmitter {
       // Create a ChartDataSync object
       const chartSync: ChartDataSync = {
         birthData: {
-          year: new Date().getFullYear(),
-          month: new Date().getMonth() + 1,
-          day: new Date().getDate(),
-          hour: new Date().getHours(),
-          minute: new Date().getMinutes(),
-          lat: chartData.latitude || 0,
-          lon: chartData.longitude || 0,
+          birth_date: `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`,
+          birth_time: `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`,
+          latitude: chartData.latitude || 0,
+          longitude: chartData.longitude || 0,
           timezone: chartData.timezone || 'UTC',
           city: 'Unknown',
         },

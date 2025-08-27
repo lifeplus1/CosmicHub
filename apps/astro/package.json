@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "type-check": "tsc --noEmit",
-    "lint": "eslint ../../apps/astro/src --ext .ts,.tsx --max-warnings=0 --config ../../eslint.config.js",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings=0 --config ../../eslint.config.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "storybook:ci": "pnpm run build-storybook",
@@ -23,9 +23,11 @@
     "quality:all": "pnpm run lint && pnpm run type-check && pnpm run test -- --run && pnpm run a11y:check"
   },
   "dependencies": {
+    "@cosmichub/analytics": "workspace:*",
     "@cosmichub/auth": "workspace:*",
     "@cosmichub/config": "workspace:*",
     "@cosmichub/hooks": "workspace:*",
+    "@cosmichub/pwa": "workspace:*",
     "@cosmichub/storage": "workspace:*",
     "@cosmichub/subscriptions": "workspace:*",
     "@cosmichub/types": "workspace:*",

@@ -14,7 +14,7 @@ vi.mock('@cosmichub/ui', () => ({
   ErrorBoundary: ({ children, fallback }: { children: React.ReactNode; fallback?: React.ComponentType<any> }) => {
     try {
       return <div data-testid="error-boundary">{children}</div>;
-    } catch (error) {
+    } catch {
       const FallbackComponent = fallback;
       return FallbackComponent ? <FallbackComponent /> : <div data-testid="error-fallback">Error occurred</div>;
     }
@@ -25,7 +25,7 @@ vi.mock('@cosmichub/ui', () => ({
   CardHeader: ({ children, className }: { children: React.ReactNode; className?: string }) => <div data-testid="card-header" className={className}>{children}</div>,
   CardTitle: ({ children, className }: { children: React.ReactNode; className?: string }) => <h3 data-testid="card-title" className={className}>{children}</h3>,
   Input: ({ className, ...props }: any) => <input data-testid="input" className={className} {...props} />,
-  Button: ({ children, className, variant, ...props }: any) => <button data-testid="button" className={className} {...props}>{children}</button>,
+  Button: ({ children, className, ...props }: any) => <button data-testid="button" className={className} {...props}>{children}</button>,
   Tooltip: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip">{children}</div>,
   TooltipContent: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
   TooltipTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip-trigger">{children}</div>,

@@ -16,7 +16,7 @@ interface PersistenceState<T> {
 }
 
 // Debounced save timeouts storage
-const saveTimeouts = new Map<string, NodeJS.Timeout>();
+const saveTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 
 /**
  * Debounced save to storage
@@ -120,15 +120,12 @@ export function clearStorage(config: PersistenceConfig): void {
 /**
  * Check if storage is available
  */
-export function isStorageAvailable(
-  storage: 'localStorage' | 'sessionStorage' = 'localStorage'
-): boolean {
+export function isStorageAvailable(type: 'localStorage' | 'sessionStorage' = 'localStorage'): boolean {
   try {
-    const storageObj =
-      storage === 'sessionStorage' ? sessionStorage : localStorage;
-    const test = '__storage_test__';
-    storageObj.setItem(test, 'test');
-    storageObj.removeItem(test);
+    const storageObj = type === 'sessionStorage' ? sessionStorage : localStorage;
+    const testKey = '__storage_test__';
+    storageObj.setItem(testKey, '1');
+    storageObj.removeItem(testKey);
     return true;
   } catch {
     return false;
@@ -138,34 +135,17 @@ export function isStorageAvailable(
 /**
  * Get storage usage info (for debugging)
  */
-export function getStorageInfo(
-  storage: 'localStorage' | 'sessionStorage' = 'localStorage'
-): {
-  available: boolean;
-  used: number;
-  remaining: number;
-  keys: string[];
-} {
+export function getStorageUsage(storage: 'localStorage' | 'sessionStorage' = 'localStorage') {
   if (!isStorageAvailable(storage)) {
     return { available: false, used: 0, remaining: 0, keys: [] };
   }
-
   try {
-    const storageObj =
-      storage === 'sessionStorage' ? sessionStorage : localStorage;
+    const storageObj = storage === 'sessionStorage' ? sessionStorage : localStorage;
     const keys = Object.keys(storageObj);
     const used = JSON.stringify(storageObj).length;
-
-    // Rough estimate of remaining space (5MB typical limit)
-    const limit = 5 * 1024 * 1024; // 5MB in bytes
+    const limit = 5 * 1024 * 1024; // Approx 5MB
     const remaining = Math.max(0, limit - used);
-
-    return {
-      available: true,
-      used,
-      remaining,
-      keys,
-    };
+    return { available: true, used, remaining, keys };
   } catch {
     return { available: false, used: 0, remaining: 0, keys: [] };
   }

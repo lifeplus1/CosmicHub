@@ -23,29 +23,30 @@ const ChineseChart: React.FC<Props> = ({ data }) => {
   }
 
   // Safe data extraction with fallbacks
+  const dataRecord = data as unknown as Record<string, unknown>;
   const description = safeGet(
-    data,
+    dataRecord,
     'description',
     'Chinese Astrology Four Pillars Analysis'
   );
-  const yearElement = safeGet(data, 'year.element', 'Unknown');
-  const yearAnimal = safeGet(data, 'year.animal', 'Unknown');
-  const monthAnimal = safeGet(data, 'month.animal', 'Unknown');
-  const dayAnimal = safeGet(data, 'day.animal', 'Unknown');
-  const hourAnimal = safeGet(data, 'hour.animal', 'Unknown');
-  const fourPillars = safeGet(data, 'four_pillars', 'Not available');
+  const yearElement = safeGet(dataRecord, 'year.element', 'Unknown');
+  const yearAnimal = safeGet(dataRecord, 'year.animal', 'Unknown');
+  const monthAnimal = safeGet(dataRecord, 'month.animal', 'Unknown');
+  const dayAnimal = safeGet(dataRecord, 'day.animal', 'Unknown');
+  const hourAnimal = safeGet(dataRecord, 'hour.animal', 'Unknown');
+  const fourPillars = safeGet(dataRecord, 'four_pillars', 'Not available');
   const elementsAnalysis = safeGet(
-    data,
+    dataRecord,
     'elements_analysis.analysis',
     'Elements analysis not available'
   );
   const yearTraits = safeGet(
-    data,
+    dataRecord,
     'year.traits',
     'Personality traits not available'
   );
   const personalitySummary = safeGet(
-    data,
+    dataRecord,
     'personality_summary',
     'Summary not available'
   );

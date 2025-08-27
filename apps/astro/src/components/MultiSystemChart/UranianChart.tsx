@@ -72,7 +72,7 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                             </div>
                           </td>
                           <td className='py-2 font-mono text-cosmic-silver/80'>
-                            {info.position != null
+                            {info.position !== null && info.position !== undefined
                               ? `${info.position.toFixed(2)}°`
                               : 'N/A'}
                           </td>
@@ -122,7 +122,7 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                             {aspect.angle}°
                           </td>
                           <td className='py-2 text-cosmic-silver/80'>
-                            {aspect.orb != null
+                            {aspect.orb !== null && aspect.orb !== undefined
                               ? `${aspect.orb.toFixed(2)}°`
                               : 'N/A'}
                           </td>

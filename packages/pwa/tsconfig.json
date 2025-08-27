@@ -5,6 +5,7 @@
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true,
+  "noEmit": false,
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "target": "ES2022",
     "module": "ESNext",

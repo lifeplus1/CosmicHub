@@ -5,19 +5,20 @@
 
 import React from 'react';
 
-export interface FrequencyVisualizerProps {
-  frequencies?: number[];
+interface FrequencyVisualizerProps {
+  frequencies: number[];
   type?: 'solfeggio' | 'binaural' | 'custom';
   isPlaying?: boolean;
   className?: string;
 }
 
 export const FrequencyVisualizer: React.FC<FrequencyVisualizerProps> = ({
-  frequencies = [528, 639, 741],
+  frequencies,
   type = 'solfeggio',
   isPlaying = false,
   className = '',
 }) => {
+
   return (
     <div className={`frequency-visualizer ${className}`}>
       <div className='visualizer-container p-4 border rounded-lg'>

@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-export interface FrequencyPlayerModalProps {
+interface FrequencyPlayerModalProps {
   isOpen: boolean;
   onClose: () => void;
 }

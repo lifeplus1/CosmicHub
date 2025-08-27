@@ -122,7 +122,7 @@ export function useAIInterpretationManager(
   useEffect(() => {
     if (!enableIndexedDB) return;
 
-    const initIndexedDB = async () => {
+    const initIndexedDB = () => {
       try {
         const request = indexedDB.open('CosmicHubInterpretations', 1);
 
@@ -200,9 +200,10 @@ export function useAIInterpretationManager(
             dbRequest.onsuccess = () => {
               if (dbRequest.result) {
                 performanceRef.current.cacheHits++;
-                // Promote to memory cache
-                state.cache.memory.set(key, dbRequest.result);
-                resolve(dbRequest.result);
+                // Promote to memory cache with type safety
+                const result = dbRequest.result as AIInterpretation;
+                state.cache.memory.set(key, result);
+                resolve(result);
               } else {
                 resolve(null);
               }
@@ -220,10 +221,10 @@ export function useAIInterpretationManager(
   );
 
   const setCachedInterpretation = useCallback(
-    async (
+    (
       request: AIInterpretationRequest,
       interpretation: AIInterpretation
-    ): Promise<void> => {
+    ): void => {
       if (!enableCache) return;
 
       const key = cacheKey(request);
@@ -282,13 +283,16 @@ export function useAIInterpretationManager(
           );
         }
 
-        const data = await response.json();
+        const data = await response.json() as {
+          success: boolean;
+          data: AIInterpretation[];
+        };
 
         if (!data.success || !data.data || data.data.length === 0) {
           throw new Error('Invalid API response format');
         }
 
-        const interpretation = data.data[0] as AIInterpretation;
+        const interpretation = data.data[0];
 
         // Record performance metrics
         const responseTime = Date.now() - startTime;
@@ -363,7 +367,7 @@ export function useAIInterpretationManager(
       const result = await callInterpretationAPI(request);
 
       // Cache the result
-      await setCachedInterpretation(request, result);
+      setCachedInterpretation(request, result);
 
       setState(prev => ({
         ...prev,
@@ -423,7 +427,7 @@ export function useAIInterpretationManager(
 
   const getInterpretationById = useCallback(
     (id: string): AIInterpretation | null => {
-      return state.interpretations.find(interp => interp.id === id) || null;
+      return state.interpretations.find(interp => interp.id === id) ?? null;
     },
     [state.interpretations]
   );

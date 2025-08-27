@@ -5,8 +5,7 @@ import { MultiSystemChartDisplay } from '../components/MultiSystemChart';
 import type { MultiSystemChartData } from '../components/MultiSystemChart/types';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
-import { fetchChart } from '../services/api';
-import type { ChartBirthData } from '../services/api';
+import { fetchChart, type ChartBirthData } from '../services/api';
 
 const MultiSystemChart: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
@@ -57,7 +56,7 @@ const MultiSystemChart: React.FC = () => {
       }
     };
 
-    fetchMultiSystemChart();
+    void fetchMultiSystemChart();
   }, [birthData, isDataValid]);
 
   const handleBirthDataSubmit = (data: ChartBirthData): void => {

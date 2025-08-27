@@ -25,8 +25,7 @@ export type {
 } from '@cosmichub/integrations';
 
 // Basic shape we rely on from integrations package. (Kept intentionally minimal)
-export interface BasicSubscription {
-  tier: string; // e.g. 'free' | 'premium' | 'elite'
+interface BasicSubscription {
   status: string; // e.g. 'active'
   currentPeriodEnd?: Date; // Normalized to Date within provider
   [key: string]: unknown; // allow forward-compat extension
@@ -41,8 +40,7 @@ interface SubscriptionManagerLike {
   ) => { canAccess: boolean };
 }
 
-export interface SubscriptionState {
-  subscription: BasicSubscription | null;
+interface SubscriptionState {
   userTier: string;
   tier: string; // Alias for userTier for backwards compatibility
   isLoading: boolean;

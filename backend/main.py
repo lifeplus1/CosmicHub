@@ -61,7 +61,7 @@ load_environment()
 from functools import lru_cache  # noqa: E402
 
 from fastapi import (  # noqa: E402
-    BackgroundTasks, FastAPI, HTTPException, Query, Request
+    BackgroundTasks, FastAPI, HTTPException, Query, Request, Response
 )
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import (  # noqa: E402
@@ -489,6 +489,25 @@ async def lifespan(app: FastAPI):  # suppress benign CancelledError on shutdown
 
 app = FastAPI(lifespan=lifespan)
 
+# Performance / response time middleware for analytics
+@app.middleware("http")
+async def response_time_middleware(request: Request, call_next):  # type: ignore[override]
+    start = time.time()
+    response: Response
+    try:
+        response = cast(Response, await call_next(request))
+        return response
+    finally:
+        try:
+            duration_ms = int((time.time() - start) * 1000)
+            # Avoid recording for internal or health endpoints if desired
+            if not request.url.path.startswith('/_internal'):
+                from analytics.custom_analytics import get_analytics_service  # local import to avoid circular
+                svc = get_analytics_service()
+                svc.record_response_time(duration_ms)
+        except Exception:  # pragma: no cover - defensive
+            pass
+
 # Instrument FastAPI & requests after app creation (non-fatal if missing)
 with suppress(Exception):  # pragma: no cover
     # Use noqa to suppress flake8 redefinition errors
@@ -880,9 +899,6 @@ async def root_health():
 
 
 from api import (  # noqa: E402
-    charts,  # consolidated charts endpoints
-)
-from api import (  # noqa: E402
     salt_management,  # admin salt endpoints  # noqa: E502
 )
 from api import (  # noqa: E402
@@ -894,6 +910,7 @@ from api import (  # noqa: E402
 from api.routers import (  # noqa: E402
     ai,
     calculations,
+    charts,  # consolidated charts router
     csp_router,
     ephemeris,
     presets,
@@ -902,6 +919,7 @@ from api.routers import (  # noqa: E402
 )
 from astro.calculations import transits_clean  # noqa: E402
 from routers import synastry  # noqa: E402
+from analytics.analytics_api import router as analytics_router  # noqa: E402
 
 app.include_router(ai.router)
 app.include_router(presets.router)
@@ -910,6 +928,7 @@ app.include_router(ephemeris.router, prefix="/api")
 app.include_router(calculations.router, prefix="/api")  # Multi-system calculations router
 app.include_router(charts.router, prefix="/api")  # consolidated charts router
 app.include_router(interpretations.router)  # AI Interpretations router
+app.include_router(analytics_router)  # Analytics tracking and dashboards
 app.include_router(
     transits_clean.router, prefix="/api/astro", tags=["transits"]
 )  # Transit calculations router

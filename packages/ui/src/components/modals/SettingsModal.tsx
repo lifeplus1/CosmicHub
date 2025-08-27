@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-export interface SettingsModalProps {
+interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }

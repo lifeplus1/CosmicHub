@@ -180,7 +180,7 @@ export function calculateHousePosition(
   }
 
   // Normalize planet position to 0-360
-  let normalizedPosition = ((planetDegrees % 360) + 360) % 360;
+  const normalizedPosition = ((planetDegrees % 360) + 360) % 360;
 
   // Find which house the planet is in
   for (let i = 0; i < 12; i++) {
@@ -275,15 +275,6 @@ export function isValidPosition(position: unknown): position is number {
  * @param precision - Decimal places (default: 2)
  * @returns Formatted position string
  */
-export function formatPlanetPosition(
-  position: number,
-  retrograde: boolean = false,
-  precision: number = 2
-): string {
-  const pos = position.toFixed(precision);
-  const retrogradeSymbol = retrograde ? ' ℞' : '';
-  return `${pos}°${retrogradeSymbol}`;
-}
 
 // Validation functions
 export function isZodiacSign(value: unknown): value is ZodiacSign {

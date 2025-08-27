@@ -1,31 +1,31 @@
 import React from 'react';
 
-export interface TableProps {
+interface TableProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TableHeaderProps {
+interface TableHeaderProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TableBodyProps {
+interface TableBodyProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TableRowProps {
+interface TableRowProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TableHeadProps {
+interface TableHeadProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TableCellProps {
+interface TableCellProps {
   children: React.ReactNode;
   className?: string;
 }

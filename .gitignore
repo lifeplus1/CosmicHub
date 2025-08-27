@@ -255,3 +255,10 @@ backend/.env
 backend/logs/
 backend/functionsbackend/firebase-adminsdk.json
 node_modules
+
+# === Temporary and Debug Files ===
+temp-check.*
+debug_*
+*temp*.*
+fix-*.*
+analyze-*.*

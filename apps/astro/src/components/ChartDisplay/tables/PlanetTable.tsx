@@ -15,7 +15,7 @@ import {
 } from './tableUtils';
 import { AstroSymbol } from '../AstroSymbol';
 
-export interface PlanetRow {
+interface PlanetRow {
   name: string;
   sign: string;
   house: number;
@@ -23,6 +23,8 @@ export interface PlanetRow {
   position?: number;
   retrograde?: boolean;
 }
+
+export type { PlanetRow };
 
 const PlanetTable: React.FC<{ data: PlanetRow[] }> = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) return null;

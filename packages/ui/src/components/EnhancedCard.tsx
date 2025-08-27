@@ -113,7 +113,7 @@ export const Card = createCompoundComponent(
 };
 
 // Card header with essential props
-export interface CardHeaderProps {
+interface CardHeaderProps {
   title?: string;
   subtitle?: string;
   actions?: React.ReactNode;
@@ -155,7 +155,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
 };
 
 // Enhanced card body with content management
-export interface CardBodyProps {
+interface CardBodyProps {
   scrollable?: boolean;
   maxHeight?: string;
   padding?: 'none' | 'small' | 'medium' | 'large';
@@ -199,15 +199,15 @@ export const CardBody: React.FC<CardBodyProps> = ({
 
 // Card footer with action management
 export interface CardFooterProps {
-  align?: 'left' | 'center' | 'right' | 'between';
+  align?: 'start' | 'center' | 'end';
   children?: React.ReactNode;
   className?: string;
 }
 
 export const CardFooter: React.FC<CardFooterProps> = ({
-  align = 'right',
+  align = 'end',
   children,
-  className = '',
+  className,
 }) => {
   const footerClasses = [
     'card__footer',
@@ -282,7 +282,7 @@ export interface ErrorCardProps extends Omit<CardProps, 'variant'> {
 export const ErrorCard: React.FC<ErrorCardProps> = ({
   error,
   onRetry,
-  retryText = 'Retry',
+  retryText = 'Try Again',
   ...props
 }) => {
   const errorMessage = typeof error === 'string' ? error : error.message;

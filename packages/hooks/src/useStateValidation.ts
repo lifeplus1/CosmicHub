@@ -16,7 +16,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 
 // Core validation types
-export interface ValidationRule<T = any> {
+export interface ValidationRule<T = unknown> {
   name: string;
   validator: (value: T) => boolean | Promise<boolean>;
   message: string;
@@ -36,7 +36,7 @@ export interface ValidationError {
   rule: string;
   message: string;
   severity: 'error' | 'warning' | 'info';
-  value?: any;
+  value?: unknown;
 }
 
 export interface ValidationCache {
@@ -61,12 +61,31 @@ export interface BirthData {
 }
 
 // Chart data validation types
+export interface PlanetData {
+  position: number;
+  house?: number;
+  retrograde?: boolean;
+}
+
+export interface HouseData {
+  number: number;
+  cusp: number;
+  sign: string;
+}
+
+export interface AspectData {
+  point1: string;
+  point2: string;
+  aspect: string;
+  orb: number;
+}
+
 export interface ChartData {
-  planets?: Record<string, any>;
-  houses?: any[];
-  aspects?: any[];
-  asteroids?: Record<string, any>;
-  angles?: Record<string, any>;
+  planets?: Record<string, PlanetData>;
+  houses?: HouseData[];
+  aspects?: AspectData[];
+  asteroids?: Record<string, PlanetData>;
+  angles?: Record<string, PlanetData>;
 }
 
 // Validation configuration
@@ -104,7 +123,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
 
   // Generate cache key for validation
   const getCacheKey = useCallback(
-    (data: any, rules: ValidationRule[]): string => {
+    (data: unknown, rules: ValidationRule[]): string => {
       const dataHash = JSON.stringify(data);
       const rulesHash = rules.map(r => r.name).join(',');
       return `${dataHash}-${rulesHash}`;
@@ -215,7 +234,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
     () => [
       {
         name: 'required_fields',
-        validator: data => {
+        validator: (data: BirthData) => {
           return !!(
             data &&
             typeof data.year === 'number' &&
@@ -233,7 +252,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'valid_year',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (!data || typeof data.year !== 'number') return false;
           const currentYear = new Date().getFullYear();
           return data.year >= 1900 && data.year <= currentYear + 1;
@@ -243,7 +262,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'valid_month',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (!data || typeof data.month !== 'number') return false;
           return data.month >= 1 && data.month <= 12;
         },
@@ -252,7 +271,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'valid_day',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (
             !data ||
             typeof data.day !== 'number' ||
@@ -271,7 +290,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'valid_hour',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (!data || typeof data.hour !== 'number') return false;
           return data.hour >= 0 && data.hour <= 23;
         },
@@ -280,7 +299,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'valid_minute',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (!data || typeof data.minute !== 'number') return false;
           return data.minute >= 0 && data.minute <= 59;
         },
@@ -289,7 +308,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'valid_coordinates',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (!data) return true; // Optional coordinates
 
           const hasLat = typeof data.lat === 'number';
@@ -315,7 +334,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'city_length',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (!data || typeof data.city !== 'string') return false;
           return data.city.trim().length >= 2 && data.city.trim().length <= 100;
         },
@@ -324,7 +343,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'future_date_warning',
-        validator: data => {
+        validator: (data: BirthData) => {
           if (
             !data ||
             typeof data.year !== 'number' ||
@@ -353,10 +372,9 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
     () => [
       {
         name: 'has_planets',
-        validator: data => {
+        validator: (data: ChartData) => {
           return !!(
-            data &&
-            data.planets &&
+            data?.planets &&
             typeof data.planets === 'object' &&
             Object.keys(data.planets).length > 0
           );
@@ -366,10 +384,9 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'has_houses',
-        validator: data => {
+        validator: (data: ChartData) => {
           return !!(
-            data &&
-            data.houses &&
+            data?.houses &&
             Array.isArray(data.houses) &&
             data.houses.length > 0
           );
@@ -379,15 +396,15 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'valid_planet_data',
-        validator: data => {
-          if (!data || !data.planets) return false;
+        validator: (data: ChartData) => {
+          if (!data?.planets) return false;
 
-          return Object.values(data.planets).every(planet => {
+          return Object.values(data.planets).every((planet: PlanetData) => {
             if (!planet || typeof planet !== 'object') return false;
             return (
-              typeof (planet as any).position === 'number' &&
-              (planet as any).position >= 0 &&
-              (planet as any).position < 360
+              typeof planet.position === 'number' &&
+              planet.position >= 0 &&
+              planet.position < 360
             );
           });
         },
@@ -396,8 +413,8 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'sufficient_houses',
-        validator: data => {
-          if (!data || !data.houses || !Array.isArray(data.houses))
+        validator: (data: ChartData) => {
+          if (!data?.houses || !Array.isArray(data.houses))
             return false;
           return data.houses.length >= 12;
         },
@@ -406,8 +423,8 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       },
       {
         name: 'has_aspects',
-        validator: data => {
-          return !!(data && data.aspects && Array.isArray(data.aspects));
+        validator: (data: ChartData) => {
+          return !!(data?.aspects && Array.isArray(data.aspects));
         },
         message: 'Chart data should contain aspects information',
         severity: 'info',

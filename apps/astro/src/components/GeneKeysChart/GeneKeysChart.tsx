@@ -24,7 +24,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
     const { toast } = useToast();
 
     const handleCalculate = useCallback(async () => {
-      if (birthData == null) {
+      if (birthData === null || birthData === undefined) {
         return;
       }
 
@@ -82,7 +82,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
     }, [onCalculate]);
 
     useEffect(() => {
-      if (birthData != null) {
+      if (birthData !== null && birthData !== undefined) {
         void handleCalculate();
       }
       // Intentional: handleCalculate depends on toast causing changing identity; rely only on birthData changes

@@ -1,12 +1,15 @@
 import { useCallback, useRef, useState } from 'react';
 
-export interface AsyncError {
-  error: Error;
+export interface ErrorHandlingResult {
+  error: Error | null;
+  handleError: (error: Error) => void;
+  canRetry: boolean;
+  retryCount: number;
   retry: () => void;
   reset: () => void;
 }
 
-export interface UseAsyncErrorOptions {
+interface UseErrorHandlingOptions {
   onError?: (error: Error) => void;
   maxRetries?: number;
   retryDelay?: number;
@@ -15,7 +18,7 @@ export interface UseAsyncErrorOptions {
 /**
  * Hook for handling async errors with retry logic
  */
-export function useAsyncError(options: UseAsyncErrorOptions = {}) {
+export function useErrorHandling(options: UseErrorHandlingOptions = {}): ErrorHandlingResult {
   const { onError, maxRetries = 3, retryDelay = 1000 } = options;
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -70,107 +73,20 @@ export function useAsyncError(options: UseAsyncErrorOptions = {}) {
 /**
  * Hook for safe async operations with error handling
  */
-export interface SafeAsyncState<T> {
-  data: T | null;
   loading: boolean;
   error: Error | null;
 }
 
-export interface UseSafeAsyncReturn<T> extends SafeAsyncState<T> {
-  execute: (asyncFunction: () => Promise<T>) => Promise<T>;
   reset: () => void;
 }
 
 // Default generic is unknown to force consumers to specify or consciously narrow later
-export function useSafeAsync<T = unknown>(): UseSafeAsyncReturn<T> {
-  const [state, setState] = useState<{
-    data: T | null;
-    loading: boolean;
-    error: Error | null;
-  }>({
-    data: null,
-    loading: false,
-    error: null,
-  });
-
-  const execute = useCallback(async (asyncFunction: () => Promise<T>) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-
-    try {
-      const data = await asyncFunction();
-      setState({ data, loading: false, error: null });
-      return data;
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
-      setState(prev => ({ ...prev, loading: false, error: err }));
-      throw err;
-    }
-  }, []);
-
-  const reset = useCallback(() => {
-    setState({ data: null, loading: false, error: null });
-  }, []);
-
-  return { ...state, execute, reset };
-}
 
 /**
  * Utility for handling form errors
  */
-export interface FormError {
-  field?: string;
   message: string;
   code?: string;
-}
-
-export function useFormErrors() {
-  const [errors, setErrors] = useState<FormError[]>([]);
-
-  const addError = useCallback((error: FormError) => {
-    setErrors(prev => [...prev, error]);
-  }, []);
-
-  const addErrors = useCallback((newErrors: FormError[]) => {
-    setErrors(prev => [...prev, ...newErrors]);
-  }, []);
-
-  const removeError = useCallback((field?: string) => {
-    if (field) {
-      setErrors(prev => prev.filter(err => err.field !== field));
-    } else {
-      setErrors([]);
-    }
-  }, []);
-
-  const clearErrors = useCallback(() => {
-    setErrors([]);
-  }, []);
-
-  const getFieldError = useCallback(
-    (field: string) => {
-      return errors.find(err => err.field === field);
-    },
-    [errors]
-  );
-
-  const hasErrors = errors.length > 0;
-  const hasFieldError = useCallback(
-    (field: string) => {
-      return errors.some(err => err.field === field);
-    },
-    [errors]
-  );
-
-  return {
-    errors,
-    addError,
-    addErrors,
-    removeError,
-    clearErrors,
-    getFieldError,
-    hasErrors,
-    hasFieldError,
-  };
 }
 
 /**
@@ -184,93 +100,13 @@ export interface ErrorContext {
   metadata?: Record<string, unknown>;
 }
 
-export function createEnhancedError(
-  message: string,
-  context?: ErrorContext,
-  originalError?: Error
-): Error {
-  const error = new Error(message);
-
-  // Add context to error object
-  if (context) {
-    Object.assign(error, { context });
-  }
-
-  // Chain original error
-  if (originalError) {
-    Object.assign(error, { cause: originalError });
-  }
-
-  // Add stack trace from original error if available
-  if (originalError?.stack) {
-    error.stack = `${error.stack}\nCaused by: ${originalError.stack}`;
-  }
-
-  return error;
-}
-
 /**
  * Error classification utilities
  */
-export enum ErrorType {
-  NETWORK = 'network',
-  VALIDATION = 'validation',
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  NOT_FOUND = 'not_found',
-  SERVER = 'server',
-  CLIENT = 'client',
-  UNKNOWN = 'unknown',
-}
-
-export function classifyError(error: Error): ErrorType {
-  const message = error.message.toLowerCase();
-  const stack = error.stack?.toLowerCase() ?? '';
-
-  if (
-    message.includes('network') ||
-    message.includes('fetch') ||
-    message.includes('timeout')
-  ) {
-    return ErrorType.NETWORK;
-  }
-
-  if (message.includes('validation') || message.includes('invalid')) {
-    return ErrorType.VALIDATION;
-  }
-
-  if (message.includes('unauthorized') || message.includes('authentication')) {
-    return ErrorType.AUTHENTICATION;
-  }
-
-  if (message.includes('forbidden') || message.includes('permission')) {
-    return ErrorType.AUTHORIZATION;
-  }
-
-  if (message.includes('not found') || message.includes('404')) {
-    return ErrorType.NOT_FOUND;
-  }
-
-  if (
-    message.includes('server') ||
-    message.includes('500') ||
-    message.includes('503')
-  ) {
-    return ErrorType.SERVER;
-  }
-
-  if (stack.includes('render') || stack.includes('component')) {
-    return ErrorType.CLIENT;
-  }
-
-  return ErrorType.UNKNOWN;
-}
 
 /**
  * Error retry strategies
  */
-export interface RetryConfig {
-  maxAttempts: number;
   baseDelay: number;
   maxDelay: number;
   backoffFactor: number;
@@ -285,34 +121,13 @@ export const defaultRetryConfig: RetryConfig = {
   retryableErrors: [ErrorType.NETWORK, ErrorType.SERVER],
 };
 
-export function shouldRetry(
-  error: Error,
-  config: RetryConfig = defaultRetryConfig
-): boolean {
-  const errorType = classifyError(error);
-  return config.retryableErrors.includes(errorType);
-}
-
-export function calculateDelay(
-  attempt: number,
-  config: RetryConfig = defaultRetryConfig
-): number {
-  const delay = config.baseDelay * Math.pow(config.backoffFactor, attempt - 1);
-  return Math.min(delay, config.maxDelay);
-}
-
 /**
  * Error recovery strategies
  */
-export interface RecoveryAction {
-  label: string;
   action: () => void;
   primary?: boolean;
 }
 
-export function getRecoveryActions(
-  error: Error,
-  _context: ErrorContext = {}
 ): RecoveryAction[] {
   const errorType = classifyError(error);
   const actions: RecoveryAction[] = [];

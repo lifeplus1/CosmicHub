@@ -27,7 +27,6 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
   /** Deprecated: fallback / legacy variable name for API base URL. */
   readonly VITE_BACKEND_URL?: string;
-  readonly VITE_XAI_API_KEY?: string;
   /** Feature flags (string 'true' interpreted elsewhere). */
   readonly VITE_ENABLE_ANALYTICS?: string;
   readonly VITE_ENABLE_ERROR_REPORTING?: string;

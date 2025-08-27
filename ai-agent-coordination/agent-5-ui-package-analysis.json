@@ -1,0 +1,27 @@
+{
+  "agentId": "agent-5-ui-package",
+  "agent": "UIPackageAgent",
+  "timestamp": "2025-08-27T07:55:13.443Z",
+  "success": false,
+  "duration": 9512,
+  "targets": [
+    "packages/ui/src"
+  ],
+  "estimatedFiles": 54,
+  "maxWarnings": 25,
+  "specialization": "Shared UI component fixes",
+  "commonIssues": [
+    "unused-vars",
+    "react-hooks",
+    "jsx-a11y"
+  ],
+  "dependencies": [],
+  "conflictRisk": "high",
+  "lintOutput": "npm warn Unknown env config \"auto-install-peers\". This will stop working in the next major version of npm.\nnpm warn Unknown project config \"auto-install-peers\". This will stop working in the next major version of npm.\n",
+  "errors": "\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/EnhancedChartDisplay.tsx\n  335:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/ErrorBoundaries.tsx\n  25:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/ErrorHandling.tsx\n  14:7  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/LoadingStates.tsx\n  174:12  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/MobileResponsive.tsx\n  66:12  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/PerformanceDashboard.tsx\n  7:22  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/UpgradeModalAB.tsx\n  21:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/UserFeedback.tsx\n  11:10  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/accessibility/AccessibilityUtils.tsx\n  15:12  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/analytics/AnalyticsPanel.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/calculators/EphemerisCalculator.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/calculators/FrequencyCalculator.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/calculators/GeneKeysCalculator.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/charts/AstrologyChart.tsx\n  10:2  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/charts/BiofeedbackChart.tsx\n  8:8  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/charts/FrequencyVisualizer.tsx\n  8:7  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/charts/SynastryChart.tsx\n  9:2  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/charts/TransitChart.tsx\n  8:11  error  Parsing error: Expression expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/forms/AdvancedForm.tsx\n  8:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/forms/BirthDataForm.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/forms/FrequencyForm.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/lazy-components.tsx\n  20:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/reports/ReportGenerator.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/components/tools/ExportTools.tsx\n  2:0  error  Parsing error: Declaration or statement expected\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/hooks/useABTest.ts\n  21:19  error  Parsing error: An element access expression should take an argument\n\n/Users/Chris/Projects/CosmicHub/packages/ui/src/hooks/useErrorHandling.ts\n  78:0  error  Parsing error: Declaration or statement expected\n\n✖ 26 problems (26 errors, 0 warnings)\n\n",
+  "exitCode": 1,
+  "errorCount": 26,
+  "warningCount": 0,
+  "hasLintOutput": true,
+  "readyForExecution": false
+}

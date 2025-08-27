@@ -18,7 +18,6 @@ const envSchema = z.object({
     .min(1, 'Firebase messaging sender ID is required'),
   VITE_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
   VITE_API_URL: z.string().url().optional(),
-  VITE_XAI_API_KEY: z.string().optional(),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
@@ -50,16 +49,11 @@ export const env = validateEnvironment();
 // Environment helper functions
 export const isDevelopment = () => env.NODE_ENV === 'development';
 export const isProduction = () => env.NODE_ENV === 'production';
-export const isTest = () => env.NODE_ENV === 'test';
 
 // Feature flags
-export const features = {
+export const featureFlags = {
   analytics: env.VITE_ENABLE_ANALYTICS ?? false,
-  errorReporting: env.VITE_ENABLE_ERROR_REPORTING ?? isProduction(),
-  healwave: true,
-  numerology: true,
-  humanDesign: true,
-  crossAppIntegration: true,
+  errorReporting: env.VITE_ENABLE_ERROR_REPORTING ?? false,
 };
 
 // API configuration
@@ -81,23 +75,9 @@ export const firebaseConfig = {
 
 // Security configuration
 export const securityConfig = {
-  enableCSP: isProduction(),
-  enableHSTS: isProduction(),
-  sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
-  maxLoginAttempts: 5,
-  lockoutDuration: 15 * 60 * 1000, // 15 minutes
-};
-
-// XAI API configuration
-export const xaiConfig = {
-  apiKey: env.VITE_XAI_API_KEY,
-  baseUrl: 'https://api.x.ai/v1',
-  model: 'grok-beta',
-  timeout: 30000,
-  enabled:
-    env.VITE_XAI_API_KEY !== null &&
-    env.VITE_XAI_API_KEY !== undefined &&
-    env.VITE_XAI_API_KEY !== '',
+  enforceHttps: isProduction(),
+  enableCsrf: true,
+  sessionTimeout: 30 * 60 * 1000, // 30 minutes
 };
 
 // Logging configuration
@@ -109,17 +89,8 @@ export const loggingConfig = {
 
 // Performance monitoring configuration
 export const performanceConfig = {
-  enabled: isDevelopment() || env.VITE_ENABLE_ANALYTICS === true,
-  trackingInterval: 5000, // 5 seconds
-  maxOperations: 1000, // Keep last 1000 operations
-  enableMemoryTracking: 'memory' in performance,
-  enablePagePerformance: true,
-  enableComponentTracking: isDevelopment(),
-  thresholds: {
-    slowOperation: 1000, // 1 second
-    memoryWarning: 80, // 80% of heap limit
-    renderWarning: 100, // 100ms render time
-  },
+  enableMetrics: isProduction(),
+  sampleRate: isProduction() ? 0.1 : 1.0,
   logging: {
     enabled: isDevelopment(),
     verbose: false,

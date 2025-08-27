@@ -10,11 +10,13 @@ import {
 import { getPlanetSymbol, getSignSymbol } from './tableUtils';
 import { AstroSymbol } from '../AstroSymbol';
 
-export interface AngleRow {
+interface AngleRow {
   name: string;
   sign: string;
   degree: string;
 }
+
+export type { AngleRow };
 
 const AngleTable: React.FC<{ data: AngleRow[] }> = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) return null;

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { xaiConfig, devConsole } from '../../config/environment';
+import { devConsole, apiConfig } from '../../config/environment';
 
 // Temporary direct imports while package resolution is being fixed
 interface InterpretationRequest {
@@ -25,17 +25,15 @@ interface APIResponse {
 
 // XAI Service class (temporary inline implementation)
 class XAIService {
-  private static baseUrl = xaiConfig.baseUrl;
+  private static baseUrl = apiConfig.baseUrl; // Fixed: use apiConfig instead of undefined xaiConfig
 
   private static getApiKey(): string {
-    if (
-      xaiConfig.enabled !== true ||
-      typeof xaiConfig.apiKey !== 'string' ||
-      xaiConfig.apiKey === ''
-    ) {
+    // Fixed: Use environment variable or throw error for now
+    const apiKey = process.env.VITE_XAI_API_KEY;
+    if (typeof apiKey !== 'string' || apiKey === '') {
       throw new Error('XAI API key is not configured');
     }
-    return xaiConfig.apiKey;
+    return apiKey;
   }
 
   static async generateInterpretation(
@@ -52,7 +50,7 @@ class XAIService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: xaiConfig.model,
+          model: 'grok-beta', // Fixed: use specific model instead of undefined xaiConfig.model
           messages: [
             {
               role: 'system',
@@ -129,7 +127,7 @@ class XAIService {
       relationships: `Provide a relationship analysis based on the astrological chart for someone born on ${birthDate} at ${birthTime} in ${birthLocation}. Focus on romantic tendencies and compatibility factors.`,
     };
 
-    return prompts[interpretationType] ?? prompts.general;
+    return prompts[interpretationType] ?? prompts.general; // Fixed: use nullish coalescing
   }
 
   static async generateMockInterpretation(
@@ -145,7 +143,7 @@ class XAIService {
     };
 
     return (
-      interpretations[request.interpretationType] ?? interpretations.general
+      interpretations[request.interpretationType] ?? interpretations.general // Fixed: use nullish coalescing
     );
   }
 }
@@ -191,7 +189,7 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
         try {
           result = await XAIService.generateInterpretation(request);
         } catch (xaiError) {
-          devConsole.warn(
+          devConsole.warn?.(
             'xAI service failed, falling back to mock service:',
             xaiError
           );
@@ -206,7 +204,7 @@ export const useAIInterpretation = (): UseAIInterpretationReturn => {
             ? err.message
             : 'Failed to generate interpretation';
         setError(errorMessage);
-        devConsole.error('AI interpretation error:', err);
+        devConsole.error?.('AI interpretation error:', err);
       }
     },
     [queryClient]

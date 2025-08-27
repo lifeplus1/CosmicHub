@@ -1,9 +1,9 @@
 import type React from 'react';
 
-export type BoundaryLevel = 'page' | 'section' | 'component';
-export type LogLevel = 'low' | 'medium' | 'high' | 'critical';
+export type BoundaryLevel = 'app' | 'page' | 'section' | 'component';
+export type LogLevel = 'critical' | 'high' | 'medium' | 'low';
 
-export interface ErrorMetrics {
+export interface ErrorMetrics extends Record<string, unknown> {
   errorId: string;
   boundaryName: string | undefined;
   boundaryLevel: BoundaryLevel;
@@ -22,11 +22,12 @@ export interface ErrorInfo extends ErrorMetrics {
   sessionId: string | undefined;
 }
 
-export interface ErrorReportingService {
-  captureException(error: ErrorInfo): void;
-}
 export interface AnalyticsService {
-  track(eventName: string, data: ErrorMetrics): void;
+  track: (eventName: string, data: Record<string, unknown>) => void;
+}
+
+export interface ErrorReportingService {
+  captureException: (error: ErrorInfo) => void;
 }
 
 export interface ErrorBoundaryProps {

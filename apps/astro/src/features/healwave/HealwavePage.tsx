@@ -5,6 +5,8 @@ import AudioPlayer from './components/AudioPlayer';
 import DurationTimer from './components/DurationTimer';
 
 const HealwavePage: React.FC = () => {
+  const healwaveHook = useHealwave();
+  
   const {
     currentFrequency,
     isPlaying,
@@ -15,8 +17,7 @@ const HealwavePage: React.FC = () => {
     setVolume,
     setDuration,
     togglePlayPause,
-    // formatTime
-  } = useHealwave();
+  } = healwaveHook;
 
   return (
     <div className='container mx-auto px-4 py-8 space-y-6'>

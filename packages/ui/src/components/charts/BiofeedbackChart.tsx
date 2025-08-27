@@ -5,13 +5,15 @@
 
 import React from 'react';
 
-export interface BiofeedbackChartProps {
-  data?: {
-    heartRate?: number[];
-    hrv?: number[];
-    stress?: number[];
-    timestamp: string[];
-  };
+interface BiofeedbackData {
+  heartRate?: number[];
+  hrv?: number[];
+  stress?: number[];
+  timestamp: string[];
+}
+
+interface BiofeedbackChartProps {
+  data?: BiofeedbackData;
   type?: 'realtime' | 'historical';
   duration?: '1h' | '24h' | '7d' | '30d';
   className?: string;
@@ -23,6 +25,7 @@ export const BiofeedbackChart: React.FC<BiofeedbackChartProps> = ({
   duration = '1h',
   className = '',
 }) => {
+
   const hasData = data && data.timestamp.length > 0;
 
   return (

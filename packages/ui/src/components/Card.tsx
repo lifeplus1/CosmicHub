@@ -1,22 +1,22 @@
 import React, { forwardRef } from 'react';
 
-export interface CardProps {
+interface CardProps {
   children: React.ReactNode;
   title?: string;
   className?: string;
 }
 
-export interface CardHeaderProps {
+interface CardHeaderProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface CardTitleProps {
+interface CardTitleProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface CardContentProps {
+interface CardContentProps {
   children: React.ReactNode;
   className?: string;
 }

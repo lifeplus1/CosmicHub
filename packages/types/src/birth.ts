@@ -4,8 +4,8 @@
  */
 
 export interface UnifiedBirthData {
-  year: number;
-  month: number; // 1-12
+  year: number; // 1-12
+  month: number; // 1-31
   day: number; // 1-31
   hour: number; // 0-23
   minute: number; // 0-59
@@ -31,9 +31,7 @@ export interface TextBirthData {
 export type AnyBirthInput = UnifiedBirthData | TextBirthData;
 
 export const isUnifiedBirthData = (v: unknown): v is UnifiedBirthData => {
-  if (v === null || v === undefined || typeof v !== 'object') {
-    return false;
-  }
+  if (v === null || v === undefined || typeof v !== 'object') return false;
 
   // Type assertion after null check
   const obj = v as Record<string, unknown>;
@@ -57,9 +55,7 @@ export const isUnifiedBirthData = (v: unknown): v is UnifiedBirthData => {
 };
 
 export const isTextBirthData = (v: unknown): v is TextBirthData => {
-  if (v === null || v === undefined || typeof v !== 'object') {
-    return false;
-  }
+  if (v === null || v === undefined || typeof v !== 'object') return false;
 
   // Type assertion after null check
   const obj = v as Record<string, unknown>;
@@ -205,18 +201,19 @@ export function toUnifiedBirthData(input: AnyBirthInput): UnifiedBirthData {
 }
 
 // Backwards compatibility exports
-export type ChartBirthData = UnifiedBirthData;
 
 /** Result type for safe parsing */
-export interface SafeParseSuccess {
+export interface SafeParseResult {
   success: true;
   data: UnifiedBirthData;
 }
-export interface SafeParseFailure {
+
+export interface SafeParseError {
   success: false;
   error: Error;
 }
-export type SafeParseResult = SafeParseSuccess | SafeParseFailure;
+
+export type SafeParseResult = SafeParseResult | SafeParseError;
 
 /**
  * Non-throwing variant returning a discriminated union.
@@ -237,3 +234,6 @@ export function safeParseTextBirthData(data: TextBirthData): SafeParseResult {
     };
   }
 }
+
+// Backwards compatibility alias
+export type ChartBirthData = TextBirthData;

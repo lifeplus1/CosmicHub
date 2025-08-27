@@ -36,7 +36,7 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({
   const { toast } = useToast();
 
   const handleCalculate = useCallback(async (): Promise<void> => {
-    if (birthData == null) return;
+    if (birthData === null || birthData === undefined) return;
 
     setLoading(true);
     setError(null);
@@ -81,7 +81,7 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({
   }, [birthData, onHumanDesignCalculated, toast]);
 
   useEffect(() => {
-    if (birthData != null) {
+    if (birthData !== null && birthData !== undefined) {
       void handleCalculate();
     }
   }, [birthData, handleCalculate]);

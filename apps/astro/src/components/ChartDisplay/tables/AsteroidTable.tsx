@@ -9,12 +9,14 @@ import {
 } from '@cosmichub/ui';
 import { getAsteroidSymbol, getSignSymbol } from './tableUtils';
 
-export interface AsteroidRow {
+interface AsteroidRow {
   name: string;
   sign: string;
   degree: string;
   house: string;
 }
+
+export type { AsteroidRow };
 
 const AsteroidTable: React.FC<{ data: AsteroidRow[] }> = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) return null;

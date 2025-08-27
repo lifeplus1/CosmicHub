@@ -21,7 +21,7 @@ vi.mock('../../../utils/astrologyUtils', () => ({
     ];
     return signs[Math.floor(degrees / 30) % 12];
   },
-  calculateHousePosition: (position: number, houseCusps: number[]) => {
+  calculateHousePosition: (position: number) => {
     // Simple mock: return house 1-12 based on position
     return (Math.floor(position / 30) % 12) + 1;
   },

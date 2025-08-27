@@ -65,7 +65,7 @@ const CoreQuartetTab: React.FC<CoreQuartetTabProps> = React.memo(
         {/* Core Keys Grid */}
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
           {coreKeys.map((item, index) => {
-            if (item.key == null) {
+            if (item.key === null) {
               return null;
             }
 

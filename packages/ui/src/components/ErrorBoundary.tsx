@@ -188,16 +188,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
   private reportError(errorInfo: ErrorInfo): void {
     try {
       window.errorReportingService?.captureException(errorInfo);
-    } catch (reportingError) {
-      logger.error('Failed to report error:', reportingError);
+    } catch (reportingError: unknown) {
+      const errorMessage = reportingError instanceof Error ? reportingError.message : String(reportingError);
+      logger.error('Failed to report error:', errorMessage);
     }
   }
 
   private trackErrorMetrics(errorData: ErrorMetrics): void {
     try {
       window.analytics?.track('Error Boundary Triggered', errorData);
-    } catch (analyticsError) {
-      logger.error('Failed to track error metrics:', analyticsError);
+    } catch (analyticsError: unknown) {
+      const errorMessage = analyticsError instanceof Error ? analyticsError.message : String(analyticsError);
+      logger.error('Failed to track error metrics:', errorMessage);
     }
   }
 
@@ -270,6 +272,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     maxRetriesReached: boolean
   ): ReactNode {
     const { error } = this.state;
+    if (!error) return null;
     const isPageLevel = level === 'page';
     const containerClass = isPageLevel
       ? 'min-h-screen flex items-center justify-center bg-gradient-to-br from-cosmic-dark to-cosmic-purple/20'

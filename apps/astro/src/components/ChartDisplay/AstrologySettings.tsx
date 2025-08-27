@@ -2,6 +2,7 @@ import React from 'react';
 import { IoSettings } from 'react-icons/io5';
 
 export interface AstrologySettings {
+  __version?: number; // schema version for migrations
   houseSystem:
     | 'placidus'
     | 'koch'
@@ -59,6 +60,7 @@ export interface AstrologySettings {
 }
 
 export const defaultAstrologySettings: AstrologySettings = {
+  __version: 2,
   houseSystem: 'placidus',
   zodiacSystem: 'tropical',
   orbs: {
@@ -105,6 +107,39 @@ export const defaultAstrologySettings: AstrologySettings = {
   },
 };
 
+// Migration utility for persisted settings
+export function migrateAstrologySettings(raw: unknown): AstrologySettings {
+  const base = { ...defaultAstrologySettings };
+  if (!raw || typeof raw !== 'object') return base;
+  const obj = raw as Partial<AstrologySettings & { [k: string]: unknown }>;
+  const version = typeof obj.__version === 'number' ? obj.__version : 0;
+  let working: AstrologySettings = { ...base, ...obj, __version: base.__version };
+  switch (version) {
+    case 0: {
+      // Pre-versioned: ensure new flags have safe defaults
+      if (!('hypotheticalPoints' in (obj.celestialBodies || {}))) {
+        working = {
+          ...working,
+          celestialBodies: {
+            ...working.celestialBodies,
+            hypotheticalPoints: true,
+          },
+        };
+      }
+      break;
+    }
+    case 1: {
+      // Example future migration placeholder
+      break;
+    }
+    default:
+      break;
+  }
+  // Always stamp with current version
+  working.__version = base.__version;
+  return working;
+}
+
 interface AstrologySettingsProps {
   settings: AstrologySettings;
   onSettingsChange: (settings: AstrologySettings) => void;
@@ -128,7 +163,7 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
   ) => {
     onSettingsChange({
       ...settings,
-      [category]: { ...(settings[category] as any), ...updates },
+      [category]: { ...(settings[category] as Record<string, unknown>), ...updates },
     });
   };
 
@@ -148,13 +183,19 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
           <div className='space-y-6'>
             {/* House System */}
             <div>
-              <label className='block text-sm font-medium text-cosmic-gold mb-2'>
+              <label 
+                htmlFor="house-system-select"
+                className='block text-sm font-medium text-cosmic-gold mb-2'
+              >
                 House System
               </label>
               <select
+                id="house-system-select"
                 value={settings.houseSystem}
                 onChange={e =>
-                  updateSettings({ houseSystem: e.target.value as any })
+                  updateSettings({ 
+                    houseSystem: e.target.value as AstrologySettings['houseSystem']
+                  })
                 }
                 aria-label='House System'
                 className='w-full px-3 py-2 bg-cosmic-dark/60 border border-cosmic-purple/30 rounded-md text-cosmic-silver focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50'
@@ -169,10 +210,10 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
             </div>
 
             {/* Zodiac System */}
-            <div>
-              <label className='block text-sm font-medium text-cosmic-gold mb-2'>
+            <fieldset>
+              <legend className='block text-sm font-medium text-cosmic-gold mb-2'>
                 Zodiac System
-              </label>
+              </legend>
               <div className='flex gap-4'>
                 <label className='flex items-center'>
                   <input
@@ -181,7 +222,9 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     value='tropical'
                     checked={settings.zodiacSystem === 'tropical'}
                     onChange={e =>
-                      updateSettings({ zodiacSystem: e.target.value as any })
+                      updateSettings({ 
+                        zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                      })
                     }
                     className='mr-2'
                   />
@@ -194,20 +237,22 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     value='sidereal'
                     checked={settings.zodiacSystem === 'sidereal'}
                     onChange={e =>
-                      updateSettings({ zodiacSystem: e.target.value as any })
+                      updateSettings({ 
+                        zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                      })
                     }
                     className='mr-2'
                   />
                   <span className='text-cosmic-silver'>Sidereal</span>
                 </label>
               </div>
-            </div>
+            </fieldset>
 
             {/* Orb Settings */}
-            <div>
-              <label className='block text-sm font-medium text-cosmic-gold mb-3'>
+            <fieldset>
+              <legend className='block text-sm font-medium text-cosmic-gold mb-3'>
                 Orb Tolerances (degrees)
-              </label>
+              </legend>
               <div className='grid grid-cols-3 gap-4'>
                 <div>
                   <label
@@ -273,13 +318,13 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                   />
                 </div>
               </div>
-            </div>
+            </fieldset>
 
             {/* Celestial Bodies - Enhanced Granular Controls */}
-            <div>
-              <label className='block text-sm font-medium text-cosmic-gold mb-3'>
+            <fieldset>
+              <legend className='block text-sm font-medium text-cosmic-gold mb-3'>
                 Celestial Bodies to Display
-              </label>
+              </legend>
 
               {/* Planets Section */}
               <div className='mb-4'>
@@ -427,13 +472,13 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                   </label>
                 </div>
               </div>
-            </div>
+            </fieldset>
 
             {/* Aspects */}
-            <div>
-              <label className='block text-sm font-medium text-cosmic-gold mb-3'>
+            <fieldset>
+              <legend className='block text-sm font-medium text-cosmic-gold mb-3'>
                 Enabled Aspects
-              </label>
+              </legend>
               <div className='grid grid-cols-2 gap-2'>
                 {Object.entries(settings.aspectsEnabled).map(
                   ([key, enabled]) => (
@@ -455,13 +500,13 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                   )
                 )}
               </div>
-            </div>
+            </fieldset>
 
             {/* Display Options */}
-            <div>
-              <label className='block text-sm font-medium text-cosmic-gold mb-3'>
+            <fieldset>
+              <legend className='block text-sm font-medium text-cosmic-gold mb-3'>
                 Display Options
-              </label>
+              </legend>
               <div className='grid grid-cols-2 gap-2'>
                 {Object.entries(settings.displayOptions).map(
                   ([key, enabled]) => (
@@ -483,7 +528,7 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                   )
                 )}
               </div>
-            </div>
+            </fieldset>
           </div>
 
           <div className='mt-6 pt-4 border-t border-cosmic-purple/20'>

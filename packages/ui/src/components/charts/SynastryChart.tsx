@@ -5,30 +5,32 @@
 
 import React from 'react';
 
-export interface SynastryChartProps {
-  person1?: {
-    name: string;
-    birthData: { date: string; time: string; location: string };
-  };
-  person2?: {
-    name: string;
-    birthData: { date: string; time: string; location: string };
-  };
-  aspects?: Array<{
-    planet1: string;
-    planet2: string;
-    aspect: string;
-    orb: number;
-  }>;
+interface PersonData {
+  name: string;
+  birthData: { date: string; time: string; location: string };
+}
+
+interface AspectData {
+  planet1: string;
+  planet2: string;
+  aspect: string;
+  orb: number;
+}
+
+interface SynastryChartProps {
+  person1?: PersonData;
+  person2?: PersonData;
+  aspects?: AspectData[];
   className?: string;
 }
 
 export const SynastryChart: React.FC<SynastryChartProps> = ({
   person1,
   person2,
-  aspects = [],
+  aspects,
   className = '',
 }) => {
+
   return (
     <div className={`synastry-chart ${className}`}>
       <div className='chart-container p-4 border rounded-lg'>
@@ -50,7 +52,7 @@ export const SynastryChart: React.FC<SynastryChartProps> = ({
                 Synastry chart visualization placeholder
               </span>
             </div>
-            {aspects.length > 0 && (
+            {aspects && aspects.length > 0 && (
               <div className='aspects-list'>
                 <h4 className='font-medium mb-2'>Key Aspects:</h4>
                 <div className='space-y-2'>

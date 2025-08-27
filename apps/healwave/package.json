@@ -29,6 +29,7 @@
     "@cosmichub/subscriptions": "workspace:*",
     "@cosmichub/types": "workspace:*",
     "@cosmichub/ui": "workspace:*",
+    "@cosmichub/pwa": "workspace:*",
     "@eslint/js": "^8.57.1",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-dialog": "^1.1.14",

@@ -5,6 +5,7 @@ import App from './App';
 import './pwa';
 import './pwa-performance';
 import { initializeNotifications } from './services/notificationManager';
+import { initCosmicHubAnalytics, trackPageView } from './services/analytics';
 import { devConsole } from './config/environment';
 
 // Enhanced environment-aware logging (silenced in production if devConsole.log noop)
@@ -32,6 +33,20 @@ root.render(
 );
 
 devConsole.log?.('🎉 React app mounted successfully!');
+
+// Initialize analytics
+const analytics = initCosmicHubAnalytics();
+if (analytics) {
+  devConsole.log?.('📊 CosmicHub Analytics initialized');
+  
+  // Track initial page view
+  trackPageView('app_start', {
+    environment: import.meta.env.MODE,
+    timestamp: Date.now(),
+  });
+} else {
+  devConsole.warn?.('📊 Analytics initialization failed');
+}
 
 // Initialize push notifications and background sync
 initializeNotifications()

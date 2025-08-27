@@ -1,9 +1,11 @@
-export type ChartStyle = 'western' | 'vedic';
+
+// Chart Preferences Types
+
 export type HouseSystem = 'placidus' | 'whole-sign' | 'equal-house';
 export type ThemeOption = 'light' | 'dark' | 'auto';
 
 export interface ChartPreferencesData {
-  chartStyle: ChartStyle;
+  chartStyle: 'western' | 'vedic';
   houseSystem: HouseSystem;
   notifications: boolean;
   theme: ThemeOption;

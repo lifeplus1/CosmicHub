@@ -9,6 +9,7 @@ import {
   Badge,
 } from '@cosmichub/ui';
 import { ProgressBar } from '../ui/ProgressBar';
+import type { ChartData, SavedChart } from '../../services/api.types';
 import {
   TransitPrediction,
   PersonalGrowthInsight,
@@ -20,7 +21,11 @@ import {
 } from '../../services/ai-001-enhanced';
 
 interface AI001DashboardProps {
-  chartData: any;
+  chartData: Partial<SavedChart> & { 
+    id?: string;
+    planets?: ChartData['planets']; 
+    houses?: ChartData['houses']; 
+  };
   userId: string;
   className?: string;
 }
@@ -116,7 +121,7 @@ export const AI001Dashboard: React.FC<AI001DashboardProps> = ({
         ].map(tab => (
           <Button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as typeof activeTab)}
             variant={activeTab === tab.id ? 'default' : 'secondary'}
             className={`${
               activeTab === tab.id

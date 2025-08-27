@@ -264,7 +264,7 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
 };
 
 // Authors page component
-const BlogAuthors: React.FC = () => {
+export const BlogAuthors: React.FC = () => {
   return (
     <div className='max-w-4xl mx-auto px-4 py-8'>
       <div className='text-center mb-12'>
@@ -311,4 +311,3 @@ const BlogAuthors: React.FC = () => {
 };
 
 export default BlogAuthor;
-export { BlogAuthors };

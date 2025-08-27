@@ -5,12 +5,14 @@
 
 import React from 'react';
 
-export interface AstrologyChartProps {
-  birthData?: {
-    date: string;
-    time: string;
-    location: string;
-  };
+interface BirthData {
+  date: string;
+  time: string;
+  location: string;
+}
+
+interface AstrologyChartProps {
+  birthData?: BirthData;
   chartType?: 'natal' | 'transit' | 'composite';
   className?: string;
 }
@@ -20,6 +22,7 @@ export const AstrologyChart: React.FC<AstrologyChartProps> = ({
   chartType = 'natal',
   className = '',
 }) => {
+
   return (
     <div className={`astrology-chart ${className}`}>
       <div className='chart-container p-4 border rounded-lg'>

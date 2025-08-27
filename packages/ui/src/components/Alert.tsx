@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface AlertProps {
+interface AlertProps {
   children: React.ReactNode;
   variant?: 'info' | 'success' | 'warning' | 'error';
   onClose?: () => void;

@@ -1,0 +1,165 @@
+[1m🚀 CosmicHub Parallel Lint Testing[0m
+[34mOptimized batching for maximum efficiency[0m
+[34m══════════════════════════════════════════════════[0m
+[1m
+📋 Batch Execution Plan:[0m
+[36m1. Astro Core (Components & Features)[0m
+[34m   Files: ~90 | Max Warnings: 8[0m
+[34m   Directories: 2[0m
+[36m2. Astro Pages & Context[0m
+[34m   Files: ~85 | Max Warnings: 8[0m
+[34m   Directories: 4[0m
+[36m3. Astro Services & Types[0m
+[34m   Files: ~65 | Max Warnings: 6[0m
+[34m   Directories: 3[0m
+[36m4. Astro Root Files & Examples[0m
+[34m   Files: ~25 | Max Warnings: 4[0m
+[34m   Directories: 5[0m
+[36m5. All Packages & Other Apps[0m
+[34m   Files: ~181 | Max Warnings: 12[0m
+[34m   Directories: 12[0m
+[32m
+Total estimated files: 446[0m
+[32mStarting parallel execution...
+[0m
+[36m📦 Batch 1/5: Astro Core (Components & Features)[0m
+[34m   Targets: 2 directories (~90 files)[0m
+[35m   Command: npx eslint apps/astro/src/components apps/astro/src/features --ext .ts,.tsx --max-warnings=8 --config eslint.config.js[0m
+
+[36m📦 Batch 2/5: Astro Pages & Context[0m
+[34m   Targets: 4 directories (~85 files)[0m
+[35m   Command: npx eslint apps/astro/src/pages apps/astro/src/contexts apps/astro/src/hooks apps/astro/src/utils --ext .ts,.tsx --max-warnings=8 --config eslint.config.js[0m
+
+[36m📦 Batch 3/5: Astro Services & Types[0m
+[34m   Targets: 3 directories (~65 files)[0m
+[35m   Command: npx eslint apps/astro/src/services apps/astro/src/types apps/astro/src/config --ext .ts,.tsx --max-warnings=6 --config eslint.config.js[0m
+
+[36m📦 Batch 4/5: Astro Root Files & Examples[0m
+[34m   Targets: 5 directories (~25 files)[0m
+[35m   Command: npx eslint apps/astro/src/*.ts apps/astro/src/*.tsx apps/astro/src/examples apps/astro/src/a11y apps/astro/src/test-utils --ext .ts,.tsx --max-warnings=4 --config eslint.config.js[0m
+
+[36m📦 Batch 5/5: All Packages & Other Apps[0m
+[34m   Targets: 12 directories (~181 files)[0m
+[35m   Command: npx eslint packages/ui/src packages/config/src apps/healwave/src apps/mobile/src packages/auth/src packages/frequency/src packages/hooks/src packages/integrations/src packages/pwa/src packages/storage/src packages/subscriptions/src packages/types/src --ext .ts,.tsx --max-warnings=12 --config eslint.config.js[0m
+
+[1m
+📊 Batch 4 Results: Astro Root Files & Examples[0m
+[34m⏱️  Duration: 1.11s[0m
+[31m❌ Status: FAILED (exit code 2)[0m
+[33m⚠️  Stderr:[0m
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+
+Oops! Something went wrong! :(
+
+ESLint: 9.33.0
+
+You are linting "apps/astro/src/test-utils", but all of the files matching the glob pattern "apps/astro/src/test-utils" are ignored.
+
+If you don't want to lint these files, remove the pattern "apps/astro/src/test-utils" from the list of arguments passed to ESLint.
+
+If you do want to lint these files, explicitly list one or more of the files from this glob that you'd like to lint to see more details about why they are ignored.
+
+  * If the file is ignored because of a matching ignore pattern, check global ignores in your config file.
+    https://eslint.org/docs/latest/use/configure/ignore
+
+  * If the file is ignored because no matching configuration was supplied, check file patterns in your config file.
+    https://eslint.org/docs/latest/use/configure/configuration-files#specifying-files-with-arbitrary-extensions
+
+  * If the file is ignored because it is located outside of the base path, change the location of your config file to be in a parent directory.
+[34m────────────────────────────────────────────────────────────────────────────────[0m
+[1m
+📊 Batch 3 Results: Astro Services & Types[0m
+[34m⏱️  Duration: 4.79s[0m
+[31m❌ Status: FAILED (exit code 1)[0m
+[33m⚠️  Warnings: 23[0m
+[31m🚫 Errors: 1[0m
+[34m📝 Sample output:[0m
+   /Users/Chris/Projects/CosmicHub/apps/astro/src/services/ai-001-enhanced.ts
+      68:26  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+      68:40  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+      93:28  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+      93:42  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+[34m   ... (truncated)[0m
+[33m⚠️  Stderr:[0m
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+ESLint found too many warnings (maximum: 6).
+[34m────────────────────────────────────────────────────────────────────────────────[0m
+[1m
+📊 Batch 2 Results: Astro Pages & Context[0m
+[34m⏱️  Duration: 5.95s[0m
+[31m❌ Status: FAILED (exit code 1)[0m
+[33m⚠️  Warnings: 30[0m
+[31m🚫 Errors: 56[0m
+[34m📝 Sample output:[0m
+   /Users/Chris/Projects/CosmicHub/apps/astro/src/hooks/useContextPerformance.ts
+      44:5   warning  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
+      87:53  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+     101:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       @typescript-eslint/prefer-nullish-coalescing
+[34m   ... (truncated)[0m
+[33m⚠️  Stderr:[0m
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+[34m────────────────────────────────────────────────────────────────────────────────[0m
+[1m
+📊 Batch 1 Results: Astro Core (Components & Features)[0m
+[34m⏱️  Duration: 8.58s[0m
+[31m❌ Status: FAILED (exit code 1)[0m
+[33m⚠️  Warnings: 30[0m
+[31m🚫 Errors: 99[0m
+[34m📝 Sample output:[0m
+   /Users/Chris/Projects/CosmicHub/apps/astro/src/components/ChartDisplay/ChartDisplay.tsx
+       2:10  error    'serializeAstrologyData' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+       2:39  error    'AstrologyChart' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+       3:15  error    'ChartData' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+     454:3   error    'onSaveChart' is defined but never used. Allowed unused args must match /^_/u             @typescript-eslint/no-unused-vars
+[34m   ... (truncated)[0m
+[33m⚠️  Stderr:[0m
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+[34m────────────────────────────────────────────────────────────────────────────────[0m
+[1m
+📊 Batch 5 Results: All Packages & Other Apps[0m
+[34m⏱️  Duration: 8.91s[0m
+[31m❌ Status: FAILED (exit code 1)[0m
+[33m⚠️  Warnings: 78[0m
+[31m🚫 Errors: 214[0m
+[34m📝 Sample output:[0m
+   /Users/Chris/Projects/CosmicHub/apps/healwave/src/components/AudioPlayer.tsx
+     265:68  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+   /Users/Chris/Projects/CosmicHub/apps/healwave/src/pwa.ts
+     11:7  warning  Unused eslint-disable directive (no problems were reported from 'no-console')
+[34m   ... (truncated)[0m
+[33m⚠️  Stderr:[0m
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+[34m────────────────────────────────────────────────────────────────────────────────[0m
+[32m
+⏱️  Total execution time: 8.92s[0m
+[1m
+🎯 LINT BATCH SUMMARY[0m
+[34m══════════════════════════════════════════════════[0m
+[34m📊 Total Batches: 5[0m
+[33m✅ Successful: 0[0m
+[31m❌ Failed: 5[0m
+[34m⏱️  Total Processing Time: 29.34s[0m
+[34m⚡ Max Batch Duration: 8.91s[0m
+[36m🚀 Parallelization Efficiency: 65.8%[0m
+[1m
+📈 Batch Performance:[0m
+   1. Astro Core (Components & Features): [31mFAIL[0m (8.58s)
+   2. Astro Pages & Context: [31mFAIL[0m (5.95s)
+   3. Astro Services & Types: [31mFAIL[0m (4.79s)
+   4. Astro Root Files & Examples: [31mFAIL[0m (1.11s)
+   5. All Packages & Other Apps: [31mFAIL[0m (8.91s)
+[33m
+🔧 RECOMMENDATIONS:[0m
+[33m   • Batch 1: Review lint errors in Astro Core (Components & Features)[0m
+[34m     Consider increasing maxWarnings from 8[0m
+[33m   • Batch 2: Review lint errors in Astro Pages & Context[0m
+[34m     Consider increasing maxWarnings from 8[0m
+[33m   • Batch 3: Review lint errors in Astro Services & Types[0m
+[34m     Consider increasing maxWarnings from 6[0m
+[33m   • Batch 4: Review lint errors in Astro Root Files & Examples[0m
+[34m     Consider increasing maxWarnings from 4[0m
+[33m   • Batch 5: Review lint errors in All Packages & Other Apps[0m
+[34m     Consider increasing maxWarnings from 12[0m
+[32m
+🎉 Batch processing complete![0m
+[31m5 batch(es) had issues that need attention.[0m

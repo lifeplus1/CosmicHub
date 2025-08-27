@@ -1,14 +1,11 @@
 // Notification Types
-export type NotificationFrequency = 'daily' | 'instant' | 'hourly' | 'weekly';
 
 export interface QuietHours {
-  enabled: boolean;
   start: string;
   end: string;
 }
 
 export interface NotificationPreferences {
-  dailyHoroscope: boolean;
   transitAlerts: boolean;
   frequencyReminders: boolean;
   appUpdates: boolean;
@@ -17,12 +14,10 @@ export interface NotificationPreferences {
   maxDailyNotifications: number;
 }
 
-export interface SyncMessageData {
-  type: 'cosmichub-sync-chart_synced' | 'cosmichub-sync-user_data_synced';
+export interface NotificationPayload {
   data?: unknown;
 }
 
-export interface ChartData {
-  id: string;
+export interface NotificationFrequency {
   [key: string]: unknown;
 }

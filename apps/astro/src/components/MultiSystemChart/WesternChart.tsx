@@ -160,10 +160,10 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                           const orb =
                             typeof aspect?.orb === 'number' ? aspect.orb : 0;
                           const isExact = Boolean(aspect?.exact);
-                          const point1Sign = aspect?.point1_sign || '';
-                          const point2Sign = aspect?.point2_sign || '';
-                          const point1House = aspect?.point1_house || '';
-                          const point2House = aspect?.point2_house || '';
+                          const point1Sign = aspect?.point1_sign ?? '';
+                          const point2Sign = aspect?.point2_sign ?? '';
+                          const point1House = aspect?.point1_house ?? '';
+                          const point2House = aspect?.point2_house ?? '';
 
                           return (
                             <tr key={`${point1}-${point2}-${idx}`}>

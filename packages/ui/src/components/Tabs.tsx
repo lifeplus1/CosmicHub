@@ -1,23 +1,23 @@
 import React, { useState, createContext, useContext } from 'react';
 
-export interface TabsProps {
+interface TabsProps {
   defaultValue: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TabsListProps {
+interface TabsListProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TabsTriggerProps {
+interface TabsTriggerProps {
   value: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export interface TabsContentProps {
+interface TabsContentProps {
   value: string;
   children: React.ReactNode;
   className?: string;

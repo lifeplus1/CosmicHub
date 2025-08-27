@@ -41,7 +41,7 @@ class ChartErrorBoundary extends React.Component<
   override render() {
     if (this.state.hasError) {
       return (
-        this.props.fallback || (
+        this.props.fallback ?? (
           <div className='cosmic-card bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-500/30'>
             <div className='p-6 text-center'>
               <h3 className='font-bold text-red-400 mb-2'>
@@ -149,7 +149,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
                     </p>
                     <p className='text-cosmic-silver'>
                       <strong>Timezone:</strong>{' '}
-                      {displayData.birth_info.location.timezone ||
+                      {displayData.birth_info.location.timezone ??
                         'Auto-detected'}
                     </p>
                   </>
