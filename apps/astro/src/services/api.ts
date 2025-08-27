@@ -494,6 +494,7 @@ export const apiClient = {
   },
 };
 
+export interface ExtendedPersonData {
   numerology?: unknown;
   human_design?: HumanDesignData;
   gene_keys?: GeneKeysData;

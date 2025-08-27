@@ -5,10 +5,15 @@
 
 import { type FC, type FormEvent } from 'react';
 
-}
-
+interface AdvancedFormProps {
+  onSubmit?: (data: Record<string, unknown>) => void;
   className?: string;
 }
+
+export const AdvancedForm: FC<AdvancedFormProps> = ({
+  onSubmit,
+  className = '',
+}) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();

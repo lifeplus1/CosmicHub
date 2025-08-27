@@ -63,6 +63,7 @@ export const useBreakpoint = () => {
 };
 
 // Responsive container with safe areas
+interface ResponsiveContainerProps {
   className?: string;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';

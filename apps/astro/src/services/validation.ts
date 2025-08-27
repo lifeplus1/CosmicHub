@@ -2,22 +2,77 @@
  * Validation utilities for chart data and API responses
  */
 import type {
-  ChartData,
-  Planet,
-  House,
-  Aspect,
   PlanetName,
-  ZodiacSign,
   AspectType,
-  ChartAngles,
-} from './api.types';
+} from '@cosmichub/types';
+
+// Local type definitions
+type ZodiacSign =
+  | 'aries'
+  | 'taurus'
+  | 'gemini'
+  | 'cancer'
+  | 'leo'
+  | 'virgo'
+  | 'libra'
+  | 'scorpio'
+  | 'sagittarius'
+  | 'capricorn'
+  | 'aquarius'
+  | 'pisces';
+
+// Local interfaces for validation
+interface Planet {
+  name: string;
+  position: number;
+  sign: string;
+  house: number;
+  retrograde: boolean;
+  speed: number;
+  dignity?: 'domicile' | 'exaltation' | 'fall' | 'detriment';
+}
+
+interface House {
+  number: number;
+  cusp: number;
+  sign: string;
+}
+
+interface Aspect {
+  planet1: string;
+  planet2: string;
+  aspect_type: string;
+  type: string;
+  orb: number;
+  applying: boolean;
+  exact: boolean;
+}
+
+interface ChartAngles {
+  ascendant: number;
+  midheaven: number;
+  descendant: number;
+  imumcoeli: number;
+}
+
+interface ChartData {
+  planets: Record<string, Planet>;
+  houses: House[];
+  aspects: Aspect[];
+  angles: ChartAngles;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  julian_day: number;
+  house_system: string;
+}
 
 /**
  * Type guard for validating planet data
  */
 export function isPlanet(obj: unknown): obj is Planet {
   if (obj === null || typeof obj !== 'object') return false;
-  const p = obj as Planet;
+  const p = obj as Record<string, unknown>;
   return (
     typeof p.name === 'string' &&
     typeof p.position === 'number' && p.position >= 0 && p.position < 360 &&
@@ -130,7 +185,7 @@ export function isPlanetName(value: string): value is PlanetName {
  * Type guard for aspect types
  */
 export function isAspectType(value: string): value is AspectType {
-  const list: AspectType[] = ['conjunction','opposition','trine','square','sextile','quincunx','semisextile'];
+  const list: AspectType[] = ['conjunction','opposition','trine','square','sextile','quincunx','semi-sextile'];
   return list.includes(value as AspectType);
 }
 

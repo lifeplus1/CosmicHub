@@ -51,6 +51,15 @@ export type ZodiacSign =
   | 'aquarius'
   | 'pisces';
 
+export type AspectType =
+  | 'conjunction'
+  | 'opposition'
+  | 'trine'
+  | 'square'
+  | 'sextile'
+  | 'quincunx'
+  | 'semisextile';
+
 export type InterpretationType = 'natal' | 'transit' | 'synastry' | 'composite';
 
 export type InterpretationFocusArea =
@@ -128,6 +137,7 @@ export interface ApiErrorResponse extends ApiResponseBase {
 /**
  * Specific error response types
  */
+export interface ValidationErrorResponse {
   error: {
     code: 'VALIDATION_ERROR';
     message: string;
@@ -135,6 +145,7 @@ export interface ApiErrorResponse extends ApiResponseBase {
   };
 }
 
+export interface NotFoundErrorResponse {
   error: {
     code: 'NOT_FOUND';
     message: string;
@@ -145,18 +156,21 @@ export interface ApiErrorResponse extends ApiResponseBase {
   };
 }
 
+export interface UnauthorizedErrorResponse extends ApiResponseBase {
   error: {
     code: 'UNAUTHORIZED';
     message: string;
   };
 }
 
+export interface ForbiddenErrorResponse extends ApiResponseBase {
   error: {
     code: 'FORBIDDEN';
     message: string;
   };
 }
 
+export interface ServerErrorResponse extends ApiResponseBase {
   error: {
     code: 'SERVER_ERROR';
     message: string;
@@ -166,6 +180,7 @@ export interface ApiErrorResponse extends ApiResponseBase {
   };
 }
 
+export interface GenericErrorResponse extends ApiResponseBase {
   error: {
     code: string;
     message: string;
@@ -176,6 +191,7 @@ export interface ApiErrorResponse extends ApiResponseBase {
 /**
  * Specialized response types
  */
+export interface PartialSuccessResponse<T> extends ApiResponseBase {
   data: Partial<T>;
   error?: {
     code: string;
@@ -184,6 +200,7 @@ export interface ApiErrorResponse extends ApiResponseBase {
   };
 }
 
+export interface CachedResponse<T> extends ApiSuccessResponse<T> {
   data: T;
   meta: {
     cachedAt: string;
@@ -221,6 +238,7 @@ export function isErrorResponse<T>(
  * Chart Types with Improved Type Safety
  */
 
+export interface Planet {
   position: number; // Degree in zodiac (0-360)
   sign: ZodiacSign;
   house: number;
@@ -230,10 +248,12 @@ export function isErrorResponse<T>(
   essential_dignity?: number; // Score from -5 to +5
 }
 
+export interface House {
   cusp: number; // Degree position (0-360)
   sign: ZodiacSign;
 }
 
+export interface Aspect {
   planet1: PlanetName;
   planet2: PlanetName;
   orb: number;
@@ -242,6 +262,8 @@ export function isErrorResponse<T>(
   power?: number; // Strength of the aspect (0-1)
 }
 
+export interface ChartAngles {
+  ascendant: number;
   midheaven: number;
   descendant: number;
   imumcoeli: number;
@@ -250,6 +272,8 @@ export function isErrorResponse<T>(
   part_of_fortune?: number;
 }
 
+export interface ChartData {
+  planets: Record<PlanetName, Planet>;
   houses: House[];
   aspects: Aspect[];
   asteroids?: Record<string, Planet>; // Add optional asteroids field
@@ -276,6 +300,9 @@ export function isErrorResponse<T>(
 /**
  * Chart API Types
  */
+export interface Chart {
+  id: ChartId;
+  user_id: UserId;
   name: string;
   birth_date: string;
   birth_time: string;
@@ -287,7 +314,10 @@ export function isErrorResponse<T>(
   chart_data: ChartData;
 }
 
+export interface ChartListResponse {
+  charts: Chart[];
   total: number;
+}
 }
 
   month: number;

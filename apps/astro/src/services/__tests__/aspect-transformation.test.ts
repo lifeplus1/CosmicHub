@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { type Aspect } from '../api.types';
-import { devConsole } from '../../config/environment';
 
 // We import the function indirectly by simulating a minimal slice of the transformation logic.
 // To avoid duplicating the entire api.ts, we'll reproduce the aspect mapping using the same

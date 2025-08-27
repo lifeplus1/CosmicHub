@@ -1,22 +1,77 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@cosmichub/auth';
 import { useBirthData } from '../contexts/BirthDataContext';
-import { fetchSavedChartById, fetchChartDataUnified, saveChart } from '../services/api';
-import type { ChartData, SaveChartRequest } from '../services/api.types';
+import { fetchChartDataUnified, saveChart } from '../services/api';
+import type { ChartData } from '../types/astrology.types';
+import type { ChartBirthData } from '@cosmichub/types';
+// Local lightweight SaveChartRequest subset (avoid broken re-export)
+interface SaveChartRequest {
+  year: number; month: number; day: number; hour: number; minute: number;
+  city?: string; house_system?: string; chart_name?: string; timezone?: string;
+  lat?: number; lon?: number;
+}
+import { ok } from '@cosmichub/config';
+
+// Lightweight chart fetch (safe) – replace missing fetchSavedChartById with guarded fetch
+interface SavedChartPayload { chart_data: ChartData; birth_data: Record<string, unknown>; }
+type LocalResult<T> = { success: true; data: T } | { success: false; error?: string };
+function isSuccess<T>(v: LocalResult<T>): v is { success: true; data: T } {
+  return v.success === true;
+}
+function isFailure<T>(v: LocalResult<T>): v is { success: false; error?: string } {
+  return v.success === false;
+}
+interface RawBirthData {
+  birth_date?: string; birth_time?: string; city?: string; lat?: number; lon?: number; timezone?: string;
+  year?: number; month?: number; day?: number; hour?: number; minute?: number;
+}
+
+const toRawBirthData = (v: unknown): RawBirthData => {
+  if (v && typeof v === 'object') {
+    const o = v as Record<string, unknown>;
+    return {
+      birth_date: typeof o.birth_date === 'string' ? o.birth_date : undefined,
+      birth_time: typeof o.birth_time === 'string' ? o.birth_time : undefined,
+      city: typeof o.city === 'string' ? o.city : undefined,
+      lat: typeof o.lat === 'number' ? o.lat : undefined,
+      lon: typeof o.lon === 'number' ? o.lon : undefined,
+      timezone: typeof o.timezone === 'string' ? o.timezone : undefined,
+      year: typeof o.year === 'number' ? o.year : undefined,
+      month: typeof o.month === 'number' ? o.month : undefined,
+      day: typeof o.day === 'number' ? o.day : undefined,
+      hour: typeof o.hour === 'number' ? o.hour : undefined,
+      minute: typeof o.minute === 'number' ? o.minute : undefined,
+    };
+  }
+  return {};
+};
+const safeFetchSavedChartById = async (chartId: string): Promise<LocalResult<SavedChartPayload>> => {
+  try {
+    const res = await fetch(`/api/charts/${encodeURIComponent(chartId)}`);
+    if (!res.ok) return { success: false, error: `Failed (${res.status})` };
+    const data: unknown = await res.json();
+    if (data && typeof data === 'object' && 'chart_data' in data) {
+      const typed = data as SavedChartPayload;
+      return ok(typed);
+    }
+    return { success: false, error: 'Malformed chart response' };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
+  }
+};
 
 // Extremely small presentation stub for testing
 const ChartDisplay: React.FC<{ onSaveChart?: () => void }> = ({ onSaveChart }) => (
   <div>
     <h1>Astrological Chart</h1>
-    {onSaveChart && <button onClick={onSaveChart}>Save Chart</button>}
+  {onSaveChart && <button onClick={() => { void onSaveChart(); }}>Save Chart</button>}
   </div>
 );
 
 export const UnifiedChartForTest: React.FC = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { birthData, setBirthData } = useBirthData();
 
@@ -28,75 +83,128 @@ export const UnifiedChartForTest: React.FC = () => {
   const shouldCalculate = searchParams.get('calculate') === 'true';
 
   useEffect(() => {
-    (async () => {
+    let active = true;
+    const run = async () => {
       setLoading(true);
       try {
         if (chartId && !shouldCalculate) {
-          const result = await fetchSavedChartById(chartId as any);
-          if (result.success) {
-            setChartData(result.data.chart_data as ChartData);
-            const bd: any = result.data.birth_data || {};
+          const result = await safeFetchSavedChartById(chartId);
+          if (!active) return;
+          if (isSuccess(result)) {
+            const chartPayload = result.data.chart_data;
+            setChartData(chartPayload);
             if (setBirthData) {
-              // Support birth_date + birth_time formats
-              if (bd.birth_date && !bd.year) {
-                const [y, m, d] = String(bd.birth_date).split('-').map(Number);
-                const [hh = 12, mm = 0] = String(bd.birth_time || '12:00').split(':').map(Number);
-                setBirthData({ year: y, month: m, day: d, hour: hh, minute: mm, location: bd.city, latitude: bd.lat, longitude: bd.lon, timezone: bd.timezone } as any);
-              } else {
-                setBirthData(bd as any);
+              const bd = toRawBirthData(result.data.birth_data);
+              const birthDate = bd.birth_date ?? '';
+              const birthTime = bd.birth_time ?? '12:00';
+              if (birthDate && (bd.year === undefined || bd.month === undefined || bd.day === undefined)) {
+                const [yStr, mStr, dStr] = birthDate.split('-');
+                const [hhStr = '12', mmStr = '0'] = birthTime.split(':');
+                const y = Number(yStr), m = Number(mStr), d = Number(dStr);
+                const hh = Number(hhStr), mm = Number(mmStr);
+                if (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) {
+                  setBirthData({
+                    year: y, month: m, day: d,
+                    hour: Number.isFinite(hh) ? hh : 12,
+                    minute: Number.isFinite(mm) ? mm : 0,
+                    location: bd.city,
+                    latitude: bd.lat ?? 0,
+                    longitude: bd.lon ?? 0,
+                    timezone: bd.timezone ?? 'UTC',
+                  });
+                }
+              } else if (bd.year && bd.month && bd.day) {
+                setBirthData({
+                  year: bd.year,
+                  month: bd.month,
+                  day: bd.day,
+                  hour: bd.hour ?? 12,
+                  minute: bd.minute ?? 0,
+                  location: bd.city,
+                  latitude: bd.lat ?? 0,
+                  longitude: bd.lon ?? 0,
+                  timezone: bd.timezone ?? 'UTC',
+                });
               }
             }
-          } else {
-            setError(result.error || 'failed');
+          } else if (isFailure(result)) {
+            setError(typeof result.error === 'string' ? result.error : 'Failed to load chart');
           }
           return;
         }
-
         if (shouldCalculate || sessionStorage.getItem('birthData')) {
           const raw = sessionStorage.getItem('birthData');
-            if (!raw) return;
-            const parsed = JSON.parse(raw);
-            const [y, m, d] = parsed.date.split('-').map(Number);
-            const [hh, mm] = parsed.time.split(':').map(Number);
-            const birthPayload = {
-              birth_date: parsed.date,
-              birth_time: parsed.time,
-              latitude: parsed.lat || 0,
-              longitude: parsed.lon || 0,
-              city: parsed.location,
-              timezone: parsed.timezone || 'UTC'
-            } as any;
-            const result = await fetchChartDataUnified(birthPayload);
+          if (!raw) return;
+          let parsed: unknown;
+          try { parsed = JSON.parse(raw); } catch { setError('Invalid stored birth data'); return; }
+          if (!parsed || typeof parsed !== 'object') { setError('Malformed birth data'); return; }
+          const rec = toRawBirthData(parsed);
+          const dateStr = rec.birth_date ?? '';
+          const timeStr = rec.birth_time ?? '12:00';
+          const [yStr, mStr, dStr] = dateStr.split('-');
+          const [hhStr, mmStr] = timeStr.split(':');
+          const payload = {
+            year: Number(yStr),
+            month: Number(mStr),
+            day: Number(dStr),
+            hour: Number(hhStr ?? 12),
+            minute: Number(mmStr ?? 0),
+            lat: rec.lat ?? 0,
+            lon: rec.lon ?? 0,
+            city: rec.city ?? 'Unknown',
+            timezone: rec.timezone ?? 'UTC',
+            birth_date: dateStr,
+            birth_time: timeStr,
+          } satisfies ChartBirthData;
+            const result = await fetchChartDataUnified(payload as ChartBirthData);
+            if (!active) return;
             if (result.success) {
-              setChartData(result.data);
-              if (setBirthData) setBirthData({ year: y, month: m, day: d, hour: hh, minute: mm, location: parsed.location, latitude: parsed.lat, longitude: parsed.lon, timezone: parsed.timezone } as any);
-            } else {
-              setError(result.error || 'calc failed');
+              const unifiedData = result.data as ChartData;
+              setChartData(unifiedData);
+              if (setBirthData) {
+                setBirthData({
+                  year: Number(payload.year),
+                  month: Number(payload.month),
+                  day: Number(payload.day),
+                  hour: Number(payload.hour),
+                  minute: Number(payload.minute),
+                  location: payload.city,
+                  latitude: Number(payload.lat),
+                  longitude: Number(payload.lon),
+                  timezone: payload.timezone,
+                });
+              }
+            } else if (!result.success) {
+              setError(typeof result.error === 'string' ? result.error : 'Calculation failed');
             }
             return;
         }
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
-    })();
+    };
+    void run();
+    return () => { active = false; };
   }, [chartId, shouldCalculate, setBirthData]);
 
   const handleSave = useCallback(async () => {
     if (!chartData || !birthData || !user?.uid) return;
     const req: SaveChartRequest = {
-      year: (birthData as any).year,
-      month: (birthData as any).month,
-      day: (birthData as any).day,
-      hour: (birthData as any).hour || 12,
-      minute: (birthData as any).minute || 0,
-      city: (birthData as any).location || 'Unknown',
+      year: birthData.year,
+      month: birthData.month,
+      day: birthData.day,
+      hour: birthData.hour ?? 12,
+      minute: birthData.minute ?? 0,
+      city: typeof (birthData as unknown as { city?: unknown }).city === 'string'
+        ? (birthData as unknown as { city?: string }).city
+        : (typeof birthData.location === 'string' ? birthData.location : 'Unknown'),
       house_system: 'placidus',
       chart_name: 'Test Chart',
-      timezone: (birthData as any).timezone || 'UTC',
-      lat: (birthData as any).latitude || (birthData as any).lat || 0,
-      lon: (birthData as any).longitude || (birthData as any).lon || 0,
+      timezone: birthData.timezone ?? 'UTC',
+      lat: (birthData as unknown as { lat?: number }).lat ?? birthData.latitude ?? 0,
+      lon: (birthData as unknown as { lon?: number }).lon ?? birthData.longitude ?? 0,
     };
-    try { await saveChart(req); } catch { /* ignore for test */ }
+    try { await saveChart(req); } catch { /* swallow for test */ }
   }, [chartData, birthData, user?.uid]);
 
   if (loading) return <div>Loading</div>;
