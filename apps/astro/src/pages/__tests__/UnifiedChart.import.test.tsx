@@ -8,5 +8,7 @@ try {
 }
 
 describe('UnifiedChart import', () => {
-  it('placeholder', () => { expect(true).toBe(true); });
+  it('placeholder', () => {
+    expect(true).toBe(true);
+  });
 });

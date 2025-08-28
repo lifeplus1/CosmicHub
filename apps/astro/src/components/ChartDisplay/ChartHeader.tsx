@@ -19,7 +19,8 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   return (
     <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
       <CardTitle className='text-2xl font-bold text-cosmic-gold'>
-        ✨ {chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart Analysis
+        ✨ {chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart
+        Analysis
       </CardTitle>
       <div className='flex items-center gap-3'>
         <Input

@@ -1,8 +1,17 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import { BirthSummaryHeader } from '../components/ChartDisplay/BirthSummaryHeader';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
-import { useBirthData, type ExtendedBirthData } from '../contexts/BirthDataContext';
+import {
+  useBirthData,
+  type ExtendedBirthData,
+} from '../contexts/BirthDataContext';
 import ChartDisplay from '../components/ChartDisplay/ChartDisplay';
 import type { ChartLike } from '../components/ChartDisplay/normalizeChart';
 import type { ChartBirthData } from '@cosmichub/types';
@@ -10,7 +19,10 @@ import type { ApiResult } from '../services/apiResult';
 import type { ChartData } from '../services/api.types';
 import { componentLogger } from '../utils/componentLogger';
 import { useChartProcessing } from '@cosmichub/hooks';
-import { trackCosmicHubChartCalculation, trackCosmicHubChartView } from '../services/analytics';
+import {
+  trackCosmicHubChartCalculation,
+  trackCosmicHubChartView,
+} from '../services/analytics';
 import { parseBirthParams } from '../utils/birthDataTransforms';
 import { useCanonicalBirthData } from '../hooks/useCanonicalBirthData';
 
@@ -219,8 +231,8 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
     if (parsed === null) {
       return; // Missing or invalid param set -> leave existing state untouched.
     }
-  // Cast raw numeric params to generic incoming shape for context normalization
-  setBirthData(parsed as unknown as Record<string, unknown>);
+    // Cast raw numeric params to generic incoming shape for context normalization
+    setBirthData(parsed as unknown as Record<string, unknown>);
   }, [searchParams, setBirthData]);
 
   const canonicalBirthData = useCanonicalBirthData();
@@ -237,7 +249,11 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
           }
         })
         .catch(err => {
-          componentLogger.error('Chart', 'Failed dynamic import of fetchChartData', err);
+          componentLogger.error(
+            'Chart',
+            'Failed dynamic import of fetchChartData',
+            err
+          );
         });
     }
   }, [fetchFn, fetchImpl]);
@@ -263,10 +279,10 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
         setChartData(result.data);
         trackCosmicHubChartCalculation({
           chart_type: 'natal',
-            calculation_time_ms: calculationTime,
-            success: true,
-            astrology_system: 'western',
-            house_system: 'placidus',
+          calculation_time_ms: calculationTime,
+          success: true,
+          astrology_system: 'western',
+          house_system: 'placidus',
         });
       } else {
         setError(result.error);
@@ -286,7 +302,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
       if (err instanceof Error) {
         componentLogger.error('Chart', 'Error calculating chart', err);
         setError(err.message);
-  trackCosmicHubChartCalculation({
+        trackCosmicHubChartCalculation({
           chart_type: 'natal',
           calculation_time_ms: calculationTime,
           success: false,
@@ -295,8 +311,12 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
         });
       } else {
         componentLogger.error('Chart', 'Error calculating chart', String(err));
-        setError(typeof err === 'string' ? err : 'An error occurred while calculating the chart');
-  trackCosmicHubChartCalculation({
+        setError(
+          typeof err === 'string'
+            ? err
+            : 'An error occurred while calculating the chart'
+        );
+        trackCosmicHubChartCalculation({
           chart_type: 'natal',
           calculation_time_ms: calculationTime,
           success: false,
@@ -418,9 +438,16 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
             },
           ])
         ),
-        houses: processedChart.houses.map((h: ProcessedHouse) => ({ cusp: h.cusp })),
+        houses: processedChart.houses.map((h: ProcessedHouse) => ({
+          cusp: h.cusp,
+        })),
         aspects: processedChart.aspects.map(
-          (a: { planet1: string; planet2: string; type: string; orb: number }) => ({
+          (a: {
+            planet1: string;
+            planet2: string;
+            type: string;
+            orb: number;
+          }) => ({
             planet1: a.planet1,
             planet2: a.planet2,
             type: a.type,

@@ -27,7 +27,10 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
   ) => {
     onSettingsChange({
       ...settings,
-      [category]: { ...(settings[category] as Record<string, unknown>), ...updates },
+      [category]: {
+        ...(settings[category] as Record<string, unknown>),
+        ...updates,
+      },
     });
   };
 
@@ -55,18 +58,19 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
               {/* House System */}
               <div className='mb-4'>
-                <label 
-                  htmlFor="house-system-select-view"
+                <label
+                  htmlFor='house-system-select-view'
                   className='block text-sm font-medium text-cosmic-silver mb-2'
                 >
                   House System
                 </label>
                 <select
-                  id="house-system-select-view"
+                  id='house-system-select-view'
                   value={settings.houseSystem}
                   onChange={e =>
-                    updateSettings({ 
-                      houseSystem: e.target.value as AstrologySettings['houseSystem']
+                    updateSettings({
+                      houseSystem: e.target
+                        .value as AstrologySettings['houseSystem'],
                     })
                   }
                   aria-label='House System Selection'
@@ -94,8 +98,9 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                       value='tropical'
                       checked={settings.zodiacSystem === 'tropical'}
                       onChange={e =>
-                        updateSettings({ 
-                          zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                        updateSettings({
+                          zodiacSystem: e.target
+                            .value as AstrologySettings['zodiacSystem'],
                         })
                       }
                       className='mr-2'
@@ -109,8 +114,9 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                       value='sidereal'
                       checked={settings.zodiacSystem === 'sidereal'}
                       onChange={e =>
-                        updateSettings({ 
-                          zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                        updateSettings({
+                          zodiacSystem: e.target
+                            .value as AstrologySettings['zodiacSystem'],
                         })
                       }
                       className='mr-2'
@@ -134,14 +140,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                 </legend>
                 <div className='grid grid-cols-3 gap-3'>
                   <div>
-                    <label 
-                      htmlFor="major-orbs-view"
+                    <label
+                      htmlFor='major-orbs-view'
                       className='block text-xs text-cosmic-silver/70 mb-1'
                     >
                       Major
                     </label>
                     <input
-                      id="major-orbs-view"
+                      id='major-orbs-view'
                       type='number'
                       min='1'
                       max='15'
@@ -156,14 +162,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                     />
                   </div>
                   <div>
-                    <label 
-                      htmlFor="minor-orbs-view"
+                    <label
+                      htmlFor='minor-orbs-view'
                       className='block text-xs text-cosmic-silver/70 mb-1'
                     >
                       Minor
                     </label>
                     <input
-                      id="minor-orbs-view"
+                      id='minor-orbs-view'
                       type='number'
                       min='1'
                       max='10'
@@ -178,14 +184,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
                     />
                   </div>
                   <div>
-                    <label 
-                      htmlFor="luminaries-orbs-view"
+                    <label
+                      htmlFor='luminaries-orbs-view'
                       className='block text-xs text-cosmic-silver/70 mb-1'
                     >
                       Luminaries
                     </label>
                     <input
-                      id="luminaries-orbs-view"
+                      id='luminaries-orbs-view'
                       type='number'
                       min='1'
                       max='20'
@@ -248,12 +254,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
                 {/* Celestial Bodies - All affect the unified table */}
                 <div>
-                  <div 
+                  <div
                     className='block text-sm font-medium text-cosmic-silver mb-3'
-                    role="group"
-                    aria-labelledby="celestial-bodies-heading"
+                    role='group'
+                    aria-labelledby='celestial-bodies-heading'
                   >
-                    <span id="celestial-bodies-heading">Celestial Bodies to Include</span>
+                    <span id='celestial-bodies-heading'>
+                      Celestial Bodies to Include
+                    </span>
                   </div>
 
                   <div className='grid grid-cols-2 gap-2 text-sm'>
@@ -416,12 +424,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
                 {/* Table Visibility Controls */}
                 <div>
-                  <div 
+                  <div
                     className='block text-sm font-medium text-cosmic-silver mb-3'
-                    role="group"
-                    aria-labelledby="table-visibility-heading"
+                    role='group'
+                    aria-labelledby='table-visibility-heading'
                   >
-                    <span id="table-visibility-heading">Table Visibility Controls</span>
+                    <span id='table-visibility-heading'>
+                      Table Visibility Controls
+                    </span>
                   </div>
 
                   <div className='space-y-2'>
@@ -460,12 +470,14 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
 
                 {/* Basic Display Options */}
                 <div className='mt-4'>
-                  <div 
+                  <div
                     className='block text-sm font-medium text-cosmic-silver mb-2'
-                    role="group"
-                    aria-labelledby="display-preferences-heading"
+                    role='group'
+                    aria-labelledby='display-preferences-heading'
                   >
-                    <span id="display-preferences-heading">Display Preferences</span>
+                    <span id='display-preferences-heading'>
+                      Display Preferences
+                    </span>
                   </div>
                   <div className='grid grid-cols-2 gap-2 text-sm'>
                     <label className='flex items-center'>

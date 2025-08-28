@@ -1,10 +1,10 @@
 {
-  "runId": "run-1756339233665",
+  "runId": "run-1756343357672",
   "agentId": "agent-7-apps-small-packages",
   "agent": "AppsPackagesAgent",
-  "timestamp": "2025-08-28T00:00:45.080Z",
+  "timestamp": "2025-08-28T01:09:29.269Z",
   "success": true,
-  "duration": 11402,
+  "duration": 11583,
   "targets": [
     "apps/healwave/src",
     "apps/mobile/src",
@@ -32,7 +32,7 @@
   ],
   "conflictRisk": "medium",
   "lintOutput": "npm warn Unknown env config \"auto-install-peers\". This will stop working in the next major version of npm.\nnpm warn Unknown project config \"auto-install-peers\". This will stop working in the next major version of npm.\n",
-  "errors": "\n/Users/Chris/Projects/CosmicHub/apps/healwave/src/pwa.ts\n  38:7  warning  Unused eslint-disable directive (no problems were reported from 'no-console')\n\n✖ 1 problem (0 errors, 1 warning)\n  0 errors and 1 warning potentially fixable with the `--fix` option.\n\n",
+  "errors": "\n/Users/Chris/Projects/CosmicHub/apps/healwave/src/pwa.ts\n  42:7  warning  Unused eslint-disable directive (no problems were reported from 'no-console')\n\n✖ 1 problem (0 errors, 1 warning)\n  0 errors and 1 warning potentially fixable with the `--fix` option.\n\n",
   "exitCode": 0,
   "errorCount": 0,
   "warningCount": 1,

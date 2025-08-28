@@ -13,14 +13,19 @@ import type {
 
 // Minimal runtime interfaces for third-party analytics libraries we load dynamically.
 // These purposely model only the subset of methods we actually invoke to keep typing tight.
-interface MixpanelPeople { set?(props: Record<string, unknown>): void }
+interface MixpanelPeople {
+  set?(props: Record<string, unknown>): void;
+}
 interface Mixpanel {
-  init(token: string | undefined, options?: {
-    track_pageview?: boolean;
-    persistence?: string;
-    secure_cookie?: boolean;
-    ip?: boolean;
-  }): void;
+  init(
+    token: string | undefined,
+    options?: {
+      track_pageview?: boolean;
+      persistence?: string;
+      secure_cookie?: boolean;
+      ip?: boolean;
+    }
+  ): void;
   track?(event: string, properties?: Record<string, unknown>): void;
   identify?(id: string): void;
   people?: MixpanelPeople;
@@ -28,11 +33,14 @@ interface Mixpanel {
 }
 
 interface PostHog {
-  init(apiKey: string | undefined, options?: {
-    api_host?: string;
-    disable_session_recording?: boolean;
-    autocapture?: boolean;
-  }): void;
+  init(
+    apiKey: string | undefined,
+    options?: {
+      api_host?: string;
+      disable_session_recording?: boolean;
+      autocapture?: boolean;
+    }
+  ): void;
   capture?(event: string, properties?: Record<string, unknown>): void;
   identify?(id: string, properties?: Record<string, unknown>): void;
   reset?(): void;
@@ -45,7 +53,6 @@ interface SegmentAnalytics {
   track?(event: string, properties?: Record<string, unknown>): void;
 }
 
-
 // Define global types for analytics providers
 declare global {
   interface Window {
@@ -54,10 +61,10 @@ declare global {
     doNotTrack?: string;
     mixpanel?: Mixpanel;
     posthog?: PostHog;
-  analytics?: SegmentAnalytics; // Segment global
-  rudderanalytics?: SegmentAnalytics; // RudderStack global (similar surface)
+    analytics?: SegmentAnalytics; // Segment global
+    rudderanalytics?: SegmentAnalytics; // RudderStack global (similar surface)
   }
-  
+
   interface Navigator {
     msDoNotTrack?: string;
     standalone?: boolean;
@@ -87,10 +94,10 @@ export class AnalyticsService {
     if (!config.privacy.cookieConsent) {
       // Policy: no explicit cookie consent required, enable immediately
       this.consentGranted = true;
-  this.initialize();
+      this.initialize();
     }
-  this.maybeInstallGlobalErrorHandler();
-  this.maybeStartAutoFlush();
+    this.maybeInstallGlobalErrorHandler();
+    this.maybeStartAutoFlush();
   }
 
   private initialize(): void {
@@ -108,8 +115,8 @@ export class AnalyticsService {
     this.initializeGoogleAnalytics();
     void this.initializeMixpanel();
     void this.initializePostHog();
-  void this.initializeSegment();
-  void this.initializeRudderStack();
+    void this.initializeSegment();
+    void this.initializeRudderStack();
     this.isInitialized = true;
     this.flushQueuesIfReady();
   }
@@ -128,32 +135,48 @@ export class AnalyticsService {
 
   private maybeStartAutoFlush(): void {
     const interval = this.config.advanced?.autoFlushIntervalMs;
-  // Disable background interval in non-browser or test environments to avoid hanging processes
-  const isTest = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test');
-  if (!interval || typeof window === 'undefined' || isTest) return;
-  if (this.flushTimer && this.canUseDOM()) window.clearInterval(this.flushTimer);
-  const handle = (globalThis.setInterval ?? window.setInterval)(() => this.flushQueuesIfReady(), interval) as unknown as { unref?: () => void };
-  // Allow Node to exit naturally if supported (no-op in browsers)
-  try { handle.unref?.(); } catch { /* ignore */ }
-  // Store numeric id fallback if DOM typing; we just need to clear via clearInterval later
-  this.flushTimer = (handle as unknown as number);
+    // Disable background interval in non-browser or test environments to avoid hanging processes
+    const isTest =
+      typeof process !== 'undefined' &&
+      process.env &&
+      process.env.NODE_ENV === 'test';
+    if (!interval || typeof window === 'undefined' || isTest) return;
+    if (this.flushTimer && this.canUseDOM())
+      window.clearInterval(this.flushTimer);
+    const handle = (globalThis.setInterval ?? window.setInterval)(
+      () => this.flushQueuesIfReady(),
+      interval
+    ) as unknown as { unref?: () => void };
+    // Allow Node to exit naturally if supported (no-op in browsers)
+    try {
+      handle.unref?.();
+    } catch {
+      /* ignore */
+    }
+    // Store numeric id fallback if DOM typing; we just need to clear via clearInterval later
+    this.flushTimer = handle as unknown as number;
   }
 
   private maybeInstallGlobalErrorHandler(): void {
-    if (!this.config.advanced?.autoTrackErrors || typeof window === 'undefined') return;
+    if (!this.config.advanced?.autoTrackErrors || typeof window === 'undefined')
+      return;
     // Remove existing handler if reinitializing
     if (this.globalErrorHandler) {
-      try { window.removeEventListener('error', this.globalErrorHandler); } catch { /* ignore */ }
+      try {
+        window.removeEventListener('error', this.globalErrorHandler);
+      } catch {
+        /* ignore */
+      }
     }
     this.globalErrorHandler = (event: ErrorEvent) => {
       this.trackError('uncaught_error', event.error ?? event.message);
     };
     window.addEventListener('error', this.globalErrorHandler);
   }
-  
+
   private initializeGoogleAnalytics(): void {
-  if (!this.config.googleAnalytics?.enabled) return;
-  if (typeof document === 'undefined') return; // SSR / test guard
+    if (!this.config.googleAnalytics?.enabled) return;
+    if (typeof document === 'undefined') return; // SSR / test guard
 
     const script = document.createElement('script');
     script.async = true;
@@ -161,7 +184,9 @@ export class AnalyticsService {
     document.head.appendChild(script);
 
     window.dataLayer = window.dataLayer ?? [];
-    function gtag(...args: unknown[]) { window.dataLayer?.push(args) }
+    function gtag(...args: unknown[]) {
+      window.dataLayer?.push(args);
+    }
 
     gtag('js', new Date());
     gtag('config', this.config.googleAnalytics.measurementId, {
@@ -174,7 +199,9 @@ export class AnalyticsService {
   private async initializeMixpanel(): Promise<void> {
     if (!this.config.mixpanel?.enabled) return;
     try {
-      await this.loadScriptOnce('https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js');
+      await this.loadScriptOnce(
+        'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js'
+      );
       const mixpanel = window.mixpanel;
       mixpanel?.init?.(this.config.mixpanel?.token, {
         track_pageview: this.config.mixpanel?.trackPageViews,
@@ -207,7 +234,11 @@ export class AnalyticsService {
   private async initializeSegment(): Promise<void> {
     if (!this.config.segment?.enabled) return;
     try {
-      await this.loadScriptOnce('https://cdn.segment.com/analytics.js/v1/' + this.config.segment.writeKey + '/analytics.min.js');
+      await this.loadScriptOnce(
+        'https://cdn.segment.com/analytics.js/v1/' +
+          this.config.segment.writeKey +
+          '/analytics.min.js'
+      );
       // Segment auto initializes via snippet; no explicit load call needed if CDN includes key path
       this.flushQueuesIfReady();
     } catch (e) {
@@ -218,20 +249,30 @@ export class AnalyticsService {
   private async initializeRudderStack(): Promise<void> {
     if (!this.config.rudderstack?.enabled) return;
     try {
-      await this.loadScriptOnce(this.config.rudderstack.dataPlaneUrl.replace(/\/$/, '') + '/rudder-analytics.min.js');
+      await this.loadScriptOnce(
+        this.config.rudderstack.dataPlaneUrl.replace(/\/$/, '') +
+          '/rudder-analytics.min.js'
+      );
       // RudderStack usually requires load(writeKey, dataPlaneUrl)
-  // RudderStack typical snippet: rudderanalytics.load(WRITE_KEY, DATA_PLANE_URL)
-  const ra: SegmentAnalytics | undefined = window.rudderanalytics;
-  if (ra && typeof ra.load === 'function') {
+      // RudderStack typical snippet: rudderanalytics.load(WRITE_KEY, DATA_PLANE_URL)
+      const ra: SegmentAnalytics | undefined = window.rudderanalytics;
+      if (ra && typeof ra.load === 'function') {
         try {
           // Prefer two-arg form if function length suggests support
-            if (ra.load.length >= 2) {
-              (ra.load as unknown as (w: string, u: string) => void)(this.config.rudderstack.writeKey, this.config.rudderstack.dataPlaneUrl);
-            } else {
-              // If single-arg variant, pass just writeKey (common alt snippet) and rely on dataPlaneUrl from script include
-              (ra.load as unknown as (w: string) => void)(this.config.rudderstack.writeKey);
-            }
-        } catch { /* noop */ }
+          if (ra.load.length >= 2) {
+            (ra.load as unknown as (w: string, u: string) => void)(
+              this.config.rudderstack.writeKey,
+              this.config.rudderstack.dataPlaneUrl
+            );
+          } else {
+            // If single-arg variant, pass just writeKey (common alt snippet) and rely on dataPlaneUrl from script include
+            (ra.load as unknown as (w: string) => void)(
+              this.config.rudderstack.writeKey
+            );
+          }
+        } catch {
+          /* noop */
+        }
       }
       this.flushQueuesIfReady();
     } catch (e) {
@@ -251,24 +292,32 @@ export class AnalyticsService {
 
   private getPlatform(): Platform {
     if (typeof window === 'undefined') return 'web';
-    
+
     // Check if it's a PWA
-    if (window.matchMedia('(display-mode: standalone)').matches || 
-        navigator.standalone) {
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      navigator.standalone
+    ) {
       return 'pwa';
     }
 
     // Check if it's mobile
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    if (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
       return 'mobile';
     }
 
     return 'web';
   }
 
-  public track(event: Omit<AnalyticsEvent, 'session_id' | 'timestamp' | 'platform'>): void {
-  if (!this.canUseDOM()) return; // Skip on server
-  this.ensureSessionFresh();
+  public track(
+    event: Omit<AnalyticsEvent, 'session_id' | 'timestamp' | 'platform'>
+  ): void {
+    if (!this.canUseDOM()) return; // Skip on server
+    this.ensureSessionFresh();
     const analyticsEvent: AnalyticsEvent = {
       ...event,
       session_id: this.sessionId,
@@ -280,16 +329,20 @@ export class AnalyticsService {
       this.pendingEvents.push(analyticsEvent);
       return;
     }
-  this.lastEventTs = analyticsEvent.timestamp;
-  this.dispatchEvent(this.sanitizeEvent(analyticsEvent));
+    this.lastEventTs = analyticsEvent.timestamp;
+    this.dispatchEvent(this.sanitizeEvent(analyticsEvent));
   }
 
   private dispatchEvent(analyticsEvent: AnalyticsEvent): void {
-  if (!this.canUseDOM()) return;
-  // Defensive: ignore empty event names
-  if (!analyticsEvent.event) return;
+    if (!this.canUseDOM()) return;
+    // Defensive: ignore empty event names
+    if (!analyticsEvent.event) return;
     // Google Analytics
-    if (this.config.googleAnalytics?.enabled && this.isInitialized && window.gtag) {
+    if (
+      this.config.googleAnalytics?.enabled &&
+      this.isInitialized &&
+      window.gtag
+    ) {
       window.gtag('event', analyticsEvent.event, {
         event_category: 'engagement',
         event_label: JSON.stringify(analyticsEvent.properties),
@@ -334,19 +387,32 @@ export class AnalyticsService {
       });
     }
 
-    if (this.config.customAnalytics?.enabled) void this.sendToCustomAnalytics(analyticsEvent);
-  // Invoke instrumentation callback last (non-blocking semantics expected)
-  try { this.config.advanced?.onDispatch?.(analyticsEvent); } catch { /* swallow */ }
+    if (this.config.customAnalytics?.enabled)
+      void this.sendToCustomAnalytics(analyticsEvent);
+    // Invoke instrumentation callback last (non-blocking semantics expected)
+    try {
+      this.config.advanced?.onDispatch?.(analyticsEvent);
+    } catch {
+      /* swallow */
+    }
   }
 
   /** Gracefully stop background timers and global handlers (useful for tests / teardown). */
   public shutdown(): void {
     if (this.flushTimer && this.canUseDOM()) {
-      try { window.clearInterval(this.flushTimer); } catch { /* ignore */ }
+      try {
+        window.clearInterval(this.flushTimer);
+      } catch {
+        /* ignore */
+      }
       this.flushTimer = null;
     }
     if (this.globalErrorHandler && this.canUseDOM()) {
-      try { window.removeEventListener('error', this.globalErrorHandler); } catch { /* ignore */ }
+      try {
+        window.removeEventListener('error', this.globalErrorHandler);
+      } catch {
+        /* ignore */
+      }
       this.globalErrorHandler = null;
     }
     this.isInitialized = false;
@@ -354,19 +420,24 @@ export class AnalyticsService {
 
   private sanitizeEvent(e: AnalyticsEvent): AnalyticsEvent {
     // Clone shallow to avoid mutating caller object
-    const props = { ...e.properties } as Record<string, string | number | boolean | null>;
+    const props = { ...e.properties } as Record<
+      string,
+      string | number | boolean | null
+    >;
     const defaultPII = ['email', 'ip', 'ip_address', 'full_name'];
     const extra = this.config.advanced?.piiKeys ?? [];
     for (const key of [...defaultPII, ...extra]) {
       if (key in props) {
         if (key === 'email' && typeof props[key] === 'string') {
           const val = props[key];
-          if (typeof val === 'string' && val.includes('@')) props['email_domain'] = val.split('@')[1] ?? '';
+          if (typeof val === 'string' && val.includes('@'))
+            props['email_domain'] = val.split('@')[1] ?? '';
         }
         delete props[key];
       }
     }
-    if (this.config.privacy.anonymizeIP && 'ip_hash' in props) delete props['ip_hash'];
+    if (this.config.privacy.anonymizeIP && 'ip_hash' in props)
+      delete props['ip_hash'];
     return { ...e, properties: props };
   }
 
@@ -378,27 +449,45 @@ export class AnalyticsService {
   }
 
   /** Convenience wrapper to measure a promise or function and emit timing event */
-  public async withTiming<T>(name: string, fn: () => Promise<T> | T, extra?: Record<string, unknown>): Promise<T> {
+  public async withTiming<T>(
+    name: string,
+    fn: () => Promise<T> | T,
+    extra?: Record<string, unknown>
+  ): Promise<T> {
     const start = performance.now();
     try {
       const result = await fn();
       const duration = performance.now() - start;
       this.track({
         event: 'perf_timing',
-        properties: { label: name, duration_ms: Math.round(duration), success: true, ...(extra ?? {}) }
+        properties: {
+          label: name,
+          duration_ms: Math.round(duration),
+          success: true,
+          ...(extra ?? {}),
+        },
       });
       return result;
     } catch (err) {
       const duration = performance.now() - start;
       this.track({
         event: 'perf_timing',
-        properties: { label: name, duration_ms: Math.round(duration), success: false, error_type: (err as Error).name }
+        properties: {
+          label: name,
+          duration_ms: Math.round(duration),
+          success: false,
+          error_type: (err as Error).name,
+        },
       });
       throw err;
     }
   }
 
-  public trackError(name: string, error: unknown, extra?: Record<string, unknown>): void {
+  public trackError(
+    name: string,
+    error: unknown,
+    extra?: Record<string, unknown>
+  ): void {
     const err = error instanceof Error ? error : new Error(String(error));
     this.track({
       event: 'app_error',
@@ -407,13 +496,13 @@ export class AnalyticsService {
         message: err.message.slice(0, 500),
         error_type: err.name,
         stack_present: !!err.stack,
-        ...(extra ?? {})
-      }
+        ...(extra ?? {}),
+      },
     });
   }
 
   public identify(userId: string, traits: UserTraits): void {
-  if (!this.canUseDOM()) return;
+    if (!this.canUseDOM()) return;
     if (!this.isTrackingEnabled()) {
       this.pendingIdentifies.push({ userId, traits });
       return;
@@ -437,7 +526,16 @@ export class AnalyticsService {
     if (this.config.segment?.enabled && this.isInitialized) {
       const seg = window.analytics;
       if (seg && typeof seg.identify === 'function') {
-        try { (seg.identify as unknown as (id: string, t: Record<string, unknown>) => void)(userId, traits as Record<string, unknown>); } catch { /* noop */ }
+        try {
+          (
+            seg.identify as unknown as (
+              id: string,
+              t: Record<string, unknown>
+            ) => void
+          )(userId, traits as Record<string, unknown>);
+        } catch {
+          /* noop */
+        }
       }
     }
 
@@ -447,7 +545,11 @@ export class AnalyticsService {
     }
 
     // Set user ID for Google Analytics
-    if (this.config.googleAnalytics?.enabled && this.isInitialized && window.gtag) {
+    if (
+      this.config.googleAnalytics?.enabled &&
+      this.isInitialized &&
+      window.gtag
+    ) {
       window.gtag('config', this.config.googleAnalytics.measurementId, {
         user_id: userId,
       });
@@ -465,12 +567,16 @@ export class AnalyticsService {
         ...properties,
         path: properties.path ?? window.location.pathname,
         title: properties.title ?? document.title,
-        referrer: properties.referrer ?? (document.referrer || undefined)
+        referrer: properties.referrer ?? (document.referrer || undefined),
       } as PageProperties;
     }
 
     // Track page view with Google Analytics
-    if (this.config.googleAnalytics?.enabled && this.isInitialized && window.gtag) {
+    if (
+      this.config.googleAnalytics?.enabled &&
+      this.isInitialized &&
+      window.gtag
+    ) {
       window.gtag('config', this.config.googleAnalytics.measurementId, {
         page_title: properties.title,
         page_location: properties.path,
@@ -478,7 +584,11 @@ export class AnalyticsService {
     }
 
     // Track page view with Mixpanel
-    if (this.config.mixpanel?.enabled && this.isInitialized && this.config.mixpanel.trackPageViews) {
+    if (
+      this.config.mixpanel?.enabled &&
+      this.isInitialized &&
+      this.config.mixpanel.trackPageViews
+    ) {
       const mixpanel = window.mixpanel;
       mixpanel?.track?.('Page View', {
         page_name: name,
@@ -499,7 +609,16 @@ export class AnalyticsService {
     if (this.config.segment?.enabled && this.isInitialized) {
       const seg = window.analytics;
       if (seg && typeof seg.page === 'function') {
-        try { (seg.page as unknown as (n?: string, p?: Record<string, unknown>) => void)(name, { ...properties }); } catch { /* noop */ }
+        try {
+          (
+            seg.page as unknown as (
+              n?: string,
+              p?: Record<string, unknown>
+            ) => void
+          )(name, { ...properties });
+        } catch {
+          /* noop */
+        }
       }
     }
 
@@ -554,34 +673,53 @@ export class AnalyticsService {
   }
 
   /** Manually flush queued operations regardless of consent (if tracking becomes enabled afterward). */
-  public flush(): void { this.flushQueuesIfReady(); }
+  public flush(): void {
+    this.flushQueuesIfReady();
+  }
 
   /** Temporarily disable tracking (opt-out runtime). */
-  public disable(): void { this.consentGranted = false; }
+  public disable(): void {
+    this.consentGranted = false;
+  }
 
   /** Re-enable tracking (only applies if consent not required or already granted). */
-  public enable(): void { if (!this.config.privacy.cookieConsent || this.consentGranted) this.initialize(); }
+  public enable(): void {
+    if (!this.config.privacy.cookieConsent || this.consentGranted)
+      this.initialize();
+  }
 
   // ==== Internal queue helpers ====
   private async loadScriptOnce(src: string): Promise<void> {
-    if (AnalyticsService.scriptPromises[src]) return AnalyticsService.scriptPromises[src];
-    AnalyticsService.scriptPromises[src] = new Promise<void>((resolve, reject) => {
-      try {
-  if (typeof document === 'undefined') { resolve(); return; }
-        const existing = Array.from(document.getElementsByTagName('script')).find(s => s.src === src);
-        if (existing) {
-            existing.addEventListener('load', () => resolve());
-            existing.addEventListener('error', () => reject(new Error(`Script failed: ${src}`)));
+    if (AnalyticsService.scriptPromises[src])
+      return AnalyticsService.scriptPromises[src];
+    AnalyticsService.scriptPromises[src] = new Promise<void>(
+      (resolve, reject) => {
+        try {
+          if (typeof document === 'undefined') {
+            resolve();
             return;
+          }
+          const existing = Array.from(
+            document.getElementsByTagName('script')
+          ).find(s => s.src === src);
+          if (existing) {
+            existing.addEventListener('load', () => resolve());
+            existing.addEventListener('error', () =>
+              reject(new Error(`Script failed: ${src}`))
+            );
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = src;
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error(`Script failed: ${src}`));
+          document.head.appendChild(script);
+        } catch (e) {
+          reject(e as Error);
         }
-        const script = document.createElement('script');
-        script.src = src;
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Script failed: ${src}`));
-        document.head.appendChild(script);
-      } catch (e) { reject(e as Error) }
-    });
+      }
+    );
     return AnalyticsService.scriptPromises[src];
   }
 
@@ -590,7 +728,7 @@ export class AnalyticsService {
     if (this.pendingEvents.length) {
       const events = [...this.pendingEvents];
       this.pendingEvents.length = 0;
-  events.forEach(e => this.dispatchEvent(this.sanitizeEvent(e)));
+      events.forEach(e => this.dispatchEvent(this.sanitizeEvent(e)));
     }
     if (this.pendingIdentifies.length) {
       const arr = [...this.pendingIdentifies];
@@ -608,7 +746,9 @@ export class AnalyticsService {
 // Singleton instance
 let analyticsInstance: AnalyticsService | null = null;
 
-export const initializeAnalytics = (config: AnalyticsConfig): AnalyticsService => {
+export const initializeAnalytics = (
+  config: AnalyticsConfig
+): AnalyticsService => {
   analyticsInstance = new AnalyticsService(config);
   return analyticsInstance;
 };

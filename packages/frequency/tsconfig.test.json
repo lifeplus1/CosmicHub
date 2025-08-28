@@ -1,10 +1,8 @@
 {
   "extends": "../../tsconfig.test.base.json",
-  "compilerOptions": { "noEmit": true },
   "include": [
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx"
+    "src/**/__tests__/**/*.{ts,tsx}",
+    "src/**/*.test.{ts,tsx}",
+    "src/**/*.spec.{ts,tsx}"
   ]
 }

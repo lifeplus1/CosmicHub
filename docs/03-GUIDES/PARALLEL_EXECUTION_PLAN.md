@@ -2,7 +2,7 @@
 
 **Date**: August 26, 2025  
 **Context**: Immediate next steps after successful endpoint consolidation  
-**Strategy**: Maximize efficiency through parallel task execution  
+**Strategy**: Maximize efficiency through parallel task execution
 
 ## 🎯 **Parallel Execution Strategy**
 
@@ -19,11 +19,11 @@
    ```bash
    # Start dev server if not running
    npm run dev-frontend
-   
+
    # Manual testing sequence:
    # 1. Navigate to SimpleBirthForm
    # 2. Enter test birth data
-   # 3. Submit form → should redirect to /chart?calculate=true  
+   # 3. Submit form → should redirect to /chart?calculate=true
    # 4. Verify chart displays with raw backend data
    # 5. Check browser network tab for /api/charts/unified calls
    ```
@@ -33,7 +33,7 @@
    ```bash
    # Check browser console for:
    # - Raw backend response (__raw_backend_response field)
-   # - useChartProcessing hook normalization  
+   # - useChartProcessing hook normalization
    # - No errors in chart rendering
    ```
 
@@ -59,7 +59,7 @@
    ```bash
    # Search for ChartResults.tsx usage
    grep -r "ChartResults" apps/astro/src/
-   
+
    # If no active usage, remove file
    rm apps/astro/src/pages/ChartResults.tsx
    ```
@@ -70,7 +70,7 @@
    # Search for /chart-results references
    grep -r "chart-results" apps/astro/src/
    grep -r "/chart-results" apps/astro/src/
-   
+
    # Update any remaining hardcoded references
    ```
 
@@ -79,7 +79,7 @@
    ```bash
    # Search for unused ChartResults imports
    grep -r "import.*ChartResults" apps/astro/src/
-   
+
    # Remove unused imports
    ```
 
@@ -112,7 +112,7 @@
    ```bash
    # Check backend logs for endpoint registration
    grep -i "unified" backend/app.log
-   
+
    # Verify endpoint shows in FastAPI docs
    # Visit: http://localhost:8000/docs
    ```
@@ -122,7 +122,7 @@
 ```text
 Time: 0 min    Start all tracks simultaneously
 ├── Track 1: Launch dev server + start manual testing
-├── Track 2: Begin file search and cleanup  
+├── Track 2: Begin file search and cleanup
 └── Track 3: Test unified endpoint directly
 
 Time: 15 min   Check progress
@@ -132,7 +132,7 @@ Time: 15 min   Check progress
 
 Time: 30 min   Completion check
 ├── Track 1: Complete validation, document any issues
-├── Track 2: Complete cleanup, verify no broken references  
+├── Track 2: Complete cleanup, verify no broken references
 └── Track 3: Complete backend verification
 
 Time: 45 min   Consolidation and reporting
@@ -151,7 +151,7 @@ Time: 45 min   Consolidation and reporting
 ### ✅ **Track 2 Completion Criteria:**
 
 - [ ] Unused ChartResults.tsx removed (if safe)
-- [ ] No remaining /chart-results references  
+- [ ] No remaining /chart-results references
 - [ ] No broken import statements
 - [ ] Clean codebase with no orphaned files
 

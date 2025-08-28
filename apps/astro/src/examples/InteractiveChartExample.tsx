@@ -34,7 +34,7 @@ const sampleUnifiedBirthData: UnifiedBirthData = {
   lon: -74.006,
 };
 
-// Convert to ExtendedBirthData format for chart operations  
+// Convert to ExtendedBirthData format for chart operations
 const sampleExtendedBirthData = {
   birth_date: '06/15/1990',
   birth_time: '14:30',
@@ -87,12 +87,16 @@ export const InteractiveChartExample: React.FC = () => {
     const syncService = getChartSyncService();
 
     try {
-      await syncService.registerChart('example-chart', sampleExtendedBirthData, {
-        enableTransitUpdates: true,
-        enableProgressions: false,
-        aspectAlerts: true,
-        updateInterval: 1, // 1 minute for demo
-      });
+      await syncService.registerChart(
+        'example-chart',
+        sampleExtendedBirthData,
+        {
+          enableTransitUpdates: true,
+          enableProgressions: false,
+          aspectAlerts: true,
+          updateInterval: 1, // 1 minute for demo
+        }
+      );
 
       setChartRegistered(true);
 

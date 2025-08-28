@@ -1,18 +1,11 @@
 {
+  "extends": "../../tsconfig.test.base.json",
+  "include": [
+    "src/**/__tests__/**/*.{ts,tsx}",
+    "src/**/*.test.{ts,tsx}",
+    "src/**/*.spec.{ts,tsx}"
+  ],
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "outDir": "./test-dist",
-    "rootDir": "./src",
-    "declaration": true,
-    "sourceMap": true,
-    "noEmit": false,
-    "strict": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test-dist"]
+    "moduleResolution": "node"
+  }
 }

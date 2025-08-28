@@ -130,13 +130,15 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({
             <button
               className='mt-4 cosmic-button'
               onClick={() =>
-                onCalculate(toTextBirthData({
-                  year: 2000,
-                  month: 1,
-                  day: 1,
-                  hour: 0,
-                  minute: 0,
-                }))
+                onCalculate(
+                  toTextBirthData({
+                    year: 2000,
+                    month: 1,
+                    day: 1,
+                    hour: 0,
+                    minute: 0,
+                  })
+                )
               }
             >
               🧬 Calculate Human Design

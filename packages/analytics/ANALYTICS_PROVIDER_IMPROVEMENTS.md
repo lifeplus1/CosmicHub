@@ -2,7 +2,8 @@
 
 ## Overview
 
-Enhanced the AnalyticsProvider component to properly handle singleton pattern and improve performance.
+Enhanced the AnalyticsProvider component to properly handle singleton pattern and improve
+performance.
 
 ## Changes Made
 
@@ -55,11 +56,7 @@ const config = {
 };
 
 function App() {
-  return (
-    <AnalyticsProvider config={config}>
-      {/* Your app components */}
-    </AnalyticsProvider>
-  );
+  return <AnalyticsProvider config={config}>{/* Your app components */}</AnalyticsProvider>;
 }
 ```
 

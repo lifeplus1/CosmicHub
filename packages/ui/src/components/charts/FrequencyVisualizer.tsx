@@ -18,7 +18,6 @@ export const FrequencyVisualizer: React.FC<FrequencyVisualizerProps> = ({
   isPlaying = false,
   className = '',
 }) => {
-
   return (
     <div className={`frequency-visualizer ${className}`}>
       <div className='visualizer-container p-4 border rounded-lg'>

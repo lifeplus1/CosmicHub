@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getCelestialBodyCategory, isPlanetForDisplay, isAsteroid, isPoint } from '../celestialBodyCategorization';
+import {
+  getCelestialBodyCategory,
+  isPlanetForDisplay,
+  isAsteroid,
+  isPoint,
+} from '../celestialBodyCategorization';
 
 describe('celestialBodyCategorization', () => {
   it('categorizes traditional planets', () => {

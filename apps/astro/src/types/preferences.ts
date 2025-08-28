@@ -1,4 +1,3 @@
-
 // Chart Preferences Types
 
 export type HouseSystem = 'placidus' | 'whole-sign' | 'equal-house';

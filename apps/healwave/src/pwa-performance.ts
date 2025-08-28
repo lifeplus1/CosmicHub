@@ -24,7 +24,7 @@ class PWALogger {
 
 function initializeHealWavePerformance(): void {
   PWALogger.log('Initializing HealWave performance optimizations');
-  
+
   // Add performance initialization logic here
   // This would include:
   // - Service worker registration

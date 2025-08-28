@@ -35,7 +35,9 @@ import { default as _AspectTable } from './tables/AspectTable';
 import HouseTable, { type HouseRow } from './tables/HouseTable';
 import AngleTable, { type AngleRow } from './tables/AngleTable';
 import AsteroidTable, { type AsteroidRow } from './tables/AsteroidTable';
-import EnhancedAspectTable, { type AspectType } from './tables/EnhancedAspectTable';
+import EnhancedAspectTable, {
+  type AspectType,
+} from './tables/EnhancedAspectTable';
 // AI-001 Enhanced Components
 import { AI001Dashboard as _AI001Dashboard } from '../AI001/AI001Dashboard';
 import { useAI001Analysis as _useAI001Analysis } from '../../services/ai-001-enhanced';
@@ -466,7 +468,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
           'cosmichub-astrology-settings'
         );
         if (savedSettings) {
-          const parsed = JSON.parse(savedSettings) as Partial<AstrologySettings>;
+          const parsed = JSON.parse(
+            savedSettings
+          ) as Partial<AstrologySettings>;
           // Merge with defaults to handle version updates
           return { ...defaultAstrologySettings, ...parsed };
         }
@@ -571,10 +575,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
     log.debug('🔄 ChartDisplay: chartData useMemo triggered');
     log.debug('  - chart prop:', chart ? 'provided' : 'null');
-    log.debug(
-      '  - fetchedChartData:',
-      fetchedChartData ? 'available' : 'null'
-    );
+    log.debug('  - fetchedChartData:', fetchedChartData ? 'available' : 'null');
     log.debug('  - providedData:', providedData ? 'available' : 'null');
 
     // TEMPORARY DEBUG: Log data source for troubleshooting
@@ -582,10 +583,16 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       window.console.group('🔍 ChartDisplay Data Source Debug');
       window.console.log('Chart prop provided:', !!chart);
       window.console.log('Fetched chart data available:', !!fetchedChartData);
-      window.console.log('Data source:', chart ? 'DIRECT_PROP' : fetchedChartData ? 'SAVED_CHART' : 'NONE');
+      window.console.log(
+        'Data source:',
+        chart ? 'DIRECT_PROP' : fetchedChartData ? 'SAVED_CHART' : 'NONE'
+      );
       if (providedData) {
         window.console.log('Provided data keys:', Object.keys(providedData));
-        window.console.log('Has __raw_backend_response:', !!(providedData as Record<string, unknown>).__raw_backend_response);
+        window.console.log(
+          'Has __raw_backend_response:',
+          !!(providedData as Record<string, unknown>).__raw_backend_response
+        );
       }
       window.console.groupEnd();
     }
@@ -608,7 +615,10 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       hasContent: hasChartContent(providedData as ChartLike),
     });
 
-    if (!isChartLike(providedData as ChartLike) || !hasChartContent(providedData as ChartLike)) {
+    if (
+      !isChartLike(providedData as ChartLike) ||
+      !hasChartContent(providedData as ChartLike)
+    ) {
       log.debug(
         '🚨 ChartDisplay: Invalid chart data structure, using sample data'
       );
@@ -619,9 +629,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     log.debug('🔍 ChartDisplay: Validating chart...');
     const validatedChart = validateChart(providedData as ChartLike);
     if (validatedChart === null || typeof validatedChart !== 'object') {
-      log.debug(
-        '🚨 ChartDisplay: Chart validation failed, using sample data'
-      );
+      log.debug('🚨 ChartDisplay: Chart validation failed, using sample data');
       log.warn('Chart validation failed, using sample data');
       return sampleData;
     }
@@ -668,7 +676,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
         window.console.log('ChartData keys:', Object.keys(chartData));
         window.console.log('ChartData type check results:', {
           isChartLike: isChartLike(chartData),
-          hasContent: hasChartContent(chartData)
+          hasContent: hasChartContent(chartData),
         });
         window.console.groupEnd();
       }
@@ -734,7 +742,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
       // TEMPORARY: Debug actual data structure for troubleshooting
       if (sections.planets.length === 0 && sections.aspects.length > 0) {
-        log.debug('🔍 Data Issue: No planets but aspects exist - possible data structure problem');
+        log.debug(
+          '🔍 Data Issue: No planets but aspects exist - possible data structure problem'
+        );
       }
 
       // Return early if no search term filtering will be applied later
@@ -881,13 +891,14 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
         aspect: aspect.type,
         aspectType: aspect.type.toLowerCase() as AspectType,
         orb: aspect.orb,
-        strength: Math.abs(aspect.orb) < 1
-          ? ('exact' as const)
-          : Math.abs(aspect.orb) < 2
-            ? ('strong' as const)
-            : Math.abs(aspect.orb) < 4
-              ? ('moderate' as const)
-              : ('weak' as const),
+        strength:
+          Math.abs(aspect.orb) < 1
+            ? ('exact' as const)
+            : Math.abs(aspect.orb) < 2
+              ? ('strong' as const)
+              : Math.abs(aspect.orb) < 4
+                ? ('moderate' as const)
+                : ('weak' as const),
         applying: (() => {
           if (typeof aspect.applying === 'boolean') {
             return aspect.applying;
@@ -1775,7 +1786,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                     <CardContent className='p-0'>
                       <div className='p-6 text-center text-cosmic-silver'>
                         <p className='mb-4'>🚀 AI-001 Analysis</p>
-                        <p className='text-sm'>Chart analysis features coming soon...</p>
+                        <p className='text-sm'>
+                          Chart analysis features coming soon...
+                        </p>
                       </div>
                     </CardContent>
                   )}

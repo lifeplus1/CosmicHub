@@ -25,8 +25,14 @@ export function VirtualizedList<T>({
   const [scrollTop, setScrollTop] = useState(0);
   const totalHeight = items.length * itemHeight;
   const itemsPerViewport = Math.ceil(height / itemHeight);
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscanCount);
-  const endIndex = Math.min(items.length, startIndex + itemsPerViewport + overscanCount * 2);
+  const startIndex = Math.max(
+    0,
+    Math.floor(scrollTop / itemHeight) - overscanCount
+  );
+  const endIndex = Math.min(
+    items.length,
+    startIndex + itemsPerViewport + overscanCount * 2
+  );
   const visible = items.slice(startIndex, endIndex);
 
   const onScroll = useCallback(() => {
@@ -45,20 +51,36 @@ export function VirtualizedList<T>({
   return (
     <div
       ref={containerRef}
-      data-style={JSON.stringify({ position: 'relative', height, width, overflowY: 'auto' })}
+      data-style={JSON.stringify({
+        position: 'relative',
+        height,
+        width,
+        overflowY: 'auto',
+      })}
       className={className ?? ''}
       role='list'
       aria-label={ariaLabel}
     >
-      <div data-style={JSON.stringify({ height: totalHeight, position: 'relative' })}>
+      <div
+        data-style={JSON.stringify({
+          height: totalHeight,
+          position: 'relative',
+        })}
+      >
         {visible.map((item, i) => {
           const index = startIndex + i;
           const top = index * itemHeight;
-            return (
+          return (
             <div
               key={index}
               role='listitem'
-              data-style={JSON.stringify({ position: 'absolute', top, left: 0, right: 0, height: itemHeight })}
+              data-style={JSON.stringify({
+                position: 'absolute',
+                top,
+                left: 0,
+                right: 0,
+                height: itemHeight,
+              })}
             >
               {render(item, index)}
             </div>

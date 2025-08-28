@@ -74,7 +74,9 @@
 
 ## 🏆 Architecture Impact
 
-This consolidation validates the **HOOKS-002** design decision to implement multi-source normalization in `useChartProcessing.ts`. The hook's ability to handle different endpoint formats made this transition seamless, with zero impact on completed tasks:
+This consolidation validates the **HOOKS-002** design decision to implement multi-source
+normalization in `useChartProcessing.ts`. The hook's ability to handle different endpoint formats
+made this transition seamless, with zero impact on completed tasks:
 
 - **PERF-001** ✅ - Performance optimizations unaffected
 - **UX-001** ✅ - UI/UX enhancements work with unified data flow

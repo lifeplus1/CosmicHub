@@ -414,8 +414,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
       {
         name: 'sufficient_houses',
         validator: (data: ChartData) => {
-          if (!data?.houses || !Array.isArray(data.houses))
-            return false;
+          if (!data?.houses || !Array.isArray(data.houses)) return false;
           return data.houses.length >= 12;
         },
         message: 'Chart should have at least 12 houses',

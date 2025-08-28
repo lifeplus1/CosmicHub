@@ -1,20 +1,32 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getCapabilities, onCapabilitiesChange, refreshCapabilities, __resetCapabilitiesForTests } from './capabilities';
+import {
+  getCapabilities,
+  onCapabilitiesChange,
+  refreshCapabilities,
+  __resetCapabilitiesForTests,
+} from './capabilities';
 
 // Ensure a DOM exists (Vitest jsdom usually provides this; fallback for safety)
 if (typeof window === 'undefined') {
   const { JSDOM } = require('jsdom');
-  const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
+  const dom = new JSDOM(
+    '<!doctype html><html><head></head><body></body></html>'
+  );
   // @ts-ignore
   global.window = dom.window;
   // @ts-ignore
   global.document = dom.window.document;
-  Object.defineProperty(global, 'navigator', { value: dom.window.navigator, configurable: true });
+  Object.defineProperty(global, 'navigator', {
+    value: dom.window.navigator,
+    configurable: true,
+  });
 }
 
 // Keep tests simple: rely on ambient (jsdom) environment; avoid complex matchMedia mutation.
 
-beforeEach(() => { __resetCapabilitiesForTests(); });
+beforeEach(() => {
+  __resetCapabilitiesForTests();
+});
 
 describe('capabilities singleton', () => {
   it('returns a frozen snapshot', () => {
@@ -25,7 +37,9 @@ describe('capabilities singleton', () => {
 
   it('emits change asynchronously (microtask) on refresh', async () => {
     let syncCalled = false;
-    onCapabilitiesChange(() => { syncCalled = true; });
+    onCapabilitiesChange(() => {
+      syncCalled = true;
+    });
     refreshCapabilities();
     expect(syncCalled).toBe(false); // should not be synchronous
     await Promise.resolve();

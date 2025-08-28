@@ -134,7 +134,7 @@ const OfflineChartDemo: React.FC = () => {
       const chart = await loadChart(chartId);
       setSelectedChart({
         ...chart,
-        metadata: (chart.metadata as Record<string, unknown>) || {}
+        metadata: (chart.metadata as Record<string, unknown>) || {},
       });
     } catch (err) {
       alert(
@@ -446,7 +446,7 @@ const OfflineChartDemo: React.FC = () => {
             <div className='flex items-center justify-between mb-6'>
               <h2 className='text-2xl font-bold text-white'>
                 📈 Chart Details:{' '}
-                {typeof selectedChart.metadata.name === 'string' 
+                {typeof selectedChart.metadata.name === 'string'
                   ? selectedChart.metadata.name
                   : 'Unknown'}
               </h2>

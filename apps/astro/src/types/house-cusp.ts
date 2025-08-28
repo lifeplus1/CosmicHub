@@ -23,7 +23,7 @@ export const isHouseCusp = (obj: unknown): obj is HouseCusp => {
     typeof obj === 'object' &&
     obj !== null &&
     (typeof (obj as HouseCusp).number === 'number' ||
-     typeof (obj as HouseCusp).cusp === 'number')
+      typeof (obj as HouseCusp).cusp === 'number')
   );
 };
 

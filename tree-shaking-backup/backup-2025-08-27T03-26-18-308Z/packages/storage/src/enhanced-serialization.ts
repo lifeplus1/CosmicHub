@@ -84,7 +84,11 @@ export class EnhancedChartSerializer {
 
     return {
       planets,
-      houses: (data.houses ?? []).map((h: HouseData) => [h.number, h.cusp, h.sign]),
+      houses: (data.houses ?? []).map((h: HouseData) => [
+        h.number,
+        h.cusp,
+        h.sign,
+      ]),
       aspects: (data.aspects ?? []).map((a: AspectData) => [
         planetNames.indexOf(a.point1),
         planetNames.indexOf(a.point2),

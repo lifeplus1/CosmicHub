@@ -15,63 +15,63 @@
  * - Explicit null checks over boolean expressions
  */
 interface ProcessedPlanet {
-    name: string;
-    sign: string;
-    degree: number;
-    house: string;
-    position: number;
-    retrograde: boolean;
-    aspects: unknown[];
+  name: string;
+  sign: string;
+  degree: number;
+  house: string;
+  position: number;
+  retrograde: boolean;
+  aspects: unknown[];
 }
 interface ProcessedAsteroid {
-    name: string;
-    sign: string;
-    degree: number;
-    house: string;
-    position?: number;
+  name: string;
+  sign: string;
+  degree: number;
+  house: string;
+  position?: number;
 }
 interface ProcessedHouse {
-    house: number;
-    number: number;
-    cusp: number;
-    sign: string;
-    degree: number;
-    ruler: string;
+  house: number;
+  number: number;
+  cusp: number;
+  sign: string;
+  degree: number;
+  ruler: string;
 }
 interface ProcessedAspect {
-    planet1: string;
-    planet2: string;
-    type: string;
-    orb: number;
-    applying: string;
+  planet1: string;
+  planet2: string;
+  type: string;
+  orb: number;
+  applying: string;
 }
 interface ProcessedAngle {
-    name: string;
-    sign: string;
-    degree: number;
-    position: number;
+  name: string;
+  sign: string;
+  degree: number;
+  position: number;
 }
 interface ProcessedChartData {
-    planets: ProcessedPlanet[];
-    asteroids: ProcessedAsteroid[];
-    angles: ProcessedAngle[];
-    houses: ProcessedHouse[];
-    aspects: ProcessedAspect[];
-    points: ProcessedPlanet[];
-    source: 'new_calculation' | 'saved_chart' | 'unknown';
-    hasRawBackend: boolean;
-    debug: {
-        originalKeys: string[];
-        backendKeys: string[];
-        dataStructure: string;
-        asteroidCount: number;
-        pointCount: number;
-    };
+  planets: ProcessedPlanet[];
+  asteroids: ProcessedAsteroid[];
+  angles: ProcessedAngle[];
+  houses: ProcessedHouse[];
+  aspects: ProcessedAspect[];
+  points: ProcessedPlanet[];
+  source: 'new_calculation' | 'saved_chart' | 'unknown';
+  hasRawBackend: boolean;
+  debug: {
+    originalKeys: string[];
+    backendKeys: string[];
+    dataStructure: string;
+    asteroidCount: number;
+    pointCount: number;
+  };
 }
 interface UseChartProcessingOptions {
-    enableDebug?: boolean;
-    fallbackToSample?: boolean;
-    useModernRulers?: boolean;
+  enableDebug?: boolean;
+  fallbackToSample?: boolean;
+  useModernRulers?: boolean;
 }
 /**
  * Centralized chart data processing hook
@@ -81,5 +81,8 @@ interface UseChartProcessingOptions {
  * - /api/charts/ endpoint returns transformed data WITHOUT __raw_backend_response
  * - Processing needs raw backend data for proper categorization
  */
-export declare function useChartProcessing(chartData: unknown, options?: UseChartProcessingOptions): ProcessedChartData;
+export declare function useChartProcessing(
+  chartData: unknown,
+  options?: UseChartProcessingOptions
+): ProcessedChartData;
 export type { ProcessedChartData, UseChartProcessingOptions };

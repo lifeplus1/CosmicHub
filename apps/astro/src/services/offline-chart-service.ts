@@ -4,7 +4,12 @@
  */
 
 import type { ChartData } from '@/types';
-import { OfflineChartStorage, OfflineSyncManager, type OfflineChart, type OfflineSyncItem } from '@cosmichub/storage';
+import {
+  OfflineChartStorage,
+  OfflineSyncManager,
+  type OfflineChart,
+  type OfflineSyncItem,
+} from '@cosmichub/storage';
 import {
   fetchSavedCharts,
   saveChart as apiSaveChart,
@@ -91,7 +96,9 @@ export class OfflineChartService {
   /**
    * Handle messages from service worker
    */
-  private handleServiceWorkerMessage(event: MessageEvent<ServiceWorkerMessage>) {
+  private handleServiceWorkerMessage(
+    event: MessageEvent<ServiceWorkerMessage>
+  ) {
     const { type, payload } = event.data;
 
     switch (type) {
@@ -154,7 +161,6 @@ export class OfflineChartService {
             lon: params.birthData.location.longitude,
           };
 
-           
           const apiResult = await apiSaveChart(saveRequest);
 
           if (!isSuccess(apiResult)) {
@@ -254,7 +260,8 @@ export class OfflineChartService {
         // Convert the OfflineChart format to expected format
         const params: ChartCalculationParams = {
           name: cachedChart.name,
-          birthData: cachedChart.birth_data as ChartCalculationParams['birthData'], // Type conversion needed
+          birthData:
+            cachedChart.birth_data as ChartCalculationParams['birthData'], // Type conversion needed
           systems: [],
           houses: 'placidus',
           aspects: [],
@@ -282,7 +289,7 @@ export class OfflineChartService {
     }
   }
 
-    /**
+  /**
    * List saved charts with offline support
    */
   async listCharts(): Promise<
@@ -308,32 +315,39 @@ export class OfflineChartService {
       try {
         // Try to get online charts if available
         if (typeof window !== 'undefined' && navigator.onLine) {
-           
           const chartsResult = await fetchSavedCharts();
-           
+
           if (isSuccess(chartsResult)) {
             onlineCharts = chartsResult.data;
           }
         }
       } catch (error) {
-        console.warn('Failed to load online charts, using offline only:', error);
+        console.warn(
+          'Failed to load online charts, using offline only:',
+          error
+        );
       }
 
       // Always get offline charts
-      offlineCharts = this.userId ? await this.storage.getUserCharts(this.userId) : [];
+      offlineCharts = this.userId
+        ? await this.storage.getUserCharts(this.userId)
+        : [];
 
       // Combine and deduplicate charts
-      const chartMap = new Map<string, {
-        id: string;
-        name: string;
-        createdAt: string;
-        updatedAt: string;
-        synced: boolean;
-        fromCache?: boolean;
-      }>();
+      const chartMap = new Map<
+        string,
+        {
+          id: string;
+          name: string;
+          createdAt: string;
+          updatedAt: string;
+          synced: boolean;
+          fromCache?: boolean;
+        }
+      >();
 
       // Add online charts first (they take precedence for syncing)
-      onlineCharts.forEach((chart) => {
+      onlineCharts.forEach(chart => {
         chartMap.set(chart.id, {
           id: chart.id,
           name: chart.name,
@@ -345,7 +359,7 @@ export class OfflineChartService {
       });
 
       // Add offline charts (won't overwrite existing online charts due to Map)
-      offlineCharts.forEach((chart) => {
+      offlineCharts.forEach(chart => {
         if (!chartMap.has(chart.id)) {
           chartMap.set(chart.id, {
             id: chart.id,
@@ -358,13 +372,17 @@ export class OfflineChartService {
         }
       });
 
-      return Array.from(chartMap.values()).sort(
-        (a, b) => {
-          const dateA = typeof a.updatedAt === 'string' ? new Date(a.updatedAt) : new Date(a.updatedAt);
-          const dateB = typeof b.updatedAt === 'string' ? new Date(b.updatedAt) : new Date(b.updatedAt);
-          return dateB.getTime() - dateA.getTime();
-        }
-      );
+      return Array.from(chartMap.values()).sort((a, b) => {
+        const dateA =
+          typeof a.updatedAt === 'string'
+            ? new Date(a.updatedAt)
+            : new Date(a.updatedAt);
+        const dateB =
+          typeof b.updatedAt === 'string'
+            ? new Date(b.updatedAt)
+            : new Date(b.updatedAt);
+        return dateB.getTime() - dateA.getTime();
+      });
     } catch (error) {
       console.error('❌ Failed to list charts:', error);
       throw new Error('Failed to load chart list');
@@ -381,10 +399,8 @@ export class OfflineChartService {
       // Try online delete first
       if (navigator.onLine && !chartId.startsWith('offline_')) {
         try {
-           
           const apiResult = await apiDeleteChart(toChartId(chartId));
 
-           
           if (isSuccess(apiResult)) {
             // Remove from local cache
             await this.storage.deleteChart(chartId);
@@ -478,17 +494,17 @@ export class OfflineChartService {
     exportData: string
   ): Promise<{ imported: number; errors: number }> {
     try {
-      const data = JSON.parse(exportData) as { 
+      const data = JSON.parse(exportData) as {
         charts: unknown[];
         syncItems?: unknown[];
       };
-      
+
       // Ensure the data has the required structure
       const importData = {
         charts: (data.charts ?? []) as OfflineChart[],
         syncItems: (data.syncItems ?? []) as OfflineSyncItem[],
       };
-      
+
       await this.storage.importData(importData);
       return {
         imported: data.charts?.length ?? 0,
@@ -577,10 +593,12 @@ if (typeof window !== 'undefined') {
   // Hook into your existing auth state changes
   interface WindowWithAuth extends Window {
     auth?: {
-      onAuthStateChanged?: (callback: (user: { uid?: string } | null) => void) => void;
+      onAuthStateChanged?: (
+        callback: (user: { uid?: string } | null) => void
+      ) => void;
     };
   }
-  
+
   const windowWithAuth = window as WindowWithAuth;
   if (windowWithAuth.auth?.onAuthStateChanged) {
     windowWithAuth.auth.onAuthStateChanged(updateUserId);

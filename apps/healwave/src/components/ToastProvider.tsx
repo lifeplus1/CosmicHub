@@ -34,11 +34,7 @@ export const useToast = (): ToastContextType => {
 };
 
 // Simple provider implementation
-const ToastProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+const ToastProvider = ({ children }: { children: ReactNode }) => {
   const toast = () => {};
   const closeToast = () => {};
 

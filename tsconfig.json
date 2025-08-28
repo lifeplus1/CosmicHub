@@ -24,7 +24,6 @@
     "isolatedModules": true,
     "allowJs": false,
     "baseUrl": ".",
-    "composite": true,
     "paths": {
       // Map shared alias used inside app packages to the astro app source so root-based
       // tooling (eslint, language server) can resolve imports like '@/services/...'

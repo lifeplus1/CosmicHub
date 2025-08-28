@@ -55,49 +55,49 @@ const EnhancedAspectTable: React.FC<EnhancedAspectTableProps> = ({
   maxMajorOrb,
   maxMinorOrb,
 }) => {
-const ASPECT_DEFINITIONS: Record<
-  AspectType,
-  { degrees: number; harmonic: number; isHard: boolean }
-> = {
-  conjunction: { degrees: 0, harmonic: 1, isHard: false },
-  opposition: { degrees: 180, harmonic: 2, isHard: true },
-  trine: { degrees: 120, harmonic: 3, isHard: false },
-  square: { degrees: 90, harmonic: 4, isHard: true },
-  sextile: { degrees: 60, harmonic: 6, isHard: false },
-  semisextile: { degrees: 30, harmonic: 12, isHard: false },
-  semisquare: { degrees: 45, harmonic: 8, isHard: true },
-  sesquiquadrate: { degrees: 135, harmonic: 8, isHard: true },
-  quincunx: { degrees: 150, harmonic: 12, isHard: true },
-  quintile: { degrees: 72, harmonic: 5, isHard: false },
-  biquintile: { degrees: 144, harmonic: 5, isHard: false },
-  septile: { degrees: 51.43, harmonic: 7, isHard: false },
-  novile: { degrees: 40, harmonic: 9, isHard: false },
-  decile: { degrees: 36, harmonic: 10, isHard: false },
-};
+  const ASPECT_DEFINITIONS: Record<
+    AspectType,
+    { degrees: number; harmonic: number; isHard: boolean }
+  > = {
+    conjunction: { degrees: 0, harmonic: 1, isHard: false },
+    opposition: { degrees: 180, harmonic: 2, isHard: true },
+    trine: { degrees: 120, harmonic: 3, isHard: false },
+    square: { degrees: 90, harmonic: 4, isHard: true },
+    sextile: { degrees: 60, harmonic: 6, isHard: false },
+    semisextile: { degrees: 30, harmonic: 12, isHard: false },
+    semisquare: { degrees: 45, harmonic: 8, isHard: true },
+    sesquiquadrate: { degrees: 135, harmonic: 8, isHard: true },
+    quincunx: { degrees: 150, harmonic: 12, isHard: true },
+    quintile: { degrees: 72, harmonic: 5, isHard: false },
+    biquintile: { degrees: 144, harmonic: 5, isHard: false },
+    septile: { degrees: 51.43, harmonic: 7, isHard: false },
+    novile: { degrees: 40, harmonic: 9, isHard: false },
+    decile: { degrees: 36, harmonic: 10, isHard: false },
+  };
 
-// Calculate aspect strength based on orb
-const _getAspectStrength = (
-  orb: number,
-  maxOrb: number
-): EnhancedAspect['strength'] => {
-  const orbRatio = Math.abs(orb) / maxOrb;
-  if (orbRatio <= 0.3) return 'exact';
-  if (orbRatio <= 0.6) return 'strong';
-  if (orbRatio <= 0.8) return 'moderate';
-  return 'weak';
-};
+  // Calculate aspect strength based on orb
+  const _getAspectStrength = (
+    orb: number,
+    maxOrb: number
+  ): EnhancedAspect['strength'] => {
+    const orbRatio = Math.abs(orb) / maxOrb;
+    if (orbRatio <= 0.3) return 'exact';
+    if (orbRatio <= 0.6) return 'strong';
+    if (orbRatio <= 0.8) return 'moderate';
+    return 'weak';
+  };
 
-// Get aspect color based on type and strength
-const getAspectColor = (aspect: EnhancedAspect): string => {
-  const def = ASPECT_DEFINITIONS[aspect.aspectType];
+  // Get aspect color based on type and strength
+  const getAspectColor = (aspect: EnhancedAspect): string => {
+    const def = ASPECT_DEFINITIONS[aspect.aspectType];
 
-  if (aspect.strength === 'exact') return 'text-red-600 font-bold';
-  if (def.isHard) {
-    return aspect.isMajor ? 'text-red-500' : 'text-orange-500';
-  } else {
-    return aspect.isMajor ? 'text-blue-500' : 'text-green-500';
-  }
-};
+    if (aspect.strength === 'exact') return 'text-red-600 font-bold';
+    if (def.isHard) {
+      return aspect.isMajor ? 'text-red-500' : 'text-orange-500';
+    } else {
+      return aspect.isMajor ? 'text-blue-500' : 'text-green-500';
+    }
+  };
 
   // Filter aspects based on settings
   const filteredAspects = aspects.filter(aspect => {

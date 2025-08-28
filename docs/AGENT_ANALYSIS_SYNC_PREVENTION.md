@@ -2,11 +2,13 @@
 
 ## Problem: Stale Analysis Files After Manual Fixes
 
-When you manually fix ESLint issues in individual files, the AI agent coordination system can show stale results because analysis files are not automatically updated.
+When you manually fix ESLint issues in individual files, the AI agent coordination system can show
+stale results because analysis files are not automatically updated.
 
 ## Root Cause
 
-The coordination system uses cached analysis files (`ai-agent-coordination/agent-X-analysis.json`) that are only updated when:
+The coordination system uses cached analysis files (`ai-agent-coordination/agent-X-analysis.json`)
+that are only updated when:
 
 1. Running the full coordination analysis (`npm run lint:ai-coord`)
 2. The individual agent runs through the coordination script
@@ -55,7 +57,7 @@ ls -la ai-agent-coordination/agent-7-apps-small-packages-analysis.json
 
 ```bash
 npm run lint:agent:agent-1-astro-components
-npm run lint:agent:agent-2-astro-features  
+npm run lint:agent:agent-2-astro-features
 npm run lint:agent:agent-3-astro-pages-context
 npm run lint:agent:agent-4-astro-services-types
 npm run lint:agent:agent-5-ui-package
@@ -84,11 +86,11 @@ npm run lint:ai-coord
 
 ## Quick Reference
 
-| Action | Command | Purpose |
-|--------|---------|---------|
-| Fix & Verify | `npm run lint:agent:agent-X` | Check current ESLint status |
-| Update Analysis | `npm run lint:refresh-agent agent-X` | Sync coordination files |
-| Full Check | `npm run lint:ai-coord` | Complete coordination analysis |
+| Action          | Command                              | Purpose                        |
+| --------------- | ------------------------------------ | ------------------------------ |
+| Fix & Verify    | `npm run lint:agent:agent-X`         | Check current ESLint status    |
+| Update Analysis | `npm run lint:refresh-agent agent-X` | Sync coordination files        |
+| Full Check      | `npm run lint:ai-coord`              | Complete coordination analysis |
 
 ## Example Workflow
 
@@ -97,7 +99,7 @@ npm run lint:ai-coord
 # 2. Verify fixes work
 npm run lint:agent:agent-7-apps-small-packages
 
-# 3. Update coordination analysis  
+# 3. Update coordination analysis
 npm run lint:refresh-agent agent-7-apps-small-packages
 
 # 4. Verify coordination sees the fixes

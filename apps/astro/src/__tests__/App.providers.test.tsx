@@ -11,13 +11,25 @@ import '@testing-library/jest-dom';
 
 // Mock all external dependencies
 vi.mock('@cosmichub/auth', () => ({
-  AuthProvider: ({ children, appName }: { children: React.ReactNode; appName: string }) => (
-    <div data-testid="auth-provider" data-app-name={appName}>
+  AuthProvider: ({
+    children,
+    appName,
+  }: {
+    children: React.ReactNode;
+    appName: string;
+  }) => (
+    <div data-testid='auth-provider' data-app-name={appName}>
       {children}
     </div>
   ),
-  SubscriptionProvider: ({ children, appType }: { children: React.ReactNode; appType: string }) => (
-    <div data-testid="subscription-provider" data-app-type={appType}>
+  SubscriptionProvider: ({
+    children,
+    appType,
+  }: {
+    children: React.ReactNode;
+    appType: string;
+  }) => (
+    <div data-testid='subscription-provider' data-app-type={appType}>
       {children}
     </div>
   ),
@@ -28,19 +40,19 @@ vi.mock('@cosmichub/auth', () => ({
 vi.mock('@tanstack/react-query', () => {
   let capturedConfig: any = null;
   return {
-    QueryClient: vi.fn((config) => {
+    QueryClient: vi.fn(config => {
       capturedConfig = config;
       return { __config: capturedConfig };
     }),
-    QueryClientProvider: ({ 
-      client, 
-      children 
-    }: { 
-      client: any; 
-      children: React.ReactNode; 
+    QueryClientProvider: ({
+      client,
+      children,
+    }: {
+      client: any;
+      children: React.ReactNode;
     }) => (
-      <div 
-        data-testid="query-client-provider" 
+      <div
+        data-testid='query-client-provider'
         data-config={JSON.stringify(client.__config)}
       >
         {children}
@@ -51,25 +63,25 @@ vi.mock('@tanstack/react-query', () => {
 
 vi.mock('@radix-ui/react-tooltip', () => ({
   Provider: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="tooltip-provider">{children}</div>
+    <div data-testid='tooltip-provider'>{children}</div>
   ),
 }));
 
 vi.mock('../contexts/BirthDataContext', () => ({
   BirthDataProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="birth-data-provider">{children}</div>
+    <div data-testid='birth-data-provider'>{children}</div>
   ),
 }));
 
 vi.mock('../contexts/UpgradeModalContext', () => ({
   UpgradeModalProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="upgrade-modal-provider">{children}</div>
+    <div data-testid='upgrade-modal-provider'>{children}</div>
   ),
 }));
 
 vi.mock('../components/ErrorBoundary', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="error-boundary">{children}</div>
+    <div data-testid='error-boundary'>{children}</div>
   ),
 }));
 
@@ -81,7 +93,7 @@ describe('App Providers Configuration', () => {
   describe('QueryClient Configuration', () => {
     test('configures QueryClient with correct default options', () => {
       const { QueryClient } = require('@tanstack/react-query');
-      
+
       const client = new QueryClient({
         defaultOptions: {
           queries: {
@@ -97,7 +109,7 @@ describe('App Providers Configuration', () => {
         defaultOptions: {
           queries: {
             staleTime: 300000, // 5 minutes in ms
-            gcTime: 600000,    // 10 minutes in ms
+            gcTime: 600000, // 10 minutes in ms
             retry: 2,
             refetchOnWindowFocus: false,
           },
@@ -106,7 +118,10 @@ describe('App Providers Configuration', () => {
     });
 
     test('QueryClientProvider renders with correct client config', () => {
-      const { QueryClient, QueryClientProvider } = require('@tanstack/react-query');
+      const {
+        QueryClient,
+        QueryClientProvider,
+      } = require('@tanstack/react-query');
       const client = new QueryClient({
         defaultOptions: {
           queries: { staleTime: 300000 },
@@ -115,13 +130,14 @@ describe('App Providers Configuration', () => {
 
       render(
         <QueryClientProvider client={client}>
-          <div data-testid="test-child">Test</div>
+          <div data-testid='test-child'>Test</div>
         </QueryClientProvider>
       );
 
       const provider = screen.getByTestId('query-client-provider');
       expect(provider).toBeInTheDocument();
-      expect(provider).toHaveAttribute('data-config', 
+      expect(provider).toHaveAttribute(
+        'data-config',
         JSON.stringify({ defaultOptions: { queries: { staleTime: 300000 } } })
       );
       expect(screen.getByTestId('test-child')).toBeInTheDocument();
@@ -133,8 +149,8 @@ describe('App Providers Configuration', () => {
       const { AuthProvider } = require('@cosmichub/auth');
 
       render(
-        <AuthProvider appName="astro">
-          <div data-testid="auth-child">Auth Child</div>
+        <AuthProvider appName='astro'>
+          <div data-testid='auth-child'>Auth Child</div>
         </AuthProvider>
       );
 
@@ -148,8 +164,8 @@ describe('App Providers Configuration', () => {
       const { SubscriptionProvider } = require('@cosmichub/auth');
 
       render(
-        <SubscriptionProvider appType="astro">
-          <div data-testid="subscription-child">Subscription Child</div>
+        <SubscriptionProvider appType='astro'>
+          <div data-testid='subscription-child'>Subscription Child</div>
         </SubscriptionProvider>
       );
 
@@ -166,7 +182,7 @@ describe('App Providers Configuration', () => {
 
       render(
         <BirthDataProvider>
-          <div data-testid="birth-data-child">Birth Data Child</div>
+          <div data-testid='birth-data-child'>Birth Data Child</div>
         </BirthDataProvider>
       );
 
@@ -175,11 +191,13 @@ describe('App Providers Configuration', () => {
     });
 
     test('UpgradeModalProvider renders children', () => {
-      const { UpgradeModalProvider } = require('../contexts/UpgradeModalContext');
+      const {
+        UpgradeModalProvider,
+      } = require('../contexts/UpgradeModalContext');
 
       render(
         <UpgradeModalProvider>
-          <div data-testid="upgrade-modal-child">Upgrade Modal Child</div>
+          <div data-testid='upgrade-modal-child'>Upgrade Modal Child</div>
         </UpgradeModalProvider>
       );
 
@@ -194,7 +212,7 @@ describe('App Providers Configuration', () => {
 
       render(
         <TooltipProvider>
-          <div data-testid="tooltip-child">Tooltip Child</div>
+          <div data-testid='tooltip-child'>Tooltip Child</div>
         </TooltipProvider>
       );
 
@@ -207,7 +225,7 @@ describe('App Providers Configuration', () => {
 
       render(
         <ErrorBoundary>
-          <div data-testid="error-boundary-child">Protected Child</div>
+          <div data-testid='error-boundary-child'>Protected Child</div>
         </ErrorBoundary>
       );
 
@@ -219,10 +237,15 @@ describe('App Providers Configuration', () => {
   describe('Provider Stack Integration', () => {
     test('all providers can be nested without errors', () => {
       const { AuthProvider, SubscriptionProvider } = require('@cosmichub/auth');
-      const { QueryClient, QueryClientProvider } = require('@tanstack/react-query');
+      const {
+        QueryClient,
+        QueryClientProvider,
+      } = require('@tanstack/react-query');
       const { Provider: TooltipProvider } = require('@radix-ui/react-tooltip');
       const { BirthDataProvider } = require('../contexts/BirthDataContext');
-      const { UpgradeModalProvider } = require('../contexts/UpgradeModalContext');
+      const {
+        UpgradeModalProvider,
+      } = require('../contexts/UpgradeModalContext');
       const ErrorBoundary = require('../components/ErrorBoundary').default;
 
       const queryClient = new QueryClient({
@@ -239,12 +262,14 @@ describe('App Providers Configuration', () => {
       const ProviderStack = () => (
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-            <AuthProvider appName="astro">
-              <SubscriptionProvider appType="astro">
+            <AuthProvider appName='astro'>
+              <SubscriptionProvider appType='astro'>
                 <BirthDataProvider>
                   <UpgradeModalProvider>
                     <ErrorBoundary>
-                      <div data-testid="nested-content">All Providers Working</div>
+                      <div data-testid='nested-content'>
+                        All Providers Working
+                      </div>
                     </ErrorBoundary>
                   </UpgradeModalProvider>
                 </BirthDataProvider>
@@ -260,13 +285,16 @@ describe('App Providers Configuration', () => {
 
     test('provider hierarchy is correct', () => {
       const { AuthProvider, SubscriptionProvider } = require('@cosmichub/auth');
-      const { QueryClient, QueryClientProvider } = require('@tanstack/react-query');
+      const {
+        QueryClient,
+        QueryClientProvider,
+      } = require('@tanstack/react-query');
 
       render(
         <QueryClientProvider client={new QueryClient()}>
-          <AuthProvider appName="astro">
-            <SubscriptionProvider appType="astro">
-              <div data-testid="hierarchy-test">Hierarchy Test</div>
+          <AuthProvider appName='astro'>
+            <SubscriptionProvider appType='astro'>
+              <div data-testid='hierarchy-test'>Hierarchy Test</div>
             </SubscriptionProvider>
           </AuthProvider>
         </QueryClientProvider>
@@ -283,7 +311,7 @@ describe('App Providers Configuration', () => {
   describe('Provider Error Handling', () => {
     test('handles provider initialization errors gracefully', () => {
       const { AuthProvider } = require('@cosmichub/auth');
-      
+
       // Mock a provider that throws an error
       const ErrorProvider = () => {
         throw new Error('Provider initialization failed');
@@ -294,30 +322,39 @@ describe('App Providers Configuration', () => {
           return (
             <div>
               <ErrorProvider />
-              <AuthProvider appName="astro">
-                <div data-testid="should-not-render">Should not render</div>
+              <AuthProvider appName='astro'>
+                <div data-testid='should-not-render'>Should not render</div>
               </AuthProvider>
             </div>
           );
         } catch (error) {
-          return <div data-testid="error-caught">Error caught: {(error as Error).message}</div>;
+          return (
+            <div data-testid='error-caught'>
+              Error caught: {(error as Error).message}
+            </div>
+          );
         }
       };
 
       render(<TestComponent />);
       expect(screen.getByTestId('error-caught')).toBeInTheDocument();
-      expect(screen.getByText('Error caught: Provider initialization failed')).toBeInTheDocument();
+      expect(
+        screen.getByText('Error caught: Provider initialization failed')
+      ).toBeInTheDocument();
     });
 
     test('continues working when one provider fails', () => {
       const { AuthProvider } = require('@cosmichub/auth');
-      const { QueryClient, QueryClientProvider } = require('@tanstack/react-query');
+      const {
+        QueryClient,
+        QueryClientProvider,
+      } = require('@tanstack/react-query');
 
       // Test with a working provider and content
       render(
         <QueryClientProvider client={new QueryClient()}>
-          <AuthProvider appName="astro">
-            <div data-testid="working-content">This should work</div>
+          <AuthProvider appName='astro'>
+            <div data-testid='working-content'>This should work</div>
           </AuthProvider>
         </QueryClientProvider>
       );

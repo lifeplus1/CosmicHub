@@ -38,7 +38,7 @@ devConsole.log?.('🎉 React app mounted successfully!');
 const analytics = initCosmicHubAnalytics();
 if (analytics) {
   devConsole.log?.('📊 CosmicHub Analytics initialized');
-  
+
   // Track initial page view
   trackPageView('app_start', {
     environment: import.meta.env.MODE,

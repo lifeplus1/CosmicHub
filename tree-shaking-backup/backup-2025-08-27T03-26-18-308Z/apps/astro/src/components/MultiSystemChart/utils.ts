@@ -83,7 +83,11 @@ export const isValidChartData = (
   return data !== null && data !== undefined && typeof data === 'object';
 };
 
-export const safeGet = <T>(obj: Record<string, unknown>, path: string, defaultValue: T): T => {
+export const safeGet = <T>(
+  obj: Record<string, unknown>,
+  path: string,
+  defaultValue: T
+): T => {
   try {
     const keys = path.split('.');
     let result: unknown = obj;

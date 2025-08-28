@@ -110,11 +110,11 @@ export class EphemerisClient {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    
+
     if (this.config.apiKey) {
       headers['Authorization'] = `Bearer ${this.config.apiKey}`;
     }
-    
+
     return headers;
   }
 

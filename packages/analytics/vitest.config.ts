@@ -9,16 +9,16 @@ export default defineConfig({
       'src/**/*.test.ts',
       'src/**/*.test.tsx',
       'src/**/__tests__/**/*.test.ts',
-      'src/**/__tests__/**/*.test.tsx'
+      'src/**/__tests__/**/*.test.tsx',
     ],
     coverage: {
       reporter: ['text', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/__tests__/**']
-    }
+      exclude: ['src/**/__tests__/**'],
+    },
   },
   // Using default esbuild; TS path resolution handled by project references / base config.
   resolve: {
-    conditions: ['browser', 'module', 'import', 'default']
-  }
+    conditions: ['browser', 'module', 'import', 'default'],
+  },
 });

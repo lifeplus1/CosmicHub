@@ -4,13 +4,18 @@ import { __test__, initPWA } from './pwa';
 // Ensure JSDOM environment (some runners may default to node)
 if (typeof document === 'undefined') {
   const { JSDOM } = require('jsdom');
-  const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
+  const dom = new JSDOM(
+    '<!doctype html><html><head></head><body></body></html>'
+  );
   // @ts-ignore
   global.window = dom.window;
   // @ts-ignore
   global.document = dom.window.document;
   // @ts-ignore
-  Object.defineProperty(global, 'navigator', { value: dom.window.navigator, configurable: true });
+  Object.defineProperty(global, 'navigator', {
+    value: dom.window.navigator,
+    configurable: true,
+  });
 }
 
 // Basic JSDOM environment assumptions

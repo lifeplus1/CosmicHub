@@ -32,11 +32,17 @@ const UnifiedChartStub: React.FC = () => {
         setState('error');
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [id]);
   if (state === 'loading') return <div>Loading...</div>;
   if (state === 'error') return <div>Chart Loading Error: {error}</div>;
-  return <div><h1>Astrological Chart</h1></div>;
+  return (
+    <div>
+      <h1>Astrological Chart</h1>
+    </div>
+  );
 };
 
 // Mock auth hook
@@ -50,7 +56,9 @@ vi.mock('../../contexts/BirthDataContext', () => {
   const ctx = React.createContext({ birthData: null, setBirthData: vi.fn() });
   return {
     useBirthData: () => React.useContext(ctx),
-    BirthDataProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    BirthDataProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
   };
 });
 
@@ -59,8 +67,20 @@ vi.mock('../../services/api', () => ({
   fetchSavedChartById: vi.fn(async () => ({
     success: true,
     data: {
-      chart_data: { planets: [], houses: [], aspects: [], asteroids: [], angles: [] },
-      birth_data: { birth_date: '1999-04-01', birth_time: '08:30', city: 'Test City', lat: 10, lon: 20 },
+      chart_data: {
+        planets: [],
+        houses: [],
+        aspects: [],
+        asteroids: [],
+        angles: [],
+      },
+      birth_data: {
+        birth_date: '1999-04-01',
+        birth_time: '08:30',
+        city: 'Test City',
+        lat: 10,
+        lon: 20,
+      },
     },
   })),
   fetchChartDataUnified: vi.fn(),
@@ -77,8 +97,8 @@ vi.mock('@cosmichub/hooks', () => ({
     points: [],
     houses: [],
     aspects: [],
-    debug: {}
-  })
+    debug: {},
+  }),
 }));
 
 describe('UnifiedChart saved chart loading', () => {
@@ -86,7 +106,7 @@ describe('UnifiedChart saved chart loading', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <MemoryRouter initialEntries={['/chart/abc123']}> 
+        <MemoryRouter initialEntries={['/chart/abc123']}>
           <Routes>
             <Route path='/chart/:id' element={<UnifiedChartStub />} />
           </Routes>
@@ -102,12 +122,15 @@ describe('UnifiedChart saved chart loading', () => {
 
   it('shows error UI when fetch fails', async () => {
     const api = await import('../../services/api');
-    (api.fetchSavedChartById as any).mockResolvedValueOnce({ success: false, error: 'Not found' });
+    (api.fetchSavedChartById as any).mockResolvedValueOnce({
+      success: false,
+      error: 'Not found',
+    });
 
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <MemoryRouter initialEntries={['/chart/missing']}> 
+        <MemoryRouter initialEntries={['/chart/missing']}>
           <Routes>
             <Route path='/chart/:id' element={<UnifiedChartStub />} />
           </Routes>

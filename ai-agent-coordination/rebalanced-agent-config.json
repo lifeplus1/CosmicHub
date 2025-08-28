@@ -24,9 +24,7 @@
             "errorPatterns": {
               "is": 1
             },
-            "targets": [
-              "apps/astro/src/features"
-            ],
+            "targets": ["apps/astro/src/features"],
             "totalComplexity": 4,
             "complexityPerError": 4,
             "errorBreakdown": {
@@ -93,9 +91,7 @@
               "member": 4,
               "is": 4
             },
-            "targets": [
-              "packages/config/src"
-            ],
+            "targets": ["packages/config/src"],
             "totalComplexity": 172,
             "complexityPerError": 4,
             "errorBreakdown": {
@@ -290,9 +286,7 @@
               "return": 1,
               "call": 4
             },
-            "targets": [
-              "apps/astro/src/components"
-            ],
+            "targets": ["apps/astro/src/components"],
             "totalComplexity": 512,
             "complexityPerError": 4,
             "errorBreakdown": {
@@ -359,21 +353,11 @@
     }
   },
   "executionStrategy": {
-    "parallel": [
-      "quick-wins"
-    ],
-    "sequential": [
-      "medium-complexity",
-      "high-complexity"
-    ],
+    "parallel": ["quick-wins"],
+    "sequential": ["medium-complexity", "high-complexity"],
     "dependencies": {
-      "medium-complexity": [
-        "quick-wins"
-      ],
-      "high-complexity": [
-        "quick-wins",
-        "medium-complexity"
-      ]
+      "medium-complexity": ["quick-wins"],
+      "high-complexity": ["quick-wins", "medium-complexity"]
     }
   }
 }

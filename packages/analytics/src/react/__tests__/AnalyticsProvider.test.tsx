@@ -10,45 +10,95 @@ const baseConfig = (over: Partial<AnalyticsConfig> = {}): AnalyticsConfig => {
   const base: AnalyticsConfig = {
     googleAnalytics: { measurementId: 'G-TEST', enabled: true },
     mixpanel: { token: 'mix-token', enabled: false, trackPageViews: false },
-    posthog: { apiKey: 'posthog', enabled: false, sessionRecording: false, heatmaps: false },
+    posthog: {
+      apiKey: 'posthog',
+      enabled: false,
+      sessionRecording: false,
+      heatmaps: false,
+    },
     segment: { writeKey: 'seg', enabled: false },
-    rudderstack: { writeKey: 'rud', dataPlaneUrl: 'https://rud', enabled: false },
-    customAnalytics: { endpoint: 'https://custom.local/ingest', enabled: false },
-    privacy: { respectDoNotTrack: false, anonymizeIP: false, cookieConsent: true, dataRetentionDays: 30 },
-    advanced: { sessionTimeoutMs: 1000, autoFlushIntervalMs: undefined, autoTrackErrors: false },
+    rudderstack: {
+      writeKey: 'rud',
+      dataPlaneUrl: 'https://rud',
+      enabled: false,
+    },
+    customAnalytics: {
+      endpoint: 'https://custom.local/ingest',
+      enabled: false,
+    },
+    privacy: {
+      respectDoNotTrack: false,
+      anonymizeIP: false,
+      cookieConsent: true,
+      dataRetentionDays: 30,
+    },
+    advanced: {
+      sessionTimeoutMs: 1000,
+      autoFlushIntervalMs: undefined,
+      autoTrackErrors: false,
+    },
   };
   return {
     ...base,
     ...over,
-    advanced: { ...base.advanced, ...(over.advanced || {}) }
+    advanced: { ...base.advanced, ...(over.advanced || {}) },
   };
 };
 
 // onRender payload shape is not used inside component; keep broad typing.
 type CaptureProps = { onRender: () => void };
-const Capture: React.FC<CaptureProps> = ({ onRender }) => { onRender(); return null; };
+const Capture: React.FC<CaptureProps> = ({ onRender }) => {
+  onRender();
+  return null;
+};
 
 describe('AnalyticsProvider', () => {
   it('provides context and stable session id', () => {
     const spy = vi.fn();
-  render(<AnalyticsProvider config={baseConfig()}><Capture onRender={spy} /></AnalyticsProvider>);
-  expect(spy).toHaveBeenCalled();
+    render(
+      <AnalyticsProvider config={baseConfig()}>
+        <Capture onRender={spy} />
+      </AnalyticsProvider>
+    );
+    expect(spy).toHaveBeenCalled();
   });
 
   it('re-renders when measurementId changes (signature change)', () => {
     const spy = vi.fn();
-    const { rerender } = render(<AnalyticsProvider config={baseConfig()}><Capture onRender={spy} /></AnalyticsProvider>);
+    const { rerender } = render(
+      <AnalyticsProvider config={baseConfig()}>
+        <Capture onRender={spy} />
+      </AnalyticsProvider>
+    );
     const count1 = spy.mock.calls.length;
-    rerender(<AnalyticsProvider config={baseConfig({ googleAnalytics: { measurementId: 'G-NEW', enabled: true } })}><Capture onRender={spy} /></AnalyticsProvider>);
+    rerender(
+      <AnalyticsProvider
+        config={baseConfig({
+          googleAnalytics: { measurementId: 'G-NEW', enabled: true },
+        })}
+      >
+        <Capture onRender={spy} />
+      </AnalyticsProvider>
+    );
     const count2 = spy.mock.calls.length;
     expect(count2).toBeGreaterThan(count1);
   });
 
   it('does NOT trigger extra render for non-signature change (piiKeys)', () => {
     const spy = vi.fn();
-    const { rerender } = render(<AnalyticsProvider config={baseConfig()}><Capture onRender={spy} /></AnalyticsProvider>);
+    const { rerender } = render(
+      <AnalyticsProvider config={baseConfig()}>
+        <Capture onRender={spy} />
+      </AnalyticsProvider>
+    );
     const count1 = spy.mock.calls.length;
-    rerender(<AnalyticsProvider config={baseConfig({ advanced: { piiKeys: ['email'] } })}><Capture onRender={spy} /></AnalyticsProvider>);
+    rerender(
+      <AnalyticsProvider
+        config={baseConfig({ advanced: { piiKeys: ['email'] } })}
+      >
+        <Capture onRender={spy} />
+      </AnalyticsProvider>
+    );
     const count2 = spy.mock.calls.length;
     expect(count2).toBe(count1 + 1); // only React reconciliation, no extra looped re-init cycles
   });
@@ -58,14 +108,33 @@ describe('AnalyticsProvider', () => {
     const Test: React.FC = () => {
       const { track, subscribe } = useAnalytics();
       const sub = useCallback(() => {
-        const off = subscribe(e => { received.push(e.event); });
+        const off = subscribe(e => {
+          received.push(e.event);
+        });
         return off;
       }, [subscribe]);
       // Subscribe once then fire an event
-      React.useEffect(() => { const off = sub(); track({ event: 'test_evt', properties: {} }); return () => off(); }, [sub, track]);
+      React.useEffect(() => {
+        const off = sub();
+        track({ event: 'test_evt', properties: {} });
+        return () => off();
+      }, [sub, track]);
       return null;
     };
-    render(<AnalyticsProvider config={baseConfig({ privacy: { respectDoNotTrack: false, anonymizeIP: false, cookieConsent: false, dataRetentionDays: 30 } })}><Test /></AnalyticsProvider>);
+    render(
+      <AnalyticsProvider
+        config={baseConfig({
+          privacy: {
+            respectDoNotTrack: false,
+            anonymizeIP: false,
+            cookieConsent: false,
+            dataRetentionDays: 30,
+          },
+        })}
+      >
+        <Test />
+      </AnalyticsProvider>
+    );
     // With cookieConsent false tracking auto-enabled, event should dispatch
     expect(received).toContain('test_evt');
   });
@@ -83,7 +152,20 @@ describe('AnalyticsProvider', () => {
       }, [track, subscribe, shutdown]);
       return null;
     };
-    render(<AnalyticsProvider config={baseConfig({ privacy: { respectDoNotTrack: false, anonymizeIP: false, cookieConsent: false, dataRetentionDays: 30 } })}><Test /></AnalyticsProvider>);
+    render(
+      <AnalyticsProvider
+        config={baseConfig({
+          privacy: {
+            respectDoNotTrack: false,
+            anonymizeIP: false,
+            cookieConsent: false,
+            dataRetentionDays: 30,
+          },
+        })}
+      >
+        <Test />
+      </AnalyticsProvider>
+    );
     expect(events).toContain('before_shutdown');
     // We allow that after shutdown event may be suppressed; assert not both if suppressed
     expect(events).not.toContain('after_shutdown');

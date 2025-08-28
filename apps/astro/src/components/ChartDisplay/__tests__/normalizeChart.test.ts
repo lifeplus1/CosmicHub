@@ -41,12 +41,14 @@ describe('normalizeChart utilities', () => {
       },
     };
     const { planets } = normalizeChart(raw);
-    
+
     // Debug: log the actual planets array
     console.log('planets:', planets);
     console.log('planets length:', planets.length);
-    planets.forEach(p => console.log('planet:', p.name, p.position, p.sign, p.degree));
-    
+    planets.forEach(p =>
+      console.log('planet:', p.name, p.position, p.sign, p.degree)
+    );
+
     const sun = planets.find(p => p.name === 'Sun');
     const moon = planets.find(p => p.name === 'Moon');
     expect(sun).toBeDefined();

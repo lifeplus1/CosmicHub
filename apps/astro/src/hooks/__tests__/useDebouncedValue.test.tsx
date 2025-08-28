@@ -12,7 +12,9 @@ describe('useDebouncedValue', () => {
 
   it('debounces changes', () => {
     let value = 'a';
-    const { result, rerender } = renderHook(() => useDebouncedValue(value, 300));
+    const { result, rerender } = renderHook(() =>
+      useDebouncedValue(value, 300)
+    );
     expect(result.current).toBe('a');
     value = 'ab';
     rerender();
@@ -29,7 +31,9 @@ describe('useDebouncedValue', () => {
 
   it('resets timer on rapid input', () => {
     let value = 'x';
-    const { result, rerender } = renderHook(() => useDebouncedValue(value, 300));
+    const { result, rerender } = renderHook(() =>
+      useDebouncedValue(value, 300)
+    );
     value = 'xy';
     rerender();
     act(() => {

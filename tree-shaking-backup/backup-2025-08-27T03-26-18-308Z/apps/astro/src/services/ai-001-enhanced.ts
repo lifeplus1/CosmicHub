@@ -95,8 +95,11 @@ export class AI001Service {
   ): Promise<TransitPrediction[]> {
     try {
       // TODO: Replace with backend API call when transit prediction endpoint is ready
-      devConsole.log('🔮 Generating transit predictions via backend...', { chartData, timeRange });
-      
+      devConsole.log('🔮 Generating transit predictions via backend...', {
+        chartData,
+        timeRange,
+      });
+
       // Simulate async backend call
       await new Promise(resolve => setTimeout(resolve, 100));
       return this.generateMockTransitPredictions(chartData, timeRange);
@@ -113,8 +116,11 @@ export class AI001Service {
   ): Promise<PersonalGrowthInsight[]> {
     try {
       // TODO: Replace with proper backend API integration
-      devConsole.log('🔮 Generating growth insights via backend...', { chartData, currentGoals });
-      
+      devConsole.log('🔮 Generating growth insights via backend...', {
+        chartData,
+        currentGoals,
+      });
+
       // Simulate async backend call
       await new Promise(resolve => setTimeout(resolve, 100));
       return this.generateMockGrowthInsights(chartData, currentGoals);
@@ -131,8 +137,11 @@ export class AI001Service {
   ): Promise<MultiSystemInterpretation> {
     try {
       // TODO: Replace with backend API integration
-      devConsole.log('🌍 Generating multi-system synthesis via backend...', { chartData, systems });
-      
+      devConsole.log('🌍 Generating multi-system synthesis via backend...', {
+        chartData,
+        systems,
+      });
+
       // Simulate async backend call
       await new Promise(resolve => setTimeout(resolve, 100));
       return this.generateMockSynthesis(chartData, systems);
@@ -148,9 +157,12 @@ export class AI001Service {
     historicalCharts?: unknown[]
   ): Promise<ChartPattern[]> {
     try {
-      // TODO: Replace with backend API integration  
-      devConsole.log('🔍 Analyzing chart patterns via backend...', { chartData, historicalCharts });
-      
+      // TODO: Replace with backend API integration
+      devConsole.log('🔍 Analyzing chart patterns via backend...', {
+        chartData,
+        historicalCharts,
+      });
+
       // Simulate async backend call
       await new Promise(resolve => setTimeout(resolve, 100));
       return this.generateMockPatterns(chartData);
@@ -197,12 +209,15 @@ export class AI001Service {
     try {
       // TODO: Use proper backend endpoint when available
       // For now, return mock data to prevent errors
-      devConsole.log('🤖 Backend AI API call (mock):', { prompt: prompt.slice(0, 100), options });
-      
+      devConsole.log('🤖 Backend AI API call (mock):', {
+        prompt: prompt.slice(0, 100),
+        options,
+      });
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return "Mock AI response: This is a placeholder response from the backend API integration. The actual XAI integration has been moved to the backend for security.";
+
+      return 'Mock AI response: This is a placeholder response from the backend API integration. The actual XAI integration has been moved to the backend for security.';
     } catch (error) {
       devConsole.error('Backend AI API error:', error);
       throw error;
@@ -213,7 +228,10 @@ export class AI001Service {
   // Prompt Builders
   // =============================================================================
 
-  private static buildTransitPrompt(chartData: { planets?: unknown; houses?: unknown }, timeRange: string): string {
+  private static buildTransitPrompt(
+    chartData: { planets?: unknown; houses?: unknown },
+    timeRange: string
+  ): string {
     return `
 Analyze upcoming transits for the next ${timeRange} based on this natal chart:
 
@@ -234,7 +252,10 @@ Provide detailed transit predictions including:
 Format as JSON array with structured transit objects.`;
   }
 
-  private static buildGrowthPrompt(chartData: unknown, goals?: string[]): string {
+  private static buildGrowthPrompt(
+    chartData: unknown,
+    goals?: string[]
+  ): string {
     const goalsText = goals?.length ? `Current goals: ${goals.join(', ')}` : '';
 
     return `
@@ -507,7 +528,9 @@ Provide deep pattern recognition insights.`;
     chartData: unknown;
   }): Promise<string> {
     // This would use AI to create a comprehensive summary
-    return Promise.resolve(`Based on your comprehensive AI-001 analysis, you're entering a significant period of growth and transformation. The next 12 months highlight opportunities for spiritual development, career advancement, and deeper relationship connections. Your chart patterns suggest you're naturally gifted at bridging different perspectives and creating harmony in complex situations. Focus on integrating your spiritual insights with practical action, and trust your intuitive guidance during major transits.`);
+    return Promise.resolve(
+      `Based on your comprehensive AI-001 analysis, you're entering a significant period of growth and transformation. The next 12 months highlight opportunities for spiritual development, career advancement, and deeper relationship connections. Your chart patterns suggest you're naturally gifted at bridging different perspectives and creating harmony in complex situations. Focus on integrating your spiritual insights with practical action, and trust your intuitive guidance during major transits.`
+    );
   }
 }
 
@@ -515,7 +538,10 @@ Provide deep pattern recognition insights.`;
 // AI-001 React Hooks
 // =============================================================================
 
-export const useAI001Analysis = (chartData: { id?: unknown; planets?: unknown; houses?: unknown } | null, userId: string) => {
+export const useAI001Analysis = (
+  chartData: { id?: unknown; planets?: unknown; houses?: unknown } | null,
+  userId: string
+) => {
   const _queryClient = useQueryClient();
 
   return useQuery({
@@ -545,7 +571,10 @@ export const useTransitPredictions = (
   });
 };
 
-export const useGrowthInsights = (chartData: { id?: unknown } | null, goals?: string[]) => {
+export const useGrowthInsights = (
+  chartData: { id?: unknown } | null,
+  goals?: string[]
+) => {
   return useQuery({
     queryKey: ['ai001-growth', chartData?.id as string, goals],
     queryFn: () => AI001Service.generateGrowthInsights(chartData, goals),

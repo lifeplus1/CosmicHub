@@ -24,7 +24,6 @@ export interface EnhancedChartWrapperProps {
   fetchFn?: (data: ChartBirthData) => Promise<ApiResult<ChartData>>;
 }
 
-
 export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   birthData,
   savedChartId,
@@ -44,14 +43,16 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
     if (err instanceof Error) {
       setError(err);
     } else {
-      setError(new Error('An unexpected error occurred while calculating the chart'));
+      setError(
+        new Error('An unexpected error occurred while calculating the chart')
+      );
     }
   }, []);
 
   const handleChartCalculated = useCallback(
     (data: ChartData) => {
-  // Wrap backend response so ChartDisplay normalization can detect original shape
-  setChartData({ __raw_backend_response: data } as unknown as ChartLike);
+      // Wrap backend response so ChartDisplay normalization can detect original shape
+      setChartData({ __raw_backend_response: data } as unknown as ChartLike);
       setError(null);
       onChartCalculated?.(data);
     },
@@ -75,19 +76,22 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   }, [fetchFn, fetchImpl, handleError]);
 
   useEffect(() => {
-  if (!birthData && !savedChartId) return;
+    if (!birthData && !savedChartId) return;
     if (savedChartId) return; // ChartDisplay will handle saved charts
 
     const calculateChart = async () => {
       try {
         setIsLoading(true);
         setError(null);
-  if (!canonicalBirthData) return;
-  const impl = fetchFn ?? fetchImpl;
-  if (!impl) return; // still loading dynamic import
-  const result = await impl(canonicalBirthData);
-        if (!result.success) throw new Error(result.error || 'Failed to calculate chart');
-  setChartData({ __raw_backend_response: result.data } as unknown as ChartLike);
+        if (!canonicalBirthData) return;
+        const impl = fetchFn ?? fetchImpl;
+        if (!impl) return; // still loading dynamic import
+        const result = await impl(canonicalBirthData);
+        if (!result.success)
+          throw new Error(result.error || 'Failed to calculate chart');
+        setChartData({
+          __raw_backend_response: result.data,
+        } as unknown as ChartLike);
         handleChartCalculated(result.data);
       } catch (err) {
         handleError(err);
@@ -97,20 +101,31 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
     };
 
     void calculateChart();
-  }, [birthData, savedChartId, handleError, handleChartCalculated, canonicalBirthData, fetchFn, fetchImpl]);
+  }, [
+    birthData,
+    savedChartId,
+    handleError,
+    handleChartCalculated,
+    canonicalBirthData,
+    fetchFn,
+    fetchImpl,
+  ]);
 
   const handleRetry = useCallback(() => {
     setError(null);
-  if (!birthData || !canonicalBirthData) return;
+    if (!birthData || !canonicalBirthData) return;
     const calculateChart = async () => {
       try {
         setIsLoading(true);
         setError(null);
-    const impl = fetchFn ?? fetchImpl;
-    if (!impl) return;
-    const result = await impl(canonicalBirthData);
-        if (!result.success) throw new Error(result.error || 'Failed to calculate chart');
-  setChartData({ __raw_backend_response: result.data } as unknown as ChartLike);
+        const impl = fetchFn ?? fetchImpl;
+        if (!impl) return;
+        const result = await impl(canonicalBirthData);
+        if (!result.success)
+          throw new Error(result.error || 'Failed to calculate chart');
+        setChartData({
+          __raw_backend_response: result.data,
+        } as unknown as ChartLike);
         handleChartCalculated(result.data);
       } catch (err) {
         handleError(err);
@@ -119,7 +134,14 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
       }
     };
     void calculateChart();
-  }, [birthData, handleError, handleChartCalculated, canonicalBirthData, fetchFn, fetchImpl]);
+  }, [
+    birthData,
+    handleError,
+    handleChartCalculated,
+    canonicalBirthData,
+    fetchFn,
+    fetchImpl,
+  ]);
 
   if (isLoading) {
     return (
@@ -134,8 +156,12 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
                 </div>
               </div>
               <div className='text-center space-y-2'>
-                <div className='text-lg font-medium'>Calculating celestial positions...</div>
-                <div className='text-sm text-gray-600 max-w-md'>Processing birth data and generating astrological chart</div>
+                <div className='text-lg font-medium'>
+                  Calculating celestial positions...
+                </div>
+                <div className='text-sm text-gray-600 max-w-md'>
+                  Processing birth data and generating astrological chart
+                </div>
               </div>
             </div>
           </CardContent>
@@ -150,8 +176,12 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
         <Card className='w-full max-w-4xl mx-auto border-red-200'>
           <CardContent className='p-6'>
             <div className='flex flex-col items-center justify-center py-12 space-y-4'>
-              <div className='text-red-600 text-lg font-medium'>Chart Calculation Error</div>
-              <div className='text-red-600 text-sm text-center max-w-md'>{error.message}</div>
+              <div className='text-red-600 text-lg font-medium'>
+                Chart Calculation Error
+              </div>
+              <div className='text-red-600 text-sm text-center max-w-md'>
+                {error.message}
+              </div>
               <Button onClick={handleRetry} variant='default' className='mt-4'>
                 🔄 Retry Calculation
               </Button>

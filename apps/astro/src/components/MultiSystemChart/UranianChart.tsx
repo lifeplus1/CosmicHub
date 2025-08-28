@@ -72,7 +72,8 @@ const UranianChart: React.FC<Props> = ({ data }) => {
                             </div>
                           </td>
                           <td className='py-2 font-mono text-cosmic-silver/80'>
-                            {info.position !== null && info.position !== undefined
+                            {info.position !== null &&
+                            info.position !== undefined
                               ? `${info.position.toFixed(2)}°`
                               : 'N/A'}
                           </td>

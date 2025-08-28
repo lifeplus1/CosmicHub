@@ -32,14 +32,24 @@ export interface EngagementGate {
 
 const now = () => Date.now();
 
-function safeParseInt(v: string | null): number { const n = parseInt(v ?? '0', 10); return Number.isFinite(n) ? n : 0; }
+function safeParseInt(v: string | null): number {
+  const n = parseInt(v ?? '0', 10);
+  return Number.isFinite(n) ? n : 0;
+}
 
 function getStorage(): Storage | null {
-  try { if (typeof window !== 'undefined' && window.localStorage) return window.localStorage; } catch { /* ignore */ }
+  try {
+    if (typeof window !== 'undefined' && window.localStorage)
+      return window.localStorage;
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
-export function createEngagementGate(opts: EngagementGateOptions = {}): EngagementGate {
+export function createEngagementGate(
+  opts: EngagementGateOptions = {}
+): EngagementGate {
   const {
     minPageViews = 2,
     minTimeMs = 10_000,
@@ -62,7 +72,9 @@ export function createEngagementGate(opts: EngagementGateOptions = {}): Engageme
     };
   }
 
-  function writeState(mutator: (s: EngagementGateState) => void): EngagementGateState {
+  function writeState(
+    mutator: (s: EngagementGateState) => void
+  ): EngagementGateState {
     const state = readState();
     mutator(state);
     if (store) {
@@ -70,35 +82,47 @@ export function createEngagementGate(opts: EngagementGateOptions = {}): Engageme
         store.setItem(pvKey, String(state.pageViews));
         store.setItem(firstSeenKey, String(state.firstSeen));
         store.setItem(dismissedKey, String(state.lastDismissed));
-      } catch { /* ignore quota / privacy errors */ }
+      } catch {
+        /* ignore quota / privacy errors */
+      }
     }
     return state;
   }
 
   function ensureFirstSeen(): void {
-    writeState(s => { if (s.firstSeen <= 0) s.firstSeen = now(); });
+    writeState(s => {
+      if (s.firstSeen <= 0) s.firstSeen = now();
+    });
   }
 
   if (autoIncrementOnCreate) {
     ensureFirstSeen();
-    writeState(s => { s.pageViews += 1; if (!s.firstSeen) s.firstSeen = now(); });
+    writeState(s => {
+      s.pageViews += 1;
+      if (!s.firstSeen) s.firstSeen = now();
+    });
   }
 
   function isEligible(): boolean {
     const s = readState();
     if (s.pageViews < minPageViews) return false;
     if (now() - s.firstSeen < minTimeMs) return false;
-    if (s.lastDismissed && now() - s.lastDismissed < dismissCooldownMs) return false;
+    if (s.lastDismissed && now() - s.lastDismissed < dismissCooldownMs)
+      return false;
     return true;
   }
 
   function recordPageView(): EngagementGateState {
     ensureFirstSeen();
-    return writeState(s => { s.pageViews += 1; });
+    return writeState(s => {
+      s.pageViews += 1;
+    });
   }
 
   function markDismissed(): EngagementGateState {
-    return writeState(s => { s.lastDismissed = now(); });
+    return writeState(s => {
+      s.lastDismissed = now();
+    });
   }
 
   return { isEligible, recordPageView, markDismissed, getState: readState };
@@ -106,5 +130,8 @@ export function createEngagementGate(opts: EngagementGateOptions = {}): Engageme
 
 // Convenience one-shot function for quick checks without holding an instance.
 export function isEngagementEligible(opts?: EngagementGateOptions): boolean {
-  return createEngagementGate({ ...opts, autoIncrementOnCreate: false }).isEligible();
+  return createEngagementGate({
+    ...opts,
+    autoIncrementOnCreate: false,
+  }).isEligible();
 }

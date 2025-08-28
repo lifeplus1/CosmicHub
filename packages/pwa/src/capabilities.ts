@@ -24,7 +24,11 @@ const HAS_WINDOW = typeof window !== 'undefined';
 
 function safeUA(): string {
   if (!HAS_WINDOW) return '';
-  try { return navigator.userAgent.toLowerCase(); } catch { return ''; }
+  try {
+    return navigator.userAgent.toLowerCase();
+  } catch {
+    return '';
+  }
 }
 
 function detectPlatform(ua: string): Platform {
@@ -38,27 +42,28 @@ function compute(): RuntimeCapabilities {
   if (!HAS_WINDOW) {
     return Object.freeze({
       platform: 'other',
-  isStandalone: false,
-  hasTouch: false,
-  supportsInstall: false,
-  supportsPush: false,
-  hasVibration: false,
-  hasWebShare: false,
+      isStandalone: false,
+      hasTouch: false,
+      supportsInstall: false,
+      supportsPush: false,
+      hasVibration: false,
+      hasWebShare: false,
     }) as RuntimeCapabilities;
   }
   const ua = safeUA();
   const platform = detectPlatform(ua);
   const isStandalone =
     window.matchMedia('(display-mode: standalone)').matches ||
-    ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true);
+    ('standalone' in navigator &&
+      (navigator as { standalone?: boolean }).standalone === true);
   const caps: RuntimeCapabilities = {
     platform,
-  isStandalone,
-  hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-  supportsInstall: 'serviceWorker' in navigator,
-  supportsPush: 'serviceWorker' in navigator && 'PushManager' in window,
-  hasVibration: 'vibrate' in navigator,
-  hasWebShare: 'share' in navigator,
+    isStandalone,
+    hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+    supportsInstall: 'serviceWorker' in navigator,
+    supportsPush: 'serviceWorker' in navigator && 'PushManager' in window,
+    hasVibration: 'vibrate' in navigator,
+    hasWebShare: 'share' in navigator,
   };
   return Object.freeze({ ...caps });
 }
@@ -88,11 +93,17 @@ class CapabilityDetector {
   }
 
   private emit(): void {
-  const snapshot = this.value();
-  // Call in a microtask to avoid re-entrancy issues if listeners mutate subscriptions
-  queueMicrotask(() => this.listeners.forEach(l => {
-      try { l(snapshot); } catch { /* swallow listener errors */ }
-    }));
+    const snapshot = this.value();
+    // Call in a microtask to avoid re-entrancy issues if listeners mutate subscriptions
+    queueMicrotask(() =>
+      this.listeners.forEach(l => {
+        try {
+          l(snapshot);
+        } catch {
+          /* swallow listener errors */
+        }
+      })
+    );
   }
 
   value(): RuntimeCapabilities {
@@ -114,7 +125,11 @@ class CapabilityDetector {
 
   dispose(): void {
     this.disposers.forEach(d => {
-      try { d(); } catch { /* ignore */ }
+      try {
+        d();
+      } catch {
+        /* ignore */
+      }
     });
     this.disposers = [];
     this.listeners = [];
@@ -132,7 +147,8 @@ export { CapabilityDetector };
 /**
  * Returns a snapshot of current runtime capabilities (frozen object).
  */
-export function detectRuntimeCapabilities(): RuntimeCapabilities { // legacy name
+export function detectRuntimeCapabilities(): RuntimeCapabilities {
+  // legacy name
   return CapabilityDetector.getInstance().value();
 }
 
@@ -142,7 +158,9 @@ export function getCapabilities(): RuntimeCapabilities {
 }
 
 /** Subscribe to capability changes; returns unsubscribe function. */
-export function onCapabilitiesChange(listener: (c: RuntimeCapabilities) => void): () => void {
+export function onCapabilitiesChange(
+  listener: (c: RuntimeCapabilities) => void
+): () => void {
   return CapabilityDetector.getInstance().onChange(listener);
 }
 

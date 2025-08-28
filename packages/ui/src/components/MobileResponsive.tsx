@@ -404,7 +404,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
 };
 
 // Touch-optimized button
-interface TouchButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TouchButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;

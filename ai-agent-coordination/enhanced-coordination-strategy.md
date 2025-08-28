@@ -28,15 +28,15 @@ const OPTIMIZED_BATCHES = [
     name: 'Critical Types Agent',
     files: filterByErrorDensity(typeFiles, 'low'), // <10 errors/file
     estimatedDuration: '4-6s',
-    readyProbability: 0.9
+    readyProbability: 0.9,
   },
   {
-    id: 'agent-safe-components', 
+    id: 'agent-safe-components',
     name: 'Safe Components Agent',
     files: filterByComplexity(componentFiles, 'simple'), // No hooks/context
     estimatedDuration: '5-7s',
-    readyProbability: 0.8
-  }
+    readyProbability: 0.8,
+  },
 ];
 ```
 
@@ -51,20 +51,20 @@ const OPTIMIZED_BATCHES = [
 ```typescript
 interface CoordinationMetrics {
   parallelizationEfficiency: number; // Target: 90%+
-  agentReadyRate: number;           // Target: 70%+
-  totalExecutionTime: number;       // Target: <8s
-  successRate: number;              // Target: 95%+
+  agentReadyRate: number; // Target: 70%+
+  totalExecutionTime: number; // Target: <8s
+  successRate: number; // Target: 95%+
 }
 ```
 
 ## 📊 **Expected Improvements**
 
-| Metric | Current | Target | Enhancement |
-|--------|---------|---------|-------------|
-| Efficiency | 80.8% | 92%+ | Dynamic rebalancing |
-| Ready Agents | 1/7 (14%) | 5/7 (71%) | Preprocessing |
-| Execution Time | 11.9s | 8s | Workload optimization |
-| Success Rate | 14% | 95% | Error complexity analysis |
+| Metric         | Current   | Target    | Enhancement               |
+| -------------- | --------- | --------- | ------------------------- |
+| Efficiency     | 80.8%     | 92%+      | Dynamic rebalancing       |
+| Ready Agents   | 1/7 (14%) | 5/7 (71%) | Preprocessing             |
+| Execution Time | 11.9s     | 8s        | Workload optimization     |
+| Success Rate   | 14%       | 95%       | Error complexity analysis |
 
 ## 🛠 **Implementation Priority**
 

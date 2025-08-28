@@ -4,7 +4,9 @@ import type { ExtendedBirthData } from '../contexts/BirthDataContext';
  * Factory for an ExtendedBirthData object with sensible defaults for tests.
  * Accepts partial overrides.
  */
-export function createStubBirthData(overrides: Partial<ExtendedBirthData> = {}): ExtendedBirthData {
+export function createStubBirthData(
+  overrides: Partial<ExtendedBirthData> = {}
+): ExtendedBirthData {
   const base: ExtendedBirthData = {
     year: 1990,
     month: 1,

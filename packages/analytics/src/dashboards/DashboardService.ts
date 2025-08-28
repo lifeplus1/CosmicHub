@@ -3,11 +3,17 @@
  * Real-time analytics data aggregation and insights
  */
 
-import type { DashboardMetrics, UserSegment, AstrologyAnalytics } from '../types/index.js';
+import type {
+  DashboardMetrics,
+  UserSegment,
+  AstrologyAnalytics,
+} from '../types/index.js';
 
 export interface AnalyticsDashboard {
   getRealTimeMetrics(): Promise<DashboardMetrics>;
-  getAstrologyAnalytics(timeframe: 'day' | 'week' | 'month' | 'year'): Promise<AstrologyAnalytics>;
+  getAstrologyAnalytics(
+    timeframe: 'day' | 'week' | 'month' | 'year'
+  ): Promise<AstrologyAnalytics>;
   getUserSegments(): Promise<UserSegment[]>;
   getConversionFunnel(): Promise<ConversionFunnelData>;
   getPerformanceMetrics(): Promise<PerformanceMetrics>;
@@ -58,7 +64,7 @@ export class DashboardService implements AnalyticsDashboard {
       if (!response.ok) {
         throw new Error('Failed to fetch real-time metrics');
       }
-      return await response.json() as DashboardMetrics;
+      return (await response.json()) as DashboardMetrics;
     } catch (error) {
       console.error('Error fetching real-time metrics:', error);
       // Return default metrics if API fails
@@ -74,13 +80,17 @@ export class DashboardService implements AnalyticsDashboard {
     }
   }
 
-  async getAstrologyAnalytics(timeframe: 'day' | 'week' | 'month' | 'year'): Promise<AstrologyAnalytics> {
+  async getAstrologyAnalytics(
+    timeframe: 'day' | 'week' | 'month' | 'year'
+  ): Promise<AstrologyAnalytics> {
     try {
-      const response = await fetch(`${this.apiEndpoint}/astrology?timeframe=${timeframe}`);
+      const response = await fetch(
+        `${this.apiEndpoint}/astrology?timeframe=${timeframe}`
+      );
       if (!response.ok) {
         throw new Error('Failed to fetch astrology analytics');
       }
-      return await response.json() as AstrologyAnalytics;
+      return (await response.json()) as AstrologyAnalytics;
     } catch (error) {
       console.error('Error fetching astrology analytics:', error);
       return {
@@ -114,7 +124,7 @@ export class DashboardService implements AnalyticsDashboard {
       if (!response.ok) {
         throw new Error('Failed to fetch user segments');
       }
-      return await response.json() as UserSegment[];
+      return (await response.json()) as UserSegment[];
     } catch (error) {
       console.error('Error fetching user segments:', error);
       return [];
@@ -127,7 +137,7 @@ export class DashboardService implements AnalyticsDashboard {
       if (!response.ok) {
         throw new Error('Failed to fetch conversion funnel');
       }
-      return await response.json() as ConversionFunnelData;
+      return (await response.json()) as ConversionFunnelData;
     } catch (error) {
       console.error('Error fetching conversion funnel:', error);
       return {
@@ -151,7 +161,7 @@ export class DashboardService implements AnalyticsDashboard {
       if (!response.ok) {
         throw new Error('Failed to fetch performance metrics');
       }
-      return await response.json() as PerformanceMetrics;
+      return (await response.json()) as PerformanceMetrics;
     } catch (error) {
       console.error('Error fetching performance metrics:', error);
       return {
@@ -182,14 +192,16 @@ export class DashboardService implements AnalyticsDashboard {
       'Charts/min': metrics.chartCalculationsPerMinute.toString(),
       'AI Queries/hr': metrics.aiInteractionsPerHour.toString(),
       'Mobile Sessions': metrics.mobileAppSessions.toString(),
-      'Conversions': metrics.subscriptionConversions.toString(),
+      Conversions: metrics.subscriptionConversions.toString(),
       'Error Rate': `${(metrics.errorRate * 100).toFixed(2)}%`,
       'Avg Response': `${metrics.averageResponseTime}ms`,
     };
   }
 
   // Helper method to calculate key business metrics
-  calculateBusinessMetrics(funnel: ConversionFunnelData): Record<string, string> {
+  calculateBusinessMetrics(
+    funnel: ConversionFunnelData
+  ): Record<string, string> {
     return {
       'Total Visitors': funnel.totalVisitors.toLocaleString(),
       'Signup Rate': `${(funnel.conversionRates.visitorToSignup * 100).toFixed(2)}%`,

@@ -6,7 +6,12 @@ import React, { useState, useEffect } from 'react';
 import { cn } from '../utils/cn';
 import { ProgressiveLoading } from './LoadingStates';
 import { ErrorMessage, type EnhancedError } from './ErrorHandling';
-import { ResponsiveContainer, ResponsiveGrid, MobileCard, TouchButton } from './MobileResponsive';
+import {
+  ResponsiveContainer,
+  ResponsiveGrid,
+  MobileCard,
+  TouchButton,
+} from './MobileResponsive';
 import { StatusIndicator, useToastHelpers } from './UserFeedback';
 // (Merged above) - EnhancedError type already available via type-only import if needed
 
@@ -28,15 +33,29 @@ export interface EnhancedChartDisplayProps {
 
 type LoadingStage = 'initializing' | 'processing' | 'finalizing' | 'complete';
 
-export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = (props) => {
-  const { chartId, autoRefresh = false, refreshInterval = 30_000, className, onError } = props;
+export const EnhancedChartDisplay: React.FC<
+  EnhancedChartDisplayProps
+> = props => {
+  const {
+    chartId,
+    autoRefresh = false,
+    refreshInterval = 30_000,
+    className,
+    onError,
+  } = props;
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingStage, setLoadingStage] = useState<LoadingStage>('initializing');
+  const [loadingStage, setLoadingStage] =
+    useState<LoadingStage>('initializing');
   const [error, setError] = useState<EnhancedError | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-  const { success, error: showError, info, loading: showLoading } = useToastHelpers();
+  const {
+    success,
+    error: showError,
+    info,
+    loading: showLoading,
+  } = useToastHelpers();
 
   // Simulate API call with different stages
   const fetchChartData = async (showToast = false): Promise<ChartData> => {
@@ -130,7 +149,7 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = (props)
       setError(enhancedError);
 
       if (showToast) {
-  showError('Failed to Load Chart', String(enhancedError.message));
+        showError('Failed to Load Chart', String(enhancedError.message));
       }
 
       if (onError && err instanceof Error) {
@@ -142,12 +161,16 @@ export const EnhancedChartDisplay: React.FC<EnhancedChartDisplayProps> = (props)
   };
 
   // Initial load
-  useEffect(() => { void loadChart(); }, [chartId]);
+  useEffect(() => {
+    void loadChart();
+  }, [chartId]);
 
   // Auto-refresh setup
   useEffect(() => {
     if (!autoRefresh) return;
-    const interval = setInterval(() => { void loadChart(false); }, refreshInterval);
+    const interval = setInterval(() => {
+      void loadChart(false);
+    }, refreshInterval);
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval]);
 

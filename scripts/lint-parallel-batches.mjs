@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Parallel Lint Testing with Optimal Batching for CosmicHub
- * 
+ *
  * Distributes TypeScript/TSX files across 5 optimized batches for parallel processing.
  * Each batch is balanced by file count and logical grouping.
  */
@@ -21,12 +21,9 @@ const BATCHES = [
   {
     id: 'batch-1-astro-core',
     name: 'Astro Core (Components & Features)',
-    targets: [
-      'apps/astro/src/components',
-      'apps/astro/src/features'
-    ],
+    targets: ['apps/astro/src/components', 'apps/astro/src/features'],
     estimatedFiles: 90,
-    maxWarnings: 35
+    maxWarnings: 35,
   },
   {
     id: 'batch-2-astro-pages',
@@ -35,10 +32,10 @@ const BATCHES = [
       'apps/astro/src/pages',
       'apps/astro/src/contexts',
       'apps/astro/src/hooks',
-      'apps/astro/src/utils'
+      'apps/astro/src/utils',
     ],
     estimatedFiles: 85,
-    maxWarnings: 35
+    maxWarnings: 35,
   },
   {
     id: 'batch-3-astro-services',
@@ -46,10 +43,10 @@ const BATCHES = [
     targets: [
       'apps/astro/src/services',
       'apps/astro/src/types',
-      'apps/astro/src/config'
+      'apps/astro/src/config',
     ],
     estimatedFiles: 65,
-    maxWarnings: 25
+    maxWarnings: 25,
   },
   {
     id: 'batch-4-astro-root-files',
@@ -58,10 +55,10 @@ const BATCHES = [
       'apps/astro/src/*.ts',
       'apps/astro/src/*.tsx',
       'apps/astro/src/examples',
-      'apps/astro/src/a11y'
+      'apps/astro/src/a11y',
     ],
     estimatedFiles: 25,
-    maxWarnings: 10
+    maxWarnings: 10,
   },
   {
     id: 'batch-5-all-packages-and-apps',
@@ -78,11 +75,11 @@ const BATCHES = [
       'packages/pwa/src',
       'packages/storage/src',
       'packages/subscriptions/src',
-      'packages/types/src'
+      'packages/types/src',
     ],
     estimatedFiles: 181,
-    maxWarnings: 80
-  }
+    maxWarnings: 80,
+  },
 ];
 
 const ESLINT_CONFIG = '--config eslint.config.js';
@@ -92,7 +89,7 @@ const IGNORE_PATTERNS = [
   '--ignore-pattern "**/*.spec.*"',
   '--ignore-pattern "**/__tests__/**"',
   '--ignore-pattern "**/test-utils/**"',
-  '--ignore-pattern "**/tests/**"'
+  '--ignore-pattern "**/tests/**"',
 ].join(' ');
 
 // Color codes for output
@@ -104,7 +101,7 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
 };
 
 function colorize(text, color) {
@@ -112,33 +109,38 @@ function colorize(text, color) {
 }
 
 function runBatch(batch, index) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const startTime = Date.now();
     const targets = batch.targets.join(' ');
     const cmd = `npx eslint ${targets} ${EXTENSIONS} --max-warnings=${batch.maxWarnings} ${ESLINT_CONFIG} ${IGNORE_PATTERNS}`;
-    
+
     console.log(colorize(`📦 Batch ${index + 1}/5: ${batch.name}`, 'cyan'));
-    console.log(colorize(`   Targets: ${batch.targets.length} directories (~${batch.estimatedFiles} files)`, 'blue'));
+    console.log(
+      colorize(
+        `   Targets: ${batch.targets.length} directories (~${batch.estimatedFiles} files)`,
+        'blue'
+      )
+    );
     console.log(colorize(`   Command: ${cmd}`, 'magenta'));
     console.log('');
 
     const child = spawn('bash', ['-c', cmd], {
       cwd: ROOT,
-      stdio: ['ignore', 'pipe', 'pipe']
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     let stdout = '';
     let stderr = '';
 
-    child.stdout.on('data', (data) => {
+    child.stdout.on('data', data => {
       stdout += data.toString();
     });
 
-    child.stderr.on('data', (data) => {
+    child.stderr.on('data', data => {
       stderr += data.toString();
     });
 
-    child.on('close', (code) => {
+    child.on('close', code => {
       const duration = Date.now() - startTime;
       const result = {
         batch,
@@ -147,9 +149,9 @@ function runBatch(batch, index) {
         stdout,
         stderr,
         duration,
-        success: code === 0
+        success: code === 0,
       };
-      
+
       // Print result immediately
       printBatchResult(result);
       resolve(result);
@@ -160,10 +162,10 @@ function runBatch(batch, index) {
 function printBatchResult(result) {
   const { batch, index, code, stdout, stderr, duration, success } = result;
   const durationSec = (duration / 1000).toFixed(2);
-  
+
   console.log(colorize(`\n📊 Batch ${index} Results: ${batch.name}`, 'bright'));
   console.log(colorize(`⏱️  Duration: ${durationSec}s`, 'blue'));
-  
+
   if (success) {
     console.log(colorize('✅ Status: PASSED', 'green'));
   } else {
@@ -173,14 +175,14 @@ function printBatchResult(result) {
   // Count warnings and errors from output
   const warnings = (stdout.match(/warning/gi) || []).length;
   const errors = (stdout.match(/error/gi) || []).length;
-  
+
   if (warnings > 0) {
     console.log(colorize(`⚠️  Warnings: ${warnings}`, 'yellow'));
   }
   if (errors > 0) {
     console.log(colorize(`🚫 Errors: ${errors}`, 'red'));
   }
-  
+
   // Show sample of issues (first few lines)
   if (stdout.trim()) {
     const lines = stdout.trim().split('\n').slice(0, 5);
@@ -196,12 +198,12 @@ function printBatchResult(result) {
       }
     }
   }
-  
+
   if (stderr.trim()) {
     console.log(colorize('⚠️  Stderr:', 'yellow'));
     console.log(stderr.trim());
   }
-  
+
   console.log(colorize('─'.repeat(80), 'blue'));
 }
 
@@ -210,42 +212,72 @@ function printSummary(results) {
   const maxDuration = Math.max(...results.map(r => r.duration)) / 1000;
   const successful = results.filter(r => r.success).length;
   const failed = results.length - successful;
-  
+
   console.log(colorize('\n🎯 LINT BATCH SUMMARY', 'bright'));
   console.log(colorize('═'.repeat(50), 'blue'));
-  
+
   console.log(colorize(`📊 Total Batches: ${results.length}`, 'blue'));
-  console.log(colorize(`✅ Successful: ${successful}`, successful === results.length ? 'green' : 'yellow'));
+  console.log(
+    colorize(
+      `✅ Successful: ${successful}`,
+      successful === results.length ? 'green' : 'yellow'
+    )
+  );
   console.log(colorize(`❌ Failed: ${failed}`, failed === 0 ? 'blue' : 'red'));
-  
-  console.log(colorize(`⏱️  Total Processing Time: ${totalDuration.toFixed(2)}s`, 'blue'));
-  console.log(colorize(`⚡ Max Batch Duration: ${maxDuration.toFixed(2)}s`, 'blue'));
-  console.log(colorize(`🚀 Parallelization Efficiency: ${((totalDuration / maxDuration) * 100 / results.length).toFixed(1)}%`, 'cyan'));
-  
+
+  console.log(
+    colorize(`⏱️  Total Processing Time: ${totalDuration.toFixed(2)}s`, 'blue')
+  );
+  console.log(
+    colorize(`⚡ Max Batch Duration: ${maxDuration.toFixed(2)}s`, 'blue')
+  );
+  console.log(
+    colorize(
+      `🚀 Parallelization Efficiency: ${(((totalDuration / maxDuration) * 100) / results.length).toFixed(1)}%`,
+      'cyan'
+    )
+  );
+
   // Show batch performance
   console.log(colorize('\n📈 Batch Performance:', 'bright'));
   results.forEach((result, i) => {
-    const status = result.success ? colorize('PASS', 'green') : colorize('FAIL', 'red');
+    const status = result.success
+      ? colorize('PASS', 'green')
+      : colorize('FAIL', 'red');
     const duration = (result.duration / 1000).toFixed(2);
     console.log(`   ${i + 1}. ${result.batch.name}: ${status} (${duration}s)`);
   });
-  
+
   if (failed > 0) {
     console.log(colorize('\n🔧 RECOMMENDATIONS:', 'yellow'));
     results.forEach((result, i) => {
       if (!result.success) {
-        console.log(colorize(`   • Batch ${i + 1}: Review lint errors in ${result.batch.name}`, 'yellow'));
-        console.log(colorize(`     Consider increasing maxWarnings from ${result.batch.maxWarnings}`, 'blue'));
+        console.log(
+          colorize(
+            `   • Batch ${i + 1}: Review lint errors in ${result.batch.name}`,
+            'yellow'
+          )
+        );
+        console.log(
+          colorize(
+            `     Consider increasing maxWarnings from ${result.batch.maxWarnings}`,
+            'blue'
+          )
+        );
       }
     });
   }
-  
+
   console.log(colorize('\n🎉 Batch processing complete!', 'green'));
-  
+
   if (failed === 0) {
-    console.log(colorize('All linting passed successfully across all batches.', 'green'));
+    console.log(
+      colorize('All linting passed successfully across all batches.', 'green')
+    );
   } else {
-    console.log(colorize(`${failed} batch(es) had issues that need attention.`, 'red'));
+    console.log(
+      colorize(`${failed} batch(es) had issues that need attention.`, 'red')
+    );
     process.exit(1);
   }
 }
@@ -254,34 +286,51 @@ async function main() {
   console.log(colorize('🚀 CosmicHub Parallel Lint Testing', 'bright'));
   console.log(colorize('Optimized batching for maximum efficiency', 'blue'));
   console.log(colorize('═'.repeat(50), 'blue'));
-  
+
   // Display batch plan
   console.log(colorize('\n📋 Batch Execution Plan:', 'bright'));
   BATCHES.forEach((batch, i) => {
     console.log(colorize(`${i + 1}. ${batch.name}`, 'cyan'));
-    console.log(colorize(`   Files: ~${batch.estimatedFiles} | Max Warnings: ${batch.maxWarnings}`, 'blue'));
+    console.log(
+      colorize(
+        `   Files: ~${batch.estimatedFiles} | Max Warnings: ${batch.maxWarnings}`,
+        'blue'
+      )
+    );
     console.log(colorize(`   Directories: ${batch.targets.length}`, 'blue'));
   });
-  
-  const totalEstimatedFiles = BATCHES.reduce((sum, batch) => sum + batch.estimatedFiles, 0);
-  console.log(colorize(`\nTotal estimated files: ${totalEstimatedFiles}`, 'green'));
+
+  const totalEstimatedFiles = BATCHES.reduce(
+    (sum, batch) => sum + batch.estimatedFiles,
+    0
+  );
+  console.log(
+    colorize(`\nTotal estimated files: ${totalEstimatedFiles}`, 'green')
+  );
   console.log(colorize('Starting parallel execution...\n', 'green'));
-  
+
   const startTime = Date.now();
-  
+
   try {
     // Run all batches in parallel
     const results = await Promise.all(
       BATCHES.map((batch, index) => runBatch(batch, index))
     );
-    
+
     const totalTime = Date.now() - startTime;
-    console.log(colorize(`\n⏱️  Total execution time: ${(totalTime / 1000).toFixed(2)}s`, 'green'));
-    
+    console.log(
+      colorize(
+        `\n⏱️  Total execution time: ${(totalTime / 1000).toFixed(2)}s`,
+        'green'
+      )
+    );
+
     printSummary(results);
-    
   } catch (error) {
-    console.error(colorize('\n💥 Fatal error during batch processing:', 'red'), error);
+    console.error(
+      colorize('\n💥 Fatal error during batch processing:', 'red'),
+      error
+    );
     process.exit(1);
   }
 }

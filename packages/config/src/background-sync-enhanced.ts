@@ -9,7 +9,10 @@
 
 // Helper functions for easy integration
 export const backgroundSyncHelpers = {
-  queueChartCalculation: async (_chartData: any, _userId: string): Promise<string> => {
+  queueChartCalculation: async (
+    _chartData: any,
+    _userId: string
+  ): Promise<string> => {
     // TODO: Implement proper sync manager integration
     return Promise.resolve(`sync-${Date.now()}`);
   },

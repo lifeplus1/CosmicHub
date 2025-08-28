@@ -21,10 +21,10 @@ import {
 } from '../../services/ai-001-enhanced';
 
 interface AI001DashboardProps {
-  chartData: Partial<SavedChart> & { 
+  chartData: Partial<SavedChart> & {
     id?: string;
-    planets?: ChartData['planets']; 
-    houses?: ChartData['houses']; 
+    planets?: ChartData['planets'];
+    houses?: ChartData['houses'];
   };
   userId: string;
   className?: string;

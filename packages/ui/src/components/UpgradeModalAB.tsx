@@ -25,7 +25,6 @@ export const UpgradeModalAB: React.FC<UpgradeModalABProps> = ({
   enableABTesting = true,
   ...props
 }) => {
-
   // A/B Test: Headline messaging
   const headlineTest: ABTestResult = useABTest({
     testName: 'upgrade_modal_headline',

@@ -22,7 +22,9 @@ const ChartWheelPage: React.FC = () => {
     timezone: 'America/New_York',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -39,7 +41,7 @@ const ChartWheelPage: React.FC = () => {
       city: formData.city,
       timezone: formData.timezone,
     };
-    
+
     setBirthData(data);
   };
 
@@ -87,7 +89,10 @@ const ChartWheelPage: React.FC = () => {
             <div className='space-y-4'>
               <div className='grid grid-cols-3 gap-2'>
                 <div>
-                  <label htmlFor='month' className='block text-cosmic-silver mb-1 text-sm'>
+                  <label
+                    htmlFor='month'
+                    className='block text-cosmic-silver mb-1 text-sm'
+                  >
                     Month
                   </label>
                   <select
@@ -106,7 +111,10 @@ const ChartWheelPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor='day' className='block text-cosmic-silver mb-1 text-sm'>
+                  <label
+                    htmlFor='day'
+                    className='block text-cosmic-silver mb-1 text-sm'
+                  >
                     Day
                   </label>
                   <select
@@ -125,7 +133,10 @@ const ChartWheelPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor='year' className='block text-cosmic-silver mb-1 text-sm'>
+                  <label
+                    htmlFor='year'
+                    className='block text-cosmic-silver mb-1 text-sm'
+                  >
                     Year
                   </label>
                   <input
@@ -142,7 +153,10 @@ const ChartWheelPage: React.FC = () => {
 
               <div className='grid grid-cols-2 gap-2'>
                 <div>
-                  <label htmlFor='hour' className='block text-cosmic-silver mb-1 text-sm'>
+                  <label
+                    htmlFor='hour'
+                    className='block text-cosmic-silver mb-1 text-sm'
+                  >
                     Hour (24hr)
                   </label>
                   <select
@@ -161,7 +175,10 @@ const ChartWheelPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor='minute' className='block text-cosmic-silver mb-1 text-sm'>
+                  <label
+                    htmlFor='minute'
+                    className='block text-cosmic-silver mb-1 text-sm'
+                  >
                     Minute
                   </label>
                   <select
@@ -182,7 +199,10 @@ const ChartWheelPage: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor='city' className='block text-cosmic-silver mb-1 text-sm'>
+                <label
+                  htmlFor='city'
+                  className='block text-cosmic-silver mb-1 text-sm'
+                >
                   Birth City
                 </label>
                 <input
@@ -198,7 +218,10 @@ const ChartWheelPage: React.FC = () => {
 
               <div className='grid grid-cols-2 gap-2'>
                 <div>
-                  <label htmlFor='lat' className='block text-cosmic-silver mb-1 text-sm'>
+                  <label
+                    htmlFor='lat'
+                    className='block text-cosmic-silver mb-1 text-sm'
+                  >
                     Latitude
                   </label>
                   <input
@@ -213,7 +236,10 @@ const ChartWheelPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor='lon' className='block text-cosmic-silver mb-1 text-sm'>
+                  <label
+                    htmlFor='lon'
+                    className='block text-cosmic-silver mb-1 text-sm'
+                  >
                     Longitude
                   </label>
                   <input
@@ -230,7 +256,10 @@ const ChartWheelPage: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor='timezone' className='block text-cosmic-silver mb-1 text-sm'>
+                <label
+                  htmlFor='timezone'
+                  className='block text-cosmic-silver mb-1 text-sm'
+                >
                   Timezone
                 </label>
                 <select
@@ -306,14 +335,18 @@ const ChartWheelPage: React.FC = () => {
               showAnimation={showAnimation}
             />
           ) : (
-            <Card title='Chart Wheel' className='h-96 flex items-center justify-center'>
+            <Card
+              title='Chart Wheel'
+              className='h-96 flex items-center justify-center'
+            >
               <div className='text-center text-cosmic-silver'>
                 <div className='text-6xl mb-4'>🌌</div>
                 <p className='text-lg'>
                   Enter your birth information to generate your chart
                 </p>
                 <p className='text-sm mt-2 text-cosmic-silver/70'>
-                  Or click &ldquo;Load Sample Chart&rdquo; to see a demonstration
+                  Or click &ldquo;Load Sample Chart&rdquo; to see a
+                  demonstration
                 </p>
               </div>
             </Card>
@@ -344,7 +377,8 @@ const ChartWheelPage: React.FC = () => {
             <div>
               <span className='text-cosmic-silver'>Coordinates:</span>
               <span className='text-cosmic-gold ml-2'>
-                {typeof birthData.lat === 'number' && typeof birthData.lon === 'number'
+                {typeof birthData.lat === 'number' &&
+                typeof birthData.lon === 'number'
                   ? `${birthData.lat.toFixed(4)}, ${birthData.lon.toFixed(4)}`
                   : 'Coords N/A'}
               </span>

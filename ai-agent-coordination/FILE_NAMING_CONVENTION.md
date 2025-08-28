@@ -9,7 +9,7 @@ To prevent file proliferation and maintain consistency, follow these **exact** n
 ```bash
 # ALWAYS use these exact names - never create variants
 agent-{id}-instructions.md     # Mission briefing for agent
-agent-{id}-analysis.json       # Current lint analysis results  
+agent-{id}-analysis.json       # Current lint analysis results
 coordination-manifest.json     # Global coordination rules
 ```
 
@@ -25,7 +25,7 @@ agent-{id}-completion.json     # Results and status when done
 **DO NOT CREATE** files with these patterns:
 
 - ❌ `agent-{id}-current-analysis.json`
-- ❌ `agent-{id}-analysis-post-fix.json`  
+- ❌ `agent-{id}-analysis-post-fix.json`
 - ❌ `agent-{id}-fixes.json`
 - ❌ `agent-{id}-status.json`
 - ❌ `agent-{id}-temp-*.json`
@@ -107,4 +107,5 @@ The coordination system now:
 3. **Logs when files are updated** for visibility
 4. **Includes cleanup script** to remove non-standard files
 
-**Remember**: When in doubt, run `./scripts/cleanup-ai-coordination.sh` to reset to standard structure!
+**Remember**: When in doubt, run `./scripts/cleanup-ai-coordination.sh` to reset to standard
+structure!

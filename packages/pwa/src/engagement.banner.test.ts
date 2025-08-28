@@ -5,7 +5,10 @@ import { showInstallBanner } from './ui';
 // Minimal DOM setup if not present
 if (typeof window === 'undefined') {
   const { JSDOM } = require('jsdom');
-  const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>', { url: 'https://example.test/' });
+  const dom = new JSDOM(
+    '<!doctype html><html><head></head><body></body></html>',
+    { url: 'https://example.test/' }
+  );
   // @ts-ignore
   global.window = dom.window;
   // @ts-ignore
@@ -18,7 +21,11 @@ vi.useFakeTimers();
 
 beforeEach(() => {
   document.body.innerHTML = '';
-  try { window.localStorage?.clear(); } catch { /* ignore */ }
+  try {
+    window.localStorage?.clear();
+  } catch {
+    /* ignore */
+  }
   vi.setSystemTime(0);
 });
 
@@ -34,16 +41,24 @@ describe('engagement + banner dismissal integration', () => {
     expect(gate.isEligible()).toBe(true);
 
     // Show banner
-    showInstallBanner({ title: 'Install', subtitle: 'Test', action: 'Install' });
+    showInstallBanner({
+      title: 'Install',
+      subtitle: 'Test',
+      action: 'Install',
+    });
     const banner = document.getElementById('pwa-install-banner');
     expect(banner).toBeTruthy();
 
     // Wire dismissal -> markDismissed (mirrors app integration)
-    banner?.querySelector('[data-act="dismiss"]')?.addEventListener('click', () => gate.markDismissed(), { once: true });
+    banner
+      ?.querySelector('[data-act="dismiss"]')
+      ?.addEventListener('click', () => gate.markDismissed(), { once: true });
 
     // Advance time slightly then dismiss
     vi.setSystemTime(10);
-    (banner?.querySelector('[data-act="dismiss"]') as HTMLButtonElement).click();
+    (
+      banner?.querySelector('[data-act="dismiss"]') as HTMLButtonElement
+    ).click();
     expect(gate.getState().lastDismissed).toBe(10);
     expect(gate.isEligible()).toBe(false); // cooldown active
 

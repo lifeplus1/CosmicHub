@@ -69,7 +69,11 @@ export const trackAIPredictiveTransit = (data: {
 };
 
 export const trackAIGrowthCoaching = (data: {
-  coaching_type: 'career' | 'relationships' | 'personal_development' | 'spiritual';
+  coaching_type:
+    | 'career'
+    | 'relationships'
+    | 'personal_development'
+    | 'spiritual';
   session_duration_ms: number;
   recommendations_count: number;
   user_satisfaction?: 1 | 2 | 3 | 4 | 5;
@@ -91,7 +95,11 @@ export const trackAIGrowthCoaching = (data: {
 };
 
 export const trackAIPatternRecognition = (data: {
-  pattern_type: 'personality' | 'life_cycles' | 'relationship_patterns' | 'karmic_lessons';
+  pattern_type:
+    | 'personality'
+    | 'life_cycles'
+    | 'relationship_patterns'
+    | 'karmic_lessons';
   patterns_found: number;
   confidence_score: number;
   user_feedback?: 'helpful' | 'somewhat_helpful' | 'not_helpful';

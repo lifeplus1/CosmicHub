@@ -33,7 +33,11 @@ const VedicChart: React.FC<Props> = ({ data }) => {
   );
   const ayanamsa = safeGet(dataRecord, 'ayanamsa', 0) as number;
   const moonSign = safeGet(dataRecord, 'analysis.moon_sign', 'Not calculated');
-  const analysis = safeGet(dataRecord, 'analysis.analysis', 'Analysis not available');
+  const analysis = safeGet(
+    dataRecord,
+    'analysis.analysis',
+    'Analysis not available'
+  );
   const planets = safeGet(dataRecord, 'planets', {});
 
   const planetEntries = Object.entries(planets);
@@ -109,7 +113,11 @@ const VedicChart: React.FC<Props> = ({ data }) => {
                             'nakshatra.name',
                             'Unknown'
                           );
-                          const pada = safeGet(infoRecord, 'nakshatra.pada', 'N/A') as string;
+                          const pada = safeGet(
+                            infoRecord,
+                            'nakshatra.pada',
+                            'N/A'
+                          ) as string;
 
                           return (
                             <tr

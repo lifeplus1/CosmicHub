@@ -50,8 +50,12 @@ function showIOSInstructions(): void {
         </div>
       </div>
     </div>`;
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  modal.querySelector('.close-btn')?.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => {
+    if (e.target === modal) modal.remove();
+  });
+  modal
+    .querySelector('.close-btn')
+    ?.addEventListener('click', () => modal.remove());
   document.body.appendChild(modal);
 }
 
@@ -74,10 +78,14 @@ function initializePWAFeatures(): void {
 
   const presentInstallUI = () => {
     if (caps.isStandalone || !gate.isEligible()) return;
-    const copyByPlatform: Record<string, { title: string; subtitle: string; action: string; icon?: string }> = {
+    const copyByPlatform: Record<
+      string,
+      { title: string; subtitle: string; action: string; icon?: string }
+    > = {
       ios: {
         title: 'Add CosmicHub to Home Screen',
-        subtitle: 'Use the Share button then "Add to Home Screen" for the best experience.',
+        subtitle:
+          'Use the Share button then "Add to Home Screen" for the best experience.',
         action: 'Show Steps',
         icon: '🌟',
       },
@@ -100,26 +108,46 @@ function initializePWAFeatures(): void {
         icon: '🌟',
       },
     };
-    const copy = copyByPlatform[caps.platform] ?? copyByPlatform.other ?? {
-      title: 'Install CosmicHub',
-      subtitle: 'Get an app-like experience.',
-      action: 'Install',
-      icon: '🌟',
-    };
+    const copy = copyByPlatform[caps.platform] ??
+      copyByPlatform.other ?? {
+        title: 'Install CosmicHub',
+        subtitle: 'Get an app-like experience.',
+        action: 'Install',
+        icon: '🌟',
+      };
     showInstallBanner(copy);
     if (!eligibilityLogged) {
       eligibilityLogged = true;
       devConsole.log?.('[engagement] install prompt shown');
       try {
         const state = gate.getState();
-        window.dispatchEvent(new CustomEvent('pwa:engagement-install-shown', { detail: { app: 'astro', pageViews: state.pageViews, firstSeen: state.firstSeen, ts: Date.now() } }));
-      } catch { /* ignore */ }
+        window.dispatchEvent(
+          new CustomEvent('pwa:engagement-install-shown', {
+            detail: {
+              app: 'astro',
+              pageViews: state.pageViews,
+              firstSeen: state.firstSeen,
+              ts: Date.now(),
+            },
+          })
+        );
+      } catch {
+        /* ignore */
+      }
     }
     // Record dismissal to cooldown when user explicitly dismisses banner
     const banner = document.getElementById('pwa-install-banner');
-    banner?.querySelector('[data-act="dismiss"]')?.addEventListener('click', () => {
-      try { gate.markDismissed(); } catch { /* ignore */ }
-    }, { once: true });
+    banner?.querySelector('[data-act="dismiss"]')?.addEventListener(
+      'click',
+      () => {
+        try {
+          gate.markDismissed();
+        } catch {
+          /* ignore */
+        }
+      },
+      { once: true }
+    );
   };
 
   // beforeinstallprompt (Android / some desktop Chromium)
@@ -154,7 +182,9 @@ function initializePWAFeatures(): void {
       await deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       devConsole.log?.(
-        choice.outcome === 'accepted' ? '✅ Install accepted' : '❌ Install dismissed'
+        choice.outcome === 'accepted'
+          ? '✅ Install accepted'
+          : '❌ Install dismissed'
       );
       deferredPrompt = null;
     })();
@@ -174,7 +204,10 @@ function registerServiceWorker(): void {
           }
           return Promise.all(regs.map(r => r.unregister().catch(() => false)));
         })
-        .catch(err => isDevelopment() && devConsole.error?.('SW unregister failed', err));
+        .catch(
+          err =>
+            isDevelopment() && devConsole.error?.('SW unregister failed', err)
+        );
     }
     return;
   }

@@ -24,7 +24,20 @@ vi.mock('../utils/astrologyUtils', () => ({
   calculateHousePosition: (position: number) => Math.floor(position / 30) + 1,
   getRulerFromSign: () => 'mars', // Simple mock
   isZodiacSign: (sign: string) => {
-    const signs = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
+    const signs = [
+      'aries',
+      'taurus',
+      'gemini',
+      'cancer',
+      'leo',
+      'virgo',
+      'libra',
+      'scorpio',
+      'sagittarius',
+      'capricorn',
+      'aquarius',
+      'pisces',
+    ];
     return signs.includes(sign?.toLowerCase());
   },
 }));

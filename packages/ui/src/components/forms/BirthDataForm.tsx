@@ -46,7 +46,9 @@ export const BirthDataForm: React.FC<BirthDataFormProps> = ({
               id='date'
               type='date'
               value={data.date}
-              onChange={(e) => setData(prev => ({ ...prev, date: e.target.value }))}
+              onChange={e =>
+                setData(prev => ({ ...prev, date: e.target.value }))
+              }
               className='w-full p-2 border rounded'
             />
           </div>
@@ -58,19 +60,26 @@ export const BirthDataForm: React.FC<BirthDataFormProps> = ({
               id='time'
               type='time'
               value={data.time}
-              onChange={(e) => setData(prev => ({ ...prev, time: e.target.value }))}
+              onChange={e =>
+                setData(prev => ({ ...prev, time: e.target.value }))
+              }
               className='w-full p-2 border rounded'
             />
           </div>
           <div>
-            <label htmlFor='location' className='block text-sm font-medium mb-1'>
+            <label
+              htmlFor='location'
+              className='block text-sm font-medium mb-1'
+            >
               Birth Location:
             </label>
             <input
               id='location'
               type='text'
               value={data.location}
-              onChange={(e) => setData(prev => ({ ...prev, location: e.target.value }))}
+              onChange={e =>
+                setData(prev => ({ ...prev, location: e.target.value }))
+              }
               className='w-full p-2 border rounded'
               placeholder='City, Country'
             />

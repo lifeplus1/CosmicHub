@@ -45,7 +45,12 @@ export interface ChartCalculationEvent {
 
 // AI interaction analytics
 export interface AIInteractionEvent {
-  feature: 'predictive_transits' | 'ai_questions' | 'multi_system_synthesis' | 'growth_coaching' | 'pattern_recognition';
+  feature:
+    | 'predictive_transits'
+    | 'ai_questions'
+    | 'multi_system_synthesis'
+    | 'growth_coaching'
+    | 'pattern_recognition';
   input_type: 'text' | 'voice' | 'selection';
   response_time_ms: number;
   user_satisfaction?: 1 | 2 | 3 | 4 | 5;
@@ -55,7 +60,12 @@ export interface AIInteractionEvent {
 
 // Mobile/PWA specific events
 export interface MobileEvent {
-  event_type: 'app_install' | 'install_prompt_shown' | 'install_dismissed' | 'push_notification_received' | 'offline_usage';
+  event_type:
+    | 'app_install'
+    | 'install_prompt_shown'
+    | 'install_dismissed'
+    | 'push_notification_received'
+    | 'offline_usage';
   install_source?: 'chrome' | 'safari' | 'edge' | 'firefox' | 'store';
   notification_type?: 'daily_insight' | 'transit_alert' | 'feature_update';
   offline_duration_ms?: number;
@@ -63,7 +73,12 @@ export interface MobileEvent {
 
 // Business events
 export interface BusinessEvent {
-  event_type: 'sign_up' | 'subscription_started' | 'subscription_cancelled' | 'feature_usage' | 'conversion';
+  event_type:
+    | 'sign_up'
+    | 'subscription_started'
+    | 'subscription_cancelled'
+    | 'feature_usage'
+    | 'conversion';
   subscription_tier?: 'premium' | 'pro';
   feature_name?: string;
   conversion_value?: number;
@@ -127,8 +142,8 @@ export interface AnalyticsConfig {
     enrichPageContext?: boolean;
     /** Automatically capture an uncaught error event */
     autoTrackErrors?: boolean;
-  /** Callback invoked after every successful dispatch (mainly for testing/instrumentation) */
-  onDispatch?: (event: AnalyticsEvent) => void;
+    /** Callback invoked after every successful dispatch (mainly for testing/instrumentation) */
+    onDispatch?: (event: AnalyticsEvent) => void;
   };
 }
 

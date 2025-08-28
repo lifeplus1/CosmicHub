@@ -12,7 +12,7 @@ describe('BirthSummaryHeader accessibility & shortcuts', () => {
     hour: 10,
     minute: 45,
     latitude: 40.7128,
-    longitude: -74.0060,
+    longitude: -74.006,
     city: 'New York',
     timezone: 'America/New_York',
   });
@@ -22,7 +22,13 @@ describe('BirthSummaryHeader accessibility & shortcuts', () => {
     const onRecalc = vi.fn();
     const onSave = vi.fn();
     const { rerender } = render(
-      <BirthSummaryHeader birthData={base} isLoading={false} onEdit={onEdit} onRecalculate={onRecalc} onSave={onSave} />
+      <BirthSummaryHeader
+        birthData={base}
+        isLoading={false}
+        onEdit={onEdit}
+        onRecalculate={onRecalc}
+        onSave={onSave}
+      />
     );
 
     const region = screen.getByRole('region', { name: /natal chart/i });
@@ -30,9 +36,17 @@ describe('BirthSummaryHeader accessibility & shortcuts', () => {
 
     // Simulate loading state toggle
     rerender(
-      <BirthSummaryHeader birthData={base} isLoading={true} onEdit={onEdit} onRecalculate={onRecalc} onSave={onSave} />
+      <BirthSummaryHeader
+        birthData={base}
+        isLoading={true}
+        onEdit={onEdit}
+        onRecalculate={onRecalc}
+        onSave={onSave}
+      />
     );
-    expect(screen.getByRole('button', { name: /chart calculation in progress/i })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /chart calculation in progress/i })
+    ).toBeDisabled();
   });
 
   it('supports keyboard shortcuts (e, r, s)', () => {
@@ -40,7 +54,13 @@ describe('BirthSummaryHeader accessibility & shortcuts', () => {
     const onRecalc = vi.fn();
     const onSave = vi.fn();
     render(
-      <BirthSummaryHeader birthData={base} isLoading={false} onEdit={onEdit} onRecalculate={onRecalc} onSave={onSave} />
+      <BirthSummaryHeader
+        birthData={base}
+        isLoading={false}
+        onEdit={onEdit}
+        onRecalculate={onRecalc}
+        onSave={onSave}
+      />
     );
     const region = screen.getByRole('region', { name: /natal chart/i });
     region.focus();

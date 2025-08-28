@@ -19,14 +19,14 @@ export enum Element {
   Earth = 'earth',
   Air = 'air',
   Water = 'water',
-  Unknown = 'unknown'
+  Unknown = 'unknown',
 }
 
 export enum Quality {
   Cardinal = 'cardinal',
   Fixed = 'fixed',
   Mutable = 'mutable',
-  Unknown = 'unknown'
+  Unknown = 'unknown',
 }
 
 export enum ChartShape {
@@ -37,7 +37,7 @@ export enum ChartShape {
   Splash = 'splash',
   Splay = 'splay',
   Seesaw = 'seesaw',
-  Unknown = 'unknown'
+  Unknown = 'unknown',
 }
 
 export interface UpcomingEvent {

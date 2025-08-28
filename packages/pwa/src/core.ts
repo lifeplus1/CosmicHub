@@ -14,7 +14,9 @@ export interface SWRegisterOptions {
 const HAS_WINDOW = typeof window !== 'undefined';
 const HAS_DOCUMENT = typeof document !== 'undefined';
 
-export async function registerServiceWorkerWithBackoff(opts: SWRegisterOptions = {}): Promise<ServiceWorkerRegistration | null> {
+export async function registerServiceWorkerWithBackoff(
+  opts: SWRegisterOptions = {}
+): Promise<ServiceWorkerRegistration | null> {
   if (!HAS_WINDOW || !('serviceWorker' in navigator)) return null;
   const {
     swPath = '/sw.js',
@@ -26,9 +28,12 @@ export async function registerServiceWorkerWithBackoff(opts: SWRegisterOptions =
   let delay = 1500;
   while (attempt <= maxRetries) {
     try {
-      const reg = await navigator.serviceWorker.register(swPath, { scope, type });
+      const reg = await navigator.serviceWorker.register(swPath, {
+        scope,
+        type,
+      });
       return reg;
-  } catch {
+    } catch {
       if (attempt === maxRetries) break;
       await new Promise(r => setTimeout(r, delay));
       delay = Math.min(delay * 2, 60000);
@@ -38,7 +43,9 @@ export async function registerServiceWorkerWithBackoff(opts: SWRegisterOptions =
   return null;
 }
 
-export interface InitPWAResult { dispose(): void }
+export interface InitPWAResult {
+  dispose(): void;
+}
 export interface InitPWAParams extends SWRegisterOptions {
   auto?: boolean;
 }
@@ -52,12 +59,16 @@ export function initPWA(params: InitPWAParams = {}): InitPWAResult {
       if (!reg) return;
       if (params.onUpdateFound) {
         reg.addEventListener('updatefound', params.onUpdateFound);
-        disposers.push(() => reg.removeEventListener('updatefound', params.onUpdateFound!));
+        disposers.push(() =>
+          reg.removeEventListener('updatefound', params.onUpdateFound!)
+        );
       }
       if (params.onControllerChange) {
         const cc = params.onControllerChange;
         navigator.serviceWorker.addEventListener('controllerchange', cc);
-        disposers.push(() => navigator.serviceWorker.removeEventListener('controllerchange', cc));
+        disposers.push(() =>
+          navigator.serviceWorker.removeEventListener('controllerchange', cc)
+        );
       }
       // Visibility aware update loop
       const interval = params.checkIntervalMs ?? 60000;
@@ -71,7 +82,9 @@ export function initPWA(params: InitPWAParams = {}): InitPWAResult {
       timeoutId = window.setTimeout(schedule, interval);
       const vis = () => schedule();
       document.addEventListener('visibilitychange', vis);
-      disposers.push(() => document.removeEventListener('visibilitychange', vis));
+      disposers.push(() =>
+        document.removeEventListener('visibilitychange', vis)
+      );
       disposers.push(() => clearTimeout(timeoutId));
     });
   };
@@ -82,5 +95,14 @@ export function initPWA(params: InitPWAParams = {}): InitPWAResult {
     start();
   }
 
-  return { dispose: () => disposers.forEach(d => { try { d(); } catch { /* ignore */ } }) };
+  return {
+    dispose: () =>
+      disposers.forEach(d => {
+        try {
+          d();
+        } catch {
+          /* ignore */
+        }
+      }),
+  };
 }

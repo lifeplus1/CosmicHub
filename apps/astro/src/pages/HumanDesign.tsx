@@ -126,7 +126,8 @@ const HumanDesign: React.FC = () => {
           {/* Birth Information */}
           <Card title='Birth Information'>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-              {humanDesignData?.birth_info !== null && humanDesignData?.birth_info !== undefined ? (
+              {humanDesignData?.birth_info !== null &&
+              humanDesignData?.birth_info !== undefined ? (
                 // Show birth info from Human Design calculation result
                 (() => {
                   const birthInfo = formatBirthInfo(humanDesignData.birth_info);

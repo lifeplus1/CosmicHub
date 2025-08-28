@@ -2,9 +2,13 @@
 
 ## FOR AI ASSISTANTS: CRITICAL EXECUTION RULES
 
-> **📚 Complete Setup Guide**: See [docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md](docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md) for workspace configuration and context automation
+> **📚 Complete Setup Guide**: See
+> [docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md](docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md) for
+> workspace configuration and context automation
 >
-> **📋 Essential Context**: Always read [docs/00-OVERVIEW/MASTER_CONTEXT.md](docs/00-OVERVIEW/MASTER_CONTEXT.md) for complete project context before starting work
+> **📋 Essential Context**: Always read
+> [docs/00-OVERVIEW/MASTER_CONTEXT.md](docs/00-OVERVIEW/MASTER_CONTEXT.md) for complete project
+> context before starting work
 
 ### ⚠️ MANDATORY SEQUENCING
 
@@ -21,7 +25,8 @@
 ### Current Agent Status
 
 - **Total**: 280 errors, 89 warnings across 7 agents
-- **Ready**: 5 agents (ServicesTypesAgent, UIPackageAgent, ConfigPackageAgent, FeatureFixAgent, + 1 more)
+- **Ready**: 5 agents (ServicesTypesAgent, UIPackageAgent, ConfigPackageAgent, FeatureFixAgent, + 1
+  more)
 - **Need Work**: 3 agents (ComponentFixAgent, PagesContextAgent, AppsPackagesAgent)
 
 ### Common Mistakes to Avoid

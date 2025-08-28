@@ -70,13 +70,15 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
       if (typeof onCalculate === 'function') {
         // Provide a deterministic sample request for quick demo
         void Promise.resolve(
-          onCalculate(toTextBirthData({
-            year: 2000,
-            month: 1,
-            day: 1,
-            hour: 0,
-            minute: 0,
-          }))
+          onCalculate(
+            toTextBirthData({
+              year: 2000,
+              month: 1,
+              day: 1,
+              hour: 0,
+              minute: 0,
+            })
+          )
         );
       }
     }, [onCalculate]);

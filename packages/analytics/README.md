@@ -1,30 +1,31 @@
 # @cosmichub/analytics
 
-Lightweight multi‑provider, privacy‑first analytics layer for CosmicHub apps. Consent‑aware, test‑friendly, tree‑shakeable. No provider SDK is loaded unless enabled in config.
+Lightweight multi‑provider, privacy‑first analytics layer for CosmicHub apps. Consent‑aware,
+test‑friendly, tree‑shakeable. No provider SDK is loaded unless enabled in config.
 
 ## Feature Summary
 
-| Category        | Highlights |
-|-----------------|------------|
-| Core Tracking   | Unified API (GA4, Mixpanel, PostHog, optional custom backend) |
+| Category        | Highlights                                                                   |
+| --------------- | ---------------------------------------------------------------------------- |
+| Core Tracking   | Unified API (GA4, Mixpanel, PostHog, optional custom backend)                |
 | Privacy         | PII stripping (email/ip + custom keys), email domain derivation, DNT respect |
-| Sessions        | Auto session renewal (idle timeout), manual reset, queue until consent |
-| Reliability     | Safe DOM guards (SSR), script de‑duplication, opt-in auto error tracking |
-| Instrumentation | `withTiming` perf events, `trackError`, `advanced.onDispatch` hook |
-| React           | Provider + hook (`@cosmichub/analytics/react`) |
-| Dev/Test        | Deterministic onDispatch capture, disable/enable/flush controls |
-| Extensibility   | Pluggable provider loaders, sanitized event pipeline |
+| Sessions        | Auto session renewal (idle timeout), manual reset, queue until consent       |
+| Reliability     | Safe DOM guards (SSR), script de‑duplication, opt-in auto error tracking     |
+| Instrumentation | `withTiming` perf events, `trackError`, `advanced.onDispatch` hook           |
+| React           | Provider + hook (`@cosmichub/analytics/react`)                               |
+| Dev/Test        | Deterministic onDispatch capture, disable/enable/flush controls              |
+| Extensibility   | Pluggable provider loaders, sanitized event pipeline                         |
 
 ### Provider Capability Matrix
 
-| Provider       | Track    | Page View               | Identify | Notes |
-|----------------|----------|-------------------------|----------|-------|
-| Google GA4     | gtag     | gtag config call        | user_id  | IP anonymize toggle |
-| Mixpanel       | track    | track('Page View')      | identify | People.set traits |
-| PostHog        | capture  | capture('$pageview')    | identify | Session recording flag |
-| Segment        | track    | page()                  | identify | CDN key path autoload |
-| RudderStack    | track    | page()                  | identify | load(writeKey, url) variant |
-| Custom Backend | POST     | n/a                     | n/a      | Minimal ingestion endpoint |
+| Provider       | Track   | Page View            | Identify | Notes                       |
+| -------------- | ------- | -------------------- | -------- | --------------------------- |
+| Google GA4     | gtag    | gtag config call     | user_id  | IP anonymize toggle         |
+| Mixpanel       | track   | track('Page View')   | identify | People.set traits           |
+| PostHog        | capture | capture('$pageview') | identify | Session recording flag      |
+| Segment        | track   | page()               | identify | CDN key path autoload       |
+| RudderStack    | track   | page()               | identify | load(writeKey, url) variant |
+| Custom Backend | POST    | n/a                  | n/a      | Minimal ingestion endpoint  |
 
 ## Installation
 
@@ -42,12 +43,21 @@ yarn add @cosmichub/analytics
 import { initializeAnalytics } from '@cosmichub/analytics';
 
 const analytics = initializeAnalytics({
-  privacy: { respectDoNotTrack: true, anonymizeIP: true, cookieConsent: false, dataRetentionDays: 180 },
+  privacy: {
+    respectDoNotTrack: true,
+    anonymizeIP: true,
+    cookieConsent: false,
+    dataRetentionDays: 180,
+  },
   googleAnalytics: { enabled: true, measurementId: 'G-XXXX' },
   mixpanel: { enabled: false, token: '', trackPageViews: false },
   posthog: { enabled: false, apiKey: '', sessionRecording: false, heatmaps: false },
   customAnalytics: { enabled: true, endpoint: '/api/analytics' },
-  advanced: { sessionTimeoutMs: 30*60*1000, autoTrackErrors: true, onDispatch: e => console.log('DISPATCH', e) }
+  advanced: {
+    sessionTimeoutMs: 30 * 60 * 1000,
+    autoTrackErrors: true,
+    onDispatch: e => console.log('DISPATCH', e),
+  },
 });
 
 analytics.track({ event: 'chart_calculated', properties: { chart_type: 'natal', success: true } });
@@ -58,11 +68,18 @@ analytics.track({ event: 'chart_calculated', properties: { chart_type: 'natal', 
 ```tsx
 import { AnalyticsProvider, useAnalytics } from '@cosmichub/analytics/react';
 
-<AnalyticsProvider config={config}> <App/> </AnalyticsProvider>
+<AnalyticsProvider config={config}>
+  {' '}
+  <App />{' '}
+</AnalyticsProvider>;
 
-function SaveButton(){
+function SaveButton() {
   const { track } = useAnalytics();
-  return <button onClick={() => track({ event: 'save_click', properties: { location: 'toolbar' } })}>Save</button>;
+  return (
+    <button onClick={() => track({ event: 'save_click', properties: { location: 'toolbar' } })}>
+      Save
+    </button>
+  );
 }
 ```
 
@@ -85,7 +102,7 @@ Use `advanced.onDispatch` to capture fully‑sanitized events (after privacy fil
 
 ```ts
 const events: AnalyticsEvent[] = [];
-const svc = initializeAnalytics({ ...config, advanced: { onDispatch: e => events.push(e) }});
+const svc = initializeAnalytics({ ...config, advanced: { onDispatch: e => events.push(e) } });
 svc.track({ event: 'test', properties: { email: 'user@example.com' } });
 expect(events[0].properties.email).toBeUndefined();
 expect(events[0].properties.email_domain).toBe('example.com');
@@ -117,7 +134,8 @@ window.mixpanel = { init: vi.fn(), track: vi.fn(), identify: vi.fn(), people: { 
 
 ## Backend Tie‑In
 
-`backend/main.py` adds FastAPI middleware measuring response times and pushing them into rolling window used by real‑time metrics endpoint.
+`backend/main.py` adds FastAPI middleware measuring response times and pushing them into rolling
+window used by real‑time metrics endpoint.
 
 ## Event Naming Guidelines
 
@@ -130,7 +148,8 @@ Conventions:
 
 ## Migration Notes
 
-If migrating from a prototype version: rename any deprecated `onEventDispatch` to `advanced.onDispatch`.
+If migrating from a prototype version: rename any deprecated `onEventDispatch` to
+`advanced.onDispatch`.
 
 ## Roadmap (Next)
 

@@ -30,7 +30,7 @@ describe('BirthDataContext Optimizations', () => {
     latitude: 40.7128,
     longitude: -74.006,
   };
-  
+
   const mockBirthData: ChartBirthData = toTextBirthData(mockUnifiedBirthData);
 
   beforeEach(() => {
@@ -74,7 +74,9 @@ describe('BirthDataContext Optimizations', () => {
       return (
         <div>
           <span data-testid='update-test-is-valid'>{String(isDataValid)}</span>
-          <span data-testid='update-test-has-data'>{birthData ? 'yes' : 'no'}</span>
+          <span data-testid='update-test-has-data'>
+            {birthData ? 'yes' : 'no'}
+          </span>
           <button
             onClick={() => setBirthData(mockBirthData)}
             data-testid='update-test-set-data'
@@ -99,7 +101,9 @@ describe('BirthDataContext Optimizations', () => {
 
     // Should now have valid data
     expect(screen.getByTestId('update-test-has-data')).toHaveTextContent('yes');
-    expect(screen.getByTestId('update-test-is-valid')).toHaveTextContent('true');
+    expect(screen.getByTestId('update-test-is-valid')).toHaveTextContent(
+      'true'
+    );
   });
 
   it('should use useCallback for functions to prevent unnecessary re-renders', () => {
@@ -119,7 +123,10 @@ describe('BirthDataContext Optimizations', () => {
           >
             Set Data
           </button>
-          <button onClick={clearBirthData} data-testid='callback-test-clear-data'>
+          <button
+            onClick={clearBirthData}
+            data-testid='callback-test-clear-data'
+          >
             Clear Data
           </button>
         </div>
@@ -135,7 +142,9 @@ describe('BirthDataContext Optimizations', () => {
     );
 
     // Should render once initially
-    expect(screen.getByTestId('callback-test-render-count')).toHaveTextContent('1');
+    expect(screen.getByTestId('callback-test-render-count')).toHaveTextContent(
+      '1'
+    );
 
     // Setting data should cause a re-render
     const setButton = screen.getByTestId('callback-test-set-data');
@@ -143,7 +152,9 @@ describe('BirthDataContext Optimizations', () => {
       setButton.click();
     });
 
-    expect(screen.getByTestId('callback-test-render-count')).toHaveTextContent('2');
+    expect(screen.getByTestId('callback-test-render-count')).toHaveTextContent(
+      '2'
+    );
   });
 
   it('should validate birth data correctly', () => {

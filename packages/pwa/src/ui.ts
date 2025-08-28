@@ -1,5 +1,68 @@
 import { detectRuntimeCapabilities } from './capabilities';
-const san=(s:string)=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-export function showUpdateBanner(message: string): void { if (typeof document==='undefined') return; if (document.getElementById('pwa-update-banner')) return; if(!document.getElementById('pwa-shared-styles')){ const st=document.createElement('style'); st.id='pwa-shared-styles'; st.textContent='.pwa-upd{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#553c9a,#06b6d4);color:#fff;padding:12px 16px;display:flex;gap:12px;justify-content:center;align-items:center;z-index:10000;font-family:system-ui,-apple-system,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.25)}.pwa-upd button{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:500}'; document.head.appendChild(st);} const el=document.createElement('div'); el.id='pwa-update-banner'; el.className='pwa-upd'; el.setAttribute('role','alert'); el.innerHTML=`<span>${san(message)}</span><button data-act="reload" type="button">Update</button><button data-act="dismiss" type="button">Dismiss</button>`; el.querySelector('[data-act="reload"]')?.addEventListener('click',()=>window.location.reload()); el.querySelector('[data-act="dismiss"]')?.addEventListener('click',()=>el.remove()); document.body.appendChild(el); }
-export interface InstallCopy { title:string; subtitle:string; action:string; icon?:string }
-export function showInstallBanner(copy: InstallCopy): void { if (typeof document==='undefined') return; const caps=detectRuntimeCapabilities(); if (caps.isStandalone) return; if (document.getElementById('pwa-install-banner')) return; if(!document.getElementById('pwa-shared-styles')){ const st=document.createElement('style'); st.id='pwa-shared-styles'; st.textContent += '.pwa-inst{position:fixed;left:20px;right:20px;bottom:20px;background:rgba(26,26,46,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(85,60,154,.35);border-radius:16px;padding:20px;z-index:10000;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;display:flex;gap:14px;align-items:flex-start;transform:translateY(100%);animation:pwaSlide .4s cubic-bezier(.34,1.56,.64,1) forwards;max-width:430px;margin:0 auto}.pwa-inst h3{margin:0 0 6px 0;font-size:16px;font-weight:600}.pwa-inst p{margin:0 0 10px 0;font-size:14px;line-height:1.4;color:#cbd5e1}.pwa-inst-actions{display:flex;gap:10px;flex-wrap:wrap}.pwa-btn{flex:1;min-width:110px;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}.pwa-btn.primary{background:linear-gradient(135deg,#553c9a,#06b6d4);color:#fff;border:none}.pwa-btn.secondary{background:transparent;color:#cbd5e1;border:1px solid rgba(255,255,255,.25)}@keyframes pwaSlide{to{transform:translateY(0)}}'; document.head.appendChild(st);} const el=document.createElement('div'); el.id='pwa-install-banner'; el.className='pwa-inst'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); const icon = copy.icon ? `<div style="width:48px;height:48px;background:linear-gradient(135deg,#553c9a,#06b6d4);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">${san(copy.icon)}</div>` : ''; el.innerHTML=`${icon}<div style="flex:1;min-width:0;"><h3>${san(copy.title)}</h3><p>${san(copy.subtitle)}</p><div class='pwa-inst-actions'><button data-act='install' class='pwa-btn primary' type='button'>${san(copy.action)}</button><button data-act='dismiss' class='pwa-btn secondary' type='button'>Dismiss</button></div></div>`; el.querySelector('[data-act="dismiss"]')?.addEventListener('click',()=>el.remove()); el.querySelector('[data-act="install"]')?.addEventListener('click',()=>{ window.dispatchEvent(new CustomEvent('install-app')); el.remove(); }); document.body.appendChild(el); (el.querySelector('[data-act="install"]') as HTMLElement)?.focus(); }
+const san = (s: string) =>
+  s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+export function showUpdateBanner(message: string): void {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('pwa-update-banner')) return;
+  if (!document.getElementById('pwa-shared-styles')) {
+    const st = document.createElement('style');
+    st.id = 'pwa-shared-styles';
+    st.textContent =
+      '.pwa-upd{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#553c9a,#06b6d4);color:#fff;padding:12px 16px;display:flex;gap:12px;justify-content:center;align-items:center;z-index:10000;font-family:system-ui,-apple-system,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.25)}.pwa-upd button{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:500}';
+    document.head.appendChild(st);
+  }
+  const el = document.createElement('div');
+  el.id = 'pwa-update-banner';
+  el.className = 'pwa-upd';
+  el.setAttribute('role', 'alert');
+  el.innerHTML = `<span>${san(message)}</span><button data-act="reload" type="button">Update</button><button data-act="dismiss" type="button">Dismiss</button>`;
+  el.querySelector('[data-act="reload"]')?.addEventListener('click', () =>
+    window.location.reload()
+  );
+  el.querySelector('[data-act="dismiss"]')?.addEventListener('click', () =>
+    el.remove()
+  );
+  document.body.appendChild(el);
+}
+export interface InstallCopy {
+  title: string;
+  subtitle: string;
+  action: string;
+  icon?: string;
+}
+export function showInstallBanner(copy: InstallCopy): void {
+  if (typeof document === 'undefined') return;
+  const caps = detectRuntimeCapabilities();
+  if (caps.isStandalone) return;
+  if (document.getElementById('pwa-install-banner')) return;
+  if (!document.getElementById('pwa-shared-styles')) {
+    const st = document.createElement('style');
+    st.id = 'pwa-shared-styles';
+    st.textContent +=
+      '.pwa-inst{position:fixed;left:20px;right:20px;bottom:20px;background:rgba(26,26,46,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(85,60,154,.35);border-radius:16px;padding:20px;z-index:10000;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;display:flex;gap:14px;align-items:flex-start;transform:translateY(100%);animation:pwaSlide .4s cubic-bezier(.34,1.56,.64,1) forwards;max-width:430px;margin:0 auto}.pwa-inst h3{margin:0 0 6px 0;font-size:16px;font-weight:600}.pwa-inst p{margin:0 0 10px 0;font-size:14px;line-height:1.4;color:#cbd5e1}.pwa-inst-actions{display:flex;gap:10px;flex-wrap:wrap}.pwa-btn{flex:1;min-width:110px;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}.pwa-btn.primary{background:linear-gradient(135deg,#553c9a,#06b6d4);color:#fff;border:none}.pwa-btn.secondary{background:transparent;color:#cbd5e1;border:1px solid rgba(255,255,255,.25)}@keyframes pwaSlide{to{transform:translateY(0)}}';
+    document.head.appendChild(st);
+  }
+  const el = document.createElement('div');
+  el.id = 'pwa-install-banner';
+  el.className = 'pwa-inst';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-modal', 'true');
+  const icon = copy.icon
+    ? `<div style="width:48px;height:48px;background:linear-gradient(135deg,#553c9a,#06b6d4);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">${san(copy.icon)}</div>`
+    : '';
+  el.innerHTML = `${icon}<div style="flex:1;min-width:0;"><h3>${san(copy.title)}</h3><p>${san(copy.subtitle)}</p><div class='pwa-inst-actions'><button data-act='install' class='pwa-btn primary' type='button'>${san(copy.action)}</button><button data-act='dismiss' class='pwa-btn secondary' type='button'>Dismiss</button></div></div>`;
+  el.querySelector('[data-act="dismiss"]')?.addEventListener('click', () =>
+    el.remove()
+  );
+  el.querySelector('[data-act="install"]')?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('install-app'));
+    el.remove();
+  });
+  document.body.appendChild(el);
+  (el.querySelector('[data-act="install"]') as HTMLElement)?.focus();
+}

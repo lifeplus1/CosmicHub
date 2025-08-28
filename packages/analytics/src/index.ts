@@ -69,7 +69,9 @@ export {
 } from './events/BusinessEvents.js';
 
 // Default Analytics Configuration
-export const createDefaultAnalyticsConfig = (overrides: Partial<import('./types/index.js').AnalyticsConfig> = {}): import('./types/index.js').AnalyticsConfig => ({
+export const createDefaultAnalyticsConfig = (
+  overrides: Partial<import('./types/index.js').AnalyticsConfig> = {}
+): import('./types/index.js').AnalyticsConfig => ({
   googleAnalytics: {
     measurementId: '',
     enabled: false,

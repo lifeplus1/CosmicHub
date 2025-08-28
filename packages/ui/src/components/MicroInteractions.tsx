@@ -32,10 +32,10 @@ export const InteractiveRating: React.FC<InteractiveRatingProps> = ({
 
   const handleClick = (newRating: number) => {
     if (readonly) return;
-    
+
     setIsAnimating(true);
     onRatingChange?.(newRating);
-    
+
     setTimeout(() => setIsAnimating(false), 300);
   };
 
@@ -63,7 +63,7 @@ export const InteractiveRating: React.FC<InteractiveRatingProps> = ({
         return (
           <button
             key={index}
-            type="button"
+            type='button'
             onClick={() => handleClick(itemRating)}
             onMouseEnter={() => !readonly && setHoverRating(itemRating)}
             onMouseLeave={() => setHoverRating(0)}
@@ -115,7 +115,9 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
   rippleColor = 'rgba(255, 255, 255, 0.6)',
   className,
 }) => {
-  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [ripples, setRipples] = useState<
+    Array<{ id: number; x: number; y: number }>
+  >([]);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -146,7 +148,8 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
 
   const variantClasses = {
     primary: 'bg-cosmic-purple hover:bg-cosmic-purple/90 text-white',
-    secondary: 'bg-cosmic-silver/20 hover:bg-cosmic-silver/30 text-cosmic-silver',
+    secondary:
+      'bg-cosmic-silver/20 hover:bg-cosmic-silver/30 text-cosmic-silver',
     ghost: 'bg-transparent hover:bg-cosmic-purple/10 text-cosmic-silver',
   };
 
@@ -159,7 +162,7 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
   return (
     <button
       ref={buttonRef}
-      type="button"
+      type='button'
       onClick={handleClick}
       disabled={disabled}
       className={cn(
@@ -172,13 +175,13 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
         className
       )}
     >
-      <span className="relative z-10">{children}</span>
-      
+      <span className='relative z-10'>{children}</span>
+
       {/* Ripple effects */}
       {ripples.map(ripple => (
         <span
           key={ripple.id}
-          className="absolute rounded-full animate-ping pointer-events-none ripple-effect"
+          className='absolute rounded-full animate-ping pointer-events-none ripple-effect'
           data-ripple-x={ripple.x - 20}
           data-ripple-y={ripple.y - 20}
           data-ripple-color={rippleColor}
@@ -306,9 +309,11 @@ export const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
 
   const arrowClasses = {
     top: 'top-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-cosmic-dark',
-    bottom: 'bottom-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-cosmic-dark',
+    bottom:
+      'bottom-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-cosmic-dark',
     left: 'left-full top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-l-4 border-t-transparent border-b-transparent border-l-cosmic-dark',
-    right: 'right-full top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-r-4 border-t-transparent border-b-transparent border-r-cosmic-dark',
+    right:
+      'right-full top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-r-4 border-t-transparent border-b-transparent border-r-cosmic-dark',
   };
 
   return (
@@ -318,7 +323,7 @@ export const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
       onMouseLeave={handleMouseLeave}
     >
       {children}
-      
+
       {isVisible && (
         <div
           className={cn(
@@ -358,9 +363,9 @@ export const PulseOnChange: React.FC<PulseOnChangeProps> = ({
     if (previousValue.current !== watchValue) {
       setIsPulsing(true);
       const timer = setTimeout(() => setIsPulsing(false), duration);
-      
+
       previousValue.current = watchValue;
-      
+
       return () => clearTimeout(timer);
     }
     return undefined;
@@ -413,11 +418,11 @@ export const CountUp: React.FC<CountUpProps> = ({
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       // Easing function (ease-out)
       const easeOut = 1 - Math.pow(1 - progress, 3);
       const currentValue = startVal + (endVal - startVal) * easeOut;
-      
+
       setDisplayValue(currentValue);
 
       if (progress < 1) {

@@ -3,7 +3,10 @@ import { useProcessedSections } from '../hooks/useProcessedSections';
 import type { ChartLike } from '../normalizeChart';
 
 // Helper to build house cusps every 30 degrees
-const houses = Array.from({ length: 12 }, (_, i) => ({ house: i + 1, cusp: i * 30 }));
+const houses = Array.from({ length: 12 }, (_, i) => ({
+  house: i + 1,
+  cusp: i * 30,
+}));
 
 describe('useProcessedSections', () => {
   // Shape matches normalizeChart expectations (object maps with position numbers)

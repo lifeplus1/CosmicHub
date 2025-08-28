@@ -35,7 +35,21 @@ const HouseTable: React.FC<{ data: HouseRow[] }> = ({ data }) => {
         {data.map((item, index) => {
           const ruler = (() => {
             try {
-              return getRulerFromSign(item.sign.toLowerCase() as 'aries' | 'taurus' | 'gemini' | 'cancer' | 'leo' | 'virgo' | 'libra' | 'scorpio' | 'sagittarius' | 'capricorn' | 'aquarius' | 'pisces');
+              return getRulerFromSign(
+                item.sign.toLowerCase() as
+                  | 'aries'
+                  | 'taurus'
+                  | 'gemini'
+                  | 'cancer'
+                  | 'leo'
+                  | 'virgo'
+                  | 'libra'
+                  | 'scorpio'
+                  | 'sagittarius'
+                  | 'capricorn'
+                  | 'aquarius'
+                  | 'pisces'
+              );
             } catch {
               return 'Unknown';
             }

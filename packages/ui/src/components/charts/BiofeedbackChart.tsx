@@ -25,7 +25,6 @@ export const BiofeedbackChart: React.FC<BiofeedbackChartProps> = ({
   duration = '1h',
   className = '',
 }) => {
-
   const hasData = data && data.timestamp.length > 0;
 
   return (

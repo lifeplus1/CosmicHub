@@ -18,8 +18,8 @@ vi.mock('../../AnalyticsService', () => {
 
 describe('AnalyticsProvider singleton behavior', () => {
   const mockConfig: AnalyticsConfig = {
-    privacy: { 
-      anonymizeIP: true, 
+    privacy: {
+      anonymizeIP: true,
       respectDoNotTrack: true,
       cookieConsent: false,
       dataRetentionDays: 365,
@@ -34,14 +34,16 @@ describe('AnalyticsProvider singleton behavior', () => {
   });
 
   it('initializes analytics service when no existing instance is found', async () => {
-    const { initializeAnalytics, getAnalytics } = await import('../../AnalyticsService');
-    
+    const { initializeAnalytics, getAnalytics } = await import(
+      '../../AnalyticsService'
+    );
+
     // Mock that no existing analytics instance exists
     (getAnalytics as any).mockReturnValueOnce(null);
-    
+
     // Import the provider to ensure it's available for testing
     await import('../AnalyticsProvider');
-    
+
     expect(getAnalytics).toBeDefined();
     expect(initializeAnalytics).toBeDefined();
   });
@@ -49,7 +51,7 @@ describe('AnalyticsProvider singleton behavior', () => {
   it('validates that analytics service provides expected interface', async () => {
     const { initializeAnalytics } = await import('../../AnalyticsService');
     const mockInstance = (initializeAnalytics as any)();
-    
+
     expect(mockInstance.track).toBeDefined();
     expect(mockInstance.identify).toBeDefined();
     expect(mockInstance.page).toBeDefined();

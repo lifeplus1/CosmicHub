@@ -550,22 +550,24 @@ export function convertToCelestialBodies(chartData: {
   if (chartData.houses) {
     chartData.houses.forEach(house => {
       // Check if house data contains special points
-      (['vertex', 'antivertex', 'part_of_fortune'] as const).forEach(pointName => {
-        if (house[pointName] !== undefined) {
-          const position = house[pointName];
-          if (typeof position === 'number') {
-            bodies.push({
-              name: pointName
-                .replace('_', ' ')
-                .replace(/\b\w/g, l => l.toUpperCase()),
-              sign: '', // Will be calculated from position
-              house: String(house.number ?? '--'),
-              position,
-              category: 'points',
-            });
+      (['vertex', 'antivertex', 'part_of_fortune'] as const).forEach(
+        pointName => {
+          if (house[pointName] !== undefined) {
+            const position = house[pointName];
+            if (typeof position === 'number') {
+              bodies.push({
+                name: pointName
+                  .replace('_', ' ')
+                  .replace(/\b\w/g, l => l.toUpperCase()),
+                sign: '', // Will be calculated from position
+                house: String(house.number ?? '--'),
+                position,
+                category: 'points',
+              });
+            }
           }
         }
-      });
+      );
     });
   }
 

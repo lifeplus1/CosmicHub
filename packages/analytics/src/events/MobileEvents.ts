@@ -85,7 +85,11 @@ export const trackOfflineUsage = (data: {
 };
 
 export const trackPushNotification = (data: {
-  notification_type: 'daily_insight' | 'transit_alert' | 'feature_update' | 'engagement';
+  notification_type:
+    | 'daily_insight'
+    | 'transit_alert'
+    | 'feature_update'
+    | 'engagement';
   action: 'received' | 'clicked' | 'dismissed';
   time_to_action_ms?: number;
   user_id?: string;
@@ -105,7 +109,11 @@ export const trackPushNotification = (data: {
 };
 
 export const trackMobilePerformance = (data: {
-  metric_type: 'app_startup_time' | 'chart_render_time' | 'sync_time' | 'memory_usage';
+  metric_type:
+    | 'app_startup_time'
+    | 'chart_render_time'
+    | 'sync_time'
+    | 'memory_usage';
   value: number;
   device_info?: {
     model: string;

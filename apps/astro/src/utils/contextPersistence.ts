@@ -120,9 +120,12 @@ export function clearStorage(config: PersistenceConfig): void {
 /**
  * Check if storage is available
  */
-export function isStorageAvailable(type: 'localStorage' | 'sessionStorage' = 'localStorage'): boolean {
+export function isStorageAvailable(
+  type: 'localStorage' | 'sessionStorage' = 'localStorage'
+): boolean {
   try {
-    const storageObj = type === 'sessionStorage' ? sessionStorage : localStorage;
+    const storageObj =
+      type === 'sessionStorage' ? sessionStorage : localStorage;
     const testKey = '__storage_test__';
     storageObj.setItem(testKey, '1');
     storageObj.removeItem(testKey);
@@ -135,12 +138,15 @@ export function isStorageAvailable(type: 'localStorage' | 'sessionStorage' = 'lo
 /**
  * Get storage usage info (for debugging)
  */
-export function getStorageUsage(storage: 'localStorage' | 'sessionStorage' = 'localStorage') {
+export function getStorageUsage(
+  storage: 'localStorage' | 'sessionStorage' = 'localStorage'
+) {
   if (!isStorageAvailable(storage)) {
     return { available: false, used: 0, remaining: 0, keys: [] };
   }
   try {
-    const storageObj = storage === 'sessionStorage' ? sessionStorage : localStorage;
+    const storageObj =
+      storage === 'sessionStorage' ? sessionStorage : localStorage;
     const keys = Object.keys(storageObj);
     const used = JSON.stringify(storageObj).length;
     const limit = 5 * 1024 * 1024; // Approx 5MB

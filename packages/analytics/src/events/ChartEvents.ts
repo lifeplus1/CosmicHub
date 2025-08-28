@@ -87,7 +87,11 @@ export const trackChartError = (data: {
 
 export const trackChartCustomization = (data: {
   chart_type: string;
-  customization_type: 'house_system' | 'orb_settings' | 'chart_style' | 'aspect_filter';
+  customization_type:
+    | 'house_system'
+    | 'orb_settings'
+    | 'chart_style'
+    | 'aspect_filter';
   old_value: string | number;
   new_value: string | number;
   user_id?: string;

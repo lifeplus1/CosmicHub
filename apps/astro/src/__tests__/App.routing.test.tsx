@@ -18,8 +18,8 @@ vi.mock('react-router-dom', () => {
     BrowserRouter: vi.fn((props: any) => {
       routerProps = props;
       return (
-        <div 
-          data-testid="browser-router" 
+        <div
+          data-testid='browser-router'
           data-future={JSON.stringify(props.future)}
         >
           {props.children}
@@ -27,13 +27,15 @@ vi.mock('react-router-dom', () => {
       );
     }),
     Routes: vi.fn(({ children }: { children: React.ReactNode }) => {
-      return <div data-testid="routes">{children}</div>;
+      return <div data-testid='routes'>{children}</div>;
     }),
-    Route: vi.fn(({ path, element }: { path?: string; element?: React.ReactElement }) => (
-      <div data-testid={`route-${path || 'default'}`} data-path={path}>
-        {element}
-      </div>
-    )),
+    Route: vi.fn(
+      ({ path, element }: { path?: string; element?: React.ReactElement }) => (
+        <div data-testid={`route-${path || 'default'}`} data-path={path}>
+          {element}
+        </div>
+      )
+    ),
     useNavigate: vi.fn(() => vi.fn()),
     useLocation: vi.fn(() => ({ pathname: '/', search: '', hash: '' })),
     useParams: vi.fn(() => ({})),
@@ -42,39 +44,41 @@ vi.mock('react-router-dom', () => {
 
 // Mock lazy-loaded page components
 vi.mock('../pages/Dashboard', () => ({
-  default: () => <div data-testid="dashboard-page">Dashboard Page</div>,
+  default: () => <div data-testid='dashboard-page'>Dashboard Page</div>,
 }));
 
 vi.mock('../pages/UnifiedChart', () => ({
-  default: () => <div data-testid="unified-chart-page">Unified Chart Page</div>,
+  default: () => <div data-testid='unified-chart-page'>Unified Chart Page</div>,
 }));
 
 vi.mock('../pages/MultiSystemChart', () => ({
-  default: () => <div data-testid="multi-system-chart-page">Multi System Chart Page</div>,
+  default: () => (
+    <div data-testid='multi-system-chart-page'>Multi System Chart Page</div>
+  ),
 }));
 
 vi.mock('../pages/Calculator', () => ({
-  default: () => <div data-testid="calculator-page">Calculator Page</div>,
+  default: () => <div data-testid='calculator-page'>Calculator Page</div>,
 }));
 
 vi.mock('../pages/Profile', () => ({
-  default: () => <div data-testid="profile-page">Profile Page</div>,
+  default: () => <div data-testid='profile-page'>Profile Page</div>,
 }));
 
 vi.mock('../pages/Login', () => ({
-  default: () => <div data-testid="login-page">Login Page</div>,
+  default: () => <div data-testid='login-page'>Login Page</div>,
 }));
 
 vi.mock('../pages/SignUp', () => ({
-  default: () => <div data-testid="signup-page">SignUp Page</div>,
+  default: () => <div data-testid='signup-page'>SignUp Page</div>,
 }));
 
 vi.mock('../pages/Blog', () => ({
-  default: () => <div data-testid="blog-page">Blog Page</div>,
+  default: () => <div data-testid='blog-page'>Blog Page</div>,
 }));
 
 vi.mock('../pages/BlogPost', () => ({
-  default: () => <div data-testid="blog-post-page">Blog Post Page</div>,
+  default: () => <div data-testid='blog-post-page'>Blog Post Page</div>,
 }));
 
 // Mock Suspense and lazy loading
@@ -85,35 +89,42 @@ vi.mock('react', async () => {
     lazy: vi.fn((factory: () => Promise<{ default: React.ComponentType }>) => {
       // Return a component that renders synchronously for testing
       const LazyComponent: React.FC = () => {
-        const [Component, setComponent] = React.useState<React.ComponentType | null>(null);
-        
+        const [Component, setComponent] =
+          React.useState<React.ComponentType | null>(null);
+
         React.useEffect(() => {
           factory()
-            .then((module) => {
+            .then(module => {
               setComponent(() => module.default);
             })
             .catch(() => {
-              setComponent(() => () => <div data-testid="lazy-error">Failed to load</div>);
+              setComponent(() => () => (
+                <div data-testid='lazy-error'>Failed to load</div>
+              ));
             });
         }, []);
 
         if (!Component) {
-          return <div data-testid="lazy-loading">Loading...</div>;
+          return <div data-testid='lazy-loading'>Loading...</div>;
         }
-        
+
         return React.createElement(Component);
       };
-      
+
       return LazyComponent;
     }),
-    Suspense: ({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) => (
-      <div data-testid="suspense-boundary">
-        <div data-testid="suspense-fallback" className="hidden">
+    Suspense: ({
+      children,
+      fallback,
+    }: {
+      children: React.ReactNode;
+      fallback?: React.ReactNode;
+    }) => (
+      <div data-testid='suspense-boundary'>
+        <div data-testid='suspense-fallback' className='hidden'>
           {fallback}
         </div>
-        <div data-testid="suspense-content">
-          {children}
-        </div>
+        <div data-testid='suspense-content'>{children}</div>
       </div>
     ),
   };
@@ -121,7 +132,7 @@ vi.mock('react', async () => {
 
 vi.mock('../components/CosmicLoading', () => ({
   CosmicLoading: ({ size, message }: { size?: string; message?: string }) => (
-    <div data-testid="cosmic-loading" data-size={size}>
+    <div data-testid='cosmic-loading' data-size={size}>
       {message || 'Loading cosmic insights...'}
     </div>
   ),
@@ -137,16 +148,18 @@ describe('App Routing Configuration', () => {
       const { BrowserRouter } = require('react-router-dom');
 
       render(
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <div data-testid="router-content">Router Content</div>
+        <BrowserRouter
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <div data-testid='router-content'>Router Content</div>
         </BrowserRouter>
       );
 
       expect(BrowserRouter).toHaveBeenCalledWith(
         expect.objectContaining({
-          future: { 
-            v7_startTransition: true, 
-            v7_relativeSplatPath: true 
+          future: {
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
           },
         }),
         expect.anything()
@@ -155,7 +168,7 @@ describe('App Routing Configuration', () => {
       const router = screen.getByTestId('browser-router');
       expect(router).toBeInTheDocument();
       expect(router).toHaveAttribute(
-        'data-future', 
+        'data-future',
         JSON.stringify({ v7_startTransition: true, v7_relativeSplatPath: true })
       );
     });
@@ -166,7 +179,7 @@ describe('App Routing Configuration', () => {
       render(
         <BrowserRouter>
           <Routes>
-            <div data-testid="routes-content">Routes Content</div>
+            <div data-testid='routes-content'>Routes Content</div>
           </Routes>
         </BrowserRouter>
       );
@@ -186,9 +199,9 @@ describe('App Routing Configuration', () => {
 
       const TestRoutes = () => (
         <div>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/chart" element={<UnifiedChart />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path='/' element={<Dashboard />} />
+          <Route path='/chart' element={<UnifiedChart />} />
+          <Route path='/profile' element={<Profile />} />
         </div>
       );
 
@@ -210,8 +223,8 @@ describe('App Routing Configuration', () => {
 
       const AuthRoutes = () => (
         <div>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<SignUp />} />
         </div>
       );
 
@@ -230,8 +243,8 @@ describe('App Routing Configuration', () => {
 
       const FeatureRoutes = () => (
         <div>
-          <Route path="/calculator" element={<Calculator />} />
-          <Route path="/multi-system" element={<MultiSystemChart />} />
+          <Route path='/calculator' element={<Calculator />} />
+          <Route path='/multi-system' element={<MultiSystemChart />} />
         </div>
       );
 
@@ -250,8 +263,8 @@ describe('App Routing Configuration', () => {
 
       const BlogRoutes = () => (
         <div>
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogPost />} />
+          <Route path='/blog' element={<Blog />} />
+          <Route path='/blog/:id' element={<BlogPost />} />
         </div>
       );
 
@@ -269,8 +282,12 @@ describe('App Routing Configuration', () => {
       const { CosmicLoading } = require('../components/CosmicLoading');
 
       render(
-        <React.Suspense fallback={<CosmicLoading size="lg" message="Loading cosmic insights..." />}>
-          <div data-testid="suspended-content">Suspended Content</div>
+        <React.Suspense
+          fallback={
+            <CosmicLoading size='lg' message='Loading cosmic insights...' />
+          }
+        >
+          <div data-testid='suspended-content'>Suspended Content</div>
         </React.Suspense>
       );
 
@@ -280,18 +297,23 @@ describe('App Routing Configuration', () => {
 
     test('lazy components show loading state initially', async () => {
       // Create a lazy component that takes time to resolve
-      const LazyComponent = React.lazy(() => 
-        new Promise<{ default: React.ComponentType }>((resolve) => {
-          setTimeout(() => {
-            resolve({ 
-              default: () => <div data-testid="lazy-resolved">Lazy Component Loaded</div> 
-            });
-          }, 100);
-        })
+      const LazyComponent = React.lazy(
+        () =>
+          new Promise<{ default: React.ComponentType }>(resolve => {
+            setTimeout(() => {
+              resolve({
+                default: () => (
+                  <div data-testid='lazy-resolved'>Lazy Component Loaded</div>
+                ),
+              });
+            }, 100);
+          })
       );
 
       render(
-        <React.Suspense fallback={<div data-testid="suspense-loading">Loading...</div>}>
+        <React.Suspense
+          fallback={<div data-testid='suspense-loading'>Loading...</div>}
+        >
           <LazyComponent />
         </React.Suspense>
       );
@@ -301,22 +323,24 @@ describe('App Routing Configuration', () => {
     });
 
     test('handles lazy loading errors gracefully', async () => {
-      const FailingLazyComponent = React.lazy(() => 
+      const FailingLazyComponent = React.lazy(() =>
         Promise.reject(new Error('Failed to load component'))
       );
 
       // Create error boundary for testing
       const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
         try {
-          return <div data-testid="error-boundary-content">{children}</div>;
+          return <div data-testid='error-boundary-content'>{children}</div>;
         } catch (error) {
-          return <div data-testid="error-boundary-error">Error caught</div>;
+          return <div data-testid='error-boundary-error'>Error caught</div>;
         }
       };
 
       render(
         <ErrorBoundary>
-          <React.Suspense fallback={<div data-testid="suspense-loading">Loading...</div>}>
+          <React.Suspense
+            fallback={<div data-testid='suspense-loading'>Loading...</div>}
+          >
             <FailingLazyComponent />
           </React.Suspense>
         </ErrorBoundary>
@@ -329,12 +353,12 @@ describe('App Routing Configuration', () => {
   describe('Router Hooks', () => {
     test('useNavigate returns navigation function', () => {
       const { useNavigate } = require('react-router-dom');
-      
+
       const TestComponent = () => {
         const navigate = useNavigate();
         return (
-          <button 
-            data-testid="navigate-button" 
+          <button
+            data-testid='navigate-button'
             onClick={() => navigate('/test')}
           >
             Navigate
@@ -343,25 +367,25 @@ describe('App Routing Configuration', () => {
       };
 
       render(<TestComponent />);
-      
+
       expect(useNavigate).toHaveBeenCalled();
       expect(screen.getByTestId('navigate-button')).toBeInTheDocument();
     });
 
     test('useLocation returns location object', () => {
       const { useLocation } = require('react-router-dom');
-      
+
       const TestComponent = () => {
         const location = useLocation();
         return (
-          <div data-testid="location-info">
+          <div data-testid='location-info'>
             Current path: {location.pathname}
           </div>
         );
       };
 
       render(<TestComponent />);
-      
+
       expect(useLocation).toHaveBeenCalled();
       expect(screen.getByTestId('location-info')).toBeInTheDocument();
       expect(screen.getByText('Current path: /')).toBeInTheDocument();
@@ -375,13 +399,17 @@ describe('App Routing Configuration', () => {
       const UnifiedChart = require('../pages/UnifiedChart').default;
 
       const CompleteRouter = () => (
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <div className="min-h-screen">
-            <main className="container px-4 py-8 mx-auto">
-              <React.Suspense fallback={<div data-testid="app-loading">Loading app...</div>}>
+        <BrowserRouter
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <div className='min-h-screen'>
+            <main className='container px-4 py-8 mx-auto'>
+              <React.Suspense
+                fallback={<div data-testid='app-loading'>Loading app...</div>}
+              >
                 <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/chart" element={<UnifiedChart />} />
+                  <Route path='/' element={<Dashboard />} />
+                  <Route path='/chart' element={<UnifiedChart />} />
                 </Routes>
               </React.Suspense>
             </main>

@@ -38,7 +38,7 @@ export async function savePreset(
   preset: FrequencyPreset
 ): Promise<ApiResult<FrequencyPreset>> {
   try {
-  const user = getSafeCurrentUser();
+    const user = getSafeCurrentUser();
     if (!user) {
       return fail(ErrorCode.AUTH, 'User not authenticated');
     }
@@ -80,7 +80,7 @@ export async function savePreset(
 
 export async function getPresets(): Promise<ApiResult<FrequencyPreset[]>> {
   try {
-  const user = getSafeCurrentUser();
+    const user = getSafeCurrentUser();
     if (!user) {
       return fail(ErrorCode.AUTH, 'User not authenticated');
     }
@@ -123,7 +123,7 @@ export async function getUserPresets(): Promise<ApiResult<FrequencyPreset[]>> {
 
 export async function deletePreset(presetId: string): Promise<ApiResult<null>> {
   try {
-  const user = getSafeCurrentUser();
+    const user = getSafeCurrentUser();
     if (!user) {
       return fail(ErrorCode.AUTH, 'User not authenticated');
     }

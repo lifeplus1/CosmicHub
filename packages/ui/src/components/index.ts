@@ -4,14 +4,9 @@ export * from './lazy-components';
 export { default as EnhancedCard } from './EnhancedCard';
 
 // UX Enhancement Components
-export {
-  ProgressiveLoading,
-  LoadingOverlay,
-} from './LoadingStates';
+export { ProgressiveLoading, LoadingOverlay } from './LoadingStates';
 
-export {
-  ErrorMessage,
-} from './ErrorHandling';
+export { ErrorMessage } from './ErrorHandling';
 
 export {
   useBreakpoint,
@@ -53,9 +48,7 @@ export {
 } from './MicroInteractions';
 
 // ANALYTICS-001: Dashboard Components
-export {
-  AnalyticsDashboard,
-} from './AnalyticsDashboard';
+export { AnalyticsDashboard } from './AnalyticsDashboard';
 
 export {
   AnalyticsWebSocket,

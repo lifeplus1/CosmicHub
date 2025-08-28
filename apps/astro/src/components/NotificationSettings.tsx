@@ -71,8 +71,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
 
   const loadStats = useCallback((): void => {
     try {
-      const notificationStats =
-        pushManager.getNotificationStats();
+      const notificationStats = pushManager.getNotificationStats();
       if (
         notificationStats !== null &&
         notificationStats !== undefined &&

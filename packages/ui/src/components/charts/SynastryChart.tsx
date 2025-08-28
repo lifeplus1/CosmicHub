@@ -30,7 +30,6 @@ export const SynastryChart: React.FC<SynastryChartProps> = ({
   aspects,
   className = '',
 }) => {
-
   return (
     <div className={`synastry-chart ${className}`}>
       <div className='chart-container p-4 border rounded-lg'>

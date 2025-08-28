@@ -78,10 +78,18 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     error,
     refetch,
   } = useQuery<ChartData>({
-  queryKey: ['chartData', birthData ? ('birth_date' in birthData ? (birthData as ChartBirthData).birth_date : (birthData as ExtendedBirthData).year) : null],
+    queryKey: [
+      'chartData',
+      birthData
+        ? 'birth_date' in birthData
+          ? (birthData as ChartBirthData).birth_date
+          : (birthData as ExtendedBirthData).year
+        : null,
+    ],
     queryFn: async () => {
       if (!canonicalBirthData) throw new Error('Birth data required');
-      const result: ApiResult<ChartData> = await fetchChartData(canonicalBirthData);
+      const result: ApiResult<ChartData> =
+        await fetchChartData(canonicalBirthData);
       if (!result.success) throw new Error(result.error);
       return result.data;
     },
@@ -517,9 +525,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     });
 
     // Draw transits if enabled
-    if (
-      interactiveState.showTransits === true
-    ) {
+    if (interactiveState.showTransits === true) {
       // For now, transits are not implemented - show a placeholder message
       g.append('text')
         .attr('x', 0)
@@ -573,10 +579,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
           .attr('x2', Math.cos(angle2) * aspectRadius)
           .attr('y2', Math.sin(angle2) * aspectRadius)
           .attr('stroke', aspectColors[aspect.aspect_type] ?? '#666666')
-          .attr(
-            'stroke-width',
-            isHighlighted ? 3 : (aspect.orb <= 2 ? 2 : 1)
-          )
+          .attr('stroke-width', isHighlighted ? 3 : aspect.orb <= 2 ? 2 : 1)
           .attr('stroke-opacity', isHighlighted ? 0.8 : 0.4)
           .attr('stroke-dasharray', getAspectDashArray(aspect.aspect_type))
           .style('cursor', 'pointer')
@@ -863,16 +866,17 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
                 <div>
                   Position:{' '}
                   {formatDegree(
-                    data.planets[interactiveState.selectedPlanet as PlanetName]?.position ?? 0
+                    data.planets[interactiveState.selectedPlanet as PlanetName]
+                      ?.position ?? 0
                   )}
                 </div>
                 <div>
                   House:{' '}
-                  {data.planets[interactiveState.selectedPlanet as PlanetName]?.house ??
-                    'Unknown'}
+                  {data.planets[interactiveState.selectedPlanet as PlanetName]
+                    ?.house ?? 'Unknown'}
                 </div>
-                {data.planets[interactiveState.selectedPlanet as PlanetName]?.retrograde ===
-                  true && (
+                {data.planets[interactiveState.selectedPlanet as PlanetName]
+                  ?.retrograde === true && (
                   <div className='text-red-400'>Status: Retrograde ℞</div>
                 )}
                 {Array.isArray(interactiveState.highlightedAspects) &&

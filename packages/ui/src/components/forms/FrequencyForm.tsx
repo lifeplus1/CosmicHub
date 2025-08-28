@@ -30,14 +30,17 @@ export const FrequencyForm: React.FC<FrequencyFormProps> = ({
         <h3 className='text-lg font-semibold mb-4'>Frequency Settings</h3>
         <div className='space-y-4'>
           <div>
-            <label htmlFor='frequency' className='block text-sm font-medium mb-1'>
+            <label
+              htmlFor='frequency'
+              className='block text-sm font-medium mb-1'
+            >
               Frequency (Hz):
             </label>
             <input
               id='frequency'
               type='number'
               value={frequency}
-              onChange={(e) => setFrequency(Number(e.target.value))}
+              onChange={e => setFrequency(Number(e.target.value))}
               className='w-full p-2 border rounded'
               min='20'
               max='20000'
@@ -50,7 +53,7 @@ export const FrequencyForm: React.FC<FrequencyFormProps> = ({
             <select
               id='type'
               value={type}
-              onChange={(e) => setType(e.target.value)}
+              onChange={e => setType(e.target.value)}
               className='w-full p-2 border rounded'
             >
               <option value='solfeggio'>Solfeggio</option>

@@ -13,8 +13,17 @@ describe('Aspect transformation (api.ts)', () => {
       if (!aspect || typeof aspect !== 'object') continue;
       const a = aspect as Record<string, unknown>;
       // New shape
-      if (typeof a.point1 === 'string' && typeof a.point2 === 'string' && typeof a.aspect === 'string' && typeof a.orb === 'number') {
-        if (isPlanetName(a.point1) && isPlanetName(a.point2) && isAspectType(a.aspect)) {
+      if (
+        typeof a.point1 === 'string' &&
+        typeof a.point2 === 'string' &&
+        typeof a.aspect === 'string' &&
+        typeof a.orb === 'number'
+      ) {
+        if (
+          isPlanetName(a.point1) &&
+          isPlanetName(a.point2) &&
+          isAspectType(a.aspect)
+        ) {
           aspects.push({
             aspect_type: a.aspect,
             planet1: a.point1,
@@ -28,8 +37,17 @@ describe('Aspect transformation (api.ts)', () => {
         }
       }
       // Legacy shape
-      if (typeof a.planet1 === 'string' && typeof a.planet2 === 'string' && typeof a.type === 'string' && typeof a.orb === 'number') {
-        if (isPlanetName(a.planet1) && isPlanetName(a.planet2) && isAspectType(a.type)) {
+      if (
+        typeof a.planet1 === 'string' &&
+        typeof a.planet2 === 'string' &&
+        typeof a.type === 'string' &&
+        typeof a.orb === 'number'
+      ) {
+        if (
+          isPlanetName(a.planet1) &&
+          isPlanetName(a.planet2) &&
+          isAspectType(a.type)
+        ) {
           aspects.push({
             aspect_type: a.type,
             planet1: a.planet1,
@@ -47,17 +65,45 @@ describe('Aspect transformation (api.ts)', () => {
   }
 
   it('accepts and transforms valid new shape aspect', () => {
-    const input = [{ point1: 'sun', point2: 'moon', aspect: 'trine', orb: 3.5, applying: true, exact: false }];
+    const input = [
+      {
+        point1: 'sun',
+        point2: 'moon',
+        aspect: 'trine',
+        orb: 3.5,
+        applying: true,
+        exact: false,
+      },
+    ];
     const result = transform(input);
     expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({ planet1: 'sun', planet2: 'moon', aspect_type: 'trine', orb: 3.5 });
+    expect(result[0]).toMatchObject({
+      planet1: 'sun',
+      planet2: 'moon',
+      aspect_type: 'trine',
+      orb: 3.5,
+    });
   });
 
   it('accepts and transforms valid legacy shape aspect', () => {
-    const input = [{ planet1: 'mars', planet2: 'venus', type: 'square', orb: 5.1, applying: false, exact: true }];
+    const input = [
+      {
+        planet1: 'mars',
+        planet2: 'venus',
+        type: 'square',
+        orb: 5.1,
+        applying: false,
+        exact: true,
+      },
+    ];
     const result = transform(input);
     expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({ planet1: 'mars', planet2: 'venus', aspect_type: 'square', orb: 5.1 });
+    expect(result[0]).toMatchObject({
+      planet1: 'mars',
+      planet2: 'venus',
+      aspect_type: 'square',
+      orb: 5.1,
+    });
   });
 
   it('filters out invalid aspect types', () => {

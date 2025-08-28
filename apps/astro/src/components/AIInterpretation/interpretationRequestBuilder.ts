@@ -1,9 +1,9 @@
-import type { 
-  InterpretationRequest, 
-  ChartId, 
-  UserId, 
-  InterpretationType, 
-  InterpretationFocusArea 
+import type {
+  InterpretationRequest,
+  ChartId,
+  UserId,
+  InterpretationType,
+  InterpretationFocusArea,
 } from '../../services/api.types';
 
 /**
@@ -37,11 +37,11 @@ export const buildChartInterpretationRequest = (
       language_style: 'casual',
       include_sources: true,
       max_sections: 8,
-      min_confidence: 0.6
-    }
+      min_confidence: 0.6,
+    },
   };
 
-  // Note: Partner information for synastry would need to be handled 
+  // Note: Partner information for synastry would need to be handled
   // at the API level or through a different request structure
   // For now, we include it in the question field if present
   if (params.type === 'synastry' && params.partnerBirthDate) {
@@ -50,8 +50,8 @@ export const buildChartInterpretationRequest = (
     }${
       params.partnerBirthLocation ? ` in ${params.partnerBirthLocation}` : ''
     }`;
-    
-    baseRequest.question = baseRequest.question 
+
+    baseRequest.question = baseRequest.question
       ? `${baseRequest.question}\n\n${partnerInfo}`
       : partnerInfo;
   }

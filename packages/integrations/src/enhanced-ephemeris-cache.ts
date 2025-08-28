@@ -267,7 +267,11 @@ class EnhancedEphemerisCache {
       request.onsuccess = () => resolve();
       request.onerror = () => {
         devConsole.error?.('Failed to store in disk cache:', request.error);
-        reject(new Error(`Failed to store in disk cache: ${request.error?.message ?? 'Unknown error'}`));
+        reject(
+          new Error(
+            `Failed to store in disk cache: ${request.error?.message ?? 'Unknown error'}`
+          )
+        );
       };
     });
   }
@@ -291,7 +295,11 @@ class EnhancedEphemerisCache {
 
       request.onerror = () => {
         devConsole.error?.('Failed to read from disk cache:', request.error);
-        reject(new Error(`Failed to read from disk cache: ${request.error?.message ?? 'Unknown error'}`));
+        reject(
+          new Error(
+            `Failed to read from disk cache: ${request.error?.message ?? 'Unknown error'}`
+          )
+        );
       };
     });
   }
@@ -319,9 +327,7 @@ class EnhancedEphemerisCache {
     return currentSizeMB > this.config.memoryLimitMB;
   }
 
-  private evictLeastValuable(
-    cacheType: 'memory' | 'disk'
-  ): void {
+  private evictLeastValuable(cacheType: 'memory' | 'disk'): void {
     const cache = cacheType === 'memory' ? this.memoryCache : null;
     if (!cache || cache.size === 0) return;
 
@@ -484,7 +490,9 @@ class EnhancedEphemerisCache {
       const recency = (now - Math.max(...accesses)) / (1000 * 60 * 60); // Hours since last access
 
       // Calculate regularity (lower variance in intervals = more regular)
-      const intervals = accesses.slice(1).map((time, i) => time - (accesses[i] ?? 0));
+      const intervals = accesses
+        .slice(1)
+        .map((time, i) => time - (accesses[i] ?? 0));
       const avgInterval =
         intervals.reduce((sum, interval) => sum + interval, 0) /
         intervals.length;
@@ -522,7 +530,11 @@ class EnhancedEphemerisCache {
       const id = Math.random().toString(36);
 
       const handleMessage = (event: MessageEvent) => {
-        const eventData = event.data as { id: string; error?: string; result?: unknown };
+        const eventData = event.data as {
+          id: string;
+          error?: string;
+          result?: unknown;
+        };
         if (eventData.id === id) {
           this.compressionWorker!.removeEventListener('message', handleMessage);
           if (eventData.error) {
@@ -548,7 +560,11 @@ class EnhancedEphemerisCache {
       const id = Math.random().toString(36);
 
       const handleMessage = (event: MessageEvent) => {
-        const eventData = event.data as { id: string; error?: string; result?: unknown };
+        const eventData = event.data as {
+          id: string;
+          error?: string;
+          result?: unknown;
+        };
         if (eventData.id === id) {
           this.compressionWorker!.removeEventListener('message', handleMessage);
           if (eventData.error) {

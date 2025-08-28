@@ -29,14 +29,14 @@ const envSchema = z
       .min(1, 'Firebase messaging sender ID is required'),
     VITE_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
     VITE_API_URL: z.string().url().optional(),
-  // Frontend analytics providers (all optional)
-  PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
-  PUBLIC_MIXPANEL_TOKEN: z.string().optional(),
-  PUBLIC_POSTHOG_API_KEY: z.string().optional(),
-  PUBLIC_POSTHOG_HOST: z.string().url().optional(),
-  // Error monitoring
-  SENTRY_DSN: z.string().url().optional(),
-  SENTRY_DSN_PROD: z.string().url().optional(),
+    // Frontend analytics providers (all optional)
+    PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
+    PUBLIC_MIXPANEL_TOKEN: z.string().optional(),
+    PUBLIC_POSTHOG_API_KEY: z.string().optional(),
+    PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+    // Error monitoring
+    SENTRY_DSN: z.string().url().optional(),
+    SENTRY_DSN_PROD: z.string().url().optional(),
     NODE_ENV: z
       .enum(['development', 'production', 'test'])
       .default('development'),
@@ -61,9 +61,9 @@ export type AppEnv = z.output<typeof envSchema>;
 // Validate environment variables
 function validateEnvironment(): AppEnv {
   try {
-  // IMPORTANT: Spread to avoid prototype pollution & only include keys expected by schema
-  const raw: Record<string, unknown> = { ...import.meta.env };
-  return envSchema.parse(raw);
+    // IMPORTANT: Spread to avoid prototype pollution & only include keys expected by schema
+    const raw: Record<string, unknown> = { ...import.meta.env };
+    return envSchema.parse(raw);
   } catch (error) {
     // Use raw console.error here intentionally (bootstrapping prior to devConsole creation)
 

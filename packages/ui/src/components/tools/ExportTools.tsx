@@ -19,7 +19,7 @@ export const ExportTools: React.FC<ExportToolsProps> = ({
       <div className='tools-container p-4 border rounded-lg'>
         <h3 className='text-lg font-semibold mb-4'>Export Tools</h3>
         <div className='export-options flex gap-2'>
-          {formats.map((format) => (
+          {formats.map(format => (
             <button
               key={format}
               className='px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm'

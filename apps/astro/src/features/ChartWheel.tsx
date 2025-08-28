@@ -122,12 +122,18 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     error,
     refetch,
   } = useQuery<ChartData>({
-    queryKey: ['chartData', canonicalBirthData?.birth_date ?? canonicalBirthData?.city ?? null],
+    queryKey: [
+      'chartData',
+      canonicalBirthData?.birth_date ?? canonicalBirthData?.city ?? null,
+    ],
     queryFn: async (): Promise<ChartData> => {
       if (!canonicalBirthData) throw new Error('Birth data required');
       const result = await fetchChartData(canonicalBirthData);
-      if (!('success' in result) || !result.success) throw new Error('Failed to fetch chart data');
-      return transformAPIResponseToChartData(result.data as unknown as APIChartData);
+      if (!('success' in result) || !result.success)
+        throw new Error('Failed to fetch chart data');
+      return transformAPIResponseToChartData(
+        result.data as unknown as APIChartData
+      );
     },
     enabled: !!canonicalBirthData && preTransformedData === null,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -147,14 +153,16 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     const planets = apiData.planets ?? {};
     Object.entries(planets).forEach(([name, planetData]) => {
       if (planetData === null || planetData === undefined) return;
-      
+
       // Type guard for planet data
-      function isValidPlanetData(data: unknown): data is { position: number; retrograde?: boolean; speed?: number } {
+      function isValidPlanetData(
+        data: unknown
+      ): data is { position: number; retrograde?: boolean; speed?: number } {
         if (typeof data !== 'object' || data === null) return false;
         const planet = data as Record<string, unknown>;
         return typeof planet.position === 'number';
       }
-      
+
       if (!isValidPlanetData(planetData)) return;
 
       transformedPlanets[name] = {

@@ -18,7 +18,6 @@ export const TransitChart: React.FC<TransitChartProps> = ({
   aspects,
   className = '',
 }) => {
-
   return (
     <div className={`transit-chart ${className}`}>
       <div className='chart-container p-4 border rounded-lg'>

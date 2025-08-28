@@ -8,17 +8,26 @@
  * Only keep this while migrating any remaining gesture or advanced mobile behaviors.
  */
 // Emit a one‑time deprecation warning in development (guard SSR)
-interface DeprecatedFlagWindow extends Window { __PWA_MOBILE_ENH_DEPR__?: boolean }
+interface DeprecatedFlagWindow extends Window {
+  __PWA_MOBILE_ENH_DEPR__?: boolean;
+}
 (() => {
   try {
-    if (typeof window !== 'undefined' && (process?.env?.NODE_ENV ?? 'development') !== 'production') {
+    if (
+      typeof window !== 'undefined' &&
+      (process?.env?.NODE_ENV ?? 'development') !== 'production'
+    ) {
       const g = window as DeprecatedFlagWindow;
       if (!g.__PWA_MOBILE_ENH_DEPR__) {
         g.__PWA_MOBILE_ENH_DEPR__ = true;
-        console.warn('[@cosmichub/pwa] mobile-enhancements.ts is deprecated; migrate to new shared mobile + ui modules.');
+        console.warn(
+          '[@cosmichub/pwa] mobile-enhancements.ts is deprecated; migrate to new shared mobile + ui modules.'
+        );
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 })();
 
 // Touch interaction enhancements

@@ -283,7 +283,7 @@ export function useAIInterpretationManager(
           );
         }
 
-        const data = await response.json() as {
+        const data = (await response.json()) as {
           success: boolean;
           data: AIInterpretation[];
         };

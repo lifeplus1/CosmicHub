@@ -29,7 +29,9 @@ interface UseErrorHandlingOptions {
 /**
  * Hook for handling async errors with retry logic
  */
-export function useErrorHandling(options: UseErrorHandlingOptions = {}): ErrorHandlingResult {
+export function useErrorHandling(
+  options: UseErrorHandlingOptions = {}
+): ErrorHandlingResult {
   const { onError, maxRetries = 3, retryDelay = 1000 } = options;
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -116,7 +118,10 @@ export interface ErrorContext {
  * Error classification utilities
  */
 export function classifyError(error: Error): ErrorType {
-  if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+  if (
+    error.message.includes('NetworkError') ||
+    error.message.includes('fetch')
+  ) {
     return ErrorType.NETWORK;
   }
   if (error.message.includes('401')) {

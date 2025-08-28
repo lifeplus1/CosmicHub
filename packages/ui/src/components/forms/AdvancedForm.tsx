@@ -14,7 +14,6 @@ export const AdvancedForm: FC<AdvancedFormProps> = ({
   onSubmit,
   className = '',
 }) => {
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     onSubmit?.({});

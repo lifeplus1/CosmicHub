@@ -155,7 +155,9 @@ class FocusManagementAnalyzer {
       '[contenteditable]',
     ].join(', ');
 
-    return Array.from(container.querySelectorAll<HTMLElement>(focusableSelectors));
+    return Array.from(
+      container.querySelectorAll<HTMLElement>(focusableSelectors)
+    );
   }
 
   static isFocusable(element: HTMLElement): boolean {
@@ -178,19 +180,36 @@ class FocusManagementAnalyzer {
 }
 
 class SemanticHTMLAnalyzer {
-  static analyzeSemantic(container: HTMLElement): { score: number; semanticElements: string[] } {
+  static analyzeSemantic(container: HTMLElement): {
+    score: number;
+    semanticElements: string[];
+  } {
     const semanticElements: string[] = [];
     const allElements = Array.from(container.querySelectorAll('*'));
-    
+
     allElements.forEach(element => {
       const tagName = element.tagName.toLowerCase();
-      if (['header', 'nav', 'main', 'section', 'article', 'aside', 'footer', 'button', 'input', 'label'].includes(tagName)) {
+      if (
+        [
+          'header',
+          'nav',
+          'main',
+          'section',
+          'article',
+          'aside',
+          'footer',
+          'button',
+          'input',
+          'label',
+        ].includes(tagName)
+      ) {
         semanticElements.push(tagName);
       }
     });
 
     const totalElements = allElements.length;
-    const score = totalElements > 0 ? (semanticElements.length / totalElements) * 100 : 0;
+    const score =
+      totalElements > 0 ? (semanticElements.length / totalElements) * 100 : 0;
 
     return { score, semanticElements: [...new Set(semanticElements)] };
   }

@@ -1,405 +1,531 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CosmicHub Analytics System - Live Demo</title>
     <link rel="stylesheet" href="./analytics-demo.css" />
-</head>
-<body class="min-h-screen bg-gradient-to-br from-indigo-500 to-violet-600 font-sans text-neutral-800 dark:text-neutral-100 antialiased">
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-indigo-500 to-violet-600 font-sans text-neutral-800 dark:text-neutral-100 antialiased"
+  >
     <div class="mx-auto max-w-6xl p-6 space-y-10">
-        <header class="text-center text-white space-y-2">
-            <h1 class="text-3xl md:text-4xl font-bold drop-shadow">🌟 CosmicHub Analytics Demo</h1>
-            <p class="opacity-90 text-sm md:text-base">Real-time analytics system demonstration - August 27, 2025</p>
-        </header>
+      <header class="text-center text-white space-y-2">
+        <h1 class="text-3xl md:text-4xl font-bold drop-shadow">
+          🌟 CosmicHub Analytics Demo
+        </h1>
+        <p class="opacity-90 text-sm md:text-base">
+          Real-time analytics system demonstration - August 27, 2025
+        </p>
+      </header>
 
-        <div class="grid gap-6 md:grid-cols-3">
-            <!-- System Status -->
-            <section class="demo-section space-y-4" aria-labelledby="system-status-heading">
-                <h2 id="system-status-heading" class="flex items-center gap-2 text-lg font-semibold">
-                    <span id="system-indicator" class="status-indicator status-checking" role="status" aria-label="Checking system status"></span>
-                    System Status
-                </h2>
-                <div class="metric-card">
-                    <div>
-                        <p class="metric-label">Backend API</p>
-                        <p id="backend-status" class="metric-value">Checking...</p>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div>
-                        <p class="metric-label">Analytics Package</p>
-                        <p id="package-status" class="metric-value">Ready</p>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div>
-                        <p class="metric-label">Database</p>
-                        <p id="db-status" class="metric-value">SQLite Active</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Event Testing -->
-            <section class="demo-section space-y-4" aria-labelledby="event-testing-heading">
-                <h2 id="event-testing-heading" class="text-lg font-semibold">🔬 Event Testing</h2>
-                <div class="button-group">
-                    <button class="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-indigo-500 to-violet-600 px-3 py-2 text-sm font-medium text-white shadow hover:from-indigo-400 hover:to-violet-500 focus:outline-none focus:ring focus:ring-indigo-300 disabled:opacity-60 disabled:cursor-not-allowed transition" onclick="testChartCalculation()">Chart Calculation</button>
-                    <button class="inline-flex items-center justify-center rounded-md bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 px-3 py-2 text-sm font-medium shadow hover:bg-neutral-300 dark:hover:bg-neutral-600 focus:outline-none focus:ring focus:ring-neutral-400/40 transition" onclick="testPageView()">Page View</button>
-                    <button class="inline-flex items-center justify-center rounded-md bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow focus:outline-none focus:ring focus:ring-emerald-400 transition" onclick="testUserAction()">User Action</button>
-                    <button class="inline-flex items-center justify-center rounded-md bg-amber-500 hover:bg-amber-400 text-white px-3 py-2 text-sm font-medium shadow focus:outline-none focus:ring focus:ring-amber-300 transition" onclick="testErrorEvent()">Error Event</button>
-                </div>
-                <button class="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-medium text-white shadow hover:from-indigo-400 hover:to-violet-500 focus:outline-none focus:ring focus:ring-indigo-300 disabled:opacity-60 disabled:cursor-not-allowed transition w-full" onclick="simulateRealUsage()">🚀 Simulate Real Usage (10 events)</button>
-            </section>
-
-            <!-- Dashboard Metrics -->
-            <section class="demo-section space-y-4" aria-labelledby="dashboard-metrics-heading">
-                <h2 id="dashboard-metrics-heading" class="flex items-center gap-2 text-lg font-semibold">📊 Live Dashboard <span class="real-time-badge">Real-time</span></h2>
-                <div class="button-group">
-                    <button class="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-indigo-500 to-violet-600 px-3 py-2 text-sm font-medium text-white shadow hover:from-indigo-400 hover:to-violet-500 focus:outline-none focus:ring focus:ring-indigo-300 transition" onclick="getDashboardOverview()">Overview</button>
-                    <button class="inline-flex items-center justify-center rounded-md bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 px-3 py-2 text-sm font-medium shadow hover:bg-neutral-300 dark:hover:bg-neutral-600 focus:outline-none focus:ring focus:ring-neutral-400/40 transition" onclick="getEventMetrics()">Event Stats</button>
-                    <button class="inline-flex items-center justify-center rounded-md bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow focus:outline-none focus:ring focus:ring-emerald-400 transition" onclick="getChartStats()">Chart Analytics</button>
-                </div>
-                <div id="dashboard-data" class="grid gap-3 grid-cols-2 md:grid-cols-2 lg:grid-cols-2">
-                    <div class="stat-card">
-                        <div class="stat-number" id="total-events">--</div>
-                        <div class="stat-label">Total Events</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="chart-calculations">--</div>
-                        <div class="stat-label">Chart Calculations</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="active-users">--</div>
-                        <div class="stat-label">Active Sessions</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="success-rate">--%</div>
-                        <div class="stat-label">Success Rate</div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Results Log -->
-        <section class="demo-section" aria-labelledby="activity-log-heading">
-            <h2 id="activity-log-heading" class="text-lg font-semibold mb-4">📋 Activity Log</h2>
-            <div class="results-container" id="results" role="log" aria-live="polite" aria-relevant="additions">
-                <div class="log-entry log-info">
-                    <span class="timestamp">[System]</span> Analytics demo initialized - Ready for testing
-                </div>
+      <div class="grid gap-6 md:grid-cols-3">
+        <!-- System Status -->
+        <section
+          class="demo-section space-y-4"
+          aria-labelledby="system-status-heading"
+        >
+          <h2
+            id="system-status-heading"
+            class="flex items-center gap-2 text-lg font-semibold"
+          >
+            <span
+              id="system-indicator"
+              class="status-indicator status-checking"
+              role="status"
+              aria-label="Checking system status"
+            ></span>
+            System Status
+          </h2>
+          <div class="metric-card">
+            <div>
+              <p class="metric-label">Backend API</p>
+              <p id="backend-status" class="metric-value">Checking...</p>
             </div>
+          </div>
+          <div class="metric-card">
+            <div>
+              <p class="metric-label">Analytics Package</p>
+              <p id="package-status" class="metric-value">Ready</p>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div>
+              <p class="metric-label">Database</p>
+              <p id="db-status" class="metric-value">SQLite Active</p>
+            </div>
+          </div>
         </section>
+
+        <!-- Event Testing -->
+        <section
+          class="demo-section space-y-4"
+          aria-labelledby="event-testing-heading"
+        >
+          <h2 id="event-testing-heading" class="text-lg font-semibold">
+            🔬 Event Testing
+          </h2>
+          <div class="button-group">
+            <button
+              class="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-indigo-500 to-violet-600 px-3 py-2 text-sm font-medium text-white shadow hover:from-indigo-400 hover:to-violet-500 focus:outline-none focus:ring focus:ring-indigo-300 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              onclick="testChartCalculation()"
+            >
+              Chart Calculation
+            </button>
+            <button
+              class="inline-flex items-center justify-center rounded-md bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 px-3 py-2 text-sm font-medium shadow hover:bg-neutral-300 dark:hover:bg-neutral-600 focus:outline-none focus:ring focus:ring-neutral-400/40 transition"
+              onclick="testPageView()"
+            >
+              Page View
+            </button>
+            <button
+              class="inline-flex items-center justify-center rounded-md bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow focus:outline-none focus:ring focus:ring-emerald-400 transition"
+              onclick="testUserAction()"
+            >
+              User Action
+            </button>
+            <button
+              class="inline-flex items-center justify-center rounded-md bg-amber-500 hover:bg-amber-400 text-white px-3 py-2 text-sm font-medium shadow focus:outline-none focus:ring focus:ring-amber-300 transition"
+              onclick="testErrorEvent()"
+            >
+              Error Event
+            </button>
+          </div>
+          <button
+            class="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-medium text-white shadow hover:from-indigo-400 hover:to-violet-500 focus:outline-none focus:ring focus:ring-indigo-300 disabled:opacity-60 disabled:cursor-not-allowed transition w-full"
+            onclick="simulateRealUsage()"
+          >
+            🚀 Simulate Real Usage (10 events)
+          </button>
+        </section>
+
+        <!-- Dashboard Metrics -->
+        <section
+          class="demo-section space-y-4"
+          aria-labelledby="dashboard-metrics-heading"
+        >
+          <h2
+            id="dashboard-metrics-heading"
+            class="flex items-center gap-2 text-lg font-semibold"
+          >
+            📊 Live Dashboard <span class="real-time-badge">Real-time</span>
+          </h2>
+          <div class="button-group">
+            <button
+              class="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-indigo-500 to-violet-600 px-3 py-2 text-sm font-medium text-white shadow hover:from-indigo-400 hover:to-violet-500 focus:outline-none focus:ring focus:ring-indigo-300 transition"
+              onclick="getDashboardOverview()"
+            >
+              Overview
+            </button>
+            <button
+              class="inline-flex items-center justify-center rounded-md bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 px-3 py-2 text-sm font-medium shadow hover:bg-neutral-300 dark:hover:bg-neutral-600 focus:outline-none focus:ring focus:ring-neutral-400/40 transition"
+              onclick="getEventMetrics()"
+            >
+              Event Stats
+            </button>
+            <button
+              class="inline-flex items-center justify-center rounded-md bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow focus:outline-none focus:ring focus:ring-emerald-400 transition"
+              onclick="getChartStats()"
+            >
+              Chart Analytics
+            </button>
+          </div>
+          <div
+            id="dashboard-data"
+            class="grid gap-3 grid-cols-2 md:grid-cols-2 lg:grid-cols-2"
+          >
+            <div class="stat-card">
+              <div class="stat-number" id="total-events">--</div>
+              <div class="stat-label">Total Events</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="chart-calculations">--</div>
+              <div class="stat-label">Chart Calculations</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="active-users">--</div>
+              <div class="stat-label">Active Sessions</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="success-rate">--%</div>
+              <div class="stat-label">Success Rate</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Results Log -->
+      <section class="demo-section" aria-labelledby="activity-log-heading">
+        <h2 id="activity-log-heading" class="text-lg font-semibold mb-4">
+          📋 Activity Log
+        </h2>
+        <div
+          class="results-container"
+          id="results"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+        >
+          <div class="log-entry log-info">
+            <span class="timestamp">[System]</span> Analytics demo initialized -
+            Ready for testing
+          </div>
+        </div>
+      </section>
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8002/analytics';
-        const results = document.getElementById('results');
-        
-        let eventCounter = 0;
-        let chartCounter = 0;
-        let sessionCounter = 1;
-        let successfulEvents = 0;
-        let totalEvents = 0;
+      const API_BASE = 'http://localhost:8002/analytics';
+      const results = document.getElementById('results');
 
-        // Utility functions
-        function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const logEntry = document.createElement('div');
-            logEntry.className = `log-entry log-${type}`;
-            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
-            results.appendChild(logEntry);
-            results.scrollTop = results.scrollHeight;
+      let eventCounter = 0;
+      let chartCounter = 0;
+      let sessionCounter = 1;
+      let successfulEvents = 0;
+      let totalEvents = 0;
+
+      // Utility functions
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry log-${type}`;
+        logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+        results.appendChild(logEntry);
+        results.scrollTop = results.scrollHeight;
+      }
+
+      function updateStats() {
+        document.getElementById('total-events').textContent = totalEvents;
+        document.getElementById('chart-calculations').textContent =
+          chartCounter;
+        document.getElementById('active-users').textContent = sessionCounter;
+        const successRate =
+          totalEvents > 0
+            ? Math.round((successfulEvents / totalEvents) * 100)
+            : 0;
+        document.getElementById('success-rate').textContent = `${successRate}%`;
+      }
+
+      function generateUserId() {
+        return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+
+      function generateSessionId() {
+        return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+
+      // System status check
+      async function checkSystemStatus() {
+        try {
+          const response = await fetch(`${API_BASE}/health`);
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById('backend-status').textContent = '✅ Online';
+            document.getElementById('system-indicator').className =
+              'status-indicator status-online';
+            log('System health check passed', 'success');
+            return true;
+          } else {
+            throw new Error(`HTTP ${response.status}`);
+          }
+        } catch (error) {
+          document.getElementById('backend-status').textContent = '❌ Offline';
+          document.getElementById('system-indicator').className =
+            'status-indicator status-offline';
+          log(`System health check failed: ${error.message}`, 'error');
+          return false;
+        }
+      }
+
+      // Event testing functions
+      async function testChartCalculation() {
+        const startTime = Date.now();
+        const calculationTime = Math.floor(Math.random() * 500) + 100;
+        const success = Math.random() > 0.1; // 90% success rate
+
+        const event = {
+          eventType: 'chart_calculation',
+          eventData: {
+            chartType: ['natal', 'transit', 'synastry', 'composite'][
+              Math.floor(Math.random() * 4)
+            ],
+            calculationTime: calculationTime,
+            success: success,
+            aspectsCount: Math.floor(Math.random() * 25) + 10,
+            houseSystem: 'placidus',
+            astrologySystem: 'western',
+          },
+          userId: generateUserId(),
+          sessionId: generateSessionId(),
+          platform: 'web',
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/event`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event),
+          });
+
+          const result = await response.json();
+          totalEvents++;
+          chartCounter++;
+          if (success) successfulEvents++;
+
+          log(
+            `Chart calculation tracked: ${event.eventData.chartType} (${calculationTime}ms)`,
+            'success'
+          );
+          updateStats();
+        } catch (error) {
+          log(`Failed to track chart calculation: ${error.message}`, 'error');
+        }
+      }
+
+      async function testPageView() {
+        const pages = [
+          '/chart',
+          '/dashboard',
+          '/profile',
+          '/settings',
+          '/about',
+        ];
+        const page = pages[Math.floor(Math.random() * pages.length)];
+        const loadTime = Math.floor(Math.random() * 300) + 50;
+
+        const event = {
+          eventType: 'page_view',
+          eventData: {
+            page: page,
+            referrer: '/',
+            loadTime: loadTime,
+            userAgent: navigator.userAgent.substring(0, 50) + '...',
+          },
+          userId: generateUserId(),
+          sessionId: generateSessionId(),
+          platform: 'web',
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/event`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event),
+          });
+
+          const result = await response.json();
+          totalEvents++;
+          successfulEvents++;
+
+          log(`Page view tracked: ${page} (${loadTime}ms load)`, 'success');
+          updateStats();
+        } catch (error) {
+          log(`Failed to track page view: ${error.message}`, 'error');
+        }
+      }
+
+      async function testUserAction() {
+        const actions = [
+          'button_click',
+          'form_submit',
+          'chart_export',
+          'settings_change',
+        ];
+        const elements = [
+          'calculate_chart',
+          'save_profile',
+          'export_pdf',
+          'theme_toggle',
+        ];
+
+        const action = actions[Math.floor(Math.random() * actions.length)];
+        const element = elements[Math.floor(Math.random() * elements.length)];
+
+        const event = {
+          eventType: 'user_action',
+          eventData: {
+            action: action,
+            element: element,
+            value: `value_${Math.floor(Math.random() * 100)}`,
+            context: 'demo_testing',
+          },
+          userId: generateUserId(),
+          sessionId: generateSessionId(),
+          platform: 'web',
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/event`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event),
+          });
+
+          const result = await response.json();
+          totalEvents++;
+          successfulEvents++;
+
+          log(`User action tracked: ${action} on ${element}`, 'success');
+          updateStats();
+        } catch (error) {
+          log(`Failed to track user action: ${error.message}`, 'error');
+        }
+      }
+
+      async function testErrorEvent() {
+        const errorTypes = [
+          'calculation_error',
+          'api_error',
+          'validation_error',
+          'network_error',
+        ];
+        const errorMessages = [
+          'Invalid birth date format',
+          'API rate limit exceeded',
+          'Required field missing',
+          'Network connection timeout',
+        ];
+
+        const errorType =
+          errorTypes[Math.floor(Math.random() * errorTypes.length)];
+        const errorMessage =
+          errorMessages[Math.floor(Math.random() * errorMessages.length)];
+
+        const event = {
+          eventType: 'error',
+          eventData: {
+            errorType: errorType,
+            errorMessage: errorMessage,
+            stackTrace: `Error at demo.js:line${Math.floor(Math.random() * 100)}`,
+            severity: 'medium',
+            context: 'demo_testing',
+          },
+          userId: generateUserId(),
+          sessionId: generateSessionId(),
+          platform: 'web',
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/event`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event),
+          });
+
+          const result = await response.json();
+          totalEvents++;
+          // Don't increment successfulEvents for errors
+
+          log(`Error event tracked: ${errorType} - ${errorMessage}`, 'error');
+          updateStats();
+        } catch (error) {
+          log(`Failed to track error event: ${error.message}`, 'error');
+        }
+      }
+
+      // Simulate realistic usage
+      async function simulateRealUsage() {
+        log('🚀 Starting realistic usage simulation...', 'info');
+
+        for (let i = 0; i < 10; i++) {
+          const eventType = Math.random();
+
+          if (eventType < 0.4) {
+            await testChartCalculation();
+          } else if (eventType < 0.7) {
+            await testPageView();
+          } else if (eventType < 0.9) {
+            await testUserAction();
+          } else {
+            await testErrorEvent();
+          }
+
+          // Add small delay between events
+          await new Promise(resolve => setTimeout(resolve, 200));
         }
 
-        function updateStats() {
-            document.getElementById('total-events').textContent = totalEvents;
-            document.getElementById('chart-calculations').textContent = chartCounter;
-            document.getElementById('active-users').textContent = sessionCounter;
-            const successRate = totalEvents > 0 ? Math.round((successfulEvents / totalEvents) * 100) : 0;
-            document.getElementById('success-rate').textContent = `${successRate}%`;
+        log('✅ Usage simulation completed!', 'success');
+        sessionCounter = Math.max(sessionCounter, 5); // Simulate multiple sessions
+        updateStats();
+      }
+
+      // Dashboard data functions
+      async function getDashboardOverview() {
+        try {
+          const response = await fetch(`${API_BASE}/dashboard/overview`);
+          const data = await response.json();
+          log(
+            `Dashboard Overview Retrieved: ${JSON.stringify(data, null, 2)}`,
+            'success'
+          );
+        } catch (error) {
+          log(`Failed to get dashboard overview: ${error.message}`, 'error');
+        }
+      }
+
+      async function getEventMetrics() {
+        try {
+          const response = await fetch(`${API_BASE}/events/metrics`);
+          const data = await response.json();
+          log(`Event Metrics: ${JSON.stringify(data, null, 2)}`, 'success');
+        } catch (error) {
+          log(`Failed to get event metrics: ${error.message}`, 'error');
+        }
+      }
+
+      async function getChartStats() {
+        try {
+          const response = await fetch(`${API_BASE}/events/chart-stats`);
+          const data = await response.json();
+          log(`Chart Statistics: ${JSON.stringify(data, null, 2)}`, 'success');
+        } catch (error) {
+          log(`Failed to get chart stats: ${error.message}`, 'error');
+        }
+      }
+
+      // Auto-refresh dashboard data
+      setInterval(async () => {
+        if (
+          document
+            .getElementById('system-indicator')
+            .className.includes('status-online')
+        ) {
+          try {
+            await getDashboardOverview();
+          } catch (error) {
+            // Silent fail for auto-refresh
+          }
+        }
+      }, 30000); // Refresh every 30 seconds
+
+      // Initialize demo
+      async function init() {
+        log('🌟 CosmicHub Analytics Demo starting...', 'info');
+
+        const isOnline = await checkSystemStatus();
+        if (isOnline) {
+          log('✅ All systems operational - Ready for testing!', 'success');
+
+          // Run a quick test sequence
+          setTimeout(async () => {
+            log('🔄 Running initial test sequence...', 'info');
+            await testChartCalculation();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testPageView();
+            log('✅ Initial test sequence completed!', 'success');
+          }, 2000);
+        } else {
+          log(
+            '❌ Backend not available - Please ensure the server is running',
+            'error'
+          );
         }
 
-        function generateUserId() {
-            return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        }
+        updateStats();
+      }
 
-        function generateSessionId() {
-            return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        }
-
-        // System status check
-        async function checkSystemStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/health`);
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('backend-status').textContent = '✅ Online';
-                    document.getElementById('system-indicator').className = 'status-indicator status-online';
-                    log('System health check passed', 'success');
-                    return true;
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-            } catch (error) {
-                document.getElementById('backend-status').textContent = '❌ Offline';
-                document.getElementById('system-indicator').className = 'status-indicator status-offline';
-                log(`System health check failed: ${error.message}`, 'error');
-                return false;
-            }
-        }
-
-        // Event testing functions
-        async function testChartCalculation() {
-            const startTime = Date.now();
-            const calculationTime = Math.floor(Math.random() * 500) + 100;
-            const success = Math.random() > 0.1; // 90% success rate
-            
-            const event = {
-                eventType: 'chart_calculation',
-                eventData: {
-                    chartType: ['natal', 'transit', 'synastry', 'composite'][Math.floor(Math.random() * 4)],
-                    calculationTime: calculationTime,
-                    success: success,
-                    aspectsCount: Math.floor(Math.random() * 25) + 10,
-                    houseSystem: 'placidus',
-                    astrologySystem: 'western'
-                },
-                userId: generateUserId(),
-                sessionId: generateSessionId(),
-                platform: 'web'
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/event`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(event)
-                });
-
-                const result = await response.json();
-                totalEvents++;
-                chartCounter++;
-                if (success) successfulEvents++;
-                
-                log(`Chart calculation tracked: ${event.eventData.chartType} (${calculationTime}ms)`, 'success');
-                updateStats();
-            } catch (error) {
-                log(`Failed to track chart calculation: ${error.message}`, 'error');
-            }
-        }
-
-        async function testPageView() {
-            const pages = ['/chart', '/dashboard', '/profile', '/settings', '/about'];
-            const page = pages[Math.floor(Math.random() * pages.length)];
-            const loadTime = Math.floor(Math.random() * 300) + 50;
-            
-            const event = {
-                eventType: 'page_view',
-                eventData: {
-                    page: page,
-                    referrer: '/',
-                    loadTime: loadTime,
-                    userAgent: navigator.userAgent.substring(0, 50) + '...'
-                },
-                userId: generateUserId(),
-                sessionId: generateSessionId(),
-                platform: 'web'
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/event`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(event)
-                });
-
-                const result = await response.json();
-                totalEvents++;
-                successfulEvents++;
-                
-                log(`Page view tracked: ${page} (${loadTime}ms load)`, 'success');
-                updateStats();
-            } catch (error) {
-                log(`Failed to track page view: ${error.message}`, 'error');
-            }
-        }
-
-        async function testUserAction() {
-            const actions = ['button_click', 'form_submit', 'chart_export', 'settings_change'];
-            const elements = ['calculate_chart', 'save_profile', 'export_pdf', 'theme_toggle'];
-            
-            const action = actions[Math.floor(Math.random() * actions.length)];
-            const element = elements[Math.floor(Math.random() * elements.length)];
-            
-            const event = {
-                eventType: 'user_action',
-                eventData: {
-                    action: action,
-                    element: element,
-                    value: `value_${Math.floor(Math.random() * 100)}`,
-                    context: 'demo_testing'
-                },
-                userId: generateUserId(),
-                sessionId: generateSessionId(),
-                platform: 'web'
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/event`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(event)
-                });
-
-                const result = await response.json();
-                totalEvents++;
-                successfulEvents++;
-                
-                log(`User action tracked: ${action} on ${element}`, 'success');
-                updateStats();
-            } catch (error) {
-                log(`Failed to track user action: ${error.message}`, 'error');
-            }
-        }
-
-        async function testErrorEvent() {
-            const errorTypes = ['calculation_error', 'api_error', 'validation_error', 'network_error'];
-            const errorMessages = [
-                'Invalid birth date format',
-                'API rate limit exceeded',
-                'Required field missing',
-                'Network connection timeout'
-            ];
-            
-            const errorType = errorTypes[Math.floor(Math.random() * errorTypes.length)];
-            const errorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-            
-            const event = {
-                eventType: 'error',
-                eventData: {
-                    errorType: errorType,
-                    errorMessage: errorMessage,
-                    stackTrace: `Error at demo.js:line${Math.floor(Math.random() * 100)}`,
-                    severity: 'medium',
-                    context: 'demo_testing'
-                },
-                userId: generateUserId(),
-                sessionId: generateSessionId(),
-                platform: 'web'
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/event`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(event)
-                });
-
-                const result = await response.json();
-                totalEvents++;
-                // Don't increment successfulEvents for errors
-                
-                log(`Error event tracked: ${errorType} - ${errorMessage}`, 'error');
-                updateStats();
-            } catch (error) {
-                log(`Failed to track error event: ${error.message}`, 'error');
-            }
-        }
-
-        // Simulate realistic usage
-        async function simulateRealUsage() {
-            log('🚀 Starting realistic usage simulation...', 'info');
-            
-            for (let i = 0; i < 10; i++) {
-                const eventType = Math.random();
-                
-                if (eventType < 0.4) {
-                    await testChartCalculation();
-                } else if (eventType < 0.7) {
-                    await testPageView();
-                } else if (eventType < 0.9) {
-                    await testUserAction();
-                } else {
-                    await testErrorEvent();
-                }
-                
-                // Add small delay between events
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-            
-            log('✅ Usage simulation completed!', 'success');
-            sessionCounter = Math.max(sessionCounter, 5); // Simulate multiple sessions
-            updateStats();
-        }
-
-        // Dashboard data functions
-        async function getDashboardOverview() {
-            try {
-                const response = await fetch(`${API_BASE}/dashboard/overview`);
-                const data = await response.json();
-                log(`Dashboard Overview Retrieved: ${JSON.stringify(data, null, 2)}`, 'success');
-            } catch (error) {
-                log(`Failed to get dashboard overview: ${error.message}`, 'error');
-            }
-        }
-
-        async function getEventMetrics() {
-            try {
-                const response = await fetch(`${API_BASE}/events/metrics`);
-                const data = await response.json();
-                log(`Event Metrics: ${JSON.stringify(data, null, 2)}`, 'success');
-            } catch (error) {
-                log(`Failed to get event metrics: ${error.message}`, 'error');
-            }
-        }
-
-        async function getChartStats() {
-            try {
-                const response = await fetch(`${API_BASE}/events/chart-stats`);
-                const data = await response.json();
-                log(`Chart Statistics: ${JSON.stringify(data, null, 2)}`, 'success');
-            } catch (error) {
-                log(`Failed to get chart stats: ${error.message}`, 'error');
-            }
-        }
-
-        // Auto-refresh dashboard data
-        setInterval(async () => {
-            if (document.getElementById('system-indicator').className.includes('status-online')) {
-                try {
-                    await getDashboardOverview();
-                } catch (error) {
-                    // Silent fail for auto-refresh
-                }
-            }
-        }, 30000); // Refresh every 30 seconds
-
-        // Initialize demo
-        async function init() {
-            log('🌟 CosmicHub Analytics Demo starting...', 'info');
-            
-            const isOnline = await checkSystemStatus();
-            if (isOnline) {
-                log('✅ All systems operational - Ready for testing!', 'success');
-                
-                // Run a quick test sequence
-                setTimeout(async () => {
-                    log('🔄 Running initial test sequence...', 'info');
-                    await testChartCalculation();
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    await testPageView();
-                    log('✅ Initial test sequence completed!', 'success');
-                }, 2000);
-            } else {
-                log('❌ Backend not available - Please ensure the server is running', 'error');
-            }
-            
-            updateStats();
-        }
-
-        // Start the demo
-        init();
+      // Start the demo
+      init();
     </script>
-</body>
+  </body>
 </html>

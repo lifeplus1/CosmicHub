@@ -1,0 +1,90 @@
+{
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "duration": 15.412459000000013,
+    "coverage": {
+      "overall": 88.34772191716942,
+      "statements": 86.91888102212891,
+      "branches": 81.60483631676223,
+      "functions": 92.92404339021465,
+      "lines": 91.94312693957195
+    },
+    "performance": {
+      "averageRenderTime": 14.875207999999986,
+      "maxRenderTime": 14.875207999999986,
+      "totalMemoryUsage": 19632
+    },
+    "accessibility": {
+      "totalViolations": 0,
+      "criticalViolations": 0,
+      "totalWarnings": 1
+    },
+    "quality": {
+      "score": 100,
+      "grade": "A",
+      "recommendations": []
+    }
+  },
+  "results": [
+    {
+      "suite": "alpha",
+      "status": "passed",
+      "duration": 15.106458000000032,
+      "coverage": {
+        "statements": 86.91888102212891,
+        "branches": 81.60483631676223,
+        "functions": 92.92404339021465,
+        "lines": 91.94312693957195
+      },
+      "performance": {
+        "renderTime": 14.875207999999986,
+        "mountTime": 0,
+        "memoryUsage": 19632
+      },
+      "accessibility": {
+        "violations": [],
+        "warnings": [
+          {
+            "id": "aria-label",
+            "description": "Consider adding aria-label for better accessibility",
+            "nodes": 1
+          }
+        ]
+      },
+      "errors": [],
+      "metadata": {
+        "timestamp": "2025-08-28T00:23:59.029Z",
+        "nodeVersion": "v24.4.1",
+        "platform": "darwin"
+      }
+    }
+  ],
+  "timestamp": "2025-08-28T00:23:59.039Z",
+  "config": {
+    "coverage": {
+      "threshold": 80,
+      "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.d.ts"
+      ]
+    },
+    "performance": {
+      "maxRenderTime": 16,
+      "maxMountTime": 100
+    },
+    "accessibility": {
+      "level": "AA",
+      "checkContrast": true
+    },
+    "reports": {
+      "generateHtml": true,
+      "generateJson": true,
+      "uploadResults": false,
+      "outputDir": "test-results-temp"
+    }
+  }
+}

@@ -189,7 +189,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     try {
       window.errorReportingService?.captureException(errorInfo);
     } catch (reportingError: unknown) {
-      const errorMessage = reportingError instanceof Error ? reportingError.message : String(reportingError);
+      const errorMessage =
+        reportingError instanceof Error
+          ? reportingError.message
+          : String(reportingError);
       logger.error('Failed to report error:', errorMessage);
     }
   }
@@ -198,7 +201,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     try {
       window.analytics?.track('Error Boundary Triggered', errorData);
     } catch (analyticsError: unknown) {
-      const errorMessage = analyticsError instanceof Error ? analyticsError.message : String(analyticsError);
+      const errorMessage =
+        analyticsError instanceof Error
+          ? analyticsError.message
+          : String(analyticsError);
       logger.error('Failed to track error metrics:', errorMessage);
     }
   }

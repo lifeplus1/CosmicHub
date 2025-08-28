@@ -1,7 +1,7 @@
 export * from './astrologyService';
 export * from './api';
 export * from './api.types';
-export { 
+export {
   useEphemerisHealth,
   useSupportedPlanets,
   usePlanetaryPosition,
@@ -12,7 +12,7 @@ export {
   useEphemerisClient,
   ephemerisKeys,
   dateToJulianDay,
-  getAstrologicalSign
+  getAstrologicalSign,
 } from './ephemeris';
 export * from './chartSyncService';
 export * from './analytics';

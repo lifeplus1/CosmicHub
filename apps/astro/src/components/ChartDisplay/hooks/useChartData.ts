@@ -2,7 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { fetchSavedChart } from '../../../services/astrologyService';
 import { validateChart } from '../validateChart';
-import { isChartLike, hasChartContent, type ChartLike } from '../normalizeChart';
+import {
+  isChartLike,
+  hasChartContent,
+  type ChartLike,
+} from '../normalizeChart';
 import { sampleChartData } from '../sampleData';
 
 interface UseChartDataArgs {
@@ -12,12 +16,20 @@ interface UseChartDataArgs {
   enabled?: boolean;
 }
 
-export function useChartData({ chart, chartId, chartType = 'natal', enabled }: UseChartDataArgs) {
+export function useChartData({
+  chart,
+  chartId,
+  chartType = 'natal',
+  enabled,
+}: UseChartDataArgs) {
   const query = useQuery({
     queryKey: ['chartData', chartId, chartType],
     queryFn: async () => {
       if (!chartId) throw new Error('Missing chartId');
-      return fetchSavedChart(chartId, chartType as 'natal' | 'transit' | 'composite');
+      return fetchSavedChart(
+        chartId,
+        chartType as 'natal' | 'transit' | 'composite'
+      );
     },
     enabled,
     refetchOnWindowFocus: false,
@@ -37,7 +49,11 @@ export function useChartData({ chart, chartId, chartType = 'natal', enabled }: U
     const provided = chart ?? query.data;
     const fallback = sampleChartData as ChartLike;
     if (!provided || typeof provided !== 'object') return fallback;
-    if (!isChartLike(provided as ChartLike) || !hasChartContent(provided as ChartLike)) return fallback;
+    if (
+      !isChartLike(provided as ChartLike) ||
+      !hasChartContent(provided as ChartLike)
+    )
+      return fallback;
     const validated = validateChart(provided as ChartLike);
     if (!validated || typeof validated !== 'object') return fallback;
     return validated;

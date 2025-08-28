@@ -183,8 +183,11 @@ export class UnifiedNotificationManager {
   }
 
   // Chart notification method
-  async notifyChartReady(chartData: _ChartData): Promise<void> {
-    _debug('Chart ready notification:', { userId: this.userId, hasData: !!chartData });
+  notifyChartReady(chartData: _ChartData): void {
+    _debug('Chart ready notification:', {
+      userId: this.userId,
+      hasData: !!chartData,
+    });
     // Implementation would send actual notification
   }
 
@@ -194,7 +197,7 @@ export class UnifiedNotificationManager {
   }
 
   // Subscribe method for user preferences
-  async subscribe(userId: string, preferences: unknown): Promise<boolean> {
+  subscribe(userId: string, preferences: unknown): boolean {
     _debug('Subscribe notification preferences:', { userId, preferences });
     this.userId = userId;
     // Implementation would save preferences
@@ -202,7 +205,7 @@ export class UnifiedNotificationManager {
   }
 
   // Send test notification
-  async sendTest(): Promise<boolean> {
+  sendTest(): boolean {
     _debug('Sending test notification for user:', this.userId);
     // Implementation would send test notification
     return true;

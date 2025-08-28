@@ -21,14 +21,17 @@ export const GeneKeysCalculator: React.FC<GeneKeysCalculatorProps> = ({
       <div className='calculator-container p-4 border rounded-lg'>
         <h3 className='text-lg font-semibold mb-4'>Gene Keys Calculator</h3>
         <div className='input-group mb-4'>
-          <label htmlFor='birth-date' className='block text-sm font-medium mb-2'>
+          <label
+            htmlFor='birth-date'
+            className='block text-sm font-medium mb-2'
+          >
             Birth Date:
           </label>
           <input
             id='birth-date'
             type='date'
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={e => setDate(e.target.value)}
             className='w-full p-2 border rounded'
           />
         </div>

@@ -95,7 +95,10 @@ const GeneKeys: React.FC = () => {
                   Coordinates
                 </div>
                 <div className='text-cosmic-silver text-sm'>
-                  {birthData.lat !== null && birthData.lon !== null && typeof birthData.lat === 'number' && typeof birthData.lon === 'number'
+                  {birthData.lat !== null &&
+                  birthData.lon !== null &&
+                  typeof birthData.lat === 'number' &&
+                  typeof birthData.lon === 'number'
                     ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
                     : 'Auto-detected'}
                 </div>

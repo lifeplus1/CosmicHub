@@ -604,5 +604,3 @@ export function getErrorIcon(type: ErrorType, severity: ErrorSeverity): string {
   if (severity === 'warning') return '⚠️';
   return 'ℹ️';
 }
-
-

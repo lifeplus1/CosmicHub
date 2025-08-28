@@ -1,10 +1,7 @@
 /**
  * Validation utilities for chart data and API responses
  */
-import type {
-  PlanetName,
-  AspectType,
-} from '@cosmichub/types';
+import type { PlanetName, AspectType } from '@cosmichub/types';
 
 // Local type definitions
 type ZodiacSign =
@@ -75,9 +72,13 @@ export function isPlanet(obj: unknown): obj is Planet {
   const p = obj as Record<string, unknown>;
   return (
     typeof p.name === 'string' &&
-    typeof p.position === 'number' && p.position >= 0 && p.position < 360 &&
+    typeof p.position === 'number' &&
+    p.position >= 0 &&
+    p.position < 360 &&
     typeof p.sign === 'string' &&
-    typeof p.house === 'number' && p.house >= 1 && p.house <= 12 &&
+    typeof p.house === 'number' &&
+    p.house >= 1 &&
+    p.house <= 12 &&
     typeof p.retrograde === 'boolean' &&
     typeof p.speed === 'number'
   );
@@ -90,8 +91,12 @@ export function isHouse(obj: unknown): obj is House {
   if (obj === null || typeof obj !== 'object') return false;
   const h = obj as House;
   return (
-    typeof h.number === 'number' && h.number >= 1 && h.number <= 12 &&
-    typeof h.cusp === 'number' && h.cusp >= 0 && h.cusp < 360 &&
+    typeof h.number === 'number' &&
+    h.number >= 1 &&
+    h.number <= 12 &&
+    typeof h.cusp === 'number' &&
+    h.cusp >= 0 &&
+    h.cusp < 360 &&
     typeof h.sign === 'string'
   );
 }
@@ -176,7 +181,19 @@ export function isZodiacSign(value: string): value is ZodiacSign {
  */
 export function isPlanetName(value: string): value is PlanetName {
   const list: PlanetName[] = [
-    'sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','chiron','north_node','south_node'
+    'sun',
+    'moon',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
+    'uranus',
+    'neptune',
+    'pluto',
+    'chiron',
+    'north_node',
+    'south_node',
   ];
   return list.includes(value as PlanetName);
 }
@@ -185,7 +202,15 @@ export function isPlanetName(value: string): value is PlanetName {
  * Type guard for aspect types
  */
 export function isAspectType(value: string): value is AspectType {
-  const list: AspectType[] = ['conjunction','opposition','trine','square','sextile','quincunx','semi-sextile'];
+  const list: AspectType[] = [
+    'conjunction',
+    'opposition',
+    'trine',
+    'square',
+    'sextile',
+    'quincunx',
+    'semi-sextile',
+  ];
   return list.includes(value as AspectType);
 }
 
@@ -210,15 +235,25 @@ export function hasRequiredPlanets(
 /**
  * Validates house system is supported
  */
-export function isValidHouseSystem(system: string): system is ChartData['house_system'] {
-  const list = ['placidus','koch','equal','whole_sign','regiomontanus','campanus','porphyry'];
+export function isValidHouseSystem(
+  system: string
+): system is ChartData['house_system'] {
+  const list = [
+    'placidus',
+    'koch',
+    'equal',
+    'whole_sign',
+    'regiomontanus',
+    'campanus',
+    'porphyry',
+  ];
   return list.includes(system);
 }
 
 /**
  * Calculates dignities for a planet
  */
- 
+
 export function calculateDignities(_planet: Planet): Planet['dignity'] {
   return undefined; // placeholder implementation
 }

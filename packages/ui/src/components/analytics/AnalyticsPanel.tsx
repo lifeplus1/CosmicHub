@@ -20,7 +20,9 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({
         <h3 className='text-lg font-semibold mb-4'>Analytics</h3>
         <div className='metrics-display'>
           <p className='text-gray-600'>
-            {showDetailed ? 'Detailed analytics data' : 'Basic analytics summary'}
+            {showDetailed
+              ? 'Detailed analytics data'
+              : 'Basic analytics summary'}
           </p>
         </div>
       </div>

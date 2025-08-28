@@ -113,7 +113,11 @@ export function migrateAstrologySettings(raw: unknown): AstrologySettings {
   if (!raw || typeof raw !== 'object') return base;
   const obj = raw as Partial<AstrologySettings & { [k: string]: unknown }>;
   const version = typeof obj.__version === 'number' ? obj.__version : 0;
-  let working: AstrologySettings = { ...base, ...obj, __version: base.__version };
+  let working: AstrologySettings = {
+    ...base,
+    ...obj,
+    __version: base.__version,
+  };
   switch (version) {
     case 0: {
       // Pre-versioned: ensure new flags have safe defaults
@@ -163,7 +167,10 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
   ) => {
     onSettingsChange({
       ...settings,
-      [category]: { ...(settings[category] as Record<string, unknown>), ...updates },
+      [category]: {
+        ...(settings[category] as Record<string, unknown>),
+        ...updates,
+      },
     });
   };
 
@@ -183,18 +190,19 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
           <div className='space-y-6'>
             {/* House System */}
             <div>
-              <label 
-                htmlFor="house-system-select"
+              <label
+                htmlFor='house-system-select'
                 className='block text-sm font-medium text-cosmic-gold mb-2'
               >
                 House System
               </label>
               <select
-                id="house-system-select"
+                id='house-system-select'
                 value={settings.houseSystem}
                 onChange={e =>
-                  updateSettings({ 
-                    houseSystem: e.target.value as AstrologySettings['houseSystem']
+                  updateSettings({
+                    houseSystem: e.target
+                      .value as AstrologySettings['houseSystem'],
                   })
                 }
                 aria-label='House System'
@@ -222,8 +230,9 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     value='tropical'
                     checked={settings.zodiacSystem === 'tropical'}
                     onChange={e =>
-                      updateSettings({ 
-                        zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                      updateSettings({
+                        zodiacSystem: e.target
+                          .value as AstrologySettings['zodiacSystem'],
                       })
                     }
                     className='mr-2'
@@ -237,8 +246,9 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     value='sidereal'
                     checked={settings.zodiacSystem === 'sidereal'}
                     onChange={e =>
-                      updateSettings({ 
-                        zodiacSystem: e.target.value as AstrologySettings['zodiacSystem']
+                      updateSettings({
+                        zodiacSystem: e.target
+                          .value as AstrologySettings['zodiacSystem'],
                       })
                     }
                     className='mr-2'

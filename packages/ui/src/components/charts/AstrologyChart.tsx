@@ -22,7 +22,6 @@ export const AstrologyChart: React.FC<AstrologyChartProps> = ({
   chartType = 'natal',
   className = '',
 }) => {
-
   return (
     <div className={`astrology-chart ${className}`}>
       <div className='chart-container p-4 border rounded-lg'>

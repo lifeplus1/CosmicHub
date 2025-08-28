@@ -36,9 +36,12 @@ import {
   PlanetTable as _PlanetTable,
   CelestialBodiesTable as _CelestialBodiesTable,
   convertToCelestialBodies,
-  HouseTable, type HouseRow,
-  AngleTable, type AngleRow,
-  AsteroidTable, type AsteroidRow,
+  HouseTable,
+  type HouseRow,
+  AngleTable,
+  type AngleRow,
+  AsteroidTable,
+  type AsteroidRow,
   EnhancedAspectTable,
 } from './tables';
 import { VirtualizedList } from './VirtualizedList';
@@ -59,7 +62,7 @@ import {
 // (Legacy direct fetch imports removed; data now sourced via useChartData hook)
 // Alias the array-based ChartData (planets/houses/aspects as arrays)
 
-// Local type definitions  
+// Local type definitions
 type ChartType = 'natal' | 'synastry' | 'composite' | 'transit';
 
 import { isChartLike, hasChartContent, type ChartLike } from './normalizeChart';
@@ -205,13 +208,13 @@ const exportChartData = (
     : [];
   const asteroids = Array.isArray(chartData.asteroids)
     ? chartData.asteroids.filter(
-        (a): a is ChartDisplayAsteroid => 
+        (a): a is ChartDisplayAsteroid =>
           typeof a === 'object' && a !== null && 'name' in a
       )
     : undefined;
   const angles = Array.isArray(chartData.angles)
     ? chartData.angles.filter(
-        (a): a is ChartDisplayAngle => 
+        (a): a is ChartDisplayAngle =>
           typeof a === 'object' && a !== null && 'name' in a
       )
     : undefined;
@@ -289,7 +292,10 @@ const shareChart = async (raw: unknown): Promise<void> => {
   try {
     if (!raw || typeof raw !== 'object') return;
     if (navigator?.share) {
-      await navigator.share({ title: 'Astrology Chart', url: window.location.href });
+      await navigator.share({
+        title: 'Astrology Chart',
+        url: window.location.href,
+      });
     } else if (navigator?.clipboard?.writeText) {
       await navigator.clipboard.writeText(window.location.href);
       // simple toast substitute
@@ -323,17 +329,21 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
   // (Settings logic trimmed for brevity of restoration - can be re-added from backup if needed)
   // Astrology settings with localStorage persistence
   const SETTINGS_KEY = 'cosmichub-astrology-settings-v2';
-  const [astrologySettings, setAstrologySettings] = useState<AstrologySettings>(() => {
-    try {
-      const saved =
-        localStorage.getItem(SETTINGS_KEY) ??
-        localStorage.getItem('cosmichub-astrology-settings'); // migrate from legacy key
-      if (saved) {
-        return migrateAstrologySettings(JSON.parse(saved));
+  const [astrologySettings, setAstrologySettings] = useState<AstrologySettings>(
+    () => {
+      try {
+        const saved =
+          localStorage.getItem(SETTINGS_KEY) ??
+          localStorage.getItem('cosmichub-astrology-settings'); // migrate from legacy key
+        if (saved) {
+          return migrateAstrologySettings(JSON.parse(saved));
+        }
+      } catch {
+        /* ignore */
       }
-    } catch { /* ignore */ }
-    return defaultAstrologySettings;
-  });
+      return defaultAstrologySettings;
+    }
+  );
 
   // Hook-based data flow
   const { chartData, isLoading, error } = useChartData({
@@ -353,7 +363,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(migrated));
       // Clean legacy
       localStorage.removeItem('cosmichub-astrology-settings');
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
   };
 
   // Map a generic chart display planet/point to PlanetTable row shape
@@ -371,15 +383,11 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     ),
     degree: typeof p.degree === 'number' ? p.degree.toFixed(2) : '0.00',
     position: typeof p.position === 'number' ? p.position : undefined,
-    retrograde:
-      typeof p.retrograde === 'boolean' ? p.retrograde : undefined,
+    retrograde: typeof p.retrograde === 'boolean' ? p.retrograde : undefined,
   });
 
   // Type-safe wrapper to handle potentially unsafe objects
-  const safeMapPointToPlanetRow = (
-    p: unknown,
-    fallbackHouse: number
-  ) => {
+  const safeMapPointToPlanetRow = (p: unknown, fallbackHouse: number) => {
     if (typeof p !== 'object' || p === null) {
       return {
         name: '',
@@ -636,11 +644,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     >
       <TooltipProvider>
         <div role='region' aria-label='Astrology chart data'>
-          <div
-            aria-live='polite'
-            aria-atomic='true'
-            className='sr-only'
-          >
+          <div aria-live='polite' aria-atomic='true' className='sr-only'>
             {`Filtered results: ${processedSections.planets.length} planets, ${processedSections.asteroids.length} asteroids, ${processedSections.points.length} points, ${processedSections.aspects.length} aspects.`}
           </div>
           <Card className='w-full max-w-6xl mx-auto cosmic-glass border border-cosmic-purple/30 rounded-xl'>
@@ -650,7 +654,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 onShare={() => void shareChart(chartData)}
-                onExport={(fmt: 'json' | 'csv' | 'txt') => exportChartData(chartData, fmt)}
+                onExport={(fmt: 'json' | 'csv' | 'txt') =>
+                  exportChartData(chartData, fmt)
+                }
               />
             </CardHeader>
             <CardContent className='p-6 space-y-8 text-cosmic-silver'>
@@ -777,10 +783,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                 // Conditional Rendering: Unified View vs Separate Tables
                 return useUnifiedView ? (
                   // UNIFIED VIEW: Single comprehensive table with all celestial bodies
-                  <Accordion
-                    type='multiple'
-                    className='space-y-6'
-                  >
+                  <Accordion type='multiple' className='space-y-6'>
                     <CollapsibleTable
                       value='unified-celestial'
                       title='Complete Chart Analysis'
@@ -872,10 +875,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                   </Accordion>
                 ) : (
                   // SEPARATE VIEW: Distinct focused tables for each celestial body category
-                  <Accordion
-                    type='multiple'
-                    className='space-y-4'
-                  >
+                  <Accordion type='multiple' className='space-y-4'>
                     {/** categorizedPoints computed via top-level useMemo */}
                     {/* Planets Only */}
                     {processedSections.planets.length > 0 && (
@@ -902,7 +902,14 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                             height={420}
                             width='100%'
                             ariaLabel='Virtualized planetary positions'
-                            render={(row: { name: string; sign: string; house: number; degree: string; position?: number; retrograde?: boolean }) => <PlanetTable data={[row]} />}
+                            render={(row: {
+                              name: string;
+                              sign: string;
+                              house: number;
+                              degree: string;
+                              position?: number;
+                              retrograde?: boolean;
+                            }) => <PlanetTable data={[row]} />}
                           />
                         ) : (
                           <PlanetTable
@@ -941,7 +948,10 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                               ...processedSections.asteroids,
                               ...processedSections.points,
                             ].forEach(body => {
-                              const bodyHouse = parseIntFromUnknown(body.house, -1);
+                              const bodyHouse = parseIntFromUnknown(
+                                body.house,
+                                -1
+                              );
                               if (bodyHouse === house.house) {
                                 planetsInHouse.push(body.name);
                               }
@@ -1053,9 +1063,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                               height={360}
                               width='100%'
                               ariaLabel='Virtualized lunar nodes'
-                              render={(row: ReturnType<typeof safeMapPointToPlanetRow>) => (
-                                <PlanetTable data={[row]} />
-                              )}
+                              render={(
+                                row: ReturnType<typeof safeMapPointToPlanetRow>
+                              ) => <PlanetTable data={[row]} />}
                             />
                           ) : (
                             <PlanetTable
@@ -1086,9 +1096,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                               height={360}
                               width='100%'
                               ariaLabel='Virtualized lilith points'
-                              render={(row: ReturnType<typeof safeMapPointToPlanetRow>) => (
-                                <PlanetTable data={[row]} />
-                              )}
+                              render={(
+                                row: ReturnType<typeof safeMapPointToPlanetRow>
+                              ) => <PlanetTable data={[row]} />}
                             />
                           ) : (
                             <PlanetTable
@@ -1119,9 +1129,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                               height={360}
                               width='100%'
                               ariaLabel='Virtualized special points'
-                              render={(row: ReturnType<typeof safeMapPointToPlanetRow>) => (
-                                <PlanetTable data={[row]} />
-                              )}
+                              render={(
+                                row: ReturnType<typeof safeMapPointToPlanetRow>
+                              ) => <PlanetTable data={[row]} />}
                             />
                           ) : (
                             <PlanetTable
@@ -1209,7 +1219,9 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                     <CardContent className='p-0'>
                       <div className='p-6 text-center text-cosmic-silver'>
                         <p className='mb-4'>🚀 AI-001 Analysis</p>
-                        <p className='text-sm'>Chart analysis features coming soon...</p>
+                        <p className='text-sm'>
+                          Chart analysis features coming soon...
+                        </p>
                       </div>
                     </CardContent>
                   )}

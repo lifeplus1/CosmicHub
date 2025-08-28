@@ -28,7 +28,7 @@ const analyticsConfig: AnalyticsConfig = createDefaultAnalyticsConfig({
   },
   posthog: {
     apiKey: (import.meta.env.PUBLIC_POSTHOG_API_KEY as string) ?? '',
-    host: (import.meta.env.PUBLIC_POSTHOG_HOST as string),
+    host: import.meta.env.PUBLIC_POSTHOG_HOST as string,
     enabled: !!import.meta.env.PUBLIC_POSTHOG_API_KEY,
     sessionRecording: true,
     heatmaps: true,
@@ -81,7 +81,11 @@ const setupConsentManagement = () => {
   // Check for existing consent
   const consent = localStorage.getItem('analytics-consent');
   if (consent) {
-    const consentData = JSON.parse(consent) as { granted: boolean; timestamp: number; version: string };
+    const consentData = JSON.parse(consent) as {
+      granted: boolean;
+      timestamp: number;
+      version: string;
+    };
     analytics?.setConsentGranted(consentData.granted);
   } else {
     // Show consent banner if required
@@ -102,7 +106,7 @@ const showConsentBanner = () => {
       </div>
     </div>
   `;
-  
+
   // Style the banner
   banner.style.cssText = `
     position: fixed;
@@ -116,15 +120,15 @@ const showConsentBanner = () => {
     z-index: 10000;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   `;
-  
+
   document.body.appendChild(banner);
-  
+
   // Handle consent choices
   banner.querySelector('#accept-analytics')?.addEventListener('click', () => {
     setAnalyticsConsent(true);
     banner.remove();
   });
-  
+
   banner.querySelector('#decline-analytics')?.addEventListener('click', () => {
     setAnalyticsConsent(false);
     banner.remove();
@@ -137,10 +141,10 @@ const setAnalyticsConsent = (granted: boolean) => {
     timestamp: Date.now(),
     version: '1.0',
   };
-  
+
   localStorage.setItem('analytics-consent', JSON.stringify(consentData));
   analytics?.setConsentGranted(granted);
-  
+
   // Track consent decision
   analytics?.track({
     event: 'consent_updated',
@@ -155,19 +159,21 @@ const setAnalyticsConsent = (granted: boolean) => {
 // PWA Install Tracking
 const setupPWATracking = () => {
   let _deferredPrompt: BeforeInstallPromptEvent | null = null;
-  
-  window.addEventListener('beforeinstallprompt', (e) => {
+
+  window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     _deferredPrompt = e as BeforeInstallPromptEvent;
-    
+
     trackPWAInstallPrompt({
       prompt_trigger: 'automatic',
       user_action: 'ignored', // Will be updated if user interacts
-      time_on_site_ms: Date.now() - ((window as unknown as { startTime?: number }).startTime ?? 0),
+      time_on_site_ms:
+        Date.now() -
+        ((window as unknown as { startTime?: number }).startTime ?? 0),
       page_path: window.location.pathname,
     });
   });
-  
+
   window.addEventListener('appinstalled', () => {
     analytics?.track({
       event: 'pwa_installed',
@@ -209,7 +215,9 @@ type CoreAIInteractionFeature =
   | 'pattern_recognition';
 
 // Local extended feature (we still accept ai_direct_interpretation and map it)
-type ExtendedAIInteractionFeature = CoreAIInteractionFeature | 'ai_direct_interpretation';
+type ExtendedAIInteractionFeature =
+  | CoreAIInteractionFeature
+  | 'ai_direct_interpretation';
 
 export const trackCosmicHubAIInteraction = (data: {
   feature: ExtendedAIInteractionFeature;
@@ -226,7 +234,10 @@ export const trackCosmicHubAIInteraction = (data: {
 };
 
 // Page tracking helper
-export const trackPageView = (pageName: string, properties: Record<string, string | number | boolean> = {}) => {
+export const trackPageView = (
+  pageName: string,
+  properties: Record<string, string | number | boolean> = {}
+) => {
   analytics?.page(pageName, {
     path: window.location.pathname,
     title: document.title,
@@ -237,7 +248,10 @@ export const trackPageView = (pageName: string, properties: Record<string, strin
 };
 
 // User identification helper
-export const identifyUser = (userId: string, traits: Record<string, string | number | boolean> = {}) => {
+export const identifyUser = (
+  userId: string,
+  traits: Record<string, string | number | boolean> = {}
+) => {
   analytics?.identify(userId, {
     user_id: userId,
     ...traits,

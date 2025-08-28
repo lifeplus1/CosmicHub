@@ -2,9 +2,13 @@
 
 ## FOR AI ASSISTANTS: CRITICAL EXECUTION RULES
 
-> **📚 Complete Setup Guide**: See [docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md](docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md) for workspace configuration and context automation
+> **📚 Complete Setup Guide**: See
+> [docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md](docs/00-OVERVIEW/AI_CONTEXT_AUTOMATION.md) for
+> workspace configuration and context automation
 >
-> **📋 Essential Context**: Always read [docs/00-OVERVIEW/MASTER_CONTEXT.md](docs/00-OVERVIEW/MASTER_CONTEXT.md) for complete project context before starting work
+> **📋 Essential Context**: Always read
+> [docs/00-OVERVIEW/MASTER_CONTEXT.md](docs/00-OVERVIEW/MASTER_CONTEXT.md) for complete project
+> context before starting work
 
 ### ⚠️ MANDATORY SEQUENCING
 
@@ -18,7 +22,7 @@
 # ✅ RECOMMENDED: Use enhanced coordination workflow
 npm run lint:enhanced-workflow
 
-# ✅ ALTERNATIVE: Use individual components  
+# ✅ ALTERNATIVE: Use individual components
 npm run lint:preprocess          # Smart preprocessing
 npm run lint:rebalance          # Agent rebalancing
 npm run lint:ai-coord-enhanced  # Enhanced coordination
@@ -35,7 +39,7 @@ npm run lint:ai-coord
 
 - **Enhanced Workflow**: Check complete output with performance improvements
 - **Rebalanced Config**: Review `ai-agent-coordination/rebalanced-agent-config.json`
-- **Complexity Analysis**: Examine error complexity scores and workload distribution  
+- **Complexity Analysis**: Examine error complexity scores and workload distribution
 - **Performance Metrics**: Monitor coordination efficiency and overall performance score
 - **Wait for completion**: Check terminal context shows `Exit Code: 0`
 

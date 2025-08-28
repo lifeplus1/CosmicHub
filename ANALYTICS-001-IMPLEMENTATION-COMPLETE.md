@@ -2,44 +2,59 @@
 
 ## Overview
 
-The Enhanced User Analytics system has been successfully implemented across the CosmicHub platform, providing comprehensive tracking, privacy compliance, and real-time dashboard capabilities.
+The Enhanced User Analytics system has been successfully implemented across the CosmicHub platform,
+providing comprehensive tracking, privacy compliance, and real-time dashboard capabilities.
 
 ## System Architecture
 
 ### 1. Core Analytics Package (`@cosmichub/analytics`)
 
-**Location**: `packages/analytics/`
-**Purpose**: Centralized analytics library for the monorepo
+**Location**: `packages/analytics/` **Purpose**: Centralized analytics library for the monorepo
 
 #### Core Package Components
 
-- **AnalyticsService.ts**: Multi-provider analytics service (Google Analytics, Mixpanel, PostHog, custom endpoint) with consent gating
+- **AnalyticsService.ts**: Multi-provider analytics service (Google Analytics, Mixpanel, PostHog,
+  custom endpoint) with consent gating
 - **Events Directory**: Specialized tracking modules actually present today:
   - `events/ChartEvents.ts`: Chart calculation & view tracking helpers
   - `events/AIEvents.ts`: AI interaction feature usage
   - `events/MobileEvents.ts`: PWA/mobile install, offline & push events
   - `events/BusinessEvents.ts`: Subscription, conversion & feature usage
 - **DashboardService.ts**: (present; wiring into UI pending) metrics helpers
-- (Planned) ConsentManager: Current consent logic lives inline in `apps/astro/src/services/analytics.ts` and can be promoted later into a dedicated module.
+- (Planned) ConsentManager: Current consent logic lives inline in
+  `apps/astro/src/services/analytics.ts` and can be promoted later into a dedicated module.
 
 #### Multi-Provider Support
 
-Current initialization (simplified excerpt) uses `createDefaultAnalyticsConfig` + `initializeAnalytics`:
+Current initialization (simplified excerpt) uses `createDefaultAnalyticsConfig` +
+`initializeAnalytics`:
 
 ```typescript
 const config = createDefaultAnalyticsConfig({
   googleAnalytics: { measurementId: GA_ID, enabled: !!GA_ID },
   mixpanel: { token: MIXPANEL_TOKEN, enabled: !!MIXPANEL_TOKEN, trackPageViews: true },
-  posthog: { apiKey: POSTHOG_KEY, host: POSTHOG_HOST, enabled: !!POSTHOG_KEY, sessionRecording: true, heatmaps: true },
+  posthog: {
+    apiKey: POSTHOG_KEY,
+    host: POSTHOG_HOST,
+    enabled: !!POSTHOG_KEY,
+    sessionRecording: true,
+    heatmaps: true,
+  },
   customAnalytics: { endpoint: '/api/analytics/track', enabled: true },
-  privacy: { respectDoNotTrack: true, anonymizeIP: true, cookieConsent: true, dataRetentionDays: 365 }
+  privacy: {
+    respectDoNotTrack: true,
+    anonymizeIP: true,
+    cookieConsent: true,
+    dataRetentionDays: 365,
+  },
 });
 initializeAnalytics(config);
 ```
 
 ### 2. Backend Analytics API (`backend/analytics/`)
 
-Current backend wiring (FastAPI) is partially outlined; the following endpoints are planned / in-progress. Confirm actual filenames & add tests before marking fully complete.
+Current backend wiring (FastAPI) is partially outlined; the following endpoints are planned /
+in-progress. Confirm actual filenames & add tests before marking fully complete.
 
 #### Planned / In-Progress Components
 
@@ -54,7 +69,8 @@ Current backend wiring (FastAPI) is partially outlined; the following endpoints 
   - `GET /analytics/events/chart-stats` – Chart-specific analytics
   - `GET /analytics/health` – Health check
 
-Status: Frontend currently posts only to the custom endpoint (`/api/analytics/track`). Harmonize route naming when backend module lands.
+Status: Frontend currently posts only to the custom endpoint (`/api/analytics/track`). Harmonize
+route naming when backend module lands.
 
 #### Database Schema
 
@@ -74,8 +90,8 @@ CREATE TABLE analytics_events (
 
 ### 3. Frontend Integration (`apps/astro/src/services/`)
 
-**Location**: `apps/astro/src/services/analytics.ts`
-**Purpose**: Application-level analytics integration
+**Location**: `apps/astro/src/services/analytics.ts` **Purpose**: Application-level analytics
+integration
 
 #### Features Implemented
 
@@ -87,20 +103,21 @@ CREATE TABLE analytics_events (
 
 #### Chart Integration
 
-Tracking helpers available & partially wired; actual usage should match exported function signatures:
+Tracking helpers available & partially wired; actual usage should match exported function
+signatures:
 
 ```typescript
 trackChartCalculation({
   chart_type: 'natal',
   calculation_time_ms: endTime - startTime,
   success: true,
-  astrology_system: 'western'
+  astrology_system: 'western',
 });
 
 trackChartView({
   chart_type: 'natal',
   user_id: currentUserId,
-  duration_ms: timeSpent
+  duration_ms: timeSpent,
 });
 ```
 
@@ -137,7 +154,7 @@ trackChartView({
 
 ```bash
 GET /analytics/dashboard/overview
-GET /analytics/events/metrics  
+GET /analytics/events/metrics
 GET /analytics/events/chart-stats
 POST /analytics/event
 DELETE /analytics/cleanup/{retention_days}
@@ -241,12 +258,12 @@ ANALYTICS_RATE_LIMIT=100
 
 ## Implementation Summary
 
-**Total Files Created/Modified**: ~15 (analytics + integration)
-**Lines of Code Added**: ~2000 (estimate, includes refactors)
-**Implemented**: Core service, event helpers, frontend init, consent banner, build integration
-**Pending**: Backend ingestion layer, dashboard, advanced modules
-**Testing Status**: Existing unit/integration coverage (PWA + engagement). Add targeted analytics tests next.
-**Privacy Compliance**: Baseline (consent + DNT). Data deletion & retention jobs pending.
-**Performance Impact**: Low (no batching logic yet; future optimization possible)
+**Total Files Created/Modified**: ~15 (analytics + integration) **Lines of Code Added**: ~2000
+(estimate, includes refactors) **Implemented**: Core service, event helpers, frontend init, consent
+banner, build integration **Pending**: Backend ingestion layer, dashboard, advanced modules
+**Testing Status**: Existing unit/integration coverage (PWA + engagement). Add targeted analytics
+tests next. **Privacy Compliance**: Baseline (consent + DNT). Data deletion & retention jobs
+pending. **Performance Impact**: Low (no batching logic yet; future optimization possible)
 
-System is partially production-ready for client-side event emission; server-side ingestion & dashboard still require completion steps outlined above.
+System is partially production-ready for client-side event emission; server-side ingestion &
+dashboard still require completion steps outlined above.

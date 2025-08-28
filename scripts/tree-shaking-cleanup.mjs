@@ -60,7 +60,6 @@ class TreeShakingCleanup {
 
       console.log('\n✅ PERF-002 Tree-shaking cleanup completed successfully!');
       return this.stats;
-
     } catch (error) {
       console.error('❌ Tree-shaking cleanup failed:', error);
       throw error;
@@ -69,11 +68,13 @@ class TreeShakingCleanup {
 
   async loadAnalysis() {
     const analysisPath = path.join(METRICS_DIR, 'tree-shaking-analysis.json');
-    
+
     try {
       const content = await fs.readFile(analysisPath, 'utf8');
       this.analysis = JSON.parse(content);
-      console.log(`📊 Loaded analysis: ${this.analysis.unusedExports.length} unused exports found`);
+      console.log(
+        `📊 Loaded analysis: ${this.analysis.unusedExports.length} unused exports found`
+      );
     } catch (error) {
       throw new Error(`Failed to load tree-shaking analysis: ${error.message}`);
     }
@@ -81,22 +82,24 @@ class TreeShakingCleanup {
 
   async createBackup() {
     console.log('💾 Creating backup...');
-    
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupPath = path.join(BACKUP_DIR, `backup-${timestamp}`);
-    
+
     await fs.mkdir(backupPath, { recursive: true });
 
     // Get unique files that will be modified
-    const filesToBackup = new Set(this.analysis.unusedExports.map(exp => exp.file));
+    const filesToBackup = new Set(
+      this.analysis.unusedExports.map(exp => exp.file)
+    );
 
     for (const file of filesToBackup) {
       const sourcePath = path.join(ROOT_DIR, file);
       const backupFilePath = path.join(backupPath, file);
-      
+
       // Ensure backup directory exists
       await fs.mkdir(path.dirname(backupFilePath), { recursive: true });
-      
+
       try {
         await fs.copyFile(sourcePath, backupFilePath);
       } catch (error) {
@@ -112,7 +115,7 @@ class TreeShakingCleanup {
 
     // Group unused exports by file
     const fileMap = new Map();
-    
+
     for (const unusedExport of this.analysis.unusedExports) {
       // Skip certain files that should be handled manually
       if (this.shouldSkipFile(unusedExport.file)) {
@@ -134,20 +137,25 @@ class TreeShakingCleanup {
       files: Array.from(fileMap.entries()).map(([file, exports]) => ({
         file,
         exports,
-        estimatedSavingsKB: exports.reduce((sum, exp) => sum + exp.estimatedSizeKB, 0)
-      }))
+        estimatedSavingsKB: exports.reduce(
+          (sum, exp) => sum + exp.estimatedSizeKB,
+          0
+        ),
+      })),
     };
 
     console.log(`📝 Plan: ${this.cleanupPlan.files.length} files to modify`);
-    
+
     // Log top files for cleanup
     const topFiles = this.cleanupPlan.files
       .sort((a, b) => b.exports.length - a.exports.length)
       .slice(0, 5);
-    
+
     console.log('\n🎯 Top files for cleanup:');
     for (const fileData of topFiles) {
-      console.log(`  • ${fileData.file}: ${fileData.exports.length} exports (~${fileData.estimatedSavingsKB}KB)`);
+      console.log(
+        `  • ${fileData.file}: ${fileData.exports.length} exports (~${fileData.estimatedSavingsKB}KB)`
+      );
     }
   }
 
@@ -162,7 +170,7 @@ class TreeShakingCleanup {
       '__tests__',
       'test-utils',
       'setup',
-      'config.ts'
+      'config.ts',
     ];
 
     return skipPatterns.some(pattern => filePath.includes(pattern));
@@ -174,8 +182,8 @@ class TreeShakingCleanup {
       'default', // default exports often used dynamically
       'Provider',
       'Context',
-      'Hook', 
-      'Component'
+      'Hook',
+      'Component',
     ];
 
     // Skip if name suggests it's a public API
@@ -184,8 +192,10 @@ class TreeShakingCleanup {
     }
 
     // Skip if it's a large function/class that might have side effects
-    if ((unusedExport.type === 'function' || unusedExport.type === 'class') && 
-        unusedExport.estimatedSizeKB > 5) {
+    if (
+      (unusedExport.type === 'function' || unusedExport.type === 'class') &&
+      unusedExport.estimatedSizeKB > 5
+    ) {
       return true;
     }
 
@@ -207,7 +217,7 @@ class TreeShakingCleanup {
 
   async cleanupFile(fileData) {
     const filePath = path.join(ROOT_DIR, fileData.file);
-    
+
     let content;
     try {
       content = await fs.readFile(filePath, 'utf8');
@@ -232,17 +242,21 @@ class TreeShakingCleanup {
 
     if (removedCount > 0) {
       if (this.dryRun) {
-        console.log(`  📝 Would remove ${removedCount} exports from ${fileData.file}`);
+        console.log(
+          `  📝 Would remove ${removedCount} exports from ${fileData.file}`
+        );
       } else {
         // Clean up any empty lines or extra whitespace
         modifiedContent = this.cleanupContent(modifiedContent);
-        
+
         await fs.writeFile(filePath, modifiedContent);
-        console.log(`  ✅ Removed ${removedCount} exports from ${fileData.file}`);
-        
+        console.log(
+          `  ✅ Removed ${removedCount} exports from ${fileData.file}`
+        );
+
         this.stats.filesModified++;
       }
-      
+
       this.stats.exportsRemoved += removedCount;
     }
   }
@@ -250,12 +264,12 @@ class TreeShakingCleanup {
   removeExport(content, unusedExport) {
     const lines = content.split('\n');
     const exportName = unusedExport.name;
-    
+
     try {
       // Handle different export patterns
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        
+
         // Direct export: export const/function/class/interface/type exportName
         if (this.isDirectExport(line, exportName, unusedExport.type)) {
           // For multi-line exports, find the end
@@ -263,7 +277,7 @@ class TreeShakingCleanup {
           lines.splice(i, endIndex - i + 1);
           return { success: true, content: lines.join('\n') };
         }
-        
+
         // Named export: export { exportName, ... }
         if (this.isInNamedExport(line, exportName)) {
           const newLine = this.removeFromNamedExport(line, exportName);
@@ -273,17 +287,19 @@ class TreeShakingCleanup {
           }
         }
       }
-      
+
       return { success: false, content };
     } catch (error) {
-      console.warn(`⚠️ Could not remove export ${exportName}: ${error.message}`);
+      console.warn(
+        `⚠️ Could not remove export ${exportName}: ${error.message}`
+      );
       return { success: false, content };
     }
   }
 
   isDirectExport(line, exportName, exportType) {
     const trimmed = line.trim();
-    
+
     // Check for various export patterns
     const patterns = [
       `export const ${exportName}`,
@@ -293,16 +309,16 @@ class TreeShakingCleanup {
       `export class ${exportName}`,
       `export interface ${exportName}`,
       `export type ${exportName}`,
-      `export enum ${exportName}`
+      `export enum ${exportName}`,
     ];
-    
+
     return patterns.some(pattern => trimmed.startsWith(pattern));
   }
 
   isInNamedExport(line, exportName) {
     const trimmed = line.trim();
     if (!trimmed.startsWith('export {')) return false;
-    
+
     // Simple check - could be improved for complex cases
     return trimmed.includes(exportName);
   }
@@ -311,14 +327,14 @@ class TreeShakingCleanup {
     // Handle export { name1, name2, name3 } patterns
     const exportMatch = line.match(/export\s*{\s*([^}]+)\s*}/);
     if (!exportMatch) return line;
-    
+
     const exportList = exportMatch[1];
     const exports = exportList.split(',').map(s => s.trim());
     const filteredExports = exports.filter(exp => {
       const cleanName = exp.split(' as ')[0].trim();
       return cleanName !== exportName;
     });
-    
+
     if (filteredExports.length === 0) {
       // Remove the entire export line if no exports left
       return '';
@@ -326,13 +342,15 @@ class TreeShakingCleanup {
       // Rebuild the export statement
       return line.replace(exportMatch[1], filteredExports.join(', '));
     }
-    
+
     return line;
   }
 
   findExportEnd(lines, startIndex, exportType) {
     // For simple exports, it's usually just one line
-    if (['const', 'let', 'var', 'interface', 'type', 'enum'].includes(exportType)) {
+    if (
+      ['const', 'let', 'var', 'interface', 'type', 'enum'].includes(exportType)
+    ) {
       // Look for semicolon or end of statement
       for (let i = startIndex; i < lines.length; i++) {
         if (lines[i].includes(';') || lines[i].includes('}')) {
@@ -340,12 +358,12 @@ class TreeShakingCleanup {
         }
       }
     }
-    
+
     // For functions and classes, find the closing brace
     if (['function', 'class'].includes(exportType)) {
       let braceCount = 0;
       let inBraces = false;
-      
+
       for (let i = startIndex; i < lines.length; i++) {
         const line = lines[i];
         for (const char of line) {
@@ -361,17 +379,20 @@ class TreeShakingCleanup {
         }
       }
     }
-    
+
     return startIndex; // fallback to single line
   }
 
   cleanupContent(content) {
     // Remove multiple consecutive empty lines
     content = content.replace(/\n\n\n+/g, '\n\n');
-    
+
     // Remove trailing whitespace
-    content = content.split('\n').map(line => line.trimRight()).join('\n');
-    
+    content = content
+      .split('\n')
+      .map(line => line.trimRight())
+      .join('\n');
+
     // Ensure file ends with single newline
     return content.trimRight() + '\n';
   }
@@ -382,25 +403,26 @@ class TreeShakingCleanup {
     try {
       // Check if TypeScript compilation still works
       console.log('  Checking TypeScript compilation...');
-      execSync('npm run type-check', { 
-        stdio: 'pipe', 
+      execSync('npm run type-check', {
+        stdio: 'pipe',
         cwd: ROOT_DIR,
-        encoding: 'utf8'
+        encoding: 'utf8',
       });
       console.log('  ✅ TypeScript compilation successful');
 
       // Run a quick build to ensure nothing is broken
       console.log('  Testing build process...');
-      execSync('npm run build:quick 2>/dev/null || npm run build 2>/dev/null', { 
-        stdio: 'pipe', 
+      execSync('npm run build:quick 2>/dev/null || npm run build 2>/dev/null', {
+        stdio: 'pipe',
         cwd: ROOT_DIR,
-        encoding: 'utf8'
+        encoding: 'utf8',
       });
       console.log('  ✅ Build process successful');
-
     } catch (error) {
       console.warn('  ⚠️ Validation warning:', error.message);
-      console.warn('  Please run tests manually to ensure everything works correctly');
+      console.warn(
+        '  Please run tests manually to ensure everything works correctly'
+      );
     }
   }
 
@@ -413,13 +435,15 @@ class TreeShakingCleanup {
         cleanupPlan: {
           totalFiles: this.cleanupPlan.files.length,
           totalExportsTargeted: this.cleanupPlan.files.reduce(
-            (sum, file) => sum + file.exports.length, 0
+            (sum, file) => sum + file.exports.length,
+            0
           ),
           estimatedTotalSavingsKB: this.cleanupPlan.files.reduce(
-            (sum, file) => sum + file.estimatedSavingsKB, 0
-          )
-        }
-      }
+            (sum, file) => sum + file.estimatedSavingsKB,
+            0
+          ),
+        },
+      },
     };
 
     const reportPath = path.join(METRICS_DIR, 'perf-002-cleanup-report.json');

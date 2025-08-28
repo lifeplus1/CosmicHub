@@ -34,30 +34,35 @@ class BundleAnalyzer {
       timestamp: new Date().toISOString(),
       phase,
       bundles: {},
-      buildTime: 0
+      buildTime: 0,
     };
 
     try {
       // Build all applications and measure time
       const startTime = Date.now();
-      
+
       console.log('  Building Astro app...');
       const astroBuild = this.buildApp('astro');
       metrics.bundles.astro = await this.analyzeBundleSize('apps/astro/dist');
-      
+
       console.log('  Building HealWave app...');
-      const healwaveBuild = this.buildApp('healwave'); 
-      metrics.bundles.healwave = await this.analyzeBundleSize('apps/healwave/dist');
+      const healwaveBuild = this.buildApp('healwave');
+      metrics.bundles.healwave =
+        await this.analyzeBundleSize('apps/healwave/dist');
 
       metrics.buildTime = Date.now() - startTime;
 
       // Save metrics
-      const metricsFile = path.join(METRICS_DIR, `bundle-analysis-${phase}.json`);
+      const metricsFile = path.join(
+        METRICS_DIR,
+        `bundle-analysis-${phase}.json`
+      );
       await fs.writeFile(metricsFile, JSON.stringify(metrics, null, 2));
 
-      console.log(`✅ Bundle analysis (${phase}) completed in ${metrics.buildTime}ms`);
+      console.log(
+        `✅ Bundle analysis (${phase}) completed in ${metrics.buildTime}ms`
+      );
       return metrics;
-
     } catch (error) {
       console.error(`❌ Bundle analysis failed:`, error.message);
       throw error;
@@ -71,22 +76,22 @@ class BundleAnalyzer {
         `npm run build:${appName}`,
         `cd apps/${appName} && npm run build`,
         `npx turbo build --filter=${appName}`,
-        'npm run build'
+        'npm run build',
       ];
 
       for (const cmd of buildCommands) {
         try {
-          execSync(cmd, { 
-            stdio: 'pipe', 
+          execSync(cmd, {
+            stdio: 'pipe',
             cwd: ROOT_DIR,
-            encoding: 'utf8'
+            encoding: 'utf8',
           });
           return true;
         } catch (error) {
           continue;
         }
       }
-      
+
       throw new Error(`Could not build ${appName}`);
     } catch (error) {
       console.warn(`⚠️ Could not build ${appName}:`, error.message);
@@ -96,7 +101,7 @@ class BundleAnalyzer {
 
   async analyzeBundleSize(distPath) {
     const fullPath = path.join(ROOT_DIR, distPath);
-    
+
     try {
       const stats = await this.getDirSize(fullPath);
       return {
@@ -104,7 +109,7 @@ class BundleAnalyzer {
         fileCount: stats.fileCount,
         jsSize: stats.jsSize,
         cssSize: stats.cssSize,
-        assets: stats.assets
+        assets: stats.assets,
       };
     } catch (error) {
       console.warn(`⚠️ Could not analyze ${distPath}:`, error.message);
@@ -113,7 +118,7 @@ class BundleAnalyzer {
         fileCount: 0,
         jsSize: 0,
         cssSize: 0,
-        assets: 0
+        assets: 0,
       };
     }
   }
@@ -124,7 +129,7 @@ class BundleAnalyzer {
       fileCount: 0,
       jsSize: 0,
       cssSize: 0,
-      assets: 0
+      assets: 0,
     };
 
     try {
@@ -166,28 +171,41 @@ class BundleAnalyzer {
 
     try {
       // Load baseline and current metrics
-      const baselineFile = path.join(METRICS_DIR, 'bundle-analysis-baseline.json');
-      const currentFile = path.join(METRICS_DIR, 'bundle-analysis-after-cleanup.json');
+      const baselineFile = path.join(
+        METRICS_DIR,
+        'bundle-analysis-baseline.json'
+      );
+      const currentFile = path.join(
+        METRICS_DIR,
+        'bundle-analysis-after-cleanup.json'
+      );
 
-      this.baselineMetrics = JSON.parse(await fs.readFile(baselineFile, 'utf8'));
+      this.baselineMetrics = JSON.parse(
+        await fs.readFile(baselineFile, 'utf8')
+      );
       this.currentMetrics = JSON.parse(await fs.readFile(currentFile, 'utf8'));
 
       this.comparison = {
         timestamp: new Date().toISOString(),
         summary: this.calculateSummary(),
         details: this.calculateDetails(),
-        recommendations: this.generateRecommendations()
+        recommendations: this.generateRecommendations(),
       };
 
       // Save comparison
-      const comparisonFile = path.join(METRICS_DIR, 'perf-002-bundle-comparison.json');
-      await fs.writeFile(comparisonFile, JSON.stringify(this.comparison, null, 2));
+      const comparisonFile = path.join(
+        METRICS_DIR,
+        'perf-002-bundle-comparison.json'
+      );
+      await fs.writeFile(
+        comparisonFile,
+        JSON.stringify(this.comparison, null, 2)
+      );
 
       // Print summary
       this.printComparison();
 
       return this.comparison;
-
     } catch (error) {
       console.error(`❌ Bundle comparison failed:`, error.message);
       throw error;
@@ -199,10 +217,12 @@ class BundleAnalyzer {
     const current = this.currentMetrics;
 
     const totalBaselineSize = Object.values(baseline.bundles).reduce(
-      (sum, bundle) => sum + bundle.totalSize, 0
+      (sum, bundle) => sum + bundle.totalSize,
+      0
     );
     const totalCurrentSize = Object.values(current.bundles).reduce(
-      (sum, bundle) => sum + bundle.totalSize, 0
+      (sum, bundle) => sum + bundle.totalSize,
+      0
     );
 
     const sizeDiff = totalBaselineSize - totalCurrentSize;
@@ -212,38 +232,40 @@ class BundleAnalyzer {
       totalSizeReduction: sizeDiff,
       percentReduction: percentChange,
       buildTimeChange: current.buildTime - baseline.buildTime,
-      perf002Success: sizeDiff > 0 && sizeDiff >= 1.5 * 1024 * 1024 // 1.5MB minimum
+      perf002Success: sizeDiff > 0 && sizeDiff >= 1.5 * 1024 * 1024, // 1.5MB minimum
     };
   }
 
   calculateDetails() {
     const details = {};
 
-    for (const [appName, baselineBundle] of Object.entries(this.baselineMetrics.bundles)) {
+    for (const [appName, baselineBundle] of Object.entries(
+      this.baselineMetrics.bundles
+    )) {
       const currentBundle = this.currentMetrics.bundles[appName];
-      
+
       if (currentBundle) {
         details[appName] = {
           totalSize: {
             before: baselineBundle.totalSize,
             after: currentBundle.totalSize,
-            reduction: baselineBundle.totalSize - currentBundle.totalSize
+            reduction: baselineBundle.totalSize - currentBundle.totalSize,
           },
           jsSize: {
             before: baselineBundle.jsSize,
             after: currentBundle.jsSize,
-            reduction: baselineBundle.jsSize - currentBundle.jsSize
+            reduction: baselineBundle.jsSize - currentBundle.jsSize,
           },
           cssSize: {
             before: baselineBundle.cssSize,
             after: currentBundle.cssSize,
-            reduction: baselineBundle.cssSize - currentBundle.cssSize
+            reduction: baselineBundle.cssSize - currentBundle.cssSize,
           },
           fileCount: {
             before: baselineBundle.fileCount,
             after: currentBundle.fileCount,
-            reduction: baselineBundle.fileCount - currentBundle.fileCount
-          }
+            reduction: baselineBundle.fileCount - currentBundle.fileCount,
+          },
         };
       }
     }
@@ -258,14 +280,14 @@ class BundleAnalyzer {
     if (summary.perf002Success) {
       recommendations.push({
         type: 'success',
-        message: `PERF-002 achieved ${(summary.percentReduction).toFixed(1)}% bundle size reduction`,
-        priority: 'info'
+        message: `PERF-002 achieved ${summary.percentReduction.toFixed(1)}% bundle size reduction`,
+        priority: 'info',
       });
     } else {
       recommendations.push({
         type: 'warning',
         message: 'PERF-002 did not achieve the target 1.5MB reduction',
-        priority: 'medium'
+        priority: 'medium',
       });
     }
 
@@ -273,7 +295,7 @@ class BundleAnalyzer {
       recommendations.push({
         type: 'success',
         message: `Build time improved by ${Math.abs(summary.buildTimeChange)}ms`,
-        priority: 'info'
+        priority: 'info',
       });
     }
 
@@ -281,8 +303,9 @@ class BundleAnalyzer {
     if (summary.percentReduction < 20) {
       recommendations.push({
         type: 'optimization',
-        message: 'Consider additional optimizations: dynamic imports, code splitting',
-        priority: 'low'
+        message:
+          'Consider additional optimizations: dynamic imports, code splitting',
+        priority: 'low',
       });
     }
 
@@ -295,21 +318,36 @@ class BundleAnalyzer {
 
     const summary = this.comparison.summary;
     const sizeMB = (summary.totalSizeReduction / (1024 * 1024)).toFixed(2);
-    
-    console.log(`Total size reduction: ${sizeMB}MB (${summary.percentReduction.toFixed(1)}%)`);
-    console.log(`Build time change: ${summary.buildTimeChange > 0 ? '+' : ''}${summary.buildTimeChange}ms`);
-    console.log(`PERF-002 target met: ${summary.perf002Success ? '✅ YES' : '❌ NO'}`);
+
+    console.log(
+      `Total size reduction: ${sizeMB}MB (${summary.percentReduction.toFixed(1)}%)`
+    );
+    console.log(
+      `Build time change: ${summary.buildTimeChange > 0 ? '+' : ''}${summary.buildTimeChange}ms`
+    );
+    console.log(
+      `PERF-002 target met: ${summary.perf002Success ? '✅ YES' : '❌ NO'}`
+    );
 
     console.log('\n📊 Per-App Breakdown:');
     for (const [appName, details] of Object.entries(this.comparison.details)) {
-      const appSizeMB = (details.totalSize.reduction / (1024 * 1024)).toFixed(2);
-      console.log(`  ${appName}: -${appSizeMB}MB (${details.fileCount.reduction} fewer files)`);
+      const appSizeMB = (details.totalSize.reduction / (1024 * 1024)).toFixed(
+        2
+      );
+      console.log(
+        `  ${appName}: -${appSizeMB}MB (${details.fileCount.reduction} fewer files)`
+      );
     }
 
     if (this.comparison.recommendations.length > 0) {
       console.log('\n💡 Recommendations:');
       for (const rec of this.comparison.recommendations) {
-        const icon = rec.priority === 'info' ? '✅' : rec.priority === 'medium' ? '⚠️' : '💡';
+        const icon =
+          rec.priority === 'info'
+            ? '✅'
+            : rec.priority === 'medium'
+              ? '⚠️'
+              : '💡';
         console.log(`  ${icon} ${rec.message}`);
       }
     }
@@ -332,15 +370,12 @@ async function main() {
   if (args.includes('--baseline')) {
     console.log('📊 Creating baseline bundle analysis...');
     await analyzer.analyze('baseline');
-    
   } else if (args.includes('--after-cleanup')) {
     console.log('📊 Analyzing bundles after PERF-002 cleanup...');
     await analyzer.analyze('after-cleanup');
-    
   } else if (args.includes('--compare')) {
     console.log('📊 Comparing baseline vs after-cleanup...');
     await analyzer.compare();
-    
   } else {
     console.log(`
 Bundle Analyzer - PERF-002 Implementation

@@ -158,8 +158,9 @@ export class AIEnhancedService {
 
   private static getApiKey(): string {
     // Support both Node and Vite environments
-    const globalProcess: unknown = (globalThis as unknown as { process?: unknown })
-      .process;
+    const globalProcess: unknown = (
+      globalThis as unknown as { process?: unknown }
+    ).process;
     const nodeEnv =
       (globalProcess && typeof globalProcess === 'object'
         ? (globalProcess as { env?: Record<string, unknown> }).env

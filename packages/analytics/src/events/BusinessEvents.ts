@@ -116,7 +116,11 @@ export const trackFeatureUsage = (data: {
 };
 
 export const trackConversion = (data: {
-  conversion_type: 'free_to_trial' | 'trial_to_paid' | 'free_to_paid' | 'upgrade';
+  conversion_type:
+    | 'free_to_trial'
+    | 'trial_to_paid'
+    | 'free_to_paid'
+    | 'upgrade';
   from_tier: 'free' | 'premium' | 'pro';
   to_tier: 'premium' | 'pro';
   conversion_value: number;

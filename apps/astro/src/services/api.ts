@@ -310,17 +310,27 @@ const createCsrfAxios = () => {
     response => response,
     async (error: unknown) => {
       // Simple check for CSRF error
-      const errorRecord = error as { response?: { status?: number; data?: { detail?: unknown } } };
-      const isCSRFError = errorRecord?.response?.status === 403 &&
-                         (typeof errorRecord?.response?.data?.detail === 'string' &&
-                          errorRecord.response.data.detail.includes('CSRF'));
+      const errorRecord = error as {
+        response?: { status?: number; data?: { detail?: unknown } };
+      };
+      const isCSRFError =
+        errorRecord?.response?.status === 403 &&
+        typeof errorRecord?.response?.data?.detail === 'string' &&
+        errorRecord.response.data.detail.includes('CSRF');
 
       if (isCSRFError) {
         devConsole.warn('CSRF token expired, clearing cache and retrying...');
         csrfService.clearToken();
 
         // Retry the request once with fresh token
-        const originalRequest = (error as { config?: Record<string, unknown> & { _retry?: boolean; headers?: Record<string, unknown> } }).config;
+        const originalRequest = (
+          error as {
+            config?: Record<string, unknown> & {
+              _retry?: boolean;
+              headers?: Record<string, unknown>;
+            };
+          }
+        ).config;
         if (originalRequest && !originalRequest._retry) {
           originalRequest._retry = true;
           try {
@@ -339,7 +349,9 @@ const createCsrfAxios = () => {
           }
         }
       }
-      return Promise.reject(new Error(error instanceof Error ? error.message : 'Request failed'));
+      return Promise.reject(
+        new Error(error instanceof Error ? error.message : 'Request failed')
+      );
     }
   );
 
@@ -422,7 +434,9 @@ export const deleteChart = async (
 
 export const fetchSavedChartById = async (
   chartId: string
-): Promise<ApiResult<{ chart_data: ChartData; birth_data?: Record<string, unknown> }>> => {
+): Promise<
+  ApiResult<{ chart_data: ChartData; birth_data?: Record<string, unknown> }>
+> => {
   devConsole.log?.(`📊 Fetching saved chart by ID: ${chartId}`);
 
   try {
@@ -932,19 +946,18 @@ export const transformBackendResponse = (
   else if (Array.isArray(rawPlanetsCandidate)) {
     for (const item of rawPlanetsCandidate) {
       if (!isChartObject(item)) continue;
-      const itemData = item as BackendChartPlanet & { name?: string; degree?: number };
+      const itemData = item as BackendChartPlanet & {
+        name?: string;
+        degree?: number;
+      };
       const nameRaw = itemData.name;
       if (!isPlanetName(nameRaw)) continue;
       if (!isPlanetForDisplay(nameRaw)) continue;
-      const degree =
-        typeof itemData.degree === 'number' ? itemData.degree : 0;
+      const degree = typeof itemData.degree === 'number' ? itemData.degree : 0;
       const position =
-        typeof itemData.position === 'number'
-          ? itemData.position
-          : degree;
+        typeof itemData.position === 'number' ? itemData.position : degree;
       const sign =
-        typeof itemData.sign === 'string' &&
-        isZodiacSign(itemData.sign)
+        typeof itemData.sign === 'string' && isZodiacSign(itemData.sign)
           ? itemData.sign
           : getSignFromDegrees(position);
       const house =
@@ -955,8 +968,7 @@ export const transformBackendResponse = (
         name: nameRaw,
         position,
         retrograde: Boolean(itemData.retrograde),
-        speed:
-          typeof itemData.speed === 'number' ? itemData.speed : 0,
+        speed: typeof itemData.speed === 'number' ? itemData.speed : 0,
         sign,
         house,
       };
@@ -1006,10 +1018,15 @@ export const transformBackendResponse = (
   }
 
   // Aspects
-  console.log('🔗 Processing aspects from backend...', (raw as BackendChartResponse)['aspects']);
+  console.log(
+    '🔗 Processing aspects from backend...',
+    (raw as BackendChartResponse)['aspects']
+  );
   // Handle aspects with robust backend field mapping
   const aspects: Aspect[] = [];
-  const rawAspects: unknown[] = Array.isArray((raw as BackendChartResponse)['aspects'])
+  const rawAspects: unknown[] = Array.isArray(
+    (raw as BackendChartResponse)['aspects']
+  )
     ? ((raw as BackendChartResponse)['aspects'] as unknown[])
     : [];
   console.log(`📊 Found ${rawAspects.length} raw aspects`);
@@ -1018,8 +1035,16 @@ export const transformBackendResponse = (
     if (!isChartObject(aspect)) continue;
     const a = aspect as BackendChartAspect;
     // Shape A: point1/point2 + aspect (new backend)
-    if (a.point1 && a.point2 && a.aspect && typeof a.orb === 'number' &&
-        isPlanetName(a.point1) && isPlanetName(a.point2) && typeof a.aspect === 'string' && isAspectType(a.aspect)) {
+    if (
+      a.point1 &&
+      a.point2 &&
+      a.aspect &&
+      typeof a.orb === 'number' &&
+      isPlanetName(a.point1) &&
+      isPlanetName(a.point2) &&
+      typeof a.aspect === 'string' &&
+      isAspectType(a.aspect)
+    ) {
       aspects.push({
         aspect_type: a.aspect,
         planet1: a.point1,
@@ -1032,8 +1057,16 @@ export const transformBackendResponse = (
       continue;
     }
     // Shape B: planet1/planet2 + type (legacy charts endpoint mock)
-    if (a.planet1 && a.planet2 && a.type && typeof a.orb === 'number' &&
-        isPlanetName(a.planet1) && isPlanetName(a.planet2) && typeof a.type === 'string' && isAspectType(a.type)) {
+    if (
+      a.planet1 &&
+      a.planet2 &&
+      a.type &&
+      typeof a.orb === 'number' &&
+      isPlanetName(a.planet1) &&
+      isPlanetName(a.planet2) &&
+      typeof a.type === 'string' &&
+      isAspectType(a.type)
+    ) {
       aspects.push({
         aspect_type: a.type,
         planet1: a.planet1,
@@ -1049,7 +1082,10 @@ export const transformBackendResponse = (
   console.log(`🎯 Final aspects count: ${aspects.length}`);
 
   // Process asteroids if they exist in the backend response
-  console.log('🌌 Processing asteroids from backend...', (raw as BackendChartResponse)['asteroids']);
+  console.log(
+    '🌌 Processing asteroids from backend...',
+    (raw as BackendChartResponse)['asteroids']
+  );
   const major_asteroids: Record<string, Planet> = {};
   const minor_asteroids: Record<string, Planet> = {};
   const rawAsteroids = (raw as BackendChartResponse)['asteroids'];
@@ -1057,42 +1093,36 @@ export const transformBackendResponse = (
     // Define major asteroids
     const majorAsteroidNames = ['chiron', 'ceres', 'pallas', 'juno', 'vesta'];
 
-    Object.entries(rawAsteroids).forEach(
-      ([name, asteroidData]) => {
-        if (asteroidData && typeof asteroidData === 'object') {
-          const data = asteroidData;
-          const position =
-            typeof data.position === 'number'
-              ? data.position
-              : 0;
-          const asteroid: Planet = {
-            name: name as PlanetName, // Cast to PlanetName
-            position,
-            retrograde: Boolean(data.retrograde),
-            speed:
-              typeof data.speed === 'number' ? data.speed : 0,
-            sign: data.sign ?? getSignFromDegrees(position),
-            house:
-              typeof data.house === 'number'
-                ? data.house
-                : calculateHousePosition(position, houseCusps),
-          };
+    Object.entries(rawAsteroids).forEach(([name, asteroidData]) => {
+      if (asteroidData && typeof asteroidData === 'object') {
+        const data = asteroidData;
+        const position = typeof data.position === 'number' ? data.position : 0;
+        const asteroid: Planet = {
+          name: name as PlanetName, // Cast to PlanetName
+          position,
+          retrograde: Boolean(data.retrograde),
+          speed: typeof data.speed === 'number' ? data.speed : 0,
+          sign: data.sign ?? getSignFromDegrees(position),
+          house:
+            typeof data.house === 'number'
+              ? data.house
+              : calculateHousePosition(position, houseCusps),
+        };
 
-          // Split into major and minor asteroids
-          if (majorAsteroidNames.includes(name.toLowerCase())) {
-            major_asteroids[name] = asteroid;
-            console.log(
-              `⭐ Added MAJOR asteroid ${name}: ${position}° → ${asteroid.sign} (House ${asteroid.house})`
-            );
-          } else {
-            minor_asteroids[name] = asteroid;
-            console.log(
-              `🌌 Added minor asteroid ${name}: ${position}° → ${asteroid.sign} (House ${asteroid.house})`
-            );
-          }
+        // Split into major and minor asteroids
+        if (majorAsteroidNames.includes(name.toLowerCase())) {
+          major_asteroids[name] = asteroid;
+          console.log(
+            `⭐ Added MAJOR asteroid ${name}: ${position}° → ${asteroid.sign} (House ${asteroid.house})`
+          );
+        } else {
+          minor_asteroids[name] = asteroid;
+          console.log(
+            `🌌 Added minor asteroid ${name}: ${position}° → ${asteroid.sign} (House ${asteroid.house})`
+          );
         }
       }
-    );
+    });
   }
   console.log(
     `🌟 Final major asteroids count: ${Object.keys(major_asteroids).length}`
@@ -1102,35 +1132,35 @@ export const transformBackendResponse = (
   );
 
   // Process points (lunar nodes, lilith, etc.) if they exist in the backend response
-  console.log('📍 Processing points from backend...', (raw as BackendChartResponse)['points']);
+  console.log(
+    '📍 Processing points from backend...',
+    (raw as BackendChartResponse)['points']
+  );
   const points: Record<string, Planet> = {};
   const rawPoints = (raw as BackendChartResponse)['points'];
   if (rawPoints && typeof rawPoints === 'object') {
-    Object.entries(rawPoints).forEach(
-      ([name, pointData]) => {
-        if (pointData && typeof pointData === 'object') {
-          const data = pointData;
-          const position =
-            typeof data.position === 'number' ? data.position : 0;
-          const point: Planet = {
-            name: name as PlanetName, // Cast to PlanetName
-            position,
-            retrograde: Boolean(data.retrograde),
-            speed: typeof data.speed === 'number' ? data.speed : 0,
-            sign: data.sign ?? getSignFromDegrees(position),
-            house:
-              typeof data.house === 'number'
-                ? data.house
-                : calculateHousePosition(position, houseCusps),
-          };
+    Object.entries(rawPoints).forEach(([name, pointData]) => {
+      if (pointData && typeof pointData === 'object') {
+        const data = pointData;
+        const position = typeof data.position === 'number' ? data.position : 0;
+        const point: Planet = {
+          name: name as PlanetName, // Cast to PlanetName
+          position,
+          retrograde: Boolean(data.retrograde),
+          speed: typeof data.speed === 'number' ? data.speed : 0,
+          sign: data.sign ?? getSignFromDegrees(position),
+          house:
+            typeof data.house === 'number'
+              ? data.house
+              : calculateHousePosition(position, houseCusps),
+        };
 
-          points[name] = point;
-          console.log(
-            `📍 Added point ${name}: ${position}° → ${point.sign} (House ${point.house})`
-          );
-        }
+        points[name] = point;
+        console.log(
+          `📍 Added point ${name}: ${position}° → ${point.sign} (House ${point.house})`
+        );
       }
-    );
+    });
   }
   console.log(`📍 Final points count: ${Object.keys(points).length}`);
 

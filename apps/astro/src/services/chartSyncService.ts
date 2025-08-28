@@ -83,7 +83,11 @@ export interface EventMap {
   'connection-restored': undefined;
   'chart-registered': { chartId: ChartId; chartSync: ChartDataSync };
   'chart-synced': { chartId: ChartId; chartData: ChartDataSync };
-  'chart-update': { chartId: ChartId; timestamp: string; changes: ChartUpdateEvent['changes'] };
+  'chart-update': {
+    chartId: ChartId;
+    timestamp: string;
+    changes: ChartUpdateEvent['changes'];
+  };
   'chart-unregistered': { chartId: ChartId };
   'all-charts-refreshed': undefined;
   'transit-update': { chartId: ChartId; transits: Record<PlanetName, Planet> };
@@ -199,7 +203,10 @@ class ChartSyncService extends TypedEventEmitter {
       // Fetch initial chart data
       const chartResult: ApiResult<ChartData> = await fetchChartData(birthData);
       if (!chartResult.success) {
-        throw new Error((chartResult as { error: string }).error || 'Failed to fetch chart data');
+        throw new Error(
+          (chartResult as { error: string }).error ||
+            'Failed to fetch chart data'
+        );
       }
       const chartData = chartResult.data;
 
@@ -397,8 +404,8 @@ class ChartSyncService extends TypedEventEmitter {
   private async fetchCurrentTransits(): Promise<Record<PlanetName, Planet>> {
     const now = new Date();
     const transitBirthData: ChartBirthData = {
-      birth_date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
-      birth_time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+      birth_date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+      birth_time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
       latitude: 0,
       longitude: 0,
       timezone: 'UTC',
@@ -413,7 +420,7 @@ class ChartSyncService extends TypedEventEmitter {
     const validPlanets = {} as Record<PlanetName, Planet>;
     Object.keys(planets).forEach(key => {
       if (this.isValidPlanetName(key)) {
-        validPlanets[key as PlanetName] = planets[key as PlanetName];
+        validPlanets[key] = planets[key];
       }
     });
 
@@ -427,8 +434,10 @@ class ChartSyncService extends TypedEventEmitter {
     birthData: ChartBirthData
   ): Promise<Record<PlanetName, Planet>> {
     // Calculate progressed positions (1 day = 1 year progression)
-  const [by, bm, bd] = (birthData.birth_date ?? '1970-01-01').split('-').map(n => parseInt(n,10));
-  const birthDate = new Date(by ?? 1970, (bm ?? 1) - 1, bd ?? 1);
+    const [by, bm, bd] = (birthData.birth_date ?? '1970-01-01')
+      .split('-')
+      .map(n => parseInt(n, 10));
+    const birthDate = new Date(by ?? 1970, (bm ?? 1) - 1, bd ?? 1);
     const now = new Date();
     const ageInYears =
       (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
@@ -437,7 +446,7 @@ class ChartSyncService extends TypedEventEmitter {
     progressedDate.setDate(progressedDate.getDate() + Math.floor(ageInYears));
 
     const progressedBirthData: ChartBirthData = {
-      birth_date: `${progressedDate.getFullYear()}-${String(progressedDate.getMonth()+1).padStart(2,'0')}-${String(progressedDate.getDate()).padStart(2,'0')}`,
+      birth_date: `${progressedDate.getFullYear()}-${String(progressedDate.getMonth() + 1).padStart(2, '0')}-${String(progressedDate.getDate()).padStart(2, '0')}`,
       birth_time: birthData.birth_time,
       latitude: birthData.latitude,
       longitude: birthData.longitude,
@@ -454,7 +463,7 @@ class ChartSyncService extends TypedEventEmitter {
     const validPlanets = {} as Record<PlanetName, Planet>;
     Object.keys(planets).forEach(key => {
       if (this.isValidPlanetName(key)) {
-        validPlanets[key as PlanetName] = planets[key as PlanetName];
+        validPlanets[key] = planets[key];
       }
     });
 
@@ -473,12 +482,12 @@ class ChartSyncService extends TypedEventEmitter {
     const aspectAngles = [0, 60, 90, 120, 150, 180]; // Major aspects
     const maxOrb = 8; // Maximum orb to consider
 
-    const transitPlanetNames = Object.keys(newTransits).filter(key => 
+    const transitPlanetNames = Object.keys(newTransits).filter(key =>
       this.isValidPlanetName(key)
-    ) as PlanetName[];
-    const natalPlanetNames = Object.keys(natal.planets).filter(key => 
+    );
+    const natalPlanetNames = Object.keys(natal.planets).filter(key =>
       this.isValidPlanetName(key)
-    ) as PlanetName[];
+    );
 
     transitPlanetNames.forEach(transitPlanet => {
       const transitData = newTransits[transitPlanet];
@@ -634,7 +643,7 @@ class ChartSyncService extends TypedEventEmitter {
     const validPlanets = {} as Record<PlanetName, Planet>;
     Object.keys(chartData.planets).forEach(key => {
       if (this.isValidPlanetName(key)) {
-        validPlanets[key as PlanetName] = chartData.planets[key as PlanetName];
+        validPlanets[key] = chartData.planets[key];
       }
     });
 
@@ -748,8 +757,8 @@ class ChartSyncService extends TypedEventEmitter {
       // Create a ChartDataSync object
       const chartSync: ChartDataSync = {
         birthData: {
-          birth_date: `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`,
-          birth_time: `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`,
+          birth_date: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`,
+          birth_time: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
           latitude: chartData.latitude ?? 0,
           longitude: chartData.longitude ?? 0,
           timezone: chartData.timezone ?? 'UTC',
@@ -842,8 +851,19 @@ class ChartSyncService extends TypedEventEmitter {
    */
   private isValidPlanetName(name: string): name is PlanetName {
     const validPlanetNames: PlanetName[] = [
-      'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-      'uranus', 'neptune', 'pluto', 'chiron', 'north_node', 'south_node'
+      'sun',
+      'moon',
+      'mercury',
+      'venus',
+      'mars',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+      'pluto',
+      'chiron',
+      'north_node',
+      'south_node',
     ];
     return validPlanetNames.includes(name as PlanetName);
   }

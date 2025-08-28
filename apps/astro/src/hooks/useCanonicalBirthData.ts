@@ -10,5 +10,8 @@ import type { ChartBirthData } from '@cosmichub/types';
  */
 export function useCanonicalBirthData(): ChartBirthData | null {
   const { birthData } = useBirthData();
-  return useMemo(() => (birthData ? toCanonicalBirthData(birthData) : null), [birthData]);
+  return useMemo(
+    () => (birthData ? toCanonicalBirthData(birthData) : null),
+    [birthData]
+  );
 }

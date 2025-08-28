@@ -1,7 +1,10 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { BirthDataProvider, useBirthData } from '../../contexts/BirthDataContext';
+import {
+  BirthDataProvider,
+  useBirthData,
+} from '../../contexts/BirthDataContext';
 import { useCanonicalBirthData } from '../useCanonicalBirthData';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -33,7 +36,7 @@ describe('useCanonicalBirthData', () => {
         lat: 10,
         lon: 20,
         city: 'Test City',
-        timezone: 'UTC'
+        timezone: 'UTC',
       } as any);
     });
     // After state update canonical should reflect values

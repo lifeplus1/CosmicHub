@@ -30,7 +30,7 @@ describe('MultiSystemChart Component', () => {
     lon: -74.006,
     timezone: 'America/New_York',
   };
-  
+
   const mockBirthData = mockUnifiedBirthData;
 
   beforeEach(() => {

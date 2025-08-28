@@ -30,7 +30,7 @@ export const StaggerAnimation: React.FC<StaggerAnimationProps> = ({
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         const entry = entries[0];
         if (entry?.isIntersecting) {
           setIsVisible(true);
@@ -63,7 +63,9 @@ export const StaggerAnimation: React.FC<StaggerAnimationProps> = ({
             'transition-all duration-500 ease-out stagger-item',
             isVisible ? `${animationClasses[animation]} visible` : ''
           )}
-          data-stagger-delay={isVisible ? initialDelay + index * staggerDelay : 0}
+          data-stagger-delay={
+            isVisible ? initialDelay + index * staggerDelay : 0
+          }
         >
           {child}
         </div>
@@ -133,7 +135,7 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
 
   return (
     <button
-      type="button"
+      type='button'
       onClick={onClick}
       disabled={disabled ?? displayState === 'loading'}
       className={cn(
@@ -144,20 +146,22 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
       )}
     >
       {/* Background ripple effect */}
-      <div className="absolute inset-0 bg-white/20 rounded-lg transform scale-0 transition-transform duration-300 group-active:scale-100 opacity-0 group-active:opacity-100" />
-      
+      <div className='absolute inset-0 bg-white/20 rounded-lg transform scale-0 transition-transform duration-300 group-active:scale-100 opacity-0 group-active:opacity-100' />
+
       {/* Content with smooth transitions */}
-      <span className={cn(
-        'relative z-10 flex items-center justify-center gap-2 transition-all duration-200',
-        displayState === 'loading' && 'animate-pulse'
-      )}>
+      <span
+        className={cn(
+          'relative z-10 flex items-center justify-center gap-2 transition-all duration-200',
+          displayState === 'loading' && 'animate-pulse'
+        )}
+      >
         {content[displayState]}
       </span>
 
       {/* Loading spinner overlay */}
       {displayState === 'loading' && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        <div className='absolute inset-0 flex items-center justify-center'>
+          <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
         </div>
       )}
     </button>
@@ -192,7 +196,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     const rect = buttonRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    
+
     const deltaX = (e.clientX - centerX) / magneticStrength;
     const deltaY = (e.clientY - centerY) / magneticStrength;
     const scale = isHovering ? 1.1 : 1;
@@ -221,7 +225,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
   return (
     <button
-      type="button"
+      type='button'
       ref={buttonRef}
       onClick={onClick}
       onMouseMove={handleMouseMove}
@@ -237,26 +241,25 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
       aria-label={label}
     >
       {/* Ripple effect */}
-      <div className="absolute inset-0 rounded-full bg-white/20 scale-0 group-active:scale-100 transition-transform duration-200" />
-      
+      <div className='absolute inset-0 rounded-full bg-white/20 scale-0 group-active:scale-100 transition-transform duration-200' />
+
       {/* Icon */}
-      <div className="relative z-10 flex items-center justify-center w-full h-full">
+      <div className='relative z-10 flex items-center justify-center w-full h-full'>
         {icon}
       </div>
 
       {/* Tooltip */}
       {label && (
-        <div className={cn(
-          'absolute px-3 py-1 bg-cosmic-dark text-cosmic-silver text-sm rounded-lg whitespace-nowrap transition-all duration-200 pointer-events-none',
-          'opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100',
-          tooltipClasses[position],
-          'top-1/2 -translate-y-1/2'
-        )}>
+        <div
+          className={cn(
+            'absolute px-3 py-1 bg-cosmic-dark text-cosmic-silver text-sm rounded-lg whitespace-nowrap transition-all duration-200 pointer-events-none',
+            'opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100',
+            tooltipClasses[position],
+            'top-1/2 -translate-y-1/2'
+          )}
+        >
           {label}
-          <div className={cn(
-            'fab-tooltip',
-            tooltipClasses[position]
-          )} />
+          <div className={cn('fab-tooltip', tooltipClasses[position])} />
         </div>
       )}
     </button>
@@ -287,7 +290,7 @@ export const ParallaxContainer: React.FC<ParallaxContainerProps> = ({
       if (elementRef.current) {
         const rect = elementRef.current.getBoundingClientRect();
         const isVisible = rect.bottom >= 0 && rect.top <= window.innerHeight;
-        
+
         if (isVisible) {
           setScrollOffset(window.scrollY * speed);
         }
@@ -385,7 +388,7 @@ export const SmoothProgress: React.FC<SmoothProgressProps> = ({
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         const entry = entries[0];
         if (entry?.isIntersecting) {
           setIsVisible(true);
@@ -415,11 +418,11 @@ export const SmoothProgress: React.FC<SmoothProgressProps> = ({
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       // Easing function (ease-out)
       const easeOut = 1 - Math.pow(1 - progress, 3);
       const currentValue = startValue + (targetValue - startValue) * easeOut;
-      
+
       setDisplayValue(currentValue);
 
       if (progress < 1) {
@@ -447,18 +450,20 @@ export const SmoothProgress: React.FC<SmoothProgressProps> = ({
   return (
     <div ref={progressRef} className={cn('space-y-2', className)}>
       {showLabel && (
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-cosmic-silver">Progress</span>
-          <span className="text-cosmic-gold font-medium">
+        <div className='flex justify-between items-center text-sm'>
+          <span className='text-cosmic-silver'>Progress</span>
+          <span className='text-cosmic-gold font-medium'>
             {Math.round(displayValue)}%
           </span>
         </div>
       )}
-      
-      <div className={cn(
-        'w-full bg-cosmic-dark rounded-full overflow-hidden relative',
-        sizeClasses[size]
-      )}>
+
+      <div
+        className={cn(
+          'w-full bg-cosmic-dark rounded-full overflow-hidden relative',
+          sizeClasses[size]
+        )}
+      >
         <div
           className={cn(
             'h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden',
@@ -468,7 +473,7 @@ export const SmoothProgress: React.FC<SmoothProgressProps> = ({
           data-width={`${displayValue}%`}
         >
           {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer' />
         </div>
       </div>
     </div>
@@ -499,10 +504,10 @@ export const TiltCard: React.FC<TiltCardProps> = ({
     const rect = cardRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    
+
     const rotateX = ((e.clientY - centerY) / rect.height) * tiltStrength;
     const rotateY = ((centerX - e.clientX) / rect.width) * tiltStrength;
-    
+
     setTilt({ x: rotateX, y: rotateY });
 
     if (glareEffect) {
@@ -522,15 +527,18 @@ export const TiltCard: React.FC<TiltCardProps> = ({
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={cn('relative transform-gpu transition-transform duration-200 ease-out tilt-card', className)}
+      className={cn(
+        'relative transform-gpu transition-transform duration-200 ease-out tilt-card',
+        className
+      )}
       data-tilt-x={tilt.x}
       data-tilt-y={tilt.y}
     >
       {children}
-      
+
       {glareEffect && (
         <div
-          className="absolute inset-0 pointer-events-none rounded-lg tilt-card-glare"
+          className='absolute inset-0 pointer-events-none rounded-lg tilt-card-glare'
           data-glare-x={glare.x}
           data-glare-y={glare.y}
           data-glare-opacity={glare.opacity}

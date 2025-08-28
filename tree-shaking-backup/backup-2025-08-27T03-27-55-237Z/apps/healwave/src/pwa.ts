@@ -17,7 +17,9 @@ import {
 // Logging Factory & Structured Log
 // -----------------------------
 type LogLevel = 'info' | 'warn' | 'error';
-interface StructuredMeta { [k: string]: unknown }
+interface StructuredMeta {
+  [k: string]: unknown;
+}
 interface StructuredLogger {
   info: (event: string, meta?: StructuredMeta) => void;
   warn: (event: string, meta?: StructuredMeta) => void;
@@ -30,13 +32,17 @@ const createLogger = (enabled: boolean): StructuredLogger => {
     const payload = { ts: Date.now(), event, ...meta, module: 'HealWavePWA' };
     // Delegate to existing devConsole (which may already be structured) but ensure fallback
     try {
-      const logMethod = devConsole[level as keyof typeof devConsole] as ((...args: unknown[]) => void) | undefined;
+      const logMethod = devConsole[level as keyof typeof devConsole] as
+        | ((...args: unknown[]) => void)
+        | undefined;
       if (logMethod) {
         logMethod(JSON.stringify(payload));
       }
     } catch {
       // eslint-disable-next-line no-console -- Fallback logging when structured logger fails
-      const fallbackMethod = console[level as keyof Console] as ((...args: unknown[]) => void) | undefined;
+      const fallbackMethod = console[level as keyof Console] as
+        | ((...args: unknown[]) => void)
+        | undefined;
       fallbackMethod?.(payload);
     }
   };
@@ -65,7 +71,10 @@ const HAS_DOCUMENT = typeof document !== 'undefined';
 // -----------------------------
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms?: string[];
-  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform?: string }>;
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform?: string;
+  }>;
   prompt: () => Promise<void>;
 }
 
@@ -74,14 +83,19 @@ interface BeforeInstallPromptEvent extends Event {
 // Legacy bespoke capability + mobile logic removed in favor of shared modules.
 
 // PWA Service Worker Registration
-async function registerServiceWorker(disposers: Array<() => void>): Promise<void> {
+async function registerServiceWorker(
+  disposers: Array<() => void>
+): Promise<void> {
   const reg = await sharedRegisterSW();
   if (!reg) return;
   reg.addEventListener('updatefound', () => {
     const newWorker = reg.installing;
     if (newWorker) {
       newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+        if (
+          newWorker.state === 'installed' &&
+          navigator.serviceWorker.controller
+        ) {
           showUpdateNotification();
         }
       });
@@ -106,7 +120,9 @@ async function registerServiceWorker(disposers: Array<() => void>): Promise<void
   let timeoutId = window.setTimeout(scheduleUpdateCheck, 60000);
   const visListener = () => scheduleUpdateCheck();
   document.addEventListener('visibilitychange', visListener);
-  disposers.push(() => document.removeEventListener('visibilitychange', visListener));
+  disposers.push(() =>
+    document.removeEventListener('visibilitychange', visListener)
+  );
   disposers.push(() => clearTimeout(timeoutId));
   await navigator.serviceWorker.ready.catch(() => undefined); // ensure ready before feature init
   initializePWAFeatures(disposers);
@@ -163,8 +179,19 @@ function initializePWAFeatures(disposers: Array<() => void>): void {
     // Telemetry: first time we actually present the install UI in this session
     try {
       const state = gate.getState();
-      window.dispatchEvent(new CustomEvent('pwa:engagement-install-shown', { detail: { app: 'healwave', pageViews: state.pageViews, firstSeen: state.firstSeen, ts: Date.now() } }));
-    } catch { /* ignore */ }
+      window.dispatchEvent(
+        new CustomEvent('pwa:engagement-install-shown', {
+          detail: {
+            app: 'healwave',
+            pageViews: state.pageViews,
+            firstSeen: state.firstSeen,
+            ts: Date.now(),
+          },
+        })
+      );
+    } catch {
+      /* ignore */
+    }
   };
 
   const beforeInstall = (e: Event) => {
@@ -173,7 +200,9 @@ function initializePWAFeatures(disposers: Array<() => void>): void {
     setTimeout(() => presentInstall(), 300);
   };
   window.addEventListener('beforeinstallprompt', beforeInstall);
-  disposers.push(() => window.removeEventListener('beforeinstallprompt', beforeInstall));
+  disposers.push(() =>
+    window.removeEventListener('beforeinstallprompt', beforeInstall)
+  );
 
   window.addEventListener('appinstalled', () => {
     log.info('pwa_installed');
@@ -311,7 +340,9 @@ function showIOSInstallInstructions(): void {
 }
 
 // Hide install prompt
-function hideInstallPrompt(): void { document.getElementById('pwa-install-banner')?.remove(); }
+function hideInstallPrompt(): void {
+  document.getElementById('pwa-install-banner')?.remove();
+}
 
 // Register when DOM is loaded
 function initPWA(): { dispose: () => void } {
@@ -325,16 +356,22 @@ function initPWA(): { dispose: () => void } {
       void registerServiceWorker(disposers);
     };
     document.addEventListener('DOMContentLoaded', listener);
-    disposers.push(() => document.removeEventListener('DOMContentLoaded', listener));
+    disposers.push(() =>
+      document.removeEventListener('DOMContentLoaded', listener)
+    );
   } else {
     void registerServiceWorker(disposers);
   }
   return {
     dispose: () => {
       disposers.forEach(d => {
-        try { d(); } catch {/* ignore */}
+        try {
+          d();
+        } catch {
+          /* ignore */
+        }
       });
-  // Shared detector is internally singleton; no explicit dispose exposed.
+      // Shared detector is internally singleton; no explicit dispose exposed.
     },
   };
 }
@@ -352,5 +389,11 @@ if (!globalAny.HEALWAVE_PWA_MANUAL_INIT) {
 // Test helpers: expose ability to trigger banners
 export const __test__ = {
   triggerUpdate: () => showUpdateNotification(),
-  triggerInstall: () => showInstallBanner({ title: 'Install HealWave', subtitle: 'Offline access & faster launches.', action: 'Install', icon: '🎧' }),
+  triggerInstall: () =>
+    showInstallBanner({
+      title: 'Install HealWave',
+      subtitle: 'Offline access & faster launches.',
+      action: 'Install',
+      icon: '🎧',
+    }),
 };

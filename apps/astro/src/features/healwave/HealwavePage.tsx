@@ -6,7 +6,7 @@ import DurationTimer from './components/DurationTimer';
 
 const HealwavePage: React.FC = () => {
   const healwaveHook = useHealwave();
-  
+
   const {
     currentFrequency,
     isPlaying,

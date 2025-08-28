@@ -56,7 +56,10 @@ class BinauralSecurityValidator {
  */
 export const useInputValidation = () => {
   const validator: InputValidation = {
-    validateNumeric: (value: number, constraints: { min: number; max: number }) => {
+    validateNumeric: (
+      value: number,
+      constraints: { min: number; max: number }
+    ) => {
       return value >= constraints.min && value <= constraints.max;
     },
     preventXSS: (input: string) => BinauralSecurityValidator.preventXSS(input),

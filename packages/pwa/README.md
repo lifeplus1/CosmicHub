@@ -7,7 +7,8 @@ Shared PWA core utilities and mobile enhancement features for CosmicHub apps.
 - Service worker registration with exponential backoff
 - Visibility-aware update scheduling
 - Update + controllerchange hooks
-- Lightweight capability detection singleton (platform / standalone / touch / push / vibration / web share)
+- Lightweight capability detection singleton (platform / standalone / touch / push / vibration / web
+  share)
 - Mobile viewport optimization & touch feedback (`initMobileUX`)
 - Accessible, sanitized update & install banners
 - Engagement-based install prompt patterns (apps can layer their own gating logic)
@@ -16,7 +17,7 @@ Shared PWA core utilities and mobile enhancement features for CosmicHub apps.
 
 ## Quick Start
 
-```ts
+````ts
 import { initPWA } from '@cosmichub/pwa';
 
 // Basic
@@ -74,9 +75,10 @@ const dispose = onCapabilitiesChange(next => {
     document.documentElement.classList.add('is-standalone');
   }
 });
-```
+````
 
-Snapshots are shallow-frozen; do not mutate. Call `refreshCapabilities()` only in controlled contexts (tests, after injecting new mocks).
+Snapshots are shallow-frozen; do not mutate. Call `refreshCapabilities()` only in controlled
+contexts (tests, after injecting new mocks).
 
 ### Mobile UX
 
@@ -94,14 +96,22 @@ const mobile = initMobileUX();
 import { showUpdateBanner, showInstallBanner } from '@cosmichub/pwa';
 
 showUpdateBanner('New version available');
-showInstallBanner({ title: 'Install App', subtitle: 'Offline access.', action: 'Install', icon: '⭐' });
+showInstallBanner({
+  title: 'Install App',
+  subtitle: 'Offline access.',
+  action: 'Install',
+  icon: '⭐',
+});
 ```
 
-Both banners sanitize user-provided copy. The install banner dispatches a `window` event `install-app` when its primary button is clicked; your app listens for that to either show iOS instructions or call the captured `beforeinstallprompt` event.
+Both banners sanitize user-provided copy. The install banner dispatches a `window` event
+`install-app` when its primary button is clicked; your app listens for that to either show iOS
+instructions or call the captured `beforeinstallprompt` event.
 
 ### Engagement Gating (App Responsibility)
 
-Use `createEngagementGate()` for a small, configurable heuristic (page views, dwell time, dismiss cooldown) before presenting an install banner.
+Use `createEngagementGate()` for a small, configurable heuristic (page views, dwell time, dismiss
+cooldown) before presenting an install banner.
 
 ```ts
 import { createEngagementGate } from '@cosmichub/pwa';
@@ -124,12 +134,15 @@ Example hooking into the shared banner dismiss button:
 ```ts
 showInstallBanner(copy);
 const banner = document.getElementById('pwa-install-banner');
-banner?.querySelector('[data-act="dismiss"]')?.addEventListener('click', () => gate.markDismissed(), { once: true });
+banner
+  ?.querySelector('[data-act="dismiss"]')
+  ?.addEventListener('click', () => gate.markDismissed(), { once: true });
 ```
 
 ## Global Opt-Out
 
-Set `globalThis.HEALWAVE_PWA_MANUAL_INIT = true` (or similar app flag) before importing your app’s PWA module to skip auto-init and manually call `initPWA()`.
+Set `globalThis.HEALWAVE_PWA_MANUAL_INIT = true` (or similar app flag) before importing your app’s
+PWA module to skip auto-init and manually call `initPWA()`.
 
 ## Testing
 
@@ -142,13 +155,15 @@ Use JSDOM; polyfill `matchMedia` and call `dispose()` after tests.
 
 ## Deprecations
 
-The file `mobile-enhancements.ts` is deprecated and will be removed after all apps migrate to the slimmer primitives:
+The file `mobile-enhancements.ts` is deprecated and will be removed after all apps migrate to the
+slimmer primitives:
 
 - Use `initMobileUX()` instead of custom viewport + gesture helpers.
 - Use capability APIs instead of bespoke UA detection.
 - Use `showInstallBanner` / `showUpdateBanner` instead of legacy banner builders.
 
-Importing the deprecated module logs a development-only warning. Avoid introducing new dependencies on it.
+Importing the deprecated module logs a development-only warning. Avoid introducing new dependencies
+on it.
 
 ## Future Enhancements
 
@@ -160,15 +175,13 @@ Importing the deprecated module logs a development-only warning. Avoid introduci
 
 ## Telemetry Events
 
-Apps using the engagement gate emit a custom browser event when the install UI is first shown in a session:
+Apps using the engagement gate emit a custom browser event when the install UI is first shown in a
+session:
 
 `pwa:engagement-install-shown` — detail payload:
 
-{
-  app: string;        // 'astro' | 'healwave' | etc.
-  pageViews: number;  // page views counted by the gate
-  firstSeen: number;  // epoch ms when first engagement was recorded
-  ts: number;         // emission timestamp
+{ app: string; // 'astro' | 'healwave' | etc. pageViews: number; // page views counted by the gate
+firstSeen: number; // epoch ms when first engagement was recorded ts: number; // emission timestamp
 }
 
 ```text

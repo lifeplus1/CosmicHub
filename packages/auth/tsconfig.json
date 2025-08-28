@@ -1,21 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.packages.json",
   "compilerOptions": {
-    "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
-    "outDir": "./dist",
-    "declaration": true,
-    "declarationMap": true,
-    "noEmit": false,
-    "jsx": "react-jsx",
-    // Override module resolution for better compatibility
-    "moduleResolution": "bundler",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    // Standardize lib to ES2022 (inherits behavior/features from base)
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    // Inherit global types (react, react-dom, node) from tsconfig.base.json to avoid duplication
-    // Add package-specific types via a local global.d.ts if needed instead of here
     "rootDir": "../../"
   },
   "include": ["src/**/*", "../config/src/**/*", "../integrations/src/**/*"],

@@ -21,7 +21,7 @@
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts,.tsx --max-warnings=25",
     "type-check": "tsc --noEmit",
-  "test": "vitest --config vitest.config.ts run"
+    "test": "vitest --config vitest.config.ts run"
   },
   "peerDependencies": {
     "react": ">=18",

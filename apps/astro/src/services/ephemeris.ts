@@ -100,11 +100,7 @@ export const usePlanetaryPosition = (
       julianDay !== null ? ephemerisKeys.calculation(julianDay, planet) : [],
     queryFn: () => {
       if (julianDay === null) throw new Error('Date is required');
-      // TODO: Implement calculatePlanet method in EphemerisClient
-      if (!('calculatePlanet' in client)) {
-        throw new Error('EphemerisClient.calculatePlanet not implemented');
-      }
-      return (client as any).calculatePlanet(planet, julianDay);
+      return client.calculatePlanet(planet, julianDay);
     },
     enabled: isEnabled,
     staleTime: 60 * 60 * 1000,
@@ -137,11 +133,7 @@ export const useAllPlanetaryPositions = (
         julian_day: julianDay,
         planet,
       }));
-      // TODO: Implement batchCalculate method in EphemerisClient
-      if (!('batchCalculate' in client)) {
-        throw new Error('EphemerisClient.batchCalculate not implemented');
-      }
-      const response = await (client as any).batchCalculate(calculations);
+      const response = await client.batchCalculate(calculations);
       const positions: Partial<Record<PlanetName, PlanetPosition>> = {};
       for (const result of response.results) {
         const planetName = result.planet as PlanetName;
@@ -176,11 +168,7 @@ export const useBatchPlanetaryCalculation = (): UseMutationResult<
         julian_day: dateToJulianDay(req.date),
         planet: req.planet,
       }));
-      // TODO: Implement batchCalculate method in EphemerisClient
-      if (!('batchCalculate' in client)) {
-        throw new Error('EphemerisClient.batchCalculate not implemented');
-      }
-      return (client as any).batchCalculate(calculations);
+      return client.batchCalculate(calculations);
     },
     onSuccess: (data, variables) => {
       data.results.forEach((result, index) => {
@@ -238,11 +226,7 @@ export const usePrefetchPlanetaryPositions = (): {
                 julian_day: julianDay,
                 planet,
               }));
-              // TODO: Implement batchCalculate method in EphemerisClient
-              if (!('batchCalculate' in client)) {
-                throw new Error('EphemerisClient.batchCalculate not implemented');
-              }
-              const response = await (client as any).batchCalculate(calculations);
+              const response = await client.batchCalculate(calculations);
               const positions: Partial<Record<PlanetName, PlanetPosition>> = {};
               for (const result of response.results) {
                 const planetName = result.planet as PlanetName;

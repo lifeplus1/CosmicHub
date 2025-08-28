@@ -5,13 +5,18 @@ import { showUpdateBanner, showInstallBanner } from './ui';
 // Basic DOM setup for tests
 if (typeof document === 'undefined') {
   const { JSDOM } = require('jsdom');
-  const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
+  const dom = new JSDOM(
+    '<!doctype html><html><head></head><body></body></html>'
+  );
   // @ts-ignore
   global.window = dom.window;
   // @ts-ignore
   global.document = dom.window.document;
   // @ts-ignore
-  Object.defineProperty(global, 'navigator', { value: dom.window.navigator, configurable: true });
+  Object.defineProperty(global, 'navigator', {
+    value: dom.window.navigator,
+    configurable: true,
+  });
 }
 
 describe('Shared PWA integration', () => {
@@ -35,7 +40,12 @@ describe('Shared PWA integration', () => {
   });
 
   it('shows install banner', () => {
-    showInstallBanner({ title: 'Install', subtitle: 'Test subtitle', action: 'Do it', icon: '⭐' });
+    showInstallBanner({
+      title: 'Install',
+      subtitle: 'Test subtitle',
+      action: 'Do it',
+      icon: '⭐',
+    });
     expect(document.getElementById('pwa-install-banner')).toBeTruthy();
   });
 

@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       className='fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4'
       onClick={onClose}
-      onKeyDown={(e) => {
+      onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
           onClose();
         }
@@ -61,7 +61,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         className={`bg-cosmic-dark/95 backdrop-blur-lg border border-cosmic-purple/20 rounded-lg shadow-xl w-full ${sizeClasses[size]} ${className} max-h-[90vh] overflow-auto`.trim()}
         onClick={e => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        onKeyDown={e => e.stopPropagation()}
         role='document'
       >
         <div className='p-6'>

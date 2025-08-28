@@ -11,7 +11,7 @@ describe('toCanonicalBirthData edge cases', () => {
       latitude: 10,
       longitude: 20,
       city: 'Test',
-      timezone: 'UTC'
+      timezone: 'UTC',
     } as any);
     expect(result.birth_date).toBe('2001-01-02');
     expect(result.birth_time).toBe('03:04');
@@ -27,7 +27,7 @@ describe('toCanonicalBirthData edge cases', () => {
       lat: 11,
       lon: 22,
       city: 'X',
-      timezone: 'UTC'
+      timezone: 'UTC',
     } as any);
     expect(result.birth_date).toBe('1999-07-08');
     expect(result.birth_time).toBe('09:05');

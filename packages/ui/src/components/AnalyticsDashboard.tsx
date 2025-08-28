@@ -71,29 +71,54 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   refreshInterval = 30000, // 30 seconds
   className = '',
 }) => {
-  const [activeTab, setActiveTab] = useState<'realtime' | 'astrology' | 'conversion' | 'segments'>('realtime');
-  const [realtimeMetrics, setRealtimeMetrics] = useState<RealTimeMetrics | null>(null);
-  const [astrologyData, setAstrologyData] = useState<AstrologyAnalytics | null>(null);
-  const [conversionData, setConversionData] = useState<ConversionFunnelData | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    'realtime' | 'astrology' | 'conversion' | 'segments'
+  >('realtime');
+  const [realtimeMetrics, setRealtimeMetrics] =
+    useState<RealTimeMetrics | null>(null);
+  const [astrologyData, setAstrologyData] = useState<AstrologyAnalytics | null>(
+    null
+  );
+  const [conversionData, setConversionData] =
+    useState<ConversionFunnelData | null>(null);
   const [userSegments, setUserSegments] = useState<UserSegment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // WebSocket for real-time updates
   const { AnalyticsWebSocket: WebSocketComponent } = useAnalyticsWebSocket(
-    (message) => {
+    message => {
       if (message.type === 'realtime_update') {
         // Validate and convert data to RealTimeMetrics
         const data = message.data;
         const validatedMetrics: RealTimeMetrics = {
-          realTimeUsers: typeof data.realTimeUsers === 'number' ? data.realTimeUsers : 0,
-          chartCalculationsPerMinute: typeof data.chartCalculationsPerMinute === 'number' ? data.chartCalculationsPerMinute : 0,
-          aiInteractionsPerHour: typeof data.aiInteractionsPerHour === 'number' ? data.aiInteractionsPerHour : 0,
-          mobileAppSessions: typeof data.mobileAppSessions === 'number' ? data.mobileAppSessions : 0,
-          subscriptionConversions: typeof data.subscriptionConversions === 'number' ? data.subscriptionConversions : 0,
+          realTimeUsers:
+            typeof data.realTimeUsers === 'number' ? data.realTimeUsers : 0,
+          chartCalculationsPerMinute:
+            typeof data.chartCalculationsPerMinute === 'number'
+              ? data.chartCalculationsPerMinute
+              : 0,
+          aiInteractionsPerHour:
+            typeof data.aiInteractionsPerHour === 'number'
+              ? data.aiInteractionsPerHour
+              : 0,
+          mobileAppSessions:
+            typeof data.mobileAppSessions === 'number'
+              ? data.mobileAppSessions
+              : 0,
+          subscriptionConversions:
+            typeof data.subscriptionConversions === 'number'
+              ? data.subscriptionConversions
+              : 0,
           errorRate: typeof data.errorRate === 'number' ? data.errorRate : 0,
-          averageResponseTime: typeof data.averageResponseTime === 'number' ? data.averageResponseTime : 0,
-          averageSessionDurationMs: typeof data.averageSessionDurationMs === 'number' ? data.averageSessionDurationMs : 0,
+          averageResponseTime:
+            typeof data.averageResponseTime === 'number'
+              ? data.averageResponseTime
+              : 0,
+          averageSessionDurationMs:
+            typeof data.averageSessionDurationMs === 'number'
+              ? data.averageSessionDurationMs
+              : 0,
         };
         setRealtimeMetrics(validatedMetrics);
       }
@@ -105,7 +130,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     try {
       const response = await fetch(`${apiEndpoint}/realtime`);
       if (!response.ok) throw new Error('Failed to fetch real-time metrics');
-      const data: RealTimeMetrics = await response.json() as RealTimeMetrics;
+      const data: RealTimeMetrics = (await response.json()) as RealTimeMetrics;
       setRealtimeMetrics(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -113,11 +138,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   // Fetch astrology analytics
-  const fetchAstrologyAnalytics = async (timeframe: 'week' | 'month' = 'week') => {
+  const fetchAstrologyAnalytics = async (
+    timeframe: 'week' | 'month' = 'week'
+  ) => {
     try {
-      const response = await fetch(`${apiEndpoint}/astrology?timeframe=${timeframe}`);
+      const response = await fetch(
+        `${apiEndpoint}/astrology?timeframe=${timeframe}`
+      );
       if (!response.ok) throw new Error('Failed to fetch astrology analytics');
-      const data: AstrologyAnalytics = await response.json() as AstrologyAnalytics;
+      const data: AstrologyAnalytics =
+        (await response.json()) as AstrologyAnalytics;
       setAstrologyData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -129,7 +159,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     try {
       const response = await fetch(`${apiEndpoint}/conversion-funnel`);
       if (!response.ok) throw new Error('Failed to fetch conversion data');
-      const data: ConversionFunnelData = await response.json() as ConversionFunnelData;
+      const data: ConversionFunnelData =
+        (await response.json()) as ConversionFunnelData;
       setConversionData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -141,7 +172,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     try {
       const response = await fetch(`${apiEndpoint}/segments`);
       if (!response.ok) throw new Error('Failed to fetch user segments');
-      const data: UserSegment[] = await response.json() as UserSegment[];
+      const data: UserSegment[] = (await response.json()) as UserSegment[];
       setUserSegments(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -184,7 +215,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
     return `${seconds}s`;
@@ -196,10 +227,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   if (loading) {
     return (
       <div className={`p-6 bg-cosmic-dark min-h-screen ${className}`}>
-        <Card className="max-w-md mx-auto">
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin w-8 h-8 border-2 border-cosmic-purple border-t-transparent rounded-full mr-3" />
-            <p className="text-cosmic-silver">Loading analytics...</p>
+        <Card className='max-w-md mx-auto'>
+          <div className='flex items-center justify-center py-8'>
+            <div className='animate-spin w-8 h-8 border-2 border-cosmic-purple border-t-transparent rounded-full mr-3' />
+            <p className='text-cosmic-silver'>Loading analytics...</p>
           </div>
         </Card>
       </div>
@@ -209,11 +240,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   if (error) {
     return (
       <div className={`p-6 bg-cosmic-dark min-h-screen ${className}`}>
-        <Card className="max-w-md mx-auto">
-          <div className="text-center py-6">
-            <h3 className="text-xl font-semibold text-cosmic-gold mb-4">Error Loading Analytics</h3>
-            <p className="text-cosmic-silver mb-4">{error}</p>
-            <Button variant="cosmic" onClick={() => window.location.reload()}>
+        <Card className='max-w-md mx-auto'>
+          <div className='text-center py-6'>
+            <h3 className='text-xl font-semibold text-cosmic-gold mb-4'>
+              Error Loading Analytics
+            </h3>
+            <p className='text-cosmic-silver mb-4'>{error}</p>
+            <Button variant='cosmic' onClick={() => window.location.reload()}>
               Retry
             </Button>
           </div>
@@ -225,14 +258,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   return (
     <div className={`bg-cosmic-dark min-h-screen p-6 ${className}`}>
       {/* Dashboard Header */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-cinzel text-cosmic-gold">CosmicHub Analytics</h2>
-          <div className="flex items-center space-x-4">
+      <div className='mb-8'>
+        <div className='flex justify-between items-center mb-6'>
+          <h2 className='text-3xl font-cinzel text-cosmic-gold'>
+            CosmicHub Analytics
+          </h2>
+          <div className='flex items-center space-x-4'>
             <WebSocketComponent />
-            <Button 
-              variant="outline" 
-              size="sm"
+            <Button
+              variant='outline'
+              size='sm'
               onClick={() => void fetchRealtimeMetrics()}
               disabled={loading}
             >
@@ -240,41 +275,41 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </Button>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 bg-cosmic-dark/50 p-1 rounded-lg border border-cosmic-purple/30">
-          <button 
+        <div className='flex flex-wrap gap-2 bg-cosmic-dark/50 p-1 rounded-lg border border-cosmic-purple/30'>
+          <button
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'realtime' 
-                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20' 
+              activeTab === 'realtime'
+                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20'
                 : 'text-cosmic-silver hover:bg-cosmic-purple/20 hover:text-cosmic-gold'
             }`}
             onClick={() => setActiveTab('realtime')}
           >
             Real-Time
           </button>
-          <button 
+          <button
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'astrology' 
-                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20' 
+              activeTab === 'astrology'
+                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20'
                 : 'text-cosmic-silver hover:bg-cosmic-purple/20 hover:text-cosmic-gold'
             }`}
             onClick={() => setActiveTab('astrology')}
           >
             Astrology
           </button>
-          <button 
+          <button
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'conversion' 
-                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20' 
+              activeTab === 'conversion'
+                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20'
                 : 'text-cosmic-silver hover:bg-cosmic-purple/20 hover:text-cosmic-gold'
             }`}
             onClick={() => setActiveTab('conversion')}
           >
             Conversion
           </button>
-          <button 
+          <button
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'segments' 
-                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20' 
+              activeTab === 'segments'
+                ? 'bg-cosmic-purple text-cosmic-gold shadow-lg shadow-cosmic-purple/20'
                 : 'text-cosmic-silver hover:bg-cosmic-purple/20 hover:text-cosmic-gold'
             }`}
             onClick={() => setActiveTab('segments')}
@@ -286,74 +321,102 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* Real-Time Metrics Tab */}
       {activeTab === 'realtime' && realtimeMetrics && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Active Users</h3>
-              <div className="text-3xl font-bold text-cosmic-silver mb-1">
+        <div className='space-y-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                Active Users
+              </h3>
+              <div className='text-3xl font-bold text-cosmic-silver mb-1'>
                 {formatNumber(realtimeMetrics.realTimeUsers)}
               </div>
-              <div className="text-sm text-cosmic-silver/70">Currently online</div>
+              <div className='text-sm text-cosmic-silver/70'>
+                Currently online
+              </div>
             </Card>
 
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Chart Calculations</h3>
-              <div className="text-3xl font-bold text-cosmic-silver mb-1">
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                Chart Calculations
+              </h3>
+              <div className='text-3xl font-bold text-cosmic-silver mb-1'>
                 {realtimeMetrics.chartCalculationsPerMinute}
               </div>
-              <div className="text-sm text-cosmic-silver/70">Per minute (last 10 min)</div>
+              <div className='text-sm text-cosmic-silver/70'>
+                Per minute (last 10 min)
+              </div>
             </Card>
 
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">AI Interactions</h3>
-              <div className="text-3xl font-bold text-cosmic-silver mb-1">
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                AI Interactions
+              </h3>
+              <div className='text-3xl font-bold text-cosmic-silver mb-1'>
                 {realtimeMetrics.aiInteractionsPerHour}
               </div>
-              <div className="text-sm text-cosmic-silver/70">Per hour</div>
+              <div className='text-sm text-cosmic-silver/70'>Per hour</div>
             </Card>
 
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Mobile Sessions</h3>
-              <div className="text-3xl font-bold text-cosmic-silver mb-1">
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                Mobile Sessions
+              </h3>
+              <div className='text-3xl font-bold text-cosmic-silver mb-1'>
                 {realtimeMetrics.mobileAppSessions}
               </div>
-              <div className="text-sm text-cosmic-silver/70">Today</div>
+              <div className='text-sm text-cosmic-silver/70'>Today</div>
             </Card>
 
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Error Rate</h3>
-              <div className={`text-3xl font-bold mb-1 ${
-                realtimeMetrics.errorRate > 0.05 ? 'text-cosmic-red' : 'text-green-400'
-              }`}>
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                Error Rate
+              </h3>
+              <div
+                className={`text-3xl font-bold mb-1 ${
+                  realtimeMetrics.errorRate > 0.05
+                    ? 'text-cosmic-red'
+                    : 'text-green-400'
+                }`}
+              >
                 {formatPercent(realtimeMetrics.errorRate)}
               </div>
-              <div className="text-sm text-cosmic-silver/70">Last hour</div>
+              <div className='text-sm text-cosmic-silver/70'>Last hour</div>
             </Card>
 
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Avg Response Time</h3>
-              <div className={`text-3xl font-bold mb-1 ${
-                realtimeMetrics.averageResponseTime > 500 ? 'text-yellow-400' : 'text-green-400'
-              }`}>
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                Avg Response Time
+              </h3>
+              <div
+                className={`text-3xl font-bold mb-1 ${
+                  realtimeMetrics.averageResponseTime > 500
+                    ? 'text-yellow-400'
+                    : 'text-green-400'
+                }`}
+              >
                 {realtimeMetrics.averageResponseTime}ms
               </div>
-              <div className="text-sm text-cosmic-silver/70">API responses</div>
+              <div className='text-sm text-cosmic-silver/70'>API responses</div>
             </Card>
 
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Session Duration</h3>
-              <div className="text-3xl font-bold text-cosmic-silver mb-1">
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                Session Duration
+              </h3>
+              <div className='text-3xl font-bold text-cosmic-silver mb-1'>
                 {formatDuration(realtimeMetrics.averageSessionDurationMs)}
               </div>
-              <div className="text-sm text-cosmic-silver/70">Average</div>
+              <div className='text-sm text-cosmic-silver/70'>Average</div>
             </Card>
 
-            <Card className="text-center">
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-2">Conversions</h3>
-              <div className="text-3xl font-bold text-green-400 mb-1">
+            <Card className='text-center'>
+              <h3 className='text-lg font-semibold text-cosmic-gold mb-2'>
+                Conversions
+              </h3>
+              <div className='text-3xl font-bold text-green-400 mb-1'>
                 {realtimeMetrics.subscriptionConversions}
               </div>
-              <div className="text-sm text-cosmic-silver/70">Today</div>
+              <div className='text-sm text-cosmic-silver/70'>Today</div>
             </Card>
           </div>
         </div>
@@ -361,54 +424,76 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* Astrology Analytics Tab */}
       {activeTab === 'astrology' && astrologyData && (
-        <div className="space-y-8">
+        <div className='space-y-8'>
           <div>
-            <h3 className="text-2xl font-cinzel text-cosmic-gold mb-4">Chart Calculations (This Week)</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {Object.entries(astrologyData.chartCalculations).map(([type, count]) => (
-                <Card key={type} className="text-center">
-                  <h4 className="text-sm font-medium text-cosmic-gold uppercase mb-2">
-                    {type.replace('_', ' ')}
-                  </h4>
-                  <div className="text-2xl font-bold text-cosmic-silver">
-                    {formatNumber(count)}
-                  </div>
-                </Card>
-              ))}
+            <h3 className='text-2xl font-cinzel text-cosmic-gold mb-4'>
+              Chart Calculations (This Week)
+            </h3>
+            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4'>
+              {Object.entries(astrologyData.chartCalculations).map(
+                ([type, count]) => (
+                  <Card key={type} className='text-center'>
+                    <h4 className='text-sm font-medium text-cosmic-gold uppercase mb-2'>
+                      {type.replace('_', ' ')}
+                    </h4>
+                    <div className='text-2xl font-bold text-cosmic-silver'>
+                      {formatNumber(count)}
+                    </div>
+                  </Card>
+                )
+              )}
             </div>
           </div>
 
           <div>
-            <h3 className="text-2xl font-cinzel text-cosmic-gold mb-4">AI Feature Usage (This Week)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {Object.entries(astrologyData.aiFeatureUsage).map(([feature, count]) => (
-                <Card key={feature} className="text-center">
-                  <h4 className="text-sm font-medium text-cosmic-gold mb-2">
-                    {feature.replace(/([A-Z])/g, ' $1').trim()}
-                  </h4>
-                  <div className="text-2xl font-bold text-cosmic-silver">
-                    {formatNumber(count)}
-                  </div>
-                </Card>
-              ))}
+            <h3 className='text-2xl font-cinzel text-cosmic-gold mb-4'>
+              AI Feature Usage (This Week)
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4'>
+              {Object.entries(astrologyData.aiFeatureUsage).map(
+                ([feature, count]) => (
+                  <Card key={feature} className='text-center'>
+                    <h4 className='text-sm font-medium text-cosmic-gold mb-2'>
+                      {feature.replace(/([A-Z])/g, ' $1').trim()}
+                    </h4>
+                    <div className='text-2xl font-bold text-cosmic-silver'>
+                      {formatNumber(count)}
+                    </div>
+                  </Card>
+                )
+              )}
             </div>
           </div>
 
           <div>
-            <h3 className="text-2xl font-cinzel text-cosmic-gold mb-4">User Preferences</h3>
-            <Card className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-cosmic-gold">Preferred System:</span>
-                <span className="text-cosmic-silver">{astrologyData.userPreferences.preferredAstrologySystem}</span>
+            <h3 className='text-2xl font-cinzel text-cosmic-gold mb-4'>
+              User Preferences
+            </h3>
+            <Card className='space-y-4'>
+              <div className='flex justify-between items-center'>
+                <span className='font-semibold text-cosmic-gold'>
+                  Preferred System:
+                </span>
+                <span className='text-cosmic-silver'>
+                  {astrologyData.userPreferences.preferredAstrologySystem}
+                </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-cosmic-gold">AI Interaction Frequency:</span>
-                <span className="text-cosmic-silver">{astrologyData.userPreferences.aiInteractionFrequency}</span>
+              <div className='flex justify-between items-center'>
+                <span className='font-semibold text-cosmic-gold'>
+                  AI Interaction Frequency:
+                </span>
+                <span className='text-cosmic-silver'>
+                  {astrologyData.userPreferences.aiInteractionFrequency}
+                </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-cosmic-gold">Average Session:</span>
-                <span className="text-cosmic-silver">
-                  {formatDuration(astrologyData.userPreferences.averageSessionDuration)}
+              <div className='flex justify-between items-center'>
+                <span className='font-semibold text-cosmic-gold'>
+                  Average Session:
+                </span>
+                <span className='text-cosmic-silver'>
+                  {formatDuration(
+                    astrologyData.userPreferences.averageSessionDuration
+                  )}
                 </span>
               </div>
             </Card>
@@ -418,66 +503,82 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* Conversion Funnel Tab */}
       {activeTab === 'conversion' && conversionData && (
-        <div className="space-y-8">
+        <div className='space-y-8'>
           <div>
-            <h3 className="text-2xl font-cinzel text-cosmic-gold mb-6">Conversion Funnel</h3>
-            <div className="flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0 lg:space-x-6">
-              <Card className="text-center min-w-[150px]">
-                <div className="text-sm font-medium text-cosmic-gold mb-1">Visitors</div>
-                <div className="text-2xl font-bold text-cosmic-silver">
+            <h3 className='text-2xl font-cinzel text-cosmic-gold mb-6'>
+              Conversion Funnel
+            </h3>
+            <div className='flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0 lg:space-x-6'>
+              <Card className='text-center min-w-[150px]'>
+                <div className='text-sm font-medium text-cosmic-gold mb-1'>
+                  Visitors
+                </div>
+                <div className='text-2xl font-bold text-cosmic-silver'>
                   {formatNumber(conversionData.totalVisitors)}
                 </div>
               </Card>
-              
-              <div className="flex items-center">
-                <div className="text-cosmic-purple text-2xl">→</div>
+
+              <div className='flex items-center'>
+                <div className='text-cosmic-purple text-2xl'>→</div>
               </div>
-              
-              <Card className="text-center min-w-[150px]">
-                <div className="text-sm font-medium text-cosmic-gold mb-1">Signups</div>
-                <div className="text-2xl font-bold text-cosmic-silver">
+
+              <Card className='text-center min-w-[150px]'>
+                <div className='text-sm font-medium text-cosmic-gold mb-1'>
+                  Signups
+                </div>
+                <div className='text-2xl font-bold text-cosmic-silver'>
                   {formatNumber(conversionData.signups)}
                 </div>
-                <div className="text-sm text-green-400 mt-1">
-                  {formatPercent(conversionData.conversionRates.visitorToSignup)}
+                <div className='text-sm text-green-400 mt-1'>
+                  {formatPercent(
+                    conversionData.conversionRates.visitorToSignup
+                  )}
                 </div>
               </Card>
-              
-              <div className="flex items-center">
-                <div className="text-cosmic-purple text-2xl">→</div>
+
+              <div className='flex items-center'>
+                <div className='text-cosmic-purple text-2xl'>→</div>
               </div>
-              
-              <Card className="text-center min-w-[150px]">
-                <div className="text-sm font-medium text-cosmic-gold mb-1">Trial Starts</div>
-                <div className="text-2xl font-bold text-cosmic-silver">
+
+              <Card className='text-center min-w-[150px]'>
+                <div className='text-sm font-medium text-cosmic-gold mb-1'>
+                  Trial Starts
+                </div>
+                <div className='text-2xl font-bold text-cosmic-silver'>
                   {formatNumber(conversionData.trialStarts)}
                 </div>
-                <div className="text-sm text-green-400 mt-1">
+                <div className='text-sm text-green-400 mt-1'>
                   {formatPercent(conversionData.conversionRates.signupToTrial)}
                 </div>
               </Card>
-              
-              <div className="flex items-center">
-                <div className="text-cosmic-purple text-2xl">→</div>
+
+              <div className='flex items-center'>
+                <div className='text-cosmic-purple text-2xl'>→</div>
               </div>
-              
-              <Card className="text-center min-w-[150px]">
-                <div className="text-sm font-medium text-cosmic-gold mb-1">Subscriptions</div>
-                <div className="text-2xl font-bold text-cosmic-silver">
+
+              <Card className='text-center min-w-[150px]'>
+                <div className='text-sm font-medium text-cosmic-gold mb-1'>
+                  Subscriptions
+                </div>
+                <div className='text-2xl font-bold text-cosmic-silver'>
                   {formatNumber(conversionData.subscriptions)}
                 </div>
-                <div className="text-sm text-green-400 mt-1">
-                  {formatPercent(conversionData.conversionRates.trialToSubscription)}
+                <div className='text-sm text-green-400 mt-1'>
+                  {formatPercent(
+                    conversionData.conversionRates.trialToSubscription
+                  )}
                 </div>
               </Card>
             </div>
 
-            <Card className="mt-8 text-center bg-cosmic-purple/10 border-cosmic-purple/30">
-              <div className="text-lg font-semibold text-cosmic-gold mb-2">
+            <Card className='mt-8 text-center bg-cosmic-purple/10 border-cosmic-purple/30'>
+              <div className='text-lg font-semibold text-cosmic-gold mb-2'>
                 Overall Conversion Rate
               </div>
-              <div className="text-3xl font-bold text-green-400">
-                {formatPercent(conversionData.conversionRates.visitorToSubscription)}
+              <div className='text-3xl font-bold text-green-400'>
+                {formatPercent(
+                  conversionData.conversionRates.visitorToSubscription
+                )}
               </div>
             </Card>
           </div>
@@ -486,43 +587,47 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* User Segments Tab */}
       {activeTab === 'segments' && userSegments && (
-        <div className="space-y-6">
-          <h3 className="text-2xl font-cinzel text-cosmic-gold">User Segments</h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {userSegments.map((segment) => (
-              <Card key={segment.id} className="space-y-4">
-                <h4 className="text-lg font-semibold text-cosmic-gold border-b border-cosmic-purple/30 pb-2">
+        <div className='space-y-6'>
+          <h3 className='text-2xl font-cinzel text-cosmic-gold'>
+            User Segments
+          </h3>
+          <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
+            {userSegments.map(segment => (
+              <Card key={segment.id} className='space-y-4'>
+                <h4 className='text-lg font-semibold text-cosmic-gold border-b border-cosmic-purple/30 pb-2'>
                   {segment.name}
                 </h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-cosmic-silver">Users:</span>
-                    <span className="font-semibold text-cosmic-gold">
+                <div className='space-y-3'>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-cosmic-silver'>Users:</span>
+                    <span className='font-semibold text-cosmic-gold'>
                       {formatNumber(segment.users)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-cosmic-silver">Conversion Rate:</span>
-                    <span className="font-semibold text-green-400">
+                  <div className='flex justify-between items-center'>
+                    <span className='text-cosmic-silver'>Conversion Rate:</span>
+                    <span className='font-semibold text-green-400'>
                       {formatPercent(segment.conversionRate)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-cosmic-silver">Avg LTV:</span>
-                    <span className="font-semibold text-cosmic-gold">
+                  <div className='flex justify-between items-center'>
+                    <span className='text-cosmic-silver'>Avg LTV:</span>
+                    <span className='font-semibold text-cosmic-gold'>
                       ${segment.averageLifetimeValue}
                     </span>
                   </div>
                 </div>
-                <div className="pt-3 border-t border-cosmic-purple/30">
-                  <div className="text-sm text-cosmic-silver/70 mb-2">Criteria:</div>
-                  <div className="space-y-1">
+                <div className='pt-3 border-t border-cosmic-purple/30'>
+                  <div className='text-sm text-cosmic-silver/70 mb-2'>
+                    Criteria:
+                  </div>
+                  <div className='space-y-1'>
                     {Object.entries(segment.criteria).map(([key, value]) => (
-                      <div key={key} className="text-sm">
-                        <span className="text-cosmic-gold">
+                      <div key={key} className='text-sm'>
+                        <span className='text-cosmic-gold'>
                           {key.replace(/_/g, ' ')}:
                         </span>
-                        <span className="text-cosmic-silver ml-2">{value}</span>
+                        <span className='text-cosmic-silver ml-2'>{value}</span>
                       </div>
                     ))}
                   </div>

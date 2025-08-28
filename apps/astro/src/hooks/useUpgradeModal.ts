@@ -83,4 +83,4 @@ export function useUpgradeModal(
     closeUpgradeModal,
     handleUpgrade,
   };
-};
+}

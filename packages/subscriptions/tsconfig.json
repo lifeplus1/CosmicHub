@@ -1,13 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.packages.json",
   "compilerOptions": {
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noEmit": false,
-    "emitDeclarationOnly": true,
-    "outDir": "dist/types",
-    "jsx": "react-jsx"
+    "rootDir": "./src"
   },
-  "include": ["src"]
+  "include": [
+    "src/**/*"
+  ]
 }

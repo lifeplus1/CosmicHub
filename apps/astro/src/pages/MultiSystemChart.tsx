@@ -259,7 +259,12 @@ const MultiSystemChart: React.FC = () => {
                   Coordinates
                 </div>
                 <div className='text-cosmic-silver text-sm'>
-                  {birthData.lat !== undefined && birthData.lon !== undefined && birthData.lat !== null && birthData.lon !== null && typeof birthData.lat === 'number' && typeof birthData.lon === 'number'
+                  {birthData.lat !== undefined &&
+                  birthData.lon !== undefined &&
+                  birthData.lat !== null &&
+                  birthData.lon !== null &&
+                  typeof birthData.lat === 'number' &&
+                  typeof birthData.lon === 'number'
                     ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
                     : 'Auto-detected'}
                 </div>

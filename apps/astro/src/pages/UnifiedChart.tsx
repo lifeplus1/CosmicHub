@@ -7,13 +7,20 @@ import { useBirthData } from '../contexts/BirthDataContext';
 import ChartDisplay from '../components/ChartDisplay/ChartDisplay';
 import type { ChartLike } from '../components/ChartDisplay/normalizeChart';
 import { CosmicLoading } from '../components/CosmicLoading';
-import { fetchChartDataUnified, saveChart, fetchSavedChartById } from '../services/api';
-import type { ChartData, SaveChartRequest, SaveChartResponse } from '../services/api.types';
+import {
+  fetchChartDataUnified,
+  saveChart,
+  fetchSavedChartById,
+} from '../services/api';
+import type {
+  ChartData,
+  SaveChartRequest,
+  SaveChartResponse,
+} from '../services/api.types';
 // NOTE: There is a naming collision for ChartBirthData between context usage (year/month/day form)
 // and the types package (birth_date/birth_time form). We support both shapes here.
 import type { ChartBirthData as LibraryChartBirthData } from '@cosmichub/types';
 import { extractNumericBirthData } from '../utils/birthDataNormalization';
-
 
 import { componentLogger } from '../utils/componentLogger';
 import { useChartProcessing } from '@cosmichub/hooks';
@@ -40,16 +47,21 @@ const UnifiedChart: React.FC = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { birthData, setBirthData } = useBirthData();
-  
+
   // State management
   const [isLoading, setIsLoading] = useState(false);
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [dataSource, setDataSource] = useState<'new_calculation' | 'saved_chart' | 'url_param' | null>(null);
+  const [dataSource, setDataSource] = useState<
+    'new_calculation' | 'saved_chart' | 'url_param' | null
+  >(null);
   const isLoadingFromSavedRef = useRef(false);
 
   // Extract chartId from URL path params
-  const chartId = location.pathname.split('/chart/')[1] ?? searchParams.get('id') ?? searchParams.get('chartId');
+  const chartId =
+    location.pathname.split('/chart/')[1] ??
+    searchParams.get('id') ??
+    searchParams.get('chartId');
   const shouldCalculate = searchParams.get('calculate') === 'true';
 
   // Chart processing hook for consistent data handling
@@ -67,17 +79,21 @@ const UnifiedChart: React.FC = () => {
   });
 
   // Save chart mutation
-  const saveChartMutation = useMutation<SaveChartResponse, unknown, SaveChartRequest>({
+  const saveChartMutation = useMutation<
+    SaveChartResponse,
+    unknown,
+    SaveChartRequest
+  >({
     mutationFn: async (payload: SaveChartRequest) => {
       const result = await saveChart(payload);
       if (!result.success) throw new Error(result.error);
       return result.data;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       devConsole.log?.('✅ Chart saved successfully:', data);
       void queryClient.invalidateQueries({ queryKey: ['savedCharts'] });
     },
-    onError: (error) => {
+    onError: error => {
       devConsole.error?.('❌ Failed to save chart:', error);
     },
   });
@@ -93,7 +109,10 @@ const UnifiedChart: React.FC = () => {
     }
 
     if (!birthData) {
-      componentLogger.warn('UnifiedChart', 'No birth data available for saving');
+      componentLogger.warn(
+        'UnifiedChart',
+        'No birth data available for saving'
+      );
       return;
     }
 
@@ -106,8 +125,12 @@ const UnifiedChart: React.FC = () => {
 
     try {
       // Normalize birth data into numeric parts
-      const normalized = extractNumericBirthData(birthData as Record<string, unknown>);
-      componentLogger.info('UnifiedChart', 'Attempting to save chart', { birthData: normalized });
+      const normalized = extractNumericBirthData(
+        birthData as Record<string, unknown>
+      );
+      componentLogger.info('UnifiedChart', 'Attempting to save chart', {
+        birthData: normalized,
+      });
 
       const saveRequest: SaveChartRequest = {
         year: normalized?.year ?? new Date().getFullYear(),
@@ -123,11 +146,17 @@ const UnifiedChart: React.FC = () => {
         lon: normalized?.lon ?? 0,
       };
 
-      componentLogger.info('UnifiedChart', 'Save request prepared', { saveRequest });
+      componentLogger.info('UnifiedChart', 'Save request prepared', {
+        saveRequest,
+      });
       await saveChartMutation.mutateAsync(saveRequest);
       componentLogger.info('UnifiedChart', 'Chart saved successfully');
     } catch (err) {
-      componentLogger.error('UnifiedChart', 'Failed to save chart', err as Error);
+      componentLogger.error(
+        'UnifiedChart',
+        'Failed to save chart',
+        err as Error
+      );
     }
   }, [chartData, user?.uid, birthData, saveChartMutation]);
 
@@ -138,26 +167,34 @@ const UnifiedChart: React.FC = () => {
       setError(null);
 
       try {
-        componentLogger.info('UnifiedChart', 'Starting unified data load process', {
-          chartId,
-          shouldCalculate,
-          hasSessionStorage: !!sessionStorage.getItem('birthData'),
-          hasLocationState: !!location.state,
-          hasBirthData: !!birthData,
-          pathname: location.pathname,
-          searchParams: Object.fromEntries(searchParams.entries()),
-        });
+        componentLogger.info(
+          'UnifiedChart',
+          'Starting unified data load process',
+          {
+            chartId,
+            shouldCalculate,
+            hasSessionStorage: !!sessionStorage.getItem('birthData'),
+            hasLocationState: !!location.state,
+            hasBirthData: !!birthData,
+            pathname: location.pathname,
+            searchParams: Object.fromEntries(searchParams.entries()),
+          }
+        );
 
         // Priority 1: Load saved chart by ID (from /chart/:chartId or ?id=chartId)
         if (chartId && !shouldCalculate) {
           setDataSource('saved_chart');
-          componentLogger.info('UnifiedChart', 'Loading saved chart by ID', { chartId });
+          componentLogger.info('UnifiedChart', 'Loading saved chart by ID', {
+            chartId,
+          });
           try {
             const result = await fetchSavedChartById(chartId);
             if (result.success) {
               setChartData(result.data.chart_data);
               // Derive numeric birth data if possible
-              const restored = extractNumericBirthData(result.data.birth_data as unknown as Record<string, unknown>);
+              const restored = extractNumericBirthData(
+                result.data.birth_data as unknown as Record<string, unknown>
+              );
               if (restored && setBirthData) {
                 setBirthData({
                   year: restored.year,
@@ -171,14 +208,27 @@ const UnifiedChart: React.FC = () => {
                   timezone: restored.timezone,
                 });
               }
-              componentLogger.info('UnifiedChart', 'Saved chart loaded successfully');
+              componentLogger.info(
+                'UnifiedChart',
+                'Saved chart loaded successfully'
+              );
             } else {
-              componentLogger.warn('UnifiedChart', 'Failed to load saved chart by ID', { chartId, error: result.error });
+              componentLogger.warn(
+                'UnifiedChart',
+                'Failed to load saved chart by ID',
+                { chartId, error: result.error }
+              );
               setError(result.error ?? 'Failed to load saved chart');
             }
           } catch (err) {
-            componentLogger.error('UnifiedChart', 'Exception loading saved chart', err);
-            setError(err instanceof Error ? err.message : 'Failed to load saved chart');
+            componentLogger.error(
+              'UnifiedChart',
+              'Exception loading saved chart',
+              err
+            );
+            setError(
+              err instanceof Error ? err.message : 'Failed to load saved chart'
+            );
           }
           return;
         }
@@ -186,7 +236,7 @@ const UnifiedChart: React.FC = () => {
         // Priority 2: Calculate new chart (from ?calculate=true or session storage)
         if (shouldCalculate || sessionStorage.getItem('birthData')) {
           setDataSource('new_calculation');
-          
+
           // Try to get birth data from session storage first
           const storedBirthData = sessionStorage.getItem('birthData');
           // Will hold transformed data for API (library ChartBirthData expects birth_date & birth_time)
@@ -205,7 +255,8 @@ const UnifiedChart: React.FC = () => {
               // Convert stored format to ChartBirthData format
               const dateParts = parsed.date.split('-').map(Number);
               const timeParts = parsed.time.split(':').map(Number);
-              const [year = new Date().getFullYear(), month = 1, day = 1] = dateParts;
+              const [year = new Date().getFullYear(), month = 1, day = 1] =
+                dateParts;
               const [hour = 12, minute = 0] = timeParts;
 
               chartBirthData = {
@@ -239,30 +290,49 @@ const UnifiedChart: React.FC = () => {
                 setBirthData(newBirthData);
               }
 
-              componentLogger.info('UnifiedChart', 'Using birth data from session storage', {
-                originalData: parsed,
-                convertedData: chartBirthData,
-              });
+              componentLogger.info(
+                'UnifiedChart',
+                'Using birth data from session storage',
+                {
+                  originalData: parsed,
+                  convertedData: chartBirthData,
+                }
+              );
             } catch (parseError) {
-              componentLogger.error('UnifiedChart', 'Failed to parse stored birth data', parseError);
+              componentLogger.error(
+                'UnifiedChart',
+                'Failed to parse stored birth data',
+                parseError
+              );
             }
           }
 
           // Calculate chart if we have birth data
           if (chartBirthData?.birth_date && chartBirthData?.birth_time) {
-            componentLogger.info('UnifiedChart', 'Calculating new chart', { chartBirthData });
-            
+            componentLogger.info('UnifiedChart', 'Calculating new chart', {
+              chartBirthData,
+            });
+
             const result = await fetchChartDataUnified(chartBirthData);
-            
+
             if (result.success && result.data) {
               setChartData(result.data);
-              componentLogger.info('UnifiedChart', 'Chart calculated successfully with unified endpoint');
-              
+              componentLogger.info(
+                'UnifiedChart',
+                'Chart calculated successfully with unified endpoint'
+              );
+
               // Clear session storage after successful calculation
               sessionStorage.removeItem('birthData');
             } else {
-              const errorMessage = !result.success ? result.error : 'Failed to calculate chart';
-              componentLogger.error('UnifiedChart', 'Unified chart calculation failed', errorMessage);
+              const errorMessage = !result.success
+                ? result.error
+                : 'Failed to calculate chart';
+              componentLogger.error(
+                'UnifiedChart',
+                'Unified chart calculation failed',
+                errorMessage
+              );
               throw new Error(errorMessage);
             }
           } else {
@@ -282,32 +352,54 @@ const UnifiedChart: React.FC = () => {
 
           if (savedChartData) {
             setDataSource('saved_chart');
-            componentLogger.info('UnifiedChart', `Loading chart from ${storageType}`);
-            
+            componentLogger.info(
+              'UnifiedChart',
+              `Loading chart from ${storageType}`
+            );
+
             try {
-              const parsedData = JSON.parse(savedChartData) as SavedChartResponse;
-              
+              const parsedData = JSON.parse(
+                savedChartData
+              ) as SavedChartResponse;
+
               if (parsedData.chart_data) {
                 setChartData(parsedData.chart_data);
-                
+
                 // Restore birth data if available (but don't trigger re-render)
                 if (parsedData.birth_data && setBirthData) {
                   const raw = parsedData.birth_data;
-                  let year: number | undefined = typeof raw.year === 'number' ? raw.year : undefined;
-                  let month: number | undefined = typeof raw.month === 'number' ? raw.month : undefined;
-                  let day: number | undefined = typeof raw.day === 'number' ? raw.day : undefined;
-                  let hour: number | undefined = typeof raw.hour === 'number' ? raw.hour : undefined;
-                  let minute: number | undefined = typeof raw.minute === 'number' ? raw.minute : undefined;
+                  let year: number | undefined =
+                    typeof raw.year === 'number' ? raw.year : undefined;
+                  let month: number | undefined =
+                    typeof raw.month === 'number' ? raw.month : undefined;
+                  let day: number | undefined =
+                    typeof raw.day === 'number' ? raw.day : undefined;
+                  let hour: number | undefined =
+                    typeof raw.hour === 'number' ? raw.hour : undefined;
+                  let minute: number | undefined =
+                    typeof raw.minute === 'number' ? raw.minute : undefined;
 
                   // If missing numeric fields but birth_date/time present, parse them
-                  if ((year === undefined || month === undefined || day === undefined) && typeof raw.birth_date === 'string') {
-                    const [y, m, d] = raw.birth_date.split('-').map((n: string) => Number(n));
+                  if (
+                    (year === undefined ||
+                      month === undefined ||
+                      day === undefined) &&
+                    typeof raw.birth_date === 'string'
+                  ) {
+                    const [y, m, d] = raw.birth_date
+                      .split('-')
+                      .map((n: string) => Number(n));
                     year = year ?? y;
                     month = month ?? m;
                     day = day ?? d;
                   }
-                  if ((hour === undefined || minute === undefined) && typeof raw.birth_time === 'string') {
-                    const [h, min] = raw.birth_time.split(':').map((n: string) => Number(n));
+                  if (
+                    (hour === undefined || minute === undefined) &&
+                    typeof raw.birth_time === 'string'
+                  ) {
+                    const [h, min] = raw.birth_time
+                      .split(':')
+                      .map((n: string) => Number(n));
                     hour = hour ?? h;
                     minute = minute ?? min;
                   }
@@ -318,36 +410,77 @@ const UnifiedChart: React.FC = () => {
                     day: day ?? 1,
                     hour: hour ?? 12,
                     minute: minute ?? 0,
-                    city: (typeof raw.city === 'string' ? raw.city : (typeof raw.location === 'string' ? raw.location : '')),
-                    location: (typeof raw.location === 'string' ? raw.location : (typeof raw.city === 'string' ? raw.city : '')),
-                    latitude: (typeof raw.latitude === 'number' ? raw.latitude : (typeof raw.lat === 'number' ? raw.lat : 0)),
-                    longitude: (typeof raw.longitude === 'number' ? raw.longitude : (typeof raw.lon === 'number' ? raw.lon : 0)),
-                    timezone: (typeof raw.timezone === 'string' ? raw.timezone : 'UTC'),
-                  }
+                    city:
+                      typeof raw.city === 'string'
+                        ? raw.city
+                        : typeof raw.location === 'string'
+                          ? raw.location
+                          : '',
+                    location:
+                      typeof raw.location === 'string'
+                        ? raw.location
+                        : typeof raw.city === 'string'
+                          ? raw.city
+                          : '',
+                    latitude:
+                      typeof raw.latitude === 'number'
+                        ? raw.latitude
+                        : typeof raw.lat === 'number'
+                          ? raw.lat
+                          : 0,
+                    longitude:
+                      typeof raw.longitude === 'number'
+                        ? raw.longitude
+                        : typeof raw.lon === 'number'
+                          ? raw.lon
+                          : 0,
+                    timezone:
+                      typeof raw.timezone === 'string' ? raw.timezone : 'UTC',
+                  };
                   setBirthData(restoredBirthData);
                 }
-                
-                componentLogger.info('UnifiedChart', 'Chart data loaded successfully from storage');
+
+                componentLogger.info(
+                  'UnifiedChart',
+                  'Chart data loaded successfully from storage'
+                );
               } else {
                 throw new Error('No chart data found in stored object');
               }
             } catch (parseError) {
-              componentLogger.error('UnifiedChart', 'Failed to parse stored chart data', parseError);
+              componentLogger.error(
+                'UnifiedChart',
+                'Failed to parse stored chart data',
+                parseError
+              );
               setError('Failed to load chart data');
             }
           }
         }
 
         // If no chart data is available and no specific action was requested, show the calculator
-        if (!chartData && !chartId && !shouldCalculate && !sessionStorage.getItem('birthData')) {
-          componentLogger.info('UnifiedChart', 'No chart data available, redirecting to calculator');
+        if (
+          !chartData &&
+          !chartId &&
+          !shouldCalculate &&
+          !sessionStorage.getItem('birthData')
+        ) {
+          componentLogger.info(
+            'UnifiedChart',
+            'No chart data available, redirecting to calculator'
+          );
           navigate('/calculator');
           return;
         }
-
       } catch (error) {
-        componentLogger.error('UnifiedChart', 'Failed to load chart data', error);
-        setError(error instanceof Error ? error.message : 'Failed to load chart data');
+        componentLogger.error(
+          'UnifiedChart',
+          'Failed to load chart data',
+          error
+        );
+        setError(
+          error instanceof Error ? error.message : 'Failed to load chart data'
+        );
       } finally {
         setIsLoading(false);
       }
@@ -357,9 +490,18 @@ const UnifiedChart: React.FC = () => {
     if (!isLoadingFromSavedRef.current) {
       void loadChartData();
     }
-  // Added missing dependencies (birthData, searchParams, chartData, setBirthData) to satisfy exhaustive-deps rule.
-  // searchParams is stable per react-router docs; including it for completeness.
-  }, [chartId, shouldCalculate, location.pathname, navigate, birthData, searchParams, chartData, setBirthData]);
+    // Added missing dependencies (birthData, searchParams, chartData, setBirthData) to satisfy exhaustive-deps rule.
+    // searchParams is stable per react-router docs; including it for completeness.
+  }, [
+    chartId,
+    shouldCalculate,
+    location.pathname,
+    navigate,
+    birthData,
+    searchParams,
+    chartData,
+    setBirthData,
+  ]);
 
   // Navigation handlers
   const handleBackToDashboard = useCallback(() => {
@@ -389,15 +531,15 @@ const UnifiedChart: React.FC = () => {
         <Card className='p-8 mx-auto max-w-2xl cosmic-glass border-red-500/30'>
           <div className='text-center'>
             <div className='text-6xl mb-4'>⚠️</div>
-            <h1 className='text-2xl font-bold mb-4 text-red-400'>Chart Loading Error</h1>
+            <h1 className='text-2xl font-bold mb-4 text-red-400'>
+              Chart Loading Error
+            </h1>
             <p className='text-cosmic-silver mb-6'>{error}</p>
             <div className='flex gap-4 justify-center'>
               <Button onClick={handleBackToDashboard} variant='outline'>
                 Back to Dashboard
               </Button>
-              <Button onClick={handleCreateNewChart}>
-                Create New Chart
-              </Button>
+              <Button onClick={handleCreateNewChart}>Create New Chart</Button>
             </div>
           </div>
         </Card>
@@ -412,13 +554,13 @@ const UnifiedChart: React.FC = () => {
         <Card className='p-8 mx-auto max-w-2xl cosmic-glass'>
           <div className='text-center'>
             <div className='text-6xl mb-4'>🌟</div>
-            <h1 className='text-2xl font-bold mb-4 text-cosmic-gold'>No Chart Data</h1>
+            <h1 className='text-2xl font-bold mb-4 text-cosmic-gold'>
+              No Chart Data
+            </h1>
             <p className='text-cosmic-silver mb-6'>
               No chart data is available. Would you like to create a new chart?
             </p>
-            <Button onClick={handleCreateNewChart}>
-              Create New Chart
-            </Button>
+            <Button onClick={handleCreateNewChart}>Create New Chart</Button>
           </div>
         </Card>
       </div>
@@ -439,16 +581,12 @@ const UnifiedChart: React.FC = () => {
               Data source: {dataSource?.replace('_', ' ') ?? 'unknown'}
             </p>
           </div>
-          
+
           <div className='flex gap-3'>
-            <Button 
-              onClick={handleBackToDashboard} 
-              variant='outline'
-              size='sm'
-            >
+            <Button onClick={handleBackToDashboard} variant='outline' size='sm'>
               ← Dashboard
             </Button>
-            
+
             {user && chartData && birthData && (
               <Button
                 onClick={() => void handleSaveChart()}
@@ -458,12 +596,8 @@ const UnifiedChart: React.FC = () => {
                 {saveChartMutation.isPending ? 'Saving...' : 'Save Chart'}
               </Button>
             )}
-            
-            <Button
-              onClick={handleCreateNewChart}
-              variant='outline'
-              size='sm'
-            >
+
+            <Button onClick={handleCreateNewChart} variant='outline' size='sm'>
               New Chart
             </Button>
           </div>
@@ -475,7 +609,6 @@ const UnifiedChart: React.FC = () => {
           chartType='natal'
           onSaveChart={user ? () => void handleSaveChart() : undefined}
         />
-
       </div>
     </div>
   );

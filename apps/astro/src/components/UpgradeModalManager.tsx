@@ -39,7 +39,7 @@ export const UpgradeModalManager: React.FC = () => {
         if (!stripeService) {
           throw new Error('Stripe service is not available');
         }
-        
+
         // Map UI tier names to Stripe tier names
         const stripeTier =
           tier === 'Basic' ? 'premium' : tier === 'Pro' ? 'premium' : 'elite';

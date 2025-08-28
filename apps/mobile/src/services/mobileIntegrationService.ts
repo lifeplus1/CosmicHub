@@ -55,7 +55,10 @@ export class MobileIntegrationService {
     } catch (error) {
       // Log error for development
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to initialize mobile integration service:', error);
+        console.error(
+          'Failed to initialize mobile integration service:',
+          error
+        );
       }
       throw error;
     }

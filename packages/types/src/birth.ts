@@ -224,17 +224,17 @@ export type SafeParseResult = SafeParseSuccess | SafeParseFailure;
 export function toTextBirthData(data: UnifiedBirthData): TextBirthData {
   const birth_date = `${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')}`;
   const birth_time = `${String(data.hour).padStart(2, '0')}:${String(data.minute).padStart(2, '0')}`;
-  
+
   const result: TextBirthData = {
     birth_date,
     birth_time,
   };
-  
+
   if (data.city) result.city = data.city;
   if (data.lat !== undefined) result.latitude = data.lat;
   if (data.lon !== undefined) result.longitude = data.lon;
   if (data.timezone) result.timezone = data.timezone;
-  
+
   return result;
 }
 

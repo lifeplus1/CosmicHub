@@ -79,7 +79,7 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
 // =============================================================================
 
 // Valid interactive ARIA roles for clickable elements
-type ValidInteractiveRole = 
+type ValidInteractiveRole =
   | 'button'
   | 'tab'
   | 'link'
@@ -119,21 +119,29 @@ export const AccessibleClickable: React.FC<InteractiveElementProps> = ({
     }
     onKeyDown?.(e);
   };
-  
+
   return (
     <div
       {...props}
       className={`accessible-clickable ${disabled ? 'disabled' : ''} ${className}`.trim()}
       role={
-        role === 'button' ? 'button' :
-        role === 'tab' ? 'tab' :
-        role === 'link' ? 'link' :
-        role === 'menuitem' ? 'menuitem' :
-        role === 'option' ? 'option' :
-        role === 'radio' ? 'radio' :
-        role === 'switch' ? 'switch' :
-        role === 'checkbox' ? 'checkbox' :
-        'button'
+        role === 'button'
+          ? 'button'
+          : role === 'tab'
+            ? 'tab'
+            : role === 'link'
+              ? 'link'
+              : role === 'menuitem'
+                ? 'menuitem'
+                : role === 'option'
+                  ? 'option'
+                  : role === 'radio'
+                    ? 'radio'
+                    : role === 'switch'
+                      ? 'switch'
+                      : role === 'checkbox'
+                        ? 'checkbox'
+                        : 'button'
       }
       tabIndex={disabled ? -1 : 0}
       aria-label={accessibleName}
@@ -310,15 +318,12 @@ export function useKeyboardAccessible(
   callback: () => void,
   deps: React.DependencyList = []
 ) {
-  const handleKeyDown = React.useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        callback();
-      }
-    },
-    deps
-  );
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      callback();
+    }
+  }, deps);
   return { onKeyDown: handleKeyDown, tabIndex: 0, role: 'button' as const };
 }
 

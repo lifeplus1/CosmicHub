@@ -1,5 +1,9 @@
 // Centralized symbol maps for celestial bodies with proper Unicode symbols
-import { CelestialSymbols as PLANET_SYMBOLS, ZodiacSymbols as SIGN_SYMBOLS, AspectSymbols as ASPECT_SYMBOLS } from '@/services/symbolService';
+import {
+  CelestialSymbols as PLANET_SYMBOLS,
+  ZodiacSymbols as SIGN_SYMBOLS,
+  AspectSymbols as ASPECT_SYMBOLS,
+} from '@/services/symbolService';
 
 // For asteroids, we'll use a subset of the celestial symbols or create a mapping
 const ASTEROID_SYMBOLS: Record<string, string> = {
@@ -8,7 +12,7 @@ const ASTEROID_SYMBOLS: Record<string, string> = {
   juno: '⚵',
   vesta: '⚶',
   chiron: '⚷',
-  ...PLANET_SYMBOLS // Include all celestial symbols as fallback
+  ...PLANET_SYMBOLS, // Include all celestial symbols as fallback
 };
 
 // Basic interpretation constants (placeholder implementations)

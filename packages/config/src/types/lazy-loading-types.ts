@@ -132,17 +132,14 @@ export type LazyComponentCreator = <T extends ComponentType<any>>(
 /**
  * Creates a type-safe lazy route
  */
- 
 
 /**
  * Creates a type-safe lazy modal
  */
- 
 
 /**
  * Creates a type-safe lazy chart
  */
- 
 
 /**
  * Higher-order component for lazy loading

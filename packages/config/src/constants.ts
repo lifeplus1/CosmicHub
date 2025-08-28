@@ -74,7 +74,7 @@ const APP_CONFIG = {
   version: '1.0.0',
 } as const;
 
-// Performance-optimized API config  
+// Performance-optimized API config
 const API_CONFIG = {
   baseUrl: getApiUrl(),
 } as const;

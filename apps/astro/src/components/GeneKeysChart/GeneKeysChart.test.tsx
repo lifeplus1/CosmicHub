@@ -30,7 +30,7 @@ describe('GeneKeysChart', () => {
     lat: 40.7128,
     lon: -74.006,
   };
-  
+
   const mockBirthData: BirthData = toTextBirthData(mockUnifiedBirthData);
 
   beforeEach(() => {

@@ -385,7 +385,7 @@ export default function PerformanceMonitoring(): React.ReactElement {
               {operations
                 ?.slice(-10)
                 ?.reverse()
-                ?.map((op) => {
+                ?.map(op => {
                   if (
                     !op?.operationId ||
                     !op.operationName ||
@@ -406,9 +406,11 @@ export default function PerformanceMonitoring(): React.ReactElement {
                           {op.operationName}
                         </span>
                         <div className='text-xs text-cosmic-silver opacity-70'>
-                          {typeof op.startTime === 'number' ? new Date(
-                            op.startTime + performance.timeOrigin
-                          ).toLocaleTimeString() : 'Unknown time'}
+                          {typeof op.startTime === 'number'
+                            ? new Date(
+                                op.startTime + performance.timeOrigin
+                              ).toLocaleTimeString()
+                            : 'Unknown time'}
                         </div>
                       </div>
                       <div className='flex items-center space-x-2'>
@@ -433,10 +435,10 @@ export default function PerformanceMonitoring(): React.ReactElement {
                   );
                 })}
               {!operations?.length && (
-                  <div className='text-cosmic-silver text-center py-4'>
-                    No operations tracked yet
-                  </div>
-                )}
+                <div className='text-cosmic-silver text-center py-4'>
+                  No operations tracked yet
+                </div>
+              )}
             </div>
           </div>
 

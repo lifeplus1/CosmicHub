@@ -9,7 +9,9 @@ export interface PageErrorBoundaryProps {
   children: ReactNode;
   pageName?: string;
   onError?: (error: Error, info: BoundaryErrorInfo) => void;
-  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
+  fallback?:
+    | ReactNode
+    | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
 export const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = ({
@@ -37,7 +39,9 @@ export interface SectionErrorBoundaryProps {
   children: ReactNode;
   sectionName?: string;
   onError?: (error: Error, info: BoundaryErrorInfo) => void;
-  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
+  fallback?:
+    | ReactNode
+    | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
 export const SectionErrorBoundary: React.FC<SectionErrorBoundaryProps> = ({
@@ -64,7 +68,9 @@ export interface ComponentErrorBoundaryProps {
   children: ReactNode;
   componentName?: string;
   onError?: (error: Error, info: BoundaryErrorInfo) => void;
-  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
+  fallback?:
+    | ReactNode
+    | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
   resetKeys?: Array<string | number>;
 }
 
@@ -95,7 +101,9 @@ export interface AsyncErrorBoundaryProps {
   operationName?: string;
   onError?: (error: Error, info: BoundaryErrorInfo) => void;
   loadingFallback?: ReactNode;
-  errorFallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
+  errorFallback?:
+    | ReactNode
+    | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
 export const AsyncErrorBoundary: React.FC<AsyncErrorBoundaryProps> = ({
@@ -168,7 +176,9 @@ export const FormErrorBoundary: React.FC<FormErrorBoundaryProps> = ({
   onError,
 }) => {
   const fallback = (
-    error: Error, _info: BoundaryErrorInfo, retry: () => void
+    error: Error,
+    _info: BoundaryErrorInfo,
+    retry: () => void
   ) => (
     <div className='p-4 bg-red-500/10 border border-red-500/20 rounded-lg'>
       <div className='text-red-400 mb-2'>📝</div>
@@ -223,7 +233,9 @@ export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = ({
   onError,
 }) => {
   const fallback = (
-    error: Error, _info: BoundaryErrorInfo, retry: () => void
+    error: Error,
+    _info: BoundaryErrorInfo,
+    retry: () => void
   ) => {
     const msg = error.message ?? '';
     const isChunkError =
@@ -275,7 +287,9 @@ export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = ({
       </div>
     );
   };
-  const nameProps = chartType ? { name: `chart-${chartType}` } : { name: 'chart' };
+  const nameProps = chartType
+    ? { name: `chart-${chartType}` }
+    : { name: 'chart' };
   return (
     <ErrorBoundary
       level='component'
@@ -303,7 +317,9 @@ export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({
   loadingFallback,
 }) => {
   const fallback = (
-    error: Error, _info: BoundaryErrorInfo, retry: () => void
+    error: Error,
+    _info: BoundaryErrorInfo,
+    retry: () => void
   ) => {
     const msg = error.message ?? '';
     const isChunkError =
@@ -379,7 +395,9 @@ export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({
 export interface WithErrorBoundaryOptions {
   level?: 'page' | 'section' | 'component';
   name?: string;
-  fallback?: ReactNode | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
+  fallback?:
+    | ReactNode
+    | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
   onError?: (error: Error, info: BoundaryErrorInfo) => void;
 }
 
