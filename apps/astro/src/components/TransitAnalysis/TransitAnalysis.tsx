@@ -5,6 +5,8 @@ import { TabLoader } from './TabLoader';
 import { useTransitAnalysis } from './useTransitAnalysis';
 import type { TransitBirthData } from './types';
 
+export interface TransitAnalysisProps {
+  birthData: TransitBirthData;
 }
 
 const TransitAnalysis: React.FC<TransitAnalysisProps> = ({ birthData }) => {

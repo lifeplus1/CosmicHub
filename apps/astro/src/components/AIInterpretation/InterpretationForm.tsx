@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { generateAIInterpretation, updateInterpretation } from '../../services/api';
 // Use shared ApiResult type from config (migration away from local services/apiResult)
 import type { ApiResult } from '@cosmichub/config';
-import type { InterpretationRequest, InterpretationResponse, ChartId, UserId, InterpretationType, InterpretationFocusArea, InterpretationId } from '../../services/api.types';
+import { isSuccess } from '../../services/apiResult';
+import type { InterpretationRequest, InterpretationResponse, ChartId, UserId, InterpretationType, InterpretationFocusArea, InterpretationId, Interpretation } from '../../services/api.types';
 import { buildChartInterpretationRequest } from './interpretationRequestBuilder';
 import { trackCosmicHubAIInteraction } from '../../services/analytics';
 import { FOCUS_AREA_LABELS, focusLabelToCanonical } from '../../services/interpretationFocus';
@@ -59,6 +60,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
   const [chartForm, setChartForm] = useState<ChartFormState>({
     type: chartId ? (typeof chartId === 'string' ? 'natal' : 'natal') : 'natal',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     focus: (Array.isArray((typeof window !== 'undefined' && (window as any)?.__defaultFocus)) ? (window as any).__defaultFocus : []) as InterpretationFocusArea[],
     question: '',
   });
@@ -118,6 +120,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
   // Focus areas centralized in services/interpretationFocus
   const uiFocusToCanonical = useCallback((label: string): InterpretationFocusArea => {
     if ((FOCUS_AREA_LABELS as readonly string[]).includes(label)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       return focusLabelToCanonical(label as any);
     }
     return 'personality';
@@ -227,28 +230,36 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
       const result: ApiResult<InterpretationResponse> = await generateAIInterpretation(requestData);
 
-      showToast({
-        title: 'Interpretation Generated',
-        description: 'Your personalized astrological interpretation is ready',
-        status: 'success',
-      });
-      setStatus('Interpretation generated successfully.');
+      if (isSuccess(result)) {
+        showToast({
+          title: 'Interpretation Generated',
+          description: 'Your personalized astrological interpretation is ready',
+          status: 'success',
+        });
+        setStatus('Interpretation generated successfully.');
 
-      if (result.success) {
         if (typeof onInterpretationGenerated === 'function') {
           onInterpretationGenerated({ data: result.data });
         }
         // Optional persistence if consumer requests
         if (persistUpdates && existingInterpretationId) {
           try {
+            // Type-safe extraction of interpretation data
+            const interpretationData = result.data as {
+              summary?: string;
+              content?: string;
+              sections?: Array<{ title: string; content: string }>;
+              focus_areas?: string[];
+            };
+            
             await updateInterpretation(existingInterpretationId, {
-              summary: (result.data as any).summary,
-              content: (result.data as any).content,
-              sections: (result.data as any).sections,
-              focus_areas: (result.data as any).focus_areas,
+              summary: interpretationData.summary,
+              content: interpretationData.content,
+              sections: interpretationData.sections,
+              focus_areas: interpretationData.focus_areas,
               updatedAt: new Date().toISOString(),
-            } as any);
-          } catch (e) {
+            } as Partial<Interpretation>);
+          } catch {
             setStatus('Failed to save interpretation changes.');
             showToast({
               title: 'Save Failed',
@@ -259,15 +270,16 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
         }
         try {
           const end = performance.now();
-            trackCosmicHubAIInteraction({
-              feature: 'ai_questions',
-              input_type: 'text',
-              response_time_ms: Math.round(end - start),
-              model_version: 'v1',
-            });
+          trackCosmicHubAIInteraction({
+            feature: 'ai_questions',
+            input_type: 'text',
+            response_time_ms: Math.round(end - start),
+            model_version: 'v1',
+          });
         } catch { /* swallow analytics errors */ }
       } else {
-        throw new Error(result.error);
+         
+        throw new Error(result.error ?? 'Unknown error');
       }
     } catch (error) {
       // Log error for debugging (replace with proper logging service in production)
@@ -378,7 +390,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                 >
                   Birth Date
                 </label>
-                {((): JSX.Element => {
+                {(() => {
                   const invalid = directForm.birthDate !== '' && !isValidDate(directForm.birthDate);
                   return (
                 <input
@@ -407,7 +419,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                 >
                   Birth Time
                 </label>
-                {((): JSX.Element => {
+                {(() => {
                   const invalid = directForm.birthTime !== '' && !isValidTime(directForm.birthTime);
                   return (
                 <input

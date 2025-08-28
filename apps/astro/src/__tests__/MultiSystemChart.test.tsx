@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { ToastProvider } from '../components/ToastProvider';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 import MultiSystemChartDisplay from '../components/MultiSystemChart';
-import type { ChartBirthData } from '../services/api';
+import type { UnifiedBirthData } from '@cosmichub/types';
 
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ToastProvider>
@@ -19,7 +19,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 describe('MultiSystemChart Component', () => {
-  const mockBirthData: ChartBirthData = {
+  const mockUnifiedBirthData: UnifiedBirthData = {
     year: 1990,
     month: 1,
     day: 1,
@@ -30,6 +30,8 @@ describe('MultiSystemChart Component', () => {
     lon: -74.006,
     timezone: 'America/New_York',
   };
+  
+  const mockBirthData = mockUnifiedBirthData;
 
   beforeEach(() => {
     vi.clearAllMocks();

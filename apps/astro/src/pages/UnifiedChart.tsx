@@ -14,15 +14,6 @@ import type { ChartData, SaveChartRequest, SaveChartResponse } from '../services
 import type { ChartBirthData as LibraryChartBirthData } from '@cosmichub/types';
 import { extractNumericBirthData } from '../utils/birthDataNormalization';
 
-// Local flexible type covering both variants
-type AnyChartBirthData =
-  | (LibraryChartBirthData & {
-      year?: number; month?: number; day?: number; hour?: number; minute?: number; city?: string; latitude?: number; longitude?: number; location?: string; lat?: number; lon?: number; timezone?: string;
-    })
-  | (LibraryChartBirthData & {
-      birth_date?: string; birth_time?: string; city?: string; latitude?: number; longitude?: number; lat?: number; lon?: number; timezone?: string; year?: number; month?: number; day?: number; hour?: number; minute?: number;
-    })
-  | Record<string, unknown>;
 
 import { componentLogger } from '../utils/componentLogger';
 import { useChartProcessing } from '@cosmichub/hooks';
@@ -31,7 +22,7 @@ import { devConsole } from '../config/environment';
 interface SavedChartResponse {
   chart_data?: ChartData;
   // Accept any stored birth data shape (legacy or new)
-  birth_data?: Record<string, any>;
+  birth_data?: Record<string, unknown>;
   error?: string;
 }
 
@@ -115,7 +106,7 @@ const UnifiedChart: React.FC = () => {
 
     try {
       // Normalize birth data into numeric parts
-      const normalized = extractNumericBirthData(birthData as unknown as Record<string, unknown>);
+      const normalized = extractNumericBirthData(birthData as Record<string, unknown>);
       componentLogger.info('UnifiedChart', 'Attempting to save chart', { birthData: normalized });
 
       const saveRequest: SaveChartRequest = {
@@ -124,7 +115,7 @@ const UnifiedChart: React.FC = () => {
         day: normalized?.day ?? 1,
         hour: normalized?.hour ?? 12,
         minute: normalized?.minute ?? 0,
-        city: (normalized?.city as string) ?? 'Unknown',
+        city: normalized?.city ?? 'Unknown',
         house_system: 'placidus',
         chart_name: `Chart ${new Date().toLocaleDateString()}`,
         timezone: normalized?.timezone ?? 'UTC',
@@ -162,9 +153,9 @@ const UnifiedChart: React.FC = () => {
           setDataSource('saved_chart');
           componentLogger.info('UnifiedChart', 'Loading saved chart by ID', { chartId });
           try {
-            const result = await fetchSavedChartById(chartId as any);
+            const result = await fetchSavedChartById(chartId);
             if (result.success) {
-              setChartData(result.data.chart_data as ChartData);
+              setChartData(result.data.chart_data);
               // Derive numeric birth data if possible
               const restored = extractNumericBirthData(result.data.birth_data as unknown as Record<string, unknown>);
               if (restored && setBirthData) {
@@ -178,7 +169,7 @@ const UnifiedChart: React.FC = () => {
                   latitude: restored.lat,
                   longitude: restored.lon,
                   timezone: restored.timezone,
-                } as any);
+                });
               }
               componentLogger.info('UnifiedChart', 'Saved chart loaded successfully');
             } else {
@@ -245,7 +236,7 @@ const UnifiedChart: React.FC = () => {
                 };
                 // The context expects numeric year/month/day variant; if original context definition mismatches,
                 // we still supply numeric form for downstream compatibility.
-                setBirthData(newBirthData as unknown as any);
+                setBirthData(newBirthData);
               }
 
               componentLogger.info('UnifiedChart', 'Using birth data from session storage', {
@@ -301,12 +292,12 @@ const UnifiedChart: React.FC = () => {
                 
                 // Restore birth data if available (but don't trigger re-render)
                 if (parsedData.birth_data && setBirthData) {
-                  const raw = parsedData.birth_data as Record<string, any>;
-                  let year: number | undefined = raw.year;
-                  let month: number | undefined = raw.month;
-                  let day: number | undefined = raw.day;
-                  let hour: number | undefined = raw.hour;
-                  let minute: number | undefined = raw.minute;
+                  const raw = parsedData.birth_data;
+                  let year: number | undefined = typeof raw.year === 'number' ? raw.year : undefined;
+                  let month: number | undefined = typeof raw.month === 'number' ? raw.month : undefined;
+                  let day: number | undefined = typeof raw.day === 'number' ? raw.day : undefined;
+                  let hour: number | undefined = typeof raw.hour === 'number' ? raw.hour : undefined;
+                  let minute: number | undefined = typeof raw.minute === 'number' ? raw.minute : undefined;
 
                   // If missing numeric fields but birth_date/time present, parse them
                   if ((year === undefined || month === undefined || day === undefined) && typeof raw.birth_date === 'string') {
@@ -327,12 +318,12 @@ const UnifiedChart: React.FC = () => {
                     day: day ?? 1,
                     hour: hour ?? 12,
                     minute: minute ?? 0,
-                    city: raw.city ?? raw.location ?? '',
-                    location: raw.location ?? raw.city ?? '',
-                    latitude: raw.latitude ?? raw.lat ?? 0,
-                    longitude: raw.longitude ?? raw.lon ?? 0,
-                    timezone: raw.timezone ?? 'UTC',
-                  } as any; // Cast to satisfy context expecting year-based variant
+                    city: (typeof raw.city === 'string' ? raw.city : (typeof raw.location === 'string' ? raw.location : '')),
+                    location: (typeof raw.location === 'string' ? raw.location : (typeof raw.city === 'string' ? raw.city : '')),
+                    latitude: (typeof raw.latitude === 'number' ? raw.latitude : (typeof raw.lat === 'number' ? raw.lat : 0)),
+                    longitude: (typeof raw.longitude === 'number' ? raw.longitude : (typeof raw.lon === 'number' ? raw.lon : 0)),
+                    timezone: (typeof raw.timezone === 'string' ? raw.timezone : 'UTC'),
+                  }
                   setBirthData(restoredBirthData);
                 }
                 

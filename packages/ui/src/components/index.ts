@@ -51,3 +51,13 @@ export {
   PulseOnChange,
   CountUp,
 } from './MicroInteractions';
+
+// ANALYTICS-001: Dashboard Components
+export {
+  AnalyticsDashboard,
+} from './AnalyticsDashboard';
+
+export {
+  AnalyticsWebSocket,
+  useAnalyticsWebSocket,
+} from './AnalyticsWebSocket';

@@ -344,7 +344,107 @@ export function useOfflineCharts() {
 /**
  * Hook for network status only (lighter weight)
  */
+export function useNetworkStatus() {
+  const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
+    isOnline: navigator.onLine,
+    connectionQuality: 'excellent',
+    lastChecked: Date.now(),
+  });
+
+  useEffect(() => {
+    const updateStatus = () => {
+      const status = offlineChartService.getNetworkStatus();
+      setNetworkStatus({
+        isOnline: status.online,
+        connectionQuality:
+          status.connection === 'fast'
+            ? 'excellent'
+            : status.connection === 'slow'
+              ? 'poor'
+              : 'offline',
+        lastChecked: Date.now(),
+      });
+    };
+
+    // Initial check
+    void updateStatus();
+
+    // Periodic updates
+    const interval = setInterval(updateStatus, 5000);
+
+    // Network event listeners
+    const handleOnline = () => updateStatus();
+    const handleOffline = () => updateStatus();
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return {
+    isOnline: networkStatus.isOnline,
+    connectionQuality: networkStatus.connectionQuality,
+    lastChecked: networkStatus.lastChecked,
+  };
+}
 
 /**
  * Hook for sync status only
  */
+export function useSyncStatus() {
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>({
+    isActive: false,
+    pendingItems: 0,
+    lastSync: 0,
+    errors: 0,
+  });
+
+  useEffect(() => {
+    const updateStatus = async () => {
+      const status = await offlineChartService.getSyncStatus();
+      setSyncStatus({
+        isActive: status.sync_in_progress,
+        pendingItems: status.pending_items,
+        lastSync: status.last_sync ? new Date(status.last_sync).getTime() : 0,
+        errors: 0, // Not provided by current API
+      });
+    };
+
+    // Initial check
+    updateStatus().catch(error => {
+      console.warn('Failed to get sync status:', error);
+    });
+
+    // Periodic updates
+    const interval = setInterval(() => {
+      updateStatus().catch(error => {
+        console.warn('Failed to get sync status:', error);
+      });
+    }, 2000);
+
+    // Subscribe to sync events
+    const unsubscribe = offlineChartService.onSyncEvent(() => {
+      updateStatus().catch(error => {
+        console.warn('Failed to get sync status:', error);
+      });
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe?.();
+    };
+  }, []);
+
+  return {
+    isSyncing: syncStatus.isActive,
+    pendingItems: syncStatus.pendingItems,
+    lastSync: syncStatus.lastSync,
+    errors: syncStatus.errors,
+    hasPendingSync: syncStatus.pendingItems > 0,
+  };
+}

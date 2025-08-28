@@ -10,6 +10,8 @@ import {
 import { getPlanetSymbol, getAspectSymbol } from './tableUtils';
 import { AstroSymbol } from '../AstroSymbol';
 
+export interface AspectRow {
+  planet1: string;
   planet2: string;
   type: string;
   orb: string;

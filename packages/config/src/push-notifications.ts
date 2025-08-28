@@ -10,6 +10,8 @@ interface ExtendedNotificationOptions extends NotificationOptions {
   timestamp?: number;
 }
 
+export interface NotificationPayload {
+  title: string;
   body: string;
   icon?: string;
   badge?: string;
@@ -21,10 +23,14 @@ interface ExtendedNotificationOptions extends NotificationOptions {
   urgency?: 'low' | 'normal' | 'high';
 }
 
+export interface NotificationAction {
+  action: string;
   title: string;
   icon?: string;
 }
 
+export interface UserSubscription {
+  endpoint: string;
   keys: {
     auth: string;
     p256dh: string;
@@ -35,6 +41,8 @@ interface ExtendedNotificationOptions extends NotificationOptions {
   lastUsed: number;
 }
 
+export interface NotificationPreferences {
+  dailyHoroscope: boolean;
   transitAlerts: boolean;
   frequencyReminders: boolean;
   appUpdates: boolean;
@@ -47,11 +55,15 @@ interface ExtendedNotificationOptions extends NotificationOptions {
   maxDailyNotifications: number;
 }
 
+export interface VAPIDKeys {
+  publicKey: string;
   privateKey: string;
   subject: string;
 }
 
 // Statistics returned from PushNotificationManager.getNotificationStats
+export interface NotificationStats {
+  totalSubscriptions: number;
   activeSubscriptions: number;
   queuedNotifications: number;
   permissionStatus: NotificationPermission;
@@ -444,6 +456,9 @@ export const DefaultNotificationPreferences: NotificationPreferences = {
 };
 
 // Astrology-specific notification templates
+export const AstrologyNotifications = {
+  dailyHoroscope: (sign: string): NotificationPayload => ({
+    title: `✨ Daily ${sign} Horoscope`,
     body: 'Your cosmic insights are ready! Tap to discover what the stars have in store.',
     icon: '/icon-192x192.png',
     tag: 'daily-horoscope',
@@ -481,6 +496,12 @@ export const DefaultNotificationPreferences: NotificationPreferences = {
 };
 
 // HealWave-specific notification templates
+export const HealWaveNotifications = {
+  sessionReminder: (
+    sessionType: string,
+    duration: number
+  ): NotificationPayload => ({
+    title: `🎧 Time for Your ${sessionType} Session`,
     body: `Your ${duration}-minute healing session is ready. Find a quiet space and begin your journey.`,
     icon: '/icon-192x192.png',
     tag: 'session-reminder',

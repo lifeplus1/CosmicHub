@@ -27,6 +27,8 @@ const NotificationContext = createContext<NotificationContextType | undefined>(
   undefined
 );
 
+export const useNotifications = () => {
+  const context = useContext(NotificationContext);
   if (context === undefined || context === null) {
     throw new Error(
       'useNotifications must be used within a NotificationProvider'

@@ -1,3 +1,18 @@
+export const getCenterColor = (
+  centerName: string,
+  isActive: boolean
+): string => {
+  const colors = {
+    Head: isActive ? 'bg-yellow-400' : 'bg-gray-200',
+    Ajna: isActive ? 'bg-green-400' : 'bg-gray-200',
+    Throat: isActive ? 'bg-brown-400' : 'bg-gray-200',
+    G: isActive ? 'bg-yellow-400' : 'bg-gray-200',
+    Heart: isActive ? 'bg-red-400' : 'bg-gray-200',
+    Spleen: isActive ? 'bg-brown-400' : 'bg-gray-200',
+    'Solar Plexus': isActive ? 'bg-orange-400' : 'bg-gray-200',
+    Sacral: isActive ? 'bg-red-400' : 'bg-gray-200',
+    Root: isActive ? 'bg-brown-400' : 'bg-gray-200',
+  };
   return colors[centerName as keyof typeof colors] ?? 'bg-gray-200';
 };
 

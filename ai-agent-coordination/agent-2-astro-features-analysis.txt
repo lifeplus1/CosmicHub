@@ -1,0 +1,19 @@
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+
+/Users/Chris/Projects/CosmicHub/apps/astro/src/features/ChartWheelInteractive.tsx
+  203:9   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  204:9   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  205:9   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  220:7   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  221:7   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  222:29  error  Unsafe argument of type error typed assigned to a parameter of type `string`  @typescript-eslint/no-unsafe-argument
+  223:7   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  224:7   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  225:7   error  Unsafe assignment of an error typed value                                     @typescript-eslint/no-unsafe-assignment
+  226:35  error  Unsafe argument of type error typed assigned to a parameter of type `number`  @typescript-eslint/no-unsafe-argument
+  709:32  error  Unsafe member access .position on an `any` value                              @typescript-eslint/no-unsafe-member-access
+  718:48  error  Unsafe argument of type `any` assigned to a parameter of type `number`        @typescript-eslint/no-unsafe-argument
+  718:55  error  Unsafe member access .position on an `any` value                              @typescript-eslint/no-unsafe-member-access
+
+✖ 13 problems (13 errors, 0 warnings)
+

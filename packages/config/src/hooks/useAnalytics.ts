@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Analytics, AnalyticsCallOptions } from '../firebase/analytics';
 
+export interface UseAnalyticsReturn {
+  analytics: Analytics | null;
   logEvent: (
     eventName: string,
     eventParams?: Record<string, unknown>,

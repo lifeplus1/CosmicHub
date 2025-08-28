@@ -21,6 +21,8 @@ const devConsole = {
   error: console.error.bind(console),
 };
 
+interface FirestoreReadMetrics {
+  queryCount: number;
   totalReads: number;
   cacheHits: number;
   averageLatency: number;
@@ -28,11 +30,15 @@ const devConsole = {
   inefficientPatterns: string[];
 }
 
+interface QueryOptimization {
+  original: string;
   optimized: string;
   improvement: string;
   estimatedSavings: number;
 }
 
+interface ReadPattern {
+  query: string;
   frequency: number;
   averageReads: number;
   cacheability: 'high' | 'medium' | 'low';

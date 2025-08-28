@@ -5,6 +5,7 @@ import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import HumanDesignChart from '../components/HumanDesignChart/HumanDesignChart';
 import * as api from '../services/api';
+import { toTextBirthData } from '@cosmichub/types';
 
 // Mock the API
 vi.mock('../services/api', () => ({
@@ -35,7 +36,7 @@ const TestWrapper = ({
   children: React.ReactNode;
 }): React.ReactElement => <MemoryRouter>{children}</MemoryRouter>;
 
-const mockBirthData = {
+const mockUnifiedBirthData = {
   year: 1990,
   month: 5,
   day: 15,
@@ -43,6 +44,8 @@ const mockBirthData = {
   minute: 30,
   city: 'New York',
 };
+
+const mockBirthData = toTextBirthData(mockUnifiedBirthData);
 
 const mockHumanDesignSuccess = {
   success: true as const,

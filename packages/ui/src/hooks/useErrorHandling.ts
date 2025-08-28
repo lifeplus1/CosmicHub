@@ -1,5 +1,16 @@
 import { useCallback, useRef, useState } from 'react';
 
+export enum ErrorType {
+  NETWORK = 'NETWORK',
+  VALIDATION = 'VALIDATION',
+  AUTHENTICATION = 'AUTHENTICATION',
+  AUTHORIZATION = 'AUTHORIZATION',
+  NOT_FOUND = 'NOT_FOUND',
+  SERVER = 'SERVER',
+  CLIENT = 'CLIENT',
+  UNKNOWN = 'UNKNOWN',
+}
+
 export interface ErrorHandlingResult {
   error: Error | null;
   handleError: (error: Error) => void;
@@ -70,21 +81,22 @@ export function useErrorHandling(options: UseErrorHandlingOptions = {}): ErrorHa
   };
 }
 
-/**
- * Hook for safe async operations with error handling
- */
+export interface AsyncOperationState<T> {
+  data: T | null;
   loading: boolean;
   error: Error | null;
 }
 
+export interface AsyncOperationActions {
+  execute: (operation: () => Promise<unknown>) => Promise<unknown>;
   reset: () => void;
 }
-
-// Default generic is unknown to force consumers to specify or consciously narrow later
 
 /**
  * Utility for handling form errors
  */
+export interface FormError {
+  field: string;
   message: string;
   code?: string;
 }
@@ -103,10 +115,30 @@ export interface ErrorContext {
 /**
  * Error classification utilities
  */
+export function classifyError(error: Error): ErrorType {
+  if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+    return ErrorType.NETWORK;
+  }
+  if (error.message.includes('401')) {
+    return ErrorType.AUTHENTICATION;
+  }
+  if (error.message.includes('403')) {
+    return ErrorType.AUTHORIZATION;
+  }
+  if (error.message.includes('404')) {
+    return ErrorType.NOT_FOUND;
+  }
+  if (error.message.includes('5')) {
+    return ErrorType.SERVER;
+  }
+  return ErrorType.UNKNOWN;
+}
 
 /**
  * Error retry strategies
  */
+export interface RetryConfig {
+  maxAttempts: number;
   baseDelay: number;
   maxDelay: number;
   backoffFactor: number;
@@ -124,11 +156,13 @@ export const defaultRetryConfig: RetryConfig = {
 /**
  * Error recovery strategies
  */
+export interface RecoveryAction {
+  label: string;
   action: () => void;
   primary?: boolean;
 }
 
-): RecoveryAction[] {
+export function getRecoveryActions(error: Error): RecoveryAction[] {
   const errorType = classifyError(error);
   const actions: RecoveryAction[] = [];
 

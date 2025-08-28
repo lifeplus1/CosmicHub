@@ -1,4 +1,20 @@
 // Centralized symbol maps for celestial bodies with proper Unicode symbols
+import { CelestialSymbols as PLANET_SYMBOLS, ZodiacSymbols as SIGN_SYMBOLS, AspectSymbols as ASPECT_SYMBOLS } from '@/services/symbolService';
+
+// For asteroids, we'll use a subset of the celestial symbols or create a mapping
+const ASTEROID_SYMBOLS: Record<string, string> = {
+  ceres: '⚳',
+  pallas: '⚴',
+  juno: '⚵',
+  vesta: '⚶',
+  chiron: '⚷',
+  ...PLANET_SYMBOLS // Include all celestial symbols as fallback
+};
+
+// Basic interpretation constants (placeholder implementations)
+const MOON_SIGN_INTERPRETATIONS: Record<string, string> = {};
+const SIGN_INTERPRETATIONS: Record<string, string> = {};
+type PlanetInterpretationFn = (planet: string, sign: string) => string;
 
 export const getPlanetSymbol = (name: string): string => {
   console.log(
@@ -53,7 +69,7 @@ export const getAsteroidSymbol = (name: string): string => {
 };
 
 // Utility function for capitalizing strings
-const capitalize = (s: string): string => {
+const _capitalize = (s: string): string => {
   if (!s || typeof s !== 'string') return '';
   const first = s.charAt(0).toUpperCase();
   return first + s.slice(1).toLowerCase();

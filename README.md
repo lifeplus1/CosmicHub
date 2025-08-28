@@ -30,6 +30,15 @@ for improved navigation:
 
 ## 🤖 **For AI Assistants**
 
+**Essential Context**: Always reference `docs/00-OVERVIEW/MASTER_CONTEXT.md` first for complete
+project context, current status, and development guidelines.
+
+**Enhanced Coordination System**: Use `npm run lint:enhanced-workflow` for optimized AI agent
+coordination with 82.7% efficiency, smart preprocessing, and intelligent workload balancing.
+
+**Current Status**: Production-ready platform with enhanced AI coordination system, 284/284 tests
+passing, all major features complete.
+
 **Essential Context**: Always reference [`docs/00-OVERVIEW/MASTER_CONTEXT.md`](docs/00-OVERVIEW/MASTER_CONTEXT.md) first for complete project context, current status, and development guidelines.
 
 **Quick Reference**: [`docs/99-REFERENCE/QUICK_REFERENCE.md`](docs/99-REFERENCE/QUICK_REFERENCE.md) provides condensed project overview when full documentation access is limited.

@@ -9,8 +9,12 @@ export interface InterpretationRequest {
   interpretationType: 'general' | 'personality' | 'career' | 'relationships';
 }
 
+export interface InterpretationResponse {
+  interpretation: string;
 }
 
+export interface AIServiceError {
+  message: string;
   code?: string;
   statusCode?: number;
 }

@@ -16,7 +16,7 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 // Local devConsole (kept internal to avoid cross-package dependency)
-
+ 
 const devConsole = {
     log: import.meta.env.DEV ? console.log.bind(console) : undefined,
     warn: import.meta.env.DEV ? console.warn.bind(console) : undefined,
@@ -52,14 +52,14 @@ try {
     catch (authError) {
         devConsole.warn?.('Firebase Auth initialization failed, using fallback:', authError);
         // Create a proxy that warns instead of throwing
-
+         
         auth = new Proxy({}, {
             get() {
                 devConsole.warn?.('Firebase Auth not available - using mock auth instead');
                 return undefined;
             }
         });
-
+         
         hasAuthAvailable = false;
     }
     try {
@@ -68,14 +68,14 @@ try {
     catch (dbError) {
         devConsole.warn?.('Firestore initialization failed:', dbError);
         // Create a proxy for Firestore as well
-
+         
         db = new Proxy({}, {
             get() {
                 devConsole.warn?.('Firestore not available');
                 return undefined;
             }
         });
-
+         
     }
     // Connect to emulators in development
     if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
@@ -111,6 +111,10 @@ catch (error) {
 /**
  * Performance optimization: Network management
  */
+export const enableFirestoreNetwork = async () => {
+    try {
+        if (hasFirestoreApp(db)) {
+            await enableNetwork(db);
             devConsole.log?.('📡 Firestore network enabled');
         }
         else {
@@ -121,6 +125,10 @@ catch (error) {
         devConsole.warn?.('Failed to enable Firestore network:', error);
     }
 };
+export const disableFirestoreNetwork = async () => {
+    try {
+        if (hasFirestoreApp(db)) {
+            await disableNetwork(db);
             devConsole.log?.('📡 Firestore network disabled');
         }
         else {
@@ -139,8 +147,17 @@ export { hasAuthAvailable };
 /**
  * Environment utilities
  */
+export const isEmulator = import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true';
 export const isDevelopment = import.meta.env.DEV;
+export const projectId = firebaseConfig.projectId;
 /**
  * Performance monitoring
  */
+export const getFirebasePerformanceInfo = () => ({
+    projectId: firebaseConfig.projectId,
+    authDomain: firebaseConfig.authDomain,
+    isEmulator,
+    isDevelopment,
+    timestamp: Date.now()
+});
 //# sourceMappingURL=firebase.js.map

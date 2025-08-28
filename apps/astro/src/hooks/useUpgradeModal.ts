@@ -3,6 +3,8 @@ import { useSubscription, useAuth } from '@cosmichub/auth';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getStripeService, type StripeSession } from '@cosmichub/integrations';
 
+interface UpgradeModalState {
+  isUpgradeModalOpen: boolean;
   requiredFeature: string | undefined;
   openUpgradeModal: (feature?: string) => void;
   closeUpgradeModal: () => void;
@@ -17,9 +19,10 @@ interface UpgradeModalOptions {
   onSuccess?: (tier: string) => void;
 }
 
-export const useUpgradeModal = (
-  options: UpgradeModalOptions = {}
-): UseUpgradeModalReturn => {
+export function useUpgradeModal(
+  options?: UpgradeModalOptions
+): UpgradeModalState {
+  const opts = options ?? {};
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [requiredFeature, setRequiredFeature] = useState<string | undefined>();
   const { userTier } = useSubscription();
@@ -38,7 +41,7 @@ export const useUpgradeModal = (
   const handleUpgrade = useCallback(
     async (tier: 'Basic' | 'Pro' | 'Enterprise') => {
       if (!user) {
-        options.onError?.('User not authenticated');
+        opts.onError?.('User not authenticated');
         closeUpgradeModal();
         return;
       }
@@ -64,13 +67,13 @@ export const useUpgradeModal = (
           },
         });
         await stripeService.updateUserSubscription(user.uid, stripeTier, true);
-        options.onSuccess?.(stripeTier);
+        opts.onSuccess?.(stripeTier);
       } catch (err) {
-        options.onError?.('Upgrade failed', err);
+        opts.onError?.('Upgrade failed', err);
         closeUpgradeModal();
       }
     },
-    [user, userTier, requiredFeature, closeUpgradeModal, options]
+    [user, userTier, requiredFeature, closeUpgradeModal, opts]
   );
 
   return {

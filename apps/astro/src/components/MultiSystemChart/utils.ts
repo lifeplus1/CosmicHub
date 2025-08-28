@@ -7,6 +7,8 @@ import {
   getZodiacSymbol,
   getAspectSymbol,
   formatDegreePosition,
+  CelestialSymbols,
+  AspectSymbols,
 } from '../../services/symbolService';
 
 // Re-export centralized functions for backward compatibility
@@ -14,6 +16,10 @@ export const getPlanetSymbol = getCelestialSymbol;
 export const getSignSymbol = getZodiacSymbol;
 
 // Optimized symbol lookups - replacing expensive proxy objects with efficient lookups
+
+// Use imported symbol maps
+const planetSymbols = CelestialSymbols;
+const aspectSymbols = AspectSymbols;
 
 // Helper functions with fallback to centralized service
 export const getPlanetSymbolSafe = (key: string): string => {

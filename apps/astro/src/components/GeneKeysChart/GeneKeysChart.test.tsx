@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import GeneKeysChart from './GeneKeysChart';
 import type { BirthData } from './types';
+import { toTextBirthData } from '@cosmichub/types';
 
 // Mock the API service
 vi.mock('../../services/api', () => ({
@@ -18,7 +19,7 @@ vi.mock('../ToastProvider', () => ({
 }));
 
 describe('GeneKeysChart', () => {
-  const mockBirthData: BirthData = {
+  const mockUnifiedBirthData = {
     year: 1990,
     month: 1,
     day: 1,
@@ -29,6 +30,8 @@ describe('GeneKeysChart', () => {
     lat: 40.7128,
     lon: -74.006,
   };
+  
+  const mockBirthData: BirthData = toTextBirthData(mockUnifiedBirthData);
 
   beforeEach(() => {
     vi.clearAllMocks();

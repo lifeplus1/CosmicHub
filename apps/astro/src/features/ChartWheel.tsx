@@ -6,15 +6,14 @@ import type { ExtendedBirthData } from '../contexts/BirthDataContext';
 import { useCanonicalBirthData } from '../hooks/useCanonicalBirthData';
 import { Button } from '@cosmichub/ui';
 
-// Define ChartBirthData to match TextBirthData from @cosmichub/types
+// Local interface definitions to avoid import issues
 interface ChartBirthData {
   birth_date: string;
   birth_time: string;
-  latitude?: number;
-  longitude?: number;
-  timezone?: string;
-  city?: string;
-  [extra: string]: unknown;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  city: string;
 }
 
 interface APIChartData {
@@ -123,17 +122,12 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     error,
     refetch,
   } = useQuery<ChartData>({
-    queryKey: ['chartData', canonicalBirthData?.birth_date || canonicalBirthData?.city || 'default'],
+    queryKey: ['chartData', canonicalBirthData?.birth_date ?? canonicalBirthData?.city ?? null],
     queryFn: async (): Promise<ChartData> => {
       if (!canonicalBirthData) throw new Error('Birth data required');
       const result = await fetchChartData(canonicalBirthData);
-      if (!result || typeof result !== 'object' || !('success' in result) || !result.success) {
-        throw new Error('Failed to fetch chart data');
-      }
-      if (!result.data || typeof result.data !== 'object') {
-        throw new Error('Invalid chart data format');
-      }
-      return transformAPIResponseToChartData(result.data as APIChartData);
+      if (!('success' in result) || !result.success) throw new Error('Failed to fetch chart data');
+      return transformAPIResponseToChartData(result.data as unknown as APIChartData);
     },
     enabled: !!canonicalBirthData && preTransformedData === null,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes

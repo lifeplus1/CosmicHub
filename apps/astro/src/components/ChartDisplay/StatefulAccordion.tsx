@@ -9,6 +9,13 @@ interface StatefulAccordionProps {
   className?: string;
 }
 
+export const StatefulAccordion: React.FC<StatefulAccordionProps> = ({
+  type,
+  value: _value,
+  onValueChange: _onValueChange,
+  children,
+  className = '',
+}) => {
   // The Accordion component from @cosmichub/ui manages its own state internally
   // We need to create a controlled version that syncs with our external state
 

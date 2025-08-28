@@ -1,3 +1,4 @@
+export interface SubscriptionPlan {
   name: string;
   price: number;
   features: string[];
@@ -7,6 +8,7 @@
   };
 }
 
+export interface UserPreferences {
   defaultChartStyle: 'western' | 'vedic';
   notifications: {
     email: boolean;

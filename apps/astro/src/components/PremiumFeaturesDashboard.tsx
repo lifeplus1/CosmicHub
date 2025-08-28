@@ -2,6 +2,8 @@ import React from 'react';
 import { useSubscription } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 
+export const PremiumFeaturesDashboard: React.FC = () => {
+  const { userTier } = useSubscription();
   const navigate = useNavigate();
 
   if (userTier === 'elite') return null; // Elite users don't need to see this

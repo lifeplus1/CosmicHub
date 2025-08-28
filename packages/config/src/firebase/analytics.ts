@@ -8,6 +8,7 @@ export type { Analytics, AnalyticsCallOptions };
  * This keeps consumers decoupled from direct firebase/analytics imports so we can
  * evolve implementation (or swap providers) without breaking APIs.
  */
+export interface AnalyticsFacade {
   setCurrentScreen: (
     screenName: string,
     options?: AnalyticsCallOptions
@@ -20,8 +21,10 @@ export type { Analytics, AnalyticsCallOptions };
 }
 
 // Factory signature for lazily retrieving an Analytics instance (supports dynamic import usage)
+export type AnalyticsFactory = () => Analytics | null;
 
 // Utility no-op implementation for SSR / analytics unavailable scenarios
+export const createNoOpAnalytics = (): AnalyticsFacade => ({
   setCurrentScreen: () => {},
   setUserId: () => {},
   setUserProperties: () => {},

@@ -14,8 +14,10 @@ const Dashboard: React.FC = () => {
     day: 21,
     hour: 12,
     minute: 0,
-    lat: 40.7128,
-    lon: -74.006,
+    latitude: 40.7128,
+    longitude: -74.006,
+    birth_date: '06/21/1990',
+    birth_time: '12:00',
     city: 'New York',
     timezone: 'America/New_York',
   });

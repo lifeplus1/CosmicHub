@@ -4,7 +4,7 @@ import { calculateGeneKeys } from '../../services/api';
 import type { ApiResult } from '../../services/apiResult';
 import * as Tabs from '@radix-ui/react-tabs';
 import type { GeneKeysChartProps, GeneKeysData, GeneKey } from './types';
-import type { ChartBirthData } from '@cosmichub/types';
+import { toTextBirthData } from '@cosmichub/types';
 import GeneKeyDetails from './GeneKeyDetails';
 import CoreQuartetTab from './CoreQuartetTab';
 import ActivationSequenceTab from './ActivationSequenceTab';
@@ -70,13 +70,13 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
       if (typeof onCalculate === 'function') {
         // Provide a deterministic sample request for quick demo
         void Promise.resolve(
-          onCalculate({
+          onCalculate(toTextBirthData({
             year: 2000,
             month: 1,
             day: 1,
             hour: 0,
             minute: 0,
-          } as ChartBirthData)
+          }))
         );
       }
     }, [onCalculate]);

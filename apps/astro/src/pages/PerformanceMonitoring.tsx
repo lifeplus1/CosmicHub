@@ -4,7 +4,6 @@ import {
   usePagePerformance,
   useOperationTracking,
   useMemoryMonitoring,
-  type OperationMetrics,
 } from '../hooks/usePerformance';
 // Removed useEphemerisPerformanceMetrics (unused)
 import { EphemerisPerformanceDashboard } from '../components/EphemerisPerformanceDashboard';
@@ -384,15 +383,15 @@ export default function PerformanceMonitoring(): React.ReactElement {
                 </div>
               )}
               {operations
-                .slice(-10)
-                .reverse()
-                .map((op: OperationMetrics) => {
+                ?.slice(-10)
+                ?.reverse()
+                ?.map((op) => {
                   if (
-                    op.operationId === null ||
-                    op.operationId === undefined ||
+                    !op?.operationId ||
+                    !op.operationName ||
+                    typeof op.operationId !== 'string' ||
+                    typeof op.operationName !== 'string' ||
                     op.operationId === '' ||
-                    op.operationName === null ||
-                    op.operationName === undefined ||
                     op.operationName === ''
                   ) {
                     return null;
@@ -407,9 +406,9 @@ export default function PerformanceMonitoring(): React.ReactElement {
                           {op.operationName}
                         </span>
                         <div className='text-xs text-cosmic-silver opacity-70'>
-                          {new Date(
+                          {typeof op.startTime === 'number' ? new Date(
                             op.startTime + performance.timeOrigin
-                          ).toLocaleTimeString()}
+                          ).toLocaleTimeString() : 'Unknown time'}
                         </div>
                       </div>
                       <div className='flex items-center space-x-2'>
@@ -433,9 +432,7 @@ export default function PerformanceMonitoring(): React.ReactElement {
                     </div>
                   );
                 })}
-              {operations !== null &&
-                operations !== undefined &&
-                operations.length === 0 && (
+              {!operations?.length && (
                   <div className='text-cosmic-silver text-center py-4'>
                     No operations tracked yet
                   </div>

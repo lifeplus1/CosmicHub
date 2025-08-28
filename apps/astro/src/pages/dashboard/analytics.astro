@@ -1,0 +1,120 @@
+---
+import { Card } from '@cosmichub/ui/components/Card';
+import { AnalyticsDashboard } from '@cosmichub/ui/components/AnalyticsDashboard';
+import Layout from '../../layouts/Layout.astro';
+
+const title = 'Analytics Dashboard - CosmicHub';
+const description = 'Real-time analytics and insights for CosmicHub platform usage, user engagement, and performance metrics.';
+---
+
+<Layout title={title} description={description}>
+  <main class="analytics-dashboard-page bg-cosmic-dark min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <!-- Page Header -->
+      <div class="mb-8 text-center">
+        <h1 class="text-4xl font-cinzel text-cosmic-gold mb-4">
+          Analytics Dashboard
+        </h1>
+        <p class="text-cosmic-silver text-lg max-w-2xl mx-auto">
+          Real-time insights into platform usage, user engagement, and performance metrics.
+          Monitor your astrology platform's growth and user behavior patterns.
+        </p>
+      </div>
+
+      <!-- Dashboard Component -->
+      <AnalyticsDashboard 
+        apiEndpoint="/api/analytics" 
+        refreshInterval={30000}
+        className="analytics-main-dashboard"
+        client:load
+      />
+
+      <!-- Additional Dashboard Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <!-- Quick Stats Card -->
+        <Card title="Platform Health" className="h-fit">
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-cosmic-silver">Backend Status:</span>
+              <span class="text-green-400 font-semibold">Operational</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-cosmic-silver">Database:</span>
+              <span class="text-green-400 font-semibold">Connected</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-cosmic-silver">API Response Time:</span>
+              <span class="text-cosmic-gold font-semibold">< 200ms</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-cosmic-silver">Uptime:</span>
+              <span class="text-green-400 font-semibold">99.9%</span>
+            </div>
+          </div>
+        </Card>
+
+        <!-- System Alerts Card -->
+        <Card title="System Alerts" className="h-fit">
+          <div class="space-y-3">
+            <div class="bg-green-500/10 border border-green-500/30 rounded-md p-3">
+              <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span class="text-green-400 text-sm font-medium">All systems operational</span>
+              </div>
+              <p class="text-cosmic-silver/70 text-xs mt-1">
+                All analytics systems are functioning normally
+              </p>
+            </div>
+            <div class="bg-blue-500/10 border border-blue-500/30 rounded-md p-3">
+              <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                <span class="text-blue-400 text-sm font-medium">Dashboard connected</span>
+              </div>
+              <p class="text-cosmic-silver/70 text-xs mt-1">
+                Real-time updates active
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <!-- Privacy Notice -->
+      <Card className="mt-8 bg-cosmic-purple/5 border-cosmic-purple/30">
+        <div class="flex items-start space-x-3">
+          <div class="w-6 h-6 text-cosmic-purple mt-1">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-cosmic-gold font-semibold mb-2">Privacy & Compliance</h3>
+            <p class="text-cosmic-silver text-sm">
+              All analytics data is collected and processed in compliance with GDPR, CCPA, and other privacy regulations. 
+              Personal information is anonymized and users maintain full control over their data through consent management.
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .analytics-dashboard-page {
+    background: radial-gradient(ellipse at center, #1a202c 0%, #0f0f23 100%);
+  }
+
+  .analytics-main-dashboard {
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+</style>

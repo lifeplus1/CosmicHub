@@ -15,16 +15,21 @@ import {
   LazyComponentOptions,
   ErrorBoundaryProps,
   UseProgressiveLoading,
-  ProgressiveLoadingOptions,
-  ProgressiveLoadingResult,
-  LazyLoadingState,
-  WithLazyLoading,
 } from './types/lazy-loading-types';
 
 // Loading components for better UX
 export const DefaultLoadingSpinner: React.FC = () => (
   <div className='flex items-center justify-center p-8'>
     <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-cosmic-purple'></div>
+  </div>
+);
+
+export const PageLoadingSpinner: React.FC = () => (
+  <div className='min-h-screen flex items-center justify-center'>
+    <div className='text-center'>
+      <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-cosmic-purple mx-auto mb-4'></div>
+      <p className='text-gray-600'>Loading...</p>
+    </div>
   </div>
 );
 
@@ -109,7 +114,7 @@ export const lazyLoadRoute = <P extends object>(
   React.PropsWithoutRef<P> & React.RefAttributes<unknown>
 > =>
   createLazyComponent<P>(importFn, `Route_${routeName}`, {
-  loadingComponent: PageLoadingSpinner,
+    loadingComponent: PageLoadingSpinner,
     preload: false,
     timeout: 15000,
   });
@@ -139,64 +144,61 @@ export const lazyLoadChart = <P extends object>(
   });
 
 // HOC for component-level code splitting
-export const withLazyLoading = (<P extends object>(
+export const withLazyLoading = <P extends object>(
   importFn: ImportFunction<ComponentType<P>>,
   componentName: string,
   options?: Pick<LazyComponentOptions, 'loadingComponent' | 'preload'>
-) => createLazyComponent<P>(importFn, componentName, options ?? {})) as WithLazyLoading;
+): React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<P> & React.RefAttributes<unknown>
+> => {
+  return createLazyComponent<P>(importFn, componentName, options);
+};
 
 // Progressive loading for large datasets
-export const useProgressiveLoading: UseProgressiveLoading = <T,>(
+export interface ProgressiveLoadingOptions {
+  batchSize: number;
+  delay: number;
+  loadingComponent?: ComponentType<{ progress: number }>;
+}
+
+export const useProgressiveLoading = function <T>(
   items: T[],
   options: ProgressiveLoadingOptions
-): ProgressiveLoadingResult<T> => {
+) {
   const [loadedItems, setLoadedItems] = React.useState<T[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [progress, setProgress] = React.useState(0);
 
   React.useEffect(() => {
-    if (!items || items.length === 0) {
-      setLoadedItems([]);
+    if (items.length === 0) {
       setIsLoading(false);
-      setProgress(0);
       return;
     }
-    let cancelled = false;
+
     setIsLoading(true);
     setLoadedItems([]);
     setProgress(0);
 
-    const loadBatch = (start: number) => {
-      if (cancelled) return;
-      const end = Math.min(start + options.batchSize, items.length);
-      const batch = items.slice(start, end);
+    const loadBatch = (startIndex: number) => {
+      const endIndex = Math.min(startIndex + options.batchSize, items.length);
+      const batch = items.slice(startIndex, endIndex);
+
       setLoadedItems(prev => [...prev, ...batch]);
-      setProgress(Math.round((end / items.length) * 100));
-      if (end < items.length) {
-        setTimeout(() => loadBatch(end), options.delay);
+      setProgress((endIndex / items.length) * 100);
+
+      if (endIndex < items.length) {
+        setTimeout(() => loadBatch(endIndex), options.delay);
       } else {
         setIsLoading(false);
       }
     };
-    loadBatch(0);
-    return () => {
-      cancelled = true;
-    };
+
+    // Start loading batches
+    setTimeout(() => loadBatch(0), 0);
   }, [items, options.batchSize, options.delay]);
 
-  return { loadedItems, isLoading, progress };
-};
-
-// Provide compatibility export (deprecated usage path)
-export const ProgressiveLoader = { use: useProgressiveLoading };
-
-// Generic page loading spinner (separate from default small spinner)
-export const PageLoadingSpinner: React.FC = () => (
-  <div className='flex flex-col items-center justify-center min-h-[200px] gap-4'>
-    <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-cosmic-gold'></div>
-    <span className='text-cosmic-silver text-sm'>Loading page...</span>
-  </div>
-);
+  return { items: loadedItems, isLoading, progress };
+} as UseProgressiveLoading;
 
 // Bundle import types
 interface BundleImport {
@@ -205,11 +207,33 @@ interface BundleImport {
 }
 
 // Bundle splitting utilities
-export const createRouteLoaders = (routes: string[]) => {
+export const BundleSplitter: Record<string, () => Promise<BundleImport>> = {
+  // Vendor libraries (should be loaded first)
+  loadVendorBundle: () => import('react').then(() => import('react-dom')),
+
+  // UI components bundle
+  loadUIBundle: () => import(/* webpackChunkName: "ui-bundle" */ 'react'),
+
+  // Astrology features bundle
+  loadAstrologyBundle: () =>
+    import(/* webpackChunkName: "astro-bundle" */ 'react'),
+
+  // Frequency healing bundle
+  loadFrequencyBundle: () =>
+    import(/* webpackChunkName: "frequency-bundle" */ 'react'),
+
+  // Authentication bundle
+  loadAuthBundle: () => import(/* webpackChunkName: "auth-bundle" */ 'react'),
+};
+
+// Route-based code splitting for apps
+export const createRouteBundle = (routes: string[]) => {
   const routeLoaders: Record<string, () => Promise<BundleImport>> = {};
+
   routes.forEach(route => {
     routeLoaders[route] = () => {
       const startTime = performance.now();
+
       return import(
         /* webpackChunkName: "[request]" */
         /* @vite-ignore */
@@ -217,10 +241,10 @@ export const createRouteLoaders = (routes: string[]) => {
       )
         .then((module: BundleImport) => {
           const loadTime = performance.now() - startTime;
-            performanceMonitor.recordMetric('RouteLoad', loadTime, {
-              route,
-              success: true,
-            });
+          performanceMonitor.recordMetric('RouteLoad', loadTime, {
+            route,
+            success: true,
+          });
           return module;
         })
         .catch((error: Error) => {
@@ -234,6 +258,7 @@ export const createRouteLoaders = (routes: string[]) => {
         });
     };
   });
+
   return routeLoaders;
 };
 
@@ -417,14 +442,27 @@ const DefaultErrorFallback: React.FC<{
 );
 
 // Hook for managing lazy loading state
-export const useLazyLoadingState = (): LazyLoadingState => {
-  const [loadingStates, setLoadingStates] = React.useState<Record<string, boolean>>({});
-  const setLoading = React.useCallback((name: string, state: boolean) => {
-    setLoadingStates(prev => (prev[name] === state ? prev : { ...prev, [name]: state }));
-  }, []);
+export function useLazyLoading() {
+  const [loadingStates, setLoadingStates] = React.useState<
+    Record<string, boolean>
+  >({});
+
+  const setLoading = React.useCallback(
+    (componentName: string, isLoading: boolean) => {
+      setLoadingStates(prev => ({
+        ...prev,
+        [componentName]: isLoading,
+      }));
+    },
+    []
+  );
+
   const isLoading = React.useCallback(
-    (name: string) => loadingStates[name] === true,
+    (componentName: string) => {
+      return loadingStates[componentName] ?? false;
+    },
     [loadingStates]
   );
+
   return { setLoading, isLoading, loadingStates };
-};
+}

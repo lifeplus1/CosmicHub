@@ -23,6 +23,8 @@ const devConsole = {
   error: console.error.bind(console),
 };
 
+interface EphemerisCacheConfig {
+  memoryLimitMB: number;
   diskLimitMB: number;
   defaultTTLHours: number;
   predictiveDays: number;
@@ -30,6 +32,8 @@ const devConsole = {
   compressionEnabled: boolean;
 }
 
+interface CacheEntry {
+  key: string;
   data: unknown;
   timestamp: number;
   expiresAt: number;
@@ -39,6 +43,8 @@ const devConsole = {
   compressed?: boolean;
 }
 
+interface CacheStats {
+  memoryHits: number;
   memoryMisses: number;
   diskHits: number;
   diskMisses: number;
@@ -47,6 +53,8 @@ const devConsole = {
   hitRate: number;
 }
 
+interface PredictiveRequest {
+  julianDay: number;
   priority: 'high' | 'medium' | 'low';
   estimatedUsage: number;
   requestTime: number;
@@ -666,15 +674,18 @@ class EnhancedEphemerisCache {
   }
 }
 
-// Default configuration
-const DEFAULT_CONFIG: EphemerisCacheConfig = {
-  memoryLimitMB: 50,
-  diskLimitMB: 200,
-  defaultTTLHours: 24,
-  predictiveDays: 7,
-  preloadThreshold: 0.7,
-  compressionEnabled: true,
-};
+// TODO: Export cache instance and configuration when implementation is complete
+// const DEFAULT_CONFIG: EphemerisCacheConfig = {
+//   memoryLimitMB: 50,
+//   diskLimitMB: 200,
+//   defaultTTLHours: 24,
+//   predictiveDays: 7,
+//   preloadThreshold: 0.7,
+//   compressionEnabled: true,
+// };
 
-// Global cache instance
-let globalCache: EnhancedEphemerisCache | null = null;
+// let globalCache: EnhancedEphemerisCache | null = null;
+
+// Export the class for future use
+export { EnhancedEphemerisCache };
+export type { EphemerisCacheConfig, CacheEntry, CacheStats, PredictiveRequest };

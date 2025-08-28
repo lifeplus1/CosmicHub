@@ -26,6 +26,9 @@ class SimpleEventEmitter {
   }
 }
 
+// Subscription interfaces
+interface SubscriptionPlan {
+  id: string;
   name: string;
   price: number;
   interval: 'month' | 'year';
@@ -34,6 +37,7 @@ class SimpleEventEmitter {
   apps: ('astro' | 'healwave')[];
 }
 
+interface UserSubscription {
   userId: string;
   planId: string;
   status: 'active' | 'inactive' | 'cancelled' | 'past_due';
@@ -44,12 +48,15 @@ class SimpleEventEmitter {
   apps: ('astro' | 'healwave')[];
 }
 
+interface FeatureAccess {
+  canAccess: boolean;
   reason?: string;
   upgradeRequired?: boolean;
   requiredPlan?: string;
 }
 
 // Subscription plans configuration
+const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     id: 'astro-pro',
     name: 'Astro Professional',
@@ -374,6 +381,7 @@ class SubscriptionManager extends SimpleEventEmitter {
 }
 
 // Create singleton instance
+const subscriptionManager = new SubscriptionManager();
 
 // React hook for subscription management
 export const useSubscription = () => {
@@ -388,16 +396,16 @@ export const useSubscription = () => {
   React.useEffect(() => {
     const unsubscribeUpdated = subscriptionManager.subscribe(
       'subscription:updated',
-      sub => {
-        setSubscription(sub as UserSubscription | null);
+      (data: unknown) => {
+        setSubscription(data as UserSubscription | null);
         setPlan(subscriptionManager.getCurrentPlan());
       }
     );
 
     const unsubscribeLoaded = subscriptionManager.subscribe(
       'subscription:loaded',
-      sub => {
-        setSubscription(sub as UserSubscription | null);
+      (data: unknown) => {
+        setSubscription(data as UserSubscription | null);
         setPlan(subscriptionManager.getCurrentPlan());
       }
     );

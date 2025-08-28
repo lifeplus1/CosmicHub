@@ -10,17 +10,256 @@ import type { ChartBirthData } from '@cosmichub/types';
 /**
  * Branded Types for IDs - prevents confusing different ID types
  */
-export type UserId = string & { readonly __brand: 'UserId' };
-export type ChartId = string & { readonly __brand: 'ChartId' };
+export type BrandedType<K, T extends string> = K & { __brand: T };
+
+export type ChartId = BrandedType<string, 'ChartId'>;
+export type UserId = BrandedType<string, 'UserId'>;
+export type InterpretationId = BrandedType<string, 'InterpretationId'>;
 
 // Type guards for branded types
-export const isUserId = (value: string): value is UserId => 
-  typeof value === 'string' && value.length > 0;
-export const isChartId = (value: string): value is ChartId => 
-  typeof value === 'string' && value.length > 0;
+export function isChartId(id: string): id is ChartId {
+  return typeof id === 'string' && id.trim().length > 0;
+}
+
+export function isUserId(id: string): id is UserId {
+  return typeof id === 'string' && id.trim().length > 0;
+}
+
+export function isInterpretationId(id: string): id is InterpretationId {
+  return typeof id === 'string' && id.trim().length > 0;
+}
 
 /**
- * Planet and zodiac type definitions
+ * API Response Status Union Type - ensures exhaustive handling of responses
+ */
+export type ApiResponseStatus =
+  | 'success'
+  | 'error'
+  | 'validation_error'
+  | 'not_found'
+  | 'unauthorized'
+  | 'forbidden'
+  | 'server_error'
+  | 'partial'
+  | 'cached';
+
+/**
+ * Base API Response with metadata
+ */
+export interface ApiResponseBase {
+  status: ApiResponseStatus;
+  message?: string;
+  timestamp: string;
+  requestId?: string;
+  version?: string;
+}
+
+/**
+ * Base interface for successful responses
+ */
+export interface ApiSuccessResponseBase<T> extends ApiResponseBase {
+  status: 'success';
+  data: T;
+  meta?: {
+    total?: number;
+    page?: number;
+    pageSize?: number;
+    hasMore?: boolean;
+  };
+}
+
+/**
+ * Base interface for error responses
+ */
+export interface ApiErrorResponseBase extends ApiResponseBase {
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+    stack?: string; // Only included in development
+  };
+}
+
+/**
+ * Specific error response types
+ */
+export interface ApiValidationErrorResponse extends ApiErrorResponseBase {
+  status: 'validation_error';
+  error: {
+    code: 'VALIDATION_ERROR';
+    message: string;
+    details: Record<string, string[]>;
+  };
+}
+
+export interface ApiNotFoundResponse extends ApiErrorResponseBase {
+  status: 'not_found';
+  error: {
+    code: 'NOT_FOUND';
+    message: string;
+    details: {
+      resource: string;
+      id: string;
+    };
+  };
+}
+
+export interface ApiUnauthorizedResponse extends ApiErrorResponseBase {
+  status: 'unauthorized';
+  error: {
+    code: 'UNAUTHORIZED';
+    message: string;
+  };
+}
+
+export interface ApiForbiddenResponse extends ApiErrorResponseBase {
+  status: 'forbidden';
+  error: {
+    code: 'FORBIDDEN';
+    message: string;
+  };
+}
+
+export interface ApiServerErrorResponse extends ApiErrorResponseBase {
+  status: 'server_error';
+  error: {
+    code: 'SERVER_ERROR';
+    message: string;
+    details?: {
+      errorId: string;
+    };
+  };
+}
+
+export interface ApiGenericErrorResponse extends ApiErrorResponseBase {
+  status: 'error';
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
+}
+
+/**
+ * Specialized response types
+ */
+export interface ApiPartialResponseType<T> extends ApiResponseBase {
+  status: 'partial';
+  data: Partial<T>;
+  error?: {
+    code: string;
+    message: string;
+    failedFields: string[];
+  };
+}
+
+export interface ApiCachedResponseType<T> extends ApiResponseBase {
+  status: 'cached';
+  data: T;
+  meta: {
+    cachedAt: string;
+    ttl: number;
+    source: 'memory' | 'redis' | 'filesystem';
+  };
+}
+
+/**
+ * Type guards for response types
+ */
+export function isSuccessResponse<T>(
+  response: ApiResponse<T>
+): response is ApiSuccessResponseBase<T> {
+  return response.status === 'success';
+}
+
+export function isErrorResponse<T>(
+  response: ApiResponse<T>
+): response is ApiErrorResponse {
+  return [
+    'error',
+    'validation_error',
+    'not_found',
+    'unauthorized',
+    'forbidden',
+    'server_error',
+  ].includes(response.status);
+}
+
+// Convenience helper when only status string is available
+export function isErrorStatus(status: ApiResponseStatus): boolean {
+  return [
+    'error',
+    'validation_error',
+    'not_found',
+    'unauthorized',
+    'forbidden',
+    'server_error',
+  ].includes(status);
+}
+
+export function isValidationError(
+  response: ApiResponse<unknown>
+): response is ApiValidationErrorResponse {
+  return response.status === 'validation_error';
+}
+
+export function isNotFoundError(
+  response: ApiResponse<unknown>
+): response is ApiNotFoundResponse {
+  return response.status === 'not_found';
+}
+
+export function isUnauthorizedError(
+  response: ApiResponse<unknown>
+): response is ApiUnauthorizedResponse {
+  return response.status === 'unauthorized';
+}
+
+export function isForbiddenError(
+  response: ApiResponse<unknown>
+): response is ApiForbiddenResponse {
+  return response.status === 'forbidden';
+}
+
+export function isServerError(
+  response: ApiResponse<unknown>
+): response is ApiServerErrorResponse {
+  return response.status === 'server_error';
+}
+
+export function isCachedResponse<T>(
+  response: ApiResponse<T>
+): response is ApiCachedResponseType<T> {
+  return response.status === 'cached';
+}
+
+export function isPartialResponse<T>(
+  response: ApiResponse<T>
+): response is ApiPartialResponseType<T> {
+  return response.status === 'partial';
+}
+
+/**
+ * Union type of all possible API responses
+ */
+export type ApiErrorResponse =
+  | ApiValidationErrorResponse
+  | ApiNotFoundResponse
+  | ApiUnauthorizedResponse
+  | ApiForbiddenResponse
+  | ApiServerErrorResponse
+  | ApiGenericErrorResponse;
+
+export type ApiResponse<T> =
+  | ApiSuccessResponseBase<T>
+  | ApiErrorResponse
+  | ApiPartialResponseType<T>
+  | ApiCachedResponseType<T>;
+
+// Consolidated all response types above
+
+/**
+ * Chart Types with Improved Type Safety
  */
 export type PlanetName =
   | 'sun'
@@ -51,194 +290,8 @@ export type ZodiacSign =
   | 'aquarius'
   | 'pisces';
 
-export type AspectType =
-  | 'conjunction'
-  | 'opposition'
-  | 'trine'
-  | 'square'
-  | 'sextile'
-  | 'quincunx'
-  | 'semisextile';
-
-export type InterpretationType = 'natal' | 'transit' | 'synastry' | 'composite';
-
-export type InterpretationFocusArea =
-  | 'personality'
-  | 'career'
-  | 'relationships'
-  | 'life_purpose'
-  | 'challenges'
-  | 'strengths'
-  | 'current_cycle'
-  | 'future_trends'
-  | 'spiritual_growth';
-
-export type InterpretationCategory =
-  | 'sun_sign'
-  | 'moon_sign'
-  | 'rising_sign'
-  | 'planets'
-  | 'houses'
-  | 'aspects'
-  | 'elements'
-  | 'modalities'
-  | 'patterns'
-  | 'transits';
-
-/**
- * API Response Status Union Type - ensures exhaustive handling of responses
- */
-export type ApiResponseStatus = 
-  | 'success' 
-  | 'error' 
-  | 'validation_error' 
-  | 'not_found' 
-  | 'unauthorized' 
-  | 'forbidden' 
-  | 'server_error';
-
-/**
- * Base API Response with metadata
- */
-export interface ApiResponseBase {
-  status: ApiResponseStatus;
-  message?: string;
-  timestamp: string;
-  requestId?: string;
-  version?: string;
-}
-
-/**
- * Base interface for successful responses
- */
-export interface ApiSuccessResponse<T> extends ApiResponseBase {
-  status: 'success';
-  data: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    pageSize?: number;
-    hasMore?: boolean;
-  };
-}
-
-/**
- * Base interface for error responses
- */
-export interface ApiErrorResponse extends ApiResponseBase {
-  status: Exclude<ApiResponseStatus, 'success'>;
-  error: {
-    message: string;
-    details?: Record<string, unknown>;
-    stack?: string; // Only included in development
-  };
-}
-
-/**
- * Specific error response types
- */
-export interface ValidationErrorResponse {
-  error: {
-    code: 'VALIDATION_ERROR';
-    message: string;
-    details: Record<string, string[]>;
-  };
-}
-
-export interface NotFoundErrorResponse {
-  error: {
-    code: 'NOT_FOUND';
-    message: string;
-    details: {
-      resource: string;
-      id: string;
-    };
-  };
-}
-
-export interface UnauthorizedErrorResponse extends ApiResponseBase {
-  error: {
-    code: 'UNAUTHORIZED';
-    message: string;
-  };
-}
-
-export interface ForbiddenErrorResponse extends ApiResponseBase {
-  error: {
-    code: 'FORBIDDEN';
-    message: string;
-  };
-}
-
-export interface ServerErrorResponse extends ApiResponseBase {
-  error: {
-    code: 'SERVER_ERROR';
-    message: string;
-    details?: {
-      errorId: string;
-    };
-  };
-}
-
-export interface GenericErrorResponse extends ApiResponseBase {
-  error: {
-    code: string;
-    message: string;
-    details?: Record<string, unknown>;
-  };
-}
-
-/**
- * Specialized response types
- */
-export interface PartialSuccessResponse<T> extends ApiResponseBase {
-  data: Partial<T>;
-  error?: {
-    code: string;
-    message: string;
-    failedFields: string[];
-  };
-}
-
-export interface CachedResponse<T> extends ApiSuccessResponse<T> {
-  data: T;
-  meta: {
-    cachedAt: string;
-    ttl: number;
-    source: 'memory' | 'redis' | 'filesystem';
-  };
-}
-
-/**
- * Type guards for response types
- */
-
-export function isErrorResponse<T>(
-  response: ApiResponse<T>
-): response is ApiErrorResponse {
-  return [
-    'error',
-    'validation_error',
-    'not_found',
-    'unauthorized',
-    'forbidden',
-    'server_error',
-  ].includes(response.status);
-}
-
-// Convenience helper when only status string is available
-
-/**
- * Union type of all possible API responses
- */
-
-// Consolidated all response types above
-
-/**
- * Chart Types with Improved Type Safety
- */
-
 export interface Planet {
+  name: PlanetName;
   position: number; // Degree in zodiac (0-360)
   sign: ZodiacSign;
   house: number;
@@ -249,11 +302,24 @@ export interface Planet {
 }
 
 export interface House {
+  number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   cusp: number; // Degree position (0-360)
   sign: ZodiacSign;
 }
 
+export type AspectType =
+  | 'conjunction'
+  | 'opposition'
+  | 'trine'
+  | 'square'
+  | 'sextile'
+  | 'quincunx'
+  | 'semi-sextile'
+  | 'semi-square'
+  | 'sesquiquadrate';
+
 export interface Aspect {
+  aspect_type: AspectType;
   planet1: PlanetName;
   planet2: PlanetName;
   orb: number;
@@ -300,9 +366,8 @@ export interface ChartData {
 /**
  * Chart API Types
  */
-export interface Chart {
+export interface SavedChart {
   id: ChartId;
-  user_id: UserId;
   name: string;
   birth_date: string;
   birth_time: string;
@@ -314,12 +379,13 @@ export interface Chart {
   chart_data: ChartData;
 }
 
-export interface ChartListResponse {
-  charts: Chart[];
+export interface SavedChartsResponse {
+  charts: SavedChart[];
   total: number;
 }
-}
 
+export interface SaveChartRequest {
+  year: number;
   month: number;
   day: number;
   hour: number;
@@ -332,6 +398,8 @@ export interface ChartListResponse {
   lon?: number;
 }
 
+export interface SaveChartResponse {
+  id: ChartId;
   message: string;
   chart_data: ChartData;
 }
@@ -339,7 +407,45 @@ export interface ChartListResponse {
 /**
  * Interpretation Types with Enhanced Type Safety
  */
+export type InterpretationType =
+  | 'natal'
+  | 'transit'
+  | 'synastry'
+  | 'composite'
+  | 'solar_return'
+  | 'progression'
+  | 'solar_arc'
+  | 'lunar_return'
+  | 'draconic';
 
+export type InterpretationFocusArea =
+  | 'personality'
+  | 'relationships'
+  | 'career'
+  | 'health'
+  | 'spirituality'
+  | 'finances'
+  | 'family'
+  | 'education'
+  | 'life_purpose'
+  | 'challenges'
+  | 'strengths'
+  | 'current_cycle'
+  | 'future_trends'
+  | 'spiritual_growth';
+
+export type InterpretationCategory =
+  | 'planets'
+  | 'houses'
+  | 'aspects'
+  | 'patterns'
+  | 'elements'
+  | 'modalities'
+  | 'transits'
+  | 'progressions';
+
+export interface InterpretationSection {
+  title: string;
   content: string;
   category: InterpretationCategory;
   confidence: number; // 0-1 confidence score
@@ -349,6 +455,8 @@ export interface ChartListResponse {
   housesAnalyzed?: number[];
 }
 
+export interface Interpretation {
+  id: InterpretationId;
   chartId: ChartId;
   userId: UserId;
   type: InterpretationType;
@@ -369,6 +477,8 @@ export interface ChartListResponse {
   updatedAt: string;
 }
 
+export interface InterpretationRequest {
+  chartId: ChartId;
   userId: UserId;
   type: InterpretationType;
   focus_areas: InterpretationFocusArea[];
@@ -383,6 +493,10 @@ export interface ChartListResponse {
   };
 }
 
+export interface InterpretationResponse
+  extends ApiSuccessResponseBase<Interpretation[]> {
+  meta: {
+    total: number;
     processing_time: number;
     techniques_used: string[];
     data_sources: string[];
@@ -392,12 +506,25 @@ export interface ChartListResponse {
 /**
  * Auth Types
  */
+export interface AuthHeaders {
+  Authorization: string;
   'Content-Type': string;
 }
 
 /**
  * Error Types - Strongly typed error hierarchy
  */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly statusCode: number,
+    public readonly details?: Record<string, unknown>
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
 
 export class AuthenticationError extends ApiError {
   constructor(
@@ -420,5 +547,22 @@ export class ValidationError extends ApiError {
   constructor(message: string, validationErrors: Record<string, string[]>) {
     super(message, 'VALIDATION_ERROR', 422, { validationErrors });
     this.name = 'ValidationError';
+  }
+}
+
+export class ForbiddenError extends ApiError {
+  constructor(message = 'Access forbidden', details?: Record<string, unknown>) {
+    super(message, 'FORBIDDEN', 403, details);
+    this.name = 'ForbiddenError';
+  }
+}
+
+export class ServerError extends ApiError {
+  constructor(
+    message = 'Internal server error',
+    details?: Record<string, unknown>
+  ) {
+    super(message, 'SERVER_ERROR', 500, details);
+    this.name = 'ServerError';
   }
 }

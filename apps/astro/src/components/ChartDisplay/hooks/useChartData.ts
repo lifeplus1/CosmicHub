@@ -17,13 +17,13 @@ export function useChartData({ chart, chartId, chartType = 'natal', enabled }: U
     queryKey: ['chartData', chartId, chartType],
     queryFn: async () => {
       if (!chartId) throw new Error('Missing chartId');
-      return fetchSavedChart(chartId, chartType as any);
+      return fetchSavedChart(chartId, chartType as 'natal' | 'transit' | 'composite');
     },
     enabled,
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       if (failureCount < 2) {
-        const msg = (error as Error)?.message || '';
+        const msg = error?.message || '';
         return !msg.includes('Missing chartId') && !msg.includes('validation');
       }
       return false;

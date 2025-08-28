@@ -1,8 +1,13 @@
+export interface NumerologyData {
+  name: string;
   year: number;
   month: number;
   day: number;
 }
 
+export interface CoreNumbers {
+  life_path: {
+    number: number;
     meaning: string;
     components?: { month: number; day: number; year: number };
   };
@@ -32,15 +37,21 @@
   };
 }
 
+export interface KarmicNumbers {
+  karmic_debts: number[];
   karmic_lessons: number[];
   debt_meanings: string[];
   lesson_meanings: string[];
 }
 
+export interface PersonalYear {
+  number: number;
   year: number;
   meaning: string;
 }
 
+export interface ChallengeNumbers {
+  first_challenge: { number: number; period: string };
   second_challenge: { number: number; period: string };
   third_challenge: { number: number; period: string };
   fourth_challenge: { number: number; period: string };
@@ -52,6 +63,8 @@
   };
 }
 
+export interface PinnacleNumbers {
+  first_pinnacle: { number: number; period: string };
   second_pinnacle: { number: number; period: string };
   third_pinnacle: { number: number; period: string };
   fourth_pinnacle: { number: number; period: string };
@@ -63,6 +76,9 @@
   };
 }
 
+export interface Systems {
+  pythagorean: {
+    system: string;
     letter_values: Record<string, string[]>;
     total_value: number;
     characteristics: string[];
@@ -76,11 +92,15 @@
   };
 }
 
+export interface Interpretation {
+  life_purpose: string;
   personality_overview: string;
   current_focus: string;
   spiritual_path: string;
 }
 
+export interface NumerologyResult {
+  core_numbers: CoreNumbers;
   karmic_numbers: KarmicNumbers;
   personal_year: PersonalYear;
   challenge_numbers: ChallengeNumbers;

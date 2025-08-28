@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChartDisplay } from '.';
 import { MultiSystemChartDisplay } from './MultiSystemChart';
 import type { MultiSystemChartData } from './MultiSystemChart/types';
-import type { ChartBirthData } from '@cosmichub/types';
+import type { UnifiedBirthData } from '@cosmichub/types';
 // ChartDisplay now accepts a loose ChartLike shape; no need for ChartData casts here
 import { saveChart, type SaveChartRequest } from '../services/api';
 import FeatureGuard from './FeatureGuard';
@@ -23,6 +23,8 @@ interface FormData {
   multiSystem: boolean;
 }
 
+export interface ExtendedChartData {
+  latitude: number;
   longitude: number;
   timezone: string;
   julian_day: number;
@@ -75,8 +77,8 @@ function isExtendedChartData(data: unknown): data is ExtendedChartData {
   );
 }
 
-// Helper function to convert FormData to ChartBirthData
-function convertToChartBirthData(formData: FormData): ChartBirthData {
+// Helper function to convert FormData to UnifiedBirthData
+function convertToChartBirthData(formData: FormData): UnifiedBirthData {
   return {
     year: parseInt(formData.year),
     month: parseInt(formData.month),

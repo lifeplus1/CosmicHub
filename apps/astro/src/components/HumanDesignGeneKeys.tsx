@@ -3,7 +3,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { FaUser, FaStar, FaKey, FaChartLine } from 'react-icons/fa';
 import { useAuth } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
-import type { ChartBirthData } from '@cosmichub/types';
+import { type ChartBirthData, toTextBirthData } from '@cosmichub/types';
 
 const HumanDesignChart = lazy(
   () => import('./HumanDesignChart/HumanDesignChart')
@@ -62,7 +62,7 @@ const HumanDesignGeneKeys: React.FC = () => {
       return;
     }
 
-    const data: ChartBirthData = {
+    const data: ChartBirthData = toTextBirthData({
       year: parseInt(formData.year),
       month: parseInt(formData.month),
       day: parseInt(formData.day),
@@ -70,7 +70,7 @@ const HumanDesignGeneKeys: React.FC = () => {
       minute: parseInt(formData.minute),
       city: formData.city,
       timezone: formData.timezone,
-    };
+    });
 
     setBirthData(data);
     setShowCalculation(true);

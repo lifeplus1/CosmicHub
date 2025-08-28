@@ -93,6 +93,7 @@ export const EducationalTooltip = React.memo(
 
 EducationalTooltip.displayName = 'EducationalTooltip';
 
+export const InfoIcon: React.FC<{ tooltip: string }> = React.memo(
   ({ tooltip }) => (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>

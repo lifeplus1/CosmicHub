@@ -4,6 +4,8 @@ import type { ChartBirthData as BirthData } from '@cosmichub/types';
 // Re-export the BirthData type for use in tests and other components
 export type { BirthData };
 
+export interface GeneKey {
+  number: number;
   name: string;
   shadow: string;
   gift: string;
@@ -16,10 +18,14 @@ export type { BirthData };
   sphere_context?: string;
 }
 
+export interface Sequence {
+  name: string;
   description: string;
   keys: GeneKey[];
 }
 
+export interface GeneKeysData {
+  life_work: GeneKey;
   evolution: GeneKey;
   radiance: GeneKey;
   purpose: GeneKey;
@@ -50,21 +56,33 @@ export type { BirthData };
   };
 }
 
+export interface GeneKeysChartProps {
+  birthData?: BirthData;
   onCalculate?: (data: BirthData) => void;
 }
 
+export interface GeneKeyDisplayProps {
+  geneKey: GeneKey;
   title: string;
   description?: string;
   onKeySelect: (key: GeneKey) => void;
 }
 
+export interface SequenceDisplayProps {
+  sequence: Sequence;
   onKeySelect: (key: GeneKey) => void;
 }
 
+export interface GeneKeyDetailsProps {
+  selectedKey: GeneKey | null;
 }
 
+export interface VenusSequenceProps {
+  geneKeysData: GeneKeysData;
   onKeySelect: (key: GeneKey) => void;
 }
 
+export interface HologenicProfileProps {
+  geneKeysData: GeneKeysData;
   onKeySelect: (key: GeneKey) => void;
 }

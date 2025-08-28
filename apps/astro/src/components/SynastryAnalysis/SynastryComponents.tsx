@@ -54,6 +54,7 @@ interface StarRatingProps {
   score: number;
 }
 
+export const StarRating: React.FC<StarRatingProps> = React.memo(({ score }) => {
   const stars = Math.round(score / 20);
   return (
     <div className='flex'>

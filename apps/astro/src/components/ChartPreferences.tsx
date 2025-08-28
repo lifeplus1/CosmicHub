@@ -19,6 +19,9 @@ import {
 const isValidUserId = (userId: unknown): userId is string =>
   typeof userId === 'string' && userId.length > 0;
 
+export interface ChartPreferencesProps {
+  /** Optional override to preload preferences (primarily for Storybook / tests) */
+  initialPreferences?: ChartPreferencesData;
   /** Called after successful save (for external analytics) */
   onSaved?: (prefs: ChartPreferencesData) => void;
 }
@@ -369,7 +372,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> =
             }}
             variant='default'
             disabled={saveButtonDisabled}
-            aria-disabled={saveButtonDisabled}
+            aria-disabled={saveButtonDisabled ? 'true' : 'false'}
             aria-busy={isLoading}
             aria-label={saveAriaLabel}
           >

@@ -4,6 +4,30 @@ import { useRealTimePerformance } from '@cosmichub/config/hooks';
 import { Card } from './Card';
 import { Badge } from './Badge';
 
+interface MetricDisplay {
+  name: string;
+  value: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+  threshold: [number, number];
+  unit?: string;
+  description?: string;
+}
+
+interface ComponentMetric {
+  componentName: string;
+  type: string;
+  duration: number;
+}
+
+interface OperationMetric {
+  operationName: string;
+  success: boolean;
+  duration: number;
+  metadata?: {
+    label?: string;
+  };
+}
+
 interface PerformanceDashboardProps {
   showDetailedMetrics?: boolean;
   className?: string;
@@ -46,6 +70,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             : vitalsData.averageRenderTime < 16
               ? 'needs-improvement'
               : 'poor',
+        threshold: [2500, 4000] as [number, number],
         unit: 'ms',
         description:
           'Largest Contentful Paint - Time to render the largest content element',
@@ -59,6 +84,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             : vitalsData.averageRenderTime < 20
               ? 'needs-improvement'
               : 'poor',
+        threshold: [100, 300] as [number, number],
         unit: 'ms',
         description:
           'First Input Delay - Time from first user interaction to browser response',
@@ -72,6 +98,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             : report.summary.errorRate < 5
               ? 'needs-improvement'
               : 'poor',
+        threshold: [0.1, 0.25] as [number, number],
         unit: '',
         description: 'Cumulative Layout Shift - Visual stability of the page',
       },
@@ -180,7 +207,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
               </div>
 
               <div className='text-2xl font-bold text-cosmic-purple mb-2'>
-                {formatValue(metric.value, metric.unit)}
+                {formatValue(metric.value, metric.unit ?? '')}
               </div>
 
               <p className='text-sm text-gray-600'>{metric.description}</p>

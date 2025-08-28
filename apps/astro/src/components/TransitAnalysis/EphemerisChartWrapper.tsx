@@ -43,6 +43,10 @@ const EphemerisErrorFallback: React.FC<{
   </div>
 );
 
+export const EphemerisChartWrapper: React.FC<EphemerisChartWrapperProps> = ({
+  date,
+  onError,
+}) => {
   return (
     <ErrorBoundary
       FallbackComponent={EphemerisErrorFallback}

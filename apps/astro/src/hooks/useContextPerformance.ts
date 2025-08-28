@@ -128,7 +128,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
     const metrics = getAllContextMetrics();
     if (metrics.length > 0) {
       console.group('🔍 Context Performance Monitor');
-      console.log(generatePerformanceReport());
+      console.log('Context performance metrics:', metrics);
       console.groupEnd();
     }
   }, 30000); // 30 seconds

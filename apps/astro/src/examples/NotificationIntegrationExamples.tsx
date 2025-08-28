@@ -65,6 +65,8 @@ function isValidChartData(data: unknown): data is ChartData {
 }
 
 // Example: Chart Calculation Component with Notifications
+export const ChartCalculationWithNotifications: React.FC = () => {
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const [notificationManager] = useState<
     ReturnType<typeof getNotificationManager>
   >((): ReturnType<typeof getNotificationManager> => getNotificationManager());
@@ -141,6 +143,10 @@ function isValidChartData(data: unknown): data is ChartData {
 };
 
 // Example: User Settings Page with Notification Preferences
+export const UserSettingsWithNotifications: React.FC = () => {
+  const [notificationManager] = useState<
+    ReturnType<typeof getNotificationManager>
+  >((): ReturnType<typeof getNotificationManager> => getNotificationManager());
   const [status, setStatus] = useState<NotificationStatus>({});
 
   useEffect((): (() => void) => {
@@ -284,6 +290,8 @@ function isValidChartData(data: unknown): data is ChartData {
 };
 
 // Example: Dashboard with Real-time Notifications
+export const DashboardWithNotifications: React.FC = () => {
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   useEffect((): (() => void) => {
     // Listen for background sync events
@@ -456,6 +464,10 @@ interface UseNotificationsReturn {
   syncChart: () => Promise<void>;
 }
 
+export const useNotifications = (): UseNotificationsReturn => {
+  const [manager] = useState<ReturnType<typeof getNotificationManager>>(
+    (): ReturnType<typeof getNotificationManager> => getNotificationManager()
+  );
   const [status, setStatus] = useState<NotificationStatus>({});
 
   useEffect((): (() => void) => {
@@ -542,12 +554,12 @@ interface UseNotificationsReturn {
 // Example usage in any component:
 /*
 function MyComponent() {
-  const {
-    hasPermission,
-    isOnline,
-    queuedItems,
-    subscribe,
-    sendTest
+  const { 
+    hasPermission, 
+    isOnline, 
+    queuedItems, 
+    subscribe, 
+    sendTest 
   } = useNotifications();
 
   return (
@@ -555,11 +567,11 @@ function MyComponent() {
       <p>Permission: {hasPermission ? '✅' : '❌'}</p>
       <p>Online: {isOnline ? '🌐' : '📴'}</p>
       <p>Queued: {queuedItems}</p>
-
+      
       <button onClick={() => subscribe('user123')}>
         Enable Notifications
       </button>
-
+      
       <button onClick={sendTest}>
         Test Notification
       </button>

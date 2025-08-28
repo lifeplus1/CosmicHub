@@ -76,7 +76,7 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({
   // Initialize with data from localStorage using new persistence utility
   const [birthData, setBirthDataState] = useState<ExtendedBirthData | null>(() => {
     const raw = loadFromStorage({ key: STORAGE_KEY }, isValidBirthDataForLoad);
-    if (raw) return raw as ExtendedBirthData;
+    if (raw) return raw;
     return null;
   });
 
@@ -99,21 +99,22 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({
     const normalized = extractNumericBirthData(data as AnyIncomingBirthData);
     if (!normalized) {
       // Retain raw shape for inspection while marking invalid
-      setBirthDataState(data as unknown as ExtendedBirthData);
+      setBirthDataState(data as ExtendedBirthData);
       setLastUpdated(Date.now());
       return;
     }
+    const dataObj = data as Record<string, unknown>;
     const cameFromNumeric =
-      typeof (data as any)?.year === 'number' &&
-      typeof (data as any)?.month === 'number' &&
-      typeof (data as any)?.day === 'number';
+      typeof dataObj.year === 'number' &&
+      typeof dataObj.month === 'number' &&
+      typeof dataObj.day === 'number';
 
-    let ext: Partial<ExtendedBirthData & { country?: string }> = {};
+    let ext;
 
     if (cameFromNumeric) {
       // Preserve original numeric shape (tests expect deep equality) and add lat/lon helpers
       ext = {
-        ...(data as any),
+        ...dataObj,
         latitude: normalized.lat,
         longitude: normalized.lon,
         hour: normalized.hour,
@@ -135,8 +136,8 @@ export const BirthDataProvider: React.FC<BirthDataProviderProps> = ({
         minute: normalized.minute,
       };
     }
-    if ((data as any)?.country) {
-      (ext as any).country = (data as any).country;
+    if (typeof dataObj.country === 'string') {
+      (ext as Record<string, unknown>).country = dataObj.country;
     }
     setBirthDataState(ext as ExtendedBirthData);
     setLastUpdated(Date.now());

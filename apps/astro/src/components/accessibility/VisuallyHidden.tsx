@@ -5,6 +5,8 @@ import React, { type ReactNode } from 'react';
  * Renders content that remains available to assistive technologies while being visually hidden.
  * Use for live updates, contextual labels for icon-only buttons, and status messages.
  */
+export interface VisuallyHiddenProps {
+  as?: keyof HTMLElementTagNameMap;
   children: ReactNode;
   /**
    * If true, element becomes visible when focused (for skip links). Ensure element is focusable.

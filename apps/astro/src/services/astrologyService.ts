@@ -1,12 +1,12 @@
 // apps/astro/src/services/astrologyService.ts
 
 import { getAuth } from 'firebase/auth';
-import type { ChartData, ChartType } from '@/types/astrology.types';
+import type { ChartData } from './api.types';
 import { config } from '@cosmichub/config'; // Shared API config from packages/config
 
 export const fetchSavedChart = async (
   userId: string,
-  chartType: ChartType
+  chartType: string
 ): Promise<ChartData> => {
   const auth = getAuth();
   const user = auth.currentUser;
@@ -30,6 +30,7 @@ export const fetchSavedChart = async (
     throw new Error(`Failed to fetch chart data: ${response.statusText}`);
   }
 
-  const data = (await response.json()) as ChartData;
+  const rawData: unknown = await response.json();
+  const data = rawData as ChartData;
   return data;
 };

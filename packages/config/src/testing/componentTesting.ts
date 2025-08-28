@@ -445,6 +445,12 @@ export const createModalTestConfig = (
   ],
 });
 
+export const createFormTestConfig = (
+  component: React.ComponentType<Record<string, unknown>>
+): ComponentTestConfig => ({
+  name: 'Form',
+  component,
+  props: {},
   variants: [
     { name: 'Empty', props: {} },
     { name: 'With Validation', props: { validation: true } },
@@ -462,4 +468,7 @@ export const createModalTestConfig = (
 
 // Export utilities
 // Helper to create & (optionally) run the suite externally
+export const createTestSuite = (
+  config: ComponentTestConfig
+): ComponentTestSuite => new ComponentTestSuite(config);
 export { ComponentTestSuite };

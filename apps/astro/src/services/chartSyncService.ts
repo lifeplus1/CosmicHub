@@ -166,9 +166,9 @@ class ChartSyncService extends TypedEventEmitter {
 
       this.fetchCurrentTransits()
         .then(currentTransits => {
-          for (const [chartId] of this.charts.entries()) {
+          Array.from(this.charts.entries()).forEach(([chartId]) => {
             this.updateTransits(chartId, currentTransits);
-          }
+          });
         })
         .catch(error => {
           Logger.error(
@@ -197,8 +197,10 @@ class ChartSyncService extends TypedEventEmitter {
       } = options;
 
       // Fetch initial chart data
-  const chartResult: ApiResult<ChartData> = await fetchChartData(birthData);
-      if (!chartResult.success) throw new Error(chartResult.error);
+      const chartResult: ApiResult<ChartData> = await fetchChartData(birthData);
+      if (!chartResult.success) {
+        throw new Error((chartResult as { error: string }).error || 'Failed to fetch chart data');
+      }
       const chartData = chartResult.data;
 
       if (!isValidChartData(chartData)) {
@@ -406,15 +408,16 @@ class ChartSyncService extends TypedEventEmitter {
     const result: ApiResult<ChartData> = await fetchChartData(transitBirthData);
     if (!result.success) return this.createEmptyTransitData();
     const planets = result.data.planets ?? {};
-    // Narrow keys to PlanetName when possible
-    const narrowed: Record<PlanetName, Planet> = {} as Record<
-      PlanetName,
-      Planet
-    >;
-    (Object.keys(planets) as PlanetName[]).forEach(k => {
-      narrowed[k] = planets[k];
+
+    // Filter to only include valid PlanetName keys
+    const validPlanets = {} as Record<PlanetName, Planet>;
+    Object.keys(planets).forEach(key => {
+      if (this.isValidPlanetName(key)) {
+        validPlanets[key as PlanetName] = planets[key as PlanetName];
+      }
     });
-    return narrowed;
+
+    return validPlanets;
   }
 
   /**
@@ -425,7 +428,7 @@ class ChartSyncService extends TypedEventEmitter {
   ): Promise<Record<PlanetName, Planet>> {
     // Calculate progressed positions (1 day = 1 year progression)
   const [by, bm, bd] = (birthData.birth_date ?? '1970-01-01').split('-').map(n => parseInt(n,10));
-  const birthDate = new Date(by || 1970, (bm || 1) - 1, bd || 1);
+  const birthDate = new Date(by ?? 1970, (bm ?? 1) - 1, bd ?? 1);
     const now = new Date();
     const ageInYears =
       (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
@@ -446,14 +449,16 @@ class ChartSyncService extends TypedEventEmitter {
       await fetchChartData(progressedBirthData);
     if (!result.success) return this.createEmptyTransitData();
     const planets = result.data.planets ?? {};
-    const narrowed: Record<PlanetName, Planet> = {} as Record<
-      PlanetName,
-      Planet
-    >;
-    (Object.keys(planets) as PlanetName[]).forEach(k => {
-      narrowed[k] = planets[k];
+
+    // Filter to only include valid PlanetName keys
+    const validPlanets = {} as Record<PlanetName, Planet>;
+    Object.keys(planets).forEach(key => {
+      if (this.isValidPlanetName(key)) {
+        validPlanets[key as PlanetName] = planets[key as PlanetName];
+      }
     });
-    return narrowed;
+
+    return validPlanets;
   }
 
   /**
@@ -468,8 +473,12 @@ class ChartSyncService extends TypedEventEmitter {
     const aspectAngles = [0, 60, 90, 120, 150, 180]; // Major aspects
     const maxOrb = 8; // Maximum orb to consider
 
-    const transitPlanetNames = Object.keys(newTransits) as PlanetName[];
-    const natalPlanetNames = Object.keys(natal.planets) as PlanetName[];
+    const transitPlanetNames = Object.keys(newTransits).filter(key => 
+      this.isValidPlanetName(key)
+    ) as PlanetName[];
+    const natalPlanetNames = Object.keys(natal.planets).filter(key => 
+      this.isValidPlanetName(key)
+    ) as PlanetName[];
 
     transitPlanetNames.forEach(transitPlanet => {
       const transitData = newTransits[transitPlanet];
@@ -614,11 +623,25 @@ class ChartSyncService extends TypedEventEmitter {
    * Transform unknown data to ChartData format with validation
    */
   private transformChartData(data: unknown): ChartData {
-    if (isValidChartData(data)) {
-      return data;
+    if (!isValidChartData(data)) {
+      throw new Error('Invalid chart data format');
     }
 
-    throw new Error('Invalid chart data format');
+    // Type assertion is safe after validation
+    const chartData = data as ChartData;
+
+    // Ensure planets have the correct type
+    const validPlanets = {} as Record<PlanetName, Planet>;
+    Object.keys(chartData.planets).forEach(key => {
+      if (this.isValidPlanetName(key)) {
+        validPlanets[key as PlanetName] = chartData.planets[key as PlanetName];
+      }
+    });
+
+    return {
+      ...chartData,
+      planets: validPlanets,
+    };
   }
 
   /**
@@ -681,7 +704,8 @@ class ChartSyncService extends TypedEventEmitter {
   private async processPendingUpdates(): Promise<void> {
     if (this.isOnline === false) return;
 
-    for (const [chartId] of this.pendingUpdates.entries()) {
+    const entries = Array.from(this.pendingUpdates.entries());
+    for (const [chartId] of entries) {
       // _pendingDate is currently unused but may be used in the future for prioritization
       try {
         await this.updateChart(chartId, {
@@ -726,9 +750,9 @@ class ChartSyncService extends TypedEventEmitter {
         birthData: {
           birth_date: `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`,
           birth_time: `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`,
-          latitude: chartData.latitude || 0,
-          longitude: chartData.longitude || 0,
-          timezone: chartData.timezone || 'UTC',
+          latitude: chartData.latitude ?? 0,
+          longitude: chartData.longitude ?? 0,
+          timezone: chartData.timezone ?? 'UTC',
           city: 'Unknown',
         },
         currentData: chartData,
@@ -814,21 +838,14 @@ class ChartSyncService extends TypedEventEmitter {
   }
 
   /**
-   * Clean up resources
+   * Validate if a string is a valid PlanetName
    */
-  destroy(): void {
-    if (
-      this.transitUpdateInterval !== null &&
-      this.transitUpdateInterval !== undefined
-    ) {
-      clearInterval(this.transitUpdateInterval);
-    }
-
-    this.syncIntervals.forEach(interval => clearInterval(interval));
-    this.syncIntervals.clear();
-    this.charts.clear();
-    this.pendingUpdates.clear();
-    this.removeAllListeners();
+  private isValidPlanetName(name: string): name is PlanetName {
+    const validPlanetNames: PlanetName[] = [
+      'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
+      'uranus', 'neptune', 'pluto', 'chiron', 'north_node', 'south_node'
+    ];
+    return validPlanetNames.includes(name as PlanetName);
   }
 }
 

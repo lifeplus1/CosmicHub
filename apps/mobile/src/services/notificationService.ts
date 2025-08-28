@@ -45,7 +45,10 @@ export class NotificationService {
       // Request permissions
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== Notifications.PermissionStatus.GRANTED) {
-        console.warn('Notification permission not granted');
+        // Only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Notification permission not granted');
+        }
         return;
       }
 
@@ -53,9 +56,13 @@ export class NotificationService {
       const tokenData = await Notifications.getExpoPushTokenAsync();
       this.pushToken = tokenData.data;
 
-      console.log('Notifications initialized successfully');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Notifications initialized successfully');
+      }
     } catch (error) {
-      console.error('Failed to initialize notifications:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to initialize notifications:', error);
+      }
     }
   }
 
@@ -70,7 +77,9 @@ export class NotificationService {
         this.preferences = { ...this.preferences, ...parsed };
       }
     } catch (error) {
-      console.error('Failed to load notification preferences:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load notification preferences:', error);
+      }
     }
   }
 
@@ -84,7 +93,9 @@ export class NotificationService {
         JSON.stringify(this.preferences)
       );
     } catch (error) {
-      console.error('Failed to save notification preferences:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to save notification preferences:', error);
+      }
     }
   }
 

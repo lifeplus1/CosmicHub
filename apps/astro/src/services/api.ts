@@ -6,7 +6,7 @@ import {
   type AnyBirthInput,
   type ChartBirthData,
 } from '@cosmichub/types';
-import { auth } from '@cosmichub/config/firebase';
+import { auth } from '../firebase';
 import { csrfService } from './csrfService';
 import type { GeneKeysData } from '../components/GeneKeysChart/types';
 import type { HumanDesignData } from '../components/HumanDesignChart/types';
@@ -349,6 +349,14 @@ const createCsrfAxios = () => {
 // Global CSRF-protected axios instance
 const csrfAxios = createCsrfAxios();
 
+// Multi-system response interface for enhanced chart data
+interface MultiSystemResponse {
+  chart_data?: BackendChartResponse;
+  numerology?: unknown;
+  human_design?: HumanDesignData;
+  gene_keys?: GeneKeysData;
+}
+
 // API Functions for Saved Charts
 export const fetchSavedCharts = async (): Promise<ApiResult<SavedChart[]>> => {
   devConsole.log?.('📊 Fetching saved charts...');
@@ -361,9 +369,9 @@ export const fetchSavedCharts = async (): Promise<ApiResult<SavedChart[]>> => {
     );
     devConsole.log?.('✅ Saved charts fetched successfully:', data);
     return ok(Array.isArray(data.charts) ? data.charts : []);
-  } catch (error) {
-    devConsole.error('❌ Error fetching saved charts:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching saved charts:', err);
+    return toFailure(err, {
       auth: 'Authentication required to view saved charts',
       defaultMsg: 'Failed to fetch saved charts',
     });
@@ -384,9 +392,9 @@ export const saveChart = async (
     );
     devConsole.log?.('✅ Chart saved successfully:', data);
     return ok(data);
-  } catch (error) {
-    devConsole.error('❌ Error saving chart:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error saving chart:', err);
+    return toFailure(err, {
       auth: 'Authentication required to save charts',
       defaultMsg: 'Failed to save chart',
     });
@@ -403,11 +411,37 @@ export const deleteChart = async (
     await axios.delete(`${BACKEND_URL}/api/charts/${chartId}`, { headers });
     devConsole.log?.('✅ Chart deleted successfully');
     return ok(null);
-  } catch (error) {
-    devConsole.error('❌ Error deleting chart:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error deleting chart:', err);
+    return toFailure(err, {
       auth: 'Authentication required to delete charts',
       defaultMsg: 'Failed to delete chart',
+    });
+  }
+};
+
+export const fetchSavedChartById = async (
+  chartId: string
+): Promise<ApiResult<{ chart_data: ChartData; birth_data?: Record<string, unknown> }>> => {
+  devConsole.log?.(`📊 Fetching saved chart by ID: ${chartId}`);
+
+  try {
+    const headers = await getAuthHeaders();
+    const { data } = await axios.get<SavedChart>(
+      `${BACKEND_URL}/api/charts/${chartId}`,
+      { headers }
+    );
+    devConsole.log?.('✅ Saved chart fetched successfully:', data);
+    return ok({
+      chart_data: data.chart_data,
+      birth_data: data.birth_data,
+    });
+  } catch (err) {
+    devConsole.error('❌ Error fetching saved chart by ID:', err);
+    return toFailure(err, {
+      auth: 'Authentication required to view saved charts',
+      notFound: 'Chart not found',
+      defaultMsg: 'Failed to fetch saved chart',
     });
   }
 };
@@ -442,9 +476,9 @@ export const apiClient = {
       const data: unknown = await response.json();
       devConsole.log?.('✅ GET response data:', data);
       return data as T;
-    } catch (error) {
-      devConsole.error('❌ GET request failed:', error);
-      throw error;
+    } catch (err) {
+      devConsole.error('❌ GET request failed:', err);
+      throw err;
     }
   },
 
@@ -487,18 +521,12 @@ export const apiClient = {
       const responseData: unknown = await response.json();
       devConsole.log?.('✅ POST response data:', responseData);
       return responseData as T;
-    } catch (error) {
-      devConsole.error('❌ POST request failed:', error);
-      throw error;
+    } catch (err) {
+      devConsole.error('❌ POST request failed:', err);
+      throw err;
     }
   },
 };
-
-export interface ExtendedPersonData {
-  numerology?: unknown;
-  human_design?: HumanDesignData;
-  gene_keys?: GeneKeysData;
-}
 
 // Uses shared toFailure from @cosmichub/config
 
@@ -520,15 +548,19 @@ export const fetchChart = async (
     const responseData = response.data;
     devConsole.log?.('✅ Chart response received:', responseData);
     return ok(responseData);
-  } catch (error) {
-    devConsole.error('❌ Error fetching chart:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching chart:', err);
+    return toFailure(err, {
       auth: 'Authentication required to fetch chart',
       defaultMsg: 'Failed to fetch chart data',
     });
   }
 };
 
+export const fetchPersonalityAnalysis = async (
+  userId: UserId
+): Promise<ApiResult<unknown>> => {
+  devConsole.log?.('🔮 Fetching personality analysis...');
   try {
     const headers = await getAuthHeaders();
     devConsole.log?.(
@@ -543,9 +575,9 @@ export const fetchChart = async (
       response.data
     );
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error fetching personality analysis:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching personality analysis:', err);
+    return toFailure(err, {
       auth: 'Authentication required to access personality analysis',
       notFound: 'Personality analysis not found',
       defaultMsg: 'Failed to fetch personality analysis',
@@ -553,6 +585,10 @@ export const fetchChart = async (
   }
 };
 
+export const calculateNumerology = async (
+  data: ChartBirthData
+): Promise<ApiResult<unknown>> => {
+  devConsole.log?.('🔮 Calculating numerology...');
   devConsole.log?.('📊 Numerology data input:', data);
   try {
     const headers = await getAuthHeaders();
@@ -564,9 +600,9 @@ export const fetchChart = async (
     );
     devConsole.log?.('✅ Numerology response received:', response.data);
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error fetching numerology:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching numerology:', err);
+    return toFailure(err, {
       auth: 'Authentication required to fetch numerology data',
       defaultMsg: 'Failed to fetch numerology data',
     });
@@ -590,9 +626,9 @@ export const calculateHumanDesign = async (
 
     devConsole.log?.('✅ Human Design calculation successful:', response.data);
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error calculating Human Design chart:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error calculating Human Design chart:', err);
+    return toFailure(err, {
       auth: 'Authentication required to calculate Human Design chart',
       validation: 'Invalid birth data for Human Design calculation',
       defaultMsg: 'Failed to calculate Human Design chart',
@@ -600,6 +636,10 @@ export const calculateHumanDesign = async (
   }
 };
 
+export const fetchHumanDesignProfile = async (
+  userId: UserId
+): Promise<ApiResult<unknown>> => {
+  devConsole.log?.('🧬 Fetching Human Design profile...');
   try {
     const headers = await getAuthHeaders();
     const response = await axios.get(
@@ -609,9 +649,9 @@ export const calculateHumanDesign = async (
 
     devConsole.log?.('✅ Human Design profile retrieved:', response.data);
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error fetching Human Design profile:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching Human Design profile:', err);
+    return toFailure(err, {
       auth: 'Authentication required to access Human Design profile',
       notFound: 'Human Design profile not found',
       defaultMsg: 'Failed to fetch Human Design profile',
@@ -635,9 +675,9 @@ export const calculateGeneKeys = async (
     );
     devConsole.log?.('✅ Gene Keys response received:', response.data);
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error calculating Gene Keys:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error calculating Gene Keys:', err);
+    return toFailure(err, {
       auth: 'Authentication required to calculate Gene Keys',
       validation: 'Invalid birth data for Gene Keys calculation',
       defaultMsg: 'Failed to calculate Gene Keys',
@@ -645,6 +685,10 @@ export const calculateGeneKeys = async (
   }
 };
 
+export const fetchGeneKeysProfile = async (
+  userId: UserId
+): Promise<ApiResult<unknown>> => {
+  devConsole.log?.('🧬 Fetching Gene Keys profile...');
   try {
     const headers = await getAuthHeaders();
     devConsole.log?.(
@@ -656,9 +700,9 @@ export const calculateGeneKeys = async (
     );
     devConsole.log?.('✅ Gene Keys profile response received:', response.data);
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error fetching Gene Keys profile:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching Gene Keys profile:', err);
+    return toFailure(err, {
       auth: 'Authentication required to access Gene Keys profile',
       notFound: 'Gene Keys profile not found',
       defaultMsg: 'Failed to fetch Gene Keys profile',
@@ -666,6 +710,10 @@ export const calculateGeneKeys = async (
   }
 };
 
+export const fetchContemplationProgress = async (
+  userId: UserId
+): Promise<ApiResult<unknown>> => {
+  devConsole.log?.('🔮 Fetching contemplation progress...');
   try {
     const headers = await getAuthHeaders();
     devConsole.log?.(
@@ -680,9 +728,9 @@ export const calculateGeneKeys = async (
       response.data
     );
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error fetching contemplation progress:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching contemplation progress:', err);
+    return toFailure(err, {
       auth: 'Authentication required to access contemplation progress',
       notFound: 'Contemplation progress not found',
       defaultMsg: 'Failed to fetch contemplation progress',
@@ -737,9 +785,9 @@ export const fetchChartDataUnified = async (
     devConsole.log?.('🔄 Transformed birth chart data:', resultWithRawData);
 
     return ok(resultWithRawData);
-  } catch (error) {
-    devConsole.error('❌ Error fetching unified chart data:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching unified chart data:', err);
+    return toFailure(err, {
       auth: 'Authentication required to fetch chart data',
       notFound: 'Chart data not found',
       defaultMsg: 'Failed to fetch chart data',
@@ -763,9 +811,9 @@ export const fetchChartData = async (
     devConsole.log?.('🔄 Transformed chart data:', transformedData);
 
     return ok(transformedData);
-  } catch (error) {
-    devConsole.error('❌ Error fetching chart data:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching chart data:', err);
+    return toFailure(err, {
       auth: 'Authentication required to fetch chart data',
       notFound: 'Chart data not found',
       defaultMsg: 'Failed to fetch chart data',
@@ -817,7 +865,8 @@ export const transformBackendResponse = (
   if (Array.isArray(rawHousesForCusps)) {
     houseCusps = rawHousesForCusps.map((h, idx) => {
       if (typeof h === 'object' && h !== null && 'cusp' in h) {
-        return coerceChartNumber((h as BackendHouseData).cusp, idx * 30);
+        const houseData = h as BackendHouseData;
+        return coerceChartNumber(houseData.cusp, idx * 30);
       }
       return coerceChartNumber(h, idx * 30);
     });
@@ -1140,7 +1189,7 @@ export const transformBackendResponse = (
 
   return {
     planets: planets as Record<PlanetName, Planet>,
-    houses: houses.sort((a, b) => a.number - b.number),
+    houses: houses.sort((a, b) => (a.number || 0) - (b.number || 0)),
     aspects, // Now properly transformed aspects
     asteroids: { ...major_asteroids, ...minor_asteroids }, // Combine major and minor asteroids
     points, // Add points (nodes, lilith, etc.)
@@ -1155,14 +1204,18 @@ export const transformBackendResponse = (
   } as ChartData;
 };
 
+export const fetchNatalChart = async (
+  birthData: ChartBirthData
+): Promise<ApiResult<unknown>> => {
+  devConsole.log?.('🔮 Fetching natal chart...');
   devConsole.log?.('📊 Natal chart data input:', birthData);
   try {
     const response = await apiClient.post('/natal-chart', birthData);
     devConsole.log?.('✅ Natal chart response received:', response);
     return ok(response);
-  } catch (error) {
-    devConsole.error('❌ Error fetching natal chart:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching natal chart:', err);
+    return toFailure(err, {
       auth: 'Authentication required to fetch natal chart',
       notFound: 'Natal chart not found',
       defaultMsg: 'Failed to fetch natal chart',
@@ -1170,6 +1223,11 @@ export const transformBackendResponse = (
   }
 };
 
+export const fetchSynastryAnalysis = async (
+  person1: ChartBirthData,
+  person2: ChartBirthData
+): Promise<ApiResult<unknown>> => {
+  devConsole.log?.('💫 Fetching synastry analysis...');
   devConsole.log?.('📊 Person 1 data:', person1);
   devConsole.log?.('📊 Person 2 data:', person2);
   // Unified backend route: /api/synastry/calculate-synastry (router mounted at /api)
@@ -1180,9 +1238,9 @@ export const transformBackendResponse = (
     });
     devConsole.log?.('✅ Synastry analysis response received:', response);
     return ok(response);
-  } catch (error) {
-    devConsole.error('❌ Error fetching synastry analysis:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching synastry analysis:', err);
+    return toFailure(err, {
       auth: 'Authentication required to fetch synastry analysis',
       validation: 'Invalid synastry request data',
       defaultMsg: 'Failed to fetch synastry analysis',
@@ -1211,9 +1269,9 @@ export const fetchAIInterpretations = async (
 
     devConsole.log?.('✅ AI interpretations response received:', response.data);
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error fetching AI interpretations:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching AI interpretations:', err);
+    return toFailure(err, {
       auth: 'Authentication required to view interpretations',
       defaultMsg: 'Failed to fetch AI interpretations',
     });
@@ -1236,15 +1294,19 @@ export const generateAIInterpretation = async (
 
     devConsole.log?.('✅ AI interpretation generated:', response.data);
     return ok(response.data);
-  } catch (error) {
-    devConsole.error('❌ Error generating AI interpretation:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error generating AI interpretation:', err);
+    return toFailure(err, {
       auth: 'Authentication required to generate interpretations',
       defaultMsg: 'Failed to generate AI interpretation',
     });
   }
 };
 
+export const fetchInterpretationById = async (
+  interpretationId: InterpretationId
+): Promise<ApiResult<Interpretation>> => {
+  devConsole.log?.('🔮 Fetching interpretation by ID...');
   try {
     const headers = await getAuthHeaders();
     interface InterpretationByIdResponse {
@@ -1258,9 +1320,9 @@ export const generateAIInterpretation = async (
 
     devConsole.log?.('✅ Interpretation fetched:', response.data);
     return ok(response.data.data);
-  } catch (error) {
-    devConsole.error('❌ Error fetching interpretation:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error fetching interpretation:', err);
+    return toFailure(err, {
       auth: 'Authentication required to view interpretation',
       notFound: 'Interpretation not found',
       defaultMsg: 'Failed to fetch interpretation',
@@ -1268,6 +1330,10 @@ export const generateAIInterpretation = async (
   }
 };
 
+export const deleteInterpretation = async (
+  interpretationId: InterpretationId
+): Promise<void> => {
+  devConsole.log?.('🗑️ Deleting interpretation...');
   try {
     const headers = await getAuthHeaders();
     await axios.delete(
@@ -1276,19 +1342,24 @@ export const generateAIInterpretation = async (
     );
 
     devConsole.log?.('✅ Interpretation deleted successfully');
-  } catch (error) {
-    devConsole.error('❌ Error deleting interpretation:', error);
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
+  } catch (err) {
+    devConsole.error('❌ Error deleting interpretation:', err);
+    if (axios.isAxiosError(err) && err.response?.status === 401) {
       throw new AuthenticationError(
         'Authentication required to delete interpretation'
       );
-    } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+    } else if (axios.isAxiosError(err) && err.response?.status === 404) {
       throw new NotFoundError('Interpretation', String(interpretationId));
     }
     throw new Error('Failed to delete interpretation');
   }
 };
 
+export const updateInterpretation = async (
+  interpretationId: InterpretationId,
+  updates: Partial<Interpretation>
+): Promise<ApiResult<Interpretation>> => {
+  devConsole.log?.('✏️ Updating interpretation...');
   try {
     const headers = await getAuthHeaders();
     interface InterpretationByIdResponse {
@@ -1303,9 +1374,9 @@ export const generateAIInterpretation = async (
 
     devConsole.log?.('✅ Interpretation updated:', response.data);
     return ok(response.data.data);
-  } catch (error) {
-    devConsole.error('❌ Error updating interpretation:', error);
-    return toFailure(error, {
+  } catch (err) {
+    devConsole.error('❌ Error updating interpretation:', err);
+    return toFailure(err, {
       auth: 'Authentication required to update interpretation',
       notFound: 'Interpretation not found',
       validation: 'Invalid interpretation update data',

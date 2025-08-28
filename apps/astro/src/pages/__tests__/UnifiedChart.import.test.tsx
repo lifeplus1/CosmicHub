@@ -4,7 +4,6 @@ try {
   await import('../UnifiedChart');
 } catch (e) {
   // swallow for test
-  // eslint-disable-next-line no-console
   console.error('Import error', e);
 }
 

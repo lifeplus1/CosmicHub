@@ -55,7 +55,7 @@ export default meta;
  */
 export const Sample: Readonly<Story> = {
   args: {
-    chart: sampleChartData,
+    chart: sampleChartData as ChartLike,
     chartType: 'natal' satisfies ChartType,
   },
   // Type safety provided by StoryBook - no runtime check needed

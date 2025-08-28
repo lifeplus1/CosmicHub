@@ -29,8 +29,12 @@ const getApiUrl = (): string => {
 };
 
 // Lazy-loaded astrological constants
+const ASTRO_CONSTANTS = {
+  // These would be lazily loaded in production
+};
 
 // Subscription tiers for performance billing
+const SUBSCRIPTION_PLANS = {
   basic: {
     id: 'basic',
     name: 'Basic',
@@ -55,9 +59,25 @@ const getApiUrl = (): string => {
 } as const;
 
 // UI performance constants
+const UI_CONSTANTS = {
+  // UI-related constants would go here
 } as const;
 
 // Feature flags for code splitting
+const FEATURES = {
+  // Feature flags would go here
+} as const;
+
+// Core app metadata
+const APP_CONFIG = {
+  name: 'CosmicHub',
+  version: '1.0.0',
+} as const;
+
+// Performance-optimized API config  
+const API_CONFIG = {
+  baseUrl: getApiUrl(),
+} as const;
 
 export default {
   APP_CONFIG,

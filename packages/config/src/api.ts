@@ -3,21 +3,43 @@
  */
 
 import { config } from './config';
-import { buildSuccess, type StandardApiError } from './utils/api/error';
+import { buildSuccess } from './utils/api/error';
 // Local fallback to avoid cross-package rootDir limitations; kept in sync with shared utility type
 type UnknownRecord = Record<string, unknown>;
 
+interface ApiResponse<T = unknown> {
   success: boolean;
+  data?: T;
   message?: string;
   error?: string;
 }
 
+interface ApiError {
+  success: false;
+  error: string;
+  message?: string;
+  status?: number;
+  code?: string;
+  details?: unknown;
+}
+
+interface RequestOptions {
   timeout?: number;
-  retries?: number;
   signal?: AbortSignal;
+  retries?: number;
+  headers?: Record<string, string>;
 }
 
 // API endpoints configuration
+export const API_ENDPOINTS = {
+  // Authentication
+  auth: {
+    login: '/auth/login',
+    register: '/auth/register',
+    logout: '/auth/logout',
+    refresh: '/auth/refresh',
+    verify: '/auth/verify',
+  },
 
   // Charts
   charts: {
@@ -170,6 +192,8 @@ export class ApiClient {
       // Non-JSON or empty body
       if (!response.ok) {
         const err: ApiError = {
+          success: false,
+          error: `Request failed with status ${response.status}`,
           code: response.status.toString(),
           message: 'API request failed',
           details: undefined,
@@ -192,6 +216,8 @@ export class ApiClient {
     if (!response.ok) {
       const errMsg = messageVal ?? errorVal ?? 'API request failed';
       const err: ApiError = {
+        success: false,
+        error: errMsg,
         code: response.status.toString(),
         message: errMsg,
         details: payload,
@@ -199,7 +225,7 @@ export class ApiClient {
       throw new Error(JSON.stringify(err));
     }
 
-    return buildSuccess(payload as T, messageVal);
+    return buildSuccess(payload as T, messageVal) as ApiResponse<T>;
   }
 
   // Retry logic
@@ -372,8 +398,13 @@ export class ApiClient {
 }
 
 // Create default API client instance
+export const apiClient = new ApiClient();
 
 // Helper functions for common API operations
+export const api = {
+  // Auth helpers
+  auth: {
+    login: (credentials: { email: string; password: string }) =>
       apiClient.post(API_ENDPOINTS.auth.login, credentials),
 
     register: (userData: { email: string; password: string; name: string }) =>

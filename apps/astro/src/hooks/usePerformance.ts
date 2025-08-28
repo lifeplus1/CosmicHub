@@ -14,13 +14,16 @@ const perf: PerformanceWithOptionalMemory = (
   typeof performance !== 'undefined' ? performance : ({} as Performance)
 ) as PerformanceWithOptionalMemory;
 
+interface PerformanceMetrics {
   startTime: number;
   endTime: number;
+  duration?: number;
   memory?: number;
   paintTime?: number;
   loadTime?: number;
 }
 
+interface OperationMetrics {
   operationName: string;
   startTime: number;
   endTime?: number;
@@ -28,13 +31,16 @@ const perf: PerformanceWithOptionalMemory = (
   status: 'pending' | 'completed' | 'error';
   error?: string;
   metadata?: Record<string, unknown>;
+  operationId?: string;
 }
 
+interface PagePerformanceMetrics {
   firstContentfulPaint: number;
   largestContentfulPaint: number;
   firstInputDelay: number;
   cumulativeLayoutShift: number;
   navigationTiming: PerformanceTiming;
+  pageLoadTime?: number;
 }
 
 /**

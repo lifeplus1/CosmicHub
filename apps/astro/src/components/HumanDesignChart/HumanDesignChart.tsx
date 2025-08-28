@@ -6,7 +6,7 @@ import { useToast } from '../ToastProvider';
 import { calculateHumanDesign } from '../../services/api';
 import type { ApiResult } from '../../services/apiResult';
 import type { HumanDesignData, HumanDesignChartProps } from './types';
-import type { ChartBirthData } from '@cosmichub/types';
+import { toTextBirthData } from '@cosmichub/types';
 import { getTypeColor, getTypeDescription } from './utils';
 
 // Lazy load tab components for better performance
@@ -130,13 +130,13 @@ const HumanDesignChart: React.FC<HumanDesignChartProps> = ({
             <button
               className='mt-4 cosmic-button'
               onClick={() =>
-                onCalculate({
+                onCalculate(toTextBirthData({
                   year: 2000,
                   month: 1,
                   day: 1,
                   hour: 0,
                   minute: 0,
-                } as ChartBirthData)
+                }))
               }
             >
               🧬 Calculate Human Design

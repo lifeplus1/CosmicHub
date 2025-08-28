@@ -15,11 +15,14 @@ const logger = {
   },
 };
 
+interface Notification {
   message: string;
   type: 'info' | 'success' | 'error';
   timestamp: number;
 }
 
+interface CrossAppStore {
+  addNotification: (notification: Notification) => void;
   notifications: Notification[];
   clearNotifications: () => void;
 }

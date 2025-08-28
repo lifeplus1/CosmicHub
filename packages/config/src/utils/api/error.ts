@@ -1,15 +1,29 @@
 // Shared API error and response helpers
+export interface StandardApiError {
+  code: string;
   message: string;
   details?: unknown;
 }
 
+export interface StandardSuccess<T> {
+  success: true;
   data: T;
   message?: string;
 }
 
+export interface StandardFailure {
+  success: false;
   error: string;
   code?: string;
   details?: unknown;
+}
+
+export type StandardApiResponse<T> = StandardSuccess<T> | StandardFailure;
+
+export function isStandardFailure<T>(
+  r: StandardApiResponse<T>
+): r is StandardFailure {
+  return r.success === false;
 }
 
 export function buildFailure(

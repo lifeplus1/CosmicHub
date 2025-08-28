@@ -3,9 +3,9 @@
   if (value === null || value === undefined || typeof value !== 'object') {
     return false;
   }
-
+  
   const obj = value as Record<string, unknown>;
-
+  
   return (* This module provides type predicates (type guards) for safely narrowing types
  * at runtime. These guards allow for more precise type checking in TypeScript
  * and help prevent runtime errors by validating data structures.
@@ -25,22 +25,99 @@ import type {
 /**
  * Type guard for Planet objects
  */
+export function isPlanet(value: unknown): value is Planet {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return (
+    typeof obj['name'] === 'string' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['position'] === 'number' &&
+    typeof obj['house'] === 'string' &&
+    (obj['retrograde'] === undefined ||
+      typeof obj['retrograde'] === 'boolean') &&
+    (obj['aspects'] === undefined || Array.isArray(obj['aspects']))
+  );
+}
 
 /**
  * Type guard for House objects
  */
+export function isHouse(value: unknown): value is House {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return (
+    typeof obj['house'] === 'number' &&
+    typeof obj['number'] === 'number' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['cusp'] === 'number' &&
+    typeof obj['ruler'] === 'string'
+  );
+}
 
 /**
  * Type guard for Aspect objects
  */
+export function isAspect(value: unknown): value is Aspect {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return (
+    typeof obj['planet1'] === 'string' &&
+    typeof obj['planet2'] === 'string' &&
+    typeof obj['type'] === 'string' &&
+    typeof obj['orb'] === 'number' &&
+    typeof obj['applying'] === 'string'
+  );
+}
 
 /**
  * Type guard for Asteroid objects
  */
+export function isAsteroid(value: unknown): value is Asteroid {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return (
+    typeof obj['name'] === 'string' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['house'] === 'string'
+  );
+}
 
 /**
  * Type guard for Angle objects
  */
+export function isAngle(value: unknown): value is Angle {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return (
+    typeof obj['name'] === 'string' &&
+    typeof obj['sign'] === 'string' &&
+    typeof obj['degree'] === 'number' &&
+    typeof obj['position'] === 'number'
+  );
+}
 
 /**
  * Type guard for AstrologyChart objects
@@ -147,6 +224,13 @@ export function getAstrologyDataType(
 /**
  * Type guard to check if the value is any valid astrology data type
  */
+export function isAstrologyData(
+  value: unknown
+): value is AstrologyChart | UserProfile | NumerologyData {
+  return (
+    isAstrologyChart(value) || isUserProfile(value) || isNumerologyData(value)
+  );
+}
 
 /**
  * Validates an astrology chart structure and reports specific validation errors

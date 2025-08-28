@@ -487,3 +487,4 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
 
 // Export singleton instance
 export const qaEngine = new QualityAssuranceEngine();
+export { QualityAssuranceEngine };

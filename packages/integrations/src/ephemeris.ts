@@ -5,14 +5,23 @@
  * with the ephemeris server, ensuring consistency across astro and healwave apps.
  */
 
+export interface PlanetPosition {
+  /** Position in degrees (0-360) */
+  position: number;
   /** Whether the planet is in retrograde motion */
   retrograde: boolean;
 }
 
+export interface CalculationRequest {
+  /** Julian Day Number for the calculation */
+  julian_day: number;
   /** Planet name (e.g., 'sun', 'moon', 'mercury') */
   planet: string;
 }
 
+export interface CalculationResponse {
+  /** Planet name */
+  planet: string;
   /** Julian Day Number */
   julian_day: number;
   /** Position data */
@@ -21,12 +30,21 @@
   calculation_time: string;
 }
 
+export interface BatchCalculationRequest {
+  /** Array of calculations to perform */
+  calculations: CalculationRequest[];
 }
 
+export interface BatchCalculationResponse {
+  /** Array of calculation results */
+  results: CalculationResponse[];
   /** UTC timestamp of batch calculation */
   calculation_time: string;
 }
 
+export interface EphemerisHealthResponse {
+  /** Service status */
+  status: 'healthy' | 'unhealthy';
   /** Health check timestamp */
   timestamp: string;
   /** Whether ephemeris is properly initialized */
@@ -54,9 +72,14 @@ export const SUPPORTED_PLANETS = [
   'vesta',
 ] as const;
 
+export type PlanetName = (typeof SUPPORTED_PLANETS)[number];
+
 /**
  * Configuration for ephemeris client.
  */
+export interface EphemerisConfig {
+  /** Backend API base URL */
+  apiBaseUrl: string;
   /** API key for authentication (if required) */
   apiKey?: string;
   /** Request timeout in milliseconds */
@@ -69,6 +92,106 @@ export const SUPPORTED_PLANETS = [
  * This client abstracts the communication with the backend, which in turn
  * communicates with the dedicated ephemeris server.
  */
+export class EphemerisClient {
+  private config: Required<EphemerisConfig>;
+
+  constructor(config: EphemerisConfig) {
+    this.config = {
+      timeout: 30000,
+      ...config,
+      apiKey: config.apiKey ?? '',
+    };
+  }
+
+  /**
+   * Create request headers with authentication if available.
+   */
+  private getHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (this.config.apiKey) {
+      headers['Authorization'] = `Bearer ${this.config.apiKey}`;
+    }
+    
+    return headers;
+  }
+
+  /**
+   * Calculate planetary positions for a specific date.
+   */
+  async calculatePlanet(
+    planet: PlanetName,
+    julianDay: number
+  ): Promise<CalculationResponse> {
+    const request: CalculationRequest = {
+      planet,
+      julian_day: julianDay,
+    };
+
+    const response = await fetch(
+      `${this.config.apiBaseUrl}/api/ephemeris/calculate`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(request),
+        signal: AbortSignal.timeout(this.config.timeout),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Ephemeris calculation failed: ${response.statusText}`);
+    }
+
+    return response.json() as Promise<CalculationResponse>;
+  }
+
+  /**
+   * Batch calculate multiple planetary positions.
+   */
+  async batchCalculate(
+    calculations: CalculationRequest[]
+  ): Promise<BatchCalculationResponse> {
+    const request: BatchCalculationRequest = { calculations };
+
+    const response = await fetch(
+      `${this.config.apiBaseUrl}/api/ephemeris/batch-calculate`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(request),
+        signal: AbortSignal.timeout(this.config.timeout),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Batch calculation failed: ${response.statusText}`);
+    }
+
+    return response.json() as Promise<BatchCalculationResponse>;
+  }
+
+  /**
+   * Check ephemeris service health.
+   */
+  async healthCheck(): Promise<EphemerisHealthResponse> {
+    const response = await fetch(
+      `${this.config.apiBaseUrl}/api/ephemeris/health`,
+      {
+        method: 'GET',
+        headers: this.getHeaders(),
+        signal: AbortSignal.timeout(this.config.timeout),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Health check failed: ${response.statusText}`);
+    }
+
+    return response.json() as Promise<EphemerisHealthResponse>;
+  }
+}
 
 /**
  * Utility function to convert a Date to Julian Day Number.

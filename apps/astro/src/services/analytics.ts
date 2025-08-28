@@ -6,7 +6,6 @@ import {
   trackChartView,
   trackAIInteraction,
   trackPWAInstallPrompt,
-  trackPWAInstallSuccess,
   type AnalyticsConfig,
 } from '@cosmichub/analytics';
 import {
@@ -19,17 +18,17 @@ import {
 // Analytics Configuration
 const analyticsConfig: AnalyticsConfig = createDefaultAnalyticsConfig({
   googleAnalytics: {
-    measurementId: import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '',
+    measurementId: (import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string) ?? '',
     enabled: !!import.meta.env.PUBLIC_GA_MEASUREMENT_ID,
   },
   mixpanel: {
-    token: import.meta.env.PUBLIC_MIXPANEL_TOKEN || '',
+    token: (import.meta.env.PUBLIC_MIXPANEL_TOKEN as string) ?? '',
     enabled: !!import.meta.env.PUBLIC_MIXPANEL_TOKEN,
     trackPageViews: true,
   },
   posthog: {
-    apiKey: import.meta.env.PUBLIC_POSTHOG_API_KEY || '',
-    host: import.meta.env.PUBLIC_POSTHOG_HOST,
+    apiKey: (import.meta.env.PUBLIC_POSTHOG_API_KEY as string) ?? '',
+    host: (import.meta.env.PUBLIC_POSTHOG_HOST as string),
     enabled: !!import.meta.env.PUBLIC_POSTHOG_API_KEY,
     sessionRecording: true,
     heatmaps: true,
@@ -82,7 +81,7 @@ const setupConsentManagement = () => {
   // Check for existing consent
   const consent = localStorage.getItem('analytics-consent');
   if (consent) {
-    const consentData = JSON.parse(consent);
+    const consentData = JSON.parse(consent) as { granted: boolean; timestamp: number; version: string };
     analytics?.setConsentGranted(consentData.granted);
   } else {
     // Show consent banner if required
@@ -155,11 +154,11 @@ const setAnalyticsConsent = (granted: boolean) => {
 
 // PWA Install Tracking
 const setupPWATracking = () => {
-  let deferredPrompt: BeforeInstallPromptEvent | null = null;
+  let _deferredPrompt: BeforeInstallPromptEvent | null = null;
   
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
-    deferredPrompt = e as BeforeInstallPromptEvent;
+    _deferredPrompt = e as BeforeInstallPromptEvent;
     
     trackPWAInstallPrompt({
       prompt_trigger: 'automatic',

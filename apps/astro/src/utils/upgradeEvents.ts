@@ -2,6 +2,8 @@
  * Event system for triggering upgrade modal from anywhere in the app
  */
 
+export interface UpgradeRequiredEvent {
+  feature: string;
 }
 
 import { devConsole } from '../config/environment';

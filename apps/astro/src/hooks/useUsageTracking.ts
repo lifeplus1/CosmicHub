@@ -8,6 +8,8 @@ interface UsageData {
   lastReset: string;
 }
 
+export function useUsageTracking() {
+  const { user } = useAuth();
   const [usage, setUsage] = useState<UsageData>({
     chartsThisMonth: 0,
     savedCharts: 0,

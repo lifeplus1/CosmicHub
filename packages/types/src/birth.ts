@@ -4,8 +4,8 @@
  */
 
 export interface UnifiedBirthData {
-  year: number; // 1-12
-  month: number; // 1-31
+  year: number;
+  month: number; // 1-12
   day: number; // 1-31
   hour: number; // 0-23
   minute: number; // 0-59
@@ -31,7 +31,9 @@ export interface TextBirthData {
 export type AnyBirthInput = UnifiedBirthData | TextBirthData;
 
 export const isUnifiedBirthData = (v: unknown): v is UnifiedBirthData => {
-  if (v === null || v === undefined || typeof v !== 'object') return false;
+  if (v === null || v === undefined || typeof v !== 'object') {
+    return false;
+  }
 
   // Type assertion after null check
   const obj = v as Record<string, unknown>;
@@ -55,7 +57,9 @@ export const isUnifiedBirthData = (v: unknown): v is UnifiedBirthData => {
 };
 
 export const isTextBirthData = (v: unknown): v is TextBirthData => {
-  if (v === null || v === undefined || typeof v !== 'object') return false;
+  if (v === null || v === undefined || typeof v !== 'object') {
+    return false;
+  }
 
   // Type assertion after null check
   const obj = v as Record<string, unknown>;
@@ -201,19 +205,38 @@ export function toUnifiedBirthData(input: AnyBirthInput): UnifiedBirthData {
 }
 
 // Backwards compatibility exports
+export type ChartBirthData = TextBirthData;
 
 /** Result type for safe parsing */
-export interface SafeParseResult {
+export interface SafeParseSuccess {
   success: true;
   data: UnifiedBirthData;
 }
-
-export interface SafeParseError {
+export interface SafeParseFailure {
   success: false;
   error: Error;
 }
+export type SafeParseResult = SafeParseSuccess | SafeParseFailure;
 
-export type SafeParseResult = SafeParseResult | SafeParseError;
+/**
+ * Convert UnifiedBirthData to TextBirthData format
+ */
+export function toTextBirthData(data: UnifiedBirthData): TextBirthData {
+  const birth_date = `${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')}`;
+  const birth_time = `${String(data.hour).padStart(2, '0')}:${String(data.minute).padStart(2, '0')}`;
+  
+  const result: TextBirthData = {
+    birth_date,
+    birth_time,
+  };
+  
+  if (data.city) result.city = data.city;
+  if (data.lat !== undefined) result.latitude = data.lat;
+  if (data.lon !== undefined) result.longitude = data.lon;
+  if (data.timezone) result.timezone = data.timezone;
+  
+  return result;
+}
 
 /**
  * Non-throwing variant returning a discriminated union.
@@ -234,6 +257,3 @@ export function safeParseTextBirthData(data: TextBirthData): SafeParseResult {
     };
   }
 }
-
-// Backwards compatibility alias
-export type ChartBirthData = TextBirthData;

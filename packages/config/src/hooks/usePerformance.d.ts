@@ -1,10 +1,14 @@
 import type { PerformanceReport } from '../performance';
+export interface PerformanceMetrics {
+  duration: number;
   startTime: number;
   endTime: number;
   memory?: number;
   paintTime?: number;
   loadTime?: number;
 }
+export interface OperationMetrics {
+  operationId: string;
   operationName: string;
   startTime: number;
   endTime?: number;
@@ -13,6 +17,8 @@ import type { PerformanceReport } from '../performance';
   error?: string;
   metadata?: Record<string, unknown>;
 }
+export interface PagePerformanceMetrics {
+  pageLoadTime: number;
   firstContentfulPaint: number;
   largestContentfulPaint: number;
   firstInputDelay: number;

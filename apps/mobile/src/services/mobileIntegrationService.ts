@@ -53,7 +53,10 @@ export class MobileIntegrationService {
       this.isInitialized = true;
       return this.getFeatureStatus();
     } catch (error) {
-      console.error('Failed to initialize mobile integration service:', error);
+      // Log error for development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to initialize mobile integration service:', error);
+      }
       throw error;
     }
   }
@@ -87,7 +90,10 @@ export class MobileIntegrationService {
         this.preferences = { ...this.preferences, ...parsed };
       }
     } catch (error) {
-      console.error('Failed to load integration preferences:', error);
+      // Development error logging only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load integration preferences:', error);
+      }
     }
   }
 
@@ -101,7 +107,9 @@ export class MobileIntegrationService {
         JSON.stringify(this.preferences)
       );
     } catch (error) {
-      console.error('Failed to save integration preferences:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to save integration preferences:', error);
+      }
       throw error;
     }
   }
@@ -176,7 +184,9 @@ export class MobileIntegrationService {
         { transits }
       );
     } catch (error) {
-      console.error('Failed to schedule transit notifications:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to schedule transit notifications:', error);
+      }
     }
   }
 
@@ -203,7 +213,9 @@ export class MobileIntegrationService {
         );
       }
     } catch (error) {
-      console.error('Failed to update location-based data:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to update location-based data:', error);
+      }
     }
   }
 
@@ -258,7 +270,9 @@ export class MobileIntegrationService {
       // For now, return null as the camera service requires a camera ref
       return null;
     } catch (error) {
-      console.error('Failed to capture and share chart:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to capture and share chart:', error);
+      }
       return null;
     }
   }
@@ -278,7 +292,9 @@ export class MobileIntegrationService {
       await this.initialize();
       return true;
     } catch (error) {
-      console.error('App launch initialization failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('App launch initialization failed:', error);
+      }
       return false;
     }
   }
@@ -293,7 +309,9 @@ export class MobileIntegrationService {
       );
       return completed === 'true';
     } catch (error) {
-      console.error('Failed to check onboarding status:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to check onboarding status:', error);
+      }
       return false;
     }
   }
@@ -305,7 +323,9 @@ export class MobileIntegrationService {
     try {
       await AsyncStorage.setItem('mobile_onboarding_completed', 'true');
     } catch (error) {
-      console.error('Failed to mark onboarding as completed:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to mark onboarding as completed:', error);
+      }
       throw error;
     }
   }

@@ -5,6 +5,8 @@ import { useSubscription } from '@cosmichub/auth';
  * Demo component to test the upgrade modal functionality
  * This demonstrates how to use the subscription system to gate premium features
  */
+export const UpgradeModalDemo: React.FC = () => {
+  const subscriptionData = useSubscription();
   const hasFeature =
     typeof subscriptionData?.hasFeature === 'function'
       ? subscriptionData.hasFeature

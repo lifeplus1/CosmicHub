@@ -7,10 +7,92 @@ import React, { type ComponentType } from 'react';
 import { lazyLoadRoute, LazyLoadErrorBoundary } from '@cosmichub/config';
 
 // Main page routes with lazy loading
+export const AstroRoutes: Record<string, ReturnType<typeof lazyLoadRoute>> = {
+  // Dashboard route
+  Dashboard: lazyLoadRoute(
+    () => import('../pages/Dashboard'),
+    'AstroDashboard'
+  ),
+
+  // Chart generation routes
+  BirthChart: lazyLoadRoute(() => import('../pages/Chart'), 'BirthChart'),
+
+  SynastryChart: lazyLoadRoute(
+    () => import('../pages/Synastry'),
+    'SynastryChart'
+  ),
+
+  TransitChart: lazyLoadRoute(() => import('../pages/Chart'), 'TransitChart'),
+
+  // Advanced features
+  GeneKeys: lazyLoadRoute(() => import('../pages/GeneKeys'), 'GeneKeys'),
+
+  HumanDesign: lazyLoadRoute(
+    () => import('../pages/HumanDesign'),
+    'HumanDesign'
+  ),
+
+  PearlSequence: lazyLoadRoute(
+    () => import('../pages/GeneKeys'),
+    'PearlSequence'
+  ),
+
+  // Analysis features
+  AspectAnalysis: lazyLoadRoute(
+    () => import('../pages/AIInterpretation'),
+    'AspectAnalysis'
+  ),
+
+  TransitAnalysis: lazyLoadRoute(
+    () => import('../pages/AIInterpretation'),
+    'TransitAnalysis'
+  ),
+
+  // User management
+  Profile: lazyLoadRoute(() => import('../pages/Profile'), 'Profile'),
+
+  Settings: lazyLoadRoute(() => import('../pages/Profile'), 'Settings'),
+
+  // Authentication
+  Login: lazyLoadRoute(() => import('../pages/Login'), 'Login'),
+
+  Register: lazyLoadRoute(() => import('../pages/SignUp'), 'Register'),
+
+  // Additional pages
+  Calculator: lazyLoadRoute(() => import('../pages/Calculator'), 'Calculator'),
+
+  Numerology: lazyLoadRoute(() => import('../pages/Numerology'), 'Numerology'),
+
+  SavedCharts: lazyLoadRoute(
+    () => import('../pages/SavedCharts'),
+    'SavedCharts'
+  ),
+
+  SubscriptionSuccess: lazyLoadRoute(
+    () => import('../pages/SubscriptionSuccess'),
+    'SubscriptionSuccess'
+  ),
+
+  SubscriptionCancelled: lazyLoadRoute(
+    () => import('../pages/SubscriptionCancel'),
+    'SubscriptionCancelled'
+  ),
+
+  PerformanceMonitoring: lazyLoadRoute(
+    () => import('../pages/PerformanceMonitoring'),
+    'PerformanceMonitoring'
+  ),
+};
 
 // Lazy loaded components with error boundaries
 // Wrap a lazily loaded component with an error boundary.
 // Use a generic to preserve prop types instead of any.
+export const withErrorBoundary = <P extends Record<string, unknown>>(
+  Component: ComponentType<P>
+): React.FC<P> => {
+  const Wrapped: React.FC<P> = (props: P) => (
+    <LazyLoadErrorBoundary>
+      {React.createElement(Component, props)}
     </LazyLoadErrorBoundary>
   );
   const baseName = Component.displayName ?? Component.name ?? 'Component';
@@ -32,6 +114,12 @@ function ensureComponent(key: keyof typeof AstroRoutes) {
   return entry;
 }
 
+export const astroRouteConfig = [
+  {
+    path: '/',
+    component: withErrorBoundary(ensureComponent('Dashboard')),
+    preload: true,
+  },
   {
     path: '/birth-chart',
     component: withErrorBoundary(ensureComponent('BirthChart')),

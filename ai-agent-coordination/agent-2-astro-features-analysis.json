@@ -1,9 +1,10 @@
 {
+  "runId": "run-1756339233665",
   "agentId": "agent-2-astro-features",
   "agent": "FeatureFixAgent",
-  "timestamp": "2025-08-27T12:03:20.913Z",
-  "success": false,
-  "duration": 11314,
+  "timestamp": "2025-08-28T00:00:42.912Z",
+  "success": true,
+  "duration": 9242,
   "targets": [
     "apps/astro/src/features"
   ],
@@ -19,10 +20,13 @@
   ],
   "conflictRisk": "low",
   "lintOutput": "npm warn Unknown env config \"auto-install-peers\". This will stop working in the next major version of npm.\nnpm warn Unknown project config \"auto-install-peers\". This will stop working in the next major version of npm.\n",
-  "errors": "\n/Users/Chris/Projects/CosmicHub/apps/astro/src/features/ChartWheel.tsx\n  126:60  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  126:88  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  129:13  error    Unsafe assignment of an error typed value                                                                  @typescript-eslint/no-unsafe-assignment\n  130:86  error    Unsafe member access .success on an `error` typed value                                                    @typescript-eslint/no-unsafe-member-access\n  133:19  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n  133:41  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n  136:53  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n\n/Users/Chris/Projects/CosmicHub/apps/astro/src/features/ChartWheelInteractive.tsx\n  142:58  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  142:86  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  145:13  error    Unsafe assignment of an error typed value                                                                  @typescript-eslint/no-unsafe-assignment\n  146:86  error    Unsafe member access .success on an `error` typed value                                                    @typescript-eslint/no-unsafe-member-access\n  149:19  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n  149:41  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n  152:53  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n  173:13  error    Unsafe assignment of an error typed value                                                                  @typescript-eslint/no-unsafe-assignment\n  174:86  error    Unsafe member access .success on an `error` typed value                                                    @typescript-eslint/no-unsafe-member-access\n  177:19  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n  177:41  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n  180:30  error    Unsafe member access .data on an `error` typed value                                                       @typescript-eslint/no-unsafe-member-access\n\n✖ 19 problems (15 errors, 4 warnings)\n\n",
-  "exitCode": 1,
-  "errorCount": 15,
-  "warningCount": 4,
-  "hasLintOutput": true,
-  "readyForExecution": false
+  "errors": "",
+  "exitCode": 0,
+  "errorCount": 0,
+  "warningCount": 0,
+  "hasLintOutput": false,
+  "readyForExecution": true,
+  "coordinatorVersion": "1.0.0",
+  "fileType": "current-analysis",
+  "isStale": false
 }

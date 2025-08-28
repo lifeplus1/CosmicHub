@@ -1,4 +1,6 @@
 // Unified minimal ApiResult used across frontend apps (astro, integrations, etc.)
+export interface ApiSuccess<T> {
+  success: true;
   data: T;
   message?: string;
 }
@@ -8,6 +10,7 @@ export interface ApiFailure {
   code?: string;
   details?: unknown;
 }
+export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
 
 // Centralized error code constants to avoid magic strings
 export const ErrorCode = {
@@ -16,6 +19,7 @@ export const ErrorCode = {
   VALIDATION: '400',
   INVALID_SHAPE: 'invalid_shape',
 } as const;
+export type ErrorCodeValue = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 export const ok = <T>(data: T, message?: string): ApiSuccess<T> => ({
   success: true,
@@ -28,6 +32,8 @@ export const fail = (
   details?: unknown
 ): ApiFailure => ({ success: false, error, code, details });
 
+export interface FailureMapOptions {
+  auth?: string; // 401
   notFound?: string; // 404
   validation?: string; // 400
   defaultMsg: string;

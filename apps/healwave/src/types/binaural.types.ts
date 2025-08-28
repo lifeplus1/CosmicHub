@@ -4,7 +4,10 @@
  */
 
 // Core binaural frequency types
+type BinauralColor = 'blue' | 'green' | 'yellow' | 'red' | 'gray';
 
+interface FrequencyRange {
+  readonly min: number;
   readonly max: number;
   readonly name: string;
   readonly color: BinauralColor;
@@ -12,18 +15,30 @@
   readonly benefits?: readonly string[];
 }
 
+interface AudioSettings {
+  volume: number;
+  duration: number;
+  fadeIn: number;
+  fadeOut: number;
 }
 
 // Settings validation schemas
+interface AudioSettingsConstraints {
+  readonly volume: { min: 0; max: 100; step: 1 };
   readonly duration: { min: 1; max: 120; step: 1 };
   readonly fadeIn: { min: 0; max: 30; step: 1 };
   readonly fadeOut: { min: 0; max: 30; step: 1 };
 }
 
+interface FrequencyConstraints {
+  readonly baseFrequency: { min: 20; max: 20000; step: 1 };
   readonly binauralBeat: { min: 0.5; max: 100; step: 0.5 };
 }
 
 // Error types for robust error handling
+type BinauralSettingsError =
+  | {
+      type: 'INVALID_FREQUENCY';
       frequency: number;
       constraints: FrequencyConstraints['baseFrequency'];
     }
@@ -41,18 +56,22 @@
   | { type: 'PRESET_CREATION_ERROR'; message: string };
 
 // Analytics events for marketability tracking
+interface AnalyticsEvent {
+  readonly event: string;
   readonly properties: Record<string, string | number | boolean>;
   readonly timestamp: number;
   readonly userId?: string;
 }
 
 // Accessibility configuration
+interface AccessibilityConfig {
   readonly useHighContrast: boolean;
   readonly enableKeyboardShortcuts: boolean;
   readonly reduceMotion: boolean;
 }
 
 // Security validation
+interface InputValidation {
   readonly validateNumeric: (
     value: number,
     constraints: { min: number; max: number }
@@ -61,10 +80,14 @@
 }
 
 // Performance optimization types
+interface PerformanceMetrics {
+  readonly renderTime: number;
   readonly interactionLatency: number;
   readonly memoryUsage: number;
 }
 
+// Predefined frequency ranges
+export const FREQUENCY_RANGES = {
   theta: {
     min: 4,
     max: 8,
@@ -106,10 +129,28 @@
   },
 } as const;
 
+export const AUDIO_SETTINGS_CONSTRAINTS: AudioSettingsConstraints = {
+  volume: { min: 0, max: 100, step: 1 },
   duration: { min: 1, max: 120, step: 1 },
   fadeIn: { min: 0, max: 30, step: 1 },
   fadeOut: { min: 0, max: 30, step: 1 },
 } as const;
 
+export const FREQUENCY_CONSTRAINTS: FrequencyConstraints = {
+  baseFrequency: { min: 20, max: 20000, step: 1 },
   binauralBeat: { min: 0.5, max: 100, step: 0.5 },
 } as const;
+
+// Export types
+export type {
+  FrequencyRange,
+  AudioSettings,
+  AudioSettingsConstraints,
+  FrequencyConstraints,
+  BinauralSettingsError,
+  AnalyticsEvent,
+  AccessibilityConfig,
+  InputValidation,
+  PerformanceMetrics,
+  BinauralColor,
+};

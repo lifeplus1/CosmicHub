@@ -18,6 +18,9 @@ import {
 } from './testEvents';
 import { TestResult, TestRunSummary } from './testTypes';
 
+export interface TestRunnerConfig {
+  coverage: {
+    threshold: number;
     exclude: string[];
   };
   performance: {
@@ -560,15 +563,25 @@ export const createDevelopmentRunner = (): TestSuiteRunner =>
     reports: { generateHtml: true, generateJson: false, uploadResults: false },
   });
 
+export const createCIRunner = (): TestSuiteRunner =>
+  new TestSuiteRunner({
+    coverage: {
+      threshold: 80,
+      exclude: ['**/*.test.*', '**/*.spec.*', '**/stories/**'],
+    },
     performance: { maxRenderTime: 16, maxMountTime: 25 },
     accessibility: { level: 'AA' as const, checkContrast: true },
     reports: { generateHtml: false, generateJson: true, uploadResults: true },
   });
 
+export const createProductionRunner = (): TestSuiteRunner =>
+  new TestSuiteRunner({
+    coverage: { threshold: 90, exclude: ['**/*.test.*', '**/*.spec.*'] },
     performance: { maxRenderTime: 10, maxMountTime: 15 },
     accessibility: { level: 'AAA' as const, checkContrast: true },
     reports: { generateHtml: true, generateJson: true, uploadResults: true },
   });
 
 // Export default instance
+export const testRunner = new TestSuiteRunner();
 export { TestSuiteRunner };

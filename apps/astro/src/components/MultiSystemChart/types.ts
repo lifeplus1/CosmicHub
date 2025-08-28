@@ -1,3 +1,6 @@
+export interface MultiSystemChartData {
+  birth_info?: {
+    date?: string;
     time?: string;
     location?: {
       latitude?: number;
@@ -79,6 +82,8 @@
   };
 }
 
+export interface WesternChartData {
+  planets: Record<string, { position: number; retrograde?: boolean }>;
   aspects: Array<{
     point1: string;
     point2: string;
@@ -92,6 +97,8 @@
   }>;
 }
 
+export interface VedicChartData {
+  description?: string;
   ayanamsa?: number;
   analysis?: { moon_sign?: string; analysis?: string };
   planets?: Record<
@@ -100,6 +107,8 @@
   >;
 }
 
+export interface ChineseChartData {
+  description?: string;
   year?: { animal?: string; element?: string; traits?: string };
   month?: { animal?: string };
   day?: { animal?: string };
@@ -109,6 +118,8 @@
   personality_summary?: string;
 }
 
+export interface MayanChartData {
+  description?: string;
   day_sign?: {
     symbol?: string;
     name?: string;
@@ -127,6 +138,8 @@
   spiritual_guidance?: string;
 }
 
+export interface UranianChartData {
+  description?: string;
   uranian_planets?: Record<
     string,
     { symbol?: string; position?: number; meaning?: string }
@@ -140,6 +153,8 @@
   }>;
 }
 
+export interface SynthesisChartData {
+  primary_themes?: string[];
   life_purpose?: string[];
   personality_integration?: Record<string, string[]>;
   spiritual_path?: string[];

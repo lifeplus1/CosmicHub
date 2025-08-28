@@ -3,9 +3,10 @@
 
 export type HouseSystem = 'placidus' | 'whole-sign' | 'equal-house';
 export type ThemeOption = 'light' | 'dark' | 'auto';
+export type ChartStyle = 'western' | 'vedic';
 
 export interface ChartPreferencesData {
-  chartStyle: 'western' | 'vedic';
+  chartStyle: ChartStyle;
   houseSystem: HouseSystem;
   notifications: boolean;
   theme: ThemeOption;

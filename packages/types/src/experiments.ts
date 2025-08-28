@@ -10,11 +10,103 @@ export const ExperimentStatus = {
   ANALYZING: 'analyzing',
 } as const;
 
+export type ExperimentStatusType =
+  (typeof ExperimentStatus)[keyof typeof ExperimentStatus];
+
 // Experiment Configuration Schema
+export const experimentMetricsSchema = z
+  .object({
+    primary: z
+      .string()
+      .min(1, 'Primary metric is required')
+      .max(100, 'Primary metric name too long')
+      .describe(
+        'The primary metric to evaluate experiment success (e.g., conversion_rate)'
+      ),
+
+    guardrails: z
+      .array(z.string())
+      .min(0, 'Guardrails array cannot be empty')
+      .max(20, 'Too many guardrail metrics')
+      .describe('Array of guardrail metrics to monitor for safety'),
+
+    secondary: z
+      .array(z.string())
+      .max(10, 'Too many secondary metrics')
+      .optional()
+      .describe('Optional secondary metrics for additional analysis'),
+  })
   .strict();
 
+export const experimentVariantSchema = z
+  .object({
+    id: z
+      .string()
+      .min(1, 'Variant ID is required')
+      .max(50, 'Variant ID too long')
+      .regex(
+        /^[a-zA-Z0-9_-]+$/,
+        'Variant ID can only contain letters, numbers, underscores, and hyphens'
+      ),
+
+    name: z
+      .string()
+      .min(1, 'Variant name is required')
+      .max(100, 'Variant name too long'),
+
+    description: z.string().max(500, 'Variant description too long').optional(),
+
+    traffic_percentage: z
+      .number()
+      .min(0, 'Traffic percentage must be 0 or greater')
+      .max(100, 'Traffic percentage cannot exceed 100')
+      .describe('Percentage of traffic allocated to this variant'),
+
+    config: z
+      .record(z.unknown())
+      .optional()
+      .describe('Variant-specific configuration parameters'),
+  })
   .strict();
 
+export const experimentConfigSchema = z
+  .object({
+    sample_size: z
+      .number()
+      .int()
+      .min(10, 'Sample size must be at least 10')
+      .max(1000000, 'Sample size too large')
+      .optional()
+      .describe('Target sample size per variant'),
+
+    statistical_power: z
+      .number()
+      .min(0.1)
+      .max(0.99)
+      .optional()
+      .default(0.8)
+      .describe('Statistical power (1 - β) for the experiment'),
+
+    significance_level: z
+      .number()
+      .min(0.01)
+      .max(0.1)
+      .optional()
+      .default(0.05)
+      .describe('Significance level (α) for hypothesis testing'),
+
+    minimum_detectable_effect: z
+      .number()
+      .min(0.001)
+      .max(1.0)
+      .optional()
+      .describe('Minimum detectable effect size'),
+
+    randomization_unit: z
+      .enum(['user', 'session', 'pageview'])
+      .default('user')
+      .describe('Unit of randomization for the experiment'),
+  })
   .strict();
 
 // Core Experiment Registry Schema
@@ -180,8 +272,17 @@ export const experimentMigrationSchema = z
   .strict();
 
 // Type exports
+export type ExperimentMetrics = z.infer<typeof experimentMetricsSchema>;
+export type ExperimentVariant = z.infer<typeof experimentVariantSchema>;
+export type ExperimentConfig = z.infer<typeof experimentConfigSchema>;
+export type ExperimentRegistry = z.infer<typeof experimentRegistrySchema>;
+export type ExperimentBatch = z.infer<typeof experimentBatchSchema>;
+export type ExperimentMigrationType = z.infer<typeof experimentMigrationSchema>;
 
 // Validation result types
+export type ValidationResult<T> =
+  | {
+      success: true;
       data: T;
       warnings?: string[];
     }
@@ -195,9 +296,19 @@ export const experimentMigrationSchema = z
     };
 
 // Experiment validation state for UI
+export interface ExperimentValidationState {
+  isValid: boolean;
   errors: Record<string, string[]>;
   warnings: Record<string, string[]>;
   isValidating: boolean;
 }
 
 // Export schemas for external use
+export const schemas = {
+  experiment: experimentRegistrySchema,
+  metrics: experimentMetricsSchema,
+  variant: experimentVariantSchema,
+  config: experimentConfigSchema,
+  batch: experimentBatchSchema,
+  migration: experimentMigrationSchema,
+} as const;

@@ -1,5 +1,8 @@
 import { useState, useCallback } from 'react';
 
+export const useAstrologyGuide = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   // Removed unused tabIndex parameter (was causing no-unused-vars)
   const openGuide = useCallback(() => {
     setIsOpen(true);

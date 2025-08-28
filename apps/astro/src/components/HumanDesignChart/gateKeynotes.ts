@@ -2,6 +2,15 @@
 // Extend or refine as needed. Keep phrases short & archetypal.
 // Structure: gate -> line -> keynote string.
 
+export const GATE_KEYNOTES: Record<number, Record<number, string>> = {
+  1: {
+    1: 'Raw creative spark',
+    2: 'Quiet formative focus',
+    3: 'Inspiration incubation',
+    4: 'Externalized artist role',
+    5: 'Enduring creative pulse',
+    6: 'Exemplar of originality',
+  },
   2: {
     1: 'Innate receptive orientation',
     2: 'Stillness aligning direction',
@@ -509,6 +518,43 @@
 };
 
 // Channel-specific keynotes based on circuit and theme
+export const CHANNEL_KEYNOTES: Record<string, string> = {
+  '1-8': 'Creative inspiration through individual contribution',
+  '2-14': 'Directional guidance through resource mastery',
+  '3-60': 'Ordering energy through limitation acceptance',
+  '4-63': 'Mental clarity through logical doubt',
+  '5-15': 'Natural rhythm through extreme moderation',
+  '6-59': 'Intimate bonding through dispersive connection',
+  '7-31': 'Future leadership through influential direction',
+  '9-52': 'Focused determination through concentrated stillness',
+  '10-20': 'Authentic awakening through present moment awareness',
+  '10-34': 'Individual exploration through powerful conviction',
+  '10-57': 'Perfect survival form through intuitive guidance',
+  '11-56': 'Curious seeking through stimulating ideas',
+  '12-22': 'Social grace through emotional expression',
+  '13-33': 'Fellowship witness through retreating memory',
+  '16-48': 'Wavelength talent through skill mastery',
+  '17-62': 'Organized acceptance through detailed opinions',
+  '18-58': 'Corrective judgment through vital improvement',
+  '19-49': 'Tribal synthesis through sensitive approach',
+  '20-57': 'Penetrating awareness through gentle intuition',
+  '21-45': 'Material control through tribal gathering',
+  '23-43': 'Individual structuring through breakthrough insight',
+  '24-61': 'Awareness thinking through returning mystery',
+  '25-51': 'Innocent initiation through shocking spirit',
+  '26-44': 'Tribal surrender through trickster meetings',
+  '27-50': 'Caring preservation through transformative values',
+  '28-38': 'Individual struggle through purposeful opposition',
+  '29-46': 'Collective discovery through committed embodiment',
+  '30-41': 'Individual recognition through desire fantasy',
+  '32-54': 'Tribal transformation through enduring ambition',
+  '34-57': 'Individual power through intuitive strength',
+  '35-36': 'Collective experience through crisis navigation',
+  '37-40': 'Tribal community through family commitment',
+  '39-55': 'Individual emotional expression through provocative abundance',
+  '42-53': 'Collective maturation through growth development',
+  '47-64': 'Mental abstraction through oppressive confusion',
+};
 
 export function getGateLineKeynote(gate: number, line: number): string {
   return GATE_KEYNOTES[gate]?.[line] ?? 'Keynote not yet added.';

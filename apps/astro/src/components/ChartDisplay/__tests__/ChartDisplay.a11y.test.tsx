@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 import { ChartDisplay } from '../ChartDisplay';
 import type { ChartLike } from '../normalizeChart';
-import { createStubChartData } from '../../../test-utils/createStubChartData';
 
 // Mock the heavy dependencies
 vi.mock('@cosmichub/ui', async () => {
   const actual = await vi.importActual('@cosmichub/ui');
   return {
     ...actual,
-    Accordion: ({ children, value, onValueChange }: any) => (
+    Accordion: ({ children, value }: any) => (
       <div data-testid="accordion" data-value={JSON.stringify(value)}>
         {children}
       </div>
@@ -94,7 +94,6 @@ describe('ChartDisplay keyboard navigation & accessibility', () => {
     render(<ChartDisplay chart={mockChart} />);
     
     // Find view toggle buttons
-    const unifiedViewBtn = screen.getByRole('button', { name: /unified view/i });
     const separateViewBtn = screen.getByRole('button', { name: /separate tables/i });
     
     // Test button activation with keyboard

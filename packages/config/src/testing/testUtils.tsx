@@ -44,6 +44,12 @@ interface TestWrapperProps {
   };
 }
 
+export const TestWrapper: React.FC<TestWrapperProps> = ({
+  children,
+  initialEntries = ['/'],
+  initialIndex = 0,
+  mockUser,
+}) => {
   // Mock auth context if user provided
   if (mockUser) {
     vi.mock('@cosmichub/auth', () => ({
@@ -261,6 +267,8 @@ interface SynastryData {
   scores: Record<string, number>;
   [k: string]: unknown;
 }
+export const createMockSynastryData = (
+  overrides: Partial<SynastryData> = {}
 ): SynastryData => ({
   compatibility: 85,
   aspects: [
@@ -294,6 +302,8 @@ interface GeneKeysData {
   hologenicProfile: Record<string, string>;
   [k: string]: unknown;
 }
+export const createMockGeneKeysData = (
+  overrides: Partial<GeneKeysData> = {}
 ): GeneKeysData => ({
   lifeWork: 42,
   evolution: 17,
@@ -312,12 +322,23 @@ interface GeneKeysData {
 });
 
 // API Mock Helpers
+export const createMockApiResponse = <T,>(
+  data: T,
+  delay = 100
+): Promise<{ data: T; status: number; statusText: string }> =>
   new Promise(resolve => {
     setTimeout(() => {
       resolve({ data, status: 200, statusText: 'OK' });
     }, delay);
   });
 
+export const createMockApiError = (
+  message = 'API Error',
+  delay = 100
+): Promise<never> =>
+  new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(message));
     }, delay);
   });
 
@@ -334,6 +355,8 @@ export const measureRenderTime = async (
   return performance.now() - start;
 };
 
+export const expectFastRender = (renderTime: number, maxTime = 16): void => {
+  expect(renderTime).toBeLessThan(maxTime);
 };
 
 // Range Testing Utilities
@@ -370,6 +393,8 @@ export const expectAccessibleModal = (modal: HTMLElement): void => {
   expect(modal.hasAttribute('aria-labelledby')).toBe(true);
 };
 
+export const expectAccessibleForm = (form: HTMLElement): void => {
+  const inputs = form.querySelectorAll('input, select, textarea');
   inputs.forEach(input => {
     const ariaLabel = input.getAttribute('aria-label');
     const ariaLabelledBy = input.getAttribute('aria-labelledby');
@@ -423,6 +448,8 @@ export const ErrorThrowingComponent = ({
 };
 
 // Local Storage Testing Utilities
+export const mockLocalStorage = (): {
+  getItem: (k: string) => string | null;
   setItem: (k: string, v: string) => void;
   removeItem: (k: string) => void;
   clear: () => void;
@@ -450,6 +477,8 @@ export const ErrorThrowingComponent = ({
 };
 
 // Network Testing Utilities
+export const mockFetch = (
+  responses: Array<{ url: string; response: unknown; delay?: number }>
 ): ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>) => {
   const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
     let url: string;
@@ -486,6 +515,12 @@ export const ErrorThrowingComponent = ({
 };
 
 // Custom Matchers for Vitest
+export const customMatchers = {
+  toBeWithinRange: (
+    received: number,
+    min: number,
+    max: number
+  ): { pass: boolean; message: () => string } => {
     const pass = received >= min && received <= max;
     return {
       pass,
@@ -512,6 +547,8 @@ export const ErrorThrowingComponent = ({
 };
 
 // Test Suite Metadata
+export interface TestSuiteMetadata {
+  component: string;
   coverage: {
     statements: number;
     branches: number;
@@ -528,6 +565,10 @@ export const ErrorThrowingComponent = ({
   };
 }
 
+export const createTestSuiteReport = (
+  metadata: TestSuiteMetadata
+): {
+  component: string;
   coverage: TestSuiteMetadata['coverage'];
   performance: TestSuiteMetadata['performance'];
   accessibility: TestSuiteMetadata['accessibility'];

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import type { MultiSystemChartData } from './types';
-import type { ChartBirthData } from '@cosmichub/types';
+import type { UnifiedBirthData } from '@cosmichub/types';
 import WesternChart from './WesternChart';
 import VedicChart from './VedicChart';
 import ChineseChart from './ChineseChart';
@@ -11,7 +11,7 @@ import SynthesisChart from './SynthesisChart';
 
 interface MultiSystemChartProps {
   chartData?: MultiSystemChartData;
-  birthData?: ChartBirthData;
+  birthData?: UnifiedBirthData;
   // showComparison prop reserved for future comparative views (currently unused)
   showComparison?: boolean;
   isLoading?: boolean;
@@ -107,9 +107,9 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
           date: `${birthData.year}-${String(birthData.month).padStart(2, '0')}-${String(birthData.day).padStart(2, '0')}`,
           time: `${String(birthData.hour).padStart(2, '0')}:${String(birthData.minute).padStart(2, '0')}`,
           location: {
-            latitude: birthData.lat,
-            longitude: birthData.lon,
-            timezone: birthData.timezone,
+            latitude: Number(birthData.lat),
+            longitude: Number(birthData.lon),
+            timezone: String(birthData.timezone ?? 'UTC'),
           },
         }
       : undefined,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, type ReactElement } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { useSearchParams, Link } from 'react-router-dom';
 import {
@@ -19,6 +19,8 @@ interface SubscriptionDetails {
   expires_at: string;
 }
 
+const SubscriptionSuccessPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const subscriptionData = useSubscription();
   const { toast } = useToast();

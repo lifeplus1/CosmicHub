@@ -23,6 +23,7 @@ import {
 import {
   useAccessibilityAuditor,
   AccessibilityTestUtils,
+  AccessibilityAuditResult,
 } from '@cosmichub/config/accessibility-testing';
 import { ComponentProvider } from '@cosmichub/config/component-architecture';
 import Card, {
@@ -352,13 +353,7 @@ describe('Chart Card', () => {
 
 // Accessibility comprehensive tests
 describe('Card Accessibility', () => {
-  interface AuditResult {
-    passed: boolean;
-    level: string;
-    score: number;
-    recommendations: string[];
-  }
-  let auditResult: AuditResult;
+  let auditResult: AccessibilityAuditResult;
 
   beforeEach(async () => {
     const { auditComponent } = useAccessibilityAuditor('AA');

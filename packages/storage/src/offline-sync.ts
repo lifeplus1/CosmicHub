@@ -442,10 +442,23 @@ export const getOfflineSyncManager = (): OfflineSyncManager => {
 };
 
 // Convenience functions
+export const syncOfflineData = (): Promise<SyncResult> => {
+  return getOfflineSyncManager().syncOfflineData();
 };
 
+export const forceSyncAll = (): Promise<SyncResult> => {
+  return getOfflineSyncManager().forceSyncAll();
 };
 
+export const getSyncStats = (): Promise<{
+  pending_items: number;
+  last_sync: string | null;
+  sync_in_progress: boolean;
+  network_status: NetworkStatus;
+}> => {
+  return getOfflineSyncManager().getSyncStats();
 };
 
+export const clearAllOfflineData = (): Promise<void> => {
+  return getOfflineSyncManager().clearAllOfflineData();
 };

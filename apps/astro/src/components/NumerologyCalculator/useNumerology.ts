@@ -11,6 +11,8 @@ interface NumerologyApiResponse {
   numerology: NumerologyResult;
 }
 
+export const useNumerology = (): {
+  formData: NumerologyData;
   setFormData: Dispatch<SetStateAction<NumerologyData>>;
   result: NumerologyResult | null;
   loading: boolean;

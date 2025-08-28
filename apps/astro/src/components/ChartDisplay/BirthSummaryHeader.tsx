@@ -29,7 +29,8 @@ export const BirthSummaryHeader: React.FC<Props> = ({ birthData, isLoading, onEd
   const timeStr = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
 
   return (
-    <Card className='p-6' aria-describedby='birth-data-summary' role='region' aria-labelledby='chart-page-heading' tabIndex={-1} onKeyDown={onKeyDown}>
+    <div role='region' aria-describedby='birth-data-summary' aria-labelledby='chart-page-heading' tabIndex={-1} onKeyDown={onKeyDown}>
+      <Card className='p-6'>
       <div className='flex flex-col md:flex-row md:justify-between gap-4 items-start'>
         <div>
           <h1 id='chart-page-heading' className='text-2xl font-bold mb-2'>
@@ -43,7 +44,7 @@ export const BirthSummaryHeader: React.FC<Props> = ({ birthData, isLoading, onEd
             </p>
             <p>
               <span className='font-medium'>Location:</span>{' '}
-              {city || <span className='italic text-gray-500'>Unknown</span>}
+              {city ?? <span className='italic text-gray-500'>Unknown</span>}
             </p>
             {typeof lat === 'number' && typeof lon === 'number' && (
               <p>
@@ -78,5 +79,6 @@ export const BirthSummaryHeader: React.FC<Props> = ({ birthData, isLoading, onEd
       </div>
       <p className='sr-only mt-2'>Press e to edit birth data, r to recalculate, s to save when this region is focused.</p>
     </Card>
+    </div>
   );
 };

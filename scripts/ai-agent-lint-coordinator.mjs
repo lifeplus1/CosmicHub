@@ -7,7 +7,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, renameSync, readdirSync, openSync, fsyncSync, closeSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -158,12 +158,50 @@ class AIAgentCoordinator {
       results: new Map(),
       conflicts: new Map()
     };
+    this.runId = `run-${Date.now()}`;
     this.ensureCoordinationDirectory();
   }
 
   ensureCoordinationDirectory() {
     if (!existsSync(COORDINATION_DIR)) {
       mkdirSync(COORDINATION_DIR, { recursive: true });
+    }
+    
+    // Clean up stale completion files from previous runs
+    this.cleanupStaleFiles();
+  }
+
+  cleanupStaleFiles() {
+    try {
+      const files = readdirSync(COORDINATION_DIR);
+      
+      // Remove old completion files that might confuse agents
+      const stalePatterns = [
+        '-completion.json',
+        '-completion-updated.json', 
+        '-completion-final.json',
+        '-status.json',
+        '-analysis-updated.json'  // Catch updated analysis files too
+      ];
+      
+      let cleanedCount = 0;
+      files.forEach(file => {
+        if (stalePatterns.some(pattern => file.includes(pattern))) {
+          const filePath = join(COORDINATION_DIR, file);
+          try {
+            unlinkSync(filePath);
+            cleanedCount++;
+          } catch (error) {
+            // Ignore cleanup errors - not critical
+          }
+        }
+      });
+      
+      if (cleanedCount > 0) {
+        console.log(colorize(`🧹 Cleaned ${cleanedCount} stale completion files`, 'gray'));
+      }
+    } catch (error) {
+      // Ignore cleanup errors - not critical
     }
   }
 
@@ -486,6 +524,7 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
 
   saveAgentAnalysis(batch, result) {
     const analysis = {
+      runId: this.runId,
       agentId: batch.id,
       agent: batch.agent,
       timestamp: new Date().toISOString(),
@@ -504,7 +543,11 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
       errorCount: result.errorCount || 0,
       warningCount: result.warningCount || 0,
       hasLintOutput: result.hasLintOutput || false,
-      readyForExecution: result.success
+      readyForExecution: result.success,
+      // Add metadata to help agents identify fresh files
+      coordinatorVersion: '1.0.0',
+      fileType: 'current-analysis',
+      isStale: false
     };
 
     // ALWAYS use consistent filename - atomic overwrite to prevent locking issues
@@ -513,7 +556,12 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
     
     try {
       // Write to temp file first, then atomically rename
-      writeFileSync(tempFile, JSON.stringify(analysis, null, 2));
+      writeFileSync(tempFile, JSON.stringify(analysis, null, 2), { encoding: 'utf8' });
+      
+      // Ensure data is written to disk before rename
+      const fd = openSync(tempFile, 'r');
+      fsyncSync(fd);
+      closeSync(fd);
       
       // Atomic rename prevents file locking issues
       if (existsSync(analysisFile)) {
@@ -522,6 +570,7 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
       renameSync(tempFile, analysisFile);
       
     } catch (error) {
+      console.error(colorize(`❌ Failed to save analysis for ${batch.id}:`, 'red'), error.message);
       // Cleanup temp file if write failed
       if (existsSync(tempFile)) {
         unlinkSync(tempFile);
@@ -575,8 +624,16 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
   printCoordinatedSummary(results) {
     const totalDuration = results.reduce((sum, r) => sum + r.duration, 0) / 1000;
     const maxDuration = Math.max(...results.map(r => r.duration)) / 1000;
+    const minDuration = Math.min(...results.map(r => r.duration)) / 1000;
     const successful = results.filter(r => r.success).length;
     const failed = results.length - successful;
+    
+    // Enhanced efficiency calculation
+    const idealParallelDuration = totalDuration / results.length;
+    const actualEfficiency = (idealParallelDuration / maxDuration) * 100;
+    const workloadBalance = (1 - (maxDuration - minDuration) / maxDuration) * 100;
+    const readyRate = (successful / results.length) * 100;
+    const overallScore = (actualEfficiency * 0.4 + workloadBalance * 0.3 + readyRate * 0.3);
     
     console.log(colorize('\n🎯 AI AGENT COORDINATION SUMMARY', 'bright'));
     console.log(colorize('═'.repeat(60), 'blue'));
@@ -587,7 +644,10 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
     
     console.log(colorize(`⏱️  Total Analysis Time: ${totalDuration.toFixed(2)}s`, 'blue'));
     console.log(colorize(`⚡ Max Agent Duration: ${maxDuration.toFixed(2)}s`, 'blue'));
-    console.log(colorize(`🚀 Coordination Efficiency: ${((totalDuration / maxDuration) * 100 / results.length).toFixed(1)}%`, 'cyan'));
+    console.log(colorize(`⚡ Min Agent Duration: ${minDuration.toFixed(2)}s`, 'blue'));
+    console.log(colorize(`🚀 Coordination Efficiency: ${actualEfficiency.toFixed(1)}%`, 'cyan'));
+    console.log(colorize(`⚖️  Workload Balance: ${workloadBalance.toFixed(1)}%`, 'cyan'));
+    console.log(colorize(`📊 Overall Performance Score: ${overallScore.toFixed(1)}%`, overallScore >= 85 ? 'green' : overallScore >= 70 ? 'yellow' : 'red'));
     
     // Show agent readiness
     console.log(colorize('\n🤖 Agent Readiness Status:', 'bright'));

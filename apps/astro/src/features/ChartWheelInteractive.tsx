@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchChartData } from '../services/api';
 import type { ExtendedBirthData } from '../contexts/BirthDataContext';
 import { useCanonicalBirthData } from '../hooks/useCanonicalBirthData';
-import type { ApiResult as _ApiResult } from '../services/apiResult';
+import type { ApiResult } from '@cosmichub/config';
 import { Button } from '@cosmichub/ui';
 import styles from './ChartWheelInteractive.module.css';
 
@@ -25,69 +25,7 @@ interface ChartBirthData {
   city: string;
 }
 
-interface APIChartData {
-  planets: Record<string, unknown>;
-  houses: unknown[];
-  aspects?: unknown[];
-  angles?: Record<string, number>;
-  latitude?: number;
-  longitude?: number;
-  timezone?: string;
-  julian_day?: number;
-}
-
-import type {
-  Planet as _APIPlanet,
-  House as _APIHouse,
-} from '../services/api.types';
-
-// Local type definitions 
-type AspectType = 
-  | 'conjunction'
-  | 'opposition'
-  | 'trine'
-  | 'square'
-  | 'sextile'
-  | 'quincunx';
-
-// Enhanced interfaces for interactivity
-interface Planet {
-  name: string;
-  position: number;
-  retrograde?: boolean;
-  speed?: number;
-  house?: number;
-  color?: string;
-}
-
-interface House {
-  number: number;
-  cusp: number;
-  sign: string;
-  planets?: string[];
-}
-// Local Aspect interface for interactive layer
-interface Aspect {
-  planet1: string;
-  planet2: string;
-  angle: number;
-  type: AspectType;
-  strength: 'strong' | 'medium' | 'weak';
-  orb: number;
-  applying?: boolean;
-  exact?: boolean;
-}
-
-interface ChartData
-  extends Omit<
-    APIChartData,
-    'planets' | 'houses' | 'aspects' | 'house_system' | 'sidereal'
-  > {
-  planets: Record<string, Planet>;
-  houses: House[];
-  aspects?: Aspect[];
-  transits?: Record<string, Planet>; // Real-time transit positions
-}
+import type { ChartData, Aspect, PlanetName } from '../services/api.types';
 
 interface InteractiveState {
   selectedPlanet: string | null;
@@ -110,11 +48,12 @@ interface ChartWheelInteractiveProps {
 }
 
 const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
-  birthData: _birthData,
+  birthData,
   chartData: preTransformedData,
   showAspects = true,
   showAnimation = true,
   showTransits = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   realTimeUpdates = false,
   onPlanetSelect,
   onAspectSelect,
@@ -139,17 +78,12 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     error,
     refetch,
   } = useQuery<ChartData>({
-  queryKey: ['chartData', canonicalBirthData?.birth_date || canonicalBirthData?.city || 'default'],
-    queryFn: async (): Promise<ChartData> => {
+  queryKey: ['chartData', birthData ? ('birth_date' in birthData ? (birthData as ChartBirthData).birth_date : (birthData as ExtendedBirthData).year) : null],
+    queryFn: async () => {
       if (!canonicalBirthData) throw new Error('Birth data required');
-      const result = await fetchChartData(canonicalBirthData);
-      if (!result || typeof result !== 'object' || !('success' in result) || !result.success) {
-        throw new Error('Failed to fetch chart data');
-      }
-      if (!result.data || typeof result.data !== 'object') {
-        throw new Error('Invalid chart data format');
-      }
-      return transformAPIResponseToChartData(result.data as APIChartData);
+      const result: ApiResult<ChartData> = await fetchChartData(canonicalBirthData);
+      if (!result.success) throw new Error(result.error);
+      return result.data;
     },
     enabled: !!canonicalBirthData && preTransformedData === null,
     staleTime: 5 * 60 * 1000,
@@ -157,185 +91,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     retry: 2,
   });
 
-  // Fetch real-time transit data
-  const { data: transitData } = useQuery<Record<string, unknown>>({
-    queryKey: ['transitData'],
-    queryFn: async (): Promise<Record<string, unknown>> => {
-      const currentTime = new Date();
-      const transitBirthData: ChartBirthData = {
-        birth_date: `${currentTime.getFullYear()}-${String(currentTime.getMonth()+1).padStart(2,'0')}-${String(currentTime.getDate()).padStart(2,'0')}`,
-        birth_time: `${String(currentTime.getHours()).padStart(2,'0')}:${String(currentTime.getMinutes()).padStart(2,'0')}`,
-        latitude: 0,
-        longitude: 0,
-        timezone: 'UTC',
-        city: 'Greenwich',
-      };
-      const result = await fetchChartData(transitBirthData);
-      if (!result || typeof result !== 'object' || !('success' in result) || !result.success) {
-        return {};
-      }
-      if (!result.data || typeof result.data !== 'object') {
-        return {};
-      }
-      const apiData = result.data as APIChartData;
-      return apiData.planets ?? {};
-    },
-    enabled: realTimeUpdates === true && interactiveState.showTransits === true,
-    refetchInterval: 60000, // Update every minute
-    staleTime: 30000,
-  });
-
   const data = preTransformedData ?? fetchedData;
-
-  // Transform API response with type-safe handling
-  // Transform API response with proper typing
-  const transformAPIResponseToChartData = (
-    apiData: APIChartData
-  ): ChartData => {
-    const transformedPlanets: Record<string, Planet> = {};
-    const planets = apiData.planets ?? {};
-
-    Object.entries(planets).forEach(([name, planetData]) => {
-      if (
-        planetData === null ||
-        planetData === undefined ||
-        typeof planetData !== 'object'
-      ) {
-        return;
-      }
-
-      // Safe access with type checking
-      const planetObj = planetData as unknown as Record<string, unknown>;
-      const position =
-        typeof planetObj['position'] === 'number' ? planetObj['position'] : 0;
-      const retrograde = planetObj['retrograde'] === true;
-      const speed =
-        typeof planetObj['speed'] === 'number' ? planetObj['speed'] : 0;
-
-      transformedPlanets[name] = {
-        name,
-        position,
-        retrograde,
-        speed,
-        house: calculateHouseForPlanet(position),
-      };
-    });
-
-    const transformedHouses: House[] = [];
-    if (Array.isArray(apiData.houses)) {
-      apiData.houses.forEach((houseData) => {
-        if (
-          typeof houseData === 'object' &&
-          houseData !== null &&
-          'number' in houseData &&
-          'cusp' in houseData
-        ) {
-          const house = houseData as { number: unknown; cusp: unknown; sign: unknown };
-          if (typeof house.number === 'number' && typeof house.cusp === 'number') {
-            transformedHouses.push({
-              number: house.number,
-              cusp: house.cusp,
-              sign: typeof house.sign === 'string' ? house.sign : 'Unknown',
-              planets: [],
-            });
-          }
-        }
-      });
-    }
-
-    // Add planets to houses
-    Object.entries(transformedPlanets).forEach(([planetName, planet]) => {
-      const house = transformedHouses.find(h => h.number === planet.house);
-      if (house !== null && house !== undefined) {
-        house.planets ??= [];
-        house.planets.push(planetName);
-      }
-    });
-
-    const transformedAspects: Aspect[] = [];
-    if (Array.isArray(apiData.aspects)) {
-      apiData.aspects.forEach((aspectData) => {
-        if (
-          typeof aspectData === 'object' &&
-          aspectData !== null &&
-          'planet1' in aspectData &&
-          'planet2' in aspectData &&
-          'aspect_type' in aspectData &&
-          'orb' in aspectData
-        ) {
-          const aspect = aspectData as { 
-            planet1: unknown; 
-            planet2: unknown; 
-            aspect_type: unknown; 
-            orb: unknown; 
-            applying: unknown; 
-          };
-          if (
-            typeof aspect.planet1 === 'string' &&
-            typeof aspect.planet2 === 'string' &&
-            typeof aspect.aspect_type === 'string' &&
-            typeof aspect.orb === 'number'
-          ) {
-            transformedAspects.push({
-              planet1: aspect.planet1,
-              planet2: aspect.planet2,
-              angle: getAspectAngle(aspect.aspect_type),
-              orb: aspect.orb,
-              type: aspect.aspect_type as AspectType,
-              applying: aspect.applying === true,
-              strength: getAspectStrength(aspect.orb),
-            });
-          }
-        }
-      });
-    }
-
-    return {
-      planets: transformedPlanets,
-      houses: transformedHouses.sort((a, b) => a.number - b.number),
-      aspects: transformedAspects,
-      angles: apiData.angles,
-      transits: undefined, // Don't include transitData in transformation
-      latitude: apiData.latitude ?? 0,
-      longitude: apiData.longitude ?? 0,
-      timezone: apiData.timezone ?? 'UTC',
-      julian_day: apiData.julian_day ?? 0,
-    };
-  };
-
-  // Utility functions
-  const calculateHouseForPlanet = (position: number): number => {
-    if (position === null || position === undefined) return 1;
-    // Simple house calculation - in production, use more accurate method
-    return Math.floor(position / 30) + 1;
-  };
-
-  const getAspectAngle = (aspectType: string): number => {
-    const aspectAngles: Record<string, number> = {
-      conjunction: 0,
-      opposition: 180,
-      trine: 120,
-      square: 90,
-      sextile: 60,
-      quincunx: 150,
-    };
-    const key = aspectType.toLowerCase();
-    if (Object.prototype.hasOwnProperty.call(aspectAngles, key)) {
-      const val = aspectAngles[key];
-      return typeof val === 'number' ? val : 0;
-    }
-    return 0;
-  };
-
-  const getAspectStrength = (orb: number): 'strong' | 'medium' | 'weak' => {
-    if (orb !== null && orb !== undefined) {
-      if (typeof orb === 'number') {
-        if (orb === 0 || orb <= 2) return 'strong';
-        if (orb > 2 && orb <= 5) return 'medium';
-      }
-    }
-    return 'weak';
-  };
 
   // Interactive event handlers
   const handlePlanetClick = useCallback(
@@ -661,7 +417,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
         .style('cursor', 'pointer')
         .on('mouseover', function (event: MouseEvent) {
           showTooltip(
-            `<strong>House ${i + 1}</strong><br/>Sign: ${houseData?.sign ?? 'Unknown'}<br/>Planets: ${houseData?.planets?.join(', ') ?? 'None'}`,
+            `<strong>House ${i + 1}</strong><br/>Sign: ${houseData?.sign ?? 'Unknown'}<br/>Planets: None`,
             {
               pageX: event.pageX,
               pageY: event.pageY,
@@ -762,96 +518,18 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
 
     // Draw transits if enabled
     if (
-      interactiveState.showTransits === true &&
-      transitData !== null &&
-      transitData !== undefined
+      interactiveState.showTransits === true
     ) {
-      Object.entries(transitData).forEach(([name, planetData]) => {
-        const natalPlanet = data.planets[name];
-        if (natalPlanet === undefined || natalPlanet === null) return; // Only show transits for natal planets
-
-        // Type guard for planet data
-        if (
-          typeof planetData !== 'object' ||
-          planetData === null ||
-          !('position' in planetData) ||
-          typeof planetData.position !== 'number'
-        ) {
-          return;
-        }
-
-        const planet = planetData as { position: number };
-        const angle = ((planet.position - 90) * Math.PI) / 180;
-
-        const transitGroup = g
-          .append('g')
-          .attr('class', 'transit-group')
-          .style('cursor', 'pointer')
-          .on('mouseover', function (event: MouseEvent) {
-            const tooltipContent = `
-              <strong>Transit ${name.charAt(0).toUpperCase() + name.slice(1)}</strong><br/>
-              Current Position: ${formatDegree(planet.position)}<br/>
-              Natal Position: ${formatDegree(data.planets[name]?.position ?? 0)}
-            `;
-            showTooltip(tooltipContent, {
-              pageX: event.pageX,
-              pageY: event.pageY,
-            });
-          })
-          .on('mouseout', hideTooltip);
-
-        // Transit planet (hollow circle)
-        transitGroup
-          .append('circle')
-          .attr('cx', Math.cos(angle) * transitRadius)
-          .attr('cy', Math.sin(angle) * transitRadius)
-          .attr('r', 15)
-          .attr('fill', 'none')
-          .attr('stroke', planetColors[name] ?? '#333333')
-          .attr('stroke-width', 2)
-          .attr('stroke-dasharray', '3,3');
-
-        // Transit symbol
-        transitGroup
-          .append('text')
-          .attr('x', Math.cos(angle) * transitRadius)
-          .attr('y', Math.sin(angle) * transitRadius)
-          .attr('text-anchor', 'middle')
-          .attr('dominant-baseline', 'middle')
-          .attr('font-size', '12')
-          .attr('font-weight', 'bold')
-          .attr(
-            'fill',
-            typeof planetColors[name] === 'string' &&
-              planetColors[name].length > 0
-              ? planetColors[name]
-              : '#333333'
-          )
-          .text(
-            typeof planetSymbols[name] === 'string' &&
-              planetSymbols[name].length > 0
-              ? planetSymbols[name]
-              : name.slice(0, 1).toUpperCase()
-          );
-
-        // Connect transit to natal position
-        const natalAngle =
-          ((data.planets[name]?.position ?? 0 - 90) * Math.PI) / 180;
-        g.append('line')
-          .attr('x1', Math.cos(natalAngle) * planetRadius)
-          .attr('y1', Math.sin(natalAngle) * planetRadius)
-          .attr('x2', Math.cos(angle) * transitRadius)
-          .attr('y2', Math.sin(angle) * transitRadius)
-          .attr(
-            'stroke',
-            typeof planetColors[name] === 'string'
-              ? planetColors[name]
-              : '#333333'
-          )
-          .attr('stroke-width', 1)
-          .attr('stroke-opacity', 0.3)
-          .attr('stroke-dasharray', '2,2');
-      });
+      // For now, transits are not implemented - show a placeholder message
+      g.append('text')
+        .attr('x', 0)
+        .attr('y', -transitRadius + 20)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('font-size', '14')
+        .attr('font-weight', 'bold')
+        .attr('fill', '#666666')
+        .text('Transits not available');
     }
 
     // Draw aspects with enhanced interactivity
@@ -894,22 +572,22 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
           .attr('y1', Math.sin(angle1) * aspectRadius)
           .attr('x2', Math.cos(angle2) * aspectRadius)
           .attr('y2', Math.sin(angle2) * aspectRadius)
-          .attr('stroke', aspectColors[aspect.type] ?? '#666666')
+          .attr('stroke', aspectColors[aspect.aspect_type] ?? '#666666')
           .attr(
             'stroke-width',
-            isHighlighted ? 3 : aspect.strength === 'strong' ? 2 : 1
+            isHighlighted ? 3 : (aspect.orb <= 2 ? 2 : 1)
           )
           .attr('stroke-opacity', isHighlighted ? 0.8 : 0.4)
-          .attr('stroke-dasharray', getAspectDashArray(aspect.type))
+          .attr('stroke-dasharray', getAspectDashArray(aspect.aspect_type))
           .style('cursor', 'pointer')
           .on('click', () => handleAspectClick(aspect))
           .on('mouseover', function (event: MouseEvent) {
             d3.select(this).attr('stroke-opacity', 0.8).attr('stroke-width', 3);
             const tooltipContent = `
-              <strong>${aspect.type.charAt(0).toUpperCase() + aspect.type.slice(1)}</strong><br/>
+              <strong>${aspect.aspect_type.charAt(0).toUpperCase() + aspect.aspect_type.slice(1)}</strong><br/>
               ${aspect.planet1} - ${aspect.planet2}<br/>
               Orb: ${aspect.orb.toFixed(1)}°<br/>
-              Strength: ${aspect.strength}
+              Strength: ${aspect.orb <= 2 ? 'Strong' : aspect.orb <= 5 ? 'Medium' : 'Weak'}
             `;
             showTooltip(tooltipContent, {
               pageX: event.pageX,
@@ -920,7 +598,7 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
             if (!isHighlighted) {
               d3.select(this)
                 .attr('stroke-opacity', 0.4)
-                .attr('stroke-width', aspect.strength === 'strong' ? 2 : 1);
+                .attr('stroke-width', aspect.orb <= 2 ? 2 : 1);
             }
             hideTooltip();
           });
@@ -966,7 +644,6 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
     showAspects,
     showAnimation,
     interactiveState,
-    transitData,
     chartConstants,
     handlePlanetClick,
     handleAspectClick,
@@ -1186,15 +863,15 @@ const ChartWheelInteractive: React.FC<ChartWheelInteractiveProps> = ({
                 <div>
                   Position:{' '}
                   {formatDegree(
-                    data.planets[interactiveState.selectedPlanet]?.position ?? 0
+                    data.planets[interactiveState.selectedPlanet as PlanetName]?.position ?? 0
                   )}
                 </div>
                 <div>
                   House:{' '}
-                  {data.planets[interactiveState.selectedPlanet]?.house ??
+                  {data.planets[interactiveState.selectedPlanet as PlanetName]?.house ??
                     'Unknown'}
                 </div>
-                {data.planets[interactiveState.selectedPlanet]?.retrograde ===
+                {data.planets[interactiveState.selectedPlanet as PlanetName]?.retrograde ===
                   true && (
                   <div className='text-red-400'>Status: Retrograde ℞</div>
                 )}

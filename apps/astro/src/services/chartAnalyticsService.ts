@@ -13,6 +13,41 @@ import {
   getSignFromDegrees,
 } from '../utils/astrologyUtils';
 
+// Types for chart analytics
+export enum Element {
+  Fire = 'fire',
+  Earth = 'earth',
+  Air = 'air',
+  Water = 'water',
+  Unknown = 'unknown'
+}
+
+export enum Quality {
+  Cardinal = 'cardinal',
+  Fixed = 'fixed',
+  Mutable = 'mutable',
+  Unknown = 'unknown'
+}
+
+export enum ChartShape {
+  Locomotive = 'locomotive',
+  Bucket = 'bucket',
+  Bowl = 'bowl',
+  Bundle = 'bundle',
+  Splash = 'splash',
+  Splay = 'splay',
+  Seesaw = 'seesaw',
+  Unknown = 'unknown'
+}
+
+export interface UpcomingEvent {
+  date: string;
+  type: 'transit' | 'progression' | 'return';
+  description: string;
+  significance: number; // 0-100
+  affectedAreas: string[];
+}
+
 // Helper functions to bridge between centralized utils and service-specific types
 function convertElementToEnum(
   elementString: 'fire' | 'earth' | 'air' | 'water'
@@ -103,6 +138,8 @@ export interface ChartPattern {
   keywords: string[];
 }
 
+export interface ChartAnalysis {
+  chartId?: string;
   dominantElement: Element;
   dominantQuality: Quality;
   dominantPlanet: string;
@@ -119,6 +156,7 @@ export interface ChartPattern {
   lastAnalyzed: Date;
 }
 
+export interface AnalysisEvent {
   type: 'transit' | 'progression' | 'return';
   description: string;
   significance: 'low' | 'medium' | 'high' | 'critical';
@@ -126,6 +164,8 @@ export interface ChartPattern {
   advice: string;
 }
 
+export interface PersonalityInsight {
+  trait: string;
   strength: number; // 0-100
   source: string; // Which planets/aspects contribute
   description: string;
@@ -352,7 +392,7 @@ class ChartAnalyticsService {
       .sort((a, b) => a - b);
 
     if (planetPositions.length <= 1) {
-      return ChartShape.Undefined;
+      return ChartShape.Unknown;
     }
 
     const spans = planetPositions.map((pos, i) => {

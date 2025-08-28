@@ -55,6 +55,24 @@ interface EnvironmentVariables {
   APP_VERSION?: string;
 }
 
+// Environment configuration type
+interface EnvConfig extends EnvironmentVariables {
+  NODE_ENV: Environment;
+}
+
+// Feature flags type
+interface FeatureFlags {
+  enableDebugMode: boolean;
+  enableBetaFeatures: boolean;
+  enableAnalytics: boolean;
+  enableHotReload: boolean;
+  enableServiceWorker: boolean;
+  enableErrorReporting: boolean;
+  enablePerformanceMonitoring: boolean;
+  enableMockData: boolean;
+  enableTestingMode: boolean;
+}
+
 // Required environment variables by environment (supporting both VITE_ and NEXT_PUBLIC_ prefixes)
 const requiredEnvVars: Record<Environment, string[]> = {
   development: [
@@ -147,7 +165,13 @@ const validateEnvironmentVariables = (): {
   };
 };
 
+// Alias for consistency
+const validateEnv = validateEnvironmentVariables;
+
 // Get environment configuration with defaults
+const getEnvConfig = (): EnvConfig => {
+  const env = getCurrentEnvironment();
+
   // Use VITE_ prefix for environment variables
   const baseConfig = {
     NODE_ENV: env,
@@ -218,10 +242,12 @@ const validateEnvironmentVariables = (): {
     ...(getEnv('APP_VERSION') && { APP_VERSION: getEnv('APP_VERSION') }),
   };
 
-  return baseConfig;
+  return baseConfig as EnvConfig;
 };
 
 // Environment-specific feature flags
+const getFeatureFlags = (): FeatureFlags => {
+  const env = getCurrentEnvironment();
 
   return {
     enableDebugMode: env === 'development',
@@ -238,6 +264,8 @@ const validateEnvironmentVariables = (): {
 
 // Utility functions
 export const isDevelopment = () => getCurrentEnvironment() === 'development';
+export const isStaging = () => getCurrentEnvironment() === 'staging';
+export const isProduction = () => getCurrentEnvironment() === 'production';
 
 // Safe environment getter with fallbacks
 export const getEnvVar = (key: keyof EnvConfig, fallback?: string): string => {
@@ -253,7 +281,8 @@ export const getEnvVar = (key: keyof EnvConfig, fallback?: string): string => {
 };
 
 // Initialize and validate environment on import
-let validationResult: ReturnType<typeof validateEnv> | null = null;
+const initializeEnv = (): ReturnType<typeof validateEnv> => {
+  const validationResult = validateEnv();
 
   if (!validationResult.isValid) {
     console.group('🚨 Environment Configuration Issues');
@@ -287,6 +316,7 @@ let validationResult: ReturnType<typeof validateEnv> | null = null;
 };
 
 // Export current environment config
+export const env = getEnvConfig();
 
 // Auto-initialize in browser environment
 if (typeof window !== 'undefined') {

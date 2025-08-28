@@ -3,6 +3,7 @@
  * UX Enhancement: Advanced mobile-first responsive components and utilities
  */
 
+// Ensure global JSX namespace is available; if using React 17+ with jsx runtime, keep React import for types
 import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '../utils/cn';
 
@@ -64,6 +65,7 @@ export const useBreakpoint = () => {
 
 // Responsive container with safe areas
 interface ResponsiveContainerProps {
+  children: React.ReactNode;
   className?: string;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -114,6 +116,8 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
 };
 
 // Responsive grid system
+interface ResponsiveGridProps {
+  children: React.ReactNode;
   className?: string;
   cols?: {
     xs?: number;
@@ -180,6 +184,8 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
 };
 
 // Mobile-optimized modal/drawer
+interface MobileDrawerProps {
+  isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
@@ -398,6 +404,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
 };
 
 // Touch-optimized button
+interface TouchButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
@@ -478,12 +485,23 @@ export const TouchButton: React.FC<TouchButtonProps> = ({
 };
 
 // Responsive text that scales with screen size
+interface ResponsiveTextProps {
+  children: React.ReactNode;
   className?: string;
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
   responsive?: boolean;
 }
+export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
+  children,
+  className,
+  as = 'p',
+  size = 'md',
+  weight = 'normal',
+  responsive = true,
+}) => {
+  const Component = as as keyof React.ReactHTML;
 
   const sizeClasses = responsive
     ? {
@@ -522,6 +540,8 @@ export const TouchButton: React.FC<TouchButtonProps> = ({
 };
 
 // Mobile-optimized card component
+interface MobileCardProps {
+  children: React.ReactNode;
   className?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   interactive?: boolean;

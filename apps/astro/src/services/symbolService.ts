@@ -184,6 +184,9 @@ export function formatDegreePosition(position: number): string {
 }
 
 // Export symbol maps for backward compatibility if needed
+export const CelestialSymbols = CORE_CELESTIAL_SYMBOLS;
+export const ZodiacSymbols = ZODIAC_SYMBOLS;
+export const AspectSymbols = ASPECT_SYMBOLS_MAP;
 
 // Element-based color mapping
 export function getElementColor(sign: string): string {
@@ -203,3 +206,8 @@ export function getElementColor(sign: string): string {
 }
 
 // Professional validation function
+export function validateCelestialName(name: string): boolean {
+  if (!name) return false;
+  const normalized = normalizeName(name);
+  return Object.keys(CORE_CELESTIAL_SYMBOLS).includes(normalized);
+}

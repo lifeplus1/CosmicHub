@@ -18,15 +18,25 @@ import { logger } from '@cosmichub/config';
  * 3. Configure Split.io dashboard for feature flags
  */
 
-  variants: string[];
+// Event properties passed when tracking A/B test events
+export interface ABTestEventProperties {
+  // Allow arbitrary serialisable properties
+  [key: string]: unknown;
+}
+
+// Configuration object for initiating an A/B test
+export interface ABTestConfig {
+  testName: string; // Unique name of the test (used as storage key)
+  variants: string[]; // List of variant identifiers (first one treated as control)
   weights?: number[]; // Optional weights for each variant (defaults to equal distribution)
   enabled?: boolean; // Feature flag to enable/disable test
 }
 
-}
-
-  isControl: boolean;
-  trackEvent: (eventName: string, properties?: ABTestEventProperties) => void;
+// Result returned by the hook describing assignment and tracking util
+export interface ABTestResult {
+  variant: string; // Assigned variant for current user/session
+  isControl: boolean; // Whether assigned variant is the control (first in list)
+  trackEvent: (eventName: string, properties?: ABTestEventProperties) => void; // Analytics tracker
 }
 
 /**
@@ -96,7 +106,10 @@ export function useABTest(config: ABTestConfig): ABTestResult {
 /**
  * Create an event tracker for A/B test analytics
  */
-function createEventTracker(testName: string, variant: string) {
+function createEventTracker(
+  testName: string,
+  variant: string
+): (eventName: string, properties?: ABTestEventProperties) => void {
   return (eventName: string, properties: ABTestEventProperties = {}) => {
     // Store event in local analytics
     const raw = localStorage.getItem('ab_test_events') ?? '[]';
@@ -237,11 +250,16 @@ function createEventTracker(testName: string, variant: string) {
 /**
  * React component wrapper for A/B testing
  */
+export interface ABTestComponentProps extends ABTestConfig {
   children: (result: ABTestResult) => React.ReactNode;
 }
 
+export const ABTest: React.FC<ABTestComponentProps> = ({
+  children,
+  ...config
+}) => {
   const result = useABTest(config);
   return children(result) as React.ReactElement;
-}
+};
 
 export default useABTest;

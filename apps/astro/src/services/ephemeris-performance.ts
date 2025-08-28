@@ -27,7 +27,7 @@ interface PerformanceEntry {
   error?: string;
 }
 
-class EphemerisPerformanceMonitor {
+export class EphemerisPerformanceMonitor {
   private entries: PerformanceEntry[] = [];
   private maxEntries = 1000; // Keep last 1000 entries
 
@@ -146,6 +146,7 @@ class EphemerisPerformanceMonitor {
 }
 
 // Global performance monitor instance
+export const ephemerisMonitor = new EphemerisPerformanceMonitor();
 
 /**
  * Higher-order function to wrap ephemeris operations with performance monitoring.

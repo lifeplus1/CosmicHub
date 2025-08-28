@@ -2,55 +2,12 @@
  * Advanced Bundle Optimization and Tree Shaking Configuration
  * Implements sophisticated bundling strategies for production optimization
  */
-// @ts-nocheck
-/* eslint-disable */
-const devConsole = {
-  log: import.meta.env?.DEV ? console.log.bind(console) : undefined,
-  warn: import.meta.env?.DEV ? console.warn.bind(console) : undefined,
-  error: console.error.bind(console),
-};
-/* eslint-enable no-console */
-
-// Bundle analysis utilities
-  gzippedSize: number;
-  chunks: ChunkInfo[];
-  dependencies: DependencyInfo[];
-  duplicates: DuplicateInfo[];
-  unusedExports: UnusedExport[];
-  recommendations: OptimizationRecommendation[];
-}
-
-  size: number;
-  gzippedSize: number;
-  modules: string[];
-  loadTime: number;
-  cacheable: boolean;
-}
-
-  version: string;
-  size: number;
-  usagePercentage: number;
-  treeshakeable: boolean;
-  alternatives?: string[];
-}
-
-  instances: number;
-  totalSize: number;
-  locations: string[];
-}
-
-  export: string;
-  size: number;
-  reason: string;
-}
-
-  target: string;
-  impact: 'high' | 'medium' | 'low';
-  description: string;
-  estimatedSavings: number;
-}
 
 // Advanced webpack configuration helpers
+export const webpackHelpers = {
+  createSplitChunks: () => ({
+    chunks: 'all',
+    cacheGroups: {
       // React ecosystem
       react: {
         test: /[\\/]node_modules[\\/](react|react-dom|react-router)[\\/]/,

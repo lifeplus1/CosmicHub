@@ -27,11 +27,23 @@ export const getConfidenceLevel = (confidence: number): string => {
 /**
  * Sort interpretations by creation date (newest first)
  */
+export const sortInterpretationsByDate = (
+  interpretations: Interpretation[]
+): Interpretation[] => {
+  return [...interpretations].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 };
 
 /**
  * Group interpretations by type
  */
+export const groupInterpretationsByType = (
+  interpretations: Interpretation[]
+): Record<string, Interpretation[]> => {
+  return interpretations.reduce(
+    (groups, interpretation) => {
+      const type = interpretation.type;
       groups[type] ??= [];
       groups[type].push(interpretation);
       return groups;
@@ -43,6 +55,11 @@ export const getConfidenceLevel = (confidence: number): string => {
 /**
  * Filter interpretations by tags
  */
+export const filterInterpretationsByTags = (
+  interpretations: Interpretation[],
+  tags: string[]
+): Interpretation[] => {
+  if (!Array.isArray(tags) || tags.length === 0) return interpretations;
 
   return interpretations.filter(interpretation =>
     tags.some(tag => interpretation.tags.includes(tag))
@@ -76,6 +93,11 @@ export const getInterpretationTypeEmoji = (type: string): string => {
 /**
  * Generate interpretation summary from content
  */
+export const generateSummary = (
+  content: string,
+  maxWords: number = 20
+): string => {
+  const words = content.split(' ');
   if (!Array.isArray(words) || words.length <= maxWords) return content;
 
   return words.slice(0, maxWords).join(' ') + '...';

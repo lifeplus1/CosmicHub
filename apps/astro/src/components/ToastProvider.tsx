@@ -1,6 +1,8 @@
 import React, { createContext, useContext, type ReactNode } from 'react';
 import { devConsole } from '../config/environment';
 
+export interface Toast {
+  id: string;
   title?: string;
   description: string;
   status: 'success' | 'error' | 'warning' | 'info';
@@ -28,6 +30,7 @@ export const useToast = (): ToastContextType => {
 };
 
 // Simple provider implementation
+export const ToastProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const toast = () => {};

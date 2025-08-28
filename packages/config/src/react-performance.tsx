@@ -170,6 +170,8 @@ const PerformanceOptimizedPage: React.FC = () => {
 export default PerformanceOptimizedPage;
 
 // Example of optimized hook patterns
+export const useOptimizedDataFetching = (endpoint: string) => {
+  const performanceOps = useOperationTracking();
   const [data, setData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -200,6 +202,13 @@ export default PerformanceOptimizedPage;
 };
 
 // Performance monitoring utilities
+export const performanceUtils = {
+  // Measure component render performance
+  measureRender: <T extends Record<string, any>>(
+    Component: React.ComponentType<T>,
+    props: T
+  ) => {
+    const start = performance.now();
     const element = React.createElement(Component, props);
     const end = performance.now();
 
@@ -259,6 +268,8 @@ export type PerformanceOptimizedComponentProps<T = any> = {
   onUpdate: (id: string) => void;
 };
 
+export type DataFetchingState<T = any> = {
+  data: T | null;
   loading: boolean;
   error: string | null;
   fetchData: () => Promise<void>;

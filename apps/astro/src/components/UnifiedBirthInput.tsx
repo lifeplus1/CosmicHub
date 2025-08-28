@@ -4,7 +4,7 @@ import {
   useBirthData,
   formatBirthDataDisplay,
 } from '../contexts/BirthDataContext';
-import type { ChartBirthData } from '@cosmichub/types';
+import { type ChartBirthData, toTextBirthData } from '@cosmichub/types';
 
 interface UnifiedBirthInputProps {
   onSubmit?: (data: ChartBirthData) => void;
@@ -55,6 +55,16 @@ const MAJOR_CITIES = [
   },
 ];
 
+export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
+  onSubmit,
+  showSubmitButton = true,
+  submitButtonText = 'Calculate Chart',
+  title = 'Birth Information',
+  description = 'Enter your birth details to unlock your cosmic blueprint',
+  autoSubmit = false,
+  showCurrentData = true,
+  className = '',
+}) => {
   const { birthData, setBirthData, isDataValid } = useBirthData();
 
   // Form state - initialize with existing birth data or defaults
@@ -140,7 +150,8 @@ const MAJOR_CITIES = [
     (e: React.FormEvent) => {
       e.preventDefault();
 
-      const newBirthData: ChartBirthData = {
+      // Create unified data for validation
+      const unifiedData = {
         year: formData.year.length > 0 ? parseInt(formData.year, 10) : 0,
         month: formData.month.length > 0 ? parseInt(formData.month, 10) : 0,
         day: formData.day.length > 0 ? parseInt(formData.day, 10) : 0,
@@ -154,16 +165,18 @@ const MAJOR_CITIES = [
 
       // Validate required fields
       if (
-        newBirthData.year === 0 ||
-        newBirthData.month === 0 ||
-        newBirthData.day === 0 ||
-        newBirthData.hour === 0 ||
-        newBirthData.minute === 0 ||
-        newBirthData.city === ''
+        unifiedData.year === 0 ||
+        unifiedData.month === 0 ||
+        unifiedData.day === 0 ||
+        unifiedData.hour === 0 ||
+        unifiedData.minute === 0 ||
+        unifiedData.city === ''
       ) {
         alert('Please fill in all required fields');
         return;
       }
+
+      const newBirthData: ChartBirthData = toTextBirthData(unifiedData);
 
       setBirthData(newBirthData);
       onSubmit?.(newBirthData);

@@ -5,6 +5,8 @@
  * Centralized environment handling for the HealWave app
  */
 
+type Environment = 'development' | 'production' | 'test';
+
 /**
  * Get the current environment
  */
@@ -33,6 +35,9 @@ function getCurrentEnvironment(): Environment {
 export const isDevelopment = () =>
   getCurrentEnvironment() === 'development' || Boolean(import.meta?.env?.DEV);
 
+export const isProduction = () => getCurrentEnvironment() === 'production';
+export const isTest = () => getCurrentEnvironment() === 'test';
+
 // Development/Production utilities
 
 // Import logger from config
@@ -42,8 +47,10 @@ import { logger } from '@cosmichub/config';
 export const devConsole = logger.child({ module: 'HealWaveEnvironment' });
 
 // Feature flags
-// Safely build feature flags without spreading potential any arrays
-const baseDev = isDevelopment();
+const features = {
+  advancedCharts: isProduction(),
+  experimentalFeatures: isDevelopment(),
+};
 
 export default {
   isDevelopment: isDevelopment(),

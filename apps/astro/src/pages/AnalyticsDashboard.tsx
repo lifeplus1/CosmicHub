@@ -12,6 +12,15 @@ interface RealtimeMetrics {
   averageSessionDurationMs?: number;
 }
 
+interface AstrologyMetrics {
+  chartCalculations: Record<string, number>;
+  aiFeatureUsage: Record<string, number>;
+}
+
+interface DailyMetrics {
+  metrics: Record<string, unknown>;
+}
+
 async function fetchJSON<T>(url: string): Promise<T> {
   const res = await fetch(url, { credentials: 'include' });
   if (!res.ok) throw new Error(`Failed ${url}: ${res.status}`);
@@ -19,22 +28,22 @@ async function fetchJSON<T>(url: string): Promise<T> {
 }
 
 export default function AnalyticsDashboard(): React.ReactElement {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const { data: realtime, refetch } = useQuery<RealtimeMetrics>({
     queryKey: ['analytics','realtime'],
     queryFn: () => fetchJSON<RealtimeMetrics>('/api/analytics/realtime'),
     refetchInterval: 5000,
   });
 
-  const { data: astrology } = useQuery({
+  const { data: astrology } = useQuery<AstrologyMetrics>({
     queryKey: ['analytics','astrology','week'],
-    queryFn: () => fetchJSON<any>('/api/analytics/astrology?timeframe=week'),
+    queryFn: () => fetchJSON<AstrologyMetrics>('/api/analytics/astrology?timeframe=week'),
     staleTime: 60_000,
   });
 
-  const { data: daily } = useQuery({
+  const { data: daily } = useQuery<DailyMetrics>({
     queryKey: ['analytics','daily'],
-    queryFn: () => fetchJSON<any>('/api/analytics/daily'),
+    queryFn: () => fetchJSON<DailyMetrics>('/api/analytics/daily'),
     staleTime: 30_000,
   });
 
@@ -57,7 +66,7 @@ export default function AnalyticsDashboard(): React.ReactElement {
         <section className='cosmic-glass p-6 rounded-lg border border-cosmic-silver/20'>
           <h2 className='text-xl font-semibold text-cosmic-gold mb-4'>Chart Calculations (Week)</h2>
           <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
-            {astrology?.chartCalculations && Object.entries(astrology.chartCalculations).map(([k,v]: any) => (
+            {astrology?.chartCalculations && Object.entries(astrology.chartCalculations).map(([k,v]: [string, number]) => (
               <div key={k} className='p-3 bg-cosmic-dark/40 rounded'>
                 <div className='text-cosmic-silver text-sm'>{k}</div>
                 <div className='text-cosmic-gold text-lg font-bold'>{v}</div>
@@ -69,7 +78,7 @@ export default function AnalyticsDashboard(): React.ReactElement {
         <section className='cosmic-glass p-6 rounded-lg border border-cosmic-silver/20'>
           <h2 className='text-xl font-semibold text-cosmic-gold mb-4'>AI Feature Usage (Week)</h2>
           <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
-            {astrology?.aiFeatureUsage && Object.entries(astrology.aiFeatureUsage).map(([k,v]: any) => (
+            {astrology?.aiFeatureUsage && Object.entries(astrology.aiFeatureUsage).map(([k,v]: [string, number]) => (
               <div key={k} className='p-3 bg-cosmic-dark/40 rounded'>
                 <div className='text-cosmic-silver text-sm'>{k}</div>
                 <div className='text-cosmic-gold text-lg font-bold'>{v}</div>
@@ -81,7 +90,7 @@ export default function AnalyticsDashboard(): React.ReactElement {
         <section className='cosmic-glass p-6 rounded-lg border border-cosmic-silver/20'>
             <h2 className='text-xl font-semibold text-cosmic-gold mb-4'>Daily Metrics</h2>
             <pre className='text-xs overflow-x-auto whitespace-pre-wrap text-cosmic-silver'>
-              {JSON.stringify(daily?.metrics || {}, null, 2)}
+              {JSON.stringify(daily?.metrics ?? {}, null, 2)}
             </pre>
             <button onClick={() => { void refetch(); }} className='mt-4 px-4 py-2 bg-cosmic-purple hover:bg-cosmic-blue rounded text-white'>Refresh Realtime</button>
         </section>

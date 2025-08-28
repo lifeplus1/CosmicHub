@@ -8,10 +8,10 @@ import type { ChartBirthData } from '@cosmichub/types';
 // Local lightweight SaveChartRequest subset (avoid broken re-export)
 interface SaveChartRequest {
   year: number; month: number; day: number; hour: number; minute: number;
-  city?: string; house_system?: string; chart_name?: string; timezone?: string;
+  city: string; house_system?: string; chart_name?: string; timezone?: string;
   lat?: number; lon?: number;
 }
-import { ok } from '@cosmichub/config';
+// (Removed ok() usage for local result typing to avoid bringing in broader ApiResult inference)
 
 // Lightweight chart fetch (safe) – replace missing fetchSavedChartById with guarded fetch
 interface SavedChartPayload { chart_data: ChartData; birth_data: Record<string, unknown>; }
@@ -53,7 +53,7 @@ const safeFetchSavedChartById = async (chartId: string): Promise<LocalResult<Sav
     const data: unknown = await res.json();
     if (data && typeof data === 'object' && 'chart_data' in data) {
       const typed = data as SavedChartPayload;
-      return ok(typed);
+  return { success: true, data: typed };
     }
     return { success: false, error: 'Malformed chart response' };
   } catch (e) {
@@ -98,7 +98,10 @@ export const UnifiedChartForTest: React.FC = () => {
               const birthDate = bd.birth_date ?? '';
               const birthTime = bd.birth_time ?? '12:00';
               if (birthDate && (bd.year === undefined || bd.month === undefined || bd.day === undefined)) {
-                const [yStr, mStr, dStr] = birthDate.split('-');
+                const parts = birthDate.split('-');
+        const yStr = parts[0] ?? '0';
+        const mStr = parts[1] ?? '0';
+        const dStr = parts[2] ?? '0';
                 const [hhStr = '12', mmStr = '0'] = birthTime.split(':');
                 const y = Number(yStr), m = Number(mStr), d = Number(dStr);
                 const hh = Number(hhStr), mm = Number(mmStr);
@@ -141,7 +144,10 @@ export const UnifiedChartForTest: React.FC = () => {
           const rec = toRawBirthData(parsed);
           const dateStr = rec.birth_date ?? '';
           const timeStr = rec.birth_time ?? '12:00';
-          const [yStr, mStr, dStr] = dateStr.split('-');
+          const parts = dateStr.split('-');
+          const yStr = parts[0] ?? '0';
+          const mStr = parts[1] ?? '0';
+          const dStr = parts[2] ?? '0';
           const [hhStr, mmStr] = timeStr.split(':');
           const payload = {
             year: Number(yStr),
@@ -156,11 +162,16 @@ export const UnifiedChartForTest: React.FC = () => {
             birth_date: dateStr,
             birth_time: timeStr,
           } satisfies ChartBirthData;
-            const result = await fetchChartDataUnified(payload as ChartBirthData);
+            const rawUnified: unknown = await fetchChartDataUnified(payload as ChartBirthData);
             if (!active) return;
-            if (result.success) {
-              const unifiedData = result.data as ChartData;
-              setChartData(unifiedData);
+            interface SuccessU<T> { success: true; data: T }
+            interface FailureU { success: false; error?: string }
+            const isUnifiedSuccess = <T,>(v: unknown): v is SuccessU<T> =>
+              typeof v === 'object' && v !== null && (v as { success?: unknown }).success === true && 'data' in (v as Record<string, unknown>);
+            const isUnifiedFailure = (v: unknown): v is FailureU =>
+              typeof v === 'object' && v !== null && (v as { success?: unknown }).success === false;
+            if (isUnifiedSuccess<ChartData>(rawUnified)) {
+              setChartData(rawUnified.data);
               if (setBirthData) {
                 setBirthData({
                   year: Number(payload.year),
@@ -174,8 +185,8 @@ export const UnifiedChartForTest: React.FC = () => {
                   timezone: payload.timezone,
                 });
               }
-            } else if (!result.success) {
-              setError(typeof result.error === 'string' ? result.error : 'Calculation failed');
+            } else if (isUnifiedFailure(rawUnified)) {
+              setError(typeof rawUnified.error === 'string' ? rawUnified.error : 'Calculation failed');
             }
             return;
         }
@@ -195,9 +206,9 @@ export const UnifiedChartForTest: React.FC = () => {
       day: birthData.day,
       hour: birthData.hour ?? 12,
       minute: birthData.minute ?? 0,
-      city: typeof (birthData as unknown as { city?: unknown }).city === 'string'
+      city: (typeof (birthData as unknown as { city?: unknown }).city === 'string'
         ? (birthData as unknown as { city?: string }).city
-        : (typeof birthData.location === 'string' ? birthData.location : 'Unknown'),
+        : (typeof birthData.location === 'string' ? birthData.location : 'Unknown')) ?? 'Unknown',
       house_system: 'placidus',
       chart_name: 'Test Chart',
       timezone: birthData.timezone ?? 'UTC',
@@ -210,7 +221,7 @@ export const UnifiedChartForTest: React.FC = () => {
   if (loading) return <div>Loading</div>;
   if (error) return <div>Error: {error}</div>;
   if (!chartData) return <div>No Chart Data</div>;
-  return <ChartDisplay onSaveChart={user ? handleSave : undefined} />;
+  return <ChartDisplay onSaveChart={user ? () => { void handleSave(); } : undefined} />;
 };
 
 export default UnifiedChartForTest;

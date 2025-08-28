@@ -71,6 +71,7 @@ export class AnalyticsService {
   private consentGranted = false;
   private lastEventTs: number | null = null;
   private flushTimer: number | null = null;
+  private globalErrorHandler: ((e: ErrorEvent) => void) | null = null;
 
   // Queues for deferred operations until consent + init
   private pendingEvents: AnalyticsEvent[] = [];
@@ -127,18 +128,27 @@ export class AnalyticsService {
 
   private maybeStartAutoFlush(): void {
     const interval = this.config.advanced?.autoFlushIntervalMs;
-    if (!interval || typeof window === 'undefined') return;
-    if (this.flushTimer) window.clearInterval(this.flushTimer);
-    this.flushTimer = window.setInterval(() => this.flushQueuesIfReady(), interval);
+  // Disable background interval in non-browser or test environments to avoid hanging processes
+  const isTest = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test');
+  if (!interval || typeof window === 'undefined' || isTest) return;
+  if (this.flushTimer && this.canUseDOM()) window.clearInterval(this.flushTimer);
+  const handle = (globalThis.setInterval ?? window.setInterval)(() => this.flushQueuesIfReady(), interval) as unknown as { unref?: () => void };
+  // Allow Node to exit naturally if supported (no-op in browsers)
+  try { handle.unref?.(); } catch { /* ignore */ }
+  // Store numeric id fallback if DOM typing; we just need to clear via clearInterval later
+  this.flushTimer = (handle as unknown as number);
   }
 
   private maybeInstallGlobalErrorHandler(): void {
     if (!this.config.advanced?.autoTrackErrors || typeof window === 'undefined') return;
-    const handler = (event: ErrorEvent) => {
+    // Remove existing handler if reinitializing
+    if (this.globalErrorHandler) {
+      try { window.removeEventListener('error', this.globalErrorHandler); } catch { /* ignore */ }
+    }
+    this.globalErrorHandler = (event: ErrorEvent) => {
       this.trackError('uncaught_error', event.error ?? event.message);
     };
-    window.addEventListener('error', handler);
-    // We intentionally don't store reference removal (library consumer can disable via config refresh if needed)
+    window.addEventListener('error', this.globalErrorHandler);
   }
   
   private initializeGoogleAnalytics(): void {
@@ -327,6 +337,19 @@ export class AnalyticsService {
     if (this.config.customAnalytics?.enabled) void this.sendToCustomAnalytics(analyticsEvent);
   // Invoke instrumentation callback last (non-blocking semantics expected)
   try { this.config.advanced?.onDispatch?.(analyticsEvent); } catch { /* swallow */ }
+  }
+
+  /** Gracefully stop background timers and global handlers (useful for tests / teardown). */
+  public shutdown(): void {
+    if (this.flushTimer && this.canUseDOM()) {
+      try { window.clearInterval(this.flushTimer); } catch { /* ignore */ }
+      this.flushTimer = null;
+    }
+    if (this.globalErrorHandler && this.canUseDOM()) {
+      try { window.removeEventListener('error', this.globalErrorHandler); } catch { /* ignore */ }
+      this.globalErrorHandler = null;
+    }
+    this.isInitialized = false;
   }
 
   private sanitizeEvent(e: AnalyticsEvent): AnalyticsEvent {

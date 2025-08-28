@@ -3,6 +3,7 @@ import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { ChartHeader } from './ChartHeader';
 import type { AstrologyChart as _AstrologyChart } from '@cosmichub/types';
 import type {
+  ChartDisplayPlanet,
   // ----------------------
   // Shared parsing helpers
   // ----------------------
@@ -354,6 +355,25 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       localStorage.removeItem('cosmichub-astrology-settings');
     } catch { /* non-fatal */ }
   };
+
+  // Map a generic chart display planet/point to PlanetTable row shape
+  const mapPointToPlanetRow = (
+    p: ChartDisplayPlanet,
+    fallbackHouse: number
+  ) => ({
+    name: typeof p.name === 'string' ? p.name : '',
+    sign: typeof p.sign === 'string' ? p.sign : '',
+    house: parseIntFromUnknown(
+      typeof p.house === 'string' || typeof p.house === 'number'
+        ? p.house
+        : fallbackHouse,
+      fallbackHouse
+    ),
+    degree: typeof p.degree === 'number' ? p.degree.toFixed(2) : '0.00',
+    position: typeof p.position === 'number' ? p.position : undefined,
+    retrograde:
+      typeof p.retrograde === 'boolean' ? p.retrograde : undefined,
+  });
 
   // Type-safe wrapper to handle potentially unsafe objects
   const safeMapPointToPlanetRow = (
@@ -791,16 +811,8 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                                   | undefined,
                               };
 
-                              processedSections.angles.forEach(angleItem => {
-                                // Type guard for the angle object
-                                if (typeof angleItem !== 'object' || angleItem === null) {
-                                  return;
-                                }
-                                
-                                const angle = angleItem as Record<string, unknown>;
-                                const name = typeof angle.name === 'string' 
-                                  ? angle.name.toLowerCase() 
-                                  : '';
+                              processedSections.angles.forEach(angle => {
+                                const name = angle.name.toLowerCase();
                                 const position =
                                   typeof angle.position === 'number'
                                     ? angle.position
@@ -875,32 +887,17 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                       >
                         {processedSections.planets.length > 40 ? (
                           <VirtualizedList
-                            items={processedSections.planets.map(planetItem => {
-                              // Type guard for planet object
-                              if (typeof planetItem !== 'object' || planetItem === null) {
-                                return {
-                                  name: '',
-                                  sign: '',
-                                  house: 0,
-                                  degree: '0.00',
-                                  position: undefined,
-                                  retrograde: undefined,
-                                };
-                              }
-                              
-                              const p = planetItem as unknown as Record<string, unknown>;
-                              return {
-                                name: typeof p.name === 'string' ? p.name : '',
-                                sign: typeof p.sign === 'string' ? p.sign : '',
-                                house: parseIntFromUnknown(p.house, 0),
-                                degree:
-                                  typeof p.degree === 'number'
-                                    ? p.degree.toFixed(2)
-                                    : '0.00',
-                                position: typeof p.position === 'number' ? p.position : undefined,
-                                retrograde: typeof p.retrograde === 'boolean' ? p.retrograde : undefined,
-                              };
-                            })}
+                            items={processedSections.planets.map(p => ({
+                              name: p.name,
+                              sign: p.sign,
+                              house: parseIntFromUnknown(p.house, 0),
+                              degree:
+                                typeof p.degree === 'number'
+                                  ? p.degree.toFixed(2)
+                                  : String(p.degree),
+                              position: p.position,
+                              retrograde: p.retrograde,
+                            }))}
                             itemHeight={48}
                             height={420}
                             width='100%'
@@ -909,32 +906,17 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                           />
                         ) : (
                           <PlanetTable
-                            data={processedSections.planets.map(planetItem => {
-                              // Type guard for planet object
-                              if (typeof planetItem !== 'object' || planetItem === null) {
-                                return {
-                                  name: '',
-                                  sign: '',
-                                  house: 0,
-                                  degree: '0.00',
-                                  position: undefined,
-                                  retrograde: undefined,
-                                };
-                              }
-                              
-                              const p = planetItem as unknown as Record<string, unknown>;
-                              return {
-                                name: typeof p.name === 'string' ? p.name : '',
-                                sign: typeof p.sign === 'string' ? p.sign : '',
-                                house: parseIntFromUnknown(p.house, 0),
-                                degree:
-                                  typeof p.degree === 'number'
-                                    ? p.degree.toFixed(2)
-                                    : '0.00',
-                                position: typeof p.position === 'number' ? p.position : undefined,
-                                retrograde: typeof p.retrograde === 'boolean' ? p.retrograde : undefined,
-                              };
-                            })}
+                            data={processedSections.planets.map(p => ({
+                              name: p.name,
+                              sign: p.sign,
+                              house: parseIntFromUnknown(p.house, 0),
+                              degree:
+                                typeof p.degree === 'number'
+                                  ? p.degree.toFixed(2)
+                                  : String(p.degree),
+                              position: p.position,
+                              retrograde: p.retrograde,
+                            }))}
                           />
                         )}
                       </CollapsibleTable>
@@ -950,55 +932,28 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                     >
                       <HouseTable
                         data={processedSections.houses.map(
-                          (houseItem): HouseRow => {
-                            // Type guard for house object
-                            if (typeof houseItem !== 'object' || houseItem === null) {
-                              return {
-                                number: 0,
-                                sign: '',
-                                cuspDegree: '0.00',
-                                planetsInHouse: 'Empty',
-                              };
-                            }
-                            
-                            const house = houseItem as unknown as Record<string, unknown>;
+                          (house): HouseRow => {
                             const planetsInHouse: string[] = [];
 
-                            // Check all celestial bodies in this house - with safe spreading
-                            const safePlanets = Array.isArray(processedSections.planets) 
-                              ? processedSections.planets.filter(item => typeof item === 'object' && item !== null)
-                              : [];
-                            const safeAsteroids = Array.isArray(processedSections.asteroids) 
-                              ? processedSections.asteroids.filter(item => typeof item === 'object' && item !== null)
-                              : [];
-                            const safePoints = Array.isArray(processedSections.points) 
-                              ? processedSections.points.filter(item => typeof item === 'object' && item !== null)
-                              : [];
-                              
-                            const allBodies = [
-                              ...safePlanets as Record<string, unknown>[],
-                              ...safeAsteroids as Record<string, unknown>[],
-                              ...safePoints as Record<string, unknown>[],
-                            ];
-                            
-                            allBodies.forEach(bodyItem => {
-                              if (typeof bodyItem !== 'object' || bodyItem === null) {
-                                return;
-                              }
-                              
-                              const body = bodyItem as unknown as Record<string, unknown>;
+                            // Check all celestial bodies in this house
+                            [
+                              ...processedSections.planets,
+                              ...processedSections.asteroids,
+                              ...processedSections.points,
+                            ].forEach(body => {
                               const bodyHouse = parseIntFromUnknown(body.house, -1);
-                              const houseNumber = typeof house.house === 'number' ? house.house : 0;
-                              
-                              if (bodyHouse === houseNumber && typeof body.name === 'string') {
+                              if (bodyHouse === house.house) {
                                 planetsInHouse.push(body.name);
                               }
                             });
 
                             return {
-                              number: typeof house.house === 'number' ? house.house : 0,
-                              sign: typeof house.sign === 'string' ? house.sign : '',
-                              cuspDegree: typeof house.degree === 'number' ? `${house.degree.toFixed(2)}` : '0.00',
+                              number:
+                                typeof house.house === 'number'
+                                  ? house.house
+                                  : 0,
+                              sign: house.sign,
+                              cuspDegree: `${house.degree.toFixed(2)}`,
                               planetsInHouse:
                                 planetsInHouse.length > 0
                                   ? planetsInHouse.join(', ')
@@ -1025,25 +980,12 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                         {processedSections.asteroids.length > 60 ? (
                           <VirtualizedList
                             items={processedSections.asteroids.map(
-                              (asteroidItem): AsteroidRow => {
-                                // Type guard for asteroid object
-                                if (typeof asteroidItem !== 'object' || asteroidItem === null) {
-                                  return {
-                                    name: '',
-                                    sign: '',
-                                    degree: '0.00',
-                                    house: '',
-                                  };
-                                }
-                                
-                                const asteroid = asteroidItem as unknown as Record<string, unknown>;
-                                return {
-                                  name: typeof asteroid.name === 'string' ? asteroid.name : '',
-                                  sign: typeof asteroid.sign === 'string' ? asteroid.sign : '',
-                                  degree: typeof asteroid.degree === 'number' ? asteroid.degree.toString() : '0.00',
-                                  house: typeof asteroid.house === 'string' || typeof asteroid.house === 'number' ? String(asteroid.house) : '',
-                                };
-                              }
+                              (asteroid): AsteroidRow => ({
+                                name: asteroid.name,
+                                sign: asteroid.sign,
+                                degree: asteroid.degree.toString(),
+                                house: asteroid.house,
+                              })
                             )}
                             itemHeight={44}
                             height={420}
@@ -1056,25 +998,12 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                         ) : (
                           <AsteroidTable
                             data={processedSections.asteroids.map(
-                              (asteroidItem): AsteroidRow => {
-                                // Type guard for asteroid object
-                                if (typeof asteroidItem !== 'object' || asteroidItem === null) {
-                                  return {
-                                    name: '',
-                                    sign: '',
-                                    degree: '0.00',
-                                    house: '',
-                                  };
-                                }
-                                
-                                const asteroid = asteroidItem as unknown as Record<string, unknown>;
-                                return {
-                                  name: typeof asteroid.name === 'string' ? asteroid.name : '',
-                                  sign: typeof asteroid.sign === 'string' ? asteroid.sign : '',
-                                  degree: typeof asteroid.degree === 'number' ? asteroid.degree.toString() : '0.00',
-                                  house: typeof asteroid.house === 'string' || typeof asteroid.house === 'number' ? String(asteroid.house) : '',
-                                };
-                              }
+                              (asteroid): AsteroidRow => ({
+                                name: asteroid.name,
+                                sign: asteroid.sign,
+                                degree: asteroid.degree.toString(),
+                                house: asteroid.house,
+                              })
                             )}
                           />
                         )}
@@ -1092,25 +1021,14 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                       >
                         <AngleTable
                           data={processedSections.angles.map(
-                            (angleItem): AngleRow => {
-                              // Type guard for angle object
-                              if (typeof angleItem !== 'object' || angleItem === null) {
-                                return {
-                                  name: '',
-                                  sign: '',
-                                  degree: '0.00',
-                                };
-                              }
-                              
-                              const angle = angleItem as unknown as Record<string, unknown>;
-                              return {
-                                name: typeof angle.name === 'string' ? angle.name : '',
-                                sign: typeof angle.sign === 'string' ? angle.sign : '',
-                                degree: typeof angle.degree === 'number'
+                            (angle): AngleRow => ({
+                              name: angle.name,
+                              sign: angle.sign,
+                              degree:
+                                typeof angle.degree === 'number'
                                   ? angle.degree.toFixed(2)
-                                  : '0.00',
-                              };
-                            }
+                                  : String(angle.degree),
+                            })
                           )}
                         />
                       </CollapsibleTable>
@@ -1227,7 +1145,7 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                         >
                           <PlanetTable
                             data={categorizedPoints.hypothetical.map(p =>
-                              safeMapPointToPlanetRow(p, 1)
+                              mapPointToPlanetRow(p, 1)
                             )}
                           />
                         </CollapsibleTable>

@@ -20,6 +20,11 @@ interface NotificationSettingsProps {
   onSettingsChange?: (preferences: NotificationPreferences) => void;
 }
 
+export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
+  userId,
+  pushManager,
+  onSettingsChange,
+}) => {
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     DefaultNotificationPreferences
   );
@@ -67,7 +72,7 @@ interface NotificationSettingsProps {
   const loadStats = useCallback((): void => {
     try {
       const notificationStats =
-        pushManager.getNotificationStats() as Partial<NotificationStats>;
+        pushManager.getNotificationStats();
       if (
         notificationStats !== null &&
         notificationStats !== undefined &&

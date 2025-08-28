@@ -3,6 +3,8 @@ declare module '@cosmichub/auth' {
   import { ReactNode, FC } from 'react';
   import { User } from 'firebase/auth';
 
+  export interface AuthState {
+    user: User | null;
     loading: boolean;
     signOut: () => Promise<void>;
   }
@@ -20,6 +22,8 @@ declare module '@cosmichub/auth' {
   export const signUp: (email: string, password: string) => Promise<User>;
   export const logOut: () => Promise<void>;
 
+  export interface SubscriptionState {
+    subscription: any | null;
     userTier: string;
     tier: string; // Alias for userTier for compatibility
     isLoading: boolean;

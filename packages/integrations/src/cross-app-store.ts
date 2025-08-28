@@ -46,13 +46,16 @@ class SimpleEventEmitter {
   }
 }
 
-}
+interface UserState {
   data: Record<string, unknown> | null;
   name: string;
 }
-  subscription: string;
-  preferences: UserPreferences;
+
+interface ChartData {
+  // Chart data structure - can be extended as needed
+  [key: string]: unknown;
 }
+
 export interface AppState {
   user: UserState | null;
   currentChart: ChartData | null;
@@ -60,6 +63,8 @@ export interface AppState {
   activeApp: 'astro' | 'healwave';
 }
 
+interface CrossAppEvent<P = unknown> {
+  type: string;
   payload: P;
   source: string;
   timestamp: number;

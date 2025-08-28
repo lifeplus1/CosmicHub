@@ -67,11 +67,17 @@ interface NetworkInformationFallback {
 
 // Performance monitoring for PWA
 
-// Initialize enhanced PWA performance
+// Stub implementation for PWA performance initialization
+function initializePWAPerformance(): void {
+  safeLog('PWA Performance initialization called');
+  // TODO: Implement PWA performance optimizations
+}
 
-// Auto-initialize when imported
-const doc = typeof document !== 'undefined' ? document : null;
-if (doc !== null) {
+// Initialize PWA performance when DOM is ready
+export function initPWAPerformance(): void {
+  const doc = typeof document !== 'undefined' ? document : null;
+  if (doc === null) return;
+
   if (doc.readyState === 'loading') {
     doc.addEventListener('DOMContentLoaded', () => {
       initializePWAPerformance();

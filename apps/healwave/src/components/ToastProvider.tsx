@@ -1,5 +1,7 @@
 import React, { createContext, useContext, type ReactNode } from 'react';
 
+interface Toast {
+  id?: string;
   message?: string;
   title?: string;
   description?: string;
@@ -32,7 +34,10 @@ export const useToast = (): ToastContextType => {
 };
 
 // Simple provider implementation
+const ToastProvider = ({
   children,
+}: {
+  children: ReactNode;
 }) => {
   const toast = () => {};
   const closeToast = () => {};

@@ -13,7 +13,7 @@ export interface ProcessedSections {
   points: ChartDisplayPlanet[];
 }
 
-const PLANET_NAMES_SET: ReadonlySet<string> = new Set([
+const _PLANET_NAMES_SET: ReadonlySet<string> = new Set([
   'sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto'
 ]);
 

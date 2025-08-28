@@ -117,7 +117,7 @@ export function migrateAstrologySettings(raw: unknown): AstrologySettings {
   switch (version) {
     case 0: {
       // Pre-versioned: ensure new flags have safe defaults
-      if (!('hypotheticalPoints' in (obj.celestialBodies || {}))) {
+      if (!('hypotheticalPoints' in (obj.celestialBodies ?? {}))) {
         working = {
           ...working,
           celestialBodies: {

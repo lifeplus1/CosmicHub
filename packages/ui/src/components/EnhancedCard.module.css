@@ -2,17 +2,82 @@
 
 /* Card Container */
 .card {
-  /* Base card styles if any were defined in CardContainer */
+  position: relative;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: white;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.cardElevated {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.cardOutlined {
+  border: 2px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.cardFilled {
+  background: #f8fafc;
+  border: none;
+  box-shadow: none;
+}
+
+.cardSmall {
+  padding: 12px;
+}
+
+.cardMedium {
+  padding: 16px;
+}
+
+.cardLarge {
+  padding: 24px;
+}
+
+.cardClickable {
+  cursor: pointer;
+}
+
+.cardClickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.cardDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.cardLoading {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 /* Card Header */
 .header {
-  /* Base header styles if any were defined in CardHeader */
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #1f2937;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
 }
 
 /* Card Body */
 .body {
-  /* Base body styles */
+  color: #374151;
 }
 
 .bodyScrollable {
@@ -26,5 +91,72 @@
 
 /* Card Footer */
 .footer {
-  /* Base footer styles if any were defined in CardFooter */
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Focus styles */
+.cardClickable:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+
+  .cardFilled {
+    background: #111827;
+  }
+
+  .title {
+    color: #f9fafb;
+  }
+
+  .subtitle {
+    color: #d1d5db;
+  }
+
+  .body {
+    color: #e5e7eb;
+  }
+
+  .footer {
+    border-color: #374151;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .cardLarge {
+    padding: 16px;
+  }
+  
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .actions > * {
+    flex: 1;
+  }
 }

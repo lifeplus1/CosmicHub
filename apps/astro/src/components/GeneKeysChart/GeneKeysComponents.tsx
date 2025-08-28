@@ -12,6 +12,8 @@ import type {
 } from './types';
 
 // Memoized Gene Key display component
+export const GeneKeyDisplay = memo<GeneKeyDisplayProps>(
+  ({ geneKey, title, description, onKeySelect }) => {
     const handleClick = useCallback(() => {
       onKeySelect(geneKey);
     }, [geneKey, onKeySelect]);
@@ -55,6 +57,8 @@ import type {
 GeneKeyDisplay.displayName = 'GeneKeyDisplay';
 
 // Memoized Sequence display component
+export const SequenceDisplay = memo<SequenceDisplayProps>(
+  ({ sequence, onKeySelect }) => {
     return (
       <div className='cosmic-card'>
         <div className='p-4'>
@@ -221,6 +225,8 @@ export const GeneKeyDetails = memo<GeneKeyDetailsProps>(({ selectedKey }) => {
 GeneKeyDetails.displayName = 'GeneKeyDetails';
 
 // Memoized Venus Sequence component
+export const VenusSequence = memo<VenusSequenceProps>(
+  ({ geneKeysData, onKeySelect }) => {
     return (
       <div className='cosmic-card'>
         <div className='p-4'>
@@ -294,6 +300,8 @@ GeneKeyDetails.displayName = 'GeneKeyDetails';
 VenusSequence.displayName = 'VenusSequence';
 
 // Memoized Hologenic Profile component
+export const HologenicProfile = memo<HologenicProfileProps>(
+  ({ geneKeysData, onKeySelect }) => {
     return (
       <div className='mb-6 cosmic-card'>
         <div className='p-4'>
@@ -338,6 +346,8 @@ VenusSequence.displayName = 'VenusSequence';
 HologenicProfile.displayName = 'HologenicProfile';
 
 // Memoized Activation Sequence component
+export const ActivationSequence = memo<{
+  geneKeysData: GeneKeysData;
   onKeySelect: (key: GeneKey) => void;
 }>(({ geneKeysData, onKeySelect }) => {
   return (
@@ -362,6 +372,7 @@ HologenicProfile.displayName = 'HologenicProfile';
 ActivationSequence.displayName = 'ActivationSequence';
 
 // Memoized Pearl Sequence component
+export const PearlSequence = memo<{ geneKeysData: GeneKeysData }>(
   ({ geneKeysData }) => {
     return (
       <div className='cosmic-card'>

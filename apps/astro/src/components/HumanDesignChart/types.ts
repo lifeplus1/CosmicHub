@@ -1,6 +1,8 @@
 // Use shared unified birth data type (alias) from types package
 import type { ChartBirthData } from '@cosmichub/types';
 
+export interface Gate {
+  number: number;
   name: string;
   description?: string;
   line?: number;
@@ -10,17 +12,24 @@ import type { ChartBirthData } from '@cosmichub/types';
   planet_symbol?: string;
 }
 
+export interface Channel {
+  gate1: number;
   gate2: number;
   name: string;
   description?: string;
 }
 
+export interface Variables {
+  description: string;
   digestion: string;
   environment: string;
   awareness: string;
   perspective: string;
 }
 
+export interface HumanDesignData {
+  birth_info?: {
+    conscious_time: string;
     unconscious_time: string;
     location: {
       latitude: number;
@@ -52,8 +61,12 @@ import type { ChartBirthData } from '@cosmichub/types';
   signature: string;
 }
 
+export interface HumanDesignChartProps {
+  birthData?: ChartBirthData;
   onCalculate?: (data: ChartBirthData) => void;
   onHumanDesignCalculated?: (data: HumanDesignData) => void;
 }
 
+export interface TabProps {
+  humanDesignData: HumanDesignData;
 }

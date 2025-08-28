@@ -1,6 +1,6 @@
 import React from 'react';
 import { UpgradeModal, UpgradeModalProps } from './UpgradeModal';
-import useABTest from '../hooks/useABTest';
+import { useABTest, ABTestResult } from '../hooks/useABTest';
 
 /**
  * Enhanced UpgradeModal with A/B Testing
@@ -17,11 +17,17 @@ import useABTest from '../hooks/useABTest';
  * Replace useABTest with useTreatments from @splitsoftware/splitio-react
  * for advanced targeting and real-time configuration updates.
  */
-
+export interface UpgradeModalABProps extends UpgradeModalProps {
+  enableABTesting?: boolean;
 }
 
+export const UpgradeModalAB: React.FC<UpgradeModalABProps> = ({
+  enableABTesting = true,
+  ...props
+}) => {
+
   // A/B Test: Headline messaging
-  const headlineTest = useABTest({
+  const headlineTest: ABTestResult = useABTest({
     testName: 'upgrade_modal_headline',
     variants: ['urgency', 'benefit'],
     weights: [50, 50], // Equal split
@@ -29,7 +35,7 @@ import useABTest from '../hooks/useABTest';
   });
 
   // A/B Test: Button copy
-  const buttonTest = useABTest({
+  const buttonTest: ABTestResult = useABTest({
     testName: 'upgrade_modal_button',
     variants: ['upgrade_now', 'start_trial'],
     weights: [40, 60], // Favor trial messaging
@@ -37,7 +43,7 @@ import useABTest from '../hooks/useABTest';
   });
 
   // A/B Test: Pricing emphasis
-  const pricingTest = useABTest({
+  const pricingTest: ABTestResult = useABTest({
     testName: 'upgrade_modal_pricing',
     variants: ['monthly', 'annual_discount'],
     weights: [30, 70], // Favor annual pricing
@@ -248,6 +254,6 @@ import useABTest from '../hooks/useABTest';
       )}
     </div>
   );
-}
+};
 
 export default UpgradeModalAB;

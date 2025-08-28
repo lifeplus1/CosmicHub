@@ -2,7 +2,7 @@ import { useState, type FC, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
-import type { ChartBirthData } from '@cosmichub/types';
+import { type ChartBirthData, toTextBirthData } from '@cosmichub/types';
 import { devConsole } from '../config/environment';
 
 // Removed unused FormFields type (was never referenced)
@@ -106,14 +106,14 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
           ? minutesRaw
           : 0;
 
-      const chartData: ChartBirthData = {
+      const chartData: ChartBirthData = toTextBirthData({
         year,
         month,
         day,
         hour: Number.isFinite(hours) ? hours : 0,
         minute: Number.isFinite(minutes) ? minutes : 0,
         city: formData.birthLocation.trim(),
-      };
+      });
 
       setBirthData(chartData);
 

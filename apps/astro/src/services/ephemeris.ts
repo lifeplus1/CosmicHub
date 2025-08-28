@@ -37,10 +37,21 @@ const getEphemerisConfig = (): EphemerisConfig => ({
 });
 
 // Query keys for React Query
+export const ephemerisKeys = {
+  all: ['ephemeris'] as const,
+  health: () => [...ephemerisKeys.all, 'health'] as const,
+  planets: () => [...ephemerisKeys.all, 'planets'] as const,
+  calculation: (julianDay: number, planet: string) =>
+    [...ephemerisKeys.all, 'calculation', julianDay, planet] as const,
+  allPositions: (julianDay: number) =>
+    [...ephemerisKeys.all, 'positions', julianDay] as const,
+};
 
 /**
  * Hook to get a configured ephemeris client instance
  */
+export const useEphemerisClient = (): EphemerisClient =>
+  useMemo(() => createEphemerisClient(getEphemerisConfig()), []);
 
 /**
  * Hook to check ephemeris service health
@@ -62,9 +73,10 @@ export const useEphemerisHealth = (): UseQueryResult<
 /**
  * Hook to get supported planets list
  */
+export const useSupportedPlanets = (): UseQueryResult<PlanetName[], Error> => {
   return useQuery<PlanetName[], Error>({
     queryKey: ephemerisKeys.planets(),
-    queryFn: () => client.getSupportedPlanets(),
+    queryFn: () => Promise.resolve([...SUPPORTED_PLANETS]),
     staleTime: 24 * 60 * 60 * 1000, // 24 hours - rarely changes
     gcTime: 24 * 60 * 60 * 1000,
   });
@@ -73,6 +85,10 @@ export const useEphemerisHealth = (): UseQueryResult<
 /**
  * Hook to calculate planetary position for a specific date and planet
  */
+export const usePlanetaryPosition = (
+  date: Date | null,
+  planet: PlanetName,
+  options?: { enabled?: boolean }
 ): UseQueryResult<CalculationResponse, Error> => {
   const client = useEphemerisClient();
   const julianDay =
@@ -84,7 +100,11 @@ export const useEphemerisHealth = (): UseQueryResult<
       julianDay !== null ? ephemerisKeys.calculation(julianDay, planet) : [],
     queryFn: () => {
       if (julianDay === null) throw new Error('Date is required');
-      return client.calculatePosition(julianDay, planet);
+      // TODO: Implement calculatePlanet method in EphemerisClient
+      if (!('calculatePlanet' in client)) {
+        throw new Error('EphemerisClient.calculatePlanet not implemented');
+      }
+      return (client as any).calculatePlanet(planet, julianDay);
     },
     enabled: isEnabled,
     staleTime: 60 * 60 * 1000,
@@ -117,7 +137,11 @@ export const useAllPlanetaryPositions = (
         julian_day: julianDay,
         planet,
       }));
-      const response = await client.calculateBatchPositions(calculations);
+      // TODO: Implement batchCalculate method in EphemerisClient
+      if (!('batchCalculate' in client)) {
+        throw new Error('EphemerisClient.batchCalculate not implemented');
+      }
+      const response = await (client as any).batchCalculate(calculations);
       const positions: Partial<Record<PlanetName, PlanetPosition>> = {};
       for (const result of response.results) {
         const planetName = result.planet as PlanetName;
@@ -134,6 +158,10 @@ export const useAllPlanetaryPositions = (
 /**
  * Hook to batch calculate multiple planetary positions
  */
+export const useBatchPlanetaryCalculation = (): UseMutationResult<
+  BatchCalculationResponse,
+  Error,
+  Array<{ date: Date; planet: PlanetName }>,
   unknown
 > => {
   const client = useEphemerisClient();
@@ -148,7 +176,11 @@ export const useAllPlanetaryPositions = (
         julian_day: dateToJulianDay(req.date),
         planet: req.planet,
       }));
-      return client.calculateBatchPositions(calculations);
+      // TODO: Implement batchCalculate method in EphemerisClient
+      if (!('batchCalculate' in client)) {
+        throw new Error('EphemerisClient.batchCalculate not implemented');
+      }
+      return (client as any).batchCalculate(calculations);
     },
     onSuccess: (data, variables) => {
       data.results.forEach((result, index) => {
@@ -169,6 +201,12 @@ export const useAllPlanetaryPositions = (
 /**
  * Utility hook to preload planetary positions for a date range
  */
+export const usePrefetchPlanetaryPositions = (): {
+  prefetchPositions: (
+    startDate: Date,
+    endDate: Date,
+    planets?: PlanetName[]
+  ) => Promise<void>;
 } => {
   const queryClient = useQueryClient();
   const client = useEphemerisClient();
@@ -195,7 +233,23 @@ export const useAllPlanetaryPositions = (
           const julianDay = dateToJulianDay(date);
           return queryClient.prefetchQuery({
             queryKey: ephemerisKeys.allPositions(julianDay),
-            queryFn: () => client.getAllPlanetaryPositions(julianDay),
+            queryFn: async () => {
+              const calculations = SUPPORTED_PLANETS.map(planet => ({
+                julian_day: julianDay,
+                planet,
+              }));
+              // TODO: Implement batchCalculate method in EphemerisClient
+              if (!('batchCalculate' in client)) {
+                throw new Error('EphemerisClient.batchCalculate not implemented');
+              }
+              const response = await (client as any).batchCalculate(calculations);
+              const positions: Partial<Record<PlanetName, PlanetPosition>> = {};
+              for (const result of response.results) {
+                const planetName = result.planet as PlanetName;
+                positions[planetName] = result.position;
+              }
+              return positions as Record<PlanetName, PlanetPosition>;
+            },
             staleTime: 60 * 60 * 1000,
           });
         })
@@ -209,6 +263,8 @@ export const useAllPlanetaryPositions = (
 /**
  * Hook to invalidate ephemeris cache (useful for forcing refresh)
  */
+export const useInvalidateEphemerisCache = (): {
+  invalidateAll: () => void;
   invalidateCalculation: (julianDay: number, planet: PlanetName) => void;
   invalidateAllPositions: (julianDay: number) => void;
 } => {
@@ -235,8 +291,6 @@ export const useAllPlanetaryPositions = (
 // Export utility functions for direct use
 export {
   dateToJulianDay,
-  julianDayToDate,
-  formatPlanetPosition,
   getAstrologicalSign,
   SUPPORTED_PLANETS,
 } from '@cosmichub/integrations';

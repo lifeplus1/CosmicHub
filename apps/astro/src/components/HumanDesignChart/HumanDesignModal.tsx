@@ -1,6 +1,8 @@
 import React from 'react';
 import { getGateLineKeynote, getChannelKeynote } from './gateKeynotes';
 
+export interface GateModalData {
+  type: 'gate';
   number: number;
   line: number;
   name: string;
@@ -11,6 +13,8 @@ import { getGateLineKeynote, getChannelKeynote } from './gateKeynotes';
   position: number;
 }
 
+export interface ChannelModalData {
+  type: 'channel';
   id: string;
   name: string;
   circuit: string;

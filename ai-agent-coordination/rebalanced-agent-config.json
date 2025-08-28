@@ -1,0 +1,379 @@
+{
+  "version": "2.0.0",
+  "rebalancingApplied": true,
+  "rebalancingDate": "2025-08-27T18:52:04.721Z",
+  "totalAgents": 6,
+  "batches": {
+    "quick-wins": {
+      "name": "Quick Wins Agent",
+      "agents": [],
+      "targetComplexity": -1,
+      "estimatedDuration": "3-5s",
+      "description": "Auto-fixable errors and simple patterns"
+    },
+    "medium-complexity": {
+      "name": "Medium Complexity Agent",
+      "agents": [
+        {
+          "agentId": "agent-2-astro-features",
+          "analysis": {
+            "errorCount": 1,
+            "warningCount": 0,
+            "duration": 10011,
+            "ready": false,
+            "errorPatterns": {
+              "is": 1
+            },
+            "targets": [
+              "apps/astro/src/features"
+            ],
+            "totalComplexity": 4,
+            "complexityPerError": 4,
+            "errorBreakdown": {
+              "is": {
+                "count": 1,
+                "complexity": 4,
+                "totalComplexity": 4
+              }
+            },
+            "workloadScore": 9.2055
+          }
+        },
+        {
+          "agentId": "agent-4-astro-services-types",
+          "analysis": {
+            "errorCount": 14,
+            "warningCount": 2,
+            "duration": 10696,
+            "ready": false,
+            "errorPatterns": {
+              "assignment": 7,
+              "member": 6,
+              "argument": 1
+            },
+            "targets": [
+              "apps/astro/src/services",
+              "apps/astro/src/types",
+              "apps/astro/src/config"
+            ],
+            "totalComplexity": 56,
+            "complexityPerError": 4,
+            "errorBreakdown": {
+              "assignment": {
+                "count": 7,
+                "complexity": 4,
+                "totalComplexity": 28
+              },
+              "member": {
+                "count": 6,
+                "complexity": 4,
+                "totalComplexity": 24
+              },
+              "argument": {
+                "count": 1,
+                "complexity": 4,
+                "totalComplexity": 4
+              }
+            },
+            "workloadScore": 64.14800000000001
+          }
+        },
+        {
+          "agentId": "agent-6-config-package",
+          "analysis": {
+            "errorCount": 43,
+            "warningCount": 0,
+            "duration": 10223,
+            "ready": false,
+            "errorPatterns": {
+              "error": 30,
+              "assignment": 2,
+              "return": 1,
+              "argument": 2,
+              "member": 4,
+              "is": 4
+            },
+            "targets": [
+              "packages/config/src"
+            ],
+            "totalComplexity": 172,
+            "complexityPerError": 4,
+            "errorBreakdown": {
+              "error": {
+                "count": 30,
+                "complexity": 4,
+                "totalComplexity": 120
+              },
+              "assignment": {
+                "count": 2,
+                "complexity": 4,
+                "totalComplexity": 8
+              },
+              "return": {
+                "count": 1,
+                "complexity": 4,
+                "totalComplexity": 4
+              },
+              "argument": {
+                "count": 2,
+                "complexity": 4,
+                "totalComplexity": 8
+              },
+              "member": {
+                "count": 4,
+                "complexity": 4,
+                "totalComplexity": 16
+              },
+              "is": {
+                "count": 4,
+                "complexity": 4,
+                "totalComplexity": 16
+              }
+            },
+            "workloadScore": 185.7115
+          }
+        },
+        {
+          "agentId": "agent-7-apps-small-packages",
+          "analysis": {
+            "errorCount": 63,
+            "warningCount": 1,
+            "duration": 12195,
+            "ready": false,
+            "errorPatterns": {
+              "is": 18,
+              "assignment": 9,
+              "member": 10,
+              "argument": 4,
+              "return": 1,
+              "call": 6,
+              "error": 15
+            },
+            "targets": [
+              "apps/healwave/src",
+              "apps/mobile/src",
+              "packages/auth/src",
+              "packages/frequency/src",
+              "packages/hooks/src",
+              "packages/integrations/src",
+              "packages/pwa/src",
+              "packages/storage/src",
+              "packages/subscriptions/src",
+              "packages/types/src"
+            ],
+            "totalComplexity": 252,
+            "complexityPerError": 4,
+            "errorBreakdown": {
+              "is": {
+                "count": 18,
+                "complexity": 4,
+                "totalComplexity": 72
+              },
+              "assignment": {
+                "count": 9,
+                "complexity": 4,
+                "totalComplexity": 36
+              },
+              "member": {
+                "count": 10,
+                "complexity": 4,
+                "totalComplexity": 40
+              },
+              "argument": {
+                "count": 4,
+                "complexity": 4,
+                "totalComplexity": 16
+              },
+              "return": {
+                "count": 1,
+                "complexity": 4,
+                "totalComplexity": 4
+              },
+              "call": {
+                "count": 6,
+                "complexity": 4,
+                "totalComplexity": 24
+              },
+              "error": {
+                "count": 15,
+                "complexity": 4,
+                "totalComplexity": 60
+              }
+            },
+            "workloadScore": 270.69750000000005
+          }
+        },
+        {
+          "agentId": "agent-3-astro-pages-context",
+          "analysis": {
+            "errorCount": 86,
+            "warningCount": 10,
+            "duration": 11153,
+            "ready": false,
+            "errorPatterns": {
+              "is": 3,
+              "assignment": 21,
+              "call": 8,
+              "member": 38,
+              "return": 2,
+              "object": 2,
+              "argument": 11,
+              "import": 1
+            },
+            "targets": [
+              "apps/astro/src/pages",
+              "apps/astro/src/contexts",
+              "apps/astro/src/hooks"
+            ],
+            "totalComplexity": 344,
+            "complexityPerError": 4,
+            "errorBreakdown": {
+              "is": {
+                "count": 3,
+                "complexity": 4,
+                "totalComplexity": 12
+              },
+              "assignment": {
+                "count": 21,
+                "complexity": 4,
+                "totalComplexity": 84
+              },
+              "call": {
+                "count": 8,
+                "complexity": 4,
+                "totalComplexity": 32
+              },
+              "member": {
+                "count": 38,
+                "complexity": 4,
+                "totalComplexity": 152
+              },
+              "return": {
+                "count": 2,
+                "complexity": 4,
+                "totalComplexity": 8
+              },
+              "object": {
+                "count": 2,
+                "complexity": 4,
+                "totalComplexity": 8
+              },
+              "argument": {
+                "count": 11,
+                "complexity": 4,
+                "totalComplexity": 44
+              },
+              "import": {
+                "count": 1,
+                "complexity": 4,
+                "totalComplexity": 4
+              }
+            },
+            "workloadScore": 366.7765
+          }
+        },
+        {
+          "agentId": "agent-1-astro-components",
+          "analysis": {
+            "errorCount": 128,
+            "warningCount": 13,
+            "duration": 13820,
+            "ready": false,
+            "errorPatterns": {
+              "is": 19,
+              "member": 55,
+              "argument": 8,
+              "assignment": 32,
+              "import": 6,
+              "type": 1,
+              "array": 2,
+              "return": 1,
+              "call": 4
+            },
+            "targets": [
+              "apps/astro/src/components"
+            ],
+            "totalComplexity": 512,
+            "complexityPerError": 4,
+            "errorBreakdown": {
+              "is": {
+                "count": 19,
+                "complexity": 4,
+                "totalComplexity": 76
+              },
+              "member": {
+                "count": 55,
+                "complexity": 4,
+                "totalComplexity": 220
+              },
+              "argument": {
+                "count": 8,
+                "complexity": 4,
+                "totalComplexity": 32
+              },
+              "assignment": {
+                "count": 32,
+                "complexity": 4,
+                "totalComplexity": 128
+              },
+              "import": {
+                "count": 6,
+                "complexity": 4,
+                "totalComplexity": 24
+              },
+              "type": {
+                "count": 1,
+                "complexity": 4,
+                "totalComplexity": 4
+              },
+              "array": {
+                "count": 2,
+                "complexity": 4,
+                "totalComplexity": 8
+              },
+              "return": {
+                "count": 1,
+                "complexity": 4,
+                "totalComplexity": 4
+              },
+              "call": {
+                "count": 4,
+                "complexity": 4,
+                "totalComplexity": 16
+              }
+            },
+            "workloadScore": 544.51
+          }
+        }
+      ],
+      "targetComplexity": -1,
+      "estimatedDuration": "6-8s",
+      "description": "Pattern-based fixes and moderate refactoring"
+    },
+    "high-complexity": {
+      "name": "High Complexity Agent",
+      "agents": [],
+      "targetComplexity": -2,
+      "estimatedDuration": "9-12s",
+      "description": "Type safety and architectural improvements"
+    }
+  },
+  "executionStrategy": {
+    "parallel": [
+      "quick-wins"
+    ],
+    "sequential": [
+      "medium-complexity",
+      "high-complexity"
+    ],
+    "dependencies": {
+      "medium-complexity": [
+        "quick-wins"
+      ],
+      "high-complexity": [
+        "quick-wins",
+        "medium-complexity"
+      ]
+    }
+  }
+}

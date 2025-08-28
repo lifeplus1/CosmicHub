@@ -30,27 +30,38 @@ import { logger } from './utils/logger';
 
 const performanceLogger = logger.child({ module: 'performance' });
 
+export interface PerformanceMetric {
+  name: string;
   duration: number;
   timestamp: number;
   metadata?: Record<string, unknown>;
 }
 
+export interface MetricMetadata {
+  label?: string;
   [key: string]: unknown;
 }
 
 export type ComponentMetricType = 'render' | 'mount' | 'interaction' | 'custom';
+export type PageMetricType = 'load' | 'interactive' | 'visibility';
 
 export interface ComponentMetric extends PerformanceMetric {
   componentName: string;
   type: ComponentMetricType;
 }
 
+export interface OperationMetric extends PerformanceMetric {
+  operationName: string;
   success: boolean;
 }
 
+export interface PageMetric extends PerformanceMetric {
+  pageName: string;
   type: PageMetricType;
 }
 
+export interface PerformanceReport {
+  components: ComponentMetric[];
   operations: OperationMetric[];
   pages: PageMetric[];
   summary: {
@@ -355,9 +366,22 @@ class PerformanceMonitor {
 export const performanceMonitor = new PerformanceMonitor();
 
 // Export minimal function for Docker build compatibility
+export const reportPerformance = () => {
+  return performanceMonitor.getPerformanceReport();
 };
 
 // Service Worker Integration Helper
+export const initServiceWorkerPerformanceCache = () => {
+  if (
+    'serviceWorker' in navigator &&
+    process.env['NODE_ENV'] === 'production'
+  ) {
+    void navigator.serviceWorker
+      .register('/performance-sw.js')
+      .then(registration => {
+        performanceLogger.info('Performance service worker registered', {
+          registration: registration.scope,
+        });
       })
       .catch(error => {
         performanceLogger.error(

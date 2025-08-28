@@ -81,6 +81,7 @@ const HealthIndicator: React.FC = () => {
   );
 };
 
+export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
   const {
     data: positions,
     isLoading,

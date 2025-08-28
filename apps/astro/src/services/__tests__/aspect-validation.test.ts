@@ -3,7 +3,7 @@ import { isAspectType } from '../validation';
 import type { AspectType } from '../api.types';
 
 describe('isAspectType', () => {
-  const valid: AspectType[] = ['conjunction','opposition','trine','square','sextile','quincunx','semisextile'];
+  const valid: AspectType[] = ['conjunction','opposition','trine','square','sextile','quincunx','semi-sextile'];
   it('accepts valid aspect types', () => {
     for (const a of valid) {
       expect(isAspectType(a)).toBe(true);

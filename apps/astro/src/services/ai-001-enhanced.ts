@@ -64,7 +64,7 @@ export interface ChartPattern {
   activationPeriods: string[];
 }
 
-interface AnalysisRequest {
+interface _AnalysisRequest {
   userId: string;
   analysisType:
     | 'transits'
@@ -72,6 +72,17 @@ interface AnalysisRequest {
     | 'synthesis'
     | 'patterns'
     | 'comprehensive';
+  preferences?: {
+    timeRange?: string;
+    focusAreas?: string[];
+    culturalSystems?: string[];
+  };
+}
+
+export interface AI001Request {
+  chartData: { planets?: unknown; houses?: unknown };
+  userId: string;
+  analysisType?: 'comprehensive';
   preferences?: {
     timeRange?: string;
     focusAreas?: string[];
@@ -167,22 +178,32 @@ export class AI001Service {
     patterns: ChartPattern[];
     summary: string;
   }> {
-    const [transits, growth, synthesis, patterns] = await Promise.all([
-      this.generateTransitPredictions(request.chartData),
-      this.generateGrowthInsights(request.chartData),
-      this.generateMultiSystemSynthesis(request.chartData),
-      this.analyzeChartPatterns(request.chartData),
-    ]);
+    try {
+      const chartData = request.chartData;
+      if (!chartData) {
+        throw new Error('Chart data is required');
+      }
 
-    const summary = await this.generateExecutiveSummary({
-      transits,
-      growth,
-      synthesis,
-      patterns,
-      chartData: request.chartData,
-    });
+      const [transits, growth, synthesis, patterns] = await Promise.all([
+        this.generateTransitPredictions(chartData),
+        this.generateGrowthInsights(chartData),
+        this.generateMultiSystemSynthesis(chartData),
+        this.analyzeChartPatterns(chartData),
+      ]);
 
-    return { transits, growth, synthesis, patterns, summary };
+      const summary = await this.generateExecutiveSummary({
+        transits,
+        growth,
+        synthesis,
+        patterns,
+        chartData,
+      });
+
+      return { transits, growth, synthesis, patterns, summary };
+    } catch (error) {
+      devConsole.error('Comprehensive analysis error:', error);
+      throw error;
+    }
   }
 
   // =============================================================================

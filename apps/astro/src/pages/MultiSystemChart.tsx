@@ -48,7 +48,7 @@ const MultiSystemChart: React.FC = () => {
           error instanceof Error
             ? error.message
             : 'Failed to calculate multi-system chart';
-        devConsole.error('❌ Error fetching multi-system chart:', error);
+        devConsole.error('❌ Error fetching multi-system chart:', errorMessage);
         setError(errorMessage);
         setChartData(null);
       } finally {
@@ -259,7 +259,7 @@ const MultiSystemChart: React.FC = () => {
                   Coordinates
                 </div>
                 <div className='text-cosmic-silver text-sm'>
-                  {birthData.lat !== undefined && birthData.lon !== undefined
+                  {birthData.lat !== undefined && birthData.lon !== undefined && birthData.lat !== null && birthData.lon !== null && typeof birthData.lat === 'number' && typeof birthData.lon === 'number'
                     ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
                     : 'Auto-detected'}
                 </div>

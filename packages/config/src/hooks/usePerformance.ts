@@ -16,6 +16,8 @@ const errorDev = (...args: unknown[]): void => {
   console.error(...args);
 };
 
+export interface PerformanceMetrics {
+  duration: number;
   startTime: number;
   endTime: number;
   memory?: number;
@@ -23,6 +25,8 @@ const errorDev = (...args: unknown[]): void => {
   loadTime?: number;
 }
 
+export interface OperationMetrics {
+  operationId: string;
   operationName: string;
   startTime: number;
   endTime?: number;
@@ -32,6 +36,8 @@ const errorDev = (...args: unknown[]): void => {
   metadata?: Record<string, unknown>;
 }
 
+export interface PagePerformanceMetrics {
+  pageLoadTime: number;
   firstContentfulPaint: number;
   largestContentfulPaint: number;
   firstInputDelay: number;

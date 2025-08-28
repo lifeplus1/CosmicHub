@@ -21,3 +21,12 @@ export interface NotificationPayload {
 export interface NotificationFrequency {
   [key: string]: unknown;
 }
+
+export interface SyncMessageData {
+  type: string;
+  payload: unknown;
+  timestamp: number;
+}
+
+// Re-export ChartData from services for notification usage
+export type { ChartData } from '../services/api.types';

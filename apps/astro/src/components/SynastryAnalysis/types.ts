@@ -1,10 +1,15 @@
 import type { BirthData } from '../../types';
 
+export interface SynastryAnalysisProps {
+  person1: BirthData;
   person2: BirthData;
   person1Name?: string;
   person2Name?: string;
 }
 
+export interface SynastryResult {
+  compatibility_analysis: {
+    overall_score: number;
     interpretation: string;
     breakdown: Record<string, number>;
     meta?: {
@@ -41,20 +46,34 @@ import type { BirthData } from '../../types';
 }
 
 // Updated in component usage: tier mapped to safe class sets
+export interface ProgressBarProps {
+  score: number;
   tier: 'excellent' | 'good' | 'moderate' | 'low';
 }
 
+export interface StarRatingProps {
+  score: number;
 }
 
+export interface CompatibilityScoreProps {
+  synastryResult: SynastryResult;
 }
 
+export interface KeyAspectsProps {
+  synastryResult: SynastryResult;
   getAspectColor: (aspect: string) => string;
   formatPlanetName: (planet: string) => string;
 }
 
+export interface HouseOverlaysProps {
+  synastryResult: SynastryResult;
   formatPlanetName: (planet: string) => string;
 }
 
+export interface CompositeChartProps {
+  synastryResult: SynastryResult;
 }
 
+export interface RelationshipSummaryProps {
+  synastryResult: SynastryResult;
 }

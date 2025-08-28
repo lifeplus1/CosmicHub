@@ -3,6 +3,9 @@ import { useSubscription } from '@cosmichub/auth';
 import { FaStar, FaCheck } from 'react-icons/fa';
 import { COSMICHUB_TIERS } from '@cosmichub/subscriptions';
 
+export const SubscriptionStatus: React.FC = React.memo(() => {
+  const { userTier, isLoading } = useSubscription();
+
   if (isLoading) {
     return (
       <div className='bg-cosmic-blue/30 rounded-xl px-4 py-2 border border-cosmic-silver/20 max-w-[320px]'>

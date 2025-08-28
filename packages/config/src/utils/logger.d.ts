@@ -1,4 +1,7 @@
 /** Minimal logger abstraction with level filtering and one-time messages. */
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export interface LoggerConfig {
+  level?: LogLevel;
 }
 export declare class BasicLogger {
   private logLevel;

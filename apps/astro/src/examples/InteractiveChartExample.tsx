@@ -14,26 +14,45 @@ import {
 } from '../services/chartAnalyticsService';
 import { getNotificationManager } from '../services/notificationManager';
 import { Button } from '@cosmichub/ui';
+import type { UnifiedBirthData, ChartBirthData } from '@cosmichub/types';
 
 // Lazy load the heavy chart component
 const ChartWheelInteractive = lazy(
   () => import('../features/ChartWheelInteractive')
 );
-// Re-exported Aspect type from ChartWheelInteractive for callback typing (dynamic import so use typeof inference if needed)
-import type { Aspect } from '../features/ChartWheelInteractive';
+// Use Aspect type from services instead
+import type { Aspect } from '../services/api.types';
 
-const sampleBirthData = {
+const sampleUnifiedBirthData: UnifiedBirthData = {
   year: 1990,
   month: 6,
   day: 15,
   hour: 14,
   minute: 30,
+  city: 'New York',
   lat: 40.7128,
   lon: -74.006,
-  timezone: 'America/New_York',
-  city: 'New York',
 };
 
+// Convert to ExtendedBirthData format for chart operations  
+const sampleExtendedBirthData = {
+  birth_date: '06/15/1990',
+  birth_time: '14:30',
+  latitude: 40.7128,
+  longitude: -74.006,
+  city: 'New York',
+  year: 1990,
+  month: 6,
+  day: 15,
+  hour: 14,
+  minute: 30,
+  timezone: 'America/New_York',
+};
+
+const sampleBirthData = sampleUnifiedBirthData;
+
+export const InteractiveChartExample: React.FC = () => {
+  const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   type AnalysisState = PersonalityInsight[] | ChartAnalysis | null;
   const [analysisResult, setAnalysisResult] = useState<AnalysisState>(null);
   const [chartRegistered, setChartRegistered] = useState(false);
@@ -50,25 +69,25 @@ const sampleBirthData = {
 
     // Send notification about planet selection
     const notificationManager = getNotificationManager();
-    // Updated to use unified notification manager test API
-    if (typeof notificationManager.sendTest === 'function') {
-      const result = notificationManager.sendTest.call(notificationManager);
-      if (
-        result !== null &&
-        typeof result === 'object' &&
-        'then' in result &&
-        typeof (result as Promise<unknown>).then === 'function'
-      ) {
-        await (result as Promise<unknown>);
-      }
-    }
+    // TODO: Fix missing sendTest method
+    // if (typeof notificationManager.sendTest === 'function') {
+    //   const result = notificationManager.sendTest.call(notificationManager);
+    //   if (
+    //     result !== null &&
+    //     typeof result === 'object' &&
+    //     'then' in result &&
+    //     typeof (result as Promise<unknown>).then === 'function'
+    //   ) {
+    //     await (result as Promise<unknown>);
+    //   }
+    // }
   };
 
   const handleRegisterChart = async () => {
     const syncService = getChartSyncService();
 
     try {
-      await syncService.registerChart('example-chart', sampleBirthData, {
+      await syncService.registerChart('example-chart', sampleExtendedBirthData, {
         enableTransitUpdates: true,
         enableProgressions: false,
         aspectAlerts: true,
@@ -185,7 +204,7 @@ const sampleBirthData = {
         }
       >
         <ChartWheelInteractive
-          birthData={sampleBirthData}
+          birthData={sampleExtendedBirthData}
           showAspects={true}
           showAnimation={true}
           showTransits={chartRegistered}
@@ -196,9 +215,9 @@ const sampleBirthData = {
           onAspectSelect={(aspect: Aspect) => {
             devConsole.log?.('Aspect selected:', {
               planets: `${aspect.planet1}-${aspect.planet2}`,
-              type: aspect.type,
+              type: aspect.aspect_type,
               orb: aspect.orb,
-              strength: aspect.strength,
+              strength: aspect.power,
             });
           }}
         />

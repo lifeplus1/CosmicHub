@@ -3,6 +3,7 @@ import { render, renderHook, act, screen } from '@testing-library/react';
 import React from 'react';
 import { BirthDataProvider, useBirthData } from '../BirthDataContext';
 import type { ChartBirthData } from '@cosmichub/types';
+import { toTextBirthData } from '@cosmichub/types';
 
 // Mock the persistence utilities
 vi.mock('../utils/contextPersistence', () => ({
@@ -17,7 +18,7 @@ vi.mock('../hooks/useContextPerformance', () => ({
 }));
 
 describe('BirthDataContext Optimizations', () => {
-  const mockBirthData: ChartBirthData = {
+  const mockUnifiedBirthData = {
     year: 1990,
     month: 5,
     day: 15,
@@ -29,6 +30,8 @@ describe('BirthDataContext Optimizations', () => {
     latitude: 40.7128,
     longitude: -74.006,
   };
+  
+  const mockBirthData: ChartBirthData = toTextBirthData(mockUnifiedBirthData);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -177,12 +180,12 @@ describe('BirthDataContext Optimizations', () => {
 
     const { result } = renderHook(() => useBirthData(), { wrapper });
 
-    // Invalid data - missing required fields
+    // Invalid data - missing required fields (use unknown cast for intentional incomplete data)
     const invalidData = {
       year: 1990,
       month: 5,
       // missing day, hour, minute
-    } as ChartBirthData;
+    } as unknown as ChartBirthData;
 
     act(() => {
       result.current.setBirthData(invalidData);

@@ -181,6 +181,10 @@ try {
 /**
  * Performance optimization: Network management
  */
+export const enableFirestoreNetwork = async (): Promise<void> => {
+  try {
+    if (hasFirestoreApp(db)) {
+      await enableNetwork(db);
       devConsole.log?.('📡 Firestore network enabled');
     } else {
       devConsole.log?.('📡 Firestore not available, skipping network enable');
@@ -190,6 +194,10 @@ try {
   }
 };
 
+export const disableFirestoreNetwork = async (): Promise<void> => {
+  try {
+    if (hasFirestoreApp(db)) {
+      await disableNetwork(db);
       devConsole.log?.('📡 Firestore network disabled');
     } else {
       devConsole.log?.('📡 Firestore not available, skipping network disable');
@@ -208,8 +216,17 @@ export { hasAuthAvailable };
 /**
  * Environment utilities
  */
+export const isEmulator = env.DEV && env['VITE_USE_EMULATOR'] === 'true';
 export const isDevelopment = env.DEV;
+export const projectId = firebaseConfig.projectId;
 
 /**
  * Performance monitoring
  */
+export const getFirebasePerformanceInfo = () => ({
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  isEmulator,
+  isDevelopment,
+  timestamp: Date.now(),
+});

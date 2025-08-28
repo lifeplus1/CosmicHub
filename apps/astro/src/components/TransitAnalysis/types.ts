@@ -1,5 +1,7 @@
 // Core types for transit analysis birth data (textual form)
 // NOTE: This differs from the shared ChartBirthData (numeric unified form)
+export interface TransitBirthData {
+  birth_date: string; // ISO format: YYYY-MM-DD
   birth_time: string; // HH:MM:SS
   latitude: number;
   longitude: number;
@@ -7,10 +9,14 @@
   city?: string;
 }
 
+export interface DateRange {
+  startDate: string; // ISO format: YYYY-MM-DD
   endDate: string; // ISO format: YYYY-MM-DD
 }
 
 // Enhanced transit result interface
+export interface TransitResult {
+  id: string;
   planet: string;
   aspect: string;
   natal_planet: string;
@@ -25,6 +31,8 @@
 }
 
 // Enhanced lunar transit result interface
+export interface LunarTransitResult {
+  phase: string;
   date: string; // ISO format: YYYY-MM-DD
   exact_time: string;
   energy: string;
@@ -35,12 +43,16 @@
 }
 
 // API Response types
+export interface TransitCalculationResponse {
+  results: TransitResult[];
   totalCount: number;
   dateRange: DateRange;
   calculatedAt: string;
   cached: boolean;
 }
 
+export interface LunarTransitCalculationResponse {
+  results: LunarTransitResult[];
   totalCount: number;
   dateRange: DateRange;
   calculatedAt: string;
@@ -48,14 +60,20 @@
 }
 
 // Error handling types
+export interface ApiError {
+  message: string;
   code: string;
   details?: Record<string, unknown>;
 }
 
 // Transit analysis options
+export interface TransitAnalysisOptions {
+  includeMinorAspects?: boolean;
   includeAsteroids?: boolean;
   orb?: number;
 }
 
+export interface LunarAnalysisOptions {
+  includeVoidOfCourse?: boolean;
   includeDailyPhases?: boolean;
 }

@@ -107,6 +107,8 @@ class MockComponentPerformanceAnalyzer {
 }
 
 // Enhanced test utilities
+export interface TestConfig {
+  performance: boolean;
   accessibility: boolean;
   responsiveness: boolean;
   interactions: boolean;
@@ -124,10 +126,15 @@ const defaultTestConfig: TestConfig = {
 };
 
 // Test wrapper with providers
+export interface TestWrapperProps {
+  children: React.ReactNode;
   config?: Partial<TestConfig>;
   mockProviders?: React.ComponentType<{ children: React.ReactNode }>[];
 }
 
+export const TestWrapper: React.FC<TestWrapperProps> = ({
+  children,
+  config = {},
   mockProviders = [],
 }) => {
   const testConfig = { ...defaultTestConfig, ...config };
@@ -152,6 +159,8 @@ const defaultTestConfig: TestConfig = {
 };
 
 // Enhanced render function
+export interface EnhancedRenderOptions {
+  config?: Partial<TestConfig>;
   mockProviders?: React.ComponentType<{ children: React.ReactNode }>[];
   initialProps?: any;
   rerender?: boolean;
@@ -526,6 +535,9 @@ export function renderHook<T, P = object>(
   };
 }
 
+export interface PerformanceReport {
+  [metricName: string]: {
+    count: number;
     average: number;
     min: number;
     max: number;

@@ -15,6 +15,8 @@ interface AstrologyGuideProps {
   initialTab?: number;
 }
 
+export const AstrologyGuide: React.FC<AstrologyGuideProps> = React.memo(
+  ({ isOpen, onClose, initialTab = 0 }) => {
     const [activeTab, setActiveTab] = useState(initialTab);
 
     return (
@@ -131,3 +133,5 @@ interface AstrologyGuideProps {
 );
 
 AstrologyGuide.displayName = 'AstrologyGuide';
+
+export { useAstrologyGuide } from './useAstrologyGuide';

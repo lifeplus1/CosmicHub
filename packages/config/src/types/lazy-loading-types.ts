@@ -9,6 +9,8 @@ import { ComponentType, ComponentProps, RefObject } from 'react';
  * Module import result with default export
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface ImportModule<T extends ComponentType<any>> {
+  default: T;
   [key: string]: unknown;
 }
 
@@ -47,6 +49,9 @@ export interface ErrorBoundaryProps<E extends Error = Error> {
 /**
  * Progressive loading options for large datasets
  */
+export interface ProgressiveLoadingOptions {
+  /** Number of items to load per batch */
+  batchSize: number;
   /** Delay between batches in milliseconds */
   delay: number;
   /** Component to show while loading */
@@ -56,6 +61,9 @@ export interface ErrorBoundaryProps<E extends Error = Error> {
 /**
  * Result of progressive loading
  */
+export interface ProgressiveLoadingResult<T> {
+  /** Loaded items */
+  items: T[];
   /** Whether loading is in progress */
   isLoading: boolean;
   /** Loading progress as a percentage */
@@ -65,13 +73,13 @@ export interface ErrorBoundaryProps<E extends Error = Error> {
 /**
  * Smart preloading functions
  */
-
+export interface SmartPreloader {
   /** Preload a component when an element becomes visible */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preloadOnIntersection: <T extends ComponentType<any>>(
-    elementRef: RefObject<HTMLElement>,
-    componentImport: ImportFunction<T>,
-    componentName: string
+    _elementRef: RefObject<HTMLElement>,
+    _componentImport: ImportFunction<T>,
+    _componentName: string
   ) => (() => void) | undefined;
 }
 
@@ -124,17 +132,17 @@ export type LazyComponentCreator = <T extends ComponentType<any>>(
 /**
  * Creates a type-safe lazy route
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 
 /**
  * Creates a type-safe lazy modal
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 
 /**
  * Creates a type-safe lazy chart
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 
 /**
  * Higher-order component for lazy loading
@@ -151,8 +159,9 @@ export type UseProgressiveLoading = <T>(
 /**
  * Hook for managing lazy loading state
  */
+export interface UseLazyLoadingState {
   /** Check if a component is loading */
-  isLoading: (componentName: string) => boolean;
+  isLoading: (_componentName: string) => boolean;
   /** Current loading states for all components */
   loadingStates: Record<string, boolean>;
 }

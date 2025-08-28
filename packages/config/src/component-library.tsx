@@ -129,6 +129,8 @@ export function createCompoundComponent<
 }
 
 // -------------- Polymorphic --------------
+export interface PolymorphicProps<T extends ElementType> {
+  as?: T;
   children?: ReactNode;
   className?: string;
 }
@@ -280,6 +282,8 @@ export function createComponentFactory<
   };
 }
 
+export interface CompositionConfig {
+  components: ComponentType<unknown>[];
   strategy: 'sequential' | 'parallel' | 'conditional';
   fallback?: ComponentType<unknown>;
 }
@@ -326,9 +330,14 @@ export function composeComponents(cfg: CompositionConfig): FC {
   return Composed;
 }
 
+export interface MemoizationStrategy {
+  shallow?: boolean;
   deep?: boolean;
   custom?: (prev: unknown, next: unknown) => boolean;
 }
+export function withMemoization<P extends Record<string, unknown>>(
+  Component: ComponentType<P>,
+  strategy: MemoizationStrategy = { shallow: true }
 ): ComponentType<P> {
   if (strategy.custom)
     return memo(
@@ -343,5 +352,9 @@ export function composeComponents(cfg: CompositionConfig): FC {
   return memo(Component) as unknown as ComponentType<P>;
 }
 
+export const isValidElement = (el: unknown): el is ReactElement =>
+  React.isValidElement(el);
+export const getDisplayName = (C: ComponentType<unknown>): string =>
+  (C as { displayName?: string; name?: string }).displayName ??
   (C as { name?: string }).name ??
   'Component';

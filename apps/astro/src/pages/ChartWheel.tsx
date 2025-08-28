@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { Card, Button } from '@cosmichub/ui';
 import ChartWheel from '../features/ChartWheel';
-import type { ChartBirthData } from '@cosmichub/types';
+import { useBirthData } from '../contexts/BirthDataContext';
 
 const ChartWheelPage: React.FC = () => {
   useAuth();
-  const [birthData, setBirthData] = useState<ChartBirthData | null>(null);
+  const { birthData, setBirthData } = useBirthData();
   const [showAspects, setShowAspects] = useState(true);
   const [showAnimation, setShowAnimation] = useState(true);
+
   const [formData, setFormData] = useState({
     year: '',
     month: '',
@@ -21,15 +22,13 @@ const ChartWheelPage: React.FC = () => {
     timezone: 'America/New_York',
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ): void => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (): void => {
-    const data: ChartBirthData = {
+  const handleSubmit = () => {
+    const data = {
       year: parseInt(formData.year),
       month: parseInt(formData.month),
       day: parseInt(formData.day),
@@ -40,12 +39,12 @@ const ChartWheelPage: React.FC = () => {
       city: formData.city,
       timezone: formData.timezone,
     };
-
+    
     setBirthData(data);
   };
 
-  const loadSampleChart = (): void => {
-    const sampleData: ChartBirthData = {
+  const loadSampleChart = () => {
+    const sampleData = {
       year: 1990,
       month: 6,
       day: 21,
@@ -58,7 +57,6 @@ const ChartWheelPage: React.FC = () => {
     };
     setBirthData(sampleData);
 
-    // Update form data to reflect the sample
     setFormData({
       year: '1990',
       month: '6',
@@ -84,122 +82,108 @@ const ChartWheelPage: React.FC = () => {
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-        {/* Chart Input Form */}
         <div className='lg:col-span-1'>
           <Card title='Birth Information'>
             <div className='space-y-4'>
               <div className='grid grid-cols-3 gap-2'>
                 <div>
-                  <label
-                    htmlFor='month'
-                    className='block text-cosmic-silver mb-1 text-sm'
-                  >
+                  <label htmlFor='month' className='block text-cosmic-silver mb-1 text-sm'>
                     Month
                   </label>
-                  <input
-                    type='number'
+                  <select
                     id='month'
                     name='month'
-                    min='1'
-                    max='12'
                     value={formData.month}
                     onChange={handleInputChange}
-                    className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
-                    placeholder='6'
-                    required
-                  />
+                    className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
+                  >
+                    <option value=''>Month</option>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label
-                    htmlFor='day'
-                    className='block text-cosmic-silver mb-1 text-sm'
-                  >
+                  <label htmlFor='day' className='block text-cosmic-silver mb-1 text-sm'>
                     Day
                   </label>
-                  <input
-                    type='number'
+                  <select
                     id='day'
                     name='day'
-                    min='1'
-                    max='31'
                     value={formData.day}
                     onChange={handleInputChange}
-                    className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
-                    placeholder='21'
-                    required
-                  />
+                    className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
+                  >
+                    <option value=''>Day</option>
+                    {Array.from({ length: 31 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label
-                    htmlFor='year'
-                    className='block text-cosmic-silver mb-1 text-sm'
-                  >
+                  <label htmlFor='year' className='block text-cosmic-silver mb-1 text-sm'>
                     Year
                   </label>
                   <input
                     type='number'
                     id='year'
                     name='year'
-                    min='1900'
-                    max='2100'
                     value={formData.year}
                     onChange={handleInputChange}
-                    className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
                     placeholder='1990'
-                    required
+                    className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
                   />
                 </div>
               </div>
 
               <div className='grid grid-cols-2 gap-2'>
                 <div>
-                  <label
-                    htmlFor='hour'
-                    className='block text-cosmic-silver mb-1 text-sm'
-                  >
-                    Hour (24h)
+                  <label htmlFor='hour' className='block text-cosmic-silver mb-1 text-sm'>
+                    Hour (24hr)
                   </label>
-                  <input
-                    type='number'
+                  <select
                     id='hour'
                     name='hour'
-                    min='0'
-                    max='23'
                     value={formData.hour}
                     onChange={handleInputChange}
-                    className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
-                    placeholder='12'
-                    required
-                  />
+                    className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
+                  >
+                    <option value=''>Hour</option>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i.toString().padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label
-                    htmlFor='minute'
-                    className='block text-cosmic-silver mb-1 text-sm'
-                  >
+                  <label htmlFor='minute' className='block text-cosmic-silver mb-1 text-sm'>
                     Minute
                   </label>
-                  <input
-                    type='number'
+                  <select
                     id='minute'
                     name='minute'
-                    min='0'
-                    max='59'
                     value={formData.minute}
                     onChange={handleInputChange}
-                    className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
-                    placeholder='0'
-                    required
-                  />
+                    className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
+                  >
+                    <option value=''>Minute</option>
+                    {Array.from({ length: 60 }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i.toString().padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               <div>
-                <label
-                  htmlFor='city'
-                  className='block text-cosmic-silver mb-1 text-sm'
-                >
-                  City
+                <label htmlFor='city' className='block text-cosmic-silver mb-1 text-sm'>
+                  Birth City
                 </label>
                 <input
                   type='text'
@@ -207,58 +191,46 @@ const ChartWheelPage: React.FC = () => {
                   name='city'
                   value={formData.city}
                   onChange={handleInputChange}
-                  className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
-                  placeholder='New York'
-                  required
+                  placeholder='New York, NY'
+                  className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
                 />
               </div>
 
               <div className='grid grid-cols-2 gap-2'>
                 <div>
-                  <label
-                    htmlFor='lat'
-                    className='block text-cosmic-silver mb-1 text-sm'
-                  >
+                  <label htmlFor='lat' className='block text-cosmic-silver mb-1 text-sm'>
                     Latitude
                   </label>
                   <input
                     type='number'
                     id='lat'
                     name='lat'
-                    step='0.0001'
                     value={formData.lat}
                     onChange={handleInputChange}
-                    className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
                     placeholder='40.7128'
-                    required
+                    step='0.0001'
+                    className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor='lon'
-                    className='block text-cosmic-silver mb-1 text-sm'
-                  >
+                  <label htmlFor='lon' className='block text-cosmic-silver mb-1 text-sm'>
                     Longitude
                   </label>
                   <input
                     type='number'
                     id='lon'
                     name='lon'
-                    step='0.0001'
                     value={formData.lon}
                     onChange={handleInputChange}
-                    className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
                     placeholder='-74.0060'
-                    required
+                    step='0.0001'
+                    className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
                   />
                 </div>
               </div>
 
               <div>
-                <label
-                  htmlFor='timezone'
-                  className='block text-cosmic-silver mb-1 text-sm'
-                >
+                <label htmlFor='timezone' className='block text-cosmic-silver mb-1 text-sm'>
                   Timezone
                 </label>
                 <select
@@ -266,7 +238,7 @@ const ChartWheelPage: React.FC = () => {
                   name='timezone'
                   value={formData.timezone}
                   onChange={handleInputChange}
-                  className='w-full p-2 rounded bg-cosmic-dark border border-cosmic-purple text-cosmic-silver'
+                  className='w-full px-3 py-2 bg-cosmic-dark border border-cosmic-silver/30 rounded-lg'
                 >
                   <option value='America/New_York'>Eastern Time</option>
                   <option value='America/Chicago'>Central Time</option>
@@ -277,18 +249,17 @@ const ChartWheelPage: React.FC = () => {
                 </select>
               </div>
 
-              <div className='space-y-2'>
+              <div className='flex space-x-2'>
                 <Button
-                  variant='default'
-                  className='w-full'
                   onClick={handleSubmit}
+                  className='flex-1 bg-cosmic-gold hover:bg-cosmic-gold/90'
                 >
                   Generate Chart
                 </Button>
                 <Button
-                  variant='secondary'
-                  className='w-full'
                   onClick={loadSampleChart}
+                  variant='secondary'
+                  className='flex-1'
                 >
                   Load Sample Chart
                 </Button>
@@ -296,8 +267,7 @@ const ChartWheelPage: React.FC = () => {
             </div>
           </Card>
 
-          {/* Chart Options */}
-          <Card title='Display Options' className='mt-4'>
+          <Card title='Chart Options' className='mt-6'>
             <div className='space-y-3'>
               <div className='flex items-center space-x-2'>
                 <input
@@ -328,7 +298,6 @@ const ChartWheelPage: React.FC = () => {
           </Card>
         </div>
 
-        {/* Chart Display */}
         <div className='lg:col-span-2'>
           {birthData !== null ? (
             <ChartWheel
@@ -337,17 +306,14 @@ const ChartWheelPage: React.FC = () => {
               showAnimation={showAnimation}
             />
           ) : (
-            <Card
-              title='Chart Wheel'
-              className='h-96 flex items-center justify-center'
-            >
+            <Card title='Chart Wheel' className='h-96 flex items-center justify-center'>
               <div className='text-center text-cosmic-silver'>
                 <div className='text-6xl mb-4'>🌌</div>
                 <p className='text-lg'>
                   Enter your birth information to generate your chart
                 </p>
                 <p className='text-sm mt-2 text-cosmic-silver/70'>
-                  Or click &quot;Load Sample Chart&quot; to see a demonstration
+                  Or click &ldquo;Load Sample Chart&rdquo; to see a demonstration
                 </p>
               </div>
             </Card>
@@ -355,7 +321,6 @@ const ChartWheelPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Chart Information */}
       {birthData !== null && (
         <Card title='Chart Information'>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm'>
@@ -368,8 +333,8 @@ const ChartWheelPage: React.FC = () => {
             <div>
               <span className='text-cosmic-silver'>Birth Time:</span>
               <span className='text-cosmic-gold ml-2'>
-                {birthData.hour.toString().padStart(2, '0')}:
-                {birthData.minute.toString().padStart(2, '0')}
+                {birthData.hour?.toString().padStart(2, '0')}:
+                {birthData.minute?.toString().padStart(2, '0')}
               </span>
             </div>
             <div>
@@ -379,7 +344,7 @@ const ChartWheelPage: React.FC = () => {
             <div>
               <span className='text-cosmic-silver'>Coordinates:</span>
               <span className='text-cosmic-gold ml-2'>
-                {birthData.lat !== undefined && birthData.lon !== undefined
+                {typeof birthData.lat === 'number' && typeof birthData.lon === 'number'
                   ? `${birthData.lat.toFixed(4)}, ${birthData.lon.toFixed(4)}`
                   : 'Coords N/A'}
               </span>

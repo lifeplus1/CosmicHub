@@ -8,7 +8,7 @@ import {
 export async function apiRequest<T>(
   endpoint: string,
   options?: RequestInit
-): Promise<ApiResponse<T>> {
+): Promise<StandardApiResponse<T>> {
   try {
     const response = await fetch(endpoint, {
       headers: { 'Content-Type': 'application/json', ...options?.headers },

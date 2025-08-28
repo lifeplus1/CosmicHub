@@ -40,11 +40,26 @@ const anglesSchema = z
   .partial();
 
 // Zod schema to validate a normalized chart-like object
+export const chartLikeSchema = z
+  .object({
+    planets: z.record(planetSchema).optional(),
+    houses: z.array(houseSchema).min(1).max(15).optional(), // Allow up to 15 houses
+    aspects: z.array(aspectSchema).optional(),
+    asteroids: z.record(planetSchema).optional(),
+    angles: anglesSchema.optional(),
+    // Allow additional API fields
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
+    timezone: z.string().optional(),
+    julian_day: z.number().optional(),
+  })
   .passthrough() // Allow additional fields
   .refine(
     obj => Object.values(obj).some(v => v !== undefined),
     'At least one chart section must be present'
   );
+
+export type ValidChartLike = z.infer<typeof chartLikeSchema> & ChartLike;
 
 export function validateChart(input: unknown): ValidChartLike | null {
   if (!isChartLike(input)) {

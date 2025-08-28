@@ -7,6 +7,8 @@ import React, { useState, useCallback, createContext, useContext } from 'react';
 import { cn } from '../utils/cn';
 
 // Toast notification types
+interface ToastNotification {
+  id: string;
   title: string;
   message?: string;
   type: 'success' | 'error' | 'warning' | 'info' | 'loading';
@@ -337,6 +339,8 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
 };
 
 // Status indicator component
+interface StatusIndicatorProps {
+  status: 'success' | 'error' | 'warning' | 'info' | 'loading' | 'idle';
   message?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
@@ -473,6 +477,8 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 };
 
 // Progress bar component
+interface ProgressBarProps {
+  value: number;
   max?: number;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
