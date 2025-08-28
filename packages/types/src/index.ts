@@ -8,7 +8,7 @@ export interface BirthData {
   city?: string;
 }
 
-export * from './birth';
+export * from './birth.js';
 
 export interface DateRange {
   startDate: string; // ISO format: YYYY-MM-DD
