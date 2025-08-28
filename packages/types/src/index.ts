@@ -8,7 +8,7 @@ export interface BirthData {
   city?: string;
 }
 
-export * from './birth.js';
+export * from './birth';
 
 export interface DateRange {
   startDate: string; // ISO format: YYYY-MM-DD
@@ -186,9 +186,9 @@ export interface UsageLimits {
 }
 
 // Export all types - chart, user, subscription, and experiment types
-export * from './astrology.types.js';
-export * from './serialize.js';
-export * from './type-guards.js';
-export * from './utility.js';
-export * from './experiments.js';
-export * from './experiment-validators.js';
+export * from './astrology.types';
+export * from './serialize';
+export * from './type-guards';
+export * from './utility';
+export * from './experiments';
+export * from './experiment-validators';
