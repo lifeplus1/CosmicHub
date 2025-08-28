@@ -2,20 +2,23 @@
 
 ## Overview
 
-The CosmicHub project now uses a **Vitest workspace** configuration to optimize test performance and resolve the "multiple projects" warning from the Vitest VS Code extension.
+The CosmicHub project now uses a **Vitest workspace** configuration to optimize test performance and
+resolve the "multiple projects" warning from the Vitest VS Code extension.
 
 ## Problem Solved
 
-**Before**: Vitest detected 14+ individual config files across apps and packages, causing performance concerns and VS Code extension warnings.
+**Before**: Vitest detected 14+ individual config files across apps and packages, causing
+performance concerns and VS Code extension warnings.
 
-**After**: Single workspace configuration that groups projects efficiently while maintaining test isolation.
+**After**: Single workspace configuration that groups projects efficiently while maintaining test
+isolation.
 
 ## Configuration Structure
 
 ### Workspace Projects
 
 1. **astro-app**: Main astrology application tests
-2. **healwave-app**: HealWave application tests  
+2. **healwave-app**: HealWave application tests
 3. **core-packages**: Analytics, types, config packages (Node.js environment)
 4. **ui-packages**: Hooks, integrations packages (jsdom environment)
 
@@ -39,7 +42,7 @@ pnpm test:ui                 # Vitest UI for all projects
 
 ```bash
 pnpm test:astro              # Astro app only
-pnpm test:healwave           # HealWave app only  
+pnpm test:healwave           # HealWave app only
 pnpm test:packages           # Core + UI packages only
 ```
 

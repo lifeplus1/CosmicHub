@@ -9,10 +9,10 @@
     "noEmit": false
   },
   "exclude": [
-    "node_modules", 
-    "dist", 
-    "**/*.test.*", 
-    "**/*.spec.*", 
+    "node_modules",
+    "dist",
+    "**/*.test.*",
+    "**/*.spec.*",
     "**/__tests__/**",
     "**/tests/**"
   ]

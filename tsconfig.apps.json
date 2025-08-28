@@ -6,10 +6,10 @@
     "types": ["react", "react-dom", "node", "vite/client"]
   },
   "exclude": [
-    "node_modules", 
-    "dist", 
-    "**/*.test.*", 
-    "**/*.spec.*", 
+    "node_modules",
+    "dist",
+    "**/*.test.*",
+    "**/*.spec.*",
     "**/__tests__/**",
     "**/tests/**"
   ]

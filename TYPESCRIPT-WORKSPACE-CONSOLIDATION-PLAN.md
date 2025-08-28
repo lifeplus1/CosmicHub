@@ -18,7 +18,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext", 
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
@@ -72,11 +72,7 @@ Instead of individual `tsconfig.test.json` in each package:
     "types": ["vitest/globals", "node", "@testing-library/jest-dom"],
     "noEmit": true
   },
-  "include": [
-    "**/__tests__/**/*",
-    "**/*.test.*", 
-    "**/*.spec.*"
-  ]
+  "include": ["**/__tests__/**/*", "**/*.test.*", "**/*.spec.*"]
 }
 ```
 

@@ -59,27 +59,25 @@ afterEach(() => {
 
 describe('Chart page integration (canonical pipeline)', () => {
   it('performs calculation with canonical birth data produced from numeric context', async () => {
-    const fetchFn = vi
-      .fn()
-      .mockResolvedValue({
-        success: true,
-        data: {
-          planets: {},
-          houses: [],
-          aspects: [],
-          angles: {
-            ascendant: 0,
-            midheaven: 0,
-            descendant: 180,
-            imumcoeli: 180,
-          },
-          latitude: 0,
-          longitude: 0,
-          timezone: 'UTC',
-          julian_day: 0,
-          house_system: 'placidus',
+    const fetchFn = vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        planets: {},
+        houses: [],
+        aspects: [],
+        angles: {
+          ascendant: 0,
+          midheaven: 0,
+          descendant: 180,
+          imumcoeli: 180,
         },
-      });
+        latitude: 0,
+        longitude: 0,
+        timezone: 'UTC',
+        julian_day: 0,
+        house_system: 'placidus',
+      },
+    });
 
     const SeedBirthData: React.FC = () => {
       const { setBirthData } = useBirthData();
@@ -115,27 +113,25 @@ describe('Chart page integration (canonical pipeline)', () => {
   });
 
   it('parses URL params into canonical fetch call', async () => {
-    const fetchFn = vi
-      .fn()
-      .mockResolvedValue({
-        success: true,
-        data: {
-          planets: {},
-          houses: [],
-          aspects: [],
-          angles: {
-            ascendant: 0,
-            midheaven: 0,
-            descendant: 180,
-            imumcoeli: 180,
-          },
-          latitude: 0,
-          longitude: 0,
-          timezone: 'UTC',
-          julian_day: 0,
-          house_system: 'placidus',
+    const fetchFn = vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        planets: {},
+        houses: [],
+        aspects: [],
+        angles: {
+          ascendant: 0,
+          midheaven: 0,
+          descendant: 180,
+          imumcoeli: 180,
         },
-      });
+        latitude: 0,
+        longitude: 0,
+        timezone: 'UTC',
+        julian_day: 0,
+        house_system: 'placidus',
+      },
+    });
 
     // No manual context seeding; rely on URL params consumed in Chart effect
     render(
@@ -265,27 +261,25 @@ describe('Chart page integration (canonical pipeline)', () => {
   });
 
   it('handles timezone param propagation', async () => {
-    const fetchFn = vi
-      .fn()
-      .mockResolvedValue({
-        success: true,
-        data: {
-          planets: {},
-          houses: [],
-          aspects: [],
-          angles: {
-            ascendant: 0,
-            midheaven: 0,
-            descendant: 180,
-            imumcoeli: 180,
-          },
-          latitude: 0,
-          longitude: 0,
-          timezone: 'America/New_York',
-          julian_day: 0,
-          house_system: 'placidus',
+    const fetchFn = vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        planets: {},
+        houses: [],
+        aspects: [],
+        angles: {
+          ascendant: 0,
+          midheaven: 0,
+          descendant: 180,
+          imumcoeli: 180,
         },
-      });
+        latitude: 0,
+        longitude: 0,
+        timezone: 'America/New_York',
+        julian_day: 0,
+        house_system: 'placidus',
+      },
+    });
     render(
       <MemoryRouter
         initialEntries={[

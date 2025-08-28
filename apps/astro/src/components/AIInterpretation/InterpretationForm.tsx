@@ -87,14 +87,18 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
 
   const [chartForm, setChartForm] = useState<ChartFormState>({
     type: chartId ? (typeof chartId === 'string' ? 'natal' : 'natal') : 'natal',
-     
-    focus: (Array.isArray(
-      typeof window !== 'undefined' && 
-      '__defaultFocus' in window &&
-      Array.isArray((window as unknown as { __defaultFocus?: InterpretationFocusArea[] }).__defaultFocus)
+
+    focus: Array.isArray(
+      typeof window !== 'undefined' &&
+        '__defaultFocus' in window &&
+        Array.isArray(
+          (window as unknown as { __defaultFocus?: InterpretationFocusArea[] })
+            .__defaultFocus
+        )
     )
-      ? ((window as unknown as { __defaultFocus: InterpretationFocusArea[] }).__defaultFocus)
-      : []),
+      ? (window as unknown as { __defaultFocus: InterpretationFocusArea[] })
+          .__defaultFocus
+      : [],
     question: '',
   });
   const [directForm, setDirectForm] = useState<DirectFormState>({

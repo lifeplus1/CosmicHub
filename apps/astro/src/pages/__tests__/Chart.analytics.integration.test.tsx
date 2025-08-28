@@ -59,27 +59,25 @@ describe('Chart page analytics integration', () => {
       .spyOn(Date, 'now')
       .mockImplementationOnce(() => 1000) // startTime
       .mockImplementation(() => 1100); // calculation end
-    const fetchFn = vi
-      .fn()
-      .mockResolvedValue({
-        success: true,
-        data: {
-          planets: {},
-          houses: [],
-          aspects: [],
-          angles: {
-            ascendant: 0,
-            midheaven: 0,
-            descendant: 180,
-            imumcoeli: 180,
-          },
-          latitude: 0,
-          longitude: 0,
-          timezone: 'UTC',
-          julian_day: 0,
-          house_system: 'placidus',
+    const fetchFn = vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        planets: {},
+        houses: [],
+        aspects: [],
+        angles: {
+          ascendant: 0,
+          midheaven: 0,
+          descendant: 180,
+          imumcoeli: 180,
         },
-      });
+        latitude: 0,
+        longitude: 0,
+        timezone: 'UTC',
+        julian_day: 0,
+        house_system: 'placidus',
+      },
+    });
 
     const SeedBirthData: React.FC = () => {
       const { setBirthData } = useBirthData();

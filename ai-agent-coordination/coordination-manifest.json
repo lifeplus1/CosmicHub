@@ -11,10 +11,7 @@
       "agent-1-astro-components",
       "agent-2-astro-features"
     ],
-    "stage2": [
-      "agent-3-astro-pages-context",
-      "agent-7-apps-small-packages"
-    ]
+    "stage2": ["agent-3-astro-pages-context", "agent-7-apps-small-packages"]
   },
   "conflictMatrix": {
     "agent-1-astro-components": {
@@ -90,9 +87,7 @@
       "estimatedFiles": 65,
       "dependencies": [],
       "conflictRisk": "low",
-      "targets": [
-        "apps/astro/src/components"
-      ]
+      "targets": ["apps/astro/src/components"]
     },
     {
       "id": "agent-2-astro-features",
@@ -100,13 +95,9 @@
       "name": "Astro Features",
       "priority": 3,
       "estimatedFiles": 25,
-      "dependencies": [
-        "agent-1-astro-components"
-      ],
+      "dependencies": ["agent-1-astro-components"],
       "conflictRisk": "low",
-      "targets": [
-        "apps/astro/src/features"
-      ]
+      "targets": ["apps/astro/src/features"]
     },
     {
       "id": "agent-3-astro-pages-context",
@@ -114,9 +105,7 @@
       "name": "Astro Pages & Context",
       "priority": 2,
       "estimatedFiles": 70,
-      "dependencies": [
-        "agent-1-astro-components"
-      ],
+      "dependencies": ["agent-1-astro-components"],
       "conflictRisk": "medium",
       "targets": [
         "apps/astro/src/pages",
@@ -146,9 +135,7 @@
       "estimatedFiles": 54,
       "dependencies": [],
       "conflictRisk": "high",
-      "targets": [
-        "packages/ui/src"
-      ]
+      "targets": ["packages/ui/src"]
     },
     {
       "id": "agent-6-config-package",
@@ -158,9 +145,7 @@
       "estimatedFiles": 48,
       "dependencies": [],
       "conflictRisk": "high",
-      "targets": [
-        "packages/config/src"
-      ]
+      "targets": ["packages/config/src"]
     },
     {
       "id": "agent-7-apps-small-packages",
@@ -198,12 +183,7 @@
       "agent-4-astro-services-types",
       "agent-5-ui-package"
     ],
-    "parallel-safe": [
-      "agent-1-astro-components",
-      "agent-2-astro-features"
-    ],
-    "final-stage": [
-      "agent-7-apps-small-packages"
-    ]
+    "parallel-safe": ["agent-1-astro-components", "agent-2-astro-features"],
+    "final-stage": ["agent-7-apps-small-packages"]
   }
 }

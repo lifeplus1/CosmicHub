@@ -465,10 +465,12 @@
 - **Effort:** 3 weeks
 - **Business Impact:** HIGH - Foundation for advanced AI and analytics warehouse
 - **Description:** Establish dual-format data export and Parquet infrastructure foundation
-- **Strategy:** Phased implementation maintaining current JSON performance while building future capabilities
+- **Strategy:** Phased implementation maintaining current JSON performance while building future
+  capabilities
 - **Timeline:** Start immediately (Next 3 months)
 - **Deliverables:**
-  - ✅ Add Parquet dependencies (pyarrow, fastparquet for backend; apache-arrow, parquet-wasm for frontend)
+  - ✅ Add Parquet dependencies (pyarrow, fastparquet for backend; apache-arrow, parquet-wasm for
+    frontend)
   - ✅ Create dual-format DataExportService supporting JSON and Parquet
   - ✅ Implement experimental analytics export in Parquet format
   - ✅ Build team expertise through gradual implementation
@@ -479,10 +481,11 @@
 
 #### 🏭 DATA-002: Analytics Warehouse Pipeline (Phase 2 - 3-6 months)
 
-- **Type:** Analytics/Machine Learning Infrastructure  
+- **Type:** Analytics/Machine Learning Infrastructure
 - **Effort:** 4 weeks
 - **Business Impact:** HIGH - Enables advanced AI training and business intelligence
-- **Description:** Implement analytics data warehouse when AI-001 features generate substantial training data
+- **Description:** Implement analytics data warehouse when AI-001 features generate substantial
+  training data
 - **Strategy:** Deploy when AI interpretation layers require large-scale data analysis
 - **Timeline:** 3-6 months (when AI-001 reaches high usage)
 - **Deliverables:**
@@ -497,7 +500,7 @@
 #### 🤖 DATA-003: ML Training Data Pipeline (Phase 3 - 6-12 months)
 
 - **Type:** Machine Learning/Advanced AI Infrastructure
-- **Effort:** 3 weeks  
+- **Effort:** 3 weeks
 - **Business Impact:** CRITICAL - Enables layered AI interpretation system
 - **Description:** Large-scale ML training data preparation for advanced AI interpretation layers
 - **Strategy:** Deploy when layered AI interpretation system needs reward model training
@@ -509,14 +512,16 @@
   - Advanced analytics for multi-system synthesis improvements
 - **Dependencies:** AI interpretation layers 2-3, substantial user feedback data
 - **Expected ROI:** Enable advanced reinforcement learning and personalized AI
-- **Success Metrics:** Reward model training operational, personalized AI interpretation quality improvement
+- **Success Metrics:** Reward model training operational, personalized AI interpretation quality
+  improvement
 
 #### 🌌 DATA-004: Ephemeris Data Lake (Phase 4 - 12-18 months)
 
 - **Type:** Data Lake/Astronomical Data Infrastructure
 - **Effort:** 2 weeks
-- **Business Impact:** MEDIUM - Supports advanced ephemeris features and multi-region deployment  
-- **Description:** Complete transition to Parquet for massive astronomical datasets and ephemeris data
+- **Business Impact:** MEDIUM - Supports advanced ephemeris features and multi-region deployment
+- **Description:** Complete transition to Parquet for massive astronomical datasets and ephemeris
+  data
 - **Strategy:** Deploy when ephemeris data storage and multi-region support become critical
 - **Timeline:** 12-18 months (full data lake architecture)
 - **Deliverables:**

@@ -17,7 +17,7 @@ export default defineWorkspace([
       root: './apps/healwave',
     },
   },
-  
+
   // Core packages - grouped for performance
   {
     test: {
@@ -31,8 +31,8 @@ export default defineWorkspace([
       globals: true,
     },
   },
-  
-  // UI and interaction packages - grouped for performance  
+
+  // UI and interaction packages - grouped for performance
   {
     test: {
       name: 'ui-packages',

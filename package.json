@@ -29,7 +29,6 @@
     "test:packages": "vitest run --workspace vitest.workspace.ts --project core-packages --project ui-packages",
     "test:backend": "cd backend && python3 -m pytest tests/ -v --cov=astro --cov-report=xml --cov-report=html",
     "benchmark:synastry": "python3 scripts/benchmark_vectorized_synastry.py --sizes=1,10,50,100 --json=benchmark-latest.json",
-
     "lint": "pnpm run lint:astro && pnpm run lint:healwave && pnpm run lint:types && pnpm run lint:backend && pnpm run lint:fail-usage",
     "lint:parallel": "node scripts/lint-parallel-batches.mjs",
     "lint:ai-coord": "./scripts/safe-coordination.sh",
