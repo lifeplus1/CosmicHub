@@ -102,10 +102,13 @@ vi.mock('@cosmichub/hooks', () => ({
 }));
 
 describe('UnifiedChart saved chart loading', () => {
-  it('loads saved chart when chartId present in path', async () => {
-    const qc = new QueryClient();
+  it('loads saved chart successfully', async () => {
+    (fetchSavedChartById as any).mockResolvedValueOnce({
+      success: true,
+      data: { chart_data: { planets: [] }, birth_data: {} },
+    });
     render(
-      <QueryClientProvider client={qc}>
+      <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter initialEntries={['/chart/abc123']}>
           <Routes>
             <Route path='/chart/:id' element={<UnifiedChartStub />} />
@@ -113,34 +116,30 @@ describe('UnifiedChart saved chart loading', () => {
         </MemoryRouter>
       </QueryClientProvider>
     );
+    await waitFor(
+      () => {
+        expect(screen.getByText('Astrological Chart')).toBeInTheDocument();
+      },
+      { timeout: 8000 }
+    );
+  }, 15000);
 
-    await waitFor(() => {
-      const elements = screen.getAllByText(/Astrological Chart/i);
-      expect(elements.length).toBeGreaterThan(0);
-    });
-  });
-
-  it('shows error UI when fetch fails', async () => {
-    const api = await import('../../services/api');
-    (api.fetchSavedChartById as any).mockResolvedValueOnce({
-      success: false,
-      error: 'Not found',
-    });
-
-    const qc = new QueryClient();
+  it('handles chart load error gracefully', async () => {
+    (fetchSavedChartById as any).mockRejectedValueOnce(new Error('Network error'));
     render(
-      <QueryClientProvider client={qc}>
-        <MemoryRouter initialEntries={['/chart/missing']}>
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={['/chart/err123']}>
           <Routes>
             <Route path='/chart/:id' element={<UnifiedChartStub />} />
           </Routes>
         </MemoryRouter>
       </QueryClientProvider>
     );
-
-    await waitFor(() => {
-      const el = screen.getByText(/Chart Loading Error/i);
-      expect(Boolean(el)).toBe(true);
-    });
-  });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Chart Loading Error/)).toBeInTheDocument();
+      },
+      { timeout: 8000 }
+    );
+  }, 15000);
 });

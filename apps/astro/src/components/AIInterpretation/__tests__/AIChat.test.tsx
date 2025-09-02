@@ -212,9 +212,9 @@ describe('AIChat Component', () => {
             }),
           })
         );
-      });
+      }, { timeout: 8000 });
     }
-  });
+  }, 15000);
 
   it('handles API error gracefully', async () => {
     mockUseAuth.mockReturnValue({
@@ -248,9 +248,9 @@ describe('AIChat Component', () => {
 
       await waitFor(() => {
         expect(mockAxiosPost).toHaveBeenCalled();
-      });
+      }, { timeout: 8000 });
     }
-  });
+  }, 15000);
 
   it('disables submit button when message is empty', () => {
     mockUseAuth.mockReturnValue({

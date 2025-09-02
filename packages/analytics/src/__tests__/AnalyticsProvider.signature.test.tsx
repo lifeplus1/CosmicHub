@@ -36,7 +36,8 @@ const baseConfig = (over: Partial<AnalyticsConfig> = {}): AnalyticsConfig => ({
   ...over,
 });
 
-// eslint-disable-next-line no-unused-vars
+ 
+/* eslint-disable no-unused-vars */
 const fireDispatch = (
   onDispatch: ((event: AnalyticsEvent) => void) | undefined
 ) => {
@@ -48,6 +49,7 @@ const fireDispatch = (
     platform: 'web',
   });
 };
+/* eslint-enable no-unused-vars */
 
 describe('AnalyticsProvider config signature + subscription', () => {
   it('re-initializes when advanced.onDispatch identity changes', () => {

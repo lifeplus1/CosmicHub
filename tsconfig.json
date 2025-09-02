@@ -28,6 +28,7 @@
       // Map shared alias used inside app packages to the astro app source so root-based
       // tooling (eslint, language server) can resolve imports like '@/services/...'
       "@/*": ["./apps/astro/src/*"],
+      "@cosmichub/analytics": ["./packages/analytics/src"],
       "@cosmichub/auth": ["./packages/auth/src"],
       "@cosmichub/config": ["./packages/config/src"],
       "@cosmichub/frequency": ["./packages/frequency/src"],
@@ -44,6 +45,7 @@
   "include": [],
   "exclude": ["node_modules", "dist", ".turbo", "build", "**/*.js"],
   "references": [
+    { "path": "./packages/analytics" },
     { "path": "./packages/auth" },
     { "path": "./packages/config" },
     { "path": "./packages/frequency" },

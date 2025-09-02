@@ -50,7 +50,7 @@ export function toCanonicalBirthData(
     };
   } else {
     // Convert from ExtendedBirthData (numeric) to ChartBirthData (text)
-    const extendedData = b as ExtendedBirthData;
+    const extendedData = b as ExtendedBirthData & { lat?: number; lon?: number };
     const year = extendedData.year ?? 0;
     const month = extendedData.month ?? 1;
     const day = extendedData.day ?? 1;
@@ -60,8 +60,8 @@ export function toCanonicalBirthData(
     canonical = {
       birth_date: `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
       birth_time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
-      latitude: extendedData.latitude ?? 0,
-      longitude: extendedData.longitude ?? 0,
+      latitude: extendedData.lat ?? extendedData.latitude ?? 0,
+      longitude: extendedData.lon ?? extendedData.longitude ?? 0,
       city: extendedData.city,
       timezone: extendedData.timezone,
     };

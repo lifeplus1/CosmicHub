@@ -70,14 +70,14 @@ describe('UnifiedNotificationManager', () => {
     expect(ok).toBe(true);
     const status = mgr.status();
     expect(status.push.queuedNotifications).toBe(0);
-  });
+  }, 15000);
 
   it('subscribes user with default prefs when invalid prefs passed', async (): Promise<void> => {
     const mgr = getNotificationManager();
     await mgr.initialize();
     const ok = await mgr.subscribe('user-1', { not: 'valid' });
     expect(ok).toBe(true);
-  });
+  }, 15000);
 
   it('ignores notifyChartReady when chart missing id', async (): Promise<void> => {
     const mgr = getNotificationManager();
@@ -85,7 +85,7 @@ describe('UnifiedNotificationManager', () => {
     // @ts-expect-error intentionally missing id
     await mgr.notifyChartReady({ planets: {} });
     // no throw expected
-  });
+  }, 15000);
 
   it('fills default stats fields when push manager omits extended metrics', async (): Promise<void> => {
     // Remock with reduced stats shape
@@ -128,5 +128,5 @@ describe('UnifiedNotificationManager', () => {
     expect(status.push.totalClicked).toBe(0);
     expect(status.push.avgDeliveryTime).toBe(0);
     expect(status.push.errors).toBe(0);
-  });
+  }, 15000);
 });

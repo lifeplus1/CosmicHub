@@ -21,7 +21,7 @@
       "@cosmichub/subscriptions": ["../../packages/subscriptions/dist"],
       "@cosmichub/ui": ["../../packages/ui/dist"],
       "@cosmichub/types": ["../../packages/types/dist"],
-      "@cosmichub/analytics": ["../../packages/analytics/dist"]
+      "@cosmichub/analytics": ["../../packages/analytics/src"]
     }
   },
   "include": ["src", "types", "src/**/*", "src/__tests__/**/*"],

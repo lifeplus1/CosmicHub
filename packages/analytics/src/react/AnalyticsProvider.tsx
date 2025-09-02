@@ -121,38 +121,37 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
     [config, buildConfigSignature]
   );
 
+  // Memoized onDispatch function to ensure stable reference for signature calculation
+  const memoizedOnDispatch = useCallback((e: AnalyticsEvent) => {
+    setLastEvent(e);
+    // Notify subscribers
+    listenersRef.current.forEach(fn => {
+      try {
+        fn(e);
+      } catch {
+        /* swallow listener errors */
+      }
+    });
+    try {
+      config.advanced?.onDispatch?.(e);
+    } catch {
+      /* swallow user errors */
+    }
+  }, [config.advanced?.onDispatch]);
+
   // Initialize or reinitialize when config signature changes (client-only)
   useEffect(() => {
     if (typeof window === 'undefined') return; // SSR guard
     const currentSig = configSignature;
 
-    // Wrap user-provided onDispatch (if any) so we can surface events via context without requiring user changes.
-    const userOnDispatch = config.advanced?.onDispatch;
-    const augmentedConfig: AnalyticsConfig =
-      userOnDispatch || listenersRef.current.size > 0
-        ? {
-            ...config,
-            advanced: {
-              ...config.advanced,
-              onDispatch: (e: AnalyticsEvent) => {
-                setLastEvent(e);
-                // Notify subscribers
-                listenersRef.current.forEach(fn => {
-                  try {
-                    fn(e);
-                  } catch {
-                    /* swallow listener errors */
-                  }
-                });
-                try {
-                  userOnDispatch?.(e);
-                } catch {
-                  /* swallow user errors */
-                }
-              },
-            },
-          }
-        : config;
+    // Always set up onDispatch to support dynamic subscription
+    const augmentedConfig: AnalyticsConfig = {
+      ...config,
+      advanced: {
+        ...config.advanced,
+        onDispatch: memoizedOnDispatch,
+      },
+    };
 
     if (!instanceRef.current) {
       instanceRef.current = initializeAnalytics(augmentedConfig);

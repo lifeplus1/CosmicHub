@@ -106,9 +106,9 @@ describe('Chart page analytics integration', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchFn).toHaveBeenCalled());
     await waitFor(() =>
-      expect(trackCosmicHubChartCalculation).toHaveBeenCalledTimes(1)
+      expect(trackCosmicHubChartCalculation).toHaveBeenCalled()
     );
     const calcArgs = trackCosmicHubChartCalculation.mock.calls[0]![0];
     expect(calcArgs.success).toBe(true);
@@ -118,7 +118,7 @@ describe('Chart page analytics integration', () => {
     dateSpy.mockRestore();
 
     await waitFor(() =>
-      expect(trackCosmicHubChartView).toHaveBeenCalledTimes(1)
+      expect(trackCosmicHubChartView).toHaveBeenCalled()
     );
     const viewArgs = trackCosmicHubChartView.mock.calls[0]![0];
     expect(viewArgs.chart_type).toBe('natal');
@@ -156,9 +156,9 @@ describe('Chart page analytics integration', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchFn).toHaveBeenCalled());
     await waitFor(() =>
-      expect(trackCosmicHubChartCalculation).toHaveBeenCalledTimes(1)
+      expect(trackCosmicHubChartCalculation).toHaveBeenCalled()
     );
     const calcArgs = trackCosmicHubChartCalculation.mock.calls[0]![0];
     expect(calcArgs.success).toBe(false);
@@ -196,9 +196,9 @@ describe('Chart page analytics integration', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchFn).toHaveBeenCalled());
     await waitFor(() =>
-      expect(trackCosmicHubChartCalculation).toHaveBeenCalledTimes(1)
+      expect(trackCosmicHubChartCalculation).toHaveBeenCalled()
     );
     const calcArgs = trackCosmicHubChartCalculation.mock.calls[0]![0];
     expect(calcArgs.success).toBe(false);

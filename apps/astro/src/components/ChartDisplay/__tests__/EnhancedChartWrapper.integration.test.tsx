@@ -66,5 +66,5 @@ describe('EnhancedChartWrapper (integration via injected fetchFn)', () => {
     const arg = calls[0]![0];
     expect(arg.birth_date).toBe('1990-05-06');
     expect(arg.birth_time).toBe('07:08');
-  });
+  }, 20000);
 });

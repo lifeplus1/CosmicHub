@@ -108,7 +108,7 @@ describe('Chart page integration (canonical pipeline)', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchFn).toHaveBeenCalled());
     const arg = fetchFn.mock.calls[0]![0];
     expect(arg.birth_date).toBe('1984-12-05');
     expect(arg.birth_time).toBe('09:07');

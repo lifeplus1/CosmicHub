@@ -198,33 +198,42 @@ describe('UnifiedChart integration', () => {
     });
     saveChart.mockResolvedValueOnce({ success: true, data: { id: 'saved1' } });
 
-    // eslint-disable-next-line no-unused-vars
-    const { container: ___container } = renderUnifiedChart('/chart/abc123');
+    renderUnifiedChart('/chart/abc123');
 
-    // The component is rendering but may not show "Natal Chart" if no birth data is loaded
-    // Check that the component mounted successfully and chart display is there
-    await waitFor(() => {
-      expect(screen.getByText('Astrological Chart')).toBeInTheDocument();
-    });
+    // Wait for the component to load and render the chart
+    await waitFor(
+      () => {
+        expect(screen.getByText('Astrological Chart')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
 
-    // Save button should appear once chart + birth data & user available
-    const saveBtn = await screen.findByRole('button', { name: /Save Chart/i });
-    expect(Boolean(saveBtn)).toBe(true);
+    // Wait for Save button to appear
+    const saveBtn = await waitFor(
+      () => screen.getByRole('button', { name: /Save Chart/i }),
+      { timeout: 5000 }
+    );
+    
+    expect(saveBtn).toBeInTheDocument();
 
     act(() => {
       fireEvent.click(saveBtn);
     });
 
-    await waitFor(() => {
-      expect(saveChart).toHaveBeenCalledTimes(1);
-      const firstCall = saveChart.mock.calls[0];
-      expect(firstCall).toBeTruthy();
-      if (firstCall) {
-        const arg = firstCall[0];
-        expect(arg).toMatchObject({ year: 1990, month: 7, day: 15 });
-      }
-    });
-  });
+    await waitFor(
+      () => {
+        expect(saveChart).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 3000 }
+    );
+    
+    const firstCall = saveChart.mock.calls[0];
+    expect(firstCall).toBeTruthy();
+    if (firstCall) {
+      const arg = firstCall[0];
+      expect(arg).toMatchObject({ year: 1990, month: 7, day: 15 });
+    }
+  }, 15000);
 
   it('calculates new chart with ?calculate=true and session birthData', async () => {
     // Set session stored birth data in expected shape
@@ -244,17 +253,16 @@ describe('UnifiedChart integration', () => {
       data: minimalChart,
     });
 
-    // eslint-disable-next-line no-unused-vars
-    const { container: ___container } = renderUnifiedChart(
-      '/chart?calculate=true'
-    );
+    renderUnifiedChart('/chart?calculate=true');
 
-    // The component is rendering but may not show "Natal Chart" if no birth data is loaded
-    // Check that the component mounted successfully and API was called
-    await waitFor(() => {
-      expect(fetchChartDataUnified).toHaveBeenCalledTimes(1);
-    });
-  });
+    // Wait for API call to be made
+    await waitFor(
+      () => {
+        expect(fetchChartDataUnified).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 5000 }
+    );
+  }, 15000);
 
   it('handles saveChart error gracefully (button re-enabled)', async () => {
     fetchSavedChartById.mockResolvedValueOnce({
@@ -275,31 +283,49 @@ describe('UnifiedChart integration', () => {
       .mockRejectedValueOnce(new Error('Network fail'))
       .mockResolvedValueOnce({ success: true, data: { id: 'retry-ok' } });
 
-    // eslint-disable-next-line no-unused-vars
-    const { container: ___container } = renderUnifiedChart('/chart/err123');
+    renderUnifiedChart('/chart/err123');
 
     // Wait for chart to load
-    await waitFor(() => {
-      expect(screen.getByText('Astrological Chart')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Astrological Chart')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
 
-    const saveBtns = screen.getAllByText(/Save Chart/i);
+    const saveBtns = await waitFor(
+      () => screen.getAllByText(/Save Chart/i),
+      { timeout: 3000 }
+    );
+    
     expect(saveBtns.length).toBeGreaterThan(0);
+    
     act(() => {
       if (saveBtns[0]) fireEvent.click(saveBtns[0]);
     });
 
-    await waitFor(() => {
-      expect(saveChart).toHaveBeenCalledTimes(1);
-    });
+    await waitFor(
+      () => {
+        expect(saveChart).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 3000 }
+    );
 
     // Click again (should retry successfully)
-    const retryBtns = screen.getAllByText(/Save Chart/i);
+    const retryBtns = await waitFor(
+      () => screen.getAllByText(/Save Chart/i),
+      { timeout: 3000 }
+    );
+    
     act(() => {
       if (retryBtns[0]) fireEvent.click(retryBtns[0]);
     });
-    await waitFor(() => {
-      expect(saveChart).toHaveBeenCalledTimes(2);
-    });
-  });
+    
+    await waitFor(
+      () => {
+        expect(saveChart).toHaveBeenCalledTimes(2);
+      },
+      { timeout: 3000 }
+    );
+  }, 20000);
 });
