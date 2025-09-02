@@ -133,7 +133,9 @@ describe('HumanDesignChart Component', () => {
     );
 
     expect(
-      screen.getByText(/enter your birth information to calculate your human design chart/i)
+      screen.getByText(
+        /enter your birth information to calculate your human design chart/i
+      )
     ).toBeInTheDocument();
   });
 

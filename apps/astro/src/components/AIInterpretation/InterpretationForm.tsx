@@ -228,7 +228,16 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       dt.getUTCDate() === d
     );
   };
-  const isValidTime = (value: string): boolean => /^\d{2}:\d{2}$/.test(value);
+  const isValidTime = (value: string): boolean => {
+    if (!/^\d{2}:\d{2}$/.test(value)) return false;
+    const [hStr, mStr] = value.split(':');
+    const h = Number(hStr);
+    const m = Number(mStr);
+    if (!Number.isInteger(h) || !Number.isInteger(m)) return false;
+    if (h < 0 || h > 23) return false;
+    if (m < 0 || m > 59) return false;
+    return true;
+  };
 
   const handleChartGenerate = async (): Promise<void> => {
     // TODO: Replace with real authentication check when auth is implemented
@@ -262,6 +271,24 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
           title: 'Partner Data Required',
           description:
             'Provide partner birth date, time, and location for synastry interpretation',
+          status: 'error',
+          duration: 6000,
+        });
+        return;
+      }
+    }
+
+    // Defensive: prevent generation if any partner field looks malformed (basic format checks)
+    if (isSynastry) {
+      const invalidDate =
+        partnerBirthDate !== '' && !isValidDate(partnerBirthDate);
+      const invalidTime =
+        partnerBirthTime !== '' && !isValidTime(partnerBirthTime);
+      if (invalidDate || invalidTime) {
+        showToast({
+          title: 'Invalid Partner Data',
+          description:
+            'Ensure partner date/time formats are valid before generating',
           status: 'error',
           duration: 6000,
         });

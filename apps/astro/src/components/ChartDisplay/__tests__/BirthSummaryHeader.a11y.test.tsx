@@ -85,21 +85,24 @@ describe('BirthSummaryHeader accessibility & shortcuts', () => {
       />
     );
 
-        // Wait for the button to update with the loading state
-    await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      const calculatingButton = buttons.find(button =>
-        button.textContent?.includes('Calculating…')
-      );
-      expect(calculatingButton).toBeInTheDocument();
+    // Wait for the button to update with the loading state
+    await waitFor(
+      () => {
+        const buttons = screen.getAllByRole('button');
+        const calculatingButton = buttons.find(button =>
+          button.textContent?.includes('Calculating…')
+        );
+        expect(calculatingButton).toBeInTheDocument();
 
-      // Debug: log the button to see what we're getting
-      console.log('Button found:', calculatingButton?.outerHTML);
-      console.log(
-        'Button disabled:',
-        calculatingButton?.hasAttribute('disabled')
-      );
-    }, { timeout: 5000 });
+        // Debug: log the button to see what we're getting
+        console.log('Button found:', calculatingButton?.outerHTML);
+        console.log(
+          'Button disabled:',
+          calculatingButton?.hasAttribute('disabled')
+        );
+      },
+      { timeout: 5000 }
+    );
   }, 15000);
 
   it('supports keyboard shortcuts (e, r, s)', () => {

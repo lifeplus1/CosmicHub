@@ -25,7 +25,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
-    include: ['**/*.{test,spec}.{ts,tsx}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['**/node_modules/**', '**/packages/**'],
     testTimeout: 10000, // 10 seconds for integration tests
     hookTimeout: 10000, // 10 seconds for setup/teardown
     env: {
@@ -66,8 +67,13 @@ export default defineConfig({
     pool: 'threads',
     poolOptions: {
       threads: {
-        singleThread: true,
+        singleThread: false,
+        maxThreads: 4,
+        minThreads: 2,
       },
+    },
+    cache: {
+      dir: 'node_modules/.vite/vitest',
     },
   },
   resolve: {

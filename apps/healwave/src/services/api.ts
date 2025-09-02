@@ -40,7 +40,7 @@ export async function savePreset(
   try {
     const user = getSafeCurrentUser();
     if (!user) {
-      return fail(ErrorCode.AUTH, 'User not authenticated');
+      return fail(ErrorCode.AUTH, 'User not authenticated'); // ALLOW_FAIL_USAGE
     }
     const token = await getIdToken(user);
     const response = await fetch(
@@ -82,7 +82,7 @@ export async function getPresets(): Promise<ApiResult<FrequencyPreset[]>> {
   try {
     const user = getSafeCurrentUser();
     if (!user) {
-      return fail(ErrorCode.AUTH, 'User not authenticated');
+      return fail(ErrorCode.AUTH, 'User not authenticated'); // ALLOW_FAIL_USAGE
     }
     const token = await getIdToken(user);
     const response = await fetch(
@@ -125,7 +125,7 @@ export async function deletePreset(presetId: string): Promise<ApiResult<null>> {
   try {
     const user = getSafeCurrentUser();
     if (!user) {
-      return fail(ErrorCode.AUTH, 'User not authenticated');
+      return fail(ErrorCode.AUTH, 'User not authenticated'); // ALLOW_FAIL_USAGE
     }
     const token = await getIdToken(user);
     const response = await fetch(

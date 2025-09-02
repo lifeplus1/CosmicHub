@@ -202,17 +202,20 @@ describe('AIChat Component', () => {
       fireEvent.change(textarea, { target: { value: 'Test question' } });
       fireEvent.click(submitButton);
 
-      await waitFor(() => {
-        expect(mockAxiosPost).toHaveBeenCalledWith(
-          expect.stringContaining('/chat'),
-          { text: 'Test question' },
-          expect.objectContaining({
-            headers: expect.objectContaining({
-              Authorization: 'Bearer mock-token',
-            }),
-          })
-        );
-      }, { timeout: 8000 });
+      await waitFor(
+        () => {
+          expect(mockAxiosPost).toHaveBeenCalledWith(
+            expect.stringContaining('/chat'),
+            { text: 'Test question' },
+            expect.objectContaining({
+              headers: expect.objectContaining({
+                Authorization: 'Bearer mock-token',
+              }),
+            })
+          );
+        },
+        { timeout: 8000 }
+      );
     }
   }, 15000);
 
@@ -246,9 +249,12 @@ describe('AIChat Component', () => {
       fireEvent.change(textarea, { target: { value: 'Test question' } });
       fireEvent.click(submitButton);
 
-      await waitFor(() => {
-        expect(mockAxiosPost).toHaveBeenCalled();
-      }, { timeout: 8000 });
+      await waitFor(
+        () => {
+          expect(mockAxiosPost).toHaveBeenCalled();
+        },
+        { timeout: 8000 }
+      );
     }
   }, 15000);
 

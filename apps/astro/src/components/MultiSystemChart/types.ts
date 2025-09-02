@@ -80,6 +80,36 @@ export interface MultiSystemChartData {
     personality_integration?: Record<string, string[]>;
     spiritual_path?: string[];
   };
+  spiritual_systems?: {
+    description?: string;
+    tarot?: {
+      daily_card?: any;
+      life_path?: any;
+      suits?: any[];
+    };
+    kabbalah?: {
+      primary_sephirah?: any;
+      secondary_sephirah?: any;
+      relevant_paths?: any[];
+      spiritual_focus?: string;
+      tree_guidance?: string;
+    };
+    correspondences?: {
+      daily_focus?: any;
+      life_purpose?: any;
+      spiritual_center?: any;
+    };
+    synthesis?: {
+      primary_themes?: string[];
+      spiritual_guidance?: string;
+      integration_focus?: string;
+      daily_practice?: string;
+    };
+    ai_interpretation?: {
+      spiritual_interpretation?: any;
+      timestamp?: string;
+    };
+  };
 }
 
 export interface WesternChartData {

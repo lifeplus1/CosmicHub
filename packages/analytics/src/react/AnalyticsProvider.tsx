@@ -122,22 +122,25 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
   );
 
   // Memoized onDispatch function to ensure stable reference for signature calculation
-  const memoizedOnDispatch = useCallback((e: AnalyticsEvent) => {
-    setLastEvent(e);
-    // Notify subscribers
-    listenersRef.current.forEach(fn => {
+  const memoizedOnDispatch = useCallback(
+    (e: AnalyticsEvent) => {
+      setLastEvent(e);
+      // Notify subscribers
+      listenersRef.current.forEach(fn => {
+        try {
+          fn(e);
+        } catch {
+          /* swallow listener errors */
+        }
+      });
       try {
-        fn(e);
+        config.advanced?.onDispatch?.(e);
       } catch {
-        /* swallow listener errors */
+        /* swallow user errors */
       }
-    });
-    try {
-      config.advanced?.onDispatch?.(e);
-    } catch {
-      /* swallow user errors */
-    }
-  }, [config.advanced?.onDispatch]);
+    },
+    [config.advanced?.onDispatch]
+  );
 
   // Initialize or reinitialize when config signature changes (client-only)
   useEffect(() => {

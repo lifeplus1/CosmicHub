@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CosmicHub Data Flow Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              cosmic: {
+                dark: '#0f0f23',
+                blue: '#1a202c',
+                purple: '#553c9a',
+                gold: '#f6ad55',
+                silver: '#e2e8f0',
+                red: '#dc2626',
+              },
+            },
+            fontFamily: {
+              cinzel: ['Cinzel', 'serif'],
+              playfair: ['Playfair Display', 'serif'],
+              inter: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="./data-flow-visualization.css" />
+  </head>
+  <body class="m-0 p-5 font-sans cosmic-gradient text-white min-h-screen">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold mb-2">
+          🌟 CosmicHub Data Flow Visualization
+        </h1>
+        <p class="text-lg opacity-90">
+          Interactive visualization of analytics, monitoring, and data flows
+        </p>
+      </div>
+
+      <div class="flex justify-center mb-5 gap-2">
+        <button
+          class="glass-button text-white px-6 py-3 rounded-lg cursor-pointer active:bg-white/30"
+          onclick="showTab('overview')"
+        >
+          System Overview
+        </button>
+        <button
+          class="glass-button text-white px-6 py-3 rounded-lg cursor-pointer"
+          onclick="showTab('analytics')"
+        >
+          Analytics Flow
+        </button>
+        <button
+          class="glass-button text-white px-6 py-3 rounded-lg cursor-pointer"
+          onclick="showTab('monitoring')"
+        >
+          Monitoring Flow
+        </button>
+        <button
+          class="glass-button text-white px-6 py-3 rounded-lg cursor-pointer"
+          onclick="showTab('metrics')"
+        >
+          Live Metrics
+        </button>
+      </div>
+
+      <div class="flex justify-center gap-2 mb-5">
+        <button
+          class="glass-button border border-white/30 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-white/30"
+          onclick="toggleAnimation()"
+        >
+          Toggle Flow Animation
+        </button>
+        <button
+          class="glass-button border border-white/30 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-white/30"
+          onclick="resetView()"
+        >
+          Reset View
+        </button>
+        <button
+          class="glass-button border border-white/30 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-white/30"
+          onclick="fitToScreen()"
+        >
+          Fit to Screen
+        </button>
+      </div>
+
+      <div class="glass-effect rounded-xl p-5">
+        <div id="overview-tab" class="tab-content">
+          <svg class="w-full h-[600px]" id="overview-diagram"></svg>
+        </div>
+        <div id="analytics-tab" class="tab-content hidden">
+          <svg class="w-full h-[600px]" id="analytics-diagram"></svg>
+        </div>
+        <div id="monitoring-tab" class="tab-content hidden">
+          <svg class="w-full h-[600px]" id="monitoring-diagram"></svg>
+        </div>
+        <div id="metrics-tab" class="tab-content hidden">
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5"
+          >
+            <div class="glass-effect rounded-lg p-4 text-center">
+              <div class="text-3xl font-bold text-green-400" id="total-events">
+                --
+              </div>
+              <div class="text-sm opacity-80 mt-2">Total Events Today</div>
+            </div>
+            <div class="glass-effect rounded-lg p-4 text-center">
+              <div class="text-3xl font-bold text-green-400" id="active-users">
+                --
+              </div>
+              <div class="text-sm opacity-80 mt-2">Active Users</div>
+            </div>
+            <div class="glass-effect rounded-lg p-4 text-center">
+              <div class="text-3xl font-bold text-green-400" id="api-requests">
+                --
+              </div>
+              <div class="text-sm opacity-80 mt-2">API Requests/min</div>
+            </div>
+            <div class="glass-effect rounded-lg p-4 text-center">
+              <div class="text-3xl font-bold text-green-400" id="response-time">
+                --
+              </div>
+              <div class="text-sm opacity-80 mt-2">Avg Response Time</div>
+            </div>
+            <div class="glass-effect rounded-lg p-4 text-center">
+              <div class="text-3xl font-bold text-green-400" id="error-rate">
+                --
+              </div>
+              <div class="text-sm opacity-80 mt-2">Error Rate</div>
+            </div>
+            <div class="glass-effect rounded-lg p-4 text-center">
+              <div
+                class="text-3xl font-bold text-green-400"
+                id="chart-calculations"
+              >
+                --
+              </div>
+              <div class="text-sm opacity-80 mt-2">Chart Calculations</div>
+            </div>
+          </div>
+          <svg class="w-full h-96 mt-5" id="metrics-diagram"></svg>
+        </div>
+      </div>
+
+      <div class="mt-5 flex flex-wrap gap-5 justify-center">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-4 h-4 rounded-full border-2 border-white legend-circle frontend"
+          ></div>
+          <span>Frontend Apps</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-4 h-4 rounded-full border-2 border-white legend-circle backend"
+          ></div>
+          <span>Backend Services</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-4 h-4 rounded-full border-2 border-white legend-circle analytics"
+          ></div>
+          <span>Analytics System</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-4 h-4 rounded-full border-2 border-white legend-circle monitoring"
+          ></div>
+          <span>Monitoring</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-4 h-4 rounded-full border-2 border-white legend-circle database"
+          ></div>
+          <span>Data Storage</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-4 h-4 rounded-full border-2 border-white legend-circle external"
+          ></div>
+          <span>External Services</span>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="absolute bg-black/80 text-white px-3 py-2 rounded text-xs pointer-events-none opacity-0 transition-opacity duration-300"
+      id="tooltip"
+    ></div>
+
+    <script>
+      let animationEnabled = false;
+      let currentTab = 'overview';
+
+      // Sample data representing your CosmicHub architecture
+      const systemOverviewData = {
+        nodes: [
+          // Frontend
+          {
+            id: 'astro-app',
+            name: 'Astro App\n(Main Frontend)',
+            x: 100,
+            y: 100,
+            type: 'frontend',
+          },
+          {
+            id: 'healwave-app',
+            name: 'Healwave App\n(Secondary)',
+            x: 100,
+            y: 200,
+            type: 'frontend',
+          },
+          {
+            id: 'mobile-app',
+            name: 'Mobile App\n(React Native)',
+            x: 100,
+            y: 300,
+            type: 'frontend',
+          },
+
+          // Backend Services
+          {
+            id: 'main-api',
+            name: 'Main API\n(FastAPI)',
+            x: 400,
+            y: 150,
+            type: 'backend',
+          },
+          {
+            id: 'ephemeris',
+            name: 'Ephemeris\nServer',
+            x: 400,
+            y: 250,
+            type: 'backend',
+          },
+
+          // Analytics
+          {
+            id: 'analytics-service',
+            name: 'Analytics\nService',
+            x: 700,
+            y: 100,
+            type: 'analytics',
+          },
+          {
+            id: 'analytics-db',
+            name: 'Analytics\nDatabase',
+            x: 900,
+            y: 100,
+            type: 'database',
+          },
+
+          // Monitoring
+          {
+            id: 'prometheus',
+            name: 'Prometheus\nMetrics',
+            x: 700,
+            y: 200,
+            type: 'monitoring',
+          },
+          {
+            id: 'grafana',
+            name: 'Grafana\nDashboards',
+            x: 900,
+            y: 200,
+            type: 'monitoring',
+          },
+
+          // Databases
+          {
+            id: 'firebase',
+            name: 'Firebase\n(Main DB)',
+            x: 700,
+            y: 300,
+            type: 'database',
+          },
+          {
+            id: 'sqlite',
+            name: 'SQLite\n(Local Cache)',
+            x: 900,
+            y: 300,
+            type: 'database',
+          },
+
+          // External
+          {
+            id: 'ga4',
+            name: 'Google\nAnalytics 4',
+            x: 1100,
+            y: 100,
+            type: 'external',
+          },
+          {
+            id: 'mixpanel',
+            name: 'Mixpanel',
+            x: 1100,
+            y: 150,
+            type: 'external',
+          },
+          { id: 'posthog', name: 'PostHog', x: 1100, y: 200, type: 'external' },
+        ],
+        links: [
+          // Frontend to Backend
+          { source: 'astro-app', target: 'main-api', type: 'data-flow' },
+          { source: 'healwave-app', target: 'main-api', type: 'data-flow' },
+          { source: 'mobile-app', target: 'main-api', type: 'data-flow' },
+          { source: 'main-api', target: 'ephemeris', type: 'data-flow' },
+
+          // Analytics flows
+          {
+            source: 'astro-app',
+            target: 'analytics-service',
+            type: 'analytics-flow',
+          },
+          {
+            source: 'healwave-app',
+            target: 'analytics-service',
+            type: 'analytics-flow',
+          },
+          {
+            source: 'mobile-app',
+            target: 'analytics-service',
+            type: 'analytics-flow',
+          },
+          {
+            source: 'main-api',
+            target: 'analytics-service',
+            type: 'analytics-flow',
+          },
+          {
+            source: 'analytics-service',
+            target: 'analytics-db',
+            type: 'analytics-flow',
+          },
+          {
+            source: 'analytics-service',
+            target: 'ga4',
+            type: 'analytics-flow',
+          },
+          {
+            source: 'analytics-service',
+            target: 'mixpanel',
+            type: 'analytics-flow',
+          },
+          {
+            source: 'analytics-service',
+            target: 'posthog',
+            type: 'analytics-flow',
+          },
+
+          // Monitoring flows
+          { source: 'main-api', target: 'prometheus', type: 'monitoring-flow' },
+          {
+            source: 'ephemeris',
+            target: 'prometheus',
+            type: 'monitoring-flow',
+          },
+          { source: 'prometheus', target: 'grafana', type: 'monitoring-flow' },
+
+          // Data flows
+          { source: 'main-api', target: 'firebase', type: 'data-flow' },
+          { source: 'astro-app', target: 'sqlite', type: 'data-flow' },
+        ],
+      };
+
+      function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+          tab.style.display = 'none';
+        });
+
+        // Show selected tab
+        document.getElementById(tabName + '-tab').style.display = 'block';
+
+        // Update tab buttons
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        currentTab = tabName;
+
+        if (tabName === 'metrics') {
+          loadMetrics();
+        }
+      }
+
+      function toggleAnimation() {
+        animationEnabled = !animationEnabled;
+        const container = document.querySelector('.visualization-container');
+        if (animationEnabled) {
+          container.classList.add('active-flows');
+        } else {
+          container.classList.remove('active-flows');
+        }
+      }
+
+      function resetView() {
+        // Reset zoom and pan for all diagrams
+        d3.selectAll('svg g').attr('transform', 'translate(0,0) scale(1)');
+      }
+
+      function fitToScreen() {
+        // Implement fit to screen logic
+        console.log('Fit to screen - implement based on current data bounds');
+      }
+
+      function createVisualization(containerId, data) {
+        const svg = d3.select('#' + containerId);
+        const width = parseInt(svg.style('width'));
+        const height = parseInt(svg.style('height'));
+
+        // Clear previous content
+        svg.selectAll('*').remove();
+
+        // Create arrow marker
+        svg
+          .append('defs')
+          .append('marker')
+          .attr('id', 'arrowhead')
+          .attr('viewBox', '-0 -5 10 10')
+          .attr('refX', 20)
+          .attr('refY', 0)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M 0,-5 L 10,0 L 0,5')
+          .attr('fill', 'white');
+
+        const g = svg.append('g');
+
+        // Add zoom behavior
+        const zoom = d3
+          .zoom()
+          .scaleExtent([0.1, 4])
+          .on('zoom', event => {
+            g.attr('transform', event.transform);
+          });
+
+        svg.call(zoom);
+
+        // Create links
+        const links = g
+          .selectAll('.link')
+          .data(data.links)
+          .enter()
+          .append('line')
+          .attr('class', d => `link ${d.type}`)
+          .attr('x1', d => data.nodes.find(n => n.id === d.source).x)
+          .attr('y1', d => data.nodes.find(n => n.id === d.source).y)
+          .attr('x2', d => data.nodes.find(n => n.id === d.target).x)
+          .attr('y2', d => data.nodes.find(n => n.id === d.target).y);
+
+        // Create nodes
+        const nodes = g
+          .selectAll('.node')
+          .data(data.nodes)
+          .enter()
+          .append('circle')
+          .attr('class', d => `node ${d.type}`)
+          .attr('cx', d => d.x)
+          .attr('cy', d => d.y)
+          .attr('r', 30)
+          .on('mouseover', function (event, d) {
+            const tooltip = d3.select('#tooltip');
+            tooltip
+              .style('opacity', 1)
+              .style('left', event.pageX + 10 + 'px')
+              .style('top', event.pageY - 10 + 'px')
+              .html(
+                `<strong>${d.name.replace('\n', ' ')}</strong><br/>Type: ${d.type}<br/>Click for details`
+              );
+          })
+          .on('mouseout', function () {
+            d3.select('#tooltip').style('opacity', 0);
+          })
+          .on('click', function (event, d) {
+            alert(
+              `${d.name}\n\nType: ${d.type}\nConnections: ${data.links.filter(l => l.source === d.id || l.target === d.id).length}`
+            );
+          });
+
+        // Add node labels
+        const labels = g
+          .selectAll('.node-text')
+          .data(data.nodes)
+          .enter()
+          .append('text')
+          .attr('class', 'node-text')
+          .attr('x', d => d.x)
+          .attr('y', d => d.y + 5)
+          .text(d => d.name.split('\n')[0])
+          .each(function (d) {
+            const lines = d.name.split('\n');
+            if (lines.length > 1) {
+              d3.select(this)
+                .append('tspan')
+                .attr('x', d.x)
+                .attr('dy', '1.2em')
+                .text(lines[1]);
+            }
+          });
+      }
+
+      function loadMetrics() {
+        // Simulate loading real metrics from your analytics API
+        const metrics = {
+          totalEvents: Math.floor(Math.random() * 10000) + 5000,
+          activeUsers: Math.floor(Math.random() * 500) + 100,
+          apiRequests: Math.floor(Math.random() * 200) + 50,
+          responseTime: (Math.random() * 100 + 50).toFixed(1) + 'ms',
+          errorRate: (Math.random() * 2).toFixed(2) + '%',
+          chartCalculations: Math.floor(Math.random() * 1000) + 200,
+        };
+
+        Object.keys(metrics).forEach(key => {
+          const element = document.getElementById(
+            key.replace(/([A-Z])/g, '-$1').toLowerCase()
+          );
+          if (element) {
+            element.textContent = metrics[key];
+          }
+        });
+
+        // Create a simple time series chart
+        createMetricsChart();
+      }
+
+      function createMetricsChart() {
+        const svg = d3.select('#metrics-diagram');
+        const width = parseInt(svg.style('width'));
+        const height = parseInt(svg.style('height'));
+
+        svg.selectAll('*').remove();
+
+        // Generate sample time series data
+        const data = Array.from({ length: 24 }, (_, i) => ({
+          hour: i,
+          value: Math.random() * 100 + 50,
+        }));
+
+        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        const g = svg
+          .append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        const xScale = d3.scaleLinear().domain([0, 23]).range([0, innerWidth]);
+
+        const yScale = d3
+          .scaleLinear()
+          .domain([0, d3.max(data, d => d.value)])
+          .range([innerHeight, 0]);
+
+        const line = d3
+          .line()
+          .x(d => xScale(d.hour))
+          .y(d => yScale(d.value))
+          .curve(d3.curveMonotoneX);
+
+        g.append('path')
+          .datum(data)
+          .attr('fill', 'none')
+          .attr('stroke', '#4CAF50')
+          .attr('stroke-width', 2)
+          .attr('d', line);
+
+        g.selectAll('.dot')
+          .data(data)
+          .enter()
+          .append('circle')
+          .attr('class', 'dot')
+          .attr('cx', d => xScale(d.hour))
+          .attr('cy', d => yScale(d.value))
+          .attr('r', 4)
+          .attr('fill', '#4CAF50');
+
+        g.append('g')
+          .attr('transform', `translate(0,${innerHeight})`)
+          .call(d3.axisBottom(xScale));
+
+        g.append('g').call(d3.axisLeft(yScale));
+
+        g.append('text')
+          .attr('transform', 'rotate(-90)')
+          .attr('y', 0 - margin.left)
+          .attr('x', 0 - innerHeight / 2)
+          .attr('dy', '1em')
+          .style('text-anchor', 'middle')
+          .style('fill', 'white')
+          .text('Events per Hour');
+      }
+
+      // Initialize visualizations
+      document.addEventListener('DOMContentLoaded', function () {
+        createVisualization('overview-diagram', systemOverviewData);
+
+        // Create analytics-specific visualization
+        const analyticsData = {
+          nodes: systemOverviewData.nodes.filter(n =>
+            [
+              'astro-app',
+              'healwave-app',
+              'mobile-app',
+              'analytics-service',
+              'analytics-db',
+              'ga4',
+              'mixpanel',
+              'posthog',
+            ].includes(n.id)
+          ),
+          links: systemOverviewData.links.filter(
+            l => l.type === 'analytics-flow'
+          ),
+        };
+        createVisualization('analytics-diagram', analyticsData);
+
+        // Create monitoring-specific visualization
+        const monitoringData = {
+          nodes: systemOverviewData.nodes.filter(n =>
+            ['main-api', 'ephemeris', 'prometheus', 'grafana'].includes(n.id)
+          ),
+          links: systemOverviewData.links.filter(
+            l => l.type === 'monitoring-flow'
+          ),
+        };
+        createVisualization('monitoring-diagram', monitoringData);
+
+        // Set up periodic metrics updates
+        setInterval(loadMetrics, 30000); // Update every 30 seconds
+      });
+    </script>
+  </body>
+</html>

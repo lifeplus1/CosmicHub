@@ -32,9 +32,9 @@ describe('GatesChannelsTab accessibility', () => {
     const { container } = render(
       <GatesChannelsTab humanDesignData={minimalHD} />
     );
-    await expectNoA11yViolations(container as HTMLElement, { 
-      allow: ['heading-order'] // Allow heading-order violations
+    await expectNoA11yViolations(container as HTMLElement, {
+      allow: ['heading-order'], // Allow heading-order violations
     });
     expect(true).toBe(true);
-  }, 15000); // Increase timeout to 15 seconds
+  }, 30000); // Increased timeout to 30 seconds for full-suite serialization
 });

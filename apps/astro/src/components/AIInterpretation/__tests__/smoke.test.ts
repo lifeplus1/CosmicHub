@@ -34,7 +34,9 @@ describe('AIInterpretation Module Smoke Tests', () => {
         trackCosmicHubAIInteraction: vi.fn(),
       }));
 
-      const { default: InterpretationForm } = await import('../InterpretationForm');
+      const { default: InterpretationForm } = await import(
+        '../InterpretationForm'
+      );
       expect(InterpretationForm).toBeDefined();
       expect(typeof InterpretationForm).toBe('function');
     });
@@ -48,8 +50,10 @@ describe('AIInterpretation Module Smoke Tests', () => {
 
   describe('Utility Functions', () => {
     it('buildChartInterpretationRequest works with minimal parameters', async () => {
-      const { buildChartInterpretationRequest } = await import('../interpretationRequestBuilder');
-      
+      const { buildChartInterpretationRequest } = await import(
+        '../interpretationRequestBuilder'
+      );
+
       const params = {
         chartId: 'test-chart' as any,
         userId: 'test-user' as any,
@@ -58,7 +62,7 @@ describe('AIInterpretation Module Smoke Tests', () => {
       };
 
       const result = buildChartInterpretationRequest(params);
-      
+
       expect(result).toBeDefined();
       expect(result.chartId).toBe('test-chart');
       expect(result.userId).toBe('test-user');
@@ -70,8 +74,10 @@ describe('AIInterpretation Module Smoke Tests', () => {
 
   describe('Type Safety', () => {
     it('maintains proper TypeScript types', async () => {
-      const { buildChartInterpretationRequest } = await import('../interpretationRequestBuilder');
-      
+      const { buildChartInterpretationRequest } = await import(
+        '../interpretationRequestBuilder'
+      );
+
       // This test ensures TypeScript compilation succeeds
       const params = {
         chartId: 'chart-123' as any,
@@ -82,7 +88,7 @@ describe('AIInterpretation Module Smoke Tests', () => {
       };
 
       const result = buildChartInterpretationRequest(params);
-      
+
       // Type assertions to ensure proper typing
       expect(typeof result.chartId).toBe('string');
       expect(typeof result.userId).toBe('string');
@@ -94,8 +100,10 @@ describe('AIInterpretation Module Smoke Tests', () => {
 
   describe('Error Resilience', () => {
     it('handles empty focus arrays gracefully', async () => {
-      const { buildChartInterpretationRequest } = await import('../interpretationRequestBuilder');
-      
+      const { buildChartInterpretationRequest } = await import(
+        '../interpretationRequestBuilder'
+      );
+
       const params = {
         chartId: 'test-chart' as any,
         userId: 'test-user' as any,
@@ -104,14 +112,16 @@ describe('AIInterpretation Module Smoke Tests', () => {
       };
 
       expect(() => buildChartInterpretationRequest(params)).not.toThrow();
-      
+
       const result = buildChartInterpretationRequest(params);
       expect(result.focus_areas).toEqual([]);
     });
 
     it('handles undefined optional parameters gracefully', async () => {
-      const { buildChartInterpretationRequest } = await import('../interpretationRequestBuilder');
-      
+      const { buildChartInterpretationRequest } = await import(
+        '../interpretationRequestBuilder'
+      );
+
       const params = {
         chartId: 'test-chart' as any,
         userId: 'test-user' as any,
@@ -124,7 +134,7 @@ describe('AIInterpretation Module Smoke Tests', () => {
       };
 
       expect(() => buildChartInterpretationRequest(params)).not.toThrow();
-      
+
       const result = buildChartInterpretationRequest(params);
       expect(result.question).toBeUndefined();
     });
@@ -135,7 +145,7 @@ describe('AIInterpretation Module Smoke Tests', () => {
       // Verify that the types can be imported
       const module = await import('../interpretationRequestBuilder');
       expect(module).toBeDefined();
-      
+
       // This test passes if the module imports without TypeScript errors
       expect(typeof module.buildChartInterpretationRequest).toBe('function');
     });
@@ -164,13 +174,13 @@ describe('AIInterpretation Module Smoke Tests', () => {
   describe('Performance', () => {
     it('imports modules efficiently', async () => {
       const start = performance.now();
-      
+
       await import('../InterpretationForm');
       await import('../interpretationRequestBuilder');
-      
+
       const end = performance.now();
       const importTime = end - start;
-      
+
       // Imports should complete within reasonable time (1 second)
       expect(importTime).toBeLessThan(1000);
     });
@@ -178,8 +188,10 @@ describe('AIInterpretation Module Smoke Tests', () => {
 
   describe('Constants and Configuration', () => {
     it('provides consistent default options', async () => {
-      const { buildChartInterpretationRequest } = await import('../interpretationRequestBuilder');
-      
+      const { buildChartInterpretationRequest } = await import(
+        '../interpretationRequestBuilder'
+      );
+
       const params1 = {
         chartId: 'chart1' as any,
         userId: 'user1' as any,

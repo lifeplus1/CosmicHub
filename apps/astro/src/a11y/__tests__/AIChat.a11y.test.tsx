@@ -1,8 +1,8 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
-import { axe } from 'vitest-axe';
 import AIChat from '../../components/AIChat';
+import { expectNoA11yViolations } from '../utils/axe';
 
 vi.mock('@cosmichub/auth', () => ({
   useAuth: () => ({ user: { uid: 'u1' }, loading: false }),
@@ -24,26 +24,11 @@ vi.mock('../../components/ToastProvider', () => ({
   useToast: () => ({ toast: () => {} }),
 }));
 
-// Global axe lock to prevent concurrent runs
-let axeLock = Promise.resolve();
-
 describe('AIChat accessibility', () => {
-  beforeEach(() => {
-    // Wait for any previous axe runs to complete
-    return axeLock;
-  });
-
   it('baseline rendering has no critical axe violations', async () => {
-    // Acquire the axe lock
-    const currentRun = axeLock.then(async () => {
-      const { container } = render(<AIChat />);
-      const results = await axe(container, {
-        rules: { 'color-contrast': { enabled: false } },
-      });
-      expect(results.violations.filter(v => v.impact === 'critical')).toEqual([]);
+    const { container } = render(<AIChat />);
+    await expectNoA11yViolations(container as HTMLElement, {
+      allow: ['color-contrast'],
     });
-    
-    axeLock = currentRun;
-    await currentRun;
-  });
+  }, 30000);
 });

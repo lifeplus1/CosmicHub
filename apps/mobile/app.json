@@ -24,10 +24,7 @@
         "NSMicrophoneUsageDescription": "CosmicHub may use the microphone for video sharing features.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "associatedDomains": [
-        "applinks:cosmichub.app",
-        "applinks:cosmichub.app"
-      ],
+      "associatedDomains": ["applinks:cosmichub.app", "applinks:cosmichub.app"],
       "supportsWatchOS": true
     },
     "android": {
@@ -59,10 +56,7 @@
               "host": "cosmichub.app"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
@@ -77,9 +71,7 @@
         {
           "icon": "./assets/notification-icon.png",
           "color": "#4a90e2",
-          "sounds": [
-            "./assets/notification.wav"
-          ]
+          "sounds": ["./assets/notification.wav"]
         }
       ],
       [

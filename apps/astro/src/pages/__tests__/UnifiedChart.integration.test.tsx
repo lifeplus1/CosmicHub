@@ -213,7 +213,7 @@ describe('UnifiedChart integration', () => {
       () => screen.getByRole('button', { name: /Save Chart/i }),
       { timeout: 5000 }
     );
-    
+
     expect(saveBtn).toBeInTheDocument();
 
     act(() => {
@@ -226,7 +226,7 @@ describe('UnifiedChart integration', () => {
       },
       { timeout: 3000 }
     );
-    
+
     const firstCall = saveChart.mock.calls[0];
     expect(firstCall).toBeTruthy();
     if (firstCall) {
@@ -293,13 +293,12 @@ describe('UnifiedChart integration', () => {
       { timeout: 5000 }
     );
 
-    const saveBtns = await waitFor(
-      () => screen.getAllByText(/Save Chart/i),
-      { timeout: 3000 }
-    );
-    
+    const saveBtns = await waitFor(() => screen.getAllByText(/Save Chart/i), {
+      timeout: 3000,
+    });
+
     expect(saveBtns.length).toBeGreaterThan(0);
-    
+
     act(() => {
       if (saveBtns[0]) fireEvent.click(saveBtns[0]);
     });
@@ -312,15 +311,14 @@ describe('UnifiedChart integration', () => {
     );
 
     // Click again (should retry successfully)
-    const retryBtns = await waitFor(
-      () => screen.getAllByText(/Save Chart/i),
-      { timeout: 3000 }
-    );
-    
+    const retryBtns = await waitFor(() => screen.getAllByText(/Save Chart/i), {
+      timeout: 3000,
+    });
+
     act(() => {
       if (retryBtns[0]) fireEvent.click(retryBtns[0]);
     });
-    
+
     await waitFor(
       () => {
         expect(saveChart).toHaveBeenCalledTimes(2);

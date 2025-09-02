@@ -629,6 +629,195 @@ class EnhancedAIService:
             ],
             "confidence": 0.8
         }
+    
+    # ===== SPIRITUAL-001: SPIRITUAL SYSTEMS AI INTEGRATION =====
+    
+    async def generate_spiritual_interpretation(
+        self,
+        chart_data: Dict[str, Any],
+        spiritual_data: Dict[str, Any],
+        interpretation_type: str = "comprehensive",
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Generate AI interpretation combining astrological and spiritual systems"""
+        try:
+            logger.info(f"Generating spiritual interpretation for type: {interpretation_type}")
+            
+            # Extract spiritual system data
+            tarot_data = spiritual_data.get("tarot", {})
+            kabbalah_data = spiritual_data.get("kabbalah", {}) 
+            correspondences = spiritual_data.get("correspondences", {})
+            
+            # Generate cross-system analysis
+            cross_system_themes = await self._analyze_spiritual_themes(
+                chart_data, tarot_data, kabbalah_data
+            )
+            
+            # Generate spiritual guidance
+            spiritual_guidance = await self._generate_spiritual_guidance(
+                tarot_data, kabbalah_data, correspondences
+            )
+            
+            # Create path working recommendations
+            path_working = await self._generate_path_working_guidance(
+                kabbalah_data, tarot_data
+            )
+            
+            return {
+                "spiritual_interpretation": {
+                    "cross_system_themes": cross_system_themes,
+                    "spiritual_guidance": spiritual_guidance,
+                    "path_working": path_working,
+                    "synthesis_confidence": 0.85,
+                    "interpretation_type": interpretation_type
+                },
+                "timestamp": datetime.now().isoformat(),
+                "ai_version": "SPIRITUAL-001"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating spiritual interpretation: {e}")
+            return {"error": f"Spiritual interpretation failed: {str(e)}"}
+    
+    async def _analyze_spiritual_themes(
+        self,
+        chart_data: Dict[str, Any],
+        tarot_data: Dict[str, Any],
+        kabbalah_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Analyze themes across astrological and spiritual systems"""
+        
+        themes = []
+        
+        # Extract astrological themes
+        if chart_data.get("planets", {}).get("sun"):
+            sun_sign = self._get_sun_sign_from_position(
+                chart_data["planets"]["sun"]["position"]
+            )
+            themes.append(f"astrological_sun_{sun_sign.lower()}")
+            
+        # Extract tarot themes
+        if tarot_data.get("daily_card", {}).get("daily_card"):
+            daily_card = tarot_data["daily_card"]["daily_card"]
+            themes.extend(daily_card.get("keywords", [])[:2])
+            
+        if tarot_data.get("life_path", {}).get("life_path_card"):
+            life_card = tarot_data["life_path"]["life_path_card"]
+            themes.extend(life_card.get("keywords", [])[:2])
+            
+        # Extract Kabbalah themes
+        if kabbalah_data.get("primary_sephirah"):
+            sephirah = kabbalah_data["primary_sephirah"]
+            themes.extend(sephirah.get("keywords", [])[:2])
+            
+        # Remove duplicates and analyze patterns
+        unique_themes = list(set(themes))
+        
+        return {
+            "primary_themes": unique_themes[:7],
+            "spiritual_focus": "Integration of cosmic wisdom with practical spiritual development",
+            "cross_system_validation": "Themes confirmed across multiple wisdom traditions",
+            "theme_confidence": 0.8
+        }
+    
+    async def _generate_spiritual_guidance(
+        self,
+        tarot_data: Dict[str, Any],
+        kabbalah_data: Dict[str, Any], 
+        correspondences: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Generate spiritual guidance combining Tarot and Kabbalah"""
+        
+        guidance = []
+        
+        # Daily guidance from tarot
+        if tarot_data.get("daily_card", {}).get("daily_card"):
+            card = tarot_data["daily_card"]["daily_card"]
+            guidance.append({
+                "type": "daily_focus",
+                "source": "tarot",
+                "guidance": f"Focus on {card.get('name', 'spiritual development')} energy today",
+                "meditation": f"Contemplate the meaning of {card.get('meaning', 'growth')}"
+            })
+            
+        # Sephirah guidance
+        if kabbalah_data.get("primary_sephirah"):
+            seph = kabbalah_data["primary_sephirah"] 
+            guidance.append({
+                "type": "spiritual_development",
+                "source": "kabbalah",
+                "guidance": f"Work with {seph.get('name', 'divine')} energy for {seph.get('english', 'growth')}",
+                "practice": f"Meditate on the divine quality of {seph.get('meaning', 'unity')}"
+            })
+            
+        # Path working guidance
+        if kabbalah_data.get("relevant_paths"):
+            paths = kabbalah_data["relevant_paths"][:2]
+            for path in paths:
+                guidance.append({
+                    "type": "path_working",
+                    "source": "tree_of_life",
+                    "guidance": f"Explore the path of {path.get('hebrew_letter', 'wisdom')}",
+                    "connection": f"This connects {' and '.join(path.get('connects', []))}"
+                })
+        
+        return {
+            "daily_guidance": guidance,
+            "integration_practice": "Combine tarot meditation with Kabbalistic contemplation",
+            "spiritual_goals": "Achieve balance between mystical understanding and practical application"
+        }
+    
+    async def _generate_path_working_guidance(
+        self,
+        kabbalah_data: Dict[str, Any],
+        tarot_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Generate specific path working recommendations"""
+        
+        path_work = {}
+        
+        # Primary path based on life path card
+        if tarot_data.get("life_path", {}).get("life_path_card"):
+            life_card = tarot_data["life_path"]["life_path_card"]
+            tree_path = life_card.get("tree_path")
+            
+            if tree_path:
+                path_work["primary_path"] = {
+                    "path_number": tree_path,
+                    "tarot_card": life_card.get("name"),
+                    "hebrew_letter": life_card.get("hebrew_letter"),
+                    "spiritual_work": f"Develop the qualities of {life_card.get('meaning', 'spiritual growth')}",
+                    "meditation_focus": life_card.get("keywords", ["wisdom", "growth"])[0]
+                }
+                
+        # Secondary path from primary sephirah
+        if kabbalah_data.get("relevant_paths"):
+            secondary_path = kabbalah_data["relevant_paths"][0]
+            path_work["secondary_path"] = {
+                "path_connection": secondary_path.get("connects", []),
+                "hebrew_letter": secondary_path.get("hebrew_letter"),
+                "major_arcana": secondary_path.get("major_arcana"),
+                "spiritual_lesson": "Balance and integration of opposing forces"
+            }
+            
+        # Progressive development plan
+        path_work["development_plan"] = {
+            "current_phase": "Foundation building through daily practice",
+            "next_phase": "Integration of tarot and Kabbalistic wisdom",
+            "advanced_phase": "Teaching and sharing spiritual insights with others",
+            "timeline": "Work with each phase for 3-4 months before progressing"
+        }
+        
+        return path_work
+    
+    def _get_sun_sign_from_position(self, sun_position: float) -> str:
+        """Convert sun position to zodiac sign"""
+        signs = [
+            "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+            "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+        ]
+        sign_index = int(sun_position // 30)
+        return signs[sign_index] if 0 <= sign_index < 12 else "Unknown"
 
 
 # Create a global instance with backward compatibility

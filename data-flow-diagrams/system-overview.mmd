@@ -1,0 +1,39 @@
+graph TD
+    %% Frontend Applications
+    A[Astro App<br/>Main Frontend] --> |API Requests| D[Main API<br/>FastAPI]
+    B[Healwave App<br/>Secondary Frontend] --> |API Requests| D
+    C[Mobile App<br/>React Native] --> |API Requests| D
+    
+    %% Backend Services
+    D --> |Ephemeris Calculations| E[Ephemeris Server<br/>Astronomical Data]
+    D --> |User Data Storage| F[Firebase<br/>Primary Database]
+    
+    %% Analytics System
+    A --> |User Events| G[Analytics Service<br/>Event Tracking]
+    B --> |User Events| G
+    C --> |User Events| G
+    D --> |Performance Metrics| G
+    G --> |Custom Analytics| H[SQLite Database<br/>Analytics Storage]
+    G --> |External Analytics| I[Google Analytics 4]
+    G --> |Event Tracking| J[Mixpanel]
+    G --> |Session Recording| K[PostHog]
+    
+    %% Monitoring System
+    D --> |Metrics Collection| L[Prometheus<br/>Metrics Storage]
+    E --> |Performance Data| L
+    L --> |Dashboard Data| M[Grafana<br/>Monitoring Dashboards]
+    
+    %% Styling
+    classDef frontend fill:#45B7D1,stroke:#333,stroke-width:2px
+    classDef backend fill:#96CEB4,stroke:#333,stroke-width:2px
+    classDef database fill:#FFEAA7,stroke:#333,stroke-width:2px
+    classDef external fill:#DDA0DD,stroke:#333,stroke-width:2px
+    classDef analytics fill:#FF6B6B,stroke:#333,stroke-width:2px
+    classDef monitoring fill:#4ECDC4,stroke:#333,stroke-width:2px
+    
+    class A,B,C frontend
+    class D,E backend
+    class F,H database
+    class I,J,K external
+    class G analytics
+    class L,M monitoring

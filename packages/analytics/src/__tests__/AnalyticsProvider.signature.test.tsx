@@ -36,7 +36,6 @@ const baseConfig = (over: Partial<AnalyticsConfig> = {}): AnalyticsConfig => ({
   ...over,
 });
 
- 
 /* eslint-disable no-unused-vars */
 const fireDispatch = (
   onDispatch: ((event: AnalyticsEvent) => void) | undefined

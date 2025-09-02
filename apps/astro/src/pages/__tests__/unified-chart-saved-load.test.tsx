@@ -125,7 +125,9 @@ describe('UnifiedChart saved chart loading', () => {
   }, 15000);
 
   it('handles chart load error gracefully', async () => {
-    (fetchSavedChartById as any).mockRejectedValueOnce(new Error('Network error'));
+    (fetchSavedChartById as any).mockRejectedValueOnce(
+      new Error('Network error')
+    );
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter initialEntries={['/chart/err123']}>

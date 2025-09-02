@@ -8,6 +8,7 @@ import ChineseChart from './ChineseChart';
 import MayanChart from './MayanChart';
 import UranianChart from './UranianChart';
 import SynthesisChart from './SynthesisChart';
+import SpiritualChart from './SpiritualChart';
 
 interface MultiSystemChartProps {
   chartData?: MultiSystemChartData;
@@ -193,6 +194,12 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
               Uranian
             </Tabs.Trigger>
             <Tabs.Trigger
+              value='spiritual'
+              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+            >
+              🔮 Spiritual
+            </Tabs.Trigger>
+            <Tabs.Trigger
               value='synthesis'
               className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
             >
@@ -227,6 +234,16 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
           <Tabs.Content value='uranian' className='pt-4'>
             <ChartErrorBoundary>
               <UranianChart data={displayData.uranian ?? {}} />
+            </ChartErrorBoundary>
+          </Tabs.Content>
+
+          <Tabs.Content value='spiritual' className='pt-4'>
+            <ChartErrorBoundary>
+              <SpiritualChart
+                chartData={displayData.spiritual_systems ?? {}}
+                _birthData={birthData}
+                isLoading={false}
+              />
             </ChartErrorBoundary>
           </Tabs.Content>
 

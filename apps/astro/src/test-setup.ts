@@ -252,3 +252,31 @@ vi.mock('@cosmichub/integrations', () => ({
 
 // Avoid full mock of '@cosmichub/config' so type exports (ApiResult, ok/fail/etc.) remain available.
 // If runtime values need stubbing, consider partial mocking with vi.importActual in individual tests.
+
+// Provide a robust localStorage polyfill (jsdom localStorage may be partial when disabled)
+if (
+  (typeof window !== 'undefined' && !('localStorage' in window)) ||
+  typeof window.localStorage.clear !== 'function'
+) {
+  const storage: Record<string, string> = {};
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      getItem: (key: string) => (key in storage ? storage[key] : null),
+      setItem: (key: string, value: string) => {
+        storage[key] = String(value);
+      },
+      removeItem: (key: string) => {
+        delete storage[key];
+      },
+      clear: () => {
+        for (const k of Object.keys(storage)) delete storage[k];
+      },
+      key: (index: number) => Object.keys(storage)[index] ?? null,
+      get length() {
+        return Object.keys(storage).length;
+      },
+    },
+    configurable: true,
+  });
+}

@@ -1,0 +1,31 @@
+graph LR
+    %% User Interactions
+    U1[User Page Views] --> A[Analytics Service]
+    U2[Chart Calculations] --> A
+    U3[Button Clicks] --> A
+    U4[Form Submissions] --> A
+    U5[Error Events] --> A
+    
+    %% Analytics Processing
+    A --> |Real-time Events| B[Event Queue<br/>Processing]
+    B --> |Privacy Filtering| C[GDPR Compliance<br/>Data Sanitization]
+    
+    %% Data Storage
+    C --> |Custom Analytics| D[SQLite Database<br/>Local Analytics]
+    C --> |User Behavior| E[Google Analytics 4<br/>Web Analytics]
+    C --> |Event Tracking| F[Mixpanel<br/>Product Analytics]
+    C --> |Session Data| G[PostHog<br/>User Experience]
+    
+    %% Analytics Dashboard
+    D --> |Dashboard API| H[Analytics Dashboard<br/>Real-time Metrics]
+    H --> |Visualizations| I[Charts & Graphs<br/>Business Intelligence]
+    
+    classDef events fill:#FFE4B5,stroke:#333,stroke-width:2px
+    classDef processing fill:#FF6B6B,stroke:#333,stroke-width:2px
+    classDef storage fill:#98FB98,stroke:#333,stroke-width:2px
+    classDef dashboard fill:#87CEEB,stroke:#333,stroke-width:2px
+    
+    class U1,U2,U3,U4,U5 events
+    class A,B,C processing
+    class D,E,F,G storage
+    class H,I dashboard

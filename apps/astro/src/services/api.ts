@@ -246,7 +246,9 @@ export const getAuthToken = async (): Promise<string | null> => {
 
   // In development, allow mock authentication - check for both null and undefined auth states
   if (import.meta.env.DEV === true && (user === null || user === undefined)) {
-    devConsole.log?.('🧪 Using development mock token (user not authenticated)');
+    devConsole.log?.(
+      '🧪 Using development mock token (user not authenticated)'
+    );
     return 'mock-dev-token';
   }
 

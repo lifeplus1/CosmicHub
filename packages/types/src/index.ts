@@ -192,3 +192,4 @@ export * from './type-guards';
 export * from './utility';
 export * from './experiments';
 export * from './experiment-validators';
+export * from './spiritual-education';

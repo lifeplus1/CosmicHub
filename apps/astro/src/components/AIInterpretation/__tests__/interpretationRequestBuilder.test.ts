@@ -1,14 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { buildChartInterpretationRequest } from '../interpretationRequestBuilder';
 import type { ChartInterpretationParams } from '../interpretationRequestBuilder';
+import type {
+  InterpretationFocusArea,
+  InterpretationType,
+} from '../../../services/api.types';
 
 describe('interpretationRequestBuilder', () => {
   describe('buildChartInterpretationRequest', () => {
     const baseParams: ChartInterpretationParams = {
-      chartId: 'chart-123' as any,
+      chartId: 'chart-123' as any, // test fixture casting retained
       userId: 'user-456' as any,
       type: 'natal',
-      focus: ['personality', 'career'],
+      focus: ['personality', 'career'] as InterpretationFocusArea[],
     };
 
     it('builds a basic interpretation request correctly', () => {
@@ -53,25 +57,29 @@ describe('interpretationRequestBuilder', () => {
     });
 
     it('handles different interpretation types', () => {
-      const types = ['natal', 'transit', 'synastry', 'composite'] as const;
-      
+      const types: InterpretationType[] = [
+        'natal',
+        'transit',
+        'synastry',
+        'composite',
+      ];
+
       types.forEach(type => {
-        const params = {
+        const params: ChartInterpretationParams = {
           ...baseParams,
           type,
         };
-
         const result = buildChartInterpretationRequest(params);
-
         expect(result.type).toBe(type);
       });
     });
 
     describe('synastry handling', () => {
       it('appends partner information to question for synastry requests', () => {
-        const params = {
+        const params: ChartInterpretationParams = {
           ...baseParams,
-          type: 'synastry' as const,
+          type: 'synastry',
+          focus: baseParams.focus,
           partnerBirthDate: '1985-03-15',
           partnerBirthTime: '10:30',
           partnerBirthLocation: 'London, UK',
@@ -79,13 +87,16 @@ describe('interpretationRequestBuilder', () => {
 
         const result = buildChartInterpretationRequest(params);
 
-        expect(result.question).toContain('Partner birth details: 1985-03-15 at 10:30 in London, UK');
+        expect(result.question).toContain(
+          'Partner birth details: 1985-03-15 at 10:30 in London, UK'
+        );
       });
 
       it('handles synastry with existing question', () => {
-        const params = {
+        const params: ChartInterpretationParams = {
           ...baseParams,
-          type: 'synastry' as const,
+          type: 'synastry',
+          focus: baseParams.focus,
           question: 'How compatible are we?',
           partnerBirthDate: '1985-03-15',
           partnerBirthTime: '10:30',
@@ -100,9 +111,10 @@ describe('interpretationRequestBuilder', () => {
       });
 
       it('handles synastry with partial partner data', () => {
-        const params = {
+        const params: ChartInterpretationParams = {
           ...baseParams,
-          type: 'synastry' as const,
+          type: 'synastry',
+          focus: baseParams.focus,
           partnerBirthDate: '1985-03-15',
           // No time or location
         };
@@ -113,9 +125,10 @@ describe('interpretationRequestBuilder', () => {
       });
 
       it('handles synastry with only date and time', () => {
-        const params = {
+        const params: ChartInterpretationParams = {
           ...baseParams,
-          type: 'synastry' as const,
+          type: 'synastry',
+          focus: baseParams.focus,
           partnerBirthDate: '1985-03-15',
           partnerBirthTime: '10:30',
           // No location
@@ -123,13 +136,16 @@ describe('interpretationRequestBuilder', () => {
 
         const result = buildChartInterpretationRequest(params);
 
-        expect(result.question).toBe('Partner birth details: 1985-03-15 at 10:30');
+        expect(result.question).toBe(
+          'Partner birth details: 1985-03-15 at 10:30'
+        );
       });
 
       it('does not append partner info for non-synastry types even if provided', () => {
-        const params = {
+        const params: ChartInterpretationParams = {
           ...baseParams,
           type: 'natal',
+          focus: baseParams.focus,
           partnerBirthDate: '1985-03-15',
           partnerBirthTime: '10:30',
           partnerBirthLocation: 'London, UK',
@@ -141,9 +157,10 @@ describe('interpretationRequestBuilder', () => {
       });
 
       it('does not append partner info if no partner birth date provided', () => {
-        const params = {
+        const params: ChartInterpretationParams = {
           ...baseParams,
-          type: 'synastry' as const,
+          type: 'synastry',
+          focus: baseParams.focus,
           partnerBirthTime: '10:30',
           partnerBirthLocation: 'London, UK',
           // No partnerBirthDate
@@ -169,16 +186,16 @@ describe('interpretationRequestBuilder', () => {
       });
 
       it('maintains the same options regardless of input parameters', () => {
-        const params1 = {
+        const params1: ChartInterpretationParams = {
           ...baseParams,
-          type: 'natal' as const,
-          focus: ['personality'],
+          type: 'natal',
+          focus: ['personality'] as InterpretationFocusArea[],
         };
 
-        const params2 = {
+        const params2: ChartInterpretationParams = {
           ...baseParams,
-          type: 'transit' as const,
-          focus: ['career', 'relationships'],
+          type: 'transit',
+          focus: ['career', 'relationships'] as InterpretationFocusArea[],
           question: 'Some question',
         };
 
@@ -233,7 +250,7 @@ describe('interpretationRequestBuilder', () => {
           chartId: 'chart-123' as any,
           userId: 'user-456' as any,
           type: 'composite',
-          focus: ['health', 'spirituality'],
+          focus: ['health', 'spirituality'] as InterpretationFocusArea[],
           question: 'Test question',
           partnerBirthDate: '1990-01-01',
           partnerBirthTime: '12:00',

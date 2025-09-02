@@ -50,7 +50,10 @@ export function toCanonicalBirthData(
     };
   } else {
     // Convert from ExtendedBirthData (numeric) to ChartBirthData (text)
-    const extendedData = b as ExtendedBirthData & { lat?: number; lon?: number };
+    const extendedData = b as ExtendedBirthData & {
+      lat?: number;
+      lon?: number;
+    };
     const year = extendedData.year ?? 0;
     const month = extendedData.month ?? 1;
     const day = extendedData.day ?? 1;

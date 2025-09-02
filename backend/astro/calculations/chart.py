@@ -379,6 +379,17 @@ def calculate_multi_system_chart(
         # Uranian astrology
         uranian_data = calculate_uranian_astrology(julian_day, planets)  # type: ignore  # noqa: E501
 
+        # Spiritual systems (NEW - SPIRITUAL-001)
+        try:
+            from .spiritual import calculate_spiritual_systems
+            spiritual_data = calculate_spiritual_systems(year, month, day, hour, minute)
+        except ImportError:
+            logger.warning("Spiritual systems module not available")
+            spiritual_data = {"error": "Spiritual systems not available"}
+        except Exception as e:
+            logger.error(f"Error calculating spiritual systems: {e}")
+            spiritual_data = {"error": f"Spiritual calculation failed: {str(e)}"}
+
         # Combine all systems
         multi_chart: Dict[str, Any] = {
             "birth_info": {
@@ -410,6 +421,10 @@ def calculate_multi_system_chart(
             "uranian": {
                 **uranian_data,
                 "description": "Uranian astrology focuses on transneptunian points, midpoints, and 90-degree dial",  # noqa: E501
+            },
+            "spiritual_systems": {
+                **spiritual_data,
+                "description": "Tarot and Kabbalah Tree of Life spiritual guidance with cross-system correspondences",  # noqa: E501
             },
             "synthesis": {
                 "primary_themes": extract_primary_themes(base_chart, vedic_analysis, chinese_data, mayan_data),  # type: ignore  # noqa: E501

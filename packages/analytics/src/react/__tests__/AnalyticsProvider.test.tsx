@@ -11,12 +11,12 @@ let storedOnDispatch: any = null;
 // Create a mock instance that implements the required interface
 const createMockAnalyticsInstance = () => {
   let isShutdown = false;
-  
+
   return {
     track: vi.fn((eventData: any) => {
       // Don't call onDispatch if shutdown
       if (isShutdown) return;
-      
+
       // Call the stored callback when track is called - simulate real service behavior
       if (storedOnDispatch) {
         const analyticsEvent = {
@@ -173,29 +173,29 @@ describe('AnalyticsProvider', () => {
 
   it('onDispatch listener receives tracked events via subscription', () => {
     const received: string[] = [];
-    
+
     const Test: React.FC = () => {
       const { track, subscribe } = useAnalytics();
-      
+
       React.useEffect(() => {
         const off = subscribe(e => {
           received.push(e.event);
         });
-        
+
         // Wait a tick to ensure subscription is set up, then track
         const timer = setTimeout(() => {
           track({ event: 'test_evt', properties: {} });
         }, 10);
-        
+
         return () => {
           clearTimeout(timer);
           off();
         };
       }, [track, subscribe]);
-      
+
       return null;
     };
-    
+
     render(
       <AnalyticsProvider
         config={baseConfig({
@@ -210,7 +210,7 @@ describe('AnalyticsProvider', () => {
         <Test />
       </AnalyticsProvider>
     );
-    
+
     // Wait for async operations and check results
     return new Promise<void>((resolve, reject) => {
       const checkAfterDelay = (delay: number) => {
@@ -221,7 +221,11 @@ describe('AnalyticsProvider', () => {
             // Try again with longer delay
             checkAfterDelay(delay * 2);
           } else {
-            reject(new Error(`Expected received to include 'test_evt', got: ${JSON.stringify(received)}. storedOnDispatch exists: ${!!storedOnDispatch}`));
+            reject(
+              new Error(
+                `Expected received to include 'test_evt', got: ${JSON.stringify(received)}. storedOnDispatch exists: ${!!storedOnDispatch}`
+              )
+            );
           }
         }, delay);
       };
@@ -235,19 +239,19 @@ describe('AnalyticsProvider', () => {
       const { track, subscribe, shutdown } = useAnalytics();
       React.useEffect(() => {
         const off = subscribe(e => events.push(e.event));
-        
+
         // Schedule the tracking operations
         setTimeout(() => {
           track({ event: 'before_shutdown', properties: {} });
           shutdown();
           track({ event: 'after_shutdown', properties: {} });
         }, 10);
-        
+
         return off;
       }, [track, subscribe, shutdown]);
       return null;
     };
-    
+
     render(
       <AnalyticsProvider
         config={baseConfig({
@@ -262,10 +266,10 @@ describe('AnalyticsProvider', () => {
         <Test />
       </AnalyticsProvider>
     );
-    
+
     // Wait for the async operations to complete
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     expect(events).toContain('before_shutdown');
     // We allow that after shutdown event may be suppressed; assert not both if suppressed
     expect(events).not.toContain('after_shutdown');

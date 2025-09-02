@@ -1,0 +1,137 @@
+/* CosmicHub Data Flow Visualization Styles */
+/* Custom styles that complement Tailwind CSS */
+
+/* D3.js specific styles that can't be easily replaced with Tailwind */
+.node {
+  fill: #4caf50;
+  stroke: #ffffff;
+  stroke-width: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.node:hover {
+  fill: #66bb6a;
+  stroke-width: 3px;
+}
+
+.node.analytics {
+  fill: #ff6b6b;
+}
+
+.node.monitoring {
+  fill: #4ecdc4;
+}
+
+.node.frontend {
+  fill: #45b7d1;
+}
+
+.node.backend {
+  fill: #96ceb4;
+}
+
+.node.database {
+  fill: #ffeaa7;
+}
+
+.node.external {
+  fill: #dda0dd;
+}
+
+.link {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 2px;
+  marker-end: url(#arrowhead);
+  transition: all 0.3s ease;
+}
+
+.link:hover {
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 3px;
+}
+
+.link.data-flow {
+  stroke: #4caf50;
+}
+
+.link.analytics-flow {
+  stroke: #ff6b6b;
+}
+
+.link.monitoring-flow {
+  stroke: #4ecdc4;
+}
+
+.node-text {
+  font-size: 12px;
+  font-weight: 500;
+  fill: white;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+/* Legend circle colors */
+.legend-circle.frontend {
+  background-color: #45b7d1;
+}
+
+.legend-circle.backend {
+  background-color: #96ceb4;
+}
+
+.legend-circle.analytics {
+  background-color: #ff6b6b;
+}
+
+.legend-circle.monitoring {
+  background-color: #4ecdc4;
+}
+
+.legend-circle.database {
+  background-color: #ffeaa7;
+}
+
+.legend-circle.external {
+  background-color: #dda0dd;
+}
+
+/* Animation for flow visualization */
+.active-flows .link {
+  animation: flowAnimation 2s infinite;
+}
+
+@keyframes flowAnimation {
+  0% {
+    stroke-dasharray: 5, 5;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dasharray: 5, 5;
+    stroke-dashoffset: 10;
+  }
+}
+
+/* Custom cosmic theme extensions */
+.cosmic-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}

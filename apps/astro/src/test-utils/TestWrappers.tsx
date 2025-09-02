@@ -3,18 +3,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 
 // Create a test-specific QueryClient with faster settings
-const createTestQueryClient = () => new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-      staleTime: 0,
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+        staleTime: 0,
+      },
+      mutations: {
+        retry: false,
+      },
     },
-    mutations: {
-      retry: false,
-    },
-  },
-});
+  });
 
 interface TestWrappersProps {
   children: ReactNode;
@@ -29,9 +30,7 @@ export const TestWrappers: React.FC<TestWrappersProps> = ({ children }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        {children}
-      </BrowserRouter>
+      <BrowserRouter>{children}</BrowserRouter>
     </QueryClientProvider>
   );
 };
@@ -43,7 +42,7 @@ export const TestWrappers: React.FC<TestWrappersProps> = ({ children }) => {
 export const renderWithProviders = (ui: React.ReactElement) => {
   return {
     queryClient: createTestQueryClient(),
-    ...require('@testing-library/react').render(ui, { wrapper: TestWrappers })
+    ...require('@testing-library/react').render(ui, { wrapper: TestWrappers }),
   };
 };
 

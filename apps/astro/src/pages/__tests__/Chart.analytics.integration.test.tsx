@@ -117,9 +117,7 @@ describe('Chart page analytics integration', () => {
     expect(calcArgs.house_system).toBe('placidus');
     dateSpy.mockRestore();
 
-    await waitFor(() =>
-      expect(trackCosmicHubChartView).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(trackCosmicHubChartView).toHaveBeenCalled());
     const viewArgs = trackCosmicHubChartView.mock.calls[0]![0];
     expect(viewArgs.chart_type).toBe('natal');
   });

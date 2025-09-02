@@ -14,16 +14,19 @@ system and production-ready architecture.
 
 ## 🚀 Current Status - September 2025
 
-**Production Ready**: ✅ Both apps fully functional and optimized  
-**ANALYTICS-001**: ✅ COMPLETE - Enterprise-grade multi-provider analytics system operational  
+> NOTE (Reality Check 2025-09-02): Some earlier status statements below over-reported production
+> readiness. See `docs/01-CURRENT-STATUS/CODE_HEALTH_STATUS.md` for an objective snapshot. Mobile
+> deployment should be gated until all criteria there are green.
+
+**Production Readiness**: ⚠️ Partial – Core features implemented but failing frontend tests (16) & 7
+TypeScript errors in test suite block full sign-off.  
+**ANALYTICS-001**: ✅ COMPLETE - Multi-provider analytics system operational  
 **DATA-001**: ✅ COMPLETE - Parquet foundation and dual-format export system ready  
-**AI-001 Features**: ✅ COMPLETE - Next-Generation AI with 5 advanced capabilities  
-**Code Quality**: ✅ Phase 2C Complete - TypeScript compilation clean, ESLint configuration
-optimized  
+**AI-001 Features**: ✅ COMPLETE - Next-Generation AI capabilities delivered  
+**Code Health**: ❌ Pending stabilization (see Code Health Status)  
 **Documentation**: ✅ Restructured - 89 organized files in numbered directory structure  
 **Build Performance**: 83% improvement (20s → 2s)  
-**Technical Debt**: 953 ESLint errors (accurate baseline post-configuration fix) - Phase 3 roadmap
-available
+**Technical Debt Baseline**: 953 ESLint errors pre-migration (flat config work outstanding)
 
 ### Recent Completions (September 2, 2025)
 

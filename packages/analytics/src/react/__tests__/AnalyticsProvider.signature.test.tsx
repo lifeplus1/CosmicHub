@@ -72,7 +72,7 @@ describe('AnalyticsProvider config signature', () => {
     );
     // Store the initial call count
     const initialCalls = (initializeAnalytics as any).mock.calls.length;
-    
+
     // Change measurementId (part of signature)
     const withNewGA: AnalyticsConfig = {
       ...baseConfig,
@@ -83,7 +83,7 @@ describe('AnalyticsProvider config signature', () => {
       },
     };
     rerender(<AnalyticsProvider config={withNewGA}>{null}</AnalyticsProvider>);
-    
+
     // Should have been called more times after the config change
     const finalCalls = (initializeAnalytics as any).mock.calls.length;
     expect(finalCalls).toBeGreaterThan(initialCalls);
@@ -95,13 +95,13 @@ describe('AnalyticsProvider config signature', () => {
     );
     // Store the initial call count
     const initialCalls = (initializeAnalytics as any).mock.calls.length;
-    
+
     const changed: AnalyticsConfig = {
       ...baseConfig,
       advanced: { ...baseConfig.advanced, sessionTimeoutMs: 42 },
     };
     rerender(<AnalyticsProvider config={changed}>{null}</AnalyticsProvider>);
-    
+
     // Should have been called more times after the config change
     const finalCalls = (initializeAnalytics as any).mock.calls.length;
     expect(finalCalls).toBeGreaterThan(initialCalls);

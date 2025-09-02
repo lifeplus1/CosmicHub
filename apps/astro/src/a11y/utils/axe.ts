@@ -22,18 +22,21 @@ const axe = configureAxe({
   } as Record<string, { enabled: boolean }>,
 });
 
-// Global lock to prevent concurrent axe runs
-let axeLock = Promise.resolve();
+// Global lock to prevent concurrent axe runs. Typed as Promise<unknown> to allow chaining
+// without constraining downstream return types.
+let axeLock: Promise<unknown> = Promise.resolve();
 
 export async function runAxe(node: HTMLElement): Promise<AxeResults> {
   // Serialize axe runs to prevent "Axe is already running" errors
   const currentRun = axeLock.then(async () => {
     // Add a small delay between runs to ensure axe cleans up properly
-    await new Promise(resolve => setTimeout(resolve, 50));
+    // Minimal delay to allow previous axe cleanup without creating long queues under full suite load
+    await new Promise(resolve => setTimeout(resolve, 5));
     return axe(node) as Promise<AxeResults>;
   });
-  
-  axeLock = currentRun;
+
+  // Reassign lock to the in-flight run (erase specific generic type)
+  axeLock = currentRun as Promise<unknown>;
   return currentRun;
 }
 
