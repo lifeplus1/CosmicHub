@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import {
   BirthDataProvider,
@@ -13,6 +13,13 @@ vi.mock('../ChartDisplay', () => ({
 }));
 
 describe('EnhancedChartWrapper (integration via injected fetchFn)', () => {
+  beforeEach(() => {
+    // Clear localStorage before each test
+    if (typeof Storage !== 'undefined') {
+      localStorage.clear();
+    }
+  });
+
   it('calls injected fetchFn with canonical birth data once data is set', async () => {
     const mockResult = {
       success: true,

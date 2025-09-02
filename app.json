@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "9eb97b74-3007-4888-82d5-ca517cd652c5"
+      }
+    },
+    "android": {
+      "package": "com.cosmichub.cosmichub"
+    }
+  }
+}

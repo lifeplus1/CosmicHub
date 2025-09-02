@@ -4,10 +4,28 @@
  * Tests React Router setup, navigation, and route configuration
  */
 
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
+
+// Mock Suspense for testing
+const mockSuspense = vi.fn(({ children, fallback }: any) => (
+  <div data-testid='suspense-boundary'>
+    <div data-testid='suspense-fallback' className='hidden'>
+      {fallback}
+    </div>
+    <div data-testid='suspense-content'>{children}</div>
+  </div>
+));
+
+// Mock React module to override Suspense
+vi.mock('react', async () => {
+  const actual = await vi.importActual('react');
+  return {
+    ...actual,
+    Suspense: mockSuspense,
+  };
+});
 
 // Mock React Router components for testing
 const mockBrowserRouter = vi.fn(({ children, ...props }: any) => (
@@ -38,20 +56,7 @@ vi.mock('react-router-dom', () => ({
   useParams: vi.fn(() => ({})),
 }));
 
-// Mock Suspense for testing
-const mockSuspense = vi.fn(({ children, fallback }: any) => (
-  <div data-testid='suspense-boundary'>
-    <div data-testid='suspense-fallback' className='hidden'>
-      {fallback}
-    </div>
-    <div data-testid='suspense-content'>{children}</div>
-  </div>
-));
-
-// Override React.Suspense
-// eslint-disable-next-line no-unused-vars
-const _____originalReact = React;
-(React as any).Suspense = mockSuspense;
+import * as React from 'react';
 
 describe('App Routing Configuration', () => {
   beforeEach(() => {

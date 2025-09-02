@@ -21,9 +21,13 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "CosmicHub uses your location to provide accurate astrological calculations and location-based transit notifications.",
         "NSLocationWhenInUseUsageDescription": "CosmicHub uses your location to provide accurate astrological calculations and location-based transit notifications.",
         "NSFaceIDUsageDescription": "CosmicHub uses Face ID for secure authentication and to protect your personal astrological data.",
-        "NSMicrophoneUsageDescription": "CosmicHub may use the microphone for video sharing features."
+        "NSMicrophoneUsageDescription": "CosmicHub may use the microphone for video sharing features.",
+        "ITSAppUsesNonExemptEncryption": false
       },
-      "associatedDomains": ["applinks:cosmichub.app"],
+      "associatedDomains": [
+        "applinks:cosmichub.app",
+        "applinks:cosmichub.app"
+      ],
       "supportsWatchOS": true
     },
     "android": {
@@ -55,7 +59,10 @@
               "host": "cosmichub.app"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -70,7 +77,9 @@
         {
           "icon": "./assets/notification-icon.png",
           "color": "#4a90e2",
-          "sounds": ["./assets/notification.wav"]
+          "sounds": [
+            "./assets/notification.wav"
+          ]
         }
       ],
       [
@@ -97,7 +106,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "cosmichub-mobile-project"
+        "projectId": "cb6eebff-3bf3-4091-b96c-eb16495fdd6c"
       }
     },
     "notification": {
@@ -106,6 +115,7 @@
       "iosDisplayInForeground": true,
       "androidMode": "default",
       "androidCollapsedTitle": "#{unread_notifications} new notifications"
-    }
+    },
+    "owner": "cosmichub"
   }
 }

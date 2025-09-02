@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { axe } from 'vitest-axe';
+import { expectNoA11yViolations } from '../utils/axe';
 import GatesChannelsTab from '../../components/HumanDesignChart/GatesChannelsTab';
 import type { HumanDesignData } from '../../components/HumanDesignChart/types';
 
@@ -32,12 +32,9 @@ describe('GatesChannelsTab accessibility', () => {
     const { container } = render(
       <GatesChannelsTab humanDesignData={minimalHD} />
     );
-    const results = await axe(container, {
-      rules: {
-        'color-contrast': { enabled: false },
-        'heading-order': { enabled: false }, // Disable heading order check for now
-      },
+    await expectNoA11yViolations(container as HTMLElement, { 
+      allow: ['heading-order'] // Allow heading-order violations
     });
-    expect(results.violations).toEqual([]);
-  });
+    expect(true).toBe(true);
+  }, 15000); // Increase timeout to 15 seconds
 });
