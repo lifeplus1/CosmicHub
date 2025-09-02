@@ -294,6 +294,10 @@ export function useAIInterpretationManager(
 
         const interpretation = data.data[0];
 
+        if (!interpretation) {
+          throw new Error('No interpretation returned from API');
+        }
+
         // Record performance metrics
         const responseTime = Date.now() - startTime;
         performanceRef.current.responseTimes.push(responseTime);

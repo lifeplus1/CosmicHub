@@ -13,8 +13,23 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('useCanonicalBirthData', () => {
   it('returns null when no birth data set', () => {
-    const { result } = renderHook(() => useCanonicalBirthData(), { wrapper });
-    expect(result.current).toBeNull();
+    const { result } = renderHook(
+      () => {
+        const bd = useBirthData();
+        const canonical = useCanonicalBirthData();
+        return { bd, canonical };
+      },
+      { wrapper }
+    );
+    
+    // Clear any existing birth data that might be in the context
+    act(() => {
+      if (result.current.bd.setBirthData) {
+        result.current.bd.setBirthData(null as any);
+      }
+    });
+    
+    expect(result.current.canonical).toBeNull();
   });
 
   it('returns canonical data when extended birth data provided', () => {

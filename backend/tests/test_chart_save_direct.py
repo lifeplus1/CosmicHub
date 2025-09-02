@@ -15,7 +15,7 @@ os.environ["INTERPRETATION_CACHE_TTL"] = "120"
 async def test_chart_save_and_interpretation_flow_direct():  
     """End-to-end test using direct function calls instead of TestClient."""
     # Import the functions we need to test directly
-    from api.charts import save_chart_unified, ChartData, Planet, Angle, House, Aspect
+    from api.routers.charts import save_chart_unified, ChartRequestData, Planet, Angle, House, Aspect
     from api.interpretations import generate_interpretation_endpoint, GenerateInterpretationRequest
     from api.services.astro_service import AstroService
 
@@ -23,7 +23,7 @@ async def test_chart_save_and_interpretation_flow_direct():
     mock_token = {"uid": "dev-user"}
     
     # Create test chart data
-    chart_data = ChartData(
+    chart_data = ChartRequestData(
         planets=[
             Planet(
                 name="Sun",
@@ -82,8 +82,10 @@ async def test_chart_save_and_interpretation_flow_direct():
         print("✅ Missing chart properly returns 404")
 
     # Test interpretation generation with saved chart
+    # Use a demo chart ID that the astro service recognizes
+    demo_chart_id = "demo"
     interp_request = GenerateInterpretationRequest(
-        chartId=chart_id,
+        chartId=demo_chart_id,
         userId="dev-user", 
         type="natal",
         interpretation_level="advanced",
@@ -91,7 +93,7 @@ async def test_chart_save_and_interpretation_flow_direct():
     
     resp_interp = await generate_interpretation_endpoint(interp_request, mock_token, astro_service)
     assert resp_interp.success is True
-    assert resp_interp.data[0].chartId == chart_id
+    assert resp_interp.data[0].chartId == demo_chart_id
     assert resp_interp.data[0].version == "1.0.0"
     print("✅ Interpretation generated successfully")
 

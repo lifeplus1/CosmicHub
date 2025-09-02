@@ -1,3 +1,12 @@
+---
+title: Upgrade Modal Copy Variants (EXP-002)
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # Upgrade Modal Copy Variants (EXP-002)
 
 Source moved to JSON for experimentation.

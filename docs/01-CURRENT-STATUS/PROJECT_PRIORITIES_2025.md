@@ -1,7 +1,37 @@
-# CosmicHub Project Priorities - Updated August 2025
+---
+title: CosmicHub Project Priorities - Updated August 2025
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 14d
+category: status
+---
+
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 Based on project cleanup implementation, current TODO analysis, and new Data Architecture strategy,
 here are the current development priorities.
+
+## Executive Snapshot (2025-09-02)
+
+| Domain | Current State | Focus (Next 2 Weeks) | Risk Level | Notes |
+|--------|---------------|----------------------|------------|-------|
+| Frontend Feature Parity | 85% complete core user journeys | Polish + minor UX debt | Low | Core flows stable |
+| Mobile Deployment | Implementation complete | Store submission prep | Medium | External dependencies (accounts) |
+| Data Architecture | JSON stable; Parquet foundation pending | Kickoff DATA-001 | Medium | Coordinate pyarrow adoption |
+| Security & Privacy | Baseline strong; batch 2 mitigations pending | SEC-006+ follow-ons | Low | Monitoring in place |
+| Observability | Core metrics & tracing live | Alert tuning + dashboards | Low | SLO automation active |
+| Experimentation | Registry + lifecycle docs done | Guardrail automation (EXP-011) | Medium | Metrics instrumentation gap |
+
+### Priority Matrix
+
+| Urgency \ Impact | High Impact | Medium Impact | Lower Impact |
+|------------------|------------|---------------|-------------|
+| High Urgency | DATA-001, MOB-001 submission tasks | Guardrail automation EXP-011 | Secret rotation automation PRIV-005 |
+| Medium Urgency | MARKET-001 groundwork | CODE-001 redundancy cleanup | UX-021 PWA Enhancements |
+| Low Urgency | INT-001 localization groundwork | SOCIAL-060 marketplace community features | CONTENT-001 content strategy |
+
+---
 
 ## 📈 Completed Optimizations (August 2025)
 
@@ -19,6 +49,8 @@ here are the current development priorities.
 
 _Phase 3 Status: **COMPLETE** - All vectorized operations, caching, memory optimization, and
 monitoring systems fully implemented and tested_
+
+> Summary: Backend platform is performance-hardened; further infra work offers diminishing returns versus data & marketplace leverage.
 
 ### Frontend Functionality Assessment Completed
 
@@ -176,6 +208,8 @@ Additional items now complete based on implementation verification:
 Total remaining (updated): ~2 developer-days (reduced from ~9 days due to completed implementations
 found during verification audit and PRIV-004 completion).
 
+> Remaining short-term lift is intentionally small; pivot effort toward data architecture & strategic revenue levers.
+
 ### 🔐 Security & Privacy (Month Horizon)
 
 - SEC-006 Threat model mitigation batch 1 (Status: TODO)
@@ -205,10 +239,59 @@ found during verification audit and PRIV-004 completion).
 
 ### 🌱 Medium-Term (Quarter Horizon)
 
-- SOCIAL-060 Community sharing & marketplace scaffolding (Status: FUTURE)
-- AI-070 Advanced model integration (Status: FUTURE)
+#### Data Architecture Evolution (Sprint 9)
 
-### 🧹 De-scoped / Reframed Items
+- DATA-001 Parquet Implementation Foundation (Phase 1 - 3 weeks) – **PRIORITY: HIGH**
+  - Dual-format data export capability (JSON + Parquet)
+  - Analytics pipeline for AI-001 interaction data
+  - Team expertise development in columnar data processing
+  - Foundation for advanced ML training and analytics warehouse
+  - Timeline: Start immediately, foundation ready in 3 months
+
+- DATA-002 Analytics Warehouse Pipeline (Phase 2 - 3-6 months) – **PRIORITY: HIGH**
+  - Deploy when AI-001 generates substantial training data
+  - Columnar storage for ML training with date/feature partitioning
+  - Historical pattern analysis for advanced AI layers
+  - Cross-referencing capabilities for multi-system synthesis
+
+- DATA-003 ML Training Data Pipeline (Phase 3 - 6-12 months) – **PRIORITY: CRITICAL**
+  - Large-scale ML training data preparation
+  - Reward model training for layered AI interpretation
+  - Pattern analysis across user cohorts for personalization
+  - Support for Layer 2/3 AI interpretation roadmap
+
+- DATA-004 Ephemeris Data Lake (Phase 4 - 12-18 months) – **PRIORITY: MEDIUM**
+  - Massive astronomical dataset storage with Parquet optimization
+  - Multi-region data distribution capabilities
+  - Time-series planetary data with year/planet partitioning
+
+**Strategic Rationale**: Enables advanced AI features, analytics warehouse, and ML training pipeline while maintaining current JSON performance. Phased approach minimizes risk while building future-ready data architecture.
+
+## Review Checklist (14d Cadence)
+
+- [ ] Executive snapshot updated (dates & metric deltas)
+- [ ] Priority matrix reflects any new strategic drivers
+- [ ] Data roadmap adjusted for actual AI feature adoption metrics
+- [ ] Security backlog (SEC-006..008) triaged against new threats
+- [ ] Marketplace prerequisites validated (payment/webhook readiness)
+- [ ] Mobile deployment blockers (accounts, store assets) resolved / tracked
+- [ ] Success metrics baselines refreshed (build time, bundle size, engagement)
+
+## Change Log
+
+| Date | Change | Author |
+|------|--------|--------|
+| 2025-09-02 | Added executive snapshot, priority matrix, review checklist | platform |
+| 2025-08-27 | Added DATA-001-004 phases | platform |
+| 2025-08-16 | Marked Phase 3 backend complete | platform |
+
+---
+_Maintained under status category (14d cycle). Update `last_reviewed` when snapshot & matrix refreshed._
+
+### Traditional Medium-Term Items
+
+- SOCIAL-060 Community sharing & marketplace scaffolding (Status: FUTURE)
+- AI-070 Advanced model integration (Status: FUTURE)### 🧹 De-scoped / Reframed Items
 
 - Redis-based rate limiting (DONE; next step is anomaly detection)
 - WebP optimization (DONE via icon pipeline; future: full asset audit optional)
@@ -294,7 +377,7 @@ tracker (to generate).
 
 ---
 
-_Last Updated: August 17, 2025 (PRIV-004 salt persistence & rotation system completed)_  
+_Last Updated: August 27, 2025 (Added DATA-001-004: Parquet Data Architecture Strategy)_  
 _Next Review: September 1, 2025_
 
 ---

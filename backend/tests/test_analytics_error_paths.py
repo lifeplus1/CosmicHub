@@ -20,5 +20,5 @@ async def test_invalid_event_type_handled(tmp_path: Path):
     ok = await svc.track_event(bad_event)
     assert ok  # It should still insert; categorization may default
     with sqlite3.connect(str(db_path)) as conn:
-        row = conn.execute("SELECT event FROM analytics_events WHERE session_id=?", ("sErr1",)).fetchone()
+        row = conn.execute("SELECT event_type FROM analytics_events WHERE session_id=?", ("sErr1",)).fetchone()
         assert row and row[0] == "UNKNOWN_EVENT"

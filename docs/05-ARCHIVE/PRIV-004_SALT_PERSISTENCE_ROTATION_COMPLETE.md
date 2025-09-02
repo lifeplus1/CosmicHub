@@ -1,3 +1,12 @@
+---
+title: Salt Persistence & Rotation System Implementation
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # Salt Persistence & Rotation System Implementation
 
 **Status**: COMPLETE ✅  

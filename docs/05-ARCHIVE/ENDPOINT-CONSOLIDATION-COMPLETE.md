@@ -1,3 +1,12 @@
+---
+title: ✅ ENDPOINT CONSOLIDATION COMPLETE
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # ✅ ENDPOINT CONSOLIDATION COMPLETE
 
 **Date**: August 26, 2025  

@@ -1,3 +1,12 @@
+---
+title: Chart Data Processing Refactor Proposal
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # Chart Data Processing Refactor Proposal
 
 ## Current Issues

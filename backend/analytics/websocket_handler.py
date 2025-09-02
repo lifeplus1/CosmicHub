@@ -4,25 +4,34 @@ Real-time analytics updates for dashboard
 """
 
 from fastapi import WebSocket, WebSocketDisconnect
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import json
 import asyncio
 import logging
 from datetime import datetime
 
+# Import here to avoid circular imports
+from .custom_analytics import get_analytics_service
+
 logger = logging.getLogger(__name__)
 
 class AnalyticsWebSocketManager:
-    def __init__(self):
+    def __init__(self, max_connections: int = 1000):
         self.active_connections: List[WebSocket] = []
         self.connection_ids: Dict[WebSocket, str] = {}
+        self.max_connections = max_connections
 
-    async def connect(self, websocket: WebSocket, client_id: str = None):
+    async def connect(self, websocket: WebSocket, client_id: Optional[str] = None):
+        if len(self.active_connections) >= self.max_connections:
+            await websocket.close(code=1008)  # Policy violation
+            logger.warning(f"Connection rejected: maximum connections ({self.max_connections}) reached")
+            return
+        
         await websocket.accept()
         self.active_connections.append(websocket)
         if client_id:
             self.connection_ids[websocket] = client_id
-        logger.info(f"Analytics WebSocket client connected: {client_id or 'anonymous'}")
+        logger.info(f"Analytics WebSocket client connected: {client_id or 'anonymous'} ({len(self.active_connections)}/{self.max_connections})")
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
@@ -42,14 +51,22 @@ class AnalyticsWebSocketManager:
             return
 
         message_str = json.dumps(message)
-        disconnected = []
         
+        # Send messages concurrently for better performance
+        tasks: List[asyncio.Task[None]] = []
         for connection in self.active_connections:
-            try:
-                await connection.send_text(message_str)
-            except Exception as e:
-                logger.error(f"Failed to broadcast to connection: {e}")
-                disconnected.append(connection)
+            task = asyncio.create_task(connection.send_text(message_str))
+            tasks.append(task)
+        
+        # Gather results and handle exceptions
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Clean up any connections that failed
+        disconnected: List[WebSocket] = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Failed to broadcast to connection {i}: {result}")
+                disconnected.append(self.active_connections[i])
 
         # Clean up disconnected clients
         for connection in disconnected:
@@ -63,7 +80,7 @@ class AnalyticsWebSocketManager:
             "timestamp": int(datetime.now().timestamp() * 1000)
         })
 
-    async def broadcast_alert(self, alert_type: str, message: str, data: Dict[str, Any] = None):
+    async def broadcast_alert(self, alert_type: str, message: str, data: Optional[Dict[str, Any]] = None):
         """Broadcast system alert"""
         await self.broadcast({
             "type": "alert",
@@ -75,7 +92,7 @@ class AnalyticsWebSocketManager:
             "timestamp": int(datetime.now().timestamp() * 1000)
         })
 
-    async def broadcast_error(self, error_message: str, error_data: Dict[str, Any] = None):
+    async def broadcast_error(self, error_message: str, error_data: Optional[Dict[str, Any]] = None):
         """Broadcast error notification"""
         await self.broadcast({
             "type": "error",
@@ -90,8 +107,23 @@ class AnalyticsWebSocketManager:
         """Get number of active connections"""
         return len(self.active_connections)
 
+    async def send_heartbeat(self):
+        """Send heartbeat ping to all connected clients"""
+        for connection in self.active_connections[:]:  # Create a copy to avoid modification during iteration
+            try:
+                await self.send_personal_message({
+                    "type": "ping",
+                    "timestamp": int(datetime.now().timestamp() * 1000)
+                }, connection)
+            except Exception as e:
+                logger.error(f"Failed to send heartbeat to connection: {e}")
+                self.disconnect(connection)
+
 # Global WebSocket manager instance
 analytics_ws_manager = AnalyticsWebSocketManager()
+
+# Background task reference for proper cancellation
+_background_task: Optional[asyncio.Task[None]] = None
 
 async def analytics_websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for analytics dashboard"""
@@ -122,9 +154,45 @@ async def analytics_websocket_endpoint(websocket: WebSocket):
                         "type": "pong",
                         "timestamp": int(datetime.now().timestamp() * 1000)
                     }, websocket)
+                elif data.get("type") == "pong":
+                    # Client responded to our ping - connection is healthy
+                    logger.debug(f"Received pong from client: {client_id or 'anonymous'}")
                 elif data.get("type") == "subscribe":
                     # Handle subscription to specific metrics
-                    pass
+                    subscription_data = data.get("data", {})
+                    metric_types = subscription_data.get("metrics", [])
+                    if isinstance(metric_types, list) and metric_types:
+                        # Validate all metrics are strings
+                        valid_metrics = True
+                        for item in metric_types:  # type: ignore
+                            if not isinstance(item, str):
+                                valid_metrics = False
+                                break
+                        
+                        if valid_metrics:
+                            await analytics_ws_manager.send_personal_message({
+                                "type": "subscription_confirmed",
+                                "data": {"metrics": metric_types},
+                                "timestamp": int(datetime.now().timestamp() * 1000)
+                            }, websocket)
+                        else:
+                            await analytics_ws_manager.send_personal_message({
+                                "type": "error",
+                                "data": {"message": "Invalid subscription format. All metrics must be strings."},
+                                "timestamp": int(datetime.now().timestamp() * 1000)
+                            }, websocket)
+                elif data.get("type") == "unsubscribe":
+                    # Handle unsubscription
+                    await analytics_ws_manager.send_personal_message({
+                        "type": "unsubscription_confirmed",
+                        "timestamp": int(datetime.now().timestamp() * 1000)
+                    }, websocket)
+                else:
+                    await analytics_ws_manager.send_personal_message({
+                        "type": "error",
+                        "data": {"message": f"Unknown message type: {data.get('type')}"},
+                        "timestamp": int(datetime.now().timestamp() * 1000)
+                    }, websocket)
                     
             except json.JSONDecodeError:
                 await analytics_ws_manager.send_personal_message({
@@ -145,12 +213,20 @@ async def analytics_websocket_endpoint(websocket: WebSocket):
 # Background task to send periodic updates
 async def start_analytics_broadcast_task():
     """Background task that broadcasts real-time updates"""
+    last_heartbeat = 0
+    heartbeat_interval = 60  # Send heartbeat every 60 seconds
+    
     while True:
         try:
+            current_time = asyncio.get_event_loop().time()
+            
+            # Send heartbeat if enough time has passed
+            if current_time - last_heartbeat >= heartbeat_interval:
+                await analytics_ws_manager.send_heartbeat()
+                last_heartbeat = current_time
+            
+            # Send analytics updates if there are connections
             if analytics_ws_manager.get_connection_count() > 0:
-                # Import here to avoid circular imports
-                from .custom_analytics import get_analytics_service
-                
                 analytics = get_analytics_service()
                 if analytics:
                     metrics = await analytics.get_real_time_metrics()
@@ -166,4 +242,13 @@ async def start_analytics_broadcast_task():
 # Start the background task
 def start_analytics_websocket_task():
     """Start the analytics WebSocket background task"""
-    asyncio.create_task(start_analytics_broadcast_task())
+    global _background_task
+    if _background_task is None or _background_task.done():
+        _background_task = asyncio.create_task(start_analytics_broadcast_task())
+
+def stop_analytics_websocket_task():
+    """Stop the analytics WebSocket background task"""
+    global _background_task
+    if _background_task and not _background_task.done():
+        _background_task.cancel()
+        _background_task = None

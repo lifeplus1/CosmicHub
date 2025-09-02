@@ -1,3 +1,12 @@
+---
+title: Phased Marketplace Roadmap for CosmicHub Astrology App
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # Phased Marketplace Roadmap for CosmicHub Astrology App
 
 **Status:** ✅ Complete (v1 approved specification) – 2025-08-16

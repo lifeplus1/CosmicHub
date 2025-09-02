@@ -26,6 +26,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     include: ['**/*.{test,spec}.{ts,tsx}'],
+    testTimeout: 10000, // 10 seconds for integration tests
+    hookTimeout: 10000, // 10 seconds for setup/teardown
     env: {
       VITE_FIREBASE_API_KEY: 'test-api-key',
       VITE_FIREBASE_AUTH_DOMAIN: 'test-project.firebaseapp.com',

@@ -1,0 +1,35 @@
+name: Documentation Freshness
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+      - name: Generate Freshness Report
+        run: |
+          python scripts/doc_freshness.py --report --fail-overdue-pct 10
+      - name: Commit updated report
+        if: success()
+        run: |
+          if git diff --quiet docs/01-CURRENT-STATUS/DOCUMENTATION_FRESHNESS.md; then
+            echo "No changes"; exit 0; fi
+          git config user.name 'ci-doc-bot'
+          git config user.email 'ci-doc-bot@example.com'
+          git add docs/01-CURRENT-STATUS/DOCUMENTATION_FRESHNESS.md
+          git commit -m 'chore(docs): update freshness report'
+          git push

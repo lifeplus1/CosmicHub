@@ -1,3 +1,12 @@
+---
+title: Incident Runbook Template
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 120d
+category: operations
+---
+
 # Incident Runbook Template
 
 Status: Adopted Owner: Reliability Lead Last-Updated: 2025-08-16 Next-Review: 2025-11-01 Source:

@@ -55,6 +55,8 @@ afterEach(() => {
   sessionStorage.clear();
   localStorage.clear();
   vi.clearAllMocks();
+  // Clean up any remaining DOM elements
+  document.body.innerHTML = '';
 });
 
 describe('Chart page integration (canonical pipeline)', () => {
@@ -180,13 +182,15 @@ describe('Chart page integration (canonical pipeline)', () => {
       },
     } as any;
     sessionStorage.setItem('selectedChart', JSON.stringify(saved));
-    render(
+    
+    const { container } = render(
       <MemoryRouter initialEntries={['/chart']}>
         <BirthDataProvider>
           <Chart fetchFn={fetchFn} />
         </BirthDataProvider>
       </MemoryRouter>
     );
+    
     // Give effect time to process saved chart
     // Wait for primary page heading (level 1) to appear indicating render complete
     await screen.findByRole('heading', { level: 1, name: 'Natal Chart' });
@@ -237,7 +241,7 @@ describe('Chart page integration (canonical pipeline)', () => {
       return null;
     };
 
-    render(
+    const { container } = render(
       <MemoryRouter initialEntries={['/chart']}>
         <BirthDataProvider>
           <SeedBirthData />
@@ -251,11 +255,16 @@ describe('Chart page integration (canonical pipeline)', () => {
     // Assert error alert visible with failure message before retry
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toMatch(/fail/i);
-    const recalcButton = await screen.findByRole('button', {
-      name: /Recalculate/i,
-    });
+    
+    // Scope the query to the rendered container to avoid cross-test contamination
+    const recalcButtons = container.querySelectorAll('button');
+    const recalcButton = Array.from(recalcButtons).find(btn => 
+      btn.textContent?.includes('Recalculate')
+    );
+    expect(recalcButton).toBeTruthy();
+    
     await act(async () => {
-      recalcButton.click();
+      recalcButton!.click();
     });
     await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(2));
   });

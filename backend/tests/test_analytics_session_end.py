@@ -25,7 +25,7 @@ async def test_end_session_updates_end_time_and_duration(tmp_path: Path):
         await getattr(svc, "end_session")("sessionEnd1")  # type: ignore[attr-defined]
     with sqlite3.connect(str(db_path)) as conn:
         row = conn.execute(
-            "SELECT start_time, end_time, duration_ms FROM user_sessions WHERE session_id=?",
+            "SELECT start_time, end_time, total_duration_ms FROM user_sessions WHERE session_id=?",
             ("sessionEnd1",)
         ).fetchone()
         assert row is not None

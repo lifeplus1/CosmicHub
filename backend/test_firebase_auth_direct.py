@@ -20,7 +20,7 @@ async def test_firebase_auth_service():  # noqa: E302
 
         # Test the charts dependency function
         print("🔍 Testing charts dependency function...")
-        from api.charts import verify_id_token_dependency
+        from api.routers.charts import verify_id_token_dependency
 
         # This is a synchronous function
         result2 = verify_id_token_dependency("Bearer test_charts_dependency")

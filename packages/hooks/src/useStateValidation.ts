@@ -123,7 +123,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
 
   // Generate cache key for validation
   const getCacheKey = useCallback(
-    (data: unknown, rules: ValidationRule[]): string => {
+    <T>(data: unknown, rules: ValidationRule<T>[]): string => {
       const dataHash = JSON.stringify(data);
       const rulesHash = rules.map(r => r.name).join(',');
       return `${dataHash}-${rulesHash}`;

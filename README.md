@@ -1,4 +1,13 @@
-# CosmicHub Monorepo
+---
+title: CosmicHub Monorepo Overview
+owner: platform
+status: active
+last_reviewed: 2025-09-01
+review_cycle: 60d
+category: overview
+---
+
+## Overview
 
 A high-performance monorepo for astrology and healing frequency applications with optimized build
 system and production-ready architecture.
@@ -27,6 +36,10 @@ for improved navigation:
 - **[docs/05-ARCHIVE/](docs/05-ARCHIVE/)** - Historical and completed work
 
 📖 **Start here**: [Documentation Index](docs/00-OVERVIEW/INDEX.md)
+
+🗂️ **Active Priorities Index**: [Active Priorities](docs/02-ACTIVE-PRIORITIES/INDEX.md)
+
+🛡️ **Governance & Freshness**: See [Documentation Governance & Workflow](docs/06-OPERATIONS/DOCUMENTATION_GOVERNANCE.md) for lifecycle rules, review cadences, and automation (frontmatter + CI freshness gate). Optional webhook notifications can be layered on separately.
 
 ## 🤖 **For AI Assistants**
 

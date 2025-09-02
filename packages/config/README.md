@@ -1,3 +1,12 @@
+---
+title: @cosmichub/config
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # @cosmichub/config
 
 Shared configuration, utilities, and cross-app primitives for the CosmicHub monorepo.

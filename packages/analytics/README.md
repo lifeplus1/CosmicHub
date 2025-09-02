@@ -1,3 +1,12 @@
+---
+title: @cosmichub/analytics
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # @cosmichub/analytics
 
 Lightweight multi‑provider, privacy‑first analytics layer for CosmicHub apps. Consent‑aware,

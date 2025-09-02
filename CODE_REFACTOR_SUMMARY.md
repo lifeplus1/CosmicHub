@@ -1,4 +1,18 @@
-# Code Refactor Summary: ChartDisplay Component Cleanup
+---
+title: Code Refactor Summary ChartDisplay Component Cleanup (Moved)
+owner: platform
+status: deprecated
+last_reviewed: 2025-09-01
+review_cycle: 365d
+category: architecture
+canonical: docs/04-ARCHITECTURE/REFACTOR/CODE_REFACTOR_SUMMARY.md
+---
+
+## Moved: Code Refactor Summary: ChartDisplay Component Cleanup
+
+This document was moved to `docs/04-ARCHITECTURE/REFACTOR/CODE_REFACTOR_SUMMARY.md`.
+Please update any bookmarks or links.
+
 
 ## Problem Statement
 

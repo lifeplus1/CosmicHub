@@ -37,6 +37,17 @@ from astro.calculations.chart import (
 )
 from astro.calculations.human_design import calculate_human_design
 
+# DATA-001 Phase 1: Dual-format export foundation
+try:
+    from data_export.parquet_exporter import ParquetExporter
+    from data_export.config import get_export_base_path, is_parquet_export_enabled
+    parquet_exporter = None  # Will be initialized on first use
+except ImportError:
+    ParquetExporter = None
+    parquet_exporter = None
+    get_export_base_path = lambda: '/tmp/cosmichub_exports'
+    is_parquet_export_enabled = lambda: False
+
 # Import vectorized function if available at runtime; provide type-only import for static analysis
 try:  # Runtime optional import
     from utils.vectorized_multi_system_utils import (
@@ -140,6 +151,8 @@ async def calculate_chart_endpoint(
     )
 
     try:
+        start_time = time.time()
+        
         chart = calculate_chart(
             year=data.year,
             month=data.month,
@@ -150,6 +163,24 @@ async def calculate_chart_endpoint(
             lon=data.lon,
             city=data.city,
             timezone=data.timezone or "UTC",
+        )
+        
+        # DATA-001 Phase 1: Add processing time for analytics
+        processing_time = int((time.time() - start_time) * 1000)
+        chart['processing_time'] = processing_time
+        
+        # DATA-001 Phase 1: Schedule dual-format export in background
+        chart_with_birth_data = {
+            **chart,
+            'year': data.year,
+            'month': data.month,
+            'day': data.day,
+            'city': data.city,
+        }
+        background_tasks.add_task(
+            export_chart_data_background,
+            chart_with_birth_data,
+            getattr(request.state, 'user_id', None)  # Get user ID if available
         )
 
         # Convert houses list to dictionary format if needed
@@ -350,6 +381,52 @@ async def calculate_human_design_endpoint(
 import time
 
 chart_cache: Dict[str, Any] = {}
+
+
+def get_parquet_exporter():
+    """DATA-001 Phase 1: Get or initialize ParquetExporter lazily."""
+    global parquet_exporter
+    if parquet_exporter is None and ParquetExporter is not None:
+        # Initialize with configured export path
+        export_path = get_export_base_path()
+        parquet_exporter = ParquetExporter(export_path)
+    return parquet_exporter
+
+
+def export_chart_data_background(chart_data: Dict[str, Any], user_id: Optional[str] = None):
+    """DATA-001 Phase 1: Background task to export chart data in dual formats."""
+    # Check if Parquet export is enabled
+    if not is_parquet_export_enabled():
+        return
+        
+    exporter = get_parquet_exporter()
+    if exporter is not None:
+        try:
+            # Create standardized chart data structure
+            export_data = {
+                'session_id': f"chart_{int(time.time() * 1000)}",
+                'chart_type': 'natal',  # Default type
+                'success': True,
+                'processing_time': chart_data.get('processing_time', 0),
+                'system': 'western',
+                'birth_data': {
+                    'date': f"{chart_data.get('year', 1900)}-{chart_data.get('month', 1):02d}-{chart_data.get('day', 1):02d}",
+                    'location': chart_data.get('city', 'Unknown'),
+                },
+                'planets': chart_data.get('planets', {}),
+                'aspects': chart_data.get('aspects', []),
+                'house_system': chart_data.get('house_system', 'placidus'),
+            }
+            
+            # Export in both JSON and Parquet formats for analytics
+            exporter.export_chart_calculation(
+                export_data,
+                user_id=user_id or 'anonymous',
+                formats=['json', 'parquet']
+            )
+        except Exception as e:
+            # Don't fail the main request if export fails
+            logger.warning(f"DATA-001 background export failed: {e}")
 
 
 def cache_chart_result(

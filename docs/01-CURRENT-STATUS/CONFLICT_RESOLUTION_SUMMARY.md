@@ -1,3 +1,12 @@
+---
+title: 🎯 Markdown Conflict Resolution Summary
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 14d
+category: status
+---
+
 # 🎯 Markdown Conflict Resolution Summary
 
 > **Resolution Date:** August 26, 2025  

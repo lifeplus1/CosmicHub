@@ -1,3 +1,12 @@
+---
+title: 🔐 Firebase Authentication Fix - Invalid ID Token Error
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # 🔐 Firebase Authentication Fix - Invalid ID Token Error
 
 ## ✅ **Issue Resolved: "ERROR:auth:Invalid Firebase ID token"**

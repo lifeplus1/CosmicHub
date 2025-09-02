@@ -95,7 +95,7 @@ describe('XAIService', () => {
       await expect(
         XAIService.generateInterpretation(mockRequest)
       ).rejects.toThrow(
-        'xAI API error: No interpretation received from xAI API'
+        'xAI API error: Unexpected API response'
       );
     });
 

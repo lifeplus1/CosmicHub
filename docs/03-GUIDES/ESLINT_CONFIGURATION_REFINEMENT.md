@@ -1,3 +1,12 @@
+---
+title: ESLint Configuration Refinement Summary
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # ESLint Configuration Refinement Summary
 
 **Date**: January 2025  

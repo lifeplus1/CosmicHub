@@ -367,9 +367,9 @@ class ReIdentificationRiskAnalyzer:
                 vulnerable_attrs.append(attr)
                 continue
 
-            # Check for low entropy (predictable values)
+            # Check for low entropy (predictable values) but exclude common repeated values
             entropy = self._calculate_attribute_entropy(values)
-            if entropy < 1.5:  # Low entropy threshold
+            if entropy < 1.5 and unique_values > 1:  # Low entropy threshold but must have some variation
                 vulnerable_attrs.append(attr)
 
         return vulnerable_attrs

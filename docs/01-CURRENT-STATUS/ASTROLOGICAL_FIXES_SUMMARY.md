@@ -1,4 +1,24 @@
-# Astrological Font, UI/UX, and Celestial Body Display Fixes
+---
+title: Astrological Font, UI/UX, and Celestial Body Display Fixes
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 14d
+category: status
+---
+
+## Astrological Font, UI/UX, and Celestial Body Display Fixes
+
+### Summary Table
+
+| # | Area | Status | Key Improvements | Primary Files |
+|---|------|--------|------------------|---------------|
+| 1 | Font & Symbol Rendering | ✅ Fixed | Dedicated AstroSymbol component, semantic font classes, reliable Unicode set | `AstroSymbol.tsx`, `index.css`, table components |
+| 2 | Uranian Points Toggle | ✅ Fixed | Correct logic separation, independent Uranian table, Hamburg filtering | `ChartDisplay.tsx` |
+| 3 | Minor Asteroids Coverage | ✅ Fixed | Default enable flag, improved filtering logic, categorization enhancements | `AstrologySettings.tsx`, `CelestialBodiesTable.tsx` |
+| 4 | Collapsible Tables UX | ✅ New | Accordion-based collapsible sections, icons, counts, mobile friendly | `CollapsibleTable.tsx`, `ChartDisplay.tsx` |
+
+---
 
 ## Issues Addressed & Improvements
 
@@ -139,6 +159,27 @@ Users now have granular control over celestial body display:
 - Enhanced filtering may slightly improve performance by reducing DOM elements
 
 ## Future Enhancements
+
+## Review Checklist (Next Review Cycle)
+
+Use this quick checklist when updating next:
+
+- [ ] Font loads (network + fallback) verified in Chrome, Firefox, Safari.
+- [ ] All symbol categories display expected counts with default settings.
+- [ ] Uranian Points toggle only affects Uranian section & persists state.
+- [ ] Collapsible sections remember expansion state (once persistence implemented).
+- [ ] No layout shift / CLS issues introduced by font load.
+- [ ] Performance: initial symbol tables render within acceptable time (<50ms component mount in dev).
+
+## Change Rationale & Impact
+
+- Accessibility: Semantic symbol wrapper improves future a11y extension (tooltips / aria-labels).
+- Maintainability: Central symbol logic reduces duplication across table components.
+- Performance: Minimal overhead; consolidation may reduce future re-renders.
+- UX: Collapsible pattern reduces cognitive load and scrolling on mobile devices.
+
+---
+_Maintained under 14‑day review cadence (status category). Update `last_reviewed` after confirming checklist._
 
 1. Add local font files as backup for offline use
 2. Implement symbol preference settings (Unicode vs. text abbreviations)

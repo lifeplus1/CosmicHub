@@ -15,7 +15,10 @@ async def test_ai_service_methods():
     )
     assert section_result["section"] == "overview"
     comp = await svc.analyze_chart_comprehensive(chart, "full", None)
-    assert comp["type"] == "full" and comp["confidence"] >= 0
+    assert "type" in comp
+    assert comp["type"] == "full"
+    assert "confidence" in comp
+    assert comp["confidence"] >= 0
 
 
 @pytest.mark.asyncio

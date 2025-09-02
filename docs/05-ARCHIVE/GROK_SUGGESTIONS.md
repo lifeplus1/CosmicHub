@@ -1,3 +1,12 @@
+---
+title: InterpretationForm.tsx
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # InterpretationForm.tsx
 
 To optimize performance and align with project standards:

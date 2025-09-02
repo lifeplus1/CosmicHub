@@ -1,3 +1,12 @@
+---
+title: User Story Map for Real-Time Collaborative Chart Sharing
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # User Story Map for Real-Time Collaborative Chart Sharing
 
 To integrate real-time collaborative chart sharing into our astrology app, we'll focus on enabling

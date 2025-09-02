@@ -35,9 +35,9 @@ async def test_save_endpoint():
     print("3. Testing save endpoint...")
     
     # Mock chart data similar to the test
-    from api.charts import ChartData, Planet, House, Aspect, Angle
+    from api.routers.charts import ChartRequestData, Planet, House, Aspect, Angle
     
-    chart_data = ChartData(
+    chart_data = ChartRequestData(
         planets=[
             Planet(
                 name="Sun",

@@ -1,3 +1,12 @@
+---
+title: 🔍 Accessibility Audit Report - A11Y-030
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: monitoring
+---
+
 # 🔍 Accessibility Audit Report - A11Y-030
 
 > **Generated:** 2025-08-25T09:24:15.376Z  

@@ -1,19 +1,10 @@
 // Centralized symbol maps for celestial bodies with proper Unicode symbols
 import {
-  CelestialSymbols as PLANET_SYMBOLS,
-  ZodiacSymbols as SIGN_SYMBOLS,
-  AspectSymbols as ASPECT_SYMBOLS,
+  getCelestialSymbol,
+  getZodiacSymbol,
+  getAspectSymbol as getAspectSymbolFromService,
+  getElementColor as getElementColorFromService,
 } from '@/services/symbolService';
-
-// For asteroids, we'll use a subset of the celestial symbols or create a mapping
-const ASTEROID_SYMBOLS: Record<string, string> = {
-  ceres: '⚳',
-  pallas: '⚴',
-  juno: '⚵',
-  vesta: '⚶',
-  chiron: '⚷',
-  ...PLANET_SYMBOLS, // Include all celestial symbols as fallback
-};
 
 // Basic interpretation constants (placeholder implementations)
 const MOON_SIGN_INTERPRETATIONS: Record<string, string> = {};
@@ -21,55 +12,22 @@ const SIGN_INTERPRETATIONS: Record<string, string> = {};
 type PlanetInterpretationFn = (planet: string, sign: string) => string;
 
 export const getPlanetSymbol = (name: string): string => {
-  console.log(
-    'getPlanetSymbol called with:',
-    name,
-    'PLANET_SYMBOLS[name]:',
-    PLANET_SYMBOLS[name]
-  );
-  if (typeof name !== 'string' || name.length === 0) return '●';
-  return PLANET_SYMBOLS[name] !== undefined && PLANET_SYMBOLS[name].length > 0
-    ? PLANET_SYMBOLS[name]
-    : ASTEROID_SYMBOLS[name] !== undefined && ASTEROID_SYMBOLS[name].length > 0
-      ? ASTEROID_SYMBOLS[name]
-      : '●';
+  console.log('getPlanetSymbol called with:', name);
+  return getCelestialSymbol(name);
 };
 
 export const getSignSymbol = (sign: string): string => {
-  console.log(
-    'getSignSymbol called with:',
-    sign,
-    'SIGN_SYMBOLS[sign]:',
-    SIGN_SYMBOLS[sign]
-  );
-  if (typeof sign !== 'string' || sign.length === 0) return '○';
-  return SIGN_SYMBOLS[sign] !== undefined && SIGN_SYMBOLS[sign].length > 0
-    ? SIGN_SYMBOLS[sign]
-    : '○';
+  console.log('getSignSymbol called with:', sign);
+  return getZodiacSymbol(sign);
 };
 
 export const getAspectSymbol = (aspect: string): string => {
-  console.log(
-    'getAspectSymbol called with:',
-    aspect,
-    'ASPECT_SYMBOLS[aspect]:',
-    ASPECT_SYMBOLS[aspect]
-  );
-  if (typeof aspect !== 'string' || aspect.length === 0) return '◇';
-  if (ASPECT_SYMBOLS[aspect] !== undefined && ASPECT_SYMBOLS[aspect].length > 0)
-    return ASPECT_SYMBOLS[aspect];
-  const cap = aspect.charAt(0).toUpperCase() + aspect.slice(1);
-  if (ASPECT_SYMBOLS[cap] !== undefined && ASPECT_SYMBOLS[cap].length > 0)
-    return ASPECT_SYMBOLS[cap];
-  return '◇';
+  console.log('getAspectSymbol called with:', aspect);
+  return getAspectSymbolFromService(aspect);
 };
 
 export const getAsteroidSymbol = (name: string): string => {
-  if (typeof name !== 'string' || name.length === 0) return '●';
-  return ASTEROID_SYMBOLS[name] !== undefined &&
-    ASTEROID_SYMBOLS[name].length > 0
-    ? ASTEROID_SYMBOLS[name]
-    : '●';
+  return getCelestialSymbol(name);
 };
 
 // Utility function for capitalizing strings
@@ -97,31 +55,7 @@ export const getPlanetInterpretation: PlanetInterpretationFn = (
 
 // Element-based color scheme
 export function getElementColor(sign: string): string {
-  switch (sign) {
-    case 'Aries':
-    case 'Leo':
-    case 'Sagittarius':
-      return 'text-red-400';
-    case 'Taurus':
-    case 'Virgo':
-    case 'Capricorn':
-      return 'text-green-400';
-    case 'Gemini':
-    case 'Libra':
-    case 'Aquarius':
-      return 'text-yellow-400';
-    case 'Cancer':
-    case 'Scorpio':
-    case 'Pisces':
-      return 'text-blue-400';
-  }
-
-  // Fallback based on planet type
-  if (sign === 'Sun') {
-    return 'text-cosmic-gold';
-  }
-
-  return 'text-cosmic-silver';
+  return getElementColorFromService(sign);
 }
 
 // Export utility for consistency

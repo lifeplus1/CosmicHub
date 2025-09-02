@@ -1,3 +1,12 @@
+---
+title: CosmicHub Docker Commands Reference
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # CosmicHub Docker Commands Reference
 
 ## Build all containers

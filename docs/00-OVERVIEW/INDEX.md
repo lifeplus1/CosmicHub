@@ -1,4 +1,13 @@
-# CosmicHub Documentation Index
+---
+title: Documentation Index
+owner: platform
+status: active
+last_reviewed: 2025-09-01
+review_cycle: 30d
+category: index
+---
+
+## Documentation Index
 
 ## Last Updated: August 22, 2025
 

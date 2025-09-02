@@ -1,3 +1,12 @@
+---
+title: 🧪 Experiment Registry Schema Validator (EXP-010)
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # 🧪 Experiment Registry Schema Validator (EXP-010)
 
 > **Status**: ✅ **COMPLETE**  

@@ -1,3 +1,12 @@
+---
+title: Coverage Report (Aggregated)
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # Coverage Report (Aggregated)
 
 Combined (weighted):\n- Lines: 15.07%

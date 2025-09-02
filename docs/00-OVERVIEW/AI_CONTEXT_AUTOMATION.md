@@ -1,3 +1,12 @@
+---
+title: 🤖 Chat Instance Automation Setup
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # 🤖 Chat Instance Automation Setup
 
 > **Purpose:** Configure AI assistants to automatically reference key CosmicHub files  

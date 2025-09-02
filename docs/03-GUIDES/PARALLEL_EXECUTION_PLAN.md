@@ -1,3 +1,12 @@
+---
+title: 🔄 Parallel Execution Plan - Post Endpoint Consolidation
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # 🔄 Parallel Execution Plan - Post Endpoint Consolidation
 
 **Date**: August 26, 2025  

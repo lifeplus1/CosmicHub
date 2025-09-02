@@ -1,3 +1,12 @@
+---
+title: Type Standards Improvement Plan
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # Type Standards Improvement Plan
 
 > **📋 STATUS UPDATE (August 17, 2025):** This document has been significantly updated with progress

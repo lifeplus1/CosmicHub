@@ -1,3 +1,12 @@
+---
+title: Code Refactor Summary: ChartDisplay Component Cleanup
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # Code Refactor Summary: ChartDisplay Component Cleanup
 
 ## Problem Statement

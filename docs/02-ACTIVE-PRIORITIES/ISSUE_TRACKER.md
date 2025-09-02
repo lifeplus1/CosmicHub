@@ -1,3 +1,12 @@
+---
+title: 📋 CosmicHub Issue Tracker
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 30d
+category: plan
+---
+
 # 📋 CosmicHub Issue Tracker
 
 > **Last Updated:** August 22, 2025  

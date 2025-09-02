@@ -1,4 +1,18 @@
-# CosmicHub Parallel Lint Testing Implementation Summary
+---
+title: Parallel Lint Testing Implementation Summary (Moved)
+owner: platform
+status: deprecated
+last_reviewed: 2025-09-01
+review_cycle: 365d
+category: architecture
+canonical: docs/04-ARCHITECTURE/IMPLEMENTATION/PARALLEL_LINT_IMPLEMENTATION_SUMMARY.md
+---
+
+## Moved: CosmicHub Parallel Lint Testing Implementation Summary
+
+This document was moved to `docs/04-ARCHITECTURE/IMPLEMENTATION/PARALLEL_LINT_IMPLEMENTATION_SUMMARY.md`.
+Please update any bookmarks or links.
+
 
 ## Overview
 

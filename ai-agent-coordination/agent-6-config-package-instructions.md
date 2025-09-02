@@ -1,3 +1,12 @@
+---
+title: ConfigPackageAgent - Lint Fix Instructions
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # ConfigPackageAgent - Lint Fix Instructions
 
 ## Mission
@@ -43,7 +52,7 @@ Configuration and build setup
 # Run targeted lint analysis (OVERWRITES existing analysis file)
 npx eslint packages/config/src --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --max-warnings=20 --format json > ai-agent-coordination/agent-6-config-package-analysis.json
 
-# Generate fix suggestions (temporary file - will be cleaned up)
+# Generate fix suggestions (temporary file - will be cleaned up)  
 npx eslint packages/config/src --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --fix-dry-run --format json > /tmp/agent-6-config-package-fixes-temp.json
 ```
 
@@ -82,5 +91,5 @@ Create `ai-agent-coordination/agent-6-config-package-completion.json` with:
 - Recommendations for dependent agents
 
 ---
-
-**Generated**: 2025-08-28T01:09:17.674Z **Coordination ID**: agent-6-config-package
+**Generated**: 2025-08-28T03:35:32.978Z
+**Coordination ID**: agent-6-config-package

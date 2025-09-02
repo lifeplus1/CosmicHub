@@ -1,3 +1,12 @@
+---
+title: Grok Integration Prompts for Priority Tasks
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # Grok Integration Prompts for Priority Tasks
 
 ## 🔥 **UI-001: Synastry Analysis - Send to Grok**

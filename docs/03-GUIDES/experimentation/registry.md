@@ -1,29 +1,91 @@
 ---
-Status: Draft
-Owner: Experimentation Lead
-Last-Updated: 2025-08-16
-Next-Review: 2025-09-10
-Source: Grok Generated
+title: Experiment Registry Schema
+owner: experimentation
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 30d
+category: guide
 ---
 
-{ "$schema": "http://json-schema.org/draft-07/schema#", "title": "Experiment Registry Schema",
-"description": "JSON schema for documenting experiments in the registry, including hypothesis,
-metrics, dates, and status.", "type": "object", "properties": { "id": { "type": "string",
-"description": "Unique identifier for the experiment (e.g., UUID or auto-generated ID)." }, "name":
-{ "type": "string", "description": "Human-readable name of the experiment." }, "hypothesis": {
-"type": "string", "description": "Detailed description of the experiment's hypothesis." },
-"metrics": { "type": "object", "description": "Metrics configuration for the experiment.",
-"properties": { "primary": { "type": "string", "description": "The primary metric to evaluate the
-experiment's success (e.g., 'conversion_rate')." }, "guardrails": { "type": "array", "description":
-"Array of guardrail metrics to monitor for safety (e.g., ['user_retention', 'error_rate']).",
-"items": { "type": "string" }, "minItems": 0 } }, "required": ["primary", "guardrails"],
-"additionalProperties": false }, "start_date": { "type": "string", "format": "date-time",
-"description": "Start date and time of the experiment in ISO 8601 format (e.g.,
-'2025-08-16T00:00:00Z')." }, "end_date": { "type": "string", "format": "date-time", "description":
-"End date and time of the experiment in ISO 8601 format (e.g., '2025-09-16T23:59:59Z')." },
-"segment": { "type": "string", "description": "User segment or group targeted by the experiment
-(e.g., 'premium_users')." }, "owner": { "type": "string", "description": "Owner or responsible party
-for the experiment (e.g., username or email)." }, "status": { "type": "string", "description":
-"Current status of the experiment.", "enum": ["planned", "running", "completed", "aborted",
-"analyzing"] } }, "required": ["id", "name", "hypothesis", "metrics", "start_date", "end_date",
-"segment", "owner", "status"], "additionalProperties": false }
+## Experiment Registry Schema
+
+JSON Schema definition for structuring experiment metadata (hypothesis, metrics, lifecycle) used by the experimentation program.
+
+## Usage
+
+1. Create a new experiment entry file (`experiments/<id>.json`).
+2. Validate against this schema (e.g. using `ajv` or an IDE JSON schema association).
+3. Keep `status` updated as the experiment progresses.
+
+## Schema
+
+```json
+{
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "title": "Experiment Registry Schema",
+   "description": "JSON schema for documenting experiments in the registry, including hypothesis, metrics, dates, and status.",
+   "type": "object",
+   "properties": {
+      "id": {
+         "type": "string",
+         "description": "Unique identifier (UUID or auto-generated)."
+      },
+      "name": {
+         "type": "string",
+         "description": "Human-readable name."
+      },
+      "hypothesis": {
+         "type": "string",
+         "description": "Detailed hypothesis statement."
+      },
+      "metrics": {
+         "type": "object",
+         "description": "Primary + guardrail metrics configuration.",
+         "properties": {
+            "primary": {
+               "type": "string",
+               "description": "Primary success metric (e.g., conversion_rate)."
+            },
+            "guardrails": {
+               "type": "array",
+               "description": "Guardrail metrics (e.g., user_retention, error_rate).",
+               "items": { "type": "string" },
+               "minItems": 0
+            }
+         },
+         "required": ["primary", "guardrails"],
+         "additionalProperties": false
+      },
+      "start_date": {
+         "type": "string",
+         "format": "date-time",
+         "description": "Experiment start timestamp (ISO 8601)."
+      },
+      "end_date": {
+         "type": "string",
+         "format": "date-time",
+         "description": "Planned/actual end timestamp (ISO 8601)."
+      },
+      "segment": {
+         "type": "string",
+         "description": "Targeted user segment."
+      },
+      "owner": {
+         "type": "string",
+         "description": "Responsible party (username or email)."
+      },
+      "status": {
+         "type": "string",
+         "description": "Lifecycle status.",
+         "enum": ["planned", "running", "completed", "aborted", "analyzing"]
+      }
+   },
+   "required": ["id", "name", "hypothesis", "metrics", "start_date", "end_date", "segment", "owner", "status"],
+   "additionalProperties": false
+}
+```
+
+## Review Notes
+
+- Review cycle set to 30d to align with typical experiment cadence.
+- Update `last_reviewed` when schema fields change or governance rules evolve.

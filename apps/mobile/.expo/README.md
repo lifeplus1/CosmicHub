@@ -1,3 +1,12 @@
+---
+title: README
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 > Why do I have a folder named ".expo" in my project? The ".expo" folder is created when an Expo
 > project is started using "expo start" command. What do the files contain?
 

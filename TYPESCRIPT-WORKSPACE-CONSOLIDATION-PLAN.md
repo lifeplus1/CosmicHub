@@ -1,3 +1,12 @@
+---
+title: TypeScript Workspace Consolidation Plan
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # TypeScript Workspace Consolidation Plan
 
 ## Current State Analysis

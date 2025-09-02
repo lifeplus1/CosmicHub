@@ -16,7 +16,7 @@ async def test_chart_save_and_interpretation_flow():
     
     Tests chart save and interpretation flow without HTTP layer that causes hanging
     """
-    from api.charts import save_chart_unified, ChartData, Planet, Angle, House, Aspect
+    from api.routers.charts import save_chart_unified, ChartRequestData, Planet, Angle, House, Aspect
     from unittest.mock import AsyncMock
     
     # Create proper Pydantic models
@@ -49,7 +49,7 @@ async def test_chart_save_and_interpretation_flow():
         applying=True
     )
     
-    chart_data = ChartData(
+    chart_data = ChartRequestData(
         planets=[planet],
         asteroids=[],
         angles=[angle],

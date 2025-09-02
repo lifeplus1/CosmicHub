@@ -1,3 +1,12 @@
+---
+title: 🏗️ CosmicHub Project Structure
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # 🏗️ CosmicHub Project Structure
 
 > **Last Updated:** August 22, 2025  

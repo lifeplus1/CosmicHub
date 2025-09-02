@@ -27,8 +27,10 @@ export default defineWorkspace([
         'packages/types/**/*.{test,spec}.{ts,tsx}',
         'packages/config/**/*.{test,spec}.{ts,tsx}',
       ],
-      environment: 'node',
+      environment: 'jsdom',
       globals: true,
+      setupFiles: ['./apps/astro/src/test-setup.ts'],
+      testTimeout: 8000,
     },
   },
 
@@ -43,6 +45,7 @@ export default defineWorkspace([
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./apps/astro/src/test-setup.ts'],
+      testTimeout: 8000,
     },
   },
 ]);

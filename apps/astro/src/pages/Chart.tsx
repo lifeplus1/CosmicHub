@@ -348,7 +348,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
       componentLogger.info('Chart', 'Skipping chart calculation');
     }
     // deps: birthData triggers recalculation; calculateChartData memoized on birthData only.
-  }, [birthData, calculateChartData, chartData]);
+  }, [birthData, calculateChartData]);
 
   const handleRecalculate = useCallback((): void => {
     if (birthData !== null) {
@@ -399,7 +399,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
 
   // Build a ChartLike object from processedChart (memoized to avoid needless re-renders)
   const processedChartLike: ChartLike | null = useMemo(() => {
-    if (!chartData || !processedChart) return null;
+    if (!processedChart || !chartData) return null;
     try {
       return {
         planets: Object.fromEntries(
@@ -459,7 +459,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
       componentLogger.warn('Chart', 'Failed to build processedChartLike', e);
       return null;
     }
-  }, [chartData, processedChart]);
+  }, [processedChart]);
 
   if (birthData === null) {
     return (

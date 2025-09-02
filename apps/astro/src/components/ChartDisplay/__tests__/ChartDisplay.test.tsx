@@ -9,6 +9,63 @@ vi.mock('@/services/astrologyService', () => ({
   fetchSavedChart: vi.fn(),
 }));
 
+// Mock the hooks
+vi.mock('../hooks/useChartData', () => ({
+  useChartData: vi.fn(() => ({
+    chartData: {
+      planets: [
+        { name: 'Sun', sign: 'Leo', degree: 15.5, position: 135.5, house: '11', retrograde: false },
+        { name: 'Moon', sign: 'Cancer', degree: 22.3, position: 112.3, house: '10', retrograde: false },
+      ],
+      houses: [
+        { house: 1, sign: 'Aries', cusp: 0, degree: 0 },
+        { house: 2, sign: 'Taurus', cusp: 30, degree: 0 },
+      ],
+      aspects: [
+        { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+      ],
+      asteroids: [],
+      angles: [],
+    },
+    isLoading: false,
+    error: null,
+  })),
+}));
+
+vi.mock('../hooks/useProcessedSections', () => ({
+  useProcessedSections: vi.fn(() => ({
+    planets: [
+      { name: 'Sun', sign: 'Leo', degree: 15.5, position: 135.5, house: '11', retrograde: false },
+      { name: 'Moon', sign: 'Cancer', degree: 22.3, position: 112.3, house: '10', retrograde: false },
+    ],
+    houses: [
+      { house: 1, sign: 'Aries', cusp: 0, degree: 0 },
+      { house: 2, sign: 'Taurus', cusp: 30, degree: 0 },
+    ],
+    aspects: [
+      { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+    ],
+    asteroids: [],
+    angles: [],
+    points: [],
+  })),
+}));
+
+vi.mock('../hooks/useCategorizedPoints', () => ({
+  useCategorizedPoints: vi.fn(() => ({
+    lunar_nodes: [],
+    lilith_points: [],
+    special_points: [],
+    hypothetical: [],
+  })),
+}));
+
+vi.mock('../hooks/useEnhancedAspects', () => ({
+  useEnhancedAspects: vi.fn(() => [
+    { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+  ]),
+}));
+
 // Mock the UI components
 vi.mock('@cosmichub/ui', () => ({
   ErrorBoundary: ({
@@ -283,7 +340,7 @@ describe('ChartDisplay', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText(/Natal Chart Analysis/)).toBeDefined();
+    expect(screen.getAllByText(/Complete Chart Analysis/).length).toBeGreaterThan(0);
   });
 
   it('displays content when no chart is provided', () => {
@@ -294,7 +351,7 @@ describe('ChartDisplay', () => {
     );
 
     // Component shows sample data, ensure at least one chart analysis header rendered
-    expect(screen.getAllByText(/Chart Analysis/).length).toBeGreaterThanOrEqual(
+    expect(screen.getAllByText(/Complete Chart Analysis/).length).toBeGreaterThanOrEqual(
       1
     );
   });

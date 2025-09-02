@@ -1,3 +1,12 @@
+---
+title: CosmicHub Grafana Dashboards
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # CosmicHub Grafana Dashboards
 
 ## OBS-011: Performance Metrics Dashboard Implementation

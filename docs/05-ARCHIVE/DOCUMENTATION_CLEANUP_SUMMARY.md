@@ -1,3 +1,12 @@
+---
+title: Documentation Cleanup Summary - August 19, 2025
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # Documentation Cleanup Summary - August 19, 2025
 
 ## 📋 **Cleanup Actions Completed**

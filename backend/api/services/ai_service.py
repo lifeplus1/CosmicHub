@@ -431,6 +431,9 @@ class EnhancedAIService:
         # Use existing interpretation system with AI-001 enhancements
         base_interpretation = generate_interpretation(chart_data, "focused")
         
+        # Add the section parameter to the response
+        base_interpretation["section"] = section
+        
         # Add AI-001 enhancements
         if self.config.enable_predictive_transits:
             transits = await self.analyze_predictive_transits(chart_data, user_id, days_ahead=90)
@@ -447,6 +450,16 @@ class EnhancedAIService:
         """Legacy compatibility - enhanced with AI-001 features"""
         # Use existing comprehensive analysis with AI-001 enhancements
         base_analysis = generate_interpretation(chart_data, analysis_type)
+        
+        # Ensure the response has the expected keys for backward compatibility
+        if not isinstance(base_analysis, dict):
+            base_analysis = {"error": "Invalid analysis result"}
+        
+        # Add type and confidence if not present
+        if "type" not in base_analysis:
+            base_analysis["type"] = analysis_type
+        if "confidence" not in base_analysis:
+            base_analysis["confidence"] = 0.8
         
         # Add multi-system synthesis if enabled
         if self.config.enable_multi_system_synthesis and user_preferences:

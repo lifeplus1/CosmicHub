@@ -37,11 +37,11 @@ vi.mock('../pages/Dashboard', () => ({
 }));
 
 vi.mock('../components/Navbar', () => ({
-  default: () => <nav data-testid='navbar'>Navbar</nav>,
+  default: () => <nav data-testid='app-navbar'>Navbar</nav>,
 }));
 
 vi.mock('../components/Footer', () => ({
-  default: () => <footer data-testid='footer'>Footer</footer>,
+  default: () => <footer data-testid='app-footer'>Footer</footer>,
 }));
 
 vi.mock('../components/CosmicLoading', () => ({
@@ -58,14 +58,16 @@ vi.mock('react-router-dom', () => ({
   Route: () => <div data-testid='route'>Route</div>,
 }));
 
+// Import mocked components
+import { AuthProvider } from '@cosmichub/auth';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getAppConfig } from '@cosmichub/config';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { BrowserRouter, Routes } from 'react-router-dom';
+
 describe('App Component - Smoke Tests', () => {
   test('renders core providers without crashing', () => {
-    const { AuthProvider } = require('@cosmichub/auth');
-    const {
-      QueryClientProvider,
-      QueryClient,
-    } = require('@tanstack/react-query');
-
     const TestApp = () => (
       <QueryClientProvider client={new QueryClient()}>
         <AuthProvider appName='astro'>
@@ -82,7 +84,6 @@ describe('App Component - Smoke Tests', () => {
   });
 
   test('configuration works correctly', () => {
-    const { getAppConfig } = require('@cosmichub/config');
     const config = getAppConfig('astro');
 
     expect(config.app.name).toBe('astro');
@@ -90,25 +91,20 @@ describe('App Component - Smoke Tests', () => {
   });
 
   test('layout components render', () => {
-    const Navbar = require('../components/Navbar').default;
-    const Footer = require('../components/Footer').default;
-
     render(
       <div>
         <Navbar />
-        <main data-testid='main'>Content</main>
+        <main data-testid='app-main'>Content</main>
         <Footer />
       </div>
     );
 
-    expect(screen.getByTestId('navbar')).toBeInTheDocument();
-    expect(screen.getByTestId('main')).toBeInTheDocument();
-    expect(screen.getByTestId('footer')).toBeInTheDocument();
+    expect(screen.getByTestId('app-navbar')).toBeInTheDocument();
+    expect(screen.getByTestId('app-main')).toBeInTheDocument();
+    expect(screen.getByTestId('app-footer')).toBeInTheDocument();
   });
 
   test('router setup works', () => {
-    const { BrowserRouter, Routes } = require('react-router-dom');
-
     render(
       <BrowserRouter>
         <Routes>

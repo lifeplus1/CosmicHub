@@ -1,3 +1,12 @@
+---
+title: ANALYTICS-001: Enhanced User Analytics - IMPLEMENTATION PLAN
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 30d
+category: plan
+---
+
 # ANALYTICS-001: Enhanced User Analytics - IMPLEMENTATION PLAN
 
 ## 🎯 **PROJECT OVERVIEW**

@@ -1,3 +1,12 @@
+---
+title: 🤖 CosmicHub AI Assistant Guide
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 120d
+category: reference
+---
+
 # 🤖 CosmicHub AI Assistant Guide
 
 > **Auto-Discovery File**: AI assistants should read this file first for complete project context

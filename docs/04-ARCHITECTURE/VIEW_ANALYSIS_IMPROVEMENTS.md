@@ -1,3 +1,12 @@
+---
+title: UI/UX Analysis & Improvements: Unified vs Separate Tables Views
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # UI/UX Analysis & Improvements: Unified vs Separate Tables Views
 
 ## Analysis Summary

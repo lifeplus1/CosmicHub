@@ -1,3 +1,12 @@
+---
+title: CosmicHub Monitoring Stack
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # CosmicHub Monitoring Stack
 
 Comprehensive monitoring and alerting setup for CosmicHub using Prometheus, Alertmanager, and

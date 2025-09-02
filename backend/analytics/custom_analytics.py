@@ -180,7 +180,7 @@ class PrivacyCompliantAnalytics:
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(session_id) DO UPDATE SET
                 user_id=excluded.user_id,
-                page_views=CASE WHEN excluded.page_views > user_sessions.page_views THEN excluded.page_views ELSE user_sessions.page_views END,
+                page_views=user_sessions.page_views + CASE WHEN excluded.page_views > 0 THEN 1 ELSE 0 END,
                 events_count=user_sessions.events_count + 1,
                 last_event_time=excluded.last_event_time,
                 end_time=CASE WHEN excluded.last_event_time > COALESCE(user_sessions.end_time, 0) THEN excluded.last_event_time ELSE user_sessions.end_time END,

@@ -1,3 +1,12 @@
+---
+title: 📘 00-OVERVIEW - Project Overview & Essential Context
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # 📘 00-OVERVIEW - Project Overview & Essential Context
 
 This directory contains the most essential documentation for understanding and working with the

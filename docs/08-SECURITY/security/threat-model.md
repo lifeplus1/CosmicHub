@@ -1,3 +1,12 @@
+---
+title: Threat Model for CosmicHub (FastAPI + Firebase + Stripe System)
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: security
+---
+
 # Threat Model for CosmicHub (FastAPI + Firebase + Stripe System)
 
 ---

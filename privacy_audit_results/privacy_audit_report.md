@@ -1,3 +1,12 @@
+---
+title: CosmicHub Privacy Audit Report
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # CosmicHub Privacy Audit Report
 
 **Date:** 2025-08-25 10:35:41 UTC **Overall Compliance Score:** 90.0% **Pseudonymization

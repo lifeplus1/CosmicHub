@@ -1,13 +1,23 @@
 import type { ChartBirthData } from '@cosmichub/types';
 import type { ExtendedBirthData } from '../contexts/BirthDataContext';
 
+// Simple memoization for toCanonicalBirthData to prevent unnecessary re-computations
+const canonicalCache = new WeakMap<any, ChartBirthData>();
+
 // Convert any ExtendedBirthData or already-canonical ChartBirthData into ChartBirthData
 export function toCanonicalBirthData(
   b: ExtendedBirthData | ChartBirthData
 ): ChartBirthData {
+  // Check cache first for object stability
+  if (canonicalCache.has(b)) {
+    return canonicalCache.get(b)!;
+  }
+
+  let canonical: ChartBirthData;
+  
   if ('birth_date' in b && 'birth_time' in b) {
     // Assume already canonical (ExtendedBirthData extends ChartBirthData)
-    return {
+    canonical = {
       birth_date: (b as any).birth_date,
       birth_time: (b as any).birth_time,
       latitude: (b as any).latitude,
@@ -15,22 +25,27 @@ export function toCanonicalBirthData(
       city: (b as any).city,
       timezone: (b as any).timezone,
     };
+  } else {
+    // Fallback (shouldn't generally hit given typing) – attempt reconstruction
+    const anyB = b as any;
+    const year = anyB.year ?? 0;
+    const month = anyB.month ?? 1;
+    const day = anyB.day ?? 1;
+    const hour = anyB.hour ?? 0;
+    const minute = anyB.minute ?? 0;
+    canonical = {
+      birth_date: `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+      birth_time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+      latitude: anyB.lat ?? anyB.latitude ?? 0,
+      longitude: anyB.lon ?? anyB.longitude ?? 0,
+      city: anyB.city,
+      timezone: anyB.timezone,
+    };
   }
-  // Fallback (shouldn't generally hit given typing) – attempt reconstruction
-  const anyB = b as any;
-  const year = anyB.year ?? 0;
-  const month = anyB.month ?? 1;
-  const day = anyB.day ?? 1;
-  const hour = anyB.hour ?? 0;
-  const minute = anyB.minute ?? 0;
-  return {
-    birth_date: `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
-    birth_time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
-    latitude: anyB.lat ?? anyB.latitude ?? 0,
-    longitude: anyB.lon ?? anyB.longitude ?? 0,
-    city: anyB.city,
-    timezone: anyB.timezone,
-  };
+
+  // Cache the result for future calls with same input
+  canonicalCache.set(b, canonical);
+  return canonical;
 }
 
 export function hasCompleteCanonicalBirthData(

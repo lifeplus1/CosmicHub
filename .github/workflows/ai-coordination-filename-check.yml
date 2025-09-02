@@ -1,0 +1,22 @@
+name: ai-coordination-filename-check
+
+on:
+  push:
+    paths:
+      - 'ai-agent-coordination/**'
+      - 'scripts/validate_ai_coord_filenames.sh'
+      - '.github/workflows/ai-coordination-filename-check.yml'
+  pull_request:
+    paths:
+      - 'ai-agent-coordination/**'
+      - 'scripts/validate_ai_coord_filenames.sh'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate AI coordination filenames
+        run: |
+          bash scripts/validate_ai_coord_filenames.sh --all

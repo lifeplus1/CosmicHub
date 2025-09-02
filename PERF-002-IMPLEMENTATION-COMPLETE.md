@@ -1,4 +1,18 @@
-# PERF-002: Tree-Shaking Optimization - IMPLEMENTATION COMPLETE ✅
+---
+title: PERF-002 Implementation Complete (Moved)
+owner: platform
+status: deprecated
+last_reviewed: 2025-09-01
+review_cycle: 365d
+category: architecture
+canonical: docs/04-ARCHITECTURE/IMPLEMENTATION/PERF-002-IMPLEMENTATION-COMPLETE.md
+---
+
+## Moved: PERF-002 Tree-Shaking Optimization ✅
+
+This document was moved to `docs/04-ARCHITECTURE/IMPLEMENTATION/PERF-002-IMPLEMENTATION-COMPLETE.md`.
+Please update any bookmarks or links.
+
 
 ## 🎯 **IMPLEMENTATION SUMMARY**
 

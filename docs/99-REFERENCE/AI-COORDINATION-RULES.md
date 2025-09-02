@@ -1,4 +1,13 @@
-# AI Agent Coordination Instructions
+---
+title: AI Agent Coordination Instructions
+owner: platform
+status: active
+last_reviewed: 2025-09-01
+review_cycle: 120d
+category: reference
+---
+
+## AI Agent Coordination Instructions
 
 ## FOR AI ASSISTANTS: CRITICAL EXECUTION RULES
 

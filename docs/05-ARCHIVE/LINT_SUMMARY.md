@@ -1,3 +1,12 @@
+---
+title: CosmicHub Lint Summary - August 21, 2025
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # CosmicHub Lint Summary - August 21, 2025
 
 ## Current Status

@@ -91,6 +91,15 @@ vi.mock('../components/UpgradeModalManager', () => ({
   ),
 }));
 
+// Import mocked components
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { CosmicLoading } from '../components/CosmicLoading';
+import { UpgradeModalManager } from '../components/UpgradeModalManager';
+
+// Import mocked config functions
+import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
+
 describe('App Layout Structure', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -98,8 +107,6 @@ describe('App Layout Structure', () => {
 
   describe('Main Layout Components', () => {
     test('Navbar renders with correct structure and accessibility', () => {
-      const Navbar = require('../components/Navbar').default;
-
       render(<Navbar />);
 
       const navbar = screen.getByTestId('navbar');
@@ -114,8 +121,6 @@ describe('App Layout Structure', () => {
     });
 
     test('Footer renders with correct structure and accessibility', () => {
-      const Footer = require('../components/Footer').default;
-
       render(<Footer />);
 
       const footer = screen.getByTestId('footer');
@@ -133,8 +138,6 @@ describe('App Layout Structure', () => {
     });
 
     test('CosmicLoading renders with accessibility attributes', () => {
-      const { CosmicLoading } = require('../components/CosmicLoading');
-
       render(<CosmicLoading size='lg' message='Loading cosmic insights...' />);
 
       const loading = screen.getByTestId('cosmic-loading');
@@ -153,10 +156,6 @@ describe('App Layout Structure', () => {
     });
 
     test('UpgradeModalManager renders with dialog role', () => {
-      const {
-        UpgradeModalManager,
-      } = require('../components/UpgradeModalManager');
-
       render(<UpgradeModalManager />);
 
       const modal = screen.getByTestId('upgrade-modal-manager');
@@ -170,27 +169,27 @@ describe('App Layout Structure', () => {
     test('main layout applies correct CSS classes', () => {
       const MainLayout = () => (
         <div className='min-h-screen bg-cosmic-dark text-cosmic-silver'>
-          <nav data-testid='test-navbar'>Navbar</nav>
+          <nav data-testid='css-test-navbar'>Navbar</nav>
           <main
             className='container px-4 py-8 mx-auto'
-            data-testid='main-content'
+            data-testid='css-main-content'
           >
-            <div data-testid='content'>Main Content</div>
+            <div data-testid='css-content'>Main Content</div>
           </main>
-          <footer data-testid='test-footer'>Footer</footer>
+          <footer data-testid='css-test-footer'>Footer</footer>
         </div>
       );
 
       render(<MainLayout />);
 
-      const container = screen.getByTestId('main-content').parentElement;
+      const container = screen.getByTestId('css-main-content').parentElement;
       expect(container).toHaveClass(
         'min-h-screen',
         'bg-cosmic-dark',
         'text-cosmic-silver'
       );
 
-      const main = screen.getByTestId('main-content');
+      const main = screen.getByTestId('css-main-content');
       expect(main).toHaveClass('container', 'px-4', 'py-8', 'mx-auto');
     });
 
@@ -264,29 +263,68 @@ describe('App Layout Structure', () => {
 
   describe('Configuration-Based Layout Features', () => {
     test('debug info renders in development mode', () => {
-      const mockGetAppConfig = vi.fn(() => ({
+      const mockGetAppConfig = vi.fn((appName: string) => ({
         app: {
-          name: 'astro',
-          environment: 'development',
+          name: appName,
+          environment: 'development' as const,
           version: '1.2.3-dev',
+          baseUrl: 'http://localhost:3000',
+        },
+        api: {
+          baseUrl: 'http://localhost:8000',
+          timeout: 30000,
+          retries: 3,
+        },
+        firebase: {
+          projectId: '',
+          apiKey: '',
+          authDomain: '',
+          storageBucket: '',
+          messagingSenderId: '',
+          appId: '',
+        },
+        features: {
+          aiInterpretation: true,
+          humanDesign: true,
+          geneKeys: true,
+          numerology: true,
+          transits: true,
+          multiSystem: true,
+          healwaveIntegration: true,
+          crossAppIntegration: true,
+        },
+        subscription: {
+          plans: {},
+          trialDays: 14,
+          stripePublishableKey: '',
+        },
+        astro: {
+          defaultLocation: {
+            lat: 40.7128,
+            lng: -74.006,
+            city: 'New York',
+            country: 'USA',
+          },
+          ephemerisPath: '/backend/ephe/',
+          calculationEngine: 'swiss' as const,
         },
       }));
 
-      vi.mocked(require('@cosmichub/config').getAppConfig).mockImplementation(
-        mockGetAppConfig
-      );
+      // Use the mocked function directly
+      const mockedGetAppConfig = vi.mocked(getAppConfig);
+      mockedGetAppConfig.mockImplementation(mockGetAppConfig);
 
       const DebugLayout = () => {
-        const config = mockGetAppConfig();
+        const config = mockGetAppConfig('astro');
 
         return (
           <div>
-            <main data-testid='main-app'>Main App Content</main>
+            <main data-testid='debug-main-app'>Main App Content</main>
             {config.app.environment === 'development' && (
               <div
-                className='debug-info-hidden'
+                className='debug-info-visible'
                 aria-hidden='true'
-                data-testid='debug-info'
+                data-testid='debug-info-dev'
               >
                 App: {config.app.name} | Env: {config.app.environment} |
                 Version: {config.app.version}
@@ -298,7 +336,7 @@ describe('App Layout Structure', () => {
 
       render(<DebugLayout />);
 
-      expect(screen.getByTestId('debug-info')).toBeInTheDocument();
+      expect(screen.getByTestId('debug-info-dev')).toBeInTheDocument();
       expect(
         screen.getByText(
           /App: astro \| Env: development \| Version: 1\.2\.3-dev/
@@ -307,26 +345,65 @@ describe('App Layout Structure', () => {
     });
 
     test('debug info is hidden in production mode', () => {
-      const mockGetAppConfig = vi.fn(() => ({
+      const mockGetAppConfig = vi.fn((appName: string) => ({
         app: {
-          name: 'astro',
-          environment: 'production',
+          name: appName,
+          environment: 'production' as 'development' | 'staging' | 'production',
           version: '1.0.0',
+          baseUrl: 'https://cosmichub.app',
+        },
+        api: {
+          baseUrl: 'https://api.cosmichub.app',
+          timeout: 30000,
+          retries: 3,
+        },
+        firebase: {
+          projectId: '',
+          apiKey: '',
+          authDomain: '',
+          storageBucket: '',
+          messagingSenderId: '',
+          appId: '',
+        },
+        features: {
+          aiInterpretation: true,
+          humanDesign: true,
+          geneKeys: true,
+          numerology: true,
+          transits: true,
+          multiSystem: true,
+          healwaveIntegration: true,
+          crossAppIntegration: true,
+        },
+        subscription: {
+          plans: {},
+          trialDays: 14,
+          stripePublishableKey: '',
+        },
+        astro: {
+          defaultLocation: {
+            lat: 40.7128,
+            lng: -74.006,
+            city: 'New York',
+            country: 'USA',
+          },
+          ephemerisPath: '/backend/ephe/',
+          calculationEngine: 'swiss' as const,
         },
       }));
 
-      vi.mocked(require('@cosmichub/config').getAppConfig).mockImplementation(
-        mockGetAppConfig
-      );
+      // Use the mocked function directly
+      const mockedGetAppConfig = vi.mocked(getAppConfig);
+      mockedGetAppConfig.mockImplementation(mockGetAppConfig);
 
       const ProductionLayout = () => {
-        const config = mockGetAppConfig();
+        const config = mockGetAppConfig('astro');
 
         return (
           <div>
-            <main data-testid='main-app'>Main App Content</main>
+            <main data-testid='prod-main-app'>Main App Content</main>
             {config.app.environment === 'development' && (
-              <div data-testid='debug-info'>Debug Info</div>
+              <div data-testid='prod-debug-info'>Debug Info</div>
             )}
           </div>
         );
@@ -334,8 +411,8 @@ describe('App Layout Structure', () => {
 
       render(<ProductionLayout />);
 
-      expect(screen.queryByTestId('debug-info')).not.toBeInTheDocument();
-      expect(screen.getByTestId('main-app')).toBeInTheDocument();
+      expect(screen.queryByTestId('prod-debug-info')).not.toBeInTheDocument();
+      expect(screen.getByTestId('prod-main-app')).toBeInTheDocument();
     });
 
     test('feature flags control layout elements', () => {
@@ -343,21 +420,19 @@ describe('App Layout Structure', () => {
         return feature === 'betaFeatures';
       });
 
-      vi.mocked(
-        require('@cosmichub/config').isFeatureEnabled
-      ).mockImplementation(mockIsFeatureEnabled);
+      // Use the mocked function directly
+      const mockedIsFeatureEnabled = vi.mocked(isFeatureEnabled);
+      mockedIsFeatureEnabled.mockImplementation(mockIsFeatureEnabled);
 
       const FeatureFlagLayout = () => {
-        const { isFeatureEnabled } = require('@cosmichub/config');
-
         return (
           <div>
-            <main data-testid='main-content'>Main Content</main>
-            {isFeatureEnabled('betaFeatures') && (
-              <div data-testid='beta-banner'>Beta Features Enabled</div>
+            <main data-testid='feature-main-content'>Main Content</main>
+            {mockIsFeatureEnabled('betaFeatures') && (
+              <div data-testid='feature-beta-banner'>Beta Features Enabled</div>
             )}
-            {isFeatureEnabled('maintenance') && (
-              <div data-testid='maintenance-banner'>Maintenance Mode</div>
+            {mockIsFeatureEnabled('maintenance') && (
+              <div data-testid='feature-maintenance-banner'>Maintenance Mode</div>
             )}
           </div>
         );
@@ -365,9 +440,9 @@ describe('App Layout Structure', () => {
 
       render(<FeatureFlagLayout />);
 
-      expect(screen.getByTestId('beta-banner')).toBeInTheDocument();
+      expect(screen.getByTestId('feature-beta-banner')).toBeInTheDocument();
       expect(
-        screen.queryByTestId('maintenance-banner')
+        screen.queryByTestId('feature-maintenance-banner')
       ).not.toBeInTheDocument();
     });
   });
@@ -418,15 +493,15 @@ describe('App Layout Structure', () => {
     test('focus management works correctly', () => {
       const FocusLayout = () => (
         <div>
-          <button data-testid='first-button' tabIndex={1}>
+          <button data-testid='focus-first-button' tabIndex={1}>
             First
           </button>
-          <main data-testid='main-content' tabIndex={-1}>
-            <button data-testid='main-button' tabIndex={2}>
+          <main data-testid='focus-main-content' tabIndex={-1}>
+            <button data-testid='focus-main-button' tabIndex={2}>
               Main Button
             </button>
           </main>
-          <button data-testid='last-button' tabIndex={3}>
+          <button data-testid='focus-last-button' tabIndex={3}>
             Last
           </button>
         </div>
@@ -434,19 +509,19 @@ describe('App Layout Structure', () => {
 
       render(<FocusLayout />);
 
-      expect(screen.getByTestId('first-button')).toHaveAttribute(
+      expect(screen.getByTestId('focus-first-button')).toHaveAttribute(
         'tabindex',
         '1'
       );
-      expect(screen.getByTestId('main-content')).toHaveAttribute(
+      expect(screen.getByTestId('focus-main-content')).toHaveAttribute(
         'tabindex',
         '-1'
       );
-      expect(screen.getByTestId('main-button')).toHaveAttribute(
+      expect(screen.getByTestId('focus-main-button')).toHaveAttribute(
         'tabindex',
         '2'
       );
-      expect(screen.getByTestId('last-button')).toHaveAttribute(
+      expect(screen.getByTestId('focus-last-button')).toHaveAttribute(
         'tabindex',
         '3'
       );
@@ -455,11 +530,11 @@ describe('App Layout Structure', () => {
     test('skip links are properly implemented', () => {
       const SkipLinkLayout = () => (
         <div>
-          <a href='#main-content' className='skip-link' data-testid='skip-link'>
+          <a href='#skip-main-content' className='skip-link' data-testid='skip-to-main-link'>
             Skip to main content
           </a>
-          <nav data-testid='navigation'>Navigation</nav>
-          <main id='main-content' data-testid='main-content'>
+          <nav data-testid='skip-navigation'>Navigation</nav>
+          <main id='skip-main-content' data-testid='skip-main-content'>
             Main Content
           </main>
         </div>
@@ -467,11 +542,11 @@ describe('App Layout Structure', () => {
 
       render(<SkipLinkLayout />);
 
-      const skipLink = screen.getByTestId('skip-link');
-      expect(skipLink).toHaveAttribute('href', '#main-content');
-      expect(screen.getByTestId('main-content')).toHaveAttribute(
+      const skipLink = screen.getByTestId('skip-to-main-link');
+      expect(skipLink).toHaveAttribute('href', '#skip-main-content');
+      expect(screen.getByTestId('skip-main-content')).toHaveAttribute(
         'id',
-        'main-content'
+        'skip-main-content'
       );
     });
   });

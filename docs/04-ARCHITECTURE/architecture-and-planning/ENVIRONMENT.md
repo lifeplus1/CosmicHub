@@ -1,3 +1,12 @@
+---
+title: Environment & Secrets Strategy
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # Environment & Secrets Strategy
 
 This repository separates public client variables from server-only secrets to minimize accidental

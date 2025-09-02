@@ -1,3 +1,12 @@
+---
+title: @cosmichub/pwa
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # @cosmichub/pwa
 
 Shared PWA core utilities and mobile enhancement features for CosmicHub apps.

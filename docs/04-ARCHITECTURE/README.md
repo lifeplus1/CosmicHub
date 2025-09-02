@@ -1,3 +1,12 @@
+---
+title: 🏗️ 04-ARCHITECTURE - System Design & Technical Specs
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # 🏗️ 04-ARCHITECTURE - System Design & Technical Specs
 
 This directory contains comprehensive technical documentation about the system architecture and

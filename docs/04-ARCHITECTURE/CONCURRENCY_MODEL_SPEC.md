@@ -1,3 +1,12 @@
+---
+title: Concurrency and GitHub Copilot Agent Model Specifications
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # Concurrency and GitHub Copilot Agent Model Specifications
 
 ## Optimal Instance Configuration

@@ -1,3 +1,12 @@
+---
+title: UI/UX Improvements for Chart Display
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # UI/UX Improvements for Chart Display
 
 ## ✅ Implemented: Collapsible Tables

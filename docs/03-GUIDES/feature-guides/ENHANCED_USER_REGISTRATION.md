@@ -1,3 +1,12 @@
+---
+title: 🔐 Enhanced User Registration System
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # 🔐 Enhanced User Registration System
 
 ## ✅ **Comprehensive User Profile Collection Implementation**

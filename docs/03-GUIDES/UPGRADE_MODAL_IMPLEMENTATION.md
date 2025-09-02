@@ -1,3 +1,12 @@
+---
+title: 🚀 Upgrade Modal System Implementation
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # 🚀 Upgrade Modal System Implementation
 
 ## 📋 Overview

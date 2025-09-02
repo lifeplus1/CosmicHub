@@ -1,3 +1,12 @@
+---
+title: MOB-002 Implementation: Mobile-Specific Features
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # MOB-002 Implementation: Mobile-Specific Features
 
 > **Status:** ✅ COMPLETE  

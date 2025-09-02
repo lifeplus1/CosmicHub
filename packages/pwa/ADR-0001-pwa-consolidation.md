@@ -1,3 +1,12 @@
+---
+title: ADR-0001: PWA Consolidation Strategy
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # ADR-0001: PWA Consolidation Strategy
 
 Date: 2025-08-27

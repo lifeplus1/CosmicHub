@@ -1,3 +1,12 @@
+---
+title: Stripe Integration Testing & Verification Guide
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # Stripe Integration Testing & Verification Guide
 
 ## 🧪 How to Test the Stripe Integration

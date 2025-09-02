@@ -1,3 +1,12 @@
+---
+title: PRIV-006 Implementation: Executive Summary
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # PRIV-006 Implementation: Executive Summary
 
 **Date:** 2025-08-25 10:35:41 UTC **Overall Privacy Score:** 73.0%

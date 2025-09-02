@@ -1,10 +1,29 @@
+---
+title: CosmicHub Roadmap
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: overview
+---
+
 # CosmicHub Roadmap
 
-> **Last Updated:** August 26, 2025  
-> **Infrastructure Status:** ✅ COMPLETE - All core hardening tasks accomplished  
-> **Current Phase:** Strategic expansion and operational maturity enhancements  
-> **Major Update:** ✅ Documentation restructure complete - All files organized into numbered
-> directory structure
+> **Last Updated:** 2025-09-02 (matches frontmatter)  
+> **Infrastructure Status:** ✅ COMPLETE – Core hardening accomplished  
+> **Current Phase:** Strategic expansion & operational maturity  
+> **Documentation:** ✅ Restructure complete (numbered taxonomy)
+
+## Status Legend
+
+| Symbol | Meaning |
+|--------|---------|
+| ✅ | Complete / Implemented |
+| 🟡 | Partially Complete / In Progress |
+| ⏳ | Planned / Not Started |
+| ❌ | Blocked / Requires Decision |
+
+---
 
 ## ✅ Infrastructure Hardening COMPLETE (August 2025)
 
@@ -20,50 +39,50 @@ All critical infrastructure hardening tasks have been successfully completed:
 
 ### **Current Focus: Strategic Expansion**
 
-The items below represent **operational maturity enhancements** and **strategic capabilities**, not
-core infrastructure gaps:
+The items below are **maturity & leverage multipliers** (not core gaps). They improve reliability, governance, cost efficiency, and experimentation velocity.
 
-## 🎯 Strategic Development & Operational Maturity Roadmap
+## 🎯 **IMMEDIATE NEXT PRIORITIES** (September 2025)
 
-### High Priority Items
+### **Priority 1: Mobile App Deployment** 📱 (THIS WEEK)
 
-- Threat model narrative sections ✅ [docs/security/threat-model.md](docs/security/threat-model.md)
-- Incident runbook template boilerplate ✅ [docs/runbooks/template.md](docs/runbooks/template.md)
-- Experiment registry schema documentation prose ✅
-  [docs/experimentation/registry.md](docs/experimentation/registry.md)
-- Data classification glossary definitions ✅
-  [docs/privacy/data-classification.md](docs/privacy/data-classification.md)
-- Guardrail metrics explanation for stakeholders 🟡
-  [docs/experimentation/guardrails.md](docs/experimentation/guardrails.md)
-- SLO & error budget policy narrative & exemplar calculations ✅
-  [docs/observability/slo-policy.md](docs/observability/slo-policy.md)
-- Secret rotation policy & RBAC matrix documentation 🟡
-  [docs/security/secret-rotation.md](docs/security/secret-rotation.md)
-- Performance & capacity planning narrative (growth assumptions) ✅
-  [docs/operations/capacity-planning.md](docs/operations/capacity-planning.md)
-- Experiment lifecycle & statistical governance doc ✅
-  [docs/experimentation/lifecycle.md](docs/experimentation/lifecycle.md)
-- Privacy pseudonymization & retention rationale ✅
-  [docs/privacy/pseudonymization.md](docs/privacy/pseudonymization.md)
-- Incident postmortem template & rubric ✅
-  [docs/runbooks/postmortem-template.md](docs/runbooks/postmortem-template.md)
-- API graceful degradation & fallback matrix ✅
-  [docs/operations/degradation-matrix.md](docs/operations/degradation-matrix.md)
-- Security headers & CSP rollout rationale 🟡
-  [docs/security/csp-rollout.md](docs/security/csp-rollout.md) ...existing code... -- Threat model
-  narrative sections ✅ (see `docs/security/threat-model.md`) -- Incident runbook template
-  boilerplate ✅ (`docs/runbooks/template.md`) -- Experiment registry schema documentation prose ✅
-  (`docs/experimentation/registry.md`) -- Data classification glossary definitions ✅
-  (`docs/privacy/data-classification.md`) -- Guardrail metrics explanation for stakeholders 🟡
-  (`docs/experimentation/guardrails.md`) -- SLO & error budget policy narrative & exemplar
-  calculations ✅ (`docs/observability/slo-policy.md`) -- Secret rotation policy & RBAC matrix
-  documentation 🟡 (`docs/security/secret-rotation.md`) -- Performance & capacity planning narrative
-  (growth assumptions) ✅ (`docs/operations/capacity-planning.md`) -- Experiment lifecycle &
-  statistical governance doc ✅ (`docs/experimentation/lifecycle.md`) -- Privacy pseudonymization &
-  retention rationale ✅ (`docs/privacy/pseudonymization.md`) -- Incident postmortem template &
-  rubric ✅ (`docs/runbooks/postmortem-template.md`) -- API graceful degradation & fallback matrix
-  ✅ (`docs/operations/degradation-matrix.md`) -- Security headers & CSP rollout rationale 🟡
-  (`docs/security/csp-rollout.md`)
+- **Status**: ✅ Implementation complete, ready for app store submission
+- **Bottleneck**: Administrative setup (Expo auth, app store accounts)
+- **Business Impact**: HIGH - Massive market expansion opportunity
+- **Action**: Execute final deployment scripts and app store submission
+
+### **Priority 2: Data Architecture Foundation** 📊 (THIS MONTH)
+
+- **Status**: ✅ Phase 1 COMPLETE - Dual-format export foundation implemented
+- **Achievement**: Parquet export system integrated with FastAPI, ready for analytics
+- **Business Impact**: STRATEGIC - Enables advanced AI and analytics
+- **Next**: Phase 2 - Analytics warehouse and ML training pipeline setup
+
+### **Priority 3: Code Quality Optimization** 🔧 (ONGOING)
+
+- **Status**: AI Agent Coordination System ready (3/7 agents deployable)
+- **Action**: Deploy ready lint agents, fix remaining coordination issues
+
+---
+
+## Strategic Development & Operational Maturity Roadmap
+
+### High Priority Artifacts (Snapshot)
+
+| Item | Status | Path |
+|------|--------|------|
+| Threat model narrative | ✅ | docs/security/threat-model.md |
+| Incident runbook template | ✅ | docs/runbooks/template.md |
+| Experiment registry schema doc | ✅ | docs/experimentation/registry.md |
+| Data classification glossary | ✅ | docs/privacy/data-classification.md |
+| Guardrail metrics guidance | 🟡 | docs/experimentation/guardrails.md |
+| SLO & error budget policy | ✅ | docs/observability/slo-policy.md |
+| Secret rotation policy & RBAC matrix | 🟡 | docs/security/secret-rotation.md |
+| Capacity planning narrative | ✅ | docs/operations/capacity-planning.md |
+| Experiment lifecycle governance | ✅ | docs/experimentation/lifecycle.md |
+| Pseudonymization & retention rationale | ✅ | docs/privacy/pseudonymization.md |
+| Incident postmortem template & rubric | ✅ | docs/runbooks/postmortem-template.md |
+| Degradation / fallback matrix | ✅ | docs/operations/degradation-matrix.md |
+| CSP rollout rationale | 🟡 | docs/security/csp-rollout.md |
 
 ## CosmicHub Operational Roadmap (Phase: Production Hardening)
 
@@ -176,7 +195,7 @@ core infrastructure gaps:
 - [ ] Asynchronous job queue design & prototype
 - [ ] Global latency synthetic monitoring per region
 
-## Items Suitable to Draft with Grok Assistance
+## AI Assistance Guidance
 
 ⚡ **AI Model Strategy Complete**: Comprehensive recommendations available in
 [`docs/AI_MODEL_RECOMMENDATIONS.md`](docs/AI_MODEL_RECOMMENDATIONS.md)
@@ -198,30 +217,7 @@ Complete/Implemented, 🟡 = Partially Complete, ⏳ = In Progress, ❌ = Not St
 - Testing and quality assurance (use Claude 3.5 Sonnet)
 - Security policies and compliance (use GPT-4o)
 
-- Threat model narrative sections ✅ [docs/security/threat-model.md](docs/security/threat-model.md)
-- Incident runbook template boilerplate ✅ [docs/runbooks/template.md](docs/runbooks/template.md)
-- Experiment registry schema documentation prose ✅
-  [docs/experimentation/registry.md](docs/experimentation/registry.md)
-- Data classification glossary definitions ✅
-  [docs/privacy/data-classification.md](docs/privacy/data-classification.md)
-- Guardrail metrics explanation for stakeholders 🟡
-  [docs/experimentation/guardrails.md](docs/experimentation/guardrails.md)
-- SLO & error budget policy narrative & exemplar calculations ✅
-  [docs/observability/slo-policy.md](docs/observability/slo-policy.md)
-- Secret rotation policy & RBAC matrix documentation 🟡
-  [docs/security/secret-rotation.md](docs/security/secret-rotation.md)
-- Performance & capacity planning narrative (growth assumptions) ✅
-  [docs/operations/capacity-planning.md](docs/operations/capacity-planning.md)
-- Experiment lifecycle & statistical governance doc ✅
-  [docs/experimentation/lifecycle.md](docs/experimentation/lifecycle.md)
-- Privacy pseudonymization & retention rationale ✅
-  [docs/privacy/pseudonymization.md](docs/privacy/pseudonymization.md)
-- Incident postmortem template & rubric ✅
-  [docs/runbooks/postmortem-template.md](docs/runbooks/postmortem-template.md)
-- API graceful degradation & fallback matrix ✅
-  [docs/operations/degradation-matrix.md](docs/operations/degradation-matrix.md)
-- Security headers & CSP rollout rationale 🟡
-  [docs/security/csp-rollout.md](docs/security/csp-rollout.md)
+// Duplicate artifact list removed (see High Priority Artifacts table above).
 
 ### Grok Prompt Queue (Provide these prompts & target files)
 

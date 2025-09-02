@@ -1,3 +1,12 @@
+---
+title: Authentication Implementation Plan
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # Authentication Implementation Plan
 
 ## 🎯 OVERVIEW

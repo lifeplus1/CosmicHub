@@ -54,10 +54,21 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
       // Wrap backend response so ChartDisplay normalization can detect original shape
       setChartData({ __raw_backend_response: data } as unknown as ChartLike);
       setError(null);
-      onChartCalculated?.(data);
+      // Move onChartCalculated call to a separate useEffect to prevent dependency cycles
     },
-    [onChartCalculated]
+    []
   );
+
+  // Separate effect for notifying parent of chart calculation completion
+  useEffect(() => {
+    if (chartData && onChartCalculated) {
+      // Extract the original data from the wrapped format
+      const rawData = (chartData as any).__raw_backend_response;
+      if (rawData) {
+        onChartCalculated(rawData);
+      }
+    }
+  }, [chartData, onChartCalculated]);
 
   // Lazy-load fetch implementation if not injected
   useEffect(() => {
@@ -105,7 +116,6 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
     birthData,
     savedChartId,
     handleError,
-    handleChartCalculated,
     canonicalBirthData,
     fetchFn,
     fetchImpl,
@@ -137,7 +147,6 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   }, [
     birthData,
     handleError,
-    handleChartCalculated,
     canonicalBirthData,
     fetchFn,
     fetchImpl,

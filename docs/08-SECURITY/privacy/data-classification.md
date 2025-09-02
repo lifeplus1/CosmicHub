@@ -1,3 +1,12 @@
+---
+title: Data Classification Glossary
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: security
+---
+
 # Data Classification Glossary
 
 ---

@@ -1,3 +1,12 @@
+---
+title: Deployment Guide for CosmicHub Applications
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # Deployment Guide for CosmicHub Applications
 
 ## 🚀 Production Deployment Guide

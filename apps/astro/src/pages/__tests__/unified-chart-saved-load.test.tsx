@@ -115,8 +115,8 @@ describe('UnifiedChart saved chart loading', () => {
     );
 
     await waitFor(() => {
-      const el = screen.getByText(/Astrological Chart/i);
-      expect(Boolean(el)).toBe(true);
+      const elements = screen.getAllByText(/Astrological Chart/i);
+      expect(elements.length).toBeGreaterThan(0);
     });
   });
 

@@ -1,3 +1,12 @@
+---
+title: 📚 Documentation Consolidation Report
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # 📚 Documentation Consolidation Report
 
 > **Consolidation Date:** August 25, 2025  

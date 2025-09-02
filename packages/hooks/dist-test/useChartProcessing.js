@@ -1,0 +1,442 @@
+"use strict";
+/**
+ * useChartProcessing Hook - Centralizes chart data processing logic.
+ *
+ * CRITICAL FIXES:
+ * 1. Helper function to normalize planet positions for new calculations (/calculate)
+ *    AND saved charts (/api/charts/)
+ * 2. Unified normalization regardless of data source
+ * 3. Robust categorization using content analysis, not fragile field name assumptions
+ * 4. Debug logging to identify data flow issues
+ *
+ * React Hook Patterns Guide compliance:
+ * - Deterministic useMemo dependencies
+ * - Stable ref for debug logging
+ * - Early returns to prevent unnecessary computation
+ * - Explicit null checks over boolean expressions
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.useChartProcessing = useChartProcessing;
+const react_1 = require("react");
+// Simplified astrological sign calculation (degrees 0-359 to signs)
+const getSignFromDegrees = (degrees) => {
+    const signs = [
+        'Aries',
+        'Taurus',
+        'Gemini',
+        'Cancer',
+        'Leo',
+        'Virgo',
+        'Libra',
+        'Scorpio',
+        'Sagittarius',
+        'Capricorn',
+        'Aquarius',
+        'Pisces',
+    ];
+    const normalizedDegrees = ((degrees % 360) + 360) % 360;
+    const signIndex = Math.floor(normalizedDegrees / 30);
+    return signs[signIndex] ?? 'Aries';
+};
+const getDegreeWithinSign = (degrees) => {
+    const normalizedDegrees = ((degrees % 360) + 360) % 360;
+    return parseFloat((normalizedDegrees % 30).toFixed(2));
+};
+const calculateHousePosition = (planetDegrees, houseCusps) => {
+    if (houseCusps.length === 0)
+        return 1;
+    const normalizedPlanet = ((planetDegrees % 360) + 360) % 360;
+    for (let i = 0; i < houseCusps.length; i++) {
+        const currentCuspValue = houseCusps[i];
+        const nextCuspValue = houseCusps[(i + 1) % houseCusps.length];
+        if (currentCuspValue === null ||
+            currentCuspValue === undefined ||
+            nextCuspValue === null ||
+            nextCuspValue === undefined)
+            continue;
+        const currentCusp = ((currentCuspValue % 360) + 360) % 360;
+        const nextCusp = ((nextCuspValue % 360) + 360) % 360;
+        if (currentCusp <= nextCusp) {
+            if (normalizedPlanet >= currentCusp && normalizedPlanet < nextCusp) {
+                return i + 1;
+            }
+        }
+        else {
+            if (normalizedPlanet >= currentCusp || normalizedPlanet < nextCusp) {
+                return i + 1;
+            }
+        }
+    }
+    return 1; // Default to first house
+};
+// Traditional and modern rulership mappings
+const TRADITIONAL_RULERS = {
+    Aries: 'Mars',
+    Taurus: 'Venus',
+    Gemini: 'Mercury',
+    Cancer: 'Moon',
+    Leo: 'Sun',
+    Virgo: 'Mercury',
+    Libra: 'Venus',
+    Scorpio: 'Mars',
+    Sagittarius: 'Jupiter',
+    Capricorn: 'Saturn',
+    Aquarius: 'Saturn',
+    Pisces: 'Jupiter',
+};
+const MODERN_RULERS = {
+    ...TRADITIONAL_RULERS,
+    Scorpio: 'Pluto',
+    Aquarius: 'Uranus',
+    Pisces: 'Neptune',
+};
+// Calculate house ruler based on sign on the cusp
+const calculateHouseRuler = (cuspSign, useModernRulers = true) => {
+    const rulerMap = useModernRulers ? MODERN_RULERS : TRADITIONAL_RULERS;
+    return rulerMap[cuspSign] ?? '';
+};
+/**
+ * Centralized chart data processing hook
+ *
+ * Handles the critical data flow issue where:
+ * - /calculate endpoint returns data with __raw_backend_response field
+ * - /api/charts/ endpoint returns transformed data WITHOUT __raw_backend_response
+ * - Processing needs raw backend data for proper categorization
+ */
+function useChartProcessing(chartData, options = {}) {
+    const { enableDebug = true, fallbackToSample = false, useModernRulers = true, } = options;
+    // Stable ref for debug logging - follows React Hook Patterns Guide
+    const debugRef = (0, react_1.useRef)({
+        lastProcessedId: null,
+    });
+    return (0, react_1.useMemo)(() => {
+        const dataId = chartData ? JSON.stringify(chartData).slice(0, 50) : 'null';
+        if (enableDebug && debugRef.current.lastProcessedId !== dataId) {
+            console.log('🔧 useChartProcessing - Processing new chart data...', {
+                dataId,
+                chartData,
+            });
+            debugRef.current.lastProcessedId = dataId;
+        }
+        // Early return for null/undefined data - prevents unnecessary computation
+        if (chartData === null || chartData === undefined) {
+            if (enableDebug) {
+                console.log('❌ useChartProcessing - No chart data provided');
+            }
+            return {
+                planets: [],
+                asteroids: [],
+                angles: [],
+                houses: [],
+                aspects: [],
+                points: [],
+                source: 'unknown',
+                hasRawBackend: false,
+                debug: {
+                    originalKeys: [],
+                    backendKeys: [],
+                    dataStructure: 'null',
+                    asteroidCount: 0,
+                    pointCount: 0,
+                },
+            };
+        }
+        // Type guard - explicit null checks per React Hook Patterns Guide
+        if (typeof chartData !== 'object') {
+            if (enableDebug) {
+                console.log('❌ useChartProcessing - Invalid data type:', typeof chartData);
+            }
+            return {
+                planets: [],
+                asteroids: [],
+                angles: [],
+                houses: [],
+                aspects: [],
+                points: [],
+                source: 'unknown',
+                hasRawBackend: false,
+                debug: {
+                    originalKeys: [],
+                    backendKeys: [],
+                    dataStructure: typeof chartData,
+                    asteroidCount: 0,
+                    pointCount: 0,
+                },
+            };
+        }
+        const data = chartData;
+        const originalKeys = Object.keys(data);
+        // CRITICAL FIX: Detect data source and extract raw backend data
+        const hasRawBackend = '__raw_backend_response' in data && data.__raw_backend_response !== null;
+        let rawBackendData;
+        if (hasRawBackend) {
+            rawBackendData = data.__raw_backend_response;
+        }
+        else if ('chart_data' in data &&
+            data.chart_data !== null &&
+            data.chart_data !== undefined) {
+            // Saved chart with chart_data wrapper
+            rawBackendData = data.chart_data;
+        }
+        else {
+            // Direct chart data or already normalized
+            rawBackendData = data;
+        }
+        const backendKeys = Object.keys(rawBackendData);
+        // Determine data source - follows stable reference patterns
+        let source = 'unknown';
+        if (hasRawBackend) {
+            source = 'new_calculation';
+        }
+        else if ('chart_data' in data || 'birth_data' in data) {
+            source = 'saved_chart';
+        }
+        else if (originalKeys.some(key => ['planets', 'houses', 'aspects'].includes(key))) {
+            source = 'saved_chart';
+        }
+        if (enableDebug) {
+            console.log('🔍 useChartProcessing - Data analysis:', {
+                source,
+                hasRawBackend,
+                originalKeys: originalKeys.slice(0, 10), // Limit debug output
+                backendKeys: backendKeys.slice(0, 10),
+            });
+        }
+        // ROBUST FIELD DETECTION: Content analysis over field names
+        const hasAsteroids = 'asteroids' in rawBackendData &&
+            rawBackendData.asteroids !== null &&
+            rawBackendData.asteroids !== undefined &&
+            typeof rawBackendData.asteroids === 'object' &&
+            Object.keys(rawBackendData.asteroids).length > 0;
+        const hasPoints = 'points' in rawBackendData &&
+            rawBackendData.points !== null &&
+            rawBackendData.points !== undefined &&
+            typeof rawBackendData.points === 'object' &&
+            Object.keys(rawBackendData.points).length > 0;
+        const hasUranian = 'uranian' in rawBackendData &&
+            rawBackendData.uranian !== null &&
+            rawBackendData.uranian !== undefined &&
+            typeof rawBackendData.uranian === 'object' &&
+            Object.keys(rawBackendData.uranian).length > 0;
+        const hasHypothetical = 'hypothetical_points' in rawBackendData &&
+            rawBackendData.hypothetical_points !== null &&
+            rawBackendData.hypothetical_points !== undefined &&
+            typeof rawBackendData.hypothetical_points === 'object' &&
+            Object.keys(rawBackendData.hypothetical_points).length > 0;
+        // Count for debugging - stable computation
+        const asteroidCount = hasAsteroids
+            ? Object.keys(rawBackendData.asteroids).length
+            : 0;
+        const pointCount = [
+            hasPoints ? Object.keys(rawBackendData.points).length : 0,
+            hasUranian ? Object.keys(rawBackendData.uranian).length : 0,
+            hasHypothetical
+                ? Object.keys(rawBackendData.hypothetical_points).length
+                : 0,
+        ].reduce((sum, count) => sum + count, 0);
+        if (enableDebug) {
+            console.log('📊 useChartProcessing - Field analysis:', {
+                hasAsteroids,
+                hasPoints,
+                hasUranian,
+                hasHypothetical,
+                asteroidCount,
+                pointCount,
+            });
+        }
+        // Process data using internal normalization
+        const result = processChartDataInternal(rawBackendData, enableDebug, useModernRulers);
+        const finalResult = {
+            ...result,
+            source,
+            hasRawBackend,
+            debug: {
+                originalKeys,
+                backendKeys,
+                dataStructure: source,
+                asteroidCount,
+                pointCount,
+            },
+        };
+        if (enableDebug) {
+            console.log('✅ useChartProcessing - Processing complete:', {
+                planetsCount: finalResult.planets.length,
+                asteroidsCount: finalResult.asteroids.length,
+                pointsCount: finalResult.points.length,
+                aspectsCount: finalResult.aspects.length,
+                housesCount: finalResult.houses.length,
+                anglesCount: finalResult.angles.length,
+                source: finalResult.source,
+                hasRawBackend: finalResult.hasRawBackend,
+            });
+        }
+        return finalResult;
+    }, [chartData, enableDebug, fallbackToSample]); // Explicit dependency array per React Hook Patterns
+}
+/**
+ * Internal chart processing function - self-contained normalization
+ * Separated for testing and clarity
+ */
+function processChartDataInternal(rawData, enableDebug, useModernRulers = true) {
+    // Process houses first for position calculations
+    const processedHouses = [];
+    if ('houses' in rawData &&
+        rawData.houses !== null &&
+        rawData.houses !== undefined) {
+        const housesData = rawData.houses;
+        if (Array.isArray(housesData)) {
+            housesData.forEach((house, index) => {
+                if (house !== null && house !== undefined) {
+                    const houseNumber = index + 1;
+                    let cusp = 0;
+                    if (typeof house === 'number') {
+                        cusp = house;
+                    }
+                    else if (typeof house === 'object' &&
+                        house !== null &&
+                        'cusp' in house) {
+                        const houseObj = house;
+                        cusp = typeof houseObj.cusp === 'number' ? houseObj.cusp : 0;
+                    }
+                    const cuspSign = getSignFromDegrees(cusp);
+                    processedHouses.push({
+                        house: houseNumber,
+                        number: houseNumber,
+                        cusp,
+                        sign: cuspSign,
+                        degree: getDegreeWithinSign(cusp),
+                        ruler: calculateHouseRuler(cuspSign, useModernRulers), // Use ruler preference from options
+                    });
+                }
+            });
+        }
+    }
+    // Get house cusps for position calculations
+    const houseCusps = processedHouses.map(h => h.cusp);
+    // Process planets, asteroids, and points
+    const allBodies = [];
+    const categorizedAsteroids = [];
+    const mainPlanets = [];
+    const points = [];
+    // Helper to process celestial body data
+    const processBodyData = (name, data, category) => {
+        if (data === null || data === undefined || typeof data !== 'object')
+            return;
+        const bodyData = data;
+        const position = typeof bodyData.position === 'number' ? bodyData.position : 0;
+        const sign = getSignFromDegrees(position);
+        const degree = getDegreeWithinSign(position);
+        const houseNumber = houseCusps.length > 0 ? calculateHousePosition(position, houseCusps) : 1;
+        const processedBody = {
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            sign,
+            degree,
+            house: String(houseNumber),
+            position,
+            retrograde: Boolean(bodyData.retrograde),
+            aspects: Array.isArray(bodyData.aspects) ? bodyData.aspects : [],
+        };
+        allBodies.push(processedBody);
+        // Categorize based on content and naming
+        const isMainPlanet = [
+            'sun',
+            'moon',
+            'mercury',
+            'venus',
+            'mars',
+            'jupiter',
+            'saturn',
+            'uranus',
+            'neptune',
+            'pluto',
+        ].includes(name.toLowerCase());
+        if (category === 'asteroid' || (!isMainPlanet && category !== 'planet')) {
+            if (category === 'asteroid') {
+                const asteroidData = {
+                    name: processedBody.name,
+                    sign: processedBody.sign,
+                    degree: processedBody.degree,
+                    house: processedBody.house,
+                    position: processedBody.position,
+                };
+                categorizedAsteroids.push(asteroidData);
+            }
+            else {
+                points.push(processedBody);
+            }
+        }
+        else {
+            mainPlanets.push(processedBody);
+        }
+    };
+    // Process each data field
+    ['planets', 'asteroids', 'points', 'uranian', 'hypothetical_points'].forEach(fieldName => {
+        const fieldData = rawData[fieldName];
+        if (fieldData === null ||
+            fieldData === undefined ||
+            typeof fieldData !== 'object')
+            return;
+        const category = fieldName === 'planets'
+            ? 'planet'
+            : fieldName === 'asteroids'
+                ? 'asteroid'
+                : 'point';
+        if (fieldData && typeof fieldData === 'object') {
+            Object.entries(fieldData).forEach(([name, data]) => {
+                processBodyData(name, data, category);
+            });
+        }
+    });
+    // Process aspects
+    const processedAspects = [];
+    if ('aspects' in rawData && Array.isArray(rawData.aspects)) {
+        rawData.aspects.forEach((aspect) => {
+            if (aspect !== null &&
+                aspect !== undefined &&
+                typeof aspect === 'object') {
+                const aspectData = aspect;
+                processedAspects.push({
+                    planet1: String(aspectData.planet1 ?? aspectData.point1 ?? ''),
+                    planet2: String(aspectData.planet2 ?? aspectData.point2 ?? ''),
+                    type: String(aspectData.type ?? aspectData.aspect_type ?? aspectData.aspect ?? ''),
+                    orb: typeof aspectData.orb === 'number' ? aspectData.orb : 0,
+                    applying: String(aspectData.applying ?? ''),
+                });
+            }
+        });
+    }
+    // Process angles
+    const processedAngles = [];
+    if ('angles' in rawData &&
+        rawData.angles !== null &&
+        typeof rawData.angles === 'object') {
+        Object.entries(rawData.angles).forEach(([name, position]) => {
+            if (typeof position === 'number') {
+                processedAngles.push({
+                    name: name.charAt(0).toUpperCase() + name.slice(1),
+                    sign: getSignFromDegrees(position),
+                    degree: getDegreeWithinSign(position),
+                    position,
+                });
+            }
+        });
+    }
+    if (enableDebug) {
+        console.log('🔧 processChartDataInternal - Results:', {
+            mainPlanetsCount: mainPlanets.length,
+            asteroidsCount: categorizedAsteroids.length,
+            pointsCount: points.length,
+            aspectsCount: processedAspects.length,
+            housesCount: processedHouses.length,
+            anglesCount: processedAngles.length,
+        });
+    }
+    return {
+        planets: mainPlanets,
+        asteroids: categorizedAsteroids,
+        angles: processedAngles,
+        houses: processedHouses,
+        aspects: processedAspects,
+        points,
+    };
+}

@@ -1,3 +1,12 @@
+---
+title: React Hook Patterns & Dependency Management (Draft)
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # React Hook Patterns & Dependency Management (Draft)
 
 > Draft created August 18, 2025 – consolidates emerging internal conventions while auditing

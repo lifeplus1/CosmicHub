@@ -1,3 +1,12 @@
+---
+title: Linting Improvement Plan
+owner: platform
+status: archived
+last_reviewed: 2025-09-02
+review_cycle: 365d
+category: archive
+---
+
 # Linting Improvement Plan
 
 ## Overview

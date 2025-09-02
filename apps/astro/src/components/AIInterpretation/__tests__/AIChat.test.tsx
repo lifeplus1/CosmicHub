@@ -1,6 +1,6 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import AIChat from '../../AIChat';
@@ -68,6 +68,11 @@ describe('AIChat Component', () => {
     mockAxiosPost.mockReset();
     mockAxios.post = mockAxiosPost;
     mockUseAuth.mockReset();
+    cleanup(); // Clean up DOM between tests
+  });
+
+  afterEach(() => {
+    cleanup(); // Additional cleanup after each test
   });
 
   it('renders loading state when auth is loading', () => {
@@ -82,7 +87,7 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getAllByText('Loading...')[0]).toBeInTheDocument();
   });
 
   it('redirects to login when user is not authenticated', () => {
@@ -106,15 +111,21 @@ describe('AIChat Component', () => {
       loading: false,
     } as AuthContext);
 
-    render(
+    const { container } = render(
       <TestWrapper>
         <AIChat />
       </TestWrapper>
     );
 
-    expect(screen.getByText('AI Astrology Chat')).toBeInTheDocument();
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
+    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    expect(chatInterface).toBeInTheDocument();
+    
+    if (chatInterface) {
+      const withinChat = within(chatInterface as HTMLElement);
+      expect(withinChat.getByText('AI Astrology Chat')).toBeInTheDocument();
+      expect(withinChat.getByPlaceholderText('Ask about your chart...')).toBeInTheDocument();
+      expect(withinChat.getByRole('button', { name: /send message/i })).toBeInTheDocument();
+    }
   });
 
   it('handles message input correctly', () => {
@@ -123,16 +134,21 @@ describe('AIChat Component', () => {
       loading: false,
     } as AuthContext);
 
-    render(
+    const { container } = render(
       <TestWrapper>
         <AIChat />
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-    fireEvent.change(textarea, { target: { value: 'Test message' } });
-
-    expect(textarea).toHaveValue('Test message');
+    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    expect(chatInterface).toBeInTheDocument();
+    
+    if (chatInterface) {
+      const withinChat = within(chatInterface as HTMLElement);
+      const textarea = withinChat.getByPlaceholderText('Ask about your chart...') as HTMLTextAreaElement;
+      fireEvent.change(textarea, { target: { value: 'Test message' } });
+      expect(textarea).toHaveValue('Test message');
+    }
   });
 
   it('submits message and displays response', async () => {
@@ -148,29 +164,35 @@ describe('AIChat Component', () => {
       },
     } as AxiosResponse);
 
-    render(
+    const { container } = render(
       <TestWrapper>
         <AIChat />
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-    const submitButton = screen.getByRole('button', { name: /send/i });
+    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    expect(chatInterface).toBeInTheDocument();
+    
+    if (chatInterface) {
+      const withinChat = within(chatInterface as HTMLElement);
+      const textarea = withinChat.getByRole('textbox') as HTMLTextAreaElement;
+      const submitButton = withinChat.getByRole('button', { name: /send message/i });
 
-    fireEvent.change(textarea, { target: { value: 'Test question' } });
-    fireEvent.click(submitButton);
+      fireEvent.change(textarea, { target: { value: 'Test question' } });
+      fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(mockAxiosPost).toHaveBeenCalledWith(
-        expect.stringContaining('/chat'),
-        { text: 'Test question' },
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: 'Bearer mock-token',
-          }),
-        })
-      );
-    });
+      await waitFor(() => {
+        expect(mockAxiosPost).toHaveBeenCalledWith(
+          expect.stringContaining('/chat'),
+          { text: 'Test question' },
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              Authorization: 'Bearer mock-token',
+            }),
+          })
+        );
+      });
+    }
   });
 
   it('handles API error gracefully', async () => {
@@ -182,21 +204,27 @@ describe('AIChat Component', () => {
     mockGetAuthToken.mockResolvedValue('mock-token');
     mockAxiosPost.mockRejectedValue(new Error('API Error'));
 
-    render(
+    const { container } = render(
       <TestWrapper>
         <AIChat />
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-    const submitButton = screen.getByRole('button', { name: /send/i });
+    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    expect(chatInterface).toBeInTheDocument();
+    
+    if (chatInterface) {
+      const withinChat = within(chatInterface as HTMLElement);
+      const textarea = withinChat.getByRole('textbox') as HTMLTextAreaElement;
+      const submitButton = withinChat.getByRole('button', { name: /send message/i });
 
-    fireEvent.change(textarea, { target: { value: 'Test question' } });
-    fireEvent.click(submitButton);
+      fireEvent.change(textarea, { target: { value: 'Test question' } });
+      fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(mockAxiosPost).toHaveBeenCalled();
-    });
+      await waitFor(() => {
+        expect(mockAxiosPost).toHaveBeenCalled();
+      });
+    }
   });
 
   it('disables submit button when message is empty', () => {
@@ -205,14 +233,20 @@ describe('AIChat Component', () => {
       loading: false,
     } as AuthContext);
 
-    render(
+    const { container } = render(
       <TestWrapper>
         <AIChat />
       </TestWrapper>
     );
 
-    const submitButton = screen.getByRole('button', { name: /send/i });
-    expect(submitButton).toBeDisabled();
+    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    expect(chatInterface).toBeInTheDocument();
+    
+    if (chatInterface) {
+      const withinChat = within(chatInterface as HTMLElement);
+      const submitButton = withinChat.getByRole('button', { name: /send message/i });
+      expect(submitButton).toBeDisabled();
+    }
   });
 
   it('enables submit button when message has content', () => {
@@ -221,17 +255,22 @@ describe('AIChat Component', () => {
       loading: false,
     } as AuthContext);
 
-    render(
+    const { container } = render(
       <TestWrapper>
         <AIChat />
       </TestWrapper>
     );
 
-    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-    const submitButton = screen.getByRole('button', { name: /send/i });
+    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    expect(chatInterface).toBeInTheDocument();
+    
+    if (chatInterface) {
+      const withinChat = within(chatInterface as HTMLElement);
+      const textarea = withinChat.getByRole('textbox') as HTMLTextAreaElement;
+      const submitButton = withinChat.getByRole('button', { name: /send message/i });
 
-    fireEvent.change(textarea, { target: { value: 'Test message' } });
-
-    expect(submitButton).not.toBeDisabled();
+      fireEvent.change(textarea, { target: { value: 'Test message' } });
+      expect(submitButton).not.toBeDisabled();
+    }
   });
 });

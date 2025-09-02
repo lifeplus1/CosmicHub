@@ -1,3 +1,12 @@
+---
+title: 📚 CosmicHub Quick Reference Guide
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 120d
+category: reference
+---
+
 # 📚 CosmicHub Quick Reference Guide
 
 > **Purpose**: Condensed project overview for quick reference and external AI systems  

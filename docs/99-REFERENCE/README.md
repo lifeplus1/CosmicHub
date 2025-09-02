@@ -1,3 +1,12 @@
+---
+title: 📖 99-REFERENCE - Reference Materials
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 120d
+category: reference
+---
+
 # 📖 99-REFERENCE - Reference Materials
 
 This directory is designated for reference materials and standards documentation.

@@ -1,3 +1,12 @@
+---
+title: 🎨 Font Loading Optimization - Issue Resolution
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # 🎨 Font Loading Optimization - Issue Resolution
 
 ## 🚨 Problem Identified

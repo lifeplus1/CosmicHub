@@ -1,3 +1,12 @@
+---
+title: 📚 03-GUIDES - All Development & Feature Guides
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # 📚 03-GUIDES - All Development & Feature Guides
 
 This directory contains all practical guides for development, deployment, and feature

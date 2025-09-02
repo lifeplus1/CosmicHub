@@ -293,3 +293,6 @@ async def health_check() -> HealthCheckResponse:
         return HealthCheckResponse(status="healthy", timestamp=datetime.now().isoformat())
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Analytics service unhealthy: {str(e)}")
+
+# Export the router for import in main.py
+__all__ = ["router"]

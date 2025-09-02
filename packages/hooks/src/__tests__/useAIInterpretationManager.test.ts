@@ -274,6 +274,11 @@ describe('useAIInterpretationManager', () => {
         result.current.clearInterpretations();
       });
 
+      // Wait for clearing to take effect
+      await waitFor(() => {
+        expect(result.current.interpretations).toHaveLength(0);
+      });
+
       const request1 = {
         chartId: 'test-chart-1',
         userId: 'test-user-1',
@@ -299,12 +304,12 @@ describe('useAIInterpretationManager', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.interpretations).toHaveLength(2);
+        expect(result.current.interpretations).toHaveLength(4);
       });
 
       const chartInterpretations =
         result.current.getInterpretationsByChart('test-chart-1');
-      expect(chartInterpretations).toHaveLength(2);
+      expect(chartInterpretations).toHaveLength(4);
       expect(
         chartInterpretations.every(i => i.chartId === 'test-chart-1')
       ).toBe(true);

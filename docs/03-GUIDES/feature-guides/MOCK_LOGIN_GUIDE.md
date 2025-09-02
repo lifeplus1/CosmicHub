@@ -1,3 +1,12 @@
+---
+title: Mock Login System for CosmicHub
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: guide
+---
+
 # Mock Login System for CosmicHub
 
 This document explains how to use the mock login system for testing different subscription tiers in

@@ -1,3 +1,12 @@
+---
+title: OBS-012 Deployment Status Report
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 60d
+category: monitoring
+---
+
 # OBS-012 Deployment Status Report
 
 ## Incident Response Automation System

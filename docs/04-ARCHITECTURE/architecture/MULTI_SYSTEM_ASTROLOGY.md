@@ -1,3 +1,12 @@
+---
+title: 🌟 Multi-System Astrology Integration - CosmicHub
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 90d
+category: architecture
+---
+
 # 🌟 Multi-System Astrology Integration - CosmicHub
 
 ## Overview

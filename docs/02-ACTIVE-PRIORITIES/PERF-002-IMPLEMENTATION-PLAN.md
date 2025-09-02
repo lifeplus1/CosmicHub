@@ -1,3 +1,12 @@
+---
+title: PERF-002: Tree-Shaking Optimization - Implementation Plan
+owner: platform
+status: active
+last_reviewed: 2025-09-02
+review_cycle: 30d
+category: plan
+---
+
 # PERF-002: Tree-Shaking Optimization - Implementation Plan
 
 ## 🎯 **PROJECT OVERVIEW**
