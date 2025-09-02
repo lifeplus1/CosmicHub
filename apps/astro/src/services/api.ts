@@ -244,9 +244,15 @@ export const getAuthToken = async (): Promise<string | null> => {
   devConsole.log?.('🔑 Getting auth token...');
   const user = auth.currentUser;
 
-  // In development, allow mock authentication
-  if (import.meta.env.DEV === true && user === null) {
-    devConsole.log?.('🧪 Using development mock token');
+  // In development, allow mock authentication - check for both null and undefined auth states
+  if (import.meta.env.DEV === true && (user === null || user === undefined)) {
+    devConsole.log?.('🧪 Using development mock token (user not authenticated)');
+    return 'mock-dev-token';
+  }
+
+  // Also check if auth is completely unavailable (testing environment)
+  if (typeof auth === 'undefined' || auth === null) {
+    devConsole.log?.('🧪 Using development mock token (auth unavailable)');
     return 'mock-dev-token';
   }
 
@@ -263,6 +269,11 @@ export const getAuthToken = async (): Promise<string | null> => {
     return token;
   } catch (error) {
     devConsole.error('❌ Error getting auth token:', error);
+    // Fallback to mock token in development when auth fails
+    if (import.meta.env.DEV === true) {
+      devConsole.log?.('🧪 Falling back to development mock token');
+      return 'mock-dev-token';
+    }
     return null;
   }
 };
