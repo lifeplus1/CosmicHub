@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# Phase 2 Implementation Plan: Enhanced Type Checking and Module Resolution
+## Phase 2 Implementation Plan: Enhanced Type Checking and Module Resolution
 
 This document outlines the implementation plan for Phase 2 of our linting and type checking
 improvements, focusing on resolving the remaining TypeScript module resolution issues and enhancing
@@ -67,7 +67,7 @@ the type safety of our codebase.
 }
 ```
 
-2. Improve the declaration file structure to match the export patterns:
+1. Improve the declaration file structure to match the export patterns:
 
 ```typescript
 // In packages/config/src/hooks/index.ts
@@ -76,7 +76,7 @@ export * from './useAnalytics';
 // etc.
 ```
 
-3. Update the build process to ensure all declaration files are properly generated:
+1. Update the build process to ensure all declaration files are properly generated:
 
 ```typescript
 // In packages/config/tsconfig.build.json
@@ -124,7 +124,7 @@ export interface AnalyticsService {
 export type GetAnalyticsType = () => Promise<Analytics>;
 ```
 
-2. Update the dynamic import pattern in hooks:
+1. Update the dynamic import pattern in hooks:
 
 ```typescript
 // In packages/config/src/hooks/useAnalytics.ts
@@ -184,7 +184,7 @@ export function useAnalytics() {
 # Delete packages/ui/scripts/build-phase1.sh
 ```
 
-2. Update the build script in package.json:
+1. Update the build script in package.json:
 
 ```json
 // In packages/ui/package.json
@@ -195,7 +195,7 @@ export function useAnalytics() {
 }
 ```
 
-3. Fix import statements in UI package:
+1. Fix import statements in UI package:
 
 ```typescript
 // Update all imports to use proper paths
@@ -232,7 +232,7 @@ import { useABTest } from '@cosmichub/config/hooks';
 }
 ```
 
-2. Implement a type error ratcheting mechanism:
+1. Implement a type error ratcheting mechanism:
 
 ```typescript
 // In scripts/type-error-ratchet.mjs
@@ -274,7 +274,7 @@ console.log(
 );
 ```
 
-3. Add the script to package.json:
+1. Add the script to package.json:
 
 ```json
 // In package.json

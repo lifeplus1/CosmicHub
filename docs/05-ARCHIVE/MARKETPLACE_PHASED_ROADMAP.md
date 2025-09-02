@@ -7,8 +7,6 @@ review_cycle: 365d
 category: archive
 ---
 
-# Phased Marketplace Roadmap for CosmicHub Astrology App
-
 **Status:** ✅ Complete (v1 approved specification) – 2025-08-16
 
 _Note: Further changes should be tracked via incremental CHANGELOG entries rather than editing core

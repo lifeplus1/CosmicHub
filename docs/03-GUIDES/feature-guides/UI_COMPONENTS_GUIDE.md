@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# UI Components Guide - CosmicHub Design System
+## UI Components Guide - CosmicHub Design System
 
 ## Overview
 

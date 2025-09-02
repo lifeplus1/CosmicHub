@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# Experiment Lifecycle Outline
-
 ---
 
 Status: Draft Owner: Experimentation Lead Last-Updated: 2025-08-16 Next-Review: 2025-09-10 Source:

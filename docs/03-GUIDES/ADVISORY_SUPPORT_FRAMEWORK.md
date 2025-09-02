@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# 🎯 Advisory Support Framework - Post Endpoint Consolidation
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 **Date**: August 26, 2025  
 **Context**: Ongoing documentation and strategic advisory support  

@@ -1,19 +1,26 @@
 ---
-title: CosmicHub Blog System - Next Steps & Implementation Guide
-owner: platform
+title: CosmicHub Blog System - Next Steps & Implementa### 2. Content Management System (CMS)
+
+#### CMS Priority: HIGH
+
+**Options**:
+
+1. **Admin Interface** (Custom built)
+2. **Headless CMS** (Strapi, Sanity, Contentful)
+3. **Markdown-based** (MDX files with frontmatter)
+
+#### Recommended: Custom Admin Interfaceowner: platform
 status: archived
 last_reviewed: 2025-09-02
 review_cycle: 365d
 category: archive
 ---
 
-# CosmicHub Blog System - Next Steps & Implementation Guide
-
 ## Phase 1: Immediate Next Steps (1-2 weeks)
 
 ### 1. Backend Integration
 
-**Priority: HIGH**
+#### Priority: HIGH
 
 **Current State**: Using mock data in frontend components **Target**: Connect to real database/CMS
 
@@ -60,7 +67,7 @@ export class BlogAPI {
 
 ### 2. Content Management System (CMS)
 
-**Priority: HIGH**
+#### CMS Priority: HIGH
 
 **Options**:
 
@@ -68,7 +75,7 @@ export class BlogAPI {
 2. **Headless CMS** (Strapi, Sanity, Contentful)
 3. **Markdown-based** (MDX files with frontmatter)
 
-**Recommended: Custom Admin Interface**
+#### Recommended: Custom Admin Interface
 
 ```typescript
 // Create admin routes
@@ -126,7 +133,7 @@ export class EmailService {
 
 ### 4. SEO & Analytics
 
-**Priority: HIGH**
+#### SEO Priority: HIGH
 
 **SEO Improvements**:
 
@@ -166,7 +173,7 @@ export class EmailService {
 
 ### 5. Advanced Comment Features
 
-**Priority: MEDIUM**
+#### Comment Priority: MEDIUM
 
 **Current State**: Basic threading and likes **Enhancements Needed**:
 
@@ -193,7 +200,7 @@ interface EnhancedComment extends Comment {
 
 ### 6. Search Enhancement
 
-**Priority: MEDIUM**
+#### Search Priority: MEDIUM
 
 **Current State**: Client-side filtering **Target**: Full-text search with backend
 
@@ -228,7 +235,7 @@ export class SearchService {
 
 ### 7. User Profiles & Personalization
 
-**Priority: MEDIUM**
+#### Profile Priority: MEDIUM
 
 **Features**:
 

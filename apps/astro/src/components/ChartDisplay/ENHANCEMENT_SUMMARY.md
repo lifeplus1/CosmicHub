@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# ChartDisplay Component Enhancement Summary
+## ChartDisplay Component Enhancement Summary
 
 ## Overview
 

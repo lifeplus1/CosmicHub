@@ -1,4 +1,4 @@
-import type { ExtendedBirthData } from '../contexts/BirthDataContext';
+import type { ExtendedBirthData } from '@cosmichub/types';
 
 /**
  * Factory for an ExtendedBirthData object with sensible defaults for tests.

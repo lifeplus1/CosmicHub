@@ -7,10 +7,6 @@ review_cycle: 60d
 category: security
 ---
 
-# Pseudonymization Strategy for Analytics Events
-
----
-
 Status: Review Owner: Privacy Lead Last-Updated: 2025-08-16 Next-Review: 2025-09-15 Source: Grok
 Generated + Manual Edits
 
@@ -103,8 +99,8 @@ operational overhead.
 - **Implementation**:
   - Store rotation history in a secure log (e.g., encrypted in Firestore) for auditing, but never
     log original data.
-  - Automate via a cron-like script in `scripts/rotate-salts.sh`, integrated with Docker/Render for
-    scheduled execution.
+  - Automate via a cron-like script in `tools/maintenance/rotate-salts.sh`, integrated with
+    Docker/Render for scheduled execution.
 
 **Performance Note**: Batched re-pseudonymization ensures <5% CPU spike during rotations; test with
 `pytest` in `backend/tests/test_pseudonymization.py` for load simulation.

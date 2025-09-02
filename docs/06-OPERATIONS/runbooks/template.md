@@ -7,7 +7,7 @@ review_cycle: 120d
 category: operations
 ---
 
-# Incident Runbook Template
+## Incident Runbook Template
 
 Status: Adopted Owner: Reliability Lead Last-Updated: 2025-08-16 Next-Review: 2025-11-01 Source:
 Manual

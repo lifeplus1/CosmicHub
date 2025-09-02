@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
 
@@ -72,7 +72,8 @@ vi.mock('@tanstack/react-query', () => ({
     setQueryData: vi.fn(),
   })),
   QueryClientProvider: ({
-    client,
+    // eslint-disable-next-line no-unused-vars
+    client: _unused_client,
     children,
   }: {
     client: any;
@@ -102,19 +103,25 @@ vi.mock('../contexts/UpgradeModalContext', () => ({
 // Mock ErrorBoundary
 vi.mock('../components/ErrorBoundary', () => ({
   default: class ErrorBoundary extends React.Component<
-    { children: React.ReactNode; onError?: (error: Error) => void },
+    // eslint-disable-next-line no-unused-vars
+    { children: React.ReactNode; onError?: (____error: Error) => void },
     { hasError: boolean; error: Error | null }
   > {
-    constructor(props: { children: React.ReactNode; onError?: (error: Error) => void }) {
+    constructor(props: {
+      children: React.ReactNode;
+      // eslint-disable-next-line no-unused-vars
+      onError?: (____error: Error) => void;
+    }) {
       super(props);
       this.state = { hasError: false, error: null };
     }
 
-    static getDerivedStateFromError(error: Error) {
-      return { hasError: true, error };
+    static getDerivedStateFromError(_error: Error) {
+      return { hasError: true, error: _error };
     }
 
-    override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // eslint-disable-next-line no-unused-vars
+    override componentDidCatch(error: Error, ____errorInfo: React.ErrorInfo) {
       this.props.onError?.(error);
     }
 
@@ -320,8 +327,10 @@ vi.mock('react', async () => {
 // Create a minimal test version of the App component
 const TestApp: React.FC = () => {
   // Simulate config usage
-  const config = getAppConfig('astro');
-  const aiFeatureEnabled = isFeatureEnabled('aiInterpretation');
+  // eslint-disable-next-line no-unused-vars
+  const ____config = getAppConfig('astro');
+  // eslint-disable-next-line no-unused-vars
+  const ____aiFeatureEnabled = isFeatureEnabled('aiInterpretation');
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -417,12 +426,18 @@ describe('App Integration Tests', () => {
       render(<TestApp />);
 
       // Just check that elements exist, don't worry about exact counts due to test isolation
-      expect(screen.getAllByTestId('integration-navbar').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByTestId('integration-footer').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByTestId('integration-navbar').length
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByTestId('integration-footer').length
+      ).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByTestId('integration-browser-router').length
       ).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByTestId('integration-routes').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByTestId('integration-routes').length
+      ).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByTestId('integration-suspense').length
       ).toBeGreaterThanOrEqual(1);
@@ -440,7 +455,10 @@ describe('App Integration Tests', () => {
       const subscriptionProviders = screen.getAllByTestId(
         'integration-subscription-provider'
       );
-      expect(subscriptionProviders[0]).toHaveAttribute('data-app-type', 'astro');
+      expect(subscriptionProviders[0]).toHaveAttribute(
+        'data-app-type',
+        'astro'
+      );
 
       const routers = screen.getAllByTestId('integration-browser-router');
       expect(routers[0]).toHaveAttribute(
@@ -455,7 +473,9 @@ describe('App Integration Tests', () => {
       render(<TestApp />);
 
       // Check that routes are configured - allow for multiple instances
-      expect(screen.getAllByTestId('integration-route--').length).toBeGreaterThanOrEqual(1); // root route
+      expect(
+        screen.getAllByTestId('integration-route--').length
+      ).toBeGreaterThanOrEqual(1); // root route
       expect(
         screen.getAllByTestId('integration-route--chart').length
       ).toBeGreaterThanOrEqual(1);
@@ -468,7 +488,9 @@ describe('App Integration Tests', () => {
       render(<TestApp />);
 
       // Initially should show suspense content
-      expect(screen.getAllByTestId('integration-suspense').length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByTestId('integration-suspense').length
+      ).toBeGreaterThan(0);
       expect(
         screen.getAllByTestId('integration-suspense-content').length
       ).toBeGreaterThan(0);
@@ -490,7 +512,9 @@ describe('App Integration Tests', () => {
       render(<TestApp />);
 
       // Verify that the error boundary is present
-      expect(screen.getAllByTestId('integration-error-boundary').length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByTestId('integration-error-boundary').length
+      ).toBeGreaterThan(0);
     });
 
     test('handles provider initialization failures gracefully', () => {
@@ -529,7 +553,9 @@ describe('App Integration Tests', () => {
       render(<TestApp />);
 
       // Should show cosmic loading component
-      const loadingElements = screen.getAllByTestId('integration-cosmic-loading');
+      const loadingElements = screen.getAllByTestId(
+        'integration-cosmic-loading'
+      );
       expect(loadingElements.length).toBeGreaterThan(0);
       expect(loadingElements[0]).toHaveAttribute('role', 'status');
       expect(loadingElements[0]).toHaveAttribute('aria-live', 'polite');
@@ -561,7 +587,9 @@ describe('App Integration Tests', () => {
       render(<TestSlowApp />);
 
       // Should show loading initially
-      expect(screen.getAllByTestId('integration-suspense').length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByTestId('integration-suspense').length
+      ).toBeGreaterThan(0);
     });
   });
 
@@ -641,11 +669,17 @@ describe('App Integration Tests', () => {
       render(<TestApp />);
 
       // Check for proper ARIA landmarks - allow for multiple instances
-      expect(screen.getAllByRole('navigation').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByRole('contentinfo').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByRole('navigation').length).toBeGreaterThanOrEqual(
+        1
+      );
+      expect(screen.getAllByRole('contentinfo').length).toBeGreaterThanOrEqual(
+        1
+      );
 
       // Check loading states have proper ARIA attributes
-      const cosmicLoadingElements = screen.getAllByTestId('integration-cosmic-loading');
+      const cosmicLoadingElements = screen.getAllByTestId(
+        'integration-cosmic-loading'
+      );
       expect(cosmicLoadingElements[0]).toHaveAttribute('role', 'status');
       expect(cosmicLoadingElements[0]).toHaveAttribute('aria-live', 'polite');
     });

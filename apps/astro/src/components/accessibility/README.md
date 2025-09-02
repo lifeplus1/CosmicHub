@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# Accessibility Components
+## Accessibility Components
 
 ## VisuallyHidden
 

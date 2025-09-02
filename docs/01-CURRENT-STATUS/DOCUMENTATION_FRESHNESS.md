@@ -4,14 +4,9 @@ generated_at: 2025-09-02
 status: generated
 ---
 
-# Documentation Freshness Report
-
-
 Generated: 2025-09-02
 
-
-Active docs: 163  | Overdue: 0 (0.0%)
-
+Active docs: 162 | Overdue: 0 (0.0%)
 
 ## Overdue Documents
 

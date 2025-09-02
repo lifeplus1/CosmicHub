@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# Phase 1 Progress Report: Infrastructure Fixes
+## Phase 1 Progress Report: Infrastructure Fixes
 
 ## Issues Identified
 

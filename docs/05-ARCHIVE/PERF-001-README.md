@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# PERF-001: Advanced Performance Optimization
+## PERF-001: Advanced Performance Optimization
 
 ## Overview
 

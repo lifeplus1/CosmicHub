@@ -33,9 +33,9 @@ describe('GatesChannelsTab accessibility', () => {
       <GatesChannelsTab humanDesignData={minimalHD} />
     );
     const results = await axe(container, {
-      rules: { 
+      rules: {
         'color-contrast': { enabled: false },
-        'heading-order': { enabled: false } // Disable heading order check for now
+        'heading-order': { enabled: false }, // Disable heading order check for now
       },
     });
     expect(results.violations).toEqual([]);

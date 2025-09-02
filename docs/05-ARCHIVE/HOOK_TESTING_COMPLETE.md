@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# 🎉 useChartProcessing Hook - TESTING COMPLETE
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 ## ✅ **ALL TESTS PASSED - HOOK READY FOR PRODUCTION**
 

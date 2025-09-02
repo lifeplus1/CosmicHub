@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# 📘 00-OVERVIEW - Project Overview & Essential Context
+<!-- H1 heading removed to fix MD025 lint error -->
 
 This directory contains the most essential documentation for understanding and working with the
 CosmicHub project.

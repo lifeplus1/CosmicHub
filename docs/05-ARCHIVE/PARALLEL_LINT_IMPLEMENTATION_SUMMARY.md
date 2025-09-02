@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# CosmicHub Parallel Lint Testing Implementation Summary
+<!-- Removed duplicate H1 to resolve MD025 -->
 
 ## Overview
 

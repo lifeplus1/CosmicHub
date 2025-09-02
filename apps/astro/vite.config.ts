@@ -31,7 +31,10 @@ export default defineConfig({
         __dirname,
         '../../packages/integrations/src'
       ),
-      '@cosmichub/analytics': path.resolve(__dirname, '../../packages/analytics/dist'),
+      '@cosmichub/analytics': path.resolve(
+        __dirname,
+        '../../packages/analytics/dist'
+      ),
       '@cosmichub/types': path.resolve(__dirname, '../../packages/types/dist'),
     },
   },

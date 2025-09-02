@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# 🔢 Numerology Calculator - Feature Documentation
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 ## Overview
 

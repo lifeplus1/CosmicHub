@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# Authentication Implementation Plan
-
 ## 🎯 OVERVIEW
 
 Implement proper authentication across both Astro and HealWave applications with Firebase Auth

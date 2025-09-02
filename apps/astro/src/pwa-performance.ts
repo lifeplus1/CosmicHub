@@ -26,7 +26,7 @@ function safeLog(message: string): void {
   }
 }
 
-function safeWarn(message: string, ...args: unknown[]): void {
+function _safeWarn(message: string, ...args: unknown[]): void {
   try {
     void import('./config/environment')
       .then(({ devConsole }: { devConsole: DevConsole }) => {
@@ -40,7 +40,7 @@ function safeWarn(message: string, ...args: unknown[]): void {
   }
 }
 
-function safeError(message: string, ...args: unknown[]): void {
+function _safeError(message: string, ...args: unknown[]): void {
   try {
     void import('./config/environment')
       .then(({ devConsole }: { devConsole: DevConsole }) => {
@@ -59,7 +59,7 @@ function safeError(message: string, ...args: unknown[]): void {
 // Connection-aware loading (builds on existing lazy loading)
 // Local fallback type for NetworkInformation (not in standard lib in some TS configs)
 // Minimal subset used by this file
-interface NetworkInformationFallback {
+interface _NetworkInformationFallback {
   effectiveType?: string;
   downlink?: number;
   saveData?: boolean;

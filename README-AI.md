@@ -7,8 +7,6 @@ review_cycle: 60d
 category: overview
 ---
 
-# 🤖 CosmicHub AI Assistant Guide
-
 > **Auto-Discovery File**: AI assistants should read this file first for complete project context
 
 ## 📚 ESSENTIAL CONTEXT FILES (Read First)

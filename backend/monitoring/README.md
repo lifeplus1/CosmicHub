@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# CosmicHub Monitoring Stack
+<!-- H1 heading removed to fix MD025 lint error -->
 
 Comprehensive monitoring and alerting setup for CosmicHub using Prometheus, Alertmanager, and
 Grafana.

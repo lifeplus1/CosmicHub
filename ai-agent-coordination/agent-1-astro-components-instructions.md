@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# ComponentFixAgent - Lint Fix Instructions
+## ComponentFixAgent - Lint Fix Instructions
 
 ## Mission
 
@@ -53,7 +53,7 @@ React component lint fixes
 # Run targeted lint analysis (OVERWRITES existing analysis file)
 npx eslint apps/astro/src/components --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --max-warnings=30 --format json > ai-agent-coordination/agent-1-astro-components-analysis.json
 
-# Generate fix suggestions (temporary file - will be cleaned up)  
+# Generate fix suggestions (temporary file - will be cleaned up)
 npx eslint apps/astro/src/components --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --fix-dry-run --format json > /tmp/agent-1-astro-components-fixes-temp.json
 ```
 
@@ -92,5 +92,5 @@ Create `ai-agent-coordination/agent-1-astro-components-completion.json` with:
 - Recommendations for dependent agents
 
 ---
-**Generated**: 2025-08-28T03:35:32.977Z
-**Coordination ID**: agent-1-astro-components
+
+**Generated**: 2025-08-28T03:35:32.977Z **Coordination ID**: agent-1-astro-components

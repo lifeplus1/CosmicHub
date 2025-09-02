@@ -1,14 +1,3 @@
----
-title: 🎯 02-ACTIVE-PRIORITIES - Current Work & Tasks
-owner: platform
-status: active
-last_reviewed: 2025-09-02
-review_cycle: 30d
-category: plan
----
-
-# 🎯 02-ACTIVE-PRIORITIES - Current Work & Tasks
-
 This directory contains information about current work, active tasks, and immediate priorities.
 
 ## Key Files

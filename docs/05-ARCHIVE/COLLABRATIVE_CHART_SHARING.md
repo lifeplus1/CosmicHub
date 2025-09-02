@@ -7,8 +7,6 @@ review_cycle: 365d
 category: archive
 ---
 
-# User Story Map for Real-Time Collaborative Chart Sharing
-
 To integrate real-time collaborative chart sharing into our astrology app, we'll focus on enabling
 users to share and edit natal, synastry, or transit charts collaboratively. This feature enhances
 marketability by fostering community interactions (e.g., group interpretations during transits) and

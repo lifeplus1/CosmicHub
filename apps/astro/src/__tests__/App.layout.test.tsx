@@ -432,7 +432,9 @@ describe('App Layout Structure', () => {
               <div data-testid='feature-beta-banner'>Beta Features Enabled</div>
             )}
             {mockIsFeatureEnabled('maintenance') && (
-              <div data-testid='feature-maintenance-banner'>Maintenance Mode</div>
+              <div data-testid='feature-maintenance-banner'>
+                Maintenance Mode
+              </div>
             )}
           </div>
         );
@@ -530,7 +532,11 @@ describe('App Layout Structure', () => {
     test('skip links are properly implemented', () => {
       const SkipLinkLayout = () => (
         <div>
-          <a href='#skip-main-content' className='skip-link' data-testid='skip-to-main-link'>
+          <a
+            href='#skip-main-content'
+            className='skip-link'
+            data-testid='skip-to-main-link'
+          >
             Skip to main content
           </a>
           <nav data-testid='skip-navigation'>Navigation</nav>
@@ -554,23 +560,12 @@ describe('App Layout Structure', () => {
   describe('Layout Error States', () => {
     test('handles missing components gracefully', () => {
       const ComponentWithError = () => {
-        try {
-          return (
-            <div>
-              <div data-testid='working-component'>This works</div>
-              {/* Simulate missing component */}
-              {false && (
-                <div data-testid='missing-component'>This is missing</div>
-              )}
-            </div>
-          );
-        } catch (error) {
-          return (
-            <div data-testid='error-fallback'>
-              Error: {(error as Error).message}
-            </div>
-          );
-        }
+        return (
+          <div>
+            <div data-testid='working-component'>This works</div>
+            {/* Simulate missing component - intentionally not rendered */}
+          </div>
+        );
       };
 
       render(<ComponentWithError />);

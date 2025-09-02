@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# CosmicHub Structure Cleanup Plan (August 2025)
-
 Goal: finalize migration from legacy `shared/` directory to first-class typed packages and reduce
 duplication (especially subscription tier definitions) without breaking current builds.
 

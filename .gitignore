@@ -262,3 +262,27 @@ debug_*
 *temp*.*
 fix-*.*
 analyze-*.*
+
+# === Cache and Metrics ===
+cache/
+metrics/*.json
+!metrics/.gitkeep
+.tsbuildinfo
+*.tsbuildinfo
+eslint-report.json
+lint-*.json
+lint-*.txt
+benchmark_*.json
+test-analytics*.db
+
+# === Coordination and Processing Logs ===
+coordination-output.log
+*.cpython-*.pyc
+astro_phase*.json
+phase*_scan.json
+
+# === Backup and Archive Files ===
+*-backup-*.tar.gz
+cleanup-backup-*/
+tree-shaking-backup/
+restore_*.sh

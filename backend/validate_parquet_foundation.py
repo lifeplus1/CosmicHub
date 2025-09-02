@@ -10,6 +10,7 @@ import json
 import tempfile
 import shutil
 from pathlib import Path
+from typing import Dict, Any
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -29,7 +30,7 @@ try:
     print("✅ ParquetExporter initialized")
     
     # Test chart calculation export
-    chart_data = {
+    chart_data: Dict[str, Any] = {
         'session_id': 'validation_001',
         'chart_type': 'natal',
         'success': True,
@@ -76,7 +77,7 @@ try:
         print(f"   Chart type: {df['calculation_type'].iloc[0]}")
     
     # Test AI interaction export
-    ai_data = {
+    ai_data: Dict[str, Any] = {
         'interaction_id': 'validation_ai_001',
         'type': 'question_answer',
         'feature': 'custom_qa',

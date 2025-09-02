@@ -6,12 +6,12 @@ while building foundation for analytics warehouse and ML training pipeline.
 """
 
 import json
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
-from datetime import datetime
+import pandas as pd  # type: ignore
+import pyarrow as pa  # type: ignore
+import pyarrow.parquet as pq  # type: ignore
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -43,10 +43,10 @@ class ParquetExporter:
         Returns:
             Dictionary with export paths for each format
         """
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         session_id = chart_data.get('session_id', f'calc_{timestamp}')
         
-        export_paths = {}
+        export_paths: Dict[str, str] = {}
         
         # Always maintain JSON for current system compatibility
         if "json" in formats:
@@ -68,10 +68,10 @@ class ParquetExporter:
         
         Critical for Phase 3 ML training data pipeline and reward model training.
         """
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         interaction_id = interaction_data.get('interaction_id', f'ai_{timestamp}')
         
-        export_paths = {}
+        export_paths: Dict[str, str] = {}
         
         if "json" in formats:
             json_path = self._export_ai_json(interaction_data, interaction_id, timestamp)
@@ -107,7 +107,7 @@ class ParquetExporter:
         df = pd.DataFrame([flattened_data])
         
         # Define Parquet file path with partitioning strategy
-        date_partition = datetime.utcnow().strftime("%Y%m%d")
+        date_partition = datetime.now(timezone.utc).strftime("%Y%m%d")
         parquet_path = parquet_dir / f"date={date_partition}" / f"{session_id}_{timestamp}.parquet"
         parquet_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -138,7 +138,7 @@ class ParquetExporter:
         
         df = pd.DataFrame([flattened_data])
         
-        date_partition = datetime.utcnow().strftime("%Y%m%d")
+        date_partition = datetime.now(timezone.utc).strftime("%Y%m%d")
         parquet_path = parquet_dir / f"date={date_partition}" / f"{interaction_id}_{timestamp}.parquet"
         parquet_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -152,8 +152,8 @@ class ParquetExporter:
         
         Extracts key metrics for business intelligence and pattern analysis.
         """
-        flattened = {
-            'timestamp': datetime.utcnow().isoformat(),
+        flattened: Dict[str, Any] = {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'user_id_hash': user_id,
             'calculation_type': data.get('chart_type', 'natal'),
             'processing_time_ms': data.get('processing_time', 0),
@@ -183,8 +183,8 @@ class ParquetExporter:
         
         Critical for Phase 3 reward model training and pattern recognition.
         """
-        flattened = {
-            'timestamp': datetime.utcnow().isoformat(),
+        flattened: Dict[str, Any] = {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'interaction_type': data.get('type', 'question_answer'),
             'feature_used': data.get('feature', 'custom_qa'),
             'query_length': len(data.get('query', '')),
@@ -204,7 +204,7 @@ class ParquetExporter:
                 
         return flattened
         
-    def create_analytics_summary(self, date_range: Optional[tuple] = None) -> Dict[str, Any]:
+    def create_analytics_summary(self, date_range: Optional[Tuple[str, str]] = None) -> Dict[str, Any]:
         """
         Generate analytics summary from Parquet files.
         
@@ -222,10 +222,10 @@ class ParquetExporter:
             return {"error": "No Parquet files found"}
             
         # Combine all data for analysis
-        dataframes = []
+        dataframes: List[Any] = []  # List of pandas DataFrames
         for file_path in parquet_files[:100]:  # Limit for demo
             try:
-                df = pd.read_parquet(file_path)
+                df = pd.read_parquet(file_path)  # type: ignore
                 dataframes.append(df)
             except Exception as e:
                 logger.warning(f"Could not read {file_path}: {e}")
@@ -233,19 +233,19 @@ class ParquetExporter:
         if not dataframes:
             return {"error": "No readable data found"}
             
-        combined_df = pd.concat(dataframes, ignore_index=True)
+        combined_df = pd.concat(dataframes, ignore_index=True)  # type: ignore
         
         # Generate analytics summary
-        summary = {
+        summary: Dict[str, Any] = {
             'total_calculations': len(combined_df),
             'date_range': {
                 'start': combined_df['timestamp'].min(),
                 'end': combined_df['timestamp'].max()
             },
-            'chart_types': combined_df['calculation_type'].value_counts().to_dict(),
+            'chart_types': combined_df['calculation_type'].value_counts().to_dict(),  # type: ignore
             'average_processing_time': combined_df['processing_time_ms'].mean(),
             'success_rate': combined_df['success'].mean() * 100,
-            'astrology_systems': combined_df['astrology_system'].value_counts().to_dict(),
+            'astrology_systems': combined_df['astrology_system'].value_counts().to_dict(),  # type: ignore
         }
         
         return summary

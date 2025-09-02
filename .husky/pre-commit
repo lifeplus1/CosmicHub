@@ -2,10 +2,10 @@
 . "$(dirname "$0")/_/husky.sh"
 
 # 1. Run documentation freshness + markdown lint (only if markdown changed)
-bash scripts/pre_commit_docs.sh || exit 1
+bash tools/maintenance/pre_commit_docs.sh || exit 1
 
 # 1b. Enforce AI coordination filename policy (only fails on offending files)
-bash scripts/validate_ai_coord_filenames.sh || exit 1
+bash tools/maintenance/validate_ai_coord_filenames.sh || exit 1
 
 # 2. Run lint-staged for code/style enforcement
 pnpm lint-staged

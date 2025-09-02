@@ -1,6 +1,13 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+  within,
+} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import AIChat from '../../AIChat';
@@ -117,14 +124,20 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    const chatInterface = container.querySelector(
+      '[aria-label="AI Astrology Chat Interface"]'
+    );
     expect(chatInterface).toBeInTheDocument();
-    
+
     if (chatInterface) {
       const withinChat = within(chatInterface as HTMLElement);
       expect(withinChat.getByText('AI Astrology Chat')).toBeInTheDocument();
-      expect(withinChat.getByPlaceholderText('Ask about your chart...')).toBeInTheDocument();
-      expect(withinChat.getByRole('button', { name: /send message/i })).toBeInTheDocument();
+      expect(
+        withinChat.getByPlaceholderText('Ask about your chart...')
+      ).toBeInTheDocument();
+      expect(
+        withinChat.getByRole('button', { name: /send message/i })
+      ).toBeInTheDocument();
     }
   });
 
@@ -140,12 +153,16 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    const chatInterface = container.querySelector(
+      '[aria-label="AI Astrology Chat Interface"]'
+    );
     expect(chatInterface).toBeInTheDocument();
-    
+
     if (chatInterface) {
       const withinChat = within(chatInterface as HTMLElement);
-      const textarea = withinChat.getByPlaceholderText('Ask about your chart...') as HTMLTextAreaElement;
+      const textarea = withinChat.getByPlaceholderText(
+        'Ask about your chart...'
+      ) as HTMLTextAreaElement;
       fireEvent.change(textarea, { target: { value: 'Test message' } });
       expect(textarea).toHaveValue('Test message');
     }
@@ -170,13 +187,17 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    const chatInterface = container.querySelector(
+      '[aria-label="AI Astrology Chat Interface"]'
+    );
     expect(chatInterface).toBeInTheDocument();
-    
+
     if (chatInterface) {
       const withinChat = within(chatInterface as HTMLElement);
       const textarea = withinChat.getByRole('textbox') as HTMLTextAreaElement;
-      const submitButton = withinChat.getByRole('button', { name: /send message/i });
+      const submitButton = withinChat.getByRole('button', {
+        name: /send message/i,
+      });
 
       fireEvent.change(textarea, { target: { value: 'Test question' } });
       fireEvent.click(submitButton);
@@ -210,13 +231,17 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    const chatInterface = container.querySelector(
+      '[aria-label="AI Astrology Chat Interface"]'
+    );
     expect(chatInterface).toBeInTheDocument();
-    
+
     if (chatInterface) {
       const withinChat = within(chatInterface as HTMLElement);
       const textarea = withinChat.getByRole('textbox') as HTMLTextAreaElement;
-      const submitButton = withinChat.getByRole('button', { name: /send message/i });
+      const submitButton = withinChat.getByRole('button', {
+        name: /send message/i,
+      });
 
       fireEvent.change(textarea, { target: { value: 'Test question' } });
       fireEvent.click(submitButton);
@@ -239,12 +264,16 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    const chatInterface = container.querySelector(
+      '[aria-label="AI Astrology Chat Interface"]'
+    );
     expect(chatInterface).toBeInTheDocument();
-    
+
     if (chatInterface) {
       const withinChat = within(chatInterface as HTMLElement);
-      const submitButton = withinChat.getByRole('button', { name: /send message/i });
+      const submitButton = withinChat.getByRole('button', {
+        name: /send message/i,
+      });
       expect(submitButton).toBeDisabled();
     }
   });
@@ -261,13 +290,17 @@ describe('AIChat Component', () => {
       </TestWrapper>
     );
 
-    const chatInterface = container.querySelector('[aria-label="AI Astrology Chat Interface"]');
+    const chatInterface = container.querySelector(
+      '[aria-label="AI Astrology Chat Interface"]'
+    );
     expect(chatInterface).toBeInTheDocument();
-    
+
     if (chatInterface) {
       const withinChat = within(chatInterface as HTMLElement);
       const textarea = withinChat.getByRole('textbox') as HTMLTextAreaElement;
-      const submitButton = withinChat.getByRole('button', { name: /send message/i });
+      const submitButton = withinChat.getByRole('button', {
+        name: /send message/i,
+      });
 
       fireEvent.change(textarea, { target: { value: 'Test message' } });
       expect(submitButton).not.toBeDisabled();

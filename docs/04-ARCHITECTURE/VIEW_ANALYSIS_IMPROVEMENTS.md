@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# UI/UX Analysis & Improvements: Unified vs Separate Tables Views
-
 ## Analysis Summary
 
 After thoroughly reviewing both the **Unified View** and **Separate Tables View**, I identified

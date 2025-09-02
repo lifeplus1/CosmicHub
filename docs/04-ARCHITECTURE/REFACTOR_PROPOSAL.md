@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# Chart Data Processing Refactor Proposal
-
 ## Current Issues
 
 1. Multiple sign calculation functions

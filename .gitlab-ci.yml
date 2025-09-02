@@ -103,7 +103,7 @@ lint-delta-report:
   script:
     - echo "📊 Generating lint delta report..."
     - npm ci --cache .npm --prefer-offline
-    - node scripts/lint-delta.mjs > lint-delta.json || echo '{}' > lint-delta.json
+    - node tools/development/lint-delta.mjs > lint-delta.json || echo '{}' > lint-delta.json
     - cat lint-delta.json
   artifacts:
     when: always
@@ -145,7 +145,7 @@ type-check:
     - TYPECHECK_STATUS=0
     - npm run type-check > type-check.log 2>&1 || TYPECHECK_STATUS=$?
     - cat type-check.log | tail -n 40
-    - node scripts/tsc-junit.cjs type-check.log type-check-junit.xml || true
+    - node tools/testing/tsc-junit.cjs type-check.log type-check-junit.xml || true
     - if [ "$TYPECHECK_STATUS" -eq 0 ]; then echo "✅ All type checks passed (see type-check.log)"; else echo "❌ Type checks failed (see artifacts)"; fi
     - exit $TYPECHECK_STATUS
     - echo "Running type error ratchet..."
@@ -180,7 +180,7 @@ type-check-tests:
     - TEST_TYPECHECK_STATUS=0
     - npm run type-check:tests > type-check-tests.log 2>&1 || TEST_TYPECHECK_STATUS=$?
     - cat type-check-tests.log | tail -n 60
-    - node scripts/tsc-junit.cjs type-check-tests.log type-check-tests-junit.xml || true
+    - node tools/testing/tsc-junit.cjs type-check-tests.log type-check-tests-junit.xml || true
     - if [ "$TEST_TYPECHECK_STATUS" -eq 0 ]; then echo "✅ Package test type checks passed (see type-check-tests.log)"; else echo "❌ Package test type checks failed (see artifacts)"; fi
     - exit $TEST_TYPECHECK_STATUS
   artifacts:

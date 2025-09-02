@@ -1,0 +1,15 @@
+{
+  "apps": [],
+  "totalChange": 0,
+  "warnings": [
+    "Failed to analyze astro: ENOENT: no such file or directory, scandir '/Users/Chris/Projects/CosmicHub/tools/apps/astro/dist'",
+    "Failed to analyze healwave: ENOENT: no such file or directory, scandir '/Users/Chris/Projects/CosmicHub/tools/apps/healwave/dist'"
+  ],
+  "recommendations": [
+    "Use `pnpm run build:astro:analyze` to generate detailed bundle analysis",
+    "Monitor large dependencies with bundle-analyzer webpack plugin",
+    "Consider using dynamic imports for optional features",
+    "Enable tree-shaking in production builds"
+  ],
+  "timestamp": "2025-09-02T08:55:42.040Z"
+}

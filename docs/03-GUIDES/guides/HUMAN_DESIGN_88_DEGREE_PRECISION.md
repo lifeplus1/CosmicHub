@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# Human Design 88-Degree Solar Arc Precision
+## Human Design 88-Degree Solar Arc Precision
 
 ## Overview
 

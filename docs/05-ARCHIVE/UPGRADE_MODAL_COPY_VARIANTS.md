@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# Upgrade Modal Copy Variants (EXP-002)
+<!-- Upgrade Modal Copy Variants (EXP-002) -->
 
 Source moved to JSON for experimentation.
 

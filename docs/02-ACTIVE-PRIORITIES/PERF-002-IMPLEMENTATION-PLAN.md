@@ -7,8 +7,6 @@ review_cycle: 30d
 category: plan
 ---
 
-# PERF-002: Tree-Shaking Optimization - Implementation Plan
-
 ## 🎯 **PROJECT OVERVIEW**
 
 **Initiative**: PERF-002 Tree-Shaking Optimization  

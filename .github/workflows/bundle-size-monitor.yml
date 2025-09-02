@@ -51,12 +51,12 @@ jobs:
           ANALYZE: true
 
       - name: Analyze bundle sizes
-        run: node scripts/bundle-size-monitor.mjs
+        run: node tools/build/bundle-size-monitor.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check bundle size limits
-        run: node scripts/bundle-size-check.mjs
+        run: node tools/build/bundle-size-check.mjs
         env:
           BUNDLE_SIZE_LIMIT_KB: 300
           BUNDLE_SIZE_DELTA_LIMIT_KB: 30

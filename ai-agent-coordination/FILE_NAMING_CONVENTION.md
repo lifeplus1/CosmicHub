@@ -11,16 +11,18 @@ category: overview
 
 ## Purpose & Scope
 
-Defines the canonical file naming scheme for AI coordination artifacts to ensure: predictability, deduplication, safe overwrites, and automated cleanup. Applies to all files under `ai-agent-coordination/`.
+Defines the canonical file naming scheme for AI coordination artifacts to ensure: predictability,
+deduplication, safe overwrites, and automated cleanup. Applies to all files under
+`ai-agent-coordination/`.
 
 ## Summary Matrix
 
-| Category | Canonical Pattern | Regex (anchor) | Lifecycle | Overwrite Semantics |
-|----------|-------------------|----------------|-----------|---------------------|
-| Instructions | `agent-{id}-<slug>-instructions.md` | `^agent-[0-9]+-[a-z0-9-]+-instructions\.md$` | Generated at mission start | Re-generated (idempotent) |
-| Analysis | `agent-{id}-<slug>-analysis.json` | `^agent-[0-9]+-[a-z0-9-]+-analysis\.json$` | Updated after each lint/scan | Overwrite single source of truth |
-| Completion | `agent-{id}-<slug>-completion.json` | `^agent-[0-9]+-[a-z0-9-]+-completion\.json$` | Created when agent declares done | Immutable after write (append-only logs elsewhere) |
-| Manifest | `coordination-manifest.json` | `^coordination-manifest\.json$` | Edited manually / automation | Overwrite permitted |
+| Category     | Canonical Pattern                   | Regex (anchor)                               | Lifecycle                        | Overwrite Semantics                                |
+| ------------ | ----------------------------------- | -------------------------------------------- | -------------------------------- | -------------------------------------------------- |
+| Instructions | `agent-{id}-<slug>-instructions.md` | `^agent-[0-9]+-[a-z0-9-]+-instructions\.md$` | Generated at mission start       | Re-generated (idempotent)                          |
+| Analysis     | `agent-{id}-<slug>-analysis.json`   | `^agent-[0-9]+-[a-z0-9-]+-analysis\.json$`   | Updated after each lint/scan     | Overwrite single source of truth                   |
+| Completion   | `agent-{id}-<slug>-completion.json` | `^agent-[0-9]+-[a-z0-9-]+-completion\.json$` | Created when agent declares done | Immutable after write (append-only logs elsewhere) |
+| Manifest     | `coordination-manifest.json`        | `^coordination-manifest\.json$`              | Edited manually / automation     | Overwrite permitted                                |
 
 Notes:
 
@@ -62,13 +64,13 @@ agent-{id}-completion.json     # Results and status when done
 
 ### Extended Disallowed Patterns (Implicit)
 
-| Pattern Class | Example | Reason |
-|---------------|---------|--------|
-| Snapshot suffix | `agent-2-astro-components-analysis-20250902.json` | Use single overwrite file, rely on git history |
-| Status variants | `agent-3-astro-features-status.json` | Redundant; completion or analysis already convey state |
-| Phase suffix | `agent-4-astro-pages-analysis-post-fix.json` | Encodes workflow step in filename; use commit message / diff |
-| Temp persisted | `agent-5-ui-package-temp-analysis.json` | Temp artifacts must stay in `/tmp` not repo |
-| Backup copies | `agent-6-config-package-analysis.bak.json` | Increases clutter; restoration via git |
+| Pattern Class   | Example                                           | Reason                                                       |
+| --------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+| Snapshot suffix | `agent-2-astro-components-analysis-20250902.json` | Use single overwrite file, rely on git history               |
+| Status variants | `agent-3-astro-features-status.json`              | Redundant; completion or analysis already convey state       |
+| Phase suffix    | `agent-4-astro-pages-analysis-post-fix.json`      | Encodes workflow step in filename; use commit message / diff |
+| Temp persisted  | `agent-5-ui-package-temp-analysis.json`           | Temp artifacts must stay in `/tmp` not repo                  |
+| Backup copies   | `agent-6-config-package-analysis.bak.json`        | Increases clutter; restoration via git                       |
 
 ## ✅ **Correct Usage**
 
@@ -154,7 +156,8 @@ structure!
 
 The following enforcement is now live in the repository:
 
-1. Pre-commit hook invokes `scripts/validate_ai_coord_filenames.sh` (fails the commit on violations).
+1. Pre-commit hook invokes `scripts/validate_ai_coord_filenames.sh` (fails the commit on
+   violations).
 1. CI workflow `.github/workflows/ai-coordination-filename-check.yml` validates on push / PR.
 1. Manual run (all tracked files):
 
@@ -168,31 +171,37 @@ bash scripts/validate_ai_coord_filenames.sh --all
 bash scripts/validate_ai_coord_filenames.sh
 ```
 
-Non-agent support docs (e.g. `FILE_NAMING_CONVENTION.md`, strategy notes, rebalance configs) are intentionally ignored by the validator unless they start with `agent-`.
+Non-agent support docs (e.g. `FILE_NAMING_CONVENTION.md`, strategy notes, rebalance configs) are
+intentionally ignored by the validator unless they start with `agent-`.
 
 ### Legacy Inline Regex Example (Superseded)
 
-The original ad‑hoc regex gate is retained below only for reference / portability; prefer the script.
+The original ad‑hoc regex gate is retained below only for reference / portability; prefer the
+script.
 
 ```bash
 grep -E "^ai-agent-coordination/" <(git diff --name-only --cached) \
-	| grep -Ev '(agent-[0-9]+-[a-z0-9-]+-(instructions|analysis|completion)\.json$|agent-[0-9]+-[a-z0-9-]+-instructions\.md$|coordination-manifest\.json$)' \
-	| while read -r f; do [ -n "$f" ] && echo "Invalid coordination filename: $f" && exit 1; done || true
+ | grep -Ev '(agent-[0-9]+-[a-z0-9-]+-(instructions|analysis|completion)\.json$|agent-[0-9]+-[a-z0-9-]+-instructions\.md$|coordination-manifest\.json$)' \
+ | while read -r f; do [ -n "$f" ] && echo "Invalid coordination filename: $f" && exit 1; done || true
 ```
 
 Node script sketch (for future hardening):
 
 ```js
 const ALLOWED = [
-	/^agent-\d+-[a-z0-9-]+-instructions\.md$/,
-	/^agent-\d+-[a-z0-9-]+-analysis\.json$/,
-	/^agent-\d+-[a-z0-9-]+-completion\.json$/,
-	/^coordination-manifest\.json$/
+  /^agent-\d+-[a-z0-9-]+-instructions\.md$/,
+  /^agent-\d+-[a-z0-9-]+-analysis\.json$/,
+  /^agent-\d+-[a-z0-9-]+-completion\.json$/,
+  /^coordination-manifest\.json$/,
 ];
-const invalid = process.argv.slice(2).filter(p => p.startsWith('ai-agent-coordination/') && !ALLOWED.some(r => r.test(p.split('/').pop())));
+const invalid = process.argv
+  .slice(2)
+  .filter(
+    p => p.startsWith('ai-agent-coordination/') && !ALLOWED.some(r => r.test(p.split('/').pop()))
+  );
 if (invalid.length) {
-	console.error('Invalid coordination filenames:\n' + invalid.join('\n'));
-	process.exit(1);
+  console.error('Invalid coordination filenames:\n' + invalid.join('\n'));
+  process.exit(1);
 }
 ```
 
@@ -207,10 +216,11 @@ if (invalid.length) {
 
 ## Change Log
 
-| Date | Change | Author |
-|------|--------|--------|
+| Date       | Change                                                          | Author   |
+| ---------- | --------------------------------------------------------------- | -------- |
 | 2025-09-02 | Added summary matrix, validation regexes, checklist, change log | platform |
-| 2025-09-02 | Added implemented automation section (script + CI workflow) | platform |
+| 2025-09-02 | Added implemented automation section (script + CI workflow)     | platform |
 
 ---
+
 _Maintain `last_reviewed` after completing checklist updates._

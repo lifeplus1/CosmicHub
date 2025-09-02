@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# Documentation Cleanup Summary - August 19, 2025
+## Documentation Cleanup Summary - August 19, 2025
 
 ## 📋 **Cleanup Actions Completed**
 

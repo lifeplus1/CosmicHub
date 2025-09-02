@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# UI/UX Improvements for Chart Display
-
 ## ✅ Implemented: Collapsible Tables
 
 ### Features Added

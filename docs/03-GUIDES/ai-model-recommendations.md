@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# Claude 3.7 Type Improvements Progress Report
-
 ## Overview
 
 This document summarizes the improvements made using Claude 3.7's type system expertise and provides

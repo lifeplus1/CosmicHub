@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# CosmicHub Docker Commands Reference
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 ## Build all containers
 

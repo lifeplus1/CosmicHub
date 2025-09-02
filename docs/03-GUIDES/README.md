@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# 📚 03-GUIDES - All Development & Feature Guides
-
 This directory contains all practical guides for development, deployment, and feature
 implementation.
 

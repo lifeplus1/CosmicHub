@@ -170,7 +170,7 @@ async def calculate_chart_endpoint(
         chart['processing_time'] = processing_time
         
         # DATA-001 Phase 1: Schedule dual-format export in background
-        chart_with_birth_data = {
+        chart_with_birth_data: Dict[str, Any] = {
             **chart,
             'year': data.year,
             'month': data.month,
@@ -403,7 +403,7 @@ def export_chart_data_background(chart_data: Dict[str, Any], user_id: Optional[s
     if exporter is not None:
         try:
             # Create standardized chart data structure
-            export_data = {
+            export_data: Dict[str, Any] = {
                 'session_id': f"chart_{int(time.time() * 1000)}",
                 'chart_type': 'natal',  # Default type
                 'success': True,

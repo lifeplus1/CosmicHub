@@ -7,7 +7,7 @@ review_cycle: 60d
 category: monitoring
 ---
 
-# Logging Field Specification (Draft)
+<!-- Logging Field Specification (Draft) -->
 
 | Field       | Type   | Description                                 | Example              |
 | ----------- | ------ | ------------------------------------------- | -------------------- |

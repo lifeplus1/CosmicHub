@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# 🧪 Experiment Registry Schema Validator (EXP-010)
-
 > **Status**: ✅ **COMPLETE**  
 > **Implementation**: Full schema validation system with TypeScript types, JSON schema, and CLI
 > validation tools  
@@ -102,7 +100,7 @@ pnpm run validate-experiments tests/fixtures/experiments
 pnpm run validate-experiments
 
 # Direct script usage
-node scripts/validate-experiments.mjs path/to/experiments/
+node tools/development/validate-experiments.mjs path/to/experiments/
 ```
 
 ### **3. JSON Schema Validation**

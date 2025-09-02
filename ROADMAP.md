@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# CosmicHub Roadmap
+## CosmicHub Roadmap
 
 > **Last Updated:** 2025-09-02 (matches frontmatter)  
 > **Infrastructure Status:** ✅ COMPLETE – Core hardening accomplished  
@@ -16,12 +16,12 @@ category: overview
 
 ## Status Legend
 
-| Symbol | Meaning |
-|--------|---------|
-| ✅ | Complete / Implemented |
-| 🟡 | Partially Complete / In Progress |
-| ⏳ | Planned / Not Started |
-| ❌ | Blocked / Requires Decision |
+| Symbol | Meaning                          |
+| ------ | -------------------------------- |
+| ✅     | Complete / Implemented           |
+| 🟡     | Partially Complete / In Progress |
+| ⏳     | Planned / Not Started            |
+| ❌     | Blocked / Requires Decision      |
 
 ---
 
@@ -39,7 +39,8 @@ All critical infrastructure hardening tasks have been successfully completed:
 
 ### **Current Focus: Strategic Expansion**
 
-The items below are **maturity & leverage multipliers** (not core gaps). They improve reliability, governance, cost efficiency, and experimentation velocity.
+The items below are **maturity & leverage multipliers** (not core gaps). They improve reliability,
+governance, cost efficiency, and experimentation velocity.
 
 ## 🎯 **IMMEDIATE NEXT PRIORITIES** (September 2025)
 
@@ -68,21 +69,21 @@ The items below are **maturity & leverage multipliers** (not core gaps). They im
 
 ### High Priority Artifacts (Snapshot)
 
-| Item | Status | Path |
-|------|--------|------|
-| Threat model narrative | ✅ | docs/security/threat-model.md |
-| Incident runbook template | ✅ | docs/runbooks/template.md |
-| Experiment registry schema doc | ✅ | docs/experimentation/registry.md |
-| Data classification glossary | ✅ | docs/privacy/data-classification.md |
-| Guardrail metrics guidance | 🟡 | docs/experimentation/guardrails.md |
-| SLO & error budget policy | ✅ | docs/observability/slo-policy.md |
-| Secret rotation policy & RBAC matrix | 🟡 | docs/security/secret-rotation.md |
-| Capacity planning narrative | ✅ | docs/operations/capacity-planning.md |
-| Experiment lifecycle governance | ✅ | docs/experimentation/lifecycle.md |
-| Pseudonymization & retention rationale | ✅ | docs/privacy/pseudonymization.md |
-| Incident postmortem template & rubric | ✅ | docs/runbooks/postmortem-template.md |
-| Degradation / fallback matrix | ✅ | docs/operations/degradation-matrix.md |
-| CSP rollout rationale | 🟡 | docs/security/csp-rollout.md |
+| Item                                   | Status | Path                                  |
+| -------------------------------------- | ------ | ------------------------------------- |
+| Threat model narrative                 | ✅     | docs/security/threat-model.md         |
+| Incident runbook template              | ✅     | docs/runbooks/template.md             |
+| Experiment registry schema doc         | ✅     | docs/experimentation/registry.md      |
+| Data classification glossary           | ✅     | docs/privacy/data-classification.md   |
+| Guardrail metrics guidance             | 🟡     | docs/experimentation/guardrails.md    |
+| SLO & error budget policy              | ✅     | docs/observability/slo-policy.md      |
+| Secret rotation policy & RBAC matrix   | 🟡     | docs/security/secret-rotation.md      |
+| Capacity planning narrative            | ✅     | docs/operations/capacity-planning.md  |
+| Experiment lifecycle governance        | ✅     | docs/experimentation/lifecycle.md     |
+| Pseudonymization & retention rationale | ✅     | docs/privacy/pseudonymization.md      |
+| Incident postmortem template & rubric  | ✅     | docs/runbooks/postmortem-template.md  |
+| Degradation / fallback matrix          | ✅     | docs/operations/degradation-matrix.md |
+| CSP rollout rationale                  | 🟡     | docs/security/csp-rollout.md          |
 
 ## CosmicHub Operational Roadmap (Phase: Production Hardening)
 

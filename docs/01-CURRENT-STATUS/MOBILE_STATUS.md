@@ -7,8 +7,6 @@ review_cycle: 14d
 category: status
 ---
 
-# Mobile App - Ready for Development
-
 ## 🏗️ Foundation Status: Complete
 
 Your CosmicHub mobile app foundation is now **complete and ready** for development when you're ready

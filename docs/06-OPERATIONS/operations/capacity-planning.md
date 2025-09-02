@@ -7,8 +7,6 @@ review_cycle: 120d
 category: operations
 ---
 
-# Capacity Planning for CosmicHub Astrology App
-
 ---
 
 Status: Draft Owner: Platform Engineering Last-Updated: 2025-08-16 Next-Review: 2025-09-01 Source:

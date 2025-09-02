@@ -7,11 +7,15 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Button, Card, CardContent } from '@cosmichub/ui';
 import { ChartDisplay } from './ChartDisplay';
 import type { ChartData } from '../../services/api.types';
-import type { ChartBirthData } from '@cosmichub/types';
-import type { ExtendedBirthData } from '../../contexts/BirthDataContext';
+import type { ChartBirthData, ExtendedBirthData } from '@cosmichub/types';
 import { useCanonicalBirthData } from '../../hooks/useCanonicalBirthData';
 import type { ApiResult } from '@cosmichub/config';
 import type { ChartLike } from './normalizeChart';
+
+// Type for ChartLike objects that may contain raw backend response
+interface ChartLikeWithResponse extends ChartLike {
+  __raw_backend_response?: ChartData;
+}
 
 export interface EnhancedChartWrapperProps {
   birthData?: ChartBirthData | ExtendedBirthData;
@@ -35,7 +39,9 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [chartData, setChartData] = useState<ChartLike | null>(null);
+  const [chartData, setChartData] = useState<ChartLikeWithResponse | null>(
+    null
+  );
   const [fetchImpl, setFetchImpl] = useState<typeof fetchFn | null>(null);
   const canonicalBirthData = useCanonicalBirthData();
 
@@ -49,21 +55,17 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
     }
   }, []);
 
-  const handleChartCalculated = useCallback(
-    (data: ChartData) => {
-      // Wrap backend response so ChartDisplay normalization can detect original shape
-      setChartData({ __raw_backend_response: data } as unknown as ChartLike);
-      setError(null);
-      // Move onChartCalculated call to a separate useEffect to prevent dependency cycles
-    },
-    []
-  );
+  const handleChartCalculated = useCallback((data: ChartData) => {
+    // Store the data in a format compatible with ChartLike
+    setChartData({ __raw_backend_response: data } as ChartLikeWithResponse);
+    // Move onChartCalculated call to a separate useEffect to prevent dependency cycles
+  }, []);
 
   // Separate effect for notifying parent of chart calculation completion
   useEffect(() => {
     if (chartData && onChartCalculated) {
       // Extract the original data from the wrapped format
-      const rawData = (chartData as any).__raw_backend_response;
+      const rawData = chartData.__raw_backend_response;
       if (rawData) {
         onChartCalculated(rawData);
       }
@@ -144,13 +146,7 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
       }
     };
     void calculateChart();
-  }, [
-    birthData,
-    handleError,
-    canonicalBirthData,
-    fetchFn,
-    fetchImpl,
-  ]);
+  }, [birthData, handleError, canonicalBirthData, fetchFn, fetchImpl]);
 
   if (isLoading) {
     return (

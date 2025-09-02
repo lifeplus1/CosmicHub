@@ -7,8 +7,6 @@ review_cycle: 60d
 category: overview
 ---
 
-# 🤖 Chat Instance Automation Setup
-
 > **Purpose:** Configure AI assistants to automatically reference key CosmicHub files  
 > **Status:** Implementation guide for chat context automation  
 > **Benefit:** Consistent project context across all AI interactions

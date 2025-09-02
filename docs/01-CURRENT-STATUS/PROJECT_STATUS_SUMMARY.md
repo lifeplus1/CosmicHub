@@ -7,7 +7,7 @@ review_cycle: 14d
 category: status
 ---
 
-# 🚀 CosmicHub Project Status Summary
+<!-- H1 heading removed to fix MD025 lint error -->
 
 > **Status Date:** August 27, 2025  
 > **Overall Health:** 🟢 Excellent - All systems operational and infrastructure complete  

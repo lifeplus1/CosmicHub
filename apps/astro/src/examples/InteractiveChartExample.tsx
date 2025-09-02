@@ -14,7 +14,7 @@ import {
 } from '../services/chartAnalyticsService';
 import { getNotificationManager } from '../services/notificationManager';
 import { Button } from '@cosmichub/ui';
-import type { UnifiedBirthData, ChartBirthData } from '@cosmichub/types';
+import type { UnifiedBirthData } from '@cosmichub/types';
 
 // Lazy load the heavy chart component
 const ChartWheelInteractive = lazy(
@@ -49,7 +49,7 @@ const sampleExtendedBirthData = {
   timezone: 'America/New_York',
 };
 
-const sampleBirthData = sampleUnifiedBirthData;
+const _sampleBirthData = sampleUnifiedBirthData;
 
 export const InteractiveChartExample: React.FC = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export const InteractiveChartExample: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisState>(null);
   const [chartRegistered, setChartRegistered] = useState(false);
 
-  const handlePlanetSelect = async (planet: string) => {
+  const handlePlanetSelect = (planet: string) => {
     setSelectedPlanet(planet);
 
     // Get analytics for selected planet
@@ -68,7 +68,7 @@ export const InteractiveChartExample: React.FC = () => {
     setAnalysisResult(insights);
 
     // Send notification about planet selection
-    const notificationManager = getNotificationManager();
+    const _notificationManager = getNotificationManager();
     // TODO: Fix missing sendTest method
     // if (typeof notificationManager.sendTest === 'function') {
     //   const result = notificationManager.sendTest.call(notificationManager);

@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# Layered AI Interpretation Roadmap (Merged Spec)
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 Status: Draft Spec (merged Grok + internal operational enrichment) Scope: Evolution of
 interpretation engine across three maturity layers: Baseline Templated → Adaptive Contextual →

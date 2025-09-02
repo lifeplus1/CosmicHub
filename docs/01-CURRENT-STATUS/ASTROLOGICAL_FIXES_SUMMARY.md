@@ -11,12 +11,12 @@ category: status
 
 ### Summary Table
 
-| # | Area | Status | Key Improvements | Primary Files |
-|---|------|--------|------------------|---------------|
-| 1 | Font & Symbol Rendering | ✅ Fixed | Dedicated AstroSymbol component, semantic font classes, reliable Unicode set | `AstroSymbol.tsx`, `index.css`, table components |
-| 2 | Uranian Points Toggle | ✅ Fixed | Correct logic separation, independent Uranian table, Hamburg filtering | `ChartDisplay.tsx` |
-| 3 | Minor Asteroids Coverage | ✅ Fixed | Default enable flag, improved filtering logic, categorization enhancements | `AstrologySettings.tsx`, `CelestialBodiesTable.tsx` |
-| 4 | Collapsible Tables UX | ✅ New | Accordion-based collapsible sections, icons, counts, mobile friendly | `CollapsibleTable.tsx`, `ChartDisplay.tsx` |
+| #   | Area                     | Status   | Key Improvements                                                             | Primary Files                                       |
+| --- | ------------------------ | -------- | ---------------------------------------------------------------------------- | --------------------------------------------------- |
+| 1   | Font & Symbol Rendering  | ✅ Fixed | Dedicated AstroSymbol component, semantic font classes, reliable Unicode set | `AstroSymbol.tsx`, `index.css`, table components    |
+| 2   | Uranian Points Toggle    | ✅ Fixed | Correct logic separation, independent Uranian table, Hamburg filtering       | `ChartDisplay.tsx`                                  |
+| 3   | Minor Asteroids Coverage | ✅ Fixed | Default enable flag, improved filtering logic, categorization enhancements   | `AstrologySettings.tsx`, `CelestialBodiesTable.tsx` |
+| 4   | Collapsible Tables UX    | ✅ New   | Accordion-based collapsible sections, icons, counts, mobile friendly         | `CollapsibleTable.tsx`, `ChartDisplay.tsx`          |
 
 ---
 
@@ -169,7 +169,8 @@ Use this quick checklist when updating next:
 - [ ] Uranian Points toggle only affects Uranian section & persists state.
 - [ ] Collapsible sections remember expansion state (once persistence implemented).
 - [ ] No layout shift / CLS issues introduced by font load.
-- [ ] Performance: initial symbol tables render within acceptable time (<50ms component mount in dev).
+- [ ] Performance: initial symbol tables render within acceptable time (<50ms component mount in
+      dev).
 
 ## Change Rationale & Impact
 
@@ -179,7 +180,9 @@ Use this quick checklist when updating next:
 - UX: Collapsible pattern reduces cognitive load and scrolling on mobile devices.
 
 ---
-_Maintained under 14‑day review cadence (status category). Update `last_reviewed` after confirming checklist._
+
+_Maintained under 14‑day review cadence (status category). Update `last_reviewed` after confirming
+checklist._
 
 1. Add local font files as backup for offline use
 2. Implement symbol preference settings (Unicode vs. text abbreviations)

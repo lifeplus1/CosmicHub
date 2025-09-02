@@ -6,9 +6,10 @@ Test dual-format export capability without disrupting current JSON performance.
 
 import pytest
 import json
-import pandas as pd
-from datetime import datetime
+import pandas as pd  # type: ignore
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Dict, Any, Generator
 import tempfile
 import shutil
 
@@ -18,7 +19,7 @@ class TestParquetExporter:
     """Test suite for DATA-001 Phase 1 Parquet export foundation."""
     
     @pytest.fixture
-    def temp_exporter(self):
+    def temp_exporter(self) -> Generator[ParquetExporter, None, None]:
         """Create temporary exporter for testing."""
         temp_dir = tempfile.mkdtemp()
         exporter = ParquetExporter(temp_dir)
@@ -26,7 +27,7 @@ class TestParquetExporter:
         shutil.rmtree(temp_dir)
         
     @pytest.fixture
-    def sample_chart_data(self):
+    def sample_chart_data(self) -> Dict[str, Any]:
         """Sample chart calculation data for testing."""
         return {
             'session_id': 'test_calc_001',
@@ -49,7 +50,7 @@ class TestParquetExporter:
         }
         
     @pytest.fixture
-    def sample_ai_interaction(self):
+    def sample_ai_interaction(self) -> Dict[str, Any]:
         """Sample AI interaction data for testing."""
         return {
             'interaction_id': 'ai_test_001',
@@ -65,7 +66,7 @@ class TestParquetExporter:
             'categories': ['sun_sign', 'personality', 'career']
         }
         
-    def test_dual_format_chart_export(self, temp_exporter, sample_chart_data):
+    def test_dual_format_chart_export(self, temp_exporter: ParquetExporter, sample_chart_data: Dict[str, Any]) -> None:
         """Test dual-format export maintains JSON while adding Parquet."""
         # Export in both formats
         export_paths = temp_exporter.export_chart_calculation(
@@ -97,7 +98,7 @@ class TestParquetExporter:
         assert df['user_id_hash'].iloc[0] == 'test_user_hash'
         assert df['processing_time_ms'].iloc[0] == 150
         
-    def test_json_only_export(self, temp_exporter, sample_chart_data):
+    def test_json_only_export(self, temp_exporter: ParquetExporter, sample_chart_data: Dict[str, Any]) -> None:
         """Test JSON-only export maintains current system performance."""
         export_paths = temp_exporter.export_chart_calculation(
             sample_chart_data,
@@ -110,7 +111,7 @@ class TestParquetExporter:
         json_path = Path(export_paths['json'])
         assert json_path.exists()
         
-    def test_ai_interaction_export(self, temp_exporter, sample_ai_interaction):
+    def test_ai_interaction_export(self, temp_exporter: ParquetExporter, sample_ai_interaction: Dict[str, Any]) -> None:
         """Test AI interaction export for ML training pipeline foundation."""
         export_paths = temp_exporter.export_ai_interaction(
             sample_ai_interaction,
@@ -131,7 +132,7 @@ class TestParquetExporter:
         assert df['user_rating'].iloc[0] == 5
         assert 'category_1' in df.columns
         
-    def test_parquet_partitioning(self, temp_exporter, sample_chart_data):
+    def test_parquet_partitioning(self, temp_exporter: ParquetExporter, sample_chart_data: Dict[str, Any]) -> None:
         """Test date-based partitioning for analytics warehouse."""
         export_paths = temp_exporter.export_chart_calculation(
             sample_chart_data,
@@ -141,10 +142,10 @@ class TestParquetExporter:
         parquet_path = Path(export_paths['parquet'])
         
         # Verify date partition in path
-        date_str = datetime.utcnow().strftime("%Y%m%d")
+        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
         assert f"date={date_str}" in str(parquet_path)
         
-    def test_analytics_summary_generation(self, temp_exporter, sample_chart_data):
+    def test_analytics_summary_generation(self, temp_exporter: ParquetExporter, sample_chart_data: Dict[str, Any]) -> None:
         """Test analytics summary generation from Parquet files."""
         # Export some test data
         for i in range(3):
@@ -177,9 +178,9 @@ class TestParquetExporter:
             assert isinstance(exporter, ParquetExporter)
             assert str(exporter.export_base_path) == temp_dir
             
-    def test_data_flattening_preserves_key_metrics(self, temp_exporter, sample_chart_data):
+    def test_data_flattening_preserves_key_metrics(self, temp_exporter: ParquetExporter, sample_chart_data: Dict[str, Any]) -> None:
         """Test that data flattening preserves key metrics for analytics."""
-        flattened = temp_exporter._flatten_chart_data(sample_chart_data, 'test_user')
+        flattened = temp_exporter._flatten_chart_data(sample_chart_data, 'test_user')  # type: ignore[reportProtectedAccess]
         
         # Verify key analytics metrics preserved
         assert flattened['calculation_type'] == 'natal'
@@ -190,9 +191,9 @@ class TestParquetExporter:
         assert flattened['aspect_count'] == 1
         assert flattened['house_system'] == 'placidus'
         
-    def test_ai_data_flattening_for_ml_training(self, temp_exporter, sample_ai_interaction):
+    def test_ai_data_flattening_for_ml_training(self, temp_exporter: ParquetExporter, sample_ai_interaction: Dict[str, Any]) -> None:
         """Test AI data flattening preserves ML training signals."""
-        flattened = temp_exporter._flatten_ai_interaction_data(sample_ai_interaction)
+        flattened = temp_exporter._flatten_ai_interaction_data(sample_ai_interaction)  # type: ignore[reportProtectedAccess]
         
         # Verify ML training features preserved
         assert flattened['interaction_type'] == 'question_answer'
@@ -225,7 +226,7 @@ if __name__ == "__main__":
     exporter = ParquetExporter(temp_dir)
     
     # Test basic functionality
-    test_data = {
+    test_data: Dict[str, Any] = {
         'session_id': 'validation_test',
         'chart_type': 'natal',
         'success': True,

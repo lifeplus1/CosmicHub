@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# Agent Analysis Sync Prevention Guide
-
 ## Problem: Stale Analysis Files After Manual Fixes
 
 When you manually fix ESLint issues in individual files, the AI agent coordination system can show

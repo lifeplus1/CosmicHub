@@ -7,9 +7,7 @@ review_cycle: 30d
 category: plan
 ---
 
-# Context Provider Enhancement Plan
-
-## Phase 1: Core Optimizations (Pre-Testing) 🎯
+### Phase 1: Core Optimizations (Pre-Testing) 🎯
 
 ### BirthDataContext Enhancements
 

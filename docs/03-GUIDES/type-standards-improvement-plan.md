@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# Type Standards Improvement Plan
-
 > **📋 STATUS UPDATE (August 17, 2025):** This document has been significantly updated with progress
 > from Claude 3.7 improvements. For the current consolidated roadmap and remaining tasks, see:
 > [`TYPE_SYSTEM_CONSOLIDATED_ROADMAP.md`](../development-guides/TYPE_SYSTEM_CONSOLIDATED_ROADMAP.md)

@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# Human Design & Gene Keys Implementation Summary
+## Human Design & Gene Keys Implementation Summary
 
 ## 🎯 Project Overview
 

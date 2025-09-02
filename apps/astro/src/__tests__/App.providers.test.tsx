@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
 
@@ -39,7 +39,7 @@ vi.mock('@cosmichub/auth', () => ({
 
 vi.mock('@tanstack/react-query', () => {
   const QueryClientSpy = vi.fn();
-  
+
   return {
     QueryClient: QueryClientSpy,
     QueryClientProvider: ({

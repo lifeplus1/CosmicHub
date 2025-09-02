@@ -7,7 +7,7 @@ review_cycle: 60d
 category: monitoring
 ---
 
-# OBS-012 Deployment Status Report
+<!-- Removed duplicate H1 heading to resolve MD025 -->
 
 ## Incident Response Automation System
 

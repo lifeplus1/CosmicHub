@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# TypeScript Strictness Rollout Plan
-
 ## Current Global Flags
 
 strict, noImplicitAny, strictNullChecks, strictFunctionTypes, noImplicitReturns,

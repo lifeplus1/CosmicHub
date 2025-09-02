@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# Stripe Integration Implementation Guide
+<!-- Removed duplicate H1 heading to resolve MD025 -->
 
 ## 🚀 Implementation Complete
 

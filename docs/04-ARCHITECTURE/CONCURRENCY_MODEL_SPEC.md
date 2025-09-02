@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# Concurrency and GitHub Copilot Agent Model Specifications
-
 ## Optimal Instance Configuration
 
 Based on the CosmicHub project structure and performance requirements, here are the recommended

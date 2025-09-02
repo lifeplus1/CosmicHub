@@ -94,9 +94,7 @@ describe('XAIService', () => {
 
       await expect(
         XAIService.generateInterpretation(mockRequest)
-      ).rejects.toThrow(
-        'xAI API error: Unexpected API response'
-      );
+      ).rejects.toThrow('xAI API error: Unexpected API response');
     });
 
     it('validates request data', async () => {

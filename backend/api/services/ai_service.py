@@ -452,8 +452,9 @@ class EnhancedAIService:
         base_analysis = generate_interpretation(chart_data, analysis_type)
         
         # Ensure the response has the expected keys for backward compatibility
-        if not isinstance(base_analysis, dict):
-            base_analysis = {"error": "Invalid analysis result"}
+        # base_analysis is guaranteed to be Dict[str, Any] by the function signature
+        if not base_analysis:  # Handle empty dict case
+            base_analysis = cast(Dict[str, Any], {"error": "Invalid analysis result"})
         
         # Add type and confidence if not present
         if "type" not in base_analysis:

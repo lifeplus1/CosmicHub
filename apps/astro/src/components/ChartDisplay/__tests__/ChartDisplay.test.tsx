@@ -14,15 +14,35 @@ vi.mock('../hooks/useChartData', () => ({
   useChartData: vi.fn(() => ({
     chartData: {
       planets: [
-        { name: 'Sun', sign: 'Leo', degree: 15.5, position: 135.5, house: '11', retrograde: false },
-        { name: 'Moon', sign: 'Cancer', degree: 22.3, position: 112.3, house: '10', retrograde: false },
+        {
+          name: 'Sun',
+          sign: 'Leo',
+          degree: 15.5,
+          position: 135.5,
+          house: '11',
+          retrograde: false,
+        },
+        {
+          name: 'Moon',
+          sign: 'Cancer',
+          degree: 22.3,
+          position: 112.3,
+          house: '10',
+          retrograde: false,
+        },
       ],
       houses: [
         { house: 1, sign: 'Aries', cusp: 0, degree: 0 },
         { house: 2, sign: 'Taurus', cusp: 30, degree: 0 },
       ],
       aspects: [
-        { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+        {
+          planet1: 'Sun',
+          planet2: 'Moon',
+          type: 'Trine',
+          orb: 2.5,
+          applying: 'applying',
+        },
       ],
       asteroids: [],
       angles: [],
@@ -35,15 +55,35 @@ vi.mock('../hooks/useChartData', () => ({
 vi.mock('../hooks/useProcessedSections', () => ({
   useProcessedSections: vi.fn(() => ({
     planets: [
-      { name: 'Sun', sign: 'Leo', degree: 15.5, position: 135.5, house: '11', retrograde: false },
-      { name: 'Moon', sign: 'Cancer', degree: 22.3, position: 112.3, house: '10', retrograde: false },
+      {
+        name: 'Sun',
+        sign: 'Leo',
+        degree: 15.5,
+        position: 135.5,
+        house: '11',
+        retrograde: false,
+      },
+      {
+        name: 'Moon',
+        sign: 'Cancer',
+        degree: 22.3,
+        position: 112.3,
+        house: '10',
+        retrograde: false,
+      },
     ],
     houses: [
       { house: 1, sign: 'Aries', cusp: 0, degree: 0 },
       { house: 2, sign: 'Taurus', cusp: 30, degree: 0 },
     ],
     aspects: [
-      { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+      {
+        planet1: 'Sun',
+        planet2: 'Moon',
+        type: 'Trine',
+        orb: 2.5,
+        applying: 'applying',
+      },
     ],
     asteroids: [],
     angles: [],
@@ -62,7 +102,13 @@ vi.mock('../hooks/useCategorizedPoints', () => ({
 
 vi.mock('../hooks/useEnhancedAspects', () => ({
   useEnhancedAspects: vi.fn(() => [
-    { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+    {
+      planet1: 'Sun',
+      planet2: 'Moon',
+      type: 'Trine',
+      orb: 2.5,
+      applying: 'applying',
+    },
   ]),
 }));
 
@@ -340,7 +386,9 @@ describe('ChartDisplay', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getAllByText(/Complete Chart Analysis/).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(/Complete Chart Analysis/).length
+    ).toBeGreaterThan(0);
   });
 
   it('displays content when no chart is provided', () => {
@@ -351,8 +399,8 @@ describe('ChartDisplay', () => {
     );
 
     // Component shows sample data, ensure at least one chart analysis header rendered
-    expect(screen.getAllByText(/Complete Chart Analysis/).length).toBeGreaterThanOrEqual(
-      1
-    );
+    expect(
+      screen.getAllByText(/Complete Chart Analysis/).length
+    ).toBeGreaterThanOrEqual(1);
   });
 });

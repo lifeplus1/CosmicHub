@@ -12,6 +12,8 @@ export interface UnifiedBirthData {
   city?: string;
   lat?: number;
   lon?: number;
+  latitude?: number; // Alias for lat (backwards compatibility)
+  longitude?: number; // Alias for lon (backwards compatibility)
   timezone?: string; // IANA TZ name preferred
   /** Allow light extension without defeating strictness */
   [extra: string]: unknown;
@@ -28,7 +30,30 @@ export interface TextBirthData {
   [extra: string]: unknown;
 }
 
-export type AnyBirthInput = UnifiedBirthData | TextBirthData;
+/**
+ * Extended Birth Data - Unified interface that combines both text and numeric formats
+ * This serves as the primary interface for components that need both formats
+ */
+export interface ExtendedBirthData extends TextBirthData {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  /** Normalized latitude */
+  latitude: number;
+  /** Normalized longitude */
+  longitude: number;
+  /** Optional timezone identifier (IANA) */
+  timezone?: string;
+  // Flag to indicate if this came from numeric input (for internal use)
+  _isFromNumeric?: boolean;
+}
+
+export type AnyBirthInput =
+  | UnifiedBirthData
+  | TextBirthData
+  | ExtendedBirthData;
 
 export const isUnifiedBirthData = (v: unknown): v is UnifiedBirthData => {
   if (v === null || v === undefined || typeof v !== 'object') {
@@ -83,6 +108,51 @@ export const isTextBirthData = (v: unknown): v is TextBirthData => {
     typeof birthTime === 'string' &&
     birthTime !== ''
   );
+};
+
+export const isExtendedBirthData = (v: unknown): v is ExtendedBirthData => {
+  if (v === null || v === undefined || typeof v !== 'object') {
+    return false;
+  }
+
+  // Type assertion after null check
+  const obj = v as Record<string, unknown>;
+
+  // Must have both text format AND numeric format
+  const hasTextFormat = 'birth_date' in obj && 'birth_time' in obj;
+  const hasNumericFormat = ['year', 'month', 'day', 'hour', 'minute'].every(
+    key => key in obj
+  );
+  const hasRequiredCoordinates = 'latitude' in obj && 'longitude' in obj;
+
+  if (!hasTextFormat || !hasNumericFormat || !hasRequiredCoordinates) {
+    return false;
+  }
+
+  // Validate text format
+  if (!isTextBirthData(obj)) {
+    return false;
+  }
+
+  // Validate numeric format
+  const numericKeys = [
+    'year',
+    'month',
+    'day',
+    'hour',
+    'minute',
+    'latitude',
+    'longitude',
+  ];
+  return numericKeys.every(key => {
+    const value = obj[key];
+    return (
+      value !== null &&
+      value !== undefined &&
+      typeof value === 'number' &&
+      !Number.isNaN(value)
+    );
+  });
 };
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -176,10 +246,12 @@ export function parseTextBirthData(data: TextBirthData): UnifiedBirthData {
   const latVal = data.latitude ?? fallbackLat;
   if (typeof latVal === 'number') {
     result.lat = latVal;
+    result.latitude = latVal; // Also set the alias
   }
   const lonVal = data.longitude ?? fallbackLon;
   if (typeof lonVal === 'number') {
     result.lon = lonVal;
+    result.longitude = lonVal; // Also set the alias
   }
   if (
     data.timezone !== undefined &&
@@ -191,15 +263,105 @@ export function parseTextBirthData(data: TextBirthData): UnifiedBirthData {
   return result;
 }
 
+/**
+ * Convert TextBirthData to ExtendedBirthData format with both text and numeric fields
+ */
+export function textToExtendedBirthData(
+  data: TextBirthData
+): ExtendedBirthData {
+  const unified = parseTextBirthData(data);
+
+  const result: ExtendedBirthData = {
+    ...data, // Preserve original text format
+    year: unified.year,
+    month: unified.month,
+    day: unified.day,
+    hour: unified.hour,
+    minute: unified.minute,
+    latitude: unified.latitude ?? data.latitude ?? 0,
+    longitude: unified.longitude ?? data.longitude ?? 0,
+  };
+
+  if (unified.timezone) result.timezone = unified.timezone;
+  if (unified.city) result.city = unified.city;
+
+  return result;
+}
+
+/**
+ * Convert UnifiedBirthData to ExtendedBirthData format
+ */
+export function unifiedToExtendedBirthData(
+  data: UnifiedBirthData
+): ExtendedBirthData {
+  const textData = toTextBirthData(data);
+
+  const result: ExtendedBirthData = {
+    ...textData,
+    year: data.year,
+    month: data.month,
+    day: data.day,
+    hour: data.hour,
+    minute: data.minute,
+    latitude: data.latitude ?? data.lat ?? 0,
+    longitude: data.longitude ?? data.lon ?? 0,
+  };
+
+  if (data.timezone) result.timezone = data.timezone;
+  if (data.city) result.city = data.city;
+
+  return result;
+}
+
 export function toUnifiedBirthData(input: AnyBirthInput): UnifiedBirthData {
   if (input === null || input === undefined) {
     throw new Error('Birth data is null or undefined');
+  }
+  if (isExtendedBirthData(input)) {
+    // ExtendedBirthData already has numeric fields, just extract them
+    const result: UnifiedBirthData = {
+      year: input.year,
+      month: input.month,
+      day: input.day,
+      hour: input.hour,
+      minute: input.minute,
+    };
+    if (input.city) result.city = input.city;
+    if (input.latitude !== undefined) {
+      result.lat = input.latitude;
+      result.latitude = input.latitude;
+    }
+    if (input.longitude !== undefined) {
+      result.lon = input.longitude;
+      result.longitude = input.longitude;
+    }
+    if (input.timezone) result.timezone = input.timezone;
+    return result;
   }
   if (isUnifiedBirthData(input)) {
     return input;
   }
   if (isTextBirthData(input)) {
     return parseTextBirthData(input);
+  }
+  throw new Error('Unsupported birth data shape');
+}
+
+/**
+ * Convert any birth data input to ExtendedBirthData format (recommended for components)
+ */
+export function toExtendedBirthData(input: AnyBirthInput): ExtendedBirthData {
+  if (input === null || input === undefined) {
+    throw new Error('Birth data is null or undefined');
+  }
+  if (isExtendedBirthData(input)) {
+    return input;
+  }
+  if (isUnifiedBirthData(input)) {
+    return unifiedToExtendedBirthData(input);
+  }
+  if (isTextBirthData(input)) {
+    return textToExtendedBirthData(input);
   }
   throw new Error('Unsupported birth data shape');
 }

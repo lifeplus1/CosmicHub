@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# PagesContextAgent - Lint Fix Instructions
+## PagesContextAgent - Lint Fix Instructions
 
 ## Mission
 
@@ -54,7 +54,7 @@ Page routing and context management fixes
 # Run targeted lint analysis (OVERWRITES existing analysis file)
 npx eslint apps/astro/src/pages apps/astro/src/contexts apps/astro/src/hooks --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --max-warnings=30 --format json > ai-agent-coordination/agent-3-astro-pages-context-analysis.json
 
-# Generate fix suggestions (temporary file - will be cleaned up)  
+# Generate fix suggestions (temporary file - will be cleaned up)
 npx eslint apps/astro/src/pages apps/astro/src/contexts apps/astro/src/hooks --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --fix-dry-run --format json > /tmp/agent-3-astro-pages-context-fixes-temp.json
 ```
 
@@ -93,5 +93,5 @@ Create `ai-agent-coordination/agent-3-astro-pages-context-completion.json` with:
 - Recommendations for dependent agents
 
 ---
-**Generated**: 2025-08-28T03:35:32.978Z
-**Coordination ID**: agent-3-astro-pages-context
+
+**Generated**: 2025-08-28T03:35:32.978Z **Coordination ID**: agent-3-astro-pages-context

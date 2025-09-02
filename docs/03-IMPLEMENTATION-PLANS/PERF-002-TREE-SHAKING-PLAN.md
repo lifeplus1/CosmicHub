@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# PERF-002: Tree-Shaking Optimization - IMPLEMENTATION PLAN
-
 ## 🎯 **PROJECT OVERVIEW**
 
 **Priority**: HIGH-IMMEDIATE  

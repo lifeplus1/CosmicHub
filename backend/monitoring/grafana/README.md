@@ -7,8 +7,6 @@ review_cycle: 60d
 category: overview
 ---
 
-# CosmicHub Grafana Dashboards
-
 ## OBS-011: Performance Metrics Dashboard Implementation
 
 This directory contains comprehensive Grafana dashboards for monitoring CosmicHub's performance,

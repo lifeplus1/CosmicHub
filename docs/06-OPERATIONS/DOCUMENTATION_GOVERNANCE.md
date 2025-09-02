@@ -27,18 +27,18 @@ canonical: path/to/canonical (optional)
 
 ## Review Cadence Guidelines
 
-| Category | Default Cycle | Rationale |
-|----------|---------------|-----------|
-| overview | 60d | High visibility entry points |
-| status   | 14d | Rapid status drift risk |
-| plan     | 30d | Priorities shift monthly |
-| guide    | 90d | Stable how-to content |
-| architecture | 90d | Evolves quarterly |
-| operations | 120d | Runbooks less volatile |
-| monitoring | 60d | Alerting/metrics change |
-| security  | 60d | Policy & threat updates |
-| reference | 120d | API/schema stability |
-| archive   | 365d | Rarely changes |
+| Category     | Default Cycle | Rationale                    |
+| ------------ | ------------- | ---------------------------- |
+| overview     | 60d           | High visibility entry points |
+| status       | 14d           | Rapid status drift risk      |
+| plan         | 30d           | Priorities shift monthly     |
+| guide        | 90d           | Stable how-to content        |
+| architecture | 90d           | Evolves quarterly            |
+| operations   | 120d          | Runbooks less volatile       |
+| monitoring   | 60d           | Alerting/metrics change      |
+| security     | 60d           | Policy & threat updates      |
+| reference    | 120d          | API/schema stability         |
+| archive      | 365d          | Rarely changes               |
 
 ## Automation
 
@@ -60,7 +60,8 @@ python scripts/doc_freshness.py --report --fail-overdue-pct 10
 CI Workflows:
 
 - Freshness: `.github/workflows/docs-freshness.yml` (weekly + push to main) fails if >10% overdue.
-- Priorities & Snapshot: `.github/workflows/docs-priorities.yml` (weekly + push) regenerates Active Priorities index and refreshes executive snapshot / change log in `PROJECT_PRIORITIES_2025.md`.
+- Priorities & Snapshot: `.github/workflows/docs-priorities.yml` (weekly + push) regenerates Active
+  Priorities index and refreshes executive snapshot / change log in `PROJECT_PRIORITIES_2025.md`.
 
 (Optional: add a Slack/webhook notification step in customized workflows if desired.)
 
@@ -69,7 +70,8 @@ CI Workflows:
 1. Create file under appropriate `docs/<NN-CATEGORY>/` folder.
 2. Add compliant frontmatter (or rely on `--apply` to fill defaults).
 3. Commit alongside related code changes.
-4. If replacing a document, leave a stub at the old path with `status: deprecated` + `canonical` pointing to the new file.
+4. If replacing a document, leave a stub at the old path with `status: deprecated` + `canonical`
+   pointing to the new file.
 
 ## When a Doc Becomes Overdue
 
@@ -95,7 +97,8 @@ Primary implementation summaries: `docs/04-ARCHITECTURE/IMPLEMENTATION/INDEX.md`
 
 ## Future Enhancements (Backlog)
 
-- Pre-commit hook to run freshness add + lint. (Implemented: `scripts/pre_commit_docs.sh` + `.husky/pre-commit`)
+- Pre-commit hook to run freshness add + lint. (Implemented: `scripts/pre_commit_docs.sh` +
+  `.husky/pre-commit`)
 - Dashboard summarizing overdue count by category.
 - Slack notifier for >5% overdue spike.
 

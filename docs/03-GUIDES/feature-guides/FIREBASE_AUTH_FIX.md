@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# 🔐 Firebase Authentication Fix - Invalid ID Token Error
-
 ## ✅ **Issue Resolved: "ERROR:auth:Invalid Firebase ID token"**
 
 ### 🐛 **Root Cause Analysis:**

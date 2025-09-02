@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# Deployment Guide for CosmicHub Applications
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 ## 🚀 Production Deployment Guide
 

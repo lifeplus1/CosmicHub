@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# ESLint Rules Tightening Plan for CosmicHub
+<!-- Removed duplicate H1 to resolve MD025 error -->
 
 ## Current Status ✅
 

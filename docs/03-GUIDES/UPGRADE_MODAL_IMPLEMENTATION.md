@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# 🚀 Upgrade Modal System Implementation
+<!-- Removed duplicate H1 to fix MD025 error -->
 
 ## 📋 Overview
 
@@ -131,7 +131,7 @@ const handlePremiumFeature = () => {
 3. **Verify recommendations** match feature requirements
 4. **Check visual styling** and responsive behavior
 
-### **Subscription Context Testing**:
+### **Subscription Context Testing**
 
 - Free tier → Shows upgrade for Pro/Enterprise features
 - Basic tier → Shows upgrade for Pro/Enterprise features

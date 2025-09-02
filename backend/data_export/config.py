@@ -6,9 +6,10 @@ This configures the dual-format data export system for analytics and ML training
 
 import os
 from pathlib import Path
+from typing import Any, Dict
 
 # DATA-001 Phase 1: Export Configuration
-DATA_EXPORT_CONFIG = {
+DATA_EXPORT_CONFIG: Dict[str, Any] = {
     # Base export directory - can be overridden by environment variable
     'export_base_path': os.environ.get('DATA_EXPORT_PATH', '/tmp/cosmichub_exports'),
     
@@ -69,7 +70,7 @@ def get_default_export_formats():
 
 
 # Production-ready defaults
-PRODUCTION_CONFIG = {
+PRODUCTION_CONFIG: Dict[str, Any] = {
     **DATA_EXPORT_CONFIG,
     'export_base_path': '/data/cosmichub/exports',
     'analytics_summary_interval': 30,  # More frequent in production
@@ -96,7 +97,7 @@ def enable_dual_format_mode():
 
 
 # Analytics warehouse configuration
-ANALYTICS_CONFIG = {
+ANALYTICS_CONFIG: Dict[str, Any] = {
     'enable_daily_summaries': True,
     'enable_weekly_reports': True,
     'enable_user_journey_tracking': True,  # Phase 2

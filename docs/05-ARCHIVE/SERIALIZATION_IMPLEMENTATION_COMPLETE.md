@@ -7,8 +7,6 @@ review_cycle: 365d
 category: archive
 ---
 
-# Serialization Implementation Summary
-
 This document summarizes the comprehensive serialization implementation across the CosmicHub
 astrology app monorepo.
 

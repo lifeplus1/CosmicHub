@@ -21,14 +21,14 @@ describe('useCanonicalBirthData', () => {
       },
       { wrapper }
     );
-    
+
     // Clear any existing birth data that might be in the context
     act(() => {
       if (result.current.bd.setBirthData) {
         result.current.bd.setBirthData(null as any);
       }
     });
-    
+
     expect(result.current.canonical).toBeNull();
   });
 

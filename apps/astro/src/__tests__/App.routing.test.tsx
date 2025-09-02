@@ -49,7 +49,8 @@ const mockSuspense = vi.fn(({ children, fallback }: any) => (
 ));
 
 // Override React.Suspense
-const originalReact = React;
+// eslint-disable-next-line no-unused-vars
+const _____originalReact = React;
 (React as any).Suspense = mockSuspense;
 
 describe('App Routing Configuration', () => {
@@ -103,8 +104,12 @@ describe('App Routing Configuration', () => {
   describe('Route Configuration', () => {
     test('defines main application routes', () => {
       const { Routes, Route } = require('react-router-dom');
-      const Dashboard = () => <div data-testid='dashboard-page'>Dashboard Page</div>;
-      const UnifiedChart = () => <div data-testid='unified-chart-page'>Unified Chart Page</div>;
+      const Dashboard = () => (
+        <div data-testid='dashboard-page'>Dashboard Page</div>
+      );
+      const UnifiedChart = () => (
+        <div data-testid='unified-chart-page'>Unified Chart Page</div>
+      );
       const Profile = () => <div data-testid='profile-page'>Profile Page</div>;
 
       render(
@@ -144,8 +149,12 @@ describe('App Routing Configuration', () => {
 
     test('defines feature-specific routes', () => {
       const { Routes, Route } = require('react-router-dom');
-      const Calculator = () => <div data-testid='calculator-page'>Calculator Page</div>;
-      const MultiSystemChart = () => <div data-testid='multi-system-chart-page'>Multi System Chart Page</div>;
+      const Calculator = () => (
+        <div data-testid='calculator-page'>Calculator Page</div>
+      );
+      const MultiSystemChart = () => (
+        <div data-testid='multi-system-chart-page'>Multi System Chart Page</div>
+      );
 
       render(
         <Routes>
@@ -163,7 +172,9 @@ describe('App Routing Configuration', () => {
     test('defines blog routes with dynamic segments', () => {
       const { Routes, Route } = require('react-router-dom');
       const Blog = () => <div data-testid='blog-page'>Blog Page</div>;
-      const BlogPost = () => <div data-testid='blog-post-page'>Blog Post Page</div>;
+      const BlogPost = () => (
+        <div data-testid='blog-post-page'>Blog Post Page</div>
+      );
 
       render(
         <Routes>
@@ -202,7 +213,9 @@ describe('App Routing Configuration', () => {
       );
 
       render(
-        <React.Suspense fallback={<div data-testid='suspense-loading'>Loading...</div>}>
+        <React.Suspense
+          fallback={<div data-testid='suspense-loading'>Loading...</div>}
+        >
           <LazyComponent />
         </React.Suspense>
       );
@@ -222,7 +235,9 @@ describe('App Routing Configuration', () => {
 
       render(
         <ErrorBoundary>
-          <React.Suspense fallback={<div data-testid='suspense-loading'>Loading...</div>}>
+          <React.Suspense
+            fallback={<div data-testid='suspense-loading'>Loading...</div>}
+          >
             <FailingComponent />
           </React.Suspense>
         </ErrorBoundary>
@@ -279,8 +294,12 @@ describe('App Routing Configuration', () => {
   describe('Route Integration', () => {
     test('complete routing structure renders without errors', () => {
       const { BrowserRouter, Routes, Route } = require('react-router-dom');
-      const Dashboard = () => <div data-testid='dashboard-page'>Dashboard Page</div>;
-      const UnifiedChart = () => <div data-testid='unified-chart-page'>Unified Chart Page</div>;
+      const Dashboard = () => (
+        <div data-testid='dashboard-page'>Dashboard Page</div>
+      );
+      const UnifiedChart = () => (
+        <div data-testid='unified-chart-page'>Unified Chart Page</div>
+      );
 
       const CompleteRouter = () => (
         <BrowserRouter
@@ -288,7 +307,9 @@ describe('App Routing Configuration', () => {
         >
           <div className='min-h-screen'>
             <main className='container px-4 py-8 mx-auto'>
-              <React.Suspense fallback={<div data-testid='app-loading'>Loading app...</div>}>
+              <React.Suspense
+                fallback={<div data-testid='app-loading'>Loading app...</div>}
+              >
                 <Routes>
                   <Route path='/' element={<Dashboard />} />
                   <Route path='/chart' element={<UnifiedChart />} />

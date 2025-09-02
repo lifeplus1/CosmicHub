@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# Environment & Secrets Strategy
-
 This repository separates public client variables from server-only secrets to minimize accidental
 exposure.
 

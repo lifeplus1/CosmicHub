@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# Stripe Integration Testing & Verification Guide
+<!-- Removed duplicate H1 heading to resolve MD025 -->
 
 ## 🧪 How to Test the Stripe Integration
 

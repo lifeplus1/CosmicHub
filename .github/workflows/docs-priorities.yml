@@ -2,9 +2,9 @@ name: Docs Priorities Index & Snapshot
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '30 6 * * 1'  # Weekly Monday 06:30 UTC (after freshness job)
+    - cron: "30 6 * * 1" # Weekly Monday 06:30 UTC (after freshness job)
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-            python-version: '3.11'
+          python-version: "3.11"
       - name: Generate Active Priorities Index
         run: |
           python scripts/generate_active_priorities_index.py || (echo 'Index generation failed' && exit 1)

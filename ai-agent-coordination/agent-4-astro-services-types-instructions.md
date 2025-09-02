@@ -54,7 +54,7 @@ Service layer and type definitions
 # Run targeted lint analysis (OVERWRITES existing analysis file)
 npx eslint apps/astro/src/services apps/astro/src/types apps/astro/src/config --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --max-warnings=25 --format json > ai-agent-coordination/agent-4-astro-services-types-analysis.json
 
-# Generate fix suggestions (temporary file - will be cleaned up)  
+# Generate fix suggestions (temporary file - will be cleaned up)
 npx eslint apps/astro/src/services apps/astro/src/types apps/astro/src/config --ext .ts,.tsx --config eslint.config.js --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*" --ignore-pattern "**/__tests__/**" --ignore-pattern "**/test-utils/**" --ignore-pattern "**/tests/**" --fix-dry-run --format json > /tmp/agent-4-astro-services-types-fixes-temp.json
 ```
 
@@ -93,5 +93,5 @@ Create `ai-agent-coordination/agent-4-astro-services-types-completion.json` with
 - Recommendations for dependent agents
 
 ---
-**Generated**: 2025-08-28T03:35:32.978Z
-**Coordination ID**: agent-4-astro-services-types
+
+**Generated**: 2025-08-28T03:35:32.978Z **Coordination ID**: agent-4-astro-services-types

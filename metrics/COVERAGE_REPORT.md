@@ -7,8 +7,6 @@ review_cycle: 60d
 category: overview
 ---
 
-# Coverage Report (Aggregated)
-
 Combined (weighted):\n- Lines: 15.07%
 
 - Statements: 15.07%

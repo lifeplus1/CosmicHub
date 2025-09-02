@@ -1,4 +1,14 @@
-/** Analytics Integration (using @cosmichub/analytics package) */
+/** Analytics Integ  googleAnalytics: {
+    measurementId: (import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined) ?? '',
+    enabled: !!(import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined),
+  },
+  mixpanel: {
+    token: (import.meta.env.PUBLIC_MIXPANEL_TOKEN as string | undefined) ?? '',
+    enabled: !!(import.meta.env.PUBLIC_MIXPANEL_TOKEN as string | undefined),
+    trackPageViews: true,
+  },
+  posthog: {
+    apiKey: (import.meta.env.PUBLIC_POSTHOG_API_KEY as string | undefined) ?? '',ng @cosmichub/analytics package) */
 import {
   initializeAnalytics,
   createDefaultAnalyticsConfig,
@@ -18,17 +28,19 @@ import {
 // Analytics Configuration
 const analyticsConfig: AnalyticsConfig = createDefaultAnalyticsConfig({
   googleAnalytics: {
-    measurementId: (import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string) ?? '',
-    enabled: !!import.meta.env.PUBLIC_GA_MEASUREMENT_ID,
+    measurementId:
+      (import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined) ?? '',
+    enabled: !!(import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined),
   },
   mixpanel: {
-    token: (import.meta.env.PUBLIC_MIXPANEL_TOKEN as string) ?? '',
-    enabled: !!import.meta.env.PUBLIC_MIXPANEL_TOKEN,
+    token: (import.meta.env.PUBLIC_MIXPANEL_TOKEN as string | undefined) ?? '',
+    enabled: !!(import.meta.env.PUBLIC_MIXPANEL_TOKEN as string | undefined),
     trackPageViews: true,
   },
   posthog: {
-    apiKey: (import.meta.env.PUBLIC_POSTHOG_API_KEY as string) ?? '',
-    host: import.meta.env.PUBLIC_POSTHOG_HOST as string,
+    apiKey:
+      (import.meta.env.PUBLIC_POSTHOG_API_KEY as string | undefined) ?? '',
+    host: import.meta.env.PUBLIC_POSTHOG_HOST as string | undefined,
     enabled: !!import.meta.env.PUBLIC_POSTHOG_API_KEY,
     sessionRecording: true,
     heatmaps: true,
@@ -81,11 +93,7 @@ const setupConsentManagement = () => {
   // Check for existing consent
   const consent = localStorage.getItem('analytics-consent');
   if (consent) {
-    const consentData = JSON.parse(consent) as {
-      granted: boolean;
-      timestamp: number;
-      version: string;
-    };
+    const consentData = JSON.parse(consent) as { granted: boolean };
     analytics?.setConsentGranted(consentData.granted);
   } else {
     // Show consent banner if required

@@ -22,9 +22,9 @@ Object.defineProperty(window, 'localStorage', {
     removeItem: vi.fn(),
     clear: vi.fn(),
     length: 0,
-    key: vi.fn()
+    key: vi.fn(),
   },
-  writable: true
+  writable: true,
 });
 
 // Mock fetch for UnifiedChartForTest's safeFetchSavedChartById
@@ -104,47 +104,49 @@ beforeEach(() => {
   sessionStorage.clear();
   localStorage.clear();
   vi.clearAllMocks();
-  
+
   // Mock fetch for chart loading
   (global.fetch as any).mockImplementation((url: string) => {
     if (url.includes('/api/charts/abc123')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({
-          chart_data: minimalChart,
-          birth_data: {
-            birth_date: '1990-07-15',
-            birth_time: '10:30',
-            city: 'Paris',
-            lat: 48.8,
-            lon: 2.3,
-            timezone: 'Europe/Paris',
-          },
-        })
+        json: () =>
+          Promise.resolve({
+            chart_data: minimalChart,
+            birth_data: {
+              birth_date: '1990-07-15',
+              birth_time: '10:30',
+              city: 'Paris',
+              lat: 48.8,
+              lon: 2.3,
+              timezone: 'Europe/Paris',
+            },
+          }),
       });
     }
     if (url.includes('/api/charts/err123')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({
-          chart_data: minimalChart,
-          birth_data: {
-            birth_date: '2001-01-02',
-            birth_time: '12:00',
-            city: 'X',
-            lat: 0,
-            lon: 0,
-          },
-        })
+        json: () =>
+          Promise.resolve({
+            chart_data: minimalChart,
+            birth_data: {
+              birth_date: '2001-01-02',
+              birth_time: '12:00',
+              city: 'X',
+              lat: 0,
+              lon: 0,
+            },
+          }),
       });
     }
     return Promise.resolve({
       ok: false,
       status: 404,
-      json: () => Promise.resolve({ error: 'Not found' })
+      json: () => Promise.resolve({ error: 'Not found' }),
     });
   });
-  
+
   // Clean up any remaining DOM elements
   document.body.innerHTML = '';
 });
@@ -196,7 +198,8 @@ describe('UnifiedChart integration', () => {
     });
     saveChart.mockResolvedValueOnce({ success: true, data: { id: 'saved1' } });
 
-    const { container } = renderUnifiedChart('/chart/abc123');
+    // eslint-disable-next-line no-unused-vars
+    const { container: ___container } = renderUnifiedChart('/chart/abc123');
 
     // The component is rendering but may not show "Natal Chart" if no birth data is loaded
     // Check that the component mounted successfully and chart display is there
@@ -241,9 +244,12 @@ describe('UnifiedChart integration', () => {
       data: minimalChart,
     });
 
-    const { container } = renderUnifiedChart('/chart?calculate=true');
+    // eslint-disable-next-line no-unused-vars
+    const { container: ___container } = renderUnifiedChart(
+      '/chart?calculate=true'
+    );
 
-    // The component is rendering but may not show "Natal Chart" if no birth data is loaded  
+    // The component is rendering but may not show "Natal Chart" if no birth data is loaded
     // Check that the component mounted successfully and API was called
     await waitFor(() => {
       expect(fetchChartDataUnified).toHaveBeenCalledTimes(1);
@@ -269,7 +275,8 @@ describe('UnifiedChart integration', () => {
       .mockRejectedValueOnce(new Error('Network fail'))
       .mockResolvedValueOnce({ success: true, data: { id: 'retry-ok' } });
 
-    const { container } = renderUnifiedChart('/chart/err123');
+    // eslint-disable-next-line no-unused-vars
+    const { container: ___container } = renderUnifiedChart('/chart/err123');
 
     // Wait for chart to load
     await waitFor(() => {

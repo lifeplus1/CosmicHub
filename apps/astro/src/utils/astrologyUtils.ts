@@ -112,7 +112,7 @@ export function getSignFromDegrees(degrees: number): ZodiacSign {
   // Normalize degrees to 0-360 range
   const normalizedDegrees = ((degrees % 360) + 360) % 360;
   const signIndex = Math.floor(normalizedDegrees / 30);
-  return ZODIAC_SIGNS[signIndex] || 'aries';
+  return ZODIAC_SIGNS[signIndex] ?? 'aries';
 }
 
 /**
@@ -123,7 +123,7 @@ export function getSignFromDegrees(degrees: number): ZodiacSign {
 export function getSignFromDegreesCapitalized(degrees: number): string {
   const normalizedDegrees = ((degrees % 360) + 360) % 360;
   const signIndex = Math.floor(normalizedDegrees / 30);
-  return ZODIAC_SIGNS_CAPITALIZED[signIndex] || 'Aries';
+  return ZODIAC_SIGNS_CAPITALIZED[signIndex] ?? 'Aries';
 }
 
 /**
@@ -148,7 +148,7 @@ export function getAstrologicalSign(degrees: number): {
 } {
   const normalizedDegrees = ((degrees % 360) + 360) % 360;
   const signIndex = Math.floor(normalizedDegrees / 30);
-  const sign = ZODIAC_SIGNS_CAPITALIZED[signIndex] || 'Aries';
+  const sign = ZODIAC_SIGNS_CAPITALIZED[signIndex] ?? 'Aries';
   const signDegrees = normalizedDegrees % 30;
   const signMinutes = (signDegrees % 1) * 60;
 

@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# Vitest Workspace Configuration
-
 ## Overview
 
 The CosmicHub project now uses a **Vitest workspace** configuration to optimize test performance and

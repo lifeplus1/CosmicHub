@@ -7,8 +7,6 @@ review_cycle: 365d
 category: archive
 ---
 
-# 📦 05-ARCHIVE - Historical & Completed Work
-
 This directory contains historical documentation and records of completed work.
 
 ## Structure

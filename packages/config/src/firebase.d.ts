@@ -29,10 +29,10 @@ export declare const projectId: string;
  * Performance monitoring
  */
 export declare const getFirebasePerformanceInfo: () => {
-    projectId: string;
-    authDomain: string;
-    isEmulator: boolean;
-    isDevelopment: boolean;
-    timestamp: number;
+  projectId: string;
+  authDomain: string;
+  isEmulator: boolean;
+  isDevelopment: boolean;
+  timestamp: number;
 };
 //# sourceMappingURL=firebase.d.ts.map

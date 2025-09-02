@@ -7,7 +7,7 @@ review_cycle: 60d
 category: overview
 ---
 
-# CosmicHub Mypy Integration Summary
+<!-- H1 heading removed to fix MD025 lint error -->
 
 ## 🎯 **Achievement Summary**
 

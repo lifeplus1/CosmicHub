@@ -7,8 +7,6 @@ review_cycle: 365d
 category: archive
 ---
 
-# 🚀 MOB-001: Mobile App Store Deployment - Implementation Guide
-
 > **Status:** ACTIVE  
 > **Priority:** HIGH  
 > **Timeline:** 4 weeks  

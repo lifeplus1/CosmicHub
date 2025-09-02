@@ -7,8 +7,6 @@ review_cycle: 365d
 category: archive
 ---
 
-# Code Refactor Summary: ChartDisplay Component Cleanup
-
 ## Problem Statement
 
 The ChartDisplay component had massive code duplication with identical tables appearing in both

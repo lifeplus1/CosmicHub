@@ -20,11 +20,7 @@
   "estimatedFiles": 79,
   "maxWarnings": 35,
   "specialization": "Secondary apps and utility packages",
-  "commonIssues": [
-    "no-unsafe-assignment",
-    "unused-vars",
-    "no-explicit-any"
-  ],
+  "commonIssues": ["no-unsafe-assignment", "unused-vars", "no-explicit-any"],
   "dependencies": [
     "agent-4-astro-services-types",
     "agent-5-ui-package",

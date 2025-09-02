@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# Type Error Ratchet
-
 Maintains a non-increasing count of TypeScript errors across the monorepo.
 
 ## Latest Status (Aug 21 2025)

@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# Docker Optimization Summary
+<!-- Removed duplicate H1 heading to resolve MD025 -->
 
 ## Multi-Stage Build Implementation ✅
 

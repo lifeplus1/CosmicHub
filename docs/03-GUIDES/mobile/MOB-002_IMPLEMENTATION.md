@@ -7,7 +7,7 @@ review_cycle: 90d
 category: guide
 ---
 
-# MOB-002 Implementation: Mobile-Specific Features
+## MOB-002 Implementation: Mobile-Specific Features
 
 > **Status:** ✅ COMPLETE  
 > **Implementation Date:** August 25, 2025  

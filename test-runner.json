@@ -1,0 +1,5 @@
+{
+  "testFiles": ["scripts/**/*.test.js"],
+  "timeout": 5000,
+  "reporter": "spec"
+}

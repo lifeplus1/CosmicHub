@@ -7,8 +7,6 @@ review_cycle: 30d
 category: plan
 ---
 
-# UX-020 Implementation Complete ✅
-
 ## Offline Mode for Chart Data (Progressive Web App)
 
 ### 🎯 **Implementation Status: COMPLETE**

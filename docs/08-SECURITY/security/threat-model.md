@@ -7,10 +7,6 @@ review_cycle: 60d
 category: security
 ---
 
-# Threat Model for CosmicHub (FastAPI + Firebase + Stripe System)
-
----
-
 Status: Review Owner: Security Steward Last-Updated: 2025-08-16 Next-Review: 2025-09-15 Source: Grok
 Generated + Manual Edits
 
@@ -171,7 +167,8 @@ enhancing performance (e.g., caching reduces DoS impact). Gaps highlight areas f
 4. OBS-003 Centralized log aggregation (structured JSON -> OpenSearch)
 5. REL-005 Auto-scaling or at least saturation alerting rules (CPU, queue depth) | Elevation of
    Privilege | Stripe | Webhook signature verification. | In stripe_service.py; test via
-   STRIPE_TESTING_GUIDE.md. | Gap: Test/prod key mix-up; Automate via scripts/validate-env.mjs. |
+   STRIPE_TESTING_GUIDE.md. | Gap: Test/prod key mix-up; Automate via
+   tools/maintenance/validate-env.mjs. |
 
 This model aligns with robustness (error boundaries in ErrorBoundary.tsx) and security guidelines
 (e.g., SECURITY_GUIDE.md). Next steps: Validate via penetration testing; refine based on

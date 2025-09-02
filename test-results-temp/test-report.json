@@ -4,26 +4,26 @@
     "passed": 1,
     "failed": 0,
     "skipped": 0,
-    "duration": 7.012624999999957,
+    "duration": 5.341250000000059,
     "coverage": {
-      "overall": 91.87419358371791,
-      "statements": 93.27387580922525,
-      "branches": 85.07004706419794,
-      "functions": 95.84915765076823,
-      "lines": 93.30369381068023
+      "overall": 90.89551895923162,
+      "statements": 89.47925098059495,
+      "branches": 89.92690068216642,
+      "functions": 96.75570185853226,
+      "lines": 87.42022231563286
     },
     "performance": {
-      "averageRenderTime": 6.062542000000008,
-      "maxRenderTime": 6.062542000000008,
-      "totalMemoryUsage": 26224
+      "averageRenderTime": 4.734124999999949,
+      "maxRenderTime": 4.734124999999949,
+      "totalMemoryUsage": 19664
     },
     "accessibility": {
-      "totalViolations": 0,
+      "totalViolations": 1,
       "criticalViolations": 0,
       "totalWarnings": 0
     },
     "quality": {
-      "score": 100,
+      "score": 97,
       "grade": "A",
       "recommendations": []
     }
@@ -32,39 +32,42 @@
     {
       "suite": "alpha",
       "status": "passed",
-      "duration": 6.673084000000017,
+      "duration": 4.988959000000023,
       "coverage": {
-        "statements": 93.27387580922525,
-        "branches": 85.07004706419794,
-        "functions": 95.84915765076823,
-        "lines": 93.30369381068023
+        "statements": 89.47925098059495,
+        "branches": 89.92690068216642,
+        "functions": 96.75570185853226,
+        "lines": 87.42022231563286
       },
       "performance": {
-        "renderTime": 6.062542000000008,
+        "renderTime": 4.734124999999949,
         "mountTime": 0,
-        "memoryUsage": 26224
+        "memoryUsage": 19664
       },
       "accessibility": {
-        "violations": [],
+        "violations": [
+          {
+            "id": "color-contrast",
+            "impact": "moderate",
+            "description": "Text color contrast is insufficient",
+            "nodes": 1
+          }
+        ],
         "warnings": []
       },
       "errors": [],
       "metadata": {
-        "timestamp": "2025-09-01T21:19:01.649Z",
+        "timestamp": "2025-09-02T08:13:29.519Z",
         "nodeVersion": "v24.4.1",
         "platform": "darwin"
       }
     }
   ],
-  "timestamp": "2025-09-01T21:19:01.653Z",
+  "timestamp": "2025-09-02T08:13:29.522Z",
   "config": {
     "coverage": {
       "threshold": 80,
-      "exclude": [
-        "node_modules",
-        "dist",
-        "**/*.d.ts"
-      ]
+      "exclude": ["node_modules", "dist", "**/*.d.ts"]
     },
     "performance": {
       "maxRenderTime": 16,

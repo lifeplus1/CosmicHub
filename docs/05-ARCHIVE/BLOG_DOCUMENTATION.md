@@ -7,8 +7,6 @@ review_cycle: 365d
 category: archive
 ---
 
-# CosmicHub Blog System Documentation
-
 ## Overview
 
 The CosmicHub Blog System is a comprehensive, feature-rich content management platform built for the
@@ -54,7 +52,7 @@ engagement, and community building.
 
 ### File Structure
 
-```
+```text
 apps/astro/src/
 ├── pages/
 │   ├── Blog.tsx              # Main blog listing page

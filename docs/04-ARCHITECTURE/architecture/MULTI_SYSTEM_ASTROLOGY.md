@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# 🌟 Multi-System Astrology Integration - CosmicHub
-
 ## Overview
 
 CosmicHub now supports **5 major astrology systems** in a single, integrated analysis:

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Card, Button } from '@cosmichub/ui';
-import type { ExtendedBirthData } from '../../contexts/BirthDataContext';
+import type { ExtendedBirthData } from '@cosmichub/types';
 
 // Accessibility note: This header summarises the loaded chart context. We expose
 // a landmark-ish grouping with aria-labelledby so screen reader users can jump

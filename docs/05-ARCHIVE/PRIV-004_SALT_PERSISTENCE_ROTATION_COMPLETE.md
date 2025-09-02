@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# Salt Persistence & Rotation System Implementation
+<!-- Removed duplicate H1 to resolve MD025 -->
 
 **Status**: COMPLETE ✅  
 **Issue**: PRIV-004  

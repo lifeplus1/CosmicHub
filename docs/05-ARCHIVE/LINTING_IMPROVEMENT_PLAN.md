@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# Linting Improvement Plan
+## Linting Improvement Plan
 
 ## Overview
 

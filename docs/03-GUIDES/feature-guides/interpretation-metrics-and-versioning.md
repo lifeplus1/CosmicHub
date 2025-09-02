@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# Interpretation Metrics & Versioning
-
 ## Overview
 
 The interpretation generation pipeline now exposes Prometheus metrics and embeds a schema version in

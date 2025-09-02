@@ -7,8 +7,6 @@ review_cycle: 120d
 category: reference
 ---
 
-# 📖 99-REFERENCE - Reference Materials
-
 This directory is designated for reference materials and standards documentation.
 
 ## Status

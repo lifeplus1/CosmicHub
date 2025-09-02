@@ -7,8 +7,6 @@ review_cycle: 14d
 category: status
 ---
 
-# 📊 01-CURRENT-STATUS - Current Project State
-
 This directory contains real-time information about the current state of the CosmicHub project.
 
 ## Key Files

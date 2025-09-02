@@ -8,13 +8,10 @@ import React, {
 import { BirthSummaryHeader } from '../components/ChartDisplay/BirthSummaryHeader';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
-import {
-  useBirthData,
-  type ExtendedBirthData,
-} from '../contexts/BirthDataContext';
+import { useBirthData } from '../contexts/BirthDataContext';
+import type { ExtendedBirthData, ChartBirthData } from '@cosmichub/types';
 import ChartDisplay from '../components/ChartDisplay/ChartDisplay';
 import type { ChartLike } from '../components/ChartDisplay/normalizeChart';
-import type { ChartBirthData } from '@cosmichub/types';
 import type { ApiResult } from '../services/apiResult';
 import type { ChartData } from '../services/api.types';
 import { componentLogger } from '../utils/componentLogger';
@@ -348,7 +345,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
       componentLogger.info('Chart', 'Skipping chart calculation');
     }
     // deps: birthData triggers recalculation; calculateChartData memoized on birthData only.
-  }, [birthData, calculateChartData]);
+  }, [birthData, calculateChartData, chartData]);
 
   const handleRecalculate = useCallback((): void => {
     if (birthData !== null) {
@@ -399,7 +396,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
 
   // Build a ChartLike object from processedChart (memoized to avoid needless re-renders)
   const processedChartLike: ChartLike | null = useMemo(() => {
-    if (!processedChart || !chartData) return null;
+    if (!chartData || !processedChart) return null;
     try {
       return {
         planets: Object.fromEntries(
@@ -459,7 +456,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
       componentLogger.warn('Chart', 'Failed to build processedChartLike', e);
       return null;
     }
-  }, [processedChart]);
+  }, [chartData, processedChart]);
 
   if (birthData === null) {
     return (

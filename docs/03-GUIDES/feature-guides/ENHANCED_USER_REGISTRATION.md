@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# 🔐 Enhanced User Registration System
-
 ## ✅ **Comprehensive User Profile Collection Implementation**
 
 ### 🎯 **Overview**
@@ -20,7 +18,7 @@ experiences, analytics, and improved service delivery.
 
 ## 🌟 **Astrology App - Enhanced Signup Form**
 
-### 📋 **User Information Collected:**
+### 📋 **User Information Collected (HealWave):**
 
 #### **1. Basic Account Information**
 
@@ -97,7 +95,7 @@ experiences, analytics, and improved service delivery.
 
 ## 🎵 **HealWave App - Enhanced Signup Form**
 
-### 📋 **User Information Collected:**
+### 📋 **HealWave User Information Collected:**
 
 #### **1. Personal Information**
 

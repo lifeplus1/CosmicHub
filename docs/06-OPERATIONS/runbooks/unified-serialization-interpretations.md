@@ -7,8 +7,6 @@ review_cycle: 120d
 category: operations
 ---
 
-# Unified Serialization & Interpretation Flow Runbook
-
 ## Purpose
 
 Ensure a consistent, type‑safe pipeline from frontend chart capture through backend storage,

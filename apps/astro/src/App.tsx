@@ -25,7 +25,6 @@ const queryClient = new QueryClient({
 });
 
 const Dashboard = lazy(() => import('./pages/Dashboard')); // Lazy load for performance
-const Chart = lazy(() => import('./pages/Chart')); // New dedicated chart page
 const UnifiedChart = lazy(() => import('./pages/UnifiedChart')); // Unified chart page
 const MultiSystemChart = lazy(() => import('./pages/MultiSystemChart')); // Multi-system chart page
 const Profile = lazy(() => import('./pages/Profile'));

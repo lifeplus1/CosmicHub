@@ -7,8 +7,6 @@ review_cycle: 90d
 category: guide
 ---
 
-# React Hook Patterns & Dependency Management (Draft)
-
 > Draft created August 18, 2025 – consolidates emerging internal conventions while auditing
 > `Chart.tsx` & `ChartPreferences.tsx`. Refine after broader adoption.
 

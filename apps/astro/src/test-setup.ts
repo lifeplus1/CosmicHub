@@ -5,6 +5,21 @@ import React from 'react';
 // Make React available globally for tests
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
+// Mock window.matchMedia for all tests
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // Deprecated
+    removeListener: vi.fn(), // Deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 // Test setup with comprehensive mocking for external dependencies
 
 // Mock Firebase modules completely

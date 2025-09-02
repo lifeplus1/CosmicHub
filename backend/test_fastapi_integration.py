@@ -8,6 +8,7 @@ import sys
 import os
 import tempfile
 import shutil
+from typing import Dict, Any
 
 # Add backend to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -34,7 +35,7 @@ try:
         print("❌ ParquetExporter failed to initialize")
         
     # Test background export function
-    test_chart_data = {
+    test_chart_data: Dict[str, Any] = {
         'year': 1990,
         'month': 5,
         'day': 15,

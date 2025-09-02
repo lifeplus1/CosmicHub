@@ -1,9 +1,68 @@
 import React, { useCallback } from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 // @ts-ignore - test dependency assumed available in workspace; if missing, add @testing-library/react
 import { render } from '@testing-library/react';
 import AnalyticsProvider, { useAnalytics } from '../AnalyticsProvider';
 import type { AnalyticsConfig } from '../../types';
+
+// Store callback for testing
+let storedOnDispatch: any = null;
+
+// Create a mock instance that implements the required interface
+const createMockAnalyticsInstance = () => ({
+  track: vi.fn((eventData: any) => {
+    // Call the stored callback when track is called - simulate real service behavior
+    if (storedOnDispatch) {
+      const analyticsEvent = {
+        event: eventData.event,
+        properties: eventData.properties || {},
+        timestamp: Date.now(),
+        session_id: 'test-session',
+        platform: 'web' as const,
+      };
+      storedOnDispatch(analyticsEvent);
+    }
+  }),
+  identify: vi.fn(),
+  page: vi.fn(),
+  setConsentGranted: vi.fn(),
+  isTrackingEnabled: vi.fn(() => true),
+  getSessionId: vi.fn(() => 'test-session'),
+  shutdown: vi.fn(),
+  reset: vi.fn(),
+  flush: vi.fn(),
+  disable: vi.fn(),
+  enable: vi.fn(),
+  withTiming: vi.fn(),
+  trackError: vi.fn(),
+});
+
+let mockInstance: any = null;
+
+// Mock the entire AnalyticsService module
+vi.mock('../../AnalyticsService', () => ({
+  AnalyticsService: vi.fn().mockImplementation((config: any) => {
+    storedOnDispatch = config.advanced?.onDispatch;
+    mockInstance = createMockAnalyticsInstance();
+    return mockInstance;
+  }),
+  initializeAnalytics: vi.fn((config: any) => {
+    // Store the onDispatch callback for later use
+    storedOnDispatch = config.advanced?.onDispatch;
+    mockInstance = createMockAnalyticsInstance();
+    return mockInstance;
+  }),
+  getAnalytics: vi.fn(() => {
+    // Return mockInstance if it exists (after initializeAnalytics has been called)
+    return mockInstance;
+  }),
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  storedOnDispatch = null;
+  mockInstance = null;
+});
 
 // Minimal base config factory
 const baseConfig = (over: Partial<AnalyticsConfig> = {}): AnalyticsConfig => {

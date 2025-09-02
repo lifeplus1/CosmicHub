@@ -1,8 +1,31 @@
-import type { ChartBirthData } from '@cosmichub/types';
-import type { ExtendedBirthData } from '../contexts/BirthDataContext';
+import type { ChartBirthData, ExtendedBirthData } from '@cosmichub/types';
+
+// Type guard to check if data has text format properties
+function isTextBirthData(data: unknown): data is ChartBirthData {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'birth_date' in data &&
+    'birth_time' in data
+  );
+}
+
+// Type guard to check if data has numeric format properties
+function _hasNumericBirthData(data: unknown): data is ExtendedBirthData {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'year' in data &&
+    'month' in data &&
+    'day' in data
+  );
+}
 
 // Simple memoization for toCanonicalBirthData to prevent unnecessary re-computations
-const canonicalCache = new WeakMap<any, ChartBirthData>();
+const canonicalCache = new WeakMap<
+  ExtendedBirthData | ChartBirthData,
+  ChartBirthData
+>();
 
 // Convert any ExtendedBirthData or already-canonical ChartBirthData into ChartBirthData
 export function toCanonicalBirthData(
@@ -14,32 +37,33 @@ export function toCanonicalBirthData(
   }
 
   let canonical: ChartBirthData;
-  
-  if ('birth_date' in b && 'birth_time' in b) {
-    // Assume already canonical (ExtendedBirthData extends ChartBirthData)
+
+  if (isTextBirthData(b)) {
+    // Already in canonical text format
     canonical = {
-      birth_date: (b as any).birth_date,
-      birth_time: (b as any).birth_time,
-      latitude: (b as any).latitude,
-      longitude: (b as any).longitude,
-      city: (b as any).city,
-      timezone: (b as any).timezone,
+      birth_date: b.birth_date,
+      birth_time: b.birth_time,
+      latitude: b.latitude,
+      longitude: b.longitude,
+      city: b.city,
+      timezone: b.timezone,
     };
   } else {
-    // Fallback (shouldn't generally hit given typing) – attempt reconstruction
-    const anyB = b as any;
-    const year = anyB.year ?? 0;
-    const month = anyB.month ?? 1;
-    const day = anyB.day ?? 1;
-    const hour = anyB.hour ?? 0;
-    const minute = anyB.minute ?? 0;
+    // Convert from ExtendedBirthData (numeric) to ChartBirthData (text)
+    const extendedData = b as ExtendedBirthData;
+    const year = extendedData.year ?? 0;
+    const month = extendedData.month ?? 1;
+    const day = extendedData.day ?? 1;
+    const hour = extendedData.hour ?? 0;
+    const minute = extendedData.minute ?? 0;
+
     canonical = {
       birth_date: `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
       birth_time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
-      latitude: anyB.lat ?? anyB.latitude ?? 0,
-      longitude: anyB.lon ?? anyB.longitude ?? 0,
-      city: anyB.city,
-      timezone: anyB.timezone,
+      latitude: extendedData.latitude ?? 0,
+      longitude: extendedData.longitude ?? 0,
+      city: extendedData.city,
+      timezone: extendedData.timezone,
     };
   }
 
@@ -103,8 +127,8 @@ export function parseBirthParams(
   const latRaw = sp.get('lat');
   const lonRaw = sp.get('lon');
   const timezone = sp.get('timezone') ?? 'UTC';
-  const lat = latRaw != null ? Number.parseFloat(latRaw) : undefined;
-  const lon = lonRaw != null ? Number.parseFloat(lonRaw) : undefined;
+  const lat = latRaw !== null ? Number.parseFloat(latRaw) : undefined;
+  const lon = lonRaw !== null ? Number.parseFloat(lonRaw) : undefined;
   const candidate: RawNumericBirthData = {
     year,
     month,

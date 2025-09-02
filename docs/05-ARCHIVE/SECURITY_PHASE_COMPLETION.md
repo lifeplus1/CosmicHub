@@ -7,7 +7,7 @@ review_cycle: 365d
 category: archive
 ---
 
-# 🔒 Security Phase Completion Summary
+<!-- Removed duplicate H1 to resolve MD025 -->
 
 > **Completion Date:** August 23, 2025  
 > **Phase Duration:** 3 days  

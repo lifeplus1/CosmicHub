@@ -9,7 +9,7 @@ import React, {
 import * as d3 from 'd3';
 import { useQuery } from '@tanstack/react-query';
 import { fetchChartData } from '../services/api';
-import type { ExtendedBirthData } from '../contexts/BirthDataContext';
+import type { ExtendedBirthData } from '@cosmichub/types';
 import { useCanonicalBirthData } from '../hooks/useCanonicalBirthData';
 import type { ApiResult } from '@cosmichub/config';
 import { Button } from '@cosmichub/ui';

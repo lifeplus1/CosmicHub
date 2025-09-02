@@ -7,8 +7,6 @@ review_cycle: 90d
 category: architecture
 ---
 
-# 🏗️ 04-ARCHITECTURE - System Design & Technical Specs
-
 This directory contains comprehensive technical documentation about the system architecture and
 design.
 

@@ -7,7 +7,7 @@ review_cycle: 120d
 category: operations
 ---
 
-# API Degradation / Fallback Matrix
+## API Degradation / Fallback Matrix
 
 ---
 

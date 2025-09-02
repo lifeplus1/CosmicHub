@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChartDisplay } from '../ChartDisplay';
@@ -10,15 +10,35 @@ vi.mock('../hooks/useChartData', () => ({
   useChartData: vi.fn(() => ({
     chartData: {
       planets: [
-        { name: 'Sun', sign: 'Leo', degree: 15.5, position: 135.5, house: '11', retrograde: false },
-        { name: 'Moon', sign: 'Cancer', degree: 22.3, position: 112.3, house: '10', retrograde: false },
+        {
+          name: 'Sun',
+          sign: 'Leo',
+          degree: 15.5,
+          position: 135.5,
+          house: '11',
+          retrograde: false,
+        },
+        {
+          name: 'Moon',
+          sign: 'Cancer',
+          degree: 22.3,
+          position: 112.3,
+          house: '10',
+          retrograde: false,
+        },
       ],
       houses: [
         { house: 1, sign: 'Aries', cusp: 0, degree: 0 },
         { house: 2, sign: 'Taurus', cusp: 30, degree: 0 },
       ],
       aspects: [
-        { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+        {
+          planet1: 'Sun',
+          planet2: 'Moon',
+          type: 'Trine',
+          orb: 2.5,
+          applying: 'applying',
+        },
       ],
       asteroids: [],
       angles: [],
@@ -31,15 +51,35 @@ vi.mock('../hooks/useChartData', () => ({
 vi.mock('../hooks/useProcessedSections', () => ({
   useProcessedSections: vi.fn(() => ({
     planets: [
-      { name: 'Sun', sign: 'Leo', degree: 15.5, position: 135.5, house: '11', retrograde: false },
-      { name: 'Moon', sign: 'Cancer', degree: 22.3, position: 112.3, house: '10', retrograde: false },
+      {
+        name: 'Sun',
+        sign: 'Leo',
+        degree: 15.5,
+        position: 135.5,
+        house: '11',
+        retrograde: false,
+      },
+      {
+        name: 'Moon',
+        sign: 'Cancer',
+        degree: 22.3,
+        position: 112.3,
+        house: '10',
+        retrograde: false,
+      },
     ],
     houses: [
       { house: 1, sign: 'Aries', cusp: 0, degree: 0 },
       { house: 2, sign: 'Taurus', cusp: 30, degree: 0 },
     ],
     aspects: [
-      { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+      {
+        planet1: 'Sun',
+        planet2: 'Moon',
+        type: 'Trine',
+        orb: 2.5,
+        applying: 'applying',
+      },
     ],
     asteroids: [],
     angles: [],
@@ -58,7 +98,13 @@ vi.mock('../hooks/useCategorizedPoints', () => ({
 
 vi.mock('../hooks/useEnhancedAspects', () => ({
   useEnhancedAspects: vi.fn(() => [
-    { planet1: 'Sun', planet2: 'Moon', type: 'Trine', orb: 2.5, applying: 'applying' },
+    {
+      planet1: 'Sun',
+      planet2: 'Moon',
+      type: 'Trine',
+      orb: 2.5,
+      applying: 'applying',
+    },
   ]),
 }));
 
@@ -134,7 +180,8 @@ describe('ChartDisplay keyboard navigation & accessibility', () => {
     );
 
     // Find search input by placeholder or label - may not exist in current implementation
-    const searchInput = screen.queryByPlaceholderText(/search/i) || screen.queryByRole('textbox');
+    const searchInput =
+      screen.queryByPlaceholderText(/search/i) || screen.queryByRole('textbox');
 
     if (searchInput) {
       // Type search term
@@ -190,9 +237,13 @@ describe('ChartDisplay keyboard navigation & accessibility', () => {
 
     // Look for planet count card - may have different text
     const planetTexts = screen.queryAllByText('☉ Planets');
-    const planetText = planetTexts.length > 0 ? planetTexts[0] : screen.queryByText(/planets/i);
+    const planetText =
+      planetTexts.length > 0 ? planetTexts[0] : screen.queryByText(/planets/i);
     const asteroidTexts = screen.queryAllByText('☄️ Asteroids');
-    const asteroidText = asteroidTexts.length > 0 ? asteroidTexts[0] : screen.queryByText(/asteroids/i);
+    const asteroidText =
+      asteroidTexts.length > 0
+        ? asteroidTexts[0]
+        : screen.queryByText(/asteroids/i);
 
     expect(planetText || asteroidText).toBeTruthy();
   });
@@ -208,12 +259,14 @@ describe('ChartDisplay keyboard navigation & accessibility', () => {
     const unifiedViewBtns = screen.queryAllByRole('button', {
       name: /unified view/i,
     });
-    const unifiedViewBtn = unifiedViewBtns.length > 0 ? unifiedViewBtns[0] : null;
+    const unifiedViewBtn =
+      unifiedViewBtns.length > 0 ? unifiedViewBtns[0] : null;
 
     const separateViewBtns = screen.queryAllByRole('button', {
       name: /separate tables/i,
     });
-    const separateViewBtn = separateViewBtns.length > 0 ? separateViewBtns[0] : null;
+    const separateViewBtn =
+      separateViewBtns.length > 0 ? separateViewBtns[0] : null;
 
     if (unifiedViewBtn && separateViewBtn) {
       // Test button activation with keyboard
