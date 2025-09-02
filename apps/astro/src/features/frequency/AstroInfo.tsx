@@ -1,5 +1,5 @@
 import React from 'react';
-import type { FrequencyPreset } from '@cosmichub/frequency';
+import type { FrequencyPreset } from '../../types/frequency';
 
 interface AstrologyEnhancement {
   planetaryAlignment: string;

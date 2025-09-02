@@ -619,7 +619,7 @@ export class PerformanceTestRunner {
       if (!metricsByName[metric.name]) {
         metricsByName[metric.name] = [];
       }
-      metricsByName[metric.name].push(metric.value);
+      metricsByName[metric.name]!.push(metric.value);
     });
 
     const report: PerformanceReport = {};
@@ -630,7 +630,7 @@ export class PerformanceTestRunner {
         average: values.reduce((sum, val) => sum + val, 0) / values.length,
         min: Math.min(...values),
         max: Math.max(...values),
-        median: values.sort((a, b) => a - b)[Math.floor(values.length / 2)],
+        median: values.sort((a, b) => a - b)[Math.floor(values.length / 2)] ?? 0,
       };
     });
 

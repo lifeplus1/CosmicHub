@@ -26,6 +26,7 @@ export type {
 
 // Basic shape we rely on from integrations package. (Kept intentionally minimal)
 interface BasicSubscription {
+  tier: string;
   status: string; // e.g. 'active'
   currentPeriodEnd?: Date; // Normalized to Date within provider
   [key: string]: unknown; // allow forward-compat extension

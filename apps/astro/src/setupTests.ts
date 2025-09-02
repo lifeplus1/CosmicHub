@@ -28,7 +28,7 @@ vi.mock('./firebase', () => ({
 }));
 
 // Mock subscriptions package (lightweight)
-vi.mock('@cosmichub/subscriptions', () => ({
+vi.mock('@cosmichub/auth', () => ({
   COSMICHUB_TIERS: {
     free: {
       name: 'Free',

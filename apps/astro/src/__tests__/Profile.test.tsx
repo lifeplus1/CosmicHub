@@ -72,7 +72,7 @@ vi.mock('../components/ChartPreferences', () => ({
 }));
 
 // Mock subscription types (now import from package)
-vi.mock('@cosmichub/subscriptions', () => ({
+vi.mock('@cosmichub/auth', () => ({
   COSMICHUB_TIERS: {
     free: { name: 'Free Explorer' },
   },

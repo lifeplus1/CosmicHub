@@ -5,10 +5,13 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  getOfflineSyncManager,
-  type NetworkStatus,
-  type SyncResult,
-} from '@cosmichub/storage';
+  NetworkStatus,
+  SyncResult,
+  MockChartStorage,
+} from '../types/storage';
+
+// Mock offline sync manager
+const getOfflineSyncManager = () => new MockChartStorage();
 
 interface OfflineIndicatorProps {
   className?: string;
@@ -23,8 +26,7 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
 }) => {
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
     online: navigator.onLine,
-    connection: 'fast',
-    lastChecked: new Date().toISOString(),
+    connection: 'wifi',
   });
   const [syncStats, setSyncStats] = useState<{
     pending_items: number;
@@ -41,13 +43,13 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
 
   useEffect(() => {
     const updateStatus = async (): Promise<void> => {
-      const status = syncManager.getNetworkStatus();
+      const status = await syncManager.getNetworkStatus();
       const stats = await syncManager.getSyncStats();
 
       setNetworkStatus(status);
       setSyncStats({
         pending_items: stats.pending_items,
-        last_sync: stats.last_sync,
+        last_sync: stats.last_sync ? stats.last_sync.toISOString() : null,
         sync_in_progress: stats.sync_in_progress,
       });
     };
@@ -114,16 +116,16 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
     return 'Online';
   };
 
-  const getConnectionQuality = (): string => {
+  const _getConnectionIcon = () => {
     switch (networkStatus.connection) {
-      case 'fast':
-        return '4G';
-      case 'slow':
-        return '3G';
-      case 'offline':
-        return 'Offline';
+      case 'wifi':
+        return '📶';
+      case 'cellular':
+        return '📱';
+      case 'none':
+        return '❌';
       default:
-        return 'Unknown';
+        return '📶';
     }
   };
 
@@ -170,7 +172,7 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
               {getStatusText()}
             </div>
             <div className='text-xs text-gray-500'>
-              {networkStatus.online ? getConnectionQuality() : 'No connection'}
+              {networkStatus.online ? networkStatus.connection : 'No connection'}
             </div>
           </div>
         </div>

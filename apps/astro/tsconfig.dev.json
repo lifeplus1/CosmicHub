@@ -30,7 +30,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@cosmichub/frequency": ["../../packages/frequency/src"],
       "@cosmichub/auth": ["../../packages/auth/src"],
       "@cosmichub/config": ["../../packages/config/src"],
       "@cosmichub/ui": ["../../packages/ui/src"],

@@ -31,13 +31,11 @@
       "@cosmichub/analytics": ["./packages/analytics/src"],
       "@cosmichub/auth": ["./packages/auth/src"],
       "@cosmichub/config": ["./packages/config/src"],
-      "@cosmichub/frequency": ["./packages/frequency/src"],
       "@cosmichub/hooks": ["./packages/hooks/src"],
       "@cosmichub/integrations": ["./packages/integrations/src"],
       "@cosmichub/pwa": ["./packages/pwa/src"],
       "@cosmichub/ui": ["./packages/ui/src"],
-      "@cosmichub/types": ["./packages/types/src"],
-      "@cosmichub/subscriptions": ["./packages/subscriptions/src"]
+      "@cosmichub/types": ["./packages/types/src"]
     }
   },
   // Root acts as solution tsconfig only; actual source compilation handled by per-package/app tsconfigs
@@ -48,7 +46,6 @@
     { "path": "./packages/analytics" },
     { "path": "./packages/auth" },
     { "path": "./packages/config" },
-    { "path": "./packages/frequency" },
     { "path": "./packages/hooks" },
     { "path": "./packages/integrations" },
     { "path": "./packages/pwa" },

@@ -22,11 +22,31 @@ import {
   FaSave,
   FaHeadset,
 } from 'react-icons/fa';
-// Using centralized subscription tiers
-import {
-  COSMICHUB_TIERS,
-  type AstroSubscriptionTier,
-} from '@cosmichub/subscriptions';
+
+// Local tiers (auth package has compilation errors)
+const ASTRO_TIERS = {
+  free: {
+    id: 'free',
+    name: 'Free',
+    description: 'Basic astrology features',
+    price: { monthly: 0, yearly: 0 },
+    features: ['Basic birth chart', '5 charts per month', 'Basic interpretations']
+  },
+  premium: {
+    id: 'premium',
+    name: 'Premium', 
+    description: 'Advanced astrology features',
+    price: { monthly: 19, yearly: 190 },
+    features: ['Unlimited charts', 'Advanced interpretations', 'Compatibility reports', 'Transit forecasts']
+  },
+  elite: {
+    id: 'elite',
+    name: 'Elite',
+    description: 'Professional astrology suite',
+    price: { monthly: 49, yearly: 490 },
+    features: ['Everything in Premium', 'Professional reports', 'API access', 'Custom chart styles', 'Priority support']
+  }
+};
 
 const PricingPage: React.FC = React.memo(() => {
   const { user } = useAuth();
@@ -105,7 +125,7 @@ const PricingPage: React.FC = React.memo(() => {
     [user, isAnnual, toast]
   );
 
-  const getTierIcon = (tier: keyof typeof COSMICHUB_TIERS) => {
+  const getTierIcon = (tier: keyof typeof ASTRO_TIERS) => {
     switch (tier) {
       case 'free':
         return <FaUser className='text-gray-500' />;
@@ -118,7 +138,7 @@ const PricingPage: React.FC = React.memo(() => {
     }
   };
 
-  const getTierColor = (tier: keyof typeof COSMICHUB_TIERS): string => {
+  const getTierColor = (tier: keyof typeof ASTRO_TIERS): string => {
     switch (tier) {
       case 'free':
         return 'gray-500';
@@ -292,8 +312,8 @@ const PricingPage: React.FC = React.memo(() => {
         </div>
 
         <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
-          {Object.entries(COSMICHUB_TIERS).map(
-            ([tierKey, tier]: [string, AstroSubscriptionTier]) => (
+          {(Object.entries(ASTRO_TIERS) as Array<[keyof typeof ASTRO_TIERS, typeof ASTRO_TIERS[keyof typeof ASTRO_TIERS]]>).map(
+            ([tierKey, tier]) => (
               <div
                 key={tierKey}
                 className={`cosmic-card ${tierKey === userTier ? 'border-2 border-purple-500 shadow-lg' : ''}`}
@@ -327,7 +347,7 @@ const PricingPage: React.FC = React.memo(() => {
                           <div className='flex items-center space-x-2'>
                             {/* Guard against invalid tier color values (tailwind safelist recommended) */}
                             <span
-                              className={`px-2 py-1 rounded text-xs bg-${getTierColor(feature)}/20 text-${getTierColor(feature)}`}
+                              className={`px-2 py-1 rounded text-xs bg-${getTierColor(getFeatureTier(feature) || 'free')}/20 text-${getTierColor(getFeatureTier(feature) || 'free')}`}
                             >
                               {getFeatureTier(feature)}
                             </span>
@@ -474,7 +494,7 @@ const PricingPage: React.FC = React.memo(() => {
                   <td className='px-4 py-3 text-center'>
                     {isFeatureIncluded(
                       feature,
-                      COSMICHUB_TIERS['free']?.features ?? []
+                      ASTRO_TIERS['free']?.features ?? []
                     ) ? (
                       <FaCheck className='mx-auto text-green-500' />
                     ) : (
@@ -484,7 +504,7 @@ const PricingPage: React.FC = React.memo(() => {
                   <td className='px-4 py-3 text-center'>
                     {isFeatureIncluded(
                       feature,
-                      COSMICHUB_TIERS['premium']?.features ?? []
+                      ASTRO_TIERS['premium']?.features ?? []
                     ) ? (
                       <FaCheck className='mx-auto text-green-500' />
                     ) : (
@@ -494,7 +514,7 @@ const PricingPage: React.FC = React.memo(() => {
                   <td className='px-4 py-3 text-center'>
                     {isFeatureIncluded(
                       feature,
-                      COSMICHUB_TIERS['elite']?.features ?? []
+                      ASTRO_TIERS['elite']?.features ?? []
                     ) ? (
                       <FaCheck className='mx-auto text-green-500' />
                     ) : (

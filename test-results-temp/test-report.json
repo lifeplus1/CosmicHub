@@ -4,23 +4,23 @@
     "passed": 1,
     "failed": 0,
     "skipped": 0,
-    "duration": 7.771583000000078,
+    "duration": 6.3792909999999665,
     "coverage": {
-      "overall": 89.77932302649765,
-      "statements": 85.5950159767344,
-      "branches": 88.22858368184227,
-      "functions": 92.79724927982956,
-      "lines": 92.49644316758439
+      "overall": 93.57996314606055,
+      "statements": 94.28304737925669,
+      "branches": 91.54481079138424,
+      "functions": 99.70869876516336,
+      "lines": 88.7832956484379
     },
     "performance": {
-      "averageRenderTime": 7.2180419999999685,
-      "maxRenderTime": 7.2180419999999685,
-      "totalMemoryUsage": 19552
+      "averageRenderTime": 5.798416999999972,
+      "maxRenderTime": 5.798416999999972,
+      "totalMemoryUsage": 26208
     },
     "accessibility": {
       "totalViolations": 1,
       "criticalViolations": 0,
-      "totalWarnings": 0
+      "totalWarnings": 1
     },
     "quality": {
       "score": 97,
@@ -32,17 +32,17 @@
     {
       "suite": "alpha",
       "status": "passed",
-      "duration": 7.453583999999978,
+      "duration": 6.039374999999836,
       "coverage": {
-        "statements": 85.5950159767344,
-        "branches": 88.22858368184227,
-        "functions": 92.79724927982956,
-        "lines": 92.49644316758439
+        "statements": 94.28304737925669,
+        "branches": 91.54481079138424,
+        "functions": 99.70869876516336,
+        "lines": 88.7832956484379
       },
       "performance": {
-        "renderTime": 7.2180419999999685,
+        "renderTime": 5.798416999999972,
         "mountTime": 0,
-        "memoryUsage": 19552
+        "memoryUsage": 26208
       },
       "accessibility": {
         "violations": [
@@ -53,21 +53,31 @@
             "nodes": 1
           }
         ],
-        "warnings": []
+        "warnings": [
+          {
+            "id": "aria-label",
+            "description": "Consider adding aria-label for better accessibility",
+            "nodes": 1
+          }
+        ]
       },
       "errors": [],
       "metadata": {
-        "timestamp": "2025-09-02T14:11:22.643Z",
+        "timestamp": "2025-09-02T18:24:10.110Z",
         "nodeVersion": "v24.4.1",
         "platform": "darwin"
       }
     }
   ],
-  "timestamp": "2025-09-02T14:11:22.648Z",
+  "timestamp": "2025-09-02T18:24:10.115Z",
   "config": {
     "coverage": {
       "threshold": 80,
-      "exclude": ["node_modules", "dist", "**/*.d.ts"]
+      "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.d.ts"
+      ]
     },
     "performance": {
       "maxRenderTime": 16,

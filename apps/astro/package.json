@@ -28,8 +28,6 @@
     "@cosmichub/config": "workspace:*",
     "@cosmichub/hooks": "workspace:*",
     "@cosmichub/pwa": "workspace:*",
-    "@cosmichub/storage": "workspace:*",
-    "@cosmichub/subscriptions": "workspace:*",
     "@cosmichub/types": "workspace:*",
     "@cosmichub/ui": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.11",

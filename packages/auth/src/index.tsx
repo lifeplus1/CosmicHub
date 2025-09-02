@@ -344,7 +344,15 @@ export async function logOut(): Promise<void> {
 export {
   SubscriptionProvider,
   useSubscription,
-  type SubscriptionState,
 } from './SubscriptionProvider';
+
+// Export subscription utilities and tiers
+export {
+  getUserTier,
+  hasFeatureAccess,
+  ASTRO_TIERS,
+  HEALWAVE_TIERS,
+  type UserSubscription,
+} from './subscription-utils';
 
 export * from 'firebase/auth';

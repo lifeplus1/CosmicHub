@@ -74,7 +74,7 @@ function SpiritualApp() {
 
 ### Frontend Bridge Layer
 
-```
+```text
 React/TypeScript Frontend
            ↕
 PersonalizationBridge (API Service)
@@ -435,21 +435,21 @@ If migrating from parallel Phase 6B development:
 
 ### Common Issues
 
-**Backend Connection Issues**
+#### Backend Connection Issues
 
 ```
 Error: Cannot connect to spiritual AI backend
 Solution: Verify SPIRITUAL_AI_API_URL environment variable
 ```
 
-**Type Errors**
+### Type Errors
 
 ```
 Error: Property 'spiritualLevel' does not exist
 Solution: Update to latest type definitions and rebuild
 ```
 
-**CSS Not Loading**
+### CSS Not Loading
 
 ```
 Error: Styles not applied to components

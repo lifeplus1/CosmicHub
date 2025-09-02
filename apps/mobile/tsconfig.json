@@ -22,9 +22,7 @@
       "@cosmichub/auth": ["../../packages/auth/src"],
       "@cosmichub/config": ["../../packages/config/src"],
       "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
-      "@cosmichub/frequency": ["../../packages/frequency/src"],
       "@cosmichub/integrations": ["../../packages/integrations/src"],
-      "@cosmichub/subscriptions": ["../../packages/subscriptions/src"],
       "@cosmichub/ui": ["../../packages/ui/src"],
       "@cosmichub/types": ["../../packages/types/src"]
     }

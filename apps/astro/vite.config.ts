@@ -14,16 +14,12 @@ export default defineConfig({
   ],
 
   css: {
-    postcss: './postcss.config.js',
+    postcss: './postcss.config.cjs',
   },
 
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@cosmichub/frequency': path.resolve(
-        __dirname,
-        '../../packages/frequency/src'
-      ),
       '@cosmichub/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@cosmichub/config': path.resolve(__dirname, '../../packages/config/src'),
       '@cosmichub/ui': path.resolve(__dirname, '../../packages/ui/src'),
@@ -70,7 +66,7 @@ export default defineConfig({
           auth: ['@cosmichub/auth'],
 
           // Astrology calculations and utilities
-          astro: ['@cosmichub/frequency', './src/services/api.ts'],
+          astro: ['./src/services/api.ts'],
 
           // Configuration and types
           config: ['@cosmichub/config', '@cosmichub/integrations'],
@@ -114,7 +110,6 @@ export default defineConfig({
       '@radix-ui/react-tooltip',
     ],
     exclude: [
-      '@cosmichub/frequency',
       '@cosmichub/auth',
       '@cosmichub/config',
       '@cosmichub/ui',

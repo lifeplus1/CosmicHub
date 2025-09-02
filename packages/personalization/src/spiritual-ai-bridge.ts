@@ -8,7 +8,6 @@ import type {
   PracticeReadiness,
   SpiritualAIResponse,
   LearningStage,
-  SpiritualLevel,
 } from './types/spiritual-types';
 
 /**

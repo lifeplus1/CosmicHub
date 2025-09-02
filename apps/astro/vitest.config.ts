@@ -79,10 +79,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@cosmichub/frequency': path.resolve(
-        __dirname,
-        '../../packages/frequency/src'
-      ),
       '@cosmichub/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@cosmichub/config': path.resolve(__dirname, '../../packages/config/src'),
       '@cosmichub/ui': path.resolve(__dirname, '../../packages/ui/src'),

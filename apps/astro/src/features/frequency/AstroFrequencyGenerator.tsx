@@ -1,17 +1,47 @@
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { devConsole } from '../../config/environment';
 import {
-  AudioEngine,
-  PLANETARY_FREQUENCIES,
-  SOLFEGGIO_FREQUENCIES,
-  type FrequencyPreset,
-  type AudioSettings,
-} from '@cosmichub/frequency';
+  FrequencyPreset,
+  AudioSettings,
+  DEFAULT_FREQUENCY_PRESETS,
+} from '../../types/frequency';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 
 const LazyAstroInfo = lazy(() => import('./AstroInfo')); // Lazy load for performance
+
+// Mock planetary and solfeggio frequencies
+const PLANETARY_FREQUENCIES = {
+  sun: 126.22,
+  moon: 210.42,
+  mercury: 141.27,
+  venus: 221.23,
+  mars: 144.72,
+  jupiter: 183.58,
+  saturn: 147.85,
+  uranus: 207.36,
+  neptune: 211.44,
+  pluto: 140.25
+};
+
+const SOLFEGGIO_FREQUENCIES = {
+  ut: 396,
+  re: 417,
+  mi: 528,
+  fa: 639,
+  sol: 741,
+  la: 852,
+  si: 963
+};
+
+// Mock AudioEngine
+class AudioEngine {
+  constructor() {}
+  startFrequency(freq: number): void {}
+  stopFrequency(): void {}
+  static getInstance(): AudioEngine { return new AudioEngine(); }
+}
 
 interface AstrologyEnhancement {
   planetaryAlignment: string;

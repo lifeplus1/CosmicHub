@@ -18,8 +18,33 @@ import {
   FaArrowUp,
   FaHistory,
 } from 'react-icons/fa';
-import { COSMICHUB_TIERS } from '@cosmichub/subscriptions';
 import ProgressBar from './ProgressBar';
+
+// Local tier configuration until package exports are resolved
+const ASTRO_TIERS = {
+  free: { 
+    level: 0, 
+    name: 'Free',
+    description: 'Basic astrology features',
+    price: { monthly: 0, yearly: 0 },
+    features: ['Basic chart generation', 'Daily horoscope', 'Planet positions']
+  },
+  premium: { 
+    level: 1, 
+    name: 'Premium',
+    description: 'Enhanced astrology experience',
+    price: { monthly: 9.99, yearly: 99.99 },
+    features: ['Advanced charts', 'Synastry analysis', 'Transit predictions', 'Export reports']
+  },
+  elite: { 
+    level: 2, 
+    name: 'Elite',
+    description: 'Professional astrology toolkit',
+    price: { monthly: 19.99, yearly: 199.99 },
+    features: ['All Premium features', 'AI interpretations', 'Custom chart styles', 'Priority support']
+  },
+} as const;
+
 import './UserProfile.module.css';
 import {
   serializeAstrologyData,
@@ -155,7 +180,7 @@ const UserProfile = React.memo(() => {
   }, [loadUserStats]);
 
   const getTierIcon = (
-    tier: keyof typeof COSMICHUB_TIERS
+    tier: keyof typeof ASTRO_TIERS
   ): React.ReactElement => {
     const iconProps = {
       className: 'text-cosmic-silver',
@@ -174,7 +199,7 @@ const UserProfile = React.memo(() => {
     }
   };
 
-  const getTierColor = (tier: keyof typeof COSMICHUB_TIERS): string => {
+  const getTierColor = (tier: keyof typeof ASTRO_TIERS): string => {
     switch (tier) {
       case 'free':
         return 'cosmic-silver';
@@ -191,12 +216,12 @@ const UserProfile = React.memo(() => {
     navigate('/upgrade');
   }, [navigate]);
 
-  const isTierKey = (t: unknown): t is keyof typeof COSMICHUB_TIERS =>
-    typeof t === 'string' && t in COSMICHUB_TIERS;
-  const tierKey: keyof typeof COSMICHUB_TIERS = isTierKey(userTier)
+  const isTierKey = (t: unknown): t is keyof typeof ASTRO_TIERS =>
+    typeof t === 'string' && t in ASTRO_TIERS;
+  const tierKey: keyof typeof ASTRO_TIERS = isTierKey(userTier)
     ? userTier
     : 'free';
-  const currentTier = COSMICHUB_TIERS[tierKey];
+  const currentTier = ASTRO_TIERS[tierKey];
   const tierSafe =
     currentTier ??
     ({

@@ -83,21 +83,21 @@ export interface MultiSystemChartData {
   spiritual_systems?: {
     description?: string;
     tarot?: {
-      daily_card?: any;
-      life_path?: any;
-      suits?: any[];
+      daily_card?: TarotCard;
+      life_path?: TarotReading;
+      suits?: TarotSuit[];
     };
     kabbalah?: {
-      primary_sephirah?: any;
-      secondary_sephirah?: any;
-      relevant_paths?: any[];
+      primary_sephirah?: Sephirah;
+      secondary_sephirah?: Sephirah;
+      relevant_paths?: TreePath[];
       spiritual_focus?: string;
       tree_guidance?: string;
     };
     correspondences?: {
-      daily_focus?: any;
-      life_purpose?: any;
-      spiritual_center?: any;
+      daily_focus?: SpiritualCorrespondence;
+      life_purpose?: SpiritualCorrespondence;
+      spiritual_center?: SpiritualCorrespondence;
     };
     synthesis?: {
       primary_themes?: string[];
@@ -106,7 +106,7 @@ export interface MultiSystemChartData {
       daily_practice?: string;
     };
     ai_interpretation?: {
-      spiritual_interpretation?: any;
+      spiritual_interpretation?: AIInterpretation;
       timestamp?: string;
     };
   };
@@ -188,4 +188,64 @@ export interface SynthesisChartData {
   life_purpose?: string[];
   personality_integration?: Record<string, string[]>;
   spiritual_path?: string[];
+};
+
+// Spiritual system interfaces for proper typing
+export interface TarotCard {
+  name: string;
+  suit?: string;
+  number?: number;
+  meaning?: string;
+  keywords?: string[];
+  description?: string;
+}
+
+export interface TarotReading {
+  cards: TarotCard[];
+  spread_type?: string;
+  interpretation?: string;
+  timestamp?: string;
+}
+
+export interface TarotSuit {
+  name: string;
+  element?: string;
+  meaning?: string;
+  cards?: TarotCard[];
+}
+
+export interface Sephirah {
+  name: string;
+  number: number;
+  meaning?: string;
+  planet?: string;
+  color?: string;
+  attribute?: string;
+  divine_name?: string;
+}
+
+export interface TreePath {
+  number: number;
+  from_sephirah: string;
+  to_sephirah: string;
+  hebrew_letter: string;
+  tarot_card: string;
+  meaning?: string;
+  color?: string;
+  element?: string;
+}
+
+export interface SpiritualCorrespondence {
+  type: string;
+  value: string | number;
+  meaning?: string;
+  description?: string;
+}
+
+export interface AIInterpretation {
+  content: string;
+  confidence?: number;
+  model_used?: string;
+  generation_method?: string;
+  sources?: string[];
 }

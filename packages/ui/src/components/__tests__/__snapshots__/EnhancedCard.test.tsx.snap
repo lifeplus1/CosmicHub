@@ -1,0 +1,452 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Enhanced Card > renders disabled variant correctly > Enhanced Card-disabled 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="true"
+    class="card card--elevated card--medium card--theme-cosmic card--disabled"
+    data-testid="test-card"
+  />
+</div>
+`;
+
+exports[`Enhanced Card > renders elevated variant correctly > Enhanced Card-elevated 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic"
+    data-testid="test-card"
+  />
+</div>
+`;
+
+exports[`Enhanced Card > renders filled variant correctly > Enhanced Card-filled 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--filled card--medium card--theme-cosmic"
+    data-testid="test-card"
+  />
+</div>
+`;
+
+exports[`Enhanced Card > renders large variant correctly > Enhanced Card-large 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--large card--theme-cosmic"
+    data-testid="test-card"
+  />
+</div>
+`;
+
+exports[`Enhanced Card > renders loading variant correctly > Enhanced Card-loading 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="true"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic card--loading"
+    data-testid="test-card"
+  >
+    <div
+      aria-hidden="true"
+      class="card__loading-overlay"
+    >
+      <div
+        class="card__spinner"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Enhanced Card > renders outlined variant correctly > Enhanced Card-outlined 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--outlined card--medium card--theme-cosmic"
+    data-testid="test-card"
+  />
+</div>
+`;
+
+exports[`Enhanced Card > renders small variant correctly > Enhanced Card-small 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--small card--theme-cosmic"
+    data-testid="test-card"
+  />
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot > enhanced-card-default 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic"
+    data-testid="card"
+  >
+    <div
+      class="card__header "
+    >
+      <div
+        class="card__header-content"
+      >
+        <h3
+          class="card__title"
+          data-testid="card-title"
+        >
+          Visual Test Card
+        </h3>
+        <p
+          class="card__subtitle"
+          data-testid="card-subtitle"
+        >
+          Snapshot testing
+        </p>
+      </div>
+    </div>
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      Content for visual testing
+    </div>
+    <div
+      class="card__footer card__footer--align-end"
+      data-testid="card-footer"
+    >
+      Footer content
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot at desktop viewport > enhanced-card-desktop 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic"
+    data-testid="card"
+  >
+    <div
+      class="card__header "
+    >
+      <div
+        class="card__header-content"
+      >
+        <h3
+          class="card__title"
+          data-testid="card-title"
+        >
+          Visual Test Card
+        </h3>
+        <p
+          class="card__subtitle"
+          data-testid="card-subtitle"
+        >
+          Snapshot testing
+        </p>
+      </div>
+    </div>
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      Content for visual testing
+    </div>
+    <div
+      class="card__footer card__footer--align-end"
+      data-testid="card-footer"
+    >
+      Footer content
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot at mobile viewport > enhanced-card-mobile 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic"
+    data-testid="card"
+  >
+    <div
+      class="card__header "
+    >
+      <div
+        class="card__header-content"
+      >
+        <h3
+          class="card__title"
+          data-testid="card-title"
+        >
+          Visual Test Card
+        </h3>
+        <p
+          class="card__subtitle"
+          data-testid="card-subtitle"
+        >
+          Snapshot testing
+        </p>
+      </div>
+    </div>
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      Content for visual testing
+    </div>
+    <div
+      class="card__footer card__footer--align-end"
+      data-testid="card-footer"
+    >
+      Footer content
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot at tablet viewport > enhanced-card-tablet 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic"
+    data-testid="card"
+  >
+    <div
+      class="card__header "
+    >
+      <div
+        class="card__header-content"
+      >
+        <h3
+          class="card__title"
+          data-testid="card-title"
+        >
+          Visual Test Card
+        </h3>
+        <p
+          class="card__subtitle"
+          data-testid="card-subtitle"
+        >
+          Snapshot testing
+        </p>
+      </div>
+    </div>
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      Content for visual testing
+    </div>
+    <div
+      class="card__footer card__footer--align-end"
+      data-testid="card-footer"
+    >
+      Footer content
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot for elevated > enhanced-card-elevated 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic"
+    data-testid="card"
+  >
+    <div
+      class="card__header "
+    >
+      <div
+        class="card__header-content"
+      >
+        <h3
+          class="card__title"
+          data-testid="card-title"
+        >
+          Elevated Card
+        </h3>
+      </div>
+    </div>
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      Elevated variant
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot for error > enhanced-card-error 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--outlined card--medium card--theme-cosmic"
+    data-testid="card"
+  >
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      <div
+        class="error-content"
+        role="alert"
+      >
+        <div
+          aria-hidden="true"
+          class="error-icon"
+        >
+          ⚠️
+        </div>
+        <p
+          class="error-message"
+        >
+          Test error
+        </p>
+      </div>
+    </div>
+    <div
+      class="card__footer card__footer--align-end"
+      data-testid="card-footer"
+    >
+      <button
+        class="retry-button"
+        data-testid="error-retry-button"
+        type="button"
+      >
+        Try Again
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot for loading > enhanced-card-loading 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="true"
+    aria-disabled="false"
+    class="card card--elevated card--medium card--theme-cosmic card--loading"
+    data-testid="card"
+  >
+    <div
+      aria-hidden="true"
+      class="card__loading-overlay"
+    >
+      <div
+        class="card__spinner"
+      />
+    </div>
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      <div
+        aria-live="polite"
+        class="loading-content"
+      >
+        <span
+          class="sr-only"
+        >
+          Loading...
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Visual regression: enhanced-card > matches visual snapshot for outlined > enhanced-card-outlined 1`] = `
+<div
+  data-test-config="{"performance":true,"accessibility":true,"responsiveness":false,"interactions":true,"errorBoundaries":true,"animations":false}"
+  data-testid="test-wrapper"
+>
+  <div
+    aria-busy="false"
+    aria-disabled="false"
+    class="card card--outlined card--medium card--theme-cosmic"
+    data-testid="card"
+  >
+    <div
+      class="card__header "
+    >
+      <div
+        class="card__header-content"
+      >
+        <h3
+          class="card__title"
+          data-testid="card-title"
+        >
+          Outlined Card
+        </h3>
+      </div>
+    </div>
+    <div
+      class="card__body card__body--padding-medium"
+      data-testid="card-body"
+    >
+      Outlined variant
+    </div>
+  </div>
+</div>
+`;

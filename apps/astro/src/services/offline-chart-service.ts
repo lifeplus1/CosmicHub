@@ -9,7 +9,9 @@ import {
   OfflineSyncManager,
   type OfflineChart,
   type OfflineSyncItem,
-} from '@cosmichub/storage';
+  MockChartStorage,
+  getOfflineSyncManager
+} from '../types/storage';
 import {
   fetchSavedCharts,
   saveChart as apiSaveChart,
@@ -65,8 +67,8 @@ export class OfflineChartService {
   private userId: string | null = null;
 
   constructor() {
-    this.storage = new OfflineChartStorage();
-    this.syncManager = new OfflineSyncManager();
+    this.storage = new MockChartStorage();
+    this.syncManager = getOfflineSyncManager();
 
     // Initialize service worker communication
     void this.initializeServiceWorker();

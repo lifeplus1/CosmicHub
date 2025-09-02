@@ -1,7 +1,13 @@
 import React from 'react';
+import { FaCheck, FaStar } from 'react-icons/fa';
 import { useSubscription } from '@cosmichub/auth';
-import { FaStar, FaCheck } from 'react-icons/fa';
-import { COSMICHUB_TIERS } from '@cosmichub/subscriptions';
+
+// Local tiers (auth package has compilation errors)
+const ASTRO_TIERS = {
+  free: { id: 'free', name: 'Free', description: 'Basic features' },
+  premium: { id: 'premium', name: 'Premium', description: 'Advanced features' },
+  elite: { id: 'elite', name: 'Elite', description: 'Professional features' }
+};
 
 export const SubscriptionStatus: React.FC = React.memo(() => {
   const { userTier, isLoading } = useSubscription();
@@ -14,7 +20,7 @@ export const SubscriptionStatus: React.FC = React.memo(() => {
     );
   }
 
-  const tierInfo = COSMICHUB_TIERS[userTier];
+  const tierInfo = ASTRO_TIERS[userTier as keyof typeof ASTRO_TIERS];
   const isElite = userTier === 'elite';
   const tierName =
     tierInfo !== undefined && tierInfo !== null

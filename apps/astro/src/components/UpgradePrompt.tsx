@@ -2,7 +2,31 @@ import React, { useCallback } from 'react';
 import { devConsole } from '../config/environment';
 import * as Dialog from '@radix-ui/react-dialog';
 import { FaCheck } from 'react-icons/fa';
-import { COSMICHUB_TIERS } from '@cosmichub/subscriptions';
+
+// Local tiers (auth package has compilation errors)
+const ASTRO_TIERS = {
+  free: { 
+    id: 'free', 
+    name: 'Free', 
+    description: 'Basic features',
+    price: { monthly: 0, yearly: 0 },
+    features: ['Basic birth chart', '5 charts per month']
+  },
+  premium: { 
+    id: 'premium', 
+    name: 'Premium', 
+    description: 'Advanced features',
+    price: { monthly: 19, yearly: 190 },
+    features: ['Unlimited charts', 'Advanced interpretations']
+  },
+  elite: { 
+    id: 'elite', 
+    name: 'Elite', 
+    description: 'Professional features',
+    price: { monthly: 49, yearly: 490 },
+    features: ['Everything in Premium', 'Professional reports']
+  }
+};
 
 interface UpgradePromptProps {
   isOpen: boolean;
@@ -14,7 +38,7 @@ interface UpgradePromptProps {
 
 const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(
   ({ isOpen, onClose, feature, requiredTier, trigger = 'feature_access' }) => {
-    const tier = COSMICHUB_TIERS[requiredTier];
+    const tier = ASTRO_TIERS[requiredTier];
     const tierSafe =
       tier ??
       ({
