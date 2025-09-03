@@ -14,7 +14,7 @@ import Card, {
   LoadingCard,
   ErrorCard,
   ChartCard,
-} from '../EnhancedCard';
+} from '../enhanced/EnhancedCard';
 
 // Simple test to verify everything works
 describe('Import Test', () => {

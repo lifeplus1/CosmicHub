@@ -141,7 +141,7 @@ const TCMChart: React.FC<TCMChartProps> = ({
     setEducationalDialog({
       isOpen: true,
       topic,
-      content: content || null
+      content: content ?? null
     });
   };
 
@@ -227,7 +227,7 @@ const TCMChart: React.FC<TCMChartProps> = ({
               <Dialog.Content className='fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-2xl max-h-[85vh] overflow-y-auto cosmic-card bg-gradient-to-br from-cosmic-dark to-cosmic-blue border border-cosmic-gold/30 p-6 rounded-lg'>
                 <div className='flex items-center justify-between mb-4'>
                   <Dialog.Title className='text-xl font-bold text-cosmic-gold'>
-                    {educationalDialog.content?.title || 'TCM Education'}
+                    {educationalDialog.content?.title ?? 'TCM Education'}
                   </Dialog.Title>
                   <Dialog.Close asChild>
                     <AccessibleButton
@@ -494,7 +494,7 @@ const FiveElementsSection: React.FC<{
     return <div className='text-cosmic-silver'>No Five Elements analysis available</div>;
   }
 
-  const elements = data.elements || [];
+  const elements = data.elements ?? [];
 
   // Element color mapping
   const getElementColor = (element: string) => {
@@ -505,7 +505,7 @@ const FiveElementsSection: React.FC<{
       'Metal': 'gray',
       'Water': 'blue'
     };
-    return colorMap[element] || 'gray';
+    return colorMap[element] ?? 'gray';
   };
 
   const getBalanceColor = (level: string) => {
@@ -514,7 +514,7 @@ const FiveElementsSection: React.FC<{
       'balanced': 'green',
       'excess': 'orange'
     };
-    return colorMap[level] || 'gray';
+    return colorMap[level] ?? 'gray';
   };
 
   return (
@@ -585,7 +585,7 @@ const MeridianSection: React.FC<{
     return <div className='text-cosmic-silver'>No meridian system analysis available</div>;
   }
 
-  const meridians = data.meridians || [];
+  const meridians = data.meridians ?? [];
 
   return (
     <div className='space-y-6'>

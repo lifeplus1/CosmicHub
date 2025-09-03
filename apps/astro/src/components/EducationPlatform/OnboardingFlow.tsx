@@ -334,10 +334,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId, onComplete }) =
               onClick={nextStep}
               className="flex items-center gap-2"
               disabled={
-                (currentStep === 2 && !onboardingData.spiritualExperience) ||
-                (currentStep === 3 && onboardingData.interests.length === 0) ||
-                (currentStep === 4 && !onboardingData.practiceStyle) ||
-                (currentStep === 5 && !onboardingData.timeCommitment) ||
+                (currentStep === 2 && !onboardingData.spiritualExperience) ??
+                (currentStep === 3 && onboardingData.interests.length === 0) ??
+                (currentStep === 4 && !onboardingData.practiceStyle) ??
+                (currentStep === 5 && !onboardingData.timeCommitment) ??
                 (currentStep === 6 && onboardingData.goals.length === 0)
               }
             >

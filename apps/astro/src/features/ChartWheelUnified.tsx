@@ -118,7 +118,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
             ? []
             : (data?.aspects
                 ?.filter(
-                  a => a.planet1 === planetName || a.planet2 === planetName
+                  a => a.planet1 === planetName ?? a.planet2 === planetName
                 )
                 .map(a => `${a.planet1}-${a.planet2}`) ?? []),
       }));
@@ -142,7 +142,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
 
   const showTooltip = useCallback(
     (content: string, event: { pageX: number; pageY: number }) => {
-      if (!interactive || !tooltipRef.current || !content) return;
+      if (!interactive ?? !tooltipRef.current ?? !content) return;
 
       tooltipRef.current.innerHTML = content;
       tooltipRef.current.style.display = 'block';
@@ -153,7 +153,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
   );
 
   const hideTooltip = useCallback(() => {
-    if (!interactive || !tooltipRef.current) return;
+    if (!interactive ?? !tooltipRef.current) return;
     tooltipRef.current.style.display = 'none';
   }, [interactive]);
 
@@ -201,7 +201,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
 
   // Main chart rendering effect
   useEffect(() => {
-    if (!data || !svgRef.current) return;
+    if (!data ?? !svgRef.current) return;
 
     const {
       width, height, radius, center, signs, signSymbols, signColors,
@@ -436,15 +436,15 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
     if (showAspects && Array.isArray(data.aspects) && data.aspects.length > 0) {
       data.aspects.forEach((aspect, index) => {
         if (
-          typeof aspect.planet1 !== 'string' ||
-          typeof aspect.planet2 !== 'string' ||
-          !(aspect.planet1 in data.planets) ||
+          typeof aspect.planet1 !== 'string' ??
+          typeof aspect.planet2 !== 'string' ??
+          !(aspect.planet1 in data.planets) ??
           !(aspect.planet2 in data.planets)
         ) return;
 
         const planet1 = data.planets[aspect.planet1];
         const planet2 = data.planets[aspect.planet2];
-        if (!planet1 || !planet2) return;
+        if (!planet1 ?? !planet2) return;
 
         const angle1 = ((planet1.position - 90) * Math.PI) / 180;
         const angle2 = ((planet2.position - 90) * Math.PI) / 180;
@@ -630,7 +630,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
     );
   }
 
-  if (data === null || data === undefined) {
+  if (data === null ?? data === undefined) {
     return (
       <div className='text-center p-8'>
         <div className='text-cosmic-silver mb-4'>No chart data available</div>

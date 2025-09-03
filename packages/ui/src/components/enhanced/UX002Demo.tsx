@@ -14,7 +14,7 @@ import {
   CountUp,
   SmoothProgress,
   TiltCard,
-} from './index';
+} from '../animation';
 
 export const UX002Demo: React.FC = () => {
   const [buttonState, setButtonState] = useState<

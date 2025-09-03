@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from './Card';
-import { Button } from './Button';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 import { useAnalyticsWebSocket } from './AnalyticsWebSocket';
 
 // Types for analytics data

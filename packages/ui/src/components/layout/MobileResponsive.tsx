@@ -5,7 +5,7 @@
 
 // Ensure global JSX namespace is available; if using React 17+ with jsx runtime, keep React import for types
 import React, { useState, useEffect, useCallback } from 'react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 // Responsive breakpoint detection hook
 export const useBreakpoint = () => {

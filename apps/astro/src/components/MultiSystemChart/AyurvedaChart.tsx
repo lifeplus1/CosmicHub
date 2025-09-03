@@ -416,7 +416,7 @@ const DoshasSection: React.FC<{
     return <div className='text-cosmic-silver'>No doshas analysis available</div>;
   }
 
-  const doshas = data.detailed_breakdown || [];
+  const doshas = data.detailed_breakdown ?? [];
 
   return (
     <div className='space-y-6'>
@@ -574,7 +574,7 @@ const PlanetaryHealthSection: React.FC<{
     return <div className='text-cosmic-silver'>No planetary health analysis available</div>;
   }
 
-  const correlations = data.correlations || [];
+  const correlations = data.correlations ?? [];
 
   return (
     <div className='space-y-6'>
@@ -913,7 +913,7 @@ const getDoshaIcon = (dosha: string): string => {
     'Pitta': '🔥', 
     'Kapha': '🌍'
   };
-  return iconMap[dosha] || '⭐';
+  return iconMap[dosha] ?? '⭐';
 };
 
 const getDoshaColor = (dosha: string): string => {
@@ -922,7 +922,7 @@ const getDoshaColor = (dosha: string): string => {
     'Pitta': 'bg-red-500',
     'Kapha': 'bg-green-500'
   };
-  return colorMap[dosha] || 'bg-gray-500';
+  return colorMap[dosha] ?? 'bg-gray-500';
 };
 
 const getPlanetIcon = (planet: string): string => {
@@ -937,7 +937,7 @@ const getPlanetIcon = (planet: string): string => {
     'Rahu': '☊',
     'Ketu': '☋'
   };
-  return iconMap[planet] || '🪐';
+  return iconMap[planet] ?? '🪐';
 };
 
 export default AyurvedaChart;

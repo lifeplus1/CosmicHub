@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 // Base loading spinner with cosmic theme
 interface LoadingSpinnerProps {

@@ -59,3 +59,8 @@ export const CardContent: React.FC<CardContentProps> = ({
   children,
   className = '',
 }) => <div className={`p-4 text-cosmic-silver ${className}`}>{children}</div>;
+
+export const CardDescription: React.FC<CardContentProps> = ({
+  children,
+  className = '',
+}) => <div className={`text-sm text-cosmic-silver/80 ${className}`}>{children}</div>;

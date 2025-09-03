@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import '../styles/animation-system.css';
 
 // Interactive Rating Component with hover animations

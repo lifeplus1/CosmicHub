@@ -3,32 +3,32 @@
  */
 
 // Export all UI components
-export * from './components/Button';
-export * from './components/Card';
-export * from './components/Input';
-export * from './components/Tooltip';
-export * from './components/Table';
-export * from './components/Accordion';
-export * from './components/Tabs';
-export * from './components/Modal';
-export * from './components/Loading';
-export * from './components/Badge';
-export * from './components/Spinner';
-export * from './components/UpgradeModal';
-export * from './components/PerformanceDashboard';
+export * from './components/ui/Button';
+export * from './components/ui/Card';
+export * from './components/ui/Input';
+export * from './components/ui/Tooltip';
+export * from './components/ui/Table';
+export * from './components/ui/Accordion';
+export * from './components/ui/Tabs';
+export * from './components/ui/Modal';
+export * from './components/ui/Loading';
+export * from './components/ui/Badge';
+export * from './components/ui/Spinner';
+export * from './components/modals/UpgradeModal';
+export * from './components/analytics/PerformanceDashboard';
 
 // UX Enhancement components
-export * from './components/LoadingStates';
-export * from './components/ErrorHandling';
-export * from './components/MobileResponsive';
-export * from './components/UserFeedback';
+export * from './components/feedback/LoadingStates';
+export * from './components/feedback/ErrorHandling';
+export * from './components/layout/MobileResponsive';
+export * from './components/feedback/UserFeedback';
 
 // Accessibility components for ALLY-030
 export * from './components/accessibility/AccessibilityUtils';
 
 // Error handling components
-export { default as ErrorBoundary } from './components/ErrorBoundary';
-export * from './components/ErrorBoundaries';
+export { default as ErrorBoundary } from './components/feedback/ErrorBoundary';
+export * from './components/feedback/ErrorBoundaries';
 
 // Re-export specific error boundary types for compatibility
 export {
@@ -36,4 +36,4 @@ export {
   ComponentErrorBoundary,
   FormErrorBoundary,
   withErrorBoundary,
-} from './components/ErrorBoundaries';
+} from './components/feedback/ErrorBoundaries';

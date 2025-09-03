@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cosmichub/ui/src/components/ui/Card';
+import { Badge } from '@cosmichub/ui/src/components/ui/Badge';
+import { Button } from '@cosmichub/ui/src/components/ui/Button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cosmichub/ui/src/components/ui/Tabs';
+import { Progress } from '@cosmichub/ui/src/components/ui/Progress';
+import { Alert, AlertDescription } from '@cosmichub/ui/src/components/ui/Alert';
 import { Info, Brain, Heart, Users, Lightbulb } from 'lucide-react';
-import type { MBTIResult, EnneagramResult } from '@/types/psychology';
+import type { UIMBTIResult, UIEnneagramResult, UICognitiveFunction } from '@cosmichub/types';
 
 interface PsychologyTabProps {
   birthData: any;
@@ -14,10 +14,9 @@ interface PsychologyTabProps {
 }
 
 const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) => {
-  const [mbtiResult, setMbtiResult] = useState<MBTIResult | null>(null);
-  const [enneagramResult, setEnneagramResult] = useState<EnneagramResult | null>(null);
+  const [mbtiResult, setMbtiResult] = useState<UIMBTIResult | null>(null);
+  const [enneagramResult, setEnneagramResult] = useState<UIEnneagramResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (chartData) {
@@ -72,7 +71,7 @@ const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) =
         </AlertDescription>
       </Alert>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="mbti">MBTI Analysis</TabsTrigger>
@@ -103,14 +102,14 @@ const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) =
                         {(mbtiResult.confidence * 100).toFixed(0)}% confidence
                       </span>
                     </div>
-                    <h3 className="font-semibold">{mbtiResult.title}</h3>
+                    <h3 className="font-semibold">{mbtiResult.type}</h3>
                     <p className="text-sm text-muted-foreground">
                       {mbtiResult.description}
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {mbtiResult.cognitive_functions.map((func, idx) => (
+                      {mbtiResult.cognitive_functions.map((func, idx: number) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
-                          {func}
+                          {func.name}
                         </Badge>
                       ))}
                     </div>
@@ -134,15 +133,15 @@ const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) =
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="text-lg px-3 py-1">
-                        Type {enneagramResult.primary_type}
+                        Type {enneagramResult.core_type}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
                         {(enneagramResult.confidence * 100).toFixed(0)}% confidence
                       </span>
                     </div>
-                    <h3 className="font-semibold">{enneagramResult.type_name}</h3>
+                    <h3 className="font-semibold">Core Type {enneagramResult.core_type}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {enneagramResult.description}
+                      {enneagramResult.core_motivation}
                     </p>
                     <div className="space-y-2">
                       <div className="text-xs">
@@ -178,7 +177,7 @@ const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) =
 };
 
 // Detailed MBTI View Component
-const MBTIDetailedView: React.FC<{ result: MBTIResult }> = ({ result }) => {
+const MBTIDetailedView: React.FC<{ result: UIMBTIResult }> = ({ result }) => {
   return (
     <div className="space-y-6">
       <Card>
@@ -193,10 +192,22 @@ const MBTIDetailedView: React.FC<{ result: MBTIResult }> = ({ result }) => {
               <div className="grid grid-cols-2 gap-2">
                 {result.cognitive_functions.map((func, idx) => (
                   <Badge key={idx} variant={idx < 2 ? "default" : "secondary"}>
-                    {idx + 1}. {func} {idx < 2 ? "(Dominant)" : "(Supporting)"}
+                    {func.name}
                   </Badge>
                 ))}
               </div>
+              <ul className="mt-3 space-y-2">
+                {result.cognitive_functions.map((func: UICognitiveFunction, idx: number) => (
+                  <li key={idx} className="mb-2">
+                    {idx + 1}. {func.name} {idx < 2 ? "(Dominant)" : "(Supporting)"}
+                    {func.description && (
+                      <div className="text-sm text-muted-foreground ml-4">
+                        {func.description}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div>
@@ -242,12 +253,12 @@ const MBTIDetailedView: React.FC<{ result: MBTIResult }> = ({ result }) => {
 };
 
 // Detailed Enneagram View Component
-const EnneagramDetailedView: React.FC<{ result: EnneagramResult }> = ({ result }) => {
+const EnneagramDetailedView: React.FC<{ result: UIEnneagramResult }> = ({ result }) => {
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Type {result.primary_type}: {result.type_name}</CardTitle>
+          <CardTitle>Type {result.core_type}: {result.type_name}</CardTitle>
           <CardDescription>{result.description}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -266,7 +277,7 @@ const EnneagramDetailedView: React.FC<{ result: EnneagramResult }> = ({ result }
             <div>
               <h4 className="font-semibold mb-3">Type Correlations</h4>
               <div className="space-y-2">
-                {result.top_three_types.map(([typeNum, score], idx) => (
+                {result.top_three_types.map(([typeNum, score]: [number, number], idx: number) => (
                   <div key={typeNum} className="flex items-center justify-between">
                     <span className="text-sm">
                       Type {typeNum} {idx === 0 ? "(Primary)" : idx === 1 ? "(Secondary)" : "(Tertiary)"}
@@ -284,13 +295,13 @@ const EnneagramDetailedView: React.FC<{ result: EnneagramResult }> = ({ result }
 
             <div>
               <h4 className="font-semibold mb-2">Astrological Indicators</h4>
-              <div className="flex flex-wrap gap-1">
-                {result.astrological_indicators.map((indicator, idx) => (
-                  <Badge key={idx} variant="outline" className="text-xs">
-                    {indicator}
-                  </Badge>
+              <ul className="space-y-1">
+                {result.astrological_indicators?.map((indicator, idx: number) => (
+                  <li key={idx} className="text-sm">
+                    {indicator.aspect} {indicator.planet} in {indicator.sign} (House {indicator.house}): {indicator.influence}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
         </CardContent>
@@ -300,7 +311,7 @@ const EnneagramDetailedView: React.FC<{ result: EnneagramResult }> = ({ result }
 };
 
 // Integration View Component
-const IntegrationView: React.FC<{ mbti: MBTIResult; enneagram: EnneagramResult }> = ({ 
+const IntegrationView: React.FC<{ mbti: UIMBTIResult; enneagram: UIEnneagramResult }> = ({ 
   mbti, enneagram 
 }) => {
   return (
@@ -324,13 +335,13 @@ const IntegrationView: React.FC<{ mbti: MBTIResult; enneagram: EnneagramResult }
                   {mbti.type}
                 </Badge>
                 <p className="text-sm text-muted-foreground">
-                  {mbti.title} - {mbti.cognitive_functions.slice(0,2).join(", ")}
+                  {mbti.title} - {mbti.cognitive_functions.slice(0,2).map(f => f.name).join(", ")}
                 </p>
               </div>
               <div className="space-y-2">
                 <h4 className="font-semibold">Motivational Pattern</h4>
                 <Badge variant="outline" className="text-base px-3 py-1">
-                  Type {enneagram.primary_type}
+                  Type {enneagram.core_type}
                 </Badge>
                 <p className="text-sm text-muted-foreground">
                   {enneagram.type_name}
@@ -346,18 +357,18 @@ const IntegrationView: React.FC<{ mbti: MBTIResult; enneagram: EnneagramResult }
               <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                 <p className="text-sm">
                   Your <strong>{mbti.type}</strong> cognitive pattern combined with 
-                  <strong> Type {enneagram.primary_type}</strong> motivational drives suggests:
+                  <strong> Type {enneagram.core_type}</strong> motivational drives suggests:
                 </p>
                 <ul className="text-sm space-y-1 ml-4 list-disc">
                   <li>
-                    Primary information processing through {mbti.cognitive_functions[0]} 
-                    ({getCognitiveFunctionDescription(mbti.cognitive_functions[0])})
+                    Primary information processing through {mbti.cognitive_functions[0]?.name} 
+                    ({getCognitiveFunctionDescription(mbti.cognitive_functions[0]?.name || "")})
                   </li>
                   <li>
                     Core motivation driven by {enneagram.core_motivation.toLowerCase()}
                   </li>
                   <li>
-                    Growth opportunities in balancing {mbti.cognitive_functions[2]} and 
+                    Growth opportunities in balancing {mbti.cognitive_functions[2]?.name} and 
                     addressing {enneagram.core_fear.toLowerCase()}
                   </li>
                 </ul>
@@ -396,11 +407,17 @@ const getCognitiveFunctionDescription = (func: string): string => {
 };
 
 // Mock data functions for development
-const getMockMBTIResult = (): MBTIResult => ({
+const getMockMBTIResult = (): UIMBTIResult => ({
   type: "INFP",
   title: "The Mediator",
   description: "Poetic, kind and altruistic people, always eager to help a good cause.",
-  cognitive_functions: ["Fi", "Ne", "Si", "Te"],
+  cognitive_functions: [
+    { name: "Fi", description: "Introverted Feeling - Personal values and authentic emotions" },
+    { name: "Ne", description: "Extraverted Intuition - Exploring possibilities and connections" },
+    { name: "Si", description: "Introverted Sensing - Past experience and detailed memory" },
+    { name: "Te", description: "Extraverted Thinking - Organizing and systematizing the external world" }
+  ],
+  scores: {},
   dimension_scores: {
     extroversion: 0.3,
     intuition: 0.7,
@@ -408,21 +425,33 @@ const getMockMBTIResult = (): MBTIResult => ({
     judging: 0.2
   },
   astrological_themes: "Often correlates with Pisces/Cancer emphasis, Venus-Neptune aspects",
-  confidence: 0.75,
-  disclaimer: "This correlation explores Jungian archetypal patterns in astrology. For accurate MBTI typing, professional assessment is recommended."
+  confidence: 0.75
 });
 
-const getMockEnneagramResult = (): EnneagramResult => ({
-  primary_type: 4,
+const getMockEnneagramResult = (): UIEnneagramResult => ({
+  core_type: 4,
+  primary_type: {
+    number: 4,
+    name: "The Individualist",
+    description: "Sensitive, withdrawn, expressive, dramatic, self-absorbed, and temperamental.",
+    core_motivation: "To find themselves and their significance—to create identity",
+    core_fear: "Of having no identity or personal significance",
+    healthy_traits: [],
+    average_traits: [],
+    unhealthy_traits: []
+  },
   type_name: "The Individualist",
   description: "Sensitive, withdrawn, expressive, dramatic, self-absorbed, and temperamental.",
   core_motivation: "To find themselves and their significance—to create identity",
   core_fear: "Of having no identity or personal significance",
-  type_scores: {},
+  scores: {},
   top_three_types: [[4, 0.8], [9, 0.6], [2, 0.4]],
-  astrological_indicators: ["Neptune prominence", "Water sign emphasis", "8th/12th house activity"],
-  confidence: 0.8,
-  disclaimer: "This correlation explores archetypal patterns between Enneagram and astrology. For accurate typing, work with a qualified Enneagram teacher."
+  astrological_indicators: [
+    { aspect: "conjunction", planet: "Neptune", sign: "Pisces", house: 12, influence: "Enhanced intuitive and mystical qualities" },
+    { aspect: "trine", planet: "Moon", sign: "Cancer", house: 8, influence: "Deep emotional sensitivity" },
+    { aspect: "square", planet: "Venus", sign: "Scorpio", house: 8, influence: "Complex relationship with identity and beauty" }
+  ],
+  confidence: 0.8
 });
 
 export default PsychologyTab;

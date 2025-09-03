@@ -31,7 +31,7 @@ import Card, {
   LoadingCard,
   ErrorCard,
   ChartCard,
-} from '../EnhancedCard';
+} from '../enhanced/EnhancedCard';
 
 // Mock providers for testing
 const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({

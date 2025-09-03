@@ -138,7 +138,7 @@ const PsychologyChart: React.FC<PsychologyChartProps> = ({
   }, [data]);
 
   // Memoize tab change handler to prevent child re-renders and add analytics
-  const handleTabChange = useCallback((value: 'mbti' | 'enneagram' | 'synthesis' | 'assessment') => {
+  const _handleTabChange = useCallback((value: 'mbti' | 'enneagram' | 'synthesis' | 'assessment') => {
     const start = performance.now();
     setActiveTab(value);
     
@@ -965,7 +965,7 @@ const getElementIcon = (element: string): string => {
     'Air': '💨',
     'Water': '🌊'
   };
-  return iconMap[element] || '⭐';
+  return iconMap[element] ?? '⭐';
 };
 
 // Memoized component to prevent unnecessary re-renders

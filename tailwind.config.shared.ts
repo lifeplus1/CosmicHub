@@ -39,6 +39,14 @@ export const sharedTheme = {
       'bg-start': '#f8f9fa',
       'bg-end': '#e9ecef',
     },
+    // Progress component colors
+    progress: {
+      background: 'rgba(15, 15, 35, 0.3)', // cosmic-dark/30
+      border: 'rgba(85, 60, 154, 0.2)', // cosmic-purple/20  
+      fill: 'linear-gradient(to right, #553c9a, #1a202c)', // cosmic-purple to cosmic-blue
+      shadow: 'rgba(85, 60, 154, 0.3)', // cosmic-purple/30
+      text: '#e2e8f0', // cosmic-silver
+    },
   },
   backdropBlur: {
     lg: '16px',

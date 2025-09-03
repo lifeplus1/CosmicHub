@@ -74,7 +74,7 @@ interface Mentor {
   specialties: string[];
 }
 
-const CommunityHub: React.FC<CommunityHubProps> = ({ userId }) => {
+const CommunityHub: React.FC<CommunityHubProps> = ({ userId: _userId }) => {
   const [activeTab, setActiveTab] = useState('forums');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -212,7 +212,7 @@ const CommunityHub: React.FC<CommunityHubProps> = ({ userId }) => {
     }
   };
 
-  const getLevelIcon = (level: string) => {
+  const _getLevelIcon = (level: string) => {
     switch (level) {
       case 'beginner': return FaStar;
       case 'intermediate': return FaGraduationCap;

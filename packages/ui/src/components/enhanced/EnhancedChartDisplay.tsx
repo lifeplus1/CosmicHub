@@ -3,16 +3,16 @@
  * (Reconstructed) – Demonstrates loading stages, error handling and responsiveness.
  */
 import React, { useState, useEffect } from 'react';
-import { cn } from '../utils/cn';
-import { ProgressiveLoading } from './LoadingStates';
-import { ErrorMessage, type EnhancedError } from './ErrorHandling';
+import { cn } from '../../utils/cn';
+import { ProgressiveLoading } from '../feedback/LoadingStates';
+import { ErrorMessage, type EnhancedError } from '../feedback/ErrorHandling';
 import {
   ResponsiveContainer,
   ResponsiveGrid,
-  MobileCard,
   TouchButton,
-} from './MobileResponsive';
-import { StatusIndicator, useToastHelpers } from './UserFeedback';
+  MobileCard,
+} from '../layout/MobileResponsive';
+import { StatusIndicator, useToastHelpers } from '../feedback/UserFeedback';
 // (Merged above) - EnhancedError type already available via type-only import if needed
 
 interface ChartData {

@@ -20,7 +20,6 @@ import {
   FaDownload,
   FaShare,
   FaCalendar,
-  FaUser,
   FaBookOpen
 } from 'react-icons/fa';
 
@@ -56,7 +55,7 @@ interface Certification {
   estimatedHours: number;
 }
 
-interface DigitalBadge {
+interface _DigitalBadge {
   id: string;
   name: string;
   image: string;
@@ -66,7 +65,7 @@ interface DigitalBadge {
   issuer: string;
 }
 
-const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId }) => {
+const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _userId }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedCategory, setSelectedCategory] = useState('all');
 

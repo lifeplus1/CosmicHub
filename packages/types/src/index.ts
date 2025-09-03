@@ -188,6 +188,7 @@ export interface UsageLimits {
 // Export all types - chart, user, subscription, experiment, and psychology types
 export * from './astrology.types';
 export * from './psychology.types';
+export * from './psychology-ui.types';
 export * from './serialize';
 export * from './type-guards';
 export * from './utility';

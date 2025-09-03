@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaTimes, FaStar, FaCrown, FaRocket } from 'react-icons/fa';
-import { Button } from './Button';
+import { Button } from '../ui/Button';
 
 export interface UpgradeModalProps {
   isOpen: boolean;

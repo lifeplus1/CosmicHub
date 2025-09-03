@@ -64,7 +64,7 @@ interface LearningPath {
   isRecommended?: boolean;
 }
 
-const LearningPathViewer: React.FC<LearningPathViewerProps> = ({ userId }) => {
+const LearningPathViewer: React.FC<LearningPathViewerProps> = ({ userId: _userId }) => {
   const [activeTab, setActiveTab] = useState('recommended');
   const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null);
   const [expandedModule, setExpandedModule] = useState<string>('');
@@ -164,7 +164,7 @@ const LearningPathViewer: React.FC<LearningPathViewerProps> = ({ userId }) => {
 
   const handleSelectPath = useCallback((path: LearningPath) => {
     setSelectedPath(path);
-    setExpandedModule(path.modules[0]?.id || '');
+    setExpandedModule(path.modules[0]?.id ?? '');
   }, []);
 
   const getLevelColor = (level: string) => {

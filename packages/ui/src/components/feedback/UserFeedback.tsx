@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback, createContext, useContext } from 'react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 // Toast notification types
 interface ToastNotification {

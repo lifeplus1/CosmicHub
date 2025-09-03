@@ -260,6 +260,40 @@ export interface CorrelationResearchData {
   }>;
 }
 
+// Assessment result types for components
+export interface MBTIResult {
+  type: MbtiType;
+  confidence: number;
+  cognitive_functions: Array<{
+    name: CognitiveFunction;
+    description: string;
+    strength: number;
+  }>;
+  temperament: MbtiTemperament;
+  description: string;
+  strengths: string[];
+  growth_areas: string[];
+  astrological_correlations?: MbtiAstrologyCorrelation[];
+}
+
+export interface EnneagramResult {
+  core_type: EnneagramType;
+  confidence: number;
+  wing?: EnneagramWing;
+  instinctual_variant?: InstinctualVariant;
+  top_three_types: Array<[EnneagramType, number]>;
+  core_motivation: string;
+  core_fear: string;
+  growth_direction: EnneagramType;
+  stress_direction: EnneagramType;
+  level_of_development: LevelOfDevelopment;
+  astrological_indicators?: Array<{
+    planet: string;
+    aspect: string;
+    description: string;
+  }>;
+}
+
 // Export comprehensive psychology chart data interface
 export interface PsychologyChartData {
   assessment_data?: AssessmentResults;

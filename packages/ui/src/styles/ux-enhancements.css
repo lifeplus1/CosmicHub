@@ -483,3 +483,61 @@
 .w-step-100 {
   width: 100%;
 }
+
+/* Progress Component Styles */
+.progress-container {
+  position: relative;
+}
+
+.progress-track {
+  width: 100%;
+  background-color: rgba(15, 15, 35, 0.3); /* cosmic-dark/30 */
+  border-radius: 9999px; /* rounded-full */
+  height: 0.5rem; /* h-2 */
+  border: 1px solid rgba(85, 60, 154, 0.2); /* border-cosmic-purple/20 */
+}
+
+.progress-fill {
+  background: linear-gradient(to right, #553c9a, #1a202c); /* cosmic-purple to cosmic-blue */
+  height: 0.5rem; /* h-2 */
+  border-radius: 9999px; /* rounded-full */
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 1px 2px rgba(85, 60, 154, 0.3); /* shadow-cosmic-purple/30 */
+  width: var(--progress-value, 0%);
+  transform: none; /* Override any transform */
+}
+
+.progress-text {
+  font-size: 0.75rem; /* text-xs */
+  color: #e2e8f0; /* text-cosmic-silver */
+  margin-top: 0.25rem; /* mt-1 */
+}
+
+.progress-fill-animated {
+  animation: progress-fill-smooth 0.3s ease-in-out;
+}
+
+@keyframes progress-fill-smooth {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-value, 0%);
+  }
+}
+
+/* Progress variants */
+.progress-sm .progress-track,
+.progress-sm .progress-fill {
+  height: 0.25rem; /* h-1 */
+}
+
+.progress-lg .progress-track,
+.progress-lg .progress-fill {
+  height: 0.75rem; /* h-3 */
+}
+
+.progress-xl .progress-track,
+.progress-xl .progress-fill {
+  height: 1rem; /* h-4 */
+}

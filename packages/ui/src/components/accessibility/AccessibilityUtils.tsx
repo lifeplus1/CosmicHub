@@ -112,6 +112,7 @@ export const AccessibleClickable: React.FC<InteractiveElementProps> = ({
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!disabled) onActivate(e);
   };
+  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
@@ -120,38 +121,38 @@ export const AccessibleClickable: React.FC<InteractiveElementProps> = ({
     onKeyDown?.(e);
   };
 
-  return (
-    <div
-      {...props}
-      className={`accessible-clickable ${disabled ? 'disabled' : ''} ${className}`.trim()}
-      role={
-        role === 'button'
-          ? 'button'
-          : role === 'tab'
-            ? 'tab'
-            : role === 'link'
-              ? 'link'
-              : role === 'menuitem'
-                ? 'menuitem'
-                : role === 'option'
-                  ? 'option'
-                  : role === 'radio'
-                    ? 'radio'
-                    : role === 'switch'
-                      ? 'switch'
-                      : role === 'checkbox'
-                        ? 'checkbox'
-                        : 'button'
-      }
-      tabIndex={disabled ? -1 : 0}
-      aria-label={accessibleName}
-      {...(disabled && { 'aria-disabled': 'true' })}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-    >
-      {children}
-    </div>
-  );
+  // Create the element with proper role based on the prop value
+  const divProps = {
+    ...props,
+    className: `accessible-clickable ${disabled ? 'disabled' : ''} ${className}`.trim(),
+    tabIndex: disabled ? -1 : 0,
+    'aria-label': accessibleName,
+    ...(disabled && { 'aria-disabled': 'true' }),
+    onClick: handleClick,
+    onKeyDown: handleKeyDown,
+  };
+
+  // Use switch to ensure ESLint sees literal role values
+  switch (role) {
+    case 'button':
+      return <div {...divProps} role="button">{children}</div>;
+    case 'tab':
+      return <div {...divProps} role="tab">{children}</div>;
+    case 'link':
+      return <div {...divProps} role="link">{children}</div>;
+    case 'menuitem':
+      return <div {...divProps} role="menuitem">{children}</div>;
+    case 'option':
+      return <div {...divProps} role="option">{children}</div>;
+    case 'radio':
+      return <div {...divProps} role="radio">{children}</div>;
+    case 'switch':
+      return <div {...divProps} role="switch">{children}</div>;
+    case 'checkbox':
+      return <div {...divProps} role="checkbox">{children}</div>;
+    default:
+      return <div {...divProps} role="button">{children}</div>;
+  }
 };
 
 // =============================================================================

@@ -1,6 +1,6 @@
 import React from 'react';
 import { UpgradeModal, UpgradeModalProps } from './UpgradeModal';
-import { useABTest, ABTestResult } from '../hooks/useABTest';
+import { useABTest, ABTestResult } from '../../hooks/useABTest';
 
 /**
  * Enhanced UpgradeModal with A/B Testing

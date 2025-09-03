@@ -1,8 +1,8 @@
 import React from 'react';
 import '@cosmichub/config/performance';
 import { useRealTimePerformance } from '@cosmichub/config/hooks';
-import { Card } from './Card';
-import { Badge } from './Badge';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
 
 interface MetricDisplay {
   name: string;

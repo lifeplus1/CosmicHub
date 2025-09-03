@@ -54,7 +54,7 @@ const EnneagramDetailViewError: React.FC<{ error: Error; resetErrorBoundary: () 
 );
 
 const EnneagramDetailView: React.FC<EnneagramDetailViewProps> = ({ profile }) => {
-  const getHealthLevelColor = (level: number) => {
+  const _getHealthLevelColor = (level: number) => {
     if (level <= 3) return 'from-green-500 to-emerald-500';
     if (level <= 6) return 'from-yellow-500 to-orange-500';
     return 'from-red-500 to-rose-500';

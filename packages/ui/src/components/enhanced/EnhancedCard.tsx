@@ -344,7 +344,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
         let module: { LazyAstrologyChart: unknown };
         switch (chartType) {
           case 'astrology':
-            module = await import('./lazy-components');
+            module = await import('../lazy-components');
             break;
           default:
             // Fallback chart component

@@ -125,7 +125,7 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
             <div className="p-4">
               <FaChartLine className="text-2xl text-cosmic-gold mx-auto mb-2" />
               <div className="text-2xl font-bold text-cosmic-silver mb-1">
-                {userProgress?.completedLessons || 0}
+                {userProgress?.completedLessons ?? 0}
               </div>
               <div className="text-sm text-cosmic-silver/70">Lessons Complete</div>
             </div>
@@ -135,7 +135,7 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
             <div className="p-4">
               <FaMedal className="text-2xl text-purple-500 mx-auto mb-2" />
               <div className="text-2xl font-bold text-cosmic-silver mb-1">
-                {achievements?.length || 0}
+                {achievements?.length ?? 0}
               </div>
               <div className="text-sm text-cosmic-silver/70">Achievements</div>
             </div>
@@ -145,7 +145,7 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
             <div className="p-4">
               <FaUsers className="text-2xl text-blue-500 mx-auto mb-2" />
               <div className="text-2xl font-bold text-cosmic-silver mb-1">
-                {communityActivity?.connections || 0}
+                {communityActivity?.connections ?? 0}
               </div>
               <div className="text-sm text-cosmic-silver/70">Community</div>
             </div>
@@ -155,7 +155,7 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
             <div className="p-4">
               <FaCertificate className="text-2xl text-golden-500 mx-auto mb-2" />
               <div className="text-2xl font-bold text-cosmic-silver mb-1">
-                {userProgress?.certifications?.length || 0}
+                {userProgress?.certifications?.length ?? 0}
               </div>
               <div className="text-sm text-cosmic-silver/70">Certificates</div>
             </div>
@@ -239,7 +239,7 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-cosmic-silver mb-2">
-                        Welcome back, {user?.displayName || 'Spiritual Seeker'}!
+                        Welcome back, {user?.displayName ?? 'Spiritual Seeker'}!
                       </h3>
                       <p className="text-cosmic-silver/70">
                         Continue your journey of consciousness development and spiritual mastery

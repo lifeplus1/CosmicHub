@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import '../styles/animation-system.css';
 
 // Stagger animation container for lists and grids
