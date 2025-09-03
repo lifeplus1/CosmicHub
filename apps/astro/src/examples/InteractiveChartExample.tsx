@@ -17,8 +17,8 @@ import { Button } from '@cosmichub/ui';
 import type { UnifiedBirthData } from '@cosmichub/types';
 
 // Lazy load the heavy chart component
-const ChartWheelInteractive = lazy(
-  () => import('../features/ChartWheelInteractive')
+const ChartWheelUnified = lazy(
+  () => import('../features/ChartWheelUnified')
 );
 // Use Aspect type from services instead
 import type { Aspect } from '../services/api.types';
@@ -207,13 +207,16 @@ export const InteractiveChartExample: React.FC = () => {
           </div>
         }
       >
-        <ChartWheelInteractive
+        <ChartWheelUnified
           birthData={sampleExtendedBirthData}
           showAspects={true}
           showAnimation={true}
+          interactive={true}
           showTransits={chartRegistered}
           realTimeUpdates={chartRegistered}
-          onPlanetSelect={planet => {
+          size="lg"
+          showControls={true}
+          onPlanetSelect={(planet: string) => {
             void handlePlanetSelect(planet);
           }}
           onAspectSelect={(aspect: Aspect) => {

@@ -15,11 +15,14 @@ review_cycle: 7d
 
 ### 🎯 **Strategic Overview**
 
-**Mission**: Create the world's first comprehensive psychology-spirituality integration platform, combining MBTI personality typing with Enneagram consciousness development and astrological birth chart synthesis.
+**Mission**: Create the world's first comprehensive psychology-spirituality integration platform,
+combining MBTI personality typing with Enneagram consciousness development and astrological birth
+chart synthesis.
 
 **Market Impact**: 3x larger addressable market by bridging psychology and spirituality communities
 
-**Revenue Model**: Premium tier upgrade from $19.99 to $24.99 monthly (25% price increase justified by unique offering)
+**Revenue Model**: Premium tier upgrade from $19.99 to $24.99 monthly (25% price increase justified
+by unique offering)
 
 ### 📊 **Expert Consultation Foundation**
 
@@ -32,15 +35,17 @@ review_cycle: 7d
 
 #### **Key Expert Insights Applied**
 
-1. **Jung-Astrology Historical Connection**: Leveraging Carl Jung's documented use of astrology for psychological insights
-2. **Enneagram-Chart Synthesis**: Nine types correlating with astrological houses and planetary influences
+1. **Jung-Astrology Historical Connection**: Leveraging Carl Jung's documented use of astrology for
+   psychological insights
+2. **Enneagram-Chart Synthesis**: Nine types correlating with astrological houses and planetary
+   influences
 3. **Personality-Transit Integration**: How psychological patterns evolve with astrological transits
 
 ### 🏗️ **Technical Implementation Architecture**
 
 #### **Backend Development (Week 1)**
 
-**Core Calculation Engines**
+##### **Core Calculation Engines**
 
 ```python
 # backend/astro/calculations/mbti.py
@@ -48,51 +53,48 @@ class MBTICalculator:
     def calculate_mbti_profile(self, birth_chart_data):
         # MBTI type determination from astrological factors
         # Mercury (thinking), Venus (feeling), Mars (judging/perceiving)
-        
+
     def generate_mbti_astro_synthesis(self, mbti_type, chart_data):
         # Integration of MBTI with natal chart interpretation
-        
+
 # backend/astro/calculations/enneagram.py
 class EnneagramCalculator:
     def determine_enneagram_type(self, chart_data, mbti_type):
         # Enneagram type correlation with astrological houses
-        
+
     def generate_growth_recommendations(self, type_data, current_transits):
         # Personalized growth path based on current planetary influences
 ```
 
-**API Endpoint Integration**
+##### **API Endpoint Integration**
 
 ```python
 # backend/api/routers/psychology.py
 @router.post("/psychology/profile")
 async def generate_psychology_profile(birth_data: BirthChartRequest):
     # Complete psychology-spirituality profile generation
-    
-@router.post("/psychology/synthesis")  
+
+@router.post("/psychology/synthesis")
 async def generate_synthesis_report(psychology_data: PsychologyProfile):
     # Comprehensive integration report
 ```
 
 #### **Frontend Development (Week 2)**
 
-**React Component Architecture**
+##### **React Component Architecture**
 
 ```typescript
 // apps/astro/src/components/PsychologyChart/
-- PsychologyChartDisplay.tsx       // Main integration component
-- MbtiChart/
-  - MbtiTypeDisplay.tsx           // MBTI type visualization
-  - MbtiAstroCorrelation.tsx      // Astrology correlations
-- EnneagramChart/  
-  - EnneagramWheel.tsx            // Interactive Enneagram wheel
-  - GrowthPathVisualization.tsx   // Development trajectory
-- PsychologySynthesis/
-  - IntegratedProfile.tsx         // Complete synthesis view
-  - TransitPsychologyImpact.tsx   // Current psychological influences
+-PsychologyChartDisplay.tsx - // Main integration component
+  MbtiChart / -MbtiTypeDisplay.tsx - // MBTI type visualization
+  MbtiAstroCorrelation.tsx - // Astrology correlations
+  EnneagramChart / -EnneagramWheel.tsx - // Interactive Enneagram wheel
+  GrowthPathVisualization.tsx - // Development trajectory
+  PsychologySynthesis / -IntegratedProfile.tsx - // Complete synthesis view
+  TransitPsychologyImpact.tsx; // Current psychological influences
 ```
 
-**Type System Enhancement**
+##### **Type System Enhancement**
 
 ```typescript
 // packages/types/psychology.types.ts
@@ -114,7 +116,7 @@ export interface EnneagramProfile {
 
 #### **Multi-System Integration (Week 2-3)**
 
-**Enhanced MultiSystemChart Integration**
+##### **Enhanced MultiSystemChart Integration**
 
 ```typescript
 // apps/astro/src/components/MultiSystemChart/
@@ -122,14 +124,14 @@ export interface EnneagramProfile {
 export interface SystemChartProps {
   systems: Array<
     | 'western'
-    | 'vedic' 
+    | 'vedic'
     | 'chinese'
     | 'mayan'
     | 'uranian'
     | 'tarot'
     | 'kabbalah'
-    | 'mbti'        // NEW
-    | 'enneagram'   // NEW
+    | 'mbti' // NEW
+    | 'enneagram' // NEW
   >;
 }
 ```
@@ -138,19 +140,19 @@ export interface SystemChartProps {
 
 #### **Psychology-Astrology Synthesis AI**
 
-**Enhanced Interpretation Engine**
+##### **Enhanced Interpretation Engine**
 
 ```python
 # backend/ai/psychology_synthesis.py
 class PsychologyAstrologySynthesizer:
     def generate_integrated_interpretation(
-        self, 
+        self,
         mbti_profile: MBTIProfile,
-        enneagram_profile: EnneagramProfile, 
+        enneagram_profile: EnneagramProfile,
         birth_chart: BirthChart
     ):
         # AI-powered synthesis of psychological and astrological insights
-        
+
     def generate_personal_growth_plan(self, integrated_profile):
         # Personalized development recommendations
 ```
@@ -158,20 +160,20 @@ class PsychologyAstrologySynthesizer:
 #### **Dynamic Assessment Integration**
 
 - Interactive MBTI assessment correlated with astrological factors
-- Enneagram type exploration with chart-based insights  
+- Enneagram type exploration with chart-based insights
 - Progressive personality development tracking with transit correlations
 
 ### 💰 **Monetization Strategy**
 
 #### **Subscription Tier Evolution**
 
-| Feature Set | Current ($19.99) | Psychology Bridge ($24.99) |
-|-------------|-------------------|----------------------------|
-| Astrology Systems | 7 systems | 7 systems |
-| Psychology Systems | 0 | 2 systems (MBTI + Enneagram) |
-| Synthesis Features | Basic | Advanced psychology-astrology |
-| Assessment Tools | None | Interactive personality assessments |
-| Growth Planning | Generic | Personalized psychological development |
+| Feature Set        | Current ($19.99) | Psychology Bridge ($24.99)             |
+| ------------------ | ---------------- | -------------------------------------- |
+| Astrology Systems  | 7 systems        | 7 systems                              |
+| Psychology Systems | 0                | 2 systems (MBTI + Enneagram)           |
+| Synthesis Features | Basic            | Advanced psychology-astrology          |
+| Assessment Tools   | None             | Interactive personality assessments    |
+| Growth Planning    | Generic          | Personalized psychological development |
 
 #### **Revenue Projections**
 
@@ -184,7 +186,7 @@ class PsychologyAstrologySynthesizer:
 **Optimistic Scenario**:
 
 - 1,500 existing users × 80% upgrade rate = 1,200 users
-- 1,000 new psychology-focused users  
+- 1,000 new psychology-focused users
 - Total: 2,200 users × $24.99 = $659,736 annually
 
 **Aggressive Scenario**:
@@ -196,21 +198,21 @@ class PsychologyAstrologySynthesizer:
 
 #### **Week 1: Backend Foundation**
 
-**Days 1-2**: MBTI calculation engine and astrological correlation algorithms
-**Days 3-4**: Enneagram type determination and growth path generation  
+**Days 1-2**: MBTI calculation engine and astrological correlation algorithms **Days 3-4**:
+Enneagram type determination and growth path generation  
 **Days 5-7**: API endpoints, testing, and database integration
 
 #### **Week 2: Frontend Development**
 
-**Days 8-10**: React component architecture and basic UI implementation
-**Days 11-12**: MultiSystemChart integration and psychology chart display
-**Days 13-14**: Interactive assessment tools and user experience optimization
+**Days 8-10**: React component architecture and basic UI implementation **Days 11-12**:
+MultiSystemChart integration and psychology chart display **Days 13-14**: Interactive assessment
+tools and user experience optimization
 
 #### **Week 3: Integration & Launch**
 
-**Days 15-17**: AI synthesis enhancement and interpretation generation
-**Days 18-19**: Subscription system updates and pricing tier implementation
-**Days 20-21**: Testing, optimization, and market launch preparation
+**Days 15-17**: AI synthesis enhancement and interpretation generation **Days 18-19**: Subscription
+system updates and pricing tier implementation **Days 20-21**: Testing, optimization, and market
+launch preparation
 
 ### 📈 **Success Metrics**
 
@@ -274,4 +276,6 @@ class PsychologyAstrologySynthesizer:
 - Educational partnerships: Psychology schools and certification programs
 - International expansion: Localization for key markets
 
-This implementation plan provides the detailed roadmap for establishing CosmicHub as the world's first comprehensive psychology-spirituality integration platform, creating significant competitive advantage and revenue growth.
+This implementation plan provides the detailed roadmap for establishing CosmicHub as the world's
+first comprehensive psychology-spirituality integration platform, creating significant competitive
+advantage and revenue growth.

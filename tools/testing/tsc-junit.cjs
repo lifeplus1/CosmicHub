@@ -4,7 +4,6 @@
  * Usage: node scripts/tsc-junit.cjs <logPath> <outputXml>
  */
 const fs = require('fs');
-const path = require('path');
 
 const [, , logPath, outPath] = process.argv;
 if (!logPath || !outPath) {

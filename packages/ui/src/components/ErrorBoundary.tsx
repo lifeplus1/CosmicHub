@@ -10,13 +10,77 @@ import type {
   ErrorReportingService,
 } from './errorTypes';
 
-// Simple logger for UI package
-const logger = {
-  error: (...args: unknown[]) => console.error(...args),
-  warn: (...args: unknown[]) => console.warn(...args),
-  info: (...args: unknown[]) => console.info(...args),
-  debug: (...args: unknown[]) => console.debug(...args),
+// Type-safe logger integration for UI package
+interface DevConsole {
+  error?: (...args: unknown[]) => void;
+  warn?: (...args: unknown[]) => void;
+  info?: (...args: unknown[]) => void;
+  debug?: (...args: unknown[]) => void;
+  log?: (...args: unknown[]) => void;
+}
+
+interface GlobalWithDevConsole {
+  devConsole?: DevConsole;
+}
+
+// Enhanced logger that integrates with your existing logging system
+const createEnhancedLogger = () => {
+  // Fallback logger with consistent signature
+  const fallbackLogger = {
+    error: (...args: unknown[]) => console.error('[ErrorBoundary]', ...args),
+    warn: (...args: unknown[]) => console.warn('[ErrorBoundary]', ...args),
+    info: (...args: unknown[]) => console.info('[ErrorBoundary]', ...args),
+    debug: (...args: unknown[]) => console.debug('[ErrorBoundary]', ...args),
+  };
+
+  // Try to access your existing devConsole logger
+  try {
+    const global = globalThis as GlobalWithDevConsole;
+    const devConsole = global.devConsole;
+    
+    if (devConsole && typeof devConsole === 'object') {
+      return {
+        error: (...args: unknown[]) => {
+          if (typeof devConsole.error === 'function') {
+            devConsole.error('[ErrorBoundary]', ...args);
+          } else {
+            fallbackLogger.error(...args);
+          }
+        },
+        warn: (...args: unknown[]) => {
+          if (typeof devConsole.warn === 'function') {
+            devConsole.warn('[ErrorBoundary]', ...args);
+          } else {
+            fallbackLogger.warn(...args);
+          }
+        },
+        info: (...args: unknown[]) => {
+          if (typeof devConsole.info === 'function') {
+            devConsole.info('[ErrorBoundary]', ...args);
+          } else if (typeof devConsole.log === 'function') {
+            devConsole.log('[ErrorBoundary]', ...args);
+          } else {
+            fallbackLogger.info(...args);
+          }
+        },
+        debug: (...args: unknown[]) => {
+          if (typeof devConsole.debug === 'function') {
+            devConsole.debug('[ErrorBoundary]', ...args);
+          } else {
+            fallbackLogger.debug(...args);
+          }
+        },
+      };
+    }
+  } catch (error) {
+    // If anything fails, just use fallback
+    console.debug('[ErrorBoundary] Could not access enhanced logger, using fallback:', error);
+  }
+
+  return fallbackLogger;
 };
+
+const logger = createEnhancedLogger();
 
 const ENV_MODE: string =
   (globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } })

@@ -286,3 +286,5 @@ phase*_scan.json
 cleanup-backup-*/
 tree-shaking-backup/
 restore_*.sh
+CODE-001-backup-*/
+*-backup-20*

@@ -8,7 +8,6 @@
 
 import { spawn } from 'node:child_process';
 import {
-  readFileSync,
   writeFileSync,
   existsSync,
   mkdirSync,
@@ -214,7 +213,7 @@ class AIAgentCoordinator {
           try {
             unlinkSync(filePath);
             cleanedCount++;
-          } catch (error) {
+          } catch {
             // Ignore cleanup errors - not critical
           }
         }
@@ -225,7 +224,7 @@ class AIAgentCoordinator {
           colorize(`🧹 Cleaned ${cleanedCount} stale completion files`, 'gray')
         );
       }
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors - not critical
     }
   }
@@ -679,7 +678,7 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
   }
 
   printBatchResult(result) {
-    const { batch, index, code, stdout, stderr, duration, success } = result;
+    const { batch, index, code, stdout, duration, success } = result;
     const durationSec = (duration / 1000).toFixed(2);
 
     console.log(

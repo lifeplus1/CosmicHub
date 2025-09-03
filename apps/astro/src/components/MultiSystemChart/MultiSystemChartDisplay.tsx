@@ -9,6 +9,8 @@ import MayanChart from './MayanChart';
 import UranianChart from './UranianChart';
 import SynthesisChart from './SynthesisChart';
 import SpiritualChart from './SpiritualChart';
+import TCMChart from './TCMChart';
+import PsychologyChart from './PsychologyChart';
 
 interface MultiSystemChartProps {
   chartData?: MultiSystemChartData;
@@ -161,53 +163,63 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
         </div>
 
         {/* Multi-System Tabs with Error Boundaries */}
-        <Tabs.Root defaultValue='western'>
-          <Tabs.List className='flex flex-wrap gap-1'>
+        <Tabs.Root defaultValue='western' className='w-full'>
+          <Tabs.List className='flex flex-wrap gap-2 mb-6 bg-cosmic-black/30 p-2 rounded-lg'>
             <Tabs.Trigger
               value='western'
-              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
-              Western Tropical
+              ♌ Western
             </Tabs.Trigger>
             <Tabs.Trigger
               value='vedic'
-              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
-              Vedic Sidereal
+              🕉️ Vedic
             </Tabs.Trigger>
             <Tabs.Trigger
               value='chinese'
-              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
-              Chinese
+              🐉 Chinese
             </Tabs.Trigger>
             <Tabs.Trigger
               value='mayan'
-              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
-              Mayan
+              🌞 Mayan
             </Tabs.Trigger>
             <Tabs.Trigger
               value='uranian'
-              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
-              Uranian
+              ⚡ Uranian
             </Tabs.Trigger>
             <Tabs.Trigger
               value='spiritual'
-              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               🔮 Spiritual
             </Tabs.Trigger>
             <Tabs.Trigger
-              value='synthesis'
-              className='px-4 py-2 rounded data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple hover:bg-cosmic-purple/10 transition-colors'
+              value='tcm'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
-              Synthesis
+              🌿 TCM
             </Tabs.Trigger>
-          </Tabs.List>
-
-          <Tabs.Content value='western' className='pt-4'>
+            <Tabs.Trigger
+              value='psychology'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
+            >
+              🧠 Psychology
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              value='synthesis'
+              className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
+            >
+              ⚖️ Synthesis
+            </Tabs.Trigger>
+          </Tabs.List>          <Tabs.Content value='western' className='pt-4'>
             <ChartErrorBoundary>
               <WesternChart data={displayData.western_tropical} />
             </ChartErrorBoundary>
@@ -247,6 +259,26 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
             </ChartErrorBoundary>
           </Tabs.Content>
 
+          <Tabs.Content value='tcm' className='pt-4'>
+            <ChartErrorBoundary>
+              <TCMChart
+                data={displayData.tcm as any ?? {}}
+                birthData={birthData}
+                isLoading={false}
+              />
+            </ChartErrorBoundary>
+          </Tabs.Content>
+
+          <Tabs.Content value='psychology' className='pt-4'>
+            <ChartErrorBoundary>
+              <PsychologyChart
+                data={displayData.psychology as any ?? {}}
+                birthData={birthData}
+                isLoading={false}
+              />
+            </ChartErrorBoundary>
+          </Tabs.Content>
+
           <Tabs.Content value='synthesis' className='pt-4'>
             <ChartErrorBoundary>
               <SynthesisChart data={displayData.synthesis ?? {}} />
@@ -259,9 +291,11 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
           <div className='p-4'>
             <p className='text-sm text-center text-cosmic-silver'>
               This analysis combines Western tropical astrology, Vedic sidereal
-              calculations, Chinese Four Pillars, Mayan sacred calendar, and
-              Uranian midpoint techniques to provide a comprehensive
-              astrological perspective.
+              calculations, Chinese Four Pillars, Mayan sacred calendar, Uranian
+              techniques, spiritual consciousness systems (Tarot, Kabbalah),
+              Traditional Chinese Medicine (Five Elements, meridians), psychology
+              integration (MBTI, Enneagram), and synthesis methodologies to provide
+              a comprehensive multi-dimensional perspective on your cosmic blueprint.
             </p>
           </div>
         </div>

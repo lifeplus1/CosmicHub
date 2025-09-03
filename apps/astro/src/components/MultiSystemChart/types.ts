@@ -83,21 +83,21 @@ export interface MultiSystemChartData {
   spiritual_systems?: {
     description?: string;
     tarot?: {
-      daily_card?: TarotCard;
-      life_path?: TarotReading;
-      suits?: TarotSuit[];
+      daily_card?: any;
+      life_path?: any;
+      suits?: any[];
     };
     kabbalah?: {
-      primary_sephirah?: Sephirah;
-      secondary_sephirah?: Sephirah;
-      relevant_paths?: TreePath[];
+      primary_sephirah?: any;
+      secondary_sephirah?: any;
+      relevant_paths?: any[];
       spiritual_focus?: string;
       tree_guidance?: string;
     };
     correspondences?: {
-      daily_focus?: SpiritualCorrespondence;
-      life_purpose?: SpiritualCorrespondence;
-      spiritual_center?: SpiritualCorrespondence;
+      daily_focus?: any;
+      life_purpose?: any;
+      spiritual_center?: any;
     };
     synthesis?: {
       primary_themes?: string[];
@@ -106,8 +106,82 @@ export interface MultiSystemChartData {
       daily_practice?: string;
     };
     ai_interpretation?: {
-      spiritual_interpretation?: AIInterpretation;
+      spiritual_interpretation?: any;
       timestamp?: string;
+    };
+  };
+  tcm?: {
+    description?: string;
+    constitutional_analysis?: {
+      primary_type?: any;
+      secondary_type?: any;
+      constitution_summary?: string;
+    };
+    five_elements?: {
+      elements?: any[];
+      balance_overview?: string;
+      seasonal_guidance?: string;
+    };
+    meridian_system?: {
+      meridians?: any[];
+      energy_flow_assessment?: string;
+      blockage_areas?: string[];
+    };
+    health_correlations?: {
+      astrological_health_risks?: string[];
+      preventive_recommendations?: string[];
+      optimal_timing?: Record<string, string>;
+    };
+    synthesis?: {
+      tcm_astrology_integration?: string;
+      personalized_wellness_plan?: string[];
+      seasonal_adjustments?: Record<string, string[]>;
+    };
+  };
+  psychology?: {
+    description?: string;
+    mbti?: {
+      profile?: any;
+      birth_correlation?: {
+        seasonal_pattern?: string;
+        elemental_dominance?: string;
+        planetary_influences?: string;
+      };
+      astrology_synthesis?: {
+        chart_confirmation?: string[];
+        contradictions?: string[];
+        integration_notes?: string;
+      };
+    };
+    enneagram?: {
+      profile?: any;
+      astrological_correlations?: {
+        house_themes?: string;
+        planetary_alignment?: string;
+        aspect_patterns?: string;
+      };
+      spiritual_development?: {
+        current_level?: string;
+        growth_path?: string[];
+        meditation_focus?: string;
+      };
+    };
+    synthesis?: {
+      personality_integration?: {
+        mbti_enneagram_bridge?: string;
+        spiritual_path_alignment?: string;
+        growth_recommendations?: string[];
+      };
+      astrological_confirmation?: {
+        chart_personality_match?: number;
+        supporting_aspects?: string[];
+        developmental_timing?: Record<string, string>;
+      };
+      tarot_correspondences?: {
+        mbti_cards?: Record<string, string>;
+        enneagram_cards?: Record<number, string>;
+        personality_spread?: string[];
+      };
     };
   };
 }
@@ -188,64 +262,80 @@ export interface SynthesisChartData {
   life_purpose?: string[];
   personality_integration?: Record<string, string[]>;
   spiritual_path?: string[];
-};
+}
 
-// Spiritual system interfaces for proper typing
-export interface TarotCard {
-  name: string;
-  suit?: string;
-  number?: number;
-  meaning?: string;
-  keywords?: string[];
+export interface TCMChartData {
   description?: string;
+  constitutional_analysis?: {
+    primary_type?: any;
+    secondary_type?: any;
+    constitution_summary?: string;
+  };
+  five_elements?: {
+    elements?: any[];
+    balance_overview?: string;
+    seasonal_guidance?: string;
+  };
+  meridian_system?: {
+    meridians?: any[];
+    energy_flow_assessment?: string;
+    blockage_areas?: string[];
+  };
+  health_correlations?: {
+    astrological_health_risks?: string[];
+    preventive_recommendations?: string[];
+    optimal_timing?: Record<string, string>;
+  };
+  synthesis?: {
+    tcm_astrology_integration?: string;
+    personalized_wellness_plan?: string[];
+    seasonal_adjustments?: Record<string, string[]>;
+  };
 }
 
-export interface TarotReading {
-  cards: TarotCard[];
-  spread_type?: string;
-  interpretation?: string;
-  timestamp?: string;
-}
-
-export interface TarotSuit {
-  name: string;
-  element?: string;
-  meaning?: string;
-  cards?: TarotCard[];
-}
-
-export interface Sephirah {
-  name: string;
-  number: number;
-  meaning?: string;
-  planet?: string;
-  color?: string;
-  attribute?: string;
-  divine_name?: string;
-}
-
-export interface TreePath {
-  number: number;
-  from_sephirah: string;
-  to_sephirah: string;
-  hebrew_letter: string;
-  tarot_card: string;
-  meaning?: string;
-  color?: string;
-  element?: string;
-}
-
-export interface SpiritualCorrespondence {
-  type: string;
-  value: string | number;
-  meaning?: string;
+export interface PsychologyChartData {
   description?: string;
-}
-
-export interface AIInterpretation {
-  content: string;
-  confidence?: number;
-  model_used?: string;
-  generation_method?: string;
-  sources?: string[];
+  mbti?: {
+    profile?: any;
+    birth_correlation?: {
+      seasonal_pattern?: string;
+      elemental_dominance?: string;
+      planetary_influences?: string;
+    };
+    astrology_synthesis?: {
+      chart_confirmation?: string[];
+      contradictions?: string[];
+      integration_notes?: string;
+    };
+  };
+  enneagram?: {
+    profile?: any;
+    astrological_correlations?: {
+      house_themes?: string;
+      planetary_alignment?: string;
+      aspect_patterns?: string;
+    };
+    spiritual_development?: {
+      current_level?: string;
+      growth_path?: string[];
+      meditation_focus?: string;
+    };
+  };
+  synthesis?: {
+    personality_integration?: {
+      mbti_enneagram_bridge?: string;
+      spiritual_path_alignment?: string;
+      growth_recommendations?: string[];
+    };
+    astrological_confirmation?: {
+      chart_personality_match?: number;
+      supporting_aspects?: string[];
+      developmental_timing?: Record<string, string>;
+    };
+    tarot_correspondences?: {
+      mbti_cards?: Record<string, string>;
+      enneagram_cards?: Record<number, string>;
+      personality_spread?: string[];
+    };
+  };
 }

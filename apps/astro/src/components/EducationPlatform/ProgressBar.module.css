@@ -1,0 +1,61 @@
+/* Progress Bar CSS Module */
+.progressContainer {
+  position: relative;
+}
+
+.progressTrack {
+  width: 100%;
+  background-color: rgba(59, 130, 246, 0.3); /* cosmic-blue/30 fallback */
+  border-radius: 9999px;
+  height: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 0.5rem;
+  border-radius: 9999px;
+  transition: all 300ms ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.progressBar.gold {
+  background: linear-gradient(to right, #FFD700, #FFA500); /* cosmic-gold to cosmic-yellow fallback */
+}
+
+.progressBar.blue {
+  background: linear-gradient(to right, #3b82f6, #60a5fa);
+}
+
+.progressBar.purple {
+  background: linear-gradient(to right, #8b5cf6, #a78bfa);
+}
+
+.progressBar.green {
+  background: linear-gradient(to right, #10b981, #34d399);
+}
+
+/* Width classes for different progress levels */
+.w0 { width: 0%; }
+.w5 { width: 5%; }
+.w10 { width: 10%; }
+.w15 { width: 15%; }
+.w20 { width: 20%; }
+.w25 { width: 25%; }
+.w30 { width: 30%; }
+.w35 { width: 35%; }
+.w40 { width: 40%; }
+.w45 { width: 45%; }
+.w50 { width: 50%; }
+.w55 { width: 55%; }
+.w60 { width: 60%; }
+.w65 { width: 65%; }
+.w70 { width: 70%; }
+.w75 { width: 75%; }
+.w80 { width: 80%; }
+.w85 { width: 85%; }
+.w90 { width: 90%; }
+.w95 { width: 95%; }
+.w100 { width: 100%; }

@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-/* eslint-env node */
-/* global process, console */
 // Unified type-check script that optionally accepts --scope=<name> to run a subset
 // of workspace type checks without forwarding unsupported flags to each package's tsc.
 import { spawn } from 'node:child_process';

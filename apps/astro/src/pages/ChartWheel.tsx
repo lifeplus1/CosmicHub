@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { Card, Button } from '@cosmichub/ui';
-import ChartWheel from '../features/ChartWheel';
+import ChartWheelUnified from '../features/ChartWheelUnified';
 import { useBirthData } from '../contexts/BirthDataContext';
 
 const ChartWheelPage: React.FC = () => {
@@ -329,10 +329,13 @@ const ChartWheelPage: React.FC = () => {
 
         <div className='lg:col-span-2'>
           {birthData !== null ? (
-            <ChartWheel
+            <ChartWheelUnified
               birthData={birthData}
               showAspects={showAspects}
               showAnimation={showAnimation}
+              interactive={false}
+              size="lg"
+              showControls={true}
             />
           ) : (
             <Card

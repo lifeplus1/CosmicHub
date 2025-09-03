@@ -7,7 +7,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -168,7 +168,17 @@ class AgentPreprocessor {
               const errorMatch = line.match(/error\s+(.+?)(?:\s|$)/);
               if (errorMatch) {
                 const errorType = errorMatch[1];
-                errorPatterns[errorType] = (errorPatterns[errorType] || 0) + 1;
+                if (!errorPatterns[errorType]) {
+                  errorPatterns[errorType] = {
+                    count: 0,
+                    ...ERROR_COMPLEXITY_MAP[errorType] || { 
+                      complexity: 3, 
+                      autoFixable: false, 
+                      impact: 'unknown' 
+                    }
+                  };
+                }
+                errorPatterns[errorType].count++;
               }
             }
           }
@@ -184,13 +194,20 @@ class AgentPreprocessor {
       totalAgents,
       readyRate: ((readyAgents / totalAgents) * 100).toFixed(1),
       errorPatterns: Object.entries(errorPatterns)
-        .sort(([, a], [, b]) => b - a)
+        .sort(([, a], [, b]) => (b.count || b) - (a.count || a))
         .slice(0, 10), // Top 10 error types
     };
   }
 
   async applyBulkFixes(errorAnalysis) {
     const results = [];
+
+    // Identify auto-fixable errors from the analysis
+    const autoFixableErrors = errorAnalysis.errorPatterns
+      .filter(([, data]) => data.autoFixable)
+      .map(([errorType]) => errorType);
+
+    console.log(colorize(`  🔍 Found ${autoFixableErrors.length} auto-fixable error types`, 'blue'));
 
     // Apply quick wins first
     const quickWins = ['duplicate-imports', 'unused-imports'];
@@ -373,8 +390,12 @@ class AgentPreprocessor {
     });
 
     console.log(colorize('\n🔍 Top Error Patterns:', 'cyan'));
-    errorAnalysis.errorPatterns.forEach(([error, count], index) => {
-      console.log(`  ${index + 1}. ${error}: ${count} occurrences`);
+    errorAnalysis.errorPatterns.forEach(([error, data], index) => {
+      const count = data.count || data;
+      const complexity = data.complexity ? ` (complexity: ${data.complexity})` : '';
+      const autoFix = data.autoFixable ? colorize(' [auto-fixable]', 'green') : '';
+      const impact = data.impact ? ` ${data.impact} impact` : '';
+      console.log(`  ${index + 1}. ${error}: ${count} occurrences${complexity}${autoFix}${impact}`);
     });
 
     console.log(colorize('\n🚀 Next Steps:', 'bright'));

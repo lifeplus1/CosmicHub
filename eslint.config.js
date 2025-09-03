@@ -28,6 +28,12 @@ export default [
       '**/generated/**',
       '**/htmlcov/**',
 
+      // Backup directories
+      '**/CODE-001-backup-*/**',
+      '**/*-backup-20*/**',
+      '**/cleanup-backup-*/**',
+      '**/tree-shaking-backup/**',
+
       // Configuration and tooling files that shouldn't be linted
       '**/.storybook/**',
       '**/storybook-static/**',
@@ -287,7 +293,7 @@ export default [
   prettier,
   // Add explicit JS (non-TS) file support so plugin rules and globals apply uniformly
   {
-    files: ['**/*.js', '**/*.jsx'],
+    files: ['**/*.js', '**/*.jsx', '**/*.mjs'],
     languageOptions: {
       parser: tsparser, // still use @typescript-eslint/parser to unify rules; it handles JS fine
       globals: { ...globals.browser, ...globals.node, ...globals.es2020 },
@@ -302,6 +308,25 @@ export default [
       react,
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
+    },
+    rules: {
+      'no-undef': 'error',
+      'no-console': 'off',
+    },
+  },
+  // CommonJS files (.cjs) need different sourceType
+  {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      parser: tsparser,
+      globals: { ...globals.node, ...globals.es2020 },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'script', // CommonJS uses 'script', not 'module'
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
     },
     rules: {
       'no-undef': 'error',

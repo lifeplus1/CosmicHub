@@ -185,8 +185,9 @@ export interface UsageLimits {
   resetDate: string;
 }
 
-// Export all types - chart, user, subscription, and experiment types
+// Export all types - chart, user, subscription, experiment, and psychology types
 export * from './astrology.types';
+export * from './psychology.types';
 export * from './serialize';
 export * from './type-guards';
 export * from './utility';

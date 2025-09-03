@@ -10,7 +10,7 @@ let failed = false;
 function run(cmd, cwd) {
   try {
     execSync(cmd, { stdio: 'inherit', cwd });
-  } catch (e) {
+  } catch {
     failed = true;
   }
 }

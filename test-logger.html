@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logger Test</title>
+</head>
+<body>
+    <h1>Logger Test</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        const results = document.getElementById('results');
+        
+        function addResult(message) {
+            const div = document.createElement('div');
+            div.textContent = message;
+            results.appendChild(div);
+        }
+        
+        try {
+            // Test if devConsole is working
+            console.log('✅ Standard console.log works');
+            console.warn('⚠️ Standard console.warn works');
+            console.error('❌ Standard console.error works');
+            
+            // Test devConsole from environment
+            import('./apps/astro/src/config/environment.ts').then(env => {
+                addResult('✅ DevConsole imported successfully');
+                
+                // Test devConsole methods
+                env.devConsole.log?.('✅ devConsole.log works');
+                env.devConsole.warn?.('⚠️ devConsole.warn works');
+                env.devConsole.error?.('❌ devConsole.error works');
+                env.devConsole.info?.('ℹ️ devConsole.info works');
+                env.devConsole.debug?.('🐛 devConsole.debug works');
+                
+                addResult('✅ All devConsole methods executed');
+                
+                // Test BasicLogger from config package
+                import('@cosmichub/config').then(config => {
+                    const logger = config.logger;
+                    logger.info('✅ BasicLogger info works');
+                    logger.warn('⚠️ BasicLogger warn works');
+                    logger.error('❌ BasicLogger error works');
+                    logger.debug('🐛 BasicLogger debug works');
+                    
+                    addResult('✅ BasicLogger methods executed');
+                }).catch(err => {
+                    addResult('❌ Error testing BasicLogger: ' + err.message);
+                });
+                
+            }).catch(err => {
+                addResult('❌ Error importing devConsole: ' + err.message);
+            });
+            
+        } catch (err) {
+            addResult('❌ Error: ' + err.message);
+        }
+    </script>
+</body>
+</html>

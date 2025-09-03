@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 // import { StrictMode } from 'react'; // Temporarily disabled
 import './index.css';
 import App from './App';
-import './pwa';
+// import './pwa'; // Temporarily disabled due to PWA package issues
 import './pwa-performance';
 import { initializeNotifications } from './services/notificationManager';
 import { initCosmicHubAnalytics, trackPageView } from './services/analytics';

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* global console */
 import { writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { buildLintBadge } from './lib/build-lint-badge.mjs';

@@ -521,3 +521,88 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+
+/* Chart Wheel Utility Classes */
+@layer components {
+  .chart-container {
+    @apply relative bg-gradient-to-br from-chart-bg-start to-chart-bg-end rounded-lg shadow-lg;
+  }
+
+  .chart-tooltip {
+    @apply absolute pointer-events-none bg-black/90 text-white text-sm rounded px-3 py-2 shadow-lg z-50 hidden max-w-[200px] border border-white/20;
+  }
+
+  .chart-tooltip.visible {
+    @apply block;
+  }
+
+  /* Aspect Legend Lines */
+  .aspect-legend-line {
+    @apply w-4 h-0.5 rounded;
+  }
+
+  .aspect-legend-line.conjunction {
+    @apply bg-chart-conjunction;
+  }
+
+  .aspect-legend-line.opposition {
+    @apply bg-chart-opposition;
+  }
+
+  .aspect-legend-line.trine {
+    @apply bg-chart-trine;
+  }
+
+  .aspect-legend-line.square {
+    @apply bg-chart-square;
+  }
+
+  .aspect-legend-line.sextile {
+    @apply bg-chart-sextile;
+  }
+
+  .aspect-legend-line.quincunx {
+    @apply bg-chart-quincunx;
+  }
+
+  /* Chart Interactions */
+  .planet-group {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .planet-group:hover {
+    @apply animate-planet-hover;
+  }
+
+  .aspect-line {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .aspect-line:hover {
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+
+  /* Chart Control Panel */
+  .chart-control-panel {
+    @apply bg-gradient-to-r from-cosmic-dark via-cosmic-purple/20 to-cosmic-dark rounded-lg p-4 border border-cosmic-gold/20;
+  }
+
+  .chart-selection-info {
+    @apply p-3 bg-cosmic-purple/20 rounded border border-cosmic-gold/30;
+  }
+
+  .chart-aspect-legend {
+    @apply mt-4 p-3 bg-cosmic-purple/20 rounded border border-cosmic-gold/30;
+  }
+
+  /* Chart Responsive Design */
+  @media (max-width: 768px) {
+    .chart-container {
+      @apply p-4;
+    }
+
+    .chart-control-panel {
+      @apply p-3;
+    }
+  }
+}

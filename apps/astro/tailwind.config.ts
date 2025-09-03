@@ -1,4 +1,3 @@
-import type { Config } from 'tailwindcss';
 import { sharedTheme } from '../../tailwind.config.shared.js';
 
 export default {
@@ -23,6 +22,13 @@ export default {
     'bg-pink-600',
     'bg-gray-200',
     'bg-gray-300',
+    // Chart aspect colors
+    'bg-chart-conjunction',
+    'bg-chart-opposition',
+    'bg-chart-trine',
+    'bg-chart-square',
+    'bg-chart-sextile',
+    'bg-chart-quincunx',
     // Progress bar width step classes
     'w-step-0',
     'w-step-5',
@@ -50,4 +56,4 @@ export default {
     extend: sharedTheme,
   },
   plugins: [],
-} satisfies Config;
+};

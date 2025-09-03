@@ -42,47 +42,6 @@ function run(cmd, cwd) {
   }
 }
 
-function aggregateCoverage(finalJsonPath) {
-  if (!existsSync(finalJsonPath)) {
-    throw new Error(`Coverage file missing: ${finalJsonPath}`);
-  }
-  const data = JSON.parse(readFileSync(finalJsonPath, 'utf8'));
-  let statementsCovered = 0,
-    statementsTotal = 0;
-  let functionsCovered = 0,
-    functionsTotal = 0;
-  let branchesCovered = 0,
-    branchesTotal = 0;
-  let linesCovered = 0,
-    linesTotal = 0;
-
-  for (const file of Object.values(data)) {
-    if (typeof file !== 'object' || file === null) continue;
-    const f = file;
-    const sKeys = Object.keys(f.s ?? {});
-    statementsTotal += sKeys.length;
-    statementsCovered += sKeys.filter(k => (f.s?.[k] ?? 0) > 0).length;
-    const fnKeys = Object.keys(f.f ?? {});
-    functionsTotal += fnKeys.length;
-    functionsCovered += fnKeys.filter(k => (f.f?.[k] ?? 0) > 0).length;
-    for (const arr of Object.values(f.b ?? {})) {
-      if (!Array.isArray(arr)) continue;
-      branchesTotal += arr.length;
-      branchesCovered += arr.filter(c => (c ?? 0) > 0).length;
-    }
-    linesTotal += sKeys.length;
-    linesCovered += sKeys.filter(k => (f.s?.[k] ?? 0) > 0).length;
-  }
-
-  const pct = (covered, total) => (total === 0 ? 100 : (covered / total) * 100);
-  return {
-    lines: pct(linesCovered, linesTotal),
-    statements: pct(statementsCovered, statementsTotal),
-    functions: pct(functionsCovered, functionsTotal),
-    branches: pct(branchesCovered, branchesTotal),
-  };
-}
-
 function roundMetrics(m) {
   const r = {};
   for (const k of Object.keys(m)) {

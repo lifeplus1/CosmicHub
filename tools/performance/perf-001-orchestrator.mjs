@@ -91,12 +91,12 @@ class PERF001Orchestrator {
     }
   }
 
-  async runBundleAnalysis(options) {
+  async runBundleAnalysis(/* options */) {
     console.log('📦 Phase 1: Bundle Size Analysis');
     console.log('----------------------------------');
 
     try {
-      const { stdout, stderr } = await execAsync(
+      const { stdout } = await execAsync(
         'node scripts/bundle-size-monitor.mjs'
       );
 
@@ -115,6 +115,7 @@ class PERF001Orchestrator {
         console.log('✅ Bundle size within limits');
       } catch (error) {
         console.log('⚠️ Bundle size check failed - review recommendations');
+        console.log(`   Details: ${error.message}`);
         this.results.summary.warnings++;
         this.results.summary.recommendations.push(
           'Reduce bundle size to meet performance targets'
@@ -137,12 +138,12 @@ class PERF001Orchestrator {
     console.log('');
   }
 
-  async runTreeShakingAnalysis(options) {
+  async runTreeShakingAnalysis(/* options */) {
     console.log('🌳 Phase 2: Tree-shaking Analysis');
     console.log('----------------------------------');
 
     try {
-      const { stdout, stderr } = await execAsync(
+      const { stdout } = await execAsync(
         'node scripts/tree-shaking-analyzer.mjs'
       );
 
@@ -190,7 +191,7 @@ class PERF001Orchestrator {
     console.log('');
   }
 
-  async runFirestoreOptimization(options) {
+  async runFirestoreOptimization(/* options */) {
     console.log('🔥 Phase 3: Firestore Performance Optimization');
     console.log('-----------------------------------------------');
 
@@ -234,7 +235,7 @@ class PERF001Orchestrator {
     console.log('');
   }
 
-  async runConcurrencyTest(options) {
+  async runConcurrencyTest(/* options */) {
     console.log('⚡ Phase 4: Concurrency Control Testing');
     console.log('---------------------------------------');
 
@@ -279,7 +280,7 @@ class PERF001Orchestrator {
     console.log('');
   }
 
-  async runCacheTest(options) {
+  async runCacheTest(/* options */) {
     console.log('💾 Phase 5: Cache Performance Validation');
     console.log('-----------------------------------------');
 

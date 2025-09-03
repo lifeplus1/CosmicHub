@@ -27,9 +27,6 @@ import {
   Badge,
   ErrorBoundary,
   Accordion,
-  AccordionItem as _AccordionItem,
-  AccordionTrigger as _AccordionTrigger,
-  AccordionContent as _AccordionContent,
 } from '@cosmichub/ui';
 // Extracted table components (barrel export)
 import {
@@ -49,29 +46,15 @@ import { VirtualizedList } from './VirtualizedList';
 // Extracted table components (barrel export)
 const PlanetTable = React.memo(_PlanetTable);
 const CelestialBodiesTable = React.memo(_CelestialBodiesTable);
-// AI-001 Enhanced Components
-import { AI001Dashboard as _AI001Dashboard } from '../AI001/AI001Dashboard';
-import { useAI001Analysis as _useAI001Analysis } from '../../services/ai-001-enhanced';
-import {
-  getPlanetSymbol as _getPlanetSymbol,
-  getSignSymbol as _getSignSymbol,
-  getAsteroidSymbol as _getAsteroidSymbol,
-  getAspectSymbol as _getAspectSymbol,
-} from './tables/tableUtils';
-// FIXED: Import both services with descriptive names for clarity
-// (Legacy direct fetch imports removed; data now sourced via useChartData hook)
-// Alias the array-based ChartData (planets/houses/aspects as arrays)
-
-// Local type definitions
-type ChartType = 'natal' | 'synastry' | 'composite' | 'transit';
-
 import { isChartLike, hasChartContent, type ChartLike } from './normalizeChart';
 import {
-  AstrologySettingsPanel as _AstrologySettingsPanel,
   type AstrologySettings,
   defaultAstrologySettings,
   migrateAstrologySettings,
 } from './AstrologySettings';
+
+// Local type definitions
+type ChartType = 'natal' | 'synastry' | 'composite' | 'transit';
 
 // Export shape used by exportChartData utility
 interface ExportableChart {
@@ -171,8 +154,10 @@ const coerceHouse = (v: unknown): ChartHouse => {
   };
 };
 const coerceAspect = (v: unknown): ChartAspect => {
-  const obj =
-    typeof v === 'object' && v !== null ? (v as Record<string, unknown>) : {};
+  const obj = (typeof v === 'object' && v !== null) 
+    ? (v as Record<string, unknown>) 
+    : {};
+    
   return {
     planet1: typeof obj['planet1'] === 'string' ? obj['planet1'] : '',
     planet2: typeof obj['planet2'] === 'string' ? obj['planet2'] : '',

@@ -6,14 +6,27 @@
  */
 
 import { devConsole, isDevelopment } from './config/environment';
-import {
-  initPWA as sharedInitPWA,
-  initMobileUX,
-  detectRuntimeCapabilities,
-  showUpdateBanner,
-  showInstallBanner,
-  createEngagementGate,
-} from '@cosmichub/pwa';
+// Temporarily disabled PWA imports to fix dev server
+// import {
+//   initPWA as sharedInitPWA,
+//   initMobileUX,
+//   detectRuntimeCapabilities,
+//   showUpdateBanner,
+//   showInstallBanner,
+//   createEngagementGate,
+// } from '@cosmichub/pwa';
+
+// Placeholder functions for disabled PWA
+const sharedInitPWA = (_options?: any) => {};
+const initMobileUX = () => ({ dispose: () => {} });
+const detectRuntimeCapabilities = () => ({ platform: 'other', isStandalone: false });
+const showUpdateBanner = (_message?: string) => {};
+const showInstallBanner = (_copy?: any) => {};
+const createEngagementGate = (_options?: any) => ({ 
+  isEligible: () => false, 
+  markDismissed: () => {},
+  getState: () => ({ pageViews: 0, firstSeen: Date.now() })
+});
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;

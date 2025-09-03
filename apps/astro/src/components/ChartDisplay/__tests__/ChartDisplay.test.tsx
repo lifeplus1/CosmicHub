@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ChartDisplay from '../ChartDisplay';
+import type { ChartLike } from '../normalizeChart';
 
 // Mock the astrologyService module
 vi.mock('@/services/astrologyService', () => ({
@@ -372,12 +373,127 @@ describe('ChartDisplay', () => {
   });
 
   it('renders chart component without errors', () => {
-    const mockChart: any = {
-      planets: { sun: { name: 'Sun', sign: 'Leo' } },
+    const mockChart: ChartLike = {
+      planets: { 
+        sun: { 
+          name: 'sun', 
+          position: 120,
+          retrograde: false,
+          speed: 1,
+          sign: 'leo',
+          house: 5
+        },
+        moon: { 
+          name: 'moon', 
+          position: 180,
+          retrograde: false,
+          speed: 13,
+          sign: 'sagittarius',
+          house: 9
+        },
+        mercury: { 
+          name: 'mercury', 
+          position: 100,
+          retrograde: false,
+          speed: 1.2,
+          sign: 'cancer',
+          house: 4
+        },
+        venus: { 
+          name: 'venus', 
+          position: 140,
+          retrograde: false,
+          speed: 1.1,
+          sign: 'virgo',
+          house: 6
+        },
+        mars: { 
+          name: 'mars', 
+          position: 200,
+          retrograde: false,
+          speed: 0.5,
+          sign: 'capricorn',
+          house: 10
+        },
+        jupiter: { 
+          name: 'jupiter', 
+          position: 60,
+          retrograde: false,
+          speed: 0.08,
+          sign: 'gemini',
+          house: 3
+        },
+        saturn: { 
+          name: 'saturn', 
+          position: 300,
+          retrograde: true,
+          speed: 0.03,
+          sign: 'aquarius',
+          house: 11
+        },
+        uranus: { 
+          name: 'uranus', 
+          position: 45,
+          retrograde: false,
+          speed: 0.01,
+          sign: 'taurus',
+          house: 2
+        },
+        neptune: { 
+          name: 'neptune', 
+          position: 330,
+          retrograde: false,
+          speed: 0.006,
+          sign: 'pisces',
+          house: 12
+        },
+        pluto: { 
+          name: 'pluto', 
+          position: 270,
+          retrograde: false,
+          speed: 0.004,
+          sign: 'capricorn',
+          house: 10
+        },
+        chiron: { 
+          name: 'chiron', 
+          position: 90,
+          retrograde: false,
+          speed: 0.02,
+          sign: 'cancer',
+          house: 4
+        },
+        north_node: { 
+          name: 'north_node', 
+          position: 210,
+          retrograde: true,
+          speed: -0.05,
+          sign: 'capricorn',
+          house: 10
+        },
+        south_node: { 
+          name: 'south_node', 
+          position: 30,
+          retrograde: true,
+          speed: -0.05,
+          sign: 'cancer',
+          house: 4
+        }
+      },
       houses: [],
       aspects: [],
-      asteroids: [],
-      angles: { ascendant: 0 },
+      asteroids: {},
+      angles: { 
+        ascendant: 0,
+        midheaven: 90,
+        descendant: 180,
+        imumcoeli: 270
+      },
+      latitude: 40.7128,
+      longitude: -74.0060,
+      timezone: 'America/New_York',
+      julian_day: 2459000,
+      house_system: 'placidus'
     };
 
     render(

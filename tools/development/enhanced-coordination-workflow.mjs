@@ -7,7 +7,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -231,7 +231,12 @@ class EnhancedCoordinationWorkflow {
             ready: analysis.readyForExecution || false,
           });
         } catch (error) {
-          console.log(colorize(`    ⚠️  Could not read ${file}`, 'yellow'));
+          console.log(
+            colorize(
+              `    ⚠️  Could not read ${file}: ${error.message}`,
+              'yellow'
+            )
+          );
         }
       }
     }
@@ -478,7 +483,10 @@ class EnhancedCoordinationWorkflow {
           }
         } catch (error) {
           console.log(
-            colorize(`  ⚠️  ${config.name}: Could not read analysis`, 'yellow')
+            colorize(
+              `  ⚠️  ${config.name}: Could not read analysis - ${error.message}`,
+              'yellow'
+            )
           );
         }
       }

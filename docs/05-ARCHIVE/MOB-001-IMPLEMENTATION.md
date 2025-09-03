@@ -354,7 +354,7 @@ eas submit --platform android --profile production
 
 #### **5.3 Post-Launch Monitoring**
 
-**Week 1-2 After Launch:**
+#### **Week 1-2 After Launch:**
 
 - [ ] Monitor crash reports and fix critical bugs
 - [ ] Track user acquisition metrics

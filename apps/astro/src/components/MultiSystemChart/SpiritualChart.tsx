@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import type { UnifiedBirthData } from '@cosmichub/types';
 
-// Proper types instead of 'any'
+// Updated TarotCard interface to match the actual data structure being passed
 interface TarotCard {
   name: string;
-  hebrew_letter: string;
-  astrology: string;
-  tree_path: number;
-  connects: string;
-  meaning: string;
-  number: number;
+  suit: string;
+  arcana: 'major' | 'minor';
+  upright_meaning: string;
+  reversed_meaning: string;
+  astrological_correlation: string;
+  // Optional additional properties for future enhancement
+  hebrew_letter?: string;
+  astrology?: string;
+  tree_path?: number;
+  connects?: string;
+  meaning?: string;
+  number?: number;
   keywords?: string[];
   life_path_card?: TarotCard;
   secondary_influence?: TarotCard;
@@ -41,9 +47,27 @@ interface TreePath {
 }
 
 interface KabbalahData {
-  primary_sephirah?: Sephirah;
-  secondary_sephirah?: Sephirah;
-  relevant_paths?: TreePath[];
+  primary_sephirah?: {
+    name: string;
+    hebrew_name: string;
+    planetary_association: string;
+    meaning: string;
+    path_guidance: string;
+  };
+  secondary_sephirah?: {
+    name: string;
+    hebrew_name: string;
+    planetary_association: string;
+    meaning: string;
+    path_guidance: string;
+  };
+  relevant_paths?: Array<{
+    from: string;
+    to: string;
+    hebrew_letter: string;
+    meaning: string;
+    tarot_card: string;
+  }>;
   spiritual_focus?: string;
   tree_guidance?: string;
 }
@@ -108,32 +132,50 @@ interface SynthesisData {
 
 // Local correspondence interfaces for this component
 interface DailyFocusCorrespondence {
-  tarot: string;
-  hebrew_letter: string;
-  tree_path: number;
-  astrology: string;
+  element: string;
+  planet: string;
+  theme: string;
+  tarot?: string;
+  hebrew_letter?: string;
+  tree_path?: number;
+  astrology?: string;
+}
+
+interface LifePurposeCorrespondence {
+  primary_energy: string;
+  spiritual_goal: string;
+  manifestation_style: string;
 }
 
 interface SpiritualCenterCorrespondence {
-  sephirah: string;
-  astrology: string;
-  tarot_association: string;
-  element: string;
+  chakra: string;
+  color: string;
+  focus_area: string;
+  sephirah?: string;
+  astrology?: string;
+  tarot_association?: string;
+  element?: string;
 }
 
 interface LocalCorrespondences {
   daily_focus?: DailyFocusCorrespondence;
-  life_purpose?: DailyFocusCorrespondence; // Using same structure as daily_focus
+  life_purpose?: LifePurposeCorrespondence;
   spiritual_center?: SpiritualCenterCorrespondence;
 }
 
 interface TarotData {
-  daily_card?: TarotCard; // Make optional to match incoming data
+  daily_card?: TarotCard;
   life_path?: {
-    life_path_card: TarotCard;
-    life_path_number: number;
-    spiritual_purpose: string;
+    card: string;
+    meaning: string;
+    guidance: string;
   };
+  suits?: Array<{
+    name: string;
+    element: string;
+    themes: string[];
+    strength: number;
+  }>;
 }
 
 interface SpiritualChartData {
@@ -288,7 +330,7 @@ const TarotSection: React.FC<{ data?: SpiritualChartData['tarot'] }> = ({
     return <div className='text-cosmic-silver'>No tarot data available</div>;
 
   const dailyCard = data.daily_card;
-  const lifePathCard = data.life_path?.life_path_card;
+  const lifePathData = data.life_path;
   const secondaryInfluence = data.daily_card?.secondary_influence;
 
   return (
@@ -382,48 +424,24 @@ const TarotSection: React.FC<{ data?: SpiritualChartData['tarot'] }> = ({
       )}
 
       {/* Life Path Card */}
-      {lifePathCard && (
+      {lifePathData && (
         <div className='bg-rose-900/10 border border-rose-500/20 rounded-lg p-4'>
           <h3 className='text-lg font-semibold text-rose-300 mb-3 flex items-center'>
             <span className='mr-2'>🎯</span>
-            Life Path: {lifePathCard.name}
+            Life Path: {lifePathData.card}
           </h3>
           <div className='grid md:grid-cols-2 gap-4'>
             <div>
               <p className='text-cosmic-silver mb-2'>
-                <span className='text-rose-400 font-medium'>
-                  Hebrew Letter:
-                </span>{' '}
-                {lifePathCard.hebrew_letter}
-              </p>
-              <p className='text-cosmic-silver mb-2'>
-                <span className='text-rose-400 font-medium'>Numerology:</span>{' '}
-                {lifePathCard.numerology}
-              </p>
-              <p className='text-cosmic-silver mb-2'>
-                <span className='text-rose-400 font-medium'>Life Path #:</span>{' '}
-                {data.life_path?.life_path_number}
+                <span className='text-rose-400 font-medium'>Meaning:</span>{' '}
+                {lifePathData.meaning}
               </p>
             </div>
             <div>
               <p className='text-cosmic-silver mb-2'>
-                <span className='text-rose-400 font-medium'>
-                  Spiritual Purpose:
-                </span>{' '}
-                {data.life_path?.spiritual_purpose}
+                <span className='text-rose-400 font-medium'>Guidance:</span>{' '}
+                {lifePathData.guidance}
               </p>
-              <div className='flex flex-wrap gap-1 mt-2'>
-                {lifePathCard.keywords?.map(
-                  (keyword: string, index: number) => (
-                    <span
-                      key={index}
-                      className='text-xs bg-rose-500/20 text-rose-300 px-2 py-1 rounded'
-                    >
-                      {keyword}
-                    </span>
-                  )
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -448,25 +466,17 @@ const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
         <div className='bg-yellow-900/10 border border-yellow-500/20 rounded-lg p-4'>
           <h3 className='text-lg font-semibold text-yellow-300 mb-3 flex items-center'>
             <span className='mr-2'>👑</span>
-            Primary Sephirah: {primarySephirah.name} ({primarySephirah.english})
+            Primary Sephirah: {primarySephirah.name}
           </h3>
           <div className='grid md:grid-cols-2 gap-4'>
             <div>
               <p className='text-cosmic-silver mb-2'>
-                <span className='text-yellow-400 font-medium'>Hebrew:</span>{' '}
-                {primarySephirah.hebrew}
+                <span className='text-yellow-400 font-medium'>Hebrew Name:</span>{' '}
+                {primarySephirah.hebrew_name}
               </p>
               <p className='text-cosmic-silver mb-2'>
-                <span className='text-yellow-400 font-medium'>Astrology:</span>{' '}
-                {primarySephirah.astrology}
-              </p>
-              <p className='text-cosmic-silver mb-2'>
-                <span className='text-yellow-400 font-medium'>Element:</span>{' '}
-                {primarySephirah.element}
-              </p>
-              <p className='text-cosmic-silver mb-2'>
-                <span className='text-yellow-400 font-medium'>Gematria:</span>{' '}
-                {primarySephirah.gematria}
+                <span className='text-yellow-400 font-medium'>Planetary Association:</span>{' '}
+                {primarySephirah.planetary_association}
               </p>
             </div>
             <div>
@@ -475,23 +485,9 @@ const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
                 {primarySephirah.meaning}
               </p>
               <p className='text-cosmic-silver mb-2'>
-                <span className='text-yellow-400 font-medium'>Position:</span>{' '}
-                {typeof primarySephirah.position === 'string'
-                  ? primarySephirah.position.replace(/_/g, ' ')
-                  : primarySephirah.position}
+                <span className='text-yellow-400 font-medium'>Path Guidance:</span>{' '}
+                {primarySephirah.path_guidance}
               </p>
-              <div className='flex flex-wrap gap-1 mt-2'>
-                {primarySephirah.keywords?.map(
-                  (keyword: string, index: number) => (
-                    <span
-                      key={index}
-                      className='text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded'
-                    >
-                      {keyword}
-                    </span>
-                  )
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -502,18 +498,17 @@ const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
         <div className='bg-orange-900/10 border border-orange-500/20 rounded-lg p-4'>
           <h3 className='text-lg font-semibold text-orange-300 mb-3 flex items-center'>
             <span className='mr-2'>⭐</span>
-            Secondary Sephirah: {secondarySephirah.name} (
-            {secondarySephirah.english})
+            Secondary Sephirah: {secondarySephirah.name}
           </h3>
           <div className='grid md:grid-cols-2 gap-4'>
             <div>
               <p className='text-cosmic-silver mb-2'>
-                <span className='text-orange-400 font-medium'>Hebrew:</span>{' '}
-                {secondarySephirah.hebrew}
+                <span className='text-orange-400 font-medium'>Hebrew Name:</span>{' '}
+                {secondarySephirah.hebrew_name}
               </p>
               <p className='text-cosmic-silver mb-2'>
-                <span className='text-orange-400 font-medium'>Astrology:</span>{' '}
-                {secondarySephirah.astrology}
+                <span className='text-orange-400 font-medium'>Planetary Association:</span>{' '}
+                {secondarySephirah.planetary_association}
               </p>
             </div>
             <div>
@@ -521,18 +516,10 @@ const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
                 <span className='text-orange-400 font-medium'>Meaning:</span>{' '}
                 {secondarySephirah.meaning}
               </p>
-              <div className='flex flex-wrap gap-1 mt-2'>
-                {secondarySephirah.keywords
-                  ?.slice(0, 3)
-                  .map((keyword: string, index: number) => (
-                    <span
-                      key={index}
-                      className='text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded'
-                    >
-                      {keyword}
-                    </span>
-                  ))}
-              </div>
+              <p className='text-cosmic-silver mb-2'>
+                <span className='text-orange-400 font-medium'>Path Guidance:</span>{' '}
+                {secondarySephirah.path_guidance}
+              </p>
             </div>
           </div>
         </div>
@@ -560,23 +547,23 @@ const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
             Relevant Tree Paths
           </h3>
           <div className='space-y-3'>
-            {relevantPaths.slice(0, 3).map((path: TreePath, index: number) => (
+            {relevantPaths.slice(0, 3).map((path, index: number) => (
               <div key={index} className='bg-blue-900/20 rounded-lg p-3'>
                 <div className='flex justify-between items-start mb-2'>
                   <span className='text-blue-300 font-medium'>
-                    Path {path.path}
+                    Path {path.from} → {path.to}
                   </span>
                   <span className='text-xs text-blue-400'>
                     {path.hebrew_letter}
                   </span>
                 </div>
                 <p className='text-cosmic-silver text-sm'>
-                  <span className='text-blue-400'>Connects:</span>{' '}
-                  {path.connects?.join(' → ')}
+                  <span className='text-blue-400'>Meaning:</span>{' '}
+                  {path.meaning}
                 </p>
                 <p className='text-cosmic-silver text-sm'>
-                  <span className='text-blue-400'>Major Arcana:</span>{' '}
-                  {path.major_arcana}
+                  <span className='text-blue-400'>Tarot Card:</span>{' '}
+                  {path.tarot_card}
                 </p>
               </div>
             ))}

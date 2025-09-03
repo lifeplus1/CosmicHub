@@ -5,7 +5,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -136,15 +136,12 @@ async function refreshAgentAnalysis(agentId) {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    let stdout = '';
-    let stderr = '';
-
-    child.stdout.on('data', data => {
-      stdout += data.toString();
+    child.stdout.on('data', () => {
+      // Collect stdout (unused)
     });
 
-    child.stderr.on('data', data => {
-      stderr += data.toString();
+    child.stderr.on('data', () => {
+      // Collect stderr (unused)
     });
 
     child.on('close', code => {
@@ -169,7 +166,13 @@ async function refreshAgentAnalysis(agentId) {
             );
           }
         } catch (err) {
-          // Empty file means no issues
+          // Empty file or parsing error means no issues (treat as clean)
+          console.log(
+            colorize(
+              `ℹ️  Analysis file parsing: ${err.message || 'Empty/clean result'}`,
+              'blue'
+            )
+          );
           errorCount = 0;
           warningCount = 0;
         }

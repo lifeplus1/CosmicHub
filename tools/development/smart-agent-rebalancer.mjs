@@ -323,7 +323,8 @@ async function main() {
     );
 
     console.log('\n⚖️  Optimized Batches:');
-    Object.entries(results.optimizedBatches).forEach(([batchId, batch]) => {
+    // eslint-disable-next-line no-unused-vars
+    Object.entries(results.optimizedBatches).forEach(([_, batch]) => {
       console.log(
         `  📦 ${batch.name}: ${batch.agents.length} agents (${batch.estimatedDuration})`
       );
@@ -333,7 +334,7 @@ async function main() {
     });
 
     console.log('\n💡 Recommendations:');
-    results.recommendations.forEach((rec, index) => {
+    results.recommendations.forEach((rec) => {
       const priority =
         rec.priority === 'high'
           ? '🔴'

@@ -1,0 +1,75 @@
+/* Unified Chart Wheel Styles */
+
+.chart-container {
+  position: relative;
+}
+
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  display: none;
+  max-width: 200px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Aspect color legend lines */
+.aspect-legend-line {
+  width: 1rem;
+  height: 0.125rem;
+  border-radius: 0.0625rem;
+}
+
+.aspectColorConjunction {
+  background-color: #ff0000;
+}
+
+.aspectColorOpposition {
+  background-color: #0066cc;
+}
+
+.aspectColorTrine {
+  background-color: #00aa00;
+}
+
+.aspectColorSquare {
+  background-color: #ff6600;
+}
+
+.aspectColorSextile {
+  background-color: #9966ff;
+}
+
+.aspectColorQuincunx {
+  background-color: #666666;
+}
+
+/* Planet animations */
+.planet-group {
+  transition: all 0.3s ease;
+}
+
+.planet-group:hover {
+  transform: scale(1.05);
+}
+
+.aspect-line {
+  transition: all 0.2s ease;
+}
+
+.aspect-line:hover {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-container {
+    padding: 1rem;
+  }
+}

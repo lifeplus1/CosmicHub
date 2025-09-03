@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import fs from 'fs';
-import path from 'path';
 
 const packageJsonPath = './package.json';
 const backupPath = './package.json.pre-consolidation.backup';

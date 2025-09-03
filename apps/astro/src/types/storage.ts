@@ -205,5 +205,5 @@ export function getOfflineSyncManager(): OfflineSyncManager {
   if (!syncManagerInstance) {
     syncManagerInstance = new MockOfflineSyncManager();
   }
-  return syncManagerInstance!;
+  return syncManagerInstance;
 }

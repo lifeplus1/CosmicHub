@@ -4,26 +4,26 @@
     "passed": 1,
     "failed": 0,
     "skipped": 0,
-    "duration": 6.3792909999999665,
+    "duration": 5.969417000000021,
     "coverage": {
-      "overall": 93.57996314606055,
-      "statements": 94.28304737925669,
-      "branches": 91.54481079138424,
-      "functions": 99.70869876516336,
-      "lines": 88.7832956484379
+      "overall": 91.6596939656378,
+      "statements": 91.13289704886235,
+      "branches": 86.98963074152257,
+      "functions": 96.45662582946825,
+      "lines": 92.05962224269803
     },
     "performance": {
-      "averageRenderTime": 5.798416999999972,
-      "maxRenderTime": 5.798416999999972,
-      "totalMemoryUsage": 26208
+      "averageRenderTime": 4.722416000000067,
+      "maxRenderTime": 4.722416000000067,
+      "totalMemoryUsage": 19552
     },
     "accessibility": {
-      "totalViolations": 1,
+      "totalViolations": 0,
       "criticalViolations": 0,
-      "totalWarnings": 1
+      "totalWarnings": 0
     },
     "quality": {
-      "score": 97,
+      "score": 100,
       "grade": "A",
       "recommendations": []
     }
@@ -32,52 +32,35 @@
     {
       "suite": "alpha",
       "status": "passed",
-      "duration": 6.039374999999836,
+      "duration": 5.292416999999887,
       "coverage": {
-        "statements": 94.28304737925669,
-        "branches": 91.54481079138424,
-        "functions": 99.70869876516336,
-        "lines": 88.7832956484379
+        "statements": 91.13289704886235,
+        "branches": 86.98963074152257,
+        "functions": 96.45662582946825,
+        "lines": 92.05962224269803
       },
       "performance": {
-        "renderTime": 5.798416999999972,
+        "renderTime": 4.722416000000067,
         "mountTime": 0,
-        "memoryUsage": 26208
+        "memoryUsage": 19552
       },
       "accessibility": {
-        "violations": [
-          {
-            "id": "color-contrast",
-            "impact": "moderate",
-            "description": "Text color contrast is insufficient",
-            "nodes": 1
-          }
-        ],
-        "warnings": [
-          {
-            "id": "aria-label",
-            "description": "Consider adding aria-label for better accessibility",
-            "nodes": 1
-          }
-        ]
+        "violations": [],
+        "warnings": []
       },
       "errors": [],
       "metadata": {
-        "timestamp": "2025-09-02T18:24:10.110Z",
+        "timestamp": "2025-09-03T00:54:54.100Z",
         "nodeVersion": "v24.4.1",
         "platform": "darwin"
       }
     }
   ],
-  "timestamp": "2025-09-02T18:24:10.115Z",
+  "timestamp": "2025-09-03T00:54:54.110Z",
   "config": {
     "coverage": {
       "threshold": 80,
-      "exclude": [
-        "node_modules",
-        "dist",
-        "**/*.d.ts"
-      ]
+      "exclude": ["node_modules", "dist", "**/*.d.ts"]
     },
     "performance": {
       "maxRenderTime": 16,

@@ -18,34 +18,10 @@ const BACKUP_DIR = path.join(
 const DAMAGED_FILES = ['apps/astro/src/services/api.ts'];
 
 // Files that are NEW/ENHANCED since tree-shaking and should NOT be touched
-const PRESERVE_FILES = [
-  'apps/astro/src/services/ai-001-enhanced.ts',
-  'apps/astro/src/services/analytics.ts',
-  'apps/astro/src/services/chartAnalyticsService.ts',
-  'apps/astro/src/services/chartSyncService.ts',
-  'apps/astro/src/services/ephemeris.ts',
-  'apps/astro/src/services/ephemeris-performance.ts',
-  'apps/astro/src/services/notificationManager.unified.ts',
-  'apps/astro/src/services/offline-chart-service.ts',
-  'apps/astro/src/pages/UnifiedChartForTest.tsx',
-  'packages/config/src/accessibility-testing.tsx',
-  'packages/integrations/src/ephemeris.ts',
-  'packages/integrations/src/types.ts',
-  'packages/ui/src/components/MobileResponsive.tsx',
-  'packages/ui/src/components/PerformanceDashboard.tsx',
-  'packages/ui/src/components/UpgradeModalAB.tsx',
-  'packages/ui/src/components/UserFeedback.tsx',
-  'packages/ui/src/components/accessibility/AccessibilityUtils.tsx',
-  'packages/ui/src/components/analytics/AnalyticsPanel.tsx',
-  'packages/ui/src/components/lazy-components.tsx',
-  'packages/ui/src/components/reports/ReportGenerator.tsx',
-  'packages/ui/src/components/tools/ExportTools.tsx',
-  'packages/ui/src/hooks/useABTest.ts',
-  'packages/ui/src/hooks/useErrorHandling.ts',
-];
+// Note: PRESERVE_FILES removed as unused - can be restored if needed
 
-// All test files should be preserved (they're new)
-const TEST_PATTERN = /\/__tests__\/.*\.test\.tsx?$/;
+// All test files should be preserved (they're new)  
+// Note: TEST_PATTERN removed as unused - can be restored if needed
 
 class SurgicalRecovery {
   constructor() {

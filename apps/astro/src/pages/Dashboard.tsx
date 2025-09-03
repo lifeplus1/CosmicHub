@@ -3,7 +3,7 @@ import { useAuth } from '@cosmichub/auth';
 import { isFeatureEnabled } from '@cosmichub/config';
 import EnvironmentStatus from '../components/EnvironmentStatus';
 import { PageLoading } from '../components/CosmicLoading';
-import ChartWheel from '../features/ChartWheel';
+import ChartWheelUnified from '../features/ChartWheelUnified';
 
 const Dashboard: React.FC = () => {
   const { user, loading } = useAuth();
@@ -138,10 +138,13 @@ const Dashboard: React.FC = () => {
             </button>
           </div>
           <div className='bg-cosmic-dark/50 rounded-lg p-4 border border-cosmic-silver/10'>
-            <ChartWheel
+            <ChartWheelUnified
               birthData={sampleBirthData}
               showAspects={true}
               showAnimation={true}
+              interactive={false}
+              size="md"
+              showControls={false}
             />
             <div className='mt-4 text-center'>
               <p className='text-cosmic-silver/70 text-sm mb-3'>

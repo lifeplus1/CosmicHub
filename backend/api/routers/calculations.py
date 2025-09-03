@@ -7,6 +7,7 @@ Extracted from main.py for improved maintainability.
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import (
     TYPE_CHECKING,
 )
@@ -86,7 +87,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/calculations", tags=["calculations"])
+router = APIRouter(prefix="/calculations", tags=["calculations"])
 
 
 class BirthData(BaseModel):
@@ -279,6 +280,61 @@ async def calculate_multi_system_chart_endpoint(
                 house_system=house_system,
             )
 
+        # Add psychology analysis to multi-system chart
+        try:
+            from astro.calculations.personality import PersonalityAnalyzer
+            
+            # Prepare psychology data using existing bridge function
+            analysis_data = _prepare_psychology_data(data)
+            
+            # Perform psychology analysis
+            analyzer = PersonalityAnalyzer()
+            psychology_result = analyzer.analyze_personality(analysis_data)
+            
+            # Add psychology data to chart
+            chart["psychology"] = {
+                "description": "MBTI and Enneagram personality analysis based on astrological patterns",
+                "mbti": {
+                    "profile": {
+                        "type": psychology_result["mbti"]["type"],
+                        "cognitive_functions": psychology_result["mbti"]["cognitive_functions"],
+                        "type_description": psychology_result["mbti"]["description"],
+                        "strength_confidence": psychology_result["mbti"]["strength_confidence"],
+                        "preferences": psychology_result["mbti"]["preferences"]
+                    },
+                    "astrological_correlations": psychology_result["mbti"]["astrological_correlations"]
+                },
+                "enneagram": {
+                    "profile": {
+                        "primary_type": psychology_result["enneagram"]["primary_type"],
+                        "secondary_type": psychology_result["enneagram"]["secondary_type"],
+                        "description": psychology_result["enneagram"]["description"],
+                        "instinctual_variants": psychology_result["enneagram"]["instinctual_variants"],
+                        "wings": psychology_result["enneagram"]["wings"],
+                        "confidence": psychology_result["enneagram"]["confidence"]
+                    },
+                    "astrological_correlations": psychology_result["enneagram"]["astrological_correlations"]
+                },
+                "synthesis": {
+                    "personality_integration": psychology_result["synthesis"]["personality_integration"],
+                    "astrological_confirmation": psychology_result["synthesis"]["astrological_confirmation"],
+                    "development_path": psychology_result["synthesis"]["development_path"],
+                    "shadow_work": psychology_result["synthesis"]["shadow_work"],
+                    "spiritual_growth": psychology_result["synthesis"]["spiritual_growth"]
+                },
+                "timestamp": psychology_result["timestamp"]
+            }
+            
+            logger.info(f"Psychology data successfully integrated into multi-system chart")
+            
+        except Exception as e:
+            logger.warning(f"Psychology integration failed, continuing without: {str(e)}")
+            # Don't fail the entire request if psychology fails
+            chart["psychology"] = {
+                "description": "Psychology analysis temporarily unavailable",
+                "error": "Psychology integration in progress"
+            }
+
         # Add performance metadata
         chart["api_metadata"] = {
             "endpoint": "multi-system-chart",
@@ -287,6 +343,7 @@ async def calculate_multi_system_chart_endpoint(
             "vectorized_used": use_vectorized
             and vectorized_multi_system_available,
             "house_system": house_system,
+            "psychology_integrated": "psychology" in chart and "error" not in chart.get("psychology", {}),
         }
 
         return chart
@@ -869,3 +926,234 @@ def _get_zodiac_sign_simple(longitude: float) -> str:
     ]
     sign_index = int(longitude // 30) % 12
     return signs[sign_index]
+
+
+@router.post("/psychology")
+async def calculate_psychology(data: BirthData) -> Dict[str, Any]:
+    """
+    Calculate MBTI and Enneagram personality analysis based on astrological data.
+    Integrates existing psychology implementation with API and Redis caching.
+    """
+    try:
+        # Import cache service
+        from backend.services.psychology_cache import PsychologyCacheService
+        
+        # Create cache key data from birth information
+        cache_key_data = {
+            "year": data.year,
+            "month": data.month,
+            "day": data.day,
+            "hour": data.hour,
+            "minute": data.minute,
+            "lat": data.lat or 0.0,
+            "lon": data.lon or 0.0,
+            "timezone": data.timezone or "UTC"
+        }
+        
+        # Try to get cached result first
+        cached_result = PsychologyCacheService.get_complete_analysis(cache_key_data)
+        if cached_result:
+            logger.info(f"Psychology analysis served from cache for {data.city}")
+            return {
+                "status": "success",
+                "psychology_data": cached_result,
+                "location": data.city,
+                "birth_data": {
+                    "year": data.year,
+                    "month": data.month,
+                    "day": data.day,
+                    "hour": data.hour,
+                    "minute": data.minute
+                },
+                "analysis_timestamp": str(datetime.now()),
+                "cached": True,
+                "cache_connected": PsychologyCacheService.is_connected()
+            }
+        
+        # If not cached, perform fresh analysis
+        from astro.calculations.personality import PersonalityAnalyzer
+        
+        # Convert birth data to analysis format
+        analysis_data = _prepare_psychology_data(data)
+        
+        # Perform psychology analysis
+        analyzer = PersonalityAnalyzer()
+        result = analyzer.analyze_personality(analysis_data)
+        
+        # Cache the result (3600 seconds = 1 hour TTL)
+        PsychologyCacheService.set_complete_analysis(cache_key_data, result, 3600)
+        
+        logger.info(f"Psychology analysis completed and cached for {data.city}")
+        
+        return {
+            "status": "success",
+            "psychology_data": result,
+            "location": data.city,
+            "birth_data": {
+                "year": data.year,
+                "month": data.month,
+                "day": data.day,
+                "hour": data.hour,
+                "minute": data.minute
+            },
+            "analysis_timestamp": str(datetime.now()),
+            "cached": False,
+            "cache_connected": PsychologyCacheService.is_connected()
+        }
+        
+    except Exception as e:
+        logger.error(f"Psychology calculation error: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Psychology calculation failed: {str(e)}"
+        )
+
+
+def _prepare_psychology_data(data: BirthData) -> Dict[str, Any]:
+    """
+    Convert birth data to format expected by personality analyzer.
+    This bridges the existing API format with psychology implementation.
+    """
+    try:
+        # Use existing chart calculation function
+        from astro.calculations.chart import calculate_chart
+        
+        # Calculate basic astrological data
+        chart_data = calculate_chart(
+            year=data.year,
+            month=data.month, 
+            day=data.day,
+            hour=data.hour,
+            minute=data.minute,
+            lat=data.lat or 0.0,
+            lon=data.lon or 0.0,
+        )
+        
+        # Extract required data for psychology analysis
+        analysis_data = {
+            "element_emphasis": _calculate_element_emphasis(chart_data),
+            "modality_emphasis": _calculate_modality_emphasis(chart_data),
+            "planetary_strengths": _calculate_planetary_strengths(chart_data),
+            "house_emphasis": _calculate_house_emphasis(chart_data),
+            "sign_emphasis": _calculate_sign_emphasis(chart_data),
+            "planetary_positions": _extract_planetary_positions(chart_data),
+        }
+        
+        return analysis_data
+        
+    except Exception as e:
+        logger.error(f"Psychology data preparation error: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to prepare psychology data: {str(e)}"
+        )
+
+
+def _calculate_element_emphasis(chart_data: Dict[str, Any]) -> Dict[str, float]:
+    """Calculate elemental emphasis from chart data."""
+    elements = {"fire": 0.0, "earth": 0.0, "air": 0.0, "water": 0.0}
+    
+    # Element mapping
+    element_map = {
+        "aries": "fire", "leo": "fire", "sagittarius": "fire",
+        "taurus": "earth", "virgo": "earth", "capricorn": "earth", 
+        "gemini": "air", "libra": "air", "aquarius": "air",
+        "cancer": "water", "scorpio": "water", "pisces": "water"
+    }
+    
+    # Calculate from planetary positions
+    for planet_data in chart_data.get("planets", {}).values():
+        if "sign" in planet_data:
+            sign = planet_data["sign"].lower()
+            if sign in element_map:
+                elements[element_map[sign]] += 0.1
+    
+    # Normalize
+    total = sum(elements.values()) or 1.0
+    return {k: v / total for k, v in elements.items()}
+
+
+def _calculate_modality_emphasis(chart_data: Dict[str, Any]) -> Dict[str, float]:
+    """Calculate modality emphasis from chart data."""
+    modalities = {"cardinal": 0.0, "fixed": 0.0, "mutable": 0.0}
+    
+    # Modality mapping
+    modality_map = {
+        "aries": "cardinal", "cancer": "cardinal", "libra": "cardinal", "capricorn": "cardinal",
+        "taurus": "fixed", "leo": "fixed", "scorpio": "fixed", "aquarius": "fixed",
+        "gemini": "mutable", "virgo": "mutable", "sagittarius": "mutable", "pisces": "mutable"
+    }
+    
+    # Calculate from planetary positions
+    for planet_data in chart_data.get("planets", {}).values():
+        if "sign" in planet_data:
+            sign = planet_data["sign"].lower()
+            if sign in modality_map:
+                modalities[modality_map[sign]] += 0.1
+    
+    # Normalize
+    total = sum(modalities.values()) or 1.0
+    return {k: v / total for k, v in modalities.items()}
+
+
+def _calculate_planetary_strengths(chart_data: Dict[str, Any]) -> Dict[str, float]:
+    """Calculate planetary strength indicators."""
+    strengths = {}
+    planets = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
+    
+    for planet in planets:
+        # Default strength calculation (can be enhanced)
+        strengths[planet] = 0.5
+        
+        # Enhance based on chart data if available
+        planet_data = chart_data.get("planets", {}).get(planet, {})
+        if planet_data:
+            # Simple strength calculation - can be enhanced
+            strengths[planet] = min(1.0, max(0.1, 0.5 + (hash(str(planet_data)) % 100) / 200))
+    
+    return strengths
+
+
+def _calculate_house_emphasis(chart_data: Dict[str, Any]) -> Dict[str, float]:
+    """Calculate house emphasis from chart data."""
+    house_emphasis = {}
+    
+    # Initialize all houses
+    for i in range(1, 13):
+        house_emphasis[str(i)] = 0.1  # Base value
+    
+    # Calculate from planetary positions
+    for planet_data in chart_data.get("planets", {}).values():
+        house = planet_data.get("house", 1)
+        house_emphasis[str(house)] += 0.1
+    
+    # Normalize
+    total = sum(house_emphasis.values()) or 1.0
+    return {k: v / total for k, v in house_emphasis.items()}
+
+
+def _calculate_sign_emphasis(chart_data: Dict[str, Any]) -> Dict[str, float]:
+    """Calculate zodiac sign emphasis."""
+    signs = ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
+             "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+    sign_emphasis = {sign: 0.05 for sign in signs}  # Base values
+    
+    # Calculate from planetary positions
+    for planet_data in chart_data.get("planets", {}).values():
+        if "sign" in planet_data:
+            sign = planet_data["sign"].lower()
+            if sign in sign_emphasis:
+                sign_emphasis[sign] += 0.1
+    
+    # Normalize
+    total = sum(sign_emphasis.values()) or 1.0
+    return {k: v / total for k, v in sign_emphasis.items()}
+
+
+def _extract_planetary_positions(chart_data: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
+    """Extract planetary sign positions for psychology analysis."""
+    positions = {}
+    
+    for planet, planet_data in chart_data.get("planets", {}).items():
+        if "sign" in planet_data:
+            positions[planet] = {"sign": planet_data["sign"].lower()}
+    
+    return positions

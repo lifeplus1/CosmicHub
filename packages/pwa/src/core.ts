@@ -74,23 +74,28 @@ export function initPWA(params: InitPWAParams = {}): InitPWAResult {
       const interval = params.checkIntervalMs ?? 60000;
       let timeoutId: number;
       const schedule = () => {
-        if (document.visibilityState === 'visible') {
+        if (HAS_DOCUMENT && typeof document !== 'undefined' && document.visibilityState === 'visible') {
           void reg.update();
         }
         timeoutId = window.setTimeout(schedule, interval);
       };
       timeoutId = window.setTimeout(schedule, interval);
       const vis = () => schedule();
-      document.addEventListener('visibilitychange', vis);
-      disposers.push(() =>
-        document.removeEventListener('visibilitychange', vis)
-      );
+      if (HAS_DOCUMENT && typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', vis);
+        disposers.push(() =>
+          document.removeEventListener('visibilitychange', vis)
+        );
+      }
       disposers.push(() => clearTimeout(timeoutId));
     });
   };
 
-  if (document.readyState === 'loading') {
+  if (HAS_DOCUMENT && typeof document !== 'undefined' && document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once: true });
+    disposers.push(() =>
+      document.removeEventListener('DOMContentLoaded', start)
+    );
   } else {
     start();
   }

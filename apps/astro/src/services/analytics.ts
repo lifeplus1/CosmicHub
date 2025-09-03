@@ -102,6 +102,9 @@ const setupConsentManagement = () => {
 };
 
 const showConsentBanner = () => {
+  // SSR guard - don't show banner during server-side rendering
+  if (typeof document === 'undefined') return;
+
   // Create and show consent banner
   const banner = document.createElement('div');
   banner.className = 'analytics-consent-banner';
@@ -166,6 +169,9 @@ const setAnalyticsConsent = (granted: boolean) => {
 
 // PWA Install Tracking
 const setupPWATracking = () => {
+  // SSR guard - don't set up PWA tracking during server-side rendering
+  if (typeof window === 'undefined') return;
+
   let _deferredPrompt: BeforeInstallPromptEvent | null = null;
 
   window.addEventListener('beforeinstallprompt', e => {
@@ -246,6 +252,9 @@ export const trackPageView = (
   pageName: string,
   properties: Record<string, string | number | boolean> = {}
 ) => {
+  // SSR guard - don't track during server-side rendering
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
   analytics?.page(pageName, {
     path: window.location.pathname,
     title: document.title,

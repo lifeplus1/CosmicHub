@@ -1,4 +1,3 @@
-import type { Config } from 'tailwindcss';
 import { sharedTheme } from '../../tailwind.config.shared.js';
 
 export default {
@@ -12,4 +11,4 @@ export default {
     extend: sharedTheme,
   },
   plugins: [],
-} satisfies Config;
+};

@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-/* eslint-env node */
-/* global console */
 import process from 'node:process';
 /**
  * Lint Ratchet Script

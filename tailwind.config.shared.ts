@@ -1,5 +1,3 @@
-import type { Config } from 'tailwindcss';
-
 // Shared Tailwind configuration for all CosmicHub applications
 export const sharedTheme = {
   fontFamily: {
@@ -17,6 +15,30 @@ export const sharedTheme = {
       silver: '#e2e8f0',
       red: '#dc2626',
     },
+    // Chart-specific colors
+    chart: {
+      // Aspect colors
+      conjunction: '#ff0000',
+      opposition: '#0066cc',
+      trine: '#00aa00',
+      square: '#ff6600',
+      sextile: '#9966ff',
+      quincunx: '#666666',
+      // Planet colors
+      sun: '#FFD700',
+      moon: '#E8E8E8',
+      mercury: '#87CEEB',
+      venus: '#32CD32',
+      mars: '#FF4500',
+      jupiter: '#FF8C00',
+      saturn: '#DAA520',
+      uranus: '#4FD0E4',
+      neptune: '#6495ED',
+      pluto: '#DA70D6',
+      // Background gradients
+      'bg-start': '#f8f9fa',
+      'bg-end': '#e9ecef',
+    },
   },
   backdropBlur: {
     lg: '16px',
@@ -25,6 +47,10 @@ export const sharedTheme = {
     float: 'float 6s ease-in-out infinite',
     shimmer: 'shimmer 2s linear infinite',
     spin: 'spin 1s linear infinite',
+    // Chart-specific animations
+    'planet-hover': 'planet-hover 0.3s ease',
+    'aspect-draw': 'aspect-draw 0.8s ease',
+    'chart-zoom': 'chart-zoom 0.2s ease',
   },
   keyframes: {
     float: {
@@ -39,10 +65,23 @@ export const sharedTheme = {
       '0%': { transform: 'rotate(0deg)' },
       '100%': { transform: 'rotate(360deg)' },
     },
+    // Chart-specific keyframes
+    'planet-hover': {
+      '0%': { transform: 'scale(1)' },
+      '100%': { transform: 'scale(1.05)' },
+    },
+    'aspect-draw': {
+      '0%': { strokeDashoffset: '100' },
+      '100%': { strokeDashoffset: '0' },
+    },
+    'chart-zoom': {
+      '0%': { transform: 'scale(1)' },
+      '100%': { transform: 'scale(1.1)' },
+    },
   },
 };
 
-const sharedConfig: Config = {
+const sharedConfig = {
   theme: {
     extend: sharedTheme,
   },

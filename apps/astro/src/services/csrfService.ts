@@ -17,6 +17,12 @@ class CSRFTokenService {
    * Get a valid CSRF token, fetching a new one if needed
    */
   async getToken(): Promise<string> {
+    // Skip CSRF in development mode
+    if (import.meta.env.VITE_DISABLE_CSRF === 'true' || import.meta.env.DEV) {
+      console.log('🔓 CSRF disabled in development mode');
+      return 'dev-bypass-token';
+    }
+    
     // Check if current token is still valid (with 5-minute buffer)
     const now = Date.now() / 1000;
     if (this.token && this.tokenExpiry > now + 300) {
