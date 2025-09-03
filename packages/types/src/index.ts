@@ -189,6 +189,7 @@ export interface UsageLimits {
 export * from './astrology.types';
 export * from './psychology.types';
 export * from './psychology-ui.types';
+export * from './tcm-systems.types';
 export * from './serialize';
 export * from './type-guards';
 export * from './utility';

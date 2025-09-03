@@ -65,7 +65,7 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
       className={`accessible-button ${className}`.trim()}
       aria-label={ariaLabel ?? undefined}
       disabled={isDisabled}
-      {...(isDisabled && { 'aria-disabled': 'true' })}
+      {...(isDisabled && { 'aria-disabled': true })}
       onClick={isDisabled ? undefined : onClick}
       onKeyDown={handleKeyDown}
     >
@@ -79,13 +79,14 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
 // =============================================================================
 
 // Valid interactive ARIA roles for clickable elements
+// Note: Some ARIA roles require specific parent containers and are not included here:
+// - 'tab' requires 'tablist' parent
+// - 'menuitem' requires 'menu'/'menubar' parent  
+// - 'option' requires 'listbox'/'menu'/'combobox' parent
+// - 'radio' requires 'radiogroup' parent
 type ValidInteractiveRole =
   | 'button'
-  | 'tab'
   | 'link'
-  | 'menuitem'
-  | 'option'
-  | 'radio'
   | 'switch'
   | 'checkbox';
 
@@ -95,6 +96,8 @@ export interface InteractiveElementProps
   accessibleName: string;
   role?: ValidInteractiveRole;
   disabled?: boolean;
+  /** Required for switch/checkbox roles - indicates the checked state */
+  'aria-checked'?: boolean | 'mixed';
   onActivate: (e: React.SyntheticEvent) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }
@@ -107,6 +110,7 @@ export const AccessibleClickable: React.FC<InteractiveElementProps> = ({
   onActivate,
   onKeyDown,
   children,
+  'aria-checked': ariaChecked,
   ...props
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -122,12 +126,12 @@ export const AccessibleClickable: React.FC<InteractiveElementProps> = ({
   };
 
   // Create the element with proper role based on the prop value
-  const divProps = {
+  const baseProps = {
     ...props,
     className: `accessible-clickable ${disabled ? 'disabled' : ''} ${className}`.trim(),
     tabIndex: disabled ? -1 : 0,
     'aria-label': accessibleName,
-    ...(disabled && { 'aria-disabled': 'true' }),
+    ...(disabled && { 'aria-disabled': true }),
     onClick: handleClick,
     onKeyDown: handleKeyDown,
   };
@@ -135,23 +139,35 @@ export const AccessibleClickable: React.FC<InteractiveElementProps> = ({
   // Use switch to ensure ESLint sees literal role values
   switch (role) {
     case 'button':
-      return <div {...divProps} role="button">{children}</div>;
-    case 'tab':
-      return <div {...divProps} role="tab">{children}</div>;
+      return <div {...baseProps} role="button">{children}</div>;
     case 'link':
-      return <div {...divProps} role="link">{children}</div>;
-    case 'menuitem':
-      return <div {...divProps} role="menuitem">{children}</div>;
-    case 'option':
-      return <div {...divProps} role="option">{children}</div>;
-    case 'radio':
-      return <div {...divProps} role="radio">{children}</div>;
-    case 'switch':
-      return <div {...divProps} role="switch">{children}</div>;
-    case 'checkbox':
-      return <div {...divProps} role="checkbox">{children}</div>;
+      return <div {...baseProps} role="link">{children}</div>;
+    case 'switch': {
+      // Switch requires aria-checked attribute
+      if (ariaChecked === undefined) {
+        console.warn('AccessibleClickable: role="switch" requires aria-checked prop');
+      }
+      const switchProps = {
+        ...baseProps,
+        role: 'switch' as const,
+        'aria-checked': ariaChecked ?? false
+      };
+      return <div {...switchProps}>{children}</div>;
+    }
+    case 'checkbox': {
+      // Checkbox requires aria-checked attribute
+      if (ariaChecked === undefined) {
+        console.warn('AccessibleClickable: role="checkbox" requires aria-checked prop');
+      }
+      const checkboxProps = {
+        ...baseProps,
+        role: 'checkbox' as const,
+        'aria-checked': ariaChecked ?? false
+      };
+      return <div {...checkboxProps}>{children}</div>;
+    }
     default:
-      return <div {...divProps} role="button">{children}</div>;
+      return <div {...baseProps} role="button">{children}</div>;
   }
 };
 
@@ -309,6 +325,29 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
     </>
   );
 };
+
+// =============================================================================
+// DOCUMENTATION FOR ROLES REQUIRING SPECIFIC PARENTS
+// =============================================================================
+
+/**
+ * The following ARIA roles require specific parent containers and are not included
+ * in the AccessibleClickable component to avoid ARIA violations:
+ * 
+ * - 'tab' requires 'tablist' parent
+ * - 'menuitem' requires 'menu'/'menubar' parent  
+ * - 'option' requires 'listbox'/'menu'/'combobox' parent
+ * - 'radio' requires 'radiogroup' parent
+ * 
+ * For these patterns, use semantic HTML elements or dedicated component libraries
+ * that properly implement the full ARIA pattern with all required roles and states.
+ * 
+ * Examples:
+ * - For tabs: Use semantic <button> elements with proper ARIA attributes
+ * - For menus: Consider libraries like Headless UI, React ARIA, or Radix UI
+ * - For radio groups: Use semantic <input type="radio"> elements
+ * - For select options: Use semantic <select>/<option> elements
+ */
 
 // =============================================================================
 // UTILITY HOOKS

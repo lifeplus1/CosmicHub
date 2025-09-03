@@ -173,24 +173,34 @@ const VirtualizedDataTable = <T extends TableRowData>({
 
         {/* Table Header */}
         <div className="flex items-center bg-cosmic-dark/50 border-b border-cosmic-dark/30 font-medium text-sm text-cosmic-silver backdrop-blur-sm">
-          {columns.map((column) => (
-            <div
-              key={column.key}
-              className={`px-3 py-3 overflow-hidden text-ellipsis whitespace-nowrap ${getColumnWidthClasses(column.width).width} ${getColumnWidthClasses(column.width).minWidth} ${getColumnWidthClasses(column.width).maxWidth} ${
-                sortable ? 'cursor-pointer hover:bg-cosmic-purple/20 transition-colors cosmic-button' : ''
-              }`}
-              onClick={() => handleSort(column.key)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSort(column.key)}
-              tabIndex={sortable ? 0 : -1}
-              role={sortable ? 'button' : undefined}
-              aria-label={sortable ? `Sort by ${column.label}` : undefined}
-            >
-              <span className="flex items-center">
-                {column.label}
-                {sortable && getSortIcon(column.key)}
-              </span>
-            </div>
-          ))}
+          {columns.map((column) => {
+            const columnProps = sortable
+              ? {
+                  role: 'button' as const,
+                  onClick: () => handleSort(column.key),
+                  onKeyDown: (e: React.KeyboardEvent) => e.key === 'Enter' && handleSort(column.key),
+                  tabIndex: 0,
+                  'aria-label': `Sort by ${column.label}`,
+                }
+              : {
+                  tabIndex: -1,
+                };
+
+            return (
+              <div
+                key={column.key}
+                className={`px-3 py-3 overflow-hidden text-ellipsis whitespace-nowrap ${getColumnWidthClasses(column.width).width} ${getColumnWidthClasses(column.width).minWidth} ${getColumnWidthClasses(column.width).maxWidth} ${
+                  sortable ? 'cursor-pointer hover:bg-cosmic-purple/20 transition-colors cosmic-button' : ''
+                }`}
+                {...columnProps}
+              >
+                <span className="flex items-center">
+                  {column.label}
+                  {sortable && getSortIcon(column.key)}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Virtualized Table Body */}

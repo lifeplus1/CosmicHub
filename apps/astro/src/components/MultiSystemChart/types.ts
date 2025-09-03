@@ -1,3 +1,5 @@
+import type { TCMConstitutionType, WuXingElement, MeridianFlowData, MBTIResult, EnneagramResult } from '@cosmichub/types';
+
 export interface MultiSystemChartData {
   birth_info?: {
     date?: string;
@@ -113,17 +115,17 @@ export interface MultiSystemChartData {
   tcm?: {
     description?: string;
     constitutional_analysis?: {
-      primary_type?: any;
-      secondary_type?: any;
+      primary_type?: TCMConstitutionType;
+      secondary_type?: TCMConstitutionType;
       constitution_summary?: string;
     };
     five_elements?: {
-      elements?: any[];
+      elements?: WuXingElement[];
       balance_overview?: string;
       seasonal_guidance?: string;
     };
     meridian_system?: {
-      meridians?: any[];
+      meridians?: MeridianFlowData[];
       energy_flow_assessment?: string;
       blockage_areas?: string[];
     };
@@ -141,7 +143,7 @@ export interface MultiSystemChartData {
   psychology?: {
     description?: string;
     mbti?: {
-      profile?: any;
+      profile?: MBTIResult;
       birth_correlation?: {
         seasonal_pattern?: string;
         elemental_dominance?: string;
@@ -154,7 +156,7 @@ export interface MultiSystemChartData {
       };
     };
     enneagram?: {
-      profile?: any;
+      profile?: EnneagramResult;
       astrological_correlations?: {
         house_themes?: string;
         planetary_alignment?: string;
@@ -267,17 +269,17 @@ export interface SynthesisChartData {
 export interface TCMChartData {
   description?: string;
   constitutional_analysis?: {
-    primary_type?: any;
-    secondary_type?: any;
+    primary_type?: TCMConstitutionType;
+    secondary_type?: TCMConstitutionType;
     constitution_summary?: string;
   };
   five_elements?: {
-    elements?: any[];
+    elements?: WuXingElement[];
     balance_overview?: string;
     seasonal_guidance?: string;
   };
   meridian_system?: {
-    meridians?: any[];
+    meridians?: MeridianFlowData[];
     energy_flow_assessment?: string;
     blockage_areas?: string[];
   };
@@ -296,7 +298,7 @@ export interface TCMChartData {
 export interface PsychologyChartData {
   description?: string;
   mbti?: {
-    profile?: any;
+    profile?: MBTIResult;
     birth_correlation?: {
       seasonal_pattern?: string;
       elemental_dominance?: string;
@@ -309,7 +311,7 @@ export interface PsychologyChartData {
     };
   };
   enneagram?: {
-    profile?: any;
+    profile?: EnneagramResult;
     astrological_correlations?: {
       house_themes?: string;
       planetary_alignment?: string;

@@ -28,7 +28,7 @@
 
 #### Primary Files
 
-```
+```text
 apps/astro/src/components/MultiSystemChart/TCMChart.tsx (35 type errors)
 apps/astro/src/components/MultiSystemChart/PsychologyTab.tsx (8 type errors)
 apps/astro/src/types/storage.ts (15 type errors)
@@ -37,7 +37,7 @@ apps/astro/src/services/offline-chart-service.ts (12 type errors)
 
 #### Task Prompt
 
-```
+```text
 You are the TypeScript Type Safety Specialist for CosmicHub. Your ONLY job is to eliminate unsafe type usage and create proper type definitions. 
 
 FOCUS AREAS:
@@ -70,7 +70,7 @@ START WITH: TCMChart.tsx (highest error density)
 
 #### Primary Files
 
-```
+```text
 apps/astro/src/components/EducationPlatform/CommunityHub.tsx
 apps/astro/src/components/EducationPlatform/EducationDashboard.tsx  
 apps/astro/src/components/common/VirtualizedDataTable.tsx
@@ -79,7 +79,7 @@ apps/astro/src/features/ChartWheelUnified.tsx
 
 #### Task Prompt
 
-```
+```text
 You are the Accessibility Compliance Officer for CosmicHub. Your ONLY mission is achieving full WCAG 2.1 AA compliance.
 
 FOCUS AREAS:
@@ -113,7 +113,7 @@ START WITH: CommunityHub.tsx (most form elements)
 
 #### Primary Files
 
-```
+```text
 apps/astro/src/components/EducationPlatform/OnboardingFlow.tsx
 apps/astro/src/components/MultiSystemChart/PsychologyChart.tsx
 apps/astro/src/components/PricingPage.tsx
@@ -122,7 +122,7 @@ apps/astro/src/hooks/useOfflineCharts.ts
 
 #### Task Prompt
 
-```
+```text
 You are the React/JSX Standards Enforcer for CosmicHub. Your ONLY focus is React best practices and JSX compliance.
 
 FOCUS AREAS:
@@ -155,7 +155,7 @@ START WITH: OnboardingFlow.tsx (most React entity errors)
 
 #### Primary Files
 
-```
+```text
 apps/astro/src/components/EducationPlatform/*.tsx (all files)
 apps/astro/src/components/MultiSystemChart/PsychologyChart.tsx
 apps/astro/src/features/frequency/AstroFrequencyGenerator.tsx
@@ -163,7 +163,7 @@ apps/astro/src/features/frequency/AstroFrequencyGenerator.tsx
 
 #### Task Prompt
 
-```
+```text
 You are the Import/Module Resolution Expert for CosmicHub. Your ONLY job is cleaning up imports and resolving module issues.
 
 FOCUS AREAS:
@@ -196,7 +196,7 @@ START WITH: EducationPlatform components (most unused react-icons)
 
 #### Primary Files
 
-```
+```text
 apps/astro/src/components/MultiSystemChart/__tests__/PsychologyChart.test.tsx
 apps/astro/src/types/storage.ts  
 vitest.workspace.ts configuration
@@ -204,7 +204,7 @@ vitest.workspace.ts configuration
 
 #### Task Prompt
 
-```
+```text
 You are the Test Environment & Configuration Specialist for CosmicHub. Your ONLY focus is testing infrastructure and async/await patterns.
 
 FOCUS AREAS:

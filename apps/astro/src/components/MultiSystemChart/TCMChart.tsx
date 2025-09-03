@@ -2,43 +2,9 @@ import React, { useState } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronDownIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
-import type { UnifiedBirthData } from '@cosmichub/types';
+import type { UnifiedBirthData, WuXingElement, TCMConstitutionType, MeridianFlowData, TCMAnalysisData } from '@cosmichub/types';
 import type { TCMChartData } from './types';
 import { AccessibleButton } from '@cosmichub/ui';
-
-// TCM Data Types (keeping for future use)
-interface _WuXingElement {
-  name: string;
-  chineseName: string;
-  season: string;
-  organ: string;
-  meridian: string;
-  emotion: string;
-  color: string;
-  energy: string;
-  balanceLevel: 'deficient' | 'balanced' | 'excess';
-  percentage: number;
-}
-
-interface _ConstitutionalType {
-  name: string;
-  description: string;
-  characteristics: string[];
-  vulnerabilities: string[];
-  balancing_elements: string[];
-  recommendations: string[];
-  dominant: boolean;
-}
-
-interface _MeridianSystem {
-  name: string;
-  element: string;
-  organSystem: string;
-  emotionalAssociation: string;
-  timeOfDay: string;
-  strength: number;
-  astrologicalCorrelation: string;
-}
 
 interface TCMChartProps {
   data?: TCMChartData;

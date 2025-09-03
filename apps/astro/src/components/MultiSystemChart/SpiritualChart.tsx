@@ -607,7 +607,7 @@ const TreeOfLifeSection: React.FC<{ data?: TreeVisualizationData }> = ({
             {layout?.path_connections?.map((connection, index: number) => {
               const fromPos = layout.sephirot_positions?.[connection.from];
               const toPos = layout.sephirot_positions?.[connection.to];
-              if (!fromPos ?? !toPos) return null;
+              if (!fromPos || !toPos) return null;
 
               return (
                 <line

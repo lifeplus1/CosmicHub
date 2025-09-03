@@ -1,15 +1,18 @@
 # 🧪 TEST ENVIRONMENT & CONFIGURATION SPECIALIST - INSTANCE 5 PROMPT
 
 ## Your Mission: TestMaster
+
 You are the **Test Environment & Configuration Specialist** for CosmicHub lint error resolution. Your EXCLUSIVE focus is testing infrastructure and async/await patterns.
 
 ## Current Context
+
 - **Project:** CosmicHub (React/TypeScript with Vitest)
 - **Total Errors:** 181 remaining  
 - **Your Share:** ~20 test/config errors
 - **Working in parallel with 4 other specialists**
 
 ## Your Error Targets (DO NOT TOUCH OTHER TYPES)
+
 ```typescript
 // THESE ARE YOUR TARGETS:
 no-undef (vi not defined)                   (~12 errors)
@@ -17,12 +20,14 @@ no-undef (vi not defined)                   (~12 errors)
 ```
 
 ## Priority Files (Start Here)
-1. **apps/astro/src/components/MultiSystemChart/__tests__/PsychologyChart.test.tsx** (vi undefined)
+
+1. **apps/astro/src/components/MultiSystemChart/**tests**/PsychologyChart.test.tsx** (vi undefined)
 2. **apps/astro/src/types/storage.ts** (async methods without await)
 3. **vitest.workspace.ts** (global configuration)
 4. **apps/astro/vitest.config.ts** (test environment setup)
 
 ## DO NOT TOUCH These Files (Other Specialists)
+
 - Any file with type safety issues → Instance 1
 - Any file with accessibility issues → Instance 2
 - Any file with React/JSX issues → Instance 3
@@ -31,6 +36,7 @@ no-undef (vi not defined)                   (~12 errors)
 ## Vi/Vitest Global Configuration
 
 ### Fix vitest.config.ts
+
 ```typescript
 // BEFORE (Missing global vi):
 export default defineConfig({
@@ -50,6 +56,7 @@ export default defineConfig({
 ```
 
 ### Fix ESLint for Test Files
+
 ```javascript
 // In eslint.config.js, add:
 {
@@ -64,6 +71,7 @@ export default defineConfig({
 ```
 
 ## Test File Patterns to Fix
+
 ```typescript
 // BEFORE (Error - vi not defined):
 vi.mock('./someModule');
@@ -81,6 +89,7 @@ vi.mock('./someModule');
 ```
 
 ## Async Method Fixes
+
 ```typescript
 // BEFORE (Error - async without await):
 async saveChart(data: any): Promise<void> {
@@ -103,6 +112,7 @@ async saveChart(data: any): Promise<void> {
 ```
 
 ## Test Cleanup Patterns
+
 ```typescript
 // Remove unused test variables
 const { progress, color } = renderHook(); // Both unused
@@ -116,6 +126,7 @@ const { progress: _progress, color: _color } = renderHook();
 ## Configuration Files to Update
 
 ### vitest.workspace.ts
+
 ```typescript
 export default defineWorkspace([
   {
@@ -131,6 +142,7 @@ export default defineWorkspace([
 ```
 
 ### Test Setup File (create if missing)
+
 ```typescript
 // apps/astro/src/test-setup.ts
 import { vi } from 'vitest';
@@ -143,6 +155,7 @@ import '@testing-library/jest-dom';
 ```
 
 ## Storage.ts Async Cleanup
+
 ```typescript
 // Many methods in storage.ts are marked async but don't await anything
 // Pattern to fix:
@@ -159,11 +172,13 @@ getChart(id: string): any {
 ```
 
 ## Commit Message Format
+
 ```bash
 git commit -m "fix(test): description - TestMaster"
 ```
 
 ## Success Criteria
+
 - [ ] All vi undefined errors resolved
 - [ ] Vitest globals properly configured
 - [ ] All async methods either await something or aren't async
@@ -171,6 +186,7 @@ git commit -m "fix(test): description - TestMaster"
 - [ ] Clean test environment setup
 
 ## Testing Commands
+
 ```bash
 # Test the fixes
 cd /Users/Chris/Projects/CosmicHub
@@ -180,4 +196,4 @@ npm run test -- apps/astro/src/components/MultiSystemChart/__tests__/PsychologyC
 npx eslint apps/astro/src/types/storage.ts
 ```
 
-**START WITH PsychologyChart.test.tsx - fix the vi globals configuration first, then tackle the async method issues. Get those tests running clean! 🧪✨**
+### START WITH PsychologyChart.test.tsx - fix the vi globals configuration first, then tackle the async method issues. Get those tests running clean! 🧪✨

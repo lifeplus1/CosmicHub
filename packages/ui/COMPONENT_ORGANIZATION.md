@@ -25,7 +25,9 @@ packages/ui/src/components/
 ## 🧩 Component Categories
 
 ### **UI Primitives** (`/ui/`)
+
 Basic building blocks used throughout the application:
+
 - `Button` - Interactive buttons with variants
 - `Card` - Container component for content grouping
 - `Input` - Form input components
@@ -41,36 +43,48 @@ Basic building blocks used throughout the application:
 - `Loading/Spinner` - Loading state indicators
 
 ### **Feedback** (`/feedback/`)
+
 User feedback and application state components:
+
 - `ErrorBoundary` - Error boundary components
 - `ErrorHandling` - Error message displays
 - `LoadingStates` - Loading state management
 - `UserFeedback` - Toast notifications and status
 
 ### **Animation** (`/animation/`)
+
 Animation and micro-interaction components:
+
 - `AnimationSystem` - Core animation components
 - `MicroInteractions` - Small interactive elements
 
 ### **Layout** (`/layout/`)
+
 Layout and responsive design components:
+
 - `MobileResponsive` - Mobile-first responsive utilities
 
 ### **Enhanced** (`/enhanced/`)
+
 Complex, feature-rich components:
+
 - `EnhancedCard` - Advanced card with additional features
 - `EnhancedChartDisplay` - Enhanced chart rendering
 - `UX002Demo` - UX demonstration components
 
 ### **Analytics** (`/analytics/`)
+
 Analytics and performance monitoring:
+
 - `AnalyticsDashboard` - Main analytics dashboard
 - `AnalyticsWebSocket` - Real-time analytics
 - `PerformanceDashboard` - Performance monitoring
 - `AnalyticsPanel` - Analytics panel component
 
 ### **Charts** (`/charts/`)
+
 Specialized chart and visualization components:
+
 - `AstrologyChart` - Astrological chart displays
 - `BiofeedbackChart` - Biofeedback visualizations
 - `FrequencyVisualizer` - Frequency data visualization
@@ -78,13 +92,17 @@ Specialized chart and visualization components:
 - `TransitChart` - Transit chart displays
 
 ### **Forms** (`/forms/`)
+
 Form components and form-related utilities:
+
 - `AdvancedForm` - Complex form components
 - `BirthDataForm` - Astrological birth data forms
 - `FrequencyForm` - Frequency input forms
 
 ### **Modals** (`/modals/`)
+
 Modal dialogs and overlay components:
+
 - `ChartModal` - Chart display modals
 - `FrequencyPlayerModal` - Frequency player interface
 - `ProfileModal` - User profile modals
@@ -93,26 +111,35 @@ Modal dialogs and overlay components:
 - `UpgradeModal` - Subscription upgrade flows
 
 ### **Calculators** (`/calculators/`)
+
 Calculation and computation components:
+
 - `EphemerisCalculator` - Astronomical calculations
 - `FrequencyCalculator` - Frequency computations
 - `GeneKeysCalculator` - Gene Keys calculations
 
 ### **Accessibility** (`/accessibility/`)
+
 Accessibility utilities and components:
+
 - `AccessibilityUtils` - A11Y helper components and hooks
 
 ### **Tools** (`/tools/`)
+
 Utility and tool components:
+
 - `ExportTools` - Data export functionality
 
 ### **Reports** (`/reports/`)
+
 Report generation components:
+
 - `ReportGenerator` - Report creation utilities
 
 ## 📦 Import Patterns
 
 ### **Recommended Imports**
+
 ```typescript
 // Import by category (recommended)
 import { Button, Card, Progress } from '@cosmichub/ui/components/ui';
@@ -124,6 +151,7 @@ import { Button, Card, AnalyticsDashboard } from '@cosmichub/ui/components';
 ```
 
 ### **Direct Imports** (if needed)
+
 ```typescript
 import { Button } from '@cosmichub/ui/src/components/ui/Button';
 import { AnalyticsDashboard } from '@cosmichub/ui/src/components/analytics/AnalyticsDashboard';
@@ -132,12 +160,15 @@ import { AnalyticsDashboard } from '@cosmichub/ui/src/components/analytics/Analy
 ## 🔧 Migration Guide
 
 ### **Automatic Migration**
+
 Use the provided script to update imports automatically:
+
 ```bash
 ./scripts/update-ui-imports.sh
 ```
 
 ### **Manual Updates**
+
 If you need to update imports manually, here are the key changes:
 
 | Old Path | New Path |
