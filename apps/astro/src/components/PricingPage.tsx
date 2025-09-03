@@ -347,7 +347,7 @@ const PricingPage: React.FC = React.memo(() => {
                           <div className='flex items-center space-x-2'>
                             {/* Guard against invalid tier color values (tailwind safelist recommended) */}
                             <span
-                              className={`px-2 py-1 rounded text-xs bg-${getTierColor(getFeatureTier(feature) || 'free')}/20 text-${getTierColor(getFeatureTier(feature) || 'free')}`}
+                              className={`px-2 py-1 rounded text-xs bg-${getTierColor(getFeatureTier(feature) ?? 'free')}/20 text-${getTierColor(getFeatureTier(feature) ?? 'free')}`}
                             >
                               {getFeatureTier(feature)}
                             </span>

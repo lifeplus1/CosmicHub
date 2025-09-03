@@ -3,7 +3,6 @@ import { devConsole } from '../../config/environment';
 import {
   FrequencyPreset,
   AudioSettings,
-  DEFAULT_FREQUENCY_PRESETS,
 } from '../../types/frequency';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -38,7 +37,7 @@ const SOLFEGGIO_FREQUENCIES = {
 // Mock AudioEngine
 class AudioEngine {
   constructor() {}
-  startFrequency(freq: number): void {}
+  startFrequency(_freq: number): void {}
   stopFrequency(): void {}
   static getInstance(): AudioEngine { return new AudioEngine(); }
 }

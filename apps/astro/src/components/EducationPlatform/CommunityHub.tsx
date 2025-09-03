@@ -19,11 +19,9 @@ import {
   FaCrown,
   FaStar,
   FaCalendar,
-  FaMapMarkerAlt,
   FaVideo,
   FaPlus,
-  FaSearch,
-  FaFilter
+  FaSearch
 } from 'react-icons/fa';
 
 interface CommunityHubProps {
@@ -565,10 +563,11 @@ const CommunityHub: React.FC<CommunityHubProps> = ({ userId: _userId }) => {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-cosmic-silver mb-2">
+                <label htmlFor="discussion-title" className="block text-sm font-medium text-cosmic-silver mb-2">
                   Discussion Title
                 </label>
                 <input
+                  id="discussion-title"
                   type="text"
                   placeholder="Enter your discussion topic..."
                   className="w-full px-3 py-2 bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:outline-none focus:border-cosmic-gold"
@@ -576,10 +575,11 @@ const CommunityHub: React.FC<CommunityHubProps> = ({ userId: _userId }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-cosmic-silver mb-2">
+                <label htmlFor="discussion-category" className="block text-sm font-medium text-cosmic-silver mb-2">
                   Category
                 </label>
                 <select 
+                  id="discussion-category"
                   className="w-full px-3 py-2 bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg text-cosmic-silver focus:outline-none focus:border-cosmic-gold"
                   aria-label="Discussion category"
                 >
@@ -593,10 +593,11 @@ const CommunityHub: React.FC<CommunityHubProps> = ({ userId: _userId }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-cosmic-silver mb-2">
+                <label htmlFor="discussion-description" className="block text-sm font-medium text-cosmic-silver mb-2">
                   Description
                 </label>
                 <textarea
+                  id="discussion-description"
                   rows={4}
                   placeholder="Share your question or topic for discussion..."
                   className="w-full px-3 py-2 bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg text-cosmic-silver placeholder-cosmic-silver/50 focus:outline-none focus:border-cosmic-gold resize-none"

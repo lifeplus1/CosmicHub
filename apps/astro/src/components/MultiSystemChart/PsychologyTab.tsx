@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cosmichub/ui/src/components/ui/Card';
 import { Badge } from '@cosmichub/ui/src/components/ui/Badge';
-import { Button } from '@cosmichub/ui/src/components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cosmichub/ui/src/components/ui/Tabs';
 import { Progress } from '@cosmichub/ui/src/components/ui/Progress';
 import { Alert, AlertDescription } from '@cosmichub/ui/src/components/ui/Alert';
 import { Info, Brain, Heart, Users, Lightbulb } from 'lucide-react';
-import type { UIMBTIResult, UIEnneagramResult, UICognitiveFunction } from '@cosmichub/types';
+import type { 
+  UIMBTIResult, 
+  UIEnneagramResult, 
+  UICognitiveFunction,
+  UnifiedBirthData,
+  PsychologyChartData 
+} from '@cosmichub/types';
 
 interface PsychologyTabProps {
-  birthData: any;
-  chartData: any;
+  birthData: UnifiedBirthData;
+  chartData: PsychologyChartData;
+}
+
+interface PsychologyApiResponse {
+  mbti?: UIMBTIResult;
+  enneagram?: UIEnneagramResult;
 }
 
 const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) => {
@@ -20,11 +30,11 @@ const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) =
 
   useEffect(() => {
     if (chartData) {
-      calculatePsychologyProfiles();
+      void calculatePsychologyProfiles();
     }
   }, [chartData]);
 
-  const calculatePsychologyProfiles = async () => {
+  const calculatePsychologyProfiles = async (): Promise<void> => {
     setLoading(true);
     try {
       // This would connect to your backend API
@@ -34,9 +44,14 @@ const PsychologyTab: React.FC<PsychologyTabProps> = ({ birthData, chartData }) =
         body: JSON.stringify({ birthData, chartData })
       });
       
-      const data = await response.json();
-      setMbtiResult(data.mbti);
-      setEnneagramResult(data.enneagram);
+      const data: PsychologyApiResponse = await response.json() as PsychologyApiResponse;
+      
+      if (data.mbti) {
+        setMbtiResult(data.mbti);
+      }
+      if (data.enneagram) {
+        setEnneagramResult(data.enneagram);
+      }
     } catch (error) {
       console.error('Error calculating psychology profiles:', error);
       // For demo purposes, set mock data
@@ -362,7 +377,7 @@ const IntegrationView: React.FC<{ mbti: UIMBTIResult; enneagram: UIEnneagramResu
                 <ul className="text-sm space-y-1 ml-4 list-disc">
                   <li>
                     Primary information processing through {mbti.cognitive_functions[0]?.name} 
-                    ({getCognitiveFunctionDescription(mbti.cognitive_functions[0]?.name || "")})
+                    ({getCognitiveFunctionDescription(mbti.cognitive_functions[0]?.name ?? "")})
                   </li>
                   <li>
                     Core motivation driven by {enneagram.core_motivation.toLowerCase()}
@@ -403,7 +418,7 @@ const getCognitiveFunctionDescription = (func: string): string => {
     "Fi": "Introverted Feeling - Personal values and authentic emotions",
     "Fe": "Extraverted Feeling - Harmonizing and connecting with others"
   };
-  return descriptions[func] || "Unknown function";
+  return descriptions[func] ?? "Unknown function";
 };
 
 // Mock data functions for development

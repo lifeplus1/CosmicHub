@@ -1,14 +1,13 @@
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import type { UnifiedBirthData } from '@cosmichub/types';
 import { AccessibleButton } from '@cosmichub/ui';
 import { ProgressBar } from '../ui/ProgressBar';
 import { trackCosmicHubAIInteraction } from '../../services/analytics';
 
-// Lazy-loaded components for virtualization
-const MBTIDetailView = lazy(() => import('./PsychologyChartComponents/MBTIDetailView'));
-const EnneagramDetailView = lazy(() => import('./PsychologyChartComponents/EnneagramDetailView'));
-const PsychologySynthesisView = lazy(() => import('./PsychologyChartComponents/PsychologySynthesisView'));
+// Lazy-loaded components for virtualization (keeping for future use)
+const _MBTIDetailView = lazy(() => import('./PsychologyChartComponents/MBTIDetailView'));
+const _EnneagramDetailView = lazy(() => import('./PsychologyChartComponents/EnneagramDetailView'));
+const _PsychologySynthesisView = lazy(() => import('./PsychologyChartComponents/PsychologySynthesisView'));
 
 // MBTI Data Types
 interface CognitiveFunction {
@@ -115,7 +114,7 @@ interface PsychologyChartProps {
 
 const PsychologyChart: React.FC<PsychologyChartProps> = ({ 
   data, 
-  birthData, 
+  birthData: _birthData, 
   isLoading = false 
 }) => {
   const [activeTab, setActiveTab] = useState<
@@ -895,7 +894,7 @@ const AssessmentSection: React.FC = () => {
             </h4>
             <p className='text-cosmic-silver text-sm mb-4'>
               Discover your 4-letter personality type and cognitive function stack based on
-              Jung's psychological types theory.
+              Jung&apos;s psychological types theory.
             </p>
             <ul className='text-xs text-cosmic-silver/70 space-y-1 mb-4'>
               <li>• 64 questions, ~15 minutes</li>

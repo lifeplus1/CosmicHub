@@ -16,7 +16,7 @@ interface MobileTabsProps {
 
 export const MobileTabs: React.FC<MobileTabsProps> = ({
   tabs,
-  activeTab,
+  activeTab: _activeTab,
   onTabChange,
   className = ''
 }) => {

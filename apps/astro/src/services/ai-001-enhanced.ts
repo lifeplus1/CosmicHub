@@ -540,7 +540,7 @@ Provide deep pattern recognition insights.`;
     ];
   }
 
-  private static generateExecutiveSummary(_data: {
+  private static async generateExecutiveSummary(_data: {
     transits: TransitPrediction[];
     growth: PersonalGrowthInsight[];
     synthesis: MultiSystemInterpretation;
@@ -548,7 +548,7 @@ Provide deep pattern recognition insights.`;
     chartData: unknown;
   }): Promise<string> {
     // This would use AI to create a comprehensive summary
-    return Promise.resolve(
+    return await Promise.resolve(
       `Based on your comprehensive AI-001 analysis, you're entering a significant period of growth and transformation. The next 12 months highlight opportunities for spiritual development, career advancement, and deeper relationship connections. Your chart patterns suggest you're naturally gifted at bridging different perspectives and creating harmony in complex situations. Focus on integrating your spiritual insights with practical action, and trust your intuitive guidance during major transits.`
     );
   }

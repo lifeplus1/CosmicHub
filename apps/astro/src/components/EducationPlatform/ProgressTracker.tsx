@@ -10,17 +10,12 @@ import { Card, Button } from '@cosmichub/ui';
 import * as Tabs from '@radix-ui/react-tabs';
 import { 
   FaChartLine, 
-  FaCalendar, 
   FaTrophy, 
   FaFire,
   FaBookOpen,
   FaOm,
-  FaStar,
   FaBullseye,
   FaHistory,
-  FaArrowUp,
-  FaArrowDown,
-  FaCheck,
   FaClock,
   FaGraduationCap
 } from 'react-icons/fa';

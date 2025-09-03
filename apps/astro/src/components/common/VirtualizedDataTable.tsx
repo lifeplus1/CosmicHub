@@ -5,7 +5,7 @@ import styles from './VirtualizedDataTable.module.css';
 
 // Utility function to generate width classes
 const getColumnWidthClasses = (width?: number) => {
-  const columnWidth = width || 120;
+  const columnWidth = width ?? 120;
   return {
     width: `w-[${columnWidth}px]`,
     minWidth: `min-w-[${columnWidth}px]`,
@@ -180,6 +180,10 @@ const VirtualizedDataTable = <T extends TableRowData>({
                 sortable ? 'cursor-pointer hover:bg-cosmic-purple/20 transition-colors cosmic-button' : ''
               }`}
               onClick={() => handleSort(column.key)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSort(column.key)}
+              tabIndex={sortable ? 0 : -1}
+              role={sortable ? 'button' : undefined}
+              aria-label={sortable ? `Sort by ${column.label}` : undefined}
             >
               <span className="flex items-center">
                 {column.label}

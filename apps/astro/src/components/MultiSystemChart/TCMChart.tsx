@@ -6,8 +6,8 @@ import type { UnifiedBirthData } from '@cosmichub/types';
 import type { TCMChartData } from './types';
 import { AccessibleButton } from '@cosmichub/ui';
 
-// TCM Data Types
-interface WuXingElement {
+// TCM Data Types (keeping for future use)
+interface _WuXingElement {
   name: string;
   chineseName: string;
   season: string;
@@ -20,7 +20,7 @@ interface WuXingElement {
   percentage: number;
 }
 
-interface ConstitutionalType {
+interface _ConstitutionalType {
   name: string;
   description: string;
   characteristics: string[];
@@ -30,7 +30,7 @@ interface ConstitutionalType {
   dominant: boolean;
 }
 
-interface MeridianSystem {
+interface _MeridianSystem {
   name: string;
   element: string;
   organSystem: string;
@@ -48,7 +48,7 @@ interface TCMChartProps {
 
 const TCMChart: React.FC<TCMChartProps> = ({ 
   data, 
-  birthData, 
+  birthData: _birthData, 
   isLoading = false 
 }) => {
   const [activeTab, setActiveTab] = useState<

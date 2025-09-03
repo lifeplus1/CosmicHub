@@ -22,9 +22,6 @@ import {
   FaEye,
   FaTree,
   FaGem,
-  FaHeart,
-  FaSun,
-  FaMoon,
   FaChevronDown
 } from 'react-icons/fa';
 

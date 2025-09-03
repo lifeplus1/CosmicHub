@@ -16,7 +16,6 @@ import {
   FaBookOpen,
   FaChartLine,
   FaMedal,
-  FaComments,
   FaHeart
 } from 'react-icons/fa';
 import { useAuth } from '@cosmichub/auth';
@@ -278,7 +277,14 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
               {/* Quick Access */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card title="Learning Paths" className="cursor-pointer hover:bg-cosmic-purple/10 transition-colors">
-                  <div className="p-4 text-center" onClick={() => setActiveTab('learning')}>
+                  <div 
+                    className="p-4 text-center" 
+                    onClick={() => setActiveTab('learning')}
+                    onKeyDown={(e) => e.key === 'Enter' && setActiveTab('learning')}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Navigate to Learning Paths"
+                  >
                     <FaGraduationCap className="text-3xl text-cosmic-gold mx-auto mb-3" />
                     <p className="text-cosmic-silver/70 text-sm">
                       Explore structured curricula for spiritual systems
@@ -287,7 +293,14 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
                 </Card>
                 
                 <Card title="Community Hub" className="cursor-pointer hover:bg-cosmic-purple/10 transition-colors">
-                  <div className="p-4 text-center" onClick={() => setActiveTab('community')}>
+                  <div 
+                    className="p-4 text-center" 
+                    onClick={() => setActiveTab('community')}
+                    onKeyDown={(e) => e.key === 'Enter' && setActiveTab('community')}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Navigate to Community Hub"
+                  >
                     <FaUsers className="text-3xl text-blue-500 mx-auto mb-3" />
                     <p className="text-cosmic-silver/70 text-sm">
                       Connect with fellow seekers and mentors
@@ -296,7 +309,14 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
                 </Card>
                 
                 <Card title="Certifications" className="cursor-pointer hover:bg-cosmic-purple/10 transition-colors">
-                  <div className="p-4 text-center" onClick={() => setActiveTab('certifications')}>
+                  <div 
+                    className="p-4 text-center" 
+                    onClick={() => setActiveTab('certifications')}
+                    onKeyDown={(e) => e.key === 'Enter' && setActiveTab('certifications')}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Navigate to Certifications"
+                  >
                     <FaCertificate className="text-3xl text-golden-500 mx-auto mb-3" />
                     <p className="text-cosmic-silver/70 text-sm">
                       Earn credentials for your spiritual expertise

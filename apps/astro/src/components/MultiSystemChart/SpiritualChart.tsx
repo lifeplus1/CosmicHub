@@ -39,7 +39,8 @@ interface Sephirah {
   keywords?: string[];
 }
 
-interface TreePath {
+// Keeping interface for future use
+interface _TreePath {
   path: number;
   hebrew_letter: string;
   connects?: string[];

@@ -52,7 +52,7 @@ interface ChartWheelUnifiedProps {
 }
 
 const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
-  birthData,
+  birthData: _birthData,
   chartData: preTransformedData,
   showAspects = true,
   showAnimation = true,
@@ -744,6 +744,10 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
                   key={index}
                   className={`flex items-center gap-2 p-2 bg-gray-50 rounded border ${interactive ? 'cursor-pointer hover:bg-gray-100' : ''}`}
                   onClick={interactive ? () => handleAspectClick(aspect) : undefined}
+                  onKeyDown={interactive ? (e) => e.key === 'Enter' && handleAspectClick(aspect) : undefined}
+                  tabIndex={interactive ? 0 : -1}
+                  role={interactive ? 'button' : undefined}
+                  aria-label={interactive ? `View aspect: ${aspect.aspect_type} between ${aspect.planet1} and ${aspect.planet2}` : undefined}
                 >
                   <span className='capitalize font-medium'>{aspect.aspect_type}</span>
                   <span className='text-gray-600'>{aspect.planet1} - {aspect.planet2}</span>
@@ -759,7 +763,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
             <div>
               <h5 className='font-semibold text-gray-800 mb-2'>Aspect Colors</h5>
               <div className='space-y-1'>
-                {Object.entries(chartConstants.aspectColors).map(([type, color]) => (
+                {Object.entries(chartConstants.aspectColors).map(([type, _color]) => (
                   <div key={type} className='flex items-center gap-2'>
                     <div className={`aspect-legend-line ${type}`} />
                     <span className='capitalize text-gray-700'>{type}</span>

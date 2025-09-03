@@ -256,7 +256,7 @@ export class OfflineChartService {
   }> {
     try {
       // Load from offline storage first (for now - simplifies implementation)
-      const cachedChart = await this.storage.getChart(chartId);
+      const cachedChart = await this.storage.getOfflineChart(chartId);
 
       if (cachedChart) {
         // Convert the OfflineChart format to expected format

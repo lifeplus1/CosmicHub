@@ -8,9 +8,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Card, Button } from '@cosmichub/ui';
-import * as Dialog from '@radix-ui/react-dialog';
 import { 
-  FaGraduationCap, 
   FaHeart, 
   FaStar, 
   FaMoon, 
@@ -18,7 +16,6 @@ import {
   FaEye,
   FaTree,
   FaGem,
-  FaUserCircle,
   FaArrowRight,
   FaArrowLeft,
   FaCheckCircle
@@ -38,7 +35,7 @@ interface OnboardingData {
   learningStyle: 'visual' | 'auditory' | 'kinesthetic' | 'reading' | '';
 }
 
-const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId, onComplete }) => {
+const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isComplete, setIsComplete] = useState(false);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
@@ -63,7 +60,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId, onComplete }) =
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1);
     } else {
-      handleComplete();
+      void handleComplete();
     }
   }, [currentStep, totalSteps]);
 
@@ -140,10 +137,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId, onComplete }) =
                 Welcome to CosmicHub Education
               </h2>
               <p className="text-lg text-cosmic-silver/80 mb-6">
-                Let's personalize your spiritual learning journey. This will only take a few minutes.
+                Let&apos;s personalize your spiritual learning journey. This will only take a few minutes.
               </p>
               <div className="bg-cosmic-purple/20 rounded-lg p-4">
-                <h3 className="font-semibold text-cosmic-silver mb-2">What You'll Get:</h3>
+                <h3 className="font-semibold text-cosmic-silver mb-2">What You&apos;ll Get:</h3>
                 <ul className="text-left text-cosmic-silver/70 space-y-1">
                   <li>• Personalized learning recommendations</li>
                   <li>• Progressive skill development</li>
@@ -157,7 +154,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId, onComplete }) =
           {currentStep === 2 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-cosmic-gold text-center mb-6">
-                What's Your Spiritual Experience Level?
+                What&apos;s Your Spiritual Experience Level?
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
@@ -189,7 +186,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId, onComplete }) =
                 Which Spiritual Systems Interest You?
               </h2>
               <p className="text-center text-cosmic-silver/70 mb-6">
-                Select all that apply - we'll customize your learning path
+                Select all that apply - we&apos;ll customize your learning path
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[

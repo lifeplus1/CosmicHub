@@ -91,7 +91,7 @@ interface AyurvedaChartProps {
 
 const AyurvedaChart: React.FC<AyurvedaChartProps> = ({ 
   data, 
-  birthData, 
+  birthData: _birthData, 
   isLoading = false 
 }) => {
   const [activeTab, setActiveTab] = useState<
