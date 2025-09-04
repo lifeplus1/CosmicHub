@@ -1,12 +1,12 @@
-import { UserAction, LearningPattern } from './types';
-import { isUserAction } from './types';
+import { UserAction, LearningPattern, isUserAction } from './types';
+import { EngagementMetrics } from './metrics';
 
 /**
  * Core behavior tracking service that analyzes user actions and learns patterns
  */
 export class UserBehaviorTracker {
   private actions: UserAction[] = [];
-  private patterns: Map<string, any> = new Map();
+  private patterns: Map<string, unknown> = new Map();
 
   /**
    * Track a user action with type safety validation
@@ -29,16 +29,16 @@ export class UserBehaviorTracker {
     const userId = action.userId;
 
     // Track feature usage frequency
-    const featureKey = `${userId}:feature:${action.context.feature}`;
-    const currentCount = this.patterns.get(featureKey) || 0;
-    this.patterns.set(featureKey, currentCount + 1);
+  const featureKey = `${userId}:feature:${action.context.feature}`;
+  const currentCount = (this.patterns.get(featureKey) as number | undefined) ?? 0;
+  this.patterns.set(featureKey, currentCount + 1);
 
     // Track time-based patterns
-    const hour = new Date(action.timestamp).getHours();
-    const timeKey = `${userId}:active_hours`;
-    const hours = this.patterns.get(timeKey) || new Set();
-    hours.add(hour);
-    this.patterns.set(timeKey, hours);
+  const hour = new Date(action.timestamp).getHours();
+  const timeKey = `${userId}:active_hours`;
+  const hours = (this.patterns.get(timeKey) as Set<number> | undefined) ?? new Set<number>();
+  hours.add(hour);
+  this.patterns.set(timeKey, hours);
 
     // Track session patterns
     if (action.type === 'session_started' || action.type === 'session_ended') {
@@ -52,7 +52,7 @@ export class UserBehaviorTracker {
   private updateSessionPatterns(action: UserAction): void {
     const userId = action.userId;
     const sessionKey = `${userId}:sessions`;
-    const sessions = this.patterns.get(sessionKey) || [];
+  const sessions = (this.patterns.get(sessionKey) as Array<{ id?: string; startTime: Date; endTime?: Date; duration?: number; actions: unknown[] }> | undefined) ?? [];
 
     if (action.type === 'session_started') {
       sessions.push({
@@ -61,7 +61,7 @@ export class UserBehaviorTracker {
         actions: [],
       });
     } else if (action.type === 'session_ended') {
-      const session = sessions.find((s: any) => s.id === action.sessionId);
+  const session = sessions.find((s) => s.id === action.sessionId);
       if (session) {
         session.endTime = action.timestamp;
         session.duration = action.duration;
@@ -74,36 +74,30 @@ export class UserBehaviorTracker {
   /**
    * Get user engagement metrics
    */
-  getUserEngagementMetrics(userId: string): {
-    totalActions: number;
-    uniqueFeatures: number;
-    averageSessionDuration: number;
-    peakHours: number[];
-    favoriteFeatures: string[];
-  } {
+  getUserEngagementMetrics(userId: string): EngagementMetrics {
     const userActions = this.actions.filter(a => a.userId === userId);
     const uniqueFeatures = new Set(userActions.map(a => a.context.feature))
       .size;
 
-    const sessions = this.patterns.get(`${userId}:sessions`) || [];
-    const completedSessions = sessions.filter((s: any) => s.endTime);
+  const sessions = (this.patterns.get(`${userId}:sessions`) as Array<{ endTime?: Date; duration?: number }> | undefined) ?? [];
+  const completedSessions = sessions.filter((s) => s.endTime);
     const avgDuration =
       completedSessions.length > 0
         ? completedSessions.reduce(
-            (sum: number, s: any) => sum + (s.duration || 0),
+            (sum: number, s) => sum + (s.duration ?? 0),
             0
           ) / completedSessions.length
         : 0;
 
     const activeHours = Array.from(
-      this.patterns.get(`${userId}:active_hours`) || new Set<number>()
-    ) as number[];
+  ((this.patterns.get(`${userId}:active_hours`) as Set<number> | undefined) ?? new Set<number>()).values()
+    );
 
     // Get top 3 most used features
     const featureUsage = new Map<string, number>();
     userActions.forEach(action => {
       const feature = action.context.feature;
-      featureUsage.set(feature, (featureUsage.get(feature) || 0) + 1);
+  featureUsage.set(feature, (featureUsage.get(feature) ?? 0) + 1);
     });
 
     const favoriteFeatures = Array.from(featureUsage.entries())
@@ -215,7 +209,7 @@ export class UserBehaviorTracker {
   }
 
   private recommendComplexity(
-    metrics: any
+    metrics: EngagementMetrics
   ): 'beginner' | 'intermediate' | 'advanced' {
     if (metrics.uniqueFeatures < 3 || metrics.totalActions < 20)
       return 'beginner';
@@ -256,12 +250,10 @@ export class UserBehaviorTracker {
   private calculateWeeklyFrequency(userId: string): number {
     const userActions = this.actions.filter(a => a.userId === userId);
     if (userActions.length === 0) return 0;
-
-    const sessions = this.patterns.get(`${userId}:sessions`) || [];
+  const sessions = (this.patterns.get(`${userId}:sessions`) as Array<{ startTime: Date }> | undefined) ?? [];
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
     const recentSessions = sessions.filter(
-      (s: any) => new Date(s.startTime) > oneWeekAgo
+      (s) => new Date(s.startTime) > oneWeekAgo
     );
 
     return recentSessions.length;

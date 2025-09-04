@@ -920,6 +920,8 @@ from api.routers import (  # noqa: E402
 from astro.calculations import transits_clean  # noqa: E402
 from routers import synastry  # noqa: E402
 from analytics.analytics_api import router as analytics_router  # noqa: E402
+from api.endpoints.psychology_systems import psychology_router  # noqa: E402
+from api.endpoints.spiritual_systems import spiritual_router  # noqa: E402
 
 app.include_router(ai.router)
 app.include_router(presets.router)
@@ -929,6 +931,8 @@ app.include_router(calculations.router, prefix="/api")  # Multi-system calculati
 app.include_router(charts.router, prefix="/api")  # consolidated charts router
 app.include_router(interpretations.router)  # AI Interpretations router
 app.include_router(analytics_router)  # Analytics tracking and dashboards
+app.include_router(psychology_router)  # Psychology assessments/profile endpoints
+app.include_router(spiritual_router)  # Spiritual systems (tarot, kabbalah, correspondences)
 app.include_router(
     transits_clean.router, prefix="/api/astro", tags=["transits"]
 )  # Transit calculations router

@@ -7,8 +7,18 @@ AI #3: Backend Architecture Specialist Implementation
 import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, HTTPException, Query, Path
+
+# Import centralized TCM types
+from backend.types.tcm_systems import (
+    TCMRequest,
+    TCMAnalysisResponse,
+    ElementalBalanceResponse,
+    HealthRecommendationsResponse,
+    ElementInfoResponse,
+    ElementInfo,
+    TCMHealthCheck
+)
 
 # Import TCM calculation engine
 try:
@@ -16,51 +26,36 @@ try:
 except ImportError as e:
     logging.error(f"Failed to import TCM engine: {e}")
     # Graceful fallback for development
-    def calculate_tcm_constitution(*args, **kwargs) -> Dict[str, Any]:
+    def calculate_tcm_constitution(*args: Any, **kwargs: Any) -> Dict[str, Any]:
         return {"error": "TCM engine not available"}
     
     tcm_engine = None
 
+# Import type bridge for safe conversions
+from backend.api.bridges.tcm_type_bridge import (
+    TCMTypeBridge,
+    safe_get_element_data_typed
+)
+
 logger = logging.getLogger(__name__)
 
+# ===== HELPER FUNCTIONS =====
+
+def safe_call_engine_method(engine: Any, method_name: str, *args: Any) -> Any:
+    """Safely call engine methods with fallback"""
+    if engine and hasattr(engine, method_name):
+        method = getattr(engine, method_name)
+        if callable(method):
+            return method(*args)
+    return None
+
 # Create API router
-tcm_router = APIRouter(prefix="/api/tcm", tags=["tcm-systems"])
-
-# ===== REQUEST/RESPONSE MODELS =====
-
-class TCMRequest(BaseModel):
-    """TCM constitutional analysis request"""
-    year: int = Field(..., ge=1900, le=2100, description="Birth year")
-    month: int = Field(..., ge=1, le=12, description="Birth month") 
-    day: int = Field(..., ge=1, le=31, description="Birth day")
-    hour: int = Field(12, ge=0, le=23, description="Birth hour (24-hour format)")
-    minute: int = Field(0, ge=0, le=59, description="Birth minute")
-    lat: float = Field(0.0, ge=-90, le=90, description="Birth latitude")
-    lon: float = Field(0.0, ge=-180, le=180, description="Birth longitude")
-    timezone: str = Field("UTC", description="Birth timezone")
-    user_id: Optional[str] = Field(None, description="User identifier")
-    include_detailed_analysis: bool = Field(True, description="Include detailed analysis")
-
-class ElementalBalanceResponse(BaseModel):
-    """Elemental balance result"""
-    wood: float = Field(..., description="Wood element strength (0-1)")
-    fire: float = Field(..., description="Fire element strength (0-1)")
-    earth: float = Field(..., description="Earth element strength (0-1)") 
-    metal: float = Field(..., description="Metal element strength (0-1)")
-    water: float = Field(..., description="Water element strength (0-1)")
-
-class ConstitutionAnalysisResponse(BaseModel):
-    """Constitutional analysis result"""
-    primary_element: str = Field(..., description="Dominant element")
-    secondary_element: Optional[str] = Field(None, description="Secondary element")
-    constitutional_type: str = Field(..., description="Constitutional type name")
-    element_strength: float = Field(..., description="Primary element strength")
-    constitution_traits: list[str] = Field(..., description="Constitutional traits")
+tcm_router: APIRouter = APIRouter(prefix="/api/tcm", tags=["tcm-systems"])
 
 # ===== API ENDPOINTS =====
 
-@tcm_router.post("/calculate", response_model=Dict[str, Any])
-async def calculate_tcm_analysis(request: TCMRequest) -> Dict[str, Any]:
+@tcm_router.post("/calculate", response_model=TCMAnalysisResponse)
+async def calculate_tcm_analysis(request: TCMRequest) -> TCMAnalysisResponse:
     """
     Calculate complete TCM constitutional analysis
     
@@ -92,33 +87,19 @@ async def calculate_tcm_analysis(request: TCMRequest) -> Dict[str, Any]:
         if "error" in tcm_data:
             raise HTTPException(status_code=400, detail=tcm_data["error"])
         
+        # Convert raw engine data to typed calculation data  
+        typed_data = TCMTypeBridge.engine_to_calculation_data(tcm_data)
+        
         # Calculate processing time
         processing_time = (datetime.now() - start_time).total_seconds() * 1000
         
-        # Build response with metadata
-        response = {
-            "success": True,
-            "data": tcm_data,
-            "calculation_method": "traditional_chinese_medicine",
-            "processing_time_ms": processing_time,
-            "api_version": "1.0",
-            "generated_at": datetime.now().isoformat(),
-            "includes_detailed_analysis": request.include_detailed_analysis
-        }
-        
-        # Add simplified version if not detailed
-        if not request.include_detailed_analysis:
-            response["data"] = {
-                "primary_element": tcm_data.get("primary_element"),
-                "elemental_balance": tcm_data.get("elemental_balance"),
-                "constitution_analysis": {
-                    "constitutional_type": tcm_data.get("constitution_analysis", {}).get("constitutional_type"),
-                    "constitution_traits": tcm_data.get("constitution_analysis", {}).get("constitution_traits", [])
-                },
-                "analysis_confidence": tcm_data.get("analysis_confidence")
-            }
-        
-        return response
+        # Create properly typed response using type bridge
+        return TCMTypeBridge.create_tcm_analysis_response(
+            tcm_data=typed_data,
+            processing_time_ms=processing_time,
+            includes_detailed_analysis=request.include_detailed_analysis,
+            generated_at=datetime.now().isoformat()
+        )
         
     except HTTPException:
         raise
@@ -126,14 +107,14 @@ async def calculate_tcm_analysis(request: TCMRequest) -> Dict[str, Any]:
         logger.error(f"Error in TCM calculation: {e}")
         raise HTTPException(status_code=500, detail=f"TCM calculation failed: {str(e)}")
 
-@tcm_router.post("/elemental-balance", response_model=Dict[str, Any])
+@tcm_router.post("/elemental-balance", response_model=ElementalBalanceResponse)
 async def calculate_elemental_balance_only(
     year: int = Query(..., ge=1900, le=2100),
     month: int = Query(..., ge=1, le=12),
     day: int = Query(..., ge=1, le=31),
     hour: int = Query(12, ge=0, le=23),
     user_id: Optional[str] = Query(None)
-) -> Dict[str, Any]:
+) -> ElementalBalanceResponse:
     """
     Calculate only the Five Element balance (quick analysis)
     """
@@ -141,32 +122,33 @@ async def calculate_elemental_balance_only(
         logger.info(f"Calculating elemental balance for {year}-{month}-{day}")
         
         # Use engine directly for just balance calculation
+        elemental_balance: Dict[str, float]
+        
         if tcm_engine:
-            elemental_balance = tcm_engine._calculate_elemental_balance(year, month, day, hour)
-            primary_element = max(elemental_balance.items(), key=lambda x: x[1])[0]
+            elemental_balance = safe_call_engine_method(tcm_engine, '_calculate_elemental_balance', year, month, day, hour) or {}
+            if not elemental_balance:
+                elemental_balance = {"wood": 0.2, "fire": 0.2, "earth": 0.2, "metal": 0.2, "water": 0.2}
         else:
             # Fallback calculation
             elemental_balance = {"wood": 0.2, "fire": 0.2, "earth": 0.2, "metal": 0.2, "water": 0.2}
-            primary_element = "earth"
         
-        return {
-            "success": True,
-            "elemental_balance": elemental_balance,
-            "primary_element": primary_element,
-            "element_strength": elemental_balance.get(primary_element, 0.2),
-            "quick_analysis": True,
-            "user_id": user_id,
-            "generated_at": datetime.now().isoformat()
-        }
+        # Create elemental balance response using type bridge
+        balance_response = TCMTypeBridge.create_elemental_balance_response(elemental_balance)
+        
+        # Update with additional metadata
+        balance_response.user_id = user_id
+        balance_response.generated_at = datetime.now().isoformat()
+        
+        return balance_response
         
     except Exception as e:
         logger.error(f"Error in elemental balance calculation: {e}")
         raise HTTPException(status_code=500, detail=f"Elemental balance calculation failed: {str(e)}")
 
-@tcm_router.get("/health-recommendations/{element}")
+@tcm_router.get("/health-recommendations/{element}", response_model=HealthRecommendationsResponse)
 async def get_health_recommendations(
-    element: str = Field(..., description="Element type (wood, fire, earth, metal, water)")
-) -> Dict[str, Any]:
+    element: str = Path(..., description="Element type (wood, fire, earth, metal, water)")
+) -> HealthRecommendationsResponse:
     """
     Get health recommendations for specific element type
     """
@@ -178,26 +160,21 @@ async def get_health_recommendations(
         
         # Get recommendations from engine
         if tcm_engine:
-            dietary_recs = tcm_engine._get_dietary_recommendations(element_lower)
-            lifestyle_recs = tcm_engine._get_lifestyle_recommendations(element_lower)
-            element_info = tcm_engine.element_data.get(element_lower, {})
+            dietary_recs = safe_call_engine_method(tcm_engine, '_get_dietary_recommendations', element_lower) or ["Balanced diet appropriate for constitution"]
+            lifestyle_recs = safe_call_engine_method(tcm_engine, '_get_lifestyle_recommendations', element_lower) or ["Balanced lifestyle appropriate for constitution"]
+            element_info: ElementInfo = safe_get_element_data_typed(tcm_engine, element_lower)
         else:
             dietary_recs = ["Balanced diet appropriate for constitution"]
             lifestyle_recs = ["Balanced lifestyle appropriate for constitution"]
-            element_info = {}
+            element_info: ElementInfo = ElementInfo()
         
-        return {
-            "element": element_lower,
-            "dietary_recommendations": dietary_recs,
-            "lifestyle_recommendations": lifestyle_recs,
-            "optimal_season": element_info.get("season", "varies"),
-            "balanced_emotion": element_info.get("emotion_balanced", "balance"),
-            "dominant_organs": [
-                element_info.get("organ_yin", "unknown"),
-                element_info.get("organ_yang", "unknown")
-            ],
-            "generated_at": datetime.now().isoformat()
-        }
+        return TCMTypeBridge.create_health_recommendations_response(
+            element=element_lower,
+            dietary_recommendations=dietary_recs,
+            lifestyle_recommendations=lifestyle_recs,
+            element_info=element_info,
+            generated_at=datetime.now().isoformat()
+        )
         
     except HTTPException:
         raise
@@ -205,10 +182,10 @@ async def get_health_recommendations(
         logger.error(f"Error getting health recommendations: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get recommendations: {str(e)}")
 
-@tcm_router.get("/element-info/{element}")
+@tcm_router.get("/element-info/{element}", response_model=ElementInfoResponse)
 async def get_element_info(
-    element: str = Field(..., description="Element type")
-) -> Dict[str, Any]:
+    element: str = Path(..., description="Element type")
+) -> ElementInfoResponse:
     """
     Get detailed information about a specific element
     """
@@ -218,24 +195,17 @@ async def get_element_info(
         
         element_lower = element.lower()
         
-        if tcm_engine and element_lower in tcm_engine.element_data:
-            element_info = tcm_engine.element_data[element_lower]
+        if tcm_engine:
+            element_info: ElementInfo = safe_get_element_data_typed(tcm_engine, element_lower)
             
-            return {
-                "element": element_lower,
-                "season": element_info.get("season"),
-                "organs": {
-                    "yin": element_info.get("organ_yin"),
-                    "yang": element_info.get("organ_yang")
-                },
-                "emotions": {
-                    "balanced": element_info.get("emotion_balanced"),
-                    "imbalanced": element_info.get("emotion_imbalanced")
-                },
-                "planetary_influences": element_info.get("planets", []),
-                "optimal_hours": element_info.get("hours", {}),
-                "generated_at": datetime.now().isoformat()
-            }
+            if element_info.season or element_info.organ_yin or element_info.organ_yang:  # Check if we have actual data
+                return TCMTypeBridge.create_element_info_response(
+                    element=element_lower,
+                    element_info=element_info,
+                    generated_at=datetime.now().isoformat()
+                )
+            else:
+                raise HTTPException(status_code=404, detail="Element information not available")
         else:
             raise HTTPException(status_code=404, detail="Element information not available")
             
@@ -245,28 +215,30 @@ async def get_element_info(
         logger.error(f"Error getting element info: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get element info: {str(e)}")
 
-@tcm_router.get("/health")
-async def health_check() -> Dict[str, Any]:
+@tcm_router.get("/health", response_model=TCMHealthCheck)
+async def health_check() -> TCMHealthCheck:
     """Health check endpoint for TCM service"""
-    return {
-        "service": "TCM Systems API",
-        "status": "healthy",
-        "engine_available": tcm_engine is not None,
-        "version": "1.0",
-        "timestamp": datetime.now().isoformat()
-    }
+    return TCMHealthCheck(
+        service="TCM Systems API",
+        status="healthy",
+        engine_available=tcm_engine is not None,
+        version="1.0",
+        timestamp=datetime.now().isoformat()
+    )
 
 # ===== ERROR HANDLERS =====
+# Note: Exception handlers should be on the main FastAPI app, not the router
+# These can be added to main.py if needed
 
-@tcm_router.exception_handler(ValueError)
-async def value_error_handler(request, exc):
-    logger.error(f"Value error in TCM API: {exc}")
-    raise HTTPException(status_code=422, detail=str(exc))
+# @app.exception_handler(ValueError)
+# async def value_error_handler(request, exc):
+#     logger.error(f"Value error in TCM API: {exc}")
+#     raise HTTPException(status_code=422, detail=str(exc))
 
-@tcm_router.exception_handler(Exception)  
-async def general_error_handler(request, exc):
-    logger.error(f"Unexpected error in TCM API: {exc}")
-    raise HTTPException(status_code=500, detail="Internal server error")
+# @app.exception_handler(Exception)  
+# async def general_error_handler(request, exc):
+#     logger.error(f"Unexpected error in TCM API: {exc}")
+#     raise HTTPException(status_code=500, detail="Internal server error")
 
 # Export router
 __all__ = ["tcm_router"]

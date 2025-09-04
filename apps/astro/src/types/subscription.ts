@@ -1,5 +1,5 @@
 /**
- * DEPRECATED local subscription types (migrated to @cosmichub/subscriptions)
+ * DEPRECATED local subscription types (migrated to @cosmichub/config)
  * This file now re-exports symbols from the centralized package to avoid large diff.
  * Remove after all imports updated.
  */
@@ -11,4 +11,4 @@ export {
   hasFeatureAccess,
   getTierLimits,
   type AstroSubscriptionTier as SubscriptionTier,
-} from '@cosmichub/subscriptions';
+} from '@cosmichub/config';

@@ -1,6 +1,8 @@
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import React from 'react';
+import { afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 
 // Make React available globally for tests
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -280,3 +282,37 @@ if (
     configurable: true,
   });
 }
+
+// Canvas polyfill for a11y + components relying on getContext
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS { interface Global {} }
+}
+if (typeof HTMLCanvasElement !== 'undefined') {
+  // Minimal safe mock that satisfies most libs expecting 2d context
+  const ctx: any = {
+    fillRect: () => {}, clearRect: () => {}, getImageData: () => new ImageData(1,1),
+    putImageData: () => {}, createImageData: () => new ImageData(1,1), setTransform: () => {},
+    drawImage: () => {}, save: () => {}, fillText: () => {}, restore: () => {}, beginPath: () => {},
+    moveTo: () => {}, lineTo: () => {}, closePath: () => {}, stroke: () => {}, translate: () => {},
+    scale: () => {}, rotate: () => {}, arc: () => {}, fill: () => {}, measureText: () => ({
+      width: 0,
+      actualBoundingBoxAscent: 0, actualBoundingBoxDescent: 0,
+      actualBoundingBoxLeft: 0, actualBoundingBoxRight: 0,
+      fontBoundingBoxAscent: 0, fontBoundingBoxDescent: 0,
+      emHeightAscent: 0, emHeightDescent: 0, hangingBaseline: 0,
+      alphabeticBaseline: 0, ideographicBaseline: 0
+    }),
+    transform: () => {}, rect: () => {}, clip: () => {},
+  };
+  HTMLCanvasElement.prototype.getContext = function getContext(type: any) {
+    if (type === '2d') return ctx;
+    return null as any;
+  };
+}
+
+// Global RTL cleanup
+afterEach(() => {
+  cleanup();
+});
+

@@ -82,6 +82,10 @@ export const AstroRoutes: Record<string, ReturnType<typeof lazyLoadRoute>> = {
     () => import('../pages/PerformanceMonitoring'),
     'PerformanceMonitoring'
   ),
+  // Domain standalone pages (extracted from MultiSystemChart tabs)
+  TCM: lazyLoadRoute(() => import('../pages/TCM'), 'TCMPage'),
+  Psychology: lazyLoadRoute(() => import('../pages/Psychology'), 'PsychologyPage'),
+  Spiritual: lazyLoadRoute(() => import('../pages/Spiritual'), 'SpiritualPage'),
 };
 
 // Lazy loaded components with error boundaries
@@ -208,6 +212,21 @@ export const astroRouteConfig = [
   {
     path: '/performance',
     component: withErrorBoundary(ensureComponent('PerformanceMonitoring')),
+    preload: false,
+  },
+  {
+    path: '/tcm',
+    component: withErrorBoundary(ensureComponent('TCM')),
+    preload: false,
+  },
+  {
+    path: '/psychology',
+    component: withErrorBoundary(ensureComponent('Psychology')),
+    preload: false,
+  },
+  {
+    path: '/spiritual',
+    component: withErrorBoundary(ensureComponent('Spiritual')),
     preload: false,
   },
 ];

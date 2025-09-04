@@ -158,11 +158,14 @@ export class OfflineSyncManager {
     });
 
     // Add to sync queue
-    await this.storage.addToSyncQueue('create', {
-      id: chartId,
-      userId,
-      chart_data: chartData,
-      birth_data: birthData,
+    await this.storage.enqueue({
+      type: 'create',
+      payload: {
+        id: chartId,
+        userId,
+        chart_data: chartData,
+        birth_data: birthData,
+      },
     });
 
     // Trigger sync if online
@@ -186,7 +189,7 @@ export class OfflineSyncManager {
 
     // If chart is synced, add delete to sync queue
     if (chart.synced) {
-      await this.storage.addToSyncQueue('delete', { id: chartId });
+  await this.storage.enqueue({ type: 'delete', payload: { id: chartId } });
     }
 
     // Remove from local storage

@@ -4,7 +4,7 @@ Privacy-compliant analytics storage and processing for CosmicHub
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Any, Sequence, TypeVar
+from typing import Dict, Optional, Any, Sequence, TypeVar, Literal
 import json
 from dataclasses import dataclass
 from enum import Enum
@@ -43,14 +43,14 @@ class PrivacyCompliantAnalytics:
     to avoid blocking the event loop.
     """
 
-    def __init__(self, db_path: str = "analytics.db"):
+    def __init__(self, db_path: str = "analytics.db") -> None:
         self.db_path = db_path
         # Rolling window for response time metrics
         self._recent_response_times: list[int] = []
         self._max_response_samples = 500
         self.init_database()
     
-    def init_database(self):
+    def init_database(self) -> None:
         """Initialize SQLite database with analytics tables and pragmas"""
         with sqlite3.connect(self.db_path) as conn:
             try:
@@ -157,7 +157,7 @@ class PrivacyCompliantAnalytics:
         
         return event
 
-    def _update_session(self, conn: sqlite3.Connection, event: AnalyticsEvent):
+    def _update_session(self, conn: sqlite3.Connection, event: AnalyticsEvent) -> None:
         """Upsert session row and maintain rolling total duration (gaps >30m ignored)."""
         existing = conn.execute(
             "SELECT start_time, last_event_time, total_duration_ms FROM user_sessions WHERE session_id = ?",
@@ -174,13 +174,14 @@ class PrivacyCompliantAnalytics:
                     total_duration_ms = (prev_total or 0)
             else:
                 total_duration_ms = prev_total or 0
+        # For page_views we need additive behavior, not max(). Use a two step upsert:
         conn.execute(
             """
             INSERT INTO user_sessions (session_id, user_id, start_time, platform, page_views, events_count, last_event_time, total_duration_ms)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(session_id) DO UPDATE SET
                 user_id=excluded.user_id,
-                page_views=CASE WHEN excluded.page_views > user_sessions.page_views THEN excluded.page_views ELSE user_sessions.page_views END,
+                page_views=user_sessions.page_views + excluded.page_views,
                 events_count=user_sessions.events_count + 1,
                 last_event_time=excluded.last_event_time,
                 end_time=CASE WHEN excluded.last_event_time > COALESCE(user_sessions.end_time, 0) THEN excluded.last_event_time ELSE user_sessions.end_time END,
@@ -199,7 +200,7 @@ class PrivacyCompliantAnalytics:
             )
         )
 
-    def _update_daily_metrics(self, conn: sqlite3.Connection, event: AnalyticsEvent):
+    def _update_daily_metrics(self, conn: sqlite3.Connection, event: AnalyticsEvent) -> None:
         """Update daily aggregated metrics"""
         date = datetime.fromtimestamp(event.timestamp / 1000).date()
         
@@ -292,7 +293,7 @@ class PrivacyCompliantAnalytics:
                 """, (hour_ago,)).fetchone()[0] or 0
                 
                 # Average session duration (recent sessions today)
-                avg_session_duration = conn.execute(
+                avg_session_duration_raw = conn.execute(
                     """
                     SELECT AVG(total_duration_ms) FROM (
                         SELECT total_duration_ms FROM user_sessions
@@ -302,8 +303,10 @@ class PrivacyCompliantAnalytics:
                     """,
                     (today_start,)
                 ).fetchone()[0] or 0
+                # Ensure float for JSON serialization; DB may return int when sample size 1
+                avg_session_duration = float(avg_session_duration_raw)
 
-                avg_response_time = 0
+                avg_response_time: float = 0.0
                 if self._recent_response_times:
                     avg_response_time = sum(self._recent_response_times) / len(self._recent_response_times)
 
@@ -330,7 +333,7 @@ class PrivacyCompliantAnalytics:
                 'averageSessionDurationMs': 0
             }
 
-    async def get_astrology_analytics(self, timeframe: str = 'week') -> Dict[str, Any]:
+    async def get_astrology_analytics(self, timeframe: Literal['day','week','month','year'] = 'week') -> Dict[str, Any]:
         """Get astrology-specific analytics"""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -371,7 +374,8 @@ class PrivacyCompliantAnalytics:
                     """,
                     (since,)
                 ).fetchone()[0] or 0
-                
+                # Ensure float for JSON serialization; DB may return int when sample size 1
+                avg_session_duration = float(avg_session_duration)
                 return {
                     'chartCalculations': chart_calculations,
                     'aiFeatureUsage': ai_features,
@@ -402,26 +406,32 @@ class PrivacyCompliantAnalytics:
                 }
             }
 
-    async def cleanup_old_data(self, retention_days: int = 365):
-        """Clean up old analytics data according to privacy policy"""
+    async def cleanup_old_data(self, retention_days: int = 365) -> tuple[int, int]:
+        """Clean up old analytics data according to privacy policy.
+
+        Args:
+            retention_days: Number of days of data to retain.
+
+        Returns:
+            (deleted_events, deleted_sessions) tuple with counts of removed rows.
+        """
         cutoff = int((datetime.now() - timedelta(days=retention_days)).timestamp() * 1000)
-        
+
         with sqlite3.connect(self.db_path) as conn:
-            # Delete old events
             deleted_events = conn.execute(
-                "DELETE FROM analytics_events WHERE timestamp < ?", 
+                "DELETE FROM analytics_events WHERE timestamp < ?",
                 (cutoff,)
             ).rowcount
-            
-            # Delete old sessions
+
             deleted_sessions = conn.execute(
-                "DELETE FROM user_sessions WHERE start_time < ?", 
+                "DELETE FROM user_sessions WHERE start_time < ?",
                 (cutoff,)
             ).rowcount
-            
+
             conn.commit()
-            
-            logger.info("Cleaned up %s old events and %s old sessions", deleted_events, deleted_sessions)
+
+        logger.info("Cleaned up %s old events and %s old sessions", deleted_events, deleted_sessions)
+        return deleted_events or 0, deleted_sessions or 0
 
     # --- Session management ---
     async def end_session(self, session_id: str) -> bool:
@@ -463,7 +473,7 @@ class PrivacyCompliantAnalytics:
             return False
 
     # --- Performance instrumentation helper ---
-    def record_response_time(self, duration_ms: int):
+    def record_response_time(self, duration_ms: int) -> None:
         """Record an API response time (ms) into rolling window."""
         self._recent_response_times.append(int(duration_ms))
         if len(self._recent_response_times) > self._max_response_samples:

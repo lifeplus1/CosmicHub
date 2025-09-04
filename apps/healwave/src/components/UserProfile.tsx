@@ -12,7 +12,7 @@ import {
   FaArrowUp,
   FaHistory,
 } from 'react-icons/fa';
-import { HEALWAVE_TIERS } from '@cosmichub/subscriptions';
+import { HEALWAVE_TIERS, type HealwaveSubscriptionTier } from '@cosmichub/config';
 import ProgressBar from './ProgressBar';
 
 interface UserStats {
@@ -111,8 +111,10 @@ const UserProfile: React.FC = React.memo(() => {
     navigate('/upgrade');
   }, [navigate]);
 
-  const currentTier =
-    HEALWAVE_TIERS[userTier.toLowerCase()] ?? HEALWAVE_TIERS['free'];
+  const tierKey = userTier.toLowerCase();
+  const tiersTyped = HEALWAVE_TIERS satisfies Record<string, HealwaveSubscriptionTier>;
+  const currentTier: HealwaveSubscriptionTier | undefined =
+    tiersTyped[tierKey] ?? tiersTyped['free'];
   const sessionUsage: SubscriptionUsage =
     typeof checkUsageLimit === 'function'
       ? (checkUsageLimit('sessionsPerDay') ?? { current: 0, limit: 2 })

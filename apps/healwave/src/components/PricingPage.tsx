@@ -3,11 +3,16 @@ import {
   HEALWAVE_TIERS,
   calculateYearlySavings,
   type HealwaveSubscriptionTier,
-} from '@cosmichub/subscriptions';
+} from '@cosmichub/config';
 import { useAuth } from '@cosmichub/auth';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 
 const PricingPage: React.FC = () => {
+  // Ensure proper typing; imported constant may lose literal types under path mapping
+  const HEALWAVE_TIERS_TYPED = HEALWAVE_TIERS satisfies Record<
+    string,
+    HealwaveSubscriptionTier
+  >;
   const [isYearly, setIsYearly] = useState(false);
   const { user } = useAuth();
 
@@ -55,8 +60,9 @@ const PricingPage: React.FC = () => {
         </div>
 
         <div className='grid grid-cols-1 gap-8 lg:grid-cols-3'>
-          {Object.entries(HEALWAVE_TIERS).map(
-            ([tierSlug, tier]: [string, HealwaveSubscriptionTier]) => {
+          {Object.keys(HEALWAVE_TIERS_TYPED).map(tierSlug => {
+            const tier = HEALWAVE_TIERS_TYPED[tierSlug];
+            if (!tier) return null;
               const price = isYearly ? tier.price.yearly : tier.price.monthly;
               const yearlyPrice = tier.price.yearly;
               const monthlyPrice = tier.price.monthly;
@@ -107,8 +113,8 @@ const PricingPage: React.FC = () => {
                     </div>
 
                     <ul className='w-full space-y-3'>
-                      {tier.features.map((feature, index) => (
-                        <li key={index} className='flex items-center'>
+                      {tier.features.map((feature: string, index: number) => (
+                        <li key={feature + index.toString()} className='flex items-center'>
                           <span className='mr-2 text-green-500'>✓</span>
                           <span className='text-sm text-gray-700 dark:text-gray-300'>
                             {feature}
@@ -136,8 +142,7 @@ const PricingPage: React.FC = () => {
                   </div>
                 </div>
               );
-            }
-          )}
+            })}
         </div>
 
         <div className='flex flex-col items-center mt-16 space-y-4 text-center'>

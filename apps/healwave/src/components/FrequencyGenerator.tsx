@@ -12,7 +12,8 @@ import {
   FrequencyPreset,
   AudioSettings,
   getAllPresets,
-} from '@cosmichub/frequency';
+  isValidFrequencyPreset,
+} from '@cosmichub/integrations';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -41,7 +42,8 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
   // Ref for radiogroup to manage keyboard navigation
   const radioGroupRef = useRef<HTMLDivElement | null>(null);
 
-  const presets = useMemo(() => getAllPresets(), []); // Memoize; fetch batched from Firestore with indexing for scalability
+  // Fully typed immutable preset collection
+  const presets = useMemo<readonly FrequencyPreset[]>(() => getAllPresets(), []); // Memoize; fetch batched from Firestore with indexing for scalability
   // Stop any playing audio on unmount for cleanup
   useEffect(() => {
     return () => {
@@ -89,10 +91,11 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
     [presets, selectedPreset]
   );
 
-  const handlePlay = useCallback(async () => {
-    if (!selectedPreset) return;
+  const handlePlay = useCallback(async (): Promise<void> => {
+    const preset = selectedPreset; // snapshot to avoid stale closure updates
+    if (!preset || !isValidFrequencyPreset(preset)) return;
     try {
-      await audioEngine.startFrequency(selectedPreset, settings);
+      await audioEngine.startFrequency(preset, settings);
       setIsPlaying(true);
     } catch (error: unknown) {
       devConsole.error('Failed to start frequency', { error });
@@ -105,14 +108,15 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
   }, [audioEngine]);
 
   const updateSettings = useCallback(
-    (key: keyof AudioSettings, value: number) => {
+    (key: keyof AudioSettings, value: number): void => {
       // Type guard for valid ranges
       if (
         (key === 'volume' && (value < 0 || value > 100)) ||
         (key === 'duration' && (value < 1 || value > 60))
-      )
+      ) {
         return;
-      setSettings(prev => ({ ...prev, [key]: value }));
+      }
+      setSettings((prev: AudioSettings) => ({ ...prev, [key]: value }));
     },
     []
   );
@@ -295,9 +299,11 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
               <div className='mt-2'>
                 <strong className='text-cyan-300'>Benefits:</strong>
                 <ul className='list-disc list-inside mt-1'>
-                  {selectedPreset.benefits.map((benefit, index) => (
-                    <li key={index}>{benefit}</li>
-                  ))}
+                  {selectedPreset.benefits.map(
+                    (benefit: string, index: number) => (
+                      <li key={benefit + index.toString()}>{benefit}</li>
+                    )
+                  )}
                 </ul>
               </div>
             )}

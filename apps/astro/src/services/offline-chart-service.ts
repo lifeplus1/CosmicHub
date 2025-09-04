@@ -3,14 +3,15 @@
  * Bridges offline storage with existing chart APIs for seamless offline functionality
  */
 
-import type { ChartData } from '@/types';
+// Use storage-level ChartData alias to ensure structural compatibility
 import {
+  type ChartData,
   OfflineChartStorage,
   OfflineSyncManager,
   type OfflineChart,
   type OfflineSyncItem,
   MockChartStorage,
-  getOfflineSyncManager
+  getOfflineSyncManager,
 } from '../types/storage';
 import {
   fetchSavedCharts,
@@ -48,11 +49,16 @@ export interface ChartCalculationParams {
 }
 
 // Define message types for service worker communication
-interface ServiceWorkerMessage {
-  type: 'SYNC_REQUEST' | 'CACHE_REQUEST';
-  payload?: {
-    chartId?: string;
-  };
+interface ServiceWorkerSyncRequest { type: 'SYNC_REQUEST' }
+interface ServiceWorkerCacheRequest { type: 'CACHE_REQUEST'; payload: { chartId: string } }
+type ServiceWorkerMessage = ServiceWorkerSyncRequest | ServiceWorkerCacheRequest;
+
+// Metadata returned alongside loaded charts
+interface ChartLoadMetadata {
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  synced: boolean;
 }
 
 // Service Worker registration promise
@@ -101,17 +107,11 @@ export class OfflineChartService {
   private handleServiceWorkerMessage(
     event: MessageEvent<ServiceWorkerMessage>
   ) {
-    const { type, payload } = event.data;
-
-    switch (type) {
-      case 'SYNC_REQUEST':
-        void this.syncManager.forceSyncAll();
-        break;
-      case 'CACHE_REQUEST':
-        if (payload?.chartId) {
-          this.cacheChartInServiceWorker(payload.chartId);
-        }
-        break;
+    const msg = event.data;
+    if (msg.type === 'SYNC_REQUEST') {
+      void this.syncManager.forceSyncAll();
+    } else if (msg.type === 'CACHE_REQUEST') {
+      this.cacheChartInServiceWorker(msg.payload.chartId);
     }
   }
 
@@ -173,20 +173,8 @@ export class OfflineChartService {
           const chartId = apiResult.data.id;
 
           // Cache successful save locally
-          await this.storage.saveChart({
-            id: chartId,
-            userId: this.userId ?? 'anonymous',
-            name: params.name ?? `Chart ${new Date().toISOString()}`,
-            birth_date: params.birthData.date,
-            birth_time: params.birthData.time,
-            birth_location: `${params.birthData.location.city}, ${params.birthData.location.country}`,
-            chart_type: 'natal',
-            chart_data: chartData,
-            birth_data: params.birthData,
-            synced: true,
-            offline_created: false,
-            priority: 'medium',
-          });
+          // Persist a local copy (chartData already matches ChartData alias)
+          await this.storage.saveChart(chartData);
 
           // Cache in service worker for faster access
           this.cacheChartInServiceWorker(chartId, chartData);
@@ -206,32 +194,19 @@ export class OfflineChartService {
       // Offline save
       const chartId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      await this.storage.saveChart({
-        id: chartId,
-        userId: this.userId ?? 'anonymous',
-        name: params.name ?? `Chart ${new Date().toISOString()}`,
-        birth_date: params.birthData.date,
-        birth_time: params.birthData.time,
-        birth_location: `${params.birthData.location.city}, ${params.birthData.location.country}`,
-        chart_type: 'natal',
-        chart_data: chartData,
-        birth_data: params.birthData,
-        synced: false,
-        offline_created: true,
-        priority: 'high',
-      });
+  await this.storage.saveChart(chartData);
 
       // Queue for background sync
-      await this.storage.addToSyncQueue('create', {
-        id: chartId,
-        userId: this.userId ?? 'anonymous',
-        name: params.name ?? `Chart ${new Date().toISOString()}`,
-        birth_date: params.birthData.date,
-        birth_time: params.birthData.time,
-        birth_location: `${params.birthData.location.city}, ${params.birthData.location.country}`,
-        chart_type: 'natal',
-        chart_data: chartData,
-        birth_data: params.birthData,
+      await this.storage.enqueue({
+        type: 'create',
+        payload: {
+          id: chartId,
+          action: 'create',
+          timestamp: new Date(),
+          data: chartData,
+          userId: this.userId ?? 'anonymous',
+          name: params.name ?? chartId,
+        },
       });
 
       return {
@@ -251,7 +226,7 @@ export class OfflineChartService {
   async loadChart(chartId: string): Promise<{
     chartData: ChartData;
     params: ChartCalculationParams;
-    metadata: unknown;
+    metadata: ChartLoadMetadata;
     fromCache?: boolean;
   }> {
     try {
@@ -270,7 +245,7 @@ export class OfflineChartService {
         };
 
         return {
-          chartData: cachedChart.chart_data as ChartData,
+          chartData: cachedChart.chart_data,
           params,
           metadata: {
             name: cachedChart.name,
@@ -306,7 +281,7 @@ export class OfflineChartService {
   > {
     try {
       let onlineCharts: SavedChart[] = [];
-      let offlineCharts: Array<{
+      let offlineRecords: Array<{
         id: string;
         name: string;
         created_at: string;
@@ -331,9 +306,14 @@ export class OfflineChartService {
       }
 
       // Always get offline charts
-      offlineCharts = this.userId
-        ? await this.storage.getUserCharts(this.userId)
-        : [];
+      const offlineCharts = await this.storage.getOfflineCharts();
+      offlineRecords = offlineCharts.map(c => ({
+        id: c.id,
+        name: c.name,
+        created_at: c.created_at.toISOString(),
+        updated_at: c.updated_at.toISOString(),
+        synced: c.synced,
+      }));
 
       // Combine and deduplicate charts
       const chartMap = new Map<
@@ -361,7 +341,7 @@ export class OfflineChartService {
       });
 
       // Add offline charts (won't overwrite existing online charts due to Map)
-      offlineCharts.forEach(chart => {
+  offlineRecords.forEach(chart => {
         if (!chartMap.has(chart.id)) {
           chartMap.set(chart.id, {
             id: chart.id,
@@ -375,14 +355,8 @@ export class OfflineChartService {
       });
 
       return Array.from(chartMap.values()).sort((a, b) => {
-        const dateA =
-          typeof a.updatedAt === 'string'
-            ? new Date(a.updatedAt)
-            : new Date(a.updatedAt);
-        const dateB =
-          typeof b.updatedAt === 'string'
-            ? new Date(b.updatedAt)
-            : new Date(b.updatedAt);
+        const dateA = new Date(a.updatedAt);
+        const dateB = new Date(b.updatedAt);
         return dateB.getTime() - dateA.getTime();
       });
     } catch (error) {
@@ -421,7 +395,10 @@ export class OfflineChartService {
 
       // Queue deletion for sync if it's a real chart ID
       if (!chartId.startsWith('offline_')) {
-        await this.storage.addToSyncQueue('delete', { id: chartId });
+        await this.storage.enqueue({
+          type: 'delete',
+          payload: { id: chartId },
+        });
       }
 
       return {
@@ -496,20 +473,24 @@ export class OfflineChartService {
     exportData: string
   ): Promise<{ imported: number; errors: number }> {
     try {
-      const data = JSON.parse(exportData) as {
-        charts: unknown[];
-        syncItems?: unknown[];
+      const parsed = JSON.parse(exportData) as {
+        charts?: Array<[string, ChartData]>;
+        offlineCharts?: OfflineChart[];
+        syncItems?: OfflineSyncItem[];
+        metadata?: unknown;
       };
-
-      // Ensure the data has the required structure
-      const importData = {
-        charts: (data.charts ?? []) as OfflineChart[],
-        syncItems: (data.syncItems ?? []) as OfflineSyncItem[],
-      };
-
-      await this.storage.importData(importData);
+      await this.storage.importData({
+        charts: parsed.charts ?? [],
+        metadata: {
+          exportedAt: new Date(),
+          version: '1.0.1',
+          totalCharts: parsed.charts?.length ?? 0,
+        },
+        offlineCharts: parsed.offlineCharts ?? [],
+        syncItems: parsed.syncItems ?? [],
+      });
       return {
-        imported: data.charts?.length ?? 0,
+        imported: parsed.charts?.length ?? 0,
         errors: 0,
       };
     } catch (error) {

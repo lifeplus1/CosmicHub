@@ -1,48 +1,23 @@
 // apps/astro/src/types/astrology.types.ts
+// Re-exports from consolidated @cosmichub/types package
 
-export interface PlanetData {
-  name: string;
-  sign: string;
-  house: number;
-  degree: number;
-  aspects: Array<{ type: string; target: string; orb: number }>;
-}
-
-export interface AsteroidData {
-  name: string;
-  sign: string;
-  house: number;
-  degree: number;
-  aspects: Array<{ type: string; target: string; orb: number }>;
-}
-
-export interface AngleData {
-  name: string;
-  sign: string;
-  degree: number;
-}
-
-export interface HouseData {
-  number: number;
-  sign: string;
-  cusp: number;
-  planets: string[];
-}
-
-export interface AspectData {
-  planet1: string;
-  planet2: string;
-  type: string;
-  orb: number;
-  applying: boolean;
-}
-
-export interface ChartData {
-  planets: PlanetData[];
-  asteroids: AsteroidData[];
-  angles: AngleData[];
-  houses: HouseData[];
-  aspects: AspectData[];
-}
-
-export type ChartType = 'natal' | 'transit' | 'synastry';
+export type {
+  // App-specific data variants (with number house fields and boolean applying)
+  PlanetData,
+  AsteroidData, 
+  AngleData,
+  HouseData,
+  AspectData,
+  ChartData,
+  ChartType,
+  
+  // Core astrology entities (for compatibility)
+  Planet,
+  House,
+  Aspect,
+  Asteroid,
+  Angle,
+  AstrologyChart,
+  UserProfile,
+  NumerologyData,
+} from '@cosmichub/types';

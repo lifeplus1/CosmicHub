@@ -49,7 +49,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComp
 
   const totalSteps = 6;
 
-  const updateData = useCallback((field: keyof OnboardingData, value: any) => {
+  const updateData = useCallback((field: keyof OnboardingData, value: unknown) => {
     setOnboardingData(prev => ({
       ...prev,
       [field]: value

@@ -1,4 +1,5 @@
 import React from 'react';
+import { featureFlags } from '../../config/featureFlags';
 import * as Tabs from '@radix-ui/react-tabs';
 import type { MultiSystemChartData } from './types';
 import type { UnifiedBirthData } from '@cosmichub/types';
@@ -9,8 +10,8 @@ import MayanChart from './MayanChart';
 import UranianChart from './UranianChart';
 import SynthesisChart from './SynthesisChart';
 import SpiritualChart from './SpiritualChart';
+import PsychologyChart, { type PsychologyChartData } from './PsychologyChart';
 import TCMChart from './TCMChart';
-import PsychologyChart from './PsychologyChart';
 
 interface MultiSystemChartProps {
   chartData?: MultiSystemChartData;
@@ -18,6 +19,11 @@ interface MultiSystemChartProps {
   // showComparison prop reserved for future comparative views (currently unused)
   showComparison?: boolean;
   isLoading?: boolean;
+  /**
+   * Optional list of tab value ids to render (used when embedding a single-domain view like standalone TCM page)
+   * If omitted, all tabs are shown.
+   */
+  overrideVisibleTabs?: string[];
 }
 
 // Error Boundary Component
@@ -76,6 +82,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
   // maintain API surface while unused
   showComparison: _showComparison = false,
   isLoading = false,
+  overrideVisibleTabs,
 }) => {
   if (isLoading) {
     return (
@@ -163,62 +170,71 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
         </div>
 
         {/* Multi-System Tabs with Error Boundaries */}
-        <Tabs.Root defaultValue='western' className='w-full'>
+  <Tabs.Root defaultValue={overrideVisibleTabs?.[0] ?? 'western'} className='w-full'>
           <Tabs.List className='flex flex-wrap gap-2 mb-6 bg-cosmic-black/30 p-2 rounded-lg'>
-            <Tabs.Trigger
+      {(!overrideVisibleTabs || overrideVisibleTabs.includes('western')) && (
+      <Tabs.Trigger
               value='western'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               ♌ Western
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+      {(!overrideVisibleTabs || overrideVisibleTabs.includes('vedic')) && (
+      <Tabs.Trigger
               value='vedic'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               🕉️ Vedic
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+      {(!overrideVisibleTabs || overrideVisibleTabs.includes('chinese')) && (
+      <Tabs.Trigger
               value='chinese'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               🐉 Chinese
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+      {(!overrideVisibleTabs || overrideVisibleTabs.includes('mayan')) && (
+      <Tabs.Trigger
               value='mayan'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               🌞 Mayan
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+      {(!overrideVisibleTabs || overrideVisibleTabs.includes('uranian')) && (
+      <Tabs.Trigger
               value='uranian'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               ⚡ Uranian
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+            {(!overrideVisibleTabs || overrideVisibleTabs.includes('spiritual')) && (!featureFlags.deprecateMultiSystemTabs || overrideVisibleTabs) && (
+      <Tabs.Trigger
               value='spiritual'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               🔮 Spiritual
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+            {(!overrideVisibleTabs || overrideVisibleTabs.includes('tcm')) && (!featureFlags.deprecateMultiSystemTabs || overrideVisibleTabs) && (
+      <Tabs.Trigger
               value='tcm'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               🌿 TCM
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+            {(!overrideVisibleTabs || overrideVisibleTabs.includes('psychology')) && (!featureFlags.deprecateMultiSystemTabs || overrideVisibleTabs) && (
+      <Tabs.Trigger
               value='psychology'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               🧠 Psychology
-            </Tabs.Trigger>
-            <Tabs.Trigger
+      </Tabs.Trigger>)}
+      {(!overrideVisibleTabs || overrideVisibleTabs.includes('synthesis')) && (
+      <Tabs.Trigger
               value='synthesis'
               className='flex-1 min-w-fit py-2 px-4 rounded-md text-sm font-medium transition-all data-[state=active]:bg-cosmic-purple/30 data-[state=active]:text-cosmic-gold hover:bg-cosmic-purple/10 text-cosmic-silver'
             >
               ⚖️ Synthesis
-            </Tabs.Trigger>
+      </Tabs.Trigger>)}
           </Tabs.List>          <Tabs.Content value='western' className='pt-4'>
             <ChartErrorBoundary>
               <WesternChart data={displayData.western_tropical} />
@@ -249,7 +265,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
             </ChartErrorBoundary>
           </Tabs.Content>
 
-          <Tabs.Content value='spiritual' className='pt-4'>
+          {(!overrideVisibleTabs || overrideVisibleTabs.includes('spiritual')) && (<Tabs.Content value='spiritual' className='pt-4'>
             <ChartErrorBoundary>
               <SpiritualChart
                 chartData={displayData.spiritual_systems ?? {}}
@@ -257,33 +273,33 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
                 isLoading={false}
               />
             </ChartErrorBoundary>
-          </Tabs.Content>
+          </Tabs.Content>)}
 
-          <Tabs.Content value='tcm' className='pt-4'>
+          {(!overrideVisibleTabs || overrideVisibleTabs.includes('tcm')) && (<Tabs.Content value='tcm' className='pt-4'>
             <ChartErrorBoundary>
               <TCMChart
-                data={displayData.tcm as any ?? {}}
+                data={displayData.tcm ?? {}}
                 birthData={birthData}
                 isLoading={false}
               />
             </ChartErrorBoundary>
-          </Tabs.Content>
+          </Tabs.Content>)}
 
-          <Tabs.Content value='psychology' className='pt-4'>
+          {(!overrideVisibleTabs || overrideVisibleTabs.includes('psychology')) && (<Tabs.Content value='psychology' className='pt-4'>
             <ChartErrorBoundary>
               <PsychologyChart
-                data={displayData.psychology as any ?? {}}
+                data={displayData.psychology as PsychologyChartData}
                 birthData={birthData}
                 isLoading={false}
               />
             </ChartErrorBoundary>
-          </Tabs.Content>
+          </Tabs.Content>)}
 
-          <Tabs.Content value='synthesis' className='pt-4'>
+          {(!overrideVisibleTabs || overrideVisibleTabs.includes('synthesis')) && (<Tabs.Content value='synthesis' className='pt-4'>
             <ChartErrorBoundary>
               <SynthesisChart data={displayData.synthesis ?? {}} />
             </ChartErrorBoundary>
-          </Tabs.Content>
+          </Tabs.Content>)}
         </Tabs.Root>
 
         {/* Footer with methodology */}

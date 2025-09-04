@@ -4,7 +4,7 @@ This document outlines the new organized structure of the UI component library a
 
 ## 📁 New Folder Structure
 
-```
+```text
 packages/ui/src/components/
 ├── ui/                     # Base UI primitives
 ├── feedback/               # User feedback & error states  

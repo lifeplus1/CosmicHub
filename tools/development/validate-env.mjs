@@ -98,7 +98,11 @@ try {
       }
     }
   }
-} catch {}
+} catch (e) {
+  if (process.env.DEBUG_ENV_VALIDATION) {
+    console.warn('Env validation optional server compare failed:', e);
+  }
+}
 
 // 1. Required public vars
 for (const k of requiredPublic) {

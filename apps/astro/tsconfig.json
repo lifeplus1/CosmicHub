@@ -23,7 +23,7 @@
       "@cosmichub/analytics": ["../../packages/analytics/src"]
     }
   },
-  "include": ["src", "types", "src/**/*", "src/__tests__/**/*"],
+  "include": ["src", "types", "src/**/*", "src/__tests__/**/*", "src/test-utils/**/*"],
   "exclude": ["**/*.refactor_attempt.*", "**/*.backup.*", "**/*.old.*"],
   "references": [
     { "path": "../../packages/auth" },

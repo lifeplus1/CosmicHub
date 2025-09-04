@@ -17,12 +17,12 @@ import { devConsole, isDevelopment } from './config/environment';
 // } from '@cosmichub/pwa';
 
 // Placeholder functions for disabled PWA
-const sharedInitPWA = (_options?: any) => {};
+const sharedInitPWA = (_options?: Record<string, unknown>) => {};
 const initMobileUX = () => ({ dispose: () => {} });
 const detectRuntimeCapabilities = () => ({ platform: 'other', isStandalone: false });
 const showUpdateBanner = (_message?: string) => {};
-const showInstallBanner = (_copy?: any) => {};
-const createEngagementGate = (_options?: any) => ({ 
+const showInstallBanner = (_copy?: Record<string, unknown>) => {};
+const createEngagementGate = (_options?: Record<string, unknown>) => ({ 
   isEligible: () => false, 
   markDismissed: () => {},
   getState: () => ({ pageViews: 0, firstSeen: Date.now() })

@@ -1,5 +1,6 @@
 import { AdaptiveUIState, LearningPattern, UserPreference } from './types';
 import { UserBehaviorTracker } from './behavior-tracker';
+import { EngagementMetrics } from './metrics';
 
 /**
  * Manages adaptive UI state based on user behavior and preferences
@@ -121,7 +122,7 @@ export class AdaptiveUIManager {
    * Determine optimal layout complexity based on user experience
    */
   private determineLayoutComplexity(
-    metrics: any,
+    metrics: EngagementMetrics,
     learningPattern: LearningPattern
   ): 'minimal' | 'standard' | 'detailed' {
     // New users start with minimal
@@ -146,7 +147,7 @@ export class AdaptiveUIManager {
    */
   private determineNavigationStyle(
     learningPattern: LearningPattern,
-    metrics: any
+    metrics: EngagementMetrics
   ): 'guided' | 'freeform' | 'expert' {
     // Sequential learners prefer guided navigation
     if (learningPattern.patterns.informationProcessing === 'sequential') {
@@ -180,7 +181,7 @@ export class AdaptiveUIManager {
    */
   private determineContentDepth(
     preferences: UserPreference,
-    metrics: any
+    metrics: EngagementMetrics
   ): 'overview' | 'balanced' | 'comprehensive' {
     // Respect user's complexity preference
     if (preferences.preferences.complexity === 'beginner') return 'overview';
@@ -198,7 +199,7 @@ export class AdaptiveUIManager {
    */
   private determineVisualDensity(
     learningPattern: LearningPattern,
-    metrics: any
+    metrics: EngagementMetrics
   ): 'spacious' | 'normal' | 'compact' {
     // Fast feature adoption suggests comfort with density
     if (
@@ -223,7 +224,7 @@ export class AdaptiveUIManager {
    */
   private determineInteractionStyle(
     learningPattern: LearningPattern,
-    metrics: any
+    metrics: EngagementMetrics
   ): 'tooltips' | 'inline' | 'discovery' {
     // New users need tooltips
     if (metrics.totalActions < 25) return 'tooltips';
@@ -249,7 +250,7 @@ export class AdaptiveUIManager {
    */
   private updateCustomizations(
     currentState: AdaptiveUIState,
-    metrics: any,
+    metrics: EngagementMetrics,
     preferences: UserPreference
   ): AdaptiveUIState['customizations'] {
     const { customizations } = currentState;
@@ -280,7 +281,7 @@ export class AdaptiveUIManager {
    */
   private updateLearningProgress(
     currentState: AdaptiveUIState,
-    metrics: any,
+    metrics: EngagementMetrics,
     learningPattern: LearningPattern
   ): AdaptiveUIState['learningProgress'] {
     const { learningProgress } = currentState;
@@ -316,7 +317,7 @@ export class AdaptiveUIManager {
 
   // Helper methods for customization updates
   private updatePreferredWidgets(
-    metrics: any,
+    metrics: EngagementMetrics,
     preferences: UserPreference
   ): string[] {
     const widgets = ['daily_insight'];
@@ -340,7 +341,7 @@ export class AdaptiveUIManager {
     return [...new Set(widgets)]; // Remove duplicates
   }
 
-  private updateQuickActions(metrics: any): string[] {
+  private updateQuickActions(metrics: EngagementMetrics): string[] {
     const baseActions = ['generate_chart'];
 
     // Add most-used features as quick actions
@@ -361,10 +362,10 @@ export class AdaptiveUIManager {
   }
 
   private updateDashboardLayout(
-    currentLayout: Record<string, any>,
-    metrics: any,
+    currentLayout: Record<string, unknown>,
+    metrics: EngagementMetrics,
     preferences: UserPreference
-  ): Record<string, any> {
+  ): Record<string, unknown> {
     // Start with current layout or default
     const layout = { ...currentLayout };
 
@@ -384,7 +385,7 @@ export class AdaptiveUIManager {
     return layout;
   }
 
-  private identifyMasteredFeatures(metrics: any): string[] {
+  private identifyMasteredFeatures(metrics: EngagementMetrics): string[] {
     const mastered: string[] = [];
 
     // Features used frequently are considered mastered
@@ -406,7 +407,7 @@ export class AdaptiveUIManager {
   }
 
   private identifyStrugglingAreas(
-    metrics: any,
+    metrics: EngagementMetrics,
     learningPattern: LearningPattern
   ): string[] {
     const struggling: string[] = [];
@@ -430,7 +431,7 @@ export class AdaptiveUIManager {
   }
 
   private generateNextSteps(
-    metrics: any,
+    metrics: EngagementMetrics,
     learningPattern: LearningPattern,
     masteredFeatures: string[]
   ): string[] {

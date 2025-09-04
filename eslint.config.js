@@ -15,6 +15,9 @@ export default [
       // Build artifacts and dependencies
       '**/node_modules/**',
       '**/dist/**',
+  // Built test distributions
+  '**/test-dist/**',
+  '**/dist-test/**',
       '**/build/**',
       '**/coverage/**',
       '**/.next/**',
@@ -63,6 +66,9 @@ export default [
       '**/temp/**',
       '**/cache/**',
       '**/logs/**',
+      
+      // Test results and report files
+      '**/test-results-temp/**',
 
       // Additional build artifacts
       '**/storybook-static/**',
@@ -90,10 +96,11 @@ export default [
   // Stricter test files configuration with full type-aware rules
   {
     files: [
-      '**/*.spec.{ts,tsx,js,jsx}',
-      '**/*.test.{ts,tsx,js,jsx}',
-      '**/tests/**/*.{ts,tsx,js,jsx}',
-      '**/__tests__/**/*.{ts,tsx,js,jsx}',
+  // Restrict to TS test files only so type-aware rules don't run on JS build artifacts
+  '**/*.spec.{ts,tsx}',
+  '**/*.test.{ts,tsx}',
+  '**/tests/**/*.{ts,tsx}',
+  '**/__tests__/**/*.{ts,tsx}',
     ],
     languageOptions: {
       parser: tsparser,
@@ -164,7 +171,21 @@ export default [
     ],
     languageOptions: {
       parser: tsparser,
-      globals: { ...globals.browser, ...globals.jest, ...globals.node },
+      globals: { 
+        ...globals.browser, 
+        ...globals.jest, 
+        ...globals.node,
+        // Vitest globals
+        vi: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+      },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',

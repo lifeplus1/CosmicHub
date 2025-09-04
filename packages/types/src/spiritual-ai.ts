@@ -121,6 +121,28 @@ export interface SpiritualTiming {
   next_significant_date?: string;
 }
 
+// Added structured supporting types (replacing previous any[] usages)
+export interface TransitEvent {
+  planet: string;           // e.g. 'mars'
+  aspect?: string;          // aspect type if relevant
+  orb?: number;             // degrees of separation
+  timing_window?: string;   // textual timing descriptor
+  strength?: number;        // optional computed strength 0-100
+}
+
+export interface PatternHistoryEntry {
+  date: string;             // ISO date
+  themes: string[];         // recurring thematic tags
+  practices: string[];      // practices performed
+  insights: string[];       // notable insights captured
+}
+
+export interface CurrentPatternContext {
+  transits: TransitEvent[];       // current relevant transits
+  spiritual_focus: string[];      // active focus areas user selected
+  life_events: string[];          // recent life event descriptors
+}
+
 // Main AI service interface following Grok's recommendations
 export interface SpiritualAIService {
   // Cross-system synthesis
@@ -142,7 +164,7 @@ export interface SpiritualAIService {
     context: {
       user_profile: UserProfile;
       birth_data: SynthesisInput['birth_data'];
-      current_transits: any[];
+      current_transits: TransitEvent[];
     }
   ): Promise<Record<string, number>>;
 
@@ -154,11 +176,7 @@ export interface SpiritualAIService {
       practices: string[];
       insights: string[];
     }>,
-    currentAnalysis: {
-      transits: any[];
-      spiritual_focus: string[];
-      life_events: string[];
-    }
+  currentAnalysis: CurrentPatternContext
   ): Promise<PatternAnalysis>;
 
   // Practice recommendations
@@ -211,7 +229,7 @@ export interface SpiritualAIResponse<T> {
 export interface SpiritualAIError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   suggestions?: string[];
 }
 
@@ -258,7 +276,10 @@ export interface UseSpiritualAI {
     data: PatternAnalysis | null;
     loading: boolean;
     error: SpiritualAIError | null;
-    analyzePatterns: (history: any[], current: any) => Promise<void>;
+    analyzePatterns: (
+      history: PatternHistoryEntry[],
+      current: CurrentPatternContext
+    ) => Promise<void>;
   };
 
   config: SpiritualAIConfig;

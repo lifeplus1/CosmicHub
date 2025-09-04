@@ -8,13 +8,13 @@ import hashlib
 import os
 import time
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict
 
 from fastapi import HTTPException, Request, status
 
 # Redis configuration with fallback
-redis_client: Optional["redis.Redis"] = None
-redis_available = False
+redis_client: Optional["redis.Redis"] = None  # type: ignore[name-defined]
+redis_available: bool = False
 
 try:
     import redis  # type: ignore
@@ -27,7 +27,13 @@ except Exception:
     redis_available = False
 
 # In-memory fallback
-_rate_limit_store: Dict[str, List[float]] = defaultdict(list)
+_rate_limit_store: Dict[str, List[int]] = defaultdict(list)
+
+class LimitConfig(TypedDict):
+    requests: int
+    window: int  # seconds
+
+LimitsMap = Dict[str, LimitConfig]
 
 
 class EnhancedRateLimiter:
@@ -36,13 +42,13 @@ class EnhancedRateLimiter:
     Implements sliding window algorithm with Redis backing
     """
 
-    def __init__(self):
-        # Rate limits per endpoint type (requests per minute)
-        self.limits = {
-            "auth": {"requests": 10, "window": 900},      # 10 requests per 15 minutes  # noqa: E501
-            "heavy": {"requests": 20, "window": 3600},    # 20 requests per hour (calculations)  # noqa: E501
-            "medium": {"requests": 100, "window": 3600},   # 100 requests per hour (API calls)  # noqa: E501
-            "light": {"requests": 1000, "window": 3600},  # 1000 requests per hour (health checks)  # noqa: E501
+    def __init__(self) -> None:
+        # Rate limits per endpoint type (requests per window)
+        self.limits: LimitsMap = {
+            "auth": {"requests": 10, "window": 900},      # 15 minutes
+            "heavy": {"requests": 20, "window": 3600},    # 1 hour
+            "medium": {"requests": 100, "window": 3600},  # 1 hour
+            "light": {"requests": 1000, "window": 3600},  # 1 hour
         }
 
     def get_endpoint_category(self, path: str) -> str:
@@ -59,12 +65,10 @@ class EnhancedRateLimiter:
     def get_rate_limit_key(self, request: Request, user_id: Optional[str] = None) -> str:  # noqa: E501
         """Create rate limiting key with IP and user context"""
         ip = self._get_client_ip(request)
-  # noqa: E114, W293
         if user_id:
             # Hash user ID for privacy
             user_hash = hashlib.sha256(user_id.encode()).hexdigest()[:16]
             return f"rate_limit:user:{user_hash}:{ip}"
-  # noqa: E114, W293
         return f"rate_limit:ip:{ip}"
 
     def _get_client_ip(self, request: Request) -> str:
@@ -73,11 +77,9 @@ class EnhancedRateLimiter:
         forwarded_for = request.headers.get("X-Forwarded-For")
         if forwarded_for:
             return forwarded_for.split(",")[0].strip()
-  # noqa: E114, W293
         real_ip = request.headers.get("X-Real-IP")
         if real_ip:
             return real_ip
-  # noqa: E114, W293
         # Fallback to direct connection
         return request.client.host if request.client else "unknown"
 
@@ -85,30 +87,24 @@ class EnhancedRateLimiter:
         """Check if request is within rate limits"""
         category = self.get_endpoint_category(request.url.path)
         limit_config = self.limits[category]
-  # noqa: E114, W293
         key = self.get_rate_limit_key(request, user_id)
-  # noqa: E114, W293
         if redis_available and redis_client:
             await self._redis_rate_limit(key, limit_config, category)
         else:
             await self._memory_rate_limit(key, limit_config, category)
 
-    async def _redis_rate_limit(self, key: str, limit_config: Dict[str, int], category: str) -> None:  # noqa: E501
+    async def _redis_rate_limit(self, key: str, limit_config: LimitConfig, category: str) -> None:  # noqa: E501
         """Redis-based rate limiting with sliding window"""
         if not redis_client:
             await self._memory_rate_limit(key, limit_config, category)
             return
-  # noqa: E114, W293
         try:
             current_time = int(time.time())
             window_start = current_time - limit_config["window"]
-  # noqa: E114, W293
             # Remove old entries
             redis_client.zremrangebyscore(key, "-inf", window_start)  # type: ignore  # noqa: E501
-  # noqa: E114, W293
             # Count current requests
             current_count = int(redis_client.zcard(key))  # type: ignore
-  # noqa: E114, W293
             if current_count >= limit_config["requests"]:
                 remaining_time = redis_client.zrange(key, 0, 0, withscores=True)  # type: ignore  # noqa: E501
                 reset_time = current_time + limit_config["window"]
@@ -117,9 +113,7 @@ class EnhancedRateLimiter:
                         reset_time = int(remaining_time[0][1]) + limit_config["window"]  # type: ignore  # noqa: E501
                     except (IndexError, ValueError, TypeError):
                         pass
-  # noqa: E114, W293
                 retry_after = max(reset_time - current_time, 1)
-  # noqa: E114, W293
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                     detail=f"Rate limit exceeded for {category} endpoints. Try again in {retry_after} seconds.",  # noqa: E501
@@ -132,29 +126,25 @@ class EnhancedRateLimiter:
                 )
   # noqa: E114, W293
             # Add current request
-            redis_client.zadd(key, {f"{current_time}:{hash(key)}": current_time})  # type: ignore  # noqa: E501
+            redis_client.zadd(key, {f"{current_time}:{hash(key)}": float(current_time)})  # type: ignore  # noqa: E501
             redis_client.expire(key, limit_config["window"])  # type: ignore
-  # noqa: E114, W293
         except Exception:
             # Fallback to memory-based limiting if Redis fails
             await self._memory_rate_limit(key, limit_config, category)
 
-    async def _memory_rate_limit(self, key: str, limit_config: Dict[str, int], category: str) -> None:  # noqa: E501
+    async def _memory_rate_limit(self, key: str, limit_config: LimitConfig, category: str) -> None:  # noqa: E501
         """In-memory rate limiting fallback"""
-        current_time = time.time()
-        window_start = current_time - limit_config["window"]
-  # noqa: E114, W293
+        current_time: int = int(time.time())
+        window_start: int = current_time - limit_config["window"]
         # Clean old entries
         _rate_limit_store[key] = [
             timestamp for timestamp in _rate_limit_store[key]  # noqa: W291
             if timestamp > window_start
         ]
-  # noqa: E114, W293
         if len(_rate_limit_store[key]) >= limit_config["requests"]:
             oldest_request = min(_rate_limit_store[key]) if _rate_limit_store[key] else current_time  # noqa: E501
             retry_after = int(oldest_request + limit_config["window"] - current_time)  # noqa: E501
             retry_after = max(retry_after, 1)
-  # noqa: E114, W293
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail=f"Rate limit exceeded for {category} endpoints. Try again in {retry_after} seconds.",  # noqa: E501
@@ -165,7 +155,7 @@ class EnhancedRateLimiter:
                     "X-RateLimit-Reset": str(int(oldest_request + limit_config["window"])),  # noqa: E501
                 },
             )
-  # noqa: E114, W293
+        
         # Add current request
         _rate_limit_store[key].append(current_time)
 
@@ -174,16 +164,13 @@ class EnhancedRateLimiter:
         category = self.get_endpoint_category(request.url.path)
         limit_config = self.limits[category]
         key = self.get_rate_limit_key(request, user_id)
-  # noqa: E114, W293
         if redis_available and redis_client:
             try:
                 current_time = int(time.time())
                 window_start = current_time - limit_config["window"]
-  # noqa: E114, W293
                 # Clean and count
                 redis_client.zremrangebyscore(key, "-inf", window_start)  # type: ignore  # noqa: E501
                 current_count = redis_client.zcard(key)  # type: ignore
-  # noqa: E114, W293
                 return {
                     "limit": limit_config["requests"],
                     "remaining": max(limit_config["requests"] - int(current_count), 0),  # type: ignore  # noqa: E501
@@ -192,20 +179,17 @@ class EnhancedRateLimiter:
                 }
             except Exception:
                 pass
-  # noqa: E114, W293
         # Memory fallback
-        current_time = time.time()
+        current_time = int(time.time())
         window_start = current_time - limit_config["window"]
-  # noqa: E114, W293
         current_requests = [
             timestamp for timestamp in _rate_limit_store[key]  # noqa: W291
             if timestamp > window_start
         ]
-  # noqa: E114, W293
         return {
             "limit": limit_config["requests"],
             "remaining": max(limit_config["requests"] - len(current_requests), 0),  # noqa: E501
-            "reset": int(current_time + limit_config["window"]),
+            "reset": current_time + limit_config["window"],
             "category": category,
         }
 

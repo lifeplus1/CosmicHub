@@ -1,0 +1,20 @@
+name: Duplicate Implementation Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main ]
+
+jobs:
+  duplicates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Run duplicate detector
+        run: |
+          python tools/maintenance/detect-duplicates.py || echo "Duplicates found (non-blocking for now)"

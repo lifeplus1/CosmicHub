@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
+  "pythonVersion": "3.11",
+  "venvPath": "backend/.venv",
+  "venv": ".venv",
+  "include": ["backend"],
+  "exclude": ["**/tests", "**/__pycache__", "backend/tests"],
+  "stubPath": "typings",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "typeCheckingMode": "basic",
+  "executionEnvironments": [
+    {
+      "root": "backend",
+      "pythonVersion": "3.11",
+      "extraPaths": ["backend"]
+    }
+  ],
+  "strict": [
+    "backend/security",
+    "backend/analytics/custom_analytics.py",
+    "backend/analytics/websocket_handler.py",
+    "backend/routers/synastry.py",
+    "backend/api/bridges"
+  ]
+}

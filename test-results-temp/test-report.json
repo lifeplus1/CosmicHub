@@ -4,18 +4,18 @@
     "passed": 1,
     "failed": 0,
     "skipped": 0,
-    "duration": 8.359249999999975,
+    "duration": 8.418583000000126,
     "coverage": {
-      "overall": 91.67303761511832,
-      "statements": 92.27807317666982,
-      "branches": 90.8621800913694,
-      "functions": 94.28603700611313,
-      "lines": 89.26586018632095
+      "overall": 91.32466970792073,
+      "statements": 91.48162617224763,
+      "branches": 90.23483981325623,
+      "functions": 90.79664840897074,
+      "lines": 92.78556443720832
     },
     "performance": {
-      "averageRenderTime": 7.178332999999839,
-      "maxRenderTime": 7.178332999999839,
-      "totalMemoryUsage": 26208
+      "averageRenderTime": 6.867792000000009,
+      "maxRenderTime": 6.867792000000009,
+      "totalMemoryUsage": 26016
     },
     "accessibility": {
       "totalViolations": 0,
@@ -32,17 +32,17 @@
     {
       "suite": "alpha",
       "status": "passed",
-      "duration": 7.690458000000035,
+      "duration": 7.765083999999888,
       "coverage": {
-        "statements": 92.27807317666982,
-        "branches": 90.8621800913694,
-        "functions": 94.28603700611313,
-        "lines": 89.26586018632095
+        "statements": 91.48162617224763,
+        "branches": 90.23483981325623,
+        "functions": 90.79664840897074,
+        "lines": 92.78556443720832
       },
       "performance": {
-        "renderTime": 7.178332999999839,
+        "renderTime": 6.867792000000009,
         "mountTime": 0,
-        "memoryUsage": 26208
+        "memoryUsage": 26016
       },
       "accessibility": {
         "violations": [],
@@ -56,17 +56,21 @@
       },
       "errors": [],
       "metadata": {
-        "timestamp": "2025-09-03T05:47:24.945Z",
+        "timestamp": "2025-09-04T02:22:32.511Z",
         "nodeVersion": "v24.4.1",
         "platform": "darwin"
       }
     }
   ],
-  "timestamp": "2025-09-03T05:47:24.951Z",
+  "timestamp": "2025-09-04T02:22:32.527Z",
   "config": {
     "coverage": {
       "threshold": 80,
-      "exclude": ["node_modules", "dist", "**/*.d.ts"]
+      "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.d.ts"
+      ]
     },
     "performance": {
       "maxRenderTime": 16,

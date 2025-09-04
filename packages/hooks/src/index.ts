@@ -24,3 +24,25 @@ export type {
   ChartData as ValidationChartData,
   UseStateValidationOptions,
 } from './useStateValidation';
+
+// Spiritual hooks (migrated)
+export {
+  useSpiritualAI,
+  useSpiritualSynthesis,
+  useLearningPath as useSpiritualLearningPath,
+  usePatternAnalysis,
+  useSpiritualAIOptimized,
+} from './spiritual/useSpiritualAI';
+export {
+  useSpiritualPractices,
+  usePathworking,
+  useTarotMeditation,
+  useHebrewLetters,
+  useDailyRoutine,
+  usePracticeSafety,
+  useSessionTimeout,
+} from './spiritual/useSpiritualPractices';
+export {
+  SpiritualEducationProvider,
+  useSpiritualEducation,
+} from './spiritual/useSpiritualEducation';

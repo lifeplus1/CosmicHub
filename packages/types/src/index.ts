@@ -186,6 +186,8 @@ export interface UsageLimits {
 }
 
 // Export all types - chart, user, subscription, experiment, and psychology types
+// Astrology structural entities (Planet, House, Aspect, PlanetData, ChartData, etc.)
+// Exposed for consolidated import usage in tests and application modules.
 export * from './astrology.types';
 export * from './psychology.types';
 export * from './psychology-ui.types';
@@ -196,3 +198,53 @@ export * from './utility';
 export * from './experiments';
 export * from './experiment-validators';
 export * from './spiritual-education';
+// Explicit re-exports for spiritual domains (avoid wildcard collisions)
+export type {
+  SpiritualLevel as SpiritualPracticeLevel,
+  PracticeType,
+  SafetyStatus,
+  PathworkingSessionRequest,
+  PathworkingResponse,
+  TarotMeditationRequest,
+  TarotMeditationResponse,
+  HebrewLetterRequest,
+  HebrewLetterResponse,
+  DailyRoutineRequest,
+  DailyRoutineResponse,
+  PracticeReadinessRequest,
+  PracticeReadinessAssessment,
+  SafetyCheckRequest,
+  SafetyCheckResponse,
+  StartSessionRequest,
+  SessionStartResponse,
+  CompleteSessionRequest,
+  SessionCompletionResponse,
+  UserProgress as SpiritualPracticeUserProgress,
+  TreePathsResource,
+  HebrewLettersResource,
+  UseSpiritualPracticesResult,
+} from './spiritual-practices';
+
+// Spiritual AI domain explicit re-exports (avoid enum name collision with practices SpiritualLevel)
+export type {
+  SpiritualLevel as SpiritualAILevel,
+  SynthesisInput,
+  SynthesisOutput,
+  LearningPath,
+  PatternAnalysis,
+  UserProfile as SpiritualAIUserProfile,
+  CurrentKnowledge,
+  CorrespondenceWeight,
+  SpiritualPractice,
+  DevelopmentCycle,
+  SpiritualTiming,
+  SpiritualAIService,
+  SpiritualSynthesisProps,
+  LearningPathProps,
+  PatternAnalysisProps,
+  SpiritualAIResponse,
+  SpiritualAIError,
+  SpiritualAIConfig,
+  SpiritualInsightUpdate,
+  UseSpiritualAI,
+} from './spiritual-ai';

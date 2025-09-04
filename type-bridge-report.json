@@ -1,0 +1,636 @@
+{
+  "timestamp": "2025-09-03T23:43:29.695867+00:00",
+  "typescript_types": {
+    "WuXingElement": {
+      "name": {
+        "type": "string",
+        "optional": false
+      },
+      "chineseName": {
+        "type": "string",
+        "optional": false
+      },
+      "season": {
+        "type": "string",
+        "optional": false
+      },
+      "organ": {
+        "type": "string",
+        "optional": false
+      },
+      "emotion": {
+        "type": "string",
+        "optional": false
+      },
+      "balanceLevel": {
+        "type": "'high' | 'medium' | 'low'",
+        "optional": false
+      },
+      "percentage": {
+        "type": "number",
+        "optional": false
+      },
+      "characteristics": {
+        "type": "string[]",
+        "optional": false
+      },
+      "vulnerabilities": {
+        "type": "string[]",
+        "optional": false
+      },
+      "balancing_elements": {
+        "type": "string[]",
+        "optional": false
+      },
+      "recommendations": {
+        "type": "string[]",
+        "optional": false
+      }
+    },
+    "TCMConstitutionType": {
+      "name": {
+        "type": "string",
+        "optional": false
+      },
+      "description": {
+        "type": "string",
+        "optional": false
+      },
+      "characteristics": {
+        "type": "string[]",
+        "optional": false
+      },
+      "vulnerabilities": {
+        "type": "string[]",
+        "optional": false
+      },
+      "season": {
+        "type": "string",
+        "optional": true
+      },
+      "organ": {
+        "type": "string",
+        "optional": true
+      },
+      "emotion": {
+        "type": "string",
+        "optional": true
+      },
+      "recommendations": {
+        "type": "string[]",
+        "optional": true
+      }
+    },
+    "TCMAnalysisData": {
+      "primary_type": {
+        "type": "TCMConstitutionType",
+        "optional": false
+      },
+      "secondary_type": {
+        "type": "TCMConstitutionType",
+        "optional": true
+      },
+      "constitution_types": {
+        "type": "TCMConstitutionType[]",
+        "optional": true
+      },
+      "wuxing_elements": {
+        "type": "WuXingElement[]",
+        "optional": true
+      },
+      "balance_score": {
+        "type": "number",
+        "optional": true
+      },
+      "recommendations": {
+        "type": "string[]",
+        "optional": true
+      }
+    },
+    "OrganSystemBalance": {
+      "name": {
+        "type": "string",
+        "optional": false
+      },
+      "balance": {
+        "type": "number",
+        "optional": false
+      },
+      "season": {
+        "type": "string",
+        "optional": false
+      },
+      "element": {
+        "type": "string",
+        "optional": false
+      },
+      "characteristics": {
+        "type": "string[]",
+        "optional": false
+      },
+      "vulnerabilities": {
+        "type": "string[]",
+        "optional": false
+      }
+    },
+    "MeridianFlowData": {
+      "name": {
+        "type": "string",
+        "optional": false
+      },
+      "timeWindow": {
+        "type": "string",
+        "optional": false
+      },
+      "energy_level": {
+        "type": "number",
+        "optional": false
+      },
+      "blockages": {
+        "type": "string[]",
+        "optional": true
+      },
+      "flow_direction": {
+        "type": "'ascending' | 'descending' | 'circular'",
+        "optional": false
+      }
+    },
+    "ElementInfo": {
+      "season": {
+        "type": "string",
+        "optional": true
+      },
+      "organ_yin": {
+        "type": "string",
+        "optional": true
+      },
+      "organ_yang": {
+        "type": "string",
+        "optional": true
+      },
+      "emotion_balanced": {
+        "type": "string",
+        "optional": true
+      },
+      "emotion_imbalanced": {
+        "type": "string",
+        "optional": true
+      },
+      "planets": {
+        "type": "string[]",
+        "optional": true
+      },
+      "hours": {
+        "type": "Record<string, string | number>",
+        "optional": true
+      }
+    },
+    "ElementalBalance": {
+      "wood": {
+        "type": "number",
+        "optional": false
+      },
+      "fire": {
+        "type": "number",
+        "optional": false
+      },
+      "earth": {
+        "type": "number",
+        "optional": false
+      },
+      "metal": {
+        "type": "number",
+        "optional": false
+      },
+      "water": {
+        "type": "number",
+        "optional": false
+      }
+    },
+    "ConstitutionAnalysis": {
+      "constitutional_type": {
+        "type": "string",
+        "optional": true
+      },
+      "constitution_traits": {
+        "type": "string[]",
+        "optional": true
+      },
+      "primary_element": {
+        "type": "string",
+        "optional": true
+      },
+      "element_strength": {
+        "type": "number",
+        "optional": true
+      }
+    },
+    "TCMCalculationData": {
+      "primary_element": {
+        "type": "string",
+        "optional": true
+      },
+      "elemental_balance": {
+        "type": "Record<string, number>",
+        "optional": true
+      },
+      "constitution_analysis": {
+        "type": "ConstitutionAnalysis",
+        "optional": true
+      },
+      "analysis_confidence": {
+        "type": "number",
+        "optional": true
+      },
+      "dietary_recommendations": {
+        "type": "string[]",
+        "optional": true
+      },
+      "lifestyle_recommendations": {
+        "type": "string[]",
+        "optional": true
+      },
+      "seasonal_guidance": {
+        "type": "Record<string, string | number>",
+        "optional": true
+      }
+    },
+    "TCMResponse": {
+      "success": {
+        "type": "boolean",
+        "optional": false
+      },
+      "data": {
+        "type": "TCMCalculationData",
+        "optional": false
+      },
+      "calculation_method": {
+        "type": "string",
+        "optional": false
+      },
+      "processing_time_ms": {
+        "type": "number",
+        "optional": false
+      },
+      "api_version": {
+        "type": "string",
+        "optional": false
+      },
+      "generated_at": {
+        "type": "string",
+        "optional": false
+      },
+      "includes_detailed_analysis": {
+        "type": "boolean",
+        "optional": false
+      }
+    },
+    "TCMRequest": {
+      "year": {
+        "type": "number",
+        "optional": false
+      },
+      "month": {
+        "type": "number",
+        "optional": false
+      },
+      "day": {
+        "type": "number",
+        "optional": false
+      },
+      "hour": {
+        "type": "number",
+        "optional": true
+      },
+      "minute": {
+        "type": "number",
+        "optional": true
+      },
+      "lat": {
+        "type": "number",
+        "optional": true
+      },
+      "lon": {
+        "type": "number",
+        "optional": true
+      },
+      "timezone": {
+        "type": "string",
+        "optional": true
+      },
+      "user_id": {
+        "type": "string",
+        "optional": true
+      },
+      "include_detailed_analysis": {
+        "type": "boolean",
+        "optional": true
+      }
+    },
+    "ElementalBalanceResponse": {
+      "wood": {
+        "type": "number",
+        "optional": false
+      },
+      "fire": {
+        "type": "number",
+        "optional": false
+      },
+      "earth": {
+        "type": "number",
+        "optional": false
+      },
+      "metal": {
+        "type": "number",
+        "optional": false
+      },
+      "water": {
+        "type": "number",
+        "optional": false
+      }
+    },
+    "ConstitutionAnalysisResponse": {
+      "primary_element": {
+        "type": "string",
+        "optional": false
+      },
+      "secondary_element": {
+        "type": "string",
+        "optional": true
+      },
+      "constitutional_type": {
+        "type": "string",
+        "optional": false
+      },
+      "element_strength": {
+        "type": "number",
+        "optional": false
+      },
+      "constitution_traits": {
+        "type": "string[]",
+        "optional": false
+      }
+    },
+    "HealthRecommendationsResponse": {
+      "element": {
+        "type": "string",
+        "optional": false
+      },
+      "dietary_recommendations": {
+        "type": "string[]",
+        "optional": false
+      },
+      "lifestyle_recommendations": {
+        "type": "string[]",
+        "optional": false
+      },
+      "optimal_season": {
+        "type": "string",
+        "optional": false
+      },
+      "balanced_emotion": {
+        "type": "string",
+        "optional": false
+      },
+      "dominant_organs": {
+        "type": "string[]",
+        "optional": false
+      },
+      "generated_at": {
+        "type": "string",
+        "optional": false
+      }
+    },
+    "ElementInfoResponse": {
+      "element": {
+        "type": "string",
+        "optional": false
+      },
+      "season": {
+        "type": "string",
+        "optional": true
+      },
+      "organs": {
+        "type": "{\n    yin?: string",
+        "optional": false
+      },
+      "yang": {
+        "type": "string",
+        "optional": true
+      }
+    },
+    "TCMHealthCheck": {
+      "service": {
+        "type": "string",
+        "optional": false
+      },
+      "status": {
+        "type": "'healthy' | 'unhealthy'",
+        "optional": false
+      },
+      "engine_available": {
+        "type": "boolean",
+        "optional": false
+      },
+      "version": {
+        "type": "string",
+        "optional": false
+      },
+      "timestamp": {
+        "type": "string",
+        "optional": false
+      }
+    }
+  },
+  "diffs": {
+    "WuXingElement": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "TCMConstitutionType": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "TCMAnalysisData": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "OrganSystemBalance": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "MeridianFlowData": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "ElementInfo": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [
+        "ElementInfo.hours/hours: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict"
+      ],
+      "optional_mismatches": [],
+      "status": "issues"
+    },
+    "ElementalBalance": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "ConstitutionAnalysis": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "TCMCalculationData": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [
+        "TCMCalculationData.seasonal_guidance/seasonal_guidance: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict"
+      ],
+      "optional_mismatches": [],
+      "status": "issues"
+    },
+    "TCMResponse": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "TCMRequest": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [
+        "TCMRequest.hour/hour: ts_optional=True py_optional=False",
+        "TCMRequest.include_detailed_analysis/include_detailed_analysis: ts_optional=True py_optional=False",
+        "TCMRequest.lat/lat: ts_optional=True py_optional=False",
+        "TCMRequest.lon/lon: ts_optional=True py_optional=False",
+        "TCMRequest.minute/minute: ts_optional=True py_optional=False",
+        "TCMRequest.timezone/timezone: ts_optional=True py_optional=False"
+      ],
+      "status": "ok"
+    },
+    "ElementalBalanceResponse": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [
+        "element_strength",
+        "elemental_balance",
+        "generated_at",
+        "primary_element",
+        "quick_analysis",
+        "success",
+        "user_id"
+      ],
+      "type_mismatches": [],
+      "optional_mismatches": [
+        "ElementalBalanceResponse.earth/earth: ts_optional=False py_optional=True",
+        "ElementalBalanceResponse.fire/fire: ts_optional=False py_optional=True",
+        "ElementalBalanceResponse.metal/metal: ts_optional=False py_optional=True",
+        "ElementalBalanceResponse.water/water: ts_optional=False py_optional=True",
+        "ElementalBalanceResponse.wood/wood: ts_optional=False py_optional=True"
+      ],
+      "status": "ok"
+    },
+    "ConstitutionAnalysisResponse": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "HealthRecommendationsResponse": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "ElementInfoResponse": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [
+        "emotions",
+        "generated_at",
+        "optimal_hours",
+        "planetary_influences"
+      ],
+      "type_mismatches": [
+        "ElementInfoResponse.organs/organs: ts={\n    yin?: string -> {\n    yin?: string vs py=Dict[str, Optional[str]] -> dict"
+      ],
+      "optional_mismatches": [],
+      "status": "issues"
+    },
+    "TCMHealthCheck": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "ok"
+    },
+    "TCMAnalysisResponse": {
+      "exists_in_python": true,
+      "missing_fields": [],
+      "extra_fields": [
+        "success",
+        "data",
+        "calculation_method",
+        "processing_time_ms",
+        "api_version",
+        "generated_at",
+        "includes_detailed_analysis"
+      ],
+      "type_mismatches": [],
+      "optional_mismatches": [],
+      "status": "python_only"
+    }
+  },
+  "issues": [
+    "Type mismatch ElementInfo.hours/hours: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict",
+    "Type mismatch TCMCalculationData.seasonal_guidance/seasonal_guidance: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict",
+    "Type mismatch ElementInfoResponse.organs/organs: ts={\n    yin?: string -> {\n    yin?: string vs py=Dict[str, Optional[str]] -> dict"
+  ],
+  "generated_models": [],
+  "updated_models": [],
+  "metrics": {
+    "total_interfaces": 16,
+    "models_with_issues": 3,
+    "issue_rate": 0.1875
+  },
+  "sync_status": "issues"
+}

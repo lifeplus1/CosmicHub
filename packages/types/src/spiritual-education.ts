@@ -114,7 +114,7 @@ export interface PracticeHistory {
 export interface UserAssessmentData {
   spiritual_background: SpiritualBackground;
   practice_history: PracticeHistory;
-  birth_chart_data?: any; // From existing astro system
+  birth_chart_data?: BirthChartData; // From existing astro system
   mentor_support: boolean;
   goals?: string[];
   time_availability?: number; // minutes per day
@@ -126,7 +126,7 @@ export interface SpiritualAssessmentResult {
   prerequisite_gaps: string[];
   recommended_pathway: SpiritualLevel;
   safety_clearance: boolean;
-  personalization_factors: Record<string, any>;
+  personalization_factors: PersonalizationFactorMap;
   detailed_scores: {
     meditation_readiness: number;
     traditional_understanding: number;
@@ -206,7 +206,7 @@ export interface PersonalizedCurriculum {
 
 export interface LessonResponse {
   written_response?: string;
-  practice_log?: Record<string, any>;
+  practice_log?: PracticeLogMap;
   meditation_notes?: string;
   insights?: string[];
   questions?: string[];
@@ -337,7 +337,7 @@ export interface MobileFeatures {
 // API RESPONSE TYPES
 // ============================================================================
 
-export interface SpiritualEducationResponse<T = any> {
+export interface SpiritualEducationResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -399,6 +399,25 @@ export interface CurriculumMetadata {
   mobile_optimizations: string[];
 }
 
+// Auxiliary types introduced to remove 'any'
+export interface BirthChartData {
+  sun_sign?: string;
+  moon_sign?: string;
+  ascendant?: string;
+  dominant_elements?: string[];
+  houses?: Record<string, string | number>;
+}
+
+export type PersonalizationFactorMap = Record<string, string | number | boolean | string[] | number[]>;
+
+export type PracticeLogMap = Record<string, string | number | boolean | string[] | number[] | undefined>;
+
+export interface RecentPracticeData {
+  lastPractices: Array<{ date: string; type: string; duration_minutes: number }>;
+  streak_days?: number;
+  anySafetyFlags?: boolean;
+}
+
 // ============================================================================
 // HOOK INTEGRATION TYPES
 // ============================================================================
@@ -419,7 +438,7 @@ export interface UseSpiritualEducation {
     error: string | null;
     generate: (
       assessment: SpiritualAssessmentResult,
-      birthChart?: any
+      birthChart?: BirthChartData
     ) => Promise<void>;
   };
 
@@ -463,7 +482,7 @@ export interface UseSpiritualEducation {
     assessment: SafetyAssessment | null;
     loading: boolean;
     error: string | null;
-    checkSafety: (userId: string, recentData: any) => Promise<void>;
+    checkSafety: (userId: string, recentData: RecentPracticeData) => Promise<void>;
   };
 }
 

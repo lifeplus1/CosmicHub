@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronDownIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
-import type { UnifiedBirthData, WuXingElement, TCMConstitutionType, MeridianFlowData, TCMAnalysisData } from '@cosmichub/types';
+import type { UnifiedBirthData } from '@cosmichub/types';
 import type { TCMChartData } from './types';
 import { AccessibleButton } from '@cosmichub/ui';
 
@@ -361,6 +361,14 @@ const ConstitutionSection: React.FC<{
   const primaryType = data.primary_type;
   const secondaryType = data.secondary_type;
 
+  if (!primaryType) {
+    return (
+      <div className='text-cosmic-silver text-center py-8'>
+        <p>Primary constitution type analysis not available</p>
+      </div>
+    );
+  }
+
   return (
     <div className='space-y-6'>
       {/* Primary Constitution */}
@@ -403,14 +411,14 @@ const ConstitutionSection: React.FC<{
             </div>
             
             <div>
-              <h4 className='text-blue-400 font-medium mb-2'>Balancing Elements</h4>
+              <h4 className='text-blue-400 font-medium mb-2'>Recommended Practices</h4>
               <div className='flex flex-wrap gap-2'>
-                {Array.isArray(primaryType.balancing_elements) && primaryType.balancing_elements.map((element: string, index: number) => (
+                {Array.isArray(primaryType.recommendations) && primaryType.recommendations.map((rec: string, index: number) => (
                   <span
                     key={index}
                     className='text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded'
                   >
-                    {element}
+                    {rec}
                   </span>
                 ))}
               </div>
@@ -598,7 +606,7 @@ const MeridianSection: React.FC<{
                     <div className="flex flex-col">
                       <span className="text-blue-300 font-medium">{meridian.name}</span>
                       <span className="text-xs text-cosmic-silver">
-                        {meridian.element} • {meridian.timeOfDay}
+                        Flow: {meridian.flow_direction} • {meridian.timeWindow}
                       </span>
                     </div>
                     
@@ -606,11 +614,11 @@ const MeridianSection: React.FC<{
                     <div className="flex items-center space-x-2">
                       <div className="w-16 bg-gray-700 rounded-full h-2 relative overflow-hidden">
                         <div
-                          className={`absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all duration-300 w-[${Math.min(100, Math.max(0, meridian.strength))}%]`}
-                          data-strength={meridian.strength}
+                          className={`absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all duration-300 w-[${Math.min(100, Math.max(0, meridian.energy_level))}%]`}
+                          data-strength={meridian.energy_level}
                         ></div>
                       </div>
-                      <span className="text-xs text-blue-400">{meridian.strength}%</span>
+                      <span className="text-xs text-blue-400">{meridian.energy_level}%</span>
                     </div>
                   </div>
                   
@@ -622,16 +630,31 @@ const MeridianSection: React.FC<{
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-cosmic-silver mb-2">
-                      <span className="text-blue-400 font-medium">Organ System:</span> {meridian.organSystem}
+                      <span className="text-blue-400 font-medium">Time Window:</span> {meridian.timeWindow}
                     </p>
                     <p className="text-cosmic-silver mb-2">
-                      <span className="text-blue-400 font-medium">Emotional Association:</span> {meridian.emotionalAssociation}
+                      <span className="text-blue-400 font-medium">Flow Direction:</span> {meridian.flow_direction}
                     </p>
                   </div>
                   <div>
-                    <p className="text-cosmic-silver">
-                      <span className="text-blue-400 font-medium">Astrological Correlation:</span> {meridian.astrologicalCorrelation}
+                    <p className="text-cosmic-silver mb-2">
+                      <span className="text-blue-400 font-medium">Energy Level:</span> {meridian.energy_level}%
                     </p>
+                    {meridian.blockages && meridian.blockages.length > 0 && (
+                      <div>
+                        <span className="text-blue-400 font-medium">Blockages:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {meridian.blockages.map((blockage, blockageIndex) => (
+                            <span
+                              key={blockageIndex}
+                              className="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded"
+                            >
+                              {blockage}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Accordion.Content>

@@ -65,6 +65,8 @@ export type {
 export { logger, silenceLogsForTests } from './utils/logger';
 // Feature keys (centralized identifiers)
 export * from './featureKeys';
+// Subscription tiers & helpers
+export * from './subscriptions';
 // Shared API utilities
 export * from './utils/api/error';
 export {

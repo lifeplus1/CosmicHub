@@ -37,7 +37,9 @@
       "@cosmichub/ui": ["packages/ui/dist"],
       "@cosmichub/frequency": ["packages/frequency/src"],
       "@cosmichub/integrations": ["packages/integrations/src"],
-      "@cosmichub/types": ["packages/types/dist"],
+  "@cosmichub/types": ["packages/types/src"],
+  "@cosmichub/types/spiritual-ai": ["packages/types/src/spiritual-ai.ts"],
+  "@cosmichub/types/spiritual-practices": ["packages/types/src/spiritual-practices.ts"],
       "@cosmichub/subscriptions": ["packages/subscriptions/dist"],
       "@cosmichub/*": ["packages/*/src"],
       "@cosmichub/config/*": ["packages/config/src/*"],
@@ -60,6 +62,10 @@
       "healwave/*": ["apps/healwave/src/*"]
     }
   },
-  "include": [],
+  "include": [
+    "packages/types/src/**/*.ts",
+    "packages/personalization/src/**/*.ts",
+    "packages/personalization/src/**/*.tsx"
+  ],
   "exclude": ["node_modules", "dist", ".turbo", "**/*.test.*", "**/*.spec.*"]
 }

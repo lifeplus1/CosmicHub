@@ -9,7 +9,7 @@ import os
 import sys
 
 # Add the project root to the Python path
-project_root = os.path.dirname(os.path.abspath(__file__))
+project_root: str = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
 # Now import and run the PRIV-006 implementation

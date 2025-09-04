@@ -135,6 +135,9 @@ importers:
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
+      react-test-renderer:
+        specifier: '18'
+        version: 18.3.1(react@18.3.1)
       storybook:
         specifier: 8.6.14
         version: 8.6.14(prettier@3.6.2)
@@ -718,16 +721,6 @@ importers:
         specifier: ^2.1.4
         version: 2.1.9(@types/node@20.19.11)(@vitest/ui@2.1.9)(jsdom@25.0.1)
 
-  packages/frequency:
-    dependencies:
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.2
-
   packages/hooks:
     dependencies:
       react:
@@ -828,26 +821,6 @@ importers:
     devDependencies:
       typescript:
         specifier: ^5.3.0
-        version: 5.9.2
-
-  packages/storage:
-    dependencies:
-      '@cosmichub/config':
-        specifier: workspace:*
-        version: link:../config
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.2
-
-  packages/subscriptions:
-    dependencies:
-      react:
-        specifier: ^18.0.0
-        version: 18.3.1
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
         version: 5.9.2
 
   packages/types:
@@ -3696,7 +3669,7 @@ packages:
       magic-string: 0.27.0
       react-docgen-typescript: 2.4.0(typescript@5.9.2)
       typescript: 5.9.2
-      vite: 5.4.19(@types/node@20.19.11)
+      vite: 5.4.19(@types/node@24.3.0)
     dev: true
 
   /@jridgewell/gen-mapping@0.3.13:
@@ -5544,7 +5517,7 @@ packages:
       browser-assert: 1.2.1
       storybook: 8.6.14(prettier@3.6.2)
       ts-dedent: 2.2.0
-      vite: 5.4.19(@types/node@20.19.11)
+      vite: 5.4.19(@types/node@24.3.0)
     dev: true
 
   /@storybook/components@8.6.14(storybook@8.6.14):
@@ -5670,7 +5643,7 @@ packages:
       resolve: 1.22.10
       storybook: 8.6.14(prettier@3.6.2)
       tsconfig-paths: 4.2.0
-      vite: 5.4.19(@types/node@20.19.11)
+      vite: 5.4.19(@types/node@24.3.0)
     transitivePeerDependencies:
       - rollup
       - supports-color
@@ -6148,6 +6121,7 @@ packages:
     resolution: {integrity: sha512-uug3FEEGv0r+jrecvUUpbY8lLisvIjg6AAic6a2bSP5OEOLeJsDSnvhCDov7ipFFMXS3orMpzlmi0ZcuGkBbow==}
     dependencies:
       undici-types: 6.21.0
+    dev: true
 
   /@types/node@24.3.0:
     resolution: {integrity: sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==}
@@ -6661,7 +6635,7 @@ packages:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@types/node@20.19.11)(@vitest/ui@2.1.9)(jsdom@25.0.1)
+      vitest: 2.1.9(@types/node@24.3.0)(@vitest/ui@2.1.9)(jsdom@25.0.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6713,7 +6687,7 @@ packages:
       '@vitest/spy': 2.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.17
-      vite: 5.4.19(@types/node@20.19.11)
+      vite: 5.4.19(@types/node@24.3.0)
 
   /@vitest/pretty-format@2.0.5:
     resolution: {integrity: sha512-h8k+1oWHfwTkyTkb9egzwNMfJAEx4veaPSnMeKbVSjp4euqGSbQlm5+6VHwTr7u4FJslVVsUG5nopCaAYdOmSQ==}
@@ -6806,7 +6780,7 @@ packages:
       sirv: 3.0.1
       tinyglobby: 0.2.14
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@types/node@20.19.11)(@vitest/ui@2.1.9)(jsdom@25.0.1)
+      vitest: 2.1.9(@types/node@24.3.0)(@vitest/ui@2.1.9)(jsdom@25.0.1)
 
   /@vitest/utils@0.34.6:
     resolution: {integrity: sha512-IG5aDD8S6zlvloDsnzHw0Ut5xczlF+kv2BOTo+iXfPr54Yhi5qbVOgGB1hZaVq4iJ4C/MZ2J0y15IlsV/ZcI0A==}
@@ -13622,6 +13596,16 @@ packages:
       react: 18.3.1
     dev: false
 
+  /react-shallow-renderer@16.15.0(react@18.3.1):
+    resolution: {integrity: sha512-oScf2FqQ9LFVQgA73vr86xl2NaOIX73rh+YFqcOp68CWj56tSfgtGKrEbyhCj0rSijyG9M1CYprTh39fBi5hzA==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      object-assign: 4.1.1
+      react: 18.3.1
+      react-is: 18.3.1
+    dev: true
+
   /react-style-singleton@2.2.3(@types/react@18.3.23)(react@18.3.1):
     resolution: {integrity: sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==}
     engines: {node: '>=10'}
@@ -13637,6 +13621,17 @@ packages:
       react: 18.3.1
       tslib: 2.8.1
     dev: false
+
+  /react-test-renderer@18.3.1(react@18.3.1):
+    resolution: {integrity: sha512-KkAgygexHUkQqtvvx/otwxtuFu5cVjfzTCtjXLH9boS19/Nbtg84zS7wIQn39G8IlrhThBpQsMKkq5ZHZIYFXA==}
+    peerDependencies:
+      react: ^18.3.1
+    dependencies:
+      react: 18.3.1
+      react-is: 18.3.1
+      react-shallow-renderer: 16.15.0(react@18.3.1)
+      scheduler: 0.23.2
+    dev: true
 
   /react-window@2.0.2(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-KCDGR+5qB6hG/eDWCNZku5ERMV21vjMEDJeobqPXI0/foVDaqjf+Fsum4iJu0ftLUTxh9yvZ9t7T+SJ7woOLFw==}
@@ -15036,6 +15031,7 @@ packages:
 
   /undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+    dev: true
 
   /undici-types@7.10.0:
     resolution: {integrity: sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag==}
@@ -15311,6 +15307,7 @@ packages:
       - sugarss
       - supports-color
       - terser
+    dev: true
 
   /vite-node@2.1.9(@types/node@24.3.0):
     resolution: {integrity: sha512-AM9aQ/IPrW/6ENLQg3AGY4K1N2TGZdR5e4gu/MmmR2xR3Ll1+dib+nook92g4TV3PXVyeyxdWwtaCAiUL0hMxA==}
@@ -15332,7 +15329,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: true
 
   /vite@5.4.19(@types/node@20.19.11):
     resolution: {integrity: sha512-qO3aKv3HoQC8QKiNSTuUM1l9o/XX3+c+VTgLHbJWHZGeTPVAg2XwazI9UWzoxjIJCGCV2zU60uqMzjeLZuULqA==}
@@ -15371,6 +15367,7 @@ packages:
       rollup: 4.46.2
     optionalDependencies:
       fsevents: 2.3.3
+    dev: true
 
   /vite@5.4.19(@types/node@24.3.0):
     resolution: {integrity: sha512-qO3aKv3HoQC8QKiNSTuUM1l9o/XX3+c+VTgLHbJWHZGeTPVAg2XwazI9UWzoxjIJCGCV2zU60uqMzjeLZuULqA==}
@@ -15409,7 +15406,6 @@ packages:
       rollup: 4.46.2
     optionalDependencies:
       fsevents: 2.3.3
-    dev: true
 
   /vitest-axe@0.1.0(vitest@2.1.9):
     resolution: {integrity: sha512-jvtXxeQPg8R/2ANTY8QicA5pvvdRP4F0FsVUAHANJ46YCDASie/cuhlSzu0DGcLmZvGBSBNsNuK3HqfaeknyvA==}
@@ -15422,7 +15418,7 @@ packages:
       dom-accessibility-api: 0.5.16
       lodash-es: 4.17.21
       redent: 3.0.0
-      vitest: 2.1.9(@types/node@20.19.11)(@vitest/ui@2.1.9)(jsdom@25.0.1)
+      vitest: 2.1.9(@types/node@24.3.0)(@vitest/ui@2.1.9)(jsdom@25.0.1)
 
   /vitest@0.34.6(@vitest/ui@2.1.9)(jsdom@25.0.1):
     resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}
@@ -15609,6 +15605,7 @@ packages:
       - sugarss
       - supports-color
       - terser
+    dev: true
 
   /vitest@2.1.9(@types/node@24.3.0)(@vitest/ui@2.1.9)(jsdom@25.0.1):
     resolution: {integrity: sha512-MSmPM9REYqDGBI8439mA4mWhV5sKmDlBKWIYbA3lRb2PTHACE0mgKwA8yQ2xq9vxDTuk4iPrECBAEW2aoFXY0Q==}
@@ -15668,7 +15665,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: true
 
   /vlq@1.0.1:
     resolution: {integrity: sha512-gQpnTgkubC6hQgdIcRdYGDSDc+SaujOdyesZQMv6JlfQee/9Mp0Qhnys6WxDWvQnL5WZdT7o2Ul187aSt0Rq+w==}

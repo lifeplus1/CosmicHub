@@ -1,5 +1,57 @@
 import type { TCMConstitutionType, WuXingElement, MeridianFlowData, MBTIResult, EnneagramResult } from '@cosmichub/types';
 
+// Basic interfaces for spiritual systems data structures
+interface _BasicSephirah {
+  name: string;
+  description?: string;
+  attributes?: string[];
+}
+
+interface _BasicKabbalahPath {
+  name: string;
+  description?: string;
+  sephirot?: string[];
+}
+
+interface _BasicCorrespondence {
+  name: string;
+  description?: string;
+  associations?: string[];
+}
+
+interface BasicSpiritualInterpretation {
+  content: string;
+  themes?: string[];
+  guidance?: string;
+  timestamp?: string;
+}
+
+// Basic spiritual types until proper ones are defined
+interface TarotCard {
+  name: string;
+  suit: string;
+  number?: number;
+  meaning?: string;
+  reversed?: boolean;
+  arcana: "major" | "minor";
+  upright_meaning: string;
+  reversed_meaning: string;
+  astrological_correlation: string;
+}
+
+interface _Sephirah {
+  name: string;
+  number: number;
+  title?: string;
+  correspondences?: string[];
+}
+
+interface _SpiritualCorrespondence {
+  name: string;
+  symbolism?: string;
+  guidance?: string;
+}
+
 export interface MultiSystemChartData {
   birth_info?: {
     date?: string;
@@ -85,21 +137,69 @@ export interface MultiSystemChartData {
   spiritual_systems?: {
     description?: string;
     tarot?: {
-      daily_card?: any;
-      life_path?: any;
-      suits?: any[];
+      daily_card?: TarotCard;
+      life_path?: {
+        card: string;
+        meaning: string;
+        guidance: string;
+      };
+      suits?: Array<{
+        name: string;
+        element: string;
+        themes: string[];
+        strength: number;
+      }>;
     };
     kabbalah?: {
-      primary_sephirah?: any;
-      secondary_sephirah?: any;
-      relevant_paths?: any[];
+      primary_sephirah?: {
+        name: string;
+        hebrew_name: string;
+        planetary_association: string;
+        meaning: string;
+        path_guidance: string;
+      };
+      secondary_sephirah?: {
+        name: string;
+        hebrew_name: string;
+        planetary_association: string;
+        meaning: string;
+        path_guidance: string;
+      };
+      relevant_paths?: Array<{
+        from: string;
+        to: string;
+        hebrew_letter: string;
+        meaning: string;
+        tarot_card: string;
+        guidance: string;
+      }>;
       spiritual_focus?: string;
       tree_guidance?: string;
     };
     correspondences?: {
-      daily_focus?: any;
-      life_purpose?: any;
-      spiritual_center?: any;
+      daily_focus?: {
+        element: string;
+        planet: string;
+        theme: string;
+        tarot?: string;
+        hebrew_letter?: string;
+        tree_path?: number;
+        astrology?: string;
+      };
+      life_purpose?: {
+        primary_energy: string;
+        spiritual_goal: string;
+        manifestation_style: string;
+      };
+      spiritual_center?: {
+        chakra: string;
+        color: string;
+        focus_area: string;
+        sephirah?: string;
+        astrology?: string;
+        tarot_association?: string;
+        element?: string;
+      };
     };
     synthesis?: {
       primary_themes?: string[];
@@ -108,7 +208,7 @@ export interface MultiSystemChartData {
       daily_practice?: string;
     };
     ai_interpretation?: {
-      spiritual_interpretation?: any;
+      spiritual_interpretation?: BasicSpiritualInterpretation;
       timestamp?: string;
     };
   };

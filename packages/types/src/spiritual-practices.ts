@@ -72,7 +72,7 @@ export interface HebrewLetterData {
 export interface PracticeReadinessRequest {
   practice_type: PracticeType;
   level: SpiritualLevel;
-  session_details?: Record<string, any>;
+  session_details?: Record<string, unknown>;
 }
 
 export interface PracticeReadinessAssessment {
@@ -224,7 +224,7 @@ export interface TarotMobileFeatures {
 }
 
 export interface PersonalizedInterpretation {
-  user_context: Record<string, any>;
+  user_context: Record<string, string | number | boolean | string[] | number[]>;
   personalized_message: string;
   practical_applications: string[];
   timing_guidance: string;
@@ -306,7 +306,13 @@ export interface DailyRoutineRequest {
   user_level: SpiritualLevel;
   available_time: number; // minutes per day
   spiritual_goals: string[];
-  lifestyle_constraints?: Record<string, any>;
+  lifestyle_constraints?: {
+    time_available_minutes?: number;
+    environment?: string;
+    physical_limitations?: string[];
+    equipment_access?: string[];
+  [key: string]: string | number | string[] | undefined;
+  };
   focus_areas?: string[];
 }
 
@@ -440,7 +446,7 @@ export interface FollowUpGuidance {
 // Practice Session Management
 export interface StartSessionRequest {
   practice_type: PracticeType;
-  session_content: Record<string, any>;
+  session_content: Record<string, unknown>;
   level: SpiritualLevel;
   estimated_duration: number;
 }
@@ -555,7 +561,7 @@ export interface PracticeSummary {
 }
 
 // API Response Types
-export interface SpiritualPracticeResponse<T = any> {
+export interface SpiritualPracticeResponse<T = unknown> {
   status: 'success' | 'error';
   data?: T;
   error?: string;
@@ -615,7 +621,7 @@ export interface DailyRoutineResponse
 
 export interface SafetyCheckResponse
   extends SpiritualPracticeResponse<SafetyCheckResult> {
-  // Inherits from base response type
+  response_type: 'safety_check'; // discriminator to avoid empty extension
 }
 
 export interface SessionCompletionResponse
@@ -701,7 +707,13 @@ export interface DailyRoutineComponentProps
   extends SpiritualPracticeComponentProps {
   availableTime?: number;
   spiritualGoals?: string[];
-  lifestyleConstraints?: Record<string, any>;
+  lifestyleConstraints?: {
+    timeAvailableMinutes?: number;
+    environment?: string;
+    physicalLimitations?: string[];
+    equipmentAccess?: string[];
+  [key: string]: string | number | string[] | undefined;
+  };
 }
 
 // Hook Return Types

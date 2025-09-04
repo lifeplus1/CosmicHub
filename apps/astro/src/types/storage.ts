@@ -12,14 +12,34 @@ export interface SyncActionData {
   data: ChartData;
 }
 
+// Discriminated queue items for offline sync operations
+export interface SyncQueueCreate {
+  type: 'create';
+  payload: SyncActionData & { userId: string; name: string };
+}
+export interface SyncQueueUpdate {
+  type: 'update';
+  payload: { id: string; changes: Partial<ChartData>; updatedAt: Date };
+}
+export interface SyncQueueDelete {
+  type: 'delete';
+  payload: { id: string };
+}
+export type SyncQueueItem = SyncQueueCreate | SyncQueueUpdate | SyncQueueDelete;
+
 // Export data structure
+// Exported dataset (extended to support offline & queue persistence)
 export interface ExportedChartData {
-  charts: Array<[string, ChartData]>;
+  charts: Array<[string, ChartData]>; // Base chart cache map entries
   metadata: {
     exportedAt: Date;
-    version: string;
+    version: string; // semantic version for serialized schema
     totalCharts: number;
   };
+  // Optional enriched offline records (persisted only when available)
+  offlineCharts?: OfflineChart[];
+  // Optional pending sync items (for background queue reconstruction)
+  syncItems?: OfflineSyncItem[];
 }
 
 export interface ChartStorage {
@@ -30,6 +50,8 @@ export interface ChartStorage {
   getUserCharts: (userId?: string) => Promise<ChartData[]>;
   forceSyncAll: () => Promise<SyncResult>;
   addToSyncQueue: (action: string, data: SyncActionData) => Promise<void>;
+  // New stricter method variant (preferred going forward)
+  enqueue: (item: SyncQueueItem) => Promise<void>;
   getSyncStats: () => Promise<SyncStats>;
   getStorageStats: () => Promise<StorageStats>;
   getNetworkStatus: () => Promise<NetworkStatus>;
@@ -99,16 +121,26 @@ export interface OfflineSyncManager {
 
 // Mock implementation for development
 export class MockChartStorage implements OfflineChartStorage {
-  private charts: Map<string, ChartData> = new Map();
-  private offlineCharts: OfflineChart[] = [];
-  private syncItems: OfflineSyncItem[] = [];
+  private charts: Map<string, ChartData> = new Map(); // Raw chart payloads (id -> data)
+  private offlineCharts: OfflineChart[] = []; // Enriched offline records
+  private syncItems: OfflineSyncItem[] = []; // Pending sync queue items
 
   async saveChart(data: ChartData): Promise<void> {
-    if (data.birth_info?.date) {
-      // Use birth info date as id if available, otherwise generate one
-      const id = `chart-${Date.now()}`;
-      this.charts.set(id, data);
-    }
+    // Determine / generate id (if chart data already contains an id-like field reuse) - fallback timestamp
+    const id = `chart-${Date.now()}`;
+    this.charts.set(id, data);
+    // Create enriched offline record (simple heuristic defaults)
+    const record: OfflineChart = {
+      id,
+      name: `Chart ${new Date().toISOString()}`,
+      data,
+      birth_data: data.birth_info,
+      chart_data: data,
+      created_at: new Date(),
+      updated_at: new Date(),
+      synced: false,
+    };
+    this.offlineCharts.push(record);
     await Promise.resolve();
   }
 
@@ -157,6 +189,55 @@ export class MockChartStorage implements OfflineChartStorage {
     await Promise.resolve();
   }
 
+  async enqueue(item: SyncQueueItem): Promise<void> {
+    // Convert SyncQueueItem variants into OfflineSyncItem structure for mock
+    const now = new Date();
+    if (item.type === 'create') {
+      const syncItem: OfflineSyncItem = {
+        id: item.payload.id,
+        type: 'chart',
+        data: {
+          id: item.payload.id,
+            action: 'create',
+            timestamp: now,
+            data: item.payload.data ?? ({} as ChartData),
+        },
+        created_at: now,
+        attempts: 0,
+      };
+      this.syncItems.push(syncItem);
+    } else if (item.type === 'update') {
+      const syncItem: OfflineSyncItem = {
+        id: item.payload.id,
+        type: 'chart',
+        data: {
+          id: item.payload.id,
+          action: 'update',
+          timestamp: now,
+          data: (this.charts.get(item.payload.id) ?? ({} as ChartData)),
+        },
+        created_at: now,
+        attempts: 0,
+      };
+      this.syncItems.push(syncItem);
+    } else if (item.type === 'delete') {
+      const syncItem: OfflineSyncItem = {
+        id: item.payload.id,
+        type: 'chart',
+        data: {
+          id: item.payload.id,
+          action: 'delete',
+          timestamp: now,
+          data: ({} as ChartData),
+        },
+        created_at: now,
+        attempts: 0,
+      };
+      this.syncItems.push(syncItem);
+    }
+    await Promise.resolve();
+  }
+
   async getSyncStats(): Promise<SyncStats> {
     return await Promise.resolve({
       sync_in_progress: false,
@@ -192,14 +273,21 @@ export class MockChartStorage implements OfflineChartStorage {
       charts: Array.from(this.charts.entries()),
       metadata: {
         exportedAt: new Date(),
-        version: '1.0.0',
-        totalCharts: this.charts.size
-      }
+        version: '1.0.1',
+        totalCharts: this.charts.size,
+      },
+      offlineCharts: this.offlineCharts,
+      syncItems: this.syncItems,
     });
   }
-
   async importData(data: ExportedChartData): Promise<void> {
     this.charts = new Map(data.charts);
+    if (data.offlineCharts) {
+      this.offlineCharts = data.offlineCharts;
+    }
+    if (data.syncItems) {
+      this.syncItems = data.syncItems;
+    }
     await Promise.resolve();
   }
 

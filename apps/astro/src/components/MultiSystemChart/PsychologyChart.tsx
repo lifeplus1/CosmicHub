@@ -58,7 +58,7 @@ interface EnneagramProfile {
   sephirahCorrelation: string;
 }
 
-// Psychology Chart Data Interface
+// Psychology Chart Data Interface (local for component compatibility)
 interface PsychologyChartData {
   description?: string;
   mbti?: {
@@ -352,7 +352,7 @@ const MBTISection: React.FC<{
   const profile = data.profile;
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid="mbti-detail-view">
       {/* MBTI Profile Overview */}
       <div className='bg-indigo-900/10 border border-indigo-500/20 rounded-lg p-6'>
         <div className='flex items-center justify-between mb-4'>
@@ -558,7 +558,7 @@ const EnneagramSection: React.FC<{
   const profile = data.profile;
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid="enneagram-detail-view">
       {/* Enneagram Profile Overview */}
       <div className='bg-purple-900/10 border border-purple-500/20 rounded-lg p-6'>
         <div className='flex items-center justify-between mb-4'>
@@ -729,7 +729,7 @@ const SynthesisSection: React.FC<{
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid="synthesis-view">
       {/* Personality Integration */}
       {data.personality_integration && (
         <div className='bg-teal-900/10 border border-teal-500/20 rounded-lg p-6'>

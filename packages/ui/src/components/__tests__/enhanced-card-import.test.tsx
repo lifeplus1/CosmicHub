@@ -26,8 +26,8 @@ describe('Import Test', () => {
   });
 
   it('imports all card components correctly', () => {
-    expect(typeof Card).toBe('function');
-    expect(typeof InteractiveCard).toBe('function');
+    expect(typeof Card).toBe('object'); // Card is a compound component (object)
+    expect(typeof InteractiveCard).toBe('object'); // InteractiveCard uses forwardRef (object)
     expect(typeof LoadingCard).toBe('function');
     expect(typeof ErrorCard).toBe('function');
     expect(typeof ChartCard).toBe('function');

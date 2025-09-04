@@ -240,6 +240,11 @@ class OfflineChartStorage {
     });
   }
 
+  // New unified enqueue API (mirrors app-level storage) for future refactor
+  async enqueue(item: { type: 'create' | 'update' | 'delete'; payload: Partial<OfflineChart> }): Promise<void> {
+    return this.addToSyncQueue(item.type, item.payload);
+  }
+
   async getPendingSyncItems(): Promise<OfflineSyncItem[]> {
     if (!this.db) await this.initializeDB();
 

@@ -1,5 +1,5 @@
 /**
- * DEPRECATED HealWave subscription types (migrated to @cosmichub/subscriptions)
+ * DEPRECATED HealWave subscription types (migrated to @cosmichub/config)
  * Temporary re-export shim; remove after all imports updated.
  */
 export {
@@ -7,4 +7,4 @@ export {
   calculateYearlySavings,
   getUserTier,
   hasFeatureAccess,
-} from '@cosmichub/subscriptions';
+} from '@cosmichub/config';

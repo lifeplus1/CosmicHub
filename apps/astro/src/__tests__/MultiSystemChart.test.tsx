@@ -46,10 +46,10 @@ describe('MultiSystemChart Component', () => {
 
     // Check for tab buttons specifically
     expect(
-      screen.getByRole('tab', { name: /Western Tropical/i })
+      screen.getByRole('tab', { name: /Western/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('tab', { name: /Vedic Sidereal/i })
+      screen.getByRole('tab', { name: /Vedic/i })
     ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Chinese/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Mayan/i })).toBeInTheDocument();

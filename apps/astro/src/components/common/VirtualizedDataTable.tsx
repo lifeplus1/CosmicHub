@@ -14,7 +14,9 @@ const getColumnWidthClasses = (width?: number) => {
 };
 
 // Generic type for table row data
-interface TableRowData extends Record<string, unknown> {}
+interface TableRowData {
+  [key: string]: unknown;
+}
 
 // Type for column render function with proper generic constraints
 // Restrict keys to string | number for React key compatibility
@@ -72,13 +74,13 @@ const VirtualizedDataTable = <T extends TableRowData>({
   // Safe comparison function for unknown values
   const compareValues = (a: unknown, b: unknown): number => {
     // Handle null/undefined
-    if (a == null && b == null) return 0;
-    if (a == null) return -1;
-    if (b == null) return 1;
+    if (a === null && b === null) return 0;
+    if (a === null) return -1;
+    if (b === null) return 1;
 
-    // Convert to strings for consistent comparison
-    const aStr = String(a);
-    const bStr = String(b);
+    // Convert to strings for consistent comparison with safe stringification
+    const aStr = typeof a === 'string' || typeof a === 'number' ? String(a) : JSON.stringify(a);
+    const bStr = typeof b === 'string' || typeof b === 'number' ? String(b) : JSON.stringify(b);
 
     // Try numeric comparison if both look like numbers
     const aNum = Number(aStr);

@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "isolatedModules": false,
+    "baseUrl": ".",
+    "paths": {
+      "@cosmichub/types": ["../types/dist"]
+    },
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "allowImportingTsExtensions": false,
+    "verbatimModuleSyntax": false
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/__tests__/**"
+  ]
+}

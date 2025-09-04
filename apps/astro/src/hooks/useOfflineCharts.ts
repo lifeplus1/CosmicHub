@@ -246,18 +246,27 @@ export function useOfflineCharts() {
 
   // Setup network and sync status monitoring
   useEffect(() => {
-    const updateNetworkStatus = () => {
-      const status = offlineChartService.getNetworkStatus();
-      setNetworkStatus({
-        isOnline: status.online,
-        connectionQuality:
-          status.connection === 'fast'
-            ? 'excellent'
-            : status.connection === 'slow'
-              ? 'poor'
-              : 'offline',
-        lastChecked: Date.now(),
-      });
+    const updateNetworkStatus = async () => {
+      try {
+        const status = await offlineChartService.getNetworkStatus();
+        setNetworkStatus({
+          isOnline: status.online,
+          connectionQuality:
+            status.connection === 'wifi'
+              ? 'excellent'
+              : status.connection === 'cellular'
+                ? 'good'
+                : 'offline',
+          lastChecked: Date.now(),
+        });
+      } catch (error) {
+        console.warn('Failed to get network status:', error);
+        setNetworkStatus({
+          isOnline: navigator.onLine,
+          connectionQuality: navigator.onLine ? 'excellent' : 'offline',
+          lastChecked: Date.now(),
+        });
+      }
     };
 
     const updateSyncStatus = async () => {
@@ -271,16 +280,16 @@ export function useOfflineCharts() {
     };
 
     // Initial status check
-    updateNetworkStatus();
+    void updateNetworkStatus();
     void updateSyncStatus();
 
     // Set up periodic status updates
-    const networkStatusInterval = setInterval(updateNetworkStatus, 5000);
+    const networkStatusInterval = setInterval(() => void updateNetworkStatus(), 5000);
     const syncStatusInterval = setInterval(() => void updateSyncStatus(), 2000);
 
     // Listen for network changes
-    const handleOnline = () => updateNetworkStatus();
-    const handleOffline = () => updateNetworkStatus();
+    const handleOnline = () => void updateNetworkStatus();
+    const handleOffline = () => void updateNetworkStatus();
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -352,29 +361,38 @@ export function useNetworkStatus() {
   });
 
   useEffect(() => {
-    const updateStatus = () => {
-      const status = offlineChartService.getNetworkStatus();
-      setNetworkStatus({
-        isOnline: status.online,
-        connectionQuality:
-          status.connection === 'fast'
-            ? 'excellent'
-            : status.connection === 'slow'
-              ? 'poor'
-              : 'offline',
-        lastChecked: Date.now(),
-      });
+    const updateStatus = async () => {
+      try {
+        const status = await offlineChartService.getNetworkStatus();
+        setNetworkStatus({
+          isOnline: status.online,
+          connectionQuality:
+            status.connection === 'wifi'
+              ? 'excellent'
+              : status.connection === 'cellular'
+                ? 'good'
+                : 'offline',
+          lastChecked: Date.now(),
+        });
+      } catch (error) {
+        console.warn('Failed to get network status:', error);
+        setNetworkStatus({
+          isOnline: navigator.onLine,
+          connectionQuality: navigator.onLine ? 'excellent' : 'offline',
+          lastChecked: Date.now(),
+        });
+      }
     };
 
     // Initial check
     void updateStatus();
 
     // Periodic updates
-    const interval = setInterval(updateStatus, 5000);
+    const interval = setInterval(() => void updateStatus(), 5000);
 
     // Network event listeners
-    const handleOnline = () => updateStatus();
-    const handleOffline = () => updateStatus();
+    const handleOnline = () => void updateStatus();
+    const handleOffline = () => void updateStatus();
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -416,7 +434,7 @@ export function useSyncStatus() {
     };
 
     // Initial check
-    updateStatus().catch(error => {
+    updateStatus().catch((error: unknown) => {
       console.warn('Failed to get sync status:', error);
     });
 

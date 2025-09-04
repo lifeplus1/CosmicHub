@@ -8,7 +8,7 @@ declare const process:
 
 // console usage intentionally gated by DEV checks
 import { useAuth } from '@cosmichub/auth';
-import { FrequencyPreset, AudioSettings } from '@cosmichub/frequency';
+import { FrequencyPreset, AudioSettings } from '@cosmichub/integrations';
 import { savePreset, getUserPresets, deletePreset } from '../services/api';
 import { ProgressiveLoading, ErrorMessage } from '@cosmichub/ui';
 
@@ -81,7 +81,11 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
         setError(null);
         const userPresets = await getUserPresets();
         if (userPresets.success) {
-          setPresets(userPresets.data);
+          // Constrain to expected shape; fallback to empty array if invalid
+          const data = Array.isArray(userPresets.data)
+            ? (userPresets.data as FrequencyPreset[])
+            : [];
+          setPresets(data);
         } else {
           setError(userPresets.error);
           setPresets([]);
@@ -146,7 +150,10 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
 
         const savedPreset = await savePreset(preset);
         if (savedPreset.success) {
-          setPresets(prev => [...prev, savedPreset.data]);
+          setPresets(prev => {
+            const next = savedPreset.data as FrequencyPreset;
+            return [...prev, next];
+          });
         } else {
           setError(savedPreset.error);
         }

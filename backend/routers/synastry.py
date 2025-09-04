@@ -1,3 +1,13 @@
+"""Synastry router.
+
+CONSOLIDATION NOTE:
+This module contains a legacy `BirthData` model (date/time/lat/long strings).
+Canonical BirthData lives in `backend.types.astrology_systems` (year/month/day etc.).
+Phase 1 (current): annotate and mark duplication (this comment).
+Phase 2: introduce adapter/conversion functions (not yet merged to keep diff small).
+Phase 3: replace local BirthData usage with canonical model + remove duplicate class.
+"""
+
 # apps/backend/src/routers/synastry.py
 from typing import Dict, List, TypedDict
 

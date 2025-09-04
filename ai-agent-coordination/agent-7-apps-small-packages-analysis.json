@@ -1,10 +1,10 @@
 {
-  "runId": "run-1756352132977",
+  "runId": "run-1756952113988",
   "agentId": "agent-7-apps-small-packages",
   "agent": "AppsPackagesAgent",
-  "timestamp": "2025-08-28T03:35:41.507Z",
-  "success": true,
-  "duration": 8516,
+  "timestamp": "2025-09-04T02:15:14.498Z",
+  "success": false,
+  "duration": 497,
   "targets": [
     "apps/healwave/src",
     "apps/mobile/src",
@@ -20,20 +20,24 @@
   "estimatedFiles": 79,
   "maxWarnings": 35,
   "specialization": "Secondary apps and utility packages",
-  "commonIssues": ["no-unsafe-assignment", "unused-vars", "no-explicit-any"],
+  "commonIssues": [
+    "no-unsafe-assignment",
+    "unused-vars",
+    "no-explicit-any"
+  ],
   "dependencies": [
     "agent-4-astro-services-types",
     "agent-5-ui-package",
     "agent-6-config-package"
   ],
   "conflictRisk": "medium",
-  "lintOutput": "npm warn Unknown env config \"auto-install-peers\". This will stop working in the next major version of npm.\nnpm warn Unknown project config \"auto-install-peers\". This will stop working in the next major version of npm.\n",
-  "errors": "\n/Users/Chris/Projects/CosmicHub/apps/healwave/src/pwa.ts\n  42:7  warning  Unused eslint-disable directive (no problems were reported from 'no-console')\n\n✖ 1 problem (0 errors, 1 warning)\n  0 errors and 1 warning potentially fixable with the `--fix` option.\n\n",
-  "exitCode": 0,
+  "lintOutput": "npm warn Unknown env config \"auto-install-peers\". This will stop working in the next major version of npm.\nnpm warn Unknown project config \"auto-install-peers\". This will stop working in the next major version of npm.\n\nOops! Something went wrong! :(\n\nESLint: 9.33.0\n\nNo files matching the pattern \"packages/frequency/src\" were found.\nPlease check for typing mistakes in the pattern.\n\n",
+  "errors": "",
+  "exitCode": 2,
   "errorCount": 0,
-  "warningCount": 1,
-  "hasLintOutput": true,
-  "readyForExecution": true,
+  "warningCount": 0,
+  "hasLintOutput": false,
+  "readyForExecution": false,
   "coordinatorVersion": "1.0.0",
   "fileType": "current-analysis",
   "isStale": false

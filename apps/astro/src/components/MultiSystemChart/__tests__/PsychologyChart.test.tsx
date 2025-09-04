@@ -21,7 +21,7 @@ vi.mock('@cosmichub/ui', () => ({
 
 // Mock the ProgressBar component
 vi.mock('../ui/ProgressBar', () => ({
-  ProgressBar: ({ progress, className, color }: any) => (
+  ProgressBar: ({ className }: { progress?: number; className?: string; color?: string }) => (
     <div className={`progress-bar ${className || ''}`}>
       <div className="progress-fill" />
     </div>
@@ -181,7 +181,7 @@ describe('PsychologyChart Component', () => {
 
     it('displays no data state when data is null', () => {
       render(<PsychologyChart data={undefined} />);
-      expect(screen.getByText(/Psychology analysis not available/)).toBeInTheDocument();
+      expect(screen.getByText(/Psychology Integration Ready/)).toBeInTheDocument();
     });
 
     it('renders all tab buttons', () => {

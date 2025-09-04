@@ -10,29 +10,29 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 
 const LazyAstroInfo = lazy(() => import('./AstroInfo')); // Lazy load for performance
 
-// Mock planetary and solfeggio frequencies
-const PLANETARY_FREQUENCIES = {
-  sun: 126.22,
-  moon: 210.42,
-  mercury: 141.27,
-  venus: 221.23,
-  mars: 144.72,
-  jupiter: 183.58,
-  saturn: 147.85,
-  uranus: 207.36,
-  neptune: 211.44,
-  pluto: 140.25
-};
+// Mock planetary and solfeggio frequencies - converted to arrays
+const PLANETARY_FREQUENCIES: FrequencyPreset[] = [
+  { id: 'sun', name: 'Sun', description: 'Solar energy and vitality', frequency: 126.22, category: 'planetary' },
+  { id: 'moon', name: 'Moon', description: 'Lunar cycles and intuition', frequency: 210.42, category: 'planetary' },
+  { id: 'mercury', name: 'Mercury', description: 'Communication and mental clarity', frequency: 141.27, category: 'planetary' },
+  { id: 'venus', name: 'Venus', description: 'Love and harmony', frequency: 221.23, category: 'planetary' },
+  { id: 'mars', name: 'Mars', description: 'Energy and action', frequency: 144.72, category: 'planetary' },
+  { id: 'jupiter', name: 'Jupiter', description: 'Growth and expansion', frequency: 183.58, category: 'planetary' },
+  { id: 'saturn', name: 'Saturn', description: 'Structure and discipline', frequency: 147.85, category: 'planetary' },
+  { id: 'uranus', name: 'Uranus', description: 'Innovation and change', frequency: 207.36, category: 'planetary' },
+  { id: 'neptune', name: 'Neptune', description: 'Spirituality and dreams', frequency: 211.44, category: 'planetary' },
+  { id: 'pluto', name: 'Pluto', description: 'Transformation and rebirth', frequency: 140.25, category: 'planetary' }
+];
 
-const SOLFEGGIO_FREQUENCIES = {
-  ut: 396,
-  re: 417,
-  mi: 528,
-  fa: 639,
-  sol: 741,
-  la: 852,
-  si: 963
-};
+const SOLFEGGIO_FREQUENCIES: FrequencyPreset[] = [
+  { id: 'ut', name: 'UT - Liberation', description: 'Liberation from fear', frequency: 396, category: 'solfeggio' },
+  { id: 're', name: 'RE - Change', description: 'Facilitating change', frequency: 417, category: 'solfeggio' },
+  { id: 'mi', name: 'MI - Transformation', description: 'DNA transformation', frequency: 528, category: 'solfeggio' },
+    { id: 'fa', name: 'FA - Connection', description: 'Connection and relationships', frequency: 639, category: 'solfeggio' },
+  { id: 'sol', name: 'SOL - Expression', description: 'Solutions and expression', frequency: 741, category: 'solfeggio' },
+  { id: 'la', name: 'LA - Awakening', description: 'Awakening intuition', frequency: 852, category: 'solfeggio' },
+  { id: 'si', name: 'SI - Returning', description: 'Returning to spiritual order', frequency: 963, category: 'solfeggio' },
+];
 
 // Mock AudioEngine
 class AudioEngine {
@@ -68,7 +68,7 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> =
     const [selectedPreset, setSelectedPreset] =
       useState<AstroFrequencyPreset | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [settings, setSettings] = useState<AudioSettings>({
+    const [settings, setSettings] = useState<Omit<AudioSettings, 'frequency'>>({
       volume: 50,
       duration: 15,
       fadeIn: 3,
@@ -119,10 +119,10 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> =
         };
 
         const adjustedFrequency =
-          basePreset.baseFrequency *
+          basePreset.frequency *
           (elementMultipliers[dominantElement] ?? 1.0);
         return Object.assign({}, basePreset, {
-          baseFrequency: adjustedFrequency,
+          frequency: adjustedFrequency,
           description:
             `${basePreset.description ?? ''} - Personalized for ${dominantElement} dominance`.trim(),
         });
@@ -130,16 +130,16 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> =
       [chartData]
     );
 
-    const handlePlay = useCallback(async () => {
+    const handlePlay = useCallback(() => {
       if (selectedPreset === null || selectedPreset === undefined) return;
       try {
         const personalizedPreset = getPersonalizedFrequency(selectedPreset);
-        await audioEngine.startFrequency(personalizedPreset, settings);
+        audioEngine.startFrequency(personalizedPreset.frequency);
         setIsPlaying(true);
       } catch (error) {
         devConsole.error('❌ Failed to start astrology frequency:', error);
       }
-    }, [audioEngine, selectedPreset, settings, getPersonalizedFrequency]);
+    }, [audioEngine, selectedPreset, getPersonalizedFrequency]);
 
     const handleStop = useCallback(() => {
       audioEngine.stopFrequency();
@@ -147,7 +147,7 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> =
     }, [audioEngine]);
 
     const updateSettings = useCallback(
-      (key: keyof AudioSettings, value: number) => {
+      (key: keyof Omit<AudioSettings, 'frequency'>, value: number) => {
         setSettings(prev => ({ ...prev, [key]: value }));
       },
       []
@@ -195,12 +195,12 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> =
                           className='p-4 rounded-lg border text-left transition-colors border-purple-500 bg-purple-50'
                           role='radio'
                           aria-checked='true'
-                          aria-label={`${preset.name} preset (${preset.baseFrequency} Hz)`}
+                          aria-label={`${preset.name} preset (${preset.frequency} Hz)`}
                           tabIndex={0}
                         >
                           <div className='font-medium'>{preset.name}</div>
                           <div className='text-sm text-gray-600'>
-                            {preset.baseFrequency} Hz
+                            {preset.frequency} Hz
                           </div>
                           <div className='mt-1 text-xs text-gray-500'>
                             {preset.description}
@@ -225,12 +225,12 @@ const AstroFrequencyGenerator: React.FC<AstroFrequencyGeneratorProps> =
                           className='p-4 rounded-lg border text-left transition-colors border-gray-200 hover:border-gray-300'
                           role='radio'
                           aria-checked='false'
-                          aria-label={`${preset.name} preset (${preset.baseFrequency} Hz)`}
+                          aria-label={`${preset.name} preset (${preset.frequency} Hz)`}
                           tabIndex={0}
                         >
                           <div className='font-medium'>{preset.name}</div>
                           <div className='text-sm text-gray-600'>
-                            {preset.baseFrequency} Hz
+                            {preset.frequency} Hz
                           </div>
                           <div className='mt-1 text-xs text-gray-500'>
                             {preset.description}

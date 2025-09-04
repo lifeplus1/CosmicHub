@@ -15,12 +15,16 @@
       "@cosmichub/pwa": ["./packages/pwa/src"],
       "@cosmichub/ui": ["./packages/ui/src"],
       "@cosmichub/types": ["./packages/types/src"],
+  "@cosmichub/types/spiritual-ai": ["./packages/types/src/spiritual-ai.ts"],
+  "@cosmichub/types/spiritual-practices": ["./packages/types/src/spiritual-practices.ts"],
       "@cosmichub/subscriptions": ["./packages/subscriptions/src"]
     }
   },
   "include": [
     "apps/*/src/**/*.ts",
     "apps/*/src/**/*.tsx",
+    "apps/mobile/**/*.ts",
+    "apps/mobile/**/*.tsx",
     "packages/*/src/**/*.ts",
     "packages/*/src/**/*.tsx"
   ],
