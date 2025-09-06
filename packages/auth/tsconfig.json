@@ -4,7 +4,7 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
     "rootDir": "../../"
   },
-  "include": ["src/**/*", "../config/src/**/*", "../integrations/src/**/*"],
+  "include": ["src/**/*", "../config/src/**/*", "../integrations/src/**/*", "../types/src/**/*"],
   "references": [],
   "exclude": [
     "dist",
@@ -12,6 +12,10 @@
     "**/*.test.*",
     "**/*.spec.*",
     "../config/src/__tests__/**/*",
-    "../config/src/**/*.test.*"
+    "../config/src/**/*.test.*",
+    "../types/src/__tests__/**/*",
+    "../types/src/**/*.test.*",
+    "../integrations/src/__tests__/**/*",
+    "../integrations/src/**/*.test.*"
   ]
 }

@@ -9,7 +9,7 @@ import type {
   PageProperties,
   AnalyticsConfig,
   Platform,
-} from './types/index.js';
+} from './types/index';
 
 // Minimal runtime interfaces for third-party analytics libraries we load dynamically.
 // These purposely model only the subset of methods we actually invoke to keep typing tight.
@@ -200,7 +200,7 @@ export class AnalyticsService {
     if (!this.config.mixpanel?.enabled) return;
     try {
       await this.loadScriptOnce(
-        'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js'
+        'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min'
       );
       const mixpanel = window.mixpanel;
       mixpanel?.init?.(this.config.mixpanel?.token, {
@@ -237,7 +237,7 @@ export class AnalyticsService {
       await this.loadScriptOnce(
         'https://cdn.segment.com/analytics.js/v1/' +
           this.config.segment.writeKey +
-          '/analytics.min.js'
+          '/analytics.min'
       );
       // Segment auto initializes via snippet; no explicit load call needed if CDN includes key path
       this.flushQueuesIfReady();
@@ -251,7 +251,7 @@ export class AnalyticsService {
     try {
       await this.loadScriptOnce(
         this.config.rudderstack.dataPlaneUrl.replace(/\/$/, '') +
-          '/rudder-analytics.min.js'
+          '/rudder-analytics.min'
       );
       // RudderStack usually requires load(writeKey, dataPlaneUrl)
       // RudderStack typical snippet: rudderanalytics.load(WRITE_KEY, DATA_PLANE_URL)
@@ -757,4 +757,4 @@ export const getAnalytics = (): AnalyticsService | null => {
   return analyticsInstance;
 };
 
-export * from './types/index.js';
+export * from './types/index';

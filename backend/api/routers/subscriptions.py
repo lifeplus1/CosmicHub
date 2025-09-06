@@ -16,7 +16,7 @@ router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 async def create_checkout_session(
     session: CheckoutSession,
     current_user: Dict[str, Any] = Depends(get_current_user),
-):
+) -> Dict[str, str]:
     try:
         checkout_session = create_stripe_session(
             current_user["email"], session.price_id
@@ -27,7 +27,7 @@ async def create_checkout_session(
 
 
 @router.post("/webhook")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(request: Request) -> Dict[str, str]:
     # Implement signature verification for security
     # Use Firestore batch updates for robustness
     return {"status": "received"}

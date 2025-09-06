@@ -1,10 +1,10 @@
 import React, { lazy, Suspense, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { AuthProvider } from '@cosmichub/auth';
+import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 import { useCrossAppStore } from '@cosmichub/integrations';
 import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
-import ErrorBoundary from './components/ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -69,7 +69,12 @@ const MainApp: React.FC = () => {
   }, [addNotification]);
 
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <div className='min-h-screen text-white bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900'>
         <header>
           <Navbar />
@@ -147,9 +152,14 @@ const MainApp: React.FC = () => {
 const App: React.FC = () => (
   <Tooltip.Provider>
     <AuthProvider>
-      <ErrorBoundary>
-        <MainApp />
-      </ErrorBoundary>
+      <SubscriptionProvider appType="healwave">
+        <ErrorBoundary 
+          level="page" 
+          name="HealWaveApp"
+        >
+          <MainApp />
+        </ErrorBoundary>
+      </SubscriptionProvider>
     </AuthProvider>
   </Tooltip.Provider>
 );

@@ -12,8 +12,8 @@ import type {
   AnalyticsEvent,
   UserTraits,
   PageProperties,
-} from '../types/index.js';
-import { initializeAnalytics, getAnalytics } from '../AnalyticsService.js';
+} from '../types/index';
+import { initializeAnalytics, getAnalytics } from '../AnalyticsService';
 
 interface AnalyticsContextValue {
   track: (

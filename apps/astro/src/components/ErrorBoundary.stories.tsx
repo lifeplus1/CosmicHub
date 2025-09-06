@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import ErrorBoundary from './ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 import './ErrorBoundary.stories.css';
 
 const meta: Meta<typeof ErrorBoundary> = {
@@ -30,7 +30,7 @@ const Boom: React.FC<{ mode?: 'render' | 'effect' }> = ({
 };
 
 export const Basic: Story = {
-  render: args => (
+  render: (args) => (
     <ErrorBoundary {...args}>
       <Boom />
     </ErrorBoundary>
@@ -38,7 +38,7 @@ export const Basic: Story = {
 };
 
 export const WithFallback: Story = {
-  render: args => (
+  render: (args) => (
     <ErrorBoundary
       {...args}
       fallback={

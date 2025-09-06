@@ -84,7 +84,7 @@ def calculate_numerology(name: str, birth_date: datetime) -> Dict[str, Any]:
     # Clean name for calculations
     clean_name = re.sub(r"[^a-zA-Z\s]", "", name.upper())
 
-    result = {  # type: ignore
+    result = {
         "core_numbers": {
             "life_path": calc.calculate_life_path(birth_date),
             "destiny": calc.calculate_destiny_number(clean_name),
@@ -109,7 +109,7 @@ def calculate_numerology(name: str, birth_date: datetime) -> Dict[str, Any]:
         ),
     }
 
-    return result  # type: ignore
+    return result
 
 
 class NumerologyCalculator:
@@ -251,27 +251,27 @@ class NumerologyCalculator:
         # Check life path for karmic debt
         life_path_total = sum(int(d) for d in birth_date.strftime("%m%d%Y"))
         if life_path_total in [13, 14, 16, 19]:
-            karmic_debts.append(life_path_total)  # type: ignore
+            karmic_debts.append(life_path_total)
 
         # Check destiny number for karmic debt
         destiny_total = sum(
             PYTHAGOREAN.get(char, 0) for char in name if char.isalpha()
         )
         if destiny_total in [13, 14, 16, 19]:
-            karmic_debts.append(destiny_total)  # type: ignore
+            karmic_debts.append(destiny_total)
 
         # Calculate karmic lessons (missing numbers 1-9 in name)
-        name_numbers = set()  # type: ignore
+        name_numbers = set()
         for char in name:
             if char.isalpha():
-                name_numbers.add(PYTHAGOREAN.get(char, 0))  # type: ignore
+                name_numbers.add(PYTHAGOREAN.get(char, 0))
 
         karmic_lessons = [i for i in range(1, 10) if i not in name_numbers]
 
         return {
             "karmic_debts": karmic_debts,
             "karmic_lessons": karmic_lessons,
-            "debt_meanings": [self.get_karmic_debt_meaning(debt) for debt in karmic_debts],  # type: ignore  # noqa: E501
+            "debt_meanings": [self.get_karmic_debt_meaning(debt) for debt in karmic_debts],  # noqa: E501
             "lesson_meanings": [
                 self.get_karmic_lesson_meaning(lesson)
                 for lesson in karmic_lessons
@@ -381,13 +381,13 @@ class NumerologyCalculator:
 
     def calculate_pythagorean_analysis(self, name: str) -> Dict[str, Any]:
         """Full Pythagorean numerology analysis."""
-        letter_values = {}
+        letter_values: Dict[int, List[str]] = {}
         for char in name:
             if char.isalpha():
                 value = PYTHAGOREAN.get(char, 0)
                 if value not in letter_values:
                     letter_values[value] = []
-                letter_values[value].append(char)  # type: ignore
+                letter_values[value].append(char)
 
         return {
             "system": "Pythagorean",
@@ -395,18 +395,18 @@ class NumerologyCalculator:
             "total_value": sum(
                 PYTHAGOREAN.get(char, 0) for char in name if char.isalpha()
             ),
-            "characteristics": self.get_pythagorean_characteristics(letter_values),  # type: ignore  # noqa: E501
+            "characteristics": self.get_pythagorean_characteristics(letter_values),  # noqa: E501
         }
 
     def calculate_chaldean_analysis(self, name: str) -> Dict[str, Any]:
         """Full Chaldean numerology analysis."""
-        letter_values = {}
+        letter_values: Dict[int, List[str]] = {}
         for char in name:
             if char.isalpha():
                 value = CHALDEAN.get(char, 0)
                 if value not in letter_values:
                     letter_values[value] = []
-                letter_values[value].append(char)  # type: ignore
+                letter_values[value].append(char)
 
         total = sum(CHALDEAN.get(char, 0) for char in name if char.isalpha())
         chaldean_number = self.reduce_to_single_digit(total)
@@ -626,32 +626,32 @@ class NumerologyCalculator:
         }
         return meanings.get(number, "Unique Chaldean interpretation")
 
-    def get_pythagorean_characteristics(self, letter_values: Dict) -> List[str]:  # type: ignore  # noqa: E501
+    def get_pythagorean_characteristics(self, letter_values: Dict[int, List[str]]) -> List[str]:  # noqa: E501
         """Get personality characteristics based on Pythagorean letter analysis."""  # noqa: E501
         characteristics = []
 
         # Analyze dominant numbers
-        for num, letters in letter_values.items():  # type: ignore
-            count = len(letters)  # type: ignore
+        for num, letters in letter_values.items():
+            count = len(letters)
             if count >= 3:
                 if num == 1:
-                    characteristics.append("Strong leadership tendencies")  # type: ignore  # noqa: E501
+                    characteristics.append("Strong leadership tendencies")  # noqa: E501
                 elif num == 2:
-                    characteristics.append("Highly cooperative nature")  # type: ignore  # noqa: E501
+                    characteristics.append("Highly cooperative nature")  # noqa: E501
                 elif num == 3:
-                    characteristics.append("Naturally creative and expressive")  # type: ignore # type: ignore  # noqa: E501
+                    characteristics.append("Naturally creative and expressive")  # noqa: E501
                 elif num == 4:
-                    characteristics.append("Very practical and organized")  # type: ignore  # noqa: E501
+                    characteristics.append("Very practical and organized")  # noqa: E501
                 elif num == 5:
-                    characteristics.append("Freedom-loving and adventurous")  # type: ignore  # noqa: E501
+                    characteristics.append("Freedom-loving and adventurous")  # noqa: E501
                 elif num == 6:
-                    characteristics.append("Naturally nurturing and responsible")  # type: ignore  # noqa: E501
+                    characteristics.append("Naturally nurturing and responsible")  # noqa: E501
                 elif num == 7:
-                    characteristics.append("Deeply spiritual and analytical")  # type: ignore  # noqa: E501
+                    characteristics.append("Deeply spiritual and analytical")  # noqa: E501
                 elif num == 8:
-                    characteristics.append("Business-minded and ambitious")  # type: ignore  # noqa: E501
+                    characteristics.append("Business-minded and ambitious")  # noqa: E501
                 elif num == 9:
-                    characteristics.append("Humanitarian and globally conscious")  # type: ignore  # noqa: E501
+                    characteristics.append("Humanitarian and globally conscious")  # noqa: E501
 
         return (
             characteristics

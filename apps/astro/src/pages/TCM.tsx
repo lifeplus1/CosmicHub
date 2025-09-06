@@ -1,5 +1,5 @@
 import React from 'react';
-import MultiSystemChartDisplay from '../components/MultiSystemChart';
+import { MultiSystemChartDisplay } from '../components/MultiSystemChart/MultiSystemChartDisplay';
 import { useTCMChartData } from '../routes/hooks/useTCMChartData';
 import DomainPageFrame from '../components/layout/DomainPageFrame';
 

@@ -1,55 +1,16 @@
-import { useState, type FC, type FormEvent, type ChangeEvent } from 'react';
+import React, { useState, useCallback, type FC, type FormEvent, type ChangeEvent } from 'react';
 import { signUp, useAuth } from '@cosmichub/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import ErrorBoundary from './ErrorBoundary';
 
 interface SignupProps {
   onSwitchToLogin?: () => void;
   onClose?: () => void;
 }
 
-interface NotificationPreferences {
-  sessionReminders: boolean;
-  weeklyProgress: boolean;
-  newFrequencies: boolean;
-  healthTips: boolean;
-}
+import { UserProfile } from '@cosmichub/types';
 
-interface UserProfile {
-  email: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  dateOfBirth: string | null;
-  occupation: string | null;
-  experienceLevel: string | null;
-  primaryGoals: string | null;
-  healthConditions: string | null;
-  meditationExperience: string | null;
-  preferredSessionLength: string | null;
-  notificationPreferences: NotificationPreferences;
-  createdAt: string;
-  lastLoginAt: string;
-  profileCompleted: boolean;
-  privacyConsentGiven: boolean;
-  privacyConsentDate: string;
-  healthDisclaimerAccepted: boolean;
-  healthDisclaimerDate: string;
-  signupSource: string;
-  hasCompletedOnboarding: boolean;
-  totalSessionsCompleted: number;
-  totalListeningMinutes: number;
-  favoriteFrequencies: string[];
-  lastActiveAt: string;
-  moodTrackingEnabled: boolean;
-  progressTrackingEnabled: boolean;
-  reminderSettings: {
-    enabled: boolean;
-    frequency: string;
-    preferredTime: string;
-  };
-}
-
-const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
+const Signup: FC<SignupProps> = React.memo(({ onSwitchToLogin, onClose }) => {
   // Basic account fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -78,23 +39,22 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
   const [error, setError] = useState('');
   const { user } = useAuth();
 
-  // If user is already logged in, show success message
-  if (user) {
-    return (
-      <div className='text-center'>
-        <div className='mb-4 text-xl text-green-400'>✅ Already logged in!</div>
-        <p className='mb-4 text-gray-300'>Welcome, {user.email}</p>
-        <button
-          onClick={onClose}
-          className='px-6 py-2 text-white transition-colors bg-purple-500 rounded-lg hover:bg-purple-600'
-        >
-          Continue
-        </button>
-      </div>
-    );
-  }
+  // Keyboard event handlers
+  const handleCloseKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClose?.();
+    }
+  }, [onClose]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSwitchToLoginKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSwitchToLogin?.();
+    }
+  }, [onSwitchToLogin]);
+
+  const handleSubmit = useCallback(async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
 
@@ -132,8 +92,8 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
 
       // Create comprehensive user profile
       const userProfile: UserProfile = {
+        userId: user.uid,
         // Basic info
-        email: user.email ?? '',
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         fullName: `${firstName.trim()} ${lastName.trim()}`,
@@ -158,21 +118,12 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
         },
 
         // Account metadata
-        createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-        profileCompleted: !!(firstName && lastName && experienceLevel),
-        privacyConsentGiven: true,
-        privacyConsentDate: new Date().toISOString(),
-        healthDisclaimerAccepted: true,
-        healthDisclaimerDate: new Date().toISOString(),
-
-        // Usage analytics
-        signupSource: 'web',
-        hasCompletedOnboarding: false,
-        totalSessionsCompleted: 0,
-        totalListeningMinutes: 0,
-        favoriteFrequencies: [],
-        lastActiveAt: new Date().toISOString(),
+        metadata: {
+          createdAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+          lastActiveAt: new Date().toISOString(),
+          signupSource: 'web',
+        },
 
         // Wellness tracking
         moodTrackingEnabled: false,
@@ -181,6 +132,13 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
           enabled: notificationPreferences.sessionReminders,
           frequency: 'daily',
           preferredTime: '19:00',
+        },
+
+        // Required birthData for compatibility
+        birthData: {
+          date: dateOfBirth || '',
+          time: '',
+          location: '',
         },
       };
 
@@ -191,7 +149,30 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [
+    firstName, lastName, password, confirmPassword, email, dateOfBirth, 
+    occupation, experienceLevel, primaryGoals, healthConditions, 
+    meditationExperience, preferredSessionLength, notificationPreferences,
+    healthDisclaimer, privacyConsent, onClose
+  ]);
+
+  // If user is already logged in, show success message
+  if (user) {
+    return (
+      <div className='text-center'>
+        <div className='mb-4 text-xl text-green-400'>✅ Already logged in!</div>
+        <p className='mb-4 text-gray-300'>Welcome, {user.email}</p>
+        <button
+          onClick={onClose}
+          onKeyDown={handleCloseKeyDown}
+          className='px-6 py-2 text-white transition-colors bg-purple-500 rounded-lg hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2'
+          aria-label='Continue to app'
+        >
+          Continue
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className='max-w-2xl mx-auto max-h-[90vh] overflow-y-auto'>
@@ -626,7 +607,9 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
             Already have an account?{' '}
             <button
               onClick={onSwitchToLogin}
-              className='font-medium text-purple-400 transition-colors hover:text-purple-300'
+              onKeyDown={handleSwitchToLoginKeyDown}
+              className='font-medium text-purple-400 transition-colors hover:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 rounded-sm'
+              aria-label='Switch to login form'
             >
               Sign in here
             </button>
@@ -642,6 +625,33 @@ const Signup: FC<SignupProps> = ({ onSwitchToLogin, onClose }) => {
       </div>
     </div>
   );
-};
+});
 
-export default Signup;
+Signup.displayName = 'Signup';
+
+// Export with ErrorBoundary wrapper
+const SignupWithErrorBoundary: React.FC<SignupProps> = (props) => (
+  <ErrorBoundary
+    fallback={
+      <div className='max-w-2xl mx-auto max-h-[90vh] overflow-y-auto p-8 border shadow-2xl bg-gradient-to-br from-red-900/50 to-red-800/50 backdrop-blur-md rounded-2xl border-red-500/20'>
+        <div className='text-center'>
+          <div className='mb-4 text-4xl'>⚠️</div>
+          <h2 className='mb-2 text-2xl font-bold text-white'>Signup Error</h2>
+          <p className='mb-4 text-red-300'>
+            The signup form encountered an error. Please refresh and try again.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className='px-6 py-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    }
+  >
+    <Signup {...props} />
+  </ErrorBoundary>
+);
+
+export default SignupWithErrorBoundary;

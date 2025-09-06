@@ -51,9 +51,9 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build:types": "tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "build:packages": "tsc -p tsconfig.build.json",
+    "build": "tsc",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:packages": "tsc",
     "dev": "tsc --watch",
     "type-check": "tsc --noEmit",
     "test": "vitest",
@@ -65,17 +65,18 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0",
     "@testing-library/jest-dom": "^6.0.0",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/react": "^14.3.1",
+    "@types/node": "^20.0.0",
+    "@types/testing-library__react": "^10.2.0",
     "@vitejs/plugin-react": "^4.0.0",
+    "@vitest/coverage-v8": "^2.1.4",
+    "@vitest/ui": "^2.1.4",
     "jsdom": "^25.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "vitest": "^2.1.4",
-    "@vitest/ui": "^2.1.4",
-    "@vitest/coverage-v8": "^2.1.4"
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.4"
   },
   "files": [
     "dist",

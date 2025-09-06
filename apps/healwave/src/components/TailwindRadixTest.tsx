@@ -1,7 +1,7 @@
 import React from 'react';
 import * as Switch from '@radix-ui/react-switch';
 
-const TailwindRadixTest: React.FC = () => {
+const TailwindRadixTest: React.FC = React.memo(() => {
   return (
     <div className='p-8 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white'>
       <div className='max-w-4xl mx-auto'>
@@ -28,13 +28,22 @@ const TailwindRadixTest: React.FC = () => {
           </div>
 
           <div className='flex flex-wrap gap-4 mb-4'>
-            <button className='px-6 py-3 bg-gradient-to-r from-cosmic-gold to-yellow-500 text-cosmic-dark font-semibold rounded-lg transition-all duration-200 hover:scale-105 shadow-lg'>
+            <button 
+              className='px-6 py-3 bg-gradient-to-r from-cosmic-gold to-yellow-500 text-cosmic-dark font-semibold rounded-lg transition-all duration-200 hover:scale-105 shadow-lg focus:outline-none focus:ring-2 focus:ring-cosmic-gold focus:ring-offset-2'
+              aria-label='Cosmic gold button test'
+            >
               Cosmic Gold Button
             </button>
-            <button className='px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'>
+            <button 
+              className='px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+              aria-label='Blue button test'
+            >
               Blue Button
             </button>
-            <button className='px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors'>
+            <button 
+              className='px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2'
+              aria-label='Purple button test'
+            >
               Purple Button
             </button>
           </div>
@@ -57,7 +66,8 @@ const TailwindRadixTest: React.FC = () => {
               </label>
               <Switch.Root
                 id='test-switch'
-                className='w-11 h-6 bg-gray-600 rounded-full relative data-[state=checked]:bg-blue-600 outline-none cursor-pointer transition-colors'
+                className='w-11 h-6 bg-gray-600 rounded-full relative data-[state=checked]:bg-blue-600 outline-none cursor-pointer transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                aria-label='Test toggle switch'
               >
                 <Switch.Thumb className='block w-5 h-5 bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-5' />
               </Switch.Root>
@@ -65,10 +75,19 @@ const TailwindRadixTest: React.FC = () => {
 
             <div className='space-y-4'>
               <p className='text-lg'>Animation Classes Test:</p>
-              <div className='flex flex-wrap gap-4'>
-                <div className='w-12 h-12 bg-blue-500 rounded-full animate-spin'></div>
-                <div className='w-12 h-12 bg-purple-500 rounded-full animate-pulse'></div>
-                <div className='w-12 h-12 bg-green-500 rounded-full animate-bounce'></div>
+              <div className='flex flex-wrap gap-4' role='group' aria-label='Animation examples'>
+                <div 
+                  className='w-12 h-12 bg-blue-500 rounded-full animate-spin'
+                  aria-label='Spinning blue circle'
+                ></div>
+                <div 
+                  className='w-12 h-12 bg-purple-500 rounded-full animate-pulse'
+                  aria-label='Pulsing purple circle'
+                ></div>
+                <div 
+                  className='w-12 h-12 bg-green-500 rounded-full animate-bounce'
+                  aria-label='Bouncing green circle'
+                ></div>
               </div>
             </div>
           </div>
@@ -91,6 +110,8 @@ const TailwindRadixTest: React.FC = () => {
       </div>
     </div>
   );
-};
+});
+
+TailwindRadixTest.displayName = 'TailwindRadixTest';
 
 export default TailwindRadixTest;

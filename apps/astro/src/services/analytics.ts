@@ -17,6 +17,7 @@ import {
   trackAIInteraction,
   trackPWAInstallPrompt,
   type AnalyticsConfig,
+  type AnalyticsService,
 } from '@cosmichub/analytics';
 import {
   featureFlags,
@@ -29,18 +30,25 @@ import {
 const analyticsConfig: AnalyticsConfig = createDefaultAnalyticsConfig({
   googleAnalytics: {
     measurementId:
+      // @ts-ignore - Vite provides import.meta.env at runtime
       (import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined) ?? '',
+    // @ts-ignore - Vite provides import.meta.env at runtime
     enabled: !!(import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined),
   },
   mixpanel: {
+    // @ts-ignore - Vite provides import.meta.env at runtime
     token: (import.meta.env.PUBLIC_MIXPANEL_TOKEN as string | undefined) ?? '',
+    // @ts-ignore - Vite provides import.meta.env at runtime
     enabled: !!(import.meta.env.PUBLIC_MIXPANEL_TOKEN as string | undefined),
     trackPageViews: true,
   },
   posthog: {
     apiKey:
+      // @ts-ignore - Vite provides import.meta.env at runtime
       (import.meta.env.PUBLIC_POSTHOG_API_KEY as string | undefined) ?? '',
+    // @ts-ignore - Vite provides import.meta.env at runtime
     host: import.meta.env.PUBLIC_POSTHOG_HOST as string | undefined,
+    // @ts-ignore - Vite provides import.meta.env at runtime
     enabled: !!import.meta.env.PUBLIC_POSTHOG_API_KEY,
     sessionRecording: true,
     heatmaps: true,
@@ -58,9 +66,9 @@ const analyticsConfig: AnalyticsConfig = createDefaultAnalyticsConfig({
 });
 
 // Initialize Analytics
-let analytics: ReturnType<typeof initializeAnalytics> | null = null;
+let analytics: AnalyticsService | null = null;
 
-export const initCosmicHubAnalytics = () => {
+export const initCosmicHubAnalytics = (): AnalyticsService | null => {
   if (analytics) return analytics;
 
   if (typeof window === 'undefined') return null; // SSR guard

@@ -1,10 +1,15 @@
 import React from 'react';
-import MultiSystemChartDisplay from '../components/MultiSystemChart';
+import { MultiSystemChartDisplay } from '../components/MultiSystemChart/MultiSystemChartDisplay';
 import { usePsychologyChartData } from '../routes/hooks/usePsychologyChartData';
 import DomainPageFrame from '../components/layout/DomainPageFrame';
 
 const PsychologyPage: React.FC = () => {
-  const { data, isLoading, error, refresh } = usePsychologyChartData();
+  const { data: _data, isLoading, error, refresh } = usePsychologyChartData() as {
+    data: unknown; 
+    isLoading: boolean; 
+    error: Error | null; 
+    refresh: () => void;
+  };
   return (
     <DomainPageFrame title='Psychology Profile' onRefresh={refresh} isRefreshing={isLoading} error={error}>
       <React.Suspense fallback={<div>Loading psychology systems...</div>}>

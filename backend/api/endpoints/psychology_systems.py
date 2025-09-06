@@ -10,9 +10,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 import logging
 
-from backend.api.bridges.psychology_type_bridge import PsychologyTypeBridge
+from ..bridges.psychology_type_bridge import PsychologyTypeBridge
 from backend.types.psychology_systems import (
-    AssessmentType,
+    AssessmentType, PsychologyAssessmentResponse, PsychologyProfileResponse, PsychologyHealthCheck
 )
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ class PsychologyProfileRequest(BaseModel):
     enrich: bool = Field(True, description="Include enrichment insights")
 
 
-@psychology_router.post('/assessment', response_model=Dict[str, Any])
-async def run_psychology_assessment(request: PsychologyAssessmentRequest) -> Dict[str, Any]:
+@psychology_router.post('/assessment', response_model=PsychologyAssessmentResponse)
+async def run_psychology_assessment(request: PsychologyAssessmentRequest) -> PsychologyAssessmentResponse:
     """Run a psychology assessment and return typed result."""
     try:
         start = datetime.now(timezone.utc)
@@ -82,29 +82,71 @@ async def run_psychology_assessment(request: PsychologyAssessmentRequest) -> Dic
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@psychology_router.post('/profile', response_model=Dict[str, Any])
-async def build_psychology_profile(request: PsychologyProfileRequest) -> Dict[str, Any]:
-    """Build a (mock) psychology profile until real aggregation pipeline is integrated."""
+@psychology_router.post('/profile', response_model=PsychologyProfileResponse)
+async def build_psychology_profile(request: PsychologyProfileRequest) -> PsychologyProfileResponse:
+    """Build a psychology profile using the type bridge."""
     try:
+        start = datetime.now(timezone.utc)
         logger.info(f"[Psychology] profile user={request.user_id}")
-        return {
-            "user_id": request.user_id,
-            "summary": "Well-balanced archetypal pattern.",
-            "enriched": request.enrich,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+        
+        # Create mock profile data for now
+        profile_data = {
+            'user_id': request.user_id,
+            'assessment_date': datetime.now(timezone.utc),
+            'assessment_completeness': 85.0,
+            'reliability_score': 78.5
         }
+        
+        summary = {
+            'overall_type': 'Balanced Integrator',
+            'strengths': ['Emotional Intelligence', 'Analytical Thinking'],
+            'growth_areas': ['Social Confidence', 'Decision Making']
+        }
+        
+        # Use the type bridge to create properly typed response
+        profile_response = PsychologyTypeBridge.create_psychology_profile_response(
+            profile_data=profile_data,
+            summary=summary,
+            insights=[{
+                "category": "strength",
+                "title": "Emotional Balance",
+                "description": "You demonstrate strong emotional regulation and self-awareness.",
+                "priority": "high",
+                "actionable": True,
+                "related_traits": ["emotional_intelligence", "self_regulation"]
+            }],
+            recommendations=[{
+                "approach": "integrative",
+                "rationale": "Supports holistic personal development",
+                "suitability_score": 82.0,
+                "focus_areas": ["leadership", "relationships"],
+                "techniques": ["mindfulness", "cognitive_restructuring"]
+            }],
+            processing_time_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
+        )
+        
+        return profile_response
     except Exception as e:
         logger.error(f"Profile build failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@psychology_router.get('/health', response_model=Dict[str, Any])
-async def psychology_health() -> Dict[str, Any]:
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "PSYCHOLOGY-001-v1.0",
-    }
+@psychology_router.get('/health', response_model=PsychologyHealthCheck)
+async def psychology_health() -> PsychologyHealthCheck:
+    """Get psychology service health status."""
+    try:
+        # Use the type bridge to create properly typed health check
+        health_check = PsychologyTypeBridge.create_psychology_health_check(
+            assessments_available=True,
+            models_loaded=["mbti", "big_five", "enneagram"],
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            last_assessment=datetime.now(timezone.utc).isoformat(),
+            uptime_seconds=3600.0  # Mock uptime
+        )
+        return health_check
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 __all__ = ["psychology_router"]

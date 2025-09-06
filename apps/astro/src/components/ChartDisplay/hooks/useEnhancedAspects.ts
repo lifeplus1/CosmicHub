@@ -22,16 +22,19 @@ export function useEnhancedAspects(aspects: ChartDisplayAspect[]) {
         const applying = (() => {
           if (typeof a.applying === 'boolean') return a.applying;
           if (typeof a.applying === 'string') {
-            const s = a.applying.toLowerCase();
+            const s = String(a.applying).toLowerCase();
             return s === 'applying' || s === 'exact';
           }
           return absOrb < 3;
         })();
+        
+        const aspectType = String(a.aspect_type || 'conjunction').toLowerCase();
+        
         return {
-          planet1: a.planet1,
-          planet2: a.planet2,
-          aspect: a.type,
-          aspectType: a.type.toLowerCase() as AspectType,
+          planet1: String(a.planet1),
+          planet2: String(a.planet2),
+          aspect: aspectType,
+          aspectType: aspectType as AspectType,
           orb: a.orb,
           strength:
             absOrb < 1
@@ -48,7 +51,7 @@ export function useEnhancedAspects(aspects: ChartDisplayAspect[]) {
             'trine',
             'square',
             'sextile',
-          ].includes(a.type.toLowerCase()),
+          ].includes(aspectType),
           angularDifference: absOrb,
         };
       }),

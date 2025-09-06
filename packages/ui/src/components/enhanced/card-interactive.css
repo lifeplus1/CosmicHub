@@ -1,0 +1,22 @@
+.card-interactive-button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  width: 100%;
+  text-align: left;
+}
+
+.card-interactive-button--disabled {
+  cursor: not-allowed;
+}
+
+.card-interactive-button:focus {
+  outline: 2px solid var(--focus-color, #0066cc);
+  outline-offset: 2px;
+}
+
+.card-interactive-button:focus:not(:focus-visible) {
+  outline: none;
+}

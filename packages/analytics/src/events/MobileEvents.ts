@@ -3,8 +3,8 @@
  * Specialized analytics for mobile app and PWA interactions
  */
 
-import { getAnalytics } from '../AnalyticsService.js';
-import type { MobileEvent } from '../types/index.js';
+import { getAnalytics } from '../AnalyticsService';
+import type { MobileEvent } from '../types/index';
 
 export const trackMobileEvent = (data: MobileEvent): void => {
   const analytics = getAnalytics();

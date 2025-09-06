@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.packages.json",
   "compilerOptions": {
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
@@ -16,6 +16,8 @@
     // Skip type checking of external libraries
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "isolatedModules": true,
+    "preserveSymlinks": true,
     // Override root path mappings to point at compiled outputs of @cosmichub/config
     "baseUrl": ".",
     "paths": {
@@ -43,5 +45,5 @@
   },
   "references": [{ "path": "../config" }],
   "include": ["src/**/*", "src/vite-env.d.ts", "src/types/**/*"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules", "../config/**/*"]
 }

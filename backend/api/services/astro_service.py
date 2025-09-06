@@ -32,7 +32,7 @@ class BaseCache:
 class RedisCache(BaseCache):
     """In-memory mock cache (default)."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._cache: Dict[str, Dict[str, Any]] = {}
 
     async def get(self, key: str) -> Optional[str]:
@@ -126,7 +126,7 @@ class RealRedisCache(BaseCache):
 class AstroService:
     """Enhanced astro service with Redis caching and serialization."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Attempt real Redis first if configured
         redis_url = os.getenv("REDIS_URL")
         if redis_url:

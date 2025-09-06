@@ -64,6 +64,7 @@ export class AudioEngine {
   private oscillatorRight: OscillatorNode | null = null;
   private gainNodeLeft: GainNode | null = null;
   private gainNodeRight: GainNode | null = null;
+  private oscillatorsStarted: boolean = false;
   private isPlaying: boolean = false;
   private currentPreset: FrequencyPreset | null = null;
   private currentSettings: AudioSettings | null = null;
@@ -184,7 +185,7 @@ export class AudioEngine {
 
       // Schedule stop with fade-out if duration is specified
       if (settings.duration > 0) {
-        const stopTime = currentTime + settings.duration * 60; // Convert minutes to seconds
+        const stopTime = currentTime + Math.max(settings.duration * 60, 0.01); // Ensure at least 10ms in the future
         const fadeOutStart = stopTime - settings.fadeOut;
 
         this.gainNodeLeft.gain.exponentialRampToValueAtTime(
@@ -203,6 +204,15 @@ export class AudioEngine {
       // Start oscillators
       this.oscillatorLeft.start();
       this.oscillatorRight.start();
+      this.oscillatorsStarted = true;
+
+      // Listen for ended event to reset the started flag when scheduled stop occurs
+      this.oscillatorLeft.addEventListener('ended', () => {
+        this.oscillatorsStarted = false;
+      });
+      this.oscillatorRight.addEventListener('ended', () => {
+        this.oscillatorsStarted = false;
+      });
 
       this.isPlaying = true;
       this.currentPreset = preset;
@@ -227,23 +237,57 @@ export class AudioEngine {
   private cleanup(): void {
     try {
       if (this.oscillatorLeft) {
-        this.oscillatorLeft.stop();
-        this.oscillatorLeft.disconnect();
+        try {
+          if (this.oscillatorsStarted) {
+            this.oscillatorLeft.stop();
+          }
+        } catch (error) {
+          // Ignore errors when stopping oscillators that weren't started or already stopped
+          logger.warn('Error stopping left oscillator (expected if not started or already stopped):', error);
+        }
+        try {
+          this.oscillatorLeft.disconnect();
+        } catch (error) {
+          // Ignore errors when disconnecting
+          logger.warn('Error disconnecting left oscillator:', error);
+        }
         this.oscillatorLeft = null;
       }
       if (this.oscillatorRight) {
-        this.oscillatorRight.stop();
-        this.oscillatorRight.disconnect();
+        try {
+          if (this.oscillatorsStarted) {
+            this.oscillatorRight.stop();
+          }
+        } catch (error) {
+          // Ignore errors when stopping oscillators that weren't started or already stopped
+          logger.warn('Error stopping right oscillator (expected if not started or already stopped):', error);
+        }
+        try {
+          this.oscillatorRight.disconnect();
+        } catch (error) {
+          // Ignore errors when disconnecting
+          logger.warn('Error disconnecting right oscillator:', error);
+        }
         this.oscillatorRight = null;
       }
       if (this.gainNodeLeft) {
-        this.gainNodeLeft.disconnect();
+        try {
+          this.gainNodeLeft.disconnect();
+        } catch (error) {
+          logger.warn('Error disconnecting left gain node:', error);
+        }
         this.gainNodeLeft = null;
       }
       if (this.gainNodeRight) {
-        this.gainNodeRight.disconnect();
+        try {
+          this.gainNodeRight.disconnect();
+        } catch (error) {
+          logger.warn('Error disconnecting right gain node:', error);
+        }
         this.gainNodeRight = null;
       }
+      
+      this.oscillatorsStarted = false;
     } catch (error) {
       // Ignore cleanup errors, but log them
       logger.warn('Error during audio cleanup:', error);

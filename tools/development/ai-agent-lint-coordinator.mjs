@@ -123,12 +123,9 @@ const AI_AGENT_BATCHES = [
       'apps/healwave/src',
       'apps/mobile/src',
       'packages/auth/src',
-      'packages/frequency/src',
       'packages/hooks/src',
       'packages/integrations/src',
       'packages/pwa/src',
-      'packages/storage/src',
-      'packages/subscriptions/src',
       'packages/types/src',
     ],
     estimatedFiles: 79,
@@ -525,7 +522,7 @@ Create \`ai-agent-coordination/${batch.id}-completion.json\` with:
           'npx eslint packages/config/src --ext .ts,.tsx --max-warnings=20 --config eslint.config.js';
       } else if (batch.id === 'agent-7-apps-small-packages') {
         cmd =
-          'npx eslint apps/healwave/src apps/mobile/src packages/auth/src packages/frequency/src packages/hooks/src packages/integrations/src packages/pwa/src packages/storage/src packages/subscriptions/src packages/types/src --ext .ts,.tsx --max-warnings=35 --config eslint.config.js';
+          'npx eslint apps/healwave/src apps/mobile/src packages/auth/src packages/hooks/src packages/integrations/src packages/pwa/src packages/types/src --ext .ts,.tsx --max-warnings=35 --config eslint.config.js';
       } else {
         cmd = `npx eslint ${batch.targets.join(' ')} ${EXTENSIONS} --max-warnings=${batch.maxWarnings} ${ESLINT_CONFIG} ${IGNORE_PATTERNS}`;
       }

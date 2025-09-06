@@ -3,17 +3,17 @@
   "version": "1.0.0",
   "description": "Shared React hooks for CosmicHub applications",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/packages/hooks/src/index.js",
+  "types": "./dist/packages/hooks/src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/packages/hooks/src/index.js",
+      "types": "./dist/packages/hooks/src/index.d.ts"
     }
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && node scripts/fix-imports.js",
-    "dev": "tsc --project tsconfig.build.json --watch",
+    "build": "tsc && node scripts/fix-imports.js",
+    "dev": "tsc --watch",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint src --ext .ts,.tsx --max-warnings=0",

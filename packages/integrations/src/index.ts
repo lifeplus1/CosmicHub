@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import type { Planet, House, Aspect } from '@cosmichub/types';
 
 // Simple logger for integrations package
 const logger = {
@@ -59,41 +60,22 @@ export interface AstrologyChart {
   aspects: Aspect[];
 }
 
-export interface Planet {
-  name: string;
-  sign: string;
-  degree: number;
-  house: number;
-  retrograde: boolean;
-}
-
-export interface House {
-  number: number;
-  sign: string;
-  degree: number;
-}
-
-export interface Aspect {
-  planet1: string;
-  planet2: string;
-  aspect: string;
-  orb: number;
-  applying: boolean;
-}
-
 export interface HealwaveSession {
   id: string;
   userId: string;
   frequency: number;
   duration: number; // in minutes
   timestamp: string; // ISO 8601 format
+  startTime?: Date;
+  isActive?: boolean;
   personalizedFor?: AstrologyChart;
 }
 
 export interface Notification {
   id: string;
+  title?: string;
   message: string;
-  type: 'info' | 'success' | 'error';
+  type: 'info' | 'success' | 'warning' | 'error';
   timestamp: number;
 }
 
@@ -118,7 +100,7 @@ export const useCrossAppStore = (): CrossAppStore => {
   return { addNotification, notifications, clearNotifications };
 };
 
-export * from './api';
-export * from './ephemeris';
-export * from './stripe';
-export * from './frequency';
+export * from './api.js';
+export * from './ephemeris.js';
+export * from './stripe.js';
+export * from './frequency/index.js';

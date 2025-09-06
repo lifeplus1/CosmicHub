@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { UnifiedBirthData } from '@cosmichub/types';
+import type { UnifiedBirthData, TCMResponse } from '@cosmichub/types';
 
 interface UseTCMChartDataResult {
   data: {
-    raw?: any;
-    analysis?: any;
+    raw?: TCMResponse;
+    analysis?: TCMResponse['data'];
     normalizedBirthData?: UnifiedBirthData;
   } | undefined;
   isLoading: boolean;
@@ -44,7 +44,12 @@ export function useTCMChartData(): UseTCMChartDataResult {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`TCM API error: ${res.status}`);
-      const json = await res.json();
+      const json = await res.json() as unknown;
+      // Basic runtime validation - in production this would use Zod
+      if (typeof json !== 'object' || json === null) {
+        throw new Error('Invalid TCM API response format');
+      }
+      const tcmResponse = json as TCMResponse;
       const normalizedBirthData: UnifiedBirthData = {
         year: payload.year as number,
         month: payload.month as number,
@@ -55,7 +60,7 @@ export function useTCMChartData(): UseTCMChartDataResult {
         lon: payload.lon as number,
         timezone: payload.timezone as string,
       };
-      return { raw: json, analysis: json?.data, normalizedBirthData };
+      return { raw: tcmResponse, analysis: tcmResponse?.data, normalizedBirthData };
     },
     staleTime: 60_000,
     retry: 1,
@@ -72,5 +77,5 @@ export function useTCMChartData(): UseTCMChartDataResult {
     }
   } : undefined);
 
-  return { data, isLoading: query.isLoading, error: query.error as Error | null, refresh };
+  return { data, isLoading: query.isLoading, error: query.error ?? null, refresh };
 }

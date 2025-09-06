@@ -65,11 +65,104 @@ interface _NetworkInformationFallback {
   saveData?: boolean;
 }
 
+// Type guard for navigator with connection property
+interface NavigatorWithConnection extends Navigator {
+  connection?: _NetworkInformationFallback;
+}
+
+function hasConnection(nav: Navigator): nav is NavigatorWithConnection {
+  return 'connection' in nav;
+}
+
 // Performance monitoring for PWA
+interface PerformanceMetrics {
+  componentLoadTime: Map<string, number>;
+  bundleLoadTime: Map<string, number>;
+  totalLazyLoadTime: number;
+  failedComponents: string[];
+}
+
+// Enhanced lazy loading orchestrator with type safety
+class LazyLoadOrchestrator {
+  private metrics: PerformanceMetrics = {
+    componentLoadTime: new Map(),
+    bundleLoadTime: new Map(),
+    totalLazyLoadTime: 0,
+    failedComponents: []
+  };
+
+  private networkInfo: _NetworkInformationFallback | null = null;
+
+  constructor() {
+    this.initializeNetworkDetection();
+  }
+
+  private initializeNetworkDetection(): void {
+    // Safely access navigator with type checking
+    if (typeof navigator !== 'undefined' && hasConnection(navigator)) {
+      this.networkInfo = navigator.connection ?? null;
+    }
+  }
+
+  // Smart preloading based on network conditions
+  shouldPreloadComponent(priority: 'high' | 'medium' | 'low'): boolean {
+    if (!this.networkInfo) return true; // Default to preload if no network info
+
+    const { effectiveType, saveData } = this.networkInfo;
+    
+    if (saveData) return false; // Respect user's data saving preference
+    
+    switch (priority) {
+      case 'high':
+        return true; // Always preload high priority
+      case 'medium':
+        return effectiveType !== 'slow-2g' && effectiveType !== '2g';
+      case 'low':
+        return effectiveType === '4g'; // Only on fast connections
+      default:
+        return false;
+    }
+  }
+
+  // Track component loading performance
+  trackComponentLoad(componentName: string, startTime: number): void {
+    const endTime = performance.now();
+    const loadTime = endTime - startTime;
+    
+    this.metrics.componentLoadTime.set(componentName, loadTime);
+    safeLog(`Component ${componentName} loaded in ${loadTime.toFixed(2)}ms`);
+  }
+
+  // Get performance insights
+  getPerformanceInsights(): PerformanceMetrics {
+    return { ...this.metrics };
+  }
+
+  // Adaptive loading strategy
+  getLoadingStrategy(): 'aggressive' | 'balanced' | 'conservative' {
+    if (!this.networkInfo) return 'balanced';
+
+    const { effectiveType, downlink, saveData } = this.networkInfo;
+    
+    if (saveData) return 'conservative';
+    if (effectiveType === '4g' && (downlink ?? 0) > 1.5) return 'aggressive';
+    if (effectiveType === '3g') return 'balanced';
+    
+    return 'conservative';
+  }
+}
+
+// Global orchestrator instance
+const lazyLoadOrchestrator = new LazyLoadOrchestrator();
 
 // Stub implementation for PWA performance initialization
 function initializePWAPerformance(): void {
   safeLog('PWA Performance initialization called');
+  
+  // Initialize lazy loading strategy based on network conditions
+  const strategy = lazyLoadOrchestrator.getLoadingStrategy();
+  safeLog(`Using ${strategy} loading strategy`);
+  
   // TODO: Implement PWA performance optimizations
 }
 
@@ -86,3 +179,7 @@ export function initPWAPerformance(): void {
     initializePWAPerformance();
   }
 }
+
+// Export orchestrator for use by lazy loading utilities
+export { lazyLoadOrchestrator };
+export type { PerformanceMetrics };

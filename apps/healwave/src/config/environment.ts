@@ -44,7 +44,7 @@ export const isTest = () => getCurrentEnvironment() === 'test';
 import { logger } from '@cosmichub/config';
 
 // Create environment-specific logger
-export const devConsole = logger.child({ module: 'HealWaveEnvironment' });
+export const devConsole = logger.child ? logger.child({ module: 'HealWaveEnvironment' }) : logger;
 
 // Feature flags
 const features = {

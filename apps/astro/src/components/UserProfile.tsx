@@ -45,11 +45,13 @@ const ASTRO_TIERS = {
   },
 } as const;
 
-import './UserProfile.module.css';
+import { stylesModules } from '@cosmichub/ui';
 import {
   serializeAstrologyData,
   type UserProfile as UserProfileType,
 } from '@cosmichub/types';
+
+const _styles = stylesModules.userProfileStyles;
 
 interface UserStats {
   totalCharts: number;
@@ -282,9 +284,9 @@ const UserProfile = React.memo(() => {
               role='status'
               aria-label={`Subscription tier: ${userTier}`}
             >
-              {getTierIcon(userTier)}
+              {getTierIcon(tierKey)}
               <span
-                className={`bg-${getTierColor(userTier)}/20 text-${getTierColor(userTier)} px-2 py-1 rounded text-sm font-semibold uppercase`}
+                className={`bg-${getTierColor(tierKey)}/20 text-${getTierColor(tierKey)} px-2 py-1 rounded text-sm font-semibold uppercase`}
               >
                 {userTier}
               </span>

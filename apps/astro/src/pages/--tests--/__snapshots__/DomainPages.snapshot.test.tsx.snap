@@ -1,0 +1,132 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Domain page snapshots > PsychologyPage renders consistently 1`] = `
+<div
+  className="p-4 max-w-6xl mx-auto"
+>
+  <header
+    className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <h1
+      className="text-2xl font-semibold text-cosmic-silver"
+    >
+      Psychology Profile
+    </h1>
+    <div
+      className="flex gap-2"
+    >
+      <button
+        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm"
+        disabled={false}
+        onClick={[Function]}
+      >
+        Refresh
+      </button>
+    </div>
+  </header>
+  <div
+    className="p-6 border border-yellow-500 rounded-md bg-yellow-900/50"
+  >
+    <div
+      className="text-center"
+    >
+      <h3
+        className="font-bold text-cosmic-silver"
+      >
+        No Chart Data
+      </h3>
+      <p
+        className="text-cosmic-silver/70"
+      >
+        Please calculate a chart to see the multi-system analysis.
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Domain page snapshots > SpiritualPage renders consistently 1`] = `
+<div
+  className="p-4 max-w-6xl mx-auto"
+>
+  <header
+    className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <h1
+      className="text-2xl font-semibold text-cosmic-silver"
+    >
+      Spiritual Systems
+    </h1>
+    <div
+      className="flex gap-2"
+    >
+      <button
+        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm"
+        disabled={true}
+        onClick={[Function]}
+      >
+        Refreshing...
+      </button>
+    </div>
+  </header>
+  <div
+    className="cosmic-card p-6 rounded-lg"
+  >
+    <div
+      className="flex items-center justify-center space-x-3"
+    >
+      <div
+        className="w-5 h-5 border-b-2 border-cosmic-purple rounded-full animate-spin"
+      />
+      <p
+        className="text-center text-cosmic-silver"
+      >
+        Calculating multi-system chart...
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Domain page snapshots > TCMPage renders consistently 1`] = `
+<div
+  className="p-4 max-w-6xl mx-auto"
+>
+  <header
+    className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <h1
+      className="text-2xl font-semibold text-cosmic-silver"
+    >
+      TCM Analysis
+    </h1>
+    <div
+      className="flex gap-2"
+    >
+      <button
+        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm"
+        disabled={true}
+        onClick={[Function]}
+      >
+        Refreshing...
+      </button>
+    </div>
+  </header>
+  <div
+    className="cosmic-card p-6 rounded-lg"
+  >
+    <div
+      className="flex items-center justify-center space-x-3"
+    >
+      <div
+        className="w-5 h-5 border-b-2 border-cosmic-purple rounded-full animate-spin"
+      />
+      <p
+        className="text-center text-cosmic-silver"
+      >
+        Calculating multi-system chart...
+      </p>
+    </div>
+  </div>
+</div>
+`;

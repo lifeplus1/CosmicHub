@@ -7,6 +7,7 @@ import {
   FaClock,
   FaArrowLeft,
 } from 'react-icons/fa';
+import { formatDate } from '@cosmichub/config';
 import SocialShare from '../components/SocialShare';
 import BlogComments from '../components/BlogComments';
 import RelatedPosts from '../components/RelatedPosts';
@@ -310,14 +311,6 @@ const BlogPost: React.FC = () => {
       </div>
     );
   }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   // Simple markdown-like processing for content
   const processContent = (content: string) => {

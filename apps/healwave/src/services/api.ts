@@ -1,6 +1,6 @@
 import { getIdToken, type User, type Auth } from 'firebase/auth';
 import { auth } from '@cosmichub/auth';
-import { FrequencyPreset } from '@cosmichub/frequency';
+import { FrequencyPreset } from '@cosmichub/integrations';
 import {
   ok,
   fail,

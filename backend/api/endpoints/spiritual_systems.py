@@ -22,7 +22,13 @@ try:
 except ImportError as e:
     logging.error(f"Failed to import spiritual modules: {e}")
     # Graceful fallback for development
-    def calculate_spiritual_systems(*args, **kwargs):
+    def calculate_spiritual_systems(
+        year: int,
+        month: int,
+        day: int,
+        hour: int = 12,
+        minute: int = 0
+    ) -> Dict[str, Any]:
         return {"error": "Spiritual systems not available"}
 
 logger = logging.getLogger(__name__)
@@ -164,7 +170,7 @@ async def calculate_tarot_only(request: TarotOnlyRequest) -> Dict[str, Any]:
         logger.info(f"Calculating tarot for {request.year}-{request.month}-{request.day}")
         
         # Calculate spiritual systems (tarot portion only)
-        spiritual_data = calculate_spiritual_systems(
+        spiritual_data: Dict[str, Any] = calculate_spiritual_systems(
             request.year,
             request.month,
             request.day
@@ -173,8 +179,8 @@ async def calculate_tarot_only(request: TarotOnlyRequest) -> Dict[str, Any]:
         if "error" in spiritual_data:
             raise HTTPException(status_code=400, detail=spiritual_data["error"])
             
-        # Extract tarot data only
-        tarot_data = spiritual_data.get("tarot", {})
+        # Extract tarot data only - with proper type checking
+        tarot_data: Dict[str, Any] = spiritual_data.get("tarot", {})
         
         return {
             "reading_id": generate_spiritual_reading_id(),

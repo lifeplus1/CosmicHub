@@ -1,4 +1,4 @@
-import React, { createContext, useContext, type ReactNode } from 'react';
+import React, { createContext, type ReactNode } from 'react';
 
 interface Toast {
   id?: string;
@@ -17,33 +17,23 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export const useToast = (): ToastContextType => {
-  const context = useContext(ToastContext);
-  if (context === undefined) {
-    // Return a mock implementation to prevent compilation errors
-    return {
-      toast: () => {
-        // Mock implementation for development
-      },
-      closeToast: () => {
-        // Mock implementation for development
-      },
-    };
-  }
-  return context;
-};
-
 // Simple provider implementation
-const ToastProvider = ({ children }: { children: ReactNode }) => {
+const ToastProvider = React.memo(({ children }: { children: ReactNode }) => {
   const toast = () => {};
   const closeToast = () => {};
 
+  const value: ToastContextType = { toast, closeToast };
+
   return (
-    <ToastContext.Provider value={{ toast, closeToast }}>
+    <ToastContext.Provider value={value}>
       {children}
     </ToastContext.Provider>
   );
-};
+});
 
 ToastProvider.displayName = 'ToastProvider';
+
+// Export types and context for external use
+export { ToastContext };
+export type { Toast, ToastContextType };
 export default ToastProvider;

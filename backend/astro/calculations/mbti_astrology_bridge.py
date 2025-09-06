@@ -13,7 +13,7 @@ try:
     PERSONALITY_AVAILABLE = True
 except ImportError:
     PERSONALITY_AVAILABLE = False
-    PersonalityAnalyzer = None
+    PersonalityAnalyzer = None  # type: ignore[misc,assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -141,10 +141,21 @@ class MBTIAstrologyBridge:
             # Calculate Enneagram correlation if not provided
             if not enneagram_type:
                 enneagram_analysis = self._calculate_enneagram_from_astrology(birth_data)
-                enneagram_type = enneagram_analysis['predicted_type']
-                enneagram_confidence = enneagram_analysis['confidence']
+                enneagram_type = enneagram_analysis.get('predicted_type', 1)  # Default to type 1
+                enneagram_confidence = enneagram_analysis.get('confidence', 0.5)
             else:
                 enneagram_confidence = 0.85
+            
+            # Ensure we have valid types before proceeding (additional safety check)
+            if not mbti_type:
+                logger.warning("Could not determine MBTI type, using default")
+                mbti_type = "INTJ"  # Default type
+                mbti_confidence = 0.3
+                
+            if not enneagram_type:
+                logger.warning("Could not determine Enneagram type, using default")
+                enneagram_type = 1  # Default type
+                enneagram_confidence = 0.3
             
             # Astrological confirmation analysis
             astrological_confirmation = self._analyze_astrological_confirmation(
@@ -331,7 +342,7 @@ class MBTIAstrologyBridge:
         confirmation_factors['element_alignment'] = min(1.0, element_match_score)
         
         # Cognitive function alignment (simplified)
-        if PERSONALITY_AVAILABLE and PersonalityAnalyzer:
+        if PERSONALITY_AVAILABLE and PersonalityAnalyzer is not None:
             analyzer = PersonalityAnalyzer()
             if mbti_type in analyzer.cognitive_functions:
                 functions = analyzer.cognitive_functions[mbti_type]
@@ -381,7 +392,7 @@ class MBTIAstrologyBridge:
     def _analyze_cognitive_functions(self, birth_data: Dict[str, Any], mbti_type: str) -> Dict[str, Any]:
         """Detailed cognitive function analysis with astrological correlations"""
         
-        if not PERSONALITY_AVAILABLE or not PersonalityAnalyzer:
+        if not PERSONALITY_AVAILABLE or PersonalityAnalyzer is None:
             return {"error": "Personality analysis not available"}
             
         analyzer = PersonalityAnalyzer()

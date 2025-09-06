@@ -5,7 +5,7 @@ FastAPI routes for analytics data and real-time dashboards
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Query
 from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Literal
 from datetime import datetime
 
 from .custom_analytics import get_analytics_service, AnalyticsEvent
@@ -13,6 +13,34 @@ from .custom_analytics import get_analytics_service, AnalyticsEvent
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
 class TrackEventRequest(BaseModel):
+    """
+    Request model for tracking user analytics events.
+    
+    Used to capture user interactions and behaviors for analytics processing,
+    helping understand user engagement and platform usage patterns.
+    
+    Attributes:
+        event: Event name/type (e.g., "chart_calculated", "subscription_started")
+        user_id: Optional authenticated user identifier
+        session_id: Unique session identifier for anonymous tracking
+        timestamp: Unix timestamp when the event occurred
+        platform: Platform identifier ("web", "mobile", "api")
+        properties: Additional event-specific data and context
+        
+    Example:
+        {
+            "event": "chart_calculated",
+            "user_id": "user_123",
+            "session_id": "session_abc456",
+            "timestamp": 1693920000,
+            "platform": "web",
+            "properties": {
+                "chart_type": "natal",
+                "calculation_time_ms": 1250,
+                "house_system": "placidus"
+            }
+        }
+    """
     event: str
     user_id: Optional[str] = None
     session_id: str
@@ -20,7 +48,28 @@ class TrackEventRequest(BaseModel):
     platform: str
     properties: Dict[str, Any]
 
+
 class ConsentUpdateRequest(BaseModel):
+    """
+    Request model for updating user privacy consent preferences.
+    
+    Handles GDPR and privacy compliance by tracking user consent
+    for different types of data collection and processing.
+    
+    Attributes:
+        user_id: Optional user identifier (may be None for anonymous users)
+        consent_type: Type of consent ("analytics", "marketing", "essential")
+        granted: Whether consent was granted (True) or revoked (False)
+        consent_version: Version of the consent policy/terms
+        
+    Example:
+        {
+            "user_id": "user_123",
+            "consent_type": "analytics",
+            "granted": true,
+            "consent_version": "2023.1"
+        }
+    """
     user_id: Optional[str] = None
     consent_type: str
     granted: bool
@@ -29,11 +78,47 @@ class ConsentUpdateRequest(BaseModel):
 
 # --- Response Models ---
 class SuccessMessage(BaseModel):
+    """
+    Standard success response for API operations.
+    
+    Generic response model indicating successful completion of an operation
+    with an optional descriptive message.
+    
+    Attributes:
+        success: Boolean indicating operation success
+        message: Human-readable success message
+        
+    Example:
+        {
+            "success": true,
+            "message": "Event tracked successfully"
+        }
+    """
     success: bool
     message: str
 
 
 class ConversionRates(BaseModel):
+    """
+    Conversion rates at different stages of the user funnel.
+    
+    Tracks the percentage of users converting between key stages
+    in the customer journey from visitor to paying subscriber.
+    
+    Attributes:
+        visitorToSignup: Percentage of visitors who create accounts (0.0-1.0)
+        signupToTrial: Percentage of signups who start trials (0.0-1.0) 
+        trialToSubscription: Percentage of trials who become subscribers (0.0-1.0)
+        visitorToSubscription: Overall conversion rate visitor to subscriber (0.0-1.0)
+        
+    Example:
+        {
+            "visitorToSignup": 0.15,
+            "signupToTrial": 0.45,
+            "trialToSubscription": 0.25,
+            "visitorToSubscription": 0.017
+        }
+    """
     visitorToSignup: float
     signupToTrial: float
     trialToSubscription: float
@@ -41,6 +126,28 @@ class ConversionRates(BaseModel):
 
 
 class ConversionFunnelResponse(BaseModel):
+    """
+    Complete conversion funnel metrics with counts and rates.
+    
+    Provides both absolute numbers and conversion rates for each stage
+    of the user acquisition and conversion process.
+    
+    Attributes:
+        totalVisitors: Total number of unique visitors
+        signups: Number of users who created accounts
+        trialStarts: Number of users who started trials
+        subscriptions: Number of users who became paid subscribers
+        conversionRates: Calculated conversion rates between stages
+        
+    Example:
+        {
+            "totalVisitors": 10000,
+            "signups": 1500,
+            "trialStarts": 675,
+            "subscriptions": 169,
+            "conversionRates": {...}
+        }
+    """
     totalVisitors: int
     signups: int
     trialStarts: int
@@ -159,7 +266,7 @@ async def get_session_summary(limit: int = Query(20, ge=1, le=200)) -> Dict[str,
         raise HTTPException(status_code=500, detail=f"Failed to get session summary: {str(e)}")
 
 @router.get("/astrology")
-async def get_astrology_analytics(timeframe: str = "week") -> Dict[str, Any]:
+async def get_astrology_analytics(timeframe: Literal["day", "week", "month", "year"] = "week") -> Dict[str, Any]:
     """Get astrology-specific analytics"""
     if timeframe not in ["day", "week", "month", "year"]:
         raise HTTPException(status_code=400, detail="Invalid timeframe. Use: day, week, month, year")

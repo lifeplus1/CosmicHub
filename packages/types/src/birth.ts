@@ -401,21 +401,68 @@ export function toTextBirthData(data: UnifiedBirthData): TextBirthData {
 }
 
 /**
- * Non-throwing variant returning a discriminated union.
+ * Convert legacy Astro app BirthData to UnifiedBirthData
  */
-export function safeParseTextBirthData(data: TextBirthData): SafeParseResult {
-  if (data === null || data === undefined) {
-    return {
-      success: false,
-      error: new Error('Birth data is null or undefined'),
-    };
+export function convertLegacyBirthData(legacyData: {
+  date: string;
+  time: string;
+  city: string;
+  country?: string;
+  timezone: string;
+  latitude: number;
+  longitude: number;
+  datetime?: string;
+}): UnifiedBirthData {
+  const dateParts = legacyData.date.split('-').map(Number);
+  const timeParts = legacyData.time.split(':').map(Number);
+
+  if (dateParts.length !== 3 || timeParts.length < 2) {
+    throw new Error('Invalid date or time format');
   }
-  try {
-    return { success: true, data: parseTextBirthData(data) };
-  } catch (e) {
-    return {
-      success: false,
-      error: e instanceof Error ? e : new Error(String(e)),
-    };
+
+  const year = dateParts[0];
+  const month = dateParts[1];
+  const day = dateParts[2];
+  const hour = timeParts[0];
+  const minute = timeParts[1];
+
+  if (!year || !month || !day || hour === undefined || minute === undefined) {
+    throw new Error('Invalid date or time values');
   }
+
+  return {
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    city: legacyData.city,
+    lat: legacyData.latitude,
+    lon: legacyData.longitude,
+    timezone: legacyData.timezone,
+  };
+}
+
+/**
+ * Convert UnifiedBirthData back to legacy Astro app format
+ */
+export function convertToLegacyBirthData(unifiedData: UnifiedBirthData): {
+  date: string;
+  time: string;
+  city: string;
+  country?: string;
+  timezone: string;
+  latitude: number;
+  longitude: number;
+  datetime: string;
+} {
+  return {
+    date: `${unifiedData.year}-${String(unifiedData.month).padStart(2, '0')}-${String(unifiedData.day).padStart(2, '0')}`,
+    time: `${String(unifiedData.hour).padStart(2, '0')}:${String(unifiedData.minute).padStart(2, '0')}`,
+    city: unifiedData.city ?? '',
+    timezone: unifiedData.timezone ?? 'UTC',
+    latitude: unifiedData.lat ?? unifiedData.latitude ?? 0,
+    longitude: unifiedData.lon ?? unifiedData.longitude ?? 0,
+    datetime: new Date(unifiedData.year, unifiedData.month - 1, unifiedData.day, unifiedData.hour, unifiedData.minute).toISOString(),
+  };
 }

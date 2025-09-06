@@ -7,6 +7,7 @@ import {
   FaClock,
   FaArrowRight,
 } from 'react-icons/fa';
+import { formatDate } from '@cosmichub/config';
 import BlogSubscription from '../components/BlogSubscription';
 import '../styles/blog.css';
 
@@ -251,14 +252,6 @@ const Blog: React.FC = () => {
 
   const featuredPosts = filteredPosts.filter(post => post.featured);
   const regularPosts = filteredPosts.filter(post => !post.featured);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   return (
     <div className='max-w-7xl mx-auto px-4 py-8'>

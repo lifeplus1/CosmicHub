@@ -4,7 +4,7 @@ import { Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
 import GeneKeysChart from '../components/GeneKeysChart/GeneKeysChart';
-import type { ChartBirthData } from '@cosmichub/types';
+import { type ChartBirthData, parseTextBirthData } from '@cosmichub/types';
 
 const GeneKeys: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
@@ -72,38 +72,48 @@ const GeneKeys: React.FC = () => {
 
           {/* Birth Information */}
           <Card title='Birth Information'>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-              <div className='text-center'>
-                <div className='text-cosmic-gold font-semibold'>Date</div>
-                <div className='text-cosmic-silver'>
-                  {birthData.month}/{birthData.day}/{birthData.year}
-                </div>
-              </div>
-              <div className='text-center'>
-                <div className='text-cosmic-gold font-semibold'>Time</div>
-                <div className='text-cosmic-silver'>
-                  {birthData.hour.toString().padStart(2, '0')}:
-                  {birthData.minute.toString().padStart(2, '0')}
-                </div>
-              </div>
-              <div className='text-center'>
-                <div className='text-cosmic-gold font-semibold'>Location</div>
-                <div className='text-cosmic-silver'>{birthData.city}</div>
-              </div>
-              <div className='text-center'>
-                <div className='text-cosmic-gold font-semibold'>
-                  Coordinates
-                </div>
-                <div className='text-cosmic-silver text-sm'>
-                  {birthData.lat !== null &&
-                  birthData.lon !== null &&
-                  typeof birthData.lat === 'number' &&
-                  typeof birthData.lon === 'number'
-                    ? `${birthData.lat.toFixed(2)}°, ${birthData.lon.toFixed(2)}°`
-                    : 'Auto-detected'}
-                </div>
-              </div>
-            </div>
+            {(() => {
+              try {
+                const parsed = parseTextBirthData(birthData);
+                return (
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+                    <div className='text-center'>
+                      <div className='text-cosmic-gold font-semibold'>Date</div>
+                      <div className='text-cosmic-silver'>
+                        {parsed.month}/{parsed.day}/{parsed.year}
+                      </div>
+                    </div>
+                    <div className='text-center'>
+                      <div className='text-cosmic-gold font-semibold'>Time</div>
+                      <div className='text-cosmic-silver'>
+                        {String(parsed.hour).padStart(2, '0')}:
+                        {String(parsed.minute).padStart(2, '0')}
+                      </div>
+                    </div>
+                    <div className='text-center'>
+                      <div className='text-cosmic-gold font-semibold'>Location</div>
+                      <div className='text-cosmic-silver'>{birthData.city}</div>
+                    </div>
+                    <div className='text-center'>
+                      <div className='text-cosmic-gold font-semibold'>
+                        Coordinates
+                      </div>
+                      <div className='text-cosmic-silver text-sm'>
+                        {birthData.latitude !== null &&
+                        birthData.longitude !== null &&
+                        typeof birthData.latitude === 'number' &&
+                        typeof birthData.longitude === 'number'
+                          ? `${birthData.latitude.toFixed(2)}°, ${birthData.longitude.toFixed(2)}°`
+                          : 'Auto-detected'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              } catch (error) {
+                devConsole.error?.('Error parsing birth data:', error);
+                return <div className='text-cosmic-silver'>Unable to display birth data</div>;
+              }
+            })()}
           </Card>
 
           {/* Educational Information */}

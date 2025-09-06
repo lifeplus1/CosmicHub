@@ -33,7 +33,7 @@ interface CelestialBody {
   position?: number; // degrees 0-360
   degree?: number; // degree within sign 0-30
   sign: string;
-  house: string;
+  house: number; // Updated to align with Enhanced Type Bridge System
   retrograde?: boolean;
   category:
     | 'planets'
@@ -401,11 +401,11 @@ function CelestialBodiesTable({
   );
 }
 
-// Type interfaces for conversion function
+// Type interfaces for conversion function - aligned with Enhanced Type Bridge System
 interface PlanetInput {
   name: string;
   sign: string;
-  house: string;
+  house: number; // Updated to align with Enhanced Type Bridge System
   position?: number;
   degree?: number;
   retrograde?: boolean;
@@ -414,7 +414,7 @@ interface PlanetInput {
 interface AsteroidInput {
   name: string;
   sign: string;
-  house: string;
+  house: number; // Updated to align with Enhanced Type Bridge System
   position?: number;
   degree?: number;
 }
@@ -422,7 +422,7 @@ interface AsteroidInput {
 interface PointInput {
   name: string;
   sign: string;
-  house: string;
+  house: number; // Updated to align with Enhanced Type Bridge System
   position?: number;
   degree?: number;
   retrograde?: boolean;
@@ -532,7 +532,7 @@ export function convertToCelestialBodies(chartData: {
           house: calculateHousePosition(
             angle.position,
             chartData.houses?.map(h => h.cusp) ?? []
-          ).toString(),
+          ),
           position: angle.position,
           degree: angle.position % 30, // Position within sign
           category:
@@ -560,7 +560,7 @@ export function convertToCelestialBodies(chartData: {
                   .replace('_', ' ')
                   .replace(/\b\w/g, l => l.toUpperCase()),
                 sign: '', // Will be calculated from position
-                house: String(house.number ?? '--'),
+                house: house.number ?? 0,
                 position,
                 category: 'points',
               });

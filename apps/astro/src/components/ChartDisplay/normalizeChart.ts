@@ -1,12 +1,16 @@
-import { Planet, House, Aspect, Asteroid, Angle } from './types';
+import { Planet, House, Aspect, Asteroid, Angle, ZodiacSign } from '@cosmichub/types';
 import {
   getSignFromDegrees,
   calculateHousePosition,
   getDegreeWithinSign,
   getRulerFromSign,
   getSignFromDegreesCapitalized,
-  type ZodiacSign,
 } from '../../utils/astrologyUtils';
+import {
+  assertPlanetType,
+  assertAspectType,
+  assertHouseType
+} from '../../utils/type-assertions';
 
 // Helper to bridge between centralized utils and display components
 const getSignFromDegree = getSignFromDegreesCapitalized;
@@ -154,15 +158,15 @@ function _toPlanetArray(input: unknown, houses: House[] = []): Planet[] {
               ? Number(data.house)
               : calculatePlanetHouse(pos, houses);
 
-        return {
-          name: name.charAt(0).toUpperCase() + name.slice(1),
+        return assertPlanetType({
+          name: name,
           sign: displaySign,
           degree: degWithinSign,
-          house: String(houseNumber),
+          house: houseNumber,
           aspects: Array.isArray(data.aspects) ? data.aspects : [],
           position: pos,
           retrograde: Boolean(data.retrograde),
-        } as Planet;
+        });
       }
     );
   }
@@ -178,16 +182,15 @@ function _toHouseArray(input: unknown): House[] {
         : typeof h.degree === 'number'
           ? h.degree
           : 0;
-    return {
-      house: h.number ?? h.house ?? 0,
-      number: h.number ?? h.house ?? 0,
+    
+    return assertHouseType({
+      house: h.number ?? h.house ?? 1,
+      number: h.number ?? h.house ?? 1,
       sign: h.sign ?? getSignFromDegree(cusp),
       degree: cusp % 30,
       cusp,
-      ruler:
-        h.ruler ??
-        getRulerFromSign((h.sign ?? getSignFromDegrees(cusp)) as ZodiacSign),
-    } as House;
+      ruler: h.ruler ?? getRulerFromSign((h.sign ?? getSignFromDegrees(cusp)) as ZodiacSign),
+    });
   };
   if (Array.isArray(input)) return (input as LooseHouseInput[]).map(mapOne);
   if (typeof input === 'object')
@@ -210,13 +213,14 @@ function _toAspectArray(input: unknown): Aspect[] {
             : parseFloat(a.orb)
           : 0;
     const orb = getAspectOrb(type, rawOrb !== 0 ? rawOrb : undefined);
-    return {
-      planet1: a.planet1 ?? a.point1 ?? 'Unknown', // Backend uses point1
-      planet2: a.planet2 ?? a.point2 ?? 'Unknown', // Backend uses point2
+    
+    return assertAspectType({
       type,
+      planet1: a.planet1 ?? a.point1 ?? 'Unknown',
+      planet2: a.planet2 ?? a.point2 ?? 'Unknown',
       orb,
       applying: a.applying ?? '',
-    } as Aspect;
+    });
   };
 
   // Handle arrays (existing behavior)
@@ -268,7 +272,7 @@ function _toAsteroidArray(input: unknown, houses: House[] = []): Asteroid[] {
           name: name.charAt(0).toUpperCase() + name.slice(1),
           sign: displaySign,
           degree: degWithinSign,
-          house: String(houseNumber),
+          house: houseNumber,
           position: pos,
         } as Asteroid;
       }
@@ -330,15 +334,15 @@ function _toPointArray(input: unknown, houses: House[] = []): Planet[] {
               ? Number(data.house)
               : calculatePlanetHouse(pos, houses);
 
-        return {
-          name: name.charAt(0).toUpperCase() + name.slice(1),
+        return assertPlanetType({
+          name: name,
           sign: displaySign,
           degree: degWithinSign,
-          house: String(houseNumber),
+          house: houseNumber,
           aspects: Array.isArray(data.aspects) ? data.aspects : [],
           position: pos,
           retrograde: Boolean(data.retrograde),
-        } as Planet;
+        });
       }
     );
   }
@@ -393,45 +397,41 @@ export function normalizeChart(raw: ChartLike): {
 
   // Process houses first for house position calculations
   const processedHouses: House[] = [];
-  const houseData = backendData.houses;
+  const houseData = backendData && typeof backendData === 'object' ? (backendData as Record<string, unknown>).houses : undefined;
 
   // Handle houses data
   if (Array.isArray(houseData)) {
-    houseData.forEach((house: Record<string, unknown>, index: number) => {
+    houseData.forEach((house: unknown, index: number) => {
       const houseNumber = index + 1;
-      const cusp =
-        typeof house.cusp === 'number'
-          ? house.cusp
-          : typeof house === 'number'
-            ? house
-            : 0;
-      processedHouses.push({
+      const cusp: number =
+        (typeof house === 'object' && house && typeof (house as Record<string, unknown>).cusp === 'number')
+          ? (house as Record<string, unknown>).cusp as number
+          : (typeof house === 'number' ? house : 0);
+      processedHouses.push(assertHouseType({
         house: Number(houseNumber) || 1,
         number: Number(houseNumber) || 1,
         cusp,
         sign: getSignFromDegree(cusp),
         degree: getDegreeWithinSign(cusp),
         ruler: getRulerFromSign(getSignFromDegree(cusp) as ZodiacSign),
-      });
+      }));
     });
   } else if (typeof houseData === 'object' && houseData) {
-    Object.entries(houseData).forEach(
-      ([key, house]: [string, Record<string, unknown>]) => {
+    Object.entries(houseData as Record<string, unknown>).forEach(
+      ([key, house]: [string, unknown]) => {
         const houseNumber = key.replace('house_', '');
-        const cusp =
-          typeof house.cusp === 'number'
-            ? house.cusp
-            : typeof house === 'number'
-              ? house
-              : 0;
-        processedHouses.push({
+        const cusp: number =
+          (typeof house === 'object' && house && typeof (house as Record<string, unknown>).cusp === 'number')
+            ? (house as Record<string, unknown>).cusp as number
+            : (typeof house === 'number' ? house : 0);
+        processedHouses.push(assertHouseType({
           house: Number(houseNumber.replace('house_', '')) || 1,
           number: Number(houseNumber.replace('house_', '')) || 1,
           cusp,
           sign: getSignFromDegree(cusp),
           degree: getDegreeWithinSign(cusp),
           ruler: getRulerFromSign(getSignFromDegree(cusp) as ZodiacSign),
-        });
+        }));
       }
     );
   }
@@ -442,16 +442,17 @@ export function normalizeChart(raw: ChartLike): {
   const categorizedPoints: Planet[] = [];
 
   // Process asteroids from backend 'asteroids' field
-  if (backendData.asteroids && typeof backendData.asteroids === 'object') {
-    const asteroidsData = backendData.asteroids;
-    Object.entries(asteroidsData).forEach(
-      ([name, data]: [string, Record<string, unknown>]) => {
+  const asteroidsData = backendData && typeof backendData === 'object' ? (backendData as Record<string, unknown>).asteroids : undefined;
+  if (asteroidsData && typeof asteroidsData === 'object') {
+    Object.entries(asteroidsData as Record<string, unknown>).forEach(
+      ([name, data]: [string, unknown]) => {
         if (
           data &&
-          typeof data === 'object' &&
-          typeof data.position === 'number'
+          typeof data === 'object'
         ) {
-          const pos = Number(data.position) || 0;
+          const dataObj = data as Record<string, unknown>;
+          const position = typeof dataObj.position === 'number' ? dataObj.position : 0;
+          const pos = Number(position) || 0;
           const houseNumber = calculateHousePosition(
             pos,
             processedHouses.map(h => h.cusp)
@@ -464,20 +465,20 @@ export function normalizeChart(raw: ChartLike): {
             name,
             sign: displaySign,
             degree: degWithinSign,
-            house: String(houseNumber),
+            house: houseNumber,
           };
           categorizedAsteroids.push(asteroid);
 
           // Also add to all celestial bodies for potential point filtering
-          const planetEntry: Planet = {
+          const planetEntry: Planet = assertPlanetType({
             name,
             position: pos,
             sign: displaySign,
             degree: degWithinSign,
-            house: String(houseNumber),
-            aspects: Array.isArray(data.aspects) ? data.aspects : [],
-            retrograde: Boolean(data.retrograde),
-          };
+            house: houseNumber,
+            aspects: Array.isArray(dataObj.aspects) ? dataObj.aspects : [],
+            retrograde: Boolean(dataObj.retrograde),
+          });
           allCelestialBodies.push(planetEntry);
         }
       }
@@ -485,16 +486,17 @@ export function normalizeChart(raw: ChartLike): {
   }
 
   // Process points from backend 'points' field
-  if (backendData.points && typeof backendData.points === 'object') {
-    const pointsData = backendData.points;
-    Object.entries(pointsData).forEach(
-      ([name, data]: [string, Record<string, unknown>]) => {
+  const pointsData = backendData && typeof backendData === 'object' ? (backendData as Record<string, unknown>).points : undefined;
+  if (pointsData && typeof pointsData === 'object') {
+    Object.entries(pointsData as Record<string, unknown>).forEach(
+      ([name, data]: [string, unknown]) => {
         if (
           data &&
-          typeof data === 'object' &&
-          typeof data.position === 'number'
+          typeof data === 'object'
         ) {
-          const pos = Number(data.position) || 0;
+          const dataObj = data as Record<string, unknown>;
+          const position = typeof dataObj.position === 'number' ? dataObj.position : 0;
+          const pos = Number(position) || 0;
           const houseNumber = calculateHousePosition(
             pos,
             processedHouses.map(h => h.cusp)
@@ -502,15 +504,15 @@ export function normalizeChart(raw: ChartLike): {
           const displaySign = getSignFromDegree(pos);
           const degWithinSign = getDegreeWithinSign(pos);
 
-          const pointEntry: Planet = {
+          const pointEntry: Planet = assertPlanetType({
             name,
             position: pos,
             sign: displaySign,
             degree: degWithinSign,
-            house: String(houseNumber),
-            aspects: Array.isArray(data.aspects) ? data.aspects : [],
-            retrograde: Boolean(data.retrograde),
-          };
+            house: houseNumber,
+            aspects: Array.isArray(dataObj.aspects) ? dataObj.aspects : [],
+            retrograde: Boolean(dataObj.retrograde),
+          });
           categorizedPoints.push(pointEntry);
           allCelestialBodies.push(pointEntry);
         }
@@ -536,15 +538,15 @@ export function normalizeChart(raw: ChartLike): {
             const displaySign = getSignFromDegree(pos);
             const degWithinSign = getDegreeWithinSign(pos);
 
-            const pointEntry: Planet = {
+            const pointEntry: Planet = assertPlanetType({
               name,
               position: pos,
               sign: displaySign,
               degree: degWithinSign,
-              house: String(houseNumber),
+              house: houseNumber,
               aspects: Array.isArray(data.aspects) ? data.aspects : [],
               retrograde: Boolean(data.retrograde),
-            };
+            });
             categorizedPoints.push(pointEntry);
             allCelestialBodies.push(pointEntry);
           }
@@ -554,16 +556,17 @@ export function normalizeChart(raw: ChartLike): {
   });
 
   // Process main planets from backend 'planets' field
-  if (backendData.planets && typeof backendData.planets === 'object') {
-    const planetsData = backendData.planets;
-    Object.entries(planetsData).forEach(
-      ([name, data]: [string, Record<string, unknown>]) => {
+  const planetsData = backendData && typeof backendData === 'object' ? (backendData as Record<string, unknown>).planets : undefined;
+  if (planetsData && typeof planetsData === 'object') {
+    Object.entries(planetsData as Record<string, unknown>).forEach(
+      ([name, data]: [string, unknown]) => {
         if (
           data &&
-          typeof data === 'object' &&
-          typeof data.position === 'number'
+          typeof data === 'object'
         ) {
-          const pos = Number(data.position) || 0;
+          const dataObj = data as Record<string, unknown>;
+          const position = typeof dataObj.position === 'number' ? dataObj.position : 0;
+          const pos = Number(position) || 0;
           const houseNumber = calculateHousePosition(
             pos,
             processedHouses.map(h => h.cusp)
@@ -571,15 +574,15 @@ export function normalizeChart(raw: ChartLike): {
           const displaySign = getSignFromDegree(pos);
           const degWithinSign = getDegreeWithinSign(pos);
 
-          const planetEntry: Planet = {
+          const planetEntry: Planet = assertPlanetType({
             name,
             position: pos,
             sign: displaySign,
             degree: degWithinSign,
-            house: String(houseNumber),
-            aspects: Array.isArray(data.aspects) ? data.aspects : [],
-            retrograde: Boolean(data.retrograde),
-          };
+            house: houseNumber,
+            aspects: Array.isArray(dataObj.aspects) ? dataObj.aspects : [],
+            retrograde: Boolean(dataObj.retrograde),
+          });
           allCelestialBodies.push(planetEntry);
           // If this is not a main planet, also track as point for downstream consumers
           const lower = name.toLowerCase();
@@ -605,24 +608,27 @@ export function normalizeChart(raw: ChartLike): {
 
   // Process aspects
   const processedAspects: Aspect[] = [];
-  if (Array.isArray(backendData.aspects)) {
-    backendData.aspects.forEach((aspect: Record<string, unknown>) => {
+  const aspectsData = backendData && typeof backendData === 'object' ? (backendData as Record<string, unknown>).aspects : undefined;
+  if (Array.isArray(aspectsData)) {
+    aspectsData.forEach((aspect: unknown) => {
       if (aspect && typeof aspect === 'object') {
-        processedAspects.push({
-          planet1: typeof aspect.planet1 === 'string' ? aspect.planet1 : '',
-          planet2: typeof aspect.planet2 === 'string' ? aspect.planet2 : '',
-          type: typeof aspect.type === 'string' ? aspect.type : '',
-          orb: Number(aspect.orb) || 0,
-          applying: typeof aspect.applying === 'string' ? aspect.applying : '',
-        });
+        const aspectObj = aspect as Record<string, unknown>;
+        processedAspects.push(assertAspectType({
+          planet1: typeof aspectObj.planet1 === 'string' ? aspectObj.planet1 : '',
+          planet2: typeof aspectObj.planet2 === 'string' ? aspectObj.planet2 : '',
+          type: typeof aspectObj.type === 'string' ? aspectObj.type : '',
+          orb: Number(aspectObj.orb) || 0,
+          applying: typeof aspectObj.applying === 'string' ? aspectObj.applying : '',
+        }));
       }
     });
   }
 
   // Process angles
   const processedAngles: Angle[] = [];
-  if (backendData.angles && typeof backendData.angles === 'object') {
-    Object.entries(backendData.angles).forEach(
+  const anglesData = backendData && typeof backendData === 'object' ? (backendData as Record<string, unknown>).angles : undefined;
+  if (anglesData && typeof anglesData === 'object') {
+    Object.entries(anglesData as Record<string, unknown>).forEach(
       ([name, position]: [string, unknown]) => {
         if (typeof position === 'number') {
           processedAngles.push({

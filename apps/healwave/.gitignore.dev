@@ -1,0 +1,38 @@
+# Development Environment Git Ignore
+# Add to .gitignore for better dev experience
+
+# Environment files
+.env.local
+.env.development.local
+
+# Development logs
+debug.log
+*.log
+
+# Hot reload cache
+.vite-temp/
+vite.config.ts.timestamp-*
+
+# Development databases
+*.db-journal
+dev.db
+
+# IDE specific (VS Code)
+.vscode/settings.json
+.vscode/launch.json
+
+# macOS
+.DS_Store
+
+# Development certificates
+dev-cert.pem
+dev-key.pem
+
+# Local testing
+coverage/
+test-results/
+*.tsbuildinfo
+
+# Development build artifacts
+dist-dev/
+build-temp/

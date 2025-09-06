@@ -14,6 +14,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef } from 'react';
+import type { UnifiedBirthData, ValidationChartData, Planet } from '@cosmichub/types';
 
 // Core validation types
 export interface ValidationRule<T = unknown> {
@@ -48,45 +49,10 @@ export interface ValidationCache {
 }
 
 // Birth data validation types
-export interface BirthData {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  city: string;
-  lat?: number;
-  lon?: number;
-  timezone?: string;
-}
+export type BirthData = UnifiedBirthData;
 
 // Chart data validation types
-export interface PlanetData {
-  position: number;
-  house?: number;
-  retrograde?: boolean;
-}
-
-export interface HouseData {
-  number: number;
-  cusp: number;
-  sign: string;
-}
-
-export interface AspectData {
-  point1: string;
-  point2: string;
-  aspect: string;
-  orb: number;
-}
-
-export interface ChartData {
-  planets?: Record<string, PlanetData>;
-  houses?: HouseData[];
-  aspects?: AspectData[];
-  asteroids?: Record<string, PlanetData>;
-  angles?: Record<string, PlanetData>;
-}
+export type ChartData = ValidationChartData;
 
 // Validation configuration
 export interface UseStateValidationOptions {
@@ -399,7 +365,7 @@ export function useStateValidation(options: UseStateValidationOptions = {}) {
         validator: (data: ChartData) => {
           if (!data?.planets) return false;
 
-          return Object.values(data.planets).every((planet: PlanetData) => {
+          return Object.values(data.planets).every((planet) => {
             if (!planet || typeof planet !== 'object') return false;
             return (
               typeof planet.position === 'number' &&

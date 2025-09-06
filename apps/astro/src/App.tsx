@@ -5,7 +5,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 import { getAppConfig, isFeatureEnabled, logger } from '@cosmichub/config';
 import { BirthDataProvider } from './contexts/BirthDataContext';
-import ErrorBoundary from './components/ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { CosmicLoading } from './components/CosmicLoading';
@@ -40,6 +40,7 @@ const Numerology = lazy(() => import('./pages/Numerology'));
 const HumanDesign = lazy(() => import('./pages/HumanDesign'));
 const GeneKeys = lazy(() => import('./pages/GeneKeys'));
 const Synastry = lazy(() => import('./pages/Synastry'));
+const ChartWheelPage = lazy(() => import('./pages/ChartWheel'));
 const AIInterpretation = lazy(() => import('./pages/AIInterpretation'));
 const SavedCharts = lazy(() => import('./pages/SavedCharts'));
 const Login = lazy(() => import('./pages/Login'));
@@ -53,6 +54,12 @@ const BlogAuthors = lazy(() =>
     default: module.BlogAuthors,
   }))
 );
+
+// Specialized Analysis Pages
+const Psychology = lazy(() => import('./pages/Psychology'));
+const Spiritual = lazy(() => import('./pages/Spiritual'));
+const TCM = lazy(() => import('./pages/TCM'));
+const Synthesis = lazy(() => import('./pages/Synthesis'));
 
 const MainApp: React.FC = React.memo(function MainApp() {
   const config = getAppConfig('astro');
@@ -77,6 +84,7 @@ const MainApp: React.FC = React.memo(function MainApp() {
             <Routes>
               <Route path='/' element={<Dashboard />} />
               <Route path='/chart' element={<UnifiedChart />} />
+              <Route path='/chartwheel' element={<ChartWheelPage />} />
               <Route path='/multi-system' element={<MultiSystemChart />} />
               <Route path='/calculator' element={<Calculator />} />
               <Route path='/numerology' element={<Numerology />} />
@@ -103,6 +111,12 @@ const MainApp: React.FC = React.memo(function MainApp() {
                 element={<SubscriptionSuccess />}
               />
               <Route path='/pricing/cancel' element={<SubscriptionCancel />} />
+              
+              {/* Specialized Analysis Pages */}
+              <Route path='/psychology' element={<Psychology />} />
+              <Route path='/spiritual' element={<Spiritual />} />
+              <Route path='/wellness' element={<TCM />} />
+              <Route path='/synthesis' element={<Synthesis />} />
             </Routes>
           </Suspense>
         </main>
@@ -131,7 +145,13 @@ const App: React.FC = () => {
           <SubscriptionProvider appType='astro'>
             <BirthDataProvider>
               <UpgradeModalProvider>
-                <ErrorBoundary>
+                <ErrorBoundary 
+                  level="page" 
+                  name="AstroApp"
+                  onError={(error, info) => {
+                    logger.error('App-level error:', { error: error.message, errorInfo: info });
+                  }}
+                >
                   <MainApp />
                   <UpgradeModalManager />
                 </ErrorBoundary>

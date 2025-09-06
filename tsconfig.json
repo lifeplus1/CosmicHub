@@ -35,12 +35,23 @@
       "@cosmichub/integrations": ["./packages/integrations/src"],
       "@cosmichub/pwa": ["./packages/pwa/src"],
       "@cosmichub/ui": ["./packages/ui/src"],
-      "@cosmichub/types": ["./packages/types/src"]
+      "@cosmichub/types": ["./packages/types/src"],
+      "@cosmichub/types/spiritual-ai": ["./packages/types/src/spiritual-ai.ts"],
+      "@cosmichub/types/spiritual-practices": [
+        "./packages/types/src/spiritual-practices.ts"
+      ]
     }
   },
   // Root acts as solution tsconfig only; actual source compilation handled by per-package/app tsconfigs
   // No include to avoid pulling in test/experimental files that cause build noise
-  "include": [],
+  "include": [
+    "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
+    "apps/mobile/**/*.ts",
+    "apps/mobile/**/*.tsx",
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx"
+  ],
   "exclude": ["node_modules", "dist", ".turbo", "build", "**/*.js"],
   "references": [
     { "path": "./packages/analytics" },

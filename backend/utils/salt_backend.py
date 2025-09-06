@@ -128,10 +128,10 @@ class FirestoreSaltBackend(SaltBackendProtocol):  # pragma: no cover - until rea
         try:
             if use_emulate:
                 raise ImportError("Emulation forced")
-            import google.cloud.firestore  # type: ignore
+            import google.cloud.firestore
 
             # Placeholder: real client wiring deferred.
-            self._client: Any = google.cloud.firestore.Client()  # type: ignore[attr-defined]  # noqa: E501
+            self._client: Any = google.cloud.firestore.Client()  # noqa: E501
             # Mark unimplemented operations by raising when used.
             self._emulated = False
         except Exception:
@@ -201,7 +201,7 @@ def get_salt_backend(refresh: bool = False) -> SaltBackendProtocol:
 def backend_storage_type(backend: SaltBackendProtocol) -> str:
     if isinstance(backend, InMemorySaltBackend):
         return "memory"
-    if isinstance(backend, FirestoreSaltBackend):  # type: ignore[arg-type]
+    if isinstance(backend, FirestoreSaltBackend):
         return "firestore"  # Currently unused (fallback maps to memory)
     return backend.__class__.__name__.lower()
 

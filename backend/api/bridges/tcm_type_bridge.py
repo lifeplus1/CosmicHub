@@ -11,26 +11,21 @@ Key principle: Accept dynamic data, but validate it immediately into known types
 """
 
 import logging
-from typing import Dict, List, Optional, Union, Tuple, cast, Literal, TypedDict
+from typing import Dict, List, Optional, Union, cast, Literal, TypedDict, Any
 from enum import Enum
 from datetime import datetime
 
 from backend.types.tcm_systems import (
     ElementInfo,
-    ElementInfoResponse,
     TCMCalculationData,
     ConstitutionAnalysis,
-    HealthRecommendationsResponse,
     WuXingElement,
     TCMConstitutionType,
-    TCMAnalysisData,
-    OrganSystemBalance,
-    MeridianFlowData,
     ElementalBalanceResponse,
-    ConstitutionAnalysisResponse,
-    TCMAnalysisResponse,
     TCMResponse,
-    TCMRequest
+    TCMAnalysisResponse,
+    HealthRecommendationsResponse,
+    ElementInfoResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -113,12 +108,13 @@ def safe_list_from_dict(data: Dict[str, object], key: str, default: Optional[Lis
     value = data.get(key, default)
     if isinstance(value, list):
         result: List[str] = []
-        for item in value:
+        # Use type: ignore since we're doing runtime type checking
+        for item in value:  # type: ignore[misc]
             if isinstance(item, str):
                 result.append(item)
             elif item is not None:
-                # Type assertion for the str() call
-                result.append(str(item))
+                # Safe conversion to string for non-None items
+                result.append(str(item))  # type: ignore[arg-type]
         return result
     elif isinstance(value, str):
         return [value]
@@ -132,6 +128,26 @@ def safe_optional_str_from_dict(data: Dict[str, object], key: str) -> Optional[s
     elif value is None:
         return None
     return str(value)
+
+def safe_dict_from_dict(data: Dict[str, object], key: str) -> Optional[Dict[str, Any]]:
+    """Extract dictionary value with type validation."""
+    value = data.get(key)
+    if isinstance(value, dict):
+        # Convert to Dict[str, Any] safely
+        return cast(Dict[str, Any], value)
+    elif value is None:
+        return None
+    else:
+        # For non-dict, non-None values, return empty dict as fallback
+        return {}
+
+def safe_dict_object_from_object(value: object) -> Dict[str, object]:
+    """Extract Dict[str, object] from object with type validation."""
+    if isinstance(value, dict):
+        # Cast to the expected type after validation
+        return cast(Dict[str, object], value)
+    else:
+        return {}
 
 # ===== TYPE VALIDATORS =====
 
@@ -252,7 +268,7 @@ class TCMTypeBridge:
                 emotion_balanced=safe_optional_str_from_dict(raw_data, "emotion_balanced"),
                 emotion_imbalanced=safe_optional_str_from_dict(raw_data, "emotion_imbalanced"),
                 planets=safe_list_from_dict(raw_data, "planets"),
-                hours=raw_data.get("hours") if isinstance(raw_data.get("hours"), dict) else {},
+                hours=safe_dict_from_dict(raw_data, "hours"),
             )
         except Exception as e:
             log_conversion_error(BridgeError.ELEMENT_CONVERSION, "engine_to_element_info", e)
@@ -264,42 +280,45 @@ class TCMTypeBridge:
         try:
             # Extract constitution analysis
             constitution_data = raw_calculation.get("constitution_analysis")
+            constitution_dict = safe_dict_object_from_object(constitution_data)
+            
             constitution_analysis = ConstitutionAnalysis(
                 constitutional_type=safe_str_from_dict(
-                    constitution_data if isinstance(constitution_data, dict) else {}, 
+                    constitution_dict, 
                     "constitutional_type", 
                     "unknown"
                 ),
                 constitution_traits=safe_list_from_dict(
-                    constitution_data if isinstance(constitution_data, dict) else {},
+                    constitution_dict,
                     "constitution_traits"
                 ),
                 primary_element=safe_str_from_dict(
-                    constitution_data if isinstance(constitution_data, dict) else {},
+                    constitution_dict,
                     "primary_element",
                     "earth"
                 ),
                 element_strength=safe_float_from_dict(
-                    constitution_data if isinstance(constitution_data, dict) else {},
+                    constitution_dict,
                     "element_strength"
                 )
             )
             
             # Extract health guidance
             health_guidance = raw_calculation.get("health_guidance", {})
-            if not isinstance(health_guidance, dict):
-                health_guidance = {}
+            health_dict = safe_dict_object_from_object(health_guidance)
+            
+            # Extract elemental balance
+            elemental_balance = raw_calculation.get("elemental_balance")
+            balance_dict = safe_dict_object_from_object(elemental_balance)
             
             return TCMCalculationData(
                 primary_element=safe_str_from_dict(raw_calculation, "primary_element", "earth"),
-                elemental_balance=TCMTypeBridge.validate_elemental_balance(
-                    raw_calculation.get("elemental_balance") if isinstance(raw_calculation.get("elemental_balance"), dict) else {}
-                ),
+                elemental_balance=TCMTypeBridge.validate_elemental_balance(balance_dict),
                 constitution_analysis=constitution_analysis,
                 analysis_confidence=safe_float_from_dict(raw_calculation, "analysis_confidence"),
-                dietary_recommendations=safe_list_from_dict(health_guidance, "dietary_recommendations"),
-                lifestyle_recommendations=safe_list_from_dict(health_guidance, "lifestyle_recommendations"),
-                seasonal_guidance=safe_optional_str_from_dict(raw_calculation, "seasonal_recommendations")
+                dietary_recommendations=safe_list_from_dict(health_dict, "dietary_recommendations"),
+                lifestyle_recommendations=safe_list_from_dict(health_dict, "lifestyle_recommendations"),
+                seasonal_guidance=safe_dict_from_dict(raw_calculation, "seasonal_recommendations")
             )
         except Exception as e:
             log_conversion_error(BridgeError.ANALYSIS_CONVERSION, "engine_to_calculation_data", e)
@@ -311,9 +330,12 @@ class TCMTypeBridge:
             )
 
     @staticmethod
-    def create_elemental_balance_response(raw_balance: Dict[str, object]) -> ElementalBalanceResponse:
+    def create_elemental_balance_response(raw_balance: Union[Dict[str, float], Dict[str, object]]) -> ElementalBalanceResponse:
         """Create elemental balance response from raw data."""
-        balance_dict = TCMTypeBridge.validate_elemental_balance(raw_balance)
+        # Convert to Dict[str, object] for validation
+        balance_input: Dict[str, object] = {k: v for k, v in raw_balance.items()}
+        
+        balance_dict = TCMTypeBridge.validate_elemental_balance(balance_input)
         
         # Find primary element (highest value)
         primary_element = max(balance_dict.items(), key=lambda x: x[1])[0] if balance_dict else "earth"
@@ -345,6 +367,69 @@ class TCMTypeBridge:
             api_version="1.0",
             generated_at=datetime.now().isoformat(),
             includes_detailed_analysis=include_detail,
+        )
+
+    @staticmethod
+    def create_tcm_analysis_response(
+        tcm_data: TCMCalculationData,
+        processing_time_ms: float,
+        includes_detailed_analysis: bool,
+        generated_at: str
+    ) -> TCMAnalysisResponse:
+        """Create properly typed TCM analysis response"""
+        return TCMAnalysisResponse(
+            success=True,
+            data=tcm_data,
+            calculation_method="traditional_chinese_medicine",
+            processing_time_ms=processing_time_ms,
+            api_version="1.0",
+            generated_at=generated_at,
+            includes_detailed_analysis=includes_detailed_analysis
+        )
+
+    @staticmethod
+    def create_health_recommendations_response(
+        element: str,
+        dietary_recommendations: List[str],
+        lifestyle_recommendations: List[str], 
+        element_info: ElementInfo,
+        generated_at: str
+    ) -> HealthRecommendationsResponse:
+        """Create properly typed health recommendations response"""
+        return HealthRecommendationsResponse(
+            element=validate_element_name(element),
+            dietary_recommendations=dietary_recommendations,
+            lifestyle_recommendations=lifestyle_recommendations,
+            optimal_season=element_info.season or "varies",
+            balanced_emotion=element_info.emotion_balanced or "balance",
+            dominant_organs=[
+                element_info.organ_yin or "unknown",
+                element_info.organ_yang or "unknown"
+            ],
+            generated_at=generated_at
+        )
+    
+    @staticmethod
+    def create_element_info_response(
+        element: str,
+        element_info: ElementInfo,
+        generated_at: str
+    ) -> ElementInfoResponse:
+        """Create properly typed element info response"""
+        return ElementInfoResponse(
+            element=validate_element_name(element),
+            season=element_info.season,
+            organs={
+                "yin": element_info.organ_yin,
+                "yang": element_info.organ_yang
+            },
+            emotions={
+                "balanced": element_info.emotion_balanced,
+                "imbalanced": element_info.emotion_imbalanced
+            },
+            planetary_influences=element_info.planets or [],
+            optimal_hours=element_info.hours or {},
+            generated_at=generated_at
         )
 
 # ===== ANALYTICS FUNCTIONS =====
@@ -389,11 +474,21 @@ def to_analytics_flat_schema(tcm_data: TCMCalculationData, user_context: Dict[st
         "timezone": user_context.get("timezone"),
     }
 
+# ===== CONVENIENCE FUNCTIONS =====
+
+def safe_get_element_data_typed(engine: Any, element: str) -> ElementInfo:
+    """Type-safe wrapper for getting element data"""
+    if engine and hasattr(engine, 'element_data') and element in engine.element_data:
+        raw_data = engine.element_data[element]
+        return TCMTypeBridge.engine_to_element_info(raw_data)
+    return ElementInfo()
+
 # ===== PUBLIC EXPORTS =====
 
 __all__ = [
     "TCMTypeBridge",
     "to_analytics_flat_schema",
+    "safe_get_element_data_typed",
     "BridgeError",
     "VALID_ELEMENTS",
     "DEFAULT_ELEMENTAL_BALANCE",

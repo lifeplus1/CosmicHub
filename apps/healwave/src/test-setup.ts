@@ -1,5 +1,190 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import React from 'react';
+
+// Mock environment variables for Firebase
+process.env.VITE_FIREBASE_API_KEY = 'mock-api-key';
+process.env.VITE_FIREBASE_PROJECT_ID = 'mock-project-id';
+process.env.VITE_FIREBASE_APP_ID = 'mock-app-id';
+process.env.VITE_FIREBASE_AUTH_DOMAIN = 'mock-auth-domain';
+process.env.VITE_FIREBASE_STORAGE_BUCKET = 'mock-storage-bucket';
+process.env.VITE_FIREBASE_MESSAGING_SENDER_ID = 'mock-sender-id';
+
+// Mock @cosmichub/config logger and API helpers
+vi.mock('@cosmichub/config', () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+  // API Result helpers for test compatibility
+  ok: vi.fn((data: unknown, message?: string) => ({
+    success: true,
+    data,
+    message: message || 'Success',
+  })),
+  fail: vi.fn((error: string, statusCode?: string) => ({
+    success: false,
+    error,
+    statusCode: statusCode || '500',
+  })),
+  toFailure: vi.fn((error: Error | { message?: string; response?: { status?: number } }) => ({
+    success: false,
+    error: error?.message || 'Error',
+    statusCode: 'response' in error && error.response?.status ? String(error.response.status) : '500',
+  })),
+  unwrap: vi.fn((result: { success: boolean; data?: unknown; error?: string }) => {
+    if (result.success) return result.data;
+    throw new Error(result.error);
+  }),
+  unwrapOr: vi.fn((result: { success: boolean; data?: unknown }, fallback: unknown) => {
+    return result.success ? result.data : fallback;
+  }),
+  mapSuccess: vi.fn((result: { success: boolean; data?: unknown }, fn: (data: unknown) => unknown) => {
+    if (result.success) {
+      return { ...result, data: fn(result.data) };
+    }
+    return result;
+  }),
+  mapFailure: vi.fn((result: { success: boolean }, fn: (result: unknown) => unknown) => {
+    if (!result.success) {
+      return fn(result);
+    }
+    return result;
+  }),
+  isSuccess: vi.fn((result: { success: boolean }) => result.success === true),
+  isFailure: vi.fn((result: { success: boolean }) => result.success === false),
+  mapResult: vi.fn((result: { success: boolean; data?: unknown }, successFn: (data: unknown) => unknown, failureFn: (result: unknown) => unknown) => {
+    return result.success ? successFn(result.data) : failureFn(result);
+  }),
+}));
+
+// Mock @cosmichub/ui components
+vi.mock('@cosmichub/ui', () => ({
+  // Button components
+  Button: vi.fn(({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) => 
+    React.createElement('button', { onClick, 'data-testid': 'ui-button', ...props }, children)
+  ),
+  ButtonPrimary: vi.fn(({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) => 
+    React.createElement('button', { onClick, 'data-testid': 'ui-button-primary', ...props }, children)
+  ),
+  ButtonSecondary: vi.fn(({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) => 
+    React.createElement('button', { onClick, 'data-testid': 'ui-button-secondary', ...props }, children)
+  ),
+
+  // Input components
+  Input: vi.fn(({ value, onChange, ...props }: { value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; [key: string]: unknown }) => 
+    React.createElement('input', { value, onChange, 'data-testid': 'ui-input', ...props })
+  ),
+  Select: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+    React.createElement('select', { 'data-testid': 'ui-select', ...props }, children)
+  ),
+  TextArea: vi.fn(({ value, onChange, ...props }: { value?: string; onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; [key: string]: unknown }) => 
+    React.createElement('textarea', { value, onChange, 'data-testid': 'ui-textarea', ...props })
+  ),
+
+  // Layout components
+  Card: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+    React.createElement('div', { 'data-testid': 'ui-card', ...props }, children)
+  ),
+  Modal: vi.fn(({ children, isOpen, onClose, ...props }: { children: React.ReactNode; isOpen?: boolean; onClose?: () => void; [key: string]: unknown }) => 
+    isOpen ? React.createElement('div', { 'data-testid': 'ui-modal', ...props }, 
+      React.createElement('button', { onClick: onClose, 'data-testid': 'modal-close' }, 'Close'),
+      children
+    ) : null
+  ),
+
+  // Error handling components
+  ErrorBoundary: vi.fn(({ children, name, ...props }: { children: React.ReactNode; name?: string; [key: string]: unknown }) => 
+    React.createElement('div', { 'data-testid': 'ui-error-boundary', 'data-name': name, ...props }, children)
+  ),
+  ChartErrorBoundary: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+    React.createElement('div', { 'data-testid': 'ui-chart-error-boundary', ...props }, children)
+  ),
+
+  // Navigation components
+  Tabs: {
+    Root: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+      React.createElement('div', { 'data-testid': 'ui-tabs-root', ...props }, children)
+    ),
+    List: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+      React.createElement('div', { 'data-testid': 'ui-tabs-list', ...props }, children)
+    ),
+    Trigger: vi.fn(({ children, value, ...props }: { children: React.ReactNode; value?: string; [key: string]: unknown }) => 
+      React.createElement('button', { 'data-testid': 'ui-tabs-trigger', 'data-value': value, ...props }, children)
+    ),
+    Content: vi.fn(({ children, value, ...props }: { children: React.ReactNode; value?: string; [key: string]: unknown }) => 
+      React.createElement('div', { 'data-testid': 'ui-tabs-content', 'data-value': value, ...props }, children)
+    ),
+  },
+
+  // Form components
+  Label: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+    React.createElement('label', { 'data-testid': 'ui-label', ...props }, children)
+  ),
+  Switch: vi.fn(({ checked, onCheckedChange, ...props }: { checked?: boolean; onCheckedChange?: (checked: boolean) => void; [key: string]: unknown }) => 
+    React.createElement('button', { 
+      'data-testid': 'ui-switch', 
+      'data-checked': checked,
+      onClick: () => onCheckedChange?.(!checked),
+      ...props
+    }, checked ? 'ON' : 'OFF')
+  ),
+  Slider: vi.fn(({ value, onValueChange, min, max, step, ...props }: { 
+    value?: number[]; 
+    onValueChange?: (value: number[]) => void; 
+    min?: number; 
+    max?: number; 
+    step?: number; 
+    [key: string]: unknown 
+  }) => 
+    React.createElement('input', {
+      type: 'range',
+      'data-testid': 'ui-slider',
+      value: value?.[0] || 0,
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => onValueChange?.([Number(e.target.value)]),
+      min,
+      max,
+      step,
+      ...props
+    })
+  ),
+
+  // Display components
+  Spinner: vi.fn(() => React.createElement('div', { 'data-testid': 'ui-spinner' }, 'Loading...')),
+  LoadingSpinner: vi.fn(() => React.createElement('div', { 'data-testid': 'ui-loading-spinner' }, 'Loading...')),
+  ProgressiveLoading: vi.fn(({ stage, message }: { stage?: string; message?: string }) => 
+    React.createElement('div', { 'data-testid': 'ui-progressive-loading' }, message || `Loading: ${stage}`)
+  ),
+  Progress: vi.fn(({ value, ...props }: { value?: number; [key: string]: unknown }) => 
+    React.createElement('div', { 'data-testid': 'ui-progress', 'data-value': value, ...props }, `${value}%`)
+  ),
+
+  // Utility components
+  Tooltip: {
+    Provider: vi.fn(({ children }: { children: React.ReactNode }) => children),
+    Root: vi.fn(({ children }: { children: React.ReactNode }) => children),
+    Trigger: vi.fn(({ children }: { children: React.ReactNode }) => children),
+    Content: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+      React.createElement('div', { 'data-testid': 'ui-tooltip-content', ...props }, children)
+    ),
+  },
+
+  // Dropdown/Menu components
+  DropdownMenu: {
+    Root: vi.fn(({ children }: { children: React.ReactNode }) => children),
+    Trigger: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+      React.createElement('button', { 'data-testid': 'ui-dropdown-trigger', ...props }, children)
+    ),
+    Content: vi.fn(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => 
+      React.createElement('div', { 'data-testid': 'ui-dropdown-content', ...props }, children)
+    ),
+    Item: vi.fn(({ children, onSelect, ...props }: { children: React.ReactNode; onSelect?: () => void; [key: string]: unknown }) => 
+      React.createElement('div', { 'data-testid': 'ui-dropdown-item', onClick: onSelect, ...props }, children)
+    ),
+  },
+}));
 
 // Mock window.matchMedia for all tests
 Object.defineProperty(window, 'matchMedia', {
@@ -79,3 +264,10 @@ globalThis.AudioContext ??= vi.fn().mockImplementation(() => ({
   destination: {},
   currentTime: 0,
 }));
+
+// Mock crypto.randomUUID for request ID generation
+Object.defineProperty(global, 'crypto', {
+  value: {
+    randomUUID: vi.fn(() => 'mock-uuid-123'),
+  },
+});

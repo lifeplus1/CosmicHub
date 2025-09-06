@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { devConsole } from '../config/devConsole';
 
 import { useAuth } from '@cosmichub/auth';
@@ -93,7 +93,7 @@ import DurationTimer from './DurationTimer';
   ],
 }; */
 
-const FrequencyControls = () => {
+const FrequencyControls: React.FC = React.memo(() => {
   const { user } = useAuth();
   const [frequency] = useState(528);
   const [binaural] = useState(0);
@@ -103,13 +103,27 @@ const FrequencyControls = () => {
   const [presetName, setPresetName] = useState('');
   const [showPresets, setShowPresets] = useState(false);
 
-  const togglePlayback = () => setIsPlaying(!isPlaying);
+  const togglePlayback = useCallback(() => {
+    setIsPlaying(!isPlaying);
+  }, [isPlaying]);
 
-  const handleSessionComplete = () => {
+  const handleSessionComplete = useCallback(() => {
     setIsPlaying(false);
-  };
+  }, []);
 
-  const handleSavePreset = async () => {
+  const handleDurationChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDuration(parseInt(e.target.value));
+  }, []);
+
+  const handlePresetNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPresetName(e.target.value);
+  }, []);
+
+  const togglePresets = useCallback(() => {
+    setShowPresets(!showPresets);
+  }, [showPresets]);
+
+  const handleSavePreset = useCallback(async () => {
     if (!presetName.trim()) return;
     try {
       const preset = {
@@ -132,7 +146,7 @@ const FrequencyControls = () => {
     } catch (error) {
       devConsole.error('Failed to save preset:', error);
     }
-  };
+  }, [presetName, frequency, binaural, duration, volume]);
 
   return (
     <div className='space-y-8'>
@@ -149,8 +163,9 @@ const FrequencyControls = () => {
           <select
             id='session-duration'
             value={duration}
-            onChange={e => setDuration(parseInt(e.target.value))}
+            onChange={handleDurationChange}
             className='w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
+            aria-label='Select session duration'
           >
             <option value={5}>5 minutes</option>
             <option value={10}>10 minutes</option>
@@ -174,7 +189,15 @@ const FrequencyControls = () => {
       <div className='flex flex-col items-center space-y-4'>
         <div className='flex space-x-4'>
           <button
+            type="button"
             onClick={togglePlayback}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                togglePlayback();
+              }
+            }}
+            aria-label={isPlaying ? 'Stop healing session' : 'Start healing session'}
             className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center space-x-2 ${
               isPlaying
                 ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg hover:shadow-red-500/25'
@@ -199,13 +222,41 @@ const FrequencyControls = () => {
 
       {user && (
         <div className='p-6 border bg-white/5 rounded-xl border-white/20'>
-          <button
-            onClick={() => setShowPresets(!showPresets)}
-            className='flex items-center justify-between w-full p-3 text-white transition-all duration-200 bg-white/10 rounded-xl hover:bg-white/20'
-          >
-            <span className='font-semibold'>Save Custom Preset</span>
-            <span className='text-xl'>{showPresets ? '−' : '+'}</span>
-          </button>
+          {!showPresets ? (
+            <button
+              type="button"
+              onClick={togglePresets}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  togglePresets();
+                }
+              }}
+              aria-label="Show preset options"
+              aria-expanded="false"
+              className='flex items-center justify-between w-full p-3 text-white transition-all duration-200 bg-white/10 rounded-xl hover:bg-white/20'
+            >
+              <span className='font-semibold'>Save Custom Preset</span>
+              <span className='text-xl'>+</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={togglePresets}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  togglePresets();
+                }
+              }}
+              aria-label="Hide preset options"
+              aria-expanded="true"
+              className='flex items-center justify-between w-full p-3 text-white transition-all duration-200 bg-white/10 rounded-xl hover:bg-white/20'
+            >
+              <span className='font-semibold'>Save Custom Preset</span>
+              <span className='text-xl'>−</span>
+            </button>
+          )}
 
           {showPresets && (
             <div className='mt-4 space-y-4'>
@@ -213,14 +264,17 @@ const FrequencyControls = () => {
                 type='text'
                 placeholder='Enter preset name...'
                 value={presetName}
-                onChange={e => setPresetName(e.target.value)}
+                onChange={handlePresetNameChange}
+                aria-label='Preset name'
                 className='w-full p-3 text-white transition-all border bg-white/10 backdrop-blur-sm border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
               />
               <button
+                type="button"
                 onClick={() => {
                   void handleSavePreset();
                 }}
                 disabled={!presetName.trim()}
+                aria-label='Save custom preset'
                 className='w-full py-3 font-semibold text-white transition-all duration-200 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-500 disabled:to-gray-600 rounded-xl disabled:cursor-not-allowed'
               >
                 Save Preset
@@ -241,6 +295,8 @@ const FrequencyControls = () => {
       </div>
     </div>
   );
-};
+});
+
+FrequencyControls.displayName = 'FrequencyControls';
 
 export default FrequencyControls;

@@ -16,8 +16,10 @@ const logger = {
 };
 
 interface Notification {
+  id: string;
+  title?: string;
   message: string;
-  type: 'info' | 'success' | 'error';
+  type: 'info' | 'success' | 'warning' | 'error';
   timestamp: number;
 }
 
@@ -30,9 +32,13 @@ interface CrossAppStore {
 export const useCrossAppStore = (): CrossAppStore => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = useCallback((notification: Notification): void => {
-    logger.info('Cross-app notification:', notification);
-    setNotifications(prev => [...prev, notification]);
+  const addNotification = useCallback((notification: Omit<Notification, 'id'>): void => {
+    const fullNotification: Notification = {
+      ...notification,
+      id: crypto.randomUUID(),
+    };
+    logger.info('Cross-app notification:', fullNotification);
+    setNotifications(prev => [...prev, fullNotification]);
   }, []);
 
   const clearNotifications = useCallback((): void => {

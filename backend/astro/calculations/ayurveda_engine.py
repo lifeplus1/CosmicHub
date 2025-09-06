@@ -5,13 +5,23 @@ Following Integration Strategy: ENHANCE vs CREATE NEW
 """
 
 import logging
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional, TYPE_CHECKING, Literal
 from datetime import datetime
+
+# Type aliases for better type safety
+if TYPE_CHECKING:
+    AyurvedaConstitutionType = Literal[
+        "vata", "pitta", "kapha",
+        "vata_pitta", "pitta_kapha", "vata_kapha", 
+        "tridoshic"
+    ]
+else:
+    AyurvedaConstitutionType = str
 
 try:
     from .ayurveda_schema import (
         AyurvedaAnalysisResult, AyurvedaConstitution, AyurvedaHealthGuidance,
-        AstrologyAyurvedaCorrelation, DoshaBalance, AyurvedaConstitutionType,
+        AstrologyAyurvedaCorrelation, DoshaBalance,
         AYURVEDA_DOSHA_DATA, PLANET_AYURVEDA_CORRELATIONS, 
         AYURVEDA_HOUSE_CORRELATIONS, AYURVEDA_SEASONAL_GUIDANCE
     )
@@ -19,7 +29,7 @@ except ImportError:
     # Fallback for standalone testing
     from ayurveda_schema import (
         AyurvedaAnalysisResult, AyurvedaConstitution, AyurvedaHealthGuidance,
-        AstrologyAyurvedaCorrelation, DoshaBalance, AyurvedaConstitutionType,
+        AstrologyAyurvedaCorrelation, DoshaBalance,
         AYURVEDA_DOSHA_DATA, PLANET_AYURVEDA_CORRELATIONS,
         AYURVEDA_HOUSE_CORRELATIONS, AYURVEDA_SEASONAL_GUIDANCE
     )
@@ -41,7 +51,7 @@ class AyurvedaEngine:
     Vedic astrology and Ayurveda while respecting both traditions.
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Ayurveda analysis engine"""
         self.doshas = ["vata", "pitta", "kapha"]
         self.dosha_data = AYURVEDA_DOSHA_DATA

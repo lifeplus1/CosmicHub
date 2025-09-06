@@ -68,33 +68,33 @@ def to_failure(error: Any, opts: FailureOptions) -> ApiFailure:  # noqa: E302
 # Type guards / utilities
 
 def is_success(result: ApiResult[T]) -> bool:  # noqa: E302
-    return result.success is True  # type: ignore[attr-defined]
+    return result.success is True
 
 def is_failure(result: ApiResult[T]) -> bool:  # noqa: E302
-    return result.success is False  # type: ignore[attr-defined]
+    return result.success is False
 
 def unwrap(result: ApiResult[T]) -> T:  # noqa: E302
-    if is_success(result):  # type: ignore[arg-type]
+    if is_success(result):
         return cast(ApiSuccess[T], result).data
     failure = cast(ApiFailure, result)
     code_part = f" (code {failure.code})" if failure.code else ""
     raise RuntimeError(f"ApiResult failure: {failure.error}{code_part}")
 
 def unwrap_or(result: ApiResult[T], fallback: T) -> T:  # noqa: E302
-    return cast(ApiSuccess[T], result).data if is_success(result) else fallback  # type: ignore[arg-type]  # noqa: E501
+    return cast(ApiSuccess[T], result).data if is_success(result) else fallback  # noqa: E501
 
 def map_result(result: ApiResult[T], on_success: Callable[[T], U], on_failure: Callable[[ApiFailure], U]) -> U:  # noqa: E302,E501
-    if is_success(result):  # type: ignore[arg-type]
+    if is_success(result):
         return on_success(cast(ApiSuccess[T], result).data)
     return on_failure(cast(ApiFailure, result))
 
 def map_success(result: ApiResult[T], fn: Callable[[T], U]) -> ApiResult[U]:  # noqa: E501, E302
-    if is_success(result):  # type: ignore[arg-type]
+    if is_success(result):
         suc = cast(ApiSuccess[T], result)
         return ok(fn(suc.data), suc.message)
     return cast(ApiFailure, result)
 
 def map_failure(result: ApiResult[T], fn: Callable[[ApiFailure], ApiFailure]) -> ApiResult[T]:  # noqa: E302,E501
-    if is_failure(result):  # type: ignore[arg-type]
+    if is_failure(result):
         return fn(cast(ApiFailure, result))
     return result

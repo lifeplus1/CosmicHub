@@ -57,11 +57,6 @@ const run = (cmd, args, cwd) =>
         );
         await run(
           'pnpm',
-          ['-F', '@cosmichub/subscriptions', 'build'],
-          resolve(__dirname, '../..')
-        );
-        await run(
-          'pnpm',
           ['-F', '@cosmichub/ui', 'build'],
           resolve(__dirname, '../..')
         );

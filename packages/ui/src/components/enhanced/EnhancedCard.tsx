@@ -10,7 +10,8 @@ import {
   useComponentContext,
   withPerformanceTracking,
 } from '@cosmichub/config/component-architecture';
-import styles from './EnhancedCard.module.css';
+import { enhancedCardStyles as styles } from '../../styles/modules';
+import './card-interactive.css';
 
 // Base card props
 export interface CardProps {
@@ -23,6 +24,7 @@ export interface CardProps {
   children?: React.ReactNode;
   onClick?: () => void;
   onKeyDown?: (event: React.KeyboardEvent) => void;
+  'aria-label'?: string;
   'data-testid'?: string;
 }
 
@@ -40,6 +42,7 @@ const BaseCard = forwardRef<HTMLDivElement, CardProps>(
       loading = false,
       className = '',
       children,
+      'aria-label': ariaLabel,
       'data-testid': testId = 'card',
       ...props
     },
@@ -69,6 +72,7 @@ const BaseCard = forwardRef<HTMLDivElement, CardProps>(
         tabIndex={clickable && !disabled ? 0 : undefined}
         aria-disabled='true'
         aria-busy={loading ? 'true' : 'false'}
+        aria-label={clickable ? ariaLabel : undefined}
         {...props}
       >
         {loading && (
@@ -87,6 +91,7 @@ const BaseCard = forwardRef<HTMLDivElement, CardProps>(
         tabIndex={clickable && !disabled ? 0 : undefined}
         aria-disabled='false'
         aria-busy={loading ? 'true' : 'false'}
+        aria-label={clickable ? ariaLabel : undefined}
         {...props}
       >
         {loading && (
@@ -231,13 +236,15 @@ Card.Footer = CardFooter;
 
 // Enhanced card variants
 export const InteractiveCard = forwardRef<
-  HTMLDivElement,
+  HTMLButtonElement,
   CardProps & {
     onClick?: () => void;
     onKeyDown?: (event: React.KeyboardEvent) => void;
   }
->(({ onClick, onKeyDown, ...props }) => {
+>(({ onClick, onKeyDown, 'aria-label': ariaLabel, disabled, 'data-testid': testId, ...props }, ref) => {
   const handleKeyDown = (event: React.KeyboardEvent): void => {
+    if (disabled) return;
+    
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onClick?.();
@@ -245,13 +252,27 @@ export const InteractiveCard = forwardRef<
     onKeyDown?.(event);
   };
 
+  const handleClick = () => {
+    if (disabled) return;
+    onClick?.();
+  };
+
   return (
-    <Card
-      {...props}
-      clickable
-      onClick={onClick ?? (() => {})}
+    <button
+      ref={ref}
+      disabled={disabled}
+      tabIndex={disabled ? -1 : 0}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
-    />
+      aria-label={ariaLabel ?? 'Interactive card'}
+      className={`card-interactive-button ${disabled ? 'card-interactive-button--disabled' : ''}`}
+      data-testid={testId}
+    >
+      <Card
+        {...props}
+        clickable
+      />
+    </button>
   );
 });
 

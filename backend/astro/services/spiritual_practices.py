@@ -13,17 +13,29 @@ Traditional sources: Golden Dawn, Kabbalah, Tarot esoteric traditions
 Digital adaptations preserving authenticity and safety
 """
 
-from typing import Dict, List, Optional, Union, Literal, TypedDict
+from typing import Dict, List, Optional, Union, Literal, TypedDict, Any, Protocol, runtime_checkable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 import logging
 from enum import Enum
 
-# Core spiritual imports
-from .spiritual import SpiritualEngine, TarotCard, TreeOfLifePath
-from .spiritual_ai_enhanced import SpiritualAIEnhanced
-from .spiritual_education import SpiritualEducationEngine
+# Create protocol definitions for missing classes
+@runtime_checkable
+class SpiritualEngine(Protocol):
+    """Protocol for spiritual calculation engine"""
+    def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]: ...
+
+@runtime_checkable  
+class TarotCard(Protocol):
+    """Protocol for tarot card representation"""
+    name: str
+    meaning: str
+    
+@runtime_checkable
+class TreeOfLifePath(Protocol):
+    """Protocol for Tree of Life path representation"""
+    number: int
+    name: str
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +196,7 @@ class SpiritualPracticesEngine:
     - Progressive safety protocols
     """
     
-    def __init__(self, spiritual_engine: SpiritualEngine, ai_engine: SpiritualAIEnhanced):
+    def __init__(self, spiritual_engine: SpiritualEngine, ai_engine: Any):
         self.spiritual = spiritual_engine
         self.ai_enhanced = ai_engine
         self.safety_protocols = self._initialize_safety_protocols()
@@ -273,7 +285,7 @@ class SpiritualPracticesEngine:
             )
         }
     
-    def assess_practice_readiness(self, user_id: str, practice_type: str, level: PracticeLevel) -> Dict[str, Union[bool, List[str]]]:
+    def assess_practice_readiness(self, user_id: str, practice_type: str, level: PracticeLevel) -> Dict[str, Any]:
         """
         Assess user readiness for specific spiritual practice
         
@@ -548,8 +560,8 @@ class SpiritualPracticesEngine:
             # Return safe default routine
             return DailyPracticeRoutine(
                 level=PracticeLevel.BEGINNER,
-                morning_practice={"duration": 5, "practices": ["Grounding", "Breath awareness"]},
-                evening_practice={"duration": 5, "practices": ["Gratitude", "Grounding"]},
+                morning_practice={"duration": 5, "type": "basic_grounding"},
+                evening_practice={"duration": 5, "type": "gratitude_practice"},
                 completion_status={"morning_complete": False, "evening_complete": False, "insights_journaled": False},
                 insights=[],
                 next_progression="Continue building foundation",
@@ -576,7 +588,8 @@ class SpiritualPracticesEngine:
             }
             
             # Check session frequency (prevent overuse)
-            if self._check_session_frequency(user_id, practice_session.get("type")):
+            practice_type = practice_session.get("type")
+            if practice_type and self._check_session_frequency(user_id, practice_type):
                 safety_status["warnings"].append("High practice frequency - ensure adequate rest")
             
             # Check preparation completeness
@@ -639,13 +652,20 @@ class SpiritualPracticesEngine:
             progress_analysis = self._analyze_progress_patterns(user_id)
             
             # Generate insights using AI enhancement
-            ai_insights = self.ai_enhanced.cross_system_synthesis(
-                {
-                    "practice_history": self.user_progress[user_id]["sessions"][-10:],  # Last 10 sessions
-                    "current_level": self.user_progress[user_id]["current_level"].value,
-                    "total_experience": self.user_progress[user_id]["total_hours"]
-                }
+            practice_data = {
+                "practice_history": self.user_progress[user_id]["sessions"][-10:],  # Last 10 sessions
+                "current_level": self.user_progress[user_id]["current_level"].value,
+                "total_experience": self.user_progress[user_id]["total_hours"]
+            }
+            
+            # Use available spiritual_theme_synthesis method
+            ai_synthesis = self.ai_enhanced.spiritual_theme_synthesis(
+                birth_data={},  # Empty birth data for practice analysis
+                spiritual_systems=practice_data
             )
+            
+            # Extract insights text from synthesis result
+            ai_insights = ai_synthesis.get("spiritual_themes", []) if isinstance(ai_synthesis, dict) else []
             
             return {
                 "progress_summary": progress_analysis,

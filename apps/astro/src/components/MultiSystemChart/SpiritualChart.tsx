@@ -1,135 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import type { UnifiedBirthData } from '@cosmichub/types';
-
-// Updated TarotCard interface to match the actual data structure being passed
-interface TarotCard {
-  name: string;
-  suit: string;
-  arcana: 'major' | 'minor';
-  upright_meaning: string;
-  reversed_meaning: string;
-  astrological_correlation: string;
-  // Optional additional properties for future enhancement
-  hebrew_letter?: string;
-  astrology?: string;
-  tree_path?: number;
-  connects?: string;
-  meaning?: string;
-  number?: number;
-  keywords?: string[];
-  life_path_card?: TarotCard;
-  secondary_influence?: TarotCard;
-  life_path_number?: number;
-  spiritual_purpose?: string;
-  sephirah?: string;
-  numerology?: number;
-}
-
-interface Sephirah {
-  name: string;
-  english: string;
-  meaning: string;
-  position: number | string;
-  activation_level: number | string; // Can be number or 'inactive'/'primary'/'secondary'
-  meditation_focus: string;
-  hebrew?: string;
-  astrology?: string;
-  element?: string;
-  gematria?: number;
-  keywords?: string[];
-}
-
-// Keeping interface for future use
-interface _TreePath {
-  path: number;
-  hebrew_letter: string;
-  connects?: string[];
-  major_arcana: string;
-}
-
-interface KabbalahData {
-  primary_sephirah?: {
-    name: string;
-    hebrew_name: string;
-    planetary_association: string;
-    meaning: string;
-    path_guidance: string;
-  };
-  secondary_sephirah?: {
-    name: string;
-    hebrew_name: string;
-    planetary_association: string;
-    meaning: string;
-    path_guidance: string;
-  };
-  relevant_paths?: Array<{
-    from: string;
-    to: string;
-    hebrew_letter: string;
-    meaning: string;
-    tarot_card: string;
-  }>;
-  spiritual_focus?: string;
-  tree_guidance?: string;
-}
-
-interface TreeVisualizationData {
-  sephirot?: Sephirah[];
-  paths?: TarotCard[];
-  tree_layout?: {
-    path_connections?: Array<{ from: string; to: string }>;
-    sephirot_positions?: Record<string, { x: number; y: number }>;
-  };
-  active_correspondences?: {
-    daily?: { card: string; path: string };
-    life_path?: { card: string; path: string };
-    primary_sephirah?: { sephirah: string };
-  };
-}
-
-interface PathWorkingData {
-  primary_path?: {
-    tarot_card: string;
-    hebrew_letter: string;
-    path_number: number;
-    meditation_focus: string;
-    spiritual_work: string;
-    practical_exercises?: string[];
-  };
-  phases?: Array<{
-    phase: number;
-    name: string;
-    duration: string;
-    focus: string;
-    practices: string[];
-  }>;
-}
-
-interface HermeticCorrespondenceData {
-  daily_hermetic?: {
-    tarot: string;
-    hebrew_letter: string;
-    elemental: string;
-    golden_dawn_title: string;
-  };
-  sephirah_hermetic?: {
-    sephirah: string;
-    divine_name: string;
-    archangel: string;
-    gematria: number;
-    magical_image: string;
-  };
-}
-
-interface SynthesisData {
-  primary_themes?: string[];
-  spiritual_guidance?: string;
-  integration_focus?: string;
-  daily_practice?: string;
-  tree_visualization?: TreeVisualizationData;
-  path_working?: PathWorkingData;
-  hermetic_correspondences?: HermeticCorrespondenceData;
-}
+import type {
+  SpiritualSystemsData,
+  SpiritualSynthesisData,
+  SephirahData,
+  KabbalahSystemData,
+  KabbalahPathData
+} from './types';
+import { Card, CardContent, CardHeader, CardTitle, Button, ErrorBoundary } from '@cosmichub/ui';
 
 // Local correspondence interfaces for this component
 interface DailyFocusCorrespondence {
@@ -164,30 +42,8 @@ interface LocalCorrespondences {
   spiritual_center?: SpiritualCenterCorrespondence;
 }
 
-interface TarotData {
-  daily_card?: TarotCard;
-  life_path?: {
-    card: string;
-    meaning: string;
-    guidance: string;
-  };
-  suits?: Array<{
-    name: string;
-    element: string;
-    themes: string[];
-    strength: number;
-  }>;
-}
-
-interface SpiritualChartData {
-  tarot?: TarotData;
-  kabbalah?: KabbalahData;
-  synthesis?: SynthesisData;
-  correspondences?: LocalCorrespondences;
-}
-
 interface SpiritualChartProps {
-  chartData?: SpiritualChartData;
+  chartData?: SpiritualSystemsData;
   _birthData?: UnifiedBirthData; // Prefixed with _ to indicate intentionally unused
   isLoading?: boolean;
 }
@@ -200,131 +56,154 @@ const SpiritualChart: React.FC<SpiritualChartProps> = ({
   const [activeTab, setActiveTab] = useState<
     'tarot' | 'kabbalah' | 'tree' | 'synthesis'
   >('tarot');
+
+  // Memoized tab handlers for performance
+  const handleTarotTab = useCallback(() => setActiveTab('tarot'), []);
+  const handleKabbalahTab = useCallback(() => setActiveTab('kabbalah'), []);
+  const handleTreeTab = useCallback(() => setActiveTab('tree'), []);
+  const handleSynthesisTab = useCallback(() => setActiveTab('synthesis'), []);
+
   // Note: error state removed as it's not currently used but may be needed for future error handling
 
   // Handle loading state
   if (isLoading) {
     return (
-      <div className='cosmic-card bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/30'>
-        <div className='p-6 text-center'>
-          <div className='animate-spin w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full mx-auto mb-4'></div>
+      <Card className="cosmic-glass border-cosmic-purple/30 bg-cosmic-dark/50">
+        <CardContent className="p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-cosmic-purple border-t-transparent rounded-full mx-auto mb-4"></div>
           <p className='text-cosmic-silver'>
             Calculating spiritual guidance...
           </p>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   // Handle no data state
   if (!chartData) {
     return (
-      <div className='cosmic-card bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/30'>
-        <div className='p-6 text-center'>
-          <h3 className='font-bold text-purple-400 mb-2'>
+      <Card className="cosmic-glass border-cosmic-purple/30 bg-cosmic-dark/50">
+        <CardContent className="p-8 text-center">
+          <CardTitle className="text-2xl font-bold text-cosmic-gold mb-4 font-cinzel">
             🔮 SPIRITUAL-001 System Ready
-          </h3>
-          <p className='text-cosmic-silver/70 text-sm mb-4'>
+          </CardTitle>
+          <p className='text-cosmic-silver/70 text-lg mb-6'>
             Enter your birth details to receive comprehensive spiritual guidance
             from Tarot, Kabbalah Tree of Life, and Hermetic correspondences
           </p>
-          <div className='grid grid-cols-2 gap-4 text-xs'>
-            <div className='bg-purple-900/20 p-3 rounded'>
-              <span className='text-purple-300 font-medium'>🃏 Tarot</span>
-              <p className='text-cosmic-silver/60'>
-                78-card system with Tree of Life paths
-              </p>
-            </div>
-            <div className='bg-yellow-900/20 p-3 rounded'>
-              <span className='text-yellow-300 font-medium'>🌟 Kabbalah</span>
-              <p className='text-cosmic-silver/60'>
-                10 Sephirot + 22 paths visualization
-              </p>
-            </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <Card className="border-cosmic-purple/20 bg-cosmic-purple/10">
+              <CardContent className="p-4">
+                <h4 className='text-cosmic-gold font-semibold mb-2'>🃏 Tarot</h4>
+                <p className='text-cosmic-silver/60 text-sm'>
+                  78-card system with Tree of Life paths
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-cosmic-gold/20 bg-cosmic-gold/10">
+              <CardContent className="p-4">
+                <h4 className='text-cosmic-gold font-semibold mb-2'>🌟 Kabbalah</h4>
+                <p className='text-cosmic-silver/60 text-sm'>
+                  10 Sephirot + 22 paths visualization
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className='cosmic-card bg-gradient-to-br from-purple-900/10 to-indigo-900/10 border border-purple-500/20'>
-      <div className='p-6'>
-        <h2 className='text-2xl font-bold text-purple-400 mb-6 flex items-center'>
-          <span className='mr-3'>🔮</span>
+    <Card className="cosmic-glass border-cosmic-gold/20 shadow-2xl shadow-cosmic-purple/20">
+      <CardHeader className="border-b border-cosmic-gold/10">
+        <CardTitle className="text-3xl font-bold text-cosmic-gold font-cinzel flex items-center gap-3">
+          <span>🔮</span>
           Spiritual Systems Analysis
-          <span className='ml-2 text-xs bg-purple-500/20 px-2 py-1 rounded-full'>
+          <span className='text-xs bg-cosmic-purple/20 text-cosmic-gold px-3 py-1 rounded-full border border-cosmic-purple/30'>
             SPIRITUAL-001
           </span>
-        </h2>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-8">
 
         {/* Enhanced Tab Navigation */}
-        <div className='flex space-x-1 mb-6 bg-cosmic-black/30 p-1 rounded-lg'>
-          <button
-            onClick={() => setActiveTab('tarot')}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'tarot'
-                ? 'bg-purple-500/30 text-purple-300 border border-purple-400/30'
-                : 'text-cosmic-silver hover:text-purple-300 hover:bg-purple-500/10'
-            }`}
+        <div className='flex flex-wrap gap-2 mb-8 p-2 bg-cosmic-dark/30 rounded-xl border border-cosmic-silver/10'>
+          <Button
+            onClick={handleTarotTab}
+            variant={activeTab === 'tarot' ? 'cosmic' : 'outline'}
+            size="sm"
+            className="flex-1 min-w-0"
+            aria-label="View Tarot analysis"
           >
             🃏 Tarot
-          </button>
-          <button
-            onClick={() => setActiveTab('kabbalah')}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'kabbalah'
-                ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-400/30'
-                : 'text-cosmic-silver hover:text-yellow-300 hover:bg-yellow-500/10'
-            }`}
+          </Button>
+          <Button
+            onClick={handleKabbalahTab}
+            variant={activeTab === 'kabbalah' ? 'cosmic' : 'outline'}
+            size="sm"
+            className="flex-1 min-w-0"
+            aria-label="View Kabbalah analysis"
           >
             🌟 Kabbalah
-          </button>
-          <button
-            onClick={() => setActiveTab('tree')}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'tree'
-                ? 'bg-green-500/30 text-green-300 border border-green-400/30'
-                : 'text-cosmic-silver hover:text-green-300 hover:bg-green-500/10'
-            }`}
+          </Button>
+          <Button
+            onClick={handleTreeTab}
+            variant={activeTab === 'tree' ? 'cosmic' : 'outline'}
+            size="sm"
+            className="flex-1 min-w-0"
+            aria-label="View Tree of Life analysis"
           >
             🌳 Tree of Life
-          </button>
-          <button
-            onClick={() => setActiveTab('synthesis')}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'synthesis'
-                ? 'bg-teal-500/30 text-teal-300 border border-teal-400/30'
-                : 'text-cosmic-silver hover:text-teal-300 hover:bg-teal-500/10'
-            }`}
+          </Button>
+          <Button
+            onClick={handleSynthesisTab}
+            variant={activeTab === 'synthesis' ? 'cosmic' : 'outline'}
+            size="sm"
+            className="flex-1 min-w-0"
+            aria-label="View Synthesis analysis"
           >
             ⚡ Synthesis
-          </button>
+          </Button>
         </div>
 
         {/* Tab Content */}
-        <div className='min-h-96'>
-          {activeTab === 'tarot' && <TarotSection data={chartData.tarot} />}
+        <main className='min-h-96' role="tabpanel" aria-label={`${activeTab} spiritual analysis`}>
+          {activeTab === 'tarot' && (
+            <section aria-labelledby="tarot-heading">
+              <h2 id="tarot-heading" className="sr-only">Tarot Analysis</h2>
+              <TarotSection data={chartData.tarot} />
+            </section>
+          )}
           {activeTab === 'kabbalah' && (
-            <KabbalahSection data={chartData.kabbalah} />
+            <section aria-labelledby="kabbalah-heading">
+              <h2 id="kabbalah-heading" className="sr-only">Kabbalah Analysis</h2>
+              <KabbalahSection data={chartData.kabbalah} />
+            </section>
           )}
           {activeTab === 'tree' && (
-            <TreeOfLifeSection data={chartData.synthesis?.tree_visualization} />
+            <section aria-labelledby="tree-heading">
+              <h2 id="tree-heading" className="sr-only">Tree of Life Analysis</h2>
+              <TreeOfLifeSection data={chartData.synthesis?.tree_visualization} />
+            </section>
           )}
           {activeTab === 'synthesis' && (
-            <SynthesisSection
-              data={chartData.synthesis}
-              correspondences={chartData.correspondences}
-            />
+            <section aria-labelledby="synthesis-heading">
+              <h2 id="synthesis-heading" className="sr-only">Synthesis Analysis</h2>
+              <SynthesisSection
+                data={chartData.synthesis}
+                correspondences={chartData.correspondences}
+              />
+            </section>
           )}
-        </div>
-      </div>
-    </div>
+        </main>
+      </CardContent>
+    </Card>
   );
 };
 
 // Enhanced Tarot Section Component
-const TarotSection: React.FC<{ data?: SpiritualChartData['tarot'] }> = ({
+const TarotSection: React.FC<{ data?: SpiritualSystemsData['tarot'] }> = ({
   data,
 }) => {
   if (!data)
@@ -452,7 +331,7 @@ const TarotSection: React.FC<{ data?: SpiritualChartData['tarot'] }> = ({
 };
 
 // Enhanced Kabbalah Section Component
-const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
+const KabbalahSection: React.FC<{ data?: KabbalahSystemData }> = ({ data }) => {
   if (!data)
     return <div className='text-cosmic-silver'>No Kabbalah data available</div>;
 
@@ -548,7 +427,7 @@ const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
             Relevant Tree Paths
           </h3>
           <div className='space-y-3'>
-            {relevantPaths.slice(0, 3).map((path, index: number) => (
+            {relevantPaths.slice(0, 3).map((path: KabbalahPathData, index: number) => (
               <div key={index} className='bg-blue-900/20 rounded-lg p-3'>
                 <div className='flex justify-between items-start mb-2'>
                   <span className='text-blue-300 font-medium'>
@@ -576,7 +455,7 @@ const KabbalahSection: React.FC<{ data?: KabbalahData }> = ({ data }) => {
 };
 
 // New Interactive Tree of Life Section
-const TreeOfLifeSection: React.FC<{ data?: TreeVisualizationData }> = ({
+const TreeOfLifeSection: React.FC<{ data?: SpiritualSynthesisData['tree_visualization'] }> = ({
   data,
 }) => {
   if (!data)
@@ -624,7 +503,7 @@ const TreeOfLifeSection: React.FC<{ data?: TreeVisualizationData }> = ({
             })}
 
             {/* Render sephirot */}
-            {sephirot.map((seph: Sephirah, index: number) => {
+            {sephirot.map((seph: SephirahData, index: number) => {
               const position = layout?.sephirot_positions?.[seph.name];
               if (!position) return null;
 
@@ -718,8 +597,8 @@ const TreeOfLifeSection: React.FC<{ data?: TreeVisualizationData }> = ({
       {/* Sephirot Details */}
       <div className='grid md:grid-cols-2 gap-4'>
         {sephirot
-          .filter((s: Sephirah) => s.activation_level !== 'inactive')
-          .map((seph: Sephirah, index: number) => (
+          .filter((s: SephirahData) => s.activation_level !== 'inactive')
+          .map((seph: SephirahData, index: number) => (
             <div
               key={index}
               className={`rounded-lg p-4 border ${
@@ -756,7 +635,7 @@ const TreeOfLifeSection: React.FC<{ data?: TreeVisualizationData }> = ({
 
 // Enhanced Synthesis Section Component
 const SynthesisSection: React.FC<{
-  data?: SynthesisData;
+  data?: SpiritualSynthesisData;
   correspondences?: LocalCorrespondences;
 }> = ({ data, correspondences }) => {
   if (!data)
@@ -1033,5 +912,15 @@ const SynthesisSection: React.FC<{
   );
 };
 
-export default SpiritualChart;
-export type { SpiritualChartData, SpiritualChartProps };
+// Memoized component for performance optimization
+const MemoizedSpiritualChart = memo(SpiritualChart);
+
+// Enhanced component with error boundary
+const SpiritualChartWithErrorBoundary: React.FC<SpiritualChartProps> = (props) => (
+  <ErrorBoundary fallback={<div className="cosmic-error p-8 text-center">Error loading spiritual chart</div>}>
+    <MemoizedSpiritualChart {...props} />
+  </ErrorBoundary>
+);
+
+export default SpiritualChartWithErrorBoundary;
+export type { SpiritualChartProps };

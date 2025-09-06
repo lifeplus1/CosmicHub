@@ -297,13 +297,13 @@ class IncidentResponseSystem:
                     await self._add_timeline_event(incident, f"Service recovery failed with command: {cmd}")
 
             except Exception as e:
-                mitigation: MitigationAttempt = {
+                mitigation_failed: MitigationAttempt = {
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "action": cmd,
                     "result": "error",
                     "output": str(e)
                 }
-                incident.mitigation_attempts.append(mitigation)
+                incident.mitigation_attempts.append(mitigation_failed)
                 await self._add_timeline_event(incident, f"Recovery command error: {str(e)}")
 
         # Wait for service to come back online

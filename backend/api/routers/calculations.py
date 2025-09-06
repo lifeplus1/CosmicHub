@@ -7,6 +7,7 @@ Extracted from main.py for improved maintainability.
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime
 from typing import (
     TYPE_CHECKING,
@@ -40,19 +41,32 @@ from astro.calculations.human_design import calculate_human_design
 
 # DATA-001 Phase 1: Dual-format export foundation
 try:
-    from data_export.parquet_exporter import ParquetExporter
-    from data_export.config import get_export_base_path, is_parquet_export_enabled
+    # Primary import path (underscore package)
+    from data_export import (
+        ParquetExporter,  # type: ignore
+        get_export_base_path,  # type: ignore
+        is_parquet_export_enabled,  # type: ignore
+    )
     parquet_exporter = None  # Will be initialized on first use
-except ImportError:
-    ParquetExporter = None
+except Exception:  # pragma: no cover - fallback to legacy hyphenated shim
+    try:
+        from data_export.parquet_exporter import ParquetExporter  # type: ignore
+    except Exception:  # pragma: no cover
+        ParquetExporter = None  # type: ignore
+    try:
+        from data_export.config import (  # type: ignore
+            get_export_base_path,
+            is_parquet_export_enabled,
+        )
+    except Exception:  # pragma: no cover
+        get_export_base_path = lambda: '/tmp/cosmichub_exports'  # type: ignore
+        is_parquet_export_enabled = lambda: False  # type: ignore
     parquet_exporter = None
-    get_export_base_path = lambda: '/tmp/cosmichub_exports'
-    is_parquet_export_enabled = lambda: False
 
 # Import vectorized function if available at runtime; provide type-only import for static analysis
 try:  # Runtime optional import
-    from utils.vectorized_multi_system_utils import (
-        calculate_multi_system_chart_fast,  # type: ignore
+    from utils.vectorized_multi_system_utils import (  # type: ignore[attr-defined]
+        calculate_multi_system_chart_fast,  # type: ignore[attr-defined]
     )
 
     vectorized_multi_system_available = True
@@ -81,9 +95,6 @@ if TYPE_CHECKING:
             city: str,
             house_system: str,
         ) -> Dict[str, Any]: ...
-
-    # Provide a typed alias for the optional runtime symbol
-    calculate_multi_system_chart_fast: Optional[_VectorizedMultiSystemFunc]
 
 logger = logging.getLogger(__name__)
 
@@ -435,8 +446,6 @@ async def calculate_human_design_endpoint(
 
 
 # Cache for chart calculations with Redis integration ready
-import time
-
 chart_cache: Dict[str, Any] = {}
 
 
@@ -546,17 +555,6 @@ def clear_expired_cache() -> int:
 
     return len(expired_keys)
 
-    # Simple cleanup for in-memory cache
-    if len(chart_cache) > 100:
-        current_time = __import__("time").time()
-        expired_keys = [
-            key
-            for key, data in chart_cache.items()
-            if current_time - data["timestamp"] > data["ttl"]
-        ]
-        for key in expired_keys:
-            del chart_cache[key]
-
 
 def generate_cache_key(
     data: BirthData, calculation_type: str = "chart"
@@ -581,10 +579,9 @@ composite_vectorization_available = False
 # Runtime import - attempt to load the actual implementation
 try:
     # pylint: disable=ungrouped-imports
-    # flake8: noqa: F811
-    from utils.vectorized_composite_utils import (
-        VectorizedChartData,
-        create_vectorized_composite_calculator,
+    from utils.vectorized_composite_utils import (  # type: ignore  # noqa: F811
+        VectorizedChartData,  # noqa: F811
+        create_vectorized_composite_calculator,  # noqa: F811
     )
     composite_vectorization_available = True
 except Exception:
@@ -732,7 +729,7 @@ async def calculate_composite_chart(
                 individual_charts, request.method
             )
 
-            response_data: Dict[str, Any] = {
+            response_data = {
                 "composite_chart": composite_chart,
                 "relationship_analysis": {
                     "method": request.method,
@@ -936,7 +933,7 @@ async def calculate_psychology(data: BirthData) -> Dict[str, Any]:
     """
     try:
         # Import cache service
-        from backend.services.psychology_cache import PsychologyCacheService
+        from ...services.psychology_cache import PsychologyCacheService
         
         # Create cache key data from birth information
         cache_key_data = {

@@ -1,0 +1,46 @@
+# HealWave Production Dockerfile
+FROM node:20-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY turbo.json ./
+COPY apps/healwave/package.json ./apps/healwave/
+COPY packages/ ./packages/
+
+# Install dependencies (skip postinstall scripts to avoid missing tools)
+RUN pnpm install --no-frozen-lockfile --ignore-scripts
+
+# Copy source code
+COPY . .
+
+# Build HealWave app (this will automatically build dependencies if needed)
+RUN cd apps/healwave && pnpm run build
+
+# Production stage
+FROM nginx:alpine
+
+# Copy built app
+COPY --from=builder /app/apps/healwave/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY apps/healwave/deploy/nginx.conf /etc/nginx/nginx.conf
+
+# Copy SSL certificates (if using HTTPS)
+# COPY certs/ /etc/nginx/certs/
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+
+# Expose port
+EXPOSE 80
+EXPOSE 443
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

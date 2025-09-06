@@ -1,9 +1,0 @@
-{
-  "schemaVersion": 1,
-  "label": "lint status",
-  "message": "953 errors",
-  "color": "red",
-  "namedLogo": "eslint",
-  "logoColor": "white",
-  "style": "flat-square"
-}

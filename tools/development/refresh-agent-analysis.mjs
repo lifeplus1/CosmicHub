@@ -74,17 +74,16 @@ const AGENT_CONFIGS = {
   },
   'agent-7-apps-small-packages': {
     command:
-      'npx eslint apps/healwave/src apps/mobile/src packages/auth/src packages/frequency/src packages/hooks/src packages/integrations/src packages/pwa/src packages/storage/src packages/subscriptions/src packages/types/src --ext .ts,.tsx --max-warnings=35 --config eslint.config.js',
+      'npx eslint apps/healwave/src apps/mobile/src packages/auth/src packages/hooks/src packages/integrations/src packages/pwa/src packages/types/src --ext .ts,.tsx --max-warnings=35 --config eslint.config.js',
     agent: 'AppsPackagesAgent',
     targets: [
       'apps/healwave/src',
       'apps/mobile/src',
       'packages/auth/src',
-      'packages/frequency/src',
+      'packages/auth/src',
       'packages/hooks/src',
       'packages/integrations/src',
       'packages/pwa/src',
-      'packages/storage/src',
       'packages/subscriptions/src',
       'packages/types/src',
     ],

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaCalendarAlt, FaUser, FaClock, FaArrowRight } from 'react-icons/fa';
+import { formatDate } from '@cosmichub/config';
 
 interface BlogPost {
   id: string;
@@ -50,13 +51,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
   posts,
   maxPosts = 3,
 }) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+
 
   // Smart algorithm to find related posts
   const getRelatedPosts = (): BlogPost[] => {

@@ -16,7 +16,7 @@ async def create_preset(
     preset: PresetCreate,
     user: Dict[str, Any] = Depends(get_current_user),
     db: Any = Depends(get_firestore_client),
-):
+) -> Preset:
     if not user.get("is_premium", False):
         raise HTTPException(status_code=403, detail="Premium feature required")
     doc_ref = (
@@ -34,7 +34,7 @@ async def create_preset(
 async def get_presets(
     user: Dict[str, Any] = Depends(get_current_user),
     db: Any = Depends(get_firestore_client),
-):
+) -> List[Preset]:
     docs = (
         db.collection("users")
         .document(user["uid"])

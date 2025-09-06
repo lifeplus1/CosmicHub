@@ -1,49 +1,45 @@
-import React from 'react';
-import * as ProgressPrimitive from '@radix-ui/react-progress';
+import * as React from 'react';
 import { cn } from '../../utils/cn';
 
-interface ProgressProps {
-  value: number;
+export interface ProgressComponentProps {
+  value?: number;
   max?: number;
+  size?: 'sm' | 'default' | 'lg' | 'xl';
+  showText?: boolean;
   className?: string;
-  showValue?: boolean;
-  variant?: 'default' | 'sm' | 'lg' | 'xl';
-  animated?: boolean;
 }
 
-export const Progress = React.forwardRef<
-  React.ElementRef<typeof ProgressPrimitive.Root>,
-  ProgressProps
->(({
-  value,
-  max = 100,
-  className,
-  showValue = false,
-  variant = 'default',
-  ...props
-}, ref) => {
-  const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
+const Progress = React.forwardRef<HTMLDivElement, ProgressComponentProps>(
+  ({ value = 0, max = 100, size = 'default', showText = false, className, ...props }, ref) => {
+    const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
+    
+    // Round to nearest 5% for the step classes
+    const stepValue = Math.round(percentage / 5) * 5;
+    const widthClass = `w-step-${stepValue}`;
 
-  return (
-    <div className={cn('progress-container', variant !== 'default' && `progress-${variant}`, className)}>
-      <ProgressPrimitive.Root
+    return (
+      <div
         ref={ref}
-        className="progress-track"
-        value={percentage}
-        max={100}
+        className={cn('progress-container', size !== 'default' && `progress-${size}`, className)}
         {...props}
       >
-        <ProgressPrimitive.Indicator
-          style={{ '--progress-value': `${percentage}%` } as React.CSSProperties}
-        />
-      </ProgressPrimitive.Root>
-      {showValue && (
-        <div className="progress-text">
-          {Math.round(percentage)}%
+        <div className="progress-track">
+          <div 
+            className={cn('progress-fill progress-fill-animated', widthClass)}
+            role="progressbar"
+            aria-label={`Progress: ${Math.round(percentage)}% complete`}
+          />
         </div>
-      )}
-    </div>
-  );
-});
+        {showText && (
+          <div className="progress-text">
+            {Math.round(percentage)}%
+          </div>
+        )}
+      </div>
+    );
+  }
+);
 
 Progress.displayName = 'Progress';
+
+export { Progress };

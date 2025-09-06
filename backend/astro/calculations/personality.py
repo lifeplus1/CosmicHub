@@ -389,7 +389,7 @@ class PersonalityAnalyzer:
         }
 
 # Maintain backwards compatibility by importing the class under the old name
-PersonalityCalculator = PersonalityAnalyzer
+# PersonalityCalculator class is defined below
 import logging
 from typing import Any, Dict, List
 from dataclasses import dataclass

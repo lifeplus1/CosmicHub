@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.packages.json",
   "compilerOptions": {
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true,
+    "incremental": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.*", "**/*.spec.*"]
 }

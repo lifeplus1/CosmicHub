@@ -1,14 +1,28 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.packages.json",
   "compilerOptions": {
-    "outDir": "./dist",
     "rootDir": "./src",
+    "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": false,
+    "composite": true,
     "noEmit": false,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "isolatedModules": false,
+    "baseUrl": ".",
+    "paths": {
+      "@cosmichub/types": ["../types/dist"]
+    },
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "allowImportingTsExtensions": false,
+    "verbatimModuleSyntax": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "incremental": true
   },
   "include": [
     "src/**/*"

@@ -5,15 +5,15 @@ Handles Western, Vedic, Uranian and other astrological system data
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 from datetime import datetime
 
 # Import astrology types from centralized location
 from backend.types.astrology_systems import (
-    Planet, House, Aspect, Asteroid, Angle,
-    BirthData, UserProfile, AstrologyChart,
-    ChartResponse, MultiSystemChartResponse, CompositeChartResponse,
-    AstrologyHealthCheck, ZodiacSign, MajorPlanet
+    Planet, House, Aspect,
+    BirthData, 
+    ChartResponse, MultiSystemChartResponse,
+    AstrologyHealthCheck
 )
 
 logger = logging.getLogger(__name__)
@@ -89,57 +89,67 @@ class AstrologyTypeBridge:
             return 0.0
     
     @staticmethod
-    def safe_extract_planet_data(raw_planet: Dict[str, Any], planet_name: str) -> Dict[str, Any]:
-        """Safely extract and validate planet data"""
+    def safe_extract_planet_data(raw_planet: Dict[str, Any], planet_name: str) -> Planet:
+        """Safely extract planet data with type validation"""
         try:
-            return {
-                'name': AstrologyTypeBridge.validate_planet_name(planet_name),
-                'position': AstrologyTypeBridge.validate_degree(raw_planet.get('position', 0)),
-                'sign': AstrologyTypeBridge.validate_zodiac_sign(raw_planet.get('sign', 'aries')),
-                'degree': AstrologyTypeBridge.validate_degree(raw_planet.get('degree', 0)),
-                'house': AstrologyTypeBridge.validate_house_number(raw_planet.get('house', 1)),
-                'retrograde': bool(raw_planet.get('retrograde', False))
-            }
-        except Exception as e:
-            logger.error(f"Error extracting planet data for {planet_name}: {e}")
-            return {
-                'name': planet_name,
-                'position': 0.0,
-                'sign': 'aries',
-                'degree': 0.0,
-                'house': 1,
-                'retrograde': False
-            }
+            return Planet(
+                name=AstrologyTypeBridge.validate_planet_name(planet_name),
+                position=AstrologyTypeBridge.validate_degree(raw_planet.get('position', 0)),
+                sign=AstrologyTypeBridge._degree_to_sign(raw_planet.get('position', 0)),
+                degree=raw_planet.get('position', 0) % 30,
+                house=str(raw_planet.get('house', 1)),
+                retrograde=bool(raw_planet.get('retrograde', False))
+            )
+        except (ValueError, TypeError, KeyError) as e:
+            logger.warning(f"Failed to extract planet data for {planet_name}: {e}")
+            return Planet(
+                name=planet_name,
+                position=0.0,
+                sign='aries',
+                degree=0.0,
+                house='1',
+                retrograde=False
+            )
     
     @staticmethod
-    def safe_extract_house_data(raw_house: Dict[str, Any], house_number: int) -> Dict[str, Any]:
-        """Safely extract and validate house data"""
+    def safe_extract_house_data(raw_house: Dict[str, Any], house_number: int) -> House:
+        """Extract house data safely with type conversion"""
         try:
-            cusp = AstrologyTypeBridge.validate_degree(raw_house.get('cusp', 0))
-            # Determine sign from cusp degree
-            sign_index = int(cusp // 30)
-            sign_names = list(AstrologyTypeBridge.VALID_SIGNS)
-            sign = sign_names[sign_index] if 0 <= sign_index < 12 else 'aries'
+            cusp_position = float(raw_house.get('cusp', raw_house.get('degree', 0.0)))
+            sign = str(raw_house.get('sign', 'aries'))
             
-            return {
-                'number': AstrologyTypeBridge.validate_house_number(house_number),
-                'cusp': cusp,
-                'sign': sign,
-                'degree': cusp % 30,  # Degree within sign
-                'ruler': AstrologyTypeBridge._get_sign_ruler(sign)
-            }
+            return House(
+                house=house_number,
+                number=house_number,
+                sign=sign,
+                degree=cusp_position,
+                cusp=cusp_position,
+                ruler=str(raw_house.get('ruler', AstrologyTypeBridge._get_sign_ruler(sign)))
+            )
         except Exception as e:
-            logger.error(f"Error extracting house data for house {house_number}: {e}")
-            return {
-                'number': house_number,
-                'cusp': 0.0,
-                'sign': 'aries',
-                'degree': 0.0,
-                'ruler': 'mars'
-            }
+            logger.error(f"Error extracting house data: {e}")
+            return House(
+                house=house_number,
+                number=house_number,
+                sign='aries',
+                degree=0.0,
+                cusp=0.0,
+                ruler='mars'
+            )
+
+    @staticmethod
+    def _get_sign_ruler(sign: str) -> str:
+        """Get the traditional ruler of a zodiac sign"""
+        rulers = {
+            'aries': 'mars', 'taurus': 'venus', 'gemini': 'mercury',
+            'cancer': 'moon', 'leo': 'sun', 'virgo': 'mercury',
+            'libra': 'venus', 'scorpio': 'mars', 'sagittarius': 'jupiter',
+            'capricorn': 'saturn', 'aquarius': 'saturn', 'pisces': 'jupiter'
+        }
+        return rulers.get(sign.lower(), 'sun')
     
     @staticmethod
-    def safe_extract_aspect_data(raw_aspect: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def safe_extract_aspect_data(raw_aspect: Dict[str, Any]) -> Optional[Aspect]:
         """Safely extract and validate aspect data"""
         try:
             planet1 = raw_aspect.get('planet1', '')
@@ -150,75 +160,62 @@ class AstrologyTypeBridge:
             if not planet1 or not planet2:
                 return None
                 
-            return {
-                'planet1': AstrologyTypeBridge.validate_planet_name(planet1),
-                'planet2': AstrologyTypeBridge.validate_planet_name(planet2),
-                'type': aspect_type.lower(),
-                'orb': abs(orb),  # Ensure positive orb
-                'applying': bool(raw_aspect.get('applying', False))
-            }
+            return Aspect(
+                planet1=AstrologyTypeBridge.validate_planet_name(planet1),
+                planet2=AstrologyTypeBridge.validate_planet_name(planet2),
+                type=aspect_type.lower(),
+                orb=abs(orb),  # Ensure positive orb
+                applying="applying" if bool(raw_aspect.get('applying', False)) else "separating"
+            )
         except Exception as e:
             logger.error(f"Error extracting aspect data: {e}")
             return None
-    
-    @staticmethod
-    def _get_sign_ruler(sign: str) -> str:
-        """Get traditional ruler of zodiac sign"""
-        rulers = {
-            'aries': 'mars',
-            'taurus': 'venus',
-            'gemini': 'mercury',
-            'cancer': 'moon',
-            'leo': 'sun',
-            'virgo': 'mercury',
-            'libra': 'venus',
-            'scorpio': 'mars',  # Traditional ruler
-            'sagittarius': 'jupiter',
-            'capricorn': 'saturn',
-            'aquarius': 'saturn',  # Traditional ruler
-            'pisces': 'jupiter'    # Traditional ruler
-        }
-        return rulers.get(sign.lower(), 'sun')
     
     @staticmethod
     def convert_chart_data(raw_chart: Dict[str, Any]) -> Dict[str, Any]:
         """Convert raw chart calculation to typed chart data"""
         try:
             # Extract planets
-            planets = []
+            planets: List[Planet] = []
             raw_planets = raw_chart.get('planets', {})
             for planet_name, planet_data in raw_planets.items():
                 planet = AstrologyTypeBridge.safe_extract_planet_data(planet_data, planet_name)
                 planets.append(planet)
             
             # Extract houses
-            houses = []
+            houses: List[House] = []
             raw_houses = raw_chart.get('houses', [])
             for i, house_data in enumerate(raw_houses, 1):
                 if isinstance(house_data, dict):
-                    house = AstrologyTypeBridge.safe_extract_house_data(house_data, i)
+                    # Type-safe cast for dynamic data
+                    house_dict = cast(Dict[str, Any], house_data)
+                    house = AstrologyTypeBridge.safe_extract_house_data(house_dict, i)
                     houses.append(house)
             
             # Extract aspects
-            aspects = []
+            aspects: List[Aspect] = []
             raw_aspects = raw_chart.get('aspects', [])
             for aspect_data in raw_aspects:
                 if isinstance(aspect_data, dict):
-                    aspect = AstrologyTypeBridge.safe_extract_aspect_data(aspect_data)
+                    # Type-safe cast for dynamic data
+                    aspect_dict = cast(Dict[str, Any], aspect_data)
+                    aspect = AstrologyTypeBridge.safe_extract_aspect_data(aspect_dict)
                     if aspect:
                         aspects.append(aspect)
             
             # Extract angles (ASC, MC, etc.)
-            angles = []
+            angles: List[Dict[str, Any]] = []
             raw_angles = raw_chart.get('angles', {})
             for angle_name, angle_data in raw_angles.items():
                 if isinstance(angle_data, (dict, float, int)):
                     if isinstance(angle_data, (float, int)):
                         position = float(angle_data)
                     else:
-                        position = float(angle_data.get('position', 0))
+                        # Type-safe cast for dict access
+                        angle_dict = cast(Dict[str, Any], angle_data)
+                        position = float(angle_dict.get('position', 0))
                     
-                    angle = {
+                    angle: Dict[str, Any] = {
                         'name': angle_name.lower(),
                         'position': AstrologyTypeBridge.validate_degree(position),
                         'sign': AstrologyTypeBridge.validate_zodiac_sign(

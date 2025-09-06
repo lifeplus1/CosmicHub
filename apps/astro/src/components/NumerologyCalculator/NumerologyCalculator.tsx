@@ -1,9 +1,10 @@
 import { ChevronDownIcon } from '@radix-ui/react-icons';
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { useToast } from '../ToastProvider';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Accordion from '@radix-ui/react-accordion';
 import { apiConfig } from '../../config/environment';
+import { ErrorBoundary } from '@cosmichub/ui';
 
 interface NumerologyData {
   name: string;
@@ -104,7 +105,7 @@ interface NumerologyResult {
   };
 }
 
-const NumerologyCalculator: React.FC = () => {
+const NumerologyCalculator: React.FC = memo(function NumerologyCalculator() {
   const [formData, setFormData] = useState<NumerologyData>({
     name: '',
     year: new Date().getFullYear() - 30,
@@ -115,7 +116,7 @@ const NumerologyCalculator: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = useCallback(async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
@@ -176,59 +177,77 @@ const NumerologyCalculator: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData.name, formData.year, formData.month, formData.day, toast]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: name === 'name' ? value : parseInt(value),
     }));
-  };
+  }, []);
 
-  const renderCoreNumber = (
+  const renderCoreNumber = useCallback((
     title: string,
     number: number,
     meaning: string,
     components?: { month: number; day: number; year: number }
   ): React.ReactNode => (
-    <div className='cosmic-card'>
+    <article className='cosmic-card' aria-labelledby={`${title.toLowerCase().replace(' ', '-')}-title`}>
       <div className='p-4'>
         <div className='flex items-center justify-between mb-2'>
-          <h3 className='font-bold text-md'>{title}</h3>
-          <span className='px-3 py-1 text-lg text-white rounded-full bg-cosmic-purple'>
+          <h3 
+            id={`${title.toLowerCase().replace(' ', '-')}-title`}
+            className='font-bold text-md'
+          >
+            {title}
+          </h3>
+          <span 
+            className='px-3 py-1 text-lg text-white rounded-full bg-cosmic-purple'
+            aria-label={`${title} number is ${number}`}
+          >
             {number}
           </span>
         </div>
         <p className='text-cosmic-silver'>{meaning}</p>
         {components && (
-          <p className='mt-2 text-sm text-cosmic-silver/80'>
+          <p 
+            className='mt-2 text-sm text-cosmic-silver/80'
+            aria-label={`Calculation: month ${components.month} plus day ${components.day} plus year ${components.year} equals ${number}`}
+          >
             Calculation: {components.month} + {components.day} +{' '}
             {components.year} = {number}
           </p>
         )}
       </div>
-    </div>
-  );
+    </article>
+  ), []);
 
-  const SystemsDisplay = ({
+  const SystemsDisplay = useMemo(() => memo(function SystemsDisplay({
     systems,
   }: {
     systems: NumerologyResult['systems'];
-  }): React.ReactNode => (
-    <div className='flex flex-col space-y-6'>
-      <div className='cosmic-card'>
+  }): React.ReactNode {
+    return (
+    <div className='flex flex-col space-y-6' aria-label="Numerology systems comparison">
+      <div className='cosmic-card' role="group" aria-labelledby="pythagorean-title">
         <div className='p-4'>
-          <h3 className='mb-4 text-lg font-bold'>Pythagorean System</h3>
-          <p className='mb-4 text-cosmic-silver'>
+          <h3 id="pythagorean-title" className='mb-4 text-lg font-bold'>Pythagorean System</h3>
+          <p className='mb-4 text-cosmic-silver' aria-label="System description">
             {systems.pythagorean.system}
           </p>
-          <div className='grid grid-cols-3 gap-2 mb-4'>
+          <div 
+            className='grid grid-cols-3 gap-2 mb-4'
+            role="list"
+            aria-label="Letter values in Pythagorean system"
+          >
             {Object.entries(systems.pythagorean.letter_values).map(
               ([letter, values]) => (
                 <div
                   key={letter}
                   className='p-2 text-center rounded-md bg-gray-50'
+                  role="listitem"
+                  aria-label={`Letter ${letter} has values ${values.join(', ')}`}
                 >
                   <p className='font-bold'>{letter}</p>
                   <p className='text-sm'>{values.join(', ')}</p>
@@ -236,12 +255,12 @@ const NumerologyCalculator: React.FC = () => {
               )
             )}
           </div>
-          <p className='mb-2 text-cosmic-silver'>
+          <p className='mb-2 text-cosmic-silver' aria-label={`Total value: ${systems.pythagorean.total_value}`}>
             Total Value: {systems.pythagorean.total_value}
           </p>
-          <div className='flex flex-col space-y-2'>
+          <div className='flex flex-col space-y-2' role="list" aria-label="Pythagorean characteristics">
             {systems.pythagorean.characteristics.map((char, index) => (
-              <p key={index} className='text-cosmic-silver'>
+              <p key={index} className='text-cosmic-silver' role="listitem">
                 {char}
               </p>
             ))}
@@ -249,16 +268,22 @@ const NumerologyCalculator: React.FC = () => {
         </div>
       </div>
 
-      <div className='cosmic-card'>
+      <div className='cosmic-card' role="group" aria-labelledby="chaldean-title">
         <div className='p-4'>
-          <h3 className='mb-4 text-lg font-bold'>Chaldean System</h3>
-          <p className='mb-4 text-cosmic-silver'>{systems.chaldean.system}</p>
-          <div className='grid grid-cols-3 gap-2 mb-4'>
+          <h3 id="chaldean-title" className='mb-4 text-lg font-bold'>Chaldean System</h3>
+          <p className='mb-4 text-cosmic-silver' aria-label="System description">{systems.chaldean.system}</p>
+          <div 
+            className='grid grid-cols-3 gap-2 mb-4'
+            role="list"
+            aria-label="Letter values in Chaldean system"
+          >
             {Object.entries(systems.chaldean.letter_values).map(
               ([letter, values]) => (
                 <div
                   key={letter}
                   className='p-2 text-center rounded-md bg-gray-50'
+                  role="listitem"
+                  aria-label={`Letter ${letter} has values ${values.join(', ')}`}
                 >
                   <p className='font-bold'>{letter}</p>
                   <p className='text-sm'>{values.join(', ')}</p>
@@ -266,41 +291,57 @@ const NumerologyCalculator: React.FC = () => {
               )
             )}
           </div>
-          <p className='mb-2 text-cosmic-silver'>
+          <p className='mb-2 text-cosmic-silver' aria-label={`Total value: ${systems.chaldean.total_value}`}>
             Total Value: {systems.chaldean.total_value}
           </p>
-          <p className='mb-2 text-cosmic-silver'>
+          <p className='mb-2 text-cosmic-silver' aria-label={`Chaldean number: ${systems.chaldean.chaldean_number}`}>
             Chaldean Number: {systems.chaldean.chaldean_number}
           </p>
-          <p className='text-cosmic-silver'>{systems.chaldean.meaning}</p>
+          <p className='text-cosmic-silver' aria-label="Chaldean meaning">{systems.chaldean.meaning}</p>
         </div>
       </div>
     </div>
-  );
+    );
+  }), []);
 
   if (loading) {
     return (
-      <div className='py-10 text-center'>
-        <div className='mx-auto text-4xl text-purple-500 animate-spin'>⭐</div>
+      <div 
+        className='py-10 text-center'
+        role="status"
+        aria-live="polite"
+        aria-label="Calculating numerology chart"
+      >
+        <div 
+          className='mx-auto text-4xl text-purple-500 animate-spin'
+          aria-hidden="true"
+        >
+          ⭐
+        </div>
         <p className='mt-4 text-cosmic-silver'>
           Calculating your numerology chart...
         </p>
+        <div className="sr-only">
+          Please wait while we calculate your personalized numerology chart. This may take a few moments.
+        </div>
       </div>
     );
   }
 
   return (
-    <div className='flex flex-col space-y-6'>
+    <div className='flex flex-col space-y-6' role="main" aria-label="Numerology Calculator">
       <form
         onSubmit={e => {
           e.preventDefault();
           void handleSubmit(e);
         }}
+        aria-label="Calculate numerology chart"
       >
-        <div className='flex flex-col space-y-4'>
+        <fieldset className='flex flex-col space-y-4'>
+          <legend className="sr-only">Personal Information for Numerology Calculation</legend>
           <div>
             <label htmlFor='name' className='block mb-2 text-cosmic-gold'>
-              Full Name
+              Full Name <span aria-label="required">*</span>
             </label>
             <input
               id='name'
@@ -309,26 +350,42 @@ const NumerologyCalculator: React.FC = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder='Enter your full name'
+              required
+              aria-required="true"
+              aria-describedby="name-help"
+              autoComplete="name"
             />
+            <div id="name-help" className="sr-only">
+              Enter your complete legal name for accurate numerology calculation
+            </div>
           </div>
-          <div className='grid grid-cols-3 gap-4'>
+          <fieldset className='grid grid-cols-3 gap-4'>
+            <legend className="sr-only">Birth Date</legend>
             <div>
               <label htmlFor='year' className='block mb-2 text-cosmic-gold'>
-                Year
+                Year <span aria-label="required">*</span>
               </label>
               <input
                 id='year'
                 className='cosmic-input'
                 name='year'
                 type='number'
+                min='1900'
+                max={new Date().getFullYear()}
                 value={formData.year}
                 onChange={handleChange}
                 placeholder='Year'
+                required
+                aria-required="true"
+                aria-describedby="year-help"
               />
+              <div id="year-help" className="sr-only">
+                Enter your birth year (1900-{new Date().getFullYear()})
+              </div>
             </div>
             <div>
               <label htmlFor='month' className='block mb-2 text-cosmic-gold'>
-                Month
+                Month <span aria-label="required">*</span>
               </label>
               <input
                 id='month'
@@ -340,11 +397,17 @@ const NumerologyCalculator: React.FC = () => {
                 value={formData.month}
                 onChange={handleChange}
                 placeholder='Month'
+                required
+                aria-required="true"
+                aria-describedby="month-help"
               />
+              <div id="month-help" className="sr-only">
+                Enter your birth month (1-12)
+              </div>
             </div>
             <div>
               <label htmlFor='day' className='block mb-2 text-cosmic-gold'>
-                Day
+                Day <span aria-label="required">*</span>
               </label>
               <input
                 id='day'
@@ -356,97 +419,131 @@ const NumerologyCalculator: React.FC = () => {
                 value={formData.day}
                 onChange={handleChange}
                 placeholder='Day'
+                required
+                aria-required="true"
+                aria-describedby="day-help"
               />
+              <div id="day-help" className="sr-only">
+                Enter your birth day (1-31)
+              </div>
             </div>
-          </div>
+          </fieldset>
           <button
             className='cosmic-button'
             type='submit'
-            onClick={e => {
-              e.preventDefault();
-              void handleSubmit(e);
+            disabled={loading}
+            aria-describedby="submit-help"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                void handleSubmit(e);
+              }
             }}
           >
-            Calculate Numerology
+            {loading ? 'Calculating...' : 'Calculate Numerology'}
           </button>
-        </div>
+          <div id="submit-help" className="sr-only">
+            Press Enter or Space to calculate your numerology chart
+          </div>
+        </fieldset>
       </form>
 
       {result && (
-        <Tabs.Root>
-          <Tabs.List className='flex border-b border-cosmic-silver/30'>
-            <Tabs.Trigger
-              value='core'
-              className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
+        <section aria-label="Numerology Results">
+          <Tabs.Root defaultValue="core" aria-label="Numerology chart sections">
+            <Tabs.List 
+              className='flex border-b border-cosmic-silver/30'
+              role="tablist"
+              aria-label="Chart sections"
             >
-              Core Numbers
-            </Tabs.Trigger>
-            <Tabs.Trigger
-              value='cycles'
-              className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
-            >
-              Cycles & Challenges
-            </Tabs.Trigger>
-            <Tabs.Trigger
-              value='karmic'
-              className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
-            >
-              Karmic Numbers
-            </Tabs.Trigger>
-            <Tabs.Trigger
-              value='systems'
-              className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
-            >
-              Systems Comparison
-            </Tabs.Trigger>
-            <Tabs.Trigger
-              value='interpretation'
-              className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
-            >
-              Interpretation
-            </Tabs.Trigger>
-          </Tabs.List>
+              <Tabs.Trigger
+                value='core'
+                className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
+                role="tab"
+                aria-controls="core-panel"
+              >
+                Core Numbers
+              </Tabs.Trigger>
+              <Tabs.Trigger
+                value='cycles'
+                className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
+                role="tab"
+                aria-controls="cycles-panel"
+              >
+                Cycles & Challenges
+              </Tabs.Trigger>
+              <Tabs.Trigger
+                value='karmic'
+                className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
+                role="tab"
+                aria-controls="karmic-panel"
+              >
+                Karmic Numbers
+              </Tabs.Trigger>
+              <Tabs.Trigger
+                value='systems'
+                className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
+                role="tab"
+                aria-controls="systems-panel"
+              >
+                Systems Comparison
+              </Tabs.Trigger>
+              <Tabs.Trigger
+                value='interpretation'
+                className='px-4 py-2 data-[state=active]:bg-cosmic-purple/20 data-[state=active]:text-cosmic-purple'
+                role="tab"
+                aria-controls="interpretation-panel"
+              >
+                Interpretation
+              </Tabs.Trigger>
+            </Tabs.List>
 
-          <Tabs.Content value='core' className='p-4'>
-            <div className='grid grid-cols-2 gap-4'>
-              {renderCoreNumber(
-                'Life Path',
-                result.core_numbers.life_path.number,
-                result.core_numbers.life_path.meaning,
-                result.core_numbers.life_path.components
-              )}
-              {renderCoreNumber(
-                'Destiny',
-                result.core_numbers.destiny.number,
-                result.core_numbers.destiny.meaning
-              )}
-              {renderCoreNumber(
-                'Soul Urge',
-                result.core_numbers.soul_urge.number,
-                result.core_numbers.soul_urge.meaning
-              )}
-              {renderCoreNumber(
-                'Personality',
-                result.core_numbers.personality.number,
-                result.core_numbers.personality.meaning
-              )}
-              {renderCoreNumber(
-                'Birth Day',
-                result.core_numbers.birth_day.number,
-                result.core_numbers.birth_day.meaning
-              )}
-              {renderCoreNumber(
-                'Attitude',
-                result.core_numbers.attitude.number,
-                result.core_numbers.attitude.meaning
-              )}
-              {renderCoreNumber(
-                'Power Name',
-                result.core_numbers.power_name.number,
-                result.core_numbers.power_name.meaning
-              )}
-            </div>
-          </Tabs.Content>
+            <Tabs.Content 
+              value='core' 
+              className='p-4'
+              role="tabpanel"
+              id="core-panel"
+              aria-label="Core numbers section"
+            >
+              <div className='grid grid-cols-2 gap-4' aria-label="Core numerology numbers">
+                {renderCoreNumber(
+                  'Life Path',
+                  result.core_numbers.life_path.number,
+                  result.core_numbers.life_path.meaning,
+                  result.core_numbers.life_path.components
+                )}
+                {renderCoreNumber(
+                  'Destiny',
+                  result.core_numbers.destiny.number,
+                  result.core_numbers.destiny.meaning
+                )}
+                {renderCoreNumber(
+                  'Soul Urge',
+                  result.core_numbers.soul_urge.number,
+                  result.core_numbers.soul_urge.meaning
+                )}
+                {renderCoreNumber(
+                  'Personality',
+                  result.core_numbers.personality.number,
+                  result.core_numbers.personality.meaning
+                )}
+                {renderCoreNumber(
+                  'Birth Day',
+                  result.core_numbers.birth_day.number,
+                  result.core_numbers.birth_day.meaning
+                )}
+                {renderCoreNumber(
+                  'Attitude',
+                  result.core_numbers.attitude.number,
+                  result.core_numbers.attitude.meaning
+                )}
+                {renderCoreNumber(
+                  'Power Name',
+                  result.core_numbers.power_name.number,
+                  result.core_numbers.power_name.meaning
+                )}
+              </div>
+            </Tabs.Content>
 
           <Tabs.Content value='cycles' className='p-4'>
             <div className='flex flex-col space-y-6'>
@@ -681,9 +778,17 @@ const NumerologyCalculator: React.FC = () => {
             </div>
           </Tabs.Content>
         </Tabs.Root>
+        </section>
       )}
     </div>
   );
-};
+});
 
-export default NumerologyCalculator;
+// Wrap the component with ErrorBoundary for complete error handling
+const NumerologyCalculatorWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary fallback={<div>Something went wrong with the Numerology Calculator. Please try again.</div>}>
+    <NumerologyCalculator />
+  </ErrorBoundary>
+);
+
+export default NumerologyCalculatorWithErrorBoundary;

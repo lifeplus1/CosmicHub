@@ -115,7 +115,7 @@ class TestPsychologyAPI:
             assert response_data["status"] == "success"
             assert "psychology_data" in response_data
             assert response_data["location"] == "New York"
-            assert response_data["cached"] == False
+            assert response_data["cached"] is False
             assert "analysis_timestamp" in response_data
 
     def test_psychology_endpoint_cached_result(self, sample_birth_data, mock_psychology_result):
@@ -128,7 +128,7 @@ class TestPsychologyAPI:
         
         response_data = response.json()
         assert response_data["status"] == "success"
-        assert response_data["cached"] == True
+        assert response_data["cached"] is True
         assert response_data["psychology_data"] == mock_psychology_result
 
     def test_psychology_endpoint_validation_error(self):
@@ -434,7 +434,7 @@ class TestPsychologyIntegrationPerformance:
         
         assert response1.status_code == 200
         assert response2.status_code == 200
-        assert response2.json()["cached"] == True
+        assert response2.json()["cached"] is True
 
 
 if __name__ == "__main__":

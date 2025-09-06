@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { logIn, useAuth } from '@cosmichub/auth';
+import ErrorBoundary from './ErrorBoundary';
 // Removed unused useNavigate import
 
 interface LoginProps {
@@ -7,30 +8,30 @@ interface LoginProps {
   onClose?: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
+const Login: React.FC<LoginProps> = React.memo(({ onSwitchToSignup, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { user } = useAuth();
 
-  // If user is already logged in, show success message
-  if (user) {
-    return (
-      <div className='text-center'>
-        <div className='text-green-400 text-xl mb-4'>✅ Already logged in!</div>
-        <p className='text-gray-300 mb-4'>Welcome back, {user.email}</p>
-        <button
-          onClick={onClose}
-          className='px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors'
-        >
-          Continue
-        </button>
-      </div>
-    );
-  }
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    onClose?.();
+  }, [onClose]);
+
+  const handleSwitchToSignup = useCallback(() => {
+    onSwitchToSignup?.();
+  }, [onSwitchToSignup]);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -43,35 +44,60 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [email, password, onClose]);
+
+  // If user is already logged in, show success message
+  if (user) {
+    return (
+      <div className='max-w-md mx-auto'>
+        <div className='p-8 border shadow-2xl bg-gradient-to-br from-green-900/50 to-blue-900/50 backdrop-blur-md rounded-2xl border-green-500/20'>
+          <div className='text-center'>
+            <div className='mb-4 text-xl text-green-400'>✅ Already logged in!</div>
+            <p className='mb-4 text-gray-300'>Welcome back, {user.email}</p>
+            <button
+              onClick={handleClose}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleClose();
+                }
+              }}
+              aria-label='Continue to application'
+              className='px-6 py-2 text-white transition-colors bg-green-500 rounded-lg hover:bg-green-600'
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='max-w-md mx-auto'>
-      <div className='bg-gradient-to-br from-purple-900/50 to-blue-900/50 backdrop-blur-md rounded-2xl p-8 border border-purple-500/20 shadow-2xl'>
-        <div className='text-center mb-8'>
-          <div className='text-4xl mb-4'>🎵</div>
-          <h2 className='text-2xl font-bold text-white mb-2'>Welcome Back</h2>
+      <div className='p-8 border shadow-2xl bg-gradient-to-br from-purple-900/50 to-blue-900/50 backdrop-blur-md rounded-2xl border-purple-500/20'>
+        <div className='mb-8 text-center'>
+          <div className='mb-4 text-4xl'>🎵</div>
+          <h2 className='mb-2 text-2xl font-bold text-white'>Welcome Back</h2>
           <p className='text-gray-300'>
             Sign in to access your healing frequencies
           </p>
         </div>
 
         {error && (
-          <div className='bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-6'>
-            <p className='text-red-200 text-sm'>{error}</p>
+          <div className='p-3 mb-6 border rounded-lg bg-red-500/20 border-red-500/50'>
+            <p className='text-sm text-red-200'>{error}</p>
           </div>
         )}
 
         <form
-          onSubmit={e => {
-            void handleSubmit(e);
-          }}
+          onSubmit={handleSubmit}
           className='space-y-6'
         >
           <div>
             <label
               htmlFor='email'
-              className='block text-sm font-medium text-gray-200 mb-2'
+              className='block mb-2 text-sm font-medium text-gray-200'
             >
               Email Address
             </label>
@@ -79,10 +105,10 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
               type='email'
               id='email'
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               required
-              aria-label='Email input'
-              className='w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'
+              aria-label='Email address'
+              className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
               placeholder='your@email.com'
             />
           </div>
@@ -90,7 +116,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
           <div>
             <label
               htmlFor='password'
-              className='block text-sm font-medium text-gray-200 mb-2'
+              className='block mb-2 text-sm font-medium text-gray-200'
             >
               Password
             </label>
@@ -98,10 +124,10 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
               type='password'
               id='password'
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               required
-              aria-label='Password input'
-              className='w-full px-4 py-3 bg-white/10 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'
+              aria-label='Password'
+              className='w-full px-4 py-3 text-white placeholder-gray-400 transition-all border rounded-lg bg-white/10 border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
               placeholder='••••••••'
             />
           </div>
@@ -113,7 +139,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
           >
             {isLoading ? (
               <div className='flex items-center justify-center'>
-                <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2'></div>
+                <div className='w-5 h-5 mr-2 border-b-2 border-white rounded-full animate-spin'></div>
                 Signing In...
               </div>
             ) : (
@@ -126,8 +152,15 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
           <p className='text-gray-300'>
             Don&apos;t have an account?{' '}
             <button
-              onClick={onSwitchToSignup}
-              className='text-purple-400 hover:text-purple-300 font-medium transition-colors'
+              onClick={handleSwitchToSignup}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSwitchToSignup();
+                }
+              }}
+              aria-label='Switch to sign up form'
+              className='font-medium text-purple-400 transition-colors hover:text-purple-300'
             >
               Sign up here
             </button>
@@ -136,6 +169,33 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup, onClose }) => {
       </div>
     </div>
   );
-};
+});
 
-export default Login;
+Login.displayName = 'Login';
+
+// Export with ErrorBoundary wrapper
+const LoginWithErrorBoundary: React.FC<LoginProps> = (props) => (
+  <ErrorBoundary
+    fallback={
+      <div className='max-w-md mx-auto max-h-[90vh] overflow-y-auto p-8 border shadow-2xl bg-gradient-to-br from-red-900/50 to-red-800/50 backdrop-blur-md rounded-2xl border-red-500/20'>
+        <div className='text-center'>
+          <div className='mb-4 text-4xl'>⚠️</div>
+          <h2 className='mb-2 text-2xl font-bold text-white'>Login Error</h2>
+          <p className='mb-4 text-red-300'>
+            The login form encountered an error. Please refresh and try again.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className='px-6 py-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    }
+  >
+    <Login {...props} />
+  </ErrorBoundary>
+);
+
+export default LoginWithErrorBoundary;

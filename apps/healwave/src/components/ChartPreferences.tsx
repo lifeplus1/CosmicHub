@@ -2,9 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { logger } from '@cosmichub/config';
 
 // Create component-specific logger
-const chartLogger = logger.child({ module: 'ChartPreferences' });
+const chartLogger = logger.child ? logger.child({ module: 'ChartPreferences' }) : logger;
 
-import { Card, Button } from '@cosmichub/ui';
+import { Card } from '@cosmichub/ui';
 import { useToast } from './ToastProvider';
 import { useAuth } from '@cosmichub/auth';
 import { db } from '@cosmichub/config/firebase';
@@ -121,6 +121,13 @@ const ChartPreferences: React.FC = React.memo(() => {
     }
   }, [user?.uid, preferences, toast]);
 
+  const handleSaveKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      void handleSavePreferences();
+    }
+  }, [handleSavePreferences]);
+
   return (
     <div className='space-y-6'>
       <Card title='HealWave Preferences'>
@@ -207,15 +214,21 @@ const ChartPreferences: React.FC = React.memo(() => {
       </Card>
 
       <div className='text-center'>
-        <Button
+        <button
           onClick={() => {
             void handleSavePreferences();
           }}
-          variant='default'
+          onKeyDown={handleSaveKeyDown}
           disabled={isLoading || isLoadingPreferences || !user}
+          className={`px-6 py-3 font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+            isLoading || isLoadingPreferences || !user
+              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+          }`}
+          aria-label='Save preferences'
         >
           {isLoading ? 'Saving...' : 'Save Preferences'}
-        </Button>
+        </button>
         {isLoadingPreferences && (
           <p className='mt-2 text-sm text-cosmic-silver/70'>
             Loading your preferences...

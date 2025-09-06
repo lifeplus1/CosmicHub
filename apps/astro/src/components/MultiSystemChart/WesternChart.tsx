@@ -154,9 +154,9 @@ const WesternChart: React.FC<Props> = ({ data }) => {
                       <tbody>
                         {aspectsArray.map((aspect, idx) => {
                           // Safe property access with fallbacks
-                          const aspectType = aspect?.aspect || 'Unknown';
-                          const point1 = aspect?.point1 || 'Unknown';
-                          const point2 = aspect?.point2 || 'Unknown';
+                          const aspectType = aspect?.aspect ?? 'Unknown';
+                          const point1 = aspect?.point1 ?? 'Unknown';
+                          const point2 = aspect?.point2 ?? 'Unknown';
                           const orb =
                             typeof aspect?.orb === 'number' ? aspect.orb : 0;
                           const isExact = Boolean(aspect?.exact);

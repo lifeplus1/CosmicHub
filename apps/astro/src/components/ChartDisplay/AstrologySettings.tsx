@@ -199,10 +199,9 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
               <select
                 id='house-system-select'
                 value={settings.houseSystem}
-                onChange={e =>
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   updateSettings({
-                    houseSystem: e.target
-                      .value as AstrologySettings['houseSystem'],
+                    houseSystem: e.target.value as AstrologySettings['houseSystem'],
                   })
                 }
                 aria-label='House System'
@@ -229,10 +228,9 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     name='zodiacSystem'
                     value='tropical'
                     checked={settings.zodiacSystem === 'tropical'}
-                    onChange={e =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       updateSettings({
-                        zodiacSystem: e.target
-                          .value as AstrologySettings['zodiacSystem'],
+                        zodiacSystem: e.target.value as AstrologySettings['zodiacSystem'],
                       })
                     }
                     className='mr-2'
@@ -245,10 +243,9 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     name='zodiacSystem'
                     value='sidereal'
                     checked={settings.zodiacSystem === 'sidereal'}
-                    onChange={e =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       updateSettings({
-                        zodiacSystem: e.target
-                          .value as AstrologySettings['zodiacSystem'],
+                        zodiacSystem: e.target.value as AstrologySettings['zodiacSystem'],
                       })
                     }
                     className='mr-2'
@@ -277,7 +274,7 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     min='1'
                     max='15'
                     value={settings.orbs.major}
-                    onChange={e =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       updateNestedSettings('orbs', {
                         major: Number(e.target.value),
                       })
@@ -298,7 +295,7 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     min='1'
                     max='10'
                     value={settings.orbs.minor}
-                    onChange={e =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       updateNestedSettings('orbs', {
                         minor: Number(e.target.value),
                       })
@@ -319,7 +316,7 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     min='1'
                     max='20'
                     value={settings.orbs.luminaries}
-                    onChange={e =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       updateNestedSettings('orbs', {
                         luminaries: Number(e.target.value),
                       })
@@ -346,7 +343,7 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
                     <input
                       type='checkbox'
                       checked={settings.celestialBodies.traditionalPlanets}
-                      onChange={e =>
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         updateNestedSettings('celestialBodies', {
                           traditionalPlanets: e.target.checked,
                         })

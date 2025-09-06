@@ -322,7 +322,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
 
       // House numbers
       const midAngle = ((i * 30 + 15 - 90) * Math.PI) / 180;
-      const houseData = data.houses.find(h => h.number === i + 1);
+      const houseData = data?.houses.find(h => h.number === i + 1);
 
       const houseText = g.append('text')
         .attr('x', Math.cos(midAngle) * houseNumberRadius)
@@ -348,91 +348,93 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
     }
 
     // Draw planets
-    Object.entries(data.planets).forEach(([name, planet], index) => {
-      const angle = ((planet.position - 90) * Math.PI) / 180;
-      const isSelected = interactive && interactiveState.selectedPlanet === name;
-      const isHighlighted = interactive && interactiveState.highlightedAspects.some(aspectId =>
-        aspectId.includes(name)
-      );
+    if (data?.planets) {
+      Object.entries(data.planets).forEach(([name, planet], index) => {
+        const angle = ((planet.position - 90) * Math.PI) / 180;
+        const isSelected = interactive && interactiveState.selectedPlanet === name;
+        const isHighlighted = interactive && interactiveState.highlightedAspects.some(aspectId =>
+          aspectId.includes(name)
+        );
 
-      const planetGroup = g
-        .append('g')
-        .attr('class', 'planet-group')
-        .style('cursor', interactive ? 'pointer' : 'default');
+        const planetGroup = g
+          .append('g')
+          .attr('class', 'planet-group')
+          .style('cursor', interactive ? 'pointer' : 'default');
 
-      if (interactive) {
+        if (interactive) {
+          planetGroup
+            .on('click', () => handlePlanetClick(name))
+            .on('mouseover', function (event: MouseEvent) {
+              d3.select(this).select('circle').attr('r', size === 'sm' ? 20 : 25);
+              const tooltipContent = `
+                <strong>${name.charAt(0).toUpperCase() + name.slice(1)}</strong><br/>
+                Position: ${formatDegree(planet.position)}<br/>
+                House: ${planet.house}<br/>
+                ${planet.retrograde ? '<span style="color: red;">Retrograde ℞</span>' : 'Direct'}
+              `;
+              showTooltip(tooltipContent, { pageX: event.pageX, pageY: event.pageY });
+            })
+            .on('mouseout', function () {
+              if (!isSelected) {
+                d3.select(this).select('circle').attr('r', size === 'sm' ? 15 : 20);
+              }
+              hideTooltip();
+            });
+        }
+
+        // Planet background circle
+        const planetRadius_local = isSelected ? (size === 'sm' ? 20 : 25) : (size === 'sm' ? 15 : 20);
         planetGroup
-          .on('click', () => handlePlanetClick(name))
-          .on('mouseover', function (event: MouseEvent) {
-            d3.select(this).select('circle').attr('r', size === 'sm' ? 20 : 25);
-            const tooltipContent = `
-              <strong>${name.charAt(0).toUpperCase() + name.slice(1)}</strong><br/>
-              Position: ${formatDegree(planet.position)}<br/>
-              House: ${planet.house}<br/>
-              ${planet.retrograde ? '<span style="color: red;">Retrograde ℞</span>' : 'Direct'}
-            `;
-            showTooltip(tooltipContent, { pageX: event.pageX, pageY: event.pageY });
-          })
-          .on('mouseout', function () {
-            if (!isSelected) {
-              d3.select(this).select('circle').attr('r', size === 'sm' ? 15 : 20);
-            }
-            hideTooltip();
-          });
-      }
+          .append('circle')
+          .attr('cx', Math.cos(angle) * planetRadius)
+          .attr('cy', Math.sin(angle) * planetRadius)
+          .attr('r', planetRadius_local)
+          .attr('fill', isSelected ? (planetColors[name] ?? '#ffffff') : '#ffffff')
+          .attr('stroke', planetColors[name] ?? '#333333')
+          .attr('stroke-width', isHighlighted ? 4 : 2)
+          .attr('fill-opacity', 0.9)
+          .style('filter', isSelected ? 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' : 'none');
 
-      // Planet background circle
-      const planetRadius_local = isSelected ? (size === 'sm' ? 20 : 25) : (size === 'sm' ? 15 : 20);
-      planetGroup
-        .append('circle')
-        .attr('cx', Math.cos(angle) * planetRadius)
-        .attr('cy', Math.sin(angle) * planetRadius)
-        .attr('r', planetRadius_local)
-        .attr('fill', isSelected ? (planetColors[name] ?? '#ffffff') : '#ffffff')
-        .attr('stroke', planetColors[name] ?? '#333333')
-        .attr('stroke-width', isHighlighted ? 4 : 2)
-        .attr('fill-opacity', 0.9)
-        .style('filter', isSelected ? 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' : 'none');
-
-      // Planet symbol
-      planetGroup
-        .append('text')
-        .attr('x', Math.cos(angle) * planetRadius)
-        .attr('y', Math.sin(angle) * planetRadius)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'middle')
-        .attr('font-size', isSelected ? '20' : (size === 'sm' ? '14' : '16'))
-        .attr('font-weight', 'bold')
-        .attr('fill', isSelected ? '#ffffff' : (planetColors[name] ?? '#333333'))
-        .text(planetSymbols[name] ?? name.slice(0, 2).toUpperCase());
-
-      // Retrograde indicator
-      if (planet.retrograde) {
+        // Planet symbol
         planetGroup
           .append('text')
-          .attr('x', Math.cos(angle) * planetRadius + 15)
-          .attr('y', Math.sin(angle) * planetRadius - 15)
+          .attr('x', Math.cos(angle) * planetRadius)
+          .attr('y', Math.sin(angle) * planetRadius)
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'middle')
-          .attr('font-size', '12')
+          .attr('font-size', isSelected ? '20' : (size === 'sm' ? '14' : '16'))
           .attr('font-weight', 'bold')
-          .attr('fill', '#FF0000')
-          .text('℞');
-      }
+          .attr('fill', isSelected ? '#ffffff' : (planetColors[name] ?? '#333333'))
+          .text(planetSymbols[name] ?? name.slice(0, 2).toUpperCase());
 
-      // Animation
-      if (showAnimation) {
-        planetGroup
-          .style('opacity', 0)
-          .transition()
-          .delay(index * 100)
-          .duration(600)
-          .style('opacity', 1);
-      }
-    });
+        // Retrograde indicator
+        if (planet.retrograde) {
+          planetGroup
+            .append('text')
+            .attr('x', Math.cos(angle) * planetRadius + 15)
+            .attr('y', Math.sin(angle) * planetRadius - 15)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .attr('font-size', '12')
+            .attr('font-weight', 'bold')
+            .attr('fill', '#FF0000')
+            .text('℞');
+        }
+
+        // Animation
+        if (showAnimation) {
+          planetGroup
+            .style('opacity', 0)
+            .transition()
+            .delay(index * 100)
+            .duration(600)
+            .style('opacity', 1);
+        }
+      });
+    }
 
     // Draw aspects
-    if (showAspects && Array.isArray(data.aspects) && data.aspects.length > 0) {
+    if (showAspects && data?.aspects && Array.isArray(data.aspects) && data.aspects.length > 0) {
       data.aspects.forEach((aspect, index) => {
         if (
           typeof aspect.planet1 !== 'string' ||

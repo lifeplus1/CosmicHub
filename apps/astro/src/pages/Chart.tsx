@@ -9,10 +9,9 @@ import { BirthSummaryHeader } from '../components/ChartDisplay/BirthSummaryHeade
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
-import type { ExtendedBirthData, ChartBirthData } from '@cosmichub/types';
 import ChartDisplay from '../components/ChartDisplay/ChartDisplay';
 import type { ChartLike } from '../components/ChartDisplay/normalizeChart';
-import type { ApiResult } from '../services/apiResult';
+import type { ApiResult } from '@cosmichub/config';
 import type { ChartData } from '../services/api.types';
 import { componentLogger } from '../utils/componentLogger';
 import { useChartProcessing } from '@cosmichub/hooks';
@@ -22,6 +21,11 @@ import {
 } from '../services/analytics';
 import { parseBirthParams } from '../utils/birthDataTransforms';
 import { useCanonicalBirthData } from '../hooks/useCanonicalBirthData';
+import { 
+  toExtendedBirthData, 
+  type ExtendedBirthData,
+  type ChartBirthData
+} from '@cosmichub/types';
 
 // Import the proper types from the hook
 interface ProcessedPlanet {
@@ -172,10 +176,10 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
                   '../services/api'
                 );
                 const transformedData = transformBackendResponse(chartData);
-                console.log('✅ Saved chart transformation complete');
+                componentLogger.info('Chart', '✅ Saved chart transformation complete');
                 setChartData(transformedData);
               } catch (error) {
-                console.error('❌ Error transforming saved chart:', error);
+                componentLogger.error('Chart', '❌ Error transforming saved chart:', error);
                 setChartData(chartData); // Fall back to original
               }
             } else {
@@ -228,8 +232,16 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
     if (parsed === null) {
       return; // Missing or invalid param set -> leave existing state untouched.
     }
-    // Cast raw numeric params to generic incoming shape for context normalization
-    setBirthData(parsed as unknown as Record<string, unknown>);
+    // Convert raw numeric params to TextBirthData for context normalization
+    const textBirthData: ChartBirthData = {
+      birth_date: `${parsed.year}-${parsed.month.toString().padStart(2, '0')}-${parsed.day.toString().padStart(2, '0')}`,
+      birth_time: `${parsed.hour.toString().padStart(2, '0')}:${parsed.minute.toString().padStart(2, '0')}`,
+      latitude: parsed.lat,
+      longitude: parsed.lon,
+      city: parsed.city,
+      timezone: parsed.timezone,
+    };
+    setBirthData(textBirthData);
   }, [searchParams, setBirthData]);
 
   const canonicalBirthData = useCanonicalBirthData();
@@ -242,7 +254,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
       import('../services/api')
         .then(mod => {
           if (!fetchFn) {
-            setFetchImpl(() => mod.fetchChartData);
+            setFetchImpl(mod.fetchChartData);
           }
         })
         .catch(err => {
@@ -372,7 +384,8 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
 
   const handleViewWithSave = useCallback((): void => {
     if (birthData === null) return;
-    const storedBirthData = toStoredBirthData(birthData);
+    const extendedBirthData = toExtendedBirthData(birthData);
+    const storedBirthData = toStoredBirthData(extendedBirthData);
     try {
       sessionStorage.setItem('birthData', JSON.stringify(storedBirthData));
       componentLogger.info(
@@ -487,7 +500,7 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
     >
       {/* Header with birth data summary */}
       <BirthSummaryHeader
-        birthData={birthData}
+        birthData={toExtendedBirthData(birthData)}
         isLoading={isLoading}
         onEdit={handleEditBirthData}
         onRecalculate={handleRecalculate}

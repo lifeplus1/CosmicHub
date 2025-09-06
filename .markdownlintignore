@@ -1,13 +1,22 @@
 # Ignore generated and dependency files
 **/node_modules/**
+**/node-modules/**
 **/.git/**
 **/.cache/**
 **/dist/**
 **/build/**
 **/coverage/**
 **/docs/archive/**
-**/packages/**/node_modules/**
-**/apps/**/node_modules/**
-**/packages/**/node_modules/**
-**/apps/**/node_modules/**
+**/.pnpm/**
 **/pnpm/**
+**/npm/**
+**/.npm/**
+
+# Ignore temporary and build artifacts
+**/.next/**
+**/.nuxt/**
+**/.output/**
+**/.vitepress/cache/**
+**/.turbo/**
+**/tmp/**
+**/temp/**

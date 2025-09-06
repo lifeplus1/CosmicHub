@@ -69,6 +69,8 @@ export default [
       
       // Test results and report files
       '**/test-results-temp/**',
+      '**/test-report.html',
+      '**/*.test-report.html',
 
       // Additional build artifacts
       '**/storybook-static/**',
@@ -88,6 +90,7 @@ export default [
       '**/*.json',
       '**/*.yaml',
       '**/*.yml',
+      '**/*.html',
 
       // Generated type files
       '**/*.d.ts',
@@ -220,7 +223,7 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: './tsconfig.eslint.json',
+        projectService: true,
         ecmaFeatures: { jsx: true },
       },
     },
@@ -303,7 +306,7 @@ export default [
             {
               name: 'shared',
               message:
-                'Do not import from shared/. Use @cosmichub/subscriptions or other packages.',
+                'Do not import from shared/. Use @cosmichub/config or other packages.',
             },
           ],
           patterns: ['shared/*'],

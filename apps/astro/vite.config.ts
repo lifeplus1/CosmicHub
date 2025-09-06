@@ -58,7 +58,7 @@ export default defineConfig({
           // Chart and visualization chunks (heavy components)
           charts: [
             './src/components/ChartDisplay/ChartDisplay.tsx',
-            './src/features/ChartWheel.tsx',
+            './src/pages/ChartWheel.tsx',
             './src/components/MultiSystemChart/MultiSystemChartDisplay.tsx',
           ],
 
@@ -95,6 +95,9 @@ export default defineConfig({
         secure: false,
       },
     },
+    watch: {
+      ignored: ['**/test-results/**', '**/logs/**', '**/cache/**', '**/node_modules/**'],
+    },
   },
 
   preview: {
@@ -122,5 +125,11 @@ export default defineConfig({
   esbuild: {
     target: 'es2020',
     format: 'esm',
+    // Exclude test files and results from scanning
+    exclude: ['**/*.test.*', '**/test-results/**', '**/__tests__/**'],
+  },
+
+  define: {
+    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
   },
 });

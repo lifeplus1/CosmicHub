@@ -6,8 +6,17 @@ interface SpiritualPayload {
   autoLoad?: boolean;
 }
 
-interface SpiritualResult<T = any> {
-  data: T | undefined;
+interface SpiritualAnalysisData {
+  spiritual_level?: string;
+  learning_stage?: string;
+  recommendations?: string[];
+  ai_interpretation?: string;
+  generated_at?: string;
+  [key: string]: unknown;
+}
+
+interface SpiritualResult {
+  data: SpiritualAnalysisData | undefined;
   isLoading: boolean;
   error: Error | null;
   refresh: () => void;
@@ -18,7 +27,7 @@ export function useSpiritualChartData(payload: SpiritualPayload = {}): Spiritual
   const query = useQuery({
     queryKey: ['spiritual', 'analysis', payload],
     enabled: payload.autoLoad === true,
-    queryFn: async () => {
+    queryFn: async (): Promise<SpiritualAnalysisData> => {
       const res = await fetch('/api/spiritual/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,13 +41,17 @@ export function useSpiritualChartData(payload: SpiritualPayload = {}): Spiritual
         }),
       });
       if (!res.ok) throw new Error('Spiritual analysis failed');
-      return res.json();
+      const result = await res.json() as unknown;
+      if (typeof result === 'object' && result !== null) {
+        return result as SpiritualAnalysisData;
+      }
+      throw new Error('Invalid response format');
     },
   });
   return {
     data: query.data,
     isLoading: query.isLoading,
-    error: (query.error as Error) || null,
+    error: (query.error as Error) ?? null,
     refresh: () => { void query.refetch(); },
   };
 }

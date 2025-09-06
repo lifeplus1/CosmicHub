@@ -51,7 +51,7 @@ interface UserState {
   name: string;
 }
 
-interface ChartData {
+export interface ChartData {
   // Chart data structure - can be extended as needed
   [key: string]: unknown;
 }

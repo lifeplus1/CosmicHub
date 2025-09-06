@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 import { useAuth, useSubscription } from '@cosmichub/auth';
 import * as Tabs from '@radix-ui/react-tabs';
 import {
@@ -42,7 +42,7 @@ interface SubscriptionHookData {
 const UserProfile: React.FC = React.memo(() => {
   const { user } = useAuth();
   const subscriptionData = useSubscription() as unknown as SubscriptionHookData; // Narrowing locally; upstream hook lacks exported type
-  const navigate = useNavigate();
+  const { goTo } = useAppNavigation();
   const { subscription, userTier, isLoading, checkUsageLimit } =
     subscriptionData;
 
@@ -108,8 +108,15 @@ const UserProfile: React.FC = React.memo(() => {
   };
 
   const handleUpgrade = useCallback((): void => {
-    navigate('/upgrade');
-  }, [navigate]);
+    goTo('/upgrade');
+  }, [goTo]);
+
+  const handleUpgradeKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleUpgrade();
+    }
+  }, [handleUpgrade]);
 
   const tierKey = userTier.toLowerCase();
   const tiersTyped = HEALWAVE_TIERS satisfies Record<string, HealwaveSubscriptionTier>;
@@ -228,8 +235,9 @@ const UserProfile: React.FC = React.memo(() => {
                   </div>
                 </div>
                 <button
-                  className='w-full mt-4 cosmic-button sm:w-auto'
+                  className='w-full mt-4 cosmic-button sm:w-auto focus:outline-none focus:ring-2 focus:ring-cosmic-purple focus:ring-offset-2'
                   onClick={handleUpgrade}
+                  onKeyDown={handleUpgradeKeyDown}
                   aria-label={
                     currentTier?.name === 'Free'
                       ? 'Upgrade Plan'

@@ -12,65 +12,151 @@ import {
   getAstrologyDataType,
 } from './type-guards.js';
 
-// Define Zod schemas for validation
+// Enhanced Type Bridge System: Backward compatible Zod schema aligned with TypeScript interfaces
 const ChartSchema = z.object({
-  planets: z.array(
+  planets: z.record(
+    z.string(), // PlanetName key
     z.object({
       name: z.string(),
-      sign: z.string(),
-      degree: z.number(),
       position: z.number(),
-      house: z.string(),
-      retrograde: z.boolean().optional(),
-      // Use structured aspect schema instead of z.any
-      aspects: z
-        .array(
-          z.object({
-            planet1: z.string(),
-            planet2: z.string(),
-            type: z.string(),
-            orb: z.number(),
-            applying: z.string(),
-          })
-        )
-        .optional(),
+      degree: z.number().optional(), // Optional, defaults to position
+      sign: z.string(),
+      house: z.number(),
+      retrograde: z.boolean().optional().default(false), // Optional with default
+      speed: z.number().optional(), // Optional - can be computed
+      dignity: z.enum(['domicile', 'exaltation', 'fall', 'detriment']).optional(),
+      essential_dignity: z.number().optional(),
+      aspects: z.array(
+        z.object({
+          aspect_type: z.string(),
+          planet1: z.string(),
+          planet2: z.string(),
+          orb: z.number(),
+          applying: z.boolean(),
+          exact: z.boolean().optional(), // Optional with computed default
+          power: z.number().optional(), // Optional with computed default
+          aspect_angle: z.number().optional(), // Optional enhanced field
+          separating: z.boolean().optional(),
+          mutual_reception: z.boolean().optional(),
+          dignity_interaction: z.enum(['enhancement', 'conflict', 'neutral']).optional(),
+          timing: z.object({
+            peak_exact: z.string().optional(),
+            duration_days: z.number().optional(),
+          }).optional(),
+        })
+      ).optional(),
+      element: z.enum(['fire', 'earth', 'air', 'water']).optional(),
+      modality: z.enum(['cardinal', 'fixed', 'mutable']).optional(),
+      house_position: z.enum(['early', 'middle', 'late']).optional(),
     })
   ),
   houses: z.array(
     z.object({
-      house: z.number(),
-      number: z.number(),
-      sign: z.string(),
-      degree: z.number(),
+      number: z.number().int().min(1).max(12),
       cusp: z.number(),
-      ruler: z.string(),
+      sign: z.string(),
+      ruler: z.string().optional(), // PlanetName - optional for backward compatibility
+      modern_ruler: z.string().optional(),
+      degree: z.number().optional(), // Alias for cusp - optional
+      size: z.number().optional(), // Optional enhanced field
+      contains_planets: z.array(z.string()).optional(),
     })
   ),
   aspects: z.array(
     z.object({
+      aspect_type: z.string(),
       planet1: z.string(),
       planet2: z.string(),
-      type: z.string(),
       orb: z.number(),
-      applying: z.string(),
+      applying: z.boolean(),
+      exact: z.boolean().optional(), // Optional with computed default
+      power: z.number().optional(), // Optional with computed default
+      aspect_angle: z.number().optional(), // Optional enhanced field
+      separating: z.boolean().optional(),
+      mutual_reception: z.boolean().optional(),
+      dignity_interaction: z.enum(['enhancement', 'conflict', 'neutral']).optional(),
+      timing: z.object({
+        peak_exact: z.string().optional(),
+        duration_days: z.number().optional(),
+      }).optional(),
     })
   ),
-  asteroids: z.array(
-    z.object({
-      name: z.string(),
-      sign: z.string(),
-      degree: z.number(),
-      house: z.string(),
-    })
-  ),
-  angles: z.array(
-    z.object({
-      name: z.string(),
-      sign: z.string(),
-      degree: z.number(),
-      position: z.number(),
-    })
-  ),
+  asteroids: z.record(z.string(), z.object({
+    name: z.string(),
+    position: z.number(),
+    degree: z.number(),
+    sign: z.string(),
+    house: z.number(),
+    retrograde: z.boolean(),
+    speed: z.number(),
+  })).optional(),
+  points: z.record(z.string(), z.object({
+    name: z.string(),
+    position: z.number(),
+    degree: z.number(),
+    sign: z.string(),
+    house: z.number(),
+    retrograde: z.boolean(),
+    speed: z.number(),
+  })).optional(),
+  angles: z.object({
+    ascendant: z.number(),
+    midheaven: z.number(),
+    descendant: z.number(),
+    imumcoeli: z.number(),
+    vertex: z.number().optional(),
+    antivertex: z.number().optional(),
+    part_of_fortune: z.number().optional(),
+    north_node: z.number().optional(),
+    south_node: z.number().optional(),
+    lilith_mean: z.number().optional(),
+    lilith_true: z.number().optional(),
+    chiron: z.number().optional(),
+    house_system: z.enum(['placidus', 'koch', 'equal', 'whole_sign', 'regiomontanus', 'campanus', 'porphyry']).optional(),
+    angles_calculated_at: z.string().optional(),
+  }),
+  latitude: z.number(),
+  longitude: z.number(),
+  timezone: z.string(),
+  julian_day: z.number(),
+  house_system: z.enum(['placidus', 'koch', 'equal', 'whole_sign', 'regiomontanus', 'campanus', 'porphyry']),
+  sidereal: z.object({
+    ayanamsa: z.enum(['lahiri', 'raman', 'krishnamurti', 'fagan_bradley']),
+    offset: z.number(),
+  }).optional(),
+  chart_metadata: z.object({
+    calculation_timestamp: z.string(),
+    ephemeris_source: z.enum(['swiss', 'jpl', 'moshier']),
+    coordinate_system: z.enum(['tropical', 'sidereal']),
+    house_system_details: z.object({
+      obliquity: z.number().optional(),
+      mean_node: z.boolean().optional(),
+    }).optional(),
+    location_metadata: z.object({
+      place_name: z.string().optional(),
+      country: z.string().optional(),
+      altitude: z.number().optional(),
+      dst_offset: z.number().optional(),
+    }).optional(),
+  }).optional(),
+  chart_patterns: z.object({
+    grand_trines: z.array(z.object({
+      element: z.enum(['fire', 'earth', 'air', 'water']),
+      planets: z.tuple([z.string(), z.string(), z.string()]),
+      strength: z.number(),
+    })).optional(),
+    t_squares: z.array(z.object({
+      focal_planet: z.string(),
+      opposition_planets: z.tuple([z.string(), z.string()]),
+      strength: z.number(),
+    })).optional(),
+    stelliums: z.array(z.object({
+      sign: z.string().optional(),
+      house: z.number().optional(),
+      planets: z.array(z.string()),
+      concentration_strength: z.number(),
+    })).optional(),
+  }).optional(),
 });
 
 const ProfileSchema = z.object({

@@ -7,7 +7,7 @@ import type {
   DashboardMetrics,
   UserSegment,
   AstrologyAnalytics,
-} from '../types/index.js';
+} from '../types/index';
 
 export interface AnalyticsDashboard {
   getRealTimeMetrics(): Promise<DashboardMetrics>;

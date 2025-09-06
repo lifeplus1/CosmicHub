@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-03T23:43:29.695867+00:00",
+  "timestamp": "2025-09-06T02:28:08.279083+00:00",
   "typescript_types": {
     "WuXingElement": {
       "name": {
@@ -411,12 +411,8 @@
         "optional": true
       },
       "organs": {
-        "type": "{\n    yin?: string",
+        "type": "{ yang?: string",
         "optional": false
-      },
-      "yang": {
-        "type": "string",
-        "optional": true
       }
     },
     "TCMHealthCheck": {
@@ -442,195 +438,16 @@
       }
     }
   },
-  "diffs": {
-    "WuXingElement": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "TCMConstitutionType": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "TCMAnalysisData": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "OrganSystemBalance": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "MeridianFlowData": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "ElementInfo": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [
-        "ElementInfo.hours/hours: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict"
-      ],
-      "optional_mismatches": [],
-      "status": "issues"
-    },
-    "ElementalBalance": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "ConstitutionAnalysis": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "TCMCalculationData": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [
-        "TCMCalculationData.seasonal_guidance/seasonal_guidance: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict"
-      ],
-      "optional_mismatches": [],
-      "status": "issues"
-    },
-    "TCMResponse": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "TCMRequest": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [
-        "TCMRequest.hour/hour: ts_optional=True py_optional=False",
-        "TCMRequest.include_detailed_analysis/include_detailed_analysis: ts_optional=True py_optional=False",
-        "TCMRequest.lat/lat: ts_optional=True py_optional=False",
-        "TCMRequest.lon/lon: ts_optional=True py_optional=False",
-        "TCMRequest.minute/minute: ts_optional=True py_optional=False",
-        "TCMRequest.timezone/timezone: ts_optional=True py_optional=False"
-      ],
-      "status": "ok"
-    },
-    "ElementalBalanceResponse": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [
-        "element_strength",
-        "elemental_balance",
-        "generated_at",
-        "primary_element",
-        "quick_analysis",
-        "success",
-        "user_id"
-      ],
-      "type_mismatches": [],
-      "optional_mismatches": [
-        "ElementalBalanceResponse.earth/earth: ts_optional=False py_optional=True",
-        "ElementalBalanceResponse.fire/fire: ts_optional=False py_optional=True",
-        "ElementalBalanceResponse.metal/metal: ts_optional=False py_optional=True",
-        "ElementalBalanceResponse.water/water: ts_optional=False py_optional=True",
-        "ElementalBalanceResponse.wood/wood: ts_optional=False py_optional=True"
-      ],
-      "status": "ok"
-    },
-    "ConstitutionAnalysisResponse": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "HealthRecommendationsResponse": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "ElementInfoResponse": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [
-        "emotions",
-        "generated_at",
-        "optimal_hours",
-        "planetary_influences"
-      ],
-      "type_mismatches": [
-        "ElementInfoResponse.organs/organs: ts={\n    yin?: string -> {\n    yin?: string vs py=Dict[str, Optional[str]] -> dict"
-      ],
-      "optional_mismatches": [],
-      "status": "issues"
-    },
-    "TCMHealthCheck": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "ok"
-    },
-    "TCMAnalysisResponse": {
-      "exists_in_python": true,
-      "missing_fields": [],
-      "extra_fields": [
-        "success",
-        "data",
-        "calculation_method",
-        "processing_time_ms",
-        "api_version",
-        "generated_at",
-        "includes_detailed_analysis"
-      ],
-      "type_mismatches": [],
-      "optional_mismatches": [],
-      "status": "python_only"
-    }
-  },
+  "diffs": {},
   "issues": [
-    "Type mismatch ElementInfo.hours/hours: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict",
-    "Type mismatch TCMCalculationData.seasonal_guidance/seasonal_guidance: ts=Record<string, string | number> -> any]|dict[string|number> vs py=Optional[Dict[str, Any]] -> dict",
-    "Type mismatch ElementInfoResponse.organs/organs: ts={\n    yin?: string -> {\n    yin?: string vs py=Dict[str, Optional[str]] -> dict"
+    "Missing Python file: /Users/Chris/Projects/CosmicHub/backend/types/tcm_systems.py"
   ],
   "generated_models": [],
   "updated_models": [],
   "metrics": {
     "total_interfaces": 16,
-    "models_with_issues": 3,
-    "issue_rate": 0.1875
+    "models_with_issues": 0,
+    "issue_rate": 0.0
   },
   "sync_status": "issues"
 }

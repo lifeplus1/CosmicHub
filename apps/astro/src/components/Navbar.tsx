@@ -18,6 +18,8 @@ import {
   FaTools,
   FaKey,
   FaPen,
+  FaLeaf,
+  FaBalanceScale,
 } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, useSubscription } from '@cosmichub/auth';
@@ -309,6 +311,53 @@ const Navbar: React.FC = React.memo(() => {
         title: 'Gene Keys Profile',
         description:
           'Journey through the contemplative path of consciousness evolution with your genetic blueprint.',
+      },
+    },
+    {
+      to: '/psychology',
+      icon: FaBrain,
+      label: 'Psychological Astrology',
+      tier: 'premium' as const,
+      tooltip: {
+        title: 'Psychological Astrology',
+        description:
+          'MBTI, Enneagram, and personality integration with birth chart analysis.',
+        tier: 'premium' as const,
+      },
+    },
+    {
+      to: '/spiritual',
+      icon: FaStar,
+      label: 'Spiritual Astrology',
+      tier: 'elite' as const,
+      tooltip: {
+        title: 'Spiritual Astrology',
+        description:
+          'Tarot, Kabbalah, and consciousness development practices.',
+        tier: 'elite' as const,
+      },
+    },
+    {
+      to: '/wellness',
+      icon: FaLeaf,
+      label: 'Astrological Wellness',
+      tier: 'premium' as const,
+      tooltip: {
+        title: 'Astrological Wellness',
+        description:
+          'TCM constitutional analysis and health correlations with your birth chart.',
+        tier: 'premium' as const,
+      },
+    },
+    {
+      to: '/synthesis',
+      icon: FaBalanceScale,
+      label: 'Integration Overview',
+      tooltip: {
+        title: 'Integration Overview',
+        description:
+          'Unified insights and life purpose synthesis across all systems.',
+        tier: 'free' as const,
       },
     },
   ];

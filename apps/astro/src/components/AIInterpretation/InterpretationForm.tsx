@@ -240,7 +240,6 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
   };
 
   const handleChartGenerate = async (): Promise<void> => {
-    // TODO: Replace with real authentication check when auth is implemented
     if (user?.uid === undefined || user?.uid === null || user?.uid === '') {
       showToast({
         title: 'Authentication Required',

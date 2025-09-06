@@ -33,40 +33,61 @@ const validateBirthData = (data: unknown): data is ChartBirthData => {
     data !== null &&
     data !== undefined &&
     typeof data === 'object' &&
-    'year' in data &&
-    typeof (data as Record<string, unknown>)['year'] === 'number' &&
-    'month' in data &&
-    typeof (data as Record<string, unknown>)['month'] === 'number' &&
-    'day' in data &&
-    typeof (data as Record<string, unknown>)['day'] === 'number'
+    'birth_date' in data &&
+    typeof (data as Record<string, unknown>)['birth_date'] === 'string' &&
+    'birth_time' in data &&
+    typeof (data as Record<string, unknown>)['birth_time'] === 'string'
   );
 };
 
-// Enhanced validation with full birth data requirements
+// Enhanced validation with full birth data requirements for TextBirthData (ChartBirthData)
 const isValidBirthData = (data: ChartBirthData | null): boolean => {
-  return (
-    data !== null &&
-    typeof data === 'object' &&
-    typeof data.year === 'number' &&
-    data.year > 1900 &&
-    data.year < 2100 &&
-    typeof data.month === 'number' &&
-    data.month >= 1 &&
-    data.month <= 12 &&
-    typeof data.day === 'number' &&
-    data.day >= 1 &&
-    data.day <= 31 &&
-    typeof data.hour === 'number' &&
-    data.hour >= 0 &&
-    data.hour <= 23 &&
-    typeof data.minute === 'number' &&
-    data.minute >= 0 &&
-    data.minute <= 59
-  );
+  if (data === null || data === undefined || typeof data !== 'object') {
+    return false;
+  }
+
+  // Check if birth_date exists and is valid format
+  if (
+    typeof data.birth_date !== 'string' ||
+    data.birth_date.trim() === '' ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(data.birth_date)
+  ) {
+    return false;
+  }
+
+  // Check if birth_time exists and is valid format
+  if (
+    typeof data.birth_time !== 'string' ||
+    data.birth_time.trim() === '' ||
+    !/^\d{2}:\d{2}(?::\d{2})?$/.test(data.birth_time)
+  ) {
+    return false;
+  }
+
+  // Validate date parts
+  const [yearStr, monthStr, dayStr] = data.birth_date.split('-');
+  const year = parseInt(yearStr ?? '0', 10);
+  const month = parseInt(monthStr ?? '0', 10);
+  const day = parseInt(dayStr ?? '0', 10);
+
+  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+    return false;
+  }
+
+  // Validate time parts
+  const [hourStr, minuteStr] = data.birth_time.split(':');
+  const hour = parseInt(hourStr ?? '0', 10);
+  const minute = parseInt(minuteStr ?? '0', 10);
+
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    return false;
+  }
+
+  return true;
 };
 
 // Debounced localStorage utility
-let saveTimeoutId: NodeJS.Timeout | null = null;
+let saveTimeoutId: ReturnType<typeof setTimeout> | null = null;
 const debouncedSave = (key: string, data: ChartBirthData | null) => {
   if (saveTimeoutId) {
     clearTimeout(saveTimeoutId);
@@ -153,7 +174,18 @@ export const useBirthData = (): BirthDataContextType => {
 
 // Helper function to format birth data for display
 export const formatBirthDataDisplay = (data: ChartBirthData): string => {
-  const base = `${data.month}/${data.day}/${data.year} ${String(data.hour).padStart(2, '0')}:${String(data.minute).padStart(2, '0')}`;
+  const date = data.birth_date || '1990-01-01';
+  const time = data.birth_time || '12:00';
+  
+  // Format date from YYYY-MM-DD to MM/DD/YYYY
+  const [year, month, day] = date.split('-');
+  const formattedDate = `${month}/${day}/${year}`;
+  
+  // Extract hour and minute from HH:MM or HH:MM:SS
+  const [hour, minute] = time.split(':');
+  const formattedTime = `${hour}:${minute}`;
+  
+  const base = `${formattedDate} ${formattedTime}`;
   return data.city !== null && data.city !== undefined
     ? `${base} in ${data.city}`
     : base;

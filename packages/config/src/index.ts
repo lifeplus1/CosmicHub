@@ -63,10 +63,14 @@ export type {
 } from './utils/api/result';
 // Logger abstraction
 export { logger, silenceLogsForTests } from './utils/logger';
+// Date formatting utilities
+export * from './utils/date';
 // Feature keys (centralized identifiers)
 export * from './featureKeys';
 // Subscription tiers & helpers
 export * from './subscriptions';
+// Storage utilities
+export * from './storage';
 // Shared API utilities
 export * from './utils/api/error';
 export {

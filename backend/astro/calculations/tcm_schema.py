@@ -2,93 +2,259 @@
 """
 TCM (Traditional Chinese Medicine) Database Schema
 AI #3: Backend Architecture Specialist Implementation
+
+This module provides comprehensive type definitions for Traditional Chinese Medicine
+analysis integration with astrological calculations. It defines strict type safety
+for all TCM-related data structures and validation functions.
+
+Key Features:
+- Five Element Theory types and data structures
+- Constitutional analysis result types  
+- Organ system analysis with detailed health guidance
+- Seasonal influence calculations
+- Astrological correlation mappings
+- Firestore collection schemas for data persistence
 """
 
-from typing import Any, Dict, List, Optional, TypedDict, Final
+from typing import Dict, List, Optional, TypedDict, Union, Literal, NewType, Mapping
 from enum import Enum
+
+# ===== TYPE ALIASES =====
+
+# Strength values range from 0.0 (weakest) to 1.0 (strongest)
+StrengthScore = NewType('StrengthScore', float)
+
+# Confidence values range from 0.0 (lowest) to 1.0 (highest)
+ConfidenceScore = NewType('ConfidenceScore', float)
+
+# Element balance values range from 0.0 (deficient) to 1.0 (excessive)  
+ElementBalance = NewType('ElementBalance', float)
 
 # ===== TYPE DEFINITIONS =====
 
 class TCMElement(Enum):
-    """Five Elements of TCM"""
-    WOOD = "wood"
-    FIRE = "fire" 
-    EARTH = "earth"
-    METAL = "metal"
-    WATER = "water"
+    """
+    Five Elements of Traditional Chinese Medicine
+    
+    Each element represents fundamental life forces and has specific
+    correspondences with organs, emotions, seasons, and celestial bodies.
+    """
+    WOOD = "wood"      # Spring, growth, liver/gallbladder, Jupiter
+    FIRE = "fire"      # Summer, expansion, heart/small intestine, Mars
+    EARTH = "earth"    # Late summer, stability, spleen/stomach, Saturn
+    METAL = "metal"    # Autumn, contraction, lung/large intestine, Venus
+    WATER = "water"    # Winter, conservation, kidney/bladder, Mercury
 
 class TCMOrgan(Enum):
-    """TCM Organ Systems"""
-    LIVER = "liver"
-    HEART = "heart"
-    SPLEEN = "spleen"
-    LUNG = "lung"
-    KIDNEY = "kidney"
-    GALLBLADDER = "gallbladder"
-    SMALL_INTESTINE = "small_intestine"
-    STOMACH = "stomach"
-    LARGE_INTESTINE = "large_intestine"
-    BLADDER = "bladder"
-    PERICARDIUM = "pericardium"
-    TRIPLE_HEATER = "triple_heater"
+    """
+    TCM Organ Systems (Zang-Fu Theory)
+    
+    Includes both Yin organs (Zang) that store essence and Yang organs (Fu)
+    that transport and transform substances. Each has specific functions
+    beyond the physical organ in Western medicine.
+    """
+    # Yin Organs (Zang) - Store essence
+    LIVER = "liver"              # Stores blood, governs free flow of qi
+    HEART = "heart"              # Houses spirit, governs blood circulation  
+    SPLEEN = "spleen"            # Governs transformation and transportation
+    LUNG = "lung"                # Governs qi and respiration
+    KIDNEY = "kidney"            # Stores essence, governs growth and reproduction
+    PERICARDIUM = "pericardium"  # Protects the heart
+    
+    # Yang Organs (Fu) - Transform and transport
+    GALLBLADDER = "gallbladder"           # Stores and secretes bile
+    SMALL_INTESTINE = "small_intestine"   # Separates pure from impure
+    STOMACH = "stomach"                   # Receives and ripens food
+    LARGE_INTESTINE = "large_intestine"   # Transports and excretes waste
+    BLADDER = "bladder"                   # Stores and excretes urine
+    TRIPLE_HEATER = "triple_heater"       # Regulates water passages
+
+class ConstitutionType(Enum):
+    """TCM Constitutional Types based on dominant element patterns"""
+    WOOD_DOMINANT = "wood_dominant"        # Goal-oriented, driven personality
+    FIRE_DOMINANT = "fire_dominant"        # Enthusiastic, social personality
+    EARTH_DOMINANT = "earth_dominant"      # Nurturing, stable personality
+    METAL_DOMINANT = "metal_dominant"      # Organized, detail-oriented personality
+    WATER_DOMINANT = "water_dominant"      # Introspective, wise personality
+    BALANCED = "balanced"                  # No single element dominates
+
+class BalanceState(Enum):
+    """Organ system balance states in TCM diagnosis"""
+    STRONG = "strong"           # Abundant qi, optimal function
+    BALANCED = "balanced"       # Normal qi flow, healthy function
+    WEAK = "weak"              # Slightly deficient qi, minor dysfunction
+    DEFICIENT = "deficient"    # Significantly low qi, notable symptoms
+    STAGNANT = "stagnant"      # Blocked qi flow, stress symptoms
+    EXCESSIVE = "excessive"    # Overactive qi, hyperfunction symptoms
+
+# ===== ADDITIONAL TYPE DEFINITIONS =====
+
+class BirthData(TypedDict):
+    """
+    Birth data for TCM analysis
+    
+    Contains precise birth timing and location data required for
+    accurate astrological-TCM correlation calculations.
+    """
+    year: int                    # Birth year (e.g., 1990)
+    month: int                   # Birth month (1-12)
+    day: int                     # Birth day (1-31)
+    hour: int                    # Birth hour (0-23)
+    minute: int                  # Birth minute (0-59)
+    latitude: float              # Birth latitude (-90.0 to 90.0)
+    longitude: float             # Birth longitude (-180.0 to 180.0)
+    timezone: str                # Timezone identifier (e.g., "UTC", "America/New_York")
+
+class OrganAnalysis(TypedDict):
+    """
+    Analysis of individual organ systems in TCM
+    
+    Provides detailed assessment of each organ's energetic state,
+    including recommendations for balancing and strengthening.
+    """
+    strength: StrengthScore                              # Organ qi strength (0.0-1.0)
+    element: str                                         # Associated TCM element
+    balance_state: Literal["strong", "balanced", "weak", "deficient", "stagnant", "excessive"]
+    recommendations: List[str]                           # Specific health recommendations
+    meridian_hours: str                                  # Peak energy flow hours (e.g., "3-5 AM")
+    seasonal_affinity: str                               # Most supportive season
+    symptoms_when_imbalanced: List[str]                  # Common symptoms of imbalance
+    foods_to_strengthen: List[str]                       # Foods that support this organ
+    emotions_associated: List[str]                       # Related emotional patterns
+
+class SeasonalInfluence(TypedDict):
+    """
+    Seasonal influence on constitutional patterns
+    
+    Describes how different seasons affect the individual's
+    energy patterns and provides seasonal wellness guidance.
+    """
+    season: str                                          # Season name
+    influence_strength: float                            # How strongly this season affects person (0.0-1.0)
+    recommendations: List[str]                           # General seasonal recommendations
+    optimal_activities: List[str]                        # Best activities for this season
+    foods_to_favor: List[str]                           # Seasonal foods to emphasize
+    foods_to_avoid: List[str]                           # Foods to minimize this season
+    energy_patterns: str                                 # Expected energy changes
+    potential_challenges: List[str]                      # Common seasonal challenges for this constitution
+
+class HealthGuidance(TypedDict):
+    """
+    Comprehensive health guidance based on TCM analysis
+    
+    Provides holistic wellness recommendations covering diet,
+    lifestyle, exercise, and emotional balance strategies.
+    """
+    constitutional_strengths: List[str]                  # Natural strengths of this constitution
+    potential_weaknesses: List[str]                      # Areas requiring attention
+    dietary_guidelines: Dict[str, List[str]]             # Detailed dietary recommendations by category
+    exercise_recommendations: List[str]                  # Optimal exercise types and timing
+    lifestyle_patterns: Dict[str, List[str]]             # Daily routine recommendations
+    preventive_measures: List[str]                       # Prevention strategies for common issues
+    seasonal_adjustments: Dict[str, List[str]]           # Season-specific modifications
+    emotional_balance_tips: List[str]                    # Emotional wellness strategies
+    sleep_recommendations: Dict[str, str]                # Optimal sleep patterns and environment
+    stress_management: List[str]                         # Stress reduction techniques
 
 class TCMConstitution(TypedDict):
-    """TCM Constitutional Type"""
-    type_name: str
-    primary_element: str
-    secondary_element: Optional[str]
-    dominant_organs: List[str]
-    characteristics: List[str]
-    emotional_tendencies: List[str]
-    physical_traits: List[str]
-    astrological_correlations: Dict[str, str]
-    health_recommendations: List[str]
-    optimal_seasons: List[str]
+    """
+    TCM Constitutional Type Analysis
     
+    Defines an individual's fundamental constitutional pattern based on
+    Five Element Theory, including physical, emotional, and energetic characteristics.
+    """
+    # Required fields
+    type_name: str                                       # Constitutional type name (e.g., "Wood Constitution")
+    primary_element: str                                 # Dominant element (wood, fire, earth, metal, water)
+    secondary_element: Optional[str]                     # Secondary influential element
+    dominant_organs: List[str]                           # Primary organ systems for this constitution
+    characteristics: List[str]                           # Key constitutional characteristics
+    emotional_tendencies: List[str]                      # Typical emotional patterns
+    physical_traits: List[str]                          # Common physical characteristics
+    astrological_correlations: Dict[str, str]            # Planetary and sign correlations
+    health_recommendations: List[str]                    # Constitution-specific health advice
+    optimal_seasons: List[str]                          # Most supportive seasons
+
+class TCMConstitutionExtended(TCMConstitution, total=False):
+    """Extended TCM Constitution with optional enhanced fields"""
+    learning_style: str                                 # Preferred learning and processing style
+    career_affinities: List[str]                        # Career types that suit this constitution
+    relationship_patterns: List[str]                     # Typical relationship dynamics
+    spiritual_practices: List[str]                       # Recommended spiritual/meditation practices
+
 class TCMElementData(TypedDict):
-    """Five Element System Data"""
-    element: str
-    yin_organ: str
-    yang_organ: str
-    emotion_balanced: str
-    emotion_imbalanced: str
-    season: str
-    direction: str
-    color: str
-    taste: str
-    body_tissue: str
-    sense_organ: str
-    sound: str
-    climate: str
-    astrological_planets: List[str]
-    birth_timing_influence: Dict[str, float]
-    meridian_flow_hours: Dict[str, str]
+    """
+    Five Element System Reference Data
+    
+    Complete reference information for each of the five elements,
+    including all traditional correspondences and modern correlations.
+    """
+    # Required fields
+    element: str                                         # Element name
+    yin_organ: str                                       # Primary yin organ
+    yang_organ: str                                      # Primary yang organ
+    emotion_balanced: str                                # Emotion when element is balanced
+    emotion_imbalanced: str                              # Emotion when element is imbalanced
+    season: str                                          # Associated season
+    direction: str                                       # Compass direction
+    color: str                                           # Associated color
+    taste: str                                           # Associated taste
+    body_tissue: str                                     # Governed body tissue
+    sense_organ: str                                     # Associated sense organ
+    sound: str                                           # Vocal expression when imbalanced
+    climate: str                                         # Environmental preference
+    astrological_planets: List[str]                      # Correlated planets
+    birth_timing_influence: Dict[str, float]             # Birth time influence weights
+    meridian_flow_hours: Dict[str, str]                  # Optimal energy flow hours
+
+class TCMElementDataExtended(TCMElementData, total=False):
+    """Extended TCM Element Data with optional enhanced fields"""
+    development_stage: str                               # Life development stage association
+    virtues: List[str]                                   # Positive qualities when balanced
+    challenges: List[str]                                # Common challenges when imbalanced
 
 class TCMAstrologicalMapping(TypedDict):
-    """TCM-Astrology Correspondence"""
-    planet: str
-    primary_element: str  # Changed from tcm_element
-    organ_system: str
-    emotional_quality: str
-    physical_influence: str
-    optimal_timing: str
-    challenging_aspects: List[str]
-    harmonious_aspects: List[str]
+    """
+    TCM-Astrology Correspondence Mapping
+    
+    Defines correlations between astrological factors and TCM elements/organs,
+    enabling integrated analysis of celestial and energetic influences.
+    """
+    # Required fields
+    planet: str                                          # Astrological planet
+    primary_element: str                                 # Associated TCM element
+    organ_system: str                                    # Correlated organ system
+    emotional_quality: str                               # Emotional influence
+    physical_influence: str                              # Physical/health influence
+    optimal_timing: str                                  # Best timing for related activities
+    challenging_aspects: List[str]                       # Potentially difficult astrological aspects
+    harmonious_aspects: List[str]                        # Supportive astrological aspects
+
+class TCMAstrologicalMappingExtended(TCMAstrologicalMapping, total=False):
+    """Extended TCM Astrological Mapping with optional enhanced fields"""
+    transiting_effects: Dict[str, str]                   # Effects during planetary transits
+    retrograde_influence: str                            # Influence during retrograde periods
 
 class TCMAnalysisResult(TypedDict):
-    """Complete TCM Analysis Result"""
-    user_id: str
-    birth_data: Dict[str, Any]
-    primary_constitution: TCMConstitution
-    elemental_balance: Dict[str, float]
-    organ_strength_analysis: Dict[str, Dict[str, Any]]
-    seasonal_influences: Dict[str, Any]
-    health_guidance: Dict[str, Any]
-    astrological_correlations: List[TCMAstrologicalMapping]
-    lifestyle_recommendations: Dict[str, List[str]]
-    treatment_suggestions: Dict[str, List[str]]
-    analysis_confidence: float
-    timestamp: str
+    """
+    Complete TCM Analysis Result
+    
+    Comprehensive analysis result combining constitutional assessment,
+    elemental balance analysis, organ system evaluation, and personalized
+    health guidance based on Traditional Chinese Medicine principles.
+    """
+    user_id: str                                         # Unique user identifier
+    birth_data: BirthData                               # Complete birth information
+    primary_constitution: TCMConstitution               # Dominant constitutional pattern
+    elemental_balance: Dict[str, ElementBalance]        # Five element balance scores (0.0-1.0)
+    organ_strength_analysis: Dict[str, OrganAnalysis]   # Detailed organ system analysis
+    seasonal_influences: Dict[str, SeasonalInfluence]   # Seasonal effect patterns
+    health_guidance: HealthGuidance                     # Comprehensive health recommendations
+    astrological_correlations: List[TCMAstrologicalMapping]  # Astrological-TCM correlations
+    lifestyle_recommendations: Dict[str, List[str]]     # Lifestyle guidance by category
+    treatment_suggestions: Dict[str, List[str]]         # Therapeutic recommendations
+    analysis_confidence: ConfidenceScore               # Overall analysis confidence (0.0-1.0)
+    timestamp: str                                      # Analysis creation timestamp (ISO format)
 
 # ===== TCM CONSTANTS AND DATA =====
 
@@ -375,7 +541,18 @@ PLANET_TCM_CORRELATIONS: Dict[str, TCMAstrologicalMapping] = {
 
 # ===== FIRESTORE COLLECTION SCHEMAS =====
 
-TCM_COLLECTIONS: Dict[str, Dict[str, Any]] = {
+# Define collection schema types
+class FirestoreFieldSchema(TypedDict):
+    type: str
+    required: bool
+    description: Optional[str]
+
+class FirestoreCollectionSchema(TypedDict, total=False):
+    description: str
+    fields: Dict[str, Union[str, FirestoreFieldSchema]]
+    indexes: List[List[str]]
+
+TCM_COLLECTIONS: Dict[str, FirestoreCollectionSchema] = {
     "tcm_constitutions": {
         "description": "TCM constitutional analysis results",
         "fields": {
@@ -415,32 +592,145 @@ TCM_COLLECTIONS: Dict[str, Dict[str, Any]] = {
 
 # ===== VALIDATION FUNCTIONS =====
 
-def validate_tcm_constitution(data: Dict[str, Any]) -> bool:
-    """Validate TCM constitution data"""
+def validate_tcm_constitution(data: Union[TCMConstitution, Dict[str, Union[str, List[str], Dict[str, str], None]]]) -> bool:
+    """
+    Validate TCM constitution data structure
+    
+    Args:
+        data: Constitution data dictionary to validate
+        
+    Returns:
+        bool: True if data contains required fields and valid structure
+    """
     required_fields = ["type_name", "primary_element", "dominant_organs"]
     return all(field in data for field in required_fields)
 
-def validate_elemental_balance(balance: Dict[str, float]) -> bool:
-    """Validate elemental balance percentages"""
+def validate_elemental_balance(balance: Mapping[str, Union[float, ElementBalance]]) -> bool:
+    """
+    Validate elemental balance percentages
+    
+    Args:
+        balance: Dictionary mapping element names to balance scores
+        
+    Returns:
+        bool: True if balance contains all five elements with valid scores (0.0-1.0)
+    """
     elements = ["wood", "fire", "earth", "metal", "water"]
     return (
         all(element in balance for element in elements) and
-        abs(sum(balance.values()) - 1.0) < 0.01  # Should sum to approximately 1.0
+        all(0.0 <= float(score) <= 1.0 for score in balance.values()) and
+        len(balance) == 5
     )
+
+def validate_birth_data(birth_data: BirthData) -> bool:
+    """
+    Validate birth data for TCM analysis
+    
+    Args:
+        birth_data: Birth data dictionary to validate
+        
+    Returns:
+        bool: True if birth data contains valid date/time/location information
+    """
+    try:
+        # Basic range validation
+        valid_year = 1900 <= birth_data['year'] <= 2100
+        valid_month = 1 <= birth_data['month'] <= 12
+        valid_day = 1 <= birth_data['day'] <= 31
+        valid_hour = 0 <= birth_data['hour'] <= 23
+        valid_minute = 0 <= birth_data['minute'] <= 59
+        valid_lat = -90.0 <= birth_data['latitude'] <= 90.0
+        valid_lon = -180.0 <= birth_data['longitude'] <= 180.0
+        
+        return all([valid_year, valid_month, valid_day, valid_hour, 
+                   valid_minute, valid_lat, valid_lon])
+    except (KeyError, TypeError):
+        return False
+
+def validate_organ_analysis(analysis: OrganAnalysis) -> bool:
+    """
+    Validate organ analysis data structure
+    
+    Args:
+        analysis: Organ analysis dictionary to validate
+        
+    Returns:
+        bool: True if analysis contains valid structure and data ranges
+    """
+    try:
+        valid_strength = 0.0 <= analysis['strength'] <= 1.0
+        valid_element = analysis['element'] in ["wood", "fire", "earth", "metal", "water"]
+        valid_state = analysis['balance_state'] in [
+            "strong", "balanced", "weak", "deficient", "stagnant", "excessive"
+        ]
+        return valid_strength and valid_element and valid_state
+    except (KeyError, TypeError):
+        return False
+
+def validate_analysis_result(result: TCMAnalysisResult) -> bool:
+    """
+    Validate complete TCM analysis result
+    
+    Args:
+        result: Complete analysis result to validate
+        
+    Returns:
+        bool: True if result structure and data are valid
+    """
+    try:
+        # Validate core components
+        valid_birth = validate_birth_data(result['birth_data'])
+        valid_constitution = validate_tcm_constitution(result['primary_constitution'])
+        valid_balance = validate_elemental_balance(result['elemental_balance'])
+        valid_confidence = 0.0 <= result['analysis_confidence'] <= 1.0
+        
+        # Validate organ analyses
+        valid_organs = all(
+            validate_organ_analysis(analysis) 
+            for analysis in result['organ_strength_analysis'].values()
+        )
+        
+        return all([valid_birth, valid_constitution, valid_balance, 
+                   valid_confidence, valid_organs])
+    except (KeyError, TypeError):
+        return False
 
 # ===== EXPORT DEFINITIONS =====
 
 __all__ = [
+    # Type Aliases
+    "StrengthScore",
+    "ConfidenceScore", 
+    "ElementBalance",
+    
+    # Enums
     "TCMElement",
-    "TCMOrgan", 
+    "TCMOrgan",
+    "ConstitutionType",
+    "BalanceState",
+    
+    # TypedDict Classes
+    "BirthData",
+    "OrganAnalysis",
+    "SeasonalInfluence",
+    "HealthGuidance",
     "TCMConstitution",
     "TCMElementData",
     "TCMAstrologicalMapping",
     "TCMAnalysisResult",
+    "FirestoreFieldSchema",
+    "FirestoreCollectionSchema",
+    
+    # Data Constants
     "TCM_FIVE_ELEMENTS_DATA",
     "TCM_CONSTITUTIONAL_TYPES",
     "PLANET_TCM_CORRELATIONS",
     "TCM_COLLECTIONS",
+    
+    # Validation Functions
     "validate_tcm_constitution",
-    "validate_elemental_balance"
+    "validate_elemental_balance",
+    "validate_birth_data",
+    "validate_organ_analysis",
+    "validate_analysis_result"
 ]

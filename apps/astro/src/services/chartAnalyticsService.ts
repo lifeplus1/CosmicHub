@@ -12,6 +12,7 @@ import {
   normalizeAngle,
   getSignFromDegrees,
 } from '../utils/astrologyUtils';
+import { Logger } from '../utils/logger';
 
 // Types for chart analytics
 export enum Element {
@@ -444,8 +445,8 @@ class ChartAnalyticsService {
       try {
         const detectedPatterns = recognizer(chartData);
         patterns.push(...detectedPatterns);
-      } catch {
-        // TODO: Replace with structured logging
+      } catch (error) {
+        Logger.error('Pattern recognition failed', error instanceof Error ? error : new Error(String(error)));
       }
     });
 

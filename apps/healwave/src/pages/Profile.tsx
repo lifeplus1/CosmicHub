@@ -1,24 +1,24 @@
 import React from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { Button } from '@cosmichub/ui';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 import { useToast } from '../components/ToastProvider';
 import UserProfile from '../components/UserProfile';
 
 const Profile: React.FC = React.memo(() => {
   const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { goToHome } = useAppNavigation();
   const { toast } = useToast();
 
   const handleSignOut = React.useCallback(async () => {
     try {
       await signOut();
       toast({ message: 'Signed out successfully', type: 'success' });
-      navigate('/login');
+      goToHome(); // Navigate to home page instead of /login
     } catch {
       toast({ message: 'Error signing out', type: 'error' });
     }
-  }, [signOut, navigate, toast]);
+  }, [signOut, goToHome, toast]);
 
   if (!user) {
     return (
@@ -33,11 +33,11 @@ const Profile: React.FC = React.memo(() => {
           Please sign in to view your profile
         </p>
         <Button
-          onClick={() => navigate('/login')}
+          onClick={goToHome} // Navigate to home page where login modal can be opened
           variant='default'
           className='mt-4'
         >
-          Sign In
+          Go to Home
         </Button>
       </div>
     );

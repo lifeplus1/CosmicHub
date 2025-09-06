@@ -1,4 +1,5 @@
-// Simple logger for integrations package
+// Using type alias to avoid import conflicts
+type AstrologyChart = Record<string, unknown>;
 const logger = {
   info: (message: string, data?: unknown) => {
     if (process.env.NODE_ENV === 'development') {
@@ -13,57 +14,21 @@ const logger = {
   },
 };
 
-export interface AstrologyChart {
-  id: string;
-  userId: string;
-  birthData: {
-    date: string;
-    time: string;
-    location: {
-      lat: number;
-      lng: number;
-      name: string;
-    };
-  };
-  planets: Planet[];
-  houses: House[];
-  aspects: Aspect[];
-}
-
-export interface Planet {
-  name: string;
-  sign: string;
-  degree: number;
-  house: number;
-  retrograde: boolean;
-}
-
-export interface House {
-  number: number;
-  sign: string;
-  degree: number;
-}
-
-export interface Aspect {
-  planet1: string;
-  planet2: string;
-  aspect: string;
-  orb: number;
-  applying: boolean;
-}
-
 export interface HealwaveSession {
   id: string;
   userId: string;
   frequency: number;
   duration: number;
   timestamp: string;
+  startTime?: Date;
+  isActive?: boolean;
   personalizedFor?: AstrologyChart;
 }
 
 // Enhanced cross-app integration
 export interface CrossAppNotification {
   id: string;
+  title?: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   timestamp: number;

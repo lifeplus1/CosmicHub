@@ -17,11 +17,7 @@
       "jsx": true
     },
     // Updated to correct monorepo app paths
-    "project": [
-      "./apps/astro/tsconfig.json",
-      "./apps/healwave/tsconfig.json",
-      "./packages/subscriptions/tsconfig.json"
-    ]
+    "project": ["./apps/astro/tsconfig.json", "./apps/healwave/tsconfig.json"]
   },
   "plugins": ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
   "env": {
@@ -89,7 +85,7 @@
         "patterns": [
           {
             "group": ["shared/*", "./shared/*", "../shared/*"],
-            "message": "Legacy shared/ modules have been removed. Import from @cosmichub/subscriptions or other @cosmichub/* packages instead."
+            "message": "Legacy shared/ modules have been removed. Import from @cosmichub/config or other @cosmichub/* packages instead."
           }
         ]
       }

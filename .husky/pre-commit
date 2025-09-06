@@ -1,11 +1,30 @@
 #!/usr/bin/env bash
 . "$(dirname "$0")/_/husky.sh"
 
-# 1. Run documentation freshness + markdown lint (only if markdown changed)
-bash tools/maintenance/pre_commit_docs.sh || exit 1
+# Enhanced CosmicHub Pre-Commit with comprehensive validation
+# This hook coordinates with the git pre-commit hook for full coverage
 
-# 1b. Enforce AI coordination filename policy (only fails on offending files)
-bash tools/maintenance/validate_ai_coord_filenames.sh || exit 1
+echo "🔄 Running Husky pre-commit coordination..."
 
-# 2. Run lint-staged for code/style enforcement
-pnpm lint-staged
+# Set environment variable to indicate we're in a Husky context
+export COSMICHUB_HUSKY_CONTEXT=true
+
+# 1. Run the enhanced git pre-commit hook which includes all validations
+if [ -x .git/hooks/pre-commit ]; then
+    echo "🚀 Executing enhanced pre-commit validation..."
+    .git/hooks/pre-commit || exit 1
+else
+    echo "⚠️  Enhanced pre-commit hook not found, falling back to basic validation..."
+    
+    # Fallback: Original validation steps
+    # 1. Run documentation freshness + markdown lint (only if markdown changed)
+    bash tools/maintenance/pre-commit-docs.sh || exit 1
+
+    # 1b. Enforce AI coordination filename policy (only fails on offending files)
+    bash tools/maintenance/validate_ai_coord_filenames.sh || exit 1
+
+    # 2. Run lint-staged for code/style enforcement
+    pnpm lint-staged || exit 1
+fi
+
+echo "✅ Husky pre-commit coordination completed successfully!"

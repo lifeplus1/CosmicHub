@@ -123,7 +123,7 @@ class InMemoryCache:
                     break
 
                 # Find least recently used item
-                lru_key = min(self.access_times, key=self.access_times.get)
+                lru_key = min(self.access_times.keys(), key=lambda k: self.access_times[k])
 
                 # Remove from all tracking structures
                 self.cache.pop(lru_key, None)

@@ -5,12 +5,13 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "pnpm run clean && tsc -p tsconfig.build.json",
+    "build": "pnpm run clean && tsc && pnpm run copy:css",
     "build:packages": "pnpm run build",
-    "build:safe": "pnpm run clean && tsc -p tsconfig.build.json --skipLibCheck",
-    "build:nochecks": "pnpm run clean && tsc -p tsconfig.nocheck.json",
+    "build:safe": "pnpm run clean && tsc --skipLibCheck && pnpm run copy:css",
+    "build:nochecks": "pnpm run clean && tsc -p tsconfig.nocheck.json && pnpm run copy:css",
     "dev": "tsc -b . --watch",
-    "clean": "rm -rf dist node_modules/.tmp"
+    "clean": "rm -rf dist node_modules/.tmp",
+    "copy:css": "cp -r src/styles/modules/components dist/styles/modules/ && cp -r src/styles/modules/features dist/styles/modules/ && cp -r src/styles/modules/pages dist/styles/modules/"
   },
   "dependencies": {
     "@cosmichub/config": "workspace:*",

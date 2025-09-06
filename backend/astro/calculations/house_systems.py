@@ -25,6 +25,20 @@ class HousesResult(TypedDict):
 def calculate_houses(
     julian_day: float, lat: float, lon: float, system: str = "P"
 ) -> HousesResult:
+    """Calculate house cusps and key angles.
+
+    Parameters
+    ----------
+    julian_day : float
+        Julian day (UT) for the chart.
+    lat : float
+        Geographic latitude.
+    lon : float
+        Geographic longitude.
+    system : str, default "P"
+        One-letter Swiss Ephemeris house system code or a longer
+        human-readable key (e.g. "placidus", "koch").
+    """
     logger.debug(
         f"Calculating houses for JD: {julian_day}, lat: {lat}, lon: {lon}, system: {system}"  # noqa: E501
     )
@@ -51,7 +65,7 @@ def calculate_houses(
     try:
         # Calculate houses with extended flags for Vertex
         logger.debug(
-            f"Using house system bytes: {system_bytes}, type: {type(system_bytes)}, length: {len(system_bytes)}"  # noqa: E501
+            f"Using house system bytes: {system_bytes!r}, type: {type(system_bytes)}, length: {len(system_bytes)}"  # noqa: E501
         )
         houses_result = swe.houses_ex(julian_day, lat, lon, flags=0, hsys=system_bytes)  # type: ignore  # noqa: E501
 
@@ -66,10 +80,18 @@ def calculate_houses(
         angles: AnglesData = {
             "ascendant": float(ascmc[0]),
             "mc": float(ascmc[1]),
-            "vertex": float(ascmc[3]),  # Vertex
+            "vertex": float(ascmc[3]),  # Vertex index 3
         }
         logger.debug(f"Houses calculated: {houses_data}, Angles: {angles}")
         return {"houses": houses_data, "angles": angles}
     except Exception as e:
         logger.error(f"Error in house calculation: {str(e)}", exc_info=True)
         raise ValueError(f"Error in house calculation: {str(e)}")
+
+
+__all__ = [
+    "HouseData",
+    "AnglesData",
+    "HousesResult",
+    "calculate_houses",
+]

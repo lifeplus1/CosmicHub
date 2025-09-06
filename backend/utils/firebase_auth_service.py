@@ -48,7 +48,7 @@ _firebase_auth_executor = ThreadPoolExecutor(
 class FirebaseAuthConfig:
     """Configuration for Firebase Auth service"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # 5 second default timeout
         self.timeout = float(os.getenv("FIREBASE_AUTH_TIMEOUT", "5.0"))
         # 3 failures before circuit opens
@@ -99,7 +99,7 @@ class FirebaseAuthService:
             or os.getenv("TEST_MODE", "0") in ("1", "true", "yes")
         )
 
-    def _setup_circuit_breaker(self):
+    def _setup_circuit_breaker(self) -> None:
         """Setup circuit breaker for Firebase auth operations"""
         circuit_config = CircuitBreakerConfig(
             failure_threshold=self.config.failure_threshold,
@@ -141,7 +141,7 @@ class FirebaseAuthService:
             result: Any = await loop.run_in_executor(
                 _firebase_auth_executor,
                 # Explicit type ignore for Firebase SDK's incomplete typing
-                lambda: auth.verify_id_token(  # type: ignore[misc]
+                lambda: auth.verify_id_token(
                     token, check_revoked=check_revoked
                 )
             )
@@ -153,7 +153,7 @@ class FirebaseAuthService:
             
             # Explicitly cast the unknown Firebase result to our known structure
             # Firebase Admin SDK guarantees this is a dict[str, Any] but typing is incomplete
-            token_data: Dict[str, Any] = result  # type: ignore[assignment]
+            token_data: Dict[str, Any] = result
             
             # Validate required fields are present
             required_fields = ['uid', 'iss', 'aud', 'iat', 'exp']
@@ -205,7 +205,7 @@ class FirebaseAuthService:
 
         # Check if Firebase Admin is properly initialized
         try:
-            firebase_admin.get_app()  # type: ignore[misc]
+            firebase_admin.get_app()
         except ValueError:
             logger.error("Firebase Admin SDK not initialized")
             raise ValueError("Firebase Admin SDK not initialized")

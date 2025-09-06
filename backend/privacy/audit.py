@@ -79,7 +79,7 @@ class AuditResults:
 class PrivacyAuditor:
     """Comprehensive privacy auditor for CosmicHub platform."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.data_inventory = self._build_data_inventory()
         self.risks: list[PrivacyRisk] = []
 

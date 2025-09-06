@@ -8,6 +8,7 @@ import { useOfflineCharts } from '@/hooks/useOfflineCharts';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import type { ChartData } from '@/types';
 import type { ChartCalculationParams } from '@/services/offline-chart-service';
+import type { ZodiacSign } from '@cosmichub/types';
 
 const OfflineChartDemo: React.FC = () => {
   const {
@@ -44,68 +45,74 @@ const OfflineChartDemo: React.FC = () => {
   const createSampleChart = async () => {
     const sampleChartData: ChartData = {
       planets: {
-        Sun: { position: 15.5, house: 1 },
-        Moon: { position: 120.3, house: 5 },
-        Mercury: { position: 25.8, house: 2 },
-        Venus: { position: 45.2, house: 3 },
-        Mars: { position: 200.7, house: 8 },
-        Jupiter: { position: 165.4, house: 6 },
-        Saturn: { position: 285.9, house: 10 },
-        Uranus: { position: 320.1, house: 11 },
-        Neptune: { position: 340.5, house: 12 },
-        Pluto: { position: 260.8, house: 9 },
+        sun: { name: 'sun', position: 15.5, sign: 'aries', house: 1 },
+        moon: { name: 'moon', position: 120.3, sign: 'leo', house: 5 },
+        mercury: { name: 'mercury', position: 25.8, sign: 'aries', house: 2 },
+        venus: { name: 'venus', position: 45.2, sign: 'taurus', house: 3 },
+        mars: { name: 'mars', position: 200.7, sign: 'libra', house: 8 },
+        jupiter: { name: 'jupiter', position: 165.4, sign: 'virgo', house: 6 },
+        saturn: { name: 'saturn', position: 285.9, sign: 'capricorn', house: 10 },
+        uranus: { name: 'uranus', position: 320.1, sign: 'aquarius', house: 11 },
+        neptune: { name: 'neptune', position: 340.5, sign: 'pisces', house: 12 },
+        pluto: { name: 'pluto', position: 260.8, sign: 'scorpio', house: 9 },
+        chiron: { name: 'chiron', position: 45.2, sign: 'taurus', house: 3 },
+        north_node: { name: 'north_node', position: 125.8, sign: 'leo', house: 5 },
+        south_node: { name: 'south_node', position: 305.8, sign: 'aquarius', house: 11 },
       },
       houses: Array.from({ length: 12 }, (_, i) => ({
-        house: i + 1,
+        number: (i + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
         cusp: i * 30 + Math.random() * 30,
-        sign: [
-          'Aries',
-          'Taurus',
-          'Gemini',
-          'Cancer',
-          'Leo',
-          'Virgo',
-          'Libra',
-          'Scorpio',
-          'Sagittarius',
-          'Capricorn',
-          'Aquarius',
-          'Pisces',
-        ][i] as string,
+        sign: ([
+          'aries',
+          'taurus',
+          'gemini',
+          'cancer',
+          'leo',
+          'virgo',
+          'libra',
+          'scorpio',
+          'sagittarius',
+          'capricorn',
+          'aquarius',
+          'pisces',
+        ] as const)[i] as ZodiacSign,
       })),
       aspects: [
         {
-          point1: 'Sun',
-          point2: 'Moon',
-          aspect: 'Trine',
+          aspect_type: 'trine',
+          planet1: 'sun',
+          planet2: 'moon',
           orb: 2.1,
-          exact: false,
-          point1_sign: 'Aries',
-          point2_sign: 'Leo',
+          applying: true,
         },
         {
-          point1: 'Sun',
-          point2: 'Mercury',
-          aspect: 'Conjunction',
+          aspect_type: 'conjunction',
+          planet1: 'sun',
+          planet2: 'mercury',
           orb: 0.5,
-          exact: true,
-          point1_sign: 'Aries',
-          point2_sign: 'Aries',
+          applying: false,
         },
       ],
+      angles: {
+        ascendant: 0,
+        midheaven: 90,
+        descendant: 180,
+        imumcoeli: 270,
+      },
     };
 
     const sampleParams: ChartCalculationParams = {
       name: newChartName || `Sample Chart ${Date.now()}`,
       birthData: {
-        date: '1990-06-15',
-        time: '14:30',
-        location: {
-          latitude: 37.7749,
-          longitude: -122.4194,
-          city: 'San Francisco',
-          country: 'US',
-        },
+        year: 1990,
+        month: 6,
+        day: 15,
+        hour: 14,
+        minute: 30,
+        city: 'San Francisco',
+        lat: 37.7749,
+        lon: -122.4194,
+        timezone: 'America/Los_Angeles',
       },
       systems: ['western'],
       houses: 'placidus',
@@ -134,7 +141,12 @@ const OfflineChartDemo: React.FC = () => {
       const chart = await loadChart(chartId);
       setSelectedChart({
         ...chart,
-        metadata: (chart.metadata as Record<string, unknown>) || {},
+        metadata: {
+          name: chart.metadata.name,
+          createdAt: chart.metadata.createdAt.toString(),
+          updatedAt: chart.metadata.updatedAt.toString(),
+          synced: chart.metadata.synced,
+        },
       });
     } catch (err) {
       alert(
@@ -464,17 +476,15 @@ const OfflineChartDemo: React.FC = () => {
                   Birth Data
                 </h3>
                 <div className='text-blue-100 space-y-2'>
-                  <div>Date: {selectedChart.params.birthData.date}</div>
-                  <div>Time: {selectedChart.params.birthData.time}</div>
+                  <div>Date: {`${selectedChart.params.birthData.year}-${String(selectedChart.params.birthData.month).padStart(2, '0')}-${String(selectedChart.params.birthData.day).padStart(2, '0')}`}</div>
+                  <div>Time: {`${String(selectedChart.params.birthData.hour).padStart(2, '0')}:${String(selectedChart.params.birthData.minute).padStart(2, '0')}`}</div>
                   <div>
-                    Location: {selectedChart.params.birthData.location.city},{' '}
-                    {selectedChart.params.birthData.location.country}
+                    Location: {selectedChart.params.birthData.city ?? 'Unknown'}
                   </div>
                   <div>
-                    Coordinates:{' '}
-                    {selectedChart.params.birthData.location.latitude}°,{' '}
-                    {selectedChart.params.birthData.location.longitude}°
+                    Coordinates: {selectedChart.params.birthData.lat ?? selectedChart.params.birthData.latitude ?? 0}°, {selectedChart.params.birthData.lon ?? selectedChart.params.birthData.longitude ?? 0}°
                   </div>
+                  <div>Timezone: {selectedChart.params.birthData.timezone ?? 'UTC'}</div>
                 </div>
               </div>
 

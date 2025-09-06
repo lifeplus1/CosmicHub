@@ -6,4 +6,4 @@
 import { logger } from '@cosmichub/config';
 
 // Create HealWave-specific logger
-export const devConsole = logger.child({ module: 'HealWave' });
+export const devConsole = logger.child ? logger.child({ module: 'HealWave' }) : logger;

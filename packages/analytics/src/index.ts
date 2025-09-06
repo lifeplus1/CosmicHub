@@ -8,7 +8,7 @@ export {
   AnalyticsService,
   initializeAnalytics,
   getAnalytics,
-} from './AnalyticsService.js';
+} from './AnalyticsService';
 
 // Types
 export type {
@@ -25,7 +25,7 @@ export type {
   AstrologyAnalytics,
   DashboardMetrics,
   UserSegment,
-} from './types/index.js';
+} from './types/index';
 
 // Chart Events
 export {
@@ -34,7 +34,7 @@ export {
   trackChartShare,
   trackChartError,
   trackChartCustomization,
-} from './events/ChartEvents.js';
+} from './events/ChartEvents';
 
 // AI Events
 export {
@@ -44,7 +44,7 @@ export {
   trackAIGrowthCoaching,
   trackAIPatternRecognition,
   trackAIMultiSystemSynthesis,
-} from './events/AIEvents.js';
+} from './events/AIEvents';
 
 // Mobile Events
 export {
@@ -54,7 +54,7 @@ export {
   trackOfflineUsage,
   trackPushNotification,
   trackMobilePerformance,
-} from './events/MobileEvents.js';
+} from './events/MobileEvents';
 
 // Business Events
 export {
@@ -66,12 +66,12 @@ export {
   trackConversion,
   trackTrialStart,
   trackPaywall,
-} from './events/BusinessEvents.js';
+} from './events/BusinessEvents';
 
 // Default Analytics Configuration
 export const createDefaultAnalyticsConfig = (
-  overrides: Partial<import('./types/index.js').AnalyticsConfig> = {}
-): import('./types/index.js').AnalyticsConfig => ({
+  overrides: Partial<import('./types/index').AnalyticsConfig> = {}
+): import('./types/index').AnalyticsConfig => ({
   googleAnalytics: {
     measurementId: '',
     enabled: false,

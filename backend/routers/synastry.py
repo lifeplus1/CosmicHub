@@ -2,7 +2,7 @@
 
 CONSOLIDATION NOTE:
 This module contains a legacy `BirthData` model (date/time/lat/long strings).
-Canonical BirthData lives in `backend.types.astrology_systems` (year/month/day etc.).
+Canonical BirthData lives in `backend.backend.types.astrology_systems` (year/month/day etc.).
 Phase 1 (current): annotate and mark duplication (this comment).
 Phase 2: introduce adapter/conversion functions (not yet merged to keep diff small).
 Phase 3: replace local BirthData usage with canonical model + remove duplicate class.
@@ -352,10 +352,11 @@ async def calculate_synastry(
 
         house_overlays_raw = get_key_overlays(overlays)
         house_overlays: List[HouseOverlay] = []
-        for item in house_overlays_raw:
+        for item in house_overlays_raw:  # type: ignore[assignment]
+            house_num = item.get("house", 0)
             overlay_data: HouseOverlay = {
                 "planet": str(item.get("planet", "")),
-                "house": int(item.get("house", 0)),
+                "house": int(house_num) if isinstance(house_num, (int, float, str)) else 0,
                 "influence": str(item.get("influence", "")),
                 "strength": float(item.get("strength", 0.0)),
             }

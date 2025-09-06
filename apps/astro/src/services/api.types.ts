@@ -5,7 +5,29 @@
  * including discriminated unions and branded types for improved type safety.
  */
 
-import type { ChartBirthData } from '@cosmichub/types';
+import type { 
+  ChartBirthData,
+  ChartData,
+  PlanetName,
+  ZodiacSign,
+  AspectType,
+  Planet,
+  House,
+  Aspect,
+  ChartAngles
+} from '@cosmichub/types';
+
+// Re-export astrology types for local use
+export type {
+  ChartData,
+  PlanetName,
+  ZodiacSign,
+  AspectType,
+  Planet,
+  House,
+  Aspect,
+  ChartAngles
+};
 
 /**
  * Branded Types for IDs - prevents confusing different ID types
@@ -75,8 +97,39 @@ export interface ApiErrorResponseBase extends ApiResponseBase {
   error: {
     code: string;
     message: string;
-    details?: Record<string, unknown>;
+    details?: ApiErrorDetails;
     stack?: string; // Only included in development
+  };
+}
+
+// Specific error detail types for better debugging and error handling
+export interface ApiErrorDetails {
+  timestamp?: string;
+  requestPath?: string;
+  method?: string;
+  statusCode?: number;
+  correlationId?: string;
+  context?: ApiErrorContext;
+  // Specific error details for different error types
+  resource?: string;
+  id?: string;
+  errorId?: string;
+  validationErrors?: Record<string, string[]>;
+}
+
+export interface ApiErrorContext {
+  userId?: string;
+  chartId?: string;
+  action?: string;
+  inputData?: {
+    birthDate?: string;
+    location?: string;
+    chartType?: string;
+  };
+  serverInfo?: {
+    version?: string;
+    environment?: string;
+    node?: string;
   };
 }
 
@@ -88,7 +141,9 @@ export interface ApiValidationErrorResponse extends ApiErrorResponseBase {
   error: {
     code: 'VALIDATION_ERROR';
     message: string;
-    details: Record<string, string[]>;
+    details: ApiErrorDetails & {
+      validationErrors: Record<string, string[]>;
+    };
   };
 }
 
@@ -97,7 +152,7 @@ export interface ApiNotFoundResponse extends ApiErrorResponseBase {
   error: {
     code: 'NOT_FOUND';
     message: string;
-    details: {
+    details: ApiErrorDetails & {
       resource: string;
       id: string;
     };
@@ -125,7 +180,7 @@ export interface ApiServerErrorResponse extends ApiErrorResponseBase {
   error: {
     code: 'SERVER_ERROR';
     message: string;
-    details?: {
+    details?: ApiErrorDetails & {
       errorId: string;
     };
   };
@@ -136,7 +191,7 @@ export interface ApiGenericErrorResponse extends ApiErrorResponseBase {
   error: {
     code: string;
     message: string;
-    details?: Record<string, unknown>;
+    details?: ApiErrorDetails;
   };
 }
 
@@ -257,111 +312,6 @@ export type ApiResponse<T> =
   | ApiCachedResponseType<T>;
 
 // Consolidated all response types above
-
-/**
- * Chart Types with Improved Type Safety
- */
-export type PlanetName =
-  | 'sun'
-  | 'moon'
-  | 'mercury'
-  | 'venus'
-  | 'mars'
-  | 'jupiter'
-  | 'saturn'
-  | 'uranus'
-  | 'neptune'
-  | 'pluto'
-  | 'chiron'
-  | 'north_node'
-  | 'south_node';
-
-export type ZodiacSign =
-  | 'aries'
-  | 'taurus'
-  | 'gemini'
-  | 'cancer'
-  | 'leo'
-  | 'virgo'
-  | 'libra'
-  | 'scorpio'
-  | 'sagittarius'
-  | 'capricorn'
-  | 'aquarius'
-  | 'pisces';
-
-export interface Planet {
-  name: PlanetName;
-  position: number; // Degree in zodiac (0-360)
-  sign: ZodiacSign;
-  house: number;
-  retrograde: boolean;
-  speed: number; // Degrees per day
-  dignity?: 'domicile' | 'exaltation' | 'fall' | 'detriment';
-  essential_dignity?: number; // Score from -5 to +5
-}
-
-export interface House {
-  number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-  cusp: number; // Degree position (0-360)
-  sign: ZodiacSign;
-}
-
-export type AspectType =
-  | 'conjunction'
-  | 'opposition'
-  | 'trine'
-  | 'square'
-  | 'sextile'
-  | 'quincunx'
-  | 'semi-sextile'
-  | 'semi-square'
-  | 'sesquiquadrate';
-
-export interface Aspect {
-  aspect_type: AspectType;
-  planet1: PlanetName;
-  planet2: PlanetName;
-  orb: number;
-  applying: boolean;
-  exact: boolean;
-  power?: number; // Strength of the aspect (0-1)
-}
-
-export interface ChartAngles {
-  ascendant: number;
-  midheaven: number;
-  descendant: number;
-  imumcoeli: number;
-  vertex?: number;
-  antivertex?: number; // Add antivertex
-  part_of_fortune?: number;
-}
-
-export interface ChartData {
-  planets: Record<PlanetName, Planet>;
-  houses: House[];
-  aspects: Aspect[];
-  asteroids?: Record<string, Planet>; // Add optional asteroids field
-  points?: Record<string, Planet>; // Add optional points field (lunar nodes, lilith, etc.)
-  angles: ChartAngles;
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  julian_day: number;
-  house_system:
-    | 'placidus'
-    | 'koch'
-    | 'equal'
-    | 'whole_sign'
-    | 'regiomontanus'
-    | 'campanus'
-    | 'porphyry';
-  sidereal?: {
-    ayanamsa: 'lahiri' | 'raman' | 'krishnamurti' | 'fagan_bradley';
-    offset: number;
-  };
-}
 
 /**
  * Chart API Types
@@ -519,7 +469,7 @@ export class ApiError extends Error {
     message: string,
     public readonly code: string,
     public readonly statusCode: number,
-    public readonly details?: Record<string, unknown>
+    public readonly details?: ApiErrorDetails
   ) {
     super(message);
     this.name = 'ApiError';
@@ -529,7 +479,7 @@ export class ApiError extends Error {
 export class AuthenticationError extends ApiError {
   constructor(
     message = 'Authentication failed',
-    details?: Record<string, unknown>
+    details?: ApiErrorDetails
   ) {
     super(message, 'AUTH_ERROR', 401, details);
     this.name = 'AuthenticationError';
@@ -537,21 +487,29 @@ export class AuthenticationError extends ApiError {
 }
 
 export class NotFoundError extends ApiError {
-  constructor(resource: string, id: string, details?: Record<string, unknown>) {
-    super(`${resource} with id ${id} not found`, 'NOT_FOUND', 404, details);
+  constructor(resource: string, id: string, details?: ApiErrorDetails) {
+    const enhancedDetails: ApiErrorDetails = {
+      ...details,
+      resource,
+      id
+    };
+    super(`${resource} with id ${id} not found`, 'NOT_FOUND', 404, enhancedDetails);
     this.name = 'NotFoundError';
   }
 }
 
 export class ValidationError extends ApiError {
   constructor(message: string, validationErrors: Record<string, string[]>) {
-    super(message, 'VALIDATION_ERROR', 422, { validationErrors });
+    const details: ApiErrorDetails = { 
+      validationErrors 
+    };
+    super(message, 'VALIDATION_ERROR', 422, details);
     this.name = 'ValidationError';
   }
 }
 
 export class ForbiddenError extends ApiError {
-  constructor(message = 'Access forbidden', details?: Record<string, unknown>) {
+  constructor(message = 'Access forbidden', details?: ApiErrorDetails) {
     super(message, 'FORBIDDEN', 403, details);
     this.name = 'ForbiddenError';
   }
@@ -560,7 +518,7 @@ export class ForbiddenError extends ApiError {
 export class ServerError extends ApiError {
   constructor(
     message = 'Internal server error',
-    details?: Record<string, unknown>
+    details?: ApiErrorDetails
   ) {
     super(message, 'SERVER_ERROR', 500, details);
     this.name = 'ServerError';

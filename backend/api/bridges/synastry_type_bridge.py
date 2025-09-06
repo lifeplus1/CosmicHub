@@ -154,10 +154,7 @@ class SynastryTypeBridge:
         if isinstance(input_data, BirthData):
             return cls.from_api_birth_data(input_data)
         
-        # If it's not a mapping-like object, fallback to mock defaults
-        if not isinstance(input_data, dict):  # type: ignore[redundant-expr]
-            return cls.from_mock_defaults()
-
+        # At this point input_data must be a dict based on type annotation
         data: Dict[str, Any] = dict(input_data)
         
         # Flow 1: API - Canonical form with individual date/time fields  
@@ -175,7 +172,7 @@ class SynastryTypeBridge:
             return cls.from_flat_config(data)
         
         # Flow 3: Mock fallback for incomplete/malformed data
-        return cls.from_mock_defaults()
+        return cls.from_mock_defaults()  # type: ignore[unreachable]
 
     # --- Aspect Factory with 3 Data Flows ---
     @classmethod
@@ -271,11 +268,11 @@ class SynastryTypeBridge:
     # --- Match Quality Helper ---
     @staticmethod
     def categorize_match_quality(score: float) -> MatchQuality:
-        if score >= 85: return cast(MatchQuality, 'excellent')
-        if score >= 75: return cast(MatchQuality, 'very_good')
-        if score >= 65: return cast(MatchQuality, 'good')
-        if score >= 50: return cast(MatchQuality, 'fair')
-        return cast(MatchQuality, 'challenging')
+        if score >= 85: return 'excellent'
+        if score >= 75: return 'very_good'
+        if score >= 65: return 'good'
+        if score >= 50: return 'fair'
+        return 'challenging'
 
     # --- Relationship Match ---
     @classmethod

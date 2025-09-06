@@ -66,7 +66,7 @@ class ComplianceAssessment:
 class GDPRComplianceChecker:
     """Comprehensive GDPR compliance checker."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.lawful_bases = [
             "consent",
             "contract",

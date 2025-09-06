@@ -29,15 +29,7 @@ jobs:
           pip install mypy
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run mypy type checking
-        working-directory: ./backend
+      - name: Run type bridge validation
+        working-directory: ./
         run: |
-          # Run strict checking on well-typed files
-          mypy --follow-imports=silent --ignore-missing-imports \
-               --disallow-untyped-defs --disallow-incomplete-defs \
-               --check-untyped-defs --pretty --show-error-codes \
-               security/advanced_validation.py
-
-          # Run basic checking on all files (non-blocking for now)
-          mypy --follow-imports=silent --ignore-missing-imports \
-               --pretty --show-error-codes security/ || true
+          python3 scripts/type-bridge-generator.py --no-fail

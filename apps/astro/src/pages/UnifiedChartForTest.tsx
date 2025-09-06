@@ -4,7 +4,10 @@ import { useAuth } from '@cosmichub/auth';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { fetchChartDataUnified, saveChart } from '../services/api';
 import type { ChartData } from '../types/astrology.types';
-import type { ChartBirthData } from '@cosmichub/types';
+import { 
+  toExtendedBirthData,
+  type ChartBirthData 
+} from '@cosmichub/types';
 // Local lightweight SaveChartRequest subset (avoid broken re-export)
 interface SaveChartRequest {
   year: number;
@@ -161,12 +164,9 @@ export const UnifiedChartForTest: React.FC = () => {
                   Number.isFinite(d)
                 ) {
                   setBirthData({
-                    year: y,
-                    month: m,
-                    day: d,
-                    hour: Number.isFinite(hh) ? hh : 12,
-                    minute: Number.isFinite(mm) ? mm : 0,
-                    location: bd.city,
+                    birth_date: `${y}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`,
+                    birth_time: `${(Number.isFinite(hh) ? hh : 12).toString().padStart(2, '0')}:${(Number.isFinite(mm) ? mm : 0).toString().padStart(2, '0')}`,
+                    city: bd.city,
                     latitude: bd.lat ?? 0,
                     longitude: bd.lon ?? 0,
                     timezone: bd.timezone ?? 'UTC',
@@ -174,12 +174,9 @@ export const UnifiedChartForTest: React.FC = () => {
                 }
               } else if (bd.year && bd.month && bd.day) {
                 setBirthData({
-                  year: bd.year,
-                  month: bd.month,
-                  day: bd.day,
-                  hour: bd.hour ?? 12,
-                  minute: bd.minute ?? 0,
-                  location: bd.city,
+                  birth_date: `${bd.year}-${bd.month.toString().padStart(2, '0')}-${bd.day.toString().padStart(2, '0')}`,
+                  birth_time: `${(bd.hour ?? 12).toString().padStart(2, '0')}:${(bd.minute ?? 0).toString().padStart(2, '0')}`,
+                  city: bd.city,
                   latitude: bd.lat ?? 0,
                   longitude: bd.lon ?? 0,
                   timezone: bd.timezone ?? 'UTC',
@@ -255,12 +252,9 @@ export const UnifiedChartForTest: React.FC = () => {
             setChartData(rawUnified.data);
             if (setBirthData) {
               setBirthData({
-                year: Number(payload.year),
-                month: Number(payload.month),
-                day: Number(payload.day),
-                hour: Number(payload.hour),
-                minute: Number(payload.minute),
-                location: payload.city,
+                birth_date: `${Number(payload.year)}-${Number(payload.month).toString().padStart(2, '0')}-${Number(payload.day).toString().padStart(2, '0')}`,
+                birth_time: `${Number(payload.hour).toString().padStart(2, '0')}:${Number(payload.minute).toString().padStart(2, '0')}`,
+                city: payload.city,
                 latitude: Number(payload.lat),
                 longitude: Number(payload.lon),
                 timezone: payload.timezone,
@@ -287,12 +281,13 @@ export const UnifiedChartForTest: React.FC = () => {
 
   const handleSave = useCallback(async () => {
     if (!chartData || !birthData || !user?.uid) return;
+    const extendedBirthData = toExtendedBirthData(birthData);
     const req: SaveChartRequest = {
-      year: birthData.year,
-      month: birthData.month,
-      day: birthData.day,
-      hour: birthData.hour ?? 12,
-      minute: birthData.minute ?? 0,
+      year: extendedBirthData.year,
+      month: extendedBirthData.month,
+      day: extendedBirthData.day,
+      hour: extendedBirthData.hour ?? 12,
+      minute: extendedBirthData.minute ?? 0,
       city:
         (typeof (birthData as unknown as { city?: unknown }).city === 'string'
           ? (birthData as unknown as { city?: string }).city

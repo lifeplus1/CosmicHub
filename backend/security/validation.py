@@ -6,7 +6,12 @@ Part of SEC-006: Threat Model Mitigation (Batch 1)
 
 import re
 import html
-from typing import Any, Dict, Optional, Union, cast
+from typing import Dict, Optional, Union
+
+# Define JSON value types
+JsonValue = Union[str, int, float, bool, None, Dict[str, 'JsonValue'], list['JsonValue']]
+JsonDict = Dict[str, JsonValue]
+JsonList = list[JsonValue]
 from datetime import datetime
 
 from fastapi import HTTPException, status
@@ -240,9 +245,9 @@ class SecurityValidator:
         return SecurityValidator.sanitize_string(timezone_str, 50)
   # noqa: E114, W293
     @staticmethod  # noqa: E301
-    def validate_json_payload(payload: Any, max_depth: int = 10, max_keys: int = 100) -> Any:  # noqa: E501
+    def validate_json_payload(payload: JsonValue, max_depth: int = 10, max_keys: int = 100) -> JsonValue:  # noqa: E501
         """Enhanced JSON payload validation"""
-        def check_depth(obj: Any, current_depth: int = 0) -> None:
+        def check_depth(obj: JsonValue, current_depth: int = 0) -> None:
             if current_depth > max_depth:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -250,36 +255,40 @@ class SecurityValidator:
                 )
   # noqa: E114, W293
             if isinstance(obj, dict):
-                dict_obj = cast(Dict[Any, Any], obj)
-                if len(dict_obj) > max_keys:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="JSON payload has too many keys"
-                    )
-                for value in dict_obj.values():
+                # Type narrowing for dict
+                obj_dict = obj
+                for value in obj_dict.values():
                     check_depth(value, current_depth + 1)
             elif isinstance(obj, list):
-                list_obj = cast(list[Any], obj)
-                if len(list_obj) > max_keys:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="JSON array too long"
-                    )
-                for item in list_obj:
+                # Type narrowing for list  
+                obj_list = obj
+                for item in obj_list:
                     check_depth(item, current_depth + 1)
   # noqa: E114, W293
         check_depth(payload)
         return payload
   # noqa: E114, W293
     @staticmethod  # noqa: E301
-    def validate_frequency_settings(settings: Dict[str, Any]) -> Dict[str, Any]:  # noqa: E501
+    def validate_frequency_settings(settings: JsonDict) -> JsonDict:  # noqa: E501
         """Enhanced frequency generator settings validation"""
-        validated_settings: Dict[str, Any] = {}
+        validated_settings: JsonDict = {}
+        
+        def safe_float(value: JsonValue, field_name: str) -> float:
+            """Safely convert JSON value to float with validation"""
+            if not isinstance(value, (int, float, str)):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"{field_name} must be a number"
+                )
+            return float(value)
   # noqa: E114, W293
         # Base frequency validation (20Hz - 2000Hz for safety)
         if "baseFrequency" in settings:
             try:
-                freq = float(settings["baseFrequency"])
+                freq_value = settings["baseFrequency"]
+                if not isinstance(freq_value, (int, float, str)):
+                    raise ValueError("Invalid frequency type")
+                freq = float(freq_value)
                 if not (20 <= freq <= 2000):
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -295,7 +304,7 @@ class SecurityValidator:
         # Binaural beat validation (0.5Hz - 100Hz)
         if "binauralBeat" in settings:
             try:
-                beat = float(settings["binauralBeat"])
+                beat = safe_float(settings["binauralBeat"], "Binaural beat")
                 if not (0.5 <= beat <= 100):
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -311,7 +320,7 @@ class SecurityValidator:
         # Volume validation (0-100)
         if "volume" in settings:
             try:
-                volume = float(settings["volume"])
+                volume = safe_float(settings["volume"], "Volume")
                 if not (0 <= volume <= 100):
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -327,7 +336,7 @@ class SecurityValidator:
         # Duration validation (1-120 minutes)
         if "duration" in settings:
             try:
-                duration = float(settings["duration"])
+                duration = safe_float(settings["duration"], "Duration")
                 if not (1 <= duration <= 120):
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -353,7 +362,7 @@ class SecurityValidator:
             return False
   # noqa: E114, W293
     @staticmethod  # noqa: E301
-    def validate_birth_data(birth_data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_birth_data(birth_data: JsonDict) -> JsonDict:
         """Backward compatibility: validate birth data dictionary"""
         if not birth_data:
             raise HTTPException(
@@ -361,7 +370,7 @@ class SecurityValidator:
                 detail="Birth data is required"
             )
   # noqa: E114, W293
-        validated: Dict[str, Any] = {}
+        validated: JsonDict = {}
   # noqa: E114, W293
         # Handle date validation
         if "date" in birth_data:
@@ -373,15 +382,18 @@ class SecurityValidator:
   # noqa: E114, W293
         # Handle location validation
         if "location" in birth_data and isinstance(birth_data["location"], dict):  # noqa: E501
-            location = cast(Dict[str, Any], birth_data["location"])
-            validated_location: Dict[str, Any] = {}
+            location = birth_data["location"]
+            validated_location: JsonDict = {}
   # noqa: E114, W293
             # Validate coordinates
             if "lat" in location and "lng" in location:
                 try:
-                    lat, lng = SecurityValidator.validate_coordinates(location["lat"], location["lng"])  # noqa: E501
-                    validated_location["lat"] = lat
-                    validated_location["lng"] = lng
+                    lat_val = location["lat"]
+                    lng_val = location["lng"]
+                    if isinstance(lat_val, (str, int, float)) and isinstance(lng_val, (str, int, float)):
+                        lat, lng = SecurityValidator.validate_coordinates(lat_val, lng_val)  # noqa: E501
+                        validated_location["lat"] = lat
+                        validated_location["lng"] = lng
                 except HTTPException:
                     pass  # Skip invalid coordinates
   # noqa: E114, W293

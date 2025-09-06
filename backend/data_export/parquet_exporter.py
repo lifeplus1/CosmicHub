@@ -6,9 +6,9 @@ while building foundation for analytics warehouse and ML training pipeline.
 """
 
 import json
-import pandas as pd  # type: ignore
-import pyarrow as pa  # type: ignore
-import pyarrow.parquet as pq  # type: ignore
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
@@ -225,7 +225,7 @@ class ParquetExporter:
         dataframes: List[Any] = []  # List of pandas DataFrames
         for file_path in parquet_files[:100]:  # Limit for demo
             try:
-                df = pd.read_parquet(file_path)  # type: ignore
+                df = pd.read_parquet(file_path)
                 dataframes.append(df)
             except Exception as e:
                 logger.warning(f"Could not read {file_path}: {e}")
@@ -233,7 +233,7 @@ class ParquetExporter:
         if not dataframes:
             return {"error": "No readable data found"}
             
-        combined_df = pd.concat(dataframes, ignore_index=True)  # type: ignore
+        combined_df = pd.concat(dataframes, ignore_index=True)
         
         # Generate analytics summary
         summary: Dict[str, Any] = {
@@ -242,10 +242,10 @@ class ParquetExporter:
                 'start': combined_df['timestamp'].min(),
                 'end': combined_df['timestamp'].max()
             },
-            'chart_types': combined_df['calculation_type'].value_counts().to_dict(),  # type: ignore
+            'chart_types': combined_df['calculation_type'].value_counts().to_dict(),
             'average_processing_time': combined_df['processing_time_ms'].mean(),
             'success_rate': combined_df['success'].mean() * 100,
-            'astrology_systems': combined_df['astrology_system'].value_counts().to_dict(),  # type: ignore
+            'astrology_systems': combined_df['astrology_system'].value_counts().to_dict(),
         }
         
         return summary

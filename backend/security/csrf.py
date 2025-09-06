@@ -31,7 +31,7 @@ class CSRFProtection:
                 CSRF_SECRET_KEY)  # noqa: E501
             token_lifetime: Token lifetime in seconds (default: 1 hour)
         """
-        self.secret_key = secret_key or os.getenv("CSRF_SECRET_KEY", "")
+        self.secret_key = secret_key or os.getenv("CSRF_SECRET_KEY") or ""
         if not self.secret_key:
             # Generate a random secret key if none provided (not recommended for production)  # noqa: E501
             self.secret_key = secrets.token_urlsafe(32)
@@ -231,19 +231,20 @@ class CSRFMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
   # noqa: E114, W293
         # Get CSRF token from request
-        csrf_token = self._get_csrf_token_from_request(request)
+        csrf_token_optional = self._get_csrf_token_from_request(request)
   # noqa: E114, W293
-        if not csrf_token:
+        if not csrf_token_optional:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="CSRF token missing. Include X-CSRF-Token header."
             )
+        csrf_token_validated: str = csrf_token_optional  # Type assertion after None check
   # noqa: E114, W293
         # Validate token
         user_id = getattr(request.state, 'user_id', None)
         session_id = request.session.get('id') if hasattr(request, 'session') else None  # noqa: E501
   # noqa: E114, W293
-        if not self.csrf.validate_token(csrf_token, user_id, session_id):
+        if not self.csrf.validate_token(csrf_token_validated, user_id, session_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid or expired CSRF token"

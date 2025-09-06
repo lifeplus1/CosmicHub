@@ -1,5 +1,8 @@
 import React from 'react';
-import { crossAppStore, AppState } from './cross-app-store';
+import { crossAppStore, AppState, type ChartData } from './cross-app-store';
+
+// Export type for external use
+export type { ChartData };
 
 // React hook for easy integration
 export const useCrossAppStore = () => {

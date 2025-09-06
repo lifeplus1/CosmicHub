@@ -242,13 +242,13 @@ def calculate_vedic_planets(julian_day: float) -> Dict[str, Any]:
                 # Calculate Ketu as opposite of Rahu
                 rahu_data = vedic_positions.get("rahu", {})
                 rahu_pos = float(rahu_data.get("tropical_position", 0))
-                tropical_pos: float = (rahu_pos + 180) % 360
+                tropical_pos = (rahu_pos + 180) % 360
             else:
                 pos = calc_ut(julian_day, body, FLG_SWIEPH | FLG_SPEED)
                 if pos[0][0] < 0:
                     logger.error(f"Error calculating {name}: {pos[0][0]}")
                     continue
-                tropical_pos: float = float(pos[0][0])
+                tropical_pos = float(pos[0][0])
 
             vedic_positions[name] = {
                 "tropical_position": tropical_pos,

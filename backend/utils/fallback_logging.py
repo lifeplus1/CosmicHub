@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from dataclasses import dataclass, asdict
 from contextlib import contextmanager
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Generator
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class FallbackLogger:
     and recovery patterns.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.events: List[FallbackEvent] = []
         self._max_events = 1000  # Keep last 1000 events in memory
 
@@ -225,7 +225,7 @@ def track_fallback_operation(
     operation: str,
     user_id: Optional[str] = None,
     request_id: Optional[str] = None
-):
+) -> Generator[Any, None, None]:
     """
     Context manager to track operations that might fall back
 
@@ -243,13 +243,13 @@ def track_fallback_operation(
     start_time = time.time()
 
     class FallbackTracker:
-        def __init__(self):
+        def __init__(self) -> None:
             self.fallback_occurred = False
 
         def log_fallback(self,
             fallback_service: str,
             reason: FallbackReason,
-            error: Exception):
+            error: Exception) -> None:
             duration_ms = (time.time() - start_time) * 1000
             fallback_logger.log_fallback(
                 service_type=service_type,

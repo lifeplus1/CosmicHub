@@ -17,14 +17,18 @@
 
 import { useMemo, useRef } from 'react';
 
-// Self-contained types to avoid cross-package dependencies
-interface ChartLike {
-  planets?: unknown;
-  houses?: unknown;
-  aspects?: unknown;
-  asteroids?: unknown;
-  angles?: unknown;
-  points?: unknown;
+// Import centralized astrology utilities
+import {
+  getSignFromDegrees,
+  getDegreeWithinSign,
+  calculateHousePosition,
+  SIGN_RULERS,
+} from '../../../apps/astro/src/utils/astrologyUtils';
+
+// Import centralized ChartLike interface and extend it
+import type { ChartLike as BaseChartLike } from '../../../apps/astro/src/components/ChartDisplay/normalizeChart';
+
+interface ChartLike extends BaseChartLike {
   uranian?: unknown;
   hypothetical_points?: unknown;
   __raw_backend_response?: ChartLike;
@@ -39,17 +43,9 @@ interface CelestialBodyData {
   aspects?: unknown[];
 }
 
-interface AspectData {
-  planet1?: string;
-  planet2?: string;
-  point1?: string;
-  point2?: string;
-  type?: string;
-  aspect_type?: string;
-  aspect?: string;
-  orb?: number;
-  applying?: string;
-}
+import type { UnifiedAspectData } from '@cosmichub/types';
+
+type AspectData = UnifiedAspectData;
 
 interface ProcessedPlanet {
   name: string;
@@ -112,75 +108,24 @@ interface ProcessedChartData {
 }
 
 interface UseChartProcessingOptions {
+  /** Enable debug logging for development and troubleshooting */
   enableDebug?: boolean;
+  /** Fallback to sample data if processing fails (development only) */
   fallbackToSample?: boolean;
+  /** Use modern planetary rulers instead of traditional ones */
   useModernRulers?: boolean;
+  /** Optional error handler callback for custom error handling */
+  onError?: (error: Error, chartData: unknown) => void;
 }
 
 // Simplified astrological sign calculation (degrees 0-359 to signs)
-const getSignFromDegrees = (degrees: number): string => {
-  const signs = [
-    'Aries',
-    'Taurus',
-    'Gemini',
-    'Cancer',
-    'Leo',
-    'Virgo',
-    'Libra',
-    'Scorpio',
-    'Sagittarius',
-    'Capricorn',
-    'Aquarius',
-    'Pisces',
-  ];
-  const normalizedDegrees = ((degrees % 360) + 360) % 360;
-  const signIndex = Math.floor(normalizedDegrees / 30);
-  return signs[signIndex] ?? 'Aries';
-};
+// REMOVED: getSignFromDegrees - now imported from astrologyUtils.ts
 
-const getDegreeWithinSign = (degrees: number): number => {
-  const normalizedDegrees = ((degrees % 360) + 360) % 360;
-  return parseFloat((normalizedDegrees % 30).toFixed(2));
-};
+// REMOVED: getDegreeWithinSign - now imported from astrologyUtils.ts
 
-const calculateHousePosition = (
-  planetDegrees: number,
-  houseCusps: number[]
-): number => {
-  if (houseCusps.length === 0) return 1;
+// REMOVED: calculateHousePosition - now imported from astrologyUtils.ts
 
-  const normalizedPlanet = ((planetDegrees % 360) + 360) % 360;
-
-  for (let i = 0; i < houseCusps.length; i++) {
-    const currentCuspValue = houseCusps[i];
-    const nextCuspValue = houseCusps[(i + 1) % houseCusps.length];
-
-    if (
-      currentCuspValue === null ||
-      currentCuspValue === undefined ||
-      nextCuspValue === null ||
-      nextCuspValue === undefined
-    )
-      continue;
-
-    const currentCusp = ((currentCuspValue % 360) + 360) % 360;
-    const nextCusp = ((nextCuspValue % 360) + 360) % 360;
-
-    if (currentCusp <= nextCusp) {
-      if (normalizedPlanet >= currentCusp && normalizedPlanet < nextCusp) {
-        return i + 1;
-      }
-    } else {
-      if (normalizedPlanet >= currentCusp || normalizedPlanet < nextCusp) {
-        return i + 1;
-      }
-    }
-  }
-
-  return 1; // Default to first house
-};
-
-// Traditional and modern rulership mappings
+// Traditional rulership mappings (different from centralized modern rulers)
 const TRADITIONAL_RULERS: Record<string, string> = {
   Aries: 'Mars',
   Taurus: 'Venus',
@@ -196,29 +141,51 @@ const TRADITIONAL_RULERS: Record<string, string> = {
   Pisces: 'Jupiter',
 };
 
-const MODERN_RULERS: Record<string, string> = {
-  ...TRADITIONAL_RULERS,
-  Scorpio: 'Pluto',
-  Aquarius: 'Uranus',
-  Pisces: 'Neptune',
-};
+// REMOVED: MODERN_RULERS - now using SIGN_RULERS from astrologyUtils.ts
 
 // Calculate house ruler based on sign on the cusp
 const calculateHouseRuler = (
   cuspSign: string,
   useModernRulers: boolean = true
 ): string => {
-  const rulerMap = useModernRulers ? MODERN_RULERS : TRADITIONAL_RULERS;
-  return rulerMap[cuspSign] ?? '';
+  if (useModernRulers) {
+    // SIGN_RULERS uses lowercase keys, so convert cuspSign to lowercase
+    const lowercaseSign = cuspSign.toLowerCase();
+    return SIGN_RULERS[lowercaseSign as keyof typeof SIGN_RULERS] ?? '';
+  } else {
+    // TRADITIONAL_RULERS uses capitalized keys
+    return TRADITIONAL_RULERS[cuspSign] ?? '';
+  }
 };
 
 /**
  * Centralized chart data processing hook
- *
- * Handles the critical data flow issue where:
+ * 
+ * @description Handles the critical data flow issue where:
  * - /calculate endpoint returns data with __raw_backend_response field
  * - /api/charts/ endpoint returns transformed data WITHOUT __raw_backend_response
  * - Processing needs raw backend data for proper categorization
+ * 
+ * @param chartData - Raw chart data from API endpoints (unknown type for flexibility)
+ * @param options - Configuration options for processing behavior
+ * @returns Processed and normalized chart data with categorized celestial bodies
+ * 
+ * @example
+ * ```tsx
+ * const processedChart = useChartProcessing(rawChartData, {
+ *   enableDebug: true,
+ *   useModernRulers: true
+ * });
+ * 
+ * console.log(processedChart.planets); // Normalized planet data
+ * console.log(processedChart.source); // 'new_calculation' | 'saved_chart'
+ * ```
+ * 
+ * @performance
+ * - Uses useMemo for expensive processing operations
+ * - Stable ref for debug logging to prevent unnecessary re-renders
+ * - Early returns for null/invalid data
+ * - Error boundaries for graceful failure handling
  */
 export function useChartProcessing(
   chartData: unknown,
@@ -228,6 +195,7 @@ export function useChartProcessing(
     enableDebug = true,
     fallbackToSample = false,
     useModernRulers = true,
+    onError,
   } = options;
 
   // Stable ref for debug logging - follows React Hook Patterns Guide
@@ -236,15 +204,16 @@ export function useChartProcessing(
   });
 
   return useMemo(() => {
-    const dataId = chartData ? JSON.stringify(chartData).slice(0, 50) : 'null';
+    try {
+      const dataId = chartData ? JSON.stringify(chartData).slice(0, 50) : 'null';
 
-    if (enableDebug && debugRef.current.lastProcessedId !== dataId) {
-      console.log('🔧 useChartProcessing - Processing new chart data...', {
-        dataId,
-        chartData,
-      });
-      debugRef.current.lastProcessedId = dataId;
-    }
+      if (enableDebug && debugRef.current.lastProcessedId !== dataId) {
+        console.log('🔧 useChartProcessing - Processing new chart data...', {
+          dataId,
+          chartData,
+        });
+        debugRef.current.lastProcessedId = dataId;
+      }
 
     // Early return for null/undefined data - prevents unnecessary computation
     if (chartData === null || chartData === undefined) {
@@ -428,7 +397,38 @@ export function useChartProcessing(
     }
 
     return finalResult;
-  }, [chartData, enableDebug, fallbackToSample]); // Explicit dependency array per React Hook Patterns
+    } catch (error) {
+      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      
+      if (enableDebug) {
+        console.error('❌ useChartProcessing - Error during processing:', errorInstance);
+      }
+      
+      // Call custom error handler if provided
+      if (onError) {
+        onError(errorInstance, chartData);
+      }
+      
+      // Return safe fallback data structure
+      return {
+        planets: [],
+        asteroids: [],
+        angles: [],
+        houses: [],
+        aspects: [],
+        points: [],
+        source: 'unknown',
+        hasRawBackend: false,
+        debug: {
+          originalKeys: [],
+          backendKeys: [],
+          dataStructure: 'error',
+          asteroidCount: 0,
+          pointCount: 0,
+        },
+      };
+    }
+  }, [chartData, enableDebug, fallbackToSample, useModernRulers, onError]); // Explicit dependency array per React Hook Patterns - FIXED: Added useModernRulers and onError
 }
 
 /**

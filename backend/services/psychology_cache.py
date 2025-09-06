@@ -1,30 +1,63 @@
-import redis
-import json
+"""
+Psychology Cache Service following UNIFIED-TYPE-VALIDATION-STRATEGY.md
+
+This module provides Redis-based caching for psychology analysis results
+with strict type safety and error handling.
+"""
+
+from __future__ import annotations
+
 import hashlib
-import time
+import json
 import logging
-from typing import Dict, Any, Optional, Union
-from datetime import datetime, timedelta
 import os
+import time
+from datetime import datetime, timedelta
+from typing import Any, Dict, Optional, Union, cast
+
+try:
+    import redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    redis = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 
+# Type alias for cache data following best practices
+CacheData = Union[None, bool, int, float, str, list[Any], dict[str, Any]]
+
+
 class PsychologyCache:
-    """Redis-based caching service for psychology analysis results."""
+    """
+    Redis-based caching service for psychology analysis results.
     
-    def __init__(self):
-        self.client: Optional[redis.Redis] = None
-        self.default_ttl = 3600  # 1 hour default
-        self.connected = False
+    Provides type-safe caching with automatic TTL management and
+    graceful fallback when Redis is unavailable.
+    """
+    
+    def __init__(self) -> None:
+        """Initialize cache with connection configuration."""
+        self.client: Any = None  # Redis client when available
+        self.default_ttl: int = 3600  # 1 hour default
+        self.connected: bool = False
         self.connect()
     
-    def connect(self):
-        """Establish Redis connection with error handling."""
+    def connect(self) -> None:
+        """
+        Establish Redis connection with error handling.
+        
+        Uses environment variables for configuration with sensible defaults.
+        """
+        if not REDIS_AVAILABLE:
+            logger.warning("[PsychologyCache] Redis not available - using fallback mode")
+            return
+            
         try:
             # Use environment variables for Redis configuration
             redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379')
             
-            self.client = redis.from_url(
+            self.client = redis.from_url(  # type: ignore
                 redis_url,
                 decode_responses=True,
                 retry_on_timeout=True,
@@ -33,7 +66,8 @@ class PsychologyCache:
             )
             
             # Test connection
-            self.client.ping()
+            if self.client:
+                self.client.ping()
             self.connected = True
             logger.info("[PsychologyCache] Redis connected successfully")
             
@@ -42,16 +76,34 @@ class PsychologyCache:
             self.connected = False
             self.client = None
     
-    def _generate_cache_key(self, prefix: str, data: Dict[str, Any]) -> str:
-        """Generate consistent cache key from data."""
+    def _generate_cache_key(self, prefix: str, data: Dict[str, CacheData]) -> str:
+        """
+        Generate consistent cache key from data.
+        
+        Args:
+            prefix: Cache prefix for categorization
+            data: Data to hash for key generation
+            
+        Returns:
+            Consistent cache key string
+        """
         # Sort keys for consistent hashing
         sorted_data = json.dumps(data, sort_keys=True, separators=(',', ':'))
         hash_object = hashlib.md5(sorted_data.encode())
         hash_hex = hash_object.hexdigest()
         return f"psychology:{prefix}:{hash_hex}"
     
-    def get(self, prefix: str, key_data: Dict[str, Any]) -> Optional[Any]:
-        """Retrieve cached data."""
+    def get(self, prefix: str, key_data: Dict[str, CacheData]) -> Optional[Dict[str, Any]]:
+        """
+        Retrieve cached data with type safety.
+        
+        Args:
+            prefix: Cache category prefix
+            key_data: Data to generate cache key
+            
+        Returns:
+            Cached data if found and valid, None otherwise
+        """
         if not self.connected or not self.client:
             return None
         
@@ -62,7 +114,16 @@ class PsychologyCache:
             if not cached:
                 return None
             
-            cache_data = json.loads(cached)
+            # Ensure cached data is a string for JSON parsing
+            if isinstance(cached, bytes):
+                cached_str = cached.decode('utf-8')
+            elif isinstance(cached, str):
+                cached_str = cached
+            else:
+                logger.warning(f"[PsychologyCache] Unexpected cache data type: {type(cached)}")
+                return None
+            
+            cache_data = json.loads(cached_str)
             
             # Check if cache is expired (additional safety check)
             now = time.time()
@@ -74,14 +135,29 @@ class PsychologyCache:
                 self.client.delete(key)
                 return None
             
-            return cache_data['data']
+            # Type-safe return of cached data
+            return cast(Dict[str, Any], cache_data['data'])
             
         except Exception as error:
             logger.warning(f"[PsychologyCache] Cache get error: {error}")
             return None
     
-    def set(self, prefix: str, key_data: Dict[str, Any], value: Any, ttl: Optional[int] = None) -> None:
-        """Store data in cache."""
+    def set(
+        self, 
+        prefix: str, 
+        key_data: Dict[str, CacheData], 
+        value: Dict[str, Any], 
+        ttl: Optional[int] = None
+    ) -> None:
+        """
+        Store data in cache with automatic expiration.
+        
+        Args:
+            prefix: Cache category prefix
+            key_data: Data to generate cache key
+            value: Data to cache
+            ttl: Time to live in seconds (uses default if None)
+        """
         if not self.connected or not self.client:
             return
         
@@ -91,7 +167,9 @@ class PsychologyCache:
             
             cache_data = {
                 'data': value,
-                'timestamp': time.time()
+                'timestamp': time.time(),
+                'prefix': prefix,
+                'ttl': cache_ttl
             }
             
             serialized = json.dumps(cache_data, default=str)
@@ -103,8 +181,14 @@ class PsychologyCache:
         except Exception as error:
             logger.warning(f"[PsychologyCache] Cache set error: {error}")
     
-    def invalidate(self, prefix: str, key_data: Dict[str, Any]) -> None:
-        """Remove specific cache entry."""
+    def invalidate(self, prefix: str, key_data: Dict[str, CacheData]) -> None:
+        """
+        Remove specific cache entry.
+        
+        Args:
+            prefix: Cache category prefix
+            key_data: Data to generate cache key for removal
+        """
         if not self.connected or not self.client:
             return
         
@@ -117,13 +201,18 @@ class PsychologyCache:
             logger.warning(f"[PsychologyCache] Cache invalidate error: {error}")
     
     def invalidate_pattern(self, pattern: str) -> None:
-        """Remove cache entries matching pattern."""
+        """
+        Remove cache entries matching pattern.
+        
+        Args:
+            pattern: Pattern to match for bulk deletion
+        """
         if not self.connected or not self.client:
             return
         
         try:
             keys = self.client.keys(f"psychology:{pattern}:*")
-            if keys:
+            if keys and isinstance(keys, list):
                 self.client.delete(*keys)
                 logger.info(f"[PsychologyCache] Invalidated {len(keys)} cache keys matching pattern: {pattern}")
                 
@@ -137,7 +226,7 @@ class PsychologyCache:
         
         try:
             keys = self.client.keys('psychology:*')
-            if keys:
+            if keys and isinstance(keys, list):
                 self.client.delete(*keys)
                 logger.info(f"[PsychologyCache] Flushed {len(keys)} psychology cache keys")
                 
@@ -146,13 +235,18 @@ class PsychologyCache:
     
     def is_connected(self) -> bool:
         """Check if Redis is connected."""
-        return self.connected
+        return self.connected and REDIS_AVAILABLE
     
     def disconnect(self) -> None:
-        """Close Redis connection."""
+        """Close Redis connection gracefully."""
         if self.client:
-            self.client.close()
-            self.connected = False
+            try:
+                self.client.close()
+            except Exception as error:
+                logger.warning(f"[PsychologyCache] Error closing Redis connection: {error}")
+            finally:
+                self.connected = False
+                logger.info("[PsychologyCache] Redis disconnected")
 
 
 # Singleton instance
@@ -160,51 +254,137 @@ psychology_cache = PsychologyCache()
 
 
 class PsychologyCacheService:
-    """High-level cache service for psychology analysis data."""
+    """
+    High-level cache service for psychology analysis data.
+    
+    Provides typed methods for specific psychology analysis types
+    following the service pattern.
+    """
     
     @staticmethod
-    def get_mbti_analysis(birth_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Get cached MBTI analysis."""
+    def get_mbti_analysis(birth_data: Dict[str, CacheData]) -> Optional[Dict[str, Any]]:
+        """
+        Get cached MBTI analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            
+        Returns:
+            Cached MBTI analysis if found
+        """
         return psychology_cache.get('mbti', birth_data)
     
     @staticmethod
-    def set_mbti_analysis(birth_data: Dict[str, Any], analysis: Dict[str, Any], ttl: int = 3600) -> None:
-        """Cache MBTI analysis."""
+    def set_mbti_analysis(
+        birth_data: Dict[str, CacheData], 
+        analysis: Dict[str, Any], 
+        ttl: int = 3600
+    ) -> None:
+        """
+        Cache MBTI analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            analysis: MBTI analysis data
+            ttl: Time to live in seconds
+        """
         psychology_cache.set('mbti', birth_data, analysis, ttl)
     
     @staticmethod
-    def get_enneagram_analysis(birth_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Get cached Enneagram analysis."""
+    def get_enneagram_analysis(birth_data: Dict[str, CacheData]) -> Optional[Dict[str, Any]]:
+        """
+        Get cached Enneagram analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            
+        Returns:
+            Cached Enneagram analysis if found
+        """
         return psychology_cache.get('enneagram', birth_data)
     
     @staticmethod
-    def set_enneagram_analysis(birth_data: Dict[str, Any], analysis: Dict[str, Any], ttl: int = 3600) -> None:
-        """Cache Enneagram analysis."""
+    def set_enneagram_analysis(
+        birth_data: Dict[str, CacheData], 
+        analysis: Dict[str, Any], 
+        ttl: int = 3600
+    ) -> None:
+        """
+        Cache Enneagram analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            analysis: Enneagram analysis data
+            ttl: Time to live in seconds
+        """
         psychology_cache.set('enneagram', birth_data, analysis, ttl)
     
     @staticmethod
-    def get_synthesis_analysis(birth_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Get cached synthesis analysis."""
+    def get_synthesis_analysis(birth_data: Dict[str, CacheData]) -> Optional[Dict[str, Any]]:
+        """
+        Get cached synthesis analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            
+        Returns:
+            Cached synthesis analysis if found
+        """
         return psychology_cache.get('synthesis', birth_data)
     
     @staticmethod
-    def set_synthesis_analysis(birth_data: Dict[str, Any], analysis: Dict[str, Any], ttl: int = 7200) -> None:
-        """Cache synthesis analysis (longer TTL for complex analysis)."""
+    def set_synthesis_analysis(
+        birth_data: Dict[str, CacheData], 
+        analysis: Dict[str, Any], 
+        ttl: int = 7200
+    ) -> None:
+        """
+        Cache synthesis analysis with longer TTL for complex analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            analysis: Synthesis analysis data
+            ttl: Time to live in seconds (default 2 hours for complex analysis)
+        """
         psychology_cache.set('synthesis', birth_data, analysis, ttl)
     
     @staticmethod
-    def get_complete_analysis(birth_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Get cached complete psychology analysis."""
+    def get_complete_analysis(birth_data: Dict[str, CacheData]) -> Optional[Dict[str, Any]]:
+        """
+        Get cached complete analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            
+        Returns:
+            Cached complete analysis if found
+        """
         return psychology_cache.get('complete', birth_data)
     
     @staticmethod
-    def set_complete_analysis(birth_data: Dict[str, Any], analysis: Dict[str, Any], ttl: int = 3600) -> None:
-        """Cache complete psychology analysis."""
+    def set_complete_analysis(
+        birth_data: Dict[str, CacheData], 
+        analysis: Dict[str, Any], 
+        ttl: int = 3600
+    ) -> None:
+        """
+        Cache complete psychology analysis.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+            analysis: Complete analysis data
+            ttl: Time to live in seconds
+        """
         psychology_cache.set('complete', birth_data, analysis, ttl)
     
     @staticmethod
-    def invalidate_user_analysis(birth_data: Dict[str, Any]) -> None:
-        """Invalidate all cached analysis for a user."""
+    def invalidate_user_analysis(birth_data: Dict[str, CacheData]) -> None:
+        """
+        Invalidate all cached analysis for a user.
+        
+        Args:
+            birth_data: Birth data for cache key generation
+        """
         psychology_cache.invalidate('mbti', birth_data)
         psychology_cache.invalidate('enneagram', birth_data)
         psychology_cache.invalidate('synthesis', birth_data)
@@ -239,3 +419,7 @@ class PsychologyCacheService:
     def disconnect() -> None:
         """Disconnect cache service."""
         psychology_cache.disconnect()
+
+
+# Export public interface
+__all__ = ["PsychologyCacheService", "PsychologyCache", "CacheData"]

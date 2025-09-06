@@ -42,7 +42,9 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   const [chartData, setChartData] = useState<ChartLikeWithResponse | null>(
     null
   );
-  const [fetchImpl, setFetchImpl] = useState<typeof fetchFn | null>(null);
+  const [fetchImpl, setFetchImpl] = useState<
+    ((data: ChartBirthData) => Promise<ApiResult<ChartData>>) | null
+  >(null);
   const canonicalBirthData = useCanonicalBirthData();
 
   const handleError = useCallback((err: unknown) => {
@@ -79,7 +81,7 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
         .then(mod => {
           // Only set if still needed
           if (!fetchFn) {
-            setFetchImpl(() => mod.fetchChartData);
+            setFetchImpl(mod.fetchChartData);
           }
         })
         .catch(err => {

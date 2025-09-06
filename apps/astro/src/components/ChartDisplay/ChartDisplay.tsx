@@ -1,6 +1,11 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { ChartHeader } from './ChartHeader';
+import { 
+  ChartLoadingState, 
+  ChartErrorState, 
+  ChartEmptyState 
+} from './index';
 import type { AstrologyChart as _AstrologyChart } from '@cosmichub/types';
 import type {
   ChartDisplayPlanet,
@@ -39,7 +44,8 @@ import {
   type AngleRow,
   AsteroidTable,
   type AsteroidRow,
-  EnhancedAspectTable,
+  UnifiedAspectTable,
+  convertEnhancedAspect,
 } from './tables';
 import { VirtualizedList } from './VirtualizedList';
 
@@ -340,8 +346,23 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
   const categorizedPoints = useCategorizedPoints(processedSections.points);
   const enhancedAspects = useEnhancedAspects(processedSections.aspects);
 
+  // Memoized summary calculations for performance
+  const _totalCelestialBodies = useMemo(() => 
+    processedSections.planets.length +
+    processedSections.asteroids.length +
+    processedSections.angles.length,
+    [processedSections.planets.length, processedSections.asteroids.length, processedSections.angles.length]
+  );
+
+  const _hasAnyData = useMemo(() => 
+    processedSections.planets.length > 0 ||
+    processedSections.asteroids.length > 0 ||
+    processedSections.aspects.length > 0,
+    [processedSections.planets.length, processedSections.asteroids.length, processedSections.aspects.length]
+  );
+
   // Settings change stub (full persistence logic trimmed in refactor phase)
-  const handleSettingsChange = (newSettings: AstrologySettings): void => {
+  const handleSettingsChange = useCallback((newSettings: AstrologySettings): void => {
     const migrated = migrateAstrologySettings(newSettings);
     setAstrologySettings(migrated);
     try {
@@ -351,10 +372,10 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     } catch {
       /* non-fatal */
     }
-  };
+  }, []);
 
   // Map a generic chart display planet/point to PlanetTable row shape
-  const mapPointToPlanetRow = (
+  const mapPointToPlanetRow = useCallback((
     p: ChartDisplayPlanet,
     fallbackHouse: number
   ) => ({
@@ -369,10 +390,10 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
     degree: typeof p.degree === 'number' ? p.degree.toFixed(2) : '0.00',
     position: typeof p.position === 'number' ? p.position : undefined,
     retrograde: typeof p.retrograde === 'boolean' ? p.retrograde : undefined,
-  });
+  }), []);
 
   // Type-safe wrapper to handle potentially unsafe objects
-  const safeMapPointToPlanetRow = (p: unknown, fallbackHouse: number) => {
+  const safeMapPointToPlanetRow = useCallback((p: unknown, fallbackHouse: number) => {
     if (typeof p !== 'object' || p === null) {
       return {
         name: '',
@@ -399,7 +420,13 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       retrograde:
         typeof obj.retrograde === 'boolean' ? obj.retrograde : undefined,
     };
-  };
+  }, []);
+
+  const isValidChartData = useCallback((data: unknown): data is ChartLike => {
+    if (data === null || typeof data !== 'object') return false;
+    if (!isChartLike(data)) return false;
+    return hasChartContent(data);
+  }, []);
 
   // ---------------- Render branches ----------------
 
@@ -407,56 +434,10 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
 
   if (isLoading) {
     return (
-      <Card className='w-full max-w-4xl mx-auto cosmic-glass border border-cosmic-purple/30'>
-        <CardHeader className='bg-gradient-to-r from-cosmic-purple to-cosmic-blue text-cosmic-gold rounded-t-xl'>
-          <CardTitle className='text-xl font-bold flex items-center gap-2'>
-            ✨ Loading Chart Data
-          </CardTitle>
-        </CardHeader>
-        <CardContent className='p-6'>
-          <div
-            className='flex flex-col items-center justify-center py-12 space-y-6'
-            role='status'
-            aria-label='Loading chart data'
-            aria-busy='true'
-          >
-            {/* Animated loading spinner */}
-            <div className='relative'>
-              <div className='w-16 h-16 border-4 border-cosmic-purple/30 border-t-cosmic-purple rounded-full animate-spin'></div>
-              <div className='absolute inset-0 flex items-center justify-center'>
-                <div className='w-8 h-8 bg-gradient-to-r from-cosmic-purple to-cosmic-blue rounded-full opacity-60 animate-pulse'></div>
-              </div>
-            </div>
-
-            {/* Loading message */}
-            <div className='text-center space-y-2'>
-              <div className='text-lg font-medium text-cosmic-silver'>
-                Calculating celestial positions...
-              </div>
-              <div className='text-sm text-cosmic-silver/70 max-w-md'>
-                Connecting to ephemeris server and processing{' '}
-                {astrologySettings?.celestialBodies?.minorAsteroids
-                  ? '28+'
-                  : '11+'}{' '}
-                celestial bodies
-              </div>
-            </div>
-
-            {/* Progress dots */}
-            <div className='flex space-x-2'>
-              <div className='w-2 h-2 bg-cosmic-purple rounded-full animate-bounce [animation-delay:0ms]'></div>
-              <div className='w-2 h-2 bg-cosmic-purple rounded-full animate-bounce [animation-delay:150ms]'></div>
-              <div className='w-2 h-2 bg-cosmic-purple rounded-full animate-bounce [animation-delay:300ms]'></div>
-            </div>
-
-            {/* Timeout warning */}
-            <div className='text-xs text-cosmic-silver/50 text-center max-w-sm'>
-              This may take a moment for complex charts with many celestial
-              bodies
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ChartLoadingState 
+        message="Calculating celestial positions..."
+        showProgress={true}
+      />
     );
   }
 
@@ -471,151 +452,25 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
       return 'Unknown error occurred';
     };
 
-    const getErrorType = (
-      err: unknown
-    ): 'network' | 'data' | 'calculation' | 'unknown' => {
-      if (err instanceof Error) {
-        if (err.message.includes('Network') || err.message.includes('fetch')) {
-          return 'network';
-        }
-        if (
-          err.message.includes('calculation') ||
-          err.message.includes('ephemeris')
-        ) {
-          return 'calculation';
-        }
-        if (err.message.includes('data') || err.message.includes('parse')) {
-          return 'data';
-        }
-      }
-      return 'unknown';
-    };
-
-    const errorMessage = getErrorMessage(error);
-    const errorType = getErrorType(error);
-
     return (
-      <Card className='w-full max-w-4xl mx-auto cosmic-glass border border-red-500/30'>
-        <CardHeader className='bg-gradient-to-r from-red-600 to-red-700 text-white rounded-t-xl'>
-          <CardTitle className='text-xl font-bold flex items-center gap-2'>
-            🚨 Chart Loading Error
-            {errorType === 'network' && '🌐'}
-            {errorType === 'calculation' && '🧮'}
-            {errorType === 'data' && '📊'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className='p-6'>
-          <div className='space-y-4'>
-            <div
-              className='flex flex-col items-center justify-center p-6 bg-cosmic-dark/30 border border-red-500/30 rounded-lg'
-              role='alert'
-              aria-live='assertive'
-            >
-              <div className='text-lg text-red-400 font-medium mb-2'>
-                {errorType === 'network' && 'Connection Problem'}
-                {errorType === 'calculation' && 'Calculation Error'}
-                {errorType === 'data' && 'Data Processing Error'}
-                {errorType === 'unknown' && 'Unexpected Error'}
-              </div>
-              <div className='text-sm text-red-300 text-center mb-4'>
-                {errorMessage}
-              </div>
-
-              <div className='flex flex-col sm:flex-row gap-3 items-center'>
-                <Button
-                  onClick={() => window.location.reload()}
-                  variant='default'
-                  className='bg-red-500 hover:bg-red-600 text-white'
-                >
-                  🔄 Retry Loading
-                </Button>
-
-                {errorType === 'network' && (
-                  <div className='text-xs text-red-400 text-center max-w-md'>
-                    Check your internet connection and ensure the ephemeris
-                    server is running on port 8001
-                  </div>
-                )}
-
-                {errorType === 'calculation' && (
-                  <div className='text-xs text-red-400 text-center max-w-md'>
-                    Astrological calculation services may be temporarily
-                    unavailable. Try again in a moment.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Error Details for Development */}
-            {process.env.NODE_ENV === 'development' && (
-              <details className='mt-4'>
-                <summary className='text-sm text-red-600 cursor-pointer hover:text-red-800'>
-                  🔧 Developer Details
-                </summary>
-                <pre className='mt-2 p-3 bg-cosmic-dark/50 border border-cosmic-purple/30 text-xs text-cosmic-silver rounded overflow-auto'>
-                  {JSON.stringify(error, null, 2)}
-                </pre>
-              </details>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <ChartErrorState 
+        error={getErrorMessage(error)}
+        onRetry={() => window.location.reload()}
+        details={process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined}
+        showDebug={process.env.NODE_ENV === 'development'}
+      />
     );
   }
 
-  const isValidChartData = (data: unknown): data is ChartLike => {
-    if (data === null || typeof data !== 'object') return false;
-    if (!isChartLike(data)) return false;
-    return hasChartContent(data);
-  };
-
   if (!isValidChartData(chartData)) {
     return (
-      <Card className='w-full max-w-4xl mx-auto cosmic-glass border border-yellow-500/30'>
-        <CardHeader className='bg-gradient-to-r from-yellow-600 to-yellow-700 text-white rounded-t-xl'>
-          <CardTitle className='text-xl font-bold flex items-center gap-2'>
-            ⚠️ No Chart Data Available
-          </CardTitle>
-        </CardHeader>
-        <CardContent className='p-6'>
-          <div
-            className='flex flex-col items-center justify-center py-8 space-y-4'
-            role='status'
-            aria-live='polite'
-          >
-            <div className='text-center space-y-4'>
-              <div className='text-lg font-medium text-yellow-700'>
-                Chart data is not available or incomplete
-              </div>
-              <div className='text-sm text-yellow-600 max-w-md space-y-2'>
-                <p>This could happen if:</p>
-                <ul className='list-disc list-inside text-left space-y-1'>
-                  <li>The chart calculation is still in progress</li>
-                  <li>Required birth data (date, time, location) is missing</li>
-                  <li>The ephemeris server is not responding</li>
-                  <li>There was an issue processing the chart data</li>
-                </ul>
-              </div>
-              <div className='flex flex-col sm:flex-row gap-3 items-center mt-6'>
-                <Button
-                  onClick={() => window.location.reload()}
-                  variant='default'
-                  className='bg-yellow-600 hover:bg-yellow-700 text-white'
-                >
-                  🔄 Try Again
-                </Button>
-                <Button
-                  onClick={() => window.history.back()}
-                  variant='secondary'
-                  className='border-yellow-500 text-yellow-700 hover:bg-yellow-50'
-                >
-                  ← Go Back
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ChartEmptyState 
+        message="Chart data is not available or incomplete"
+        showAction={true}
+        actionText="Try Again"
+        onAction={() => window.location.reload()}
+        showDemo={true}
+      />
     );
   }
 
@@ -752,13 +607,21 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                         </CardTitle>
                       </CardHeader>
                       <CardContent className='p-6'>
-                        <EnhancedAspectTable
-                          aspects={enhancedAspects}
-                          includeMinorAspects={
-                            astrologySettings.displayOptions.showMinorAspects
-                          }
-                          maxMajorOrb={astrologySettings.orbs.major}
-                          maxMinorOrb={astrologySettings.orbs.minor}
+                        <UnifiedAspectTable
+                          aspects={enhancedAspects.map(convertEnhancedAspect)}
+                          mode="professional"
+                          enhanced={{
+                            includeMinorAspects: astrologySettings.displayOptions.showMinorAspects,
+                            maxMajorOrb: astrologySettings.orbs.major,
+                            maxMinorOrb: astrologySettings.orbs.minor,
+                            showStatistics: true,
+                            showStrength: true
+                          }}
+                          performance={{
+                            virtualize: true,
+                            virtualizationThreshold: 100
+                          }}
+                          ariaLabel="Professional astrological aspects analysis"
                         />
                       </CardContent>
                     </Card>
@@ -846,13 +709,21 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                         count={processedSections.aspects.length}
                       >
                         <div className='p-6'>
-                          <EnhancedAspectTable
-                            aspects={enhancedAspects}
-                            includeMinorAspects={
-                              astrologySettings.displayOptions.showMinorAspects
-                            }
-                            maxMajorOrb={astrologySettings.orbs.major}
-                            maxMinorOrb={astrologySettings.orbs.minor}
+                          <UnifiedAspectTable
+                            aspects={enhancedAspects.map(convertEnhancedAspect)}
+                            mode="professional"
+                            enhanced={{
+                              includeMinorAspects: astrologySettings.displayOptions.showMinorAspects,
+                              maxMajorOrb: astrologySettings.orbs.major,
+                              maxMinorOrb: astrologySettings.orbs.minor,
+                              showStatistics: false,
+                              showStrength: true
+                            }}
+                            performance={{
+                              virtualize: true,
+                              virtualizationThreshold: 50
+                            }}
+                            ariaLabel="Unified planetary aspects table"
                           />
                         </div>
                       </CollapsibleTable>
@@ -937,18 +808,18 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                                 body.house,
                                 -1
                               );
-                              if (bodyHouse === house.house) {
+                              if (bodyHouse === house.number) {
                                 planetsInHouse.push(body.name);
                               }
                             });
 
                             return {
                               number:
-                                typeof house.house === 'number'
-                                  ? house.house
+                                typeof house.number === 'number'
+                                  ? house.number
                                   : 0,
-                              sign: house.sign,
-                              cuspDegree: `${house.degree.toFixed(2)}`,
+                              sign: house.sign as string,
+                              cuspDegree: `${house.degree?.toFixed(2) ?? house.cusp.toFixed(2)}`,
                               planetsInHouse:
                                 planetsInHouse.length > 0
                                   ? planetsInHouse.join(', ')
@@ -1160,13 +1031,21 @@ const ChartDisplayComponent: React.FC<ChartDisplayProps> = ({
                         count={processedSections.aspects.length}
                       >
                         <div className='p-6'>
-                          <EnhancedAspectTable
-                            aspects={enhancedAspects}
-                            includeMinorAspects={
-                              astrologySettings.displayOptions.showMinorAspects
-                            }
-                            maxMajorOrb={astrologySettings.orbs.major}
-                            maxMinorOrb={astrologySettings.orbs.minor}
+                          <UnifiedAspectTable
+                            aspects={enhancedAspects.map(convertEnhancedAspect)}
+                            mode="professional"
+                            enhanced={{
+                              includeMinorAspects: astrologySettings.displayOptions.showMinorAspects,
+                              maxMajorOrb: astrologySettings.orbs.major,
+                              maxMinorOrb: astrologySettings.orbs.minor,
+                              showStatistics: false,
+                              showStrength: true
+                            }}
+                            performance={{
+                              virtualize: true,
+                              virtualizationThreshold: 50
+                            }}
+                            ariaLabel="Separate view planetary aspects table"
                           />
                         </div>
                       </CollapsibleTable>

@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  healwave-app:
+    build:
+      context: ../../..
+      dockerfile: apps/healwave/deploy/Dockerfile.production
+    container_name: healwave-production
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # SSL certificates (uncomment when using HTTPS)
+      # - ./certs:/etc/nginx/certs:ro
+      # Logs
+      - ./logs:/var/log/nginx
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - healwave-network
+
+  # Optional: Add a reverse proxy/load balancer
+  # traefik:
+  #   image: traefik:v3.0
+  #   container_name: healwave-proxy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./traefik.yml:/etc/traefik/traefik.yml:ro
+  #   networks:
+  #     - healwave-network
+
+networks:
+  healwave-network:
+    driver: bridge
+
+volumes:
+  nginx-logs:

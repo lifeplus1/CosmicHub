@@ -50,7 +50,7 @@ class RiskAssessment:
 class ReIdentificationRiskAnalyzer:
     """Advanced re-identification risk analyzer."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.quasi_identifiers = [
             "age_group",
             "location_region",

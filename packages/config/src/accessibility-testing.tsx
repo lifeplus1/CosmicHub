@@ -1,20 +1,6 @@
 /**
  * Advanced Accessibility Testing and Compliance Framework
- // Accessibility audit result interface
-export interface AccessibilityAuditResult {
-  passed: boolean;
-  level: 'AA' | 'AAA';
-  score: number; // 0-100
-  violations: AccessibilityViolation[];
-  warnings: AccessibilityWarning[];
-  recommendations: string[];
-  summary: {
-    totalTests: number;
-    passedTests: number;
-    failedTests: number;
-    warningTests: number;
-  };
-}AAA compliance testing with automated checks
+ * WCAG 2.1 AA/AAA compliance testing with automated checks
  */
 
 import React from 'react';
@@ -185,7 +171,8 @@ class SemanticHTMLAnalyzer {
     semanticElements: string[];
   } {
     const semanticElements: string[] = [];
-    const allElements = Array.from(container.querySelectorAll('*'));
+    // Include the container element itself in the analysis
+    const allElements = [container, ...Array.from(container.querySelectorAll('*'))];
 
     allElements.forEach(element => {
       const tagName = element.tagName.toLowerCase();

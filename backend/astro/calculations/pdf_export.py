@@ -1,6 +1,15 @@
 # backend/astro/calculations/pdf_export.py
 import logging
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict, Union, cast, Any
+from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus.flowables import Flowable
+from reportlab.lib.styles import StyleSheet1
+
+# Define CompatibilityBreakdown locally since backend.types.synastry_systems import is failing
+ProperCompatibilityBreakdown = Dict[str, float]
+
+# Define proper types for ReportLab story elements
+StoryElement = Union[Paragraph, Spacer, Table, Flowable]
 
 
 class PlanetData(TypedDict, total=False):
@@ -36,10 +45,9 @@ class BirthInfo(TypedDict, total=False):
     city: str
 
 
-class CompatibilityBreakdown(TypedDict, total=False):
-    # area: score
-
-    ...
+# Define CompatibilityBreakdown locally since backend.types.synastry_systems import is failing
+# This provides typed fields for all compatibility scores
+CompatibilityBreakdown = Union[Dict[str, float], ProperCompatibilityBreakdown]
 
 
 class CompatibilityAnalysis(TypedDict, total=False):
@@ -69,12 +77,12 @@ class SynastryData(TypedDict, total=False):
 
 class MultiSystemData(TypedDict, total=False):
     birth_info: BirthInfo
-    western_tropical: Dict[str, Any]
-    vedic_sidereal: Dict[str, Any]
-    chinese: Dict[str, Any]
-    mayan: Dict[str, Any]
-    uranian: Dict[str, Any]
-    synthesis: Dict[str, Any]
+    western_tropical: ChartData
+    vedic_sidereal: ChartData
+    chinese: ChartData
+    mayan: ChartData
+    uranian: ChartData
+    synthesis: ChartData
 
 
 import base64  # noqa: E402
@@ -112,10 +120,9 @@ def create_chart_pdf(
             topMargin=72,
             bottomMargin=18,
         )
-        from typing import Any, List
 
         # Container for the 'Flowable' objects
-        story: List[Any] = []
+        story: List[StoryElement] = []
 
         # Define styles
         styles = getSampleStyleSheet()
@@ -137,7 +144,7 @@ def create_chart_pdf(
             textColor=colors.darkblue,
         )
 
-        subheading_style = ParagraphStyle(  # type: ignore  # noqa: F841
+        subheading_style = ParagraphStyle(  # noqa: F841
             "CustomSubheading",
             parent=styles["Heading3"],
             fontSize=14,
@@ -178,7 +185,7 @@ def create_chart_pdf(
 
         # Chart Information
         if chart_data.get("latitude") and chart_data.get("longitude"):
-            coord_text = f"<b>Coordinates:</b> {chart_data['latitude']:.2f}°, {chart_data['longitude']:.2f}°<br/>"  # type: ignore  # noqa: E501
+            coord_text = f"<b>Coordinates:</b> {chart_data.get('latitude', 0.0):.2f}°, {chart_data.get('longitude', 0.0):.2f}°<br/>"  # noqa: E501
             coord_text += f"<b>Timezone:</b> {chart_data.get('timezone', 'Unknown')}<br/>"  # noqa: E501
             coord_text += (
                 f"<b>Julian Day:</b> {chart_data.get('julian_day', 'Unknown')}"
@@ -221,7 +228,7 @@ def create_chart_pdf(
             for planet, data in planets.items():
                 position = data.get("position")
                 if position is not None:
-                    symbol = planet_symbols.get(planet, planet.title())  # type: ignore  # noqa: E501
+                    symbol = planet_symbols.get(planet, planet.title())  # noqa: E501
                     sign_index = int(position // 30)
                     degree_in_sign = position % 30
                     sign = (
@@ -229,7 +236,7 @@ def create_chart_pdf(
                         if sign_index < len(zodiac_signs)
                         else "Unknown"
                     )
-                    position_str = f"{degree_in_sign:.2f}° {sign}"  # type: ignore  # noqa: E501
+                    position_str = f"{degree_in_sign:.2f}° {sign}"  # noqa: E501
                     retrograde = (
                         "Yes" if data.get("retrograde", False) else "No"
                     )
@@ -298,7 +305,7 @@ def create_chart_pdf(
             # Aspects Section
             aspects = chart_data.get("aspects")
             if aspects:
-                aspects_typed: List[AspectData] = aspects  # type: ignore
+                aspects_typed: List[AspectData] = aspects
                 story.append(Paragraph("Major Aspects", heading_style))
                 aspect_data: List[List[str]] = []
                 aspect_data.append(["Aspect", "Planets", "Orb", "Type"])
@@ -356,10 +363,11 @@ def create_chart_pdf(
             aspect_data.append(["Aspect", "Planets", "Orb", "Type"])
 
             # Sort aspects by orb (most exact first)
-            sorted_aspects = sorted(chart_data["aspects"], key=lambda x: x.get("orb", 999))  # type: ignore  # noqa: E501
+            aspects_list = chart_data.get("aspects", [])
+            sorted_aspects = sorted(aspects_list, key=lambda x: x.get("orb", 999))  # noqa: E501
 
             for aspect in sorted_aspects[:15]:  # Show top 15 aspects
-                if isinstance(aspect, dict):  # type: ignore
+                if isinstance(aspect, dict):
                     aspect_name = aspect.get("aspect", "Unknown")
                     point1 = aspect.get("point1", "Unknown")
                     point2 = aspect.get("point2", "Unknown")
@@ -446,8 +454,8 @@ def create_chart_pdf(
 
 
 def add_chart_interpretation(
-    story: list[Any], chart_data: ChartData, styles: Any
-):
+    story: List[StoryElement], chart_data: ChartData, styles: StyleSheet1
+) -> None:
     """Add basic chart interpretation to the PDF"""
     try:
         heading_style = ParagraphStyle(
@@ -562,9 +570,7 @@ def create_synastry_pdf(synastry_data: SynastryData) -> str:
             bottomMargin=18,
         )
 
-        from typing import Any, List
-
-        story: List[Any] = []
+        story: List[StoryElement] = []
         styles = getSampleStyleSheet()
 
         # Title
@@ -577,8 +583,8 @@ def create_synastry_pdf(synastry_data: SynastryData) -> str:
             textColor=colors.darkred,
         )
 
-        story.append(Paragraph("Relationship Compatibility Report", title_style))  # type: ignore  # noqa: E501
-        story.append(Spacer(1, 20))  # type: ignore # type: ignore
+        story.append(Paragraph("Relationship Compatibility Report", title_style))  # noqa: E501
+        story.append(Spacer(1, 20))
 
         # Compatibility Score
         compatibility = synastry_data.get("compatibility_analysis", {})
@@ -590,7 +596,7 @@ def create_synastry_pdf(synastry_data: SynastryData) -> str:
         story.append(
             Paragraph(
                 score_text,
-                ParagraphStyle(  # type: ignore
+                ParagraphStyle(
                     "ScoreStyle",
                     parent=styles["Normal"],
                     fontSize=14,
@@ -604,12 +610,12 @@ def create_synastry_pdf(synastry_data: SynastryData) -> str:
         )
 
         # Compatibility Breakdown
-        breakdown = compatibility.get("breakdown", {})
-        if breakdown:
+        breakdown = compatibility.get("breakdown")
+        if breakdown is not None and breakdown:
             story.append(
                 Paragraph(
                     "Compatibility Areas",
-                    ParagraphStyle(  # type: ignore
+                    ParagraphStyle(
                         "BreakdownHeading",
                         parent=styles["Heading2"],
                         fontSize=16,
@@ -620,11 +626,30 @@ def create_synastry_pdf(synastry_data: SynastryData) -> str:
             )
 
             breakdown_data = []
-            breakdown_data.append(["Area", "Score", "Rating"])  # type: ignore
+            breakdown_data.append(["Area", "Score", "Rating"])
 
-            for area, score in breakdown.items():
+            # Handle both dict and Pydantic model formats
+            breakdown_dict: Dict[str, Any]
+            if hasattr(breakdown, 'model_dump') and callable(getattr(breakdown, 'model_dump')):
+                # Pydantic model - convert to dict
+                breakdown_dict = breakdown.model_dump()  # type: ignore
+            elif isinstance(breakdown, dict):
+                # Already a dict
+                breakdown_dict = breakdown
+            else:
+                # Fallback to empty dict
+                breakdown_dict = {}  # type: ignore[unreachable]
+
+            for area, score in breakdown_dict.items():
                 try:
-                    score_val = float(score)  # type: ignore
+                    # Ensure score is converted to float with proper type checking
+                    if isinstance(score, (int, float)):
+                        score_val = float(score)
+                    elif isinstance(score, str):
+                        score_val = float(score)
+                    else:
+                        # Handle any other type by attempting conversion
+                        score_val = float(score) if score is not None else 0.0
                 except (TypeError, ValueError):
                     score_val = 0.0
                 if score_val >= 75:
@@ -636,14 +661,14 @@ def create_synastry_pdf(synastry_data: SynastryData) -> str:
                 else:
                     rating = "Challenging"
                 breakdown_data.append(
-                    [  # type: ignore
+                    [
                         area.title(),
                         f"{score_val:.1f}/100",
                         rating,
                     ]
                 )
 
-            breakdown_table = Table(breakdown_data, colWidths=[2 * inch, 1.5 * inch, 1.5 * inch])  # type: ignore  # noqa: E501
+            breakdown_table = Table(breakdown_data, colWidths=[2 * inch, 1.5 * inch, 1.5 * inch])  # noqa: E501
             breakdown_table.setStyle(
                 TableStyle(
                     [
@@ -659,8 +684,8 @@ def create_synastry_pdf(synastry_data: SynastryData) -> str:
                 )
             )
 
-            story.append(breakdown_table)  # type: ignore
-            story.append(Spacer(1, 20))  # type: ignore
+            story.append(breakdown_table)
+            story.append(Spacer(1, 20))
 
         # Top Aspects
         interaspects = synastry_data.get("interaspects", [])
@@ -777,9 +802,7 @@ def create_multi_system_pdf(chart_data: MultiSystemData) -> str:
             bottomMargin=18,
         )
 
-        from typing import Any, List
-
-        story: List[Any] = []
+        story: List[StoryElement] = []
         styles = getSampleStyleSheet()
 
         # Title
@@ -830,20 +853,20 @@ def create_multi_system_pdf(chart_data: MultiSystemData) -> str:
 
         for system in systems:
             if system in chart_data:
-                system_data_raw = chart_data[system]  # type: ignore
+                system_data_raw = chart_data[system]  # type: ignore[literal-required]
                 if isinstance(system_data_raw, dict):
-                    system_data: Dict[str, Any] = system_data_raw
+                    system_data = cast(ChartData, system_data_raw)
                 elif system_data_raw is not None and hasattr(
                     system_data_raw, "items"
                 ):
                     try:
-                        system_data: Dict[str, Any] = dict(
+                        system_data = cast(ChartData, dict(
                             system_data_raw.items()
-                        )
+                        ))
                     except Exception:
-                        system_data: Dict[str, Any] = {}
+                        system_data = cast(ChartData, {})
                 else:
-                    system_data: Dict[str, Any] = {}
+                    system_data = cast(ChartData, {})
                 system_name = system_names.get(system, system.title())
 
                 story.append(
@@ -864,9 +887,9 @@ def create_multi_system_pdf(chart_data: MultiSystemData) -> str:
                 if isinstance(desc_val, str):
                     description: str = desc_val
                 elif desc_val is not None:
-                    description: str = str(desc_val)
+                    description = str(desc_val)
                 else:
-                    description: str = f"{system_name} analysis"
+                    description = f"{system_name} analysis"
                 story.append(Paragraph(description, styles["Normal"]))
                 story.append(Spacer(1, 15))
 
@@ -888,7 +911,7 @@ def create_multi_system_pdf(chart_data: MultiSystemData) -> str:
             )
 
             # Primary themes
-            themes = synthesis.get("primary_themes", [])
+            themes = cast(List[str], synthesis.get("primary_themes", []))
             if themes:
                 story.append(Paragraph("Primary Themes", styles["Heading3"]))
                 for theme in themes:
@@ -896,7 +919,7 @@ def create_multi_system_pdf(chart_data: MultiSystemData) -> str:
                 story.append(Spacer(1, 15))
 
             # Life purpose
-            purpose = synthesis.get("life_purpose", [])
+            purpose = cast(List[str], synthesis.get("life_purpose", []))
             if purpose:
                 story.append(
                     Paragraph("Life Purpose Integration", styles["Heading3"])

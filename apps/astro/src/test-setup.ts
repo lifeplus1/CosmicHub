@@ -24,6 +24,65 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Test setup with comprehensive mocking for external dependencies
 
+// Mock @cosmichub/config logger and API helpers
+vi.mock('@cosmichub/config', () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+  // API Result helpers for test compatibility
+  ok: vi.fn((data: any, message?: string) => ({
+    success: true,
+    data,
+    message: message || 'Success',
+  })),
+  fail: vi.fn((error: string, code?: string) => ({
+    success: false,
+    error,
+    code: code || '500',
+  })),
+  toFailure: vi.fn((error: any, options?: any) => {
+    const status = error?.response?.status;
+    if (status && options) {
+      const statusStr = status.toString();
+      if (statusStr === '401' && options.auth) {
+        return { success: false, error: options.auth, code: '401' };
+      }
+      if (statusStr === '404' && options.notFound) {
+        return { success: false, error: options.notFound, code: '404' };
+      }
+    }
+    const errorMsg = options?.defaultMsg || error?.message || 'Error';
+    return { success: false, error: errorMsg, code: '500' };
+  }),
+  unwrap: vi.fn((result: any) => {
+    if (result.success) return result.data;
+    throw new Error(result.error);
+  }),
+  unwrapOr: vi.fn((result: any, fallback: any) => {
+    return result.success ? result.data : fallback;
+  }),
+  mapSuccess: vi.fn((result: any, fn: any) => {
+    if (result.success) {
+      return { ...result, data: fn(result.data) };
+    }
+    return result;
+  }),
+  mapFailure: vi.fn((result: any, fn: any) => {
+    if (!result.success) {
+      return fn(result);
+    }
+    return result;
+  }),
+  isSuccess: vi.fn((result: any) => result.success === true),
+  isFailure: vi.fn((result: any) => result.success === false),
+  mapResult: vi.fn((result: any, successFn: any, failureFn: any) => {
+    return result.success ? successFn(result.data) : failureFn(result);
+  }),
+}));
+
 // Mock Firebase modules completely
 vi.mock('firebase/app', () => ({
   initializeApp: vi.fn(() => ({})),
@@ -155,6 +214,121 @@ vi.mock('@cosmichub/ui', () => ({
     className?: string;
   }): React.ReactElement =>
     React.createElement('input', { placeholder, value, onChange, className }),
+
+  // Error handling components - MISSING COMPONENTS
+  ErrorBoundary: class MockErrorBoundary extends React.Component<
+    { 
+      children: React.ReactNode;
+      onError?: (error: Error, errorInfo: { componentStack: string }) => void;
+      fallback?: React.ReactNode | ((error: Error, errorInfo: any, retry: () => void) => React.ReactNode);
+    },
+    { hasError: boolean; error?: Error }
+  > {
+    constructor(props: any) {
+      super(props);
+      this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+      return { hasError: true, error };
+    }
+
+    override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+      this.props.onError?.(error, { componentStack: errorInfo.componentStack || '' });
+    }
+
+    override render() {
+      if (this.state.hasError) {
+        if (this.props.fallback) {
+          if (typeof this.props.fallback === 'function') {
+            return this.props.fallback(this.state.error!, {}, () => this.setState({ hasError: false }));
+          }
+          return this.props.fallback;
+        }
+        return React.createElement('div', { 
+          'data-testid': 'integration-error-boundary' 
+        }, 'Component Error');
+      }
+      return this.props.children;
+    }
+  },
+  ChartErrorBoundary: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+  }): React.ReactElement => 
+    React.createElement('div', { 'data-testid': 'ui-chart-error-boundary', ...props }, children),
+
+  // Modal components - MISSING COMPONENTS
+  Modal: ({
+    children,
+    isOpen,
+    onClose,
+    ...props
+  }: {
+    children: React.ReactNode;
+    isOpen?: boolean;
+    onClose?: () => void;
+  }): React.ReactElement | null => 
+    isOpen ? React.createElement('div', { 'data-testid': 'ui-modal', ...props }, 
+      React.createElement('button', { onClick: onClose, 'data-testid': 'modal-close' }, 'Close'),
+      children
+    ) : null,
+
+  // Navigation components - TABS ARE MISSING
+  Tabs: {
+    Root: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode;
+    }): React.ReactElement => 
+      React.createElement('div', { 'data-testid': 'ui-tabs-root', ...props }, children),
+    List: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode;
+    }): React.ReactElement => 
+      React.createElement('div', { 'data-testid': 'ui-tabs-list', ...props }, children),
+    Trigger: ({
+      children,
+      value,
+      ...props
+    }: {
+      children: React.ReactNode;
+      value?: string;
+    }): React.ReactElement => 
+      React.createElement('button', { 'data-testid': 'ui-tabs-trigger', 'data-value': value, ...props }, children),
+    Content: ({
+      children,
+      value,
+      ...props
+    }: {
+      children: React.ReactNode;
+      value?: string;
+    }): React.ReactElement => 
+      React.createElement('div', { 'data-testid': 'ui-tabs-content', 'data-value': value, ...props }, children),
+  },
+
+  Progress: ({
+    value,
+    className,
+    ...props
+  }: {
+    value?: number;
+    className?: string;
+    [key: string]: any;
+  }): React.ReactElement => 
+    React.createElement('div', { 
+      'data-testid': 'progress', 
+      role: 'progressbar', 
+      'aria-valuenow': value,
+      className,
+      ...props 
+    }),
+
   Table: ({ children }: { children: React.ReactNode }): React.ReactElement =>
     React.createElement('table', {}, children),
   TableBody: ({
@@ -201,8 +375,6 @@ vi.mock('@cosmichub/ui', () => ({
   }: {
     children: React.ReactNode;
   }): React.ReactElement => React.createElement('div', {}, children),
-  Tabs: ({ children }: { children: React.ReactNode }): React.ReactElement =>
-    React.createElement('div', {}, children),
   TabsContent: ({
     children,
   }: {
@@ -314,5 +486,12 @@ if (typeof HTMLCanvasElement !== 'undefined') {
 // Global RTL cleanup
 afterEach(() => {
   cleanup();
+});
+
+// Mock crypto.randomUUID for request ID generation
+Object.defineProperty(global, 'crypto', {
+  value: {
+    randomUUID: vi.fn(() => 'mock-uuid-123'),
+  },
 });
 

@@ -4,18 +4,13 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [
-    react({
-      jsxRuntime: 'classic',
-    }),
-  ],
+  // @ts-ignore - Working around dependency type conflicts
+  plugins: [react({ jsxRuntime: 'classic' })],
   define: {
     'import.meta.env.VITE_FIREBASE_API_KEY': '"test-api-key"',
-    'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN':
-      '"test-project.firebaseapp.com"',
+    'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': '"test-project.firebaseapp.com"',
     'import.meta.env.VITE_FIREBASE_PROJECT_ID': '"test-project"',
-    'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET':
-      '"test-project.appspot.com"',
+    'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': '"test-project.appspot.com"',
     'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': '"123456789"',
     'import.meta.env.VITE_FIREBASE_APP_ID': '"1:123456789:web:test-app-id"',
     'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': '"G-TEST123"',
@@ -71,9 +66,6 @@ export default defineConfig({
         maxThreads: 4,
         minThreads: 2,
       },
-    },
-    cache: {
-      dir: 'node_modules/.vite/vitest',
     },
   },
   resolve: {

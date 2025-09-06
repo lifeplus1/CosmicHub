@@ -4,6 +4,7 @@ Tests for the type_guards module
 
 import json
 import unittest
+from typing import Any, Dict
 
 from .type_guards import (
     get_astrology_data_type,
@@ -24,7 +25,7 @@ from .type_guards import (
 class TestTypeGuards(unittest.TestCase):
     """Test cases for the type_guards module"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures"""
         self.valid_planet = {
             "name": "Sun",
@@ -91,7 +92,7 @@ class TestTypeGuards(unittest.TestCase):
             "personalYear": 3,
         }
 
-    def test_is_planet(self):
+    def test_is_planet(self) -> None:
         """Test the is_planet function"""
         self.assertTrue(is_planet(self.valid_planet))
         self.assertFalse(is_planet({}))
@@ -108,7 +109,7 @@ class TestTypeGuards(unittest.TestCase):
         invalid_planet["degree"] = "15.25"  # Should be a number
         self.assertFalse(is_planet(invalid_planet))
 
-    def test_is_house(self):
+    def test_is_house(self) -> None:
         """Test the is_house function"""
         self.assertTrue(is_house(self.valid_house))
         self.assertFalse(is_house({}))
@@ -118,7 +119,7 @@ class TestTypeGuards(unittest.TestCase):
         del invalid_house["sign"]
         self.assertFalse(is_house(invalid_house))
 
-    def test_is_aspect(self):
+    def test_is_aspect(self) -> None:
         """Test the is_aspect function"""
         self.assertTrue(is_aspect(self.valid_aspect))
         self.assertFalse(is_aspect({}))
@@ -128,7 +129,7 @@ class TestTypeGuards(unittest.TestCase):
         del invalid_aspect["orb"]
         self.assertFalse(is_aspect(invalid_aspect))
 
-    def test_is_asteroid(self):
+    def test_is_asteroid(self) -> None:
         """Test the is_asteroid function"""
         self.assertTrue(is_asteroid(self.valid_asteroid))
         self.assertFalse(is_asteroid({}))
@@ -138,7 +139,7 @@ class TestTypeGuards(unittest.TestCase):
         del invalid_asteroid["house"]
         self.assertFalse(is_asteroid(invalid_asteroid))
 
-    def test_is_angle(self):
+    def test_is_angle(self) -> None:
         """Test the is_angle function"""
         self.assertTrue(is_angle(self.valid_angle))
         self.assertFalse(is_angle({}))
@@ -148,7 +149,7 @@ class TestTypeGuards(unittest.TestCase):
         del invalid_angle["position"]
         self.assertFalse(is_angle(invalid_angle))
 
-    def test_is_astrology_chart(self):
+    def test_is_astrology_chart(self) -> None:
         """Test the is_astrology_chart function"""
         self.assertTrue(is_astrology_chart(self.valid_chart))
         self.assertFalse(is_astrology_chart({}))
@@ -160,10 +161,10 @@ class TestTypeGuards(unittest.TestCase):
 
         # Test with invalid nested data
         invalid_chart = self.valid_chart.copy()
-        invalid_chart["planets"] = ["not a planet"]
+        invalid_chart["planets"] = ["not a planet"]  # type: ignore[list-item]
         self.assertFalse(is_astrology_chart(invalid_chart))
 
-    def test_is_user_profile(self):
+    def test_is_user_profile(self) -> None:
         """Test the is_user_profile function"""
         self.assertTrue(is_user_profile(self.valid_profile))
         self.assertFalse(is_user_profile({}))
@@ -178,7 +179,7 @@ class TestTypeGuards(unittest.TestCase):
         invalid_profile["birthData"] = "not an object"
         self.assertFalse(is_user_profile(invalid_profile))
 
-    def test_is_numerology_data(self):
+    def test_is_numerology_data(self) -> None:
         """Test the is_numerology_data function"""
         self.assertTrue(is_numerology_data(self.valid_numerology))
         self.assertFalse(is_numerology_data({}))
@@ -190,10 +191,10 @@ class TestTypeGuards(unittest.TestCase):
 
         # Test with wrong type
         invalid_numerology = self.valid_numerology.copy()
-        invalid_numerology["destiny"] = "9"  # Should be a number
+        invalid_numerology["destiny"] = "9"  # type: ignore[assignment] # Should be a number
         self.assertFalse(is_numerology_data(invalid_numerology))
 
-    def test_get_astrology_data_type(self):
+    def test_get_astrology_data_type(self) -> None:
         """Test the get_astrology_data_type function"""
         self.assertEqual(
             get_astrology_data_type(self.valid_chart), "AstrologyChart"
@@ -207,7 +208,7 @@ class TestTypeGuards(unittest.TestCase):
         self.assertEqual(get_astrology_data_type({}), "Unknown")
         self.assertEqual(get_astrology_data_type(None), "Unknown")
 
-    def test_validate_astrology_chart(self):
+    def test_validate_astrology_chart(self) -> None:
         """Test the validate_astrology_chart function"""
         # Valid chart should return empty list
         self.assertEqual(validate_astrology_chart(self.valid_chart), [])
@@ -230,7 +231,7 @@ class TestTypeGuards(unittest.TestCase):
         errors = validate_astrology_chart(invalid_chart)
         self.assertTrue(any("Invalid planet" in error for error in errors))
 
-    def test_safe_parse_astrology_chart(self):
+    def test_safe_parse_astrology_chart(self) -> None:
         """Test the safe_parse_astrology_chart function"""
         # Valid JSON should parse successfully
         json_string = json.dumps(self.valid_chart)
@@ -254,7 +255,7 @@ class TestTypeGuards(unittest.TestCase):
         self.assertTrue(any("planets" in error for error in result.errors))
         self.assertIsNone(result.chart)
 
-    def test_is_astrology_data(self):
+    def test_is_astrology_data(self) -> None:
         """Test the is_astrology_data function"""
         self.assertTrue(is_astrology_data(self.valid_chart))
         self.assertTrue(is_astrology_data(self.valid_profile))

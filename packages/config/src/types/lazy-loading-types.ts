@@ -3,37 +3,48 @@
  * Provides strong TypeScript typing for dynamic imports and lazy loading
  */
 
-import { ComponentType, ComponentProps, RefObject } from 'react';
+import { ComponentType, ComponentProps, RefObject, ReactNode } from 'react';
 
 /**
- * Module import result with default export
+ * Module import result with default export - using safer constraints
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface ImportModule<T extends ComponentType<any>> {
+export interface ImportModule<T = ComponentType<Record<string, never>>> {
   default: T;
   [key: string]: unknown;
 }
 
+// Define what can be exported from a module
+export type ModuleExport = unknown;
+
 /**
- * Dynamic import function type - flexible constraint for any component props
+ * Dynamic import function type - permissive for better compatibility
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ImportFunction<T extends ComponentType<any>> = () => Promise<
+export type ImportFunction<T = ComponentType<Record<string, never>>> = () => Promise<
   ImportModule<T>
 >;
 
 /**
- * Options for lazy component loading
+ * Options for lazy component loading with specific error types
  */
 export interface LazyComponentOptions<E extends Error = Error> {
-  /** Component to show while loading */
-  loadingComponent?: ComponentType;
-  /** Error boundary component */
-  errorBoundary?: ComponentType<ErrorBoundaryProps<E>>;
-  /** Whether to preload the component */
-  preload?: boolean;
-  /** Timeout in milliseconds */
+  /** Fallback component to show while loading */
+  fallback?: ComponentType<Record<string, never>>;
+  /** Component to show when loading fails */
+  errorBoundary?: ComponentType<{ error: E; retry: () => void }>;
+  /** Maximum time to wait for import in milliseconds */
   timeout?: number;
+  /** Retry configuration */
+  retry?: {
+    attempts: number;
+    delay: number;
+  };
+  /** Preload configuration */
+  preload?: 
+    | boolean
+    | {
+        on: 'hover' | 'visible' | 'immediate';
+        threshold?: number;
+      };
 }
 
 /**
@@ -75,8 +86,7 @@ export interface ProgressiveLoadingResult<T> {
  */
 export interface SmartPreloader {
   /** Preload a component when an element becomes visible */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  preloadOnIntersection: <T extends ComponentType<any>>(
+  preloadOnIntersection: <T extends ComponentType<Record<string, unknown>>>(
     _elementRef: RefObject<HTMLElement>,
     _componentImport: ImportFunction<T>,
     _componentName: string
@@ -93,16 +103,84 @@ export interface LazyComponentWrapperProps<
   /** Key of the component in the registry */
   componentKey: K;
   /** Props to pass to the loaded component */
-  props?: Record<string, unknown>;
+  props?: ComponentPropsType;
   /** Component to show while loading */
-  fallback?: ComponentType;
+  fallback?: ComponentType<Record<string, never>>;
+}
+
+// Define specific types for component props rather than generic unknown
+export type ComponentPropsType = 
+  | AstrologyChartProps
+  | FrequencyVisualizerProps
+  | TransitChartProps
+  | ChartComponentProps
+  | ModalComponentProps
+  | FormComponentProps
+  | Record<string, ComponentPropValue>;
+
+export type ComponentPropValue = 
+  | string
+  | number
+  | boolean
+  | Date
+  | ComponentPropValue[]
+  | { [key: string]: ComponentPropValue }
+  | ((...args: unknown[]) => unknown);
+
+// Specific component prop interfaces
+export interface AstrologyChartProps {
+  birthData: {
+    date: string;
+    time: string;
+    latitude: number;
+    longitude: number;
+  };
+  chartType: 'natal' | 'transit' | 'synastry';
+  theme?: string;
+  onChartLoad?: (chartData: unknown) => void;
+}
+
+export interface FrequencyVisualizerProps {
+  frequency: number;
+  amplitude: number;
+  visualType: 'waveform' | 'spectrum' | 'mandala';
+  colorScheme?: string;
+  onFrequencyChange?: (frequency: number) => void;
+}
+
+export interface TransitChartProps {
+  natalChart: unknown;
+  transitDate: string;
+  aspects: string[];
+  onTransitUpdate?: (transits: unknown) => void;
+}
+
+export interface ChartComponentProps {
+  data: unknown;
+  width?: number;
+  height?: number;
+  theme?: string;
+  interactive?: boolean;
+}
+
+export interface ModalComponentProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  size?: 'small' | 'medium' | 'large';
+  children?: ReactNode;
+}
+
+export interface FormComponentProps {
+  onSubmit: (data: Record<string, unknown>) => void;
+  initialValues?: Record<string, unknown>;
+  validation?: Record<string, (value: unknown) => string | undefined>;
 }
 
 /**
  * Result of the useDynamicComponent hook
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface DynamicComponentResult<T extends ComponentType<any>> {
+export interface DynamicComponentResult<T extends ComponentType<Record<string, unknown>>> {
   /** The loaded component */
   Component: T | null;
   /** Whether loading is in progress */
@@ -115,15 +193,13 @@ export interface DynamicComponentResult<T extends ComponentType<any>> {
  * Type-safe component registry
  */
 export type ComponentRegistry<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends Record<string, ImportFunction<ComponentType<any>>>,
+  T extends Record<string, ImportFunction<ComponentType<Record<string, unknown>>>>,
 > = T;
 
 /**
  * Creates a type-safe lazy component
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type LazyComponentCreator = <T extends ComponentType<any>>(
+export type LazyComponentCreator = <T extends ComponentType<Record<string, unknown>>>(
   importFn: ImportFunction<T>,
   componentName: string,
   options?: LazyComponentOptions

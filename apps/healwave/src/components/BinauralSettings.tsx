@@ -4,7 +4,7 @@ import {
   AudioEngine,
   FrequencyPreset,
   AudioSettings,
-} from '@cosmichub/frequency';
+} from '@cosmichub/integrations';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -164,6 +164,27 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
       onPresetSelect(customPreset);
     }, [customFrequency, binauralBeat, onPresetSelect, getCurrentRange]);
 
+    const handleRangeButtonKeyDown = useCallback((event: React.KeyboardEvent, range: BinauralRange) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        setBinauralBeat((range.min + range.max) / 2);
+      }
+    }, []);
+
+    const handleAdvancedModeKeyDown = useCallback((event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        setAdvancedMode(prev => !prev);
+      }
+    }, []);
+
+    const handleCreateCustomKeyDown = useCallback((event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        createCustomPreset();
+      }
+    }, [createCustomPreset]);
+
     const currentRange = useMemo<BinauralRangeWithKey>(
       () => getCurrentRange(binauralBeat),
       [binauralBeat, getCurrentRange]
@@ -183,7 +204,8 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
             <button
               type='button'
               onClick={() => setAdvancedMode(prev => !prev)}
-              className='text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors'
+              onKeyDown={handleAdvancedModeKeyDown}
+              className='text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2'
               aria-pressed='true'
               aria-expanded='true'
               aria-controls='binaural-advanced-section'
@@ -194,7 +216,8 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
             <button
               type='button'
               onClick={() => setAdvancedMode(prev => !prev)}
-              className='text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors'
+              onKeyDown={handleAdvancedModeKeyDown}
+              className='text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2'
               aria-pressed='false'
               aria-expanded='false'
               aria-controls='binaural-advanced-section'
@@ -499,7 +522,10 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                       onClick={() =>
                         setBinauralBeat((range.min + range.max) / 2)
                       }
-                      className={`px-2 py-1 text-xs rounded border transition-colors ${
+                      onKeyDown={(event) =>
+                        handleRangeButtonKeyDown(event, range)
+                      }
+                      className={`px-2 py-1 text-xs rounded border transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-1 ${
                         currentRange.key === key
                           ? getBorderColorClass(range.color)
                           : 'border-white/30 text-white/70 hover:border-white/50 hover:bg-white/5'
@@ -516,6 +542,7 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                   <Tooltip.Trigger asChild>
                     <button
                       onClick={createCustomPreset}
+                      onKeyDown={handleCreateCustomKeyDown}
                       className='w-full px-4 py-2 font-medium text-white transition-all bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg hover:from-cyan-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-transparent shadow-lg hover:shadow-cyan-500/25'
                     >
                       🎵 Create Custom Frequency

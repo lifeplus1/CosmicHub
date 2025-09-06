@@ -5,6 +5,7 @@ import {
   useOperationTracking,
   useMemoryMonitoring,
 } from '../hooks/usePerformance';
+import { usePerformanceRegression } from '../hooks/usePerformanceRegression';
 // Removed useEphemerisPerformanceMetrics (unused)
 import { EphemerisPerformanceDashboard } from '../components/EphemerisPerformanceDashboard';
 
@@ -35,6 +36,16 @@ export default function PerformanceMonitoring(): React.ReactElement {
   const { metrics: pageMetrics, isLoading: pageLoading } = usePagePerformance();
   const { memoryInfo, formatBytes, getMemoryUsagePercentage } =
     useMemoryMonitoring();
+  
+  // 🚀 NEW: Performance regression monitoring
+  const {
+    baselines,
+    regressions,
+    alerts,
+    acknowledgeAlert,
+    getPerformanceHealth,
+    exportBaselines,
+  } = usePerformanceRegression();
 
   // Update memory usage bar width without inline styles
   const memoryUsagePercent = useMemo(() => {
@@ -437,6 +448,245 @@ export default function PerformanceMonitoring(): React.ReactElement {
               {!operations?.length && (
                 <div className='text-cosmic-silver text-center py-4'>
                   No operations tracked yet
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 🚀 NEW: Performance Health Score */}
+          <div
+            className='cosmic-glass p-6 rounded-lg border border-cosmic-silver/20'
+            role='region'
+            aria-label='Performance health monitoring'
+          >
+            <h2 className='text-xl font-bold text-cosmic-gold mb-4'>
+              🏥 Performance Health
+            </h2>
+            {(() => {
+              const health = getPerformanceHealth();
+              return (
+                <div className='space-y-3'>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-cosmic-silver'>Health Score:</span>
+                    <span className={`font-bold ${
+                      health.score >= 90 ? 'text-green-600' :
+                      health.score >= 70 ? 'text-yellow-600' :
+                      health.score >= 50 ? 'text-orange-600' : 'text-red-600'
+                    }`}>
+                      {health.score}/100
+                    </span>
+                  </div>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-cosmic-silver'>Status:</span>
+                    <span className={`font-semibold ${
+                      health.status === 'excellent' ? 'text-green-600' :
+                      health.status === 'good' ? 'text-yellow-600' :
+                      health.status === 'fair' ? 'text-orange-600' : 'text-red-600'
+                    }`}>
+                      {health.status.charAt(0).toUpperCase() + health.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-cosmic-silver'>Recent Issues:</span>
+                    <span className='text-cosmic-silver'>{health.recentRegressions}</span>
+                  </div>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-cosmic-silver'>Critical Issues:</span>
+                    <span className={health.criticalIssues > 0 ? 'text-red-600 font-bold' : 'text-green-600'}>
+                      {health.criticalIssues}
+                    </span>
+                  </div>
+                  <div className='w-full bg-gray-700 rounded-full h-2 mt-4'>
+                    <div
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        health.score >= 90 ? 'bg-green-600' :
+                        health.score >= 70 ? 'bg-yellow-600' :
+                        health.score >= 50 ? 'bg-orange-600' : 'bg-red-600'
+                      }`}
+                      data-width={health.score}
+                      aria-label={`Performance health score ${health.score} percent`}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* 🚀 NEW: Performance Baselines */}
+          <div
+            className='cosmic-glass p-6 rounded-lg border border-cosmic-silver/20'
+            role='region'
+            aria-label='Performance baselines'
+          >
+            <div className='flex justify-between items-center mb-4'>
+              <h2 className='text-xl font-bold text-cosmic-gold'>
+                📊 Baselines
+              </h2>
+              <button
+                type='button'
+                onClick={exportBaselines}
+                className='bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors'
+                aria-label='Export performance baseline data'
+              >
+                Export
+              </button>
+            </div>
+            <div className='space-y-2 max-h-48 overflow-y-auto'>
+              {baselines.length > 0 ? (
+                baselines.slice(-5).map((baseline) => (
+                  <div
+                    key={baseline.operationName}
+                    className='flex justify-between items-center p-2 bg-cosmic-dark/30 rounded'
+                  >
+                    <div className='flex-1'>
+                      <span className='text-cosmic-silver font-medium'>
+                        {baseline.operationName}
+                      </span>
+                      <div className='text-xs text-cosmic-silver opacity-70'>
+                        {baseline.sampleCount} samples
+                      </div>
+                    </div>
+                    <div className='text-right'>
+                      <span className='text-green-600 font-semibold'>
+                        {baseline.averageDuration.toFixed(2)}ms
+                      </span>
+                      {baseline.standardDeviation > 0 && (
+                        <div className='text-xs text-cosmic-silver opacity-70'>
+                          ±{baseline.standardDeviation.toFixed(1)}ms
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className='text-cosmic-silver text-center py-4'>
+                  No baselines established yet
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 🚀 NEW: Performance Alerts */}
+          <div
+            className='cosmic-glass p-6 rounded-lg border border-cosmic-silver/20'
+            role='region'
+            aria-label='Performance alerts'
+          >
+            <h2 className='text-xl font-bold text-cosmic-gold mb-4'>
+              🚨 Active Alerts
+            </h2>
+            <div className='space-y-2 max-h-48 overflow-y-auto' aria-live='polite'>
+              {alerts.length > 0 ? (
+                alerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className={`p-3 rounded border-l-4 ${
+                      alert.severity === 'critical' ? 'border-red-600 bg-red-900/20' :
+                      alert.severity === 'high' ? 'border-orange-600 bg-orange-900/20' :
+                      alert.severity === 'medium' ? 'border-yellow-600 bg-yellow-900/20' :
+                      'border-blue-600 bg-blue-900/20'
+                    }`}
+                  >
+                    <div className='flex justify-between items-start'>
+                      <div className='flex-1'>
+                        <span className={`font-semibold ${
+                          alert.severity === 'critical' ? 'text-red-400' :
+                          alert.severity === 'high' ? 'text-orange-400' :
+                          alert.severity === 'medium' ? 'text-yellow-400' :
+                          'text-blue-400'
+                        }`}>
+                          {alert.message}
+                        </span>
+                        <div className='text-xs text-cosmic-silver opacity-70 mt-1'>
+                          {new Date(alert.timestamp).toLocaleTimeString()}
+                        </div>
+                      </div>
+                      <button
+                        type='button'
+                        onClick={() => acknowledgeAlert(alert.id)}
+                        className='ml-2 text-xs bg-cosmic-dark/50 hover:bg-cosmic-dark text-cosmic-silver px-2 py-1 rounded transition-colors'
+                        aria-label='Acknowledge alert'
+                      >
+                        ✓
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className='text-cosmic-silver text-center py-4'>
+                  No active alerts
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 🚀 NEW: Recent Regressions */}
+          <div
+            className='cosmic-glass p-6 rounded-lg border border-cosmic-silver/20 lg:col-span-3'
+            role='region'
+            aria-label='Recent performance regressions'
+          >
+            <h2 className='text-xl font-bold text-cosmic-gold mb-4'>
+              📉 Recent Performance Regressions
+            </h2>
+            <div className='space-y-3 max-h-64 overflow-y-auto'>
+              {regressions.length > 0 ? (
+                regressions.slice(0, 10).map((regression, _index) => (
+                  <div
+                    key={`${regression.operationName}-${regression.timestamp}`}
+                    className={`p-4 rounded-lg border-l-4 ${
+                      regression.severity === 'critical' ? 'border-red-600 bg-red-900/10' :
+                      regression.severity === 'major' ? 'border-orange-600 bg-orange-900/10' :
+                      regression.severity === 'moderate' ? 'border-yellow-600 bg-yellow-900/10' :
+                      'border-blue-600 bg-blue-900/10'
+                    }`}
+                  >
+                    <div className='flex justify-between items-start mb-2'>
+                      <div>
+                        <h3 className='font-semibold text-cosmic-silver'>
+                          {regression.operationName}
+                        </h3>
+                        <div className='text-sm text-cosmic-silver/70'>
+                          {new Date(regression.timestamp).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className='text-right'>
+                        <span className={`font-bold text-lg ${
+                          regression.severity === 'critical' ? 'text-red-400' :
+                          regression.severity === 'major' ? 'text-orange-400' :
+                          regression.severity === 'moderate' ? 'text-yellow-400' :
+                          'text-blue-400'
+                        }`}>
+                          +{regression.regressionPercentage.toFixed(1)}%
+                        </span>
+                        <div className='text-xs text-cosmic-silver/70'>
+                          {regression.currentDuration.toFixed(2)}ms vs {regression.baselineAverage.toFixed(2)}ms
+                        </div>
+                      </div>
+                    </div>
+                    {regression.suggestions.length > 0 && (
+                      <div className='mt-3 p-2 bg-cosmic-dark/30 rounded'>
+                        <h4 className='text-sm font-medium text-cosmic-gold mb-1'>
+                          💡 Suggestions:
+                        </h4>
+                        <ul className='text-sm text-cosmic-silver/80 space-y-1'>
+                          {regression.suggestions.slice(0, 2).map((suggestion, idx) => (
+                            <li key={idx} className='flex items-start'>
+                              <span className='mr-2'>•</span>
+                              <span>{suggestion}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className='text-cosmic-silver text-center py-8'>
+                  🎉 No performance regressions detected!
+                  <div className='text-sm text-cosmic-silver/60 mt-2'>
+                    Your optimization efforts are paying off.
+                  </div>
                 </div>
               )}
             </div>

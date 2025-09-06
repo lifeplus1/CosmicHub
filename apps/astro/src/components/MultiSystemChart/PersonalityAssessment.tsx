@@ -1,35 +1,6 @@
-import React, { useState } from 'react';
-
-// Simple Button component since we can't import the UI package version
-const Button: React.FC<{
-  onClick: () => void;
-  variant?: 'primary' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
-  children: React.ReactNode;
-}> = ({ onClick, variant = 'primary', size = 'md', disabled = false, children }) => {
-  const baseClasses = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2';
-  const variantClasses = {
-    primary: 'bg-purple-600 hover:bg-purple-700 text-white',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-  };
-  const sizeClasses = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-4 py-2',
-    lg: 'px-6 py-3 text-lg'
-  };
-  const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
-  
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses}`}
-    >
-      {children}
-    </button>
-  );
-};
+import React, { useState, useCallback } from 'react';
+import { Button, Modal, Card, CardHeader, CardTitle, CardContent, Progress, ErrorBoundary } from '@cosmichub/ui';
+import '../../styles/cosmic-components.css';
 
 interface AssessmentQuestion {
   id: string;
@@ -144,10 +115,10 @@ interface PersonalityAssessmentProps {
   onClose: () => void;
 }
 
-export const PersonalityAssessment: React.FC<PersonalityAssessmentProps> = ({
+export const PersonalityAssessment: React.FC<PersonalityAssessmentProps> = React.memo(function PersonalityAssessment({
   onComplete,
   onClose
-}) => {
+}) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [assessmentType, setAssessmentType] = useState<'quick' | 'full'>('quick');
@@ -156,7 +127,7 @@ export const PersonalityAssessment: React.FC<PersonalityAssessmentProps> = ({
   const isLastQuestion = currentQuestionIndex === QUICK_ASSESSMENT_QUESTIONS.length - 1;
   const progress = ((currentQuestionIndex + 1) / QUICK_ASSESSMENT_QUESTIONS.length) * 100;
 
-  const handleAnswer = (questionId: string, value: number) => {
+  const handleAnswer = useCallback((questionId: string, value: number) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
     
     if (isLastQuestion) {
@@ -166,7 +137,7 @@ export const PersonalityAssessment: React.FC<PersonalityAssessmentProps> = ({
     } else {
       setCurrentQuestionIndex(prev => prev + 1);
     }
-  };
+  }, [isLastQuestion, answers, onComplete]);
 
   const calculateResults = (allAnswers: Record<string, number>, lastQuestionId: string, lastValue: number): AssessmentResults => {
     const finalAnswers = { ...allAnswers, [lastQuestionId]: lastValue };
@@ -215,113 +186,117 @@ export const PersonalityAssessment: React.FC<PersonalityAssessmentProps> = ({
     };
   };
 
-  const goBack = () => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  }, []);
+
+  const goBack = useCallback(() => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
     }
-  };
+  }, [currentQuestionIndex]);
 
   if (!currentQuestion) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Personality Assessment</h2>
-              <p className="text-gray-600">
-                Question {currentQuestionIndex + 1} of {QUICK_ASSESSMENT_QUESTIONS.length}
-              </p>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Personality Assessment"
+      size="lg"
+      className="max-w-2xl"
+    >
+      <ErrorBoundary level="component" name="PersonalityAssessment">
+        <div className="space-y-6">
+          {/* Progress Section */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-sm text-cosmic-silver/80">
+              <span>Question {currentQuestionIndex + 1} of {QUICK_ASSESSMENT_QUESTIONS.length}</span>
+              <span>{Math.round(progress)}% Complete</span>
             </div>
-            <Button
-              onClick={onClose}
-              variant="secondary"
-              size="sm"
-            >
-              ✕
-            </Button>
+            <Progress value={progress} className="h-2" />
           </div>
 
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className={`bg-purple-600 h-2 rounded-full transition-all duration-300 w-[${Math.min(100, Math.max(0, progress))}%]`}
-              />
-            </div>
-          </div>
-
-          {/* Question */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">
-              {currentQuestion.text}
-            </h3>
-
-            {/* Options */}
-            <div className="space-y-3">
-              {currentQuestion.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleAnswer(currentQuestion.id, option.value)}
-                  className="w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition-all duration-200"
-                >
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-purple-600 opacity-0" />
+          {/* Question Card */}
+          <Card className="border-cosmic-purple/30 bg-cosmic-dark/30">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl text-cosmic-gold font-cinzel leading-relaxed">
+                {currentQuestion.text}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {/* Options */}
+              <div className="space-y-3">
+                {currentQuestion.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswer(currentQuestion.id, option.value)}
+                    onKeyDown={(e) => handleKeyDown(e, () => handleAnswer(currentQuestion.id, option.value))}
+                    className="w-full text-left p-4 rounded-lg border-2 border-cosmic-purple/20 bg-cosmic-dark/20 hover:border-cosmic-purple/60 hover:bg-cosmic-purple/10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50 focus:ring-offset-2 focus:ring-offset-cosmic-dark group"
+                    aria-label={`Select answer: ${option.text}`}
+                    tabIndex={0}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-5 h-5 rounded-full border-2 border-cosmic-silver/40 flex items-center justify-center group-hover:border-cosmic-gold transition-colors">
+                        <div className="w-3 h-3 rounded-full bg-cosmic-purple opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-cosmic-silver group-hover:text-cosmic-gold transition-colors font-medium">
+                        {option.text}
+                      </span>
                     </div>
-                    <span className="text-gray-900">{option.text}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Navigation */}
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <Button
               onClick={goBack}
-              variant="secondary"
+              variant="outline"
               disabled={currentQuestionIndex === 0}
+              className="min-w-[100px]"
             >
               Previous
             </Button>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-cosmic-silver/60 text-center">
               {isLastQuestion ? 'Select your answer to complete' : 'Select your answer to continue'}
             </div>
+            <div className="w-[100px]" /> {/* Spacer for alignment */}
           </div>
 
           {/* Assessment Type Toggle */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-center space-x-4">
-              <button
-                onClick={() => setAssessmentType('quick')}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  assessmentType === 'quick'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                Quick Assessment (6 questions)
-              </button>
-              <button
-                onClick={() => setAssessmentType('full')}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  assessmentType === 'full'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-                disabled
-              >
-                Full Assessment (Coming Soon)
-              </button>
-            </div>
-          </div>
+          <Card className="border-cosmic-purple/20 bg-cosmic-dark/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center space-x-4">
+                <Button
+                  onClick={() => setAssessmentType('quick')}
+                  variant={assessmentType === 'quick' ? 'cosmic' : 'outline'}
+                  size="sm"
+                  className="flex-1 max-w-xs"
+                >
+                  Quick Assessment (6 questions)
+                </Button>
+                <Button
+                  onClick={() => setAssessmentType('full')}
+                  variant={assessmentType === 'full' ? 'cosmic' : 'outline'}
+                  size="sm"
+                  disabled
+                  className="flex-1 max-w-xs opacity-50 cursor-not-allowed"
+                >
+                  Full Assessment (Coming Soon)
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </div>
+      </ErrorBoundary>
+    </Modal>
   );
-};
+});

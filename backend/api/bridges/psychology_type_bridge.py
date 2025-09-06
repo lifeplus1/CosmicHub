@@ -17,8 +17,8 @@ from backend.types.psychology_systems import (
     PersonalityTrait, CognitiveFunction, EmotionalProfile, StressIndicator,
     MBTIAssessment, BigFiveAssessment, EnneagramAssessment, TemperamentAssessment,
     PsychologyProfile, TherapeuticRecommendation, GrowthRecommendation, WellnessInsight,
-    PsychologyAssessmentResponse, PsychologyProfileResponse, PsychologyComparisonResponse,
-    PsychologyHealthCheck, AssessmentType, PersonalityDimension, BigFiveTrait, Temperament
+    PsychologyAssessmentResponse, PsychologyProfileResponse,
+    PsychologyHealthCheck
 )
 
 logger = logging.getLogger(__name__)
@@ -214,6 +214,38 @@ class PsychologyTypeBridge:
             integration_direction=max(1, min(9, integration_direction)),
             disintegration_direction=max(1, min(9, disintegration_direction)),
             type_scores=type_scores
+        )
+    
+    @classmethod
+    def create_temperament_assessment(
+        cls,
+        primary_temperament: str,
+        secondary_temperament: Optional[str],
+        temperament_scores: Dict[str, float],
+        blend_description: str
+    ) -> TemperamentAssessment:
+        """Create a properly typed TemperamentAssessment"""
+        # Validate primary temperament
+        primary = primary_temperament.lower()
+        if primary not in cls.TEMPERAMENTS:
+            primary = 'sanguine'  # Default fallback
+        
+        # Validate secondary temperament
+        secondary = None
+        if secondary_temperament:
+            sec = secondary_temperament.lower()
+            if sec in cls.TEMPERAMENTS:
+                secondary = sec
+        
+        from typing import cast, Literal
+        primary_lit = cast(Literal['sanguine', 'choleric', 'melancholic', 'phlegmatic'], primary)
+        secondary_lit = cast(Literal['sanguine', 'choleric', 'melancholic', 'phlegmatic'], secondary) if secondary else None
+        
+        return TemperamentAssessment(
+            primary_temperament=primary_lit,
+            secondary_temperament=secondary_lit,
+            temperament_scores=temperament_scores,
+            blend_description=blend_description
         )
     
     @classmethod

@@ -48,6 +48,21 @@ export const sharedTheme = {
       text: '#e2e8f0', // cosmic-silver
     },
   },
+  // Cosmic component classes for consistent UI patterns
+  extend: {
+    // Glass morphism utilities
+    utilities: {
+      '.cosmic-glass': {
+        'background-color': 'rgba(15, 15, 35, 0.3)',
+        '-webkit-backdrop-filter': 'blur(16px)',
+        'backdrop-filter': 'blur(16px)',
+        'border': '1px solid rgba(226, 232, 240, 0.2)',
+      },
+      '.cosmic-glow': {
+        'box-shadow': '0 0 20px rgba(85, 60, 154, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+      },
+    },
+  },
   backdropBlur: {
     lg: '16px',
   },

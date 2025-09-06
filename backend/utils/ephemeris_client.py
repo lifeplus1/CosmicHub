@@ -173,7 +173,7 @@ class EphemerisClient:
 
     async def _make_request(
         self, method: str, endpoint: str, **kwargs: Any
-    ) -> Dict[str, Any]:
+    ) -> Any:
         """Make HTTP request to ephemeris server."""
         url = f"{self.server_url}{endpoint}"
 
@@ -278,10 +278,10 @@ class EphemerisClient:
         response = await self._make_request("GET", "/planets")
         # The response should be a list of strings
         if isinstance(response, list):
-            return response  # type: ignore[return-value]
+            return response
         else:
             # If the response is wrapped in a dict, extract the list
-            return response.get("planets", [])  # type: ignore[return-value]
+            return response.get("planets", [])
 
     async def fetch_ephemeris_data(self, filename: str) -> bytes:
         """

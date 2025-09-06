@@ -19,6 +19,7 @@ import {
   deleteChart as apiDeleteChart,
   fetchChart as _fetchChart,
 } from './api';
+import { type UnifiedBirthData, isUnifiedBirthData } from '@cosmichub/types';
 import type { SaveChartRequest, SavedChart, ChartId } from './api.types';
 import { isSuccess } from './apiResult';
 
@@ -33,16 +34,7 @@ function toChartId(id: string): ChartId {
 // Chart calculation parameters interface
 export interface ChartCalculationParams {
   name?: string;
-  birthData: {
-    date: string;
-    time: string;
-    location: {
-      latitude: number;
-      longitude: number;
-      city: string;
-      country: string;
-    };
-  };
+  birthData: UnifiedBirthData;
   systems?: string[];
   houses?: string;
   aspects?: string[];
@@ -54,7 +46,7 @@ interface ServiceWorkerCacheRequest { type: 'CACHE_REQUEST'; payload: { chartId:
 type ServiceWorkerMessage = ServiceWorkerSyncRequest | ServiceWorkerCacheRequest;
 
 // Metadata returned alongside loaded charts
-interface ChartLoadMetadata {
+export interface ChartLoadMetadata {
   name: string;
   createdAt: Date;
   updatedAt: Date;
@@ -147,20 +139,17 @@ export class OfflineChartService {
       if (navigator.onLine) {
         try {
           // Convert to API format
-          const birthDate = new Date(
-            params.birthData.date + 'T' + params.birthData.time
-          );
           const saveRequest: SaveChartRequest = {
-            year: birthDate.getFullYear(),
-            month: birthDate.getMonth() + 1,
-            day: birthDate.getDate(),
-            hour: birthDate.getHours(),
-            minute: birthDate.getMinutes(),
-            city: params.birthData.location.city,
+            year: params.birthData.year,
+            month: params.birthData.month,
+            day: params.birthData.day,
+            hour: params.birthData.hour,
+            minute: params.birthData.minute,
+            city: params.birthData.city ?? 'Unknown',
             house_system: params.houses ?? 'placidus',
             chart_name: params.name ?? `Chart ${new Date().toISOString()}`,
-            lat: params.birthData.location.latitude,
-            lon: params.birthData.location.longitude,
+            lat: params.birthData.lat ?? params.birthData.latitude ?? 0,
+            lon: params.birthData.lon ?? params.birthData.longitude ?? 0,
           };
 
           const apiResult = await apiSaveChart(saveRequest);
@@ -235,10 +224,33 @@ export class OfflineChartService {
 
       if (cachedChart) {
         // Convert the OfflineChart format to expected format
+        // Use type guard to safely access birth_data properties
+        let birthData: ChartCalculationParams['birthData'];
+
+        if (isUnifiedBirthData(cachedChart.birth_data)) {
+          // Use UnifiedBirthData directly
+          birthData = cachedChart.birth_data;
+        } else {
+          // Fallback for unknown format - use safe property access
+          const birthDataObj = cachedChart.birth_data as Record<string, unknown>;
+          birthData = {
+            year: typeof birthDataObj.year === 'number' ? birthDataObj.year : new Date().getFullYear(),
+            month: typeof birthDataObj.month === 'number' ? birthDataObj.month : new Date().getMonth() + 1,
+            day: typeof birthDataObj.day === 'number' ? birthDataObj.day : new Date().getDate(),
+            hour: typeof birthDataObj.hour === 'number' ? birthDataObj.hour : 12,
+            minute: typeof birthDataObj.minute === 'number' ? birthDataObj.minute : 0,
+            city: typeof birthDataObj.city === 'string' ? birthDataObj.city : 'Unknown',
+            lat: typeof birthDataObj.lat === 'number' ? birthDataObj.lat :
+                 typeof birthDataObj.latitude === 'number' ? birthDataObj.latitude : 0,
+            lon: typeof birthDataObj.lon === 'number' ? birthDataObj.lon :
+                 typeof birthDataObj.longitude === 'number' ? birthDataObj.longitude : 0,
+            timezone: typeof birthDataObj.timezone === 'string' ? birthDataObj.timezone : 'UTC',
+          };
+        }
+
         const params: ChartCalculationParams = {
           name: cachedChart.name,
-          birthData:
-            cachedChart.birth_data as ChartCalculationParams['birthData'], // Type conversion needed
+          birthData,
           systems: [],
           houses: 'placidus',
           aspects: [],

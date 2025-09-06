@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { devConsole } from '../config/environment';
 import {
   NetworkStatus,
   SyncResult,
@@ -91,7 +92,7 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
         setLastSyncResult(null);
       }, 5000);
     } catch (error) {
-      console.error('Manual sync failed:', error);
+      devConsole.error?.('Manual sync failed:', error);
       setLastSyncResult({
         success: false,
         synced_items: 0,

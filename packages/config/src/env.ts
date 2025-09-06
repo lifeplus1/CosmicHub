@@ -1,5 +1,31 @@
 /**
- * Environment configuration and validation
+ * Environment Configuration and Validation
+ * 
+ * Centralized environment variable management with type safety and validation
+ * Following Component Best Practices: Type Safety, Error Handling, and Performance
+ * 
+ * Features:
+ * - Cross-runtime compatibility (Vite + Node.js)
+ * - Environment-specific validation rules
+ * - Feature flag management
+ * - Type-safe environment access
+ * - Development-friendly error messages
+ * 
+ * @example
+ * ```typescript
+ * import { env, getEnvVar, isDevelopment } from './env';
+ * 
+ * // Type-safe access
+ * const apiUrl = env.VITE_API_URL;
+ * 
+ * // Safe access with fallback
+ * const customVar = getEnvVar('CUSTOM_VAR', 'defaultValue');
+ * 
+ * // Environment checks
+ * if (isDevelopment()) {
+ *   console.log('Development mode');
+ * }
+ * ```
  */
 
 /// <reference types="vite/client" />
@@ -76,9 +102,7 @@ interface FeatureFlags {
 // Required environment variables by environment (supporting both VITE_ and NEXT_PUBLIC_ prefixes)
 const requiredEnvVars: Record<Environment, string[]> = {
   development: [
-    'VITE_FIREBASE_PROJECT_ID',
-    'VITE_FIREBASE_API_KEY',
-    'VITE_FIREBASE_AUTH_DOMAIN',
+    // In development, Firebase variables are optional to allow mock auth
   ],
   staging: [
     'VITE_API_URL',
@@ -285,26 +309,48 @@ const initializeEnv = (): ReturnType<typeof validateEnv> => {
   const validationResult = validateEnv();
 
   if (!validationResult.isValid) {
-    console.group('🚨 Environment Configuration Issues');
+    const env = getCurrentEnvironment();
+    
+    if (env === 'development') {
+      // In development, be informative but not alarming
+      console.group('� Environment Configuration Info');
+      
+      if (validationResult.missing.length > 0) {
+        console.info(
+          '📝 Optional environment variables not set (using defaults):',
+          validationResult.missing
+        );
+      }
 
-    if (validationResult.missing.length > 0) {
-      console.error(
-        'Missing required environment variables:',
-        validationResult.missing
-      );
-    }
+      if (validationResult.errors.length > 0) {
+        console.warn('⚠️ Environment validation warnings:', validationResult.errors);
+      }
+      
+      console.info('💡 This is normal for development. See .env.example for configuration options.');
+      console.groupEnd();
+    } else {
+      // In staging/production, be more strict
+      console.group('�🚨 Environment Configuration Issues');
 
-    if (validationResult.errors.length > 0) {
-      console.error('Environment validation errors:', validationResult.errors);
-    }
+      if (validationResult.missing.length > 0) {
+        console.error(
+          'Missing required environment variables:',
+          validationResult.missing
+        );
+      }
 
-    console.groupEnd();
+      if (validationResult.errors.length > 0) {
+        console.error('Environment validation errors:', validationResult.errors);
+      }
 
-    // Only throw in production to prevent development issues
-    if (isProduction()) {
-      throw new Error(
-        'Environment validation failed. Check console for details.'
-      );
+      console.groupEnd();
+
+      // Only throw in production to prevent development issues
+      if (isProduction()) {
+        throw new Error(
+          'Environment validation failed. Check console for details.'
+        );
+      }
     }
   } else {
     console.log(

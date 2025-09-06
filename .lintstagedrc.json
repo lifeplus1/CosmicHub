@@ -1,0 +1,11 @@
+{
+  "apps/**/*.{ts,tsx,js,jsx}": [
+    "eslint --no-warn-ignored --max-warnings=0 --fix"
+  ],
+  "packages/**/src/**/*.{ts,tsx,js,jsx}": [
+    "eslint --no-warn-ignored --max-warnings=0 --fix"
+  ],
+  "!(node_modules|dist|build)/**/*.{md,json,yml,yaml}": [
+    "prettier --write"
+  ]
+}

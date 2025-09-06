@@ -2,10 +2,13 @@ import React from 'react';
 import type { FrequencyPreset } from '../../types/frequency';
 
 interface AstrologyEnhancement {
-  planetaryAlignment: string;
-  transitInfluence: string;
-  recommendedDuration: number;
-  chartHarmonic: number;
+  planet?: string;
+  sign?: string;
+  element?: string;
+  planetaryAlignment?: string;
+  transitInfluence?: string;
+  recommendedDuration?: number;
+  chartHarmonic?: number;
 }
 
 interface AstroFrequencyPreset extends FrequencyPreset {
@@ -33,24 +36,24 @@ const AstroInfo: React.FC<AstroInfoProps> = ({ preset }) => {
       <div className='grid gap-4 md:grid-cols-2'>
         <div>
           <h4 className='font-medium text-purple-700'>Frequency Information</h4>
-          <ul className='mt-2 space-y-1 text-sm text-purple-600'>
-            <li>
+          <div className='mt-2 space-y-1 text-sm text-purple-600'>
+            <p>
               <strong>Name:</strong> {preset.name}
-            </li>
-            <li>
-              <strong>Base Frequency:</strong> {preset.baseFrequency} Hz
-            </li>
-            <li>
+            </p>
+            <p>
+              <strong>Base Frequency:</strong> {preset.frequency} Hz
+            </p>
+            <p>
               <strong>Category:</strong> {preset.category}
-            </li>
+            </p>
             {preset.description !== null &&
               preset.description !== undefined &&
               preset.description !== '' && (
-                <li>
+                <p>
                   <strong>Description:</strong> {preset.description}
-                </li>
+                </p>
               )}
-          </ul>
+          </div>
         </div>
 
         {preset.astrologyData !== null &&
@@ -90,8 +93,7 @@ const AstroInfo: React.FC<AstroInfoProps> = ({ preset }) => {
           planetary transits.
         </p>
 
-        {preset.astrologyData !== null &&
-          preset.astrologyData !== undefined && (
+        {preset.astrologyData?.planetaryAlignment && (
             <div className='mt-2 text-xs text-purple-600'>
               <strong>Optimal Times:</strong> Sessions are most effective during{' '}
               {preset.astrologyData.planetaryAlignment.toLowerCase()} periods.

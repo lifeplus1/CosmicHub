@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { logger } from '@cosmichub/config';
+import ErrorBoundary from './ErrorBoundary';
 
 // Create component-specific logger
-const audioLogger = logger.child({ module: 'AudioPlayer' });
+const audioLogger = logger.child ? logger.child({ module: 'AudioPlayer' }) : logger;
 interface ExtendedWindow extends Window {
   webkitAudioContext?: typeof AudioContext;
   AudioContext: typeof AudioContext;
@@ -284,4 +285,20 @@ const AudioPlayer: React.FC<AudioPlayerProps> = memo(
 
 AudioPlayer.displayName = 'AudioPlayer';
 
-export default AudioPlayer;
+// Export with ErrorBoundary wrapper
+const AudioPlayerWithErrorBoundary: React.FC<AudioPlayerProps> = (props) => (
+  <ErrorBoundary
+    fallback={
+      <div className='p-4 text-center text-red-400 bg-red-900/20 border border-red-500/30 rounded-lg'>
+        <p>Audio player encountered an error. Please refresh the page.</p>
+      </div>
+    }
+    onError={(error) => {
+      audioLogger.error('AudioPlayer Error Boundary triggered', { error });
+    }}
+  >
+    <AudioPlayer {...props} />
+  </ErrorBoundary>
+);
+
+export default AudioPlayerWithErrorBoundary;

@@ -6,10 +6,28 @@ This configures the dual-format data export system for analytics and ML training
 
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
+from typing_extensions import TypedDict
+
+
+class DataExportConfig(TypedDict):
+    """Type definition for data export configuration."""
+    export_base_path: str
+    default_formats: List[str]
+    json_only_mode: bool
+    enable_background_export: bool
+    analytics_summary_interval: int
+    partition_by_date: bool
+    partition_by_user: bool
+    json_retention_days: int
+    parquet_retention_days: int
+    enable_ai_interaction_export: bool
+    enable_user_feedback_export: bool
+    track_export_performance: bool
+    export_timeout_seconds: int
 
 # DATA-001 Phase 1: Export Configuration
-DATA_EXPORT_CONFIG: Dict[str, Any] = {
+DATA_EXPORT_CONFIG: DataExportConfig = {
     # Base export directory - can be overridden by environment variable
     'export_base_path': os.environ.get('DATA_EXPORT_PATH', '/tmp/cosmichub_exports'),
     
@@ -43,26 +61,26 @@ DATA_EXPORT_CONFIG: Dict[str, Any] = {
 }
 
 
-def get_data_export_config():
+def get_data_export_config() -> DataExportConfig:
     """Get current DATA-001 Phase 1 configuration."""
     return DATA_EXPORT_CONFIG.copy()
 
 
-def is_parquet_export_enabled():
+def is_parquet_export_enabled() -> bool:
     """Check if Parquet export is enabled (Phase 1 feature flag)."""
     if DATA_EXPORT_CONFIG['json_only_mode']:
         return False
     return DATA_EXPORT_CONFIG['enable_background_export']
 
 
-def get_export_base_path():
+def get_export_base_path() -> str:
     """Get configured export base path, creating if needed."""
     path = Path(DATA_EXPORT_CONFIG['export_base_path'])
     path.mkdir(parents=True, exist_ok=True)
     return str(path)
 
 
-def get_default_export_formats():
+def get_default_export_formats() -> List[str]:
     """Get default export formats based on configuration."""
     if DATA_EXPORT_CONFIG['json_only_mode']:
         return ['json']
@@ -70,7 +88,7 @@ def get_default_export_formats():
 
 
 # Production-ready defaults
-PRODUCTION_CONFIG: Dict[str, Any] = {
+PRODUCTION_CONFIG: DataExportConfig = {
     **DATA_EXPORT_CONFIG,
     'export_base_path': '/data/cosmichub/exports',
     'analytics_summary_interval': 30,  # More frequent in production
@@ -79,18 +97,18 @@ PRODUCTION_CONFIG: Dict[str, Any] = {
 }
 
 
-def apply_production_config():
+def apply_production_config() -> None:
     """Apply production-optimized configuration."""
     DATA_EXPORT_CONFIG.update(PRODUCTION_CONFIG)
 
 
 # Development shortcuts
-def enable_json_only_mode():
+def enable_json_only_mode() -> None:
     """Enable JSON-only mode for testing current system performance."""
     DATA_EXPORT_CONFIG['json_only_mode'] = True
 
 
-def enable_dual_format_mode():
+def enable_dual_format_mode() -> None:
     """Enable dual-format mode for DATA-001 Phase 1 testing."""
     DATA_EXPORT_CONFIG['json_only_mode'] = False
     DATA_EXPORT_CONFIG['enable_background_export'] = True
@@ -106,6 +124,6 @@ ANALYTICS_CONFIG: Dict[str, Any] = {
 }
 
 
-def get_analytics_config():
+def get_analytics_config() -> Dict[str, Any]:
     """Get analytics warehouse configuration."""
     return ANALYTICS_CONFIG.copy()

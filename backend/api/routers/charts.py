@@ -31,12 +31,52 @@ router = APIRouter(prefix="/charts", tags=["charts"])
 # ----- Request/Response Models -----
 
 class PlanetAspect(BaseModel):
+    """
+    Represents an aspect relationship between planets in astrological charts.
+    
+    This model defines the angular relationship between two celestial bodies,
+    including the type of aspect (e.g., conjunction, opposition) and its precision.
+    
+    Attributes:
+        type: The type of aspect (e.g., "conjunction", "opposition", "trine", "square", "sextile")
+        target: The name of the target planet or celestial body forming the aspect
+        orb: The orb of influence in degrees - how close the aspect is to exact (0.0 to ~10.0)
+        
+    Example:
+        {
+            "type": "conjunction",
+            "target": "venus", 
+            "orb": 2.5
+        }
+    """
     type: str
     target: str
     orb: float
 
 
 class Planet(BaseModel):
+    """
+    Represents a planet or celestial body position in an astrological chart.
+    
+    Contains the complete positional and relational data for planets including
+    their zodiacal position, house placement, and aspect relationships.
+    
+    Attributes:
+        name: Planet name in lowercase (e.g., "sun", "moon", "mercury", "venus")
+        sign: Zodiac sign in lowercase (e.g., "aries", "taurus", "gemini")
+        degree: Exact degree position within the sign (0.0 to 29.999...)
+        house: Astrological house number (1-12), optional for some calculations
+        aspects: List of aspects this planet forms with other celestial bodies
+        
+    Example:
+        {
+            "name": "sun",
+            "sign": "leo", 
+            "degree": 15.25,
+            "house": 5,
+            "aspects": [{"type": "trine", "target": "mars", "orb": 3.2}]
+        }
+    """
     name: str
     sign: str
     degree: float
@@ -45,6 +85,28 @@ class Planet(BaseModel):
 
 
 class Asteroid(BaseModel):
+    """
+    Represents an asteroid position in an astrological chart.
+    
+    Similar to planets but represents smaller celestial bodies like Ceres, Pallas,
+    Juno, and Vesta that add nuanced meaning to chart interpretation.
+    
+    Attributes:
+        name: Asteroid name (e.g., "Ceres", "Pallas", "Juno", "Vesta")
+        sign: Zodiac sign in lowercase where the asteroid is located
+        degree: Exact degree position within the sign (0.0 to 29.999...)
+        house: Astrological house number (1-12), optional
+        aspects: List of aspects this asteroid forms with other bodies
+        
+    Example:
+        {
+            "name": "Ceres",
+            "sign": "virgo",
+            "degree": 10.5,
+            "house": 6,
+            "aspects": []
+        }
+    """
     name: str
     sign: str
     degree: float
@@ -53,12 +115,50 @@ class Asteroid(BaseModel):
 
 
 class Angle(BaseModel):
+    """
+    Represents one of the four primary angles in an astrological chart.
+    
+    The angles are the most sensitive points in a chart representing the intersection
+    of the celestial sphere with the horizon and meridian at birth time/location.
+    
+    Attributes:
+        name: Angle name - "Ascendant", "Midheaven" (MC), "Descendant", or "Imum Coeli" (IC)
+        sign: Zodiac sign in lowercase where the angle falls
+        degree: Exact degree position within the sign (0.0 to 29.999...)
+        
+    Example:
+        {
+            "name": "Ascendant", 
+            "sign": "aries",
+            "degree": 5.33
+        }
+    """
     name: str
     sign: str
     degree: float
 
 
 class House(BaseModel):
+    """
+    Represents an astrological house division in a natal chart.
+    
+    Houses divide the chart into 12 sectors representing different life areas
+    (e.g., identity, money, communication, home, creativity, health, etc.).
+    
+    Attributes:
+        number: House number from 1-12 (1st house = identity, 10th = career, etc.)
+        sign: Zodiac sign in lowercase on the house cusp 
+        cusp: Degree position of the house cusp (0.0 to 359.999...)
+        planets: List of planet names located in this house
+        
+    Example:
+        {
+            "number": 1,
+            "sign": "aries", 
+            "cusp": 5.33,
+            "planets": ["sun", "mercury"]
+        }
+    """
     number: int
     sign: str
     cusp: float
@@ -66,6 +166,28 @@ class House(BaseModel):
 
 
 class Aspect(BaseModel):
+    """
+    Represents an angular relationship between two celestial bodies.
+    
+    Aspects describe the geometric relationships between planets and their
+    influence on personality traits and life events.
+    
+    Attributes:
+        planet1: First planet/body name in lowercase (e.g., "sun", "moon")
+        planet2: Second planet/body name in lowercase
+        type: Aspect type ("conjunction", "opposition", "trine", "square", "sextile", etc.)
+        orb: Orb of influence in degrees - deviation from exact aspect angle
+        applying: Whether the aspect is applying (getting closer) or separating, optional
+        
+    Example:
+        {
+            "planet1": "sun",
+            "planet2": "moon", 
+            "type": "conjunction",
+            "orb": 2.1,
+            "applying": true
+        }
+    """
     planet1: str
     planet2: str
     type: str
@@ -74,7 +196,29 @@ class Aspect(BaseModel):
 
 
 class ChartRequestData(BaseModel):
-    """Request model for chart data with planets, houses, aspects, etc."""
+    """
+    Complete astrological chart data for chart display and interpretation.
+    
+    This model contains all the calculated celestial positions and relationships
+    for a specific birth time and location, organized into the traditional
+    astrological components.
+    
+    Attributes:
+        planets: List of planetary positions and aspects (Sun, Moon, Mercury, etc.)
+        asteroids: List of asteroid positions (Ceres, Pallas, Juno, Vesta, etc.)
+        angles: List of chart angles (Ascendant, Midheaven, Descendant, IC)
+        houses: List of astrological house divisions (1st through 12th houses)
+        aspects: List of angular relationships between celestial bodies
+        
+    Example:
+        {
+            "planets": [{"name": "sun", "sign": "leo", "degree": 15.25, "house": 5}],
+            "asteroids": [{"name": "Ceres", "sign": "virgo", "degree": 10.5}],
+            "angles": [{"name": "Ascendant", "sign": "aries", "degree": 5.33}],
+            "houses": [{"number": 1, "sign": "aries", "cusp": 5.33}],
+            "aspects": [{"planet1": "sun", "planet2": "moon", "type": "trine", "orb": 2.1}]
+        }
+    """
     planets: List[Planet]
     asteroids: List[Asteroid]
     angles: List[Angle]
@@ -84,7 +228,40 @@ class ChartRequestData(BaseModel):
 
 # Legacy SaveChartRequest model
 class SaveChartRequest(BaseModel):
-    """Request model for saving a calculated birth chart"""
+    """
+    Request model for saving a calculated birth chart to user's collection.
+    
+    Contains the essential birth data needed to calculate and store an astrological
+    chart. This is a legacy model maintained for backward compatibility.
+    
+    Attributes:
+        year: Birth year (1900-2100)
+        month: Birth month (1-12)
+        day: Birth day (1-31)
+        hour: Birth hour in 24-hour format (0-23)
+        minute: Birth minute (0-59)
+        city: Birth city name, minimum 1 character
+        house_system: House calculation system - "P" for Placidus, "E" for Equal
+        chart_name: Optional custom name for the chart
+        timezone: Optional timezone identifier (e.g., "America/New_York")
+        lat: Optional latitude in decimal degrees (-90.0 to 90.0)
+        lon: Optional longitude in decimal degrees (-180.0 to 180.0)
+        
+    Example:
+        {
+            "year": 1990,
+            "month": 6,
+            "day": 15,
+            "hour": 14,
+            "minute": 30,
+            "city": "New York",
+            "house_system": "P",
+            "chart_name": "My Birth Chart",
+            "timezone": "America/New_York",
+            "lat": 40.7128,
+            "lon": -74.0060
+        }
+    """
     year: int = Field(..., ge=1900, le=2100)
     month: int = Field(..., ge=1, le=12)
     day: int = Field(..., ge=1, le=31)
@@ -99,14 +276,54 @@ class SaveChartRequest(BaseModel):
 
 
 class SaveChartResponse(BaseModel):
-    """Response model for chart save operations"""
+    """
+    Response model for successful chart save operations.
+    
+    Returned when a chart is successfully calculated and saved to the user's
+    collection, providing confirmation and the saved chart data.
+    
+    Attributes:
+        id: Unique identifier for the saved chart in the database
+        message: Success message confirming the chart was saved
+        chart_data: The complete chart data that was saved
+        
+    Example:
+        {
+            "id": "chart_123456789",
+            "message": "Chart saved successfully",
+            "chart_data": {
+                "id": "chart_123456789",
+                "name": "Birth Chart",
+                "birth_date": "1990-06-15T14:30:00Z",
+                "location": "New York, NY"
+            }
+        }
+    """
     id: str
     message: str
     chart_data: DatabaseChartData
 
 
 class ChartListResponse(BaseModel):
-    """Response model for listing multiple charts"""
+    """
+    Response model for listing multiple saved charts.
+    
+    Used by endpoints that return multiple charts, such as getting all charts
+    for a user or filtered chart lists.
+    
+    Attributes:
+        charts: List of chart data objects
+        total: Total number of charts available (for pagination)
+        
+    Example:
+        {
+            "charts": [
+                {"id": "chart_1", "name": "Birth Chart", "birth_date": "1990-06-15T14:30:00Z"},
+                {"id": "chart_2", "name": "Solar Return", "birth_date": "2023-06-15T10:15:00Z"}
+            ],
+            "total": 2
+        }
+    """
     charts: List[DatabaseChartData]
     total: int
 
@@ -261,113 +478,7 @@ async def save_chart_unified(
     except Exception as e:
         logger.error(f"Failed to save chart: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save chart: {str(e)}")
-    """
-    Save chart data with unified serialization and optional caching
-    """
-    try:
-        from os import getenv
-        trace_enabled = getenv("DEBUG_REQUEST_TRACE") in ("1", "true", "yes")
-        
-        if trace_enabled:
-            logger.info(f"save_chart:enter uid={token.get('uid')} planets={len(chart_data.planets)}")
-        
-        # Convert to serialized model
-        serialized_model = SerializedChartData(
-            planets=[
-                {
-                    "name": p.name,
-                    "sign": p.sign,
-                    "degree": p.degree,
-                    "position": p.degree,
-                    "house": p.house if p.house is not None else "",
-                }
-                for p in chart_data.planets
-            ],
-            houses=[
-                {
-                    "number": h.number,
-                    "sign": h.sign,
-                    "cusp": h.cusp,
-                }
-                for h in chart_data.houses
-            ],
-            aspects=[
-                {
-                    "planet1": a.planet1,
-                    "planet2": a.planet2,
-                    "type": a.type,
-                    "orb": a.orb,
-                    "applying": str(a.applying).lower() if a.applying is not None else "",
-                }
-                for a in chart_data.aspects
-            ],
-            asteroids=(
-                [
-                    {
-                        "name": a.name,
-                        "sign": a.sign,
-                        "degree": a.degree,
-                        "house": a.house if a.house is not None else "",
-                    }
-                    for a in chart_data.asteroids
-                ]
-                if chart_data.asteroids
-                else None
-            ),
-            angles=(
-                [
-                    {
-                        "name": ang.name,
-                        "sign": ang.sign,
-                        "degree": ang.degree,
-                        "position": ang.degree,
-                    }
-                    for ang in chart_data.angles
-                ]
-                if chart_data.angles
-                else None
-            ),
-        )
 
-        # Generate serialized JSON
-        serialized_json = serialize_data(serialized_model)
-        chart_id = f"chart_{token.get('uid', 'unknown')}_{hash(serialized_json) % 1000000}"
-
-        # Handle caching with fallback and timeout
-        cache_success = False
-        if getenv("TEST_MODE") == "1":
-            # Skip caching in test mode to avoid delays
-            cache_success = True
-            logger.info(f"Test mode: Skipping cache for chart_id: {chart_id}")
-        else:
-            try:
-                cache_success = await asyncio.wait_for(
-                    astro_service.cache_chart_data(chart_id, serialized_model.model_dump()),
-                    timeout=2.0
-                )
-            except asyncio.TimeoutError:
-                logger.warning(f"Cache operation timed out for chart_id: {chart_id}")
-                cache_success = False
-            except Exception as e:
-                logger.warning(f"Cache operation failed for chart_id: {chart_id}, error: {e}")
-                cache_success = False
-
-        if trace_enabled:
-            logger.info(f"save_chart:exit chart_id={chart_id} cached={cache_success}")
-
-        return {
-            "status": "success",
-            "chart_id": chart_id,
-            "cached": cache_success,
-            "message": "Chart saved successfully",
-            "serialized_size": len(serialized_json),
-            "version": "1.0.0",
-            "schemaVersion": "1.0.0",
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to save chart: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to save chart: {str(e)}")
 
 
 @router.get("/{chart_type}/{user_id}", response_model=ChartRequestData)
@@ -501,7 +612,47 @@ async def delete_user_chart(
 # ----- Unified Endpoint -----
 
 class UnifiedChartRequest(BaseModel):
-    """Request model for unified chart endpoint"""
+    """
+    Unified request model supporting both chart calculation and retrieval.
+    
+    This flexible model allows clients to either request a new chart calculation
+    from birth data or retrieve a previously saved chart by ID.
+    
+    Attributes:
+        year: Birth year (required for new calculations)
+        month: Birth month 1-12 (required for new calculations)  
+        day: Birth day 1-31 (required for new calculations)
+        hour: Birth hour 0-23 (optional, defaults to 12)
+        minute: Birth minute 0-59 (optional, defaults to 0)
+        lat: Latitude in decimal degrees -90.0 to 90.0 (required for calculations)
+        lon: Longitude in decimal degrees -180.0 to 180.0 (required for calculations)
+        city: Birth city name (optional but recommended for display)
+        timezone: Timezone identifier like "America/New_York" (optional)
+        chart_id: ID of previously saved chart to retrieve (alternative to birth data)
+        include_raw_data: Whether to include raw backend response for debugging
+        house_system: House calculation system - "P" for Placidus, "E" for Equal
+        
+    Example (new calculation):
+        {
+            "year": 1990,
+            "month": 6, 
+            "day": 15,
+            "hour": 14,
+            "minute": 30,
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "city": "New York",
+            "timezone": "America/New_York",
+            "include_raw_data": true,
+            "house_system": "P"
+        }
+        
+    Example (retrieve saved):
+        {
+            "chart_id": "chart_123456789",
+            "include_raw_data": false
+        }
+    """
     # For new calculations
     year: Optional[int] = None
     month: Optional[int] = None
@@ -522,7 +673,34 @@ class UnifiedChartRequest(BaseModel):
 
 
 class UnifiedChartResponse(BaseModel):
-    """Response model for unified chart endpoint"""
+    """
+    Unified response model for chart data from calculation or retrieval.
+    
+    Provides a consistent response format whether the chart data comes from
+    a new calculation or was retrieved from saved charts.
+    
+    Attributes:
+        chart_data: The complete astrological chart data with planets, houses, aspects
+        source: Indicates whether data came from "calculation" or "saved" chart
+        raw_backend_response: Optional raw calculation data for debugging/processing
+        birth_data: Optional birth information used for the chart
+        
+    Example:
+        {
+            "chart_data": {
+                "planets": [{"name": "sun", "sign": "gemini", "degree": 24.5}],
+                "houses": [{"number": 1, "sign": "virgo", "cusp": 150.2}],
+                "aspects": [{"planet1": "sun", "planet2": "moon", "type": "trine"}]
+            },
+            "source": "calculation",
+            "raw_backend_response": {...},
+            "birth_data": {
+                "date": "1990-06-15",
+                "time": "14:30",
+                "location": "New York, NY"
+            }
+        }
+    """
     chart_data: Dict[str, Any]
     source: Literal["calculation", "saved"]
     raw_backend_response: Optional[Dict[str, Any]] = None

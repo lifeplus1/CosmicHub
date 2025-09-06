@@ -1,7 +1,9 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { VirtualizedList } from '../ChartDisplay/VirtualizedList';
 import { ErrorBoundary } from 'react-error-boundary';
-import styles from './VirtualizedDataTable.module.css';
+import { stylesModules } from '@cosmichub/ui';
+
+const styles = stylesModules.virtualizedDataTableStyles;
 
 // Utility function to generate width classes
 const getColumnWidthClasses = (width?: number) => {

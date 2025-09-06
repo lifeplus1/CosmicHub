@@ -1,14 +1,123 @@
 # backend/astro/calculations/ai_interpretations.py
-# type: ignore[file]
 import logging
-from typing import Any, Dict, List
+from typing import Dict, List, Union, Any, TypedDict, cast, TYPE_CHECKING
+
+# Import the standard Unknown type from our type system
+if TYPE_CHECKING:
+    from ...api.utils.type_guards import Unknown
+else:
+    try:
+        from ...api.utils.type_guards import Unknown
+    except ImportError:
+        # Fallback definition if not available
+        Unknown = Union[None, bool, int, float, str, List[Any], Dict[str, Any]]
+
+# Type aliases for astrological data
+AstroSign = Union[str, None]
+AstroData = Dict[str, Unknown]  # Replace Any with Unknown
+ChartData = Dict[str, Unknown]  # Replace Any with Unknown
+
+# Specific TypedDict definitions for structured data
+class PlanetInfo(TypedDict):
+    sign: Union[str, None]
+    house: Union[int, None]
+    position: Union[float, None]
+
+class AspectInfo(TypedDict, total=False):
+    aspect: str
+    point1: str
+    point2: str
+    orb: float
+    severity: str
+    growth_focus: str
+
+class ElementCount(TypedDict):
+    fire: int
+    earth: int
+    air: int
+    water: int
+
+class QualityCount(TypedDict):
+    cardinal: int
+    fixed: int
+    mutable: int
+
+# Comprehensive astrological analysis result types
+class IdentityAnalysis(TypedDict, total=False):
+    sun_identity: Dict[str, Any]
+    moon_nature: Dict[str, Any]
+    rising_persona: Dict[str, Any]
+    integration_challenge: str
+
+class LifePurposeAnalysis(TypedDict, total=False):
+    soul_purpose: Dict[str, Any]
+    career_calling: Dict[str, Any]
+    creative_purpose: Dict[str, Any]
+    expansion_path: Dict[str, Any]
+    life_mission: str
+
+class RelationshipAnalysis(TypedDict, total=False):
+    love_style: Dict[str, Any]
+    passion_style: Dict[str, Any]
+    partnership_karma: Dict[str, Any]
+    compatibility_keys: List[str]
+
+class CareerAnalysis(TypedDict, total=False):
+    career_direction: Dict[str, Any]
+    mastery_path: Dict[str, Any]
+    leadership_style: Dict[str, Any]
+    tenth_house_influence: Dict[str, Any]
+    success_formula: str
+
+class GrowthAnalysis(TypedDict, total=False):
+    saturn_lessons: Dict[str, Any]
+    key_challenges: List[AstroData]
+    integration_work: Dict[str, Any]
+    empowerment_potential: Dict[str, Any]
+
+class SpiritualAnalysis(TypedDict, total=False):
+    psychic_abilities: Dict[str, Any]
+    mystical_nature: Dict[str, Any]
+    transformation_power: Dict[str, Any]
+    service_mission: str
+
+class IntegrationAnalysis(TypedDict, total=False):
+    elemental_balance: Dict[str, Any]
+    modal_balance: Dict[str, Any]
+    focal_planets: Dict[str, Any]
+    overall_theme: str
+
+class BasicSummary(TypedDict, total=False):
+    personality_overview: str
+    key_traits: List[str]
+    life_themes: List[str]
+    error: str
+
+# Use Any only in the final result interface for external compatibility
+class InterpretationResult(TypedDict, total=False):
+    core_identity: IdentityAnalysis
+    life_purpose: LifePurposeAnalysis
+    relationship_patterns: RelationshipAnalysis
+    career_path: CareerAnalysis
+    growth_challenges: GrowthAnalysis
+    spiritual_gifts: SpiritualAnalysis
+    current_life_phase: Dict[str, Any]
+    integration_themes: IntegrationAnalysis
+    basic_summary: BasicSummary
+    error: str
+    # Additional fields used by AI service
+    section: str
+    upcoming_transits: Dict[str, Any]
+    type: str
+    confidence: float
+    multi_system_synthesis: Dict[str, Any]
 
 INTERPRETATION_SCHEMA_VERSION = "1.0.0"
 
 logger = logging.getLogger(__name__)
 
 # Enhanced interpretation templates and knowledge base
-PLANET_ARCHETYPES = {  # type: ignore
+PLANET_ARCHETYPES = {
     "sun": {
         "essence": "Core identity, vitality, ego, life purpose",
         "keywords": [
@@ -172,7 +281,7 @@ PLANET_ARCHETYPES = {  # type: ignore
 # Missing helper fallbacks
 # These lightweight implementations prevent runtime NameError during tests.
 # They can be expanded with richer astrology logic later.
-def get_saturn_mastery(sign: str, house: int) -> str:  # type: ignore
+def get_saturn_mastery(sign: Union[str, None], house: Union[int, None]) -> str:
     """Return a concise mastery theme for Saturn by sign & house.
 
     Structure:
@@ -213,7 +322,7 @@ def get_saturn_mastery(sign: str, house: int) -> str:  # type: ignore
     )
 
 
-def analyze_challenging_aspects(aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:  # type: ignore  # noqa: E501
+def analyze_challenging_aspects(aspects: List[AstroData]) -> List[AstroData]:
     """Classify challenging aspects with severity and growth message.
 
     Input expects aspects list with keys: aspect (str), orb (float), point1, point2  # noqa: E501
@@ -221,13 +330,19 @@ def analyze_challenging_aspects(aspects: List[Dict[str, Any]]) -> List[Dict[str,
       - severity: high|moderate|mild
       - growth_focus: short coaching string
     """
-    classified: List[Dict[str, Any]] = []
+    classified: List[AstroData] = []
     for a in aspects:
         try:
-            orb = float(a.get("orb", 10))
-        except Exception:
+            orb_value = a.get("orb", 10)
+            # Safe cast with type validation
+            if isinstance(orb_value, (int, float)):
+                orb = float(orb_value)
+            else:
+                orb = 10.0
+        except (ValueError, TypeError):
             orb = 10.0
-        aspect_type = a.get("aspect") or a.get("type") or ""
+        aspect_type_value = a.get("aspect") or a.get("type") or ""
+        aspect_type = str(aspect_type_value) if aspect_type_value is not None else ""
         if aspect_type.lower() not in {
             "square",
             "opposition",
@@ -253,16 +368,18 @@ def analyze_challenging_aspects(aspects: List[Dict[str, Any]]) -> List[Dict[str,
         enriched["growth_focus"] = growth_focus
         enriched["orb"] = orb
         classified.append(enriched)
-    # Sort by orb ascending (more exact first)
-    classified.sort(key=lambda x: x.get("orb", 10))
+    # Sort by orb ascending (more exact first) with safe type casting
+    classified.sort(key=lambda x: cast(float, x.get("orb", 10)))
     return classified
 
 
-def get_neptune_spirituality(sign: str, house: int) -> str:  # type: ignore
+def get_neptune_spirituality(sign: Union[str, None], house: Union[int, None]) -> str:
+    if not sign or house is None:
+        return "Neptune spirituality requires sign & house"
     return f"Spiritual growth via {SIGN_ENERGIES.get(sign, {}).get('essence', 'mysticism')} in house {house}"  # noqa: E501
 
 
-def get_elemental_integration(element_count: Dict[str, int]) -> str:  # type: ignore  # noqa: E501
+def get_elemental_integration(element_count: Dict[str, int]) -> str:
     if not element_count:
         return "No elemental data"
     dominant = max(element_count, key=lambda k: element_count[k])
@@ -275,34 +392,37 @@ def get_elemental_integration(element_count: Dict[str, int]) -> str:  # type: ig
 
 
 # Additional missing helper stubs (placeholders)
-def get_partner_qualities(sign: str) -> str:  # type: ignore
+def get_partner_qualities(sign: str) -> str:
     return f"Seeks {SIGN_ENERGIES.get(sign, {}).get('essence', 'balanced connection')} qualities"  # noqa: E501
 
 
-def get_relationship_lessons(sign: str) -> str:  # type: ignore
+def get_relationship_lessons(sign: str) -> str:
     return f"Learns partnership through {SIGN_ENERGIES.get(sign, {}).get('shadow', 'growth')}"  # noqa: E501
 
 
-def synthesize_career_potential(mc_sign: Any, saturn_info: Dict[str, Any], sun_info: Dict[str, Any], tenth_house_planets: List[str]) -> str:  # type: ignore  # noqa: E501
+def synthesize_career_potential(mc_sign: AstroSign, saturn_info: PlanetInfo, sun_info: PlanetInfo, tenth_house_planets: List[str]) -> str:
     parts: List[str] = []
     if mc_sign:
         parts.append(
             f"Aim for {SIGN_ENERGIES.get(mc_sign, {}).get('essence', mc_sign)}"
         )
-    if saturn_info.get("sign"):
+    saturn_sign = saturn_info.get("sign")
+    if saturn_sign:
         parts.append("Build disciplined structure")
-    if sun_info.get("sign"):
+    sun_sign = sun_info.get("sign")
+    if sun_sign:
         parts.append("Lead with core identity")
     if tenth_house_planets:
         parts.append(f"Activate {', '.join(tenth_house_planets)} in 10th")
     return "; ".join(parts) or "Explore vocational strengths"
 
 
-def identify_primary_tension(aspects: List[Dict[str, Any]]) -> str:  # type: ignore  # noqa: E501
-    return aspects[0].get("aspect", "none") if aspects else "none"
+def identify_primary_tension(aspects: List[AstroData]) -> str:
+    aspect_value = aspects[0].get("aspect", "none") if aspects else "none"
+    return str(aspect_value) if aspect_value is not None else "none"
 
 
-def get_resolution_strategies(aspects: List[Dict[str, Any]]) -> str:  # type: ignore  # noqa: E501
+def get_resolution_strategies(aspects: List[AstroData]) -> str:
     return (
         "Cultivate awareness and balance opposing energies"
         if aspects
@@ -310,41 +430,47 @@ def get_resolution_strategies(aspects: List[Dict[str, Any]]) -> str:  # type: ig
     )
 
 
-def identify_hidden_strengths(chart_data: Dict[str, Any]) -> List[str]:  # type: ignore  # noqa: E501
-    return [k for k in chart_data.get("planets", {}).keys()][:3]
+def identify_hidden_strengths(chart_data: ChartData) -> List[str]:
+    planets = chart_data.get("planets", {})
+    if isinstance(planets, dict):
+        return list(planets.keys())[:3]
+    return []
 
 
-def get_transformation_gifts(aspects: List[Dict[str, Any]]) -> List[str]:  # type: ignore  # noqa: E501
-    return [a.get("aspect", "aspect") + " potential" for a in aspects[:3]]
+def get_transformation_gifts(aspects: List[AstroData]) -> List[str]:
+    return [str(a.get("aspect", "aspect")) + " potential" for a in aspects[:3]]
 
 
-def get_psychic_gifts(sign: str) -> str:  # type: ignore
+def get_psychic_gifts(sign: str) -> str:
     return f"Heightened intuition through {SIGN_ENERGIES.get(sign, {}).get('essence', sign)}"  # noqa: E501
 
 
-def get_pluto_healing(sign: str, house: int) -> str:  # type: ignore
+def get_pluto_healing(sign: Union[str, None], house: Union[int, None]) -> str:
+    if not sign or house is None:
+        return "Pluto healing requires sign & house"
     return f"Transformation in house {house} via {SIGN_ENERGIES.get(sign, {}).get('essence', 'regeneration')}"  # noqa: E501
 
 
-def synthesize_spiritual_mission(twelfth_sign: Any, neptune_info: Dict[str, Any], pluto_info: Dict[str, Any]) -> str:  # type: ignore  # noqa: E501
+def synthesize_spiritual_mission(twelfth_sign: AstroSign, neptune_info: PlanetInfo, pluto_info: PlanetInfo) -> str:
     return "Integrate intuition and transformation for compassionate service"
 
 
-def get_modal_integration(quality_count: Dict[str, int]) -> str:  # type: ignore  # noqa: E501
+def get_modal_integration(quality_count: Dict[str, int]) -> str:
     if not quality_count:
         return "No modality data"
     dominant = max(quality_count, key=lambda k: quality_count[k])
     return f"Balance dominant {dominant} modality"
 
 
-def get_focal_planet_meaning(planet_aspect_count: Dict[str, int]) -> str:  # type: ignore  # noqa: E501
+def get_focal_planet_meaning(planet_aspect_count: Dict[str, int]) -> str:  # noqa: E501
     if not planet_aspect_count:
         return "No focal planets"
     top = max(planet_aspect_count, key=lambda k: planet_aspect_count[k])
     return f"Focus development on {top} aspects"
 
 
-def synthesize_integration_theme(element_count: Dict[str, int], quality_count: Dict[str, int], planet_aspect_count: Dict[str, int]) -> str:  # type: ignore  # noqa: E501
+def synthesize_integration_theme(element_count: Dict[str, int], quality_count: Dict[str, int], planet_aspect_count: Dict[str, int]) -> str:
+    """Synthesize overall integration theme from elemental, modal, and planetary data"""
     dominant_element = (
         max(element_count, key=lambda k: element_count[k])
         if element_count
@@ -507,8 +633,8 @@ HOUSE_THEMES = {
 
 
 def generate_interpretation(
-    chart_data: Dict[str, Any], interpretation_type: str = "advanced"
-) -> Dict[str, Any]:
+    chart_data: ChartData, interpretation_type: str = "advanced"
+) -> InterpretationResult:
     """Generate AI-powered astrological interpretation (main entry point for WebSocket)"""  # noqa: E501
     try:
         if interpretation_type == "basic":
@@ -526,24 +652,24 @@ def generate_interpretation(
 
 
 def generate_basic_interpretation(
-    chart_data: Dict[str, Any],
-) -> Dict[str, Any]:
+    chart_data: ChartData,
+) -> InterpretationResult:
     """Generate basic interpretation focusing on Sun, Moon, Rising"""
     try:
         interpretation = {
             "core_identity": analyze_core_identity(chart_data),
             "basic_summary": generate_basic_summary(chart_data),
         }
-        return interpretation
+        return cast(InterpretationResult, interpretation)
 
     except Exception as e:
         logger.error(f"Error generating basic interpretation: {str(e)}")
-        return {"error": str(e)}
+        return cast(InterpretationResult, {"error": str(e)})
 
 
 def generate_focused_interpretation(
-    chart_data: Dict[str, Any],
-) -> Dict[str, Any]:
+    chart_data: ChartData,
+) -> InterpretationResult:
     """Generate focused interpretation on specific life areas"""
     try:
         interpretation = {
@@ -552,16 +678,16 @@ def generate_focused_interpretation(
             "relationship_patterns": analyze_relationship_patterns(chart_data),
             "career_path": analyze_career_path(chart_data),
         }
-        return interpretation
+        return cast(InterpretationResult, interpretation)
 
     except Exception as e:
         logger.error(f"Error generating focused interpretation: {str(e)}")
-        return {"error": str(e)}
+        return cast(InterpretationResult, {"error": str(e)})
 
 
 def generate_advanced_interpretation(
-    chart_data: Dict[str, Any],
-) -> Dict[str, Any]:
+    chart_data: ChartData,
+) -> InterpretationResult:
     """Generate advanced AI-powered interpretations"""
     try:
         interpretation = {
@@ -575,47 +701,58 @@ def generate_advanced_interpretation(
             "integration_themes": analyze_integration_themes(chart_data),
         }
 
-        return interpretation
+        return cast(InterpretationResult, interpretation)
 
     except Exception as e:
         logger.error(f"Error generating advanced interpretation: {str(e)}")
-        return {"error": str(e)}
+        return cast(InterpretationResult, {"error": str(e)})
 
 
-def analyze_core_identity(chart_data: Dict[str, Any]) -> Dict[str, Any]:
+def analyze_core_identity(chart_data: ChartData) -> Dict[str, Any]:
     """Analyze core identity from Sun, Moon, Rising"""
     try:
         planets = chart_data.get("planets", {})
         houses = chart_data.get("houses", [])
 
-        sun_info = get_planet_info(planets.get("sun", {}))
-        moon_info = get_planet_info(planets.get("moon", {}))
+        # Safe type checking for planets access
+        if isinstance(planets, dict):
+            sun_data = planets.get("sun", {})
+            moon_data = planets.get("moon", {})
+            sun_info = get_planet_info(sun_data if isinstance(sun_data, dict) else {})
+            moon_info = get_planet_info(moon_data if isinstance(moon_data, dict) else {})
+        else:
+            sun_info = get_planet_info({})
+            moon_info = get_planet_info({})
 
-        # Find Rising sign (1st house cusp)
-        rising_sign = (
-            get_sign_from_position(houses[0]["cusp"]) if houses else None
-        )
+        # Find Rising sign (1st house cusp) with safe type checking
+        rising_sign = None
+        if isinstance(houses, list) and len(houses) > 0:
+            first_house = houses[0]
+            if isinstance(first_house, dict):
+                cusp_value = first_house.get("cusp")
+                if isinstance(cusp_value, (int, float)):
+                    rising_sign = get_sign_from_position(float(cusp_value))
 
-        identity_analysis = {  # type: ignore
+        identity_analysis = {
             "sun_identity": {
-                "sign": sun_info["sign"],
-                "house": sun_info["house"],
-                "description": f"Your core identity is expressed through {SIGN_ENERGIES.get(sun_info['sign'], {}).get('essence', '')}",  # noqa: E501
-                "archetype": SIGN_ENERGIES.get(sun_info["sign"], {}).get(
+                "sign": sun_info.get("sign"),
+                "house": sun_info.get("house"),
+                "description": f"Your core identity is expressed through {SIGN_ENERGIES.get(sun_info.get('sign') or '', {}).get('essence', '')}",  # noqa: E501
+                "archetype": SIGN_ENERGIES.get(sun_info.get("sign") or '', {}).get(
                     "archetype", ""
                 ),
-                "element": SIGN_ENERGIES.get(sun_info["sign"], {}).get(
+                "element": SIGN_ENERGIES.get(sun_info.get("sign") or '', {}).get(
                     "element", ""
                 ),
-                "quality": SIGN_ENERGIES.get(sun_info["sign"], {}).get(
+                "quality": SIGN_ENERGIES.get(sun_info.get("sign") or '', {}).get(
                     "quality", ""
                 ),
             },
             "moon_nature": {
-                "sign": moon_info["sign"],
-                "house": moon_info["house"],
-                "description": f"Your emotional nature seeks {SIGN_ENERGIES.get(moon_info['sign'], {}).get('essence', '')}",  # noqa: E501
-                "needs": get_moon_needs(moon_info["sign"]),
+                "sign": moon_info.get("sign"),
+                "house": moon_info.get("house"),
+                "description": f"Your emotional nature seeks {SIGN_ENERGIES.get(moon_info.get('sign') or '', {}).get('essence', '')}",  # noqa: E501
+                "needs": get_moon_needs(moon_info.get("sign") or ''),
             },
             "rising_persona": {
                 "sign": rising_sign,
@@ -625,10 +762,10 @@ def analyze_core_identity(chart_data: Dict[str, Any]) -> Dict[str, Any]:
                     else "Rising sign not available"
                 ),
             },
-            "integration_challenge": synthesize_big_three(sun_info["sign"], moon_info["sign"], rising_sign),  # type: ignore  # noqa: E501
+            "integration_challenge": synthesize_big_three(sun_info.get("sign"), moon_info.get("sign"), rising_sign),
         }
 
-        return identity_analysis  # type: ignore
+        return identity_analysis
 
     except Exception as e:
         logger.error(f"Error analyzing core identity: {str(e)}")
@@ -657,18 +794,19 @@ def analyze_life_purpose(chart_data: Dict[str, Any]) -> Dict[str, Any]:
         # Jupiter sign and house (expansion/growth area)
         jupiter_info = get_planet_info(planets.get("jupiter", {}))
 
-        purpose_analysis = {  # type: ignore
+        # Get north node sign once
+        north_node_sign = (
+            get_sign_from_position(north_node.get("position", 0))
+            if north_node
+            else None
+        )
+
+        purpose_analysis = {
             "soul_purpose": {
-                "north_node_sign": (
-                    get_sign_from_position(north_node.get("position", 0))
-                    if north_node
-                    else None
-                ),
+                "north_node_sign": north_node_sign,
                 "growth_direction": (
-                    get_north_node_purpose(
-                        get_sign_from_position(north_node.get("position", 0))
-                    )
-                    if north_node
+                    get_north_node_purpose(north_node_sign)
+                    if north_node_sign is not None
                     else "North Node not available"
                 ),
             },
@@ -681,15 +819,15 @@ def analyze_life_purpose(chart_data: Dict[str, Any]) -> Dict[str, Any]:
                 ),
             },
             "creative_purpose": {
-                "sun_expression": f"Express your {sun_info['sign']} nature through {HOUSE_THEMES.get(sun_info['house'], {}).get('life_area', 'unknown area')}"  # noqa: E501
+                "sun_expression": f"Express your {sun_info.get('sign') or 'unknown'} nature through {HOUSE_THEMES.get(sun_info.get('house') or 0, {}).get('life_area', 'unknown area')}"  # noqa: E501
             },
             "expansion_path": {
-                "jupiter_gifts": f"Growth through {SIGN_ENERGIES.get(jupiter_info['sign'], {}).get('essence', '')} in {HOUSE_THEMES.get(jupiter_info['house'], {}).get('theme', 'unknown area')}"  # noqa: E501
+                "jupiter_gifts": f"Growth through {SIGN_ENERGIES.get(jupiter_info.get('sign') or '', {}).get('essence', '')} in {HOUSE_THEMES.get(jupiter_info.get('house') or 0, {}).get('theme', 'unknown area')}"  # noqa: E501
             },
-            "life_mission": synthesize_life_purpose(sun_info, jupiter_info, mc_sign),  # type: ignore  # noqa: E501
+            "life_mission": synthesize_life_purpose(sun_info, jupiter_info, mc_sign),
         }
 
-        return purpose_analysis  # type: ignore
+        return purpose_analysis
 
     except Exception as e:
         logger.error(f"Error analyzing life purpose: {str(e)}")
@@ -714,7 +852,7 @@ def analyze_relationship_patterns(
             else None
         )
 
-        relationship_analysis = {  # type: ignore
+        relationship_analysis = {
             "love_style": {
                 "venus_sign": venus_info["sign"],
                 "venus_house": venus_info["house"],
@@ -747,7 +885,7 @@ def analyze_relationship_patterns(
             ),
         }
 
-        return relationship_analysis  # type: ignore
+        return relationship_analysis
 
     except Exception as e:
         logger.error(f"Error analyzing relationship patterns: {str(e)}")
@@ -791,7 +929,7 @@ def analyze_career_path(chart_data: Dict[str, Any]) -> Dict[str, Any]:
                 ),
             },
             "leadership_style": {
-                "sun_influence": f"Lead through {SIGN_ENERGIES.get(sun_info['sign'], {}).get('essence', '')} in {HOUSE_THEMES.get(sun_info['house'], {}).get('theme', 'unknown area')}"  # noqa: E501
+                "sun_influence": f"Lead through {SIGN_ENERGIES.get(sun_info.get('sign') or '', {}).get('essence', '')} in {HOUSE_THEMES.get(sun_info.get('house') or 0, {}).get('theme', 'unknown area')}"  # noqa: E501
             },
             "tenth_house_influence": {
                 "planets_in_tenth": tenth_house_planets,
@@ -987,19 +1125,23 @@ def analyze_integration_themes(chart_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # Helper functions
-def get_planet_info(planet_data: Dict[str, Any]) -> Dict[str, Any]:
+def get_planet_info(planet_data: AstroData) -> PlanetInfo:
     """Extract planet sign and house information"""
     if not planet_data or "position" not in planet_data:
-        return {"sign": None, "house": None}
+        return {"sign": None, "house": None, "position": None}
 
-    position = planet_data["position"]
-    house = planet_data.get("house", None)
+    position_value = planet_data["position"]
+    house_value = planet_data.get("house", None)
+    
+    # Safe type conversion
+    position = float(position_value) if isinstance(position_value, (int, float)) else None
+    house = int(house_value) if isinstance(house_value, int) else None
     sign = get_sign_from_position(position)
 
-    return {"sign": sign, "house": house}
+    return {"sign": sign, "house": house, "position": position}
 
 
-def get_sign_from_position(position: float) -> str:
+def get_sign_from_position(position: float | None) -> str | None:
     """Convert ecliptic longitude to zodiac sign"""
     if position is None:
         return None
@@ -1043,15 +1185,15 @@ def get_moon_needs(sign: str) -> str:
 
 
 def synthesize_big_three(
-    sun_sign: str, moon_sign: str, rising_sign: str
+    sun_sign: Union[str, None], moon_sign: Union[str, None], rising_sign: Union[str, None]
 ) -> str:
     """Synthesize Sun, Moon, Rising integration challenge"""
     if not all([sun_sign, moon_sign, rising_sign]):
         return "Complete birth time needed for full integration analysis"
 
-    sun_element = SIGN_ENERGIES.get(sun_sign, {}).get("element", "")
-    moon_element = SIGN_ENERGIES.get(moon_sign, {}).get("element", "")
-    rising_element = SIGN_ENERGIES.get(rising_sign, {}).get("element", "")
+    sun_element = SIGN_ENERGIES.get(sun_sign or "", {}).get("element", "")
+    moon_element = SIGN_ENERGIES.get(moon_sign or "", {}).get("element", "")
+    rising_element = SIGN_ENERGIES.get(rising_sign or "", {}).get("element", "")
 
     if sun_element == moon_element == rising_element:
         return f"Strong {sun_element} emphasis - integrate through balanced expression"  # noqa: E501
@@ -1091,7 +1233,7 @@ def count_qualities(planets: Dict[str, Any]) -> Dict[str, int]:
 
 def count_planet_aspects(aspects: List[Dict[str, Any]]) -> Dict[str, int]:
     """Count aspects for each planet"""
-    aspect_count = {}
+    aspect_count: Dict[str, int] = {}
 
     for aspect in aspects:
         point1 = aspect.get("point1")
@@ -1119,8 +1261,11 @@ def find_planets_in_house(
 
 
 # Additional helper functions for specific interpretations
-def get_venus_style(sign: str) -> str:
+def get_venus_style(sign: Union[str, None]) -> str:
     """Get Venus love style by sign"""
+    if not sign:
+        return "Venus style unknown"
+    
     venus_styles = {
         "aries": "Direct, passionate, spontaneous attraction",
         "taurus": "Sensual, steady, material comfort in love",
@@ -1138,8 +1283,11 @@ def get_venus_style(sign: str) -> str:
     return venus_styles.get(sign, "Venus style unknown")
 
 
-def get_venus_needs(sign: str) -> str:
+def get_venus_needs(sign: Union[str, None]) -> str:
     """Get Venus love needs by sign"""
+    if not sign:
+        return "Venus needs unknown"
+        
     venus_needs = {
         "aries": "Excitement, independence, direct affection",
         "taurus": "Security, sensuality, loyalty",
@@ -1157,8 +1305,11 @@ def get_venus_needs(sign: str) -> str:
     return venus_needs.get(sign, "Venus needs unknown")
 
 
-def get_mars_style(sign: str) -> str:
+def get_mars_style(sign: Union[str, None]) -> str:
     """Get Mars action style by sign"""
+    if not sign:
+        return "Mars style unknown"
+        
     mars_styles = {
         "aries": "Direct, impulsive, pioneering action",
         "taurus": "Steady, determined, practical approach",
@@ -1176,8 +1327,11 @@ def get_mars_style(sign: str) -> str:
     return mars_styles.get(sign, "Mars style unknown")
 
 
-def get_mars_desires(sign: str) -> str:
+def get_mars_desires(sign: Union[str, None]) -> str:
     """Get Mars desire nature by sign"""
+    if not sign:
+        return "Mars desires unknown"
+        
     mars_desires = {
         "aries": "Seeks excitement, conquest, and immediate results",
         "taurus": "Desires stability, sensual pleasure, and loyalty",
@@ -1195,8 +1349,11 @@ def get_mars_desires(sign: str) -> str:
     return mars_desires.get(sign, "Mars desires unknown")
 
 
-def get_saturn_lessons(sign: str, house: int) -> str:
+def get_saturn_lessons(sign: Union[str, None], house: Union[int, None]) -> str:
     """Get Saturn mastery lessons"""
+    if not sign or house is None:
+        return "Saturn lessons require sign & house"
+        
     base_lesson = (
         f"Master {SIGN_ENERGIES.get(sign, {}).get('essence', 'unknown')} "
     )
@@ -1210,19 +1367,23 @@ def get_saturn_timeline() -> str:
 
 
 def generate_compatibility_insights(
-    venus_info: Dict, mars_info: Dict, partnership_sign: str
+    venus_info: PlanetInfo, mars_info: PlanetInfo, partnership_sign: Union[str, None]
 ) -> List[str]:
     """Generate relationship compatibility insights"""
     insights = []
 
-    venus_element = SIGN_ENERGIES.get(venus_info["sign"], {}).get("element")
-    mars_element = SIGN_ENERGIES.get(mars_info["sign"], {}).get("element")
+    venus_sign = venus_info.get("sign")
+    mars_sign = mars_info.get("sign")
+    
+    if venus_sign:
+        venus_element = SIGN_ENERGIES.get(venus_sign, {}).get("element")
+        if venus_element:
+            insights.append(f"Attracted to {venus_element} types")
 
-    if venus_element:
-        insights.append(f"Attracted to {venus_element} types")
-
-    if mars_element:
-        insights.append(f"Express passion through {mars_element} energy")
+    if mars_sign:
+        mars_element = SIGN_ENERGIES.get(mars_sign, {}).get("element")
+        if mars_element:
+            insights.append(f"Express passion through {mars_element} energy")
 
     if partnership_sign:
         partner_element = SIGN_ENERGIES.get(partnership_sign, {}).get(
@@ -1235,19 +1396,21 @@ def generate_compatibility_insights(
 
 
 def synthesize_life_purpose(
-    sun_info: Dict, jupiter_info: Dict, mc_sign: str
+    sun_info: PlanetInfo, jupiter_info: PlanetInfo, mc_sign: Union[str, None]
 ) -> str:
     """Synthesize overall life purpose"""
     purpose_elements = []
 
-    if sun_info["sign"]:
+    sun_sign = sun_info.get("sign")
+    if sun_sign:
         purpose_elements.append(
-            f"Express {SIGN_ENERGIES.get(sun_info['sign'], {}).get('essence', '')}"  # noqa: E501
+            f"Express {SIGN_ENERGIES.get(sun_sign, {}).get('essence', '')}"  # noqa: E501
         )
 
-    if jupiter_info["sign"]:
+    jupiter_sign = jupiter_info.get("sign")
+    if jupiter_sign:
         purpose_elements.append(
-            f"Expand through {SIGN_ENERGIES.get(jupiter_info['sign'], {}).get('essence', '')}"  # noqa: E501
+            f"Expand through {SIGN_ENERGIES.get(jupiter_sign, {}).get('essence', '')}"  # noqa: E501
         )
 
     if mc_sign:
@@ -1333,17 +1496,17 @@ def generate_basic_summary(chart_data: Dict[str, Any]) -> Dict[str, Any]:
         )
 
         summary = {
-            "personality_overview": f"You are a {sun_info['sign']} with {moon_info['sign']} Moon, presenting as {rising_sign or 'Unknown'} Rising",  # noqa: E501
+            "personality_overview": f"You are a {sun_info.get('sign') or 'Unknown'} with {moon_info.get('sign') or 'Unknown'} Moon, presenting as {rising_sign or 'Unknown'} Rising",  # noqa: E501
             "key_traits": [
-                f"Core identity: {SIGN_ENERGIES.get(sun_info['sign'], {}).get('essence', 'Unknown')}",  # noqa: E501
-                f"Emotional nature: {SIGN_ENERGIES.get(moon_info['sign'], {}).get('essence', 'Unknown')}",  # noqa: E501
-                f"Outer expression: {SIGN_ENERGIES.get(rising_sign, {}).get('essence', 'Unknown') if rising_sign else 'Unknown'}",  # noqa: E501
+                f"Core identity: {SIGN_ENERGIES.get(sun_info.get('sign') or '', {}).get('essence', 'Unknown')}",  # noqa: E501
+                f"Emotional nature: {SIGN_ENERGIES.get(moon_info.get('sign') or '', {}).get('essence', 'Unknown')}",  # noqa: E501
+                f"Outer expression: {SIGN_ENERGIES.get(rising_sign or '', {}).get('essence', 'Unknown') if rising_sign else 'Unknown'}",  # noqa: E501
             ],
             "life_themes": [
-                HOUSE_THEMES.get(sun_info["house"], {}).get(
+                HOUSE_THEMES.get(sun_info.get("house") or 0, {}).get(
                     "theme", "Identity expression"
                 ),
-                HOUSE_THEMES.get(moon_info["house"], {}).get(
+                HOUSE_THEMES.get(moon_info.get("house") or 0, {}).get(
                     "theme", "Emotional foundation"
                 ),
             ],
@@ -1356,4 +1519,3 @@ def generate_basic_summary(chart_data: Dict[str, Any]) -> Dict[str, Any]:
         return {"error": str(e)}
 
 
-# Additional helper functions for complete interpretation system...

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 // https://vitejs.dev/config/
+// @ts-ignore - Type conflict between @types/node versions in monorepo
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
@@ -29,16 +30,25 @@ export default defineConfig(({ mode }) => {
 
     // Development server configuration
     server: {
-      port: 3000, // Changed from 3001 to match Docker mapping
-      host: true,
+      port: 3000,
+      host: true, // Listen on all addresses (0.0.0.0)
       open: false, // Don't auto-open browser
+      strictPort: false, // Allow fallback to different port
       hmr: {
-        port: 3000, // Changed from 3001 to match Docker mapping
+        port: 3000,
         host: 'localhost',
+        overlay: true, // Show errors in browser overlay
       },
       watch: {
         usePolling: false, // Better performance than polling
-        ignored: ['**/node_modules/**', '**/dist/**'],
+        ignored: [
+          'node_modules/**', 
+          'dist/**',
+          'test-results/**',
+          'coverage/**',
+          '.git/**',
+          'backups/**'
+        ],
       },
     },
 
@@ -48,7 +58,7 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       sourcemap: mode === 'development',
-      minify: 'esbuild', // Faster than terser
+      minify: mode === 'production' ? 'esbuild' : false,
 
       // Code splitting and chunk optimization
       rollupOptions: {
@@ -69,16 +79,26 @@ export default defineConfig(({ mode }) => {
             ],
           },
           // Asset naming for long-term caching
-          chunkFileNames: 'assets/js/[name]-[hash].js',
-          entryFileNames: 'assets/js/[name]-[hash].js',
+          chunkFileNames: mode === 'production' 
+            ? 'assets/js/[name]-[hash].js'
+            : 'assets/js/[name].js',
+          entryFileNames: mode === 'production' 
+            ? 'assets/js/[name]-[hash].js'
+            : 'assets/js/[name].js',
           assetFileNames: ({ name }) => {
             if (/\.(gif|jpe?g|png|svg)$/.test(name ?? '')) {
-              return 'assets/images/[name]-[hash][extname]';
+              return mode === 'production' 
+                ? 'assets/images/[name]-[hash][extname]'
+                : 'assets/images/[name][extname]';
             }
             if (/\.css$/.test(name ?? '')) {
-              return 'assets/css/[name]-[hash][extname]';
+              return mode === 'production'
+                ? 'assets/css/[name]-[hash][extname]'
+                : 'assets/css/[name][extname]';
             }
-            return 'assets/[name]-[hash][extname]';
+            return mode === 'production'
+              ? 'assets/[name]-[hash][extname]'
+              : 'assets/[name][extname]';
           },
         },
       },
@@ -100,7 +120,9 @@ export default defineConfig(({ mode }) => {
         '@radix-ui/react-tooltip',
         '@radix-ui/react-switch',
       ],
-      exclude: ['@cosmichub/*'], // Don't pre-bundle our packages
+      exclude: [
+        '@cosmichub/*', // Don't pre-bundle our packages
+      ],
     },
 
     // Environment variables

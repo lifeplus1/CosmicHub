@@ -275,6 +275,19 @@ export function isValidPosition(position: unknown): position is number {
  * @param precision - Decimal places (default: 2)
  * @returns Formatted position string
  */
+export function formatPlanetPosition(
+  position: number,
+  retrograde = false,
+  precision = 2
+): string {
+  if (!isValidPosition(position)) {
+    return 'Invalid Position';
+  }
+
+  const formatted = position.toFixed(precision);
+  const retrogradeSymbol = retrograde ? ' ℞' : '';
+  return `${formatted}°${retrogradeSymbol}`;
+}
 
 // Validation functions
 export function isZodiacSign(value: unknown): value is ZodiacSign {

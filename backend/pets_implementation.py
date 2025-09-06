@@ -37,7 +37,7 @@ class HomomorphicEncryptionSimulator:
     This simulation demonstrates the concept and architecture.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
         self.key_size = 2048  # Simulated key size
         self.public_key = self._generate_key()
@@ -110,8 +110,8 @@ class HomomorphicEncryptionSimulator:
         Returns:
             Decrypted integer
         """
-        data = json.loads(base64.b64decode(encrypted_data).decode())
-        return data['value'] - data['noise']
+        data: Dict[str, Any] = json.loads(base64.b64decode(encrypted_data).decode())
+        return int(data['value']) - int(data['noise'])
 
     def compute_encrypted_statistics(self,
         encrypted_values: List[str]) -> Dict[str, Any]:
@@ -163,7 +163,7 @@ class ZeroKnowledgeProofSystem:
     Allows users to prove they have certain attributes without revealing them.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
 
     def generate_commitment(self, secret_value: str, nonce: str) -> str:
@@ -249,7 +249,7 @@ class FederatedLearningSystem:
     Enables learning from user data without centralizing raw data.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
         self.global_model: Dict[str, Any] = {'weights': [0.5, 0.3, 0.2], 'bias': 0.1}
         self.participants: List[Dict[str, Any]] = []
@@ -344,7 +344,7 @@ class SyntheticDataGenerator:
     while protecting individual privacy.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
 
     def generate_synthetic_user_profile(self,
@@ -477,7 +477,7 @@ class PETSImplementationEngine:
     Main engine coordinating all Privacy-Enhancing Technologies.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
         self.homomorphic_engine = HomomorphicEncryptionSimulator()
         self.zk_system = ZeroKnowledgeProofSystem()
@@ -654,7 +654,7 @@ class PETSImplementationEngine:
         return comprehensive_report
 
 
-def main():
+def main() -> int:
     """Main execution function for PETs implementation."""
     logging.basicConfig(
         level=logging.INFO,

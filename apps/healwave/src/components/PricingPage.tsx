@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   HEALWAVE_TIERS,
   calculateYearlySavings,
@@ -7,7 +7,7 @@ import {
 import { useAuth } from '@cosmichub/auth';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 
-const PricingPage: React.FC = () => {
+const PricingPage: React.FC = React.memo(() => {
   // Ensure proper typing; imported constant may lose literal types under path mapping
   const HEALWAVE_TIERS_TYPED = HEALWAVE_TIERS satisfies Record<
     string,
@@ -16,7 +16,7 @@ const PricingPage: React.FC = () => {
   const [isYearly, setIsYearly] = useState(false);
   const { user } = useAuth();
 
-  const handleSubscribe = (tierSlug: string) => {
+  const handleSubscribe = useCallback((tierSlug: string) => {
     if (user === null || user === undefined) {
       alert('Please sign in to subscribe to HealWave Pro');
       return;
@@ -28,7 +28,18 @@ const PricingPage: React.FC = () => {
     }
 
     alert('Subscription system will be available soon!');
-  };
+  }, [user]);
+
+  const handleYearlyToggle = useCallback((checked: boolean) => {
+    setIsYearly(checked);
+  }, []);
+
+  const handleSubscribeKeyDown = useCallback((event: React.KeyboardEvent, tierSlug: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleSubscribe(tierSlug);
+    }
+  }, [handleSubscribe]);
 
   return (
     <div className='py-16 bg-gray-50 dark:bg-gray-900'>
@@ -46,7 +57,7 @@ const PricingPage: React.FC = () => {
             <span className='font-semibold'>Monthly</span>
             <SwitchPrimitive.Root
               checked={isYearly}
-              onCheckedChange={setIsYearly}
+              onCheckedChange={handleYearlyToggle}
               className='w-11 h-6 bg-gray-200 rounded-full relative data-[state=checked]:bg-purple-600 outline-none cursor-pointer transition-colors'
               aria-label='Toggle yearly billing'
             >
@@ -127,11 +138,14 @@ const PricingPage: React.FC = () => {
                       onClick={() => {
                         handleSubscribe(tierSlug);
                       }}
+                      onKeyDown={(event) => {
+                        handleSubscribeKeyDown(event, tierSlug);
+                      }}
                       disabled={tierSlug === 'free'}
                       className={`w-full py-3 px-4 rounded-lg font-semibold text-lg transition-all duration-200 ${
                         tierSlug === 'free'
                           ? 'border border-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg'
+                          : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2'
                       }`}
                       aria-label={`Subscribe to ${tier.name} plan`}
                     >
@@ -156,6 +170,8 @@ const PricingPage: React.FC = () => {
       </div>
     </div>
   );
-};
+});
+
+PricingPage.displayName = 'PricingPage';
 
 export default PricingPage;

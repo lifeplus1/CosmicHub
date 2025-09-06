@@ -5,15 +5,19 @@ from dataclasses import dataclass
 
 # Import existing AI interpretations with fallback handling
 try:
-    from astro.calculations.ai_interpretations import generate_interpretation, PLANET_ARCHETYPES, SIGN_ENERGIES  # type: ignore
+    from ...astro.calculations.ai_interpretations import generate_interpretation, PLANET_ARCHETYPES, SIGN_ENERGIES
 except ImportError:
     # Fallback if module is not available
-    def generate_interpretation(chart_data: Dict[str, Any], interpretation_type: str = "advanced") -> Dict[str, Any]:
-        return {"interpretation": "Generated interpretation", "confidence": 0.8}
+    def _fallback_generate_interpretation(chart_data: Dict[str, Any], interpretation_type: str = "advanced") -> Dict[str, Any]:
+        return cast(Dict[str, Any], {"interpretation": "Generated interpretation", "confidence": 0.8})
+    
+    # Use fallback for the main function
+    generate_interpretation = cast(Any, _fallback_generate_interpretation)
     
     # Fallback constants - use type ignore to suppress redefinition warnings
-    PLANET_ARCHETYPES = {}  # type: ignore
-    SIGN_ENERGIES = {}  # type: ignore
+    PLANET_ARCHETYPES = {}
+    SIGN_ENERGIES = {}
+    InterpretationResult = Dict[str, Any]
 
 logger = logging.getLogger(__name__)
 
@@ -126,12 +130,12 @@ class EnhancedAIService:
         for transit in transits:
             # Use safe get with explicit type casting
             planet_key = str(transit["planet"]).lower()
-            planet_energy = PLANET_ARCHETYPES.get(planet_key, {})  # type: ignore
+            planet_energy = PLANET_ARCHETYPES.get(planet_key, {})
             aspect_nature = self._get_aspect_nature(str(transit["aspect"]))
             
             prediction: Dict[str, Any] = {
                 "transit": f"{transit['planet']} {transit['aspect']} {transit['natal_planet']}",
-                "theme": self._synthesize_transit_theme(planet_energy, aspect_nature),  # type: ignore
+                "theme": self._synthesize_transit_theme(planet_energy, aspect_nature),
                 "timing": transit["exactitude"],
                 "influence_period": transit["influence_period"],
                 "recommendation": self._generate_timing_advice(transit, aspect_nature)
@@ -323,8 +327,6 @@ class EnhancedAIService:
             return {"error": "Multi-system synthesis feature disabled"}
             
         try:
-            interpretations = {}
-            
             # Generate interpretations for each system
             interpretations: Dict[str, Dict[str, Any]] = {}
             for system in systems:
@@ -429,7 +431,7 @@ class EnhancedAIService:
     ) -> Dict[str, Any]:
         """Legacy compatibility - enhanced with AI-001 features"""
         # Use existing interpretation system with AI-001 enhancements
-        base_interpretation = generate_interpretation(chart_data, "focused")
+        base_interpretation = cast(Dict[str, Any], generate_interpretation(chart_data, "focused"))
         
         # Add the section parameter to the response
         base_interpretation["section"] = section
@@ -449,7 +451,7 @@ class EnhancedAIService:
     ) -> Dict[str, Any]:
         """Legacy compatibility - enhanced with AI-001 features"""
         # Use existing comprehensive analysis with AI-001 enhancements
-        base_analysis = generate_interpretation(chart_data, analysis_type)
+        base_analysis = cast(Dict[str, Any], generate_interpretation(chart_data, analysis_type))
         
         # Ensure the response has the expected keys for backward compatibility
         # base_analysis is guaranteed to be Dict[str, Any] by the function signature

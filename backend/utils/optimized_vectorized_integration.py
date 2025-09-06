@@ -185,10 +185,12 @@ class OptimizedVectorizedAspectCalculator:
         """Internal method to compute synastry aspects."""
         try:
             # Use existing vectorized calculation
-            from astro.calculations import VectorizedAspectCalculator
+            from .vectorized_aspect_utils import VectorizedAspectCalculator
 
             calculator = VectorizedAspectCalculator()
-            return calculator.build_aspect_matrix(chart1, chart2, orb)
+            aspect_matrix = calculator.build_aspect_matrix_vectorized(chart1, chart2)
+            # Convert to numpy array for consistency with return type
+            return np.array(aspect_matrix, dtype=object)
 
         except ImportError:
             logger.warning(
@@ -291,7 +293,7 @@ class OptimizedVectorizedAspectCalculator:
         self,
         chart_pairs: List[Tuple[Dict[str, float], Dict[str, float]]],
         orb: float,
-        progress_callback: Optional[Callable],
+        progress_callback: Optional[Callable[[float, int, int], None]],
         memory_calculator,
     ) -> List[np.ndarray]:
         """Process batch with caching support."""
@@ -336,7 +338,7 @@ class OptimizedVectorizedAspectCalculator:
 
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Get comprehensive performance metrics."""
-        metrics = {}
+        metrics: Dict[str, Any] = {}
 
         if self.enable_monitoring and self.performance_monitor:
             # Performance monitoring provides logging, but we can include basic stats  # noqa: E501
@@ -353,8 +355,11 @@ class OptimizedVectorizedAspectCalculator:
             metrics["cache"] = self.cache_manager.get_stats()
 
         # Memory calculator metrics
-        if hasattr(self.memory_calculator, "get_stats"):
-            metrics["memory"] = self.memory_calculator.get_stats()
+        if (hasattr(self.memory_calculator, "memory_pool") and 
+            self.memory_calculator.memory_pool and 
+            hasattr(self.memory_calculator.memory_pool, "pool") and
+            hasattr(self.memory_calculator.memory_pool.pool, "get_stats")):
+            metrics["memory"] = self.memory_calculator.memory_pool.pool.get_stats()
 
         return metrics
 

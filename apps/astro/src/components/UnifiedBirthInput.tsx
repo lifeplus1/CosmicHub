@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Card, Button } from '@cosmichub/ui';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { Card, Button, ErrorBoundary } from '@cosmichub/ui';
 import {
   useBirthData,
   formatBirthDataDisplay,
@@ -55,7 +55,7 @@ const MAJOR_CITIES = [
   },
 ];
 
-export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
+export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = React.memo(function UnifiedBirthInput({
   onSubmit,
   showSubmitButton = true,
   submitButtonText = 'Calculate Chart',
@@ -64,7 +64,7 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
   autoSubmit = false,
   showCurrentData = true,
   className = '',
-}) => {
+}) {
   const { birthData, setBirthData, isDataValid } = useBirthData();
 
   // Form state - initialize with existing birth data or defaults
@@ -196,16 +196,29 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
     }
   }, [autoSubmit, isDataValid, birthData, onSubmit]);
 
-  const isFormComplete =
+  // Memoized form validation
+  const isFormComplete = useMemo(() =>
     formData.year.length > 0 &&
     formData.month.length > 0 &&
     formData.day.length > 0 &&
     formData.hour.length > 0 &&
     formData.minute.length > 0 &&
-    formData.city.length > 0;
+    formData.city.length > 0,
+    [formData.year, formData.month, formData.day, formData.hour, formData.minute, formData.city]
+  );
+
+  // Memoized month options for performance
+  const monthOptions = useMemo(() =>
+    Array.from({ length: 12 }, (_, i) => ({
+      value: i + 1,
+      label: new Date(2000, i).toLocaleString('default', { month: 'long' })
+    })),
+    []
+  );
 
   return (
-    <div className={`unified-birth-input ${className}`}>
+    <ErrorBoundary>
+      <div className={`unified-birth-input ${className}`}>
       {/* Current Data Display */}
       {showCurrentData === true &&
         birthData !== null &&
@@ -236,11 +249,18 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
         birthData === undefined ||
         showCurrentData === false) && (
         <Card title={title}>
-          <p className='text-cosmic-silver/70 mb-6'>{description}</p>
+          <h2 id="birth-input-title" className="sr-only">{title}</h2>
+          <p className='text-cosmic-silver/70 mb-6' aria-describedby="birth-input-title">{description}</p>
 
-          <form onSubmit={handleSubmit} className='space-y-6'>
+          <form 
+            onSubmit={handleSubmit} 
+            className='space-y-6'
+            aria-label="Birth information form"
+            noValidate
+          >
             {/* Date of Birth */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <fieldset className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <legend className="sr-only">Date of Birth</legend>
               <div>
                 <label
                   htmlFor='birth-year'
@@ -276,11 +296,9 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                   className='w-full px-4 py-3 bg-cosmic-dark border border-cosmic-purple/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none transition-colors'
                 >
                   <option value=''>Select Month</option>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                      {new Date(2000, i).toLocaleString('default', {
-                        month: 'long',
-                      })}
+                  {monthOptions.map((month) => (
+                    <option key={month.value} value={month.value}>
+                      {month.label}
                     </option>
                   ))}
                 </select>
@@ -304,10 +322,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                   className='w-full px-4 py-3 bg-cosmic-dark border border-cosmic-purple/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none transition-colors'
                 />
               </div>
-            </div>
+            </fieldset>
 
             {/* Time of Birth */}
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <fieldset className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <legend className="sr-only">Time of Birth</legend>
               <div>
                 <label
                   htmlFor='birth-hour'
@@ -346,10 +365,11 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                   className='w-full px-4 py-3 bg-cosmic-dark border border-cosmic-purple/30 rounded-lg text-cosmic-silver focus:border-cosmic-gold focus:outline-none transition-colors'
                 />
               </div>
-            </div>
+            </fieldset>
 
             {/* Birth Location */}
-            <div className='relative'>
+            <fieldset className='relative'>
+              <legend className="sr-only">Birth Location</legend>
               <label
                 htmlFor='birth-city'
                 className='block text-cosmic-silver font-medium mb-2'
@@ -381,7 +401,7 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
                   ))}
                 </div>
               )}
-            </div>
+            </fieldset>
 
             {/* Advanced Options */}
             <div>
@@ -479,5 +499,6 @@ export const UnifiedBirthInput: React.FC<UnifiedBirthInputProps> = ({
         </Card>
       )}
     </div>
+    </ErrorBoundary>
   );
-};
+});

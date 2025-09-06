@@ -73,8 +73,8 @@ class SaltStorage:
         try:  # pragma: no cover
             doc_ref = self.db_client.collection("salts").document(user_id)
             doc = doc_ref.get()
-            if getattr(doc, "exists", False):  # type: ignore[attr-defined]
-                data = doc.to_dict()  # type: ignore[call-arg]
+            if getattr(doc, "exists", False):
+                data = doc.to_dict()
                 if isinstance(data, dict):
                     data_typed = cast(Dict[str, Any], data)
                     hex_salt = data_typed.get("salt")

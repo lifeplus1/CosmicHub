@@ -2,7 +2,7 @@
 import { defineWorkspace } from 'vitest/config';
 
 export default defineWorkspace([
-  // Main applications - primary test suites
+  // Main applications - extend their individual configurations
   {
     extends: './apps/astro/vitest.config.ts',
     test: {
@@ -20,7 +20,7 @@ export default defineWorkspace([
     },
   },
 
-  // All packages - consolidated for performance
+  // All packages - consolidated configuration for optimal performance
   {
     test: {
       name: 'packages',
@@ -37,6 +37,22 @@ export default defineWorkspace([
       setupFiles: ['./apps/astro/src/test-setup.ts'],
       testTimeout: 10000,
       root: '.',
+      // Optimized threading for package tests
+      pool: 'threads',
+      poolOptions: {
+        threads: {
+          singleThread: false,
+        },
+      },
+      // Optimize dependencies for better performance
+      server: {
+        deps: {
+          inline: [
+            /^@cosmichub\//,
+            'vitest-axe',
+          ],
+        },
+      },
     },
   },
 ]);

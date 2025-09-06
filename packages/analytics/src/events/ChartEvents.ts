@@ -3,8 +3,8 @@
  * Specialized analytics for astrological chart calculations
  */
 
-import { getAnalytics } from '../AnalyticsService.js';
-import type { ChartCalculationEvent } from '../types/index.js';
+import { getAnalytics } from '../AnalyticsService';
+import type { ChartCalculationEvent } from '../types/index';
 
 export const trackChartCalculation = (data: ChartCalculationEvent): void => {
   const analytics = getAnalytics();

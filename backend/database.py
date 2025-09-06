@@ -1,4 +1,11 @@
 # backend/database.py
+"""
+Database module for Firestore integration with proper error handling and type safety.
+
+This module handles Firebase/Firestore initialization and provides a centralized 
+database interface following the Component Best Practices Checklist.
+"""
+
 import asyncio
 import json
 import logging
@@ -7,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from datetime import datetime, timedelta
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, TypedDict, cast
 from uuid import uuid4
 
 from dotenv import load_dotenv
@@ -22,6 +29,11 @@ Query = None  # type: ignore
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
+# Structured logging configuration (Best Practice: Logging & Monitoring)
+logging.basicConfig(
+    level=logging.INFO,
+    format='{"ts": "%(asctime)s", "level": "%(levelname)s", "logger": "%(name)s", "msg": "%(message)s"}'
+)
 logger = logging.getLogger(__name__)
 
 # Optional OpenTelemetry tracer (graceful if not configured)
@@ -35,6 +47,26 @@ with suppress(Exception):  # pragma: no cover
 ChartData = Dict[str, Any]
 BirthData = Dict[str, Any]
 UserStats = Dict[str, Any]
+
+
+# Type definitions for enhanced type safety
+class ChartDocument(TypedDict, total=False):
+    """Type-safe chart document structure."""
+    id: str
+    name: str
+    birth_date: str
+    birth_time: str
+    birth_location: str
+    chart_type: str
+    birth_data: BirthData
+    chart_data: ChartData
+    created_at: str
+    updated_at: str
+
+
+class DatabaseError(Exception):
+    """Custom exception for database operations."""
+    pass
 
 use_memory_db = False
 db = None  # type: ignore
@@ -70,83 +102,62 @@ if not _IS_TEST_MODE:  # Only attempt Firestore init outside test mode
         firestore = None  # type: ignore
         initialize_app = None  # type: ignore
         Query = None  # type: ignore
-    try:
-        if firebase_admin and credentials and firestore and initialize_app:  # type: ignore
+    
+    # Only proceed with Firebase initialization if imports succeeded
+    if firebase_admin and credentials and firestore and initialize_app:  # type: ignore
+        try:  # type: ignore[unreachable]  # This is reachable when imports succeed
+            # Check if Firebase is already initialized (likely by auth.py)
+            # Best Practice: Centralized Firebase initialization coordination
             try:
-                firebase_admin.get_app()  # type: ignore[misc]
-                logger.info("Firebase app already initialized")
+                app = firebase_admin.get_app()  # type: ignore[misc]
+                logger.info("[DATABASE] Firebase app already initialized by another module")
                 db = firestore.client()  # type: ignore[attr-defined]
+                logger.info("[DATABASE] Firestore client created successfully")
             except ValueError:
-                # Prefer FIREBASE_CREDENTIALS JSON if available (matches auth.py)
-                creds_json = os.getenv("FIREBASE_CREDENTIALS")
-                if creds_json:
-                    try:
-                        cred_dict = json.loads(creds_json)
-                        cred = credentials.Certificate(cred_dict)  # type: ignore[misc]
-                        initialize_app(cred)  # type: ignore[misc]
-                        logger.info(
-                            "Firebase app initialized successfully via FIREBASE_CREDENTIALS JSON"  # noqa: E501
-                        )
-                        db = firestore.client()  # type: ignore[attr-defined]
-                    except Exception as e:
-                        logger.error(
-                            f"Failed to initialize Firebase from FIREBASE_CREDENTIALS: {e}"  # noqa: E501
-                        )
-                        raise
+                # No app exists yet, try to initialize
+                logger.info("[DATABASE] No existing Firebase app found, initializing for database...")
+                
+                # Use same credential loading logic as auth.py for consistency
+                firebase_creds = os.getenv("FIREBASE_CREDENTIALS")
+                if firebase_creds:
+                    logger.info("[DATABASE] Using FIREBASE_CREDENTIALS JSON string")
+                    creds_json_dict = json.loads(firebase_creds)
+                    cred = credentials.Certificate(creds_json_dict)  # type: ignore[misc]
+                    app = initialize_app(cred)  # type: ignore[misc]
+                    logger.info("[DATABASE] Firebase initialized successfully")
+                    db = firestore.client()  # type: ignore[attr-defined]
                 else:
-                    private_key = os.getenv("FIREBASE_PRIVATE_KEY")
-                    if private_key:
-                        cred = credentials.Certificate(  # type: ignore[misc]
-                            {  # type: ignore[misc]
-                                "type": "service_account",
-                                "project_id": os.getenv("FIREBASE_PROJECT_ID"),
-                                "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-                                "private_key": private_key.replace("\\n", "\n"),
-                                "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
-                                "client_id": os.getenv("FIREBASE_CLIENT_ID"),
-                                "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
-                                "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
-                                "auth_provider_x509_cert_url": os.getenv(
-                                    "FIREBASE_AUTH_PROVIDER_X509_CERT_URL"
-                                ),
-                                "client_x509_cert_url": os.getenv(
-                                    "FIREBASE_CLIENT_X509_CERT_URL"
-                                ),
-                                "universe_domain": os.getenv(
-                                    "FIREBASE_UNIVERSE_DOMAIN"
-                                ),
-                            }
-                        )
-                        initialize_app(cred)  # type: ignore[misc]  # type: ignore[misc]
-                        logger.info("Firebase app initialized successfully")
-                        db = firestore.client()  # type: ignore[attr-defined]
-                    else:
-                        # No credentials available
-                        env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
-                        allow_mock = os.getenv(
-                            "ALLOW_MOCK_AUTH", "1" if env != "production" else "0"
-                        )
-                        if allow_mock in ("1", "true", "yes") and env != "production":
-                            use_memory_db = True
-                            logger.warning(
-                                "Firestore credentials not found. Using in-memory database (development only)."  # noqa: E501
-                            )
-                        else:
-                            raise ValueError("FIREBASE_PRIVATE_KEY not set")
-        else:
-            # Imports missing -> memory DB already enabled
-            use_memory_db = True
-    except Exception as e:
-        # If anything unexpected happens, only allow fallback in non-production
-        env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
-        if env != "production":
-            use_memory_db = True
-            logger.warning(
-                f"Falling back to in-memory database due to error: {str(e)}"
-            )
-        else:
-            logger.error(f"Firebase initialization failed: {str(e)}")
-            raise
+                    logger.warning("[DATABASE] No FIREBASE_CREDENTIALS found, falling back to memory store")
+                    raise ValueError("No Firebase credentials available")
+                    
+        except Exception as e:
+            logger.error(f"[DATABASE] Firebase initialization failed: {e}")
+            # Environment-based fallback behavior
+            env = os.getenv("DEPLOY_ENVIRONMENT", "development").lower()
+            allow_fallback = os.getenv("ALLOW_MOCK_AUTH", "1" if env != "production" else "0")
+            
+            if allow_fallback in ("1", "true", "yes") and env != "production":
+                use_memory_db = True
+                logger.warning("[DATABASE] Falling back to in-memory database (development only)")
+            else:
+                raise DatabaseError(
+                    f"Firebase connection failed in production environment: {e}"
+                )
+    
+    else:
+        # Firebase imports not available -> force memory DB
+        use_memory_db = True
+        logger.warning("[DATABASE] Firebase imports not available, using in-memory database")
+
+else:
+    # Test mode - Firebase initialization skipped
+    use_memory_db = True
+    firebase_admin = None  # type: ignore
+    credentials = None  # type: ignore
+    firestore = None  # type: ignore
+    initialize_app = None  # type: ignore
+    Query = None  # type: ignore
+    db = None  # type: ignore
 
 # In-memory data store structure: { user_id: { chart_id: chart_data } }
 memory_store: Dict[str, Dict[str, ChartData]] = {}
@@ -156,7 +167,7 @@ executor = ThreadPoolExecutor(max_workers=4)
 
 
 @lru_cache(maxsize=128)
-def get_firestore_client():
+def get_firestore_client() -> Optional[Any]:
     """Cached Firestore client for performance (None if using memory DB)."""
     return db if not use_memory_db else None
 
@@ -170,9 +181,9 @@ def save_chart(
         birth_date = f"{birth_data['year']}-{birth_data['month']:02d}-{birth_data['day']:02d}"  # noqa: E501
         birth_time = f"{birth_data['hour']:02d}:{birth_data['minute']:02d}"
         if use_memory_db:
-            chart_id = str(uuid4())
-            chart_data_to_save: ChartData = {
-                "id": chart_id,
+            memory_chart_id = str(uuid4())
+            memory_chart_data: ChartData = {
+                "id": memory_chart_id,
                 "name": birth_data.get("city", "Chart") + f" {birth_date}",
                 "birth_date": birth_date,
                 "birth_time": birth_time,
@@ -183,11 +194,11 @@ def save_chart(
                 "created_at": datetime.now().isoformat(),
                 "updated_at": datetime.now().isoformat(),
             }
-            memory_store.setdefault(user_id, {})[chart_id] = chart_data_to_save
+            memory_store.setdefault(user_id, {})[memory_chart_id] = memory_chart_data
             logger.info(
-                f"[MEMORY_DB] Saved chart {chart_id} for user {user_id}"
+                f"[MEMORY_DB] Saved chart {memory_chart_id} for user {user_id}"
             )
-            return chart_data_to_save
+            return memory_chart_data
         db_client = get_firestore_client()
         assert db_client is not None
         doc_ref = db_client.collection("users").document(user_id).collection("charts").document()  # type: ignore[misc]  # noqa: E501
@@ -257,7 +268,8 @@ def get_charts(
             return result
         db_client = get_firestore_client()
         assert db_client is not None
-        query = db_client.collection("users").document(user_id).collection("charts").order_by("created_at", direction=Query.DESCENDING).limit(limit)  # type: ignore[misc]  # noqa: E501
+        assert Query is not None, "Query should be available when using Firestore"
+        query = db_client.collection("users").document(user_id).collection("charts").order_by("created_at", direction=Query.DESCENDING).limit(limit)  # type: ignore[misc,unreachable]  # noqa: E501
         if start_after:
             last_doc = db_client.collection("users").document(user_id).collection("charts").document(start_after).get()  # type: ignore[misc]  # noqa: E501
             if last_doc.exists:  # type: ignore[misc]
@@ -418,13 +430,13 @@ def get_user_stats(user_id: str) -> UserStats:
                     return False
 
             recent_count = sum(1 for c in charts_map.values() if is_recent(c))
-            stats: UserStats = {
+            memory_stats: UserStats = {
                 "user_id": user_id,
                 "total_charts": chart_count,
                 "recent_charts": recent_count,
                 "last_accessed": datetime.now().isoformat(),
             }
-            return stats
+            return memory_stats
         db_client = get_firestore_client()
         assert db_client is not None
         charts_ref = db_client.collection("users").document(user_id).collection("charts")  # type: ignore[misc]  # noqa: E501

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { devConsole } from '../config/devConsole';
 
-import { AudioSettings, FrequencyPreset } from '@cosmichub/frequency';
+import { AudioSettings, FrequencyPreset } from '@cosmichub/integrations';
 import PresetSelector from '../components/PresetSelector';
 
 const Presets: React.FC = () => {

@@ -14,6 +14,7 @@ export * from './components/ui/Modal';
 export * from './components/ui/Loading';
 export * from './components/ui/Badge';
 export * from './components/ui/Spinner';
+export * from './components/ui/Progress';
 export * from './components/modals/UpgradeModal';
 export * from './components/analytics/PerformanceDashboard';
 
@@ -37,3 +38,6 @@ export {
   FormErrorBoundary,
   withErrorBoundary,
 } from './components/feedback/ErrorBoundaries';
+
+// Export centralized CSS modules
+export * as stylesModules from './styles/modules';

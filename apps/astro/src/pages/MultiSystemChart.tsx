@@ -5,7 +5,8 @@ import { MultiSystemChartDisplay } from '../components/MultiSystemChart';
 import type { MultiSystemChartData } from '../components/MultiSystemChart/types';
 import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
-import { fetchChart, type ChartBirthData } from '../services/api';
+import { fetchChart } from '../services/api';
+import { parseTextBirthData, type ChartBirthData } from '@cosmichub/types';
 
 const MultiSystemChart: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
@@ -213,7 +214,7 @@ const MultiSystemChart: React.FC = () => {
               {chartData && !isLoading && !error && (
                 <MultiSystemChartDisplay
                   chartData={chartData}
-                  birthData={birthData}
+                  birthData={birthData ? parseTextBirthData(birthData) : undefined}
                   showComparison={true}
                 />
               )}
@@ -240,14 +241,27 @@ const MultiSystemChart: React.FC = () => {
               <div className='text-center'>
                 <div className='text-cosmic-gold font-semibold'>Date</div>
                 <div className='text-cosmic-silver'>
-                  {birthData.month}/{birthData.day}/{birthData.year}
+                  {(() => {
+                    try {
+                      const parsed = parseTextBirthData(birthData);
+                      return `${parsed.month}/${parsed.day}/${parsed.year}`;
+                    } catch {
+                      return 'Invalid date';
+                    }
+                  })()}
                 </div>
               </div>
               <div className='text-center'>
                 <div className='text-cosmic-gold font-semibold'>Time</div>
                 <div className='text-cosmic-silver'>
-                  {birthData.hour.toString().padStart(2, '0')}:
-                  {birthData.minute.toString().padStart(2, '0')}
+                  {(() => {
+                    try {
+                      const parsed = parseTextBirthData(birthData);
+                      return `${String(parsed.hour).padStart(2, '0')}:${String(parsed.minute).padStart(2, '0')}`;
+                    } catch {
+                      return 'Invalid time';
+                    }
+                  })()}
                 </div>
               </div>
               <div className='text-center'>

@@ -263,7 +263,6 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
             logger.warning(
                 f"Ephemeris server returned status {response.status_code}: {response.text}"  # noqa: E501
             )
-            positions: Dict[str, PlanetPosition] = {}
             # Provide deterministic fallback during tests/CI so unit tests don't fail due to remote dependency  # noqa: E501
             if _should_use_test_fallback():
                 positions = _generate_deterministic_fallback(

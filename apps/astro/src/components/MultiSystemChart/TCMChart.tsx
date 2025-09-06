@@ -4,7 +4,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronDownIcon, QuestionMarkCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
 import type { UnifiedBirthData } from '@cosmichub/types';
 import type { TCMChartData } from './types';
-import { AccessibleButton } from '@cosmichub/ui';
+import { Card, CardContent, CardHeader, CardTitle, Button } from '@cosmichub/ui';
 
 interface TCMChartProps {
   data?: TCMChartData;
@@ -165,27 +165,28 @@ const TCMChart: React.FC<TCMChartProps> = ({
   }
 
   return (
-    <div className='cosmic-card bg-gradient-to-br from-green-900/10 to-yellow-900/10 border border-green-500/20'>
-      <div className='p-6'>
+    <Card className="cosmic-card">
+      <CardHeader>
+        <CardTitle className="cosmic-title flex items-center">
+          <span className="mr-3">🧬</span>
+          Traditional Chinese Medicine Analysis
+          <span className="ml-2 text-xs bg-green-500/20 px-2 py-1 rounded-full">
+            TCM-001
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
         <div className='flex items-center justify-between mb-6'>
-          <h2 className='text-2xl font-bold text-green-400 flex items-center'>
-            <span className='mr-3'>🌿</span>
-            Traditional Chinese Medicine Analysis
-            <span className='ml-2 text-xs bg-green-500/20 px-2 py-1 rounded-full'>
-              TCM-001
-            </span>
-          </h2>
-          
           {/* Educational Help Button */}
           <Dialog.Root open={educationalDialog.isOpen} onOpenChange={closeEducationalDialog}>
             <Dialog.Trigger asChild>
-              <AccessibleButton
+              <Button
                 onClick={() => openEducationalDialog('constitution')}
                 className='p-2 text-cosmic-purple hover:text-cosmic-gold transition-colors'
-                accessibleName='Learn about Traditional Chinese Medicine'
+                variant="ghost"
               >
                 <QuestionMarkCircledIcon className='w-6 h-6' />
-              </AccessibleButton>
+              </Button>
             </Dialog.Trigger>
             
             <Dialog.Portal>
@@ -196,12 +197,12 @@ const TCMChart: React.FC<TCMChartProps> = ({
                     {educationalDialog.content?.title ?? 'TCM Education'}
                   </Dialog.Title>
                   <Dialog.Close asChild>
-                    <AccessibleButton
+                    <Button
                       className='p-2 text-cosmic-silver hover:text-cosmic-gold transition-colors'
-                      accessibleName='Close educational dialog'
+                      variant="ghost"
                     >
                       <Cross2Icon className='w-5 h-5' />
-                    </AccessibleButton>
+                    </Button>
                   </Dialog.Close>
                 </div>
                 
@@ -241,90 +242,90 @@ const TCMChart: React.FC<TCMChartProps> = ({
         {/* Tab Navigation with Educational Features */}
         <div className='flex flex-wrap gap-1 mb-6 bg-cosmic-black/30 p-1 rounded-lg'>
           <div className='flex items-center'>
-            <AccessibleButton
+            <Button
               onClick={() => setActiveTab('constitution')}
               className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'constitution'
                   ? 'bg-green-500/30 text-green-300 border border-green-400/30'
                   : 'text-cosmic-silver hover:text-green-300 hover:bg-green-500/10'
               }`}
-              accessibleName={`Constitutional Analysis Tab${activeTab === 'constitution' ? ' - Active' : ''}`}
+              variant="ghost"
             >
               🧬 Constitution
-            </AccessibleButton>
-            <AccessibleButton
+            </Button>
+            <Button
               onClick={() => openEducationalDialog('constitution')}
               className='ml-1 p-1 text-cosmic-silver hover:text-green-300 transition-colors'
-              accessibleName='Learn about TCM Constitution'
+              variant="ghost"
             >
               <QuestionMarkCircledIcon className='w-3 h-3' />
-            </AccessibleButton>
+            </Button>
           </div>
           
           <div className='flex items-center'>
-            <AccessibleButton
+            <Button
               onClick={() => setActiveTab('elements')}
               className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'elements'
                   ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-400/30'
                   : 'text-cosmic-silver hover:text-yellow-300 hover:bg-yellow-500/10'
               }`}
-              accessibleName={`Five Elements Tab${activeTab === 'elements' ? ' - Active' : ''}`}
+              variant="ghost"
             >
               🏮 Five Elements
-            </AccessibleButton>
-            <AccessibleButton
+            </Button>
+            <Button
               onClick={() => openEducationalDialog('five-elements')}
               className='ml-1 p-1 text-cosmic-silver hover:text-yellow-300 transition-colors'
-              accessibleName='Learn about Five Elements Theory'
+              variant="ghost"
             >
               <QuestionMarkCircledIcon className='w-3 h-3' />
-            </AccessibleButton>
+            </Button>
           </div>
           
           <div className='flex items-center'>
-            <AccessibleButton
+            <Button
               onClick={() => setActiveTab('meridians')}
               className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'meridians'
                   ? 'bg-blue-500/30 text-blue-300 border border-blue-400/30'
                   : 'text-cosmic-silver hover:text-blue-300 hover:bg-blue-500/10'
               }`}
-              accessibleName={`Meridian Systems Tab${activeTab === 'meridians' ? ' - Active' : ''}`}
+              variant="ghost"
             >
               ⚡ Meridians
-            </AccessibleButton>
-            <AccessibleButton
+            </Button>
+            <Button
               onClick={() => openEducationalDialog('meridians')}
               className='ml-1 p-1 text-cosmic-silver hover:text-blue-300 transition-colors'
-              accessibleName='Learn about Meridian System'
+              variant="ghost"
             >
               <QuestionMarkCircledIcon className='w-3 h-3' />
-            </AccessibleButton>
+            </Button>
           </div>
           
-          <AccessibleButton
+          <Button
             onClick={() => setActiveTab('health')}
             className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
               activeTab === 'health'
                 ? 'bg-red-500/30 text-red-300 border border-red-400/30'
                 : 'text-cosmic-silver hover:text-red-300 hover:bg-red-500/10'
             }`}
-            accessibleName={`Health Correlations Tab${activeTab === 'health' ? ' - Active' : ''}`}
+            variant="ghost"
           >
             🩺 Health
-          </AccessibleButton>
-          <AccessibleButton
+          </Button>
+          <Button
             onClick={() => setActiveTab('synthesis')}
             className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
               activeTab === 'synthesis'
                 ? 'bg-purple-500/30 text-purple-300 border border-purple-400/30'
                 : 'text-cosmic-silver hover:text-purple-300 hover:bg-purple-500/10'
             }`}
-            accessibleName={`Synthesis Tab${activeTab === 'synthesis' ? ' - Active' : ''}`}
+            variant="ghost"
           >
             🔮 Synthesis
-          </AccessibleButton>
+          </Button>
         </div>
 
         {/* Tab Content */}
@@ -345,8 +346,8 @@ const TCMChart: React.FC<TCMChartProps> = ({
             <SynthesisSection data={data.synthesis} />
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -372,11 +373,14 @@ const ConstitutionSection: React.FC<{
   return (
     <div className='space-y-6'>
       {/* Primary Constitution */}
-      <div className='bg-green-900/10 border border-green-500/20 rounded-lg p-6'>
-        <h3 className='text-lg font-semibold text-green-300 mb-4 flex items-center'>
-          <span className='mr-2'>👑</span>
-          Primary Constitution: {primaryType.name}
-        </h3>
+      <Card className="cosmic-card">
+        <CardHeader>
+          <CardTitle className="cosmic-title flex items-center">
+            <span className="mr-2">👑</span>
+            Primary Constitution: {primaryType.name}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
         
         <div className='grid md:grid-cols-2 gap-6'>
           <div>
@@ -438,24 +442,33 @@ const ConstitutionSection: React.FC<{
             ))}
           </div>
         </div>
-      </div>
+      </CardContent>
+    </Card>
 
       {/* Secondary Constitution */}
       {secondaryType && (
-        <div className='bg-orange-900/10 border border-orange-500/20 rounded-lg p-4'>
-          <h3 className='text-lg font-semibold text-orange-300 mb-3 flex items-center'>
-            <span className='mr-2'>⭐</span>
-            Secondary Constitution: {secondaryType.name}
-          </h3>
-          <p className='text-cosmic-silver text-sm'>{secondaryType.description}</p>
-        </div>
+        <Card className="cosmic-card">
+          <CardHeader>
+            <CardTitle className="cosmic-title flex items-center">
+              <span className="mr-2">⭐</span>
+              Secondary Constitution: {secondaryType.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-cosmic-silver text-sm'>{secondaryType.description}</p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Constitution Summary */}
-      <div className='bg-gradient-to-r from-green-900/10 to-yellow-900/10 border border-green-500/20 rounded-lg p-4'>
-        <h3 className='text-green-300 font-medium mb-2'>Overall Assessment</h3>
-        <p className='text-cosmic-silver'>{data.constitution_summary}</p>
-      </div>
+      <Card className="cosmic-card">
+        <CardHeader>
+          <CardTitle className="cosmic-title">Overall Assessment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className='text-cosmic-silver'>{data.constitution_summary}</p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

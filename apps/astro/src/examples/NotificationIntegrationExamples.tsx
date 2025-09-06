@@ -119,7 +119,7 @@ export const ChartCalculationWithNotifications: React.FC = () => {
 
       // Error handling - notification manager doesn't support direct queue access
 
-      console.error('Chart calculation failed:', error);
+            devConsole.error?.('Chart calculation failed:', error);
 
       throw error;
     }

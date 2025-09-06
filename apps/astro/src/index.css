@@ -4,6 +4,9 @@
 /* Import Astrological Font */
 @import url('https://fonts.googleapis.com/css2?family=Kairon+Semiserif:wght@400;700&display=swap');
 
+/* Import Cosmic Components Styles */
+@import './styles/cosmic-components.css';
+
 /* Tailwind CSS Directives - Processed by PostCSS */
 @tailwind base;
 @tailwind components;
@@ -297,6 +300,14 @@ html {
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(226, 232, 240, 0.1);
+}
+
+/* Card component styling */
+.cosmic-card {
+  background: rgba(26, 32, 44, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Glow effects for interactive elements */

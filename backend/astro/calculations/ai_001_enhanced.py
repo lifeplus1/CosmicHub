@@ -5,7 +5,7 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 # Import existing interpretation functions
 # (Imports from ai_interpretations removed – not used directly in this module)
@@ -51,11 +51,11 @@ async def generate_ai001_comprehensive_analysis(
         ]
 
         results = await asyncio.gather(*tasks)
-        transits: List[Dict[str, Any]] = results[0]
-        growth_insights: List[Dict[str, Any]] = results[1]
-        multi_system: Dict[str, Any] = results[2]
-        patterns: List[Dict[str, Any]] = results[3]
-        complexity: int = results[4]
+        transits: List[Dict[str, Any]] = cast(List[Dict[str, Any]], results[0])
+        growth_insights: List[Dict[str, Any]] = cast(List[Dict[str, Any]], results[1])
+        multi_system: Dict[str, Any] = cast(Dict[str, Any], results[2])
+        patterns: List[Dict[str, Any]] = cast(List[Dict[str, Any]], results[3])
+        complexity: int = cast(int, results[4])
 
         # Generate AI-synthesized executive summary
         executive_summary = await synthesize_comprehensive_insights({
@@ -437,7 +437,7 @@ async def generate_growth_coaching(
                 'chart_alignment': analyze_chart_growth_alignment(template, chart_data),
                 'personalized_practices': recommend_personalized_practices(template, chart_data),
                 'potential_obstacles': identify_growth_obstacles(template, chart_data),
-                'success_predictors': calculate_success_probability(template, chart_data),
+                'success_predictors': calculate_success_probability(template, chart_data),  # type: ignore[dict-item]
                 'ai_coaching_notes': generate_ai_coaching_insights(template, chart_data)
             })
 

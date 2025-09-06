@@ -15,17 +15,39 @@ import {
   disableNetwork,
 } from 'firebase/firestore';
 
-// Firebase config with environment validation
+// Firebase config validation following CosmicHub type safety patterns
+interface FirebaseEnvConfig {
+  VITE_FIREBASE_API_KEY?: string;
+  VITE_FIREBASE_AUTH_DOMAIN?: string;
+  VITE_FIREBASE_PROJECT_ID?: string;
+  VITE_FIREBASE_STORAGE_BUCKET?: string;
+  VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
+  VITE_FIREBASE_APP_ID?: string;
+  VITE_USE_EMULATOR?: string;
+  DEV: boolean;
+}
+
 // Environment access - compatible with both Vite and Node environments
 const getEnvValue = (key: string): string | undefined => {
+  // Check Vite environment first (import.meta.env)
+  if (import.meta?.env) {
+    const viteValue = import.meta.env[key] as string | undefined;
+    if (viteValue !== undefined && viteValue !== '') {
+      return viteValue;
+    }
+  }
+  
   // Fallback to process.env (Node environment) for better compatibility
   if (typeof process !== 'undefined' && process.env) {
-    return process.env[key];
+    const processValue = process.env[key];
+    if (processValue !== undefined && processValue !== '') {
+      return processValue;
+    }
   }
   return undefined;
 };
 
-const env = {
+const env: FirebaseEnvConfig = {
   VITE_FIREBASE_API_KEY: getEnvValue('VITE_FIREBASE_API_KEY'),
   VITE_FIREBASE_AUTH_DOMAIN: getEnvValue('VITE_FIREBASE_AUTH_DOMAIN'),
   VITE_FIREBASE_PROJECT_ID: getEnvValue('VITE_FIREBASE_PROJECT_ID'),
@@ -38,44 +60,42 @@ const env = {
   DEV: getEnvValue('NODE_ENV') !== 'production',
 };
 
-// Validate required config
-interface MinimalViteEnv {
-  VITE_FIREBASE_API_KEY?: string;
-  VITE_FIREBASE_PROJECT_ID?: string;
-  VITE_FIREBASE_APP_ID?: string;
-}
+// Validate required Firebase configuration (following CosmicHub validation patterns)
 const requiredEnvVars = [
   'VITE_FIREBASE_API_KEY',
   'VITE_FIREBASE_PROJECT_ID',
   'VITE_FIREBASE_APP_ID',
 ] as const;
-const envRef = env as unknown as MinimalViteEnv;
 
-const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.VITE_FIREBASE_APP_ID,
+const hasValidFirebaseConfig = (): boolean => {
+  return requiredEnvVars.every(varName => {
+    const value = env[varName];
+    return value !== undefined && value !== null && value !== '';
+  });
 };
 
-// Local devConsole (kept internal to avoid cross-package dependency)
+// Development console (respects environment, no-op in production for performance)
 const devConsole = {
-  log: env.DEV ? console.log.bind(console) : undefined,
-  warn: env.DEV ? console.warn.bind(console) : undefined,
+  log: env.DEV ? console.log.bind(console) : (() => {}),
+  warn: env.DEV ? console.warn.bind(console) : (() => {}),
   error: console.error.bind(console),
 };
 
-const missingVars = requiredEnvVars.filter(varName => {
-  const value = envRef[varName];
-  return value === undefined || value === null || value === '';
+// Firebase configuration (only created if validation passes)
+const createFirebaseConfig = () => ({
+  apiKey: env.VITE_FIREBASE_API_KEY!,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID!,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID!,
 });
 
-if (missingVars.length > 0) {
-  devConsole.warn?.(
-    `Missing required Firebase environment variables: ${missingVars.join(', ')}. Using mock auth.`
-  );
+// Initialize Firebase following CosmicHub error handling patterns
+const shouldInitializeFirebase = hasValidFirebaseConfig();
+
+if (!shouldInitializeFirebase) {
+  devConsole.log('🧪 Firebase environment not configured, using mock auth for development');
 }
 
 //Initialize Firebase app (singleton pattern)
@@ -93,44 +113,101 @@ const hasFirestoreApp = (instance: unknown): instance is Firestore => {
   );
 };
 
-try {
-  // Check if Firebase app already exists
-  const existingApps = getApps();
-  if (existingApps.length > 0 && existingApps[0]) {
-    app = existingApps[0];
-  } else {
-    app = initializeApp(firebaseConfig as Record<string, string>);
-  }
-
-  // Initialize services with error handling
+if (shouldInitializeFirebase) {
   try {
-    auth = getAuth(app);
-    hasAuthAvailable = true;
-  } catch (authError) {
-    devConsole.warn?.(
-      'Firebase Auth initialization failed, using fallback:',
-      authError
+    const firebaseConfig = createFirebaseConfig();
+    
+    // Check if Firebase app already exists
+    const existingApps = getApps();
+    if (existingApps && existingApps.length > 0 && existingApps[0]) {
+      app = existingApps[0];
+    } else {
+      app = initializeApp(firebaseConfig);
+    }
+
+    // Initialize services with error handling
+    try {
+      auth = getAuth(app);
+      hasAuthAvailable = true;
+    } catch (authError) {
+      devConsole.warn?.(
+        'Firebase Auth initialization failed, using fallback:',
+        authError
+      );
+      // Create a proxy that warns instead of throwing
+      /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+      auth = new Proxy({} as unknown as Auth, {
+        get() {
+          devConsole.warn?.(
+            'Firebase Auth not available - using mock auth instead'
+          );
+          return undefined as unknown as never;
+        },
+      }) as Auth;
+      /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
+      hasAuthAvailable = false;
+    }
+
+    try {
+      db = getFirestore(app);
+    } catch (dbError) {
+      devConsole.warn?.('Firestore initialization failed:', dbError);
+      // Create a proxy for Firestore as well
+      /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+      db = new Proxy({} as unknown as Firestore, {
+        get() {
+          devConsole.warn?.('Firestore not available');
+          return undefined as unknown as never;
+        },
+      }) as Firestore;
+      /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
+    }
+
+    // Connect to emulators in development
+    if (env.DEV && env['VITE_USE_EMULATOR'] === 'true') {
+      let authEmulatorConnected = false;
+      let firestoreEmulatorConnected = false;
+
+      try {
+        if (!authEmulatorConnected && hasAuthAvailable) {
+          connectAuthEmulator(auth, 'http://localhost:9099', {
+            disableWarnings: true,
+          });
+          authEmulatorConnected = true;
+          devConsole.log?.(
+            '🔥 Firebase Auth emulator connected - development mode'
+          );
+        }
+      } catch {
+        devConsole.log?.('Auth emulator already connected or unavailable');
+      }
+
+      try {
+        if (!firestoreEmulatorConnected && hasFirestoreApp(db)) {
+          connectFirestoreEmulator(db, 'localhost', 8080);
+          firestoreEmulatorConnected = true;
+          devConsole.log?.('🔥 Firestore emulator connected - development mode');
+        }
+      } catch {
+        devConsole.log?.('Firestore emulator already connected or unavailable');
+      }
+    }
+
+    devConsole.log(
+      `🔥 Firebase initialized for project: ${env.VITE_FIREBASE_PROJECT_ID}`
     );
-    // Create a proxy that warns instead of throwing
+  } catch (error) {
+    devConsole.error('Firebase initialization failed:', error);
+    hasAuthAvailable = false;
+    // Create proxy objects for failed initialization
     /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
     auth = new Proxy({} as unknown as Auth, {
       get() {
-        devConsole.warn?.(
-          'Firebase Auth not available - using mock auth instead'
-        );
+        devConsole.warn?.('Firebase Auth not available - using mock auth instead');
         return undefined as unknown as never;
       },
     }) as Auth;
-    /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
-    hasAuthAvailable = false;
-  }
-
-  try {
-    db = getFirestore(app);
-  } catch (dbError) {
-    devConsole.warn?.('Firestore initialization failed:', dbError);
-    // Create a proxy for Firestore as well
-    /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+    
     db = new Proxy({} as unknown as Firestore, {
       get() {
         devConsole.warn?.('Firestore not available');
@@ -139,43 +216,27 @@ try {
     }) as Firestore;
     /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
   }
-
-  // Connect to emulators in development
-  if (env.DEV && env['VITE_USE_EMULATOR'] === 'true') {
-    let authEmulatorConnected = false;
-    let firestoreEmulatorConnected = false;
-
-    try {
-      if (!authEmulatorConnected && hasAuthAvailable) {
-        connectAuthEmulator(auth, 'http://localhost:9099', {
-          disableWarnings: true,
-        });
-        authEmulatorConnected = true;
-        devConsole.log?.(
-          '🔥 Firebase Auth emulator connected - development mode'
-        );
-      }
-    } catch {
-      devConsole.log?.('Auth emulator already connected or unavailable');
-    }
-
-    try {
-      if (!firestoreEmulatorConnected && hasFirestoreApp(db)) {
-        connectFirestoreEmulator(db, 'localhost', 8080);
-        firestoreEmulatorConnected = true;
-        devConsole.log?.('🔥 Firestore emulator connected - development mode');
-      }
-    } catch {
-      devConsole.log?.('Firestore emulator already connected or unavailable');
-    }
-  }
-
-  devConsole.log?.(
-    `🔥 Firebase initialized for project: ${firebaseConfig.projectId}`
-  );
-} catch (error) {
-  devConsole.error('Firebase initialization failed:', error);
-  throw error;
+} else {
+  // Mock mode - create proxy objects that don't attempt Firebase operations
+  hasAuthAvailable = false;
+  
+  /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+  auth = new Proxy({} as unknown as Auth, {
+    get() {
+      // Silent proxy for mock mode - no warnings needed
+      return undefined as unknown as never;
+    },
+  }) as Auth;
+  
+  db = new Proxy({} as unknown as Firestore, {
+    get() {
+      // Silent proxy for mock mode - no warnings needed
+      return undefined as unknown as never;
+    },
+  }) as Firestore;
+  
+  app = {} as FirebaseApp;
+  /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
 }
 
 /**
@@ -218,14 +279,14 @@ export { hasAuthAvailable };
  */
 export const isEmulator = env.DEV && env['VITE_USE_EMULATOR'] === 'true';
 export const isDevelopment = env.DEV;
-export const projectId = firebaseConfig.projectId;
+export const projectId = env.VITE_FIREBASE_PROJECT_ID;
 
 /**
  * Performance monitoring
  */
 export const getFirebasePerformanceInfo = () => ({
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
   isEmulator,
   isDevelopment,
   timestamp: Date.now(),

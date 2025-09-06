@@ -45,7 +45,7 @@ if (analytics) {
     timestamp: Date.now(),
   });
 } else {
-  devConsole.warn?.('📊 Analytics initialization failed');
+  devConsole.log?.('📊 Analytics disabled (no providers configured or feature flag disabled)');
 }
 
 // Initialize push notifications and background sync

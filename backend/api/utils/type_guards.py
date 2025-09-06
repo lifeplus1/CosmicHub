@@ -17,8 +17,12 @@ from typing import (
     TypedDict,
     TypeGuard,
     TypeVar,
+    Union,
     cast,
 )
+
+# Type alias for unknown types in runtime validation
+Unknown = Union[None, bool, int, float, str, List[Any], Dict[str, Any]]
 
 # Type variables for generic type checking
 T = TypeVar("T")
@@ -39,7 +43,7 @@ class Planet(TypedDict, total=False):
     position: float
     house: str
     retrograde: Optional[bool]
-    aspects: Optional[List[Dict[str, Any]]]
+    aspects: Optional[List[Dict[str, Unknown]]]
 
 
 class House(TypedDict):
@@ -103,7 +107,7 @@ class UserProfile(TypedDict, total=False):
 
     userId: str
     birthData: BirthData
-    preferences: Optional[Dict[str, Any]]
+    preferences: Optional[Dict[str, Unknown]]
 
 
 class NumerologyData(TypedDict):
@@ -127,13 +131,13 @@ class AstrologyChart(TypedDict, total=False):
     userId: Optional[str]
 
 
-def is_planet(value: Any) -> TypeGuard[Planet]:
+def is_planet(value: object) -> TypeGuard[Planet]:
     """Type guard for Planet objects"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     return (
         isinstance(obj.get("name"), str)
@@ -151,13 +155,13 @@ def is_planet(value: Any) -> TypeGuard[Planet]:
     )
 
 
-def is_house(value: Any) -> TypeGuard[House]:
+def is_house(value: object) -> TypeGuard[House]:
     """Type guard for House objects"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     return (
         isinstance(obj.get("house"), int)
@@ -169,13 +173,13 @@ def is_house(value: Any) -> TypeGuard[House]:
     )
 
 
-def is_aspect(value: Any) -> TypeGuard[Aspect]:
+def is_aspect(value: object) -> TypeGuard[Aspect]:
     """Type guard for Aspect objects"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     return (
         isinstance(obj.get("planet1"), str)
@@ -186,13 +190,13 @@ def is_aspect(value: Any) -> TypeGuard[Aspect]:
     )
 
 
-def is_asteroid(value: Any) -> TypeGuard[Asteroid]:
+def is_asteroid(value: object) -> TypeGuard[Asteroid]:
     """Type guard for Asteroid objects"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     return (
         isinstance(obj.get("name"), str)
@@ -202,13 +206,13 @@ def is_asteroid(value: Any) -> TypeGuard[Asteroid]:
     )
 
 
-def is_angle(value: Any) -> TypeGuard[Angle]:
+def is_angle(value: object) -> TypeGuard[Angle]:
     """Type guard for Angle objects"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     return (
         isinstance(obj.get("name"), str)
@@ -218,13 +222,13 @@ def is_angle(value: Any) -> TypeGuard[Angle]:
     )
 
 
-def is_astrology_chart(value: Any) -> TypeGuard[AstrologyChart]:
+def is_astrology_chart(value: object) -> TypeGuard[AstrologyChart]:
     """Type guard for AstrologyChart objects with deep validation"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     # Check for required arrays
     if not all(
@@ -233,23 +237,29 @@ def is_astrology_chart(value: Any) -> TypeGuard[AstrologyChart]:
     ):
         return False
 
-    # Validate each array item
+    # Validate each array item with safe type checking
+    planets = obj.get("planets", [])
+    houses = obj.get("houses", [])
+    aspects = obj.get("aspects", [])
+    asteroids = obj.get("asteroids", [])
+    angles = obj.get("angles", [])
+    
     return (
-        all(is_planet(p) for p in obj.get("planets", []))
-        and all(is_house(h) for h in obj.get("houses", []))
-        and all(is_aspect(a) for a in obj.get("aspects", []))
-        and all(is_asteroid(a) for a in obj.get("asteroids", []))
-        and all(is_angle(a) for a in obj.get("angles", []))
+        isinstance(planets, list) and all(is_planet(p) for p in planets)
+        and isinstance(houses, list) and all(is_house(h) for h in houses)
+        and isinstance(aspects, list) and all(is_aspect(a) for a in aspects)
+        and isinstance(asteroids, list) and all(is_asteroid(a) for a in asteroids)
+        and isinstance(angles, list) and all(is_angle(a) for a in angles)
     )
 
 
-def is_user_profile(value: Any) -> TypeGuard[UserProfile]:
+def is_user_profile(value: object) -> TypeGuard[UserProfile]:
     """Type guard for UserProfile objects"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     if not isinstance(obj.get("userId"), str):
         return False
@@ -259,7 +269,7 @@ def is_user_profile(value: Any) -> TypeGuard[UserProfile]:
         return False
 
     # Cast birth_data for type checking
-    birth_dict = cast(Dict[str, Any], birth_data)
+    birth_dict = cast(Dict[str, Unknown], birth_data)
 
     return (
         isinstance(birth_dict.get("date"), str)
@@ -268,13 +278,13 @@ def is_user_profile(value: Any) -> TypeGuard[UserProfile]:
     )
 
 
-def is_numerology_data(value: Any) -> TypeGuard[NumerologyData]:
+def is_numerology_data(value: object) -> TypeGuard[NumerologyData]:
     """Type guard for NumerologyData objects"""
     if not isinstance(value, dict):
         return False
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], value)
+    obj = cast(Dict[str, Unknown], value)
 
     return (
         isinstance(obj.get("lifePath"), int)
@@ -283,7 +293,7 @@ def is_numerology_data(value: Any) -> TypeGuard[NumerologyData]:
     )
 
 
-def get_astrology_data_type(data: Any) -> str:
+def get_astrology_data_type(data: object) -> str:
     """
     Type-safe data discriminator
     Returns the specific type name of the astrology-related data
@@ -298,7 +308,7 @@ def get_astrology_data_type(data: Any) -> str:
         return "Unknown"
 
 
-def validate_astrology_chart(chart: Any) -> List[str]:
+def validate_astrology_chart(chart: object) -> List[str]:
     """
     Validates an astrology chart structure and reports specific validation errors  # noqa: E501
     Returns an array of validation errors, empty if valid
@@ -309,50 +319,55 @@ def validate_astrology_chart(chart: Any) -> List[str]:
         return ["Chart must be a dictionary"]
 
     # Cast to dict for type checking
-    obj = cast(Dict[str, Any], chart)
+    obj = cast(Dict[str, Unknown], chart)
 
     # Check required properties
-    if not isinstance(obj.get("planets"), list):
+    planets = obj.get("planets")
+    if not isinstance(planets, list):
         errors.append("Chart is missing planets array")
-    elif len(obj.get("planets", [])) == 0:
+    elif len(planets) == 0:
         errors.append("Chart must have at least one planet")
     else:
         # Validate each planet
-        for i, planet in enumerate(obj.get("planets", [])):
+        for i, planet in enumerate(planets):
             if not is_planet(planet):
                 errors.append(f"Invalid planet at index {i}")
 
-    if not isinstance(obj.get("houses"), list):
+    houses = obj.get("houses")
+    if not isinstance(houses, list):
         errors.append("Chart is missing houses array")
-    elif len(obj.get("houses", [])) != 12:
+    elif len(houses) != 12:
         errors.append("Chart must have exactly 12 houses")
     else:
         # Validate each house
-        for i, house in enumerate(obj.get("houses", [])):
+        for i, house in enumerate(houses):
             if not is_house(house):
                 errors.append(f"Invalid house at index {i}")
 
-    if not isinstance(obj.get("aspects"), list):
+    aspects = obj.get("aspects")
+    if not isinstance(aspects, list):
         errors.append("Chart is missing aspects array")
     else:
         # Validate each aspect
-        for i, aspect in enumerate(obj.get("aspects", [])):
+        for i, aspect in enumerate(aspects):
             if not is_aspect(aspect):
                 errors.append(f"Invalid aspect at index {i}")
 
-    if not isinstance(obj.get("asteroids"), list):
+    asteroids = obj.get("asteroids")
+    if not isinstance(asteroids, list):
         errors.append("Chart is missing asteroids array")
     else:
         # Validate each asteroid
-        for i, asteroid in enumerate(obj.get("asteroids", [])):
+        for i, asteroid in enumerate(asteroids):
             if not is_asteroid(asteroid):
                 errors.append(f"Invalid asteroid at index {i}")
 
-    if not isinstance(obj.get("angles"), list):
+    angles = obj.get("angles")
+    if not isinstance(angles, list):
         errors.append("Chart is missing angles array")
     else:
         # Validate each angle
-        for i, angle in enumerate(obj.get("angles", [])):
+        for i, angle in enumerate(angles):
             if not is_angle(angle):
                 errors.append(f"Invalid angle at index {i}")
 
@@ -398,7 +413,7 @@ def safe_parse_astrology_chart(json_string: str) -> ChartValidationResult:
         )
 
 
-def is_astrology_data(value: Any) -> bool:
+def is_astrology_data(value: object) -> bool:
     """
     Type guard to check if the value is any valid astrology data type
     """

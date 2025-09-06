@@ -47,7 +47,7 @@ export function useChartData({
 
   const chartData = useMemo<ChartLike>(() => {
     const provided = chart ?? query.data;
-    const fallback = sampleChartData as ChartLike;
+    const fallback = sampleChartData as unknown as ChartLike;
     if (!provided || typeof provided !== 'object') return fallback;
     if (
       !isChartLike(provided as ChartLike) ||

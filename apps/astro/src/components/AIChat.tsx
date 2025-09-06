@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '@cosmichub/auth';
@@ -13,6 +13,7 @@ import {
   CardTitle,
   Button,
   Badge,
+  ErrorBoundary,
 } from '@cosmichub/ui';
 
 interface ChatResponse {
@@ -39,7 +40,7 @@ interface AIFeatureOption {
   enabled: boolean;
 }
 
-export default function AIChat(): React.ReactElement {
+const AIChat = React.memo(function AIChat(): React.ReactElement {
   const { user, loading } = useAuth();
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState<ChatResponse | null>(null);
@@ -79,7 +80,31 @@ export default function AIChat(): React.ReactElement {
     },
   ];
 
-  const handleSubmit = async (): Promise<void> => {
+  // Memoized event handlers for performance
+  const handleChatModeClick = useCallback(() => {
+    setAiMode('chat');
+  }, []);
+
+  const handleAI001ModeClick = useCallback(() => {
+    setAiMode('ai001');
+  }, []);
+
+  const handleFeatureToggle = useCallback((featureId: string) => {
+    setSelectedFeatures(prev => 
+      prev.includes(featureId) 
+        ? prev.filter(id => id !== featureId)
+        : [...prev, featureId]
+    );
+  }, []);
+
+  const handleFeatureKeyDown = useCallback((event: React.KeyboardEvent, featureId: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleFeatureToggle(featureId);
+    }
+  }, [handleFeatureToggle]);
+
+  const handleSubmit = useCallback(async (): Promise<void> => {
     setError(null);
 
     if (
@@ -183,7 +208,7 @@ export default function AIChat(): React.ReactElement {
         isClosable: true,
       });
     }
-  };
+  }, [message, aiMode, selectedFeatures, user?.uid, toast]);
 
   if (loading === true) {
     return (
@@ -202,179 +227,192 @@ export default function AIChat(): React.ReactElement {
   }
 
   return (
-    <div
-      role='main'
-      aria-label='AI Astrology Chat Interface'
-      className='max-w-4xl p-6 mx-auto text-white border shadow-2xl bg-cosmic-dark/80 backdrop-blur-xl border-cosmic-gold/20 rounded-xl'
-    >
-      <div className='mb-6'>
-        <h1 className='text-2xl font-bold text-center text-cosmic-gold mb-2'>
-          AI Astrology Chat
-        </h1>
-
-        {/* AI Mode Toggle */}
-        <div className='flex justify-center gap-2 mb-4'>
-          <Button
-            onClick={() => setAiMode('chat')}
-            className={`${aiMode === 'chat' ? 'bg-cosmic-gold text-cosmic-dark' : 'bg-cosmic-dark/50 text-cosmic-silver'} transition-colors`}
-          >
-            💬 Standard Chat
-          </Button>
-          <Button
-            onClick={() => setAiMode('ai001')}
-            className={`${aiMode === 'ai001' ? 'bg-cosmic-gold text-cosmic-dark' : 'bg-cosmic-dark/50 text-cosmic-silver'} transition-colors`}
-          >
-            🚀 AI-001 Enhanced
-          </Button>
-        </div>
-
-        {/* AI-001 Feature Selection */}
-        {aiMode === 'ai001' && (
-          <Card className='cosmic-glass border-cosmic-purple/30 mb-4'>
-            <CardHeader>
-              <CardTitle className='text-lg text-cosmic-gold'>
-                🚀 AI-001 Features
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-cosmic-dark via-cosmic-purple/10 to-cosmic-blue/10 p-4">
+        <div className="max-w-4xl mx-auto">
+          <Card className="cosmic-glass border-cosmic-gold/20 shadow-2xl shadow-cosmic-purple/20">
+            <CardHeader className="text-center border-b border-cosmic-gold/10">
+              <CardTitle className="text-3xl font-bold text-cosmic-gold font-cinzel mb-2">
+                AI Astrology Chat
               </CardTitle>
-              <p className='text-cosmic-silver/80 text-sm'>
-                Select advanced AI capabilities to include in your analysis
+              <p className="text-cosmic-silver/80 text-lg">
+                Connect with advanced AI for personalized astrological insights
               </p>
             </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-2 gap-3'>
-                {ai001Features.map(feature => (
-                  <button
-                    key={feature.id}
-                    onClick={() => {
-                      if (selectedFeatures.includes(feature.id)) {
-                        setSelectedFeatures(prev =>
-                          prev.filter(f => f !== feature.id)
-                        );
-                      } else {
-                        setSelectedFeatures(prev => [...prev, feature.id]);
-                      }
-                    }}
-                    className={`p-3 rounded-lg border-2 transition-all text-left ${
-                      selectedFeatures.includes(feature.id)
-                        ? 'border-cosmic-gold bg-cosmic-gold/10 text-cosmic-gold'
-                        : 'border-cosmic-purple/30 bg-cosmic-purple/5 text-cosmic-silver hover:border-cosmic-purple/50'
-                    }`}
-                  >
-                    <div className='flex items-start gap-2'>
-                      <span className='text-lg'>{feature.icon}</span>
-                      <div>
-                        <div className='font-medium text-sm'>
-                          {feature.name}
-                        </div>
-                        <div className='text-xs opacity-80'>
-                          {feature.description}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+            <CardContent className="p-8 space-y-6">
+              {/* AI Mode Toggle */}
+              <div className='flex justify-center gap-4 mb-6'>
+                <Button
+                  onClick={handleChatModeClick}
+                  variant={aiMode === 'chat' ? 'cosmic' : 'outline'}
+                  size="lg"
+                  className="px-8 py-3"
+                >
+                  💬 Standard Chat
+                </Button>
+                <Button
+                  onClick={handleAI001ModeClick}
+                  variant={aiMode === 'ai001' ? 'cosmic' : 'outline'}
+                  size="lg"
+                  className="px-8 py-3"
+                >
+                  🚀 AI-001 Enhanced
+                </Button>
               </div>
+
+              {/* AI-001 Feature Selection */}
+              {aiMode === 'ai001' && (
+                <Card className='cosmic-glass border-cosmic-purple/30 mb-6'>
+                  <CardHeader>
+                    <CardTitle className='text-lg text-cosmic-gold'>
+                      🚀 AI-001 Features
+                    </CardTitle>
+                    <p className='text-cosmic-silver/80 text-sm'>
+                      Select advanced AI capabilities to include in your analysis
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      {ai001Features.map(feature => (
+                        <button
+                          key={feature.id}
+                          onClick={() => handleFeatureToggle(feature.id)}
+                          onKeyDown={(e) => handleFeatureKeyDown(e, feature.id)}
+                          aria-label={`${feature.name}: ${feature.description}`}
+                          tabIndex={0}
+                          className={`p-4 rounded-lg border-2 transition-all text-left focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 group ${
+                            selectedFeatures.includes(feature.id)
+                              ? 'border-cosmic-gold bg-cosmic-gold/10 text-cosmic-gold shadow-lg shadow-cosmic-gold/20'
+                              : 'border-cosmic-purple/30 bg-cosmic-purple/5 text-cosmic-silver hover:border-cosmic-purple/50 hover:bg-cosmic-purple/10'
+                          }`}
+                        >
+                          <div className='flex items-start gap-3'>
+                            <span className='text-2xl group-hover:scale-110 transition-transform'>{feature.icon}</span>
+                            <div>
+                              <div className='font-semibold text-sm mb-1 group-hover:text-cosmic-gold transition-colors'>
+                                {feature.name}
+                              </div>
+                              <div className='text-xs opacity-80'>
+                                {feature.description}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className='text-center mb-6'>
+                <p className='text-cosmic-silver/70 text-sm'>
+                  {aiMode === 'chat'
+                    ? 'Ask questions about your astrological chart'
+                    : 'Get comprehensive AI-001 enhanced analysis with predictive insights'}
+                </p>
+              </div>
+
+              {/* Input Section */}
+              <div className='space-y-4'>
+                <div>
+                  <label
+                    htmlFor='ai-message-input'
+                    className='block mb-3 text-cosmic-gold font-semibold'
+                  >
+                    Your {aiMode === 'ai001' ? 'Analysis Request' : 'Message'}
+                  </label>
+                  <textarea
+                    id='ai-message-input'
+                    value={message}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>): void =>
+                      setMessage(e.target.value)
+                    }
+                    placeholder={
+                      aiMode === 'ai001'
+                        ? 'Request AI-001 enhanced analysis (e.g., "Analyze my upcoming year for growth opportunities")...'
+                        : 'Ask about your chart...'
+                    }
+                    className='w-full p-4 text-white border rounded-lg resize-none bg-cosmic-dark/50 border-cosmic-gold/30 placeholder-cosmic-silver/60 focus:border-cosmic-gold focus:outline-none focus:ring-2 focus:ring-cosmic-gold/20 transition-all'
+                    rows={4}
+                    aria-describedby='ai-message-help'
+                  />
+                  <div
+                    id='ai-message-help'
+                    className='mt-2 text-sm text-cosmic-silver/70'
+                  >
+                    {aiMode === 'ai001'
+                      ? 'Request comprehensive AI-001 analysis with predictive timing, growth coaching, and pattern recognition'
+                      : 'Ask questions about your astrological chart or request interpretations'}
+                  </div>
+                </div>
+
+                <Button
+                  onClick={(): void => {
+                    void handleSubmit();
+                  }}
+                  disabled={
+                    message === null ||
+                    message === undefined ||
+                    typeof message !== 'string' ||
+                    message.trim().length === 0
+                  }
+                  variant={aiMode === 'ai001' ? 'cosmic' : 'default'}
+                  size="lg"
+                  className="w-full py-4 text-lg font-semibold"
+                  aria-label={`Send message to ${aiMode === 'ai001' ? 'AI-001 enhanced' : 'AI'} chat`}
+                >
+                  {aiMode === 'ai001' ? '🚀 Generate AI-001 Analysis' : '💬 Send Message'}
+                </Button>
+              </div>
+
+              {/* Error Display */}
+              {error !== null &&
+                error !== undefined &&
+                typeof error === 'string' &&
+                error.length > 0 && (
+                  <Card className='border-red-500/30 bg-red-900/10'>
+                    <CardContent className='p-4'>
+                      <div className='text-red-400 font-medium' role='alert'>
+                        ⚠️ {error}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+              {/* Response Display */}
+              {response !== null &&
+                response !== undefined &&
+                typeof response === 'object' &&
+                Array.isArray(response.choices) &&
+                response.choices.length > 0 &&
+                response.choices[0] !== null &&
+                response.choices[0] !== undefined &&
+                typeof response.choices[0].message?.content === 'string' &&
+                response.choices[0].message.content.length > 0 && (
+                  <Card className='cosmic-glass border-cosmic-purple/30 shadow-lg shadow-cosmic-purple/20'>
+                    <CardHeader>
+                      <CardTitle className='text-lg text-cosmic-gold flex items-center gap-2'>
+                        {aiMode === 'ai001'
+                          ? '🚀 AI-001 Enhanced Response'
+                          : '🤖 AI Response'}
+                        {aiMode === 'ai001' && (
+                          <Badge className='bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30'>
+                            Next-Gen AI
+                          </Badge>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className='text-cosmic-silver whitespace-pre-wrap leading-relaxed'>
+                      {response.choices[0].message.content}
+                    </CardContent>
+                  </Card>
+                )}
             </CardContent>
           </Card>
-        )}
-
-        <p className='text-cosmic-silver/70 text-center text-sm'>
-          {aiMode === 'chat'
-            ? 'Ask questions about your astrological chart'
-            : 'Get comprehensive AI-001 enhanced analysis with predictive insights'}
-        </p>
-      </div>
-
-      <div className='space-y-4'>
-        <div>
-          <label
-            htmlFor='ai-message-input'
-            className='block mb-2 text-cosmic-gold'
-          >
-            Your {aiMode === 'ai001' ? 'Analysis Request' : 'Message'}
-          </label>
-          <textarea
-            id='ai-message-input'
-            value={message}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>): void =>
-              setMessage(e.target.value)
-            }
-            placeholder={
-              aiMode === 'ai001'
-                ? 'Request AI-001 enhanced analysis (e.g., "Analyze my upcoming year for growth opportunities")...'
-                : 'Ask about your chart...'
-            }
-            className='w-full p-3 text-white border rounded-lg resize-none bg-cosmic-dark border-cosmic-gold/30 placeholder-cosmic-silver focus:border-cosmic-gold focus:outline-none'
-            rows={4}
-            aria-describedby='ai-message-help'
-          />
-          <div
-            id='ai-message-help'
-            className='mt-1 text-sm text-cosmic-silver/70'
-          >
-            {aiMode === 'ai001'
-              ? 'Request comprehensive AI-001 analysis with predictive timing, growth coaching, and pattern recognition'
-              : 'Ask questions about your astrological chart or request interpretations'}
-          </div>
         </div>
-        <button
-          type='button'
-          className={`w-full py-3 font-semibold transition-colors rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${
-            aiMode === 'ai001'
-              ? 'bg-gradient-to-r from-cosmic-purple to-cosmic-blue hover:from-cosmic-purple/90 hover:to-cosmic-blue/90 text-white'
-              : 'bg-cosmic-gold text-cosmic-dark hover:bg-cosmic-gold/90'
-          }`}
-          onClick={(): void => {
-            void handleSubmit();
-          }}
-          disabled={
-            message === null ||
-            message === undefined ||
-            typeof message !== 'string' ||
-            message.trim().length === 0
-          }
-          aria-label={`Send message to ${aiMode === 'ai001' ? 'AI-001 enhanced' : 'AI'} chat`}
-        >
-          {aiMode === 'ai001' ? '🚀 Generate AI-001 Analysis' : 'Send Message'}
-        </button>
-        {error !== null &&
-          error !== undefined &&
-          typeof error === 'string' &&
-          error.length > 0 && (
-            <div
-              className='p-3 text-red-400 border rounded-lg bg-red-900/20 border-red-500/30'
-              role='alert'
-            >
-              {error}
-            </div>
-          )}
-        {response !== null &&
-          response !== undefined &&
-          typeof response === 'object' &&
-          Array.isArray(response.choices) &&
-          response.choices.length > 0 &&
-          response.choices[0] !== null &&
-          response.choices[0] !== undefined &&
-          typeof response.choices[0].message?.content === 'string' &&
-          response.choices[0].message.content.length > 0 && (
-            <Card className='mt-4 cosmic-glass border-cosmic-purple/30'>
-              <CardHeader>
-                <CardTitle className='text-lg text-cosmic-gold flex items-center gap-2'>
-                  {aiMode === 'ai001'
-                    ? '🚀 AI-001 Enhanced Response'
-                    : '🤖 AI Response'}
-                  {aiMode === 'ai001' && (
-                    <Badge className='bg-cosmic-gold/20 text-cosmic-gold border-cosmic-gold/30'>
-                      Next-Gen AI
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className='text-cosmic-silver whitespace-pre-wrap'>
-                {response.choices[0].message.content}
-              </CardContent>
-            </Card>
-          )}
       </div>
-    </div>
+    </ErrorBoundary>
   );
-}
+});
+
+export default AIChat;

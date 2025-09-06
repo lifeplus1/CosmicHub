@@ -169,7 +169,7 @@ class VectorizedPerformanceMonitor:
 
     def _get_memory_usage_mb(self) -> float:
         """Get current memory usage in MB."""
-        if not PSUTIL_AVAILABLE:
+        if not PSUTIL_AVAILABLE or psutil is None:
             return 0.0
 
         try:

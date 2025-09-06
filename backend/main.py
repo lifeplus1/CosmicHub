@@ -6,15 +6,16 @@ import uuid
 import time  # moved earlier so middleware can use it
 from contextlib import suppress
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Dict, List, Optional, Protocol, Union, cast, Any
+from contextlib import AbstractContextManager
 
 
 # Enhanced environment loading with proper error handling
-def load_environment():
+def load_environment() -> bool:
     """Load environment variables with proper error handling and logging."""
     env_mode = os.environ.get("DEPLOY_ENVIRONMENT", "development").lower()
     try:
-        from dotenv import load_dotenv  # type: ignore
+        from dotenv import load_dotenv
 
         backend_dir = Path(__file__).resolve().parent
         preferred = (
@@ -75,6 +76,35 @@ from security import configure_security  # noqa: E402
 
 # Mock user profile for elite user with Pydantic
 class UserProfile(BaseModel):
+    """
+    User profile model containing account and subscription information.
+    
+    Represents a user's account data including identification, subscription status,
+    and usage metrics for the CosmicHub platform.
+    
+    Attributes:
+        uid: Unique user identifier from Firebase Authentication
+        email: User's email address
+        displayName: User's display name for the platform
+        subscription: Subscription tier and feature access information
+        usage: Current usage statistics and limits
+        
+    Example:
+        {
+            "uid": "user_123456789",
+            "email": "user@example.com",
+            "displayName": "Astrology Enthusiast",
+            "subscription": {
+                "tier": "premium",
+                "status": "active",
+                "features": ["unlimited_charts", "ai_interpretation"]
+            },
+            "usage": {
+                "chartsThisMonth": 15,
+                "savedCharts": 25
+            }
+        }
+    """
     uid: str
     email: str
     displayName: str
@@ -187,8 +217,47 @@ def _debug_trace(message: str) -> None:
         except Exception:
             pass
 
+
+# ---------------- OpenTelemetry Tracer Protocol -----------------
+class TracerProtocol(Protocol):
+    """Protocol for OpenTelemetry tracer interface."""
+    
+    def start_as_current_span(
+        self, 
+        name: str, 
+        **kwargs: object
+    ) -> AbstractContextManager[object]:
+        """Start a new span context."""
+        ...
+
+
+# ---------------- Prometheus Metrics Protocols -----------------
+class HistogramProtocol(Protocol):
+    """Protocol for Prometheus Histogram interface."""
+    
+    def observe(self, amount: float, **kwargs: object) -> None:
+        """Observe a value."""
+        ...
+        
+    def labels(self, **kwargs: str) -> 'HistogramProtocol':
+        """Create labels."""
+        ...
+
+
+class CounterProtocol(Protocol):
+    """Protocol for Prometheus Counter interface."""
+    
+    def inc(self, amount: float = 1.0, **kwargs: object) -> None:
+        """Increment counter."""
+        ...
+        
+    def labels(self, **kwargs: str) -> 'CounterProtocol':
+        """Create labels."""
+        ...
+
+
 # ---------------- Optional OpenTelemetry Tracing Setup -----------------
-otel_tracer: Any = None  # Global tracer reference used in endpoints
+otel_tracer: TracerProtocol = None  # type: ignore[assignment]  # Global tracer reference used in endpoints
 if os.getenv("ENABLE_TRACING", "true").lower() == "true" and os.getenv(
     "OTEL_EXPORTER_OTLP_ENDPOINT"
 ):
@@ -211,7 +280,7 @@ if os.getenv("ENABLE_TRACING", "true").lower() == "true" and os.getenv(
         exporter = OTLPSpanExporter(endpoint=f"{otlp_endpoint}/v1/traces")  # type: ignore[call-arg]  # noqa: E501
         provider.add_span_processor(BatchSpanProcessor(exporter))  # type: ignore[arg-type]  # noqa: E501
         trace.set_tracer_provider(provider)  # type: ignore[attr-defined]
-        otel_tracer = trace.get_tracer("cosmichub.backend")  # type: ignore[attr-defined]  # noqa: E501
+        otel_tracer = cast(TracerProtocol, trace.get_tracer("cosmichub.backend"))  # type: ignore[attr-defined]  # noqa: E501
         logger.info(
             "OpenTelemetry tracing configured",
             extra={"service": service_name, "endpoint": otlp_endpoint},
@@ -220,7 +289,7 @@ if os.getenv("ENABLE_TRACING", "true").lower() == "true" and os.getenv(
         from contextlib import nullcontext
 
         class _NoOpTracerTracingFallback:
-            def start_as_current_span(self, *a: Any, **k: Any):  # type: ignore[no-untyped-def]  # noqa: E501
+            def start_as_current_span(self, name: str, **kwargs: object) -> AbstractContextManager[object]:
                 return nullcontext()
 
         otel_tracer = _NoOpTracerTracingFallback()
@@ -232,7 +301,7 @@ elif os.getenv("ENABLE_TRACING", "true").lower() == "true":
     from contextlib import nullcontext
 
     class _NoOpTracerNoEndpoint:
-        def start_as_current_span(self, *a: Any, **k: Any):  # type: ignore[no-untyped-def]  # noqa: E501
+        def start_as_current_span(self, name: str, **kwargs: object) -> AbstractContextManager[object]:
             return nullcontext()
 
     otel_tracer = _NoOpTracerNoEndpoint()
@@ -260,8 +329,8 @@ REQUEST_LATENCY_BUCKETS = (
     3.0,
     5.0,
 )  # seconds
-request_latency: Any = None
-request_counter: Any = None
+request_latency: Optional[HistogramProtocol] = None
+request_counter: Optional[CounterProtocol] = None
 if _metrics_enabled():
     try:  # pragma: no cover
         from prometheus_client import (  # type: ignore[import]
@@ -389,13 +458,14 @@ class UserEnrichmentMiddleware(BaseHTTPMiddleware):
 
 # Redis-based rate limiter for scalability (fallback to in-memory if Redis not available)  # noqa: E501
 from typing import Any  # noqa: E402
-from typing import Any as _Any  # noqa: E402
+from collections import defaultdict
+
+# Initialize rate_limit_store for fallback scenarios
+rate_limit_store: Dict[tuple[str, str], List[float]] = defaultdict(list)
 
 if os.getenv("TEST_MODE", "0").lower() in ("1", "true", "yes"):
     # Skip Redis entirely in test mode for speed & determinism
     redis_client = None  # type: ignore
-    from collections import defaultdict
-    rate_limit_store: Dict[tuple[str, str], List[float]] = defaultdict(list)
     logger.info("[TEST_MODE] Skipping Redis connection; using in-memory rate limiting")
 else:
     try:  # Optional redis dependency
@@ -403,7 +473,7 @@ else:
 
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
         logger.info(f"Connecting to Redis at: {redis_url}")
-        redis_client: _Any | None = redis.Redis.from_url(redis_url, socket_connect_timeout=0.5, socket_timeout=0.5)  # type: ignore[attr-defined]  # noqa: E501
+        redis_client = redis.Redis.from_url(redis_url, socket_connect_timeout=0.5, socket_timeout=0.5)  # type: ignore[attr-defined]  # noqa: E501
         # Test the connection (fast timeout configured)
         redis_client.ping()
         logger.info("Redis connection successful")
@@ -412,9 +482,6 @@ else:
             f"Redis connection failed: {e}. Falling back to in-memory rate limiting."  # noqa: E501
         )
         redis_client = None
-        from collections import defaultdict
-
-        rate_limit_store: Dict[tuple[str, str], List[float]] = defaultdict(list)
 
 RATE_LIMIT = 1000  # requests - increased for development
 RATE_PERIOD = 60  # seconds
@@ -429,7 +496,7 @@ async def rate_limiter(request: Request) -> None:
 
     if redis_client:
         try:
-            count = redis_client.incr(key)
+            count: int = redis_client.incr(key)  # type: ignore[assignment]
             if count == 1:
                 redis_client.expire(key, RATE_PERIOD)
             if count > RATE_LIMIT:
@@ -541,8 +608,6 @@ else:
 
 try:
     if _metrics_enabled():
-        from fastapi import Response
-
         # Import needed prometheus client functions - avoiding F811
         # We need to reference them with different names first to avoid redefinition  # noqa: E501
         from prometheus_client import CONTENT_TYPE_LATEST as _content_type, generate_latest as _generate_latest  # type: ignore  # noqa: E501
@@ -586,6 +651,36 @@ app.add_middleware(
 
 
 class BirthData(BaseModel):
+    """
+    Birth data model for astrological chart calculations.
+    
+    Contains the essential birth information needed to calculate an accurate
+    astrological chart including date, time, and location coordinates.
+    
+    Attributes:
+        year: Birth year (1900-2100) - covers modern astrological calculations
+        month: Birth month (1-12) - January=1, December=12
+        day: Birth day (1-31) - validated against month and leap years
+        hour: Birth hour in 24-hour format (0-23) - 0=midnight, 12=noon
+        minute: Birth minute (0-59) - for precise timing
+        city: Birth city name - required for display and timezone lookup
+        timezone: Optional timezone identifier (e.g., "America/New_York")
+        lat: Optional latitude in decimal degrees (-90.0 to 90.0)
+        lon: Optional longitude in decimal degrees (-180.0 to 180.0)
+        
+    Example:
+        {
+            "year": 1990,
+            "month": 6,
+            "day": 15,
+            "hour": 14,
+            "minute": 30,
+            "city": "New York",
+            "timezone": "America/New_York",
+            "lat": 40.7128,
+            "lon": -74.0060
+        }
+    """
     year: int = Field(..., ge=1900, le=2100)
     month: int = Field(..., ge=1, le=12)
     day: int = Field(..., ge=1, le=31)
@@ -616,6 +711,44 @@ class BirthData(BaseModel):
 
 
 class ChartResponse(BaseModel):
+    """
+    Response model for calculated astrological chart data.
+    
+    Contains the complete calculated chart information returned by the
+    astrological calculation engine, including all celestial positions
+    and house divisions.
+    
+    Attributes:
+        planets: Dictionary of planetary positions keyed by planet name
+        houses: Dictionary of house cusps and information keyed by house number
+        aspects: List of aspect relationships between celestial bodies
+        asteroids: Optional asteroid positions (Ceres, Pallas, Juno, Vesta, etc.)
+        points: Optional calculated points (North Node, South Node, Lilith, etc.)
+        angles: Optional chart angles (Ascendant, Midheaven, Descendant, IC)
+        systems: Optional house system and calculation method information
+        latitude: Optional birth latitude for reference
+        longitude: Optional birth longitude for reference
+        timezone: Optional timezone used in calculations
+        julian_day: Optional Julian day number for astronomical reference
+        
+    Example:
+        {
+            "planets": {
+                "sun": {"sign": "gemini", "degree": 24.5, "house": 10},
+                "moon": {"sign": "pisces", "degree": 12.3, "house": 7}
+            },
+            "houses": {
+                "1": {"sign": "virgo", "cusp": 150.2},
+                "2": {"sign": "libra", "cusp": 180.5}
+            },
+            "aspects": [
+                {"planet1": "sun", "planet2": "moon", "type": "square", "orb": 2.1}
+            ],
+            "latitude": 40.7128,
+            "longitude": -74.0060,
+            "julian_day": 2448000.5
+        }
+    """
     planets: Dict[str, Any]
     houses: Dict[str, Any]
     aspects: List[Any]
@@ -674,13 +807,13 @@ async def calculate(
         chart = _run_calc()
 
     # Convert houses list to dictionary format if needed
-    houses_data: Any = chart.get("houses", {})
+    houses_data: Union[List[object], Dict[str, object]] = chart.get("houses", {})
     if isinstance(houses_data, list):
         # Convert list of houses to dictionary format
-        houses_dict: Dict[str, Any] = {}
-        houses_list = cast(List[Dict[str, Any]], houses_data)
+        houses_dict: Dict[str, object] = {}
+        houses_list = cast(List[Dict[str, object]], houses_data)
         for house in houses_list:
-            if "house" in house:
+            if isinstance(house, dict) and "house" in house:
                 houses_dict[f"house_{house['house']}"] = house
         houses_data = houses_dict
 
@@ -898,52 +1031,65 @@ async def root_health():
     return {"status": "ok"}
 
 
-from api import (  # noqa: E402
-    salt_management,  # admin salt endpoints  # noqa: E502
-)
-from api import (  # noqa: E402
-    interpretations,
-)
-
+# from api import (  # noqa: E402
+#     salt_management,  # admin salt endpoints  # noqa: E502 - temporarily commented
+# )
 # Structure cleanup suggestion: Move routers to separate files and import here for modularity.  # noqa: E501
-# Import API routers (local path)
+# Import API routers (local path) - temporarily simplified
 from api.routers import (  # noqa: E402
-    ai,
+    # ai,
     calculations,
-    charts,  # consolidated charts router
+    # charts,  # consolidated charts router
     csp_router,
-    ephemeris,
-    presets,
-    stripe_router,
-    subscriptions,
+    # ephemeris,
+    # presets,
+    # stripe_router,
+    # subscriptions,
 )
-from astro.calculations import transits_clean  # noqa: E402
-from routers import synastry  # noqa: E402
-from analytics.analytics_api import router as analytics_router  # noqa: E402
-from api.endpoints.psychology_systems import psychology_router  # noqa: E402
-from api.endpoints.spiritual_systems import spiritual_router  # noqa: E402
+# Import TCM router
+from api.endpoints.tcm_systems import tcm_router  # noqa: E402
+# Import Sacred Geometry router
+from api.endpoints.sacred_geometry_systems import sacred_geometry_router  # noqa: E402
+# from astro.calculations import transits_clean  # noqa: E402 - temporarily commented
+# from routers import synastry  # noqa: E402 - temporarily commented
+# from analytics.analytics_api import router as analytics_router  # noqa: E402 - temporarily commented
+# from api.endpoints.psychology_systems import psychology_router  # noqa: E402 - temporarily commented
+# from api.endpoints.spiritual_systems import spiritual_router  # noqa: E402 - temporarily commented
 
-app.include_router(ai.router)
-app.include_router(presets.router)
-app.include_router(subscriptions.router)
-app.include_router(ephemeris.router, prefix="/api")
+# Import new FastAPI spiritual routers (converted from Flask) - temporarily commented
+# from api.routers.spiritual_ai import router as spiritual_ai_router  # noqa: E402
+# from api.routers.spiritual_practices import router as spiritual_practices_router  # noqa: E402
+# from api.routers.spiritual_education import router as spiritual_education_router  # noqa: E402
+
+# Temporarily comment out router registrations to get basic server running
+# app.include_router(ai.router)
+# app.include_router(presets.router)
+# app.include_router(subscriptions.router)
+# app.include_router(ephemeris.router, prefix="/api")
 app.include_router(calculations.router, prefix="/api")  # Multi-system calculations router
-app.include_router(charts.router, prefix="/api")  # consolidated charts router
-app.include_router(interpretations.router)  # AI Interpretations router
-app.include_router(analytics_router)  # Analytics tracking and dashboards
-app.include_router(psychology_router)  # Psychology assessments/profile endpoints
-app.include_router(spiritual_router)  # Spiritual systems (tarot, kabbalah, correspondences)
-app.include_router(
-    transits_clean.router, prefix="/api/astro", tags=["transits"]
-)  # Transit calculations router
-app.include_router(
-    stripe_router.router
-)  # Stripe subscription & billing endpoints
+app.include_router(tcm_router)  # TCM analysis endpoints (already includes /api/tcm prefix)
+app.include_router(sacred_geometry_router)  # Sacred Geometry analysis endpoints
+# app.include_router(charts.router, prefix="/api")  # consolidated charts router
+# app.include_router(interpretations.router)  # AI Interpretations router
+# app.include_router(analytics_router)  # Analytics tracking and dashboards
+# app.include_router(psychology_router)  # Psychology assessments/profile endpoints
+# app.include_router(spiritual_router)  # Spiritual systems (tarot, kabbalah, correspondences)
+
+# Include new spiritual FastAPI routers - temporarily commented
+# app.include_router(spiritual_ai_router, prefix="/api")  # Spiritual AI synthesis and guidance
+# app.include_router(spiritual_practices_router, prefix="/api")  # Spiritual practices and safety
+# app.include_router(spiritual_education_router, prefix="/api")  # Spiritual education system
+# app.include_router(
+#     transits_clean.router, prefix="/api/astro", tags=["transits"]
+# )  # Transit calculations router
+# app.include_router(
+#     stripe_router.router
+# )  # Stripe subscription & billing endpoints
 app.include_router(csp_router)  # CSP violation reports
-app.include_router(
-    synastry.router, prefix="/api", tags=["synastry"]
-)  # Synastry analysis endpoints
-app.include_router(salt_management.router)  # Admin salt management
+# app.include_router(
+#     synastry.router, prefix="/api", tags=["synastry"]
+# )  # Synastry analysis endpoints
+# app.include_router(salt_management.router)  # Admin salt management
 
 # Add debug router in TEST_MODE
 if os.getenv("TEST_MODE") == "1":

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Auth,
   User,
@@ -116,37 +116,36 @@ const notifyAuthStateChange = (user: User | null) => {
 export const useAuth = (): AuthState => {
   const [user, setUser] = useState<User | null>(mockUser);
   const [loading, setLoading] = useState<boolean>(true);
-  const listenerSetupRef = useRef<boolean>(false);
 
   const signOut = useCallback(async (): Promise<void> => {
     try {
-      if (authInstance) {
+      logger.info('🚪 Sign out initiated');
+      if (authInstance && hasAuthAvailable) {
         await fbSignOut(authInstance);
       }
+      // Clear the mock user and notify all listeners
+      logger.info('🧹 Clearing mock user state');
       notifyAuthStateChange(null);
     } catch (error) {
       logger.error('Sign out failed:', error);
       // Even if Firebase sign out fails, clear local mock state
+      logger.info('🧹 Force clearing mock user state after error');
       notifyAuthStateChange(null);
     }
   }, []);
 
   useEffect(() => {
-    // Prevent duplicate listeners
-    if (listenerSetupRef.current) {
-      logger.info('🚫 Auth listener already set up, skipping');
-      return;
-    }
-    listenerSetupRef.current = true;
-
     if (process.env['NODE_ENV'] === 'development') {
       logger.info('🎯 Setting up auth state listener...');
     }
 
     // Add to local listeners for mock auth
     const mockAuthListener = (user: User | null) => {
-      logger.info('🧪 Mock auth state changed:', user ? user.email : 'null');
+      if (process.env['NODE_ENV'] === 'development') {
+        logger.info('🧪 Mock auth state changed:', user ? user.email : 'null');
+      }
       setUser(user);
+      setLoading(false);
     };
     authStateListeners.push(mockAuthListener);
 
@@ -195,7 +194,9 @@ export const useAuth = (): AuthState => {
     setLoading(false);
 
     return () => {
-      logger.info('🧹 Cleaning up auth listener');
+      if (process.env['NODE_ENV'] === 'development') {
+        logger.info('🧹 Cleaning up auth listener');
+      }
       // Remove from local listeners
       const index = authStateListeners.indexOf(mockAuthListener);
       if (index > -1) {
@@ -246,6 +247,36 @@ export async function logIn(email: string, password: string): Promise<User> {
     // Notify all auth state listeners
     notifyAuthStateChange(mockUserData);
     return mockUserData;
+  }
+
+  // Check if Firebase auth is actually available before trying to use it
+  if (!hasAuthAvailable) {
+    logger.info('🧪 Firebase auth not available, using mock login');
+    // Fallback to mock for development when Firebase is not available
+    if (email && password) {
+      logger.info('🧪 Using fallback mock user for development');
+      const fallbackMockUser = {
+        uid: `mock-${Date.now()}`,
+        email: email,
+        emailVerified: true,
+        displayName: email.split('@')[0],
+        photoURL: null,
+        phoneNumber: null,
+        providerId: 'mock',
+        isAnonymous: false,
+        metadata: {
+          creationTime: new Date().toISOString(),
+          lastSignInTime: new Date().toISOString(),
+        },
+        providerData: [],
+        refreshToken: 'mock-refresh-token',
+        tenantId: null,
+      } as unknown as User;
+
+      // Notify all auth state listeners
+      notifyAuthStateChange(fallbackMockUser);
+      return fallbackMockUser;
+    }
   }
 
   try {
@@ -329,7 +360,7 @@ export async function signUp(email: string, password: string): Promise<User> {
 
 export async function logOut(): Promise<void> {
   try {
-    if (authInstance) {
+    if (authInstance && hasAuthAvailable) {
       await fbSignOut(authInstance);
     }
     notifyAuthStateChange(null);

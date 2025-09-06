@@ -72,16 +72,16 @@ class EncryptedRotatingFileHandler(RotatingFileHandler):
 
     def _encrypt_message(self, message: str) -> str:
         """
-        Encrypt a log message using AES-256-GCM.
+        Encrypt a log message using AES-GCM.
 
         Args:
-            message: Plain text log message
+            message: Plain text message to encrypt
 
         Returns:
-            Base64-encoded encrypted message with nonce
+            Base64-encoded encrypted data
         """
         try:
-            # Generate random nonce (12 bytes for GCM)
+            # Generate nonce
             nonce = os.urandom(12)
 
             # Create cipher
@@ -125,8 +125,8 @@ class EncryptedRotatingFileHandler(RotatingFileHandler):
             encrypted_msg = json.dumps(encrypted_entry) + '\n'
 
             # Use parent's file handling but with encrypted content
-            if self.stream is None:  # type: ignore[unreachable]
-                self.stream = self._open()
+            if self.stream is None:
+                self.stream = self._open()  # type: ignore[unreachable]
 
             # Write encrypted message
             self.stream.write(encrypted_msg)

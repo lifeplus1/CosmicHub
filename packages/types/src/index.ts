@@ -1,3 +1,9 @@
+// Import types needed for local interfaces
+import type { AspectType } from './astrology.types';
+
+// Export all backend types for type bridge system
+export * from './backend-types';
+
 // Core types for birth data and date ranges
 export interface BirthData {
   birth_date: string; // ISO format: YYYY-MM-DD
@@ -83,18 +89,6 @@ export interface ApiError {
   details?: Record<string, unknown>;
 }
 
-// Aspect types for calculations
-export type AspectType =
-  | 'conjunction'
-  | 'opposition'
-  | 'trine'
-  | 'square'
-  | 'sextile'
-  | 'quincunx'
-  | 'semi-sextile'
-  | 'semi-square'
-  | 'sesquiquadrate';
-
 export interface AspectDefinition {
   name: AspectType;
   angle: number;
@@ -102,22 +96,6 @@ export interface AspectDefinition {
   energy: 'harmonious' | 'challenging' | 'neutral';
   significance: 'major' | 'minor';
 }
-
-// Planet types
-export type PlanetName =
-  | 'sun'
-  | 'moon'
-  | 'mercury'
-  | 'venus'
-  | 'mars'
-  | 'jupiter'
-  | 'saturn'
-  | 'uranus'
-  | 'neptune'
-  | 'pluto'
-  | 'chiron'
-  | 'north_node'
-  | 'south_node';
 
 // Lunar phase types
 export type LunarPhase =
@@ -198,6 +176,7 @@ export * from './utility';
 export * from './experiments';
 export * from './experiment-validators';
 export * from './spiritual-education';
+export * from './data-flow.types';
 // Explicit re-exports for spiritual domains (avoid wildcard collisions)
 export type {
   SpiritualLevel as SpiritualPracticeLevel,

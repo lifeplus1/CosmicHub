@@ -13,7 +13,7 @@ interface AsteroidRow {
   name: string;
   sign: string;
   degree: string;
-  house: string;
+  house: number;
 }
 
 export type { AsteroidRow };

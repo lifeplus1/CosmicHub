@@ -174,7 +174,7 @@ async def verify_checkout_session(
 
         import stripe
 
-        from backend.database import get_firestore_client
+        from ...database import get_firestore_client
 
         # 1. Retrieve the session from Stripe
         session = stripe.checkout.Session.retrieve(request.sessionId)

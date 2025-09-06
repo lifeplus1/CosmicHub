@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 import { getStripeService, StripeSession } from '@cosmichub/integrations';
+import ErrorBoundary from './ErrorBoundary';
 
-const Subscribe: React.FC = () => {
+const Subscribe: React.FC = React.memo(() => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { goToHome } = useAppNavigation();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubscribe = async (): Promise<void> => {
+  const handleSubscribe = useCallback(async (): Promise<void> => {
     if (!user) {
       alert('Please sign in to subscribe to HealWave Pro');
-      navigate('/login');
+      goToHome(); // Navigate to home page where login modal can be opened
       return;
     }
 
@@ -49,7 +50,14 @@ const Subscribe: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, goToHome]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      void handleSubscribe();
+    }
+  }, [handleSubscribe]);
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-4 py-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-teal-800'>
@@ -66,8 +74,9 @@ const Subscribe: React.FC = () => {
           onClick={() => {
             void handleSubscribe();
           }}
+          onKeyDown={handleKeyDown}
           disabled={isLoading}
-          className='w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none'
+          className='w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2'
           aria-label='Subscribe to HealWave Pro'
         >
           {isLoading ? (
@@ -82,6 +91,35 @@ const Subscribe: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
-export default Subscribe;
+Subscribe.displayName = 'Subscribe';
+
+// Export with ErrorBoundary wrapper
+const SubscribeWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary
+    fallback={
+      <div className='flex flex-col items-center justify-center min-h-screen px-4 py-8 bg-gradient-to-br from-red-900 via-red-800 to-red-700'>
+        <div className='w-full max-w-md p-8 border shadow-2xl bg-white/10 backdrop-blur-lg rounded-3xl border-red-400/30'>
+          <div className='text-center'>
+            <div className='text-4xl mb-4'>⚠️</div>
+            <h2 className='mb-2 text-2xl font-bold text-white'>Subscription Error</h2>
+            <p className='mb-4 text-red-300'>
+              The subscription system encountered an error. Please try again.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className='w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  >
+    <Subscribe />
+  </ErrorBoundary>
+);
+
+export default SubscribeWithErrorBoundary;

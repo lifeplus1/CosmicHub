@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { devConsole } from '../../../config/environment';
-import { Card } from '@cosmichub/ui';
-import styles from './AudioPlayer.module.css';
+import { Card, stylesModules } from '@cosmichub/ui';
+
+const styles = stylesModules.audioPlayerStyles;
 
 interface AudioPlayerProps {
   frequency: number;

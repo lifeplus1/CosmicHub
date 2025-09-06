@@ -62,6 +62,7 @@ export type AppEnv = z.output<typeof envSchema>;
 function validateEnvironment(): AppEnv {
   try {
     // IMPORTANT: Spread to avoid prototype pollution & only include keys expected by schema
+    // @ts-ignore - Vite provides import.meta.env at runtime
     const raw: Record<string, unknown> = { ...import.meta.env };
     return envSchema.parse(raw);
   } catch (error) {

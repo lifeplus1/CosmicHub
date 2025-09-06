@@ -218,7 +218,7 @@ def generate_privacy_leadership_summary() -> dict[str, Any]:
     return privacy_summary
 
 
-def main():
+def main() -> int:
     """Generate and display privacy leadership summary."""
     print("\n" + "=" * 80)
     print("🏆 COSMICHUB PRIVACY LEADERSHIP SUMMARY")

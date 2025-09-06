@@ -1,8 +1,9 @@
 // Local storage types to replace @cosmichub/storage package
-import type { MultiSystemChartData } from '../components/MultiSystemChart/types';
+import type { StorageChartData, UnifiedBirthData } from '@cosmichub/types';
 
 // Define specific chart data types
-export type ChartData = MultiSystemChartData;
+export type ChartData = StorageChartData;
+export type BirthData = UnifiedBirthData;
 
 // Generic sync data type for various sync operations
 export interface SyncActionData {
@@ -90,7 +91,7 @@ export interface OfflineChart {
   id: string;
   name: string;
   data: ChartData;
-  birth_data: ChartData['birth_info']; // Birth data specific to chart calculation
+  birth_data: BirthData; // Birth data specific to chart calculation
   chart_data: ChartData; // Full chart data
   created_at: Date;
   updated_at: Date;
@@ -134,7 +135,18 @@ export class MockChartStorage implements OfflineChartStorage {
       id,
       name: `Chart ${new Date().toISOString()}`,
       data,
-      birth_data: data.birth_info,
+      birth_data: {
+          // Provide default birth data since simple ChartData doesn't include birth info
+          year: new Date().getFullYear(),
+          month: new Date().getMonth() + 1,
+          day: new Date().getDate(),
+          hour: 12,
+          minute: 0,
+          city: 'Unknown',
+          timezone: 'UTC',
+          lat: 0,
+          lon: 0,
+        },
       chart_data: data,
       created_at: new Date(),
       updated_at: new Date(),
@@ -156,7 +168,18 @@ export class MockChartStorage implements OfflineChartStorage {
         id,
         name: `Chart ${id}`, // Default name
         data: chartData,
-        birth_data: chartData.birth_info,
+        birth_data: {
+          // Provide default birth data since simple ChartData doesn't include birth info
+          year: new Date().getFullYear(),
+          month: new Date().getMonth() + 1,
+          day: new Date().getDate(),
+          hour: 12,
+          minute: 0,
+          city: 'Unknown',
+          timezone: 'UTC',
+          lat: 0,
+          lon: 0,
+        },
         chart_data: chartData,
         created_at: new Date(),
         updated_at: new Date(),

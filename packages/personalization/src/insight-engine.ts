@@ -1,13 +1,35 @@
 import { PersonalizedInsight, UserPreference, LearningPattern } from './types';
 import { UserBehaviorTracker } from './behavior-tracker';
 import { format, addDays } from 'date-fns';
+import type { RichTransitData } from '@cosmichub/types';
+
+// Enhanced astrological types for rich transit analysis
+export type TransitData = RichTransitData;
+
+export interface MetricsData {
+  totalActions: number;
+  uniqueFeatures: number;
+  favoriteFeatures: string[];
+}
+
+export interface MilestoneData {
+  threshold: number;
+  title: string;
+  message: string;
+  type?: 'feature_mastery' | 'progress' | 'achievement';
+}
+
+export interface InsightAction {
+  text: string;
+  type: 'explore' | 'reflect' | 'action' | 'learn';
+  link?: string;
+}
 
 /**
  * Generates personalized insights based on user behavior and preferences
  */
 export class PersonalizedInsightEngine {
   private behaviorTracker: UserBehaviorTracker;
-  private astrologicalData: Map<string, any> = new Map(); // Cache for astrological calculations
 
   constructor(behaviorTracker: UserBehaviorTracker) {
     this.behaviorTracker = behaviorTracker;
@@ -174,7 +196,7 @@ export class PersonalizedInsightEngine {
   private generateRecommendationInsight(
     userId: string,
     preferences: UserPreference,
-    learningPattern: LearningPattern
+    _learningPattern: LearningPattern
   ): PersonalizedInsight | null {
     const metrics = this.behaviorTracker.getUserEngagementMetrics(userId);
 
@@ -276,25 +298,51 @@ export class PersonalizedInsightEngine {
   }
 
   // Helper methods for content generation
-  private async getCurrentTransits(userId: string, date: Date): Promise<any[]> {
+  private async getCurrentTransits(_userId: string, _date: Date): Promise<TransitData[]> {
     // This would integrate with the astrology calculation service
-    // For now, return mock data
+    // Enhanced mock data with rich astrological metadata
     return [
       {
-        planet: 'Mars',
-        sign: 'Aries',
+        planet: 'mars',
+        sign: 'aries',
+        house: 1,
+        degree: 15.5,
         aspect: 'conjunction',
-        natalPlanet: 'Sun',
+        isSignificant: true,
+        natalPlanet: 'sun',
         strength: 0.9,
         type: 'major',
+        orb: 2.5,
+        exact: false,
+        applying: true,
+        element: 'fire',
+        modality: 'cardinal',
+        dignity: 'domicile',
+      },
+      {
+        planet: 'venus',
+        sign: 'taurus',
+        house: 2,
+        degree: 22.3,
+        aspect: 'trine',
+        isSignificant: true,
+        natalPlanet: 'moon',
+        strength: 0.7,
+        type: 'major',
+        orb: 3.1,
+        exact: false,
+        applying: false,
+        element: 'earth',
+        modality: 'fixed',
+        dignity: 'domicile',
       },
     ];
   }
 
   private findMostSignificantTransit(
-    transits: any[],
+    transits: TransitData[],
     preferences: UserPreference
-  ): any | null {
+  ): TransitData | null {
     // Filter transits based on user's interests
     const relevantTransits = transits.filter(transit => {
       if (
@@ -312,16 +360,16 @@ export class PersonalizedInsightEngine {
         ['Neptune', 'Pluto', 'Jupiter'].includes(transit.planet)
       )
         return true;
-      return transit.strength > 0.7;
+      return (transit.strength ?? 0) > 0.7;
     });
 
     return relevantTransits.length > 0
-      ? relevantTransits.sort((a, b) => b.strength - a.strength)[0]
-      : transits[0] || null;
+      ? relevantTransits.sort((a, b) => (b.strength ?? 0) - (a.strength ?? 0))[0] ?? null
+      : transits[0] ?? null;
   }
 
   private generateTransitContent(
-    transit: any,
+    transit: TransitData,
     preferences: UserPreference
   ): string {
     const style = preferences.preferences.interpretationStyle;
@@ -351,13 +399,9 @@ export class PersonalizedInsightEngine {
   }
 
   private generateTransitActionItems(
-    transit: any,
+    transit: TransitData,
     preferences: UserPreference
-  ): Array<{
-    text: string;
-    type: 'explore' | 'reflect' | 'action' | 'learn';
-    link?: string;
-  }> {
+  ): InsightAction[] {
     const actions = [];
 
     if (preferences.preferences.topics.includes('career')) {
@@ -385,7 +429,7 @@ export class PersonalizedInsightEngine {
   }
 
   private generateOnboardingContent(
-    preferences: UserPreference,
+    _preferences: UserPreference,
     learningPattern: LearningPattern
   ): string {
     const style = learningPattern.patterns.informationProcessing;
@@ -401,12 +445,8 @@ export class PersonalizedInsightEngine {
 
   private generateOnboardingActions(
     learningPattern: LearningPattern
-  ): Array<{
-    text: string;
-    type: 'explore' | 'reflect' | 'action' | 'learn';
-    link?: string;
-  }> {
-    const actions = [
+  ): InsightAction[] {
+    const actions: InsightAction[] = [
       {
         text: 'Explore your birth chart basics',
         type: 'explore' as const,
@@ -433,7 +473,7 @@ export class PersonalizedInsightEngine {
 
   private generateProgressContent(
     learningPattern: LearningPattern,
-    preferences: UserPreference
+    _preferences: UserPreference
   ): string {
     const nextFeature = learningPattern.adaptations.suggestedFeatures[0];
     const complexity = learningPattern.adaptations.recommendedComplexity;
@@ -443,11 +483,7 @@ export class PersonalizedInsightEngine {
 
   private generateProgressActions(
     learningPattern: LearningPattern
-  ): Array<{
-    text: string;
-    type: 'explore' | 'reflect' | 'action' | 'learn';
-    link?: string;
-  }> {
+  ): InsightAction[] {
     return learningPattern.adaptations.suggestedFeatures
       .slice(0, 2)
       .map(feature => ({
@@ -459,15 +495,16 @@ export class PersonalizedInsightEngine {
 
   // Additional helper methods
   private calculateTransitPriority(
-    transit: any
+    transit: TransitData
   ): 'low' | 'medium' | 'high' | 'urgent' {
-    if (transit.strength > 0.8) return 'high';
-    if (transit.strength > 0.6) return 'medium';
+    const strength = transit.strength ?? 0.5;
+    if (strength > 0.8) return 'high';
+    if (strength > 0.6) return 'medium';
     return 'low';
   }
 
   private mapTransitToCategory(
-    transit: any
+    transit: TransitData
   ):
     | 'career'
     | 'relationships'
@@ -490,32 +527,96 @@ export class PersonalizedInsightEngine {
     return weights[priority as keyof typeof weights] || 1;
   }
 
-  private getSimpleTransitMeaning(transit: any): string {
-    return `new energy and opportunities in your life`;
+  private getSimpleTransitMeaning(transit: TransitData): string {
+    const elementMeaning = {
+      fire: 'passionate energy and initiative',
+      earth: 'practical grounding and manifestation',
+      air: 'mental clarity and communication',
+      water: 'emotional depth and intuition',
+    };
+
+    const aspectMeaning = {
+      conjunction: 'powerful new beginnings',
+      trine: 'harmonious flow and ease',
+      square: 'dynamic challenge and growth',
+      sextile: 'opportunity and positive potential',
+      opposition: 'balance and integration',
+    };
+
+    const element = transit.element || 'air';
+    const aspectKey = transit.aspect as keyof typeof aspectMeaning;
+    
+    return `${elementMeaning[element]} through ${aspectMeaning[aspectKey] || 'transformative energy'}`;
   }
 
-  private getDetailedTransitMeaning(transit: any): string {
-    return `complex archetypal patterns and evolutionary potential`;
+  private getDetailedTransitMeaning(transit: TransitData): string {
+    const dignityContext = transit.dignity ? 
+      (transit.dignity === 'domicile' || transit.dignity === 'exaltation' ? 
+        'This planet is in its power, amplifying its positive qualities.' :
+        'This planet faces challenges, requiring conscious integration.') : 
+      'This planetary energy seeks balanced expression.';
+
+    const modalityPattern = {
+      cardinal: 'initiating new cycles and pioneering ventures',
+      fixed: 'stabilizing current patterns and deepening commitment', 
+      mutable: 'adapting to change and integrating diverse influences',
+    };
+
+    const modality = transit.modality || 'mutable';
+    
+    return `complex archetypal patterns involving ${modalityPattern[modality]}. ${dignityContext}`;
   }
 
-  private getIntermediateTransitMeaning(transit: any): string {
-    return `meaningful changes and growth opportunities`;
+  private getIntermediateTransitMeaning(transit: TransitData): string {
+    const strengthContext = (transit.strength ?? 0.5) > 0.8 ? 'powerful' : 
+                           (transit.strength ?? 0.5) > 0.5 ? 'moderate' : 'subtle';
+    
+    const timingContext = transit.applying ? 'building toward peak influence' : 
+                         'releasing and integrating its lessons';
+    
+    return `${strengthContext} transformative energy that is ${timingContext}`;
   }
 
-  private getBasicGuidance(transit: any): string {
-    return `taking positive action`;
+  private getBasicGuidance(transit: TransitData): string {
+    const planetGuidance = {
+      Mars: 'taking bold action and asserting yourself',
+      Venus: 'nurturing relationships and embracing beauty',
+      Mercury: 'communicating clearly and learning new things',
+      Jupiter: 'expanding your horizons and seeking wisdom',
+      Saturn: 'building structure and taking responsibility',
+      Uranus: 'embracing innovation and authentic change',
+      Neptune: 'connecting with your spirituality and creativity',
+      Pluto: 'transforming deep patterns and reclaiming power',
+    };
+
+    const planet = transit.planet as keyof typeof planetGuidance;
+    return planetGuidance[planet] || 'aligning with your authentic path';
   }
 
-  private getAdvancedGuidance(transit: any): string {
-    return `integration and conscious participation in the unfolding archetypal process`;
+  private getAdvancedGuidance(transit: TransitData): string {
+    const exactnessBonus = transit.exact ? 'This is a pivotal moment of exact alignment. ' : '';
+    
+    const orbContext = transit.orb && transit.orb < 1 ? 
+      'The influence is highly focused and precise.' :
+      'The influence offers a window of opportunity for integration.';
+    
+    return `${exactnessBonus}${orbContext} Consider how this archetypal energy can serve your evolutionary path.`;
   }
 
-  private getIntermediateGuidance(transit: any): string {
-    return `pay attention to emerging themes and synchronicities`;
+  private getIntermediateGuidance(transit: TransitData): string {
+    const elementAction = {
+      fire: 'channel this energy through creative action and leadership',
+      earth: 'ground this energy through practical steps and tangible results', 
+      air: 'work with this energy through learning and communication',
+      water: 'honor this energy through emotional processing and intuitive insights',
+    };
+
+    const element = transit.element || 'air';
+    return elementAction[element];
   }
 
   private generateDiversificationContent(
-    metrics: any,
+    metrics: MetricsData,
     preferences: UserPreference
   ): string {
     return `You've mastered your favorite features (${metrics.favoriteFeatures.join(', ')}), but there's so much more to discover! Based on your interests in ${preferences.preferences.topics.join(' and ')}, I recommend exploring some new areas of cosmic wisdom.`;
@@ -523,11 +624,7 @@ export class PersonalizedInsightEngine {
 
   private generateDiversificationActions(
     preferences: UserPreference
-  ): Array<{
-    text: string;
-    type: 'explore' | 'reflect' | 'action' | 'learn';
-    link?: string;
-  }> {
+  ): InsightAction[] {
     const actions = [];
 
     if (preferences.preferences.topics.includes('synastry')) {
@@ -550,31 +647,50 @@ export class PersonalizedInsightEngine {
   }
 
   private generateMilestoneContent(
-    milestone: any,
-    metrics: any,
+    milestone: MilestoneData,
+    metrics: MetricsData,
     preferences: UserPreference
   ): string {
     return `${milestone.message} You've engaged with ${metrics.totalActions} cosmic insights and mastered ${metrics.uniqueFeatures} different features. Your dedication to ${preferences.preferences.topics.join(' and ')} shows your growing cosmic wisdom.`;
   }
 
   private generateMilestoneActions(
-    milestone: any,
+    milestone: MilestoneData,
     preferences: UserPreference
-  ): Array<{
-    text: string;
-    type: 'explore' | 'reflect' | 'action' | 'learn';
-    link?: string;
-  }> {
-    return [
+  ): InsightAction[] {
+    const actions: Array<{
+      text: string;
+      type: 'explore' | 'reflect' | 'action' | 'learn';
+      link?: string;
+    }> = [
       {
         text: 'Share your cosmic milestone with friends',
         type: 'action' as const,
         link: '/share/milestone',
       },
-      {
+    ];
+
+    // Add personalized actions based on milestone type and preferences
+    if (milestone.type === 'feature_mastery') {
+      actions.push({
+        text: 'Explore advanced features in your favorite areas',
+        type: 'explore' as const,
+        link: `/explore/${preferences.preferences.topics[0]}`,
+      });
+    }
+
+    if (preferences.preferences.topics.includes('spirituality')) {
+      actions.push({
+        text: 'Reflect on your cosmic journey and spiritual growth',
+        type: 'reflect' as const,
+      });
+    } else {
+      actions.push({
         text: 'Reflect on your cosmic journey so far',
         type: 'reflect' as const,
-      },
-    ];
+      });
+    }
+
+    return actions;
   }
 }

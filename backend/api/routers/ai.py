@@ -296,7 +296,7 @@ async def generate_interpretation_stream(
         )
 
         # If the result contains formatted text, stream it
-        if isinstance(interpretation_result, dict):
+        if "error" not in interpretation_result:
             # Stream different sections of the interpretation
             sections = [
                 (
@@ -324,7 +324,7 @@ async def generate_interpretation_stream(
 
             for section_name, section_data in sections:
                 if section_data:
-                    yield f"\n## {section_name}\n\n"
+                    yield f"\n## {section_name}\n\n"  # type: ignore[unreachable]
 
                     # Stream subsections
                     for key, value in section_data.items():
@@ -337,8 +337,9 @@ async def generate_interpretation_stream(
                                     yield f"**{subkey.replace('_', ' ').title()}:** {subvalue}\n\n"  # noqa: E501
                                 elif isinstance(subvalue, list):
                                     yield f"**{subkey.replace('_', ' ').title()}:**\n"  # noqa: E501
-                                    for item in subvalue:  # type: Any
-                                        yield f"• {item}\n"
+                                    for item in subvalue:
+                                        item_str: Any = item
+                                        yield f"• {item_str}\n"
                                     yield "\n"
                         elif isinstance(value, str):
                             yield f"**{key.replace('_', ' ').title()}:** {value}\n\n"  # noqa: E501
@@ -348,12 +349,9 @@ async def generate_interpretation_stream(
                                 yield f"• {item}\n"
                             yield "\n"
         else:
-            # If it's a simple string, stream it word by word
-            words = str(interpretation_result).split()
-            for i, word in enumerate(words):
-                if i > 0:
-                    yield " "
-                yield word
+            # If there's an error, stream the error message
+            error_msg = interpretation_result.get("error", "Unknown error")
+            yield f"Error generating interpretation: {error_msg}"
 
     except Exception as e:
         logger.error(f"Error in interpretation streaming: {str(e)}")

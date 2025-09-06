@@ -1,1 +1,1 @@
-export * from './AnalyticsProvider.js';
+export * from './AnalyticsProvider';

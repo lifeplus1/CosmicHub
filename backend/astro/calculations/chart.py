@@ -2,17 +2,18 @@
 import logging
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List, Tuple
 
 import pytz
 import swisseph as swe  # type: ignore
 from geopy.exc import GeocoderTimedOut  # type: ignore
 from geopy.geocoders import Nominatim  # type: ignore
-from timezonefinder import TimezoneFinder  # type: ignore
+from timezonefinder import TimezoneFinder
+from pydantic import BaseModel, Field, validator
 
 from .aspects import calculate_aspects
 from .ephemeris import get_planetary_positions, init_ephemeris, PlanetPosition
-from .house_systems import calculate_houses
+from .house_systems import calculate_houses, HousesResult
 from .mayan import calculate_mayan_astrology
 from .uranian import calculate_uranian_astrology
 
@@ -25,6 +26,74 @@ from .vedic import (
 
 logger = logging.getLogger(__name__)
 
+# Constants
+YEAR_MIN = 1900
+YEAR_MAX = 2100
+LOCATION_CACHE_SIZE = 1000
+ASTEROID_NAMES = [
+    'chiron', 'ceres', 'pallas', 'juno', 'vesta', 'hygiea', 
+    'eros', 'psyche', 'fortuna', 'sedna', 'eris'
+]
+POINT_NAMES = [
+    'north_node', 'south_node', 'lilith_mean', 'lilith_true', 
+    'vertex', 'antivertex'
+]
+ZODIAC_SIGNS = [
+    "aries", "taurus", "gemini", "cancer", "leo", "virgo",
+    "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"
+]
+
+# Custom exceptions
+class ChartCalculationError(Exception):
+    """Custom exception for chart calculation errors"""
+    pass
+
+class LocationError(Exception):
+    """Custom exception for location resolution errors"""
+    pass
+
+
+# Pydantic models for better type safety
+class ChartInput(BaseModel):
+    """Input validation model for chart calculations"""
+    year: int = Field(..., ge=YEAR_MIN, le=YEAR_MAX, description="Birth year")
+    month: int = Field(..., ge=1, le=12, description="Birth month")
+    day: int = Field(..., ge=1, le=31, description="Birth day")
+    hour: int = Field(..., ge=0, le=23, description="Birth hour")
+    minute: int = Field(..., ge=0, le=59, description="Birth minute")
+    lat: Optional[float] = Field(None, ge=-90, le=90, description="Latitude")
+    lon: Optional[float] = Field(None, ge=-180, le=180, description="Longitude")
+    timezone: Optional[str] = Field(None, description="Timezone string")
+    city: Optional[str] = Field(None, min_length=1, max_length=100, description="City name")
+    house_system: str = Field("P", description="House system code")
+    
+    @validator('day')
+    def validate_date(cls, v: int, values: Dict[str, Any]) -> int:
+        """Validate that the date is actually valid"""
+        try:
+            if 'year' in values and 'month' in values:
+                datetime(values['year'], values['month'], v)
+        except ValueError as e:
+            raise ValueError(f"Invalid date: {e}")
+        return v
+    
+    @validator('timezone')
+    def validate_timezone(cls, v: Optional[str]) -> Optional[str]:
+        """Validate timezone string"""
+        if v:
+            try:
+                pytz.timezone(v)
+            except pytz.exceptions.UnknownTimeZoneError:
+                raise ValueError(f"Invalid timezone: {v}")
+        return v
+
+
+class CoordinatesData(BaseModel):
+    """Validated coordinates and timezone data"""
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+    timezone: str = Field(...)
+
 
 def validate_inputs(
     year: int,
@@ -36,48 +105,37 @@ def validate_inputs(
     lon: Optional[float] = None,
     timezone: Optional[str] = None,
     city: Optional[str] = None,
-) -> bool:
+    house_system: str = "P",
+) -> ChartInput:
+    """Validate chart calculation inputs using Pydantic model"""
     logger.debug(
-        f"Validating inputs: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}"  # noqa: E501
+        f"Validating inputs: year={year}, month={month}, day={day}, "
+        f"hour={hour}, minute={minute}, lat={lat}, lon={lon}, "
+        f"timezone={timezone}, city={city}"
     )
+    
     try:
-        if not (1900 <= year <= 2100):
-            logger.error(f"Year {year} outside valid range (1900-2100)")
-            raise ValueError(f"Year {year} must be between 1900 and 2100")
-        if not (1 <= month <= 12):
-            logger.error(f"Invalid month: {month}")
-            raise ValueError(f"Month {month} must be between 1 and 12")
-        if not (1 <= day <= 31):
-            logger.error(f"Invalid day: {day}")
-            raise ValueError(f"Day {day} must be between 1 and 31")
-        if not (0 <= hour <= 23):
-            logger.error(f"Invalid hour: {hour}")
-            raise ValueError(f"Hour {hour} must be between 0 and 23")
-        if not (0 <= minute <= 59):
-            logger.error(f"Invalid minute: {minute}")
-            raise ValueError(f"Minute {minute} must be between 0 and 59")
-        try:
-            datetime(year, month, day, hour, minute)
-        except ValueError as e:
-            logger.error(f"Invalid date combination: {str(e)}")
-            raise ValueError(f"Invalid date: {str(e)}")
-        if lat is not None and not (-90 <= lat <= 90):
-            logger.error(f"Invalid latitude: {lat}")
-            raise ValueError(f"Latitude {lat} must be between -90 and 90")
-        if lon is not None and not (-180 <= lon <= 180):
-            logger.error(f"Invalid longitude: {lon}")
-            raise ValueError(f"Longitude {lon} must be between -180 and 180")
-        if timezone:
-            try:
-                pytz.timezone(timezone)
-            except pytz.exceptions.UnknownTimeZoneError:
-                logger.error(f"Invalid timezone: {timezone}")
-                raise ValueError(f"Invalid timezone: {timezone}")
-        if not city:
-            logger.error("City is required")
-            raise ValueError("City is required")
+        # Use Pydantic model for validation
+        validated_input = ChartInput(
+            year=year,
+            month=month,
+            day=day,
+            hour=hour,
+            minute=minute,
+            lat=lat,
+            lon=lon,
+            timezone=timezone,
+            city=city,
+            house_system=house_system
+        )
+        
+        # Additional business logic validation
+        if not city and (lat is None or lon is None):
+            raise ValueError("Either city or both latitude and longitude must be provided")
+        
         logger.debug("Input validation successful")
-        return True
+        return validated_input
+        
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}", exc_info=True)
         raise
@@ -86,7 +144,7 @@ def validate_inputs(
         raise ValueError(f"Unexpected validation error: {str(e)}")
 
 
-@lru_cache(maxsize=1000)
+@lru_cache(maxsize=LOCATION_CACHE_SIZE)
 def get_location(city: str) -> Dict[str, Any]:
     logger.debug(f"Resolving location for city: {city}")
     try:
@@ -132,6 +190,230 @@ def get_location(city: str) -> Dict[str, Any]:
         raise ValueError(f"Error resolving location: {str(e)}")
 
 
+def _resolve_coordinates(
+    lat: Optional[float],
+    lon: Optional[float], 
+    city: Optional[str]
+) -> CoordinatesData:
+    """Resolve latitude, longitude, and timezone from inputs"""
+    if city and (lat is None or lon is None):
+        logger.debug("Fetching location data for city")
+        loc = get_location(city)
+        resolved_lat = loc["latitude"]
+        resolved_lon = loc["longitude"]
+        timezone = loc["timezone"]
+    else:
+        resolved_lat = lat
+        resolved_lon = lon
+        timezone = "UTC"
+    
+    if not resolved_lat or not resolved_lon:
+        logger.error("Latitude and longitude are required")
+        raise ValueError("Latitude and longitude are required")
+    
+    return CoordinatesData(
+        latitude=float(resolved_lat),
+        longitude=float(resolved_lon),
+        timezone=timezone or "UTC"
+    )
+
+
+def _calculate_julian_day(
+    year: int, month: int, day: int, hour: int, minute: int, timezone: str
+) -> float:
+    """Calculate Julian day from date/time components"""
+    logger.debug(f"Using timezone: {timezone}")
+    tz = pytz.timezone(timezone)
+    dt = datetime(year, month, day, hour, minute)
+    logger.debug(f"Local datetime: {dt}")
+    dt_utc = tz.localize(dt).astimezone(pytz.UTC)
+    logger.debug(f"UTC datetime: {dt_utc}")
+    
+    # Use getattr for dynamic access to handle missing swisseph attributes
+    utc_to_jd_func = getattr(swe, 'utc_to_jd', None)
+    if utc_to_jd_func is None:
+        raise AttributeError("swisseph.utc_to_jd not available")
+    
+    jd = utc_to_jd_func(
+        dt_utc.year, dt_utc.month, dt_utc.day, 
+        dt_utc.hour, dt_utc.minute, 0, 1
+    )
+    
+    logger.debug(f"Julian day result: status={jd[0]}, julian_day={jd[1]}")
+    if jd[0] < 0:
+        logger.error(f"Invalid Julian day calculation, status: {jd[0]}")
+        raise ChartCalculationError(f"Invalid Julian day calculation, status: {jd[0]}")
+    
+    # Handle the Julian day value which could be float, list, or tuple from PySwissEph
+    julian_day_raw = jd[1]
+    if isinstance(julian_day_raw, (list, tuple)):
+        julian_day_value = float(julian_day_raw[0])
+    else:
+        julian_day_value = float(julian_day_raw)
+    
+    return julian_day_value
+
+
+def _separate_celestial_bodies(planets: Dict[str, Any]) -> tuple[
+    Dict[str, PlanetPosition], 
+    Dict[str, Dict[str, Any]], 
+    Dict[str, Dict[str, Any]]
+]:
+    """Separate planets, asteroids, and points from ephemeris data"""
+    main_planets: Dict[str, PlanetPosition] = {}
+    asteroids: Dict[str, Dict[str, Any]] = {}
+    points: Dict[str, Dict[str, Any]] = {}
+    
+    for name, data in planets.items():
+        if name in ASTEROID_NAMES:
+            asteroids[name] = {
+                "position": data["position"],
+                "retrograde": data["retrograde"]
+            }
+            logger.info(f"Found asteroid {name}: position={data['position']}, retrograde={data['retrograde']}")
+        elif name in POINT_NAMES:
+            points[name] = {
+                "position": data["position"],
+                "retrograde": data["retrograde"]
+            }
+            logger.info(f"Found point {name}: position={data['position']}, retrograde={data['retrograde']}")
+        else:
+            main_planets[name] = data
+    
+    logger.info(f"Separated {len(main_planets)} main planets, {len(asteroids)} asteroids, and {len(points)} points")
+    return main_planets, asteroids, points
+
+
+def _add_calculated_points(
+    points: Dict[str, Dict[str, Any]], 
+    houses_data: HousesResult,
+    planets: Dict[str, Any]
+) -> None:
+    """Add vertex, antivertex, and Part of Fortune to points"""
+    # Add vertex and antivertex from angles if not already present
+    if 'vertex' not in points and 'vertex' in houses_data["angles"]:
+        vertex_pos = float(houses_data["angles"]["vertex"])
+        points['vertex'] = {
+            "position": vertex_pos,
+            "retrograde": False  # Vertex is never retrograde
+        }
+        logger.info(f"Added vertex from angles: position={vertex_pos}")
+        
+    if 'antivertex' not in points:
+        # Calculate antivertex as vertex + 180°
+        vertex_pos = houses_data["angles"].get("vertex", 0)
+        antivertex_pos = float((vertex_pos + 180) % 360)
+        points['antivertex'] = {
+            "position": antivertex_pos,
+            "retrograde": False  # Antivertex is never retrograde
+        }
+        logger.info(f"Added antivertex from angles: position={antivertex_pos}")
+    
+    # Calculate Part of Fortune (Fortuna)
+    _calculate_part_of_fortune(points, houses_data, planets)
+    
+    logger.info(f"Final points after adding vertex/antivertex: {list(points.keys())}")
+
+
+def _calculate_part_of_fortune(
+    points: Dict[str, Dict[str, Any]],
+    houses_data: HousesResult, 
+    planets: Dict[str, Any]
+) -> None:
+    """Calculate Part of Fortune based on Sun, Moon, and Ascendant positions"""
+    try:
+        sun_pos = float(planets.get('sun', {}).get('position', 0))
+        moon_pos = float(planets.get('moon', {}).get('position', 0))
+        asc_pos = float(houses_data["angles"].get("ascendant", 0))  # type: ignore
+        
+        # Determine if it's a day or night chart (Sun above or below horizon)
+        # If Sun is in houses 7-12 (below ASC-DSC axis), it's a night chart
+        sun_asc_diff = (sun_pos - asc_pos) % 360
+        is_day_chart = sun_asc_diff <= 180
+        
+        if is_day_chart:
+            # Day formula: ASC + Moon - Sun
+            fortuna_pos = (asc_pos + moon_pos - sun_pos) % 360
+        else:
+            # Night formula: ASC + Sun - Moon  
+            fortuna_pos = (asc_pos + sun_pos - moon_pos) % 360
+        
+        points['part_of_fortune'] = {
+            "position": fortuna_pos,
+            "retrograde": False  # Part of Fortune is never retrograde
+        }
+        logger.info(f"Added Part of Fortune: position={fortuna_pos:.2f}° ({'day' if is_day_chart else 'night'} chart)")
+        
+    except Exception as e:
+        logger.warning(f"Failed to calculate Part of Fortune: {e}")
+
+
+def _degree_to_sign(deg: float) -> str:
+    """Convert degree position to zodiac sign"""
+    try:
+        return ZODIAC_SIGNS[int((deg % 360) // 30)]
+    except Exception:
+        return "aries"
+
+
+def _build_enriched_houses(houses_data: HousesResult) -> Dict[str, Dict[str, Any]]:
+    """Build enriched houses with sign information"""
+    enriched_houses_map: Dict[str, Dict[str, Any]] = {}
+    
+    for h in houses_data["houses"]:  # type: ignore
+        cusp_val = h.get("cusp", 0)
+        try:
+            cusp_deg = float(cusp_val)  # type: ignore[arg-type]
+        except Exception:
+            cusp_deg = 0.0
+        house_no = h.get("house", 0)
+        if 1 <= house_no <= 12:
+            enriched_houses_map[f"house_{house_no}"] = {
+                "house": house_no,
+                "cusp": cusp_deg,
+                "sign": _degree_to_sign(cusp_deg),
+            }
+    
+    return enriched_houses_map
+
+
+def _build_chart_response(
+    julian_day: float,
+    lat: float,
+    lon: float,
+    timezone: str,
+    main_planets: Dict[str, PlanetPosition],
+    asteroids: Dict[str, Dict[str, Any]],
+    points: Dict[str, Dict[str, Any]],
+    houses_data: HousesResult,
+    aspects: List[Any]
+) -> Dict[str, Any]:
+    """Build the final chart data response"""
+    return {
+        "julian_day": float(julian_day),
+        "latitude": float(lat),
+        "longitude": float(lon),
+        "timezone": timezone,
+        "planets": {
+            k: {"position": v["position"], "retrograde": v["retrograde"]} 
+            for k, v in main_planets.items()
+        },  # type: ignore
+        "asteroids": asteroids,
+        "points": points,
+        "houses": _build_enriched_houses(houses_data),
+        "angles": {
+            "ascendant": float(houses_data["angles"].get("ascendant", 0)),  # type: ignore
+            "descendant": float((houses_data["angles"].get("ascendant", 0) + 180) % 360),  # type: ignore
+            "mc": float(houses_data["angles"].get("mc", 0)),  # type: ignore
+            "ic": float((houses_data["angles"].get("mc", 0) + 180) % 360),  # type: ignore
+            "vertex": float(houses_data["angles"].get("vertex", 0)),  # type: ignore
+            "antivertex": float((houses_data["angles"].get("vertex", 0) + 180) % 360),  # type: ignore
+            "part_of_fortune": float(points.get("part_of_fortune", {}).get("position", 0)),  # type: ignore
+        },
+        "aspects": aspects,  # type: ignore
+    }
+
+
 def calculate_chart(
     year: int,
     month: int,
@@ -144,189 +426,83 @@ def calculate_chart(
     city: Optional[str] = None,
     house_system: str = "P",
 ) -> Dict[str, Any]:
+    """Calculate astrological chart with comprehensive data"""
     logger.debug(
-        f"Calculating chart: year={year}, month={month}, day={day}, hour={hour}, minute={minute}, lat={lat}, lon={lon}, timezone={timezone}, city={city}, house_system={house_system}"  # noqa: E501
+        f"Calculating chart: year={year}, month={month}, day={day}, "
+        f"hour={hour}, minute={minute}, lat={lat}, lon={lon}, "
+        f"timezone={timezone}, city={city}, house_system={house_system}"
     )
+    
     try:
+        # Validate inputs first
+        validated_input = validate_inputs(year, month, day, hour, minute, lat, lon, timezone, city, house_system)
+        
+        # Initialize ephemeris
         init_ephemeris()
-        if city and (lat is None or lon is None):
-            logger.debug("Fetching location data for city")
-            loc = get_location(city)
-            lat, lon = loc["latitude"], loc["longitude"]
-            timezone = loc["timezone"] or timezone
-        if not lat or not lon:
-            logger.error("Latitude and longitude are required")
-            raise ValueError("Latitude and longitude are required")
-        timezone = timezone or "UTC"
-        logger.debug(f"Using timezone: {timezone}")
-        tz = pytz.timezone(timezone)
-        dt = datetime(year, month, day, hour, minute)
-        logger.debug(f"Local datetime: {dt}")
-        dt_utc = tz.localize(dt).astimezone(pytz.UTC)
-        logger.debug(f"UTC datetime: {dt_utc}")
-        jd = swe.utc_to_jd(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour, dt_utc.minute, 0, 1)  # type: ignore  # noqa: E501
-        logger.debug(f"Julian day result: status={jd[0]}, julian_day={jd[1]}")
-        if jd[0] < 0:
-            logger.error(f"Invalid Julian day calculation, status: {jd[0]}")
-            raise ValueError(
-                f"Invalid Julian day calculation, status: {jd[0]}"
-            )
-        julian_day_value: float = jd[1]  # type: ignore
-        if isinstance(julian_day_value, (list, tuple)):
-            julian_day_value = julian_day_value[0]  # type: ignore
-        julian_day = float(julian_day_value)  # type: ignore
-
+        
+        # Resolve coordinates and timezone
+        coords = _resolve_coordinates(validated_input.lat, validated_input.lon, validated_input.city)
+        final_timezone = validated_input.timezone or coords.timezone
+        
+        # Calculate Julian day
+        julian_day = _calculate_julian_day(
+            validated_input.year, validated_input.month, validated_input.day,
+            validated_input.hour, validated_input.minute, final_timezone
+        )
+        
+        # Get planetary positions
         planets = get_planetary_positions(julian_day) or {}  # type: ignore
         logger.info(f"Chart calculation - got {len(planets)} planets from ephemeris: {list(planets.keys())}")
-        houses_data = calculate_houses(julian_day, lat, lon, house_system) or {"houses": [], "angles": {}}  # type: ignore  # noqa: E501
         
-        # Separate planets, asteroids, and points
-        main_planets: Dict[str, PlanetPosition] = {}
-        asteroids: Dict[str, Dict[str, Any]] = {}
-        points: Dict[str, Dict[str, Any]] = {}
-        asteroid_names = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'hygiea', 'eros', 'psyche', 'fortuna', 'sedna', 'eris']  # Include all supported asteroids
-        point_names = ['north_node', 'south_node', 'lilith_mean', 'lilith_true', 'vertex', 'antivertex']
+        # Calculate houses
+        houses_data = calculate_houses(julian_day, coords.latitude, coords.longitude, validated_input.house_system)
         
-        for name, data in planets.items():
-            if name in asteroid_names:
-                asteroids[name] = {
-                    "position": data["position"],
-                    "retrograde": data["retrograde"]
-                }
-                logger.info(f"Found asteroid {name}: position={data['position']}, retrograde={data['retrograde']}")
-            elif name in point_names:
-                points[name] = {
-                    "position": data["position"],
-                    "retrograde": data["retrograde"]
-                }
-                logger.info(f"Found point {name}: position={data['position']}, retrograde={data['retrograde']}")
-            else:
-                main_planets[name] = data
+        # Separate celestial bodies
+        main_planets, asteroids, points = _separate_celestial_bodies(planets)
         
-        logger.info(f"Separated {len(main_planets)} main planets, {len(asteroids)} asteroids, and {len(points)} points")
+        # Add calculated points (vertex, antivertex, Part of Fortune)
+        _add_calculated_points(points, houses_data, planets)
         
-        # Add vertex and antivertex from angles to points if not already present from ephemeris
-        if 'vertex' not in points and 'vertex' in houses_data["angles"]:
-            vertex_pos = float(houses_data["angles"]["vertex"])
-            points['vertex'] = {
-                "position": vertex_pos,
-                "retrograde": False  # Vertex is never retrograde
-            }
-            logger.info(f"Added vertex from angles: position={vertex_pos}")
-            
-        if 'antivertex' not in points:
-            # Calculate antivertex as vertex + 180°
-            vertex_pos = houses_data["angles"].get("vertex", 0)
-            antivertex_pos = float((vertex_pos + 180) % 360)
-            points['antivertex'] = {
-                "position": antivertex_pos,
-                "retrograde": False  # Antivertex is never retrograde
-            }
-            logger.info(f"Added antivertex from angles: position={antivertex_pos}")
+        # Debug logging
+        _log_debug_info(planets, points, asteroids)
         
-        logger.info(f"Final points after adding vertex/antivertex: {list(points.keys())}")
-        
-        # Calculate Part of Fortune (Fortuna)
-        # Part of Fortune = Ascendant + Moon - Sun (for day charts)
-        # Part of Fortune = Ascendant + Sun - Moon (for night charts)
-        try:
-            sun_pos = float(planets.get('sun', {}).get('position', 0))
-            moon_pos = float(planets.get('moon', {}).get('position', 0))
-            asc_pos = float(houses_data["angles"].get("ascendant", 0))  # type: ignore
-            
-            # Determine if it's a day or night chart (Sun above or below horizon)
-            # If Sun is in houses 7-12 (below ASC-DSC axis), it's a night chart
-            sun_asc_diff = (sun_pos - asc_pos) % 360
-            is_day_chart = sun_asc_diff <= 180
-            
-            if is_day_chart:
-                # Day formula: ASC + Moon - Sun
-                fortuna_pos = (asc_pos + moon_pos - sun_pos) % 360
-            else:
-                # Night formula: ASC + Sun - Moon  
-                fortuna_pos = (asc_pos + sun_pos - moon_pos) % 360
-            
-            points['part_of_fortune'] = {
-                "position": fortuna_pos,
-                "retrograde": False  # Part of Fortune is never retrograde
-            }
-            logger.info(f"Added Part of Fortune: position={fortuna_pos:.2f}° ({'day' if is_day_chart else 'night'} chart)")
-            
-        except Exception as e:
-            logger.warning(f"Failed to calculate Part of Fortune: {e}")
-        
-        # Debug: Log what we got from ephemeris
-        logger.info(f"DEBUG: Raw planets from ephemeris: {list(planets.keys())}")
-        logger.info(f"DEBUG: Point names we're looking for: {point_names}")
-        for point_name in point_names:
-            if point_name in planets:
-                logger.info(f"DEBUG: Found {point_name} in ephemeris data: {planets[point_name]}")
-            else:
-                logger.info(f"DEBUG: Missing {point_name} from ephemeris data")
-        logger.info(f"DEBUG: Raw planets from ephemeris: {list(planets.keys())}")
-        logger.info(f"DEBUG: Points found: {list(points.keys())}")
-        logger.info(f"DEBUG: Asteroids found: {list(asteroids.keys())}")
-        
+        # Calculate aspects
         aspects = calculate_aspects(planets) or []  # type: ignore
-
-        # Enrich houses with sign information (0° Aries = 0, each 30° per sign)
-        def degree_to_sign(deg: float) -> str:
-            names = [
-                "aries","taurus","gemini","cancer","leo","virgo",
-                "libra","scorpio","sagittarius","capricorn","aquarius","pisces"
-            ]
-            try:
-                return names[int((deg % 360) // 30)]
-            except Exception:
-                return "aries"
-        # Build object map style houses with sign for compatibility
-        enriched_houses_map: Dict[str, Dict[str, Any]] = {}
-        for h in houses_data["houses"]:  # type: ignore
-            cusp_val = h.get("cusp", 0)
-            try:
-                cusp_deg = float(cusp_val)  # type: ignore[arg-type]
-            except Exception:
-                cusp_deg = 0.0
-            house_no = h.get("house", 0)
-            if 1 <= house_no <= 12:
-                enriched_houses_map[f"house_{house_no}"] = {
-                    "house": house_no,
-                    "cusp": cusp_deg,
-                    "sign": degree_to_sign(cusp_deg),
-                }
-
-        chart_data: Dict[str, Any] = {
-            "julian_day": float(julian_day),
-            "latitude": float(lat),
-            "longitude": float(lon),
-            "timezone": timezone,
-            "planets": {k: {"position": v["position"], "retrograde": v["retrograde"]} for k, v in main_planets.items()},  # type: ignore  # noqa: E501
-            "asteroids": asteroids,  # Add asteroids to chart data
-            "points": points,  # Add points (nodes, lilith) to chart data
-            "houses": enriched_houses_map,  # type: ignore
-            "angles": {
-                "ascendant": float(houses_data["angles"].get("ascendant", 0)),  # type: ignore  # noqa: E501
-                "descendant": float((houses_data["angles"].get("ascendant", 0) + 180) % 360),  # type: ignore  # noqa: E501
-                "mc": float(houses_data["angles"].get("mc", 0)),  # type: ignore  # noqa: E501
-                "ic": float((houses_data["angles"].get("mc", 0) + 180) % 360),  # type: ignore  # noqa: E501
-                "vertex": float(houses_data["angles"].get("vertex", 0)),  # type: ignore  # noqa: E501
-                "antivertex": float((houses_data["angles"].get("vertex", 0) + 180) % 360),  # type: ignore  # noqa: E501
-                "part_of_fortune": float(points.get("part_of_fortune", {}).get("position", 0)),  # type: ignore  # noqa: E501
-            },
-            "aspects": aspects,  # type: ignore
-        }
+        
+        # Build and return chart data
+        chart_data = _build_chart_response(
+            julian_day, coords.latitude, coords.longitude, final_timezone,
+            main_planets, asteroids, points, houses_data, aspects
+        )
+        
         logger.debug(f"Chart data: {chart_data}")
         return chart_data
+        
     except ValueError as e:
-        logger.error(
-            f"Validation error in calculate_chart: {str(e)}", exc_info=True
-        )
+        logger.error(f"Validation error in calculate_chart: {str(e)}", exc_info=True)
         raise
     except Exception as e:
-        logger.error(
-            f"Unexpected error in calculate_chart: {str(e)}", exc_info=True
-        )
-        raise ValueError(f"Invalid date or calculation: {str(e)}")
+        logger.error(f"Unexpected error in calculate_chart: {str(e)}", exc_info=True)
+        raise ChartCalculationError(f"Invalid date or calculation: {str(e)}")
+
+
+def _log_debug_info(
+    planets: Dict[str, Any], 
+    points: Dict[str, Dict[str, Any]], 
+    asteroids: Dict[str, Dict[str, Any]]
+) -> None:
+    """Log debug information about celestial bodies"""
+    logger.info(f"DEBUG: Raw planets from ephemeris: {list(planets.keys())}")
+    logger.info(f"DEBUG: Point names we're looking for: {POINT_NAMES}")
+    
+    for point_name in POINT_NAMES:
+        if point_name in planets:
+            logger.info(f"DEBUG: Found {point_name} in ephemeris data: {planets[point_name]}")
+        else:
+            logger.info(f"DEBUG: Missing {point_name} from ephemeris data")
+    
+    logger.info(f"DEBUG: Points found: {list(points.keys())}")
+    logger.info(f"DEBUG: Asteroids found: {list(asteroids.keys())}")
 
 
 def calculate_multi_system_chart(
@@ -372,7 +548,7 @@ def calculate_multi_system_chart(
 
         # Chinese astrology
         # Chinese astrology
-        chinese_data = {}  # Chinese astrology calculation not available
+        chinese_data: Dict[str, Any] = {}  # Chinese astrology calculation not available
         # Mayan astrology
         mayan_data = calculate_mayan_astrology(year, month, day)  # type: ignore  # noqa: E501
 

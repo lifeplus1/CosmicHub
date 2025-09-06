@@ -6,12 +6,12 @@
  * Implements AI #5 requirement for user onboarding flows.
  */
 
-import React, { useState, useCallback } from 'react';
-import { Card, Button } from '@cosmichub/ui';
-import { 
-  FaHeart, 
-  FaStar, 
-  FaMoon, 
+import React, { useState, useCallback, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, Button, Progress, ErrorBoundary } from '@cosmichub/ui';
+import {
+  FaHeart,
+  FaStar,
+  FaMoon,
   FaSun,
   FaEye,
   FaTree,
@@ -35,7 +35,7 @@ interface OnboardingData {
   learningStyle: 'visual' | 'auditory' | 'kinesthetic' | 'reading' | '';
 }
 
-const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComplete }) => {
+const OnboardingFlow: React.FC<OnboardingFlowProps> = React.memo(({ userId: _userId, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isComplete, setIsComplete] = useState(false);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
@@ -48,6 +48,22 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComp
   });
 
   const totalSteps = 6;
+
+  // Memoized options arrays for performance
+  const experienceLevels = useMemo(() => [
+    { id: 'beginner', icon: FaSun, label: 'Beginner', desc: 'New to spiritual practices' },
+    { id: 'intermediate', icon: FaMoon, label: 'Intermediate', desc: 'Some experience with spiritual systems' },
+    { id: 'advanced', icon: FaStar, label: 'Advanced', desc: 'Deep practice and understanding' }
+  ], []);
+
+  const spiritualSystems = useMemo(() => [
+    { id: 'astrology', icon: FaSun, label: 'Astrology' },
+    { id: 'tarot', icon: FaEye, label: 'Tarot' },
+    { id: 'kabbalah', icon: FaTree, label: 'Kabbalah' },
+    { id: 'humandesign', icon: FaGem, label: 'Human Design' },
+    { id: 'genekeys', icon: FaHeart, label: 'Gene Keys' },
+    { id: 'numerology', icon: FaStar, label: 'Numerology' }
+  ], []);
 
   const updateData = useCallback((field: keyof OnboardingData, value: unknown) => {
     setOnboardingData(prev => ({
@@ -89,45 +105,56 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComp
     }
   }, [onboardingData, onComplete]);
 
+  // Keyboard handler for accessibility
+  const handleKeyDown = useCallback((event: React.KeyboardEvent, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  }, []);
+
   if (isComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cosmic-dark via-cosmic-blue/20 to-cosmic-purple/20">
-        <Card className="max-w-md mx-auto">
-          <div className="p-8 text-center">
-            <div className="text-6xl mb-6">🌟</div>
-            <h2 className="text-2xl font-bold text-cosmic-gold mb-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cosmic-dark via-cosmic-purple/20 to-cosmic-blue/20 p-4">
+        <Card className="cosmic-glass border-cosmic-gold/20 shadow-2xl shadow-cosmic-purple/20 max-w-md mx-auto">
+          <CardContent className="p-8 text-center">
+            <div className="text-6xl mb-6 animate-bounce">✨</div>
+            <CardTitle className="text-2xl font-bold text-cosmic-gold mb-4 font-cinzel">
               Welcome to Your Journey!
-            </h2>
-            <p className="text-cosmic-silver/80 mb-6">
+            </CardTitle>
+            <p className="text-cosmic-silver/80 mb-6 leading-relaxed">
               Your personalized learning path has been created based on your preferences.
             </p>
             <div className="flex items-center justify-center text-cosmic-gold">
-              <FaCheckCircle className="text-2xl animate-pulse" />
+              <FaCheckCircle className="text-3xl animate-pulse" />
             </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cosmic-dark via-cosmic-blue/20 to-cosmic-purple/20">
-      <Card className="max-w-2xl mx-auto">
-        <div className="p-8">
-          
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between text-sm text-cosmic-silver/60 mb-2">
-              <span>Step {currentStep} of {totalSteps}</span>
-              <span>{Math.round((currentStep / totalSteps) * 100)}%</span>
+    <ErrorBoundary>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cosmic-dark via-cosmic-purple/20 to-cosmic-blue/20 p-4">
+        <Card className="cosmic-glass border-cosmic-gold/20 shadow-2xl shadow-cosmic-purple/20 max-w-2xl mx-auto w-full">
+          <CardHeader className="text-center border-b border-cosmic-gold/10 pb-6">
+            <CardTitle className="text-3xl font-bold text-cosmic-gold font-cinzel mb-2">
+              Spiritual Onboarding
+            </CardTitle>
+            <p className="text-cosmic-silver/70">
+              Let&apos;s personalize your cosmic learning journey
+            </p>
+          </CardHeader>
+          <CardContent className="p-8">
+            {/* Progress Section */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center text-sm text-cosmic-silver/60 mb-3">
+                <span className="font-medium">Step {currentStep} of {totalSteps}</span>
+                <span className="text-cosmic-gold font-semibold">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
+              </div>
+              <Progress value={(currentStep / totalSteps) * 100} className="h-3" />
             </div>
-            <div className="w-full bg-cosmic-dark/50 rounded-full h-2">
-              <div 
-                className="bg-cosmic-gold h-2 rounded-full transition-all duration-300"
-                data-width={`${(currentStep / totalSteps) * 100}%`}
-              />
-            </div>
-          </div>
 
           {/* Step Content */}
           {currentStep === 1 && (
@@ -157,19 +184,18 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComp
                 What&apos;s Your Spiritual Experience Level?
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { id: 'beginner', icon: FaSun, label: 'Beginner', desc: 'New to spiritual practices' },
-                  { id: 'intermediate', icon: FaMoon, label: 'Intermediate', desc: 'Some experience with spiritual systems' },
-                  { id: 'advanced', icon: FaStar, label: 'Advanced', desc: 'Deep practice and understanding' }
-                ].map(({ id, icon: Icon, label, desc }) => (
+                {experienceLevels.map(({ id, icon: Icon, label, desc }) => (
                   <button
                     key={id}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    className={`p-4 rounded-lg border-2 transition-all text-left focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 ${
                       onboardingData.spiritualExperience === id
                         ? 'border-cosmic-gold bg-cosmic-gold/10'
                         : 'border-cosmic-silver/20 hover:border-cosmic-silver/40'
                     }`}
                     onClick={() => updateData('spiritualExperience', id)}
+                    onKeyDown={(e) => handleKeyDown(e, () => updateData('spiritualExperience', id))}
+                    aria-label={`Select ${label} experience level: ${desc}`}
+                    tabIndex={0}
                   >
                     <Icon className="text-2xl mb-2 text-cosmic-gold" />
                     <h3 className="font-semibold text-cosmic-silver">{label}</h3>
@@ -189,17 +215,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComp
                 Select all that apply - we&apos;ll customize your learning path
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[
-                  { id: 'astrology', icon: FaSun, label: 'Astrology' },
-                  { id: 'tarot', icon: FaEye, label: 'Tarot' },
-                  { id: 'kabbalah', icon: FaTree, label: 'Kabbalah' },
-                  { id: 'humandesign', icon: FaGem, label: 'Human Design' },
-                  { id: 'genekeys', icon: FaHeart, label: 'Gene Keys' },
-                  { id: 'numerology', icon: FaStar, label: 'Numerology' }
-                ].map(({ id, icon: Icon, label }) => (
+                {spiritualSystems.map(({ id, icon: Icon, label }) => (
                   <button
                     key={id}
-                    className={`p-4 rounded-lg border-2 transition-all text-center ${
+                    className={`p-4 rounded-lg border-2 transition-all text-center focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 ${
                       onboardingData.interests.includes(id)
                         ? 'border-cosmic-gold bg-cosmic-gold/10'
                         : 'border-cosmic-silver/20 hover:border-cosmic-silver/40'
@@ -210,6 +229,14 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComp
                         : [...onboardingData.interests, id];
                       updateData('interests', newInterests);
                     }}
+                    onKeyDown={(e) => handleKeyDown(e, () => {
+                      const newInterests = onboardingData.interests.includes(id)
+                        ? onboardingData.interests.filter(i => i !== id)
+                        : [...onboardingData.interests, id];
+                      updateData('interests', newInterests);
+                    })}
+                    aria-label={`${onboardingData.interests.includes(id) ? 'Deselect' : 'Select'} ${label} spiritual system`}
+                    tabIndex={0}
                   >
                     <Icon className="text-2xl mb-2 text-cosmic-gold mx-auto" />
                     <h3 className="font-semibold text-cosmic-silver text-sm">{label}</h3>
@@ -316,35 +343,40 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ userId: _userId, onComp
             </div>
           )}
 
-          {/* Navigation */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-cosmic-silver/20">
-            <Button
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className="flex items-center gap-2"
-              variant="secondary"
-            >
-              <FaArrowLeft /> Previous
-            </Button>
-            
-            <Button
-              onClick={nextStep}
-              className="flex items-center gap-2"
-              disabled={
-                (currentStep === 2 && !onboardingData.spiritualExperience) ??
-                (currentStep === 3 && onboardingData.interests.length === 0) ??
-                (currentStep === 4 && !onboardingData.practiceStyle) ??
-                (currentStep === 5 && !onboardingData.timeCommitment) ??
-                (currentStep === 6 && onboardingData.goals.length === 0)
-              }
-            >
-              {currentStep === totalSteps ? 'Complete' : 'Next'} <FaArrowRight />
-            </Button>
-          </div>
-        </div>
-      </Card>
-    </div>
+            {/* Navigation */}
+            <div className="flex justify-between items-center mt-8 pt-6 border-t border-cosmic-silver/20">
+              <Button
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                variant="outline"
+                className="flex items-center gap-2 px-6 py-3"
+              >
+                <FaArrowLeft className="text-sm" /> Previous
+              </Button>
+
+              <Button
+                onClick={nextStep}
+                variant={currentStep === totalSteps ? 'cosmic' : 'default'}
+                className="flex items-center gap-2 px-8 py-3 font-semibold"
+                disabled={
+                  (currentStep === 2 && !onboardingData.spiritualExperience) ||
+                  (currentStep === 3 && onboardingData.interests.length === 0) ||
+                  (currentStep === 4 && !onboardingData.practiceStyle) ||
+                  (currentStep === 5 && !onboardingData.timeCommitment) ||
+                  (currentStep === 6 && onboardingData.goals.length === 0)
+                }
+              >
+                {currentStep === totalSteps ? '✨ Complete Setup' : 'Next'} <FaArrowRight className="text-sm" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </ErrorBoundary>
   );
-};
+});
+
+// Add display name for React.memo
+OnboardingFlow.displayName = 'OnboardingFlow';
 
 export default OnboardingFlow;

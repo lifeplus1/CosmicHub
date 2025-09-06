@@ -3,6 +3,7 @@ import { useAuth } from '@cosmichub/auth';
 import { Card, Button } from '@cosmichub/ui';
 import ChartWheelUnified from '../features/ChartWheelUnified';
 import { useBirthData } from '../contexts/BirthDataContext';
+import { toExtendedBirthData } from '@cosmichub/types';
 
 const ChartWheelPage: React.FC = () => {
   useAuth();
@@ -42,7 +43,17 @@ const ChartWheelPage: React.FC = () => {
       timezone: formData.timezone,
     };
 
-    setBirthData(data);
+    // Convert to TextBirthData format
+    const textBirthData = {
+      birth_date: `${data.year}-${data.month.toString().padStart(2, '0')}-${data.day.toString().padStart(2, '0')}`,
+      birth_time: `${data.hour.toString().padStart(2, '0')}:${data.minute.toString().padStart(2, '0')}`,
+      latitude: data.lat,
+      longitude: data.lon,
+      city: data.city,
+      timezone: data.timezone,
+    };
+
+    setBirthData(textBirthData);
   };
 
   const loadSampleChart = () => {
@@ -57,7 +68,18 @@ const ChartWheelPage: React.FC = () => {
       city: 'New York',
       timezone: 'America/New_York',
     };
-    setBirthData(sampleData);
+
+    // Convert to TextBirthData format
+    const textBirthData = {
+      birth_date: `${sampleData.year}-${sampleData.month.toString().padStart(2, '0')}-${sampleData.day.toString().padStart(2, '0')}`,
+      birth_time: `${sampleData.hour.toString().padStart(2, '0')}:${sampleData.minute.toString().padStart(2, '0')}`,
+      latitude: sampleData.lat,
+      longitude: sampleData.lon,
+      city: sampleData.city,
+      timezone: sampleData.timezone,
+    };
+
+    setBirthData(textBirthData);
 
     setFormData({
       year: '1990',
@@ -330,7 +352,7 @@ const ChartWheelPage: React.FC = () => {
         <div className='lg:col-span-2'>
           {birthData !== null ? (
             <ChartWheelUnified
-              birthData={birthData}
+              birthData={toExtendedBirthData(birthData)}
               showAspects={showAspects}
               showAnimation={showAnimation}
               interactive={false}
@@ -357,38 +379,40 @@ const ChartWheelPage: React.FC = () => {
         </div>
       </div>
 
-      {birthData !== null && (
-        <Card title='Chart Information'>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm'>
-            <div>
-              <span className='text-cosmic-silver'>Birth Date:</span>
-              <span className='text-cosmic-gold ml-2'>
-                {birthData.month}/{birthData.day}/{birthData.year}
-              </span>
+      {birthData !== null && (() => {
+        const extendedData = toExtendedBirthData(birthData);
+        return (
+          <Card title='Chart Information'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm'>
+              <div>
+                <span className='text-cosmic-silver'>Birth Date:</span>
+                <span className='text-cosmic-gold ml-2'>
+                  {extendedData.month}/{extendedData.day}/{extendedData.year}
+                </span>
+              </div>
+              <div>
+                <span className='text-cosmic-silver'>Birth Time:</span>
+                <span className='text-cosmic-gold ml-2'>
+                  {extendedData.hour.toString().padStart(2, '0')}:
+                  {extendedData.minute.toString().padStart(2, '0')}
+                </span>
+              </div>
+              <div>
+                <span className='text-cosmic-silver'>Location:</span>
+                <span className='text-cosmic-gold ml-2'>{extendedData.city}</span>
+              </div>
+              <div>
+                <span className='text-cosmic-silver'>Coordinates:</span>
+                <span className='text-cosmic-gold ml-2'>
+                  {extendedData.latitude && extendedData.longitude
+                    ? `${extendedData.latitude.toFixed(4)}, ${extendedData.longitude.toFixed(4)}`
+                    : 'Coords N/A'}
+                </span>
+              </div>
             </div>
-            <div>
-              <span className='text-cosmic-silver'>Birth Time:</span>
-              <span className='text-cosmic-gold ml-2'>
-                {birthData.hour?.toString().padStart(2, '0')}:
-                {birthData.minute?.toString().padStart(2, '0')}
-              </span>
-            </div>
-            <div>
-              <span className='text-cosmic-silver'>Location:</span>
-              <span className='text-cosmic-gold ml-2'>{birthData.city}</span>
-            </div>
-            <div>
-              <span className='text-cosmic-silver'>Coordinates:</span>
-              <span className='text-cosmic-gold ml-2'>
-                {typeof birthData.lat === 'number' &&
-                typeof birthData.lon === 'number'
-                  ? `${birthData.lat.toFixed(4)}, ${birthData.lon.toFixed(4)}`
-                  : 'Coords N/A'}
-              </span>
-            </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        );
+      })()}
     </div>
   );
 };

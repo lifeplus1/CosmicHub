@@ -1,8 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.packages.json",
   "compilerOptions": {
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    "rootDir": "../../",
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
@@ -12,6 +13,13 @@
     // Standardize lib target (ES2022) to match monorepo baseline
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*", "../../vite-env.d.ts"],
-  "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"]
+  "include": ["src/**/*", "../types/src/**/*", "../../vite-env.d.ts"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "../types/src/**/*.test.*",
+    "../types/src/**/*test*"
+  ]
 }

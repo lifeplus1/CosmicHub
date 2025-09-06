@@ -33,7 +33,7 @@ import logging
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import numpy as np
 
@@ -213,7 +213,8 @@ class VectorizedCompositeCalculator:
             "planets": all_planets.astype(self.precision),
             "houses": all_houses.astype(self.precision),
             "angles": all_angles.astype(self.precision),
-            "chart_count": len(charts),
+            # Convert chart_count to numpy array to match return type
+            "chart_count": np.array([len(charts)]),
         }
 
     def _calculate_composite_planets(
@@ -439,7 +440,7 @@ class VectorizedCompositeCalculator:
                 compatibility_scores.append(compatibility)
 
         # Return mean compatibility or default value if no scores
-        return np.mean(compatibility_scores) if compatibility_scores else 0.5
+        return float(np.mean(compatibility_scores)) if compatibility_scores else 0.5
 
     def _get_element_distribution(self, planet_positions: np.ndarray) -> np.ndarray:  # noqa: E501
         """

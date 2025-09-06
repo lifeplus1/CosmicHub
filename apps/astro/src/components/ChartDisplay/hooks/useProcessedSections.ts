@@ -15,10 +15,10 @@ import {
 } from '../normalizeChart';
 import {
   getRulerFromSign,
-  getSignFromDegreesCapitalized,
   getSignFromDegrees,
+  calculateHousePosition,
 } from '../../../utils/astrologyUtils';
-import type { HouseCusp } from '../../../types/house-cusp';
+import { normalizePlanetName } from '../../../utils/type-bridge-utils';
 
 export interface ProcessedSections {
   planets: ChartDisplayPlanet[];
@@ -42,34 +42,7 @@ const _PLANET_NAMES_SET: ReadonlySet<string> = new Set([
   'pluto',
 ]);
 
-export function calculateHouseForPlanet(
-  planetPosition: number,
-  houseCusps: HouseCusp[]
-): string {
-  if (!Array.isArray(houseCusps) || houseCusps.length !== 12) return 'Unknown';
-  const getOrdinal = (n: number) => {
-    const v = Math.abs(n) % 100;
-    if (v >= 11 && v <= 13) return `${n}th`;
-    const last = v % 10;
-    return `${n}${last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th'}`;
-  };
-  const sorted = houseCusps
-    .map((h, i) => ({ house: i + 1, cusp: h.cusp ?? h.number ?? 0 }))
-    .sort((a, b) => a.cusp - b.cusp);
-  for (let i = 0; i < sorted.length; i++) {
-    const cur = sorted[i];
-    const next = sorted[(i + 1) % sorted.length];
-    if (!cur || !next) continue;
-    if (next.cusp > cur.cusp) {
-      if (planetPosition >= cur.cusp && planetPosition < next.cusp)
-        return getOrdinal(cur.house);
-    } else {
-      if (planetPosition >= cur.cusp || planetPosition < next.cusp)
-        return getOrdinal(cur.house);
-    }
-  }
-  return getOrdinal(1);
-}
+// REMOVED: calculateHouseForPlanet - now using centralized calculateHousePosition
 
 export function useProcessedSections(
   chartData: ChartLike | null,
@@ -117,23 +90,22 @@ export function useProcessedSections(
       return data.filter(item =>
         fields.some(f => {
           const v = item[f];
-          return typeof v === 'string' && v.toLowerCase().includes(lowered);
+          const stringValue = typeof v === 'string' ? v : String(v || '');
+          return stringValue.toLowerCase().includes(lowered);
         })
       );
     }
 
     const enrichedPlanets = mainPlanets.map(p => {
       const hasHouse =
-        p.house !== undefined && p.house !== null && p.house !== 'Unknown';
+        p.house !== undefined && p.house !== null && typeof p.house === 'number';
       const position = typeof p.position === 'number' ? p.position : 0;
       const housesValid = Array.isArray(housesArray) && housesArray.length > 0;
       const calcHouse = hasHouse
         ? p.house
-        : String(
-            calculateHouseForPlanet(
-              position,
-              housesValid ? (housesArray as HouseCusp[]) : []
-            )
+        : calculateHousePosition(
+            position,
+            housesValid ? housesArray.map(h => h.cusp ?? 0) : []
           );
       return { ...p, house: calcHouse };
     });
@@ -144,7 +116,7 @@ export function useProcessedSections(
         const pos = matchHouse('Ascendant', 0);
         return {
           ...a,
-          sign: getSignFromDegreesCapitalized(pos),
+          sign: getSignFromDegrees(pos),
           degree: pos % 30,
         };
       }
@@ -152,7 +124,7 @@ export function useProcessedSections(
         const pos = housesArray[9]?.cusp ?? 0;
         return {
           ...a,
-          sign: getSignFromDegreesCapitalized(pos),
+          sign: getSignFromDegrees(pos),
           degree: pos % 30,
         };
       }
@@ -160,24 +132,23 @@ export function useProcessedSections(
     });
     const enrichedHouses = housesArray.map(h => {
       const cusp = typeof h.cusp === 'number' ? h.cusp : 0;
+      const signLowercase = getSignFromDegrees(cusp);
+      const rulerString = h.ruler ?? getRulerFromSign(signLowercase);
+      const rulerPlanet = rulerString ? normalizePlanetName(rulerString) : undefined;
       return {
         ...h,
-        sign: getSignFromDegreesCapitalized(cusp),
+        sign: signLowercase,
         degree: cusp % 30,
-        ruler: h.ruler ?? getRulerFromSign(getSignFromDegrees(cusp)),
+        ruler: rulerPlanet,
       };
     });
     const enrichedAspects = aspectsArray.map(a => {
       const hasApplying =
-        typeof a.applying === 'string' && a.applying.length > 0;
-      const status = hasApplying
-        ? a.applying
-        : a.orb < 1
-          ? 'Exact'
-          : a.orb < 3
-            ? 'Applying'
-            : 'Separating';
-      return { ...a, orb: getAspectOrb(a.type, a.orb), applying: status };
+        typeof a.applying === 'string' && String(a.applying).length > 0;
+      const isApplying = hasApplying
+        ? String(a.applying).toLowerCase().includes('applying')
+        : a.orb < 3; // Consider applying if orb is small
+      return { ...a, orb: getAspectOrb(a.aspect_type, a.orb), applying: isApplying };
     });
 
     return {
@@ -192,10 +163,10 @@ export function useProcessedSections(
         searchTerm
       ),
       angles: filterEntities(enrichedAngles, ['name', 'sign'], searchTerm),
-      houses: filterEntities(enrichedHouses, ['house', 'sign'], searchTerm),
+      houses: filterEntities(enrichedHouses, ['number', 'sign'], searchTerm),
       aspects: filterEntities(
         enrichedAspects,
-        ['planet1', 'planet2', 'type'],
+        ['planet1', 'planet2', 'aspect_type'],
         searchTerm
       ),
       points: filterEntities(points, ['name', 'sign', 'house'], searchTerm),

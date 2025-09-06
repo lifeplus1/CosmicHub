@@ -6,7 +6,7 @@ Handles subscription management, payments, and webhook validation
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, Optional, cast
 
 import stripe
 from fastapi import Depends, HTTPException, Request
@@ -14,7 +14,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin import auth
 
 from database import get_firestore_client
-from ..types.runtime_protocols import (
+from backend.types.runtime_protocols import (
     SubscriptionPlan,
     SubscriptionData,
     FirestoreClient,

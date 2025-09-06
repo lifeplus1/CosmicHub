@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { devConsole } from '../config/devConsole';
+import ErrorBoundary from './ErrorBoundary';
 // Provide a minimal process shim typing if not present (front-end safe)
 declare const process:
   | { env?: Record<string, string | undefined>; NODE_ENV?: string }
@@ -83,7 +84,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
         if (userPresets.success) {
           // Constrain to expected shape; fallback to empty array if invalid
           const data = Array.isArray(userPresets.data)
-            ? (userPresets.data as FrequencyPreset[])
+            ? (userPresets.data)
             : [];
           setPresets(data);
         } else {
@@ -122,7 +123,14 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
       try {
         setLoading(true);
         setError(null);
-        interface NewPreset extends FrequencyPreset {
+        interface NewPreset {
+          id: string;
+          name: string;
+          category: FrequencyPreset['category'];
+          baseFrequency: number;
+          binauralBeat?: number;
+          description?: string;
+          benefits?: readonly string[];
           metadata: {
             volume: number;
             duration: number;
@@ -151,7 +159,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
         const savedPreset = await savePreset(preset);
         if (savedPreset.success) {
           setPresets(prev => {
-            const next = savedPreset.data as FrequencyPreset;
+            const next = savedPreset.data;
             return [...prev, next];
           });
         } else {
@@ -567,4 +575,29 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
 
 PresetSelector.displayName = 'PresetSelector';
 
-export default PresetSelector;
+// Export with ErrorBoundary wrapper
+const PresetSelectorWithErrorBoundary: React.FC<PresetSelectorProps> = (props) => (
+  <ErrorBoundary
+    fallback={
+      <div className='p-6 space-y-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl'>
+        <div className='text-center'>
+          <div className='text-4xl mb-4'>⚠️</div>
+          <h3 className='text-lg font-semibold text-red-400 mb-2'>Preset Selector Error</h3>
+          <p className='text-red-300 mb-4'>
+            Unable to load frequency presets. Please refresh the page.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className='px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    }
+  >
+    <PresetSelector {...props} />
+  </ErrorBoundary>
+);
+
+export default PresetSelectorWithErrorBoundary;

@@ -20,6 +20,7 @@ import {
   FaGraduationCap
 } from 'react-icons/fa';
 import { ProgressBar } from '../ui/ProgressBar';
+import { formatDate } from '@cosmichub/config';
 
 // Types for progress tracking
 interface LearningActivity {
@@ -205,14 +206,7 @@ const ProgressTracker: React.FC = () => {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+
 
   return (
     <Card className="p-6 bg-gradient-to-br from-cosmic-blue/20 via-cosmic-purple/10 to-cosmic-dark/30 backdrop-blur-xl border border-cosmic-silver/20">

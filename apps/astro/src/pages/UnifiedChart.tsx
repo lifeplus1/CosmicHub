@@ -19,8 +19,13 @@ import type {
 } from '../services/api.types';
 // NOTE: There is a naming collision for ChartBirthData between context usage (year/month/day form)
 // and the types package (birth_date/birth_time form). We support both shapes here.
-import type { ChartBirthData as LibraryChartBirthData } from '@cosmichub/types';
-import { extractNumericBirthData } from '../utils/birthDataNormalization';
+import { 
+  extractNumericBirthData 
+} from '../utils/birthDataNormalization';
+import { 
+  toTextBirthData,
+  type ChartBirthData as LibraryChartBirthData 
+} from '@cosmichub/types';
 
 import { componentLogger } from '../utils/componentLogger';
 import { useChartProcessing } from '@cosmichub/hooks';
@@ -196,17 +201,19 @@ const UnifiedChart: React.FC = () => {
                 result.data.birth_data as unknown as Record<string, unknown>
               );
               if (restored && setBirthData) {
-                setBirthData({
+                // Convert numeric data to TextBirthData format
+                const textBirthData = toTextBirthData({
                   year: restored.year,
                   month: restored.month,
                   day: restored.day,
                   hour: restored.hour,
                   minute: restored.minute,
-                  location: restored.city,
+                  city: restored.city,
                   latitude: restored.lat,
                   longitude: restored.lon,
                   timezone: restored.timezone,
                 });
+                setBirthData(textBirthData);
               }
               componentLogger.info(
                 'UnifiedChart',
@@ -274,20 +281,19 @@ const UnifiedChart: React.FC = () => {
 
               // Update birth data context once without triggering re-render
               if (setBirthData) {
-                const newBirthData = {
+                // Convert numeric data to TextBirthData format
+                const textBirthData = toTextBirthData({
                   year,
                   month,
                   day,
                   hour,
                   minute,
-                  location: parsed.location,
+                  city: parsed.location,
                   latitude: parsed.lat ?? 0,
                   longitude: parsed.lon ?? 0,
                   timezone: parsed.timezone ?? 'UTC',
-                };
-                // The context expects numeric year/month/day variant; if original context definition mismatches,
-                // we still supply numeric form for downstream compatibility.
-                setBirthData(newBirthData);
+                });
+                setBirthData(textBirthData);
               }
 
               componentLogger.info(
@@ -404,7 +410,8 @@ const UnifiedChart: React.FC = () => {
                     minute = minute ?? min;
                   }
 
-                  const restoredBirthData = {
+                  // Convert numeric data to TextBirthData format
+                  const textBirthData = toTextBirthData({
                     year: year ?? new Date().getFullYear(),
                     month: month ?? 1,
                     day: day ?? 1,
@@ -415,12 +422,6 @@ const UnifiedChart: React.FC = () => {
                         ? raw.city
                         : typeof raw.location === 'string'
                           ? raw.location
-                          : '',
-                    location:
-                      typeof raw.location === 'string'
-                        ? raw.location
-                        : typeof raw.city === 'string'
-                          ? raw.city
                           : '',
                     latitude:
                       typeof raw.latitude === 'number'
@@ -436,8 +437,8 @@ const UnifiedChart: React.FC = () => {
                           : 0,
                     timezone:
                       typeof raw.timezone === 'string' ? raw.timezone : 'UTC',
-                  };
-                  setBirthData(restoredBirthData);
+                  });
+                  setBirthData(textBirthData);
                 }
 
                 componentLogger.info(

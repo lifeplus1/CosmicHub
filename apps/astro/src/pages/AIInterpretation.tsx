@@ -8,7 +8,8 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@cosmichub/config/firebase';
 import { useAuth } from '@cosmichub/auth';
 import { useParams } from 'react-router-dom';
-import { Card, Button } from '@cosmichub/ui';
+import { Card, Button, stylesModules } from '@cosmichub/ui';
+import { formatDate } from '@cosmichub/config';
 import type { Interpretation } from '../components/AIInterpretation/types';
 import { fetchAIInterpretations, fetchSavedCharts } from '../services/api';
 import type { ApiResult } from '../services/apiResult';
@@ -18,7 +19,8 @@ import type {
   UserId,
   InterpretationResponse,
 } from '../services/api.types';
-import styles from './AIInterpretations.module.css';
+
+const styles = stylesModules.aiInterpretationsStyles;
 
 // Simple Spinner component
 const Spinner = (): React.JSX.Element => (
@@ -82,15 +84,6 @@ const AIInterpretations: React.FC<AIInterpretationsProps> = ({
   const savedCharts: SavedChart[] = savedChartsResult?.success
     ? savedChartsResult.data
     : [];
-
-  // Helper function to format date display
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   // Chart Selector Component
   const ChartSelector = (): React.JSX.Element => {

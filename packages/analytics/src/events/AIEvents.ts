@@ -3,8 +3,8 @@
  * Specialized analytics for AI feature usage
  */
 
-import { getAnalytics } from '../AnalyticsService.js';
-import type { AIInteractionEvent } from '../types/index.js';
+import { getAnalytics } from '../AnalyticsService';
+import type { AIInteractionEvent } from '../types/index';
 
 export const trackAIInteraction = (data: AIInteractionEvent): void => {
   const analytics = getAnalytics();

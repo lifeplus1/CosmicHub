@@ -1,0 +1,312 @@
+/* Cosmic Hub Component Styles - Tailwind/Radix UI Extensions */
+
+/* Base cosmic glass effect using Tailwind utilities and CSS custom properties */
+.cosmic-glass {
+  @apply bg-cosmic-dark/30 backdrop-blur-lg border border-cosmic-silver/20;
+}
+
+/* Performance monitoring progress bar with data attributes */
+[data-width] {
+  width: calc(var(--width, 0) * 1%);
+}
+
+[data-width="0"] { --width: 0; }
+[data-width="1"] { --width: 1; }
+[data-width="2"] { --width: 2; }
+[data-width="3"] { --width: 3; }
+[data-width="4"] { --width: 4; }
+[data-width="5"] { --width: 5; }
+[data-width="10"] { --width: 10; }
+[data-width="15"] { --width: 15; }
+[data-width="20"] { --width: 20; }
+[data-width="25"] { --width: 25; }
+[data-width="30"] { --width: 30; }
+[data-width="35"] { --width: 35; }
+[data-width="40"] { --width: 40; }
+[data-width="45"] { --width: 45; }
+[data-width="50"] { --width: 50; }
+[data-width="55"] { --width: 55; }
+[data-width="60"] { --width: 60; }
+[data-width="65"] { --width: 65; }
+[data-width="70"] { --width: 70; }
+[data-width="75"] { --width: 75; }
+[data-width="80"] { --width: 80; }
+[data-width="85"] { --width: 85; }
+[data-width="90"] { --width: 90; }
+[data-width="95"] { --width: 95; }
+[data-width="100"] { --width: 100; }
+
+/* Enhanced cosmic glass with glow effect */
+.cosmic-glass-glow {
+  @apply cosmic-glass;
+  box-shadow: 
+    0 0 20px rgba(85, 60, 154, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Cosmic button base styles */
+.cosmic-button {
+  @apply transition-all duration-200 font-medium rounded-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50 focus:ring-offset-2;
+}
+
+/* Cosmic button focus enhancement */
+.cosmic-focus {
+  @apply focus:ring-2 focus:ring-cosmic-purple/50 focus:ring-offset-2 focus:ring-offset-cosmic-dark;
+}
+
+/* Cosmic gradient backgrounds */
+.cosmic-bg-footer {
+  background: linear-gradient(90deg, rgba(36,0,70,0.95) 60%, rgba(244,180,0,0.12) 100%);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.cosmic-bg-contact {
+  @apply bg-cosmic-purple/90 shadow-xl;
+}
+
+/* Cosmic text gradients */
+.gradient-text-cosmic {
+  @apply bg-gradient-to-r from-cosmic-gold to-cosmic-silver bg-clip-text text-transparent;
+}
+
+.gradient-text-accent {
+  @apply bg-gradient-to-r from-cosmic-purple to-cosmic-blue bg-clip-text text-transparent;
+}
+
+/* Cosmic card styles */
+.cosmic-card {
+  @apply cosmic-glass rounded-2xl p-8 text-cosmic-silver;
+}
+
+.cosmic-card-header {
+  @apply text-cosmic-gold mb-4 font-cinzel text-2xl font-bold;
+}
+
+.cosmic-card-content {
+  @apply text-base text-cosmic-silver;
+}
+
+/* Cosmic link styles */
+.cosmic-link {
+  @apply text-cosmic-gold hover:underline transition-colors duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 focus:ring-offset-2 focus:ring-offset-cosmic-dark;
+}
+
+.cosmic-link-secondary {
+  @apply text-yellow-200 hover:text-cosmic-gold hover:underline transition-colors duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 focus:ring-offset-2 focus:ring-offset-cosmic-dark;
+}
+
+/* Cosmic navigation styles */
+.cosmic-nav {
+  @apply flex justify-center gap-4 mt-1;
+}
+
+/* Cosmic footer specific styles */
+.cosmic-footer {
+  @apply py-6 mt-16 text-center border-t-2 border-cosmic-gold/60 relative;
+}
+
+.cosmic-footer-content {
+  @apply flex flex-col items-center justify-center gap-2;
+}
+
+.cosmic-footer-header {
+  @apply flex items-center justify-center gap-2 mb-1;
+}
+
+.cosmic-footer-copyright {
+  @apply tracking-wider text-cosmic-gold font-cinzel;
+}
+
+/* Cosmic icon styles */
+.cosmic-icon {
+  @apply w-6 h-6 text-cosmic-gold;
+}
+
+/* Cosmic sun icon specific styling */
+.cosmic-sun-icon {
+  @apply cosmic-icon;
+}
+
+/* Assessment modal styles */
+.cosmic-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.cosmic-modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto;
+}
+
+.cosmic-modal-header {
+  @apply flex justify-between items-center mb-6;
+}
+
+.cosmic-modal-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.cosmic-modal-subtitle {
+  @apply text-gray-600;
+}
+
+/* Assessment specific styles */
+.cosmic-assessment-option {
+  @apply w-full text-left p-4 rounded-lg border-2 border-gray-200;
+  @apply hover:border-cosmic-purple hover:bg-cosmic-purple/5 transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50 focus:ring-offset-2;
+}
+
+.cosmic-assessment-option-content {
+  @apply flex items-center;
+}
+
+.cosmic-assessment-option-indicator {
+  @apply w-6 h-6 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center;
+}
+
+.cosmic-assessment-option-indicator-dot {
+  @apply w-3 h-3 rounded-full bg-cosmic-purple opacity-0;
+}
+
+.cosmic-assessment-option-text {
+  @apply text-gray-900;
+}
+
+/* Progress bar cosmic styling with data attribute support */
+.cosmic-progress-bg {
+  @apply w-full bg-gray-200 rounded-full h-3 mb-6;
+}
+
+.cosmic-progress-fill {
+  @apply h-3 rounded-full bg-gradient-to-r from-cosmic-purple to-cosmic-blue transition-all duration-300;
+}
+
+/* Progress width classes for common values */
+.cosmic-progress-fill[data-progress="0"] { width: 0%; }
+.cosmic-progress-fill[data-progress="17"] { width: 17%; }
+.cosmic-progress-fill[data-progress="33"] { width: 33%; }
+.cosmic-progress-fill[data-progress="50"] { width: 50%; }
+.cosmic-progress-fill[data-progress="67"] { width: 67%; }
+.cosmic-progress-fill[data-progress="83"] { width: 83%; }
+.cosmic-progress-fill[data-progress="100"] { width: 100%; }
+
+/* Assessment navigation */
+.cosmic-assessment-nav {
+  @apply flex justify-between;
+}
+
+.cosmic-assessment-nav-hint {
+  @apply text-sm text-gray-500;
+}
+
+/* Assessment type toggle */
+.cosmic-assessment-toggle {
+  @apply mt-8 pt-6 border-t border-gray-200;
+}
+
+.cosmic-assessment-toggle-content {
+  @apply flex items-center justify-center space-x-4;
+}
+
+.cosmic-assessment-toggle-button {
+  @apply px-4 py-2 rounded-lg border-2 transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50 focus:ring-offset-2;
+}
+
+.cosmic-assessment-toggle-button-active {
+  @apply cosmic-assessment-toggle-button border-cosmic-purple bg-cosmic-purple text-white;
+}
+
+.cosmic-assessment-toggle-button-inactive {
+  @apply cosmic-assessment-toggle-button border-gray-300 text-gray-600 hover:border-cosmic-purple hover:text-cosmic-purple;
+}
+
+/* Responsive design enhancements */
+@media (max-width: 640px) {
+  .cosmic-card {
+    @apply p-4 rounded-lg;
+  }
+  
+  .cosmic-card-header {
+    @apply text-xl;
+  }
+  
+  .cosmic-nav {
+    @apply flex-col gap-2;
+  }
+  
+  .cosmic-modal-content {
+    @apply mx-2 max-h-[95vh];
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .cosmic-modal-content {
+    @apply bg-cosmic-dark text-cosmic-silver;
+  }
+  
+  .cosmic-modal-title {
+    @apply text-cosmic-gold;
+  }
+  
+  .cosmic-modal-subtitle {
+    @apply text-cosmic-silver/80;
+  }
+  
+  .cosmic-assessment-option {
+    @apply border-cosmic-silver/20 bg-cosmic-dark/50;
+  }
+  
+  .cosmic-assessment-option:hover {
+    @apply border-cosmic-purple/60 bg-cosmic-purple/10;
+  }
+  
+  .cosmic-assessment-option-text {
+    @apply text-cosmic-silver;
+  }
+  
+  .cosmic-progress-bg {
+    @apply bg-cosmic-dark/50;
+  }
+  
+  .cosmic-assessment-nav-hint {
+    @apply text-cosmic-silver/60;
+  }
+}
+
+/* Animation enhancements */
+.cosmic-glass {
+  animation: cosmic-glass-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes cosmic-glass-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(85, 60, 154, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(85, 60, 154, 0.4);
+  }
+}
+
+/* Accessibility enhancements */
+.cosmic-focus-visible:focus-visible {
+  @apply outline-2 outline-cosmic-gold outline-offset-2;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .cosmic-glass {
+    animation: none;
+  }
+  
+  .cosmic-assessment-option,
+  .cosmic-button,
+  .cosmic-link,
+  .cosmic-link-secondary {
+    transition: none;
+  }
+}

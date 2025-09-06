@@ -185,7 +185,7 @@ class TestParquetExporter:
         # Verify key analytics metrics preserved
         assert flattened['calculation_type'] == 'natal'
         assert flattened['processing_time_ms'] == 150
-        assert flattened['success'] == True
+        assert flattened['success'] is True
         assert flattened['user_id_hash'] == 'test_user'
         assert flattened['planet_count'] == 2
         assert flattened['aspect_count'] == 1
@@ -201,7 +201,7 @@ class TestParquetExporter:
         assert flattened['user_rating'] == 5  # Critical for reward model
         assert flattened['query_length'] > 0
         assert flattened['response_length'] > 0
-        assert flattened['chart_context'] == True
+        assert flattened['chart_context'] is True
         assert flattened['category_1'] == 'sun_sign'
 
 

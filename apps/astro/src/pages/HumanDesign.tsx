@@ -5,7 +5,7 @@ import { useBirthData } from '../contexts/BirthDataContext';
 import { SimpleBirthForm } from '../components/SimpleBirthForm';
 import HumanDesignChart from '../components/HumanDesignChart/HumanDesignChart';
 import type { HumanDesignData } from '../components/HumanDesignChart/types';
-import type { ChartBirthData } from '@cosmichub/types';
+import { type ChartBirthData, parseTextBirthData } from '@cosmichub/types';
 
 const HumanDesign: React.FC = () => {
   const { birthData, isDataValid, setBirthData } = useBirthData();
@@ -176,7 +176,14 @@ const HumanDesign: React.FC = () => {
                     <div className='text-cosmic-silver'>
                       {birthData !== null &&
                         birthData !== undefined &&
-                        `${birthData.month}/${birthData.day}/${birthData.year}`}
+                        (() => {
+                          try {
+                            const parsed = parseTextBirthData(birthData);
+                            return `${parsed.month}/${parsed.day}/${parsed.year}`;
+                          } catch {
+                            return 'Invalid date';
+                          }
+                        })()}
                     </div>
                   </div>
                   <div className='text-center'>

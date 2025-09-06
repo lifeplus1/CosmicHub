@@ -1,0 +1,68 @@
+/* Subscription Details Component Styles */
+
+.subscription-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .subscription-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.subscription-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.subscription-label {
+  color: #e2e8f0;
+}
+
+.subscription-value {
+  font-weight: bold;
+  color: #f6ad55;
+}
+
+.subscription-description {
+  font-size: 0.875rem;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.billing-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-price {
+  font-weight: bold;
+}
+
+.billing-next {
+  font-size: 0.875rem;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+/* Button Styles */
+.upgrade-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .upgrade-button {
+    width: auto;
+  }
+}
+
+.manage-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: auto;
+}

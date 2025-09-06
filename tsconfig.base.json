@@ -17,7 +17,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false,
     "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
+    "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -30,17 +30,19 @@
     "noEmit": true,
     "declaration": false,
     "declarationMap": false,
+    "incremental": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
     "types": ["react", "react-dom", "node"],
     "baseUrl": ".",
     "paths": {
       "@cosmichub/auth": ["packages/auth/src"],
       "@cosmichub/ui": ["packages/ui/dist"],
-      "@cosmichub/frequency": ["packages/frequency/src"],
       "@cosmichub/integrations": ["packages/integrations/src"],
-  "@cosmichub/types": ["packages/types/src"],
-  "@cosmichub/types/spiritual-ai": ["packages/types/src/spiritual-ai.ts"],
-  "@cosmichub/types/spiritual-practices": ["packages/types/src/spiritual-practices.ts"],
-      "@cosmichub/subscriptions": ["packages/subscriptions/dist"],
+      "@cosmichub/types": ["packages/types/src"],
+      "@cosmichub/types/spiritual-ai": ["packages/types/src/spiritual-ai.ts"],
+      "@cosmichub/types/spiritual-practices": [
+        "packages/types/src/spiritual-practices.ts"
+      ],
       "@cosmichub/*": ["packages/*/src"],
       "@cosmichub/config/*": ["packages/config/src/*"],
       "@cosmichub/config/enhanced-testing": [

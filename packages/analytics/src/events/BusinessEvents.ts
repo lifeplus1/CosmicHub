@@ -3,8 +3,8 @@
  * Analytics for business metrics, subscriptions, and conversions
  */
 
-import { getAnalytics } from '../AnalyticsService.js';
-import type { BusinessEvent } from '../types/index.js';
+import { getAnalytics } from '../AnalyticsService';
+import type { BusinessEvent } from '../types/index';
 
 export const trackBusinessEvent = (data: BusinessEvent): void => {
   const analytics = getAnalytics();

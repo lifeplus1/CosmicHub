@@ -5,9 +5,99 @@ import { biometricAuthService } from './biometricAuthService';
 import { widgetService } from './widgetService';
 
 export interface CosmicData {
-  chart: Record<string, unknown>;
-  transits: Record<string, unknown>;
-  aspects: Record<string, unknown>;
+  chart: MobileChartData;
+  transits: MobileTransitData;
+  aspects: MobileAspectData;
+}
+
+export interface MobileChartData {
+  chartId: string;
+  chartType: 'natal' | 'transit' | 'synastry' | 'composite';
+  birthData: {
+    date: string;
+    time: string;
+    latitude: number;
+    longitude: number;
+    timezone: string;
+  };
+  planets: MobilePlanetPosition[];
+  houses: MobileHouseData[];
+  lastUpdated: string;
+  cached: boolean;
+}
+
+export interface MobilePlanetPosition {
+  name: string;
+  longitude: number;
+  sign: string;
+  house: number;
+  retrograde: boolean;
+}
+
+export interface MobileHouseData {
+  number: number;
+  cusp: number;
+  sign: string;
+  planets: string[];
+}
+
+export interface MobileTransitData {
+  transitDate: string;
+  currentTransits: MobileTransit[];
+  significantTransits: MobileTransit[];
+  nextMajorTransits: MobileTransit[];
+  lastCalculated: string;
+}
+
+export interface MobileTransit {
+  transitingPlanet: string;
+  natalPlanet: string;
+  aspect: string;
+  orb: number;
+  exactDate: string;
+  energy: 'harmonious' | 'challenging' | 'neutral';
+  description: string;
+}
+
+export interface MobileAspectData {
+  natalAspects: MobileAspect[];
+  currentAspects: MobileAspect[];
+  aspectStrengths: Record<string, number>;
+  dominantPatterns: string[];
+}
+
+// Add these interface definitions at the top of the file
+export interface DailyHoroscopeData {
+  date: string;
+  forecast: string;
+  majorTransits: MobileTransit[];
+  recommendations: string[];
+  energy: {
+    overall: number;
+    love: number;
+    career: number;
+    health: number;
+  };
+  luckyNumbers: number[];
+  bestTimeOfDay: 'morning' | 'afternoon' | 'evening';
+}
+
+export interface WeeklyForecastData {
+  week: string;
+  themes: string[];
+  keyDates: string[];
+  weeklyFocus: string;
+  challengeArea: string;
+  opportunityArea: string;
+}
+
+export interface MobileAspect {
+  planet1: string;
+  planet2: string;
+  aspectType: string;
+  orb: number;
+  exact: boolean;
+  strength: number;
 }
 
 export interface IntegrationPreferences {
@@ -176,15 +266,25 @@ export class MobileIntegrationService {
    * Schedule notifications for transits
    */
   private async scheduleTransitNotifications(
-    transits: Record<string, unknown>
+    transits: MobileTransitData
   ): Promise<void> {
     try {
+      const notificationData = {
+        transitCount: transits.currentTransits.length,
+        majorTransits: transits.significantTransits.map(t => ({
+          aspect: t.aspect,
+          planets: `${t.transitingPlanet} ${t.aspect} ${t.natalPlanet}`,
+          energy: t.energy
+        })),
+        nextTransitDate: transits.nextMajorTransits[0]?.exactDate
+      };
+
       await notificationService.scheduleDailyTransit(
         'Daily Cosmic Forecast',
         'Check your personalized insights for today',
         9,
         0,
-        { transits }
+        notificationData
       );
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -225,26 +325,34 @@ export class MobileIntegrationService {
   /**
    * Get daily horoscope data
    */
-  getDailyHoroscopeData(): Promise<Record<string, unknown>> {
+  getDailyHoroscopeData(): Promise<DailyHoroscopeData> {
     return Promise.resolve({
       date: new Date().toISOString(),
-      forecast:
-        'Your cosmic energies are aligned for growth and transformation.',
+      forecast: 'Your cosmic energies are aligned for growth and transformation.',
       majorTransits: [],
       recommendations: ['Focus on communication', 'Practice mindfulness'],
+      energy: {
+        overall: 75,
+        love: 60,
+        career: 80,
+        health: 70
+      },
+      luckyNumbers: [7, 15, 23],
+      bestTimeOfDay: 'morning'
     });
   }
 
   /**
    * Get weekly forecast data
    */
-  getWeeklyForecastData(): Promise<Record<string, unknown>> {
+  getWeeklyForecastData(): Promise<WeeklyForecastData> {
     return Promise.resolve({
       week: `Week of ${new Date().toISOString().split('T')[0]}`,
       themes: ['Transformation', 'Communication', 'Relationships'],
       keyDates: [],
-      overview:
-        'This week brings opportunities for personal growth and deeper connections.',
+      weeklyFocus: 'Personal growth and communication',
+      challengeArea: 'Patience in relationships',
+      opportunityArea: 'Career advancement'
     });
   }
 

@@ -38,6 +38,43 @@ class EnhancedCoordinationWorkflow {
       phases: [],
       improvements: {},
     };
+    // Cache for validated paths to avoid redundant file system checks
+    this._validatedPaths = null;
+  }
+
+  /**
+   * Get validated Agent 7 paths, filtering out non-existent directories
+   * This prevents ESLint from failing on missing directories
+   */
+  getValidatedAgent7Paths() {
+    if (this._validatedPaths !== null) {
+      return this._validatedPaths;
+    }
+
+    const potentialPaths = [
+      'apps/healwave/src',
+      'apps/mobile/src', 
+      'packages/auth/src',
+      'packages/hooks/src',
+      'packages/integrations/src',
+      'packages/pwa/src',
+      'packages/types/src',
+    ];
+
+    this._validatedPaths = potentialPaths.filter(path => {
+      const fullPath = join(ROOT, path);
+      return existsSync(fullPath);
+    });
+
+    console.log(colorize(`    • Validated ${this._validatedPaths.length}/${potentialPaths.length} Agent 7 paths`, 'blue'));
+    
+    // Log any missing paths for debugging
+    const missingPaths = potentialPaths.filter(path => !this._validatedPaths.includes(path));
+    if (missingPaths.length > 0) {
+      console.log(colorize(`    • Skipped missing paths: ${missingPaths.join(', ')}`, 'yellow'));
+    }
+
+    return this._validatedPaths;
   }
 
   async runEnhancedWorkflow() {
@@ -138,10 +175,7 @@ class EnhancedCoordinationWorkflow {
       colorize('  🔍 Analyzing current coordination state...', 'yellow')
     );
 
-    const result = await this.runCommand('npm', [
-      'run',
-      'lint:ai-coord-enhanced',
-    ]);
+    const result = await this.runCoordinationCommand();
 
     // Parse baseline metrics from output
     const efficiencyMatch = result.output.match(
@@ -155,6 +189,7 @@ class EnhancedCoordinationWorkflow {
       readyAgents: readyMatch ? parseInt(readyMatch[1]) : 0,
       totalAgents: totalMatch ? parseInt(totalMatch[1]) : 7,
       readyRate: 0,
+      rawOutput: result.output, // Cache for later use
     };
 
     baseline.readyRate =
@@ -172,13 +207,19 @@ class EnhancedCoordinationWorkflow {
       )
     );
 
+    // Cache this result
+    this._lastCoordinationResult = result;
+
     return baseline;
   }
 
   async runSmartPreprocessing() {
     console.log(colorize('  🛠️  Applying intelligent bulk fixes...', 'yellow'));
 
-    // Quick auto-fixable issues
+    // Get validated paths for Agent 7
+    const agent7Paths = this.getValidatedAgent7Paths();
+    
+    // Quick auto-fixable issues for primary agents
     const eslintResult = await this.runCommand('npx', [
       'eslint',
       '--fix',
@@ -189,17 +230,20 @@ class EnhancedCoordinationWorkflow {
       'apps/astro/src/components',
       'apps/astro/src/features',
       'packages/ui/src',
+      ...agent7Paths, // Add validated Agent 7 paths
     ]);
 
     // Count fixes applied
     const fixCount = (eslintResult.output.match(/✨/g) || []).length;
 
     console.log(colorize(`    • Applied ${fixCount} automatic fixes`, 'green'));
+    console.log(colorize(`    • Processed ${agent7Paths.length} Agent 7 paths`, 'blue'));
 
     return {
       success: eslintResult.success,
       fixesApplied: fixCount,
-      focusAreas: ['components', 'features', 'ui-package'],
+      focusAreas: ['components', 'features', 'ui-package', 'apps-small-packages'],
+      agent7PathsValidated: agent7Paths,
     };
   }
 
@@ -275,10 +319,19 @@ class EnhancedCoordinationWorkflow {
   async runFinalCoordination() {
     console.log(colorize('  🎯 Running optimized coordination...', 'yellow'));
 
-    const result = await this.runCommand('npm', [
-      'run',
-      'lint:ai-coord-enhanced',
-    ]);
+    // Check if we need to run coordination again or can use cached result
+    const shouldRunFresh = this._lastCoordinationResult && 
+      (Date.now() - this._lastCoordinationResult.timestamp) < 30000; // 30 second cache
+
+    let result;
+    if (shouldRunFresh && this._lastCoordinationResult) {
+      console.log(colorize('    • Using cached coordination result (< 30s old)', 'blue'));
+      result = this._lastCoordinationResult;
+    } else {
+      console.log(colorize('    • Running fresh coordination analysis', 'blue'));
+      result = await this.runCoordinationCommand();
+      this._lastCoordinationResult = result;
+    }
 
     // Parse final metrics
     const efficiencyMatch = result.output.match(
@@ -298,7 +351,21 @@ class EnhancedCoordinationWorkflow {
       readyAgents: readyMatch ? parseInt(readyMatch[1]) : 0,
       performanceScore: scoreMatch ? parseFloat(scoreMatch[1]) : 0,
       output: result.output,
+      cached: shouldRunFresh,
     };
+  }
+
+  /**
+   * Centralized coordination command runner with caching
+   */
+  async runCoordinationCommand() {
+    const result = await this.runCommand('npm', [
+      'run',
+      'lint:ai-coord-enhanced',
+    ]);
+    
+    result.timestamp = Date.now();
+    return result;
   }
 
   displayAgentResults(coordinationOutput) {

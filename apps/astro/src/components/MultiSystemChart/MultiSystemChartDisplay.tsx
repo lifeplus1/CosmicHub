@@ -1,7 +1,8 @@
 import React from 'react';
 import { featureFlags } from '../../config/featureFlags';
 import * as Tabs from '@radix-ui/react-tabs';
-import type { MultiSystemChartData } from './types';
+import { ChartErrorBoundary } from '@cosmichub/ui';
+import type { MultiSystemChartData, LoadedChartState } from './types';
 import type { UnifiedBirthData } from '@cosmichub/types';
 import WesternChart from './WesternChart';
 import VedicChart from './VedicChart';
@@ -12,6 +13,7 @@ import SynthesisChart from './SynthesisChart';
 import SpiritualChart from './SpiritualChart';
 import PsychologyChart, { type PsychologyChartData } from './PsychologyChart';
 import TCMChart from './TCMChart';
+import ExtractedSystemsNavigation from './ExtractedSystemsNavigation';
 
 interface MultiSystemChartProps {
   chartData?: MultiSystemChartData;
@@ -24,56 +26,6 @@ interface MultiSystemChartProps {
    * If omitted, all tabs are shown.
    */
   overrideVisibleTabs?: string[];
-}
-
-// Error Boundary Component
-class ChartErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: {
-    children: React.ReactNode;
-    fallback?: React.ReactNode;
-  }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Multi-system chart component error:', error, errorInfo);
-  }
-
-  override render() {
-    if (this.state.hasError) {
-      return (
-        this.props.fallback ?? (
-          <div className='cosmic-card bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-500/30'>
-            <div className='p-6 text-center'>
-              <h3 className='font-bold text-red-400 mb-2'>
-                Chart Display Error
-              </h3>
-              <p className='text-cosmic-silver/70 text-sm'>
-                There was an error displaying this chart section.
-              </p>
-              <button
-                onClick={() =>
-                  this.setState({ hasError: false, error: undefined })
-                }
-                className='mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm'
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        )
-      );
-    }
-    return this.props.children;
-  }
 }
 
 export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
@@ -112,6 +64,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
 
   // Enhanced data preparation with better validation
   const displayData: MultiSystemChartData = chartData ?? {
+    status: 'loaded',
     birth_info: birthData
       ? {
           date: `${birthData.year}-${String(birthData.month).padStart(2, '0')}-${String(birthData.day).padStart(2, '0')}`,
@@ -122,8 +75,37 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
             timezone: String(birthData.timezone ?? 'UTC'),
           },
         }
-      : undefined,
+      : {
+          date: '',
+          time: '',
+          location: {
+            latitude: 0,
+            longitude: 0,
+            timezone: 'UTC',
+          },
+        },
+    western_tropical: { planets: {}, aspects: [], houses: [], angles: [], calculation_metadata: { house_system: 'placidus', coordinate_system: 'geocentric', ephemeris_version: '1.0', calculated_at: new Date() } },
+    lastUpdated: new Date(),
   };
+
+  // Type guard for loaded state
+  const isLoadedState = (data: MultiSystemChartData): data is LoadedChartState => {
+    return data.status === 'loaded';
+  };
+
+  // Early return if not loaded state
+  if (!isLoadedState(displayData)) {
+    return (
+      <div className='p-6 border border-yellow-500 rounded-md bg-yellow-900/50'>
+        <div className='text-center'>
+          <h3 className='font-bold text-cosmic-silver'>Chart Not Ready</h3>
+          <p className='text-cosmic-silver/70'>
+            Chart data is not in loaded state.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='cosmic-card bg-gradient-to-br from-cosmic-dark/80 to-cosmic-blue/80 rounded-lg p-4 border border-cosmic-silver/20'>
@@ -168,6 +150,12 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
             )}
           </div>
         </div>
+
+        {/* Extracted Systems Navigation - show when tabs are deprecated or when filtering to core systems */}
+        {(featureFlags.deprecateMultiSystemTabs && !overrideVisibleTabs) || 
+         (overrideVisibleTabs && !overrideVisibleTabs.some(tab => ['psychology', 'spiritual', 'tcm', 'synthesis'].includes(tab))) ? (
+          <ExtractedSystemsNavigation birthData={birthData} className="mb-6" />
+        ) : null}
 
         {/* Multi-System Tabs with Error Boundaries */}
   <Tabs.Root defaultValue={overrideVisibleTabs?.[0] ?? 'western'} className='w-full'>
@@ -243,61 +231,109 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
 
           <Tabs.Content value='vedic' className='pt-4'>
             <ChartErrorBoundary>
-              <VedicChart data={displayData.vedic_sidereal ?? {}} />
+              {displayData.vedic_sidereal ? (
+                <VedicChart data={displayData.vedic_sidereal} />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No Vedic chart data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>
 
           <Tabs.Content value='chinese' className='pt-4'>
             <ChartErrorBoundary>
-              <ChineseChart data={displayData.chinese ?? {}} />
+              {displayData.chinese ? (
+                <ChineseChart data={displayData.chinese} />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No Chinese chart data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>
 
           <Tabs.Content value='mayan' className='pt-4'>
             <ChartErrorBoundary>
-              <MayanChart data={displayData.mayan ?? {}} />
+              {displayData.mayan ? (
+                <MayanChart data={displayData.mayan} />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No Mayan chart data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>
 
           <Tabs.Content value='uranian' className='pt-4'>
             <ChartErrorBoundary>
-              <UranianChart data={displayData.uranian ?? {}} />
+              {displayData.uranian ? (
+                <UranianChart data={displayData.uranian} />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No Uranian chart data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>
 
           {(!overrideVisibleTabs || overrideVisibleTabs.includes('spiritual')) && (<Tabs.Content value='spiritual' className='pt-4'>
             <ChartErrorBoundary>
-              <SpiritualChart
-                chartData={displayData.spiritual_systems ?? {}}
-                _birthData={birthData}
-                isLoading={false}
-              />
+              {displayData.spiritual_systems ? (
+                <SpiritualChart
+                  chartData={displayData.spiritual_systems}
+                  _birthData={birthData}
+                  isLoading={false}
+                />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No spiritual systems data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>)}
 
           {(!overrideVisibleTabs || overrideVisibleTabs.includes('tcm')) && (<Tabs.Content value='tcm' className='pt-4'>
             <ChartErrorBoundary>
-              <TCMChart
-                data={displayData.tcm ?? {}}
-                birthData={birthData}
-                isLoading={false}
-              />
+              {displayData.tcm ? (
+                <TCMChart
+                  data={displayData.tcm}
+                  birthData={birthData}
+                  isLoading={false}
+                />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No TCM chart data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>)}
 
           {(!overrideVisibleTabs || overrideVisibleTabs.includes('psychology')) && (<Tabs.Content value='psychology' className='pt-4'>
             <ChartErrorBoundary>
-              <PsychologyChart
-                data={displayData.psychology as PsychologyChartData}
-                birthData={birthData}
-                isLoading={false}
-              />
+              {displayData.psychology ? (
+                <PsychologyChart
+                  data={displayData.psychology as unknown as PsychologyChartData}
+                  birthData={birthData}
+                  isLoading={false}
+                />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No psychology chart data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>)}
 
           {(!overrideVisibleTabs || overrideVisibleTabs.includes('synthesis')) && (<Tabs.Content value='synthesis' className='pt-4'>
             <ChartErrorBoundary>
-              <SynthesisChart data={displayData.synthesis ?? {}} />
+              {displayData.synthesis ? (
+                <SynthesisChart data={displayData.synthesis} />
+              ) : (
+                <div className='p-4 text-center text-cosmic-silver'>
+                  No synthesis data available
+                </div>
+              )}
             </ChartErrorBoundary>
           </Tabs.Content>)}
         </Tabs.Root>

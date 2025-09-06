@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { devConsole } from '../config/environment';
+import { Button, Card, CardContent, CardHeader, CardTitle, ErrorBoundary } from '@cosmichub/ui';
 
 // Test component to verify logger functionality
-const LoggerTestComponent: React.FC = () => {
+const LoggerTestComponent: React.FC = React.memo(function LoggerTestComponent() {
   const [triggerError, setTriggerError] = useState(false);
 
-  // Test regular logging
-  const testRegularLogging = () => {
+  // Memoized event handlers for performance
+  const testRegularLogging = useCallback(() => {
     console.log('🔍 Testing logging systems...');
     
     // Test devConsole
@@ -17,7 +18,12 @@ const LoggerTestComponent: React.FC = () => {
     devConsole.debug?.('🐛 devConsole.debug works');
     
     console.log('✅ Regular logging test completed');
-  };
+  }, []);
+
+  const triggerErrorTest = useCallback(() => {
+    console.log('🔥 About to trigger error for error boundary test...');
+    setTriggerError(true);
+  }, []);
 
   // Component that throws an error when triggerError is true
   const ErrorThrowingComponent: React.FC = () => {
@@ -28,43 +34,48 @@ const LoggerTestComponent: React.FC = () => {
   };
 
   return (
-    <div className="p-5 border border-cosmic-silver/20 bg-cosmic-dark/30 backdrop-blur-lg rounded-lg m-3 cosmic-glass">
-      <h3 className="text-lg font-semibold text-cosmic-silver mb-4 gradient-text-cosmic">Logger Test Component</h3>
-      
-      <div className="mb-4 flex flex-wrap gap-3">
-        <button 
-          onClick={testRegularLogging}
-          className="px-4 py-2 bg-blue-600/80 text-white border-none rounded-lg cursor-pointer 
-                     hover:bg-blue-500/90 transition-colors cosmic-button cosmic-focus
-                     cosmic-glow font-medium"
-        >
-          Test Regular Logging
-        </button>
-        
-        <button 
-          onClick={() => {
-            console.log('🔥 About to trigger error for error boundary test...');
-            setTriggerError(true);
-          }}
-          className="px-4 py-2 bg-red-600/80 text-white border-none rounded-lg cursor-pointer 
-                     hover:bg-red-500/90 transition-colors cosmic-button cosmic-focus
-                     font-medium"
-        >
-          Test Error Boundary Logging
-        </button>
-      </div>
-      
-      <div className="p-4 bg-cosmic-dark/50 border border-cosmic-silver/10 rounded-lg
-                      backdrop-blur-sm">
-        <ErrorThrowingComponent />
-      </div>
-      
-      <div className="mt-4 text-xs text-cosmic-silver/70 leading-relaxed">
-        Check the browser console to see logging output.
-        The error boundary logging will be visible when you trigger an error.
-      </div>
-    </div>
+    <ErrorBoundary level="component" name="LoggerTestComponent">
+      <Card className="cosmic-glass border-cosmic-purple/30 bg-cosmic-dark/50 shadow-lg shadow-cosmic-purple/20 max-w-2xl mx-auto m-4">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold text-cosmic-gold font-cinzel flex items-center gap-2">
+            🔧 Logger Test Component
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex flex-wrap gap-4">
+            <Button
+              onClick={testRegularLogging}
+              variant="default"
+              className="px-6 py-3 font-semibold"
+              aria-label="Test regular logging functionality"
+            >
+              📝 Test Regular Logging
+            </Button>
+
+            <Button
+              onClick={triggerErrorTest}
+              variant="destructive"
+              className="px-6 py-3 font-semibold"
+              aria-label="Test error boundary logging functionality"
+            >
+              ⚠️ Test Error Boundary
+            </Button>
+          </div>
+
+          <Card className="border-cosmic-silver/20 bg-cosmic-dark/30">
+            <CardContent className="p-4">
+              <ErrorThrowingComponent />
+            </CardContent>
+          </Card>
+
+          <div className="text-sm text-cosmic-silver/70 leading-relaxed bg-cosmic-blue/10 p-4 rounded-lg border border-cosmic-blue/20">
+            <strong className="text-cosmic-gold">Instructions:</strong> Check the browser console to see logging output.
+            The error boundary logging will be visible when you trigger an error.
+          </div>
+        </CardContent>
+      </Card>
+    </ErrorBoundary>
   );
-};
+});
 
 export default LoggerTestComponent;

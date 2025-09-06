@@ -11,19 +11,28 @@
     "declaration": true,
     "declarationMap": true,
     "baseUrl": ".",
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
       "@/*": ["./src/*"],
       "@cosmichub/auth": ["../../packages/auth/src"],
       "@cosmichub/config": ["../../packages/config/dist"],
       "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
       "@cosmichub/integrations": ["../../packages/integrations/src"],
-      "@cosmichub/subscriptions": ["../../packages/subscriptions/dist"],
       "@cosmichub/ui": ["../../packages/ui/dist"],
       "@cosmichub/types": ["../../packages/types/dist"],
       "@cosmichub/analytics": ["../../packages/analytics/src"]
     }
   },
-  "include": ["src", "types", "src/**/*", "src/__tests__/**/*", "src/test-utils/**/*"],
+  "include": [
+    "src",
+    "types",
+    "src/**/*",
+    "src/__tests__/**/*",
+    "src/test-utils/**/*"
+  ],
   "exclude": ["**/*.refactor_attempt.*", "**/*.backup.*", "**/*.old.*"],
   "references": [
     { "path": "../../packages/auth" },
