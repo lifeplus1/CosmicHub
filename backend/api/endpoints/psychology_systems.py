@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 import logging
 
 from ..bridges.psychology_type_bridge import PsychologyTypeBridge
-from backend.types.psychology_systems import (
+from backend_types.psychology_systems import (
     AssessmentType, PsychologyAssessmentResponse, PsychologyProfileResponse, PsychologyHealthCheck
 )
 

@@ -76,6 +76,18 @@ export default defineConfig(({ mode }) => {
               '@radix-ui/react-slider',
               '@radix-ui/react-tooltip',
               '@radix-ui/react-switch',
+              '@radix-ui/react-tabs',
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+            ],
+            // CosmicHub packages chunks
+            'cosmichub-auth': ['@cosmichub/auth'],
+            'cosmichub-integrations': ['@cosmichub/integrations'],
+            // Audio components chunk
+            'audio-components': [
+              './src/components/AudioPlayer.enhanced',
+              './src/components/FrequencyControls',
+              './src/components/DurationTimer',
             ],
           },
           // Asset naming for long-term caching

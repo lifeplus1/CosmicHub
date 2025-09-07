@@ -26,8 +26,8 @@ try:
         AYURVEDA_HOUSE_CORRELATIONS, AYURVEDA_SEASONAL_GUIDANCE
     )
 except ImportError:
-    # Fallback for standalone testing
-    from ayurveda_schema import (
+    # Fallback for standalone testing - ignore mypy redefinition warning
+    from ayurveda_schema import (  # type: ignore[no-redef]
         AyurvedaAnalysisResult, AyurvedaConstitution, AyurvedaHealthGuidance,
         AstrologyAyurvedaCorrelation, DoshaBalance,
         AYURVEDA_DOSHA_DATA, PLANET_AYURVEDA_CORRELATIONS,

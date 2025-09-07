@@ -22,7 +22,7 @@ interface CollapsibleTableProps {
   className?: string;
 }
 
-export const CollapsibleTable: React.FC<CollapsibleTableProps> = ({
+export const CollapsibleTable: React.FC<CollapsibleTableProps> = React.memo(({
   value,
   title,
   icon,
@@ -65,6 +65,8 @@ export const CollapsibleTable: React.FC<CollapsibleTableProps> = ({
       </AccordionContent>
     </AccordionItem>
   );
-};
+});
 
-export default CollapsibleTable;
+CollapsibleTable.displayName = 'CollapsibleTable';
+
+export default React.memo(CollapsibleTable);

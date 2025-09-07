@@ -12,6 +12,7 @@ export { default as userProfileStyles } from './components/UserProfile.module.cs
 export { default as progressBarStyles } from './components/ProgressBar.module.css';
 export { default as virtualizedDataTableStyles } from './components/VirtualizedDataTable.module.css';
 export { default as audioPlayerStyles } from './components/AudioPlayer.module.css';
+export { default as sacredGeometryVisualizerStyles } from './components/SacredGeometryVisualizer.module.css';
 
 // Feature Modules
 export { default as chartWheelUnifiedStyles } from './features/ChartWheelUnified.module.css';

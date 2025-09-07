@@ -20,7 +20,7 @@ interface OfflineIndicatorProps {
   compact?: boolean;
 }
 
-export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
+const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   className = '',
   showSyncButton = true,
   compact = false,
@@ -182,10 +182,10 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
           <button
             onClick={() => {
               void handleManualSync();
-            }}
+            }} 
             disabled={syncStats.sync_in_progress}
             className='px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 disabled:bg-gray-100 text-blue-800 disabled:text-gray-500 rounded transition-colors'
-            aria-label='Manual sync'
+            aria-label={syncStats.sync_in_progress ? 'Syncing in progress' : 'Manual sync'}
           >
             {syncStats.sync_in_progress ? 'Syncing...' : 'Sync'}
           </button>
@@ -222,4 +222,8 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   );
 };
 
-export default OfflineIndicator;
+
+// Memoize for performance
+const MemoizedOfflineIndicator = React.memo(OfflineIndicator);
+MemoizedOfflineIndicator.displayName = 'OfflineIndicator';
+export default MemoizedOfflineIndicator;

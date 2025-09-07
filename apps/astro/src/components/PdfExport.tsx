@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useToast } from './ToastProvider';
 import * as Dialog from '@radix-ui/react-dialog';
 import { FaDownload } from 'react-icons/fa';
@@ -32,6 +32,32 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
     });
     const [isOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
+    const triggerButtonRef = useRef<HTMLButtonElement>(null);
+    const dialogContentRef = useRef<HTMLDivElement>(null);
+
+    // Focus management for modal
+    useEffect(() => {
+      if (isOpen && dialogContentRef.current) {
+        const focusableElements = dialogContentRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0] as HTMLElement;
+        firstElement?.focus();
+      } else if (!isOpen && triggerButtonRef.current) {
+        triggerButtonRef.current.focus();
+      }
+    }, [isOpen]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setIsOpen(true);
+      }
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+      setIsOpen(false);
+    }, []);
 
     const handleOptionChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -200,10 +226,12 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
               Download a professional PDF report of your chart analysis.
             </p>
             <button
+              ref={triggerButtonRef}
               className='w-full cosmic-button'
-              onClick={() => setIsOpen(true)}
+              onClick={useCallback(() => setIsOpen(true), [])}
+              onKeyDown={handleKeyDown}
               disabled={loading}
-              aria-label='Open PDF Export Options'
+              aria-label={loading ? 'Loading PDF Export' : 'Open PDF Export Options'}
             >
               <FaDownload className='mr-2' />
               Export Chart to PDF
@@ -211,10 +239,13 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
           </div>
         </div>
 
-        <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog.Root open={isOpen} onOpenChange={handleCloseModal}>
           <Dialog.Portal>
             <Dialog.Overlay className='fixed inset-0 bg-black/50 backdrop-blur-sm' />
-            <Dialog.Content className='fixed w-full max-w-lg p-6 transform -translate-x-1/2 -translate-y-1/2 border rounded-lg top-1/2 left-1/2 bg-cosmic-blue/80 backdrop-blur-md border-cosmic-silver/20'>
+            <Dialog.Content 
+              ref={dialogContentRef}
+              className='fixed w-full max-w-lg p-6 transform -translate-x-1/2 -translate-y-1/2 border rounded-lg top-1/2 left-1/2 bg-cosmic-blue/80 backdrop-blur-md border-cosmic-silver/20'
+            >
               <div className='flex items-center justify-between mb-4'>
                 <Dialog.Title className='text-lg font-bold text-cosmic-gold'>
                   PDF Export Options
@@ -222,7 +253,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
                 <Dialog.Close asChild>
                   <button
                     className='text-cosmic-silver hover:text-cosmic-gold'
-                    aria-label='Close'
+                    aria-label='Close PDF Export Dialog'
                   >
                     <svg
                       className='w-6 h-6'
@@ -271,7 +302,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
                       checked={options.includeInterpretation}
                       onChange={handleOptionChange}
                       className='w-4 h-4 text-purple-500 rounded'
-                      aria-label='checkbox input'
+                      aria-label='Include AI Interpretation in PDF export'
                     />
                     <span className='text-cosmic-silver'>
                       Include AI Interpretation (Elite Feature)
@@ -284,7 +315,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
                       checked={options.includeAspects}
                       onChange={handleOptionChange}
                       className='w-4 h-4 text-purple-500 rounded'
-                      aria-label='checkbox input'
+                      aria-label='Include detailed aspects in PDF export'
                     />
                     <span className='text-cosmic-silver'>
                       Include Detailed Aspects
@@ -297,7 +328,7 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
                       checked={options.includeTransits}
                       onChange={handleOptionChange}
                       className='w-4 h-4 text-purple-500 rounded'
-                      aria-label='checkbox input'
+                      aria-label='Include current transits in PDF export'
                     />
                     <span className='text-cosmic-silver'>
                       Include Current Transits (Elite Feature)
@@ -343,16 +374,17 @@ const PdfExport: React.FC<PdfExportProps> = React.memo(
               <div className='flex mt-6 space-x-3'>
                 <button
                   className='flex-1 bg-transparent border cosmic-button border-cosmic-silver text-cosmic-silver hover:bg-cosmic-silver/10'
-                  onClick={() => setIsOpen(false)}
-                  aria-label='Cancel'
+                  onClick={handleCloseModal}
+                  aria-label='Cancel PDF Export'
                 >
                   Cancel
                 </button>
                 <button
                   className='flex-1 cosmic-button'
-                  onClick={() => {
+                  onClick={useCallback(() => {
                     void exportToPdf();
-                  }}
+                  }, [exportToPdf])}
+                  aria-label="Generate and Download PDF"
                   disabled={loading}
                 >
                   <FaDownload className='mr-2' />

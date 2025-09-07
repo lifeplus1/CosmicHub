@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaPen,
@@ -129,12 +129,31 @@ interface BlogAuthorProps {
   className?: string;
 }
 
-const BlogAuthor: React.FC<BlogAuthorProps> = ({
+const BlogAuthor: React.FC<BlogAuthorProps> = React.memo(({
   authorName,
   showFullProfile = false,
   className = '',
 }) => {
-  const author = authors[authorName];
+  const author = useMemo(() => authors[authorName], [authorName]);
+
+  const getInitials = useMemo(() => {
+    if (!author) return '';
+    return author.name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+  }, [author]);
+
+  const expertiseSubset = useMemo(() => {
+    if (!author) return [];
+    return author.expertise.slice(0, 2);
+  }, [author]);
+
+  const socialEntries = useMemo(() => {
+    if (!author?.social) return [];
+    return Object.entries(author.social);
+  }, [author]);
 
   if (!author) {
     return (
@@ -150,26 +169,18 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
     );
   }
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase();
-  };
-
   if (!showFullProfile) {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <div className='w-10 h-10 rounded-full bg-gradient-to-br from-cosmic-purple to-cosmic-gold flex items-center justify-center text-white font-semibold text-sm'>
-          {getInitials(author.name)}
+          {getInitials}
         </div>
         <div>
           <p className='text-sm font-medium text-cosmic-silver'>
             {author.name}
           </p>
           <p className='text-xs text-cosmic-silver/60'>
-            {author.expertise.slice(0, 2).join(' • ')}
+            {expertiseSubset.join(' • ')}
           </p>
         </div>
       </div>
@@ -182,7 +193,7 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
     >
       <div className='flex items-start gap-4'>
         <div className='w-16 h-16 rounded-full bg-gradient-to-br from-cosmic-purple to-cosmic-gold flex items-center justify-center text-white font-bold text-lg'>
-          {getInitials(author.name)}
+          {getInitials}
         </div>
 
         <div className='flex-1'>
@@ -211,9 +222,9 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
           </div>
 
           {/* Social Links */}
-          {author.social && Object.keys(author.social).length > 0 && (
+          {socialEntries.length > 0 && (
             <div className='flex items-center gap-4'>
-              {author.social.email && (
+              {author.social?.email && (
                 <a
                   href={`mailto:${author.social.email}`}
                   className='flex items-center gap-2 text-cosmic-silver/80 hover:text-cosmic-gold transition-colors duration-200'
@@ -222,7 +233,7 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
                   <FaEnvelope className='w-4 h-4' />
                 </a>
               )}
-              {author.social.twitter && (
+              {author.social?.twitter && (
                 <a
                   href={`https://twitter.com/${author.social.twitter.replace('@', '')}`}
                   target='_blank'
@@ -233,7 +244,7 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
                   <FaTwitter className='w-4 h-4' />
                 </a>
               )}
-              {author.social.instagram && (
+              {author.social?.instagram && (
                 <a
                   href={`https://instagram.com/${author.social.instagram.replace('@', '')}`}
                   target='_blank'
@@ -244,7 +255,7 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
                   <FaInstagram className='w-4 h-4' />
                 </a>
               )}
-              {author.social.website && (
+              {author.social?.website && (
                 <a
                   href={`https://${author.social.website}`}
                   target='_blank'
@@ -261,10 +272,14 @@ const BlogAuthor: React.FC<BlogAuthorProps> = ({
       </div>
     </div>
   );
-};
+});
+
+BlogAuthor.displayName = 'BlogAuthor';
 
 // Authors page component
-export const BlogAuthors: React.FC = () => {
+export const BlogAuthors: React.FC = React.memo(() => {
+  const authorList = useMemo(() => Object.values(authors), []);
+
   return (
     <div className='max-w-4xl mx-auto px-4 py-8'>
       <div className='text-center mb-12'>
@@ -278,7 +293,7 @@ export const BlogAuthors: React.FC = () => {
       </div>
 
       <div className='space-y-8'>
-        {Object.values(authors).map(author => (
+        {authorList.map(author => (
           <BlogAuthor
             key={author.name}
             authorName={author.name}
@@ -308,6 +323,8 @@ export const BlogAuthors: React.FC = () => {
       </div>
     </div>
   );
-};
+});
+
+BlogAuthors.displayName = 'BlogAuthors';
 
 export default BlogAuthor;

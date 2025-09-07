@@ -61,11 +61,11 @@ const HealWaveErrorTestComponent: React.FC<ErrorTestComponentProps> = React.memo
           <h4 id='protocol-title' className='text-sm font-medium text-white mb-2'>
             Disruption Protocol:
           </h4>
-          <ol className='text-xs text-gray-300 space-y-1' role='list'>
-            <li role='listitem'>1. Frequency disruption triggered</li>
-            <li role='listitem'>2. HealWave error boundary activates</li>
-            <li role='listitem'>3. Harmony restoration interface displayed</li>
-            <li role='listitem'>4. Recovery frequencies available</li>
+          <ol className='text-xs text-gray-300 space-y-1'>
+            <li>1. Frequency disruption triggered</li>
+            <li>2. HealWave error boundary activates</li>
+            <li>3. Harmony restoration interface displayed</li>
+            <li>4. Recovery frequencies available</li>
           </ol>
         </div>
       </div>

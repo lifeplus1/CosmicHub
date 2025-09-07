@@ -5,7 +5,7 @@ import { useSubscription } from '@cosmichub/auth';
  * Demo component to test the upgrade modal functionality
  * This demonstrates how to use the subscription system to gate premium features
  */
-export const UpgradeModalDemo: React.FC = () => {
+const UpgradeModalDemo: React.FC = () => {
   const subscriptionData = useSubscription();
   const hasFeature =
     typeof subscriptionData?.hasFeature === 'function'
@@ -92,21 +92,21 @@ export const UpgradeModalDemo: React.FC = () => {
             <button
               onClick={testGeneKeysFeature}
               className='w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors'
-            >
+             aria-label="Button">
               🧬 Try Gene Keys Analysis
             </button>
 
             <button
               onClick={testSynastryFeature}
               className='w-full bg-pink-600 hover:bg-pink-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors'
-            >
+             aria-label="Button">
               💕 Try Synastry Analysis
             </button>
 
             <button
               onClick={testPdfExport}
               className='w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors'
-            >
+             aria-label="Button">
               📄 Try PDF Export
             </button>
           </div>
@@ -119,7 +119,7 @@ export const UpgradeModalDemo: React.FC = () => {
             <button
               onClick={testEnterpriseFeature}
               className='w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors'
-            >
+             aria-label="Button">
               🚀 Try Enterprise Features
             </button>
 
@@ -157,4 +157,10 @@ export const UpgradeModalDemo: React.FC = () => {
   );
 };
 
-export default UpgradeModalDemo;
+
+// Memoize the component to prevent unnecessary re-renders
+const MemoizedUpgradeModalDemo = React.memo(UpgradeModalDemo);
+MemoizedUpgradeModalDemo.displayName = 'UpgradeModalDemo';
+
+export { MemoizedUpgradeModalDemo as UpgradeModalDemo };
+export default MemoizedUpgradeModalDemo;

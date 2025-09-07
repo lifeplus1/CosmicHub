@@ -1,0 +1,35 @@
+# GitLab Security Policies Configuration
+scan_execution_policy:
+  - name: security-scan-policy
+    description: Run security scans on all merge requests and main branch
+    enabled: true
+    rules:
+      - type: pipeline
+        branches:
+          - main
+        scanners:
+          - secret_detection
+          - dependency_scanning
+          - sast
+      - type: pipeline
+        branches:
+          - merge_requests
+        scanners:
+          - secret_detection
+          - dependency_scanning
+
+approval_policy:
+  - name: security-approval-policy
+    description: Require security team approval for high-risk changes
+    enabled: true
+    rules:
+      - type: security_approvals
+        severity_levels:
+          - high
+          - critical
+        scanners:
+          - dependency_scanning
+          - secret_detection
+        vulnerabilities_allowed: 0
+        vulnerability_states:
+          - newly_detected

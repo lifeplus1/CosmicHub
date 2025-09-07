@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 from datetime import datetime
 
 # Import astrology types from centralized location
-from backend.types.astrology_systems import (
+from backend_types.astrology_systems import (
     Planet, House, Aspect,
     BirthData, 
     ChartResponse, MultiSystemChartResponse,
@@ -337,7 +337,7 @@ class AstrologyTypeBridge:
         birth_data = BirthData(**birth_data_dict)
         
         # Create multi-system chart structure
-        from backend.types.astrology_systems import (
+        from backend_types.astrology_systems import (
             MultiSystemChart, ChartCalculationMetadata, WesternChart, VedicChart
         )
         

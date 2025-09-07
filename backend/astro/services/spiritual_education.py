@@ -17,7 +17,7 @@ Date: September 2, 2025
 Integration: SPIRITUAL-001 Week 2 Educational Framework
 """
 
-from typing import Dict, List, Any, Optional, TypedDict, Literal
+from typing import Dict, List, Any, Optional, TypedDict, Literal, Union
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import json
@@ -26,6 +26,30 @@ import re
 # ============================================================================
 # TYPE DEFINITIONS FOR EDUCATIONAL SYSTEM
 # ============================================================================
+
+class SpiritualReadinessLevel(TypedDict):
+    """User spiritual readiness assessment result"""
+    current_level: Literal['beginner', 'intermediate', 'advanced', 'master']
+    spiritual_readiness_score: float
+    prerequisite_gaps: List[str]
+    recommended_pathway: Literal['beginner', 'intermediate', 'advanced', 'master']
+    safety_clearance: bool
+    personalization_factors: Dict[str, Any]
+
+class PersonalizationFactors(TypedDict):
+    """AI-powered personalization data"""
+    optimal_practice_timing: List[str]
+    emphasized_cards: List[str]
+    birth_chart_influences: Dict[str, Any]
+
+class LessonEvaluationResult(TypedDict):
+    """Lesson completion evaluation result"""
+    completion_score: float
+    depth_score: float
+    safety_score: float
+    feedback: List[str]
+    next_steps: List[str]
+    requires_review: bool
 
 class LessonType(TypedDict):
     """Individual lesson structure"""
@@ -753,64 +777,68 @@ class SpiritualEducationEngine:
     # CORE EDUCATIONAL METHODS
     # ============================================================================
     
-    def assess_user_level(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
+    def assess_user_level(self, user_data: Dict[str, Any]) -> SpiritualReadinessLevel:
         """Assess user's current spiritual learning level and readiness"""
         
-        assessment_result = {
-            'current_level': 'beginner',
-            'spiritual_readiness_score': 0.0,
-            'prerequisite_gaps': [],
-            'recommended_pathway': 'beginner',
-            'safety_clearance': False,
-            'personalization_factors': {}
-        }
-        
-        # Analyze spiritual background
+        # Analyze spiritual background with proper defaults
         spiritual_background = user_data.get('spiritual_background', {})
         practice_history = user_data.get('practice_history', {})
         
-        # Calculate readiness score
+        # Calculate readiness score with type-safe operations
         readiness_factors = {
-            'meditation_experience': spiritual_background.get('meditation_years', 0) * 0.2,
-            'tarot_familiarity': spiritual_background.get('tarot_experience', 0) * 0.15,
-            'kabbalah_knowledge': spiritual_background.get('kabbalah_study', 0) * 0.15,
-            'ethical_grounding': practice_history.get('ethical_practice', 0) * 0.3,
-            'consistent_practice': practice_history.get('daily_practice', 0) * 0.2
+            'meditation_experience': float(spiritual_background.get('meditation_years', 0)) * 0.2,
+            'tarot_familiarity': float(spiritual_background.get('tarot_experience', 0)) * 0.15,
+            'kabbalah_knowledge': float(spiritual_background.get('kabbalah_study', 0)) * 0.15,
+            'ethical_grounding': float(practice_history.get('ethical_practice', 0)) * 0.3,
+            'consistent_practice': float(practice_history.get('daily_practice', 0)) * 0.2
         }
         
-        assessment_result['spiritual_readiness_score'] = sum(readiness_factors.values())
+        spiritual_readiness_score = sum(readiness_factors.values())
         
-        # Determine appropriate level
-        if assessment_result['spiritual_readiness_score'] >= 0.8:
-            assessment_result['current_level'] = 'advanced'
-            assessment_result['recommended_pathway'] = 'advanced'
-        elif assessment_result['spiritual_readiness_score'] >= 0.6:
-            assessment_result['current_level'] = 'intermediate'
-            assessment_result['recommended_pathway'] = 'intermediate'
+        # Determine appropriate level based on score
+        if spiritual_readiness_score >= 0.8:
+            current_level: Literal['beginner', 'intermediate', 'advanced', 'master'] = 'advanced'
+            recommended_pathway: Literal['beginner', 'intermediate', 'advanced', 'master'] = 'advanced'
+        elif spiritual_readiness_score >= 0.6:
+            current_level = 'intermediate'
+            recommended_pathway = 'intermediate'
         else:
-            assessment_result['current_level'] = 'beginner'
-            assessment_result['recommended_pathway'] = 'beginner'
+            current_level = 'beginner'
+            recommended_pathway = 'beginner'
         
         # Safety clearance assessment
         safety_factors = [
-            spiritual_background.get('emotional_stability', False),
-            practice_history.get('grounding_ability', False),
-            user_data.get('mentor_support', False),
-            spiritual_background.get('respectful_approach', False)
+            bool(spiritual_background.get('emotional_stability', False)),
+            bool(practice_history.get('grounding_ability', False)),
+            bool(user_data.get('mentor_support', False)),
+            bool(spiritual_background.get('respectful_approach', False))
         ]
         
-        assessment_result['safety_clearance'] = sum(safety_factors) >= 3
+        safety_clearance = sum(safety_factors) >= 3
+        
+        assessment_result: SpiritualReadinessLevel = {
+            'current_level': current_level,
+            'spiritual_readiness_score': spiritual_readiness_score,
+            'prerequisite_gaps': [],  # Will be populated by _identify_gaps method
+            'recommended_pathway': recommended_pathway,
+            'safety_clearance': safety_clearance,
+            'personalization_factors': {}
+        }
         
         return assessment_result
     
-    def generate_personalized_curriculum(self, user_assessment: Dict[str, Any], 
+    def generate_personalized_curriculum(self, user_assessment: SpiritualReadinessLevel, 
                                        birth_chart_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Generate personalized curriculum based on user assessment and astrological data"""
         
         base_pathway = self.curriculum_data[user_assessment['recommended_pathway']]
         
         # AI personalization based on birth chart
-        personalization_factors = {}
+        personalization_factors: PersonalizationFactors = {
+            'optimal_practice_timing': [],
+            'emphasized_cards': [],
+            'birth_chart_influences': {}
+        }
         
         if birth_chart_data:
             # Emphasize cards related to user's Sun sign
@@ -821,7 +849,8 @@ class SpiritualEducationEngine:
             # Adjust timing based on current transits
             current_transits = birth_chart_data.get('current_transits', [])
             if current_transits:
-                personalization_factors['optimal_practice_timing'] = self._calculate_transit_timing(current_transits)
+                optimal_timing = self._calculate_transit_timing(current_transits)
+                personalization_factors['optimal_practice_timing'] = optimal_timing
         
         # Create personalized curriculum
         personalized_curriculum = {
@@ -842,51 +871,61 @@ class SpiritualEducationEngine:
         return personalized_curriculum
     
     def evaluate_lesson_completion(self, user_id: str, lesson_id: str, 
-                                 user_response: Dict[str, Any]) -> Dict[str, Any]:
+                                 user_response: Dict[str, Any]) -> LessonEvaluationResult:
         """AI-powered evaluation of lesson completion and understanding"""
         
         lesson_data = self._get_lesson_by_id(lesson_id)
         assessment_criteria = lesson_data.get('assessment_criteria', {})
         
-        # AI evaluation using multiple criteria
-        evaluation_result = {
-            'completion_score': 0.0,
-            'depth_score': 0.0,
-            'safety_score': 0.0,
-            'readiness_for_next': False,
-            'feedback': [],
-            'areas_for_improvement': [],
-            'strengths_identified': []
-        }
+        # Initialize evaluation result with proper types
+        feedback: List[str] = []
+        areas_for_improvement: List[str] = []
+        strengths_identified: List[str] = []
+        
+        completion_score = 0.0
+        depth_score = 0.0
+        safety_score = 0.8  # Default safe score
         
         # Analyze response depth
         response_text = user_response.get('written_response', '')
         if response_text:
             depth_analysis = self._analyze_response_depth(response_text, lesson_data)
-            evaluation_result['depth_score'] = depth_analysis['depth_score']
-            evaluation_result['feedback'].extend(depth_analysis['feedback'])
+            depth_score = float(depth_analysis.get('depth_score', 0.0))
+            depth_feedback = depth_analysis.get('feedback', [])
+            if isinstance(depth_feedback, list):
+                feedback.extend(depth_feedback)
         
         # Check practice completion
         practice_log = user_response.get('practice_log', {})
         if practice_log:
             practice_analysis = self._evaluate_practice_consistency(practice_log, lesson_data)
-            evaluation_result['completion_score'] = practice_analysis['completion_score']
+            completion_score = float(practice_analysis.get('completion_score', 0.0))
         
         # Safety assessment
         safety_analysis = self._assess_spiritual_safety(user_response, lesson_data)
-        evaluation_result['safety_score'] = safety_analysis['safety_score']
+        safety_score = float(safety_analysis.get('safety_score', 0.8))
         
-        # Overall readiness
+        # Overall readiness calculation
         overall_score = (
-            evaluation_result['completion_score'] * 0.4 +
-            evaluation_result['depth_score'] * 0.4 +
-            evaluation_result['safety_score'] * 0.2
+            completion_score * 0.4 +
+            depth_score * 0.4 +
+            safety_score * 0.2
         )
         
-        evaluation_result['readiness_for_next'] = (
+        readiness_for_next = (
             overall_score >= 0.8 and 
-            evaluation_result['safety_score'] >= 0.8
+            safety_score >= 0.8
         )
+        
+        # Construct properly typed result
+        evaluation_result: LessonEvaluationResult = {
+            'completion_score': completion_score,
+            'depth_score': depth_score,
+            'safety_score': safety_score,
+            'feedback': feedback,
+            'next_steps': ["Continue to next lesson" if readiness_for_next else "Review current material"],
+            'requires_review': not readiness_for_next
+        }
         
         return evaluation_result
     
@@ -942,30 +981,33 @@ class SpiritualEducationEngine:
         
         return sign_card_mapping.get(sun_sign.lower(), [])
     
-    def _calculate_transit_timing(self, transits: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _calculate_transit_timing(self, transits: List[Dict[str, Any]]) -> List[str]:
         """Calculate optimal practice timing based on astrological transits"""
         
         # Enhanced timing recommendations based on current transits
-        optimal_timing = {
-            'best_meditation_times': [],
-            'pathworking_windows': [],
-            'avoided_periods': [],
-            'enhanced_practices': []
-        }
+        optimal_timing_list: List[str] = []
         
         for transit in transits:
             if transit.get('aspect') == 'conjunction':
                 if transit.get('planet') == 'Moon':
-                    optimal_timing['best_meditation_times'].append(
+                    optimal_timing_list.append(
                         f"Moon conjunction {transit.get('target')} - enhanced intuitive work"
                     )
+                elif transit.get('planet') == 'Jupiter':
+                    optimal_timing_list.append(
+                        f"Jupiter transit - excellent for expansion and learning"
+                    )
+                elif transit.get('planet') == 'Mercury':
+                    optimal_timing_list.append(
+                        f"Mercury transit - ideal for study and communication"
+                    )
         
-        return optimal_timing
+        return optimal_timing_list if optimal_timing_list else ["Standard practice times recommended"]
     
-    def _calculate_optimal_pace(self, assessment: Dict[str, Any]) -> str:
+    def _calculate_optimal_pace(self, assessment: SpiritualReadinessLevel) -> str:
         """Calculate optimal learning pace for user"""
         
-        readiness_score = assessment.get('spiritual_readiness_score', 0)
+        readiness_score = assessment['spiritual_readiness_score']
         
         if readiness_score >= 0.8:
             return 'accelerated'
@@ -974,42 +1016,40 @@ class SpiritualEducationEngine:
         else:
             return 'gentle'
     
-    def _identify_emphasis_areas(self, assessment: Dict[str, Any]) -> List[str]:
-        """Identify areas needing special emphasis for this user"""
+    def _identify_emphasis_areas(self, assessment: SpiritualReadinessLevel) -> List[str]:
+        """Identify areas that need emphasis in the curriculum"""
         
-        emphasis_areas = []
+        emphasis_areas: List[str] = []
         
-        if assessment.get('safety_clearance', False) is False:
-            emphasis_areas.append('ethical_grounding')
-            emphasis_areas.append('traditional_respect')
-        
-        if assessment.get('spiritual_readiness_score', 0) < 0.4:
+        if assessment['spiritual_readiness_score'] < 0.4:
+            emphasis_areas.append('foundational_grounding')
             emphasis_areas.append('basic_meditation')
-            emphasis_areas.append('consistent_practice')
+        
+        if not assessment['safety_clearance']:
+            emphasis_areas.append('ethical_foundations')
+            emphasis_areas.append('safety_protocols')
         
         return emphasis_areas
     
-    def _determine_support_needs(self, assessment: Dict[str, Any]) -> str:
-        """Determine level of support needed"""
+    def _determine_support_needs(self, assessment: SpiritualReadinessLevel) -> str:
+        """Determine level of support needed for user"""
         
-        if assessment.get('safety_clearance', False) is False:
-            return 'high_support'
-        elif assessment.get('spiritual_readiness_score', 0) < 0.5:
-            return 'moderate_support'
+        if not assessment['safety_clearance']:
+            return 'high_mentorship'
+        elif assessment['spiritual_readiness_score'] < 0.5:
+            return 'regular_guidance'
         else:
-            return 'minimal_support'
+            return 'minimal_check_ins'
     
-    def _calculate_check_in_frequency(self, assessment: Dict[str, Any]) -> str:
-        """Calculate required check-in frequency"""
+    def _calculate_check_in_frequency(self, assessment: SpiritualReadinessLevel) -> int:
+        """Calculate how often to check in with user (days)"""
         
-        support_level = self._determine_support_needs(assessment)
-        
-        if support_level == 'high_support':
-            return 'daily'
-        elif support_level == 'moderate_support':
-            return 'weekly'
+        if not assessment['safety_clearance']:
+            return 3  # Check in every 3 days
+        elif assessment['spiritual_readiness_score'] < 0.5:
+            return 7  # Weekly check-ins
         else:
-            return 'bi_weekly'
+            return 14  # Bi-weekly check-ins
     
     def _get_lesson_by_id(self, lesson_id: str) -> Dict[str, Any]:
         """Retrieve lesson data by ID"""

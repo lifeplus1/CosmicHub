@@ -1,0 +1,207 @@
+/* Chakra Component Styles - Extends HealWave centralized styling system */
+
+@layer components {
+  /* Chakra button base styling */
+  .chakra-button {
+    position: relative;
+    
+    /* Use centralized touch target */
+    @apply touch-target;
+    
+    /* Enhanced glassmorphism for chakra buttons */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .chakra-button:hover {
+    transform: scale(1.05);
+    box-shadow: 
+      0 10px 25px rgba(0, 0, 0, 0.2),
+      0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .chakra-button:focus {
+    @apply ring-2 ring-white/50;
+    outline: none;
+  }
+
+  .chakra-button.selected {
+    @apply glass;
+    box-shadow: 
+      0 0 30px rgba(255, 255, 255, 0.4),
+      0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .chakra-button.selected::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(45deg, currentColor, transparent, currentColor);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+  }
+
+  /* Chakra color indicator */
+  .chakra-indicator {
+    @apply w-4 h-4 rounded-full border border-white/30 mb-2;
+    box-shadow: 
+      0 0 10px rgba(255, 255, 255, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  }
+
+  .chakra-button:hover .chakra-indicator {
+    @apply animate-pulse;
+    box-shadow: 
+      0 0 15px rgba(255, 255, 255, 0.6),
+      inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Chakra info panel */
+  .chakra-info-panel {
+    @apply glass border border-white/10 p-4 rounded-lg;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+
+  /* Sacred geometry container */
+  .sacred-geometry-canvas {
+    @apply glass;
+    background: radial-gradient(circle at center, 
+      rgba(0, 0, 0, 0.8) 0%, 
+      rgba(0, 0, 0, 0.95) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Meditation tip styling */
+  .meditation-tip {
+    @apply bg-white/5 border border-white/10 p-3 rounded-lg;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.02)
+    );
+  }
+}
+
+@layer utilities {
+  /* Chakra-specific animations */
+  @keyframes chakra-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+      box-shadow: 
+        0 0 30px rgba(255, 255, 255, 0.6),
+        0 0 40px rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  @keyframes chakra-glow {
+    0%, 100% {
+      filter: brightness(1);
+    }
+    50% {
+      filter: brightness(1.2);
+    }
+  }
+
+  .animate-chakra-pulse {
+    animation: chakra-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-chakra-glow {
+    animation: chakra-glow 3s ease-in-out infinite;
+  }
+
+  /* Individual chakra color classes */
+  .chakra-root {
+    --tw-bg-opacity: 0.2;
+    background-color: rgb(255 0 0 / var(--tw-bg-opacity));
+    border-color: #FF0000;
+    color: #FF0000;
+  }
+  
+  .chakra-sacral {
+    --tw-bg-opacity: 0.2;
+    background-color: rgb(255 128 0 / var(--tw-bg-opacity));
+    border-color: #FF8000;
+    color: #FF8000;
+  }
+  
+  .chakra-solar {
+    --tw-bg-opacity: 0.2;
+    background-color: rgb(255 255 0 / var(--tw-bg-opacity));
+    border-color: #FFFF00;
+    color: #FFFF00;
+  }
+  
+  .chakra-heart {
+    --tw-bg-opacity: 0.2;
+    background-color: rgb(0 255 0 / var(--tw-bg-opacity));
+    border-color: #00FF00;
+    color: #00FF00;
+  }
+  
+  .chakra-throat {
+    --tw-bg-opacity: 0.2;
+    background-color: rgb(0 255 255 / var(--tw-bg-opacity));
+    border-color: #00FFFF;
+    color: #00FFFF;
+  }
+  
+  .chakra-third-eye {
+    --tw-bg-opacity: 0.2;
+    background-color: rgb(75 0 130 / var(--tw-bg-opacity));
+    border-color: #4B0082;
+    color: #4B0082;
+  }
+  
+  .chakra-crown {
+    --tw-bg-opacity: 0.2;
+    background-color: rgb(148 0 211 / var(--tw-bg-opacity));
+    border-color: #9400D3;
+    color: #9400D3;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chakra-button {
+    @apply p-3 text-sm;
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .chakra-button {
+    transition: none;
+  }
+  
+  .chakra-indicator {
+    animation: none !important;
+  }
+  
+  .animate-chakra-pulse,
+  .animate-chakra-glow {
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .chakra-button {
+    border-width: 2px;
+  }
+  
+  .chakra-button.selected {
+    background-color: currentColor;
+    color: black;
+  }
+}

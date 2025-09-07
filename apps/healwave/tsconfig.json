@@ -31,8 +31,8 @@
       "@cosmichub/auth": ["../../packages/auth/src/index.tsx"],
       "@cosmichub/config": ["../../packages/config/src/index.ts"],
       "@cosmichub/config/firebase": ["../../packages/config/src/firebase.ts"],
-      "@cosmichub/ui": ["../../packages/ui/src/index.ts"],
-      "@cosmichub/integrations": ["../../packages/integrations/src/index.ts"],
+      "@cosmichub/ui": ["../../packages/ui/dist/index.d.ts"],
+      "@cosmichub/integrations": ["../../packages/integrations/dist/index.d.ts"],
       "@cosmichub/config/subscriptions": [
         "../../packages/config/src/subscriptions/index.ts"
       ]

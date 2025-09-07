@@ -15,12 +15,12 @@ import {
 import { useAuth, useSubscription } from '@cosmichub/auth';
 import { useAppNavigation } from '../hooks/useAppNavigation';
 import Login from './Login';
-import Signup from './Signup';
+import SignupContainer from './signup/SignupContainer';
 
 const Navbar: React.FC = React.memo(() => {
   const { user, signOut } = useAuth();
   const { tier: userTier } = useSubscription();
-  const { goToHome, goToProfile, goTo } = useAppNavigation();
+  const { goToHome, goToProfile, goToUpgrade } = useAppNavigation();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
@@ -38,8 +38,8 @@ const Navbar: React.FC = React.memo(() => {
   }, [goToProfile]);
 
   const handleNavigateToUpgrade = useCallback(() => {
-    goTo('/upgrade');
-  }, [goTo]);
+    goToUpgrade();
+  }, [goToUpgrade]);
 
   const handleNavigateToHome = useCallback(() => {
     goToHome();
@@ -285,7 +285,7 @@ const Navbar: React.FC = React.memo(() => {
             {authMode === 'login' ? (
               <Login onSwitchToSignup={switchToSignup} onClose={closeModal} />
             ) : (
-              <Signup onSwitchToLogin={switchToLogin} onClose={closeModal} />
+              <SignupContainer onSwitchToLogin={switchToLogin} onClose={closeModal} />
             )}
           </Dialog.Content>
         </Dialog.Portal>

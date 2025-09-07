@@ -3,18 +3,22 @@
  * Calculates healing frequencies and audio settings
  */
 
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 
 interface FrequencyCalculatorProps {
   baseFrequency?: number;
   className?: string;
 }
 
-export const FrequencyCalculator: React.FC<FrequencyCalculatorProps> = ({
+export const FrequencyCalculator: React.FC<FrequencyCalculatorProps> = memo(({
   baseFrequency = 440,
   className = '',
 }) => {
   const [frequency, setFrequency] = useState(baseFrequency);
+
+  const handleFrequencyChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFrequency(Number(e.target.value));
+  }, []);
 
   return (
     <div className={`frequency-calculator ${className}`}>
@@ -31,7 +35,7 @@ export const FrequencyCalculator: React.FC<FrequencyCalculatorProps> = ({
             id='frequency-input'
             type='number'
             value={frequency}
-            onChange={e => setFrequency(Number(e.target.value))}
+            onChange={handleFrequencyChange}
             className='w-full p-2 border rounded'
             min='20'
             max='20000'
@@ -45,6 +49,8 @@ export const FrequencyCalculator: React.FC<FrequencyCalculatorProps> = ({
       </div>
     </div>
   );
-};
+});
+
+FrequencyCalculator.displayName = 'FrequencyCalculator';
 
 export default FrequencyCalculator;

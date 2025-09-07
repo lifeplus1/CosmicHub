@@ -92,27 +92,31 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(
 
                 {synastryResult === null && (
                   <button
-                    className='cosmic-button'
+                    className='cosmic-button focus:outline-none focus:ring-2 focus:ring-purple-500'
                     onClick={() => {
                       void calculateSynastry();
                     }}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        void calculateSynastry();
+                      }
+                    }}
                     disabled={loading}
+                    aria-label={loading ? 'Calculating synastry compatibility' : 'Calculate relationship compatibility between two charts'}
                   >
+                    <FaInfoCircle className='mr-2' aria-hidden="true" />
                     {loading ? 'Calculating...' : 'Calculate Compatibility'}
-                    <FaInfoCircle className='mr-2' />
-                    <span className='sr-only'>
-                      Start synastry compatibility calculation
-                    </span>
                   </button>
                 )}
               </div>
             </div>
 
             {error !== null && (
-              <div className='p-4 border border-red-500 rounded-md bg-red-900/50'>
+              <div className='p-4 border border-red-500 rounded-md bg-red-900/50' role="alert">
                 <div className='flex space-x-4'>
-                  <span className='text-xl text-red-500'>⚠️</span>
-                  {error}
+                  <span className='text-xl text-red-500' aria-hidden="true">⚠️</span>
+                  <span>{error}</span>
                 </div>
               </div>
             )}
@@ -120,7 +124,8 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(
             {loading === true && synastryResult === null && (
               <div
                 className='grid grid-cols-1 gap-6 lg:grid-cols-2 animate-pulse'
-                aria-hidden
+                aria-hidden="true"
+                aria-label="Loading synastry analysis"
               >
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
@@ -160,19 +165,33 @@ export const SynastryAnalysis = React.memo<SynastryAnalysisProps>(
                 <div className='col-span-1 lg:col-span-2'>
                   <div className='flex justify-center space-x-4'>
                     <button
-                      className='px-4 py-2 text-blue-500 transition-colors border border-blue-500 rounded bg-blue-500/20 hover:bg-blue-500/30'
+                      className='px-4 py-2 text-blue-500 transition-colors border border-blue-500 rounded bg-blue-500/20 hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500'
                       onClick={() => (window.location.href = '/transits')}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          window.location.href = '/transits';
+                        }
+                      }}
+                      aria-label="View relationship transits analysis"
                     >
                       View Relationship Transits
                     </button>
                     <button
-                      className='px-4 py-2 text-purple-500 transition-colors border border-purple-500 rounded bg-purple-500/20 hover:bg-purple-500/30'
+                      className='px-4 py-2 text-purple-500 transition-colors border border-purple-500 rounded bg-purple-500/20 hover:bg-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500'
                       onClick={() => {
                         void calculateSynastry();
                       }}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          void calculateSynastry();
+                        }
+                      }}
                       disabled={loading}
+                      aria-label={loading ? 'Recalculating synastry...' : 'Recalculate synastry compatibility'}
                     >
-                      Recalculate
+                      {loading ? 'Recalculating...' : 'Recalculate'}
                     </button>
                   </div>
                 </div>

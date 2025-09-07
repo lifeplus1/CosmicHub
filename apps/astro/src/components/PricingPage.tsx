@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { devConsole } from '../config/environment';
 import { useAuth, useSubscription } from '@cosmichub/auth';
 import { useToast } from './ToastProvider';
@@ -125,7 +125,7 @@ const PricingPage: React.FC = React.memo(() => {
     [user, isAnnual, toast]
   );
 
-  const getTierIcon = (tier: keyof typeof ASTRO_TIERS) => {
+  const getTierIcon = useCallback((tier: keyof typeof ASTRO_TIERS) => {
     switch (tier) {
       case 'free':
         return <FaUser className='text-gray-500' />;
@@ -136,9 +136,28 @@ const PricingPage: React.FC = React.memo(() => {
       default:
         return <FaUser className='text-gray-500' />;
     }
-  };
+  }, []);
 
-  const getTierColor = (tier: keyof typeof ASTRO_TIERS): string => {
+  // Memoized handlers to prevent hooks violations
+  const createTierClickHandler = useCallback((tierKey: string) => {
+    return () => {
+      if (tierKey === 'premium' || tierKey === 'elite') {
+        void handleUpgrade(tierKey);
+      }
+    };
+  }, [handleUpgrade]);
+
+  const createTierKeyDownHandler = useCallback((tierKey: string) => {
+    return (e: React.KeyboardEvent) => {
+      if ((e.key === 'Enter' || e.key === ' ') && (tierKey === 'premium' || tierKey === 'elite')) {
+        e.preventDefault();
+        // TypeScript can infer the type after the condition check
+        void handleUpgrade(tierKey);
+      }
+    };
+  }, [handleUpgrade]);
+
+  const getTierColor = useCallback((tier: keyof typeof ASTRO_TIERS): string => {
     switch (tier) {
       case 'free':
         return 'gray-500';
@@ -149,9 +168,9 @@ const PricingPage: React.FC = React.memo(() => {
       default:
         return 'gray-500';
     }
-  };
+  }, []);
 
-  const getFeatureIcon = (feature: string) => {
+  const getFeatureIcon = useCallback((feature: string) => {
     switch (feature) {
       case 'Basic birth chart calculation':
         return <FaChartLine className='text-blue-500' />;
@@ -184,7 +203,7 @@ const PricingPage: React.FC = React.memo(() => {
       default:
         return <FaQuestionCircle className='text-gray-500' />;
     }
-  };
+  }, []);
 
   const getFeatureDescription = (feature: string): string => {
     const descriptions: Record<string, string> = {
@@ -255,7 +274,7 @@ const PricingPage: React.FC = React.memo(() => {
     return tiers[feature];
   };
 
-  const getAllFeatures = (): string[] => [
+  const getAllFeatures = useCallback((): string[] => [
     'Basic birth chart calculation',
     'Western tropical astrology',
     'Multi-system analysis',
@@ -270,7 +289,14 @@ const PricingPage: React.FC = React.memo(() => {
     'Unlimited calculations',
     'Unlimited storage',
     'Priority support',
-  ];
+  ], []);
+
+  const allFeatures = useMemo(() => getAllFeatures(), [getAllFeatures]);
+
+  const tierEntries = useMemo(() => 
+    Object.entries(ASTRO_TIERS) as Array<[keyof typeof ASTRO_TIERS, typeof ASTRO_TIERS[keyof typeof ASTRO_TIERS]]>,
+    []
+  );
 
   const isFeatureIncluded = (
     feature: string,
@@ -312,7 +338,7 @@ const PricingPage: React.FC = React.memo(() => {
         </div>
 
         <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
-          {(Object.entries(ASTRO_TIERS) as Array<[keyof typeof ASTRO_TIERS, typeof ASTRO_TIERS[keyof typeof ASTRO_TIERS]]>).map(
+          {tierEntries.map(
             ([tierKey, tier]) => (
               <div
                 key={tierKey}
@@ -355,7 +381,7 @@ const PricingPage: React.FC = React.memo(() => {
                               <Tooltip.Trigger asChild>
                                 <button
                                   className='text-cosmic-purple hover:text-cosmic-purple/80'
-                                  aria-label='Feature Information'
+                                  aria-label={`Learn more about ${feature}`}
                                 >
                                   <FaQuestionCircle />
                                 </button>
@@ -396,11 +422,10 @@ const PricingPage: React.FC = React.memo(() => {
                       (loading !== null && loading === tierKey) ||
                       (typeof userTier === 'string' && tierKey === userTier)
                     }
-                    onClick={() => {
-                      void handleUpgrade(tierKey as 'premium' | 'elite');
-                    }}
+                    onClick={createTierClickHandler(tierKey)}
+                    onKeyDown={createTierKeyDownHandler(tierKey)}
                     aria-label={
-                      tierKey === userTier ? 'Current Plan' : 'Select Plan'
+                      tierKey === userTier ? 'Current Plan Selected' : `Select ${tier.name} Plan`
                     }
                   >
                     {tierKey === userTier
@@ -451,7 +476,7 @@ const PricingPage: React.FC = React.memo(() => {
               </tr>
             </thead>
             <tbody>
-              {getAllFeatures().map(feature => (
+              {allFeatures.map(feature => (
                 <tr key={feature} className='border-b border-cosmic-silver/20'>
                   <td className='px-4 py-3'>
                     <div className='flex items-center space-x-2'>
@@ -461,7 +486,7 @@ const PricingPage: React.FC = React.memo(() => {
                         <Tooltip.Trigger asChild>
                           <button
                             className='text-cosmic-purple hover:text-cosmic-purple/80'
-                            aria-label='Feature Information'
+                            aria-label={`Learn more about ${feature}`}
                           >
                             <FaQuestionCircle />
                           </button>

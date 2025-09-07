@@ -1,0 +1,45 @@
+/* SignupContainer Styles */
+.progressBar {
+  background: linear-gradient(to right, #06b6d4, #8b5cf6);
+  height: 0.5rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+
+.progressBar.step1 { width: 25%; }
+.progressBar.step2 { width: 50%; }
+.progressBar.step3 { width: 75%; }
+.progressBar.step4 { width: 100%; }
+
+.progressContainer {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  height: 0.5rem;
+}
+
+.signupContainer {
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+  background: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 1.5rem;
+}
+
+.errorContainer {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(127, 29, 29, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+}
+
+.errorText {
+  color: #f87171;
+  font-size: 0.875rem;
+}

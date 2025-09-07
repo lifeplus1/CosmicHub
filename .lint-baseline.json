@@ -1,9 +1,9 @@
 {
-  "created": "2025-09-06T01:05:37.058Z",
+  "created": "2025-09-07T02:16:15.585Z",
   "rules": {
-    "@typescript-eslint/no-misused-promises": 1,
-    "@typescript-eslint/no-floating-promises": 5,
-    "@typescript-eslint/no-unsafe-assignment": 10,
+    "@typescript-eslint/no-unsafe-assignment": 12,
+    "@typescript-eslint/no-misused-promises": 0,
+    "@typescript-eslint/no-floating-promises": 0,
     "@typescript-eslint/no-unsafe-member-access": 0,
     "@typescript-eslint/strict-boolean-expressions": 0,
     "@typescript-eslint/explicit-function-return-type": 0,

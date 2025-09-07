@@ -86,6 +86,30 @@ export const AstroRoutes: Record<string, ReturnType<typeof lazyLoadRoute>> = {
   TCM: lazyLoadRoute(() => import('../pages/TCM'), 'TCMPage'),
   Psychology: lazyLoadRoute(() => import('../pages/Psychology'), 'PsychologyPage'),
   Spiritual: lazyLoadRoute(() => import('../pages/Spiritual'), 'SpiritualPage'),
+
+  // Research Platform Routes (Phase 3 Implementation)
+  ResearchDashboard: lazyLoadRoute(
+    () => import('../pages/research/ResearchDashboard'),
+    'ResearchDashboard'
+  ),
+  MetricsVisualization: lazyLoadRoute(
+    () => import('../pages/research/MetricsVisualization'),
+    'MetricsVisualization'
+  ),
+  CollaborationHub: lazyLoadRoute(
+    () => import('../pages/research/CollaborationHub'),
+    'CollaborationHub'
+  ),
+  CertificationPortal: lazyLoadRoute(
+    () => import('../pages/research/CertificationPortal'),
+    'CertificationPortal'
+  ),
+
+  // Sacred Geometry Routes (Phase 4 Implementation)
+  SacredGeometryVisualization: lazyLoadRoute(
+    () => import('../pages/sacred-geometry/SacredGeometryVisualization'),
+    'SacredGeometryVisualization'
+  ),
 };
 
 // Lazy loaded components with error boundaries
@@ -227,6 +251,33 @@ export const astroRouteConfig = [
   {
     path: '/spiritual',
     component: withErrorBoundary(ensureComponent('Spiritual')),
+    preload: false,
+  },
+  // Research Platform Routes
+  {
+    path: '/research',
+    component: withErrorBoundary(ensureComponent('ResearchDashboard')),
+    preload: false,
+  },
+  {
+    path: '/research/metrics',
+    component: withErrorBoundary(ensureComponent('MetricsVisualization')),
+    preload: false,
+  },
+  {
+    path: '/research/collaboration',
+    component: withErrorBoundary(ensureComponent('CollaborationHub')),
+    preload: false,
+  },
+  {
+    path: '/research/certification',
+    component: withErrorBoundary(ensureComponent('CertificationPortal')),
+    preload: false,
+  },
+  // Sacred Geometry Routes
+  {
+    path: '/sacred-geometry',
+    component: withErrorBoundary(ensureComponent('SacredGeometryVisualization')),
     preload: false,
   },
 ];

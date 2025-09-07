@@ -35,7 +35,7 @@ const AccordionContext = createContext<{
 
 const AccordionItemContext = createContext<string>('');
 
-export const Accordion: React.FC<AccordionProps> = ({
+const Accordion: React.FC<AccordionProps> = ({
   type,
   collapsible = false,
   children,
@@ -64,7 +64,7 @@ export const Accordion: React.FC<AccordionProps> = ({
   );
 };
 
-export const AccordionItem: React.FC<AccordionItemProps> = ({
+const AccordionItem: React.FC<AccordionItemProps> = ({
   value,
   children,
   className = '',
@@ -81,7 +81,7 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
   );
 };
 
-export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
+const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
   children,
   className = '',
 }) => {
@@ -92,7 +92,7 @@ export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
   return (
     <button
       className={`flex w-full items-center justify-between p-4 text-left font-medium text-cosmic-silver hover:bg-cosmic-purple/20 transition-colors ${className}`}
-      onClick={() => toggleItem(value)}
+      onClick={() => toggleItem(value)} aria-label="Button"
     >
       {children}
       <span
@@ -104,7 +104,7 @@ export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
   );
 };
 
-export const AccordionContent: React.FC<AccordionContentProps> = ({
+const AccordionContent: React.FC<AccordionContentProps> = ({
   children,
   className = '',
 }) => {
@@ -120,3 +120,10 @@ export const AccordionContent: React.FC<AccordionContentProps> = ({
     </div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+const MemoizedAccordion = React.memo(Accordion);
+MemoizedAccordion.displayName = 'Accordion';
+
+export { MemoizedAccordion as Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+export default MemoizedAccordion;

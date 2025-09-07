@@ -1,0 +1,290 @@
+/* Sacred Geometry Visualizer Component Styles */
+
+.visualizerContainer {
+  @apply relative;
+}
+
+.canvasContainer {
+  @apply overflow-hidden rounded-lg;
+  background: linear-gradient(to bottom, theme('colors.cosmic.dark'), theme('colors.cosmic.blue'));
+  height: var(--canvas-height, 500px);
+}
+
+/* Height variations for different use cases */
+.canvasContainerDefault {
+  height: 500px;
+}
+
+.canvasContainerSmall {
+  height: 300px;
+}
+
+.canvasContainerMedium {
+  height: 400px;
+}
+
+.canvasContainerLarge {
+  height: 600px;
+}
+
+.canvasContainerFull {
+  height: 100vh;
+}
+
+.expertControls {
+  @apply absolute top-4 right-4 p-4 space-y-3 rounded-lg bg-black/20 border border-white/10;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.controlsTitle {
+  @apply text-sm font-medium;
+  color: theme('colors.cosmic.silver');
+}
+
+.controlGroup {
+  @apply space-y-2;
+}
+
+.controlLabel {
+  @apply block text-xs;
+  color: rgba(226, 232, 240, 0.7); /* cosmic-silver/70 */
+}
+
+/* Radix UI Slider Styles */
+.sliderContainer {
+  @apply w-full py-2;
+}
+
+.sliderRoot {
+  @apply relative flex items-center select-none touch-none w-full h-5;
+}
+
+.sliderTrack {
+  @apply bg-gray-700 relative grow rounded-full h-2;
+}
+
+.sliderRange {
+  @apply absolute bg-purple-500 rounded-full h-full;
+}
+
+.sliderThumb {
+  @apply block w-4 h-4 bg-purple-500 shadow-md rounded-full border-2 border-purple-400;
+  @apply hover:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2;
+  @apply cursor-pointer transition-colors;
+}
+
+/* Radix UI Switch Styles */
+.switchGroup {
+  @apply mt-4;
+}
+
+.switchContainer {
+  @apply flex items-center space-x-3;
+}
+
+.switchLabel {
+  @apply text-xs;
+  color: rgba(226, 232, 240, 0.7); /* cosmic-silver/70 */
+}
+
+.checkboxLabel {
+  @apply text-xs;
+  color: rgba(226, 232, 240, 0.7); /* cosmic-silver/70 */
+}
+
+.switchRoot {
+  @apply w-10 h-6 bg-gray-700 rounded-full relative;
+  @apply data-[state=checked]:bg-purple-500;
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2;
+  @apply cursor-pointer transition-colors;
+}
+
+.switchThumb {
+  @apply block w-4 h-4 bg-white rounded-full shadow-md;
+  @apply transform transition-transform translate-x-0.5;
+  @apply data-[state=checked]:translate-x-4;
+  @apply will-change-transform;
+}
+
+/* Radix UI Tooltip Styles */
+.tooltipContent {
+  @apply bg-gray-800 text-gray-100 px-3 py-2 rounded-md text-sm;
+  @apply shadow-lg border border-purple-500/20;
+  @apply max-w-xs z-50;
+}
+
+.tooltipArrow {
+  @apply fill-gray-800;
+}
+
+.goldenRatioDisplay {
+  @apply absolute bottom-4 left-4 p-3 rounded-lg bg-black/20 border border-white/10;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.goldenRatioTitle {
+  @apply mb-1 text-xs;
+  color: rgba(226, 232, 240, 0.7); /* cosmic-silver/70 */
+}
+
+.goldenRatioValue {
+  @apply font-mono text-sm;
+  color: theme('colors.cosmic.silver');
+}
+
+.resonanceText {
+  @apply text-xs;
+  color: rgba(226, 232, 240, 0.7); /* cosmic-silver/70 */
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+  .expertControls {
+    @apply top-2 right-2 p-3 space-y-2;
+  }
+  
+  .goldenRatioDisplay {
+    @apply bottom-2 left-2 p-2;
+  }
+  
+  .controlsTitle {
+    @apply text-xs;
+  }
+  
+  .controlLabel {
+    @apply text-xs;
+  }
+  
+  .checkboxLabel {
+    @apply text-xs;
+  }
+}
+
+/* Accessibility improvements */
+.animationSpeedSlider:focus {
+  @apply outline-none ring-2 ring-purple-500 ring-opacity-50;
+}
+
+.checkboxInput:focus {
+  @apply outline-none;
+}
+
+/* Theme variations */
+.visualizerContainer.cosmicTheme .canvasContainer {
+  background: linear-gradient(135deg, 
+    theme('colors.cosmic.dark') 0%, 
+    theme('colors.cosmic.blue') 50%, 
+    theme('colors.cosmic.purple') 100%);
+}
+
+.visualizerContainer.highContrast .expertControls,
+.visualizerContainer.highContrast .goldenRatioDisplay {
+  @apply bg-black bg-opacity-90 border border-white border-opacity-20;
+}
+
+/* Animation states */
+.visualizerContainer.paused .canvasContainer::after {
+  content: '⏸️';
+  @apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl opacity-50 pointer-events-none;
+}
+
+/* Loading state */
+.canvasContainer.loading {
+  @apply flex items-center justify-center;
+}
+
+.canvasContainer.loading::before {
+  content: '';
+  @apply w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin;
+}
+
+/* Radix UI Component Styles */
+
+/* Radix UI Slider Styles */
+.sliderRoot {
+  @apply relative flex items-center select-none touch-none w-full h-5;
+}
+
+.sliderTrack {
+  @apply bg-gray-700 relative grow rounded-full h-2;
+}
+
+.sliderRange {
+  @apply absolute bg-purple-500 rounded-full h-full;
+}
+
+.sliderThumb {
+  @apply block w-4 h-4 bg-purple-500 rounded-full hover:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
+}
+
+/* Radix UI Checkbox Styles */
+.checkboxRoot {
+  @apply flex h-4 w-4 appearance-none items-center justify-center rounded bg-gray-700 border border-gray-600 outline-none hover:bg-gray-600 focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
+}
+
+.checkboxIndicator {
+  @apply text-purple-400;
+}
+
+/* Radix UI Tooltip Styles */
+.tooltipContent {
+  @apply bg-gray-900 text-white px-2 py-1 rounded text-xs border border-gray-700;
+  animation-duration: 0.15s;
+  animation-timing-function: ease-out;
+}
+
+.tooltipArrow {
+  @apply fill-gray-900;
+}
+
+/* Radix UI Switch Styles */
+.switchRoot {
+  @apply w-10 h-6 bg-gray-700 rounded-full relative focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 outline-none;
+}
+
+.switchRoot[data-state='checked'] {
+  @apply bg-purple-500;
+}
+
+.switchThumb {
+  @apply block w-5 h-5 bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform;
+}
+
+.switchThumb[data-state='checked'] {
+  @apply translate-x-4;
+}
+
+/* Custom styled HTML elements that look like Radix UI components */
+.customSlider {
+  @apply w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer;
+}
+
+.customSlider::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 bg-purple-500 rounded-full cursor-pointer hover:bg-purple-400;
+}
+
+.customSlider::-moz-range-thumb {
+  @apply w-4 h-4 bg-purple-500 rounded-full cursor-pointer border-none hover:bg-purple-400;
+}
+
+.customSlider:focus {
+  @apply outline-none ring-2 ring-purple-500 ring-opacity-50;
+}
+
+.customSwitch {
+  @apply w-10 h-6 bg-gray-700 rounded-full relative cursor-pointer transition-colors duration-200 border-none outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
+}
+
+.customSwitchChecked {
+  @apply bg-purple-500;
+}
+
+.customSwitchThumb {
+  @apply absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-200 transform translate-x-0;
+}
+
+.customSwitchThumbChecked {
+  @apply translate-x-4;
+}

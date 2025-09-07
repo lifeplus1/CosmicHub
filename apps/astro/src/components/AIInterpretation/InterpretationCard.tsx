@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useCallback, lazy, Suspense, useRef, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import type { Interpretation } from './types';
 
@@ -8,11 +8,41 @@ interface InterpretationCardProps {
   interpretation: Interpretation;
 }
 
-const InterpretationCard: React.FC<InterpretationCardProps> = ({
+const InterpretationCard: React.FC<InterpretationCardProps> = React.memo(({
   interpretation,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const getTypeEmoji = (type: string): string => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  const handleOpenModal = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
+  
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    // Return focus to the button after modal closes
+    setTimeout(() => buttonRef.current?.focus(), 100);
+  }, []);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleOpenModal();
+    }
+  }, [handleOpenModal]);
+
+  // Keyboard shortcut to open modal when card is focused
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (document.activeElement === buttonRef.current && event.key === 'Escape') {
+        buttonRef.current?.blur();
+      }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+  const getTypeEmoji = useCallback((type: string): string => {
     switch (type.toLowerCase()) {
       case 'natal':
         return '🌟';
@@ -25,14 +55,14 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({
       default:
         return '✨';
     }
-  };
+  }, []);
 
-  const getConfidenceColor = (confidence: number): string => {
+  const getConfidenceColor = useCallback((confidence: number): string => {
     if (typeof confidence !== 'number') return 'text-orange-400';
     if (confidence >= 0.8 && confidence <= 1.0) return 'text-green-400';
     if (confidence >= 0.6 && confidence < 0.8) return 'text-yellow-400';
     return 'text-orange-400';
-  };
+  }, []);
 
   return (
     <article
@@ -130,9 +160,12 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({
         </time>
 
         <button
-          className='text-xs text-cosmic-gold hover:text-cosmic-gold/80 transition-colors'
-          onClick={() => setIsModalOpen(true)}
+          ref={buttonRef}
+          className='text-xs text-cosmic-gold hover:text-cosmic-gold/80 transition-colors focus:outline-none focus:ring-2 focus:ring-cosmic-gold focus:ring-offset-2 focus:ring-offset-cosmic-dark'
+          onClick={handleOpenModal}
+          onKeyDown={handleKeyDown}
           aria-label={`View full ${interpretation.type} interpretation`}
+          aria-describedby={`interpretation-${interpretation.id}`}
         >
           View Full Analysis →
         </button>
@@ -155,12 +188,14 @@ const InterpretationCard: React.FC<InterpretationCardProps> = ({
           <LazyInterpretationModal
             interpretation={interpretation}
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+            onClose={handleCloseModal}
           />
         )}
       </Suspense>
     </article>
   );
-};
+});
 
-export default React.memo(InterpretationCard); // Memoize to optimize re-renders
+InterpretationCard.displayName = 'InterpretationCard';
+
+export default InterpretationCard;

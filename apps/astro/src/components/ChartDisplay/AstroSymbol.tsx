@@ -7,7 +7,7 @@ interface AstroSymbolProps {
   title?: string;
 }
 
-export const AstroSymbol: React.FC<AstroSymbolProps> = ({
+export const AstroSymbol: React.FC<AstroSymbolProps> = React.memo(({
   symbol,
   size = 'md',
   className = '',
@@ -29,6 +29,8 @@ export const AstroSymbol: React.FC<AstroSymbolProps> = ({
       {symbol}
     </span>
   );
-};
+});
 
-export default AstroSymbol;
+AstroSymbol.displayName = 'AstroSymbol';
+
+export default React.memo(AstroSymbol);

@@ -37,12 +37,12 @@ class MockGDPRComplianceChecker:
         return lambda *args, **kwargs: None
 
 if TYPE_CHECKING:
+    from .privacy.compliance import GDPRComplianceChecker
+else:
     try:
         from .privacy.compliance import GDPRComplianceChecker
     except ImportError:
         GDPRComplianceChecker = MockGDPRComplianceChecker
-else:
-    GDPRComplianceChecker = MockGDPRComplianceChecker
 
 
 class ImprovementArea(TypedDict):

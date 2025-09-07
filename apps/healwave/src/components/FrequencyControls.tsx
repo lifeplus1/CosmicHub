@@ -3,7 +3,7 @@ import { devConsole } from '../config/devConsole';
 
 import { useAuth } from '@cosmichub/auth';
 import { savePreset } from '../services/api';
-import AudioPlayer from './AudioPlayer';
+import AudioPlayer from './AudioPlayer.lazy';
 import DurationTimer from './DurationTimer';
 
 /* const PRESETS = {

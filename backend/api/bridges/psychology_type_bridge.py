@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union, cast
 
 # Import psychology types from centralized location
-from backend.types.psychology_systems import (
+from backend_types.psychology_systems import (
     PersonalityTrait, CognitiveFunction, EmotionalProfile, StressIndicator,
     MBTIAssessment, BigFiveAssessment, EnneagramAssessment, TemperamentAssessment,
     PsychologyProfile, TherapeuticRecommendation, GrowthRecommendation, WellnessInsight,

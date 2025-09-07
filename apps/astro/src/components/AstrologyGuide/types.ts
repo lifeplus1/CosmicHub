@@ -2,7 +2,7 @@ import type React from 'react';
 
 export interface Fundamental {
   title: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   description: string;
   details: string[];
 }

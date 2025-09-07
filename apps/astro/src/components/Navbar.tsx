@@ -20,6 +20,7 @@ import {
   FaPen,
   FaLeaf,
   FaBalanceScale,
+  FaMicroscope,
 } from 'react-icons/fa';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, useSubscription } from '@cosmichub/auth';
@@ -31,7 +32,7 @@ const UserMenu = lazy(() => import('./UserMenu'));
 // Type definitions for navigation items
 interface NavItem {
   to: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   label: string;
   tooltip: {
     title: string;
@@ -44,7 +45,7 @@ interface NavItem {
 
 interface DropdownNavItem {
   label: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   items: NavItem[];
 }
 
@@ -338,6 +339,18 @@ const Navbar: React.FC = React.memo(() => {
       },
     },
     {
+      to: '/sacred-geometry',
+      icon: FaStar,
+      label: 'Sacred Geometry',
+      tier: 'elite' as const,
+      tooltip: {
+        title: 'Sacred Geometry',
+        description:
+          '3D visualization of platonic solids and sacred patterns.',
+        tier: 'elite' as const,
+      },
+    },
+    {
       to: '/wellness',
       icon: FaLeaf,
       label: 'Astrological Wellness',
@@ -392,6 +405,58 @@ const Navbar: React.FC = React.memo(() => {
         ]
       : [];
 
+  // Research Platform Navigation (Phase 3 Implementation)
+  const researchPlatform: NavItem[] = [
+    {
+      to: '/research',
+      icon: FaMicroscope,
+      label: 'Research Dashboard',
+      tier: 'elite' as const,
+      tooltip: {
+        title: 'Research Dashboard',
+        description:
+          'Access academic research projects, partnerships, and consciousness studies.',
+        tier: 'elite' as const,
+      },
+    },
+    {
+      to: '/research/metrics',
+      icon: FaChartLine,
+      label: 'Analytics & Metrics',
+      tier: 'elite' as const,
+      tooltip: {
+        title: 'Research Analytics',
+        description:
+          'Visualize research data, biometric responses, and consciousness metrics.',
+        tier: 'elite' as const,
+      },
+    },
+    {
+      to: '/research/collaboration',
+      icon: FaUsers,
+      label: 'Academic Partners',
+      tier: 'elite' as const,
+      tooltip: {
+        title: 'Collaboration Hub',
+        description:
+          'Connect with researchers, universities, and academic institutions.',
+        tier: 'elite' as const,
+      },
+    },
+    {
+      to: '/research/certification',
+      icon: FaCrown,
+      label: 'Certification Portal',
+      tier: 'premium' as const,
+      tooltip: {
+        title: 'Professional Certification',
+        description:
+          'Sacred geometry wellness practitioner and research methodology programs.',
+        tier: 'premium' as const,
+      },
+    },
+  ];
+
   // Dropdown menu configuration
   const dropdownMenus: DropdownNavItem[] = [
     {
@@ -410,6 +475,15 @@ const Navbar: React.FC = React.memo(() => {
             label: 'Premium',
             icon: FaCrown,
             items: premiumFeatures,
+          },
+        ]
+      : []),
+    ...(user !== null && researchPlatform.length > 0
+      ? [
+          {
+            label: 'Research',
+            icon: FaMicroscope,
+            items: researchPlatform,
           },
         ]
       : []),

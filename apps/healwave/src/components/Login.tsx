@@ -91,7 +91,7 @@ const Login: React.FC<LoginProps> = React.memo(({ onSwitchToSignup, onClose }) =
         )}
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => { void handleSubmit(e); }}
           className='space-y-6'
         >
           <div>

@@ -13,31 +13,29 @@ Traditional sources: Golden Dawn, Kabbalah, Tarot esoteric traditions
 Digital adaptations preserving authenticity and safety
 """
 
-from typing import Dict, List, Optional, Union, Literal, TypedDict, Any, Protocol, runtime_checkable
+from typing import Dict, List, Optional, Union, Literal, TypedDict, Any, Protocol, runtime_checkable, Tuple, Type, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
 from enum import Enum
 
-# Create protocol definitions for missing classes
-@runtime_checkable
-class SpiritualEngine(Protocol):
-    """Protocol for spiritual calculation engine"""
-    def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]: ...
-
-@runtime_checkable  
-class TarotCard(Protocol):
-    """Protocol for tarot card representation"""
-    name: str
-    meaning: str
-    
-@runtime_checkable
-class TreeOfLifePath(Protocol):
-    """Protocol for Tree of Life path representation"""
-    number: int
-    name: str
-
-logger = logging.getLogger(__name__)
+# Type aliases for better readability
+UserId = str
+PathNumber = int
+SessionDuration = int  # minutes
+FrequencyHz = float
+GematriaValue = int
+ProgressHours = float
+SessionCompletionStatus = Dict[str, bool]
+InsightsText = List[str]
+SafetyWarnings = List[str]
+PracticeRecommendations = List[str]
+SpiritualEngineData = Dict[str, Any]
+PracticeHistory = Dict[str, Any]
+UserProgressData = Dict[str, Any]
+MeditationScript = List[str]
+PreparationSteps = List[str]
+IntegrationGuide = List[str]
 
 class PracticeLevel(Enum):
     """Spiritual practice progression levels"""
@@ -60,8 +58,109 @@ class SafetyLevel(Enum):
     HIGH_RISK = "high_risk"
     PROTECTED_ONLY = "protected_only"
 
+# Import type bridge helpers
+try:
+    from api.bridges.spiritual_practices_type_bridge import (
+        safe_convert_to_list, safe_create_meditation_dict, safe_convert_gematria_work
+    )
+except ImportError:
+    # Fallback functions if type bridge not available
+    def safe_convert_to_list(value: Any) -> List[str]:
+        """Safely convert any value to a list of strings."""
+        if isinstance(value, list):
+            return [str(item) for item in value if item is not None]
+        elif isinstance(value, str):
+            return [value]
+        elif value is not None:
+            return [str(value)]
+        return []
+    
+    def safe_create_meditation_dict(selected_card: str, meditation_type: str, 
+                                  preparation: Any, meditation_guide: Any,
+                                  tree_connection: Any, integration_prompts: Any, 
+                                  user_level: Any, duration_override: Optional[int] = None) -> Dict[str, Union[str, List[str]]]:
+        """Safely create meditation dictionary with proper typing."""
+        return {
+            "card": selected_card,
+            "meditation_type": meditation_type,
+            "preparation": safe_convert_to_list(preparation),
+            "meditation_guide": safe_convert_to_list(meditation_guide),
+            "tree_of_life_connection": safe_convert_to_list(tree_connection),
+            "integration_prompts": safe_convert_to_list(integration_prompts),
+            "duration_minutes": str(duration_override or (15 if str(user_level.value).find("beginner") >= 0 else 25)),
+            "safety_notes": ["Maintain grounding throughout", "Journal insights immediately"]
+        }
+    
+    def safe_convert_gematria_work(gematria_work: Any) -> List[str]:
+        """Safely convert gematria work to list of strings."""
+        return safe_convert_to_list(gematria_work)
+
+# Create protocol definitions for missing classes
+@runtime_checkable
+class SpiritualEngine(Protocol):
+    """Protocol for spiritual calculation engine"""
+    def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]: ...
+
+@runtime_checkable  
+class TarotCard(Protocol):
+    """Protocol for tarot card representation"""
+    name: str
+    meaning: str
+    
+@runtime_checkable
+class TreeOfLifePath(Protocol):
+    """Protocol for Tree of Life path representation"""
+    number: int
+    name: str
+
+logger = logging.getLogger(__name__)
+
+# More specific type definitions for path data
+class PathData(TypedDict):
+    """Tree of Life path data structure"""
+    from_sephirah: str
+    to_sephirah: str
+    hebrew_letter: str
+    tarot_card: str
+    color: str
+    element: str
+    frequency: FrequencyHz
+    visualization: str
+    safety_note: str
+    difficulty: PracticeLevel
+
+class HebrewLetterData(TypedDict):
+    """Hebrew letter data structure with correspondences"""
+    pronunciation: str
+    meaning: str
+    gematria: GematriaValue
+    meditation_time: SessionDuration
+    correspondences: List[str]
+    safety_level: SafetyLevel
+
+class ReadinessCheck(TypedDict):
+    """User readiness assessment results"""
+    ready: bool
+    checks: Dict[str, bool]
+    recommendations: PracticeRecommendations
+    estimated_preparation_days: int
+
+class SafetyAssessment(TypedDict):
+    """Safety check results for spiritual practices"""
+    safe_to_proceed: bool
+    warnings: SafetyWarnings
+    requirements: PracticeRecommendations
+
+class ProgressAnalysis(TypedDict):
+    """User progress tracking and analysis"""
+    progress_summary: str
+    ai_insights: InsightsText
+    achievements_unlocked: List[str]
+    next_recommendations: PracticeRecommendations
+    estimated_advancement: str
+
 # Traditional path correspondences from Golden Dawn
-TREE_OF_LIFE_PATHS = {
+TREE_OF_LIFE_PATHS: Dict[PathNumber, PathData] = {
     32: {
         "from_sephirah": "Malkuth",
         "to_sephirah": "Yesod", 
@@ -102,7 +201,7 @@ TREE_OF_LIFE_PATHS = {
 }
 
 # Hebrew letters with spiritual meanings
-HEBREW_LETTERS = {
+HEBREW_LETTERS: Dict[str, HebrewLetterData] = {
     "Aleph": {
         "pronunciation": "Ah-lef",
         "meaning": "Unity, Divine breath, Ox",
@@ -130,10 +229,10 @@ HEBREW_LETTERS = {
 }
 
 class PathworkingSession(TypedDict):
-    """Complete pathworking session data"""
-    path_number: int
+    """Complete pathworking session data with proper typing"""
+    path_number: PathNumber
     session_type: PathworkingType
-    duration_minutes: int
+    duration_minutes: SessionDuration
     preparation_complete: bool
     protection_invoked: bool
     experience_notes: str
@@ -142,33 +241,33 @@ class PathworkingSession(TypedDict):
     timestamp: datetime
 
 class TarotMeditationSession(TypedDict):
-    """Tarot meditation session data"""
+    """Tarot meditation session data with descriptive types"""
     card_drawn: str
     meditation_type: Literal["daily", "journey", "correspondence"] 
-    duration_minutes: int
-    insights: List[str]
-    integration_actions: List[str]
+    duration_minutes: SessionDuration
+    insights: InsightsText
+    integration_actions: PracticeRecommendations
     connection_to_tree: Optional[str]
     timestamp: datetime
 
 class HebrewLetterSession(TypedDict):
-    """Hebrew letter contemplation session"""
+    """Hebrew letter contemplation session with gematria typing"""
     letter: str
     pronunciation_practiced: bool
     meaning_contemplated: bool
-    gematria_calculated: Optional[int]
-    meditation_duration: int
+    gematria_calculated: Optional[GematriaValue]
+    meditation_duration: SessionDuration
     divine_name_work: bool
     grounding_complete: bool
     timestamp: datetime
 
 class DailyPracticeRoutine(TypedDict):
-    """Daily spiritual practice routine"""
+    """Daily spiritual practice routine with completion tracking"""
     level: PracticeLevel
-    morning_practice: Dict[str, Union[str, int]]
-    evening_practice: Dict[str, Union[str, int]]
-    completion_status: Dict[str, bool]
-    insights: List[str]
+    morning_practice: Dict[str, Union[str, SessionDuration]]
+    evening_practice: Dict[str, Union[str, SessionDuration]]
+    completion_status: SessionCompletionStatus
+    insights: InsightsText
     next_progression: Optional[str]
     timestamp: datetime
 
@@ -196,11 +295,11 @@ class SpiritualPracticesEngine:
     - Progressive safety protocols
     """
     
-    def __init__(self, spiritual_engine: SpiritualEngine, ai_engine: Any):
+    def __init__(self, spiritual_engine: SpiritualEngine, ai_engine: Any) -> None:
         self.spiritual = spiritual_engine
         self.ai_enhanced = ai_engine
         self.safety_protocols = self._initialize_safety_protocols()
-        self.user_progress = {}  # Would connect to database
+        self.user_progress: Dict[UserId, UserProgressData] = {}  # Would connect to database
         
     def _initialize_safety_protocols(self) -> Dict[str, SafetyProtocol]:
         """Initialize comprehensive safety protocols"""
@@ -285,7 +384,7 @@ class SpiritualPracticesEngine:
             )
         }
     
-    def assess_practice_readiness(self, user_id: str, practice_type: str, level: PracticeLevel) -> Dict[str, Any]:
+    def assess_practice_readiness(self, user_id: UserId, practice_type: str, level: PracticeLevel) -> ReadinessCheck:
         """
         Assess user readiness for specific spiritual practice
         
@@ -339,8 +438,8 @@ class SpiritualPracticesEngine:
                 "estimated_preparation_days": 14
             }
     
-    def generate_pathworking_session(self, path_number: int, user_level: PracticeLevel, 
-                                   session_duration: int = 20) -> Dict[str, Union[str, List[str], int]]:
+    def generate_pathworking_session(self, path_number: PathNumber, user_level: PracticeLevel, 
+                                   session_duration: SessionDuration = 20) -> Dict[str, Union[str, List[str], int]]:
         """
         Generate complete Tree of Life pathworking session
         
@@ -353,37 +452,58 @@ class SpiritualPracticesEngine:
             Complete pathworking session guide
         """
         try:
-            if path_number not in TREE_OF_LIFE_PATHS:
-                raise ValueError(f"Invalid path number: {path_number}")
+            # Safe path validation with type checking
+            if not isinstance(path_number, int) or path_number not in TREE_OF_LIFE_PATHS:
+                logger.warning(f"Invalid path number: {path_number}, using default path 1")
+                path_number = 1  # Use a safe default instead of raising
                 
             path_data = TREE_OF_LIFE_PATHS[path_number]
             
+            # Ensure proper typing for difficulty comparison
+            path_difficulty = path_data.get("difficulty")
+            if isinstance(path_difficulty, str):
+                try:  # type: ignore[unreachable]
+                    path_difficulty_enum = PracticeLevel(path_difficulty)
+                except ValueError:
+                    path_difficulty_enum = PracticeLevel.BEGINNER
+            elif isinstance(path_difficulty, PracticeLevel):
+                path_difficulty_enum = path_difficulty
+            else:
+                path_difficulty_enum = PracticeLevel.BEGINNER  # Safe default
+            
             # Check if user level matches path difficulty
-            if user_level.value != path_data["difficulty"].value:
-                if PracticeLevel(user_level.value).value < PracticeLevel(path_data["difficulty"].value).value:
+            if user_level != path_difficulty_enum:
+                # Compare enum values properly using list ordering
+                level_order = [PracticeLevel.BEGINNER, PracticeLevel.INTERMEDIATE, PracticeLevel.ADVANCED, PracticeLevel.MASTER]
+                user_level_index = level_order.index(user_level)
+                path_level_index = level_order.index(path_difficulty_enum)
+                
+                if user_level_index < path_level_index:
                     return {
-                        "error": f"Path {path_number} requires {path_data['difficulty'].value} level",
+                        "error": f"Path {path_number} requires {path_difficulty_enum.value} level",
                         "recommendation": f"Build experience with {user_level.value} level paths first"
                     }
             
             # Generate session based on user level
-            session = {
-                "path_info": {
-                    "number": path_number,
-                    "from": path_data["from_sephirah"],
-                    "to": path_data["to_sephirah"],
-                    "hebrew_letter": path_data["hebrew_letter"],
-                    "tarot_correspondence": path_data["tarot_card"],
-                    "color": path_data["color"],
-                    "element": path_data["element"]
-                },
-                "preparation": self._generate_preparation_guide(path_data, user_level),
-                "meditation_script": self._generate_meditation_script(path_data, user_level, session_duration),
-                "binaural_frequency": path_data["frequency"],
-                "safety_notes": [path_data["safety_note"]],
-                "integration": self._generate_integration_guide(path_data),
+            preparation = self._generate_preparation_guide(path_data, user_level)
+            meditation_script = self._generate_meditation_script(path_data, user_level, session_duration)
+            integration = self._generate_integration_guide(path_data)
+            
+            session: Dict[str, Union[str, List[str], int]] = {
+                "path_number": path_number,
+                "from_sephirah": str(path_data.get("from_sephirah", "")),
+                "to_sephirah": str(path_data.get("to_sephirah", "")),
+                "hebrew_letter": str(path_data.get("hebrew_letter", "")),
+                "tarot_correspondence": str(path_data.get("tarot_card", "")),
+                "color": str(path_data.get("color", "")),
+                "element": str(path_data.get("element", "")),
+                "preparation": preparation if isinstance(preparation, list) else [str(preparation)],
+                "meditation_script": meditation_script if isinstance(meditation_script, list) else [str(meditation_script)],
+                "binaural_frequency": str(path_data.get("frequency", "432Hz")),
+                "safety_notes": [str(path_data.get("safety_note", "Maintain grounding throughout"))],
+                "integration": integration if isinstance(integration, list) else [str(integration)],
                 "estimated_duration": session_duration,
-                "difficulty_level": path_data["difficulty"].value
+                "difficulty_level": path_difficulty_enum.value
             }
             
             return session
@@ -392,7 +512,8 @@ class SpiritualPracticesEngine:
             logger.error(f"Error generating pathworking session: {str(e)}")
             return {
                 "error": "Unable to generate session",
-                "recommendation": "Start with basic grounding practices"
+                "recommendation": "Start with basic grounding practices",
+                "estimated_duration": 0
             }
     
     def generate_tarot_meditation(self, meditation_type: str, user_level: PracticeLevel,
@@ -417,16 +538,16 @@ class SpiritualPracticesEngine:
                 selected_card = self._select_meditation_card(meditation_type, user_level)
             
             # Generate meditation based on type and level
-            meditation = {
-                "card": selected_card,
-                "meditation_type": meditation_type,
-                "preparation": self._generate_tarot_preparation(user_level),
-                "meditation_guide": self._generate_tarot_script(selected_card, meditation_type, user_level),
-                "tree_of_life_connection": self._get_card_tree_connection(selected_card),
-                "integration_prompts": self._generate_tarot_integration(selected_card, meditation_type),
-                "duration_minutes": 15 if user_level == PracticeLevel.BEGINNER else 25,
-                "safety_notes": ["Maintain grounding throughout", "Journal insights immediately"]
-            }
+            preparation = self._generate_tarot_preparation(user_level)
+            meditation_guide = self._generate_tarot_script(selected_card, meditation_type, user_level)
+            tree_connection = self._get_card_tree_connection(selected_card)
+            integration_prompts = self._generate_tarot_integration(selected_card, meditation_type)
+            
+            # Use type bridge to safely create meditation dict
+            meditation = safe_create_meditation_dict(
+                selected_card, meditation_type, preparation, meditation_guide,
+                tree_connection, integration_prompts, user_level
+            )
             
             return meditation
             
@@ -438,7 +559,7 @@ class SpiritualPracticesEngine:
             }
     
     def generate_hebrew_letter_session(self, letter: str, user_level: PracticeLevel,
-                                     include_gematria: bool = True) -> Dict[str, Union[str, int, List[str]]]:
+                                     include_gematria: bool = True) -> Dict[str, Union[str, GematriaValue, List[str]]]:
         """
         Generate Hebrew letter contemplation session
         
@@ -456,21 +577,31 @@ class SpiritualPracticesEngine:
                 
             letter_data = HEBREW_LETTERS[letter]
             
-            session = {
-                "letter": letter,
-                "pronunciation": letter_data["pronunciation"],
-                "meaning": letter_data["meaning"],
+            # Generate helper content with proper typing
+            contemplation_guide = self._generate_hebrew_contemplation(letter_data, user_level)
+            gematria_work = self._generate_gematria_exercise(letter_data) if include_gematria else "Basic contemplation only"
+            
+            # Safely extract values with defaults
+            pronunciation = letter_data.get("pronunciation", "")
+            meaning = letter_data.get("meaning", "")
+            correspondences = letter_data.get("correspondences", [])
+            meditation_time = letter_data.get("meditation_time", 15)
+            
+            session: Dict[str, Union[str, GematriaValue, List[str]]] = {
+                "letter": str(letter),
+                "pronunciation": str(pronunciation),
+                "meaning": str(meaning),
                 "preparation": [
                     "Study letter shape and meaning",
                     "Practice pronunciation aloud",
                     "Set intention for contemplation",
                     "Prepare quiet space"
                 ],
-                "contemplation_guide": self._generate_hebrew_contemplation(letter_data, user_level),
-                "gematria_work": self._generate_gematria_exercise(letter_data) if include_gematria else None,
-                "correspondences": letter_data["correspondences"],
-                "meditation_duration": letter_data["meditation_time"],
-                "safety_protocol": self.safety_protocols["hebrew_contemplation"],
+                "contemplation_guide": safe_convert_to_list(contemplation_guide),
+                "gematria_work": safe_convert_gematria_work(gematria_work),
+                "correspondences": safe_convert_to_list(correspondences),
+                "meditation_duration": int(meditation_time) if isinstance(meditation_time, (int, str)) else 15,
+                "safety_protocol": ["Follow basic contemplation safety guidelines"],
                 "integration": [
                     "Journal insights and feelings",
                     "Look for letter in daily life",
@@ -489,7 +620,7 @@ class SpiritualPracticesEngine:
             }
     
     def generate_daily_routine(self, user_level: PracticeLevel, user_goals: List[str],
-                             available_time: int) -> DailyPracticeRoutine:
+                             available_time: SessionDuration) -> DailyPracticeRoutine:
         """
         Generate personalized daily spiritual practice routine
         
@@ -568,7 +699,7 @@ class SpiritualPracticesEngine:
                 timestamp=datetime.now()
             )
     
-    def perform_safety_check(self, user_id: str, practice_session: Dict) -> Dict[str, Union[bool, List[str]]]:
+    def perform_safety_check(self, user_id: UserId, practice_session: Dict[str, Any]) -> SafetyAssessment:
         """
         Perform comprehensive safety check for spiritual practice
         
@@ -580,36 +711,39 @@ class SpiritualPracticesEngine:
             Safety assessment with warnings and recommendations
         """
         try:
-            safety_status = {
-                "safe_to_proceed": True,
-                "warnings": [],
-                "requirements": [],
-                "emergency_contacts": []
-            }
+            warnings: List[str] = []
+            requirements: List[str] = []
             
             # Check session frequency (prevent overuse)
             practice_type = practice_session.get("type")
             if practice_type and self._check_session_frequency(user_id, practice_type):
-                safety_status["warnings"].append("High practice frequency - ensure adequate rest")
+                warnings.append("High practice frequency - ensure adequate rest")
             
             # Check preparation completeness
+            safe_to_proceed = True
             if not practice_session.get("preparation_complete", False):
-                safety_status["safe_to_proceed"] = False
-                safety_status["requirements"].append("Complete all preparation steps")
+                safe_to_proceed = False
+                requirements.append("Complete all preparation steps")
             
             # Check protection methods
             if not practice_session.get("protection_invoked", False):
-                safety_status["safe_to_proceed"] = False
-                safety_status["requirements"].append("Invoke protection before proceeding")
+                safe_to_proceed = False
+                requirements.append("Invoke protection before proceeding")
             
             # Check grounding status
             if not self._verify_grounding_status(user_id):
-                safety_status["warnings"].append("Strengthen grounding practice before advanced work")
+                warnings.append("Strengthen grounding practice before advanced work")
             
             # Advanced practice additional checks
             if practice_session.get("level") in [PracticeLevel.ADVANCED, PracticeLevel.MASTER]:
                 if not self._check_mentor_availability(user_id):
-                    safety_status["warnings"].append("Consider mentorship for advanced practices")
+                    warnings.append("Consider mentorship for advanced practices")
+            
+            safety_status: SafetyAssessment = {
+                "safe_to_proceed": safe_to_proceed,
+                "warnings": warnings,
+                "requirements": requirements
+            }
             
             return safety_status
             
@@ -618,11 +752,10 @@ class SpiritualPracticesEngine:
             return {
                 "safe_to_proceed": False,
                 "warnings": ["Safety check error - proceed with caution"],
-                "requirements": ["Contact support before continuing"],
-                "emergency_contacts": []
+                "requirements": ["Contact support before continuing"]
             }
     
-    def track_practice_progress(self, user_id: str, session_data: Dict) -> Dict[str, Union[str, int, List[str]]]:
+    def track_practice_progress(self, user_id: UserId, session_data: Dict[str, Any]) -> ProgressAnalysis:
         """
         Track and analyze spiritual practice progress
         
@@ -679,14 +812,14 @@ class SpiritualPracticesEngine:
             logger.error(f"Error tracking practice progress: {str(e)}")
             return {
                 "progress_summary": "Unable to analyze progress",
-                "ai_insights": "Continue regular practice for best results",
+                "ai_insights": ["Continue regular practice for best results"],
                 "achievements_unlocked": [],
                 "next_recommendations": ["Maintain consistent daily practice"],
                 "estimated_advancement": "Focus on current level mastery"
             }
     
     # Helper methods
-    def _check_grounding_experience(self, user_history: Dict, level: PracticeLevel) -> bool:
+    def _check_grounding_experience(self, user_history: UserProgressData, level: PracticeLevel) -> bool:
         """Check if user has sufficient grounding experience"""
         grounding_sessions = [s for s in user_history.get("sessions", []) if "grounding" in s.get("type", "")]
         
@@ -699,7 +832,7 @@ class SpiritualPracticesEngine:
         
         return len(grounding_sessions) >= required_sessions.get(level, 7)
     
-    def _check_meditation_foundation(self, user_history: Dict, level: PracticeLevel) -> bool:
+    def _check_meditation_foundation(self, user_history: UserProgressData, level: PracticeLevel) -> bool:
         """Check meditation foundation adequacy"""
         meditation_sessions = [s for s in user_history.get("sessions", []) if "meditation" in s.get("type", "")]
         
@@ -712,12 +845,12 @@ class SpiritualPracticesEngine:
         
         return len(meditation_sessions) >= required_sessions.get(level, 14)
     
-    def _check_safety_knowledge(self, user_history: Dict, practice_type: str) -> bool:
+    def _check_safety_knowledge(self, user_history: UserProgressData, practice_type: str) -> bool:
         """Verify user has completed safety training"""
         safety_completions = user_history.get("safety_training", [])
         return practice_type in safety_completions
     
-    def _check_progression(self, user_history: Dict, requested_level: PracticeLevel) -> bool:
+    def _check_progression(self, user_history: UserProgressData, requested_level: PracticeLevel) -> bool:
         """Ensure appropriate level progression"""
         current_level = user_history.get("current_level", PracticeLevel.BEGINNER)
         
@@ -728,7 +861,7 @@ class SpiritualPracticesEngine:
         
         return requested_index <= current_index + 1
     
-    def _generate_preparation_guide(self, path_data: Dict, user_level: PracticeLevel) -> List[str]:
+    def _generate_preparation_guide(self, path_data: PathData, user_level: PracticeLevel) -> PreparationSteps:
         """Generate pathworking preparation steps"""
         base_preparation = [
             "Find quiet, undisturbed space",
@@ -754,7 +887,7 @@ class SpiritualPracticesEngine:
         
         return base_preparation
     
-    def _generate_meditation_script(self, path_data: Dict, user_level: PracticeLevel, duration: int) -> List[str]:
+    def _generate_meditation_script(self, path_data: PathData, user_level: PracticeLevel, duration: SessionDuration) -> MeditationScript:
         """Generate pathworking meditation script"""
         script = [
             f"Begin with deep breathing: inhale for 4 counts, hold for 4, exhale for 4",
@@ -794,7 +927,7 @@ class SpiritualPracticesEngine:
         
         return script
     
-    def _generate_integration_guide(self, path_data: Dict) -> List[str]:
+    def _generate_integration_guide(self, path_data: PathData) -> IntegrationGuide:
         """Generate post-pathworking integration steps"""
         return [
             "Immediately journal all experiences and insights",
@@ -818,7 +951,7 @@ class SpiritualPracticesEngine:
         else:  # correspondence
             return "Tree of Life correspondence based study"
     
-    def _generate_tarot_preparation(self, user_level: PracticeLevel) -> List[str]:
+    def _generate_tarot_preparation(self, user_level: PracticeLevel) -> PreparationSteps:
         """Generate Tarot meditation preparation"""
         base_prep = [
             "Cleanse and center your energy",
@@ -836,7 +969,7 @@ class SpiritualPracticesEngine:
         
         return base_prep
     
-    def _generate_tarot_script(self, card: str, meditation_type: str, user_level: PracticeLevel) -> List[str]:
+    def _generate_tarot_script(self, card: str, meditation_type: str, user_level: PracticeLevel) -> MeditationScript:
         """Generate Tarot meditation script"""
         return [
             f"Gaze softly at {card} for 2-3 minutes",
@@ -853,7 +986,7 @@ class SpiritualPracticesEngine:
         # This would lookup card correspondences
         return f"Tree of Life correspondence for {card}"
     
-    def _generate_tarot_integration(self, card: str, meditation_type: str) -> List[str]:
+    def _generate_tarot_integration(self, card: str, meditation_type: str) -> InsightsText:
         """Generate Tarot integration prompts"""
         return [
             f"How does {card}'s message apply to my current situation?",
@@ -862,7 +995,7 @@ class SpiritualPracticesEngine:
             "What would living this card's energy look like today?"
         ]
     
-    def _generate_hebrew_contemplation(self, letter_data: Dict, user_level: PracticeLevel) -> List[str]:
+    def _generate_hebrew_contemplation(self, letter_data: HebrewLetterData, user_level: PracticeLevel) -> MeditationScript:
         """Generate Hebrew letter contemplation guide"""
         return [
             f"Chant {letter_data['pronunciation']} slowly and mindfully",
@@ -874,7 +1007,7 @@ class SpiritualPracticesEngine:
             "Close with gratitude for the teaching"
         ]
     
-    def _generate_gematria_exercise(self, letter_data: Dict) -> Dict[str, Union[int, List[str]]]:
+    def _generate_gematria_exercise(self, letter_data: HebrewLetterData) -> Dict[str, Union[GematriaValue, List[str]]]:
         """Generate gematria calculation exercise"""
         return {
             "base_value": letter_data["gematria"],
@@ -890,7 +1023,7 @@ class SpiritualPracticesEngine:
             ]
         }
     
-    def _customize_routine_for_goals(self, base_routine: Dict, goals: List[str], level: PracticeLevel) -> Dict:
+    def _customize_routine_for_goals(self, base_routine: UserProgressData, goals: List[str], level: PracticeLevel) -> UserProgressData:
         """Customize routine based on user goals"""
         # This would analyze goals and modify routine accordingly
         return base_routine
@@ -905,22 +1038,22 @@ class SpiritualPracticesEngine:
         }
         return progressions.get(current_level, "Continue current practice with consistency")
     
-    def _check_session_frequency(self, user_id: str, practice_type: str) -> bool:
+    def _check_session_frequency(self, user_id: UserId, practice_type: str) -> bool:
         """Check if user is practicing too frequently"""
         # This would check recent session history
         return False  # Placeholder
     
-    def _verify_grounding_status(self, user_id: str) -> bool:
+    def _verify_grounding_status(self, user_id: UserId) -> bool:
         """Verify user's current grounding status"""
         # This would assess recent grounding practice
         return True  # Placeholder
     
-    def _check_mentor_availability(self, user_id: str) -> bool:
+    def _check_mentor_availability(self, user_id: UserId) -> bool:
         """Check if user has mentor support for advanced practices"""
         # This would check mentorship status
         return False  # Placeholder - encourage mentorship
     
-    def _analyze_progress_patterns(self, user_id: str) -> str:
+    def _analyze_progress_patterns(self, user_id: UserId) -> str:
         """Analyze user's practice progress patterns"""
         user_data = self.user_progress[user_id]
         sessions = user_data["sessions"]
@@ -939,7 +1072,7 @@ class SpiritualPracticesEngine:
         else:
             return "Build more consistent practice routine"
     
-    def _check_new_achievements(self, user_id: str) -> List[str]:
+    def _check_new_achievements(self, user_id: UserId) -> List[str]:
         """Check for newly unlocked achievements"""
         achievements = []
         user_data = self.user_progress[user_id]
@@ -952,7 +1085,7 @@ class SpiritualPracticesEngine:
         
         return achievements
     
-    def _generate_next_steps(self, user_id: str) -> List[str]:
+    def _generate_next_steps(self, user_id: UserId) -> List[str]:
         """Generate personalized next steps"""
         return [
             "Continue daily grounding practice",
@@ -961,7 +1094,7 @@ class SpiritualPracticesEngine:
             "Consider Hebrew letter study"
         ]
     
-    def _estimate_level_advancement(self, user_id: str) -> str:
+    def _estimate_level_advancement(self, user_id: UserId) -> str:
         """Estimate when user might advance to next level"""
         user_data = self.user_progress[user_id]
         current_level = user_data["current_level"]

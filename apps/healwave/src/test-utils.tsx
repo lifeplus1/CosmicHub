@@ -20,8 +20,8 @@ export const renderWithProviders = (component: React.ReactElement): RenderResult
 // Hook for testing navigation
 export const mockNavigate = () => {
   const mockFn = vi.fn();
-  vi.doMock('react-router-dom', () => ({
-    ...vi.importActual('react-router-dom'),
+  vi.doMock('react-router-dom', async () => ({
+    ...(await vi.importActual('react-router-dom')),
     useNavigate: () => mockFn,
   }));
   return mockFn;

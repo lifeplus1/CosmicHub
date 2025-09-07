@@ -11,7 +11,7 @@ import MayanChart from './MayanChart';
 import UranianChart from './UranianChart';
 import SynthesisChart from './SynthesisChart';
 import SpiritualChart from './SpiritualChart';
-import PsychologyChart, { type PsychologyChartData } from './PsychologyChart';
+import PsychologyChart from './PsychologyChart/index';
 import TCMChart from './TCMChart';
 import ExtractedSystemsNavigation from './ExtractedSystemsNavigation';
 
@@ -282,7 +282,7 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
               {displayData.spiritual_systems ? (
                 <SpiritualChart
                   chartData={displayData.spiritual_systems}
-                  _birthData={birthData}
+                  birthData={birthData}
                   isLoading={false}
                 />
               ) : (
@@ -311,11 +311,10 @@ export const MultiSystemChartDisplay: React.FC<MultiSystemChartProps> = ({
 
           {(!overrideVisibleTabs || overrideVisibleTabs.includes('psychology')) && (<Tabs.Content value='psychology' className='pt-4'>
             <ChartErrorBoundary>
-              {displayData.psychology ? (
+              {birthData ? (
                 <PsychologyChart
-                  data={displayData.psychology as unknown as PsychologyChartData}
-                  birthData={birthData}
-                  isLoading={false}
+                  data={birthData}
+                  className=""
                 />
               ) : (
                 <div className='p-4 text-center text-cosmic-silver'>

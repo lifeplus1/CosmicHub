@@ -12,6 +12,7 @@ import Footer from './components/Footer';
 const FrequencyGenerator = lazy(() => import('./pages/FrequencyGenerator'));
 const Presets = lazy(() => import('./pages/Presets'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Upgrade = lazy(() => import('./pages/Upgrade'));
 const TailwindRadixTest = lazy(() => import('./components/TailwindRadixTest'));
 
 const MainApp: React.FC = () => {
@@ -119,6 +120,7 @@ const MainApp: React.FC = () => {
               <Route path='/' element={<FrequencyGenerator />} />
               <Route path='/presets' element={<Presets />} />
               <Route path='/profile' element={<Profile />} />
+              <Route path='/upgrade' element={<Upgrade />} />
               <Route path='/test' element={<TailwindRadixTest />} />
             </Routes>
           </Suspense>

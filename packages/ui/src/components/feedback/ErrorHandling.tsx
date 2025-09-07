@@ -3,7 +3,7 @@
  * UX Enhancement: Comprehensive error states with user-friendly messaging and actions
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { cn } from '../../utils/cn';
 
 // Error domain types -------------------------------------------------------
@@ -44,7 +44,7 @@ export interface ErrorMessageProps {
   dismissible?: boolean;
 }
 
-export const ErrorMessage: React.FC<ErrorMessageProps> = ({
+const ErrorMessage: React.FC<ErrorMessageProps> = React.memo(({
   error,
   className,
   showDetails = false,
@@ -58,7 +58,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   const [isRetrying, setIsRetrying] = useState(false);
 
   // Normalize error to EnhancedError
-  const normalizedError: EnhancedError = React.useMemo(() => {
+  const normalizedError: EnhancedError = useMemo(() => {
     if (typeof error === 'string') {
       return {
         message: error,
@@ -85,7 +85,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
     };
   }, [error]);
 
-  const handleRetry = async () => {
+  const handleRetry = useCallback(async () => {
     if (!onRetry) return;
 
     setIsRetrying(true);
@@ -96,7 +96,18 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
     } finally {
       setIsRetrying(false);
     }
-  };
+  }, [onRetry]);
+
+  const handleToggleExpanded = useCallback(() => {
+    setIsExpanded(!isExpanded);
+  }, [isExpanded]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleToggleExpanded();
+    }
+  }, [handleToggleExpanded]);
 
   const getErrorIcon = (type: ErrorType, severity: ErrorSeverity) => {
     if (severity === 'critical') return '🔥';
@@ -227,7 +238,9 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
           {(showDetails || normalizedError.details) && (
             <button
               type='button'
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={handleToggleExpanded}
+              onKeyDown={handleKeyDown}
+              aria-label="Show or hide technical details"
               className='text-xs text-gray-300 hover:text-gray-100 mt-2 underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
             >
               {isExpanded ? 'Hide' : 'Show'} technical details
@@ -252,6 +265,12 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
           <button
             type='button'
             onClick={onDismiss}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onDismiss();
+              }
+            }}
             className='flex-shrink-0 text-gray-400 hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
             aria-label='Dismiss error'
           >
@@ -273,7 +292,14 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
           <button
             type='button'
             onClick={() => void handleRetry()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                void handleRetry();
+              }
+            }}
             disabled={isRetrying}
+            aria-label="Retry operation"
             className={cn(
               'px-3 py-1.5 text-sm font-medium rounded-md text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
               colors.button,
@@ -297,6 +323,13 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
             key={index}
             type='button'
             onClick={() => void action.action()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                void action.action();
+              }
+            }}
+            aria-label={action.label}
             className={cn(
               'px-3 py-1.5 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
               action.primary
@@ -310,7 +343,9 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ErrorMessage.displayName = 'ErrorMessage';
 
 // Error boundary fallback component ---------------------------------------
 export interface ErrorBoundaryFallbackProps {
@@ -319,12 +354,12 @@ export interface ErrorBoundaryFallbackProps {
   className?: string;
 }
 
-export const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
+export const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = React.memo(({
   error,
   resetError,
   className,
 }) => {
-  const enhancedError: EnhancedError = {
+  const enhancedError: EnhancedError = useMemo(() => ({
     message: error.message,
     type: getErrorTypeFromMessage(error.message),
     severity: 'error',
@@ -335,7 +370,7 @@ export const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
       { label: 'Reload Page', action: () => window.location.reload() },
       { label: 'Go Back', action: () => window.history.back() },
     ],
-  };
+  }), [error]);
 
   return (
     <div className={cn('p-6', className)}>
@@ -357,7 +392,9 @@ export const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
       />
     </div>
   );
-};
+});
+
+ErrorBoundaryFallback.displayName = 'ErrorBoundaryFallback';
 
 // Toast notification for errors -------------------------------------------
 export interface ErrorToastProps {
@@ -367,7 +404,7 @@ export interface ErrorToastProps {
   className?: string;
 }
 
-export const ErrorToast: React.FC<ErrorToastProps> = ({
+export const ErrorToast: React.FC<ErrorToastProps> = React.memo(({
   error,
   onClose,
   duration = 5000,
@@ -375,18 +412,29 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(true);
 
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(onClose, 300);
+  }, [onClose]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleClose();
+    }
+  }, [handleClose]);
+
   React.useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
-        setIsVisible(false);
-        setTimeout(onClose, 300);
+        handleClose();
       }, duration);
       return () => clearTimeout(timer);
     }
     return undefined;
-  }, [duration, onClose]);
+  }, [duration, handleClose]);
 
-  const normalizedError: EnhancedError =
+  const normalizedError: EnhancedError = useMemo(() =>
     typeof error === 'string'
       ? {
           message: error,
@@ -401,7 +449,7 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
             severity: 'error',
             timestamp: new Date(),
           }
-        : { ...error, timestamp: error.timestamp ?? new Date() };
+        : { ...error, timestamp: error.timestamp ?? new Date() }, [error]);
 
   const colors = getSeverityColors(normalizedError.severity ?? 'error');
 
@@ -434,10 +482,8 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
           </div>
           <button
             type='button'
-            onClick={() => {
-              setIsVisible(false);
-              setTimeout(onClose, 300);
-            }}
+            onClick={handleClose}
+            onKeyDown={handleKeyDown}
             className='flex-shrink-0 text-gray-400 hover:text-gray-200 focus:outline-none'
             aria-label='Close error notification'
             title='Close'
@@ -454,7 +500,9 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ErrorToast.displayName = 'ErrorToast';
 
 // Utility functions -------------------------------------------------------
 export function getErrorTypeFromMessage(message: string): ErrorType {
@@ -604,3 +652,12 @@ export function getErrorIcon(type: ErrorType, severity: ErrorSeverity): string {
   if (severity === 'warning') return '⚠️';
   return 'ℹ️';
 }
+
+// Collection of error handling components
+const ErrorHandling = {
+  ErrorMessage,
+  ErrorBoundaryFallback,
+  ErrorToast,
+};
+
+export default ErrorHandling;

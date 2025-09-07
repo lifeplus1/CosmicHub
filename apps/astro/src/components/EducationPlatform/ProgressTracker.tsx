@@ -5,7 +5,7 @@
  * Implements AI #5 requirements for progressive disclosure and achievement tracking.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, Button } from '@cosmichub/ui';
 import * as Tabs from '@radix-ui/react-tabs';
 import { 
@@ -186,10 +186,10 @@ const mockSystemProgress: SystemProgress[] = [
   }
 ];
 
-const ProgressTracker: React.FC = () => {
+const ProgressTracker: React.FC = React.memo(() => {
   const [activeTab, setActiveTab] = useState('overview');
 
-  const getRarityColor = (rarity: string) => {
+  const getRarityColor = useCallback((rarity: string) => {
     switch (rarity) {
       case 'common': return 'text-green-400';
       case 'uncommon': return 'text-blue-400';
@@ -197,14 +197,65 @@ const ProgressTracker: React.FC = () => {
       case 'legendary': return 'text-yellow-400';
       default: return 'text-cosmic-silver';
     }
-  };
+  }, []);
 
-  const formatTimeSpent = (minutes: number) => {
+  const formatTimeSpent = useCallback((minutes: number) => {
     if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  };
+  }, []);
+
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+  }, []);
+
+  const _handleKeyPress = useCallback((event: React.KeyboardEvent, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  }, []);
+
+  // Memoize expensive calculations
+  const totalCompletedLessons = useMemo(() => 
+    mockSystemProgress.reduce((sum, system) => sum + system.completedLessons, 0), 
+    []
+  );
+
+  const totalPracticeHours = useMemo(() => 
+    Math.round(mockSystemProgress.reduce((sum, system) => sum + system.practiceHours, 0)), 
+    []
+  );
+
+  const totalAchievementPoints = useMemo(() => 
+    mockAchievements.reduce((sum, achievement) => sum + achievement.points, 0), 
+    []
+  );
+
+  const handleViewAllActivities = useCallback(() => {
+    setActiveTab('activities');
+  }, []);
+
+  const handleAddGoal = useCallback(() => {
+    // TODO: Implement add goal functionality
+    console.log('Add goal clicked');
+  }, []);
+
+  const handleEditGoal = useCallback((goalId: string) => {
+    // TODO: Implement edit goal functionality
+    console.log('Edit goal clicked:', goalId);
+  }, []);
+
+  const handleViewGoalDetails = useCallback((goalId: string) => {
+    // TODO: Implement view goal details functionality
+    console.log('View goal details clicked:', goalId);
+  }, []);
+
+  const handleContinueLearning = useCallback((systemType: string) => {
+    // TODO: Implement continue learning functionality
+    console.log('Continue learning clicked:', systemType);
+  }, []);
 
 
 
@@ -217,7 +268,7 @@ const ProgressTracker: React.FC = () => {
 
       <Tabs.Root
         value={activeTab}
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
         className="w-full"
       >
         <Tabs.List className="flex flex-wrap gap-2 p-2 bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl">
@@ -300,7 +351,7 @@ const ProgressTracker: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-cosmic-gold">
-                    {mockSystemProgress.reduce((sum, system) => sum + system.completedLessons, 0)}
+                    {totalCompletedLessons}
                   </div>
                   <div className="text-sm text-cosmic-silver">Lessons Complete</div>
                 </div>
@@ -326,7 +377,7 @@ const ProgressTracker: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-cosmic-gold">
-                    {Math.round(mockSystemProgress.reduce((sum, system) => sum + system.practiceHours, 0))}h
+                    {totalPracticeHours}h
                   </div>
                   <div className="text-sm text-cosmic-silver">Practice Time</div>
                 </div>
@@ -341,8 +392,9 @@ const ProgressTracker: React.FC = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => setActiveTab('activities')}
+                onClick={handleViewAllActivities}
                 className="text-cosmic-silver hover:text-cosmic-gold"
+                aria-label="View all learning activities"
               >
                 View All
               </Button>
@@ -421,7 +473,7 @@ const ProgressTracker: React.FC = () => {
               <h3 className="text-lg font-semibold text-cosmic-gold">Achievements</h3>
               <div className="text-cosmic-silver">
                 Total Points: <span className="text-cosmic-gold font-bold">
-                  {mockAchievements.reduce((sum, achievement) => sum + achievement.points, 0)}
+                  {totalAchievementPoints}
                 </span>
               </div>
             </div>
@@ -459,7 +511,9 @@ const ProgressTracker: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm"
+                onClick={handleAddGoal}
                 className="border-cosmic-gold text-cosmic-gold hover:bg-cosmic-gold hover:text-cosmic-dark"
+                aria-label="Add a new learning goal"
               >
                 Add Goal
               </Button>
@@ -494,10 +548,22 @@ const ProgressTracker: React.FC = () => {
                       {goal.systemType.replace('_', ' ')}
                     </span>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="text-cosmic-silver hover:text-cosmic-gold">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleEditGoal(goal.id)}
+                        className="text-cosmic-silver hover:text-cosmic-gold"
+                        aria-label={`Edit goal: ${goal.title}`}
+                      >
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-cosmic-silver hover:text-cosmic-gold">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleViewGoalDetails(goal.id)}
+                        className="text-cosmic-silver hover:text-cosmic-gold"
+                        aria-label={`View details for goal: ${goal.title}`}
+                      >
                         View Details
                       </Button>
                     </div>
@@ -562,7 +628,9 @@ const ProgressTracker: React.FC = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
+                      onClick={() => handleContinueLearning(system.systemType)}
                       className="border-cosmic-silver/30 text-cosmic-silver hover:bg-cosmic-silver/10"
+                      aria-label={`Continue learning ${system.systemName}`}
                     >
                       Continue Learning
                     </Button>
@@ -575,6 +643,8 @@ const ProgressTracker: React.FC = () => {
       </Tabs.Root>
     </Card>
   );
-};
+});
+
+ProgressTracker.displayName = 'ProgressTracker';
 
 export default ProgressTracker;

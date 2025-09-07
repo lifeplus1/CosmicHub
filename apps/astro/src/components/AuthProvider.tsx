@@ -8,12 +8,14 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = React.memo(({ children }) => {
   return (
     <BaseAuthProvider>
       <SubscriptionProvider appType='astro'>{children}</SubscriptionProvider>
     </BaseAuthProvider>
   );
-};
+});
 
-export default AuthProvider;
+AuthProvider.displayName = 'AuthProvider';
+
+export default React.memo(AuthProvider);

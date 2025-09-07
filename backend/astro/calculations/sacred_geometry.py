@@ -448,7 +448,8 @@ class SacredGeometryEngine:
     ) -> Dict[str, Any]:
         """Integrate TCM data with sacred geometry"""
         
-        integration = {
+        # Use explicit type annotation for mypy/Pylance compatibility
+        integration: Dict[str, Any] = {
             "five_element_geometry": {},
             "meridian_flow_patterns": {},
             "constitutional_geometry": {},

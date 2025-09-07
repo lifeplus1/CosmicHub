@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { CardTitle, Button, Tooltip, Input } from '@cosmichub/ui';
 
 export interface ChartHeaderProps {
@@ -9,13 +9,48 @@ export interface ChartHeaderProps {
   onExport: (format: 'json' | 'csv' | 'txt') => void;
 }
 
-export const ChartHeader: React.FC<ChartHeaderProps> = ({
+const ChartHeader: React.FC<ChartHeaderProps> = ({
   chartType,
   searchTerm,
   onSearchChange,
   onShare,
   onExport,
 }) => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.target.value);
+  }, [onSearchChange]);
+
+  const handleShareClick = useCallback(() => {
+    onShare();
+  }, [onShare]);
+
+  const handleExportJSON = useCallback(() => {
+    onExport('json');
+  }, [onExport]);
+
+  const handleExportCSV = useCallback(() => {
+    onExport('csv');
+  }, [onExport]);
+
+  const handleExportTXT = useCallback(() => {
+    onExport('txt');
+  }, [onExport]);
+
+  const handleShareKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleShareClick();
+    }
+  }, [handleShareClick]);
+
+  const handleExportKeyDown = useCallback((format: 'json' | 'csv' | 'txt') => 
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onExport(format);
+      }
+    }, [onExport]
+  );
   return (
     <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
       <CardTitle className='text-2xl font-bold text-cosmic-gold'>
@@ -26,9 +61,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
         <Input
           placeholder='🔍 Search planets, signs, aspects...'
           value={searchTerm}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
-            onSearchChange(e.target.value)
-          }
+          onChange={handleSearchChange}
           className='w-full sm:w-64 bg-cosmic-dark/30 border-cosmic-purple/30 text-cosmic-silver placeholder-cosmic-silver/60'
           aria-label='Search chart data'
           aria-describedby='chart-search-hint'
@@ -40,7 +73,8 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <Tooltip content='Share Chart'>
             <Button
               variant='default'
-              onClick={onShare}
+              onClick={handleShareClick}
+              onKeyDown={handleShareKeyDown}
               className='text-xs px-3 py-1'
               aria-label='Share chart'
             >
@@ -50,7 +84,8 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <Tooltip content='Export as JSON'>
             <Button
               variant='secondary'
-              onClick={() => onExport('json')}
+              onClick={handleExportJSON}
+              onKeyDown={handleExportKeyDown('json')}
               className='text-xs px-3 py-1'
               aria-label='Export chart data as JSON'
             >
@@ -60,7 +95,8 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <Tooltip content='Export as CSV'>
             <Button
               variant='secondary'
-              onClick={() => onExport('csv')}
+              onClick={handleExportCSV}
+              onKeyDown={handleExportKeyDown('csv')}
               className='text-xs px-3 py-1'
               aria-label='Export chart data as CSV'
             >
@@ -70,7 +106,8 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <Tooltip content='Export as Text'>
             <Button
               variant='secondary'
-              onClick={() => onExport('txt')}
+              onClick={handleExportTXT}
+              onKeyDown={handleExportKeyDown('txt')}
               className='text-xs px-3 py-1'
               aria-label='Export chart data as plain text'
             >
@@ -82,3 +119,10 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
     </div>
   );
 };
+
+// Memoize component to prevent unnecessary re-renders
+const MemoizedChartHeader = React.memo(ChartHeader);
+MemoizedChartHeader.displayName = 'ChartHeader';
+
+export { MemoizedChartHeader as ChartHeader };
+export default MemoizedChartHeader;

@@ -3,7 +3,7 @@
  * Delightful micro-interactions for enhanced user engagement
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { cn } from '../../utils/cn';
 import '../styles/animation-system.css';
 
@@ -18,7 +18,7 @@ export interface InteractiveRatingProps {
   className?: string;
 }
 
-export const InteractiveRating: React.FC<InteractiveRatingProps> = ({
+const InteractiveRating: React.FC<InteractiveRatingProps> = React.memo(({
   rating,
   maxRating = 5,
   onRatingChange,
@@ -30,14 +30,31 @@ export const InteractiveRating: React.FC<InteractiveRatingProps> = ({
   const [hoverRating, setHoverRating] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const handleClick = (newRating: number) => {
+  const handleClick = useCallback((newRating: number) => {
     if (readonly) return;
 
     setIsAnimating(true);
     onRatingChange?.(newRating);
 
     setTimeout(() => setIsAnimating(false), 300);
-  };
+  }, [readonly, onRatingChange]);
+
+  const handleMouseEnter = useCallback((itemRating: number) => {
+    if (!readonly) {
+      setHoverRating(itemRating);
+    }
+  }, [readonly]);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoverRating(0);
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, itemRating: number) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick(itemRating);
+    }
+  }, [handleClick]);
 
   const sizeClasses = {
     sm: 'w-4 h-4',
@@ -65,8 +82,9 @@ export const InteractiveRating: React.FC<InteractiveRatingProps> = ({
             key={index}
             type='button'
             onClick={() => handleClick(itemRating)}
-            onMouseEnter={() => !readonly && setHoverRating(itemRating)}
-            onMouseLeave={() => setHoverRating(0)}
+            onKeyDown={(e) => handleKeyDown(e, itemRating)}
+            onMouseEnter={() => handleMouseEnter(itemRating)}
+            onMouseLeave={handleMouseLeave}
             disabled={readonly}
             className={cn(
               'transition-all duration-200 ease-out transform',
@@ -93,7 +111,9 @@ export const InteractiveRating: React.FC<InteractiveRatingProps> = ({
       })}
     </div>
   );
-};
+});
+
+InteractiveRating.displayName = 'InteractiveRating';
 
 // Ripple Button with customizable ripple effect
 export interface RippleButtonProps {
@@ -106,7 +126,7 @@ export interface RippleButtonProps {
   className?: string;
 }
 
-export const RippleButton: React.FC<RippleButtonProps> = ({
+export const RippleButton: React.FC<RippleButtonProps> = React.memo(({
   children,
   onClick,
   variant = 'primary',
@@ -120,7 +140,7 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
   >([]);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     if (disabled) return;
 
     const button = buttonRef.current;
@@ -144,7 +164,22 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
     }, 600);
 
     onClick?.(e);
-  };
+  }, [disabled, onClick]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      // Create a synthetic mouse event for consistent ripple behavior
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (rect) {
+        const syntheticEvent = {
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+        } as React.MouseEvent;
+        handleClick(syntheticEvent);
+      }
+    }
+  }, [handleClick]);
 
   const variantClasses = {
     primary: 'bg-cosmic-purple hover:bg-cosmic-purple/90 text-white',
@@ -164,6 +199,7 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
       ref={buttonRef}
       type='button'
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       disabled={disabled}
       className={cn(
         'relative overflow-hidden rounded-lg font-medium transition-all duration-200 ease-out',
@@ -174,6 +210,7 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
         disabled && 'opacity-50 cursor-not-allowed',
         className
       )}
+      aria-label="Interactive ripple button"
     >
       <span className='relative z-10'>{children}</span>
 
@@ -189,7 +226,9 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
       ))}
     </button>
   );
-};
+});
+
+RippleButton.displayName = 'RippleButton';
 
 // Magnetic Hover Effect Component
 export interface MagneticHoverProps {
@@ -449,3 +488,12 @@ export const CountUp: React.FC<CountUpProps> = ({
     </span>
   );
 };
+
+// Memoize for performance
+// Collection of micro interaction components
+const MicroInteractions = {
+  InteractiveRating,
+};
+
+export default MicroInteractions;
+export { InteractiveRating };

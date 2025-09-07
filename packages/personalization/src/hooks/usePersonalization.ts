@@ -35,7 +35,7 @@ export function usePersonalization(userId: string) {
     };
 
     if (userId) {
-      loadData();
+      void loadData();
     }
   }, [userId]);
 

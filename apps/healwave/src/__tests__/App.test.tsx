@@ -1,9 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { render, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
+import { act } from 'react';
+import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from 'vitest';
 import App from '../App';
 
-// Mock dependencies
+// Import jest-dom for matchers
+import '@testing-library/jest-dom';
 vi.mock('@cosmichub/auth', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="auth-provider">{children}</div>,
   SubscriptionProvider: ({ children, appType }: { children: React.ReactNode; appType: string }) => (
@@ -120,8 +123,10 @@ describe('App Component', () => {
     vi.clearAllMocks();
   });
 
-  it('renders without crashing', () => {
-    render(<App />);
+  it('renders without crashing', async () => {
+    await act(async () => {
+      render(<App />);
+    });
     
     expect(screen.getByTestId('tooltip-provider')).toBeInTheDocument();
     expect(screen.getByTestId('auth-provider')).toBeInTheDocument();

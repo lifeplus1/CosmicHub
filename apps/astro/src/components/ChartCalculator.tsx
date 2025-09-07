@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useCallback, useMemo } from 'react';
 import { FaBook, FaInfoCircle } from 'react-icons/fa';
 import { useAuth } from '@cosmichub/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -78,7 +78,7 @@ function isExtendedChartData(data: unknown): data is ExtendedChartData {
 }
 
 // Helper function to convert FormData to UnifiedBirthData
-function convertToChartBirthData(formData: FormData): UnifiedBirthData {
+const convertToChartBirthData = (formData: FormData): UnifiedBirthData => {
   return {
     year: parseInt(formData.year),
     month: parseInt(formData.month),
@@ -87,9 +87,9 @@ function convertToChartBirthData(formData: FormData): UnifiedBirthData {
     minute: parseInt(formData.minute),
     city: formData.city,
   };
-}
+};
 
-const ChartCalculator: React.FC = () => {
+const ChartCalculator: React.FC = React.memo(function ChartCalculator() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<FormData>({
@@ -105,8 +105,8 @@ const ChartCalculator: React.FC = () => {
   const [chart, setChart] = useState<
     ExtendedChartData | MultiSystemChartData | null
   >(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState('');
   const [isGuideOpen, setIsGuideOpen] = useState(false);
 
@@ -125,7 +125,7 @@ const ChartCalculator: React.FC = () => {
     },
   });
 
-  const handleSaveChart = (): void => {
+  const handleSaveChart = useCallback((): void => {
     if (user === null || user === undefined) {
       setError('Please sign in to save your chart');
       return;
@@ -162,24 +162,35 @@ const ChartCalculator: React.FC = () => {
     };
 
     saveMutation.mutate(saveData);
-  };
+  }, [user, formData, chart, houseSystem, saveMutation]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleSelectChange = (
+  const handleSelectChange = useCallback((
     e: React.ChangeEvent<HTMLSelectElement>
   ): void => {
     setHouseSystem(e.target.value);
-  };
+  }, []);
 
-  const handleSwitchChange = (checked: boolean): void => {
+  const handleSwitchChange = useCallback((checked: boolean): void => {
     setFormData(prev => ({ ...prev, multiSystem: checked }));
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleGuideToggle = useCallback(() => {
+    setIsGuideOpen(!isGuideOpen);
+  }, [isGuideOpen]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setIsGuideOpen(!isGuideOpen);
+    }
+  }, [isGuideOpen]);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -237,12 +248,18 @@ const ChartCalculator: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData, houseSystem, setChart, setError, setLoading, setSuccess]);
 
-  const isFormValid = Object.entries(formData).every(([key, value]) => {
-    if (key === 'multiSystem') return typeof value === 'boolean';
-    return typeof value === 'string' && value.trim().length > 0;
-  });
+  const isFormValid = useMemo(() => {
+    return Object.entries(formData).every(([key, value]) => {
+      if (key === 'multiSystem') return typeof value === 'boolean';
+      return typeof value === 'string' && value.trim().length > 0;
+    });
+  }, [formData]);
+
+  const convertedBirthData = useMemo(() => {
+    return convertToChartBirthData(formData);
+  }, [formData]);
 
   return (
     <div className='container px-4 py-8 mx-auto'>
@@ -264,15 +281,19 @@ const ChartCalculator: React.FC = () => {
         {/* Guide Section */}
         <div className='p-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10'>
           <button
-            onClick={() => setIsGuideOpen(!isGuideOpen)}
+            onClick={handleGuideToggle}
+            onKeyDown={handleKeyDown}
             className='flex items-center justify-between w-full font-semibold text-white'
             aria-controls='guide-content'
+            aria-expanded={isGuideOpen ? 'true' : 'false'}
+            aria-label={isGuideOpen ? 'Hide astrology chart guide' : 'Show astrology chart guide'}
+            type='button'
           >
             <div className='flex items-center space-x-2'>
               <FaBook className='text-cyan-400' />
               <span>Astrology Chart Guide</span>
             </div>
-            <span>{isGuideOpen ? '−' : '+'}</span>
+            <span aria-hidden="true">{isGuideOpen ? '−' : '+'}</span>
           </button>
 
           {isGuideOpen && (
@@ -320,10 +341,8 @@ const ChartCalculator: React.FC = () => {
 
         {/* Form */}
         <form
-          onSubmit={e => {
-            handleSubmit(e).catch(() => {
-              // Error handling is done within handleSubmit
-            });
+          onSubmit={(e) => {
+            void handleSubmit(e);
           }}
           className='p-6 space-y-6 border bg-white/5 backdrop-blur-md rounded-xl border-white/10'
         >
@@ -578,7 +597,7 @@ const ChartCalculator: React.FC = () => {
             {formData.multiSystem
               ? isExtendedChartData(chart) === false && (
                   <MultiSystemChartDisplay
-                    birthData={convertToChartBirthData(formData)}
+                    birthData={convertedBirthData}
                     showComparison={true}
                   />
                 )
@@ -595,6 +614,6 @@ const ChartCalculator: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default ChartCalculator;

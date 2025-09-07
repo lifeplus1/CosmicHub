@@ -1,6 +1,11 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, afterEach, afterAll } from 'vitest';
 import React from 'react';
+
+// Set test environment variables early to prevent Firebase initialization
+process.env.NODE_ENV = 'test';
+process.env.VITEST = 'true';
+process.env.VITE_USE_MOCK_AUTH = 'true';
 
 // Mock environment variables for Firebase
 process.env.VITE_FIREBASE_API_KEY = 'mock-api-key';
@@ -10,7 +15,15 @@ process.env.VITE_FIREBASE_AUTH_DOMAIN = 'mock-auth-domain';
 process.env.VITE_FIREBASE_STORAGE_BUCKET = 'mock-storage-bucket';
 process.env.VITE_FIREBASE_MESSAGING_SENDER_ID = 'mock-sender-id';
 
-// Mock @cosmichub/config logger and API helpers
+// Prevent Firebase initialization during tests
+process.env.VITE_DISABLE_FIREBASE = 'true';
+process.env.NODE_ENV = 'test';
+
+// Ensure HealWave PWA does not auto-initialize in tests (prevents open timers/listeners)
+// Must be set before pwa.ts is imported anywhere in tests
+(globalThis as Record<string, unknown>).HEALWAVE_PWA_MANUAL_INIT = true;
+
+// Mock @cosmichub/config completely to prevent Firebase initialization
 vi.mock('@cosmichub/config', () => ({
   logger: {
     info: vi.fn(),
@@ -18,6 +31,23 @@ vi.mock('@cosmichub/config', () => ({
     error: vi.fn(),
     debug: vi.fn(),
   },
+  // Firebase mocks
+  app: {},
+  auth: {},
+  db: {},
+  hasAuthAvailable: false,
+  isEmulator: false,
+  isDevelopment: true,
+  projectId: 'mock-project-id',
+  enableFirestoreNetwork: vi.fn().mockResolvedValue(undefined),
+  disableFirestoreNetwork: vi.fn().mockResolvedValue(undefined),
+  getFirebasePerformanceInfo: vi.fn(() => ({
+    projectId: 'mock-project-id',
+    authDomain: 'mock-auth-domain',
+    isEmulator: false,
+    isDevelopment: true,
+    timestamp: Date.now(),
+  })),
   // API Result helpers for test compatibility
   ok: vi.fn((data: unknown, message?: string) => ({
     success: true,
@@ -58,6 +88,143 @@ vi.mock('@cosmichub/config', () => ({
   mapResult: vi.fn((result: { success: boolean; data?: unknown }, successFn: (data: unknown) => unknown, failureFn: (result: unknown) => unknown) => {
     return result.success ? successFn(result.data) : failureFn(result);
   }),
+}));
+
+// Prevent hard reloads in tests if any code calls it
+Object.defineProperty(window, 'location', {
+  value: {
+    ...window.location,
+    reload: vi.fn(),
+  },
+  writable: true,
+});
+
+// Track and clean timers and RAF to avoid hanging test runner
+const originalSetTimeout = window.setTimeout.bind(window);
+const originalClearTimeout = window.clearTimeout.bind(window);
+const originalSetInterval = window.setInterval.bind(window);
+const originalClearInterval = window.clearInterval.bind(window);
+const originalRAF = window.requestAnimationFrame?.bind(window) ?? ((cb: FrameRequestCallback) => originalSetTimeout(() => cb(performance.now()), 16) as unknown as number);
+const originalCAF = window.cancelAnimationFrame?.bind(window) ?? ((id: number) => originalClearTimeout(id as unknown as number));
+
+const timeouts: number[] = [];
+const intervals: number[] = [];
+const rafs: number[] = [];
+
+window.setTimeout = ((handler: TimerHandler, timeout?: number, ...args: unknown[]) => {
+  const id = originalSetTimeout(handler as TimerHandler, timeout as number, ...(args as []));
+  timeouts.push(id as unknown as number);
+  return id;
+}) as typeof setTimeout;
+
+window.setInterval = ((handler: TimerHandler, timeout?: number, ...args: unknown[]) => {
+  const id = originalSetInterval(handler as TimerHandler, timeout as number, ...(args as []));
+  intervals.push(id as unknown as number);
+  return id;
+}) as typeof setInterval;
+
+window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+  const id = originalRAF(cb);
+  rafs.push(id as unknown as number);
+  return id;
+}) as typeof requestAnimationFrame;
+
+window.cancelAnimationFrame = ((id: number) => {
+  originalCAF(id);
+}) as typeof cancelAnimationFrame;
+
+// Track and clean window/document event listeners
+type ListenerEntry = { type: string; listener: EventListenerOrEventListenerObject; options?: boolean | AddEventListenerOptions };
+const windowListeners: ListenerEntry[] = [];
+const documentListeners: ListenerEntry[] = [];
+
+const winAdd = window.addEventListener.bind(window);
+const winRemove = window.removeEventListener.bind(window);
+const docAdd = document.addEventListener.bind(document);
+const docRemove = document.removeEventListener.bind(document);
+
+window.addEventListener = ((type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
+  windowListeners.push({ type, listener, options });
+  winAdd(type, listener as EventListener, options as never);
+}) as typeof window.addEventListener;
+
+window.removeEventListener = ((type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions) => {
+  winRemove(type, listener as EventListener, options as never);
+}) as typeof window.removeEventListener;
+
+document.addEventListener = ((type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
+  documentListeners.push({ type, listener, options });
+  docAdd(type, listener as EventListener, options as never);
+}) as typeof document.addEventListener;
+
+document.removeEventListener = ((type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions) => {
+  docRemove(type, listener as EventListener, options as never);
+}) as typeof document.removeEventListener;
+
+// Cleanup hooks
+afterEach(() => {
+  // Clear timers
+  for (const id of timeouts.splice(0)) originalClearTimeout(id);
+  for (const id of intervals.splice(0)) originalClearInterval(id);
+  for (const id of rafs.splice(0)) originalCAF(id);
+
+  // Remove window listeners
+  for (const { type, listener, options } of windowListeners.splice(0)) {
+    try { winRemove(type, listener as EventListener, options as never); } catch { /* ignore */ }
+  }
+  // Remove document listeners
+  for (const { type, listener, options } of documentListeners.splice(0)) {
+    try { docRemove(type, listener as EventListener, options as never); } catch { /* ignore */ }
+  }
+});
+
+afterAll(() => {
+  // Final safety net
+  for (const id of timeouts.splice(0)) originalClearTimeout(id);
+  for (const id of intervals.splice(0)) originalClearInterval(id);
+  for (const id of rafs.splice(0)) originalCAF(id);
+  for (const { type, listener, options } of windowListeners.splice(0)) {
+    try { winRemove(type, listener as EventListener, options as never); } catch { /* ignore */ }
+  }
+  for (const { type, listener, options } of documentListeners.splice(0)) {
+    try { docRemove(type, listener as EventListener, options as never); } catch { /* ignore */ }
+  }
+});
+
+// Mock Firebase modules early to prevent initialization
+vi.mock('firebase/app', () => ({
+  initializeApp: vi.fn(() => ({})),
+  getApps: vi.fn(() => []),
+  getApp: vi.fn(() => ({})),
+}));
+
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
+  connectAuthEmulator: vi.fn(),
+  onAuthStateChanged: vi.fn(),
+  signInWithEmailAndPassword: vi.fn(),
+  createUserWithEmailAndPassword: vi.fn(),
+  signOut: vi.fn(),
+  GoogleAuthProvider: vi.fn(),
+  signInWithPopup: vi.fn(),
+}));
+
+vi.mock('firebase/firestore', () => ({
+  getFirestore: vi.fn(() => ({})),
+  connectFirestoreEmulator: vi.fn(),
+  enableNetwork: vi.fn(),
+  disableNetwork: vi.fn(),
+  collection: vi.fn(),
+  doc: vi.fn(),
+  getDoc: vi.fn(),
+  setDoc: vi.fn(),
+  updateDoc: vi.fn(),
+  deleteDoc: vi.fn(),
+  query: vi.fn(),
+  where: vi.fn(),
+  orderBy: vi.fn(),
+  limit: vi.fn(),
+  getDocs: vi.fn(),
 }));
 
 // Mock @cosmichub/ui components
@@ -201,42 +368,6 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Mock Firebase modules
-vi.mock('firebase/app', () => ({
-  initializeApp: vi.fn(() => ({})),
-  getApps: vi.fn(() => []),
-  getApp: vi.fn(() => ({})),
-}));
-
-vi.mock('firebase/auth', () => ({
-  getAuth: vi.fn(() => ({})),
-  connectAuthEmulator: vi.fn(),
-  onAuthStateChanged: vi.fn(),
-  signInWithEmailAndPassword: vi.fn(),
-  createUserWithEmailAndPassword: vi.fn(),
-  signOut: vi.fn(),
-  GoogleAuthProvider: vi.fn(),
-  signInWithPopup: vi.fn(),
-}));
-
-vi.mock('firebase/firestore', () => ({
-  getFirestore: vi.fn(() => ({})),
-  connectFirestoreEmulator: vi.fn(),
-  enableNetwork: vi.fn(),
-  disableNetwork: vi.fn(),
-  collection: vi.fn(),
-  doc: vi.fn(),
-  getDoc: vi.fn(),
-  setDoc: vi.fn(),
-  updateDoc: vi.fn(),
-  deleteDoc: vi.fn(),
-  query: vi.fn(),
-  where: vi.fn(),
-  orderBy: vi.fn(),
-  limit: vi.fn(),
-  getDocs: vi.fn(),
-}));
-
 // Mock Audio API
 Object.defineProperty(window, 'AudioContext', {
   writable: true,
@@ -254,6 +385,8 @@ Object.defineProperty(window, 'AudioContext', {
     })),
     destination: {},
     currentTime: 0,
+    resume: vi.fn().mockResolvedValue(undefined),
+    close: vi.fn().mockResolvedValue(undefined),
   })),
 });
 
@@ -270,4 +403,38 @@ Object.defineProperty(global, 'crypto', {
   value: {
     randomUUID: vi.fn(() => 'mock-uuid-123'),
   },
+});
+
+// Mock React's act function to avoid warnings - must be done early
+vi.mock('react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react')>();
+  return {
+    ...actual,
+    act: vi.fn((callback: () => void | Promise<void>) => {
+      if (typeof callback === 'function') {
+        const result = callback();
+        if (result && typeof result.then === 'function') {
+          return result;
+        }
+      }
+      return Promise.resolve();
+    }),
+  };
+});
+
+// Mock @testing-library/react act as well
+vi.mock('@testing-library/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@testing-library/react')>();
+  return {
+    ...actual,
+    act: vi.fn((callback: () => void | Promise<void>) => {
+      if (typeof callback === 'function') {
+        const result = callback();
+        if (result && typeof result.then === 'function') {
+          return result;
+        }
+      }
+      return Promise.resolve();
+    }),
+  };
 });

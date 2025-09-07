@@ -1,0 +1,69 @@
+{
+  "budget": {
+    "timings": {
+      "firstPaint": 1500,
+      "firstContentfulPaint": 2000,
+      "firstMeaningfulPaint": 2500,
+      "speedIndex": 3000,
+      "firstCPUIdle": 4000,
+      "interactive": 4000,
+      "loadEventEnd": 5000
+    },
+    "requests": {
+      "total": 100,
+      "html": 5,
+      "javascript": 30,
+      "css": 10,
+      "image": 40,
+      "font": 5,
+      "other": 10
+    },
+    "transferSize": {
+      "total": 1000000,
+      "html": 50000,
+      "javascript": 400000,
+      "css": 100000,
+      "image": 400000,
+      "font": 50000
+    },
+    "contentTypes": {
+      "html": {
+        "requests": 5,
+        "transferSize": 50000
+      },
+      "javascript": {
+        "requests": 30,
+        "transferSize": 400000
+      },
+      "css": {
+        "requests": 10,
+        "transferSize": 100000
+      },
+      "image": {
+        "requests": 40,
+        "transferSize": 400000
+      },
+      "font": {
+        "requests": 5,
+        "transferSize": 50000
+      }
+    }
+  },
+  "waterfall": {
+    "slowestAssets": 10
+  },
+  "coach": {
+    "score": 80,
+    "performance": 80,
+    "accessibility": 90,
+    "bestpractices": 80,
+    "privacy": 80
+  },
+  "third-party": {
+    "score": 80,
+    "transferSize": 100000
+  },
+  "axe": {
+    "score": 90
+  }
+}

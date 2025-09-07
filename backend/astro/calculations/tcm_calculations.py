@@ -16,7 +16,7 @@ AI #3: Backend Archite    def calculate_tcm_constitution(
 """
 
 import logging
-from typing import Dict, List, Optional, Union, cast, TypedDict, Any
+from typing import Dict, List, Optional, Union, cast, TypedDict, Any, Mapping
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -77,10 +77,10 @@ except ImportError:
     TCM_CONSTITUTIONAL_TYPES = {}
     PLANET_TCM_CORRELATIONS = {}
     
-    def validate_tcm_constitution(data: Dict[str, Any]) -> bool:
+    def validate_tcm_constitution(data: Union['TCMConstitution', Dict[str, Union[str, List[str], Dict[str, str], None]]]) -> bool:
         return True
     
-    def validate_elemental_balance(balance: Dict[str, float]) -> bool:
+    def validate_elemental_balance(balance: Mapping[str, Union[float, Any]]) -> bool:  # type: ignore[misc]
         return True
 
 # Use schema data if available, otherwise fallbacks
@@ -294,7 +294,7 @@ class TCMCalculationEngine:
     
     def _determine_constitutional_type(
         self, elemental_balance: Dict[str, float], chart_data: AstrologicalChart
-    ) -> Dict[str, Any]:
+    ) -> 'TCMConstitution':
         """Determine primary constitutional type"""
         
         # Find dominant element
@@ -317,15 +317,29 @@ class TCMCalculationEngine:
         
         # Customize based on chart data and secondary element
         if secondary_element:
-            # Convert TypedDict to regular dict for manipulation
-            constitution_dict = cast(Dict[str, Any], base_constitution)
+            # Safe type conversion using the literal value pattern (same as type bridge)
+            if isinstance(base_constitution, dict):
+                constitution_dict = dict(base_constitution)
+            else:
+                # Convert to dict safely with literal defaults
+                constitution_dict = {
+                    "primary_element": getattr(base_constitution, "primary_element", primary_element),
+                    "secondary_element": secondary_element,
+                    "element_strength": getattr(base_constitution, "element_strength", 0.8),
+                    "constitutional_type": getattr(base_constitution, "constitutional_type", "balanced"),
+                    "organ_systems": getattr(base_constitution, "organ_systems", {}),
+                    "dietary_guidelines": getattr(base_constitution, "dietary_guidelines", []),
+                    "lifestyle_recommendations": getattr(base_constitution, "lifestyle_recommendations", []),
+                }
             constitution_dict["secondary_element"] = secondary_element
-            base_constitution = self._customize_constitution(
+            final_constitution = cast('TCMConstitution', self._customize_constitution(
                 constitution_dict, chart_data, elemental_balance
-            )
+            ))
+        else:
+            final_constitution = cast('TCMConstitution', base_constitution)
         
-        # Ensure we return a valid dict
-        return cast(Dict[str, Any], base_constitution)
+        # Return the properly typed constitution
+        return final_constitution
     
     def _analyze_organ_systems(
         self,
@@ -369,7 +383,7 @@ class TCMCalculationEngine:
                     "challenging_elements": self._get_challenging_elements(element)
                 }
         
-        return organ_analysis
+        return cast(Dict[str, 'OrganAnalysis'], organ_analysis)
     
     def _calculate_seasonal_influences(
         self, birth_month: int, birth_day: int, elemental_balance: Dict[str, float]
@@ -400,7 +414,7 @@ class TCMCalculationEngine:
                 "potential_challenges": self._get_seasonal_challenges(season, compatibility)
             }
         
-        return seasonal_effects
+        return cast(Dict[str, 'SeasonalInfluence'], seasonal_effects)
     
     def _generate_health_guidance(
         self, 
@@ -416,13 +430,13 @@ class TCMCalculationEngine:
         
         return {
             "constitutional_strengths": constitution_dict.get("characteristics", []),
-            "potential_weaknesses": self._identify_constitutional_weaknesses(constitution, elemental_balance),
+            "potential_weaknesses": self._identify_constitutional_weaknesses(cast('TCMConstitution', constitution), elemental_balance),
             "dietary_guidelines": self._generate_dietary_guidelines(primary_element, elemental_balance),
             "exercise_recommendations": self._generate_exercise_recommendations(primary_element),
-            "lifestyle_patterns": self._generate_lifestyle_patterns(constitution),
-            "preventive_measures": self._generate_preventive_measures(constitution, elemental_balance),
+            "lifestyle_patterns": self._generate_lifestyle_patterns(cast('TCMConstitution', constitution)),
+            "preventive_measures": self._generate_preventive_measures(cast('TCMConstitution', constitution), elemental_balance),
             "seasonal_adjustments": self._generate_seasonal_adjustments(seasonal_influences),
-            "emotional_balance_tips": self._generate_emotional_balance_tips(constitution)
+            "emotional_balance_tips": self._generate_emotional_balance_tips(cast('TCMConstitution', constitution))
         }
     
     def _generate_astro_correlations(
@@ -454,7 +468,7 @@ class TCMCalculationEngine:
                     )
                 })
         
-        return correlations
+        return cast(List['TCMAstrologicalMapping'], correlations)
     
     # ===== HELPER METHODS =====
     

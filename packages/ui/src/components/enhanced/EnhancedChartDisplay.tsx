@@ -2,10 +2,12 @@
  * Enhanced Chart Display Component
  * (Reconstructed) – Demonstrates loading stages, error handling and responsiveness.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cn } from '../../utils/cn';
 import { ProgressiveLoading } from '../feedback/LoadingStates';
-import { ErrorMessage, type EnhancedError } from '../feedback/ErrorHandling';
+import ErrorHandling, { type EnhancedError } from '../feedback/ErrorHandling';
+
+const { ErrorMessage } = ErrorHandling;
 import {
   ResponsiveContainer,
   ResponsiveGrid,
@@ -33,7 +35,7 @@ export interface EnhancedChartDisplayProps {
 
 type LoadingStage = 'initializing' | 'processing' | 'finalizing' | 'complete';
 
-export const EnhancedChartDisplay: React.FC<
+const EnhancedChartDisplay: React.FC<
   EnhancedChartDisplayProps
 > = props => {
   const {
@@ -58,7 +60,7 @@ export const EnhancedChartDisplay: React.FC<
   } = useToastHelpers();
 
   // Simulate API call with different stages
-  const fetchChartData = async (showToast = false): Promise<ChartData> => {
+  const fetchChartData = useCallback(async (showToast = false): Promise<ChartData> => {
     if (showToast) {
       showLoading('Loading Chart', 'Fetching latest data...');
     }
@@ -101,10 +103,10 @@ export const EnhancedChartDisplay: React.FC<
     };
 
     return mockData;
-  };
+  }, [chartId, showLoading]);
 
   // Load chart data
-  const loadChart = async (showToast = false) => {
+  const loadChart = useCallback(async (showToast = false) => {
     try {
       setLoading(true);
       setError(null);
@@ -158,12 +160,12 @@ export const EnhancedChartDisplay: React.FC<
     } finally {
       setLoading(false);
     }
-  };
+  }, [success, showError, info, onError]);
 
   // Initial load
   useEffect(() => {
     void loadChart();
-  }, [chartId]);
+  }, [chartId, loadChart]);
 
   // Auto-refresh setup
   useEffect(() => {
@@ -172,10 +174,10 @@ export const EnhancedChartDisplay: React.FC<
       void loadChart(false);
     }, refreshInterval);
     return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, loadChart]);
 
   // Get time since last refresh
-  const getTimeSinceRefresh = () => {
+  const timeSinceRefresh = useMemo(() => {
     if (!lastRefresh) return 'Never';
     const now = new Date();
     const diff = Math.floor((now.getTime() - lastRefresh.getTime()) / 1000);
@@ -183,13 +185,35 @@ export const EnhancedChartDisplay: React.FC<
     if (diff < 60) return `${diff}s ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     return `${Math.floor(diff / 3600)}h ago`;
-  };
+  }, [lastRefresh]);
+
+  // Handle refresh with keyboard support
+  const handleRefresh = useCallback((event?: React.KeyboardEvent) => {
+    if (event && event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+    if (event) {
+      event.preventDefault();
+    }
+    void loadChart(true);
+  }, [loadChart]);
+
+  // Handle retry with keyboard support
+  const handleRetry = useCallback((event?: React.KeyboardEvent) => {
+    if (event && event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+    if (event) {
+      event.preventDefault();
+    }
+    void loadChart(true);
+  }, [loadChart]);
 
   // Get appropriate width class for progress bar based on percentage
-  const getProgressWidthClass = (value: number): string => {
+  const getProgressWidthClass = useCallback((value: number): string => {
     const roundedValue = Math.round(value / 5) * 5;
     return `w-step-${Math.min(100, Math.max(0, roundedValue))}`;
-  };
+  }, []);
 
   // Loading state
   if (loading && !chartData) {
@@ -221,7 +245,7 @@ export const EnhancedChartDisplay: React.FC<
         <MobileCard padding='lg'>
           <ErrorMessage
             error={error}
-            onRetry={() => loadChart(true)}
+            onRetry={() => handleRetry()}
             showDetails
             showTimestamp
           />
@@ -251,7 +275,7 @@ export const EnhancedChartDisplay: React.FC<
             <div className='flex items-center gap-3'>
               <StatusIndicator
                 status={loading ? 'loading' : error ? 'error' : 'success'}
-                message={`Updated ${getTimeSinceRefresh()}`}
+                message={`Updated ${timeSinceRefresh}`}
                 inline
                 size='sm'
               />
@@ -259,9 +283,11 @@ export const EnhancedChartDisplay: React.FC<
               <TouchButton
                 variant='secondary'
                 size='sm'
-                onClick={() => void loadChart(true)}
+                onClick={() => handleRefresh()}
+                onKeyDown={handleRefresh}
                 loading={loading}
                 haptic
+                aria-label="Refresh chart data"
               >
                 🔄 Refresh
               </TouchButton>
@@ -334,4 +360,10 @@ export const EnhancedChartDisplay: React.FC<
   );
 };
 
-export default EnhancedChartDisplay;
+
+// Memoize the component to prevent unnecessary re-renders
+const MemoizedEnhancedChartDisplay = React.memo(EnhancedChartDisplay);
+MemoizedEnhancedChartDisplay.displayName = 'EnhancedChartDisplay';
+
+export { MemoizedEnhancedChartDisplay as EnhancedChartDisplay };
+export default MemoizedEnhancedChartDisplay;

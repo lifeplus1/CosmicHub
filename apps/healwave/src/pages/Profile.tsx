@@ -1,24 +1,24 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { Button } from '@cosmichub/ui';
 import { useAppNavigation } from '../hooks/useAppNavigation';
-import { useToast } from '../components/ToastProvider';
+import { ToastContext } from '../components/ToastProvider';
 import UserProfile from '../components/UserProfile';
 
 const Profile: React.FC = React.memo(() => {
   const { user, signOut } = useAuth();
   const { goToHome } = useAppNavigation();
-  const { toast } = useToast();
+  const toastContext = useContext(ToastContext);
 
   const handleSignOut = React.useCallback(async () => {
     try {
       await signOut();
-      toast({ message: 'Signed out successfully', type: 'success' });
+      toastContext?.toast({ message: 'Signed out successfully', type: 'success' });
       goToHome(); // Navigate to home page instead of /login
     } catch {
-      toast({ message: 'Error signing out', type: 'error' });
+      toastContext?.toast({ message: 'Error signing out', type: 'error' });
     }
-  }, [signOut, goToHome, toast]);
+  }, [signOut, goToHome, toastContext]);
 
   if (!user) {
     return (

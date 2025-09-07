@@ -25,6 +25,12 @@ export type {
   UseStateValidationOptions,
 } from './useStateValidation';
 
+// Sacred Protocol hook for SPIRITUAL-003.5
+export { useSacredProtocol } from './spiritual/useSacredProtocol';
+export type {
+  UseSacredProtocolOptions,
+} from './spiritual/useSacredProtocol';
+
 // Spiritual hooks (migrated)
 export {
   useSpiritualAI,

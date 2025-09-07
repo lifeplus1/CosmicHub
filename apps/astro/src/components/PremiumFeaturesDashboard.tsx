@@ -2,7 +2,7 @@ import React from 'react';
 import { useSubscription } from '@cosmichub/auth';
 import { useNavigate } from 'react-router-dom';
 
-export const PremiumFeaturesDashboard: React.FC = () => {
+const PremiumFeaturesDashboard: React.FC = () => {
   const { userTier } = useSubscription();
   const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ export const PremiumFeaturesDashboard: React.FC = () => {
       {userTier !== 'premium' && (
         <button
           className='bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-lg transition-colors'
-          onClick={() => navigate('/upgrade-demo')}
+          onClick={() => navigate('/upgrade-demo')} aria-label="Interactive button"
         >
           Upgrade
         </button>
@@ -30,3 +30,8 @@ export const PremiumFeaturesDashboard: React.FC = () => {
     </div>
   );
 };
+
+// Memoize for performance
+const MemoizedPremiumFeaturesDashboard = React.memo(PremiumFeaturesDashboard);
+MemoizedPremiumFeaturesDashboard.displayName = 'PremiumFeaturesDashboard';
+export default MemoizedPremiumFeaturesDashboard;

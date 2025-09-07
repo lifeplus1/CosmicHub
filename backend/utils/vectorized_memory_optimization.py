@@ -242,6 +242,9 @@ class MemoryOptimizedVectorizedCalculator:
         self.enable_memory_pooling = enable_memory_pooling
         self.max_memory_mb = max_memory_mb
 
+        # Type annotation for memory_pool
+        self.memory_pool: Optional[ArrayMemoryPool]
+
         if enable_memory_pooling:
             self.memory_pool = ArrayMemoryPool()
         else:

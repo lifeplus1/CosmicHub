@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {  useState , useCallback} from 'react';
 import {
   FaShare,
   FaTwitter,
@@ -19,7 +19,7 @@ interface SocialShareProps {
   variant?: 'compact' | 'expanded' | 'floating';
 }
 
-const SocialShare: React.FC<SocialShareProps> = ({
+const SocialShare: React.FC<SocialShareProps> = React.memo(function SocialShare({
   url,
   title,
   description,
@@ -27,7 +27,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
   author: _author = 'Christopher',
   tags = [],
   variant = 'compact',
-}) => {
+}) {
   const [showOptions, setShowOptions] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -46,7 +46,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
     reddit: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
   };
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopySuccess(true);
@@ -61,9 +61,9 @@ const SocialShare: React.FC<SocialShareProps> = ({
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     }
-  };
+  }, [url]);
 
-  const handleNativeShare = async () => {
+  const handleNativeShare = useCallback(async () => {
     if (navigator.share) {
       try {
         await navigator.share({ title, text: description, url });
@@ -73,7 +73,11 @@ const SocialShare: React.FC<SocialShareProps> = ({
     } else {
       setShowOptions(true);
     }
-  };
+  }, [title, description, url]);
+
+  const handleCloseOptions = useCallback(() => {
+    setShowOptions(false);
+  }, []);
 
   const shareButtons = [
     {
@@ -133,7 +137,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
                 className={`flex items-center justify-center w-10 h-10 rounded-lg ${button.bgColor} ${button.color} text-white transition-all duration-200 mb-2 last:mb-0 hover:scale-110`}
                 aria-label={`Share on ${button.name}`}
               >
-                <button.icon className='w-4 h-4' />
+                <button.icon className='w-4 h-4' aria-label="Interactive button" />
               </a>
             </EducationalTooltip>
           ))}
@@ -142,7 +146,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
               void handleCopyLink();
             }}
             className={`flex items-center justify-center w-10 h-10 rounded-lg ${copySuccess ? 'bg-green-500/20 text-green-400' : 'bg-cosmic-silver/20 hover:bg-cosmic-silver/30 text-cosmic-silver'} transition-all duration-200 hover:scale-110`}
-            aria-label='Copy link'
+            aria-label={copySuccess ? 'Link copied' : 'Copy link'}
           >
             <FaCopy className='w-4 h-4' />
           </button>
@@ -166,7 +170,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
               rel='noopener noreferrer'
               className={`flex items-center gap-3 px-4 py-3 rounded-lg ${button.bgColor} ${button.color} text-white transition-all duration-200 hover:scale-105`}
             >
-              <button.icon className='w-5 h-5' />
+              <button.icon className='w-5 h-5' aria-label="Interactive button" />
               <span className='font-medium'>{button.name}</span>
             </a>
           ))}
@@ -174,6 +178,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
             onClick={() => {
               void handleCopyLink();
             }}
+            aria-label="Interactive button"
             className={`flex items-center gap-3 px-4 py-3 rounded-lg ${copySuccess ? 'bg-green-500/20 text-green-400' : 'bg-cosmic-silver/20 hover:bg-cosmic-silver/30 text-cosmic-silver'} transition-all duration-200 hover:scale-105`}
           >
             <FaCopy className='w-5 h-5' />
@@ -214,7 +219,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
             ? 'bg-green-500/20 text-green-400'
             : 'bg-cosmic-silver/20 text-cosmic-silver hover:bg-cosmic-silver/30'
         }`}
-        aria-label='Copy link to post'
+        aria-label={copySuccess ? 'Link copied to clipboard' : 'Copy link to post'}
       >
         <FaCopy className='w-4 h-4' />
         <span className='hidden sm:inline text-sm'>
@@ -231,7 +236,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
                 Share Post
               </h3>
               <button
-                onClick={() => setShowOptions(false)}
+                onClick={handleCloseOptions}
                 className='text-cosmic-silver hover:text-cosmic-gold transition-colors'
                 aria-label='Close share options'
               >
@@ -246,10 +251,10 @@ const SocialShare: React.FC<SocialShareProps> = ({
                   href={button.url}
                   target='_blank'
                   rel='noopener noreferrer'
-                  onClick={() => setShowOptions(false)}
+                  onClick={handleCloseOptions}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg ${button.bgColor} ${button.color} text-white transition-all duration-200 hover:scale-105`}
                 >
-                  <button.icon className='w-4 h-4' />
+                  <button.icon className='w-4 h-4' aria-label="Interactive button" />
                   <span className='font-medium'>{button.name}</span>
                 </a>
               ))}
@@ -260,6 +265,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
                 void handleCopyLink();
                 setShowOptions(false);
               }}
+              aria-label="Interactive button"
               className={`w-full mt-3 flex items-center justify-center gap-2 px-4 py-3 rounded-lg ${copySuccess ? 'bg-green-500/20 text-green-400' : 'bg-cosmic-silver/20 hover:bg-cosmic-silver/30 text-cosmic-silver'} transition-all duration-200`}
             >
               <FaCopy className='w-4 h-4' />
@@ -272,6 +278,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
       )}
     </div>
   );
-};
+});
 
 export default SocialShare;

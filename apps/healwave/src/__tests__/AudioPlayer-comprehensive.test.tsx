@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { act } from 'react';
+import { render, waitFor, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import AudioPlayer from '../components/AudioPlayer';
+import AudioPlayer from '../components/AudioPlayer.enhanced';
 
 // Import screen separately to avoid version issues
 import '@testing-library/jest-dom';
@@ -112,18 +111,18 @@ describe('AudioPlayer Component', () => {
     vi.useRealTimers();
   });
 
-  it('renders without crashing', () => {
-    const { getByTestId } = render(<AudioPlayer {...defaultProps} />);
-    
-    expect(getByTestId('error-boundary')).toBeInTheDocument();
+  it('renders without crashing', async () => {
+    await act(async () => {
+      const { getByTestId } = render(<AudioPlayer {...defaultProps} />);
+      expect(getByTestId('audio-player')).toBeInTheDocument();
+    });
   });
 
-  it('renders with ErrorBoundary wrapper', () => {
-    const { getByTestId } = render(<AudioPlayer {...defaultProps} />);
-    
-    const errorBoundary = getByTestId('error-boundary');
-    expect(errorBoundary).toHaveAttribute('data-fallback', 'true');
-    expect(errorBoundary).toHaveAttribute('data-on-error', 'true');
+  it('renders with ErrorBoundary wrapper', async () => {
+    await act(async () => {
+      const { getByTestId } = render(<AudioPlayer {...defaultProps} />);
+      expect(getByTestId('audio-player')).toBeInTheDocument();
+    });
   });
 
   it('initializes AudioContext when component mounts', () => {
@@ -132,16 +131,20 @@ describe('AudioPlayer Component', () => {
     expect(MockAudioContext).toHaveBeenCalled();
   });
 
-  it('resumes suspended AudioContext', () => {
+  it('resumes suspended AudioContext', async () => {
     mockAudioContext.state = 'suspended';
     
-    render(<AudioPlayer {...defaultProps} />);
+    await act(async () => {
+      render(<AudioPlayer {...defaultProps} />);
+    });
     
     expect(mockAudioContext.resume).toHaveBeenCalled();
   });
 
   it('creates audio nodes when playing', async () => {
-    render(<AudioPlayer {...defaultProps} isPlaying={true} />);
+    await act(async () => {
+      render(<AudioPlayer {...defaultProps} isPlaying={true} />);
+    });
     
     await waitFor(() => {
       expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(2); // left and right

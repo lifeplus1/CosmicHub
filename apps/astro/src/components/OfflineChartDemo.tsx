@@ -3,14 +3,14 @@
  * Demonstrates the offline chart functionality and UX-020 implementation
  */
 
-import React, { useState } from 'react';
+import React, {  useState , useCallback} from 'react';
 import { useOfflineCharts } from '@/hooks/useOfflineCharts';
-import { OfflineIndicator } from '@/components/OfflineIndicator';
+import OfflineIndicator from '@/components/OfflineIndicator';
 import type { ChartData } from '@/types';
 import type { ChartCalculationParams } from '@/services/offline-chart-service';
 import type { ZodiacSign } from '@cosmichub/types';
 
-const OfflineChartDemo: React.FC = () => {
+const OfflineChartDemo: React.FC = React.memo(function OfflineChartDemo() {
   const {
     charts,
     networkStatus,
@@ -172,6 +172,27 @@ const OfflineChartDemo: React.FC = () => {
     }
   };
 
+  // Memoized callbacks to prevent hooks violations
+  const memoizedCreateSampleChart = useCallback(() => {
+    void createSampleChart();
+  }, [newChartName]);
+
+  const memoizedCloseCreateForm = useCallback(() => {
+    setShowCreateForm(false);
+  }, []);
+
+  const memoizedLoadChart = useCallback((chartId: string) => {
+    void handleLoadChart(chartId);
+  }, [loadChart]);
+
+  const memoizedDeleteChart = useCallback((chartId: string) => {
+    void handleDeleteChart(chartId);
+  }, [deleteChart]);
+
+  const memoizedCloseChart = useCallback(() => {
+    setSelectedChart(null);
+  }, []);
+
   const handleSync = async () => {
     try {
       const result = await syncCharts();
@@ -301,14 +322,14 @@ const OfflineChartDemo: React.FC = () => {
           {/* Controls */}
           <div className='flex flex-wrap gap-4 mb-8'>
             <button
-              onClick={() => setShowCreateForm(true)}
+              onClick={useCallback(() => setShowCreateForm(true), [])} aria-label="Interactive button"
               className='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors'
             >
               ➕ Create Sample Chart
             </button>
 
             <button
-              onClick={() => void handleSync()}
+              onClick={useCallback(() => void handleSync(), [])} aria-label="Interactive button"
               disabled={isSyncing || !hasPendingSync}
               className='bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors'
             >
@@ -316,7 +337,7 @@ const OfflineChartDemo: React.FC = () => {
             </button>
 
             <button
-              onClick={() => void handleExport()}
+              onClick={useCallback(() => void handleExport(), [])} aria-label="Interactive button"
               className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors'
             >
               📥 Export Charts
@@ -334,7 +355,7 @@ const OfflineChartDemo: React.FC = () => {
             </label>
 
             <button
-              onClick={() => void handleClearCache()}
+              onClick={useCallback(() => void handleClearCache(), [])} aria-label="Interactive button"
               className='bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors'
             >
               🗑️ Clear Cache
@@ -372,13 +393,15 @@ const OfflineChartDemo: React.FC = () => {
               </div>
               <div className='flex gap-3'>
                 <button
-                  onClick={() => void createSampleChart()}
+                  onClick={memoizedCreateSampleChart}
+                  aria-label="Interactive button"
                   className='flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors'
                 >
                   Create Chart
                 </button>
                 <button
-                  onClick={() => setShowCreateForm(false)}
+                  onClick={memoizedCloseCreateForm}
+                  aria-label="Interactive button"
                   className='flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors'
                 >
                   Cancel
@@ -435,13 +458,15 @@ const OfflineChartDemo: React.FC = () => {
 
                 <div className='flex gap-2'>
                   <button
-                    onClick={() => void handleLoadChart(chart.id)}
+                    onClick={() => memoizedLoadChart(chart.id)}
+                    aria-label="Interactive button"
                     className='flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-sm transition-colors'
                   >
                     View
                   </button>
                   <button
-                    onClick={() => void handleDeleteChart(chart.id)}
+                    onClick={() => memoizedDeleteChart(chart.id)}
+                    aria-label="Interactive button"
                     className='bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm transition-colors'
                   >
                     🗑️
@@ -463,7 +488,8 @@ const OfflineChartDemo: React.FC = () => {
                   : 'Unknown'}
               </h2>
               <button
-                onClick={() => setSelectedChart(null)}
+                onClick={memoizedCloseChart}
+                aria-label="Interactive button"
                 className='bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors'
               >
                 ✕ Close
@@ -554,6 +580,6 @@ const OfflineChartDemo: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default OfflineChartDemo;

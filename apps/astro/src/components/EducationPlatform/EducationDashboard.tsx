@@ -6,6 +6,9 @@
  * community features, certification frameworks, and progressive disclosure
  */
 
+import type { 
+  ChartData as _ChartData 
+} from '@cosmichub/types';
 import React, { useState, useEffect } from 'react';
 import { Card, Button } from '@cosmichub/ui';
 import * as Tabs from '@radix-ui/react-tabs';

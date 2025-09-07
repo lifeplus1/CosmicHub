@@ -1,0 +1,166 @@
+/* Sacred Geometry Demo Component Styles */
+
+.sacred-geometry-demo {
+  @apply min-h-screen bg-gray-950 text-white p-8;
+}
+
+.demo-container {
+  @apply max-w-7xl mx-auto;
+}
+
+.demo-header {
+  @apply text-center mb-8;
+}
+
+.demo-title {
+  @apply text-4xl font-bold text-purple-300 mb-4;
+}
+
+.demo-subtitle {
+  @apply text-xl text-gray-300 mb-2;
+}
+
+.demo-description {
+  @apply text-gray-400;
+}
+
+.demo-sections {
+  @apply space-y-6;
+}
+
+.section-card {
+  @apply bg-gray-900 p-6 rounded-lg;
+}
+
+.section-title {
+  @apply text-xl font-semibold text-purple-300 mb-4;
+}
+
+.visualization-container {
+  @apply h-96 bg-black rounded-lg;
+}
+
+.data-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.data-section {
+  @apply space-y-2;
+}
+
+.data-section-title {
+  @apply text-lg font-medium text-blue-300 mb-2;
+}
+
+.data-item {
+  @apply flex justify-between items-center;
+}
+
+.data-label {
+  @apply text-gray-300 capitalize;
+}
+
+.data-value {
+  @apply text-purple-300 text-sm;
+}
+
+.element-item {
+  @apply flex justify-between;
+}
+
+.color-swatches {
+  @apply flex flex-wrap gap-2;
+}
+
+.color-swatch {
+  @apply w-8 h-8 rounded-full border-2 border-gray-600 transition-transform hover:scale-110;
+}
+
+/* Dynamic color swatch backgrounds */
+.color-swatch--fire {
+  background-color: #FF4444;
+}
+
+.color-swatch--earth {
+  background-color: #FFAA00;
+}
+
+.color-swatch--air {
+  background-color: #88FF88;
+}
+
+.color-swatch--water {
+  background-color: #4444FF;
+}
+
+.color-swatch--ether {
+  background-color: #AA44FF;
+}
+
+.golden-ratio-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+}
+
+.metric-card {
+  @apply text-center;
+}
+
+.metric-value {
+  @apply text-lg font-mono text-yellow-300;
+}
+
+.metric-large {
+  @apply text-2xl font-bold text-orange-300;
+}
+
+.metric-count {
+  @apply text-lg font-medium text-pink-300;
+}
+
+.metric-label {
+  @apply text-gray-300;
+}
+
+.meditation-times {
+  @apply mt-4;
+}
+
+.meditation-times-title {
+  @apply text-sm font-medium text-purple-300 mb-2;
+}
+
+.time-badges {
+  @apply flex flex-wrap gap-2;
+}
+
+.time-badge {
+  @apply px-2 py-1 bg-purple-800 text-purple-200 rounded text-sm;
+}
+
+.controls-section {
+  @apply flex flex-wrap gap-4;
+}
+
+.expert-mode-button {
+  @apply px-4 py-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500;
+}
+
+.expert-mode-button--active {
+  @apply bg-purple-600 text-white hover:bg-purple-500;
+}
+
+.expert-mode-button--inactive {
+  @apply bg-gray-700 text-gray-300 hover:bg-purple-500;
+}
+
+.refresh-button {
+  @apply px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500 transition-colors disabled:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.section-footer {
+  @apply mt-6 pt-4 border-t border-cosmic-purple/20;
+}
+
+.section-note {
+  @apply text-xs text-cosmic-silver/70 italic;
+}

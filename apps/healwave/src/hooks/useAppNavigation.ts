@@ -20,6 +20,10 @@ export const useAppNavigation = () => {
     navigate('/profile');
   }, [navigate]);
 
+  const goToUpgrade = useCallback(() => {
+    navigate('/upgrade');
+  }, [navigate]);
+
   const goToTest = useCallback(() => {
     navigate('/test');
   }, [navigate]);
@@ -36,6 +40,7 @@ export const useAppNavigation = () => {
     goToHome,
     goToPresets,
     goToProfile,
+    goToUpgrade,
     goToTest,
     goBack,
     goTo,

@@ -1,38 +1,29 @@
-/**
- * Enhanced User Feedback System
- * UX Enhancement: Toast notifications, progress indicators, and status feedback
- */
-
-import React, { useState, useCallback, createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { cn } from '../../utils/cn';
+import styles from '../../styles/modules/components/UserFeedback.module.css';
 
-// Toast notification types
-interface ToastNotification {
+// Types
+export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'loading';
+
+export interface Toast {
   id: string;
+  type: ToastType;
   title: string;
   message?: string;
-  type: 'success' | 'error' | 'warning' | 'info' | 'loading';
-  duration?: number; // 0 for persistent
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  duration?: number;
   dismissible?: boolean;
-  position?:
-    | 'top-right'
-    | 'top-left'
-    | 'bottom-right'
-    | 'bottom-left'
-    | 'top-center'
-    | 'bottom-center';
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+  onDismiss?: () => void;
 }
 
-// Toast context
+export type StatusType = 'idle' | 'loading' | 'success' | 'error' | 'warning';
+
+// Context
 interface ToastContextType {
-  toasts: ToastNotification[];
-  addToast: (toast: Omit<ToastNotification, 'id'>) => string;
+  toasts: Toast[];
+  addToast: (toast: Omit<Toast, 'id'>) => string;
   removeToast: (id: string) => void;
-  clearToasts: () => void;
+  clearAllToasts: () => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -45,105 +36,85 @@ export const useToast = () => {
   return context;
 };
 
-// Toast provider component
-export interface ToastProviderProps {
+// Toast Provider
+interface ToastProviderProps {
   children: React.ReactNode;
-  defaultPosition?: ToastNotification['position'];
   maxToasts?: number;
+  defaultDuration?: number;
+  defaultPosition?: Toast['position'];
 }
 
 export const ToastProvider: React.FC<ToastProviderProps> = ({
   children,
-  defaultPosition = 'top-right',
   maxToasts = 5,
+  defaultDuration = 5000,
+  defaultPosition = 'top-right',
 }) => {
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback(
-    (toastData: Omit<ToastNotification, 'id'>) => {
-      const id = Math.random().toString(36).substr(2, 9);
-      const toast: ToastNotification = {
-        id,
-        duration: 5000,
-        dismissible: true,
-        position: defaultPosition,
-        ...toastData,
-      };
+  const addToast = useCallback((toastData: Omit<Toast, 'id'>): string => {
+    const id = Math.random().toString(36).substring(2, 9);
+    const newToast: Toast = {
+      id,
+      duration: defaultDuration,
+      position: defaultPosition,
+      dismissible: true,
+      ...toastData,
+    };
 
-      setToasts(prev => {
-        const newToasts = [toast, ...prev];
-        // Limit number of toasts
-        return newToasts.slice(0, maxToasts);
-      });
+    setToasts(prev => {
+      const filtered = prev.slice(-(maxToasts - 1));
+      return [...filtered, newToast];
+    });
 
-      // Auto-remove toast after duration
-      if (toast.duration && toast.duration > 0) {
-        setTimeout(() => {
-          removeToast(id);
-        }, toast.duration);
-      }
+    if (newToast.duration && newToast.duration > 0) {
+      setTimeout(() => {
+        removeToast(id);
+      }, newToast.duration);
+    }
 
-      return id;
-    },
-    [defaultPosition, maxToasts]
-  );
+    return id;
+  }, [maxToasts, defaultDuration, defaultPosition]);
 
   const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
-  const clearToasts = useCallback(() => {
+  const clearAllToasts = useCallback(() => {
     setToasts([]);
   }, []);
 
   return (
-    <ToastContext.Provider
-      value={{ toasts, addToast, removeToast, clearToasts }}
-    >
+    <ToastContext.Provider value={{ toasts, addToast, removeToast, clearAllToasts }}>
       {children}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ToastContainer />
     </ToastContext.Provider>
   );
 };
 
-// Toast container component
-interface ToastContainerProps {
-  toasts: ToastNotification[];
-  onRemove: (id: string) => void;
-}
+// Toast Container
+const ToastContainer: React.FC = () => {
+  const { toasts } = useToast();
 
-const ToastContainer: React.FC<ToastContainerProps> = ({
-  toasts,
-  onRemove,
-}) => {
-  // Group toasts by position
-  const toastsByPosition = toasts.reduce(
-    (acc, toast) => {
+  const toastsByPosition = useMemo(() => {
+    return toasts.reduce((acc, toast) => {
       const position = toast.position ?? 'top-right';
       acc[position] ??= [];
       acc[position].push(toast);
       return acc;
-    },
-    {} as Record<string, ToastNotification[]>
-  );
+    }, {} as Record<string, Toast[]>);
+  }, [toasts]);
 
-  const getPositionClasses = (position: ToastNotification['position']) => {
-    switch (position) {
-      case 'top-left':
-        return 'top-4 left-4';
-      case 'top-center':
-        return 'top-4 left-1/2 transform -translate-x-1/2';
-      case 'top-right':
-        return 'top-4 right-4';
-      case 'bottom-left':
-        return 'bottom-4 left-4';
-      case 'bottom-center':
-        return 'bottom-4 left-1/2 transform -translate-x-1/2';
-      case 'bottom-right':
-        return 'bottom-4 right-4';
-      default:
-        return 'top-4 right-4';
-    }
+  const getPositionClasses = (position: string) => {
+    const positionMap = {
+      'top-right': 'top-4 right-4',
+      'top-left': 'top-4 left-4',
+      'bottom-right': 'bottom-4 right-4',
+      'bottom-left': 'bottom-4 left-4',
+      'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
+      'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2',
+    };
+    return positionMap[position as keyof typeof positionMap] || 'top-4 right-4';
   };
 
   return (
@@ -152,16 +123,12 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
         <div
           key={position}
           className={cn(
-            'fixed z-50 flex flex-col gap-2 max-w-sm w-full',
-            getPositionClasses(position as ToastNotification['position'])
+            'fixed z-50 flex flex-col gap-2 w-full max-w-sm',
+            getPositionClasses(position)
           )}
         >
           {positionToasts.map(toast => (
-            <ToastItem
-              key={toast.id}
-              toast={toast}
-              onRemove={() => onRemove(toast.id)}
-            />
+            <ToastItem key={toast.id} toast={toast} />
           ))}
         </div>
       ))}
@@ -169,178 +136,115 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
   );
 };
 
-// Individual toast item
+// Individual Toast Item
 interface ToastItemProps {
-  toast: ToastNotification;
-  onRemove: () => void;
+  toast: Toast;
 }
 
-const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
+const ToastItem: React.FC<ToastItemProps> = ({ toast }) => {
+  const { removeToast } = useToast();
   const [isVisible, setIsVisible] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
+  const [_isPaused, setIsPaused] = useState(false);
 
-  const getToastIcon = (type: ToastNotification['type']) => {
-    switch (type) {
-      case 'success':
-        return '✅';
-      case 'error':
-        return '❌';
-      case 'warning':
-        return '⚠️';
-      case 'info':
-        return 'ℹ️';
-      case 'loading':
-        return '⏳';
-      default:
-        return 'ℹ️';
-    }
-  };
-
-  const getToastColors = (type: ToastNotification['type']) => {
-    switch (type) {
-      case 'success':
-        return {
-          border: 'border-green-500/50',
-          background: 'bg-green-900/20 backdrop-blur-sm',
-          text: 'text-green-200',
-          icon: 'text-green-400',
-        };
-      case 'error':
-        return {
-          border: 'border-red-500/50',
-          background: 'bg-red-900/20 backdrop-blur-sm',
-          text: 'text-red-200',
-          icon: 'text-red-400',
-        };
-      case 'warning':
-        return {
-          border: 'border-yellow-500/50',
-          background: 'bg-yellow-900/20 backdrop-blur-sm',
-          text: 'text-yellow-200',
-          icon: 'text-yellow-400',
-        };
-      case 'info':
-        return {
-          border: 'border-blue-500/50',
-          background: 'bg-blue-900/20 backdrop-blur-sm',
-          text: 'text-blue-200',
-          icon: 'text-blue-400',
-        };
-      case 'loading':
-        return {
-          border: 'border-cosmic-purple/50',
-          background: 'bg-cosmic-dark/80 backdrop-blur-sm',
-          text: 'text-cosmic-silver',
-          icon: 'text-cosmic-purple',
-        };
-      default:
-        return {
-          border: 'border-gray-500/50',
-          background: 'bg-gray-900/20 backdrop-blur-sm',
-          text: 'text-gray-200',
-          icon: 'text-gray-400',
-        };
-    }
-  };
-
-  const handleRemove = useCallback(() => {
+  const handleDismiss = useCallback(() => {
     setIsVisible(false);
-    setTimeout(onRemove, 300); // Wait for fade out animation
-  }, [onRemove]);
+    setTimeout(() => {
+      removeToast(toast.id);
+      toast.onDismiss?.();
+    }, 150);
+  }, [removeToast, toast.id, toast.onDismiss]);
 
-  const colors = getToastColors(toast.type);
+  const getToastConfig = (type: ToastType) => {
+    switch (type) {
+      case 'success':
+        return {
+          bgColor: 'bg-green-900/20 border-green-500/30',
+          textColor: 'text-green-400',
+          icon: '✅',
+        };
+      case 'error':
+        return {
+          bgColor: 'bg-red-900/20 border-red-500/30',
+          textColor: 'text-red-400',
+          icon: '❌',
+        };
+      case 'warning':
+        return {
+          bgColor: 'bg-yellow-900/20 border-yellow-500/30',
+          textColor: 'text-yellow-400',
+          icon: '⚠️',
+        };
+      case 'info':
+        return {
+          bgColor: 'bg-blue-900/20 border-blue-500/30',
+          textColor: 'text-blue-400',
+          icon: 'ℹ️',
+        };
+      case 'loading':
+        return {
+          bgColor: 'bg-gray-900/20 border-gray-500/30',
+          textColor: 'text-gray-400',
+          icon: 'loading',
+        };
+      default:
+        return {
+          bgColor: 'bg-gray-900/20 border-gray-500/30',
+          textColor: 'text-gray-400',
+          icon: 'ℹ️',
+        };
+    }
+  };
+
+  const config = getToastConfig(toast.type);
 
   return (
     <div
       className={cn(
-        'rounded-lg border p-4 shadow-lg transform transition-all duration-300',
-        colors.border,
-        colors.background,
-        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        'rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out',
+        config.bgColor,
+        isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full',
+        'hover:shadow-xl'
       )}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className='flex items-start gap-3'>
-        {/* Icon */}
-        <div className={cn('flex-shrink-0 text-lg', colors.icon)}>
-          {toast.type === 'loading' ? (
-            <div className='w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin' />
+      <div className="flex items-start gap-3">
+        <div className={cn('flex-shrink-0 mt-0.5', config.textColor)}>
+          {config.icon === 'loading' ? (
+            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           ) : (
-            getToastIcon(toast.type)
+            <span className="text-base">{config.icon}</span>
           )}
         </div>
-
-        {/* Content */}
-        <div className='flex-1 min-w-0'>
-          <div className={cn('font-medium text-sm', colors.text)}>
+        
+        <div className="flex-1 min-w-0">
+          <div className={cn('font-medium text-sm', config.textColor)}>
             {toast.title}
           </div>
           {toast.message && (
-            <div className={cn('text-xs mt-1 opacity-90', colors.text)}>
+            <div className="text-xs text-gray-300 mt-1">
               {toast.message}
             </div>
           )}
         </div>
 
-        {/* Action button */}
-        {toast.action && (
-          <button
-            type='button'
-            onClick={toast.action.onClick}
-            className={cn(
-              'flex-shrink-0 text-xs font-medium px-2 py-1 rounded border transition-colors',
-              colors.text,
-              'hover:bg-white/10 border-current/30'
-            )}
-          >
-            {toast.action.label}
-          </button>
-        )}
-
-        {/* Dismiss button */}
         {toast.dismissible && (
           <button
-            type='button'
-            onClick={handleRemove}
-            className='flex-shrink-0 text-gray-400 hover:text-gray-200 focus:outline-none ml-2'
-            aria-label='Dismiss notification'
-          >
-            <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
-              <path
-                fillRule='evenodd'
-                d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                clipRule='evenodd'
-              />
-            </svg>
+            onClick={handleDismiss}
+            className="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors"
+           aria-label="Interactive button">
+            <span className="sr-only">Dismiss</span>
+            <span className="text-lg leading-none">×</span>
           </button>
         )}
       </div>
-
-      {/* Progress bar for timed toasts */}
-      {toast.duration && toast.duration > 0 && !isPaused && (
-        <div className='mt-2 h-1 bg-black/20 rounded-full overflow-hidden'>
-          <div
-            className={cn(
-              'h-full rounded-full transition-all ease-linear',
-              colors.icon.replace('text-', 'bg-')
-            )}
-            ref={el => {
-              if (el && toast.duration) {
-                el.style.animation = `toast-progress ${toast.duration}ms linear`;
-                el.style.transformOrigin = 'left';
-              }
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 };
 
-// Status indicator component
+// Status Indicator Component
 interface StatusIndicatorProps {
-  status: 'success' | 'error' | 'warning' | 'info' | 'loading' | 'idle';
+  status: StatusType;
   message?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
@@ -348,7 +252,7 @@ interface StatusIndicatorProps {
   inline?: boolean;
 }
 
-export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
+export const StatusIndicator: React.FC<StatusIndicatorProps> = React.memo(({
   status,
   message,
   className,
@@ -356,7 +260,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   showIcon = true,
   inline = false,
 }) => {
-  const getStatusConfig = (status: StatusIndicatorProps['status']) => {
+  const statusConfig = useMemo(() => {
     switch (status) {
       case 'loading':
         return {
@@ -400,10 +304,9 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
           defaultMessage: 'Ready',
         };
     }
-  };
+  }, [status]);
 
-  const config = getStatusConfig(status);
-  const displayMessage = message ?? config.defaultMessage;
+  const displayMessage = message ?? statusConfig.defaultMessage;
 
   const sizeClasses = {
     sm: 'text-xs px-2 py-1',
@@ -421,8 +324,8 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     return (
       <div className={cn('flex items-center gap-2', className)}>
         {showIcon && (
-          <div className={config.color}>
-            {config.icon === 'loading' ? (
+          <div className={statusConfig.color}>
+            {statusConfig.icon === 'loading' ? (
               <div
                 className={cn(
                   'border-2 border-current border-t-transparent rounded-full animate-spin',
@@ -430,14 +333,14 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
                 )}
               />
             ) : (
-              <span className='text-base'>{config.icon}</span>
+              <span className="text-base">{statusConfig.icon}</span>
             )}
           </div>
         )}
         <span
           className={cn(
             'font-medium',
-            config.color,
+            statusConfig.color,
             sizeClasses[size].split(' ')[0]
           )}
         >
@@ -451,15 +354,15 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     <div
       className={cn(
         'rounded-lg border flex items-center gap-2',
-        config.bgColor,
-        config.borderColor,
+        statusConfig.bgColor,
+        statusConfig.borderColor,
         sizeClasses[size],
         className
       )}
     >
       {showIcon && (
-        <div className={config.color}>
-          {config.icon === 'loading' ? (
+        <div className={statusConfig.color}>
+          {statusConfig.icon === 'loading' ? (
             <div
               className={cn(
                 'border-2 border-current border-t-transparent rounded-full animate-spin',
@@ -467,14 +370,16 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
               )}
             />
           ) : (
-            <span className='text-base'>{config.icon}</span>
+            <span className="text-base">{statusConfig.icon}</span>
           )}
         </div>
       )}
-      <span className={cn('font-medium', config.color)}>{displayMessage}</span>
+      <span className={cn('font-medium', statusConfig.color)}>{displayMessage}</span>
     </div>
   );
-};
+});
+
+StatusIndicator.displayName = 'StatusIndicator';
 
 // Progress bar component
 interface ProgressBarProps {
@@ -489,7 +394,7 @@ interface ProgressBarProps {
   label?: string;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({
+export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({
   value,
   max = 100,
   className,
@@ -502,65 +407,80 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 }) => {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
 
-  const sizeClasses = {
-    sm: 'h-1',
-    md: 'h-2',
-    lg: 'h-3',
+  // Type-safe size mapping with descriptive validation
+  const getSizeClassName = (sizeValue: ProgressBarProps['size']): string => {
+    const sizeMapping: Record<NonNullable<ProgressBarProps['size']>, keyof typeof styles> = {
+      sm: 'small',
+      md: 'medium', 
+      lg: 'large',
+    } as const;
+    
+    const resolvedSize = sizeValue ?? 'md';
+    const mappedSize = sizeMapping[resolvedSize];
+    if (!(mappedSize in styles)) {
+      console.warn(`Invalid size mapping: ${resolvedSize} -> ${mappedSize}`);
+      return styles.medium; // fallback to medium
+    }
+    
+    return styles[mappedSize];
   };
 
-  const colorClasses = {
-    primary: 'bg-gradient-to-r from-cosmic-purple to-cosmic-blue',
-    success: 'bg-green-500',
-    warning: 'bg-yellow-500',
-    error: 'bg-red-500',
+  // Type-safe color mapping with cosmic theme integration
+  const getColorClassName = (colorValue: ProgressBarProps['color']): string => {
+    const colorMapping: Record<NonNullable<ProgressBarProps['color']>, string> = {
+      primary: 'bg-gradient-to-r from-cosmic-purple to-cosmic-blue',
+      success: 'bg-green-500',
+      warning: 'bg-yellow-500',
+      error: 'bg-red-500',
+    } as const;
+    
+    const resolvedColor = colorValue ?? 'primary';
+    return colorMapping[resolvedColor];
   };
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Label and value */}
       {(label ?? showValue) && (
-        <div className='flex justify-between items-center mb-1'>
+        <div className="flex justify-between items-center mb-1">
           {label && (
-            <div className='text-sm font-medium text-cosmic-silver'>
+            <div className="text-sm font-medium text-cosmic-silver">
               {label}
             </div>
           )}
           {showValue && !indeterminate && (
-            <div className='text-sm text-cosmic-silver/70'>
+            <div className="text-sm text-cosmic-silver/70">
               {Math.round(percentage)}%
             </div>
           )}
         </div>
       )}
 
-      {/* Progress bar */}
       <div
         className={cn(
-          'bg-gray-700 rounded-full overflow-hidden',
-          sizeClasses[size]
+          styles.progressContainer,
+          getSizeClassName(size),
         )}
+        {...(!indeterminate && {
+          style: { '--progress-width': `${percentage}%` } as React.CSSProperties
+        })}
       >
         <div
           className={cn(
-            'rounded-full transition-all duration-300 ease-out',
-            colorClasses[color],
+            styles.progressBar,
+            indeterminate 
+              ? styles.progressBarIndeterminate 
+              : styles.progressBarDynamic,
+            getColorClassName(color),
             animated && 'transition-all duration-300',
             indeterminate && 'animate-pulse'
           )}
-          ref={el => {
-            if (el) {
-              el.style.width = indeterminate ? '100%' : `${percentage}%`;
-              if (indeterminate) {
-                el.style.animation =
-                  'progress-indeterminate 2s ease-in-out infinite';
-              }
-            }
-          }}
         />
       </div>
     </div>
   );
-};
+});
+
+ProgressBar.displayName = 'ProgressBar';
 
 // Convenient toast hooks for different types
 export const useToastHelpers = () => {
@@ -570,7 +490,7 @@ export const useToastHelpers = () => {
     success: (title: string, message?: string) =>
       addToast({ title, message, type: 'success' }),
     error: (title: string, message?: string) =>
-      addToast({ title, message, type: 'error', duration: 0 }), // Persistent for errors
+      addToast({ title, message, type: 'error', duration: 0 }),
     warning: (title: string, message?: string) =>
       addToast({ title, message, type: 'warning' }),
     info: (title: string, message?: string) =>

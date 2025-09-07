@@ -16,13 +16,16 @@ import {
 } from '@cosmichub/integrations';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import FeatureGuard from './FeatureGuard';
+import { useHealwaveFeatures } from '../hooks/useHealwaveFeatures';
 
 /**
  * HealWave Standalone Frequency Generator
  * Uses shared audio engine but remains completely independent
  */
 export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
-  const [audioEngine] = useState(() => new AudioEngine());
+  const features = useHealwaveFeatures();
+  const [audioEngine] = useState<AudioEngine>(() => new AudioEngine());
   const [selectedPreset, setSelectedPreset] = useState<FrequencyPreset | null>(
     null
   );
@@ -42,8 +45,18 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
   // Ref for radiogroup to manage keyboard navigation
   const radioGroupRef = useRef<HTMLDivElement | null>(null);
 
-  // Fully typed immutable preset collection
-  const presets = useMemo<readonly FrequencyPreset[]>(() => getAllPresets(), []); // Memoize; fetch batched from Firestore with indexing for scalability
+  // Filter presets based on user tier
+  const presets = useMemo<readonly FrequencyPreset[]>(() => {
+    const allPresets = getAllPresets();
+    return allPresets.filter(preset => {
+      // Free tier: Only solfeggio and basic chakra frequencies
+      if (!features.advancedFrequencies.isAllowed) {
+        return preset.category === 'solfeggio' || preset.category === 'chakra';
+      }
+      // Premium/Clinical: All presets available
+      return true;
+    });
+  }, [features.advancedFrequencies.isAllowed]);
   // Stop any playing audio on unmount for cleanup
   useEffect(() => {
     return () => {
@@ -184,6 +197,35 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
           })}
         </div>
       </fieldset>
+
+      {/* Premium Preset Preview */}
+      {!features.advancedFrequencies.isAllowed && (
+        <FeatureGuard 
+          requiredTier="premium" 
+          feature="advanced-frequencies"
+          showPreview={true}
+        >
+          <fieldset className='mb-6'>
+            <legend className='mb-4 text-lg font-semibold text-white'>
+              🔬 Advanced Rife Frequencies
+            </legend>
+            <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4'>
+              <div className='p-3 border border-purple-500/30 bg-purple-500/10 rounded-lg opacity-50'>
+                <span className='text-sm text-purple-300'>20 Hz - General Vitality</span>
+              </div>
+              <div className='p-3 border border-purple-500/30 bg-purple-500/10 rounded-lg opacity-50'>
+                <span className='text-sm text-purple-300'>727 Hz - General Healing</span>
+              </div>
+              <div className='p-3 border border-purple-500/30 bg-purple-500/10 rounded-lg opacity-50'>
+                <span className='text-sm text-purple-300'>880 Hz - Immune Support</span>
+              </div>
+              <div className='p-3 border border-purple-500/30 bg-purple-500/10 rounded-lg opacity-50'>
+                <span className='text-sm text-purple-300'>+ 50 more frequencies</span>
+              </div>
+            </div>
+          </fieldset>
+        </FeatureGuard>
+      )}
 
       {/* Controls */}
       {selectedPreset && (

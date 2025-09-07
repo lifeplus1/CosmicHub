@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext, memo, useCallback, useMemo } from 'react';
 
 interface TabsProps {
   defaultValue: string;
@@ -21,6 +21,8 @@ interface TabsContentProps {
   value: string;
   children: React.ReactNode;
   className?: string;
+  id?: string;
+  'aria-labelledby'?: string;
 }
 
 const TabsContext = createContext<{
@@ -31,21 +33,32 @@ const TabsContext = createContext<{
   setActiveTab: () => {},
 });
 
-export const Tabs: React.FC<TabsProps> = ({
+export const Tabs: React.FC<TabsProps> = memo(({
   defaultValue,
   children,
   className = '',
 }) => {
   const [activeTab, setActiveTab] = useState(defaultValue);
 
+  const setActiveTabCallback = useCallback((value: string) => {
+    setActiveTab(value);
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    activeTab,
+    setActiveTab: setActiveTabCallback,
+  }), [activeTab, setActiveTabCallback]);
+
   return (
-    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+    <TabsContext.Provider value={contextValue}>
       <div className={className}>{children}</div>
     </TabsContext.Provider>
   );
-};
+});
 
-export const TabsList: React.FC<TabsListProps> = ({
+Tabs.displayName = 'Tabs';
+
+export const TabsList: React.FC<TabsListProps> = memo(({
   children,
   className = '',
 }) => {
@@ -56,15 +69,21 @@ export const TabsList: React.FC<TabsListProps> = ({
       {children}
     </div>
   );
-};
+});
 
-export const TabsTrigger: React.FC<TabsTriggerProps> = ({
+TabsList.displayName = 'TabsList';
+
+export const TabsTrigger: React.FC<TabsTriggerProps> = memo(({
   value,
   children,
   className = '',
 }) => {
   const { activeTab, setActiveTab } = useContext(TabsContext);
   const isActive = activeTab === value;
+
+  const handleClick = useCallback(() => {
+    setActiveTab(value);
+  }, [setActiveTab, value]);
 
   return (
     <button
@@ -77,23 +96,36 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
         }
         ${className}
       `}
-      onClick={() => setActiveTab(value)}
+      onClick={handleClick}
     >
       {children}
     </button>
   );
-};
+});
 
-export const TabsContent: React.FC<TabsContentProps> = ({
+TabsTrigger.displayName = 'TabsTrigger';
+
+export const TabsContent: React.FC<TabsContentProps> = memo(({
   value,
   children,
   className = '',
+  id,
+  'aria-labelledby': ariaLabelledBy,
 }) => {
   const { activeTab } = useContext(TabsContext);
 
   if (activeTab !== value) return null;
 
   return (
-    <div className={`mt-4 text-cosmic-silver ${className}`}>{children}</div>
+    <div 
+      className={`mt-4 text-cosmic-silver ${className}`}
+      id={id}
+      aria-labelledby={ariaLabelledBy}
+      role="tabpanel"
+    >
+      {children}
+    </div>
   );
-};
+});
+
+TabsContent.displayName = 'TabsContent';

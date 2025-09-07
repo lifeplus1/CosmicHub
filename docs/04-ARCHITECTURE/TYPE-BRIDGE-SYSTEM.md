@@ -80,7 +80,7 @@ const processRecommendations = (data: HealthRecommendationsResponse) => {
 - Contains element-specific information (season, organs, emotions, etc.)
 - Used for both API responses and internal calculations
 
-**ElementalBalance**
+#### ElementalBalance
 
 - Five-element balance representation
 - Standardized 0-1 range for each element

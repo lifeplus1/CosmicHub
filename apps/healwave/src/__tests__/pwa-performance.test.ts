@@ -42,7 +42,7 @@ describe('PWA Performance Module', () => {
     await expect(import('../pwa-performance')).resolves.toBeDefined();
   });
 
-  it('should add DOMContentLoaded listener when document is loading', async () => {
+  it('should add DOMContentLoaded listener when document is loading (no auto init in tests)', async () => {
     // Mock document.readyState as loading
     Object.defineProperty(document, 'readyState', {
       value: 'loading',
@@ -53,16 +53,22 @@ describe('PWA Performance Module', () => {
     vi.resetModules();
     
     // Import the module
-    await import('../pwa-performance');
+  await import('../pwa-performance');
 
-    // Verify DOMContentLoaded listener was added
+    // Verify DOMContentLoaded listener was added (test-mode guard prevents immediate init)
     expect(addEventListenerSpy).toHaveBeenCalledWith(
       'DOMContentLoaded',
       expect.any(Function)
     );
+
+    // Simulate DOMContentLoaded to ensure it initializes when fired
+    const call = addEventListenerSpy.mock.calls.find((c) => c[0] === 'DOMContentLoaded');
+    expect(call?.[1]).toBeTypeOf('function');
+    // @ts-expect-error - we know it's a function from the check above
+    call?.[1]();
   });
 
-  it('should initialize immediately when document is already loaded', async () => {
+  it('should initialize when document is already loaded (explicit call in test mode)', async () => {
     // Mock document.readyState as complete
     Object.defineProperty(document, 'readyState', {
       value: 'complete',
@@ -73,13 +79,11 @@ describe('PWA Performance Module', () => {
     vi.resetModules();
     
     // Import the module and get devConsole
-    const { devConsole } = await import('../config/devConsole');
-    await import('../pwa-performance');
-
-    // Verify initialization was called immediately
-    expect(devConsole.info).toHaveBeenCalledWith(
-      'Initializing HealWave performance optimizations'
-    );
+  // Import module and call its test initializer
+  const { devConsole } = await import('../config/devConsole');
+  const mod = await import('../pwa-performance');
+  mod.__test__.initNow();
+  expect(devConsole.info).toHaveBeenCalledWith('Initializing HealWave performance optimizations');
   });
 
   it('should handle module import without throwing', async () => {

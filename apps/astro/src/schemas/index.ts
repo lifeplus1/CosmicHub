@@ -24,3 +24,18 @@ export const AdvancedSynastryRequestSchema = z.object({
 
 export type BirthData = z.infer<typeof BirthDataSchema>;
 export type AdvancedSynastryRequest = z.infer<typeof AdvancedSynastryRequestSchema>;
+
+// Research Platform Schemas
+export * from './research';
+
+// Sacred Geometry Schemas
+export * from './sacredGeometry';
+
+// Chart Display Component Schemas
+export * from './chartDisplay';
+
+// Psychology Chart Component Schemas
+export * from './psychologyChart';
+
+// AI Interpretation Form Component Schemas
+export * from './interpretationForm';

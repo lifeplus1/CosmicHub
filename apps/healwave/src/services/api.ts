@@ -34,6 +34,20 @@ function getSafeCurrentUser(): User | null {
   return null;
 }
 
+// Vite exposes import.meta.env at build time; access defensively with a narrow type
+const maybeEnv = import.meta?.env as
+  | { VITE_HEALWAVE_API_BASE?: string }
+  | undefined;
+const API_BASE = (maybeEnv?.VITE_HEALWAVE_API_BASE ??
+  process?.env?.VITE_HEALWAVE_API_BASE ??
+  '');
+
+function apiUrl(path: string): string {
+  const base = API_BASE.replace(/\/$/, '');
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return base ? `${base}${p}` : p;
+}
+
 export async function savePreset(
   preset: FrequencyPreset
 ): Promise<ApiResult<FrequencyPreset>> {
@@ -44,7 +58,7 @@ export async function savePreset(
     }
     const token = await getIdToken(user);
     const response = await fetch(
-      'https://your-render-domain.com/healwave/presets',
+      apiUrl('/healwave/presets'),
       {
         method: 'POST',
         headers: {
@@ -86,7 +100,7 @@ export async function getPresets(): Promise<ApiResult<FrequencyPreset[]>> {
     }
     const token = await getIdToken(user);
     const response = await fetch(
-      'https://your-render-domain.com/healwave/presets',
+      apiUrl('/healwave/presets'),
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -129,7 +143,7 @@ export async function deletePreset(presetId: string): Promise<ApiResult<null>> {
     }
     const token = await getIdToken(user);
     const response = await fetch(
-      `https://your-render-domain.com/healwave/presets/${presetId}`,
+      apiUrl(`/healwave/presets/${presetId}`),
       {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },

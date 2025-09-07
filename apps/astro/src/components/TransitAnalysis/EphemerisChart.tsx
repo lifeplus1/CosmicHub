@@ -5,7 +5,7 @@
  * real-time planetary positions for astrological analysis.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   useAllPlanetaryPositions,
   useEphemerisHealth,
@@ -23,7 +23,7 @@ interface PlanetRowProps {
   retrograde: boolean;
 }
 
-const PlanetRow: React.FC<PlanetRowProps> = ({
+const PlanetRow: React.FC<PlanetRowProps> = React.memo(({
   planet,
   position,
   retrograde,
@@ -37,7 +37,11 @@ const PlanetRow: React.FC<PlanetRowProps> = ({
       <td className='py-2 px-3 text-right'>
         {sign.signDegrees}° {sign.signMinutes}&apos;
         {retrograde && (
-          <span className='ml-1 text-red-500' title='Retrograde'>
+          <span 
+            className='ml-1 text-red-500' 
+            title='Retrograde'
+            aria-label={`${planet} is in retrograde motion`}
+          >
             ℞
           </span>
         )}
@@ -47,9 +51,9 @@ const PlanetRow: React.FC<PlanetRowProps> = ({
       </td>
     </tr>
   );
-};
+});
 
-const HealthIndicator: React.FC = () => {
+const HealthIndicator: React.FC = React.memo(() => {
   const { data: health, isLoading, error } = useEphemerisHealth();
 
   if (isLoading) {
@@ -79,15 +83,26 @@ const HealthIndicator: React.FC = () => {
       Service healthy
     </div>
   );
-};
+});
 
-export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
+export const EphemerisChart: React.FC<EphemerisChartProps> = React.memo(({ date }) => {
   const {
     data: positions,
     isLoading,
     error,
     refetch,
   } = useAllPlanetaryPositions(date);
+
+  const handleRetry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleRetry();
+    }
+  }, [handleRetry]);
 
   if (isLoading) {
     return (
@@ -127,8 +142,10 @@ export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
             {error instanceof Error ? error.message : 'Unknown error occurred'}
           </div>
           <button
-            onClick={() => void refetch()}
-            className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+            onClick={handleRetry}
+            onKeyDown={handleKeyDown}
+            className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            aria-label='Retry loading planetary positions'
           >
             Try Again
           </button>
@@ -200,4 +217,8 @@ export const EphemerisChart: React.FC<EphemerisChartProps> = ({ date }) => {
       </div>
     </div>
   );
-};
+});
+
+PlanetRow.displayName = 'PlanetRow';
+HealthIndicator.displayName = 'HealthIndicator';
+EphemerisChart.displayName = 'EphemerisChart';

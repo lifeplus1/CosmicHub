@@ -192,7 +192,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
                   onClick={() => {
                     setError(null);
                     void handleCalculate();
-                  }}
+                  }} aria-label="Button"
                   className='px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
                 >
                   🔄 Try Again
@@ -200,7 +200,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
 
                 <button
                   type='button'
-                  onClick={() => setError(null)}
+                  onClick={() => setError(null)} aria-label="Button"
                   className='px-3 py-1.5 text-sm font-medium text-red-200 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
                 >
                   Dismiss
@@ -238,7 +238,7 @@ const GeneKeysChart: React.FC<GeneKeysChartProps> = React.memo(
               <button
                 className='cosmic-button px-6 py-3 text-base font-medium'
                 onClick={handleEmptyCalculate}
-              >
+               aria-label="Button">
                 ✨ Calculate Gene Keys
               </button>
 

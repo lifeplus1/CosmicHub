@@ -14,21 +14,18 @@ const booleanFromEnv = (val: unknown): boolean => {
 // Environment validation schema
 const envSchema = z
   .object({
-    VITE_FIREBASE_API_KEY: z.string().min(1, 'Firebase API key is required'),
-    VITE_FIREBASE_AUTH_DOMAIN: z
-      .string()
-      .min(1, 'Firebase auth domain is required'),
-    VITE_FIREBASE_PROJECT_ID: z
-      .string()
-      .min(1, 'Firebase project ID is required'),
-    VITE_FIREBASE_STORAGE_BUCKET: z
-      .string()
-      .min(1, 'Firebase storage bucket is required'),
-    VITE_FIREBASE_MESSAGING_SENDER_ID: z
-      .string()
-      .min(1, 'Firebase messaging sender ID is required'),
-    VITE_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
+    // Firebase config - optional in development with mock auth
+    VITE_FIREBASE_API_KEY: z.string().optional(),
+    VITE_FIREBASE_AUTH_DOMAIN: z.string().optional(),
+    VITE_FIREBASE_PROJECT_ID: z.string().optional(),
+    VITE_FIREBASE_STORAGE_BUCKET: z.string().optional(),
+    VITE_FIREBASE_MESSAGING_SENDER_ID: z.string().optional(),
+    VITE_FIREBASE_APP_ID: z.string().optional(),
     VITE_API_URL: z.string().url().optional(),
+    ALLOW_MOCK_AUTH: z
+      .any()
+      .optional()
+      .transform(v => booleanFromEnv(v) || false),
     // Frontend analytics providers (all optional)
     PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
     PUBLIC_MIXPANEL_TOKEN: z.string().optional(),
@@ -49,10 +46,38 @@ const envSchema = z
       .optional()
       .transform(v => booleanFromEnv(v) || false),
   })
+  .refine(
+    (data) => {
+      // In production, Firebase is required unless mock auth is explicitly allowed
+      if (data.NODE_ENV === 'production' && !data.ALLOW_MOCK_AUTH) {
+        return (
+          data.VITE_FIREBASE_API_KEY &&
+          data.VITE_FIREBASE_AUTH_DOMAIN &&
+          data.VITE_FIREBASE_PROJECT_ID &&
+          data.VITE_FIREBASE_STORAGE_BUCKET &&
+          data.VITE_FIREBASE_MESSAGING_SENDER_ID &&
+          data.VITE_FIREBASE_APP_ID
+        );
+      }
+      return true;
+    },
+    {
+      message: 'Firebase configuration is required in production unless ALLOW_MOCK_AUTH=true',
+    }
+  )
   .transform(data => ({
     ...data,
     // Derived fields (add more as needed)
     VITE_PUBLIC_MODE: data.NODE_ENV === 'production' ? 'prod' : 'non-prod',
+    // Check if Firebase is properly configured
+    HAS_FIREBASE_CONFIG: !!(
+      data.VITE_FIREBASE_API_KEY &&
+      data.VITE_FIREBASE_AUTH_DOMAIN &&
+      data.VITE_FIREBASE_PROJECT_ID &&
+      data.VITE_FIREBASE_STORAGE_BUCKET &&
+      data.VITE_FIREBASE_MESSAGING_SENDER_ID &&
+      data.VITE_FIREBASE_APP_ID
+    ),
   }));
 
 type _RawEnv = z.input<typeof envSchema>;

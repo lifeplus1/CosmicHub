@@ -1,29 +1,6 @@
 /**
  * Enhanced Performance Monitoring System for CosmicHub
- * Provides comprehensive performance tracking with memory ma    // Log in development
-    if (process.env['    // Log in development
-    if (process.env['NODE_ENV'] === 'development') {
-      performanceLogger.info('Page performance metric', {
-        page: pageName,
-        metricType: type,
-        durationMs: Number(duration.toFixed(2)),
-        ...metadata
-      });
-    }_ENV'] === 'development') {
-      if (success) {
-        performanceLogger.info('Operation completed successfully', {
-          operation: operationName,
-          durationMs: Number(duration.toFixed(2)),
-          ...metadata
-        });
-      } else {
-        performanceLogger.error('Operation failed', {
-          operation: operationName,
-          durationMs: Number(duration.toFixed(2)),
-          ...metadata
-        });
-      }
-    }ment and external integrations
+ * Provides comprehensive performance tracking with memory management and external integrations
  */
 
 import { logger } from './utils/logger';

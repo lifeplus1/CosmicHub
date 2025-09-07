@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/integrations';
-import PresetSelector from '../components/PresetSelector';
+import { PresetSelectorRefactored as PresetSelector } from '../components/presets';
 
 // Mock the auth hook first
 vi.mock('@cosmichub/auth', () => ({

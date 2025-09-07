@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, memo } from 'react';
 import { Card, Button } from '@cosmichub/ui';
 import { useToast } from './ToastProvider';
 import { useAuth } from '@cosmichub/auth';
@@ -26,7 +26,7 @@ export interface ChartPreferencesProps {
   onSaved?: (prefs: ChartPreferencesData) => void;
 }
 
-const ChartPreferences: React.FC<ChartPreferencesProps> =
+const ChartPreferences: React.FC<ChartPreferencesProps> = memo(
   function ChartPreferences({ initialPreferences, onSaved }) {
     const { toast } = useToast();
     const { user } = useAuth();
@@ -246,6 +246,13 @@ const ChartPreferences: React.FC<ChartPreferencesProps> =
       // deps: preferences (data saved), userId (path), toast (notifications), onSaved (callback)
     }, [preferences, toast, onSaved, user?.uid]);
 
+    const handleSaveKeyDown = useCallback((e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        void handleSavePreferences();
+      }
+    }, [handleSavePreferences]);
+
     return (
       <div
         className='space-y-6'
@@ -370,6 +377,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> =
             onClick={() => {
               void handleSavePreferences();
             }}
+            onKeyDown={handleSaveKeyDown}
             variant='default'
             disabled={saveButtonDisabled}
             aria-disabled={saveButtonDisabled ? 'true' : 'false'}
@@ -381,6 +389,7 @@ const ChartPreferences: React.FC<ChartPreferencesProps> =
         </div>
       </div>
     );
-  };
+  }
+);
 
 export default ChartPreferences;

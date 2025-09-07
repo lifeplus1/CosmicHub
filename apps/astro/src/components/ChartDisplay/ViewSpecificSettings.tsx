@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { IoSettings } from 'react-icons/io5';
 import { AstrologySettings } from './AstrologySettings';
 
@@ -10,18 +10,18 @@ interface ViewSpecificSettingsProps {
   isUnifiedView: boolean;
 }
 
-export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
+const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
   settings,
   onSettingsChange,
   isOpen,
   onToggle,
   isUnifiedView,
 }) => {
-  const updateSettings = (updates: Partial<AstrologySettings>) => {
+  const updateSettings = useCallback((updates: Partial<AstrologySettings>) => {
     onSettingsChange({ ...settings, ...updates });
-  };
+  }, [settings, onSettingsChange]);
 
-  const updateNestedSettings = <T extends keyof AstrologySettings>(
+  const updateNestedSettings = useCallback(<T extends keyof AstrologySettings>(
     category: T,
     updates: Partial<AstrologySettings[T]>
   ) => {
@@ -32,13 +32,24 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
         ...updates,
       },
     });
-  };
+  }, [settings, onSettingsChange]);
+
+  const handleToggleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onToggle();
+    }
+  }, [onToggle]);
 
   return (
     <div className='astrology-settings w-full'>
       <button
         onClick={onToggle}
-        className='settings-toggle-btn flex items-center gap-2 px-4 py-2 bg-cosmic-purple/20 hover:bg-cosmic-purple/30 rounded-lg transition-colors border border-cosmic-purple/30 text-cosmic-silver hover:text-white'
+        onKeyDown={handleToggleKeyDown}
+        className='settings-toggle-btn flex items-center gap-2 px-4 py-2 bg-cosmic-purple/20 hover:bg-cosmic-purple/30 rounded-lg transition-colors border border-cosmic-purple/30 text-cosmic-silver hover:text-white focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50'
+        aria-expanded={isOpen}
+        aria-controls='settings-panel'
+        aria-label={isOpen ? 'Collapse settings panel' : 'Expand settings panel'}
       >
         <IoSettings size={16} />
         <span className='font-medium'>
@@ -48,7 +59,15 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
       </button>
 
       {isOpen && (
-        <div className='settings-panel mt-4 p-6 bg-cosmic-dark/40 border border-cosmic-purple/30 rounded-xl backdrop-blur-sm shadow-lg'>
+        <div 
+          id='settings-panel'
+          className='settings-panel mt-4 p-6 bg-cosmic-dark/40 border border-cosmic-purple/30 rounded-xl backdrop-blur-sm shadow-lg'
+          role='region'
+          aria-labelledby='settings-panel-heading'
+        >
+          <h2 id='settings-panel-heading' className='sr-only'>
+            {isUnifiedView ? 'Chart Settings Panel' : 'Table Settings Panel'}
+          </h2>
           <div className='space-y-6'>
             {/* Universal Settings - Apply to Both Views */}
             <div className='border-b border-cosmic-purple/20 pb-4'>
@@ -534,3 +553,10 @@ export const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
     </div>
   );
 };
+
+// Memoize component to prevent unnecessary re-renders
+const MemoizedViewSpecificSettings = React.memo(ViewSpecificSettings);
+MemoizedViewSpecificSettings.displayName = 'ViewSpecificSettings';
+
+export { MemoizedViewSpecificSettings as ViewSpecificSettings };
+export default MemoizedViewSpecificSettings;

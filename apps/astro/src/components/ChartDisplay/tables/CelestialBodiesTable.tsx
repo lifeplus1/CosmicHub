@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -168,77 +168,79 @@ function CelestialBodiesTable({
   console.log('🔍 CelestialBodiesTable: Settings:', settings);
 
   // Enhanced filtering based on granular settings and centralized categorization
-  const filteredBodies = bodies.filter(body => {
-    if (!settings) return true; // Show all if no settings provided
+  const filteredBodies = useMemo(() => {
+    return bodies.filter(body => {
+      if (!settings) return true; // Show all if no settings provided
 
-    // Use centralized categorization system
-    const category = getCelestialBodyCategory(body.name);
-    console.log(`🔍 Body: ${body.name}, Category: ${category}`);
+      // Use centralized categorization system
+      const category = getCelestialBodyCategory(body.name);
+      console.log(`🔍 Body: ${body.name}, Category: ${category}`);
 
-    if (!category) return true; // Show uncategorized bodies
+      if (!category) return true; // Show uncategorized bodies
 
-    // Apply granular filtering based on category
-    switch (category) {
-      case 'traditional_planets':
-        console.log(
-          `🔍 ${body.name}: traditionalPlanets = ${settings.celestialBodies.traditionalPlanets}`
-        );
-        return settings.celestialBodies.traditionalPlanets;
-      case 'modern_planets':
-        console.log(
-          `🔍 ${body.name}: modernPlanets = ${settings.celestialBodies.modernPlanets}`
-        );
-        return settings.celestialBodies.modernPlanets;
-      case 'major_asteroids':
-        console.log(
-          `🔍 ${body.name}: majorAsteroids = ${settings.celestialBodies.majorAsteroids}`
-        );
-        return settings.celestialBodies.majorAsteroids;
-      case 'minor_asteroids':
-        console.log(
-          `🔍 ${body.name}: minorAsteroids = ${settings.celestialBodies.minorAsteroids}`
-        );
-        return settings.celestialBodies.minorAsteroids;
-      case 'lunar_nodes':
-        console.log(
-          `🔍 ${body.name}: lunarNodes = ${settings.celestialBodies.lunarNodes}`
-        );
-        return settings.celestialBodies.lunarNodes;
-      case 'lilith_points':
-        console.log(
-          `🔍 ${body.name}: lilithPoints = ${settings.celestialBodies.lilithPoints}`
-        );
-        return settings.celestialBodies.lilithPoints;
-      case 'special_points':
-        console.log(
-          `🔍 ${body.name}: specialPoints = ${settings.celestialBodies.specialPoints}`
-        );
-        return settings.celestialBodies.specialPoints;
-      case 'hypothetical':
-        console.log(
-          `🔍 ${body.name}: hypotheticalPoints = ${settings.celestialBodies.hypotheticalPoints}`
-        );
-        return settings.celestialBodies.hypotheticalPoints;
-      case 'angles':
-        console.log(`🔍 ${body.name}: angles always shown`);
-        return true; // Always show angles as they're fundamental chart structure
-      default: {
-        console.log(`🔍 ${body.name}: fallback to legacy settings`);
-        // Fallback to legacy settings for backward compatibility
-        const bodyName = body.name.toLowerCase();
-        if (bodyName.includes('lilith')) return settings.celestialBodies.lilith;
-        if (body.category === 'planets')
-          return settings.celestialBodies.planets;
-        if (
-          body.category === 'major_asteroids' ||
-          body.category === 'minor_asteroids'
-        )
-          return settings.celestialBodies.asteroids;
-        if (body.category === 'points') return settings.celestialBodies.points;
-        return true;
+      // Apply granular filtering based on category
+      switch (category) {
+        case 'traditional_planets':
+          console.log(
+            `🔍 ${body.name}: traditionalPlanets = ${settings.celestialBodies.traditionalPlanets}`
+          );
+          return settings.celestialBodies.traditionalPlanets;
+        case 'modern_planets':
+          console.log(
+            `🔍 ${body.name}: modernPlanets = ${settings.celestialBodies.modernPlanets}`
+          );
+          return settings.celestialBodies.modernPlanets;
+        case 'major_asteroids':
+          console.log(
+            `🔍 ${body.name}: majorAsteroids = ${settings.celestialBodies.majorAsteroids}`
+          );
+          return settings.celestialBodies.majorAsteroids;
+        case 'minor_asteroids':
+          console.log(
+            `🔍 ${body.name}: minorAsteroids = ${settings.celestialBodies.minorAsteroids}`
+          );
+          return settings.celestialBodies.minorAsteroids;
+        case 'lunar_nodes':
+          console.log(
+            `🔍 ${body.name}: lunarNodes = ${settings.celestialBodies.lunarNodes}`
+          );
+          return settings.celestialBodies.lunarNodes;
+        case 'lilith_points':
+          console.log(
+            `🔍 ${body.name}: lilithPoints = ${settings.celestialBodies.lilithPoints}`
+          );
+          return settings.celestialBodies.lilithPoints;
+        case 'special_points':
+          console.log(
+            `🔍 ${body.name}: specialPoints = ${settings.celestialBodies.specialPoints}`
+          );
+          return settings.celestialBodies.specialPoints;
+        case 'hypothetical':
+          console.log(
+            `🔍 ${body.name}: hypotheticalPoints = ${settings.celestialBodies.hypotheticalPoints}`
+          );
+          return settings.celestialBodies.hypotheticalPoints;
+        case 'angles':
+          console.log(`🔍 ${body.name}: angles always shown`);
+          return true; // Always show angles as they're fundamental chart structure
+        default: {
+          console.log(`🔍 ${body.name}: fallback to legacy settings`);
+          // Fallback to legacy settings for backward compatibility
+          const bodyName = body.name.toLowerCase();
+          if (bodyName.includes('lilith')) return settings.celestialBodies.lilith;
+          if (body.category === 'planets')
+            return settings.celestialBodies.planets;
+          if (
+            body.category === 'major_asteroids' ||
+            body.category === 'minor_asteroids'
+          )
+            return settings.celestialBodies.asteroids;
+          if (body.category === 'points') return settings.celestialBodies.points;
+          return true;
+        }
       }
-    }
-  });
+    });
+  }, [bodies, settings]);
 
   console.log(
     '🔍 CelestialBodiesTable: Filtered bodies count:',
@@ -246,36 +248,42 @@ function CelestialBodiesTable({
   );
 
   // Auto-categorize and sort filtered bodies
-  const categorizedBodies = filteredBodies.map(body => ({
-    ...body,
-    category: body.category || categorizeCelestialBody(body.name),
-  }));
+  const categorizedBodies = useMemo(() => {
+    return filteredBodies.map(body => ({
+      ...body,
+      category: body.category || categorizeCelestialBody(body.name),
+    }));
+  }, [filteredBodies]);
 
-  const sortedBodies = categorizedBodies.sort((a, b) => {
-    // First sort by category
-    const catA = CATEGORY_ORDER[a.category] || 999;
-    const catB = CATEGORY_ORDER[b.category] || 999;
-    if (catA !== catB) return catA - catB;
+  const sortedBodies = useMemo(() => {
+    return categorizedBodies.sort((a, b) => {
+      // First sort by category
+      const catA = CATEGORY_ORDER[a.category] || 999;
+      const catB = CATEGORY_ORDER[b.category] || 999;
+      if (catA !== catB) return catA - catB;
 
-    // Then sort within category
-    const orderA = BODY_ORDER_WITHIN_CATEGORY[a.name] ?? 999;
-    const orderB = BODY_ORDER_WITHIN_CATEGORY[b.name] ?? 999;
-    if (orderA !== orderB) return orderA - orderB;
+      // Then sort within category
+      const orderA = BODY_ORDER_WITHIN_CATEGORY[a.name] ?? 999;
+      const orderB = BODY_ORDER_WITHIN_CATEGORY[b.name] ?? 999;
+      if (orderA !== orderB) return orderA - orderB;
 
-    // Finally alphabetical
-    return a.name.localeCompare(b.name);
-  });
+      // Finally alphabetical
+      return a.name.localeCompare(b.name);
+    });
+  }, [categorizedBodies]);
 
   // Group by category for display
-  const groupedBodies = sortedBodies.reduce(
-    (groups, body) => {
-      const category = body.category;
-      groups[category] ??= [];
-      groups[category].push(body);
-      return groups;
-    },
-    {} as Record<string, CelestialBody[]>
-  );
+  const groupedBodies = useMemo(() => {
+    return sortedBodies.reduce(
+      (groups, body) => {
+        const category = body.category;
+        groups[category] ??= [];
+        groups[category].push(body);
+        return groups;
+      },
+      {} as Record<string, CelestialBody[]>
+    );
+  }, [sortedBodies]);
 
   return (
     <div className='space-y-6'>

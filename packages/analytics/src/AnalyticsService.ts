@@ -1,6 +1,13 @@
 /**
  * Core Analytics Service
  * Multi-provider analytics with privacy compliance
+ * 
+ * @fileoverview Privacy-first analytics service supporting multiple providers
+ * with comprehensive error handling, caching, and consent management.
+ * 
+ * @version 1.0.0
+ * @author CosmicHub Team
+ * @since 2025-09-06
  */
 
 import type {
@@ -10,6 +17,14 @@ import type {
   AnalyticsConfig,
   Platform,
 } from './types/index';
+
+// Constants for better maintainability
+const DEFAULT_SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const DEFAULT_PII_KEYS = ['email', 'ip', 'ip_address', 'full_name'] as const;
+const PERFORMANCE_TIMING_EVENT = 'perf_timing' as const;
+const APP_ERROR_EVENT = 'app_error' as const;
+const PAGE_VIEW_EVENT = 'Page View' as const;
+const POSTHOG_PAGEVIEW_EVENT = '$pageview' as const;
 
 // Minimal runtime interfaces for third-party analytics libraries we load dynamically.
 // These purposely model only the subset of methods we actually invoke to keep typing tight.
@@ -71,6 +86,22 @@ declare global {
   }
 }
 
+/**
+ * Comprehensive Analytics Service
+ * 
+ * Provides privacy-compliant analytics with multi-provider support,
+ * comprehensive error handling, and robust consent management.
+ * 
+ * @example
+ * ```typescript
+ * const analytics = new AnalyticsService({
+ *   googleAnalytics: { measurementId: 'GA-123', enabled: true },
+ *   privacy: { respectDoNotTrack: true, anonymizeIP: true, cookieConsent: true }
+ * });
+ * 
+ * analytics.track({ event: 'user_action', properties: { action: 'click' }});
+ * ```
+ */
 export class AnalyticsService {
   private config: AnalyticsConfig;
   private isInitialized = false;
@@ -79,6 +110,7 @@ export class AnalyticsService {
   private lastEventTs: number | null = null;
   private flushTimer: number | null = null;
   private globalErrorHandler: ((e: ErrorEvent) => void) | null = null;
+  private _cachedPlatform: Platform | null = null; // Cache platform detection
 
   // Queues for deferred operations until consent + init
   private pendingEvents: AnalyticsEvent[] = [];
@@ -88,7 +120,14 @@ export class AnalyticsService {
   // Script load cache
   private static scriptPromises: Record<string, Promise<void>> = {};
 
+  /**
+   * Initialize the Analytics Service
+   * 
+   * @param config - Analytics configuration object
+   * @throws {Error} When configuration is invalid
+   */
   constructor(config: AnalyticsConfig) {
+    this.validateConfig(config);
     this.config = config;
     this.sessionId = this.generateSessionId();
     if (!config.privacy.cookieConsent) {
@@ -100,6 +139,49 @@ export class AnalyticsService {
     this.maybeStartAutoFlush();
   }
 
+  /**
+   * Validate analytics configuration
+   * 
+   * @private
+   * @param config - Configuration to validate
+   * @throws {Error} When configuration is invalid
+   */
+  private validateConfig(config: AnalyticsConfig): void {
+    if (!config) {
+      throw new Error('Analytics configuration is required');
+    }
+    
+    if (!config.privacy) {
+      throw new Error('Privacy configuration is required');
+    }
+    
+    // Validate provider configurations
+    if (config.googleAnalytics?.enabled && !config.googleAnalytics.measurementId) {
+      throw new Error('Google Analytics measurement ID is required when enabled');
+    }
+    
+    if (config.mixpanel?.enabled && !config.mixpanel.token) {
+      throw new Error('Mixpanel token is required when enabled');
+    }
+    
+    if (config.posthog?.enabled && !config.posthog.apiKey) {
+      throw new Error('PostHog API key is required when enabled');
+    }
+    
+    if (config.segment?.enabled && !config.segment.writeKey) {
+      throw new Error('Segment write key is required when enabled');
+    }
+    
+    if (config.rudderstack?.enabled && (!config.rudderstack.writeKey || !config.rudderstack.dataPlaneUrl)) {
+      throw new Error('RudderStack write key and data plane URL are required when enabled');
+    }
+  }
+
+  /**
+   * Initialize all analytics providers
+   * 
+   * @private
+   */
   private initialize(): void {
     if (this.isInitialized) return;
     // Avoid touching window/document in SSR environments
@@ -112,13 +194,27 @@ export class AnalyticsService {
       return;
     }
 
-    this.initializeGoogleAnalytics();
-    void this.initializeMixpanel();
-    void this.initializePostHog();
-    void this.initializeSegment();
-    void this.initializeRudderStack();
-    this.isInitialized = true;
-    this.flushQueuesIfReady();
+    try {
+      this.initializeGoogleAnalytics();
+      void this.initializeMixpanel().catch(err => 
+        console.warn('Failed to initialize Mixpanel:', err)
+      );
+      void this.initializePostHog().catch(err => 
+        console.warn('Failed to initialize PostHog:', err)
+      );
+      void this.initializeSegment().catch(err => 
+        console.warn('Failed to initialize Segment:', err)
+      );
+      void this.initializeRudderStack().catch(err => 
+        console.warn('Failed to initialize RudderStack:', err)
+      );
+      this.isInitialized = true;
+      this.flushQueuesIfReady();
+    } catch (err) {
+      console.error('Failed to initialize analytics service:', err);
+      // Set initialized to prevent retry loops
+      this.isInitialized = true;
+    }
   }
 
   private canUseDOM(): boolean {
@@ -280,6 +376,16 @@ export class AnalyticsService {
     }
   }
 
+  /**
+   * Set user consent for analytics tracking
+   * 
+   * @param granted - Whether consent has been granted
+   * @example
+   * ```typescript
+   * analytics.setConsentGranted(true); // Enable tracking
+   * analytics.setConsentGranted(false); // Disable tracking
+   * ```
+   */
   public setConsentGranted(granted: boolean): void {
     this.consentGranted = granted;
     if (granted && !this.isInitialized) this.initialize();
@@ -290,15 +396,29 @@ export class AnalyticsService {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  /**
+   * Detect the current platform with caching for performance
+   * 
+   * @private
+   * @returns Platform type (web, mobile, pwa)
+   */
   private getPlatform(): Platform {
-    if (typeof window === 'undefined') return 'web';
+    if (this._cachedPlatform) {
+      return this._cachedPlatform;
+    }
+
+    if (typeof window === 'undefined') {
+      this._cachedPlatform = 'web';
+      return this._cachedPlatform;
+    }
 
     // Check if it's a PWA
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
       navigator.standalone
     ) {
-      return 'pwa';
+      this._cachedPlatform = 'pwa';
+      return this._cachedPlatform;
     }
 
     // Check if it's mobile
@@ -307,16 +427,46 @@ export class AnalyticsService {
         navigator.userAgent
       )
     ) {
-      return 'mobile';
+      this._cachedPlatform = 'mobile';
+      return this._cachedPlatform;
     }
 
-    return 'web';
+    this._cachedPlatform = 'web';
+    return this._cachedPlatform;
   }
 
+  /**
+   * Track a custom analytics event
+   * 
+   * @param event - Event data (excluding session_id, timestamp, platform which are auto-added)
+   * @example
+   * ```typescript
+   * analytics.track({
+   *   event: 'chart_calculated',
+   *   properties: {
+   *     chart_type: 'natal',
+   *     calculation_time_ms: 145,
+   *     success: true
+   *   }
+   * });
+   * ```
+   */
   public track(
     event: Omit<AnalyticsEvent, 'session_id' | 'timestamp' | 'platform'>
   ): void {
     if (!this.canUseDOM()) return; // Skip on server
+    
+    // Input validation
+    if (!event || typeof event !== 'object') {
+      console.warn('Analytics: Invalid event object provided');
+      return;
+    }
+    
+    if (!event.event || typeof event.event !== 'string') {
+      console.warn('Analytics: Event name is required and must be a string');
+      return;
+    }
+    
     this.ensureSessionFresh();
     const analyticsEvent: AnalyticsEvent = {
       ...event,
@@ -397,8 +547,18 @@ export class AnalyticsService {
     }
   }
 
-  /** Gracefully stop background timers and global handlers (useful for tests / teardown). */
+  /**
+   * Gracefully stop background timers and global handlers
+   * Call this method when destroying the analytics instance to prevent memory leaks
+   * 
+   * @example
+   * ```typescript
+   * // During app teardown or component unmount
+   * analytics.shutdown();
+   * ```
+   */
   public shutdown(): void {
+    // Clear any pending timers
     if (this.flushTimer && this.canUseDOM()) {
       try {
         window.clearInterval(this.flushTimer);
@@ -407,6 +567,8 @@ export class AnalyticsService {
       }
       this.flushTimer = null;
     }
+    
+    // Remove global error handler
     if (this.globalErrorHandler && this.canUseDOM()) {
       try {
         window.removeEventListener('error', this.globalErrorHandler);
@@ -415,7 +577,17 @@ export class AnalyticsService {
       }
       this.globalErrorHandler = null;
     }
+    
+    // Clear pending queues to free memory
+    this.pendingEvents.length = 0;
+    this.pendingIdentifies.length = 0;
+    this.pendingPageViews.length = 0;
+    
+    // Reset cached platform
+    this._cachedPlatform = null;
+    
     this.isInitialized = false;
+    this.consentGranted = false;
   }
 
   private sanitizeEvent(e: AnalyticsEvent): AnalyticsEvent {
@@ -424,9 +596,8 @@ export class AnalyticsService {
       string,
       string | number | boolean | null
     >;
-    const defaultPII = ['email', 'ip', 'ip_address', 'full_name'];
     const extra = this.config.advanced?.piiKeys ?? [];
-    for (const key of [...defaultPII, ...extra]) {
+    for (const key of [...DEFAULT_PII_KEYS, ...extra]) {
       if (key in props) {
         if (key === 'email' && typeof props[key] === 'string') {
           const val = props[key];
@@ -442,13 +613,29 @@ export class AnalyticsService {
   }
 
   private ensureSessionFresh(): void {
-    const timeout = this.config.advanced?.sessionTimeoutMs ?? 30 * 60 * 1000; // 30m default
+    const timeout = this.config.advanced?.sessionTimeoutMs ?? DEFAULT_SESSION_TIMEOUT_MS;
     if (this.lastEventTs && Date.now() - this.lastEventTs > timeout) {
       this.sessionId = this.generateSessionId();
     }
   }
 
-  /** Convenience wrapper to measure a promise or function and emit timing event */
+  /**
+   * Measure performance of a function or promise and emit timing event
+   * 
+   * @param name - Name/label for the timing metric
+   * @param fn - Function or promise to measure
+   * @param extra - Additional properties to include in the timing event
+   * @returns Promise with the result of the measured function
+   * 
+   * @example
+   * ```typescript
+   * const chartData = await analytics.withTiming(
+   *   'chart_calculation', 
+   *   () => calculateNatalChart(birthData),
+   *   { chart_type: 'natal', user_id: '123' }
+   * );
+   * ```
+   */
   public async withTiming<T>(
     name: string,
     fn: () => Promise<T> | T,
@@ -459,7 +646,7 @@ export class AnalyticsService {
       const result = await fn();
       const duration = performance.now() - start;
       this.track({
-        event: 'perf_timing',
+        event: PERFORMANCE_TIMING_EVENT,
         properties: {
           label: name,
           duration_ms: Math.round(duration),
@@ -471,7 +658,7 @@ export class AnalyticsService {
     } catch (err) {
       const duration = performance.now() - start;
       this.track({
-        event: 'perf_timing',
+        event: PERFORMANCE_TIMING_EVENT,
         properties: {
           label: name,
           duration_ms: Math.round(duration),
@@ -483,6 +670,25 @@ export class AnalyticsService {
     }
   }
 
+  /**
+   * Track application errors for monitoring and debugging
+   * 
+   * @param name - Error name/category 
+   * @param error - Error object or message
+   * @param extra - Additional context properties
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   await calculateChart(data);
+   * } catch (error) {
+   *   analytics.trackError('chart_calculation_failed', error, {
+   *     chart_type: 'natal',
+   *     user_id: '123'
+   *   });
+   * }
+   * ```
+   */
   public trackError(
     name: string,
     error: unknown,
@@ -490,7 +696,7 @@ export class AnalyticsService {
   ): void {
     const err = error instanceof Error ? error : new Error(String(error));
     this.track({
-      event: 'app_error',
+      event: APP_ERROR_EVENT,
       properties: {
         name,
         message: err.message.slice(0, 500),
@@ -501,8 +707,35 @@ export class AnalyticsService {
     });
   }
 
+  /**
+   * Identify a user with traits for personalization and segmentation
+   * 
+   * @param userId - Unique user identifier
+   * @param traits - User characteristics and preferences
+   * 
+   * @example
+   * ```typescript
+   * analytics.identify('user_123', {
+   *   subscription_tier: 'premium',
+   *   astrology_system: 'western',
+   *   created_at: Date.now()
+   * });
+   * ```
+   */
   public identify(userId: string, traits: UserTraits): void {
     if (!this.canUseDOM()) return;
+    
+    // Input validation
+    if (!userId || typeof userId !== 'string') {
+      console.warn('Analytics: User ID is required and must be a string');
+      return;
+    }
+    
+    if (!traits || typeof traits !== 'object') {
+      console.warn('Analytics: User traits must be an object');
+      return;
+    }
+    
     if (!this.isTrackingEnabled()) {
       this.pendingIdentifies.push({ userId, traits });
       return;
@@ -556,6 +789,21 @@ export class AnalyticsService {
     }
   }
 
+  /**
+   * Track page views for navigation analytics
+   * 
+   * @param name - Page name or route
+   * @param properties - Page-specific properties (path, title, etc.)
+   * 
+   * @example
+   * ```typescript
+   * analytics.page('Natal Chart', {
+   *   path: '/charts/natal',
+   *   title: 'Natal Chart - CosmicHub',
+   *   user_type: 'authenticated'
+   * });
+   * ```
+   */
   public page(name: string, properties: PageProperties): void {
     if (!this.canUseDOM()) return;
     if (!this.isTrackingEnabled()) {
@@ -590,7 +838,7 @@ export class AnalyticsService {
       this.config.mixpanel.trackPageViews
     ) {
       const mixpanel = window.mixpanel;
-      mixpanel?.track?.('Page View', {
+      mixpanel?.track?.(PAGE_VIEW_EVENT, {
         page_name: name,
         ...properties,
       });
@@ -599,7 +847,7 @@ export class AnalyticsService {
     // Track page view with PostHog
     if (this.config.posthog?.enabled && this.isInitialized) {
       const posthog = window.posthog;
-      posthog?.capture?.('$pageview', {
+      posthog?.capture?.(POSTHOG_PAGEVIEW_EVENT, {
         $current_url: properties.path,
         page_name: name,
         ...properties,
@@ -690,8 +938,9 @@ export class AnalyticsService {
 
   // ==== Internal queue helpers ====
   private async loadScriptOnce(src: string): Promise<void> {
-    if (AnalyticsService.scriptPromises[src])
-      return AnalyticsService.scriptPromises[src];
+    if (AnalyticsService.scriptPromises[src]) {
+      return await AnalyticsService.scriptPromises[src];
+    }
     AnalyticsService.scriptPromises[src] = new Promise<void>(
       (resolve, reject) => {
         try {

@@ -28,7 +28,7 @@ export interface EnhancedChartWrapperProps {
   fetchFn?: (data: ChartBirthData) => Promise<ApiResult<ChartData>>;
 }
 
-export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
+const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   birthData,
   savedChartId,
   onChartCalculated,
@@ -214,4 +214,10 @@ export const EnhancedChartWrapper: React.FC<EnhancedChartWrapperProps> = ({
   );
 };
 
-export default EnhancedChartWrapper;
+
+// Memoize component to prevent unnecessary re-renders
+const MemoizedEnhancedChartWrapper = React.memo(EnhancedChartWrapper);
+MemoizedEnhancedChartWrapper.displayName = 'EnhancedChartWrapper';
+
+export { MemoizedEnhancedChartWrapper as EnhancedChartWrapper };
+export default MemoizedEnhancedChartWrapper;

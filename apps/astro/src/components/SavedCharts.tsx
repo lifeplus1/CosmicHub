@@ -1,4 +1,4 @@
-import React, { useState, type JSX } from 'react';
+import React, { useState, memo, type JSX } from 'react';
 import { formatDate } from '@cosmichub/config';
 
 /** Birth data information */
@@ -24,7 +24,7 @@ interface Chart {
   birth_location: string | null;
 }
 
-const SavedCharts = (): JSX.Element => {
+const SavedCharts = memo((): JSX.Element => {
   // Example charts state (replace with real data/fetch)
   const [charts] = useState<Chart[]>([]);
 
@@ -115,6 +115,8 @@ const SavedCharts = (): JSX.Element => {
       </div>
     </div>
   );
-};
+});
+
+SavedCharts.displayName = 'SavedCharts';
 
 export default SavedCharts;

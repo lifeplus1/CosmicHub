@@ -14,7 +14,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef } from 'react';
-import type { UnifiedBirthData, ValidationChartData, Planet } from '@cosmichub/types';
+import type { UnifiedBirthData, ValidationChartData } from '@cosmichub/types';
 
 // Core validation types
 export interface ValidationRule<T = unknown> {

@@ -14,7 +14,7 @@ interface Props {
   onSave: () => void;
 }
 
-export const BirthSummaryHeader: React.FC<Props> = ({
+const BirthSummaryHeader: React.FC<Props> = ({
   birthData,
   isLoading,
   onEdit,
@@ -137,3 +137,10 @@ export const BirthSummaryHeader: React.FC<Props> = ({
     </div>
   );
 };
+
+// Memoize component to prevent unnecessary re-renders
+const MemoizedBirthSummaryHeader = React.memo(BirthSummaryHeader);
+MemoizedBirthSummaryHeader.displayName = 'BirthSummaryHeader';
+
+export { MemoizedBirthSummaryHeader as BirthSummaryHeader };
+export default MemoizedBirthSummaryHeader;

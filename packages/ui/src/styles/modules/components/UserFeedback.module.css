@@ -1,0 +1,104 @@
+/* UserFeedback Component CSS Module - Tailwind + Radix Integration */
+
+/* Progress Container with CSS Custom Property Support */
+.progressContainer {
+  @apply bg-cosmic-dark/70 rounded-full overflow-hidden;
+}
+
+.progressContainer.small {
+  @apply h-1;
+}
+
+.progressContainer.medium {
+  @apply h-2;
+}
+
+.progressContainer.large {
+  @apply h-3;
+}
+
+/* Progress Bar Enhancements */
+.progressBar {
+  @apply rounded-full transition-all duration-300 ease-out h-full;
+}
+
+/* Width variants using CSS custom properties for dynamic values */
+.progressBarDynamic {
+  width: var(--progress-width, 0%);
+}
+
+/* Indeterminate progress animation */
+.progressBarIndeterminate {
+  @apply w-full;
+  animation: progress-indeterminate 2s ease-in-out infinite;
+}
+
+/* Color variants using cosmic theme */
+.progressPrimary {
+  @apply bg-gradient-to-r from-cosmic-purple to-cosmic-blue;
+}
+
+.progressSuccess {
+  @apply bg-green-500;
+}
+
+.progressWarning {
+  @apply bg-yellow-500;
+}
+
+.progressError {
+  @apply bg-red-500;
+}
+
+/* Toast animations */
+.toastEnter {
+  @apply opacity-100 translate-x-0;
+}
+
+.toastExit {
+  @apply opacity-0 translate-x-full;
+}
+
+/* Indeterminate animation keyframes */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Enhanced hover states */
+.toastItem:hover {
+  @apply shadow-xl;
+}
+
+/* Status indicator color mappings using cosmic theme */
+.statusLoading {
+  @apply text-blue-400 bg-blue-900/20 border-blue-500/30;
+}
+
+.statusSuccess {
+  @apply text-green-400 bg-green-900/20 border-green-500/30;
+}
+
+.statusError {
+  @apply text-red-400 bg-red-900/20 border-red-500/30;
+}
+
+.statusWarning {
+  @apply text-yellow-400 bg-yellow-900/20 border-yellow-500/30;
+}
+
+.statusIdle {
+  @apply text-cosmic-silver bg-cosmic-dark/20 border-cosmic-purple/30;
+}
+
+/* Loading spinner animation using cosmic colors */
+.loadingSpinner {
+  @apply border-2 border-current border-t-transparent rounded-full animate-spin;
+}

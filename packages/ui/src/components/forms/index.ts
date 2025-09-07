@@ -1,3 +1,5 @@
 export { AdvancedForm } from './AdvancedForm';
-export { BirthDataForm } from './BirthDataForm';
-export { FrequencyForm } from './FrequencyForm';
+import BirthDataForm from './BirthDataForm';
+import FrequencyForm from './FrequencyForm';
+
+export { BirthDataForm, FrequencyForm };

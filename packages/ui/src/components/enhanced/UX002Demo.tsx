@@ -16,7 +16,7 @@ import {
   TiltCard,
 } from '../animation';
 
-export const UX002Demo: React.FC = () => {
+const UX002Demo: React.FC = () => {
   const [buttonState, setButtonState] = useState<
     'idle' | 'loading' | 'success' | 'error'
   >('idle');
@@ -153,14 +153,14 @@ export const UX002Demo: React.FC = () => {
                 <button
                   type='button'
                   className='px-3 py-1 bg-cosmic-purple rounded text-sm'
-                  onClick={() => setProgress(Math.max(0, progress - 10))}
+                  onClick={() => setProgress(Math.max(0, progress - 10))} aria-label="Button"
                 >
                   -10%
                 </button>
                 <button
                   type='button'
                   className='px-3 py-1 bg-cosmic-purple rounded text-sm'
-                  onClick={() => setProgress(Math.min(100, progress + 10))}
+                  onClick={() => setProgress(Math.min(100, progress + 10))} aria-label="Button"
                 >
                   +10%
                 </button>
@@ -178,7 +178,7 @@ export const UX002Demo: React.FC = () => {
                   <button
                     type='button'
                     className='px-4 py-2 bg-cosmic-silver/20 rounded hover:bg-cosmic-silver/30'
-                  >
+                   aria-label="Button">
                     Top
                   </button>
                 </AnimatedTooltip>
@@ -191,7 +191,7 @@ export const UX002Demo: React.FC = () => {
                   <button
                     type='button'
                     className='px-4 py-2 bg-cosmic-silver/20 rounded hover:bg-cosmic-silver/30'
-                  >
+                   aria-label="Button">
                     Bottom
                   </button>
                 </AnimatedTooltip>
@@ -200,7 +200,7 @@ export const UX002Demo: React.FC = () => {
                   <button
                     type='button'
                     className='px-4 py-2 bg-cosmic-silver/20 rounded hover:bg-cosmic-silver/30'
-                  >
+                   aria-label="Button">
                     Right
                   </button>
                 </AnimatedTooltip>
@@ -232,3 +232,10 @@ export const UX002Demo: React.FC = () => {
     </div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+const MemoizedUX002Demo = React.memo(UX002Demo);
+MemoizedUX002Demo.displayName = 'UX002Demo';
+
+export { MemoizedUX002Demo as UX002Demo };
+export default MemoizedUX002Demo;

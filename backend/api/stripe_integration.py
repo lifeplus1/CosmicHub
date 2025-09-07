@@ -14,7 +14,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin import auth
 
 from database import get_firestore_client
-from backend.types.runtime_protocols import (
+from backend_types.runtime_protocols import (
     SubscriptionPlan,
     SubscriptionData,
     FirestoreClient,

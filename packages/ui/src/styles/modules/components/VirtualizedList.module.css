@@ -1,0 +1,72 @@
+/**
+ * VirtualizedList Component Styles
+ * Handles virtualization of large lists for performance optimization
+ */
+
+.virtualized-container {
+  position: relative;
+  overflow-y: auto;
+  width: var(--virtualized-width, 100%);
+  height: var(--virtualized-height, 400px);
+}
+
+.virtualized-inner {
+  position: relative;
+  width: 100%;
+  height: var(--total-height, 0px);
+}
+
+.virtualized-item {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--item-top, 0px);
+  height: var(--item-height, auto);
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Scroll indicators */
+.virtualized-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.virtualized-container::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 4px;
+}
+
+.virtualized-container::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+}
+
+.virtualized-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .virtualized-container {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Tailwind scrollbar styles integration - using webkit for better browser support */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-track-cosmic-dark::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.scrollbar-thumb-cosmic-purple::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.6);
+}
+
+.scrollbar-thumb-cosmic-purple::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.8);
+}

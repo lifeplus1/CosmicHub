@@ -39,7 +39,7 @@ from pathlib import Path
 
 from .tcm_type_bridge import TCMTypeBridge
 from .astrology_type_bridge import AstrologyTypeBridge
-from backend.types.astrology_systems import Planet
+from backend_types.astrology_systems import Planet
 
 # Type protocols for validation testing - using structural typing
 class ElementInfoProtocol(TypedDict, total=False):

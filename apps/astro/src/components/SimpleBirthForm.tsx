@@ -1,4 +1,4 @@
-import { useState, type FC, type FormEvent, type ChangeEvent } from 'react';
+import React, {  useState, useCallback, useMemo, type FC, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@cosmichub/ui';
 import { useBirthData } from '../contexts/BirthDataContext';
@@ -15,7 +15,7 @@ interface SimpleBirthFormProps {
   navigateTo?: string; // Custom navigation path
 }
 
-export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
+const SimpleBirthForm: FC<SimpleBirthFormProps> = React.memo(({
   title = 'Birth Details',
   submitButtonText = 'Calculate Chart',
   onSubmit,
@@ -39,7 +39,8 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
 
   // Sample birth data removed - users must enter their own data
 
-  const validateFormData = (data: typeof formData): Record<string, string> => {
+  // Memoize validation function
+  const validateFormData = useCallback((data: typeof formData): Record<string, string> => {
     const errors: Record<string, string> = {};
 
     // Required field validation (explicit empty string checks)
@@ -55,9 +56,9 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
     }
 
     return errors;
-  };
+  }, []);
 
-  const handleFormSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleFormSubmit = useCallback((e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
     // Clear previous validation errors
@@ -140,7 +141,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [formData, setBirthData, onSubmit, navigate, navigateTo, validateFormData]);
 
   // Sample functionality removed
 
@@ -155,7 +156,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
     };
   }
 
-  const handleDetectLocation = (): void => {
+  const handleDetectLocation = useCallback((): void => {
     if (navigator.geolocation === null || navigator.geolocation === undefined) {
       setValidationErrors({
         birthLocation: 'Geolocation is not supported by this browser.',
@@ -249,7 +250,18 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
         maximumAge: 600000, // 10 minutes
       }
     );
-  };
+  }, []);
+
+  // Memoize input change handlers
+  const handleInputChange = useCallback((field: keyof typeof formData) => 
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setFormData(prev => ({ ...prev, [field]: e.target.value }));
+    }, []);
+
+  // Memoized handlers for each field
+  const handleBirthDateChange = useMemo(() => handleInputChange('birthDate'), [handleInputChange]);
+  const handleBirthTimeChange = useMemo(() => handleInputChange('birthTime'), [handleInputChange]);
+  const handleBirthLocationChange = useMemo(() => handleInputChange('birthLocation'), [handleInputChange]);
 
   return (
     <Card title={title}>
@@ -269,9 +281,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             name='birthDate'
             type='date'
             value={formData.birthDate}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setFormData(prev => ({ ...prev, birthDate: e.target.value }))
-            }
+            onChange={handleBirthDateChange}
             className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
               typeof validationErrors['birthDate'] === 'string' &&
               validationErrors['birthDate'] !== ''
@@ -303,9 +313,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             id='birth-time'
             type='time'
             value={formData.birthTime}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setFormData(prev => ({ ...prev, birthTime: e.target.value }))
-            }
+            onChange={handleBirthTimeChange}
             className={`w-full p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
               typeof validationErrors['birthTime'] === 'string' &&
               validationErrors['birthTime'] !== ''
@@ -342,12 +350,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
               type='text'
               placeholder='City, State/Country (e.g., New York, NY or London, UK)'
               value={formData.birthLocation}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setFormData(prev => ({
-                  ...prev,
-                  birthLocation: e.target.value,
-                }))
-              }
+              onChange={handleBirthLocationChange}
               className={`flex-1 p-3 rounded bg-cosmic-dark border text-cosmic-silver ${
                 typeof validationErrors['birthLocation'] === 'string' &&
                 validationErrors['birthLocation'] !== ''
@@ -364,7 +367,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
               disabled={isDetectingLocation}
               className='px-4 py-3 bg-cosmic-gold/20 hover:bg-cosmic-gold/30 disabled:bg-gray-600 border border-cosmic-gold/30 text-cosmic-gold text-sm rounded transition-colors whitespace-nowrap'
               title='Use your current location'
-            >
+             aria-label="Interactive button">
               {isDetectingLocation ? '📍...' : '📍 Current'}
             </button>
           </div>
@@ -388,7 +391,7 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
             type='submit'
             disabled={isLoading}
             className='w-full bg-cosmic-purple hover:bg-cosmic-purple/80 disabled:bg-gray-600 text-white p-3 rounded transition-colors relative overflow-hidden'
-          >
+           aria-label="Interactive button">
             {isLoading ? (
               <div className='flex items-center justify-center gap-2'>
                 <div className='animate-spin text-lg'>🌌</div>
@@ -422,4 +425,11 @@ export const SimpleBirthForm: FC<SimpleBirthFormProps> = ({
       </form>
     </Card>
   );
-};
+});
+
+SimpleBirthForm.displayName = 'SimpleBirthForm';
+
+SimpleBirthForm.displayName = 'SimpleBirthForm';
+
+export { SimpleBirthForm };
+export default SimpleBirthForm;

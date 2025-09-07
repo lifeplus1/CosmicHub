@@ -1,11 +1,13 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { logger } from '@cosmichub/config';
 
 // Create component-specific logger
-const chartLogger = logger.child ? logger.child({ module: 'ChartPreferences' }) : logger;
+const chartLogger = logger && typeof logger === 'object' && 'child' in logger && typeof logger.child === 'function'
+  ? logger.child({ module: 'ChartPreferences' })
+  : logger;
 
 import { Card } from '@cosmichub/ui';
-import { useToast } from './ToastProvider';
+import { ToastContext } from './ToastProvider';
 import { useAuth } from '@cosmichub/auth';
 import { db } from '@cosmichub/config/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -18,7 +20,7 @@ interface ChartPreferencesData {
 }
 
 const ChartPreferences: React.FC = React.memo(() => {
-  const { toast } = useToast();
+  const toastContext = useContext(ToastContext);
   const { user } = useAuth();
   const [preferences, setPreferences] = useState<ChartPreferencesData>({
     theme: 'dark',
@@ -52,14 +54,14 @@ const ChartPreferences: React.FC = React.memo(() => {
       }
     } catch (error) {
       chartLogger.error('Failed to load user preferences', { error });
-      toast({
+      toastContext?.toast({
         message: 'Failed to load your preferences',
         type: 'error',
       });
     } finally {
       setIsLoadingPreferences(false);
     }
-  }, [user?.uid, toast]);
+  }, [user?.uid, toastContext]);
 
   // Load user preferences on mount (placed after definition to satisfy TS ordering rules)
   useEffect(() => {
@@ -85,7 +87,7 @@ const ChartPreferences: React.FC = React.memo(() => {
 
   const handleSavePreferences = useCallback(async () => {
     if (!user?.uid) {
-      toast({
+      toastContext?.toast({
         message: 'You must be logged in to save preferences',
         type: 'error',
       });
@@ -106,20 +108,20 @@ const ChartPreferences: React.FC = React.memo(() => {
         { merge: true }
       );
 
-      toast({
+      toastContext?.toast({
         message: 'Preferences saved successfully',
         type: 'success',
       });
     } catch (error) {
       chartLogger.error('Failed to save preferences', { error });
-      toast({
+      toastContext?.toast({
         message: 'Failed to save preferences',
         type: 'error',
       });
     } finally {
       setIsLoading(false);
     }
-  }, [user?.uid, preferences, toast]);
+  }, [user?.uid, preferences, toastContext]);
 
   const handleSaveKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {

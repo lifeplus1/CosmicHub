@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { mobileConfig } from '../config';
 
-import type { UnifiedBirthData } from '@cosmichub/types';
-
 // API types
 interface BirthData {
   date: string;

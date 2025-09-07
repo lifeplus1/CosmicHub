@@ -17,7 +17,7 @@ interface BirthDataFormProps {
   className?: string;
 }
 
-export const BirthDataForm: React.FC<BirthDataFormProps> = ({
+const BirthDataForm: React.FC<BirthDataFormProps> = ({
   onSubmit,
   initialData,
   className = '',
@@ -87,7 +87,7 @@ export const BirthDataForm: React.FC<BirthDataFormProps> = ({
           <button
             type='submit'
             className='w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700'
-          >
+           aria-label="Interactive button">
             Submit
           </button>
         </div>
@@ -96,4 +96,8 @@ export const BirthDataForm: React.FC<BirthDataFormProps> = ({
   );
 };
 
-export default BirthDataForm;
+
+// Memoize for performance
+const MemoizedBirthDataForm = React.memo(BirthDataForm);
+MemoizedBirthDataForm.displayName = 'BirthDataForm';
+export default MemoizedBirthDataForm;

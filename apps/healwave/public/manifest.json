@@ -10,22 +10,7 @@
   "scope": "/",
   "lang": "en",
   "categories": ["health-fitness", "music", "medical", "wellness"],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-frequency.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "HealWave Desktop Frequency Generator"
-    },
-    {
-      "src": "/screenshots/mobile-presets.png",
-      "sizes": "414x896",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Healing Presets Mobile"
-    }
-  ],
+  "screenshots": [],
   "icons": [
     {
       "src": "/favicon.svg",

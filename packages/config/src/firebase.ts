@@ -24,6 +24,7 @@ interface FirebaseEnvConfig {
   VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
   VITE_FIREBASE_APP_ID?: string;
   VITE_USE_EMULATOR?: string;
+  VITE_USE_MOCK_AUTH?: string;
   DEV: boolean;
 }
 
@@ -57,6 +58,7 @@ const env: FirebaseEnvConfig = {
   ),
   VITE_FIREBASE_APP_ID: getEnvValue('VITE_FIREBASE_APP_ID'),
   VITE_USE_EMULATOR: getEnvValue('VITE_USE_EMULATOR'),
+  VITE_USE_MOCK_AUTH: getEnvValue('VITE_USE_MOCK_AUTH'),
   DEV: getEnvValue('NODE_ENV') !== 'production',
 };
 
@@ -93,9 +95,20 @@ const createFirebaseConfig = () => ({
 
 // Initialize Firebase following CosmicHub error handling patterns
 const shouldInitializeFirebase = hasValidFirebaseConfig();
+const isExplicitMockMode = env.VITE_USE_MOCK_AUTH === 'true';
+const isTestEnvironment = getEnvValue('NODE_ENV') === 'test' || 
+  getEnvValue('VITEST') === 'true' || 
+  typeof process !== 'undefined' && process.env.VITEST === 'true';
 
 if (!shouldInitializeFirebase) {
-  devConsole.log('🧪 Firebase environment not configured, using mock auth for development');
+  if (!isExplicitMockMode && !isTestEnvironment) {
+    devConsole.log('🧪 Firebase environment not configured, using mock auth for development');
+    devConsole.log(`Missing required Firebase environment variables: ${requiredEnvVars.filter(key => !env[key]).join(', ')}. Using mock auth.`);
+  } else if (isTestEnvironment) {
+    devConsole.log('🧪 Test environment detected, using mock Firebase services');
+  } else {
+    devConsole.log('🧪 Mock auth mode explicitly enabled for development');
+  }
 }
 
 //Initialize Firebase app (singleton pattern)
@@ -113,7 +126,7 @@ const hasFirestoreApp = (instance: unknown): instance is Firestore => {
   );
 };
 
-if (shouldInitializeFirebase) {
+if (shouldInitializeFirebase && !isTestEnvironment) {
   try {
     const firebaseConfig = createFirebaseConfig();
     
@@ -134,13 +147,15 @@ if (shouldInitializeFirebase) {
         'Firebase Auth initialization failed, using fallback:',
         authError
       );
-      // Create a proxy that warns instead of throwing
+      // Create a proxy that warns instead of throwing (unless in explicit mock mode)
       /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
       auth = new Proxy({} as unknown as Auth, {
         get() {
-          devConsole.warn?.(
-            'Firebase Auth not available - using mock auth instead'
-          );
+          if (!isExplicitMockMode) {
+            devConsole.warn?.(
+              'Firebase Auth not available - using mock auth instead'
+            );
+          }
           return undefined as unknown as never;
         },
       }) as Auth;
@@ -193,9 +208,11 @@ if (shouldInitializeFirebase) {
       }
     }
 
-    devConsole.log(
-      `🔥 Firebase initialized for project: ${env.VITE_FIREBASE_PROJECT_ID}`
-    );
+    if (!isTestEnvironment) {
+      devConsole.log(
+        `🔥 Firebase initialized for project: ${env.VITE_FIREBASE_PROJECT_ID}`
+      );
+    }
   } catch (error) {
     devConsole.error('Firebase initialization failed:', error);
     hasAuthAvailable = false;

@@ -1,0 +1,74 @@
+/**
+ * VirtualizedList Component Styles with Radix UI Integration
+ * Cosmic-themed virtualization for performance optimization
+ */
+
+.virtualized-container {
+  position: relative;
+  width: 100%;
+  height: var(--total-height, auto);
+}
+
+.virtualized-item {
+  position: absolute;
+  width: 100%;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+  contain: layout style paint;
+  height: var(--item-height, auto);
+  transform: var(--item-transform, translateY(0));
+}
+
+.virtualized-viewport {
+  height: var(--viewport-height, 400px);
+}
+
+.virtualized-inner {
+  height: var(--total-height, auto);
+}
+
+/* Cosmic-themed scroll styling */
+.virtualized-scroll {
+  @apply w-full overflow-auto rounded-lg;
+  @apply scrollbar-thin scrollbar-track-cosmic-dark/20 scrollbar-thumb-cosmic-purple/40;
+  @apply hover:scrollbar-thumb-cosmic-purple/60 transition-colors duration-200;
+}
+
+.virtualized-loading {
+  @apply absolute top-2 right-2 z-10;
+}
+
+.virtualized-loading-dot {
+  @apply w-2 h-2 bg-cosmic-purple rounded-full animate-pulse;
+}
+
+/* Performance optimizations */
+@media (max-width: 768px) {
+  .virtualized-scroll {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Accessibility improvements */
+.virtualized-item:focus-within {
+  @apply outline-none ring-2 ring-cosmic-purple/50 ring-offset-2 ring-offset-cosmic-dark;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .virtualized-scroll {
+    @apply scrollbar-track-white/20 scrollbar-thumb-white/60;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .virtualized-item {
+    transition: none;
+  }
+  
+  .virtualized-loading-dot {
+    animation: none;
+    @apply opacity-60;
+  }
+}

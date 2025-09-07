@@ -100,7 +100,7 @@ export const useCrossAppStore = (): CrossAppStore => {
   return { addNotification, notifications, clearNotifications };
 };
 
-export * from './api.js';
-export * from './ephemeris.js';
-export * from './stripe.js';
-export * from './frequency/index.js';
+export * from './api';
+export * from './ephemeris';
+export * from './stripe';
+export * from './frequency/index';

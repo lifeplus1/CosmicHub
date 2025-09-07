@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -100,22 +100,33 @@ const EnhancedAspectTable: React.FC<EnhancedAspectTableProps> = ({
   };
 
   // Filter aspects based on settings
-  const filteredAspects = aspects.filter(aspect => {
-    if (!includeMinorAspects && !aspect.isMajor) return false;
+  const filteredAspects = useMemo(() => {
+    return aspects.filter(aspect => {
+      if (!includeMinorAspects && !aspect.isMajor) return false;
 
-    const maxOrb = aspect.isMajor ? maxMajorOrb : maxMinorOrb;
-    return Math.abs(aspect.orb) <= maxOrb;
-  });
+      const maxOrb = aspect.isMajor ? maxMajorOrb : maxMinorOrb;
+      return Math.abs(aspect.orb) <= maxOrb;
+    });
+  }, [aspects, includeMinorAspects, maxMajorOrb, maxMinorOrb]);
 
   // Sort by strength and then by orb
-  const sortedAspects = filteredAspects.sort((a, b) => {
-    const strengthOrder = { exact: 0, strong: 1, moderate: 2, weak: 3 };
-    const strengthDiff = strengthOrder[a.strength] - strengthOrder[b.strength];
-    if (strengthDiff !== 0) return strengthDiff;
-    return Math.abs(a.orb) - Math.abs(b.orb);
-  });
+  const sortedAspects = useMemo(() => {
+    return filteredAspects.sort((a, b) => {
+      const strengthOrder = { exact: 0, strong: 1, moderate: 2, weak: 3 };
+      const strengthDiff = strengthOrder[a.strength] - strengthOrder[b.strength];
+      if (strengthDiff !== 0) return strengthDiff;
+      return Math.abs(a.orb) - Math.abs(b.orb);
+    });
+  }, [filteredAspects]);
 
-  if (sortedAspects.length === 0) {
+  // Memoize statistics calculations
+  const aspectStats = useMemo(() => {
+    const majorCount = sortedAspects.filter(a => a.isMajor).length;
+    const minorCount = sortedAspects.filter(a => !a.isMajor).length;
+    return { majorCount, minorCount, total: sortedAspects.length };
+  }, [sortedAspects]);
+
+  if (aspectStats.total === 0) {
     return (
       <div className='text-center py-8 text-gray-500'>
         <div className='text-4xl mb-2'>🔍</div>
@@ -131,11 +142,10 @@ const EnhancedAspectTable: React.FC<EnhancedAspectTableProps> = ({
     <div className='enhanced-aspect-table'>
       <div className='mb-4 flex items-center justify-between'>
         <h3 className='text-lg font-semibold'>
-          ⚡ Enhanced Aspects ({sortedAspects.length})
+          ⚡ Enhanced Aspects ({aspectStats.total})
         </h3>
         <div className='text-sm text-gray-600'>
-          Major: {sortedAspects.filter(a => a.isMajor).length} | Minor:{' '}
-          {sortedAspects.filter(a => !a.isMajor).length}
+          Major: {aspectStats.majorCount} | Minor: {aspectStats.minorCount}
         </div>
       </div>
 

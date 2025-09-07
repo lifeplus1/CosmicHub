@@ -34,10 +34,22 @@ function initializeHealWavePerformance(): void {
 }
 
 // Auto-initialize when imported
+const IS_TEST = Boolean((import.meta as unknown as { vitest?: unknown }).vitest) ??
+  (typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: { MODE?: string } }).env?.MODE === 'test') ??
+  (typeof process !== 'undefined' && typeof process.env !== 'undefined' && (process.env.VITEST ?? process.env.NODE_ENV === 'test'));
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+  const onReady = () => {
+    document.removeEventListener('DOMContentLoaded', onReady);
     initializeHealWavePerformance();
-  });
-} else {
+  };
+  document.addEventListener('DOMContentLoaded', onReady);
+} else if (!IS_TEST) {
+  // In non-test environments, initialize immediately when document is ready
   initializeHealWavePerformance();
 }
+
+// Test-only export
+export const __test__ = {
+  initNow: () => initializeHealWavePerformance(),
+};

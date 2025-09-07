@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import type { Interpretation } from './types';
 import {
@@ -12,6 +12,7 @@ interface InterpretationDisplayProps {
   loading?: boolean;
   error?: string | null;
   showFullContent?: boolean;
+  onShowFullContent?: () => void;
 }
 
 const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
@@ -19,7 +20,20 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
   loading = false,
   error = null,
   showFullContent = false,
+  onShowFullContent,
 }) => {
+  const handleShowFullContent = useCallback(() => {
+    if (onShowFullContent) {
+      onShowFullContent();
+    }
+  }, [onShowFullContent]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleShowFullContent();
+    }
+  }, [handleShowFullContent]);
   if (loading) {
     return (
       <div className='flex items-center justify-center p-8 bg-cosmic-dark/40 rounded-xl border border-cosmic-silver/20'>
@@ -141,12 +155,10 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
             typeof interpretation.content === 'string' &&
             interpretation.content.length > 500 && (
               <button
-                className='mt-4 text-cosmic-gold hover:text-cosmic-gold/80 transition-colors text-sm font-medium'
-                onClick={() => {
-                  // TODO: This would typically be handled by parent component
-                  // logger.info('Show full content for:', interpretation.id);
-                  // Implement full content display functionality
-                }}
+                className='mt-4 text-cosmic-gold hover:text-cosmic-gold/80 transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 rounded-md px-2 py-1'
+                onClick={handleShowFullContent}
+                onKeyDown={handleKeyDown}
+                aria-label='Show full interpretation content'
               >
                 Read Full Interpretation →
               </button>
@@ -185,4 +197,4 @@ const InterpretationDisplay: React.FC<InterpretationDisplayProps> = ({
   );
 };
 
-export default InterpretationDisplay;
+export default React.memo(InterpretationDisplay);

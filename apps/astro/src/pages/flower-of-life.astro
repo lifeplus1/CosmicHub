@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { FlowerOfLifeDemo } from '../components/demos/FlowerOfLifeDemo';
+---
+
+<Layout title="Flower of Life - Sacred Geometry">
+  <main class="min-h-screen bg-cosmic-dark">
+    <div class="container mx-auto px-4 py-8">
+      <FlowerOfLifeDemo client:load />
+    </div>
+  </main>
+</Layout>

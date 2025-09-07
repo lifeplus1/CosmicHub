@@ -5,7 +5,7 @@
  * and only loads when ephemeris data is actually needed.
  */
 
-import React, { Suspense, lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 // Lazy load the heavy ephemeris chart component
@@ -37,13 +37,13 @@ const EphemerisErrorFallback: React.FC<{
     <button
       onClick={resetErrorBoundary}
       className='mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700'
-    >
+     aria-label="Button">
       Try again
     </button>
   </div>
 );
 
-export const EphemerisChartWrapper: React.FC<EphemerisChartWrapperProps> = ({
+const EphemerisChartWrapper: React.FC<EphemerisChartWrapperProps> = ({
   date,
   onError,
 }) => {
@@ -59,3 +59,10 @@ export const EphemerisChartWrapper: React.FC<EphemerisChartWrapperProps> = ({
     </ErrorBoundary>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+const MemoizedEphemerisChartWrapper = React.memo(EphemerisChartWrapper);
+MemoizedEphemerisChartWrapper.displayName = 'EphemerisChartWrapper';
+
+export { MemoizedEphemerisChartWrapper as EphemerisChartWrapper };
+export default MemoizedEphemerisChartWrapper;

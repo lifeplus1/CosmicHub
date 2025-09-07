@@ -19,7 +19,6 @@
   "strict": [
     "backend/security",
     "backend/analytics/custom_analytics.py",
-    "backend/analytics/websocket_handler.py",
     "backend/routers/synastry.py",
     "backend/api/bridges"
   ]

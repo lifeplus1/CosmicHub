@@ -7,6 +7,8 @@ import {
 } from '@cosmichub/integrations';
 import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import FeatureGuard from './FeatureGuard';
+import { useHealwaveFeatures } from '../hooks/useHealwaveFeatures';
 
 interface BinauralSettingsProps {
   onSettingsChange: (settings: AudioSettings) => void;
@@ -22,6 +24,7 @@ interface BinauralSettingsProps {
  */
 export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
   ({ onSettingsChange, onPresetSelect, currentSettings, audioEngine }) => {
+    const _features = useHealwaveFeatures();
     const [advancedMode, setAdvancedMode] = useState<boolean>(false);
     const [customFrequency, setCustomFrequency] = useState<number>(40);
     const [binauralBeat, setBinauralBeat] = useState<number>(6);
@@ -537,27 +540,19 @@ export const BinauralSettings: React.FC<BinauralSettingsProps> = React.memo(
                   ))}
               </div>
 
-              <Tooltip.Provider>
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <button
-                      onClick={createCustomPreset}
-                      onKeyDown={handleCreateCustomKeyDown}
-                      className='w-full px-4 py-2 font-medium text-white transition-all bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg hover:from-cyan-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-transparent shadow-lg hover:shadow-cyan-500/25'
-                    >
-                      🎵 Create Custom Frequency
-                    </button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content
-                      className='p-2 bg-black/90 backdrop-blur-sm border border-white/20 rounded shadow-xl text-white text-sm'
-                      side='top'
-                    >
-                      Premium: Save custom presets with subscription
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-              </Tooltip.Provider>
+              <FeatureGuard 
+                requiredTier="premium" 
+                feature="custom-presets"
+                showPreview={false}
+              >
+                <button
+                  onClick={createCustomPreset}
+                  onKeyDown={handleCreateCustomKeyDown}
+                  className='w-full px-4 py-2 font-medium text-white transition-all bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg hover:from-cyan-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-transparent shadow-lg hover:shadow-cyan-500/25'
+                >
+                  🎵 Create Custom Frequency
+                </button>
+              </FeatureGuard>
             </div>
           </div>
         )}

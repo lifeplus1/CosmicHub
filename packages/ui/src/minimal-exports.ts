@@ -27,13 +27,22 @@ export * from './components/feedback/UserFeedback';
 // Accessibility components for ALLY-030
 export * from './components/accessibility/AccessibilityUtils';
 
+// Sacred Geometry Visualization - SPIRITUAL-003.5
+export * from './components/SacredGeometryVisualizer';
+export * from './components/FlowerOfLifeViewer';
+export * from './components/SacredGeometry/SacredGeometryComponents';
+
 // Error handling components
 export { default as ErrorBoundary } from './components/feedback/ErrorBoundary';
 export * from './components/feedback/ErrorBoundaries';
 
+// Import ErrorMessage from the default export of ErrorHandling
+import ErrorHandling from './components/feedback/ErrorHandling';
+export const ErrorMessage = ErrorHandling.ErrorMessage;
+
 // Re-export specific error boundary types for compatibility
 export {
-  PageErrorBoundary,
+  SectionErrorBoundary,
   ComponentErrorBoundary,
   FormErrorBoundary,
   withErrorBoundary,
@@ -41,3 +50,9 @@ export {
 
 // Export centralized CSS modules
 export * as stylesModules from './styles/modules';
+
+// Performance monitoring utilities
+export * from './utils/performance';
+export * from './utils/lazy-loading';
+export * from './utils/type-guards';
+export * from './utils/api-validation';

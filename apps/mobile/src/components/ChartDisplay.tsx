@@ -22,8 +22,9 @@ export function ChartDisplay({
 
   // This is a simplified version - you'd migrate your existing D3 logic here
   const renderPlanets = () => {
-    if (chartData?.planets === null || chartData?.planets === undefined)
+    if (!chartData?.planets || !Array.isArray(chartData.planets)) {
       return null;
+    }
 
     return chartData.planets.map((planet: Planet, index: number) => {
       const angle = (planet.position * Math.PI) / 180;
@@ -94,20 +95,11 @@ export function ChartDisplay({
 
       <View style={styles.info}>
         <Text style={styles.infoText}>
-          {chartData?.planets !== null && chartData?.planets !== undefined
-            ? chartData.planets.length
-            : 0}{' '}
-          planets •{' '}
-          {chartData?.houses !== null && chartData?.houses !== undefined
-            ? chartData.houses.length
-            : 0}{' '}
-          houses
+          {Array.isArray(chartData?.planets) ? chartData.planets.length : 0} planets •{' '}
+          {Array.isArray(chartData?.houses) ? chartData.houses.length : 0} houses
         </Text>
         <Text style={styles.infoText}>
-          {chartData?.aspects !== null && chartData?.aspects !== undefined
-            ? chartData.aspects.length
-            : 0}{' '}
-          aspects
+          {Array.isArray(chartData?.aspects) ? chartData.aspects.length : 0} aspects
         </Text>
       </View>
     </View>

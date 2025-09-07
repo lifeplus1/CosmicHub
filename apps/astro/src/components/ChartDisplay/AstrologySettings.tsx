@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { IoSettings } from 'react-icons/io5';
 
 export interface AstrologySettings {
@@ -151,17 +151,17 @@ interface AstrologySettingsProps {
   onToggle: () => void;
 }
 
-export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
+const AstrologySettingsComponent: React.FC<AstrologySettingsProps> = ({
   settings,
   onSettingsChange,
   isOpen,
   onToggle,
 }) => {
-  const updateSettings = (updates: Partial<AstrologySettings>) => {
+  const updateSettings = useCallback((updates: Partial<AstrologySettings>) => {
     onSettingsChange({ ...settings, ...updates });
-  };
+  }, [settings, onSettingsChange]);
 
-  const updateNestedSettings = <T extends keyof AstrologySettings>(
+  const updateNestedSettings = useCallback(<T extends keyof AstrologySettings>(
     category: T,
     updates: Partial<AstrologySettings[T]>
   ) => {
@@ -172,13 +172,23 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
         ...updates,
       },
     });
-  };
+  }, [settings, onSettingsChange]);
+
+  const handleToggleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onToggle();
+    }
+  }, [onToggle]);
 
   return (
     <div className='astrology-settings w-full'>
       <button
         onClick={onToggle}
-        className='settings-toggle-btn flex items-center gap-2 px-4 py-2 bg-cosmic-purple/20 hover:bg-cosmic-purple/30 rounded-lg transition-colors border border-cosmic-purple/30 text-cosmic-silver hover:text-white'
+        onKeyDown={handleToggleKeyDown}
+        className='settings-toggle-btn flex items-center gap-2 px-4 py-2 bg-cosmic-purple/20 hover:bg-cosmic-purple/30 rounded-lg transition-colors border border-cosmic-purple/30 text-cosmic-silver hover:text-white focus:outline-none focus:ring-2 focus:ring-cosmic-purple focus:ring-offset-2 focus:ring-offset-cosmic-dark'
+        aria-expanded={isOpen}
+        aria-label={`${isOpen ? 'Hide' : 'Show'} advanced astrology settings`}
       >
         <IoSettings size={16} />
         <span className='font-medium'>Advanced Settings</span>
@@ -549,3 +559,10 @@ export const AstrologySettingsPanel: React.FC<AstrologySettingsProps> = ({
     </div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+const MemoizedAstrologySettings = React.memo(AstrologySettingsComponent);
+MemoizedAstrologySettings.displayName = 'AstrologySettings';
+
+export { MemoizedAstrologySettings as AstrologySettingsComponent };
+export default MemoizedAstrologySettings;

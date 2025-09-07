@@ -64,7 +64,6 @@ export class AudioEngine {
   private oscillatorRight: OscillatorNode | null = null;
   private gainNodeLeft: GainNode | null = null;
   private gainNodeRight: GainNode | null = null;
-  private oscillatorsStarted: boolean = false;
   private isPlaying: boolean = false;
   private currentPreset: FrequencyPreset | null = null;
   private currentSettings: AudioSettings | null = null;
@@ -183,6 +182,10 @@ export class AudioEngine {
         currentTime + settings.fadeIn
       );
 
+      // Start oscillators
+      this.oscillatorLeft.start();
+      this.oscillatorRight.start();
+
       // Schedule stop with fade-out if duration is specified
       if (settings.duration > 0) {
         const stopTime = currentTime + Math.max(settings.duration * 60, 0.01); // Ensure at least 10ms in the future
@@ -201,18 +204,12 @@ export class AudioEngine {
         this.oscillatorRight.stop(stopTime);
       }
 
-      // Start oscillators
-      this.oscillatorLeft.start();
-      this.oscillatorRight.start();
-      this.oscillatorsStarted = true;
-
       // Listen for ended event to reset the started flag when scheduled stop occurs
-      this.oscillatorLeft.addEventListener('ended', () => {
-        this.oscillatorsStarted = false;
-      });
-      this.oscillatorRight.addEventListener('ended', () => {
-        this.oscillatorsStarted = false;
-      });
+      const handleEnded = () => {
+        // Oscillator has ended, no action needed as cleanup will handle it
+      };
+      this.oscillatorLeft.addEventListener('ended', handleEnded);
+      this.oscillatorRight.addEventListener('ended', handleEnded);
 
       this.isPlaying = true;
       this.currentPreset = preset;
@@ -238,9 +235,7 @@ export class AudioEngine {
     try {
       if (this.oscillatorLeft) {
         try {
-          if (this.oscillatorsStarted) {
-            this.oscillatorLeft.stop();
-          }
+          this.oscillatorLeft.stop();
         } catch (error) {
           // Ignore errors when stopping oscillators that weren't started or already stopped
           logger.warn('Error stopping left oscillator (expected if not started or already stopped):', error);
@@ -255,9 +250,7 @@ export class AudioEngine {
       }
       if (this.oscillatorRight) {
         try {
-          if (this.oscillatorsStarted) {
-            this.oscillatorRight.stop();
-          }
+          this.oscillatorRight.stop();
         } catch (error) {
           // Ignore errors when stopping oscillators that weren't started or already stopped
           logger.warn('Error stopping right oscillator (expected if not started or already stopped):', error);
@@ -287,7 +280,7 @@ export class AudioEngine {
         this.gainNodeRight = null;
       }
       
-      this.oscillatorsStarted = false;
+      // No need to set oscillatorsStarted since we removed that property
     } catch (error) {
       // Ignore cleanup errors, but log them
       logger.warn('Error during audio cleanup:', error);

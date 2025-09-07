@@ -1,6 +1,6 @@
 // COMPLETE REWRITE: Previous file was structurally corrupted (missing component wrappers,
 // orphaned code blocks). This version provides clean, typed boundary helpers.
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 import type { ErrorInfo as BoundaryErrorInfo } from './errorTypes';
 
@@ -14,7 +14,7 @@ export interface PageErrorBoundaryProps {
     | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
-export const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = ({
+const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = React.memo(({
   children,
   pageName,
   onError,
@@ -32,7 +32,9 @@ export const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = ({
       {children}
     </ErrorBoundary>
   );
-};
+});
+
+PageErrorBoundary.displayName = 'PageErrorBoundary';
 
 /** Section-level error boundary */
 export interface SectionErrorBoundaryProps {
@@ -44,7 +46,7 @@ export interface SectionErrorBoundaryProps {
     | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
-export const SectionErrorBoundary: React.FC<SectionErrorBoundaryProps> = ({
+export const SectionErrorBoundary: React.FC<SectionErrorBoundaryProps> = React.memo(({
   children,
   sectionName,
   onError,
@@ -61,7 +63,9 @@ export const SectionErrorBoundary: React.FC<SectionErrorBoundaryProps> = ({
       {children}
     </ErrorBoundary>
   );
-};
+});
+
+SectionErrorBoundary.displayName = 'SectionErrorBoundary';
 
 /** Component-level error boundary */
 export interface ComponentErrorBoundaryProps {
@@ -74,7 +78,7 @@ export interface ComponentErrorBoundaryProps {
   resetKeys?: Array<string | number>;
 }
 
-export const ComponentErrorBoundary: React.FC<ComponentErrorBoundaryProps> = ({
+export const ComponentErrorBoundary: React.FC<ComponentErrorBoundaryProps> = React.memo(({
   children,
   componentName,
   onError,
@@ -93,7 +97,9 @@ export const ComponentErrorBoundary: React.FC<ComponentErrorBoundaryProps> = ({
       {children}
     </ErrorBoundary>
   );
-};
+});
+
+ComponentErrorBoundary.displayName = 'ComponentErrorBoundary';
 
 /** Async operation boundary */
 export interface AsyncErrorBoundaryProps {
@@ -106,13 +112,35 @@ export interface AsyncErrorBoundaryProps {
     | ((error: Error, info: BoundaryErrorInfo, retry: () => void) => ReactNode);
 }
 
-export const AsyncErrorBoundary: React.FC<AsyncErrorBoundaryProps> = ({
+export const AsyncErrorBoundary: React.FC<AsyncErrorBoundaryProps> = React.memo(({
   children,
   operationName,
   onError,
   loadingFallback,
   errorFallback,
 }) => {
+  const handleRetry = useCallback((retry: () => void) => () => {
+    retry();
+  }, []);
+
+  const handleReload = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const handleRetryKeyDown = useCallback((retry: () => void) => (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      retry();
+    }
+  }, []);
+
+  const handleReloadKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      window.location.reload();
+    }
+  }, []);
+
   const fallback =
     errorFallback ??
     ((error: Error, _info: BoundaryErrorInfo, retry: () => void) => (
@@ -123,13 +151,17 @@ export const AsyncErrorBoundary: React.FC<AsyncErrorBoundaryProps> = ({
         </p>
         <div className='flex justify-center gap-2 mt-3'>
           <button
-            onClick={retry}
+            onClick={handleRetry(retry)}
+            onKeyDown={handleRetryKeyDown(retry)}
             className='px-3 py-1 bg-cosmic-purple text-white text-xs rounded hover:bg-cosmic-purple/80'
+            aria-label="Retry loading operation"
           >
             Retry
           </button>
           <button
-            onClick={() => window.location.reload()}
+            onClick={handleReload}
+            onKeyDown={handleReloadKeyDown}
+            aria-label="Reload page"
             className='px-3 py-1 border border-cosmic-silver/30 text-cosmic-silver text-xs rounded hover:bg-cosmic-silver/10'
           >
             Reload
@@ -161,7 +193,9 @@ export const AsyncErrorBoundary: React.FC<AsyncErrorBoundaryProps> = ({
       {children}
     </ErrorBoundary>
   );
-};
+});
+
+AsyncErrorBoundary.displayName = 'AsyncErrorBoundary';
 
 /** Form boundary */
 export interface FormErrorBoundaryProps {
@@ -170,11 +204,33 @@ export interface FormErrorBoundaryProps {
   onError?: (error: Error, info: BoundaryErrorInfo) => void;
 }
 
-export const FormErrorBoundary: React.FC<FormErrorBoundaryProps> = ({
+export const FormErrorBoundary: React.FC<FormErrorBoundaryProps> = React.memo(({
   children,
   formName,
   onError,
 }) => {
+  const handleRetry = useCallback((retry: () => void) => () => {
+    retry();
+  }, []);
+
+  const handleReload = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const handleRetryKeyDown = useCallback((retry: () => void) => (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      retry();
+    }
+  }, []);
+
+  const handleReloadKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      window.location.reload();
+    }
+  }, []);
+
   const fallback = (
     error: Error,
     _info: BoundaryErrorInfo,
@@ -188,13 +244,17 @@ export const FormErrorBoundary: React.FC<FormErrorBoundaryProps> = ({
       </p>
       <div className='flex gap-2'>
         <button
-          onClick={retry}
+          onClick={handleRetry(retry)}
+          onKeyDown={handleRetryKeyDown(retry)}
           className='px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600'
+          aria-label="Retry form submission"
         >
           Retry
         </button>
         <button
-          onClick={() => window.location.reload()}
+          onClick={handleReload}
+          onKeyDown={handleReloadKeyDown}
+          aria-label="Refresh page"
           className='px-3 py-1 border border-red-500 text-red-400 text-sm rounded hover:bg-red-500/10'
         >
           Refresh
@@ -218,7 +278,9 @@ export const FormErrorBoundary: React.FC<FormErrorBoundaryProps> = ({
       {children}
     </ErrorBoundary>
   );
-};
+});
+
+FormErrorBoundary.displayName = 'FormErrorBoundary';
 
 /** Chart / visualization boundary */
 export interface ChartErrorBoundaryProps {
@@ -227,11 +289,18 @@ export interface ChartErrorBoundaryProps {
   onError?: (error: Error, info: BoundaryErrorInfo) => void;
 }
 
-export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = ({
+export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = React.memo(({
   children,
   chartType,
   onError,
 }) => {
+  const handleReloadKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      window.location.reload();
+    }
+  }, []);
+
   const fallback = (
     error: Error,
     _info: BoundaryErrorInfo,
@@ -251,6 +320,8 @@ export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = ({
           </p>
           <button
             onClick={() => window.location.reload()}
+            onKeyDown={handleReloadKeyDown}
+            aria-label="Reload Application"
             className='px-4 py-2 bg-cosmic-blue text-white text-sm rounded hover:bg-cosmic-blue/80'
           >
             Reload App
@@ -269,11 +340,11 @@ export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = ({
           <button
             onClick={retry}
             className='px-4 py-2 bg-cosmic-purple text-white text-sm rounded hover:bg-cosmic-purple/80'
-          >
+           aria-label="Button">
             Try Again
           </button>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => window.location.reload()} aria-label="Button"
             className='px-4 py-2 border border-cosmic-silver/30 text-cosmic-silver text-sm rounded hover:bg-cosmic-silver/10'
           >
             Reload
@@ -300,7 +371,9 @@ export const ChartErrorBoundary: React.FC<ChartErrorBoundaryProps> = ({
       {children}
     </ErrorBoundary>
   );
-};
+});
+
+ChartErrorBoundary.displayName = 'ChartErrorBoundary';
 
 /** Lazy-loaded components boundary */
 export interface LazyErrorBoundaryProps {
@@ -334,7 +407,7 @@ export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({
             after an app update.
           </p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => window.location.reload()} aria-label="Button"
             className='px-4 py-2 bg-cosmic-blue text-white text-sm rounded hover:bg-cosmic-blue/80'
           >
             Reload App
@@ -353,11 +426,11 @@ export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({
           <button
             onClick={retry}
             className='px-4 py-2 bg-cosmic-purple text-white text-sm rounded hover:bg-cosmic-purple/80'
-          >
+           aria-label="Button">
             Try Again
           </button>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => window.location.reload()} aria-label="Button"
             className='px-4 py-2 border border-cosmic-silver/30 text-cosmic-silver text-sm rounded hover:bg-cosmic-silver/10'
           >
             Reload
@@ -421,7 +494,8 @@ export function withErrorBoundary<T extends object>(
   return Wrapped;
 }
 
-export default {
+// Component collection for easy importing
+const ErrorBoundaries = {
   PageErrorBoundary,
   SectionErrorBoundary,
   ComponentErrorBoundary,
@@ -431,3 +505,6 @@ export default {
   LazyErrorBoundary,
   withErrorBoundary,
 };
+
+// Export default for easy importing
+export default ErrorBoundaries;

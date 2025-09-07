@@ -106,7 +106,7 @@ class SpiritualAIEnhanced:
         """
         try:
             # Step 1: Map planets to Sephirot (vectorized lookup)
-            sephirot_map = {}
+            sephirot_map: Dict[str, float] = {}
             if 'planets' in birth_data:
                 for planet_data in birth_data['planets']:
                     planet_name = planet_data.get('name', '').lower()
@@ -444,7 +444,7 @@ class SpiritualAIEnhanced:
     
     def _identify_recurring_themes(self, history: List[Dict[str, Any]]) -> List[str]:
         """Identify recurring spiritual themes in user history"""
-        theme_counts = {}
+        theme_counts: Dict[str, int] = {}
         for entry in history:
             themes = entry.get('themes', [])
             for theme in themes:

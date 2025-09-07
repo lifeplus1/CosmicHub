@@ -5,7 +5,7 @@ import axios, { type AxiosError } from 'axios';
 import { apiConfig } from '../config/environment';
 import { useAuth } from '@cosmichub/auth';
 
-export default function SaveChart(): React.ReactNode {
+const SaveChart: React.FC = () => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     year: '',
@@ -213,6 +213,7 @@ export default function SaveChart(): React.ReactNode {
           type='submit'
           className='w-full cosmic-button'
           disabled={!isFormValid()}
+          aria-label="Save chart"
         >
           Save Chart
         </button>
@@ -221,3 +222,8 @@ export default function SaveChart(): React.ReactNode {
     </div>
   );
 }
+
+// Memoize for performance
+const MemoizedSaveChart = React.memo(SaveChart);
+MemoizedSaveChart.displayName = 'SaveChart';
+export default MemoizedSaveChart;

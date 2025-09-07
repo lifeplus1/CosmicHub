@@ -3,7 +3,7 @@
  * Demonstrates compound components, polymorphism, performance tracking, and accessibility
  */
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import {
   createCompoundComponent,
   createPolymorphicComponent,
@@ -50,7 +50,7 @@ const BaseCard = forwardRef<HTMLDivElement, CardProps>(
   ) => {
     const context = useComponentContext();
 
-    const cardClasses = [
+    const cardClasses = useMemo(() => [
       'card',
       `card--${variant}`,
       `card--${size}`,
@@ -61,7 +61,7 @@ const BaseCard = forwardRef<HTMLDivElement, CardProps>(
       className,
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(' '), [variant, size, context.theme, clickable, disabled, loading, className]);
 
     return disabled ? (
       <PolymorphicCard
@@ -126,7 +126,7 @@ interface CardHeaderProps {
   className?: string;
 }
 
-export const CardHeader: React.FC<CardHeaderProps> = ({
+export const CardHeader: React.FC<CardHeaderProps> = React.memo(({
   title,
   subtitle,
   actions,
@@ -157,7 +157,9 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
       )}
     </div>
   );
-};
+});
+
+CardHeader.displayName = 'CardHeader';
 
 // Enhanced card body with content management
 interface CardBodyProps {
@@ -168,14 +170,14 @@ interface CardBodyProps {
   className?: string;
 }
 
-export const CardBody: React.FC<CardBodyProps> = ({
+export const CardBody: React.FC<CardBodyProps> = React.memo(({
   scrollable = false,
   maxHeight,
   padding = 'medium',
   children,
   className = '',
 }) => {
-  const bodyClasses = [
+  const bodyClasses = useMemo(() => [
     'card__body',
     `card__body--padding-${padding}`,
     scrollable && 'card__body--scrollable',
@@ -184,12 +186,12 @@ export const CardBody: React.FC<CardBodyProps> = ({
     className,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(' '), [scrollable, padding, maxHeight, className]);
 
-  const bodyStyle =
+  const bodyStyle = useMemo(() =>
     maxHeight !== null && maxHeight !== undefined
       ? ({ '--card-body-max-height': maxHeight } as React.CSSProperties)
-      : undefined;
+      : undefined, [maxHeight]);
 
   return (
     <div
@@ -200,7 +202,9 @@ export const CardBody: React.FC<CardBodyProps> = ({
       {children}
     </div>
   );
-};
+});
+
+CardBody.displayName = 'CardBody';
 
 // Card footer with action management
 export interface CardFooterProps {
@@ -209,25 +213,27 @@ export interface CardFooterProps {
   className?: string;
 }
 
-export const CardFooter: React.FC<CardFooterProps> = ({
+export const CardFooter: React.FC<CardFooterProps> = React.memo(({
   align = 'end',
   children,
   className,
 }) => {
-  const footerClasses = [
+  const footerClasses = useMemo(() => [
     'card__footer',
     `card__footer--align-${align}`,
     className,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(' '), [align, className]);
 
   return (
     <div className={footerClasses} data-testid='card-footer'>
       {children}
     </div>
   );
-};
+});
+
+CardFooter.displayName = 'CardFooter';
 
 // Assign compound components
 Card.Header = CardHeader;
@@ -235,14 +241,15 @@ Card.Body = CardBody;
 Card.Footer = CardFooter;
 
 // Enhanced card variants
-export const InteractiveCard = forwardRef<
+// Enhanced card variants
+export const InteractiveCard = React.memo(forwardRef<
   HTMLButtonElement,
   CardProps & {
     onClick?: () => void;
     onKeyDown?: (event: React.KeyboardEvent) => void;
   }
 >(({ onClick, onKeyDown, 'aria-label': ariaLabel, disabled, 'data-testid': testId, ...props }, ref) => {
-  const handleKeyDown = (event: React.KeyboardEvent): void => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent): void => {
     if (disabled) return;
     
     if (event.key === 'Enter' || event.key === ' ') {
@@ -250,12 +257,12 @@ export const InteractiveCard = forwardRef<
       onClick?.();
     }
     onKeyDown?.(event);
-  };
+  }, [disabled, onClick, onKeyDown]);
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (disabled) return;
     onClick?.();
-  };
+  }, [disabled, onClick]);
 
   return (
     <button
@@ -274,7 +281,9 @@ export const InteractiveCard = forwardRef<
       />
     </button>
   );
-});
+}));
+
+InteractiveCard.displayName = 'InteractiveCard';
 
 InteractiveCard.displayName = 'InteractiveCard';
 
@@ -300,13 +309,27 @@ export interface ErrorCardProps extends Omit<CardProps, 'variant'> {
   retryText?: string;
 }
 
-export const ErrorCard: React.FC<ErrorCardProps> = ({
+export const ErrorCard: React.FC<ErrorCardProps> = React.memo(({
   error,
   onRetry,
   retryText = 'Try Again',
   ...props
 }) => {
-  const errorMessage = typeof error === 'string' ? error : error.message;
+  const errorMessage = useMemo(() => 
+    typeof error === 'string' ? error : error.message,
+    [error]
+  );
+
+  const handleRetry = useCallback(() => {
+    onRetry?.();
+  }, [onRetry]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleRetry();
+    }
+  }, [handleRetry]);
 
   return (
     <Card {...props} variant='outlined'>
@@ -322,9 +345,11 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
         <Card.Footer>
           <button
             type='button'
-            onClick={onRetry}
+            onClick={handleRetry}
+            onKeyDown={handleKeyDown}
             className='retry-button'
             data-testid='error-retry-button'
+            aria-label="Retry failed operation"
           >
             {retryText}
           </button>
@@ -332,7 +357,9 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
       )}
     </Card>
   );
-};
+});
+
+ErrorCard.displayName = 'ErrorCard';
 
 // Chart card with lazy loading
 export interface ChartCardProps extends CardProps {
@@ -342,7 +369,7 @@ export interface ChartCardProps extends CardProps {
   description?: string;
 }
 
-export const ChartCard: React.FC<ChartCardProps> = ({
+export const ChartCard: React.FC<ChartCardProps> = React.memo(({
   chartType,
   data,
   title,
@@ -354,40 +381,53 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
 
+  const loadChart = useCallback(async (): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let module: { LazyAstrologyChart: unknown };
+      switch (chartType) {
+        case 'astrology':
+          module = await import('../lazy-components');
+          break;
+        default:
+          // Fallback chart component
+          module = {
+            LazyAstrologyChart: (): React.ReactElement => (
+              <div>Chart placeholder</div>
+            ),
+          };
+      }
+
+      const comp = module.LazyAstrologyChart;
+      if (
+        typeof comp === 'function' ||
+        (typeof comp === 'object' && comp !== null)
+      ) {
+        setChartComponent(
+          () => comp as React.ComponentType<{ data: unknown[] }>
+        );
+      }
+      setLoading(false);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err : new Error('Failed to load chart')
+      );
+      setLoading(false);
+    }
+  }, [chartType]);
+
+  const handleRetry = useCallback((): void => {
+    window.location.reload();
+  }, []);
+
   React.useEffect(() => {
     let isMounted = true;
 
-    const loadChart = async (): Promise<void> => {
+    const loadChartSafe = async (): Promise<void> => {
       try {
-        setLoading(true);
-        setError(null);
-
-        let module: { LazyAstrologyChart: unknown };
-        switch (chartType) {
-          case 'astrology':
-            module = await import('../lazy-components');
-            break;
-          default:
-            // Fallback chart component
-            module = {
-              LazyAstrologyChart: (): React.ReactElement => (
-                <div>Chart placeholder</div>
-              ),
-            };
-        }
-
-        if (isMounted === true) {
-          const comp = module.LazyAstrologyChart;
-          if (
-            typeof comp === 'function' ||
-            (typeof comp === 'object' && comp !== null)
-          ) {
-            setChartComponent(
-              () => comp as React.ComponentType<{ data: unknown[] }>
-            );
-          }
-          setLoading(false);
-        }
+        await loadChart();
       } catch (err: unknown) {
         if (isMounted === true) {
           setError(
@@ -398,12 +438,12 @@ export const ChartCard: React.FC<ChartCardProps> = ({
       }
     };
 
-    void loadChart();
+    void loadChartSafe();
 
     return (): void => {
       isMounted = false;
     };
-  }, [chartType]);
+  }, [loadChart]);
 
   if (loading === true) {
     return (
@@ -416,9 +456,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
       <ErrorCard
         {...props}
         error={error}
-        onRetry={(): void => {
-          window.location.reload();
-        }}
+        onRetry={handleRetry}
       />
     );
   }
@@ -436,7 +474,9 @@ export const ChartCard: React.FC<ChartCardProps> = ({
       </Card.Body>
     </Card>
   );
-};
+});
+
+ChartCard.displayName = 'ChartCard';
 
 // Export all card components
 export default Card;

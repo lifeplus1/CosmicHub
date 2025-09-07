@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FaEnvelope, FaCheck, FaSpinner } from 'react-icons/fa';
 import { EducationalTooltip } from './EducationalTooltip';
 
@@ -7,7 +7,7 @@ interface BlogSubscriptionProps {
   className?: string;
 }
 
-const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
+const BlogSubscription: React.FC<BlogSubscriptionProps> = React.memo(({
   variant = 'inline',
   className = '',
 }) => {
@@ -15,9 +15,13 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
   const [status, setStatus] = useState<
     'idle' | 'loading' | 'success' | 'error'
   >('idle');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState<string>('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  }, []);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email?.includes('@')) {
@@ -55,7 +59,7 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
         setMessage('');
       }, 3000);
     }
-  };
+  }, [email]);
 
   const baseClasses = `relative ${className}`;
 
@@ -83,38 +87,43 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
           </div>
         ) : (
           <form
-            onSubmit={e => {
-              void handleSubmit(e);
-            }}
+            onSubmit={(e) => void handleSubmit(e)}
             className='space-y-3'
+            aria-label='Newsletter subscription'
           >
             <input
               type='email'
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               placeholder='your@email.com'
               className='w-full px-3 py-2 bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg text-cosmic-silver text-sm placeholder-cosmic-silver/60 focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50 focus:border-cosmic-purple/50'
               disabled={status === 'loading'}
+              aria-label='Email address'
+              aria-required='true'
+              aria-describedby={status === 'error' ? 'error-message-sidebar' : undefined}
             />
             <button
               type='submit'
-              disabled={status === 'loading'}
+              disabled={status === 'loading' || !email}
               className='w-full px-4 py-2 bg-gradient-to-r from-cosmic-gold to-cosmic-purple text-cosmic-dark rounded-lg font-semibold text-sm hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2'
+              aria-label='Subscribe to newsletter'
             >
               {status === 'loading' ? (
                 <>
-                  <FaSpinner className='animate-spin' />
+                  <FaSpinner className='animate-spin' aria-hidden='true' />
                   Subscribing...
                 </>
               ) : (
                 <>
-                  <FaEnvelope />
+                  <FaEnvelope aria-hidden='true' />
                   Subscribe
                 </>
               )}
             </button>
             {message && status === 'error' && (
-              <p className='text-red-400 text-xs text-center'>{message}</p>
+              <p id='error-message-sidebar' className='text-red-400 text-xs text-center' role='alert' aria-live='polite'>
+                {message}
+              </p>
             )}
           </form>
         )}
@@ -145,38 +154,43 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
           </div>
         ) : (
           <form
-            onSubmit={e => {
-              void handleSubmit(e);
-            }}
+            onSubmit={(e) => void handleSubmit(e)}
             className='space-y-4'
+            aria-label='Newsletter subscription'
           >
             <input
               type='email'
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               placeholder='Enter your email address'
               className='w-full px-4 py-3 bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg text-cosmic-silver placeholder-cosmic-silver/60 focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50 focus:border-cosmic-purple/50'
               disabled={status === 'loading'}
+              aria-label='Email address'
+              aria-required='true'
+              aria-describedby={status === 'error' ? 'error-message-modal' : undefined}
             />
             <button
               type='submit'
-              disabled={status === 'loading'}
+              disabled={status === 'loading' || !email}
               className='w-full px-6 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple text-cosmic-dark rounded-lg font-semibold hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2'
+              aria-label='Subscribe to newsletter'
             >
               {status === 'loading' ? (
                 <>
-                  <FaSpinner className='animate-spin' />
+                  <FaSpinner className='animate-spin' aria-hidden='true' />
                   Subscribing...
                 </>
               ) : (
                 <>
-                  <FaEnvelope />
+                  <FaEnvelope aria-hidden='true' />
                   Subscribe to Newsletter
                 </>
               )}
             </button>
             {message && status === 'error' && (
-              <p className='text-red-400 text-sm text-center'>{message}</p>
+              <p id='error-message-modal' className='text-red-400 text-sm text-center' role='alert' aria-live='polite'>
+                {message}
+              </p>
             )}
             <p className='text-xs text-cosmic-silver/60 text-center'>
               No spam, unsubscribe anytime. We respect your cosmic privacy.
@@ -209,18 +223,20 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
           </div>
         ) : (
           <form
-            onSubmit={e => {
-              void handleSubmit(e);
-            }}
+            onSubmit={(e) => void handleSubmit(e)}
             className='flex flex-col sm:flex-row gap-4 max-w-md mx-auto'
+            aria-label='Newsletter subscription'
           >
             <input
               type='email'
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               placeholder='Enter your email address'
               className='flex-1 px-4 py-3 bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg text-cosmic-silver placeholder-cosmic-silver/60 focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50 focus:border-cosmic-purple/50'
               disabled={status === 'loading'}
+              aria-label='Email address'
+              aria-required='true'
+              aria-describedby={status === 'error' ? 'error-message-inline' : undefined}
             />
             <EducationalTooltip
               title='Newsletter Benefits'
@@ -228,17 +244,18 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
             >
               <button
                 type='submit'
-                disabled={status === 'loading'}
+                disabled={status === 'loading' || !email}
                 className='px-8 py-3 bg-gradient-to-r from-cosmic-gold to-cosmic-purple text-cosmic-dark rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 whitespace-nowrap'
+                aria-label='Subscribe to newsletter'
               >
                 {status === 'loading' ? (
                   <>
-                    <FaSpinner className='animate-spin' />
+                    <FaSpinner className='animate-spin' aria-hidden='true' />
                     <span className='hidden sm:inline'>Subscribing...</span>
                   </>
                 ) : (
                   <>
-                    <FaEnvelope />
+                    <FaEnvelope aria-hidden='true' />
                     Subscribe
                   </>
                 )}
@@ -248,7 +265,9 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
         )}
 
         {message && status === 'error' && (
-          <p className='text-red-400 text-sm mt-3'>{message}</p>
+          <p id='error-message-inline' className='text-red-400 text-sm mt-3' role='alert' aria-live='polite'>
+            {message}
+          </p>
         )}
 
         <p className='text-xs text-cosmic-silver/60 mt-4'>
@@ -257,6 +276,8 @@ const BlogSubscription: React.FC<BlogSubscriptionProps> = ({
       </div>
     </div>
   );
-};
+});
+
+BlogSubscription.displayName = 'BlogSubscription';
 
 export default BlogSubscription;

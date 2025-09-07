@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { devConsole } from '../config/devConsole';
 
 import { AudioSettings, FrequencyPreset } from '@cosmichub/integrations';
-import PresetSelector from '../components/PresetSelector';
+import { PresetSelectorRefactored } from '../components/presets';
 
 const Presets: React.FC = () => {
   const [currentSettings] = useState<AudioSettings>({
@@ -24,7 +24,7 @@ const Presets: React.FC = () => {
   return (
     <div className='container mx-auto px-4 py-8'>
       <h1 className='text-3xl font-bold mb-8 text-center'>Frequency Presets</h1>
-      <PresetSelector
+      <PresetSelectorRefactored
         onSelectPreset={handleSelectPreset}
         currentSettings={currentSettings}
         currentPreset={currentPreset}

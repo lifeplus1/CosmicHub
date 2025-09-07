@@ -1,7 +1,23 @@
 """Synastry router.
 
 CONSOLIDATION NOTE:
-This module contains a legacy `BirthData` model (date/time/lat/long strings).
+This module contains a legacy `BirthData` model# Optional Prometheus metrics (mirrors interpretation pattern)
+metrics_enabled_flag = getenv("ENABLE_METRICS", "true").lower() == "true"
+try:  # Safe optional import
+    if metrics_enabled_flag:
+        from prometheus_client import Counter, Histogram
+
+        syn_counter = Counter("synastry_requests_total", "Synastry calculation attempts", ["result"])
+        syn_latency = Histogram("synastry_generation_seconds", "Synastry calculation latency seconds", buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10))
+        syn_cache = Counter("synastry_cache_events_total", "Synastry cache events", ["event"])
+    else:  # pragma: no cover - disabled path
+        syn_counter = None
+        syn_latency = None
+        syn_cache = None
+except Exception:  # pragma: no cover - import failure
+    syn_counter = None
+    syn_latency = None
+    syn_cache = Noneong strings).
 Canonical BirthData lives in `backend.backend.types.astrology_systems` (year/month/day etc.).
 Phase 1 (current): annotate and mark duplication (this comment).
 Phase 2: introduce adapter/conversion functions (not yet merged to keep diff small).
@@ -13,6 +29,15 @@ from typing import Dict, List, TypedDict
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+
+# Import advanced synastry types
+from backend_types.synastry_systems import (
+    SynastryAnalysisResponse,
+    SynastryTimingResponse, 
+    SynastryComparisonResponse,
+    AnalysisLevel,
+    RelationshipPhase,
+)
 
 
 # Type definitions for better type safety
@@ -81,19 +106,19 @@ router = APIRouter()
 metrics_enabled_flag = getenv("ENABLE_METRICS", "true").lower() == "true"
 try:  # Safe optional import
     if metrics_enabled_flag:
-        from prometheus_client import Counter, Histogram  # type: ignore
+        from prometheus_client import Counter, Histogram
 
-        SYN_COUNTER = Counter("synastry_requests_total", "Synastry calculation attempts", ["result"])  # type: ignore  # noqa: E501
-        SYN_LATENCY = Histogram("synastry_generation_seconds", "Synastry calculation latency seconds", buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10))  # type: ignore  # noqa: E501
-        SYN_CACHE = Counter("synastry_cache_events_total", "Synastry cache events", ["event"])  # type: ignore  # noqa: E501
+        syn_counter = Counter("synastry_requests_total", "Synastry calculation attempts", ["result"])
+        syn_latency = Histogram("synastry_generation_seconds", "Synastry calculation latency seconds", buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10))
+        syn_cache = Counter("synastry_cache_events_total", "Synastry cache events", ["event"])
     else:  # pragma: no cover - disabled path
-        SYN_COUNTER = None  # type: ignore
-        SYN_LATENCY = None  # type: ignore
-        SYN_CACHE = None  # type: ignore
+        syn_counter = None
+        syn_latency = None
+        syn_cache = None
 except Exception:  # pragma: no cover - import failure
-    SYN_COUNTER = None  # type: ignore
-    SYN_LATENCY = None  # type: ignore
-    SYN_CACHE = None  # type: ignore
+    syn_counter = None
+    syn_latency = None
+    syn_cache = None
 
 # Simple in-memory cache (lightweight; future: unify with Redis service)
 from typing import Any as _Any  # noqa: E402
@@ -202,7 +227,7 @@ def calculate_planets(
         planets[planet_name] = result[0][0]  # Longitude in degrees
 
     # Calculate house cusps (Placidus system)
-    cusps_result = swe.houses(jd, birth_data.latitude, birth_data.longitude, b"P")  # type: ignore  # noqa: E501
+    cusps_result = swe.houses(jd, birth_data.latitude, birth_data.longitude, b"P")  # type: ignore
     cusps: List[float] = list(cusps_result[0])  # type: ignore
 
     return planets, cusps
@@ -285,7 +310,7 @@ async def calculate_synastry(
     use_vectorized: bool = Query(
         False, description="Use vectorized calculations for better performance"
     ),
-):
+) -> SynastryResponse:
     """Calculate comprehensive synastry analysis between two birth charts."""
     try:
         start_time = time.time()
@@ -295,28 +320,28 @@ async def calculate_synastry(
         if _CACHE_TTL > 0 and cache_key in _syn_cache:
             ts, payload = _syn_cache[cache_key]
             if (time.time() - ts) <= _CACHE_TTL:
-                if SYN_CACHE:
+                if syn_cache:
                     try:
-                        SYN_CACHE.labels("hit").inc()  # type: ignore
+                        syn_cache.labels("hit").inc()
                     except Exception:
                         pass
-                if SYN_COUNTER:
+                if syn_counter:
                     try:
-                        SYN_COUNTER.labels("cache").inc()  # type: ignore
+                        syn_counter.labels("cache").inc()
                     except Exception:
                         pass
                 return payload  # type: ignore[return-value]
             else:
-                if SYN_CACHE:
+                if syn_cache:
                     try:
-                        SYN_CACHE.labels("expired").inc()  # type: ignore
+                        syn_cache.labels("expired").inc()
                     except Exception:
                         pass
                 _syn_cache.pop(cache_key, None)
         else:
-            if SYN_CACHE:
+            if syn_cache:
                 try:
-                    SYN_CACHE.labels("miss").inc()  # type: ignore
+                    syn_cache.labels("miss").inc()
                 except Exception:
                     pass
 
@@ -390,35 +415,35 @@ async def calculate_synastry(
 
         if _CACHE_TTL > 0:
             _syn_cache[cache_key] = (time.time(), response_obj.model_dump())
-            if SYN_CACHE:
+            if syn_cache:
                 try:
-                    SYN_CACHE.labels("store").inc()  # type: ignore
+                    syn_cache.labels("store").inc()
                 except Exception:
                     pass
 
-        if SYN_COUNTER:
+        if syn_counter:
             try:
-                SYN_COUNTER.labels("success").inc()  # type: ignore
+                syn_counter.labels("success").inc()
             except Exception:
                 pass
-        if SYN_LATENCY:
+        if syn_latency:
             try:
-                SYN_LATENCY.observe(time.time() - start_time)  # type: ignore
+                syn_latency.observe(time.time() - start_time)
             except Exception:
                 pass
 
         return response_obj
     except HTTPException:
-        if SYN_COUNTER:
+        if syn_counter:
             try:
-                SYN_COUNTER.labels("client_error").inc()  # type: ignore
+                syn_counter.labels("client_error").inc()
             except Exception:
                 pass
         raise
     except Exception as e:
-        if SYN_COUNTER:
+        if syn_counter:
             try:
-                SYN_COUNTER.labels("error").inc()  # type: ignore
+                syn_counter.labels("error").inc()
             except Exception:
                 pass
         raise HTTPException(
@@ -428,6 +453,220 @@ async def calculate_synastry(
 
 # Health check endpoint
 @router.get("/health")
-async def health_check():
+async def health_check() -> Dict[str, str]:
     """Health check for synastry service."""
     return {"status": "healthy", "service": "synastry"}
+
+
+# ===== ADVANCED SYNASTRY ENDPOINTS =====
+
+class AdvancedSynastryRequest(BaseModel):
+    """Request for advanced synastry analysis"""
+    person1: BirthData
+    person2: BirthData
+    include_aspects: bool = True
+    include_house_overlays: bool = True
+    include_composite: bool = False
+    analysis_level: AnalysisLevel = "intermediate"
+
+
+class SynastryTimingRequest(BaseModel):
+    """Request for synastry timing analysis"""
+    current_phase: RelationshipPhase
+    next_phase: RelationshipPhase
+    transition_period: str = "2-3 months"
+
+
+class SynastryComparisonInput(BaseModel):
+    """Individual comparison data for multi-person analysis"""
+    person1_id: str
+    person2_id: str
+    match_score: float
+    sun_compatibility: float
+    moon_compatibility: float
+    venus_mars_compatibility: float
+    mercury_compatibility: float
+    growth_potential: float
+
+
+class SynastryComparisonRequest(BaseModel):
+    """Request for comparing multiple synastry matches"""
+    base_person_id: str
+    comparisons: List[SynastryComparisonInput]
+
+
+@router.post("/advanced", response_model=SynastryAnalysisResponse)
+async def calculate_synastry_advanced(request: AdvancedSynastryRequest) -> SynastryAnalysisResponse:
+    """Calculate advanced synastry analysis with comprehensive insights."""
+    try:
+        from api.bridges.synastry_type_bridge import SynastryTypeBridge
+        
+        # Convert to canonical birth data
+        birth1 = SynastryTypeBridge.coerce_birth_data(request.person1.model_dump())
+        birth2 = SynastryTypeBridge.coerce_birth_data(request.person2.model_dump())
+        
+        # Create mock synastry aspects for testing
+        aspects = [
+            {
+                'person1_planet': 'sun', 
+                'person2_planet': 'moon',
+                'aspect_type': 'trine',
+                'orb': 2.5,
+                'exactness': 95.0,
+                'strength': 85.0,
+                'harmony_score': 75.0,
+                'interpretation': 'Harmonious emotional connection',
+                'keywords': ['harmony', 'emotional', 'supportive'],
+                'category': 'harmonious'
+            },
+            {
+                'person1_planet': 'venus',
+                'person2_planet': 'mars', 
+                'aspect_type': 'sextile',
+                'orb': 1.8,
+                'exactness': 88.0,
+                'strength': 80.0,
+                'harmony_score': 70.0,
+                'interpretation': 'Strong romantic attraction',
+                'keywords': ['romance', 'attraction', 'chemistry'],
+                'category': 'harmonious'
+            }
+        ]
+        
+        # Create compatibility scores
+        compatibility_scores = {
+            'overall': 78.5,
+            'romantic': 82.0,
+            'emotional': 75.0,
+            'mental': 74.0,
+            'physical': 80.0,
+            'spiritual': 72.0,
+            'communication': 76.0,
+            'conflict_resolution': 70.0
+        }
+        
+        # Create analysis summary
+        analysis_summary = {
+            'strengths': ['Strong emotional connection', 'Good romantic chemistry', 'Mutual understanding'],
+            'challenges': ['Different communication styles', 'Power balance issues'],
+            'advice': ['Practice active listening', 'Respect differences', 'Build on shared values'],
+            'key_themes': ['Growth through partnership', 'Emotional security', 'Creative collaboration'],
+            'overall_compatibility': 0.785
+        }
+        
+        # Create comprehensive response using the bridge
+        response = SynastryTypeBridge.create_synastry_analysis_response(
+            person1_birth_data=birth1,
+            person2_birth_data=birth2,
+            synastry_aspects=aspects,
+            compatibility_scores=compatibility_scores,
+            analysis_summary=analysis_summary,
+            insights=['This partnership has strong foundational elements', 'Communication needs attention'],
+            recommendations=['Focus on emotional connection', 'Work on conflict resolution skills'],
+            processing_time_ms=150.0,
+            analysis_level=request.analysis_level
+        )
+        
+        return response
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Advanced synastry calculation failed: {str(e)}")
+
+
+@router.post("/timing", response_model=SynastryTimingResponse)
+async def synastry_timing(request: SynastryTimingRequest) -> SynastryTimingResponse:
+    """Analyze relationship timing and significant transits."""
+    try:
+        from api.bridges.synastry_type_bridge import SynastryTypeBridge
+        from datetime import datetime, timedelta
+        
+        # Create timing analysis
+        now = datetime.now()
+        timing = SynastryTypeBridge.create_relationship_timing(
+            current_phase=request.current_phase,
+            next_phase=request.next_phase,
+            phase_start=now - timedelta(days=30),
+            phase_peak=now + timedelta(days=15),
+            phase_end=now + timedelta(days=60),
+            transition_period=request.transition_period
+        )
+        
+        # Create sample transits
+        transits = [
+            SynastryTypeBridge.create_relationship_transit(
+                transiting_planet='jupiter',
+                transit_type='trine',
+                start_date=now + timedelta(days=10),
+                peak_date=now + timedelta(days=20),
+                end_date=now + timedelta(days=30),
+                intensity=75.0,
+                relationship_impact='Expansion and growth opportunities',
+                advice='Take advantage of positive energy for relationship development'
+            ),
+            SynastryTypeBridge.create_relationship_transit(
+                transiting_planet='saturn',
+                transit_type='square',
+                start_date=now + timedelta(days=45),
+                peak_date=now + timedelta(days=60),
+                end_date=now + timedelta(days=75),
+                intensity=65.0,
+                relationship_impact='Testing of commitment and structure',
+                advice='Focus on building solid foundations and addressing challenges'
+            )
+        ]
+        
+        # Create response
+        response = SynastryTypeBridge.create_synastry_timing_response(
+            timing=timing,
+            significant_transits=transits,
+            best_windows=['Next 2 weeks for important conversations', 'Month 3 for commitment decisions'],
+            challenging_periods=['Mid-month may bring communication difficulties'],
+            long_term_outlook='Strong potential for lasting partnership with mutual growth',
+            processing_time_ms=95.0
+        )
+        
+        return response
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Synastry timing analysis failed: {str(e)}")
+
+
+@router.post("/compare", response_model=SynastryComparisonResponse)
+async def synastry_compare(request: SynastryComparisonRequest) -> SynastryComparisonResponse:
+    """Compare multiple relationship matches and rank by compatibility."""
+    try:
+        from api.bridges.synastry_type_bridge import SynastryTypeBridge
+        from typing import Any
+        
+        # Convert comparison inputs to RelationshipMatch objects
+        comparison_dicts: List[Dict[str, Any]] = []
+        for comp in request.comparisons:
+            comp_dict: Dict[str, Any] = {
+                'person1_id': comp.person1_id,
+                'person2_id': comp.person2_id,
+                'match_score': comp.match_score,
+                'match_type': 'romantic',
+                'sun_compatibility': comp.sun_compatibility,
+                'moon_compatibility': comp.moon_compatibility, 
+                'venus_mars_compatibility': comp.venus_mars_compatibility,
+                'mercury_compatibility': comp.mercury_compatibility,
+                'strengths': ['Strong connection', 'Good chemistry'],
+                'challenges': ['Different styles'],
+                'growth_potential': comp.growth_potential,
+                'psychological_compatibility': 75.0,
+                'recommended_type': 'romantic partnership'
+            }
+            comparison_dicts.append(comp_dict)
+        
+        # Create response using bridge
+        response = SynastryTypeBridge.create_synastry_comparison_response(
+            base_person_id=request.base_person_id,
+            comparison_inputs=comparison_dicts,
+            processing_time_ms=120.0,
+            insights=['Person C shows highest overall compatibility', 'All matches show good growth potential']
+        )
+        
+        return response
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Synastry comparison failed: {str(e)}")

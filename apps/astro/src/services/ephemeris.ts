@@ -171,7 +171,7 @@ export const useBatchPlanetaryCalculation = (): UseMutationResult<
       return client.batchCalculate(calculations);
     },
     onSuccess: (data, variables) => {
-      data.results.forEach((result, index) => {
+      data.results.forEach((result: CalculationResponse, index: number) => {
         const request = variables[index];
         if (request !== null && request !== undefined) {
           const julianDay = dateToJulianDay(request.date);
@@ -222,7 +222,7 @@ export const usePrefetchPlanetaryPositions = (): {
           return queryClient.prefetchQuery({
             queryKey: ephemerisKeys.allPositions(julianDay),
             queryFn: async () => {
-              const calculations = SUPPORTED_PLANETS.map(planet => ({
+              const calculations = SUPPORTED_PLANETS.map((planet: PlanetName) => ({
                 julian_day: julianDay,
                 planet,
               }));

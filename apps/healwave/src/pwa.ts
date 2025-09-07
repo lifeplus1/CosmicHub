@@ -179,6 +179,11 @@ const createLogger = (enabled: boolean): StructuredLogger => {
 
 const log = createLogger(import.meta.env.DEV);
 
+// Detect test mode to avoid auto-init that can leave open timers/listeners
+const IS_TEST = Boolean((import.meta as unknown as { vitest?: unknown }).vitest) ??
+  (typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: { MODE?: string } }).env?.MODE === 'test') ??
+  (typeof process !== 'undefined' && typeof process.env !== 'undefined' && (process.env.VITEST ?? process.env.NODE_ENV === 'test'));
+
 // -----------------------------
 // SSR Guards
 // -----------------------------
@@ -228,11 +233,12 @@ async function registerServiceWorker(
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     // Optionally show an updating banner or trigger a reload after short delay
     log.info('sw_controllerchange');
-    setTimeout(() => {
+  const id = window.setTimeout(() => {
       if (document.visibilityState === 'visible') {
         window.location.reload();
       }
-    }, 500);
+  }, 500);
+  disposers.push(() => clearTimeout(id));
   });
   // schedule update checks only when page visible
   const scheduleUpdateCheck = () => {
@@ -348,13 +354,15 @@ function initializePWAFeatures(disposers: Array<() => void>): void {
     window.removeEventListener('beforeinstallprompt', beforeInstall)
   );
 
-  window.addEventListener('appinstalled', () => {
+  const onAppInstalled = () => {
     log.info('pwa_installed');
     hideInstallPrompt();
     deferredPrompt = null;
-  });
+  };
+  window.addEventListener('appinstalled', onAppInstalled);
+  disposers.push(() => window.removeEventListener('appinstalled', onAppInstalled));
 
-  window.addEventListener('install-app', () => {
+  const onInstallApp = () => {
     if (caps.platform === 'ios') {
       showIOSInstallInstructions();
       hideInstallPrompt();
@@ -370,11 +378,14 @@ function initializePWAFeatures(disposers: Array<() => void>): void {
         deferredPrompt = null;
       }
     })();
-  });
+  };
+  window.addEventListener('install-app', onInstallApp);
+  disposers.push(() => window.removeEventListener('install-app', onInstallApp));
 
   // Fallback for iOS (no beforeinstallprompt)
   if (caps.platform === 'ios' && !caps.isStandalone) {
-    setTimeout(() => presentInstall(), 1500);
+  const iosTimeout = window.setTimeout(() => presentInstall(), 1500);
+  disposers.push(() => clearTimeout(iosTimeout));
   }
 }
 
@@ -525,7 +536,7 @@ export { initPWA, sharedRegisterSW as registerServiceWorker };
 
 // Auto init (still side-effect import behavior) but allow opting out by setting global flag before import
 const globalAny = globalThis as Record<string, unknown>;
-if (!globalAny.HEALWAVE_PWA_MANUAL_INIT) {
+if (!globalAny.HEALWAVE_PWA_MANUAL_INIT && !IS_TEST) {
   initPWA();
 }
 

@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException, Query, Path
 
 # Import centralized TCM types
-from ...types.tcm_systems import (
+from backend_types.tcm_systems import (
     TCMRequest,
     TCMAnalysisResponse,
     ElementalBalanceResponse,
@@ -22,11 +22,22 @@ from ...types.tcm_systems import (
 
 # Import TCM calculation engine
 try:
-    from astro.calculations.tcm_engine import calculate_tcm_constitution, tcm_engine
+    from astro.calculations.tcm_engine import calculate_tcm_constitution
+    # Import the engine with a specific alias to avoid type conflicts
+    try:
+        from astro.calculations.tcm_engine import SimplifiedTCMEngine as _tcm_engine_class
+        tcm_engine = _tcm_engine_class()
+    except ImportError:
+        tcm_engine = None
 except ImportError as e:
     # Fallback to tcm_calculations
     try:
-        from astro.calculations.tcm_calculations import calculate_tcm_constitution, tcm_engine
+        from astro.calculations.tcm_calculations import calculate_tcm_constitution
+        try:
+            from astro.calculations.tcm_calculations import TCMCalculationEngine as _tcm_engine_class
+            tcm_engine = _tcm_engine_class()
+        except ImportError:
+            tcm_engine = None
     except ImportError:
         logging.error(f"Failed to import TCM engine: {e}")
         # Graceful fallback for development
@@ -77,16 +88,16 @@ async def calculate_tcm_analysis(request: TCMRequest) -> TCMAnalysisResponse:
         start_time = datetime.now()
         logger.info(f"Calculating TCM analysis for {request.year}-{request.month}-{request.day}")
         
-        # Calculate TCM constitutional analysis
+        # Calculate TCM constitutional analysis with proper default values
         tcm_data = calculate_tcm_constitution(
             request.year,
             request.month,
             request.day,
-            request.hour,
-            request.minute,
-            request.lat,
-            request.lon,
-            request.timezone,
+            request.hour or 12,  # Default to noon if None
+            request.minute or 0,  # Default to 0 minutes if None
+            request.lat or 0.0,  # Default to 0.0 if None
+            request.lon or 0.0,  # Default to 0.0 if None
+            request.timezone or "UTC",  # Default to UTC if None
             request.user_id
         )
         
@@ -98,7 +109,7 @@ async def calculate_tcm_analysis(request: TCMRequest) -> TCMAnalysisResponse:
         processing_time = (datetime.now() - start_time).total_seconds() * 1000
         
         # Create direct response (simplified for now)
-        from ...types.tcm_systems import TCMCalculationData, ConstitutionAnalysis
+        from backend_types.tcm_systems import TCMCalculationData, ConstitutionAnalysis
         
         # Extract basic data from engine result
         elemental_balance = tcm_data.get("elemental_balance", {})
@@ -127,7 +138,7 @@ async def calculate_tcm_analysis(request: TCMRequest) -> TCMAnalysisResponse:
             calculation_method="traditional",
             processing_time_ms=processing_time,
             includes_detailed_analysis=request.include_detailed_analysis or False,
-            user_id=request.user_id
+            generated_at=datetime.now().isoformat()
         )
         
     except HTTPException:
@@ -162,12 +173,17 @@ async def calculate_elemental_balance_only(
             elemental_balance = {"wood": 0.2, "fire": 0.2, "earth": 0.2, "metal": 0.2, "water": 0.2}
         
         # Create elemental balance response directly
+        primary_element = max(elemental_balance.items(), key=lambda x: x[1])[0] if elemental_balance else "earth"
+        element_strength = max(elemental_balance.values()) if elemental_balance else 20.0
+        
         balance_response = ElementalBalanceResponse(
-            wood=elemental_balance.get("wood", 20.0),
-            fire=elemental_balance.get("fire", 20.0), 
-            earth=elemental_balance.get("earth", 20.0),
-            metal=elemental_balance.get("metal", 20.0),
-            water=elemental_balance.get("water", 20.0)
+            success=True,
+            elemental_balance=elemental_balance,
+            primary_element=primary_element,  # type: ignore[arg-type]
+            element_strength=element_strength,
+            quick_analysis=True,
+            user_id=user_id,
+            generated_at=datetime.now().isoformat()
         )
         
         return balance_response
@@ -247,7 +263,6 @@ async def get_element_info(
         
         if tcm_engine:
             # Create basic element info directly
-            from ...types.tcm_systems import ElementOrgans, ElementEmotions
             
             element_info = ElementInfo(
                 season=f"{element_lower.title()} season",
@@ -263,11 +278,10 @@ async def get_element_info(
                 return ElementInfoResponse(
                     element=element_lower,
                     season=element_info.season,
-                    organs=ElementOrgans(yin=element_info.organ_yin, yang=element_info.organ_yang),
-                    emotions=ElementEmotions(balanced=element_info.emotion_balanced, imbalanced=element_info.emotion_imbalanced),
+                    organs={"yin": element_info.organ_yin, "yang": element_info.organ_yang},
+                    emotions={"balanced": element_info.emotion_balanced, "imbalanced": element_info.emotion_imbalanced},
                     planetary_influences=element_info.planets or [],
                     optimal_hours=element_info.hours or {},
-                    yang=element_info.organ_yang,
                     generated_at=datetime.now().isoformat()
                 )
             else:

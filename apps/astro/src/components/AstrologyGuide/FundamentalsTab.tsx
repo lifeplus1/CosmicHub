@@ -97,7 +97,7 @@ const FundamentalsTab: React.FC = React.memo(() => {
           >
             <div className='py-4 bg-gradient-to-r from-gold-400/10 to-gold-400/0'>
               <div className='flex items-center px-4 space-x-3'>
-                <item.icon className='text-2xl text-gold-400' />
+                {React.createElement(item.icon, { className: 'text-2xl text-gold-400' })}
                 <h4 className='font-bold text-md text-gold-300'>
                   {item.title}
                 </h4>

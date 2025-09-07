@@ -36,127 +36,21 @@ Generated on: 2025-09-05 12:37:42
 │   │   │   └── ⚙️ rebalanced-agent-config.json
 │   │   ├── ⚙️ agent-1-astro-components-analysis.json
 │   │   ├── 📝 agent-1-astro-components-instructions.md
-│   │   ├── ⚙️ agent-2-astro-features-analysis.json
-│   │   ├── 📝 agent-2-astro-features-instructions.md
-│   │   ├── ⚙️ agent-3-astro-pages-context-analysis.json
-│   │   ├── 📝 agent-3-astro-pages-context-instructions.md
-│   │   ├── ⚙️ agent-4-astro-services-types-analysis.json
-│   │   ├── 📝 agent-4-astro-services-types-instructions.md
-│   │   ├── ⚙️ agent-5-ui-package-analysis.json
-│   │   ├── 📝 agent-5-ui-package-instructions.md
-│   │   ├── ⚙️ agent-6-config-package-analysis.json
-│   │   ├── 📝 agent-6-config-package-instructions.md
-│   │   ├── ⚙️ agent-7-apps-small-packages-analysis.json
-│   │   ├── 📝 agent-7-apps-small-packages-completion-report.md
-│   │   ├── 📝 agent-7-apps-small-packages-instructions.md
-│   │   ├── 📝 AGENT-7-COMPLETION-SUMMARY.md
-│   │   ├── 📝 AGENT-7-OPTIMIZATION-SUMMARY.md
-│   │   ├── ⚙️ agent-7-storage-analysis.json
-│   │   ├── ⚙️ agent-7-storage-offline-storage-analysis.json
-│   │   ├── ⚙️ agent-7-storage-offline-sync-analysis.json
-│   │   ├── ⚙️ coordination-manifest.json
-│   │   ├── 📝 enhanced-coordination-strategy.md
-│   │   ├── 📝 FILE_NAMING_CONVENTION.md
-│   │   └── ⚙️ rebalanced-agent-config.json
-│   ├── ⚙️ agent-1-astro-components-analysis.json
-│   ├── 📝 agent-1-astro-components-instructions.md
-│   ├── ⚙️ agent-2-astro-features-analysis.json
-│   ├── 📝 agent-2-astro-features-instructions.md
-│   ├── ⚙️ agent-3-astro-pages-context-analysis.json
-│   ├── 📝 agent-3-astro-pages-context-instructions.md
-│   ├── ⚙️ agent-4-astro-services-types-analysis.json
-│   ├── 📝 agent-4-astro-services-types-instructions.md
-│   ├── ⚙️ agent-5-ui-package-analysis.json
-│   ├── 📝 agent-5-ui-package-instructions.md
-│   ├── ⚙️ agent-6-config-package-analysis.json
-│   ├── 📝 agent-6-config-package-instructions.md
-│   ├── ⚙️ agent-7-apps-small-packages-analysis.json
-│   ├── 📝 agent-7-apps-small-packages-completion-report.md
-│   ├── 📝 agent-7-apps-small-packages-instructions.md
-│   ├── 📝 AGENT-7-COMPLETION-SUMMARY.md
-│   ├── 📝 AGENT-7-OPTIMIZATION-SUMMARY.md
-│   ├── ⚙️ agent-7-storage-analysis.json
-│   ├── ⚙️ agent-7-storage-offline-storage-analysis.json
-│   ├── ⚙️ agent-7-storage-offline-sync-analysis.json
-│   ├── ⚙️ coordination-manifest.json
-│   ├── 📝 enhanced-coordination-strategy.md
-│   ├── 📝 FILE_NAMING_CONVENTION.md
-│   └── ⚙️ rebalanced-agent-config.json
-├── apps/
-│   ├── apps/
-│   │   ├── apps/
-│   │   │   ├── apps/
-│   │   │   ├── astro/
-│   │   │   ├── healwave/
-│   │   │   └── mobile/
-│   │   ├── astro/
-│   │   │   ├── astro/
-│   │   │   ├── public/
-│   │   │   ├── scripts/
-│   │   │   ├── src/
-│   │   │   ├── 📄 .dockerignore
-│   │   │   ├── 📄 .gitignore
-│   │   │   ├── 🐳 Dockerfile
-│   │   │   ├── 🔷 eslint.config.ts
-│   │   │   ├── 🌐 index.html
-│   │   │   ├── 🟨 node-runtime.smoke.test.mjs
-│   │   │   ├── ⚙️ package.json
-│   │   │   ├── 📄 postcss.config.cjs
-│   │   │   ├── 🔷 postcss.config.ts
-│   │   │   ├── 🔷 tailwind.config.ts
-│   │   │   ├── ⚙️ tsconfig.build.json
-│   │   │   ├── ⚙️ tsconfig.dev.json
-│   │   │   ├── ⚙️ tsconfig.json
-│   │   │   ├── ⚙️ tsconfig.test.json
-│   │   │   ├── 🔷 vite.config.ts
-│   │   │   ├── 🔷 vitest.config.ts
-│   │   │   └── 🟨 vitest.debug.mjs
-│   │   ├── healwave/
-│   │   │   ├── healwave/
-│   │   │   ├── public/
-│   │   │   ├── src/
-│   │   │   ├── 🐳 Dockerfile
-│   │   │   ├── 🟨 eslint.config.js
-│   │   │   ├── 🌐 index.html
-│   │   │   ├── ⚙️ package.json
-│   │   │   ├── 📄 postcss.config.cjs
-│   │   │   ├── 🔷 postcss.config.ts
-│   │   │   ├── 🔷 tailwind.config.ts
-│   │   │   ├── ⚙️ tsconfig.build.json
-│   │   │   ├── ⚙️ tsconfig.json
-│   │   │   ├── 🔷 vite.config.ts
-│   │   │   └── 🔷 vitest.config.ts
-│   │   └── mobile/
-│   │       ├── mobile/
-│   │       ├── app/
-│   │       ├── assets/
-│   │       ├── src/
-│   │       ├── 📄 .gitignore
-│   │       ├── ⚙️ app.json
-│   │       ├── 🔷 App.tsx
-│   │       ├── ⚙️ eas.json
-│   │       ├── 🔷 index.ts
-│   │       ├── ⚙️ package-lock.json
-│   │       ├── ⚙️ package.json
-│   │       └── ⚙️ tsconfig.json
-│   ├── astro/
-│   │   ├── astro/
-│   │   │   ├── astro/
-│   │   │   ├── public/
-│   │   │   ├── scripts/
-│   │   │   ├── src/
-│   │   │   ├── 📄 .dockerignore
-│   │   │   ├── 📄 .gitignore
-│   │   │   ├── 🐳 Dockerfile
-│   │   │   ├── 🔷 eslint.config.ts
-│   │   │   ├── 🌐 index.html
-│   │   │   ├── 🟨 node-runtime.smoke.test.mjs
-│   │   │   ├── ⚙️ package.json
-│   │   │   ├── 📄 postcss.config.cjs
-│   │   │   ├── 🔷 postcss.config.ts
-│   │   │   ├── 🔷 tailwind.config.ts
-│   │   │   ├── ⚙️ tsconfig.build.json
-│   │   │   ├── ⚙️ tsconfig.dev.json
+---
+title: Moved: CosmicHub Project Structure
+owner: platform
+status: moved
+last_reviewed: 2025-09-07
+review_cycle: 90d
+category: redirect
+moved_to: docs/04-ARCHITECTURE/PROJECT-STRUCTURE.md
+---
+
+This document has moved to the canonical architecture reference:
+
+- docs/04-ARCHITECTURE/PROJECT-STRUCTURE.md
+
+Reason: Consolidated project structure under Architecture per docs/06-OPERATIONS/DOCS-CONSOLIDATION-STRATEGY.md.
 │   │   │   ├── ⚙️ tsconfig.json
 │   │   │   ├── ⚙️ tsconfig.test.json
 │   │   │   ├── 🔷 vite.config.ts

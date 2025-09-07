@@ -21,6 +21,7 @@ from typing import (
     List,
     Optional,
     Protocol,
+    Union,
     cast,
 )
 
@@ -932,19 +933,19 @@ async def calculate_psychology(data: BirthData) -> Dict[str, Any]:
     Integrates existing psychology implementation with API and Redis caching.
     """
     try:
-        # Import cache service
-        from ...services.psychology_cache import PsychologyCacheService
+        # Import cache service and its types
+        from ...services.psychology_cache import PsychologyCacheService, CacheData
         
-        # Create cache key data from birth information
-        cache_key_data = {
-            "year": data.year,
-            "month": data.month,
-            "day": data.day,
-            "hour": data.hour,
-            "minute": data.minute,
-            "lat": data.lat or 0.0,
-            "lon": data.lon or 0.0,
-            "timezone": data.timezone or "UTC"
+        # Create cache key data from birth information with explicit typing
+        cache_key_data: Dict[str, CacheData] = {
+            "year": int(data.year),
+            "month": int(data.month),
+            "day": int(data.day),
+            "hour": int(data.hour),
+            "minute": int(data.minute),
+            "lat": float(data.lat or 0.0),
+            "lon": float(data.lon or 0.0),
+            "timezone": str(data.timezone or "UTC")
         }
         
         # Try to get cached result first

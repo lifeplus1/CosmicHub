@@ -58,7 +58,7 @@ export function useSpiritualProfile(userId: string) {
   );
 
   useEffect(() => {
-    fetchProfile();
+    void fetchProfile();
   }, [fetchProfile]);
 
   return {
@@ -104,7 +104,7 @@ export function useLearningPath(
   }, [userId, currentKnowledge]);
 
   useEffect(() => {
-    generatePath();
+    void generatePath();
   }, [generatePath]);
 
   return {
@@ -145,7 +145,7 @@ export function usePersonalizedCurriculum(userId: string) {
   }, [userId]);
 
   useEffect(() => {
-    fetchCurriculum();
+    void fetchCurriculum();
   }, [fetchCurriculum]);
 
   return {
@@ -244,7 +244,7 @@ export function useAdaptiveUI(userId: string) {
   }, [userId]);
 
   useEffect(() => {
-    fetchConfig();
+    void fetchConfig();
   }, [fetchConfig]);
 
   // Helper functions for UI adaptation

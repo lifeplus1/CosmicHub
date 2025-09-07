@@ -24,10 +24,10 @@ The bridge supports 3 distinct data flows for maximum flexibility:
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast, Literal
 
-from backend.types.astrology_systems import BirthData
-from backend.types.synastry_systems import (
+from backend_types.astrology_systems import BirthData
+from backend_types.synastry_systems import (
     SynastryAspect,
     CompatibilityScore,
     ElementalCompatibility,
@@ -49,6 +49,12 @@ from backend.types.synastry_systems import (
     MatchQuality,
     AnalysisLevel,
 )
+
+# Type alias for category
+CategoryType = Literal['harmonious', 'challenging', 'dynamic', 'neutral']
+
+# Type alias for relationship phases  
+RelationshipPhaseType = Literal['attraction', 'bonding', 'commitment', 'challenge', 'growth', 'transformation']
 
 
 class SynastryTypeBridge:
@@ -165,14 +171,14 @@ class SynastryTypeBridge:
                 data['lat'] = data['latitude']
             if 'lon' not in data and 'longitude' in data:
                 data['lon'] = data['longitude']
-            return BirthData(**data)  # type: ignore[arg-type]
+            return BirthData(**data)
         
         # Flow 2: Flat config - Simplified date/time strings
         if 'date' in data and 'time' in data:
             return cls.from_flat_config(data)
         
         # Flow 3: Mock fallback for incomplete/malformed data
-        return cls.from_mock_defaults()  # type: ignore[unreachable]
+        return cls.from_mock_defaults()
 
     # --- Aspect Factory with 3 Data Flows ---
     @classmethod
@@ -206,7 +212,7 @@ class SynastryTypeBridge:
             harmony_score=clamp(harmony_score, -100, 100),
             interpretation=interpretation or 'Aspect interaction',
             keywords=keywords or [],
-            category=category,  # type: ignore[arg-type]
+            category=cast(CategoryType, category),
         )
 
     @classmethod
@@ -435,8 +441,8 @@ class SynastryTypeBridge:
         if next_phase not in valid:
             next_phase = 'transformation'
         return RelationshipTiming(
-            current_phase=current_phase,  # type: ignore[arg-type]
-            next_phase=next_phase,  # type: ignore[arg-type]
+            current_phase=cast(RelationshipPhaseType, current_phase),
+            next_phase=cast(RelationshipPhaseType, next_phase),
             phase_start=phase_start,
             phase_peak=phase_peak,
             phase_end=phase_end,

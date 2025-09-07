@@ -1,3 +1,6 @@
+/* Import chakra component styles */
+@import './chakra.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -1,4 +1,6 @@
-import React, { useState, lazy, Suspense } from 'react';
+import type { 
+} from '@cosmichub/types';
+import React, { useState, lazy, Suspense, useCallback, useRef, useEffect } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Dialog from '@radix-ui/react-dialog';
 
@@ -18,12 +20,38 @@ interface AstrologyGuideProps {
 export const AstrologyGuide: React.FC<AstrologyGuideProps> = React.memo(
   ({ isOpen, onClose, initialTab = 0 }) => {
     const [activeTab, setActiveTab] = useState(initialTab);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+    // Focus management - focus close button when dialog opens
+    useEffect(() => {
+      if (isOpen && closeButtonRef.current) {
+        closeButtonRef.current.focus();
+      }
+    }, [isOpen]);
+
+    // Memoized event handlers
+    const handleTabChange = useCallback((value: string) => {
+      setActiveTab(parseInt(value));
+    }, []);
+
+    const handleClose = useCallback(() => {
+      onClose();
+    }, [onClose]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    }, [handleClose]);
 
     return (
-      <Dialog.Root open={isOpen} onOpenChange={onClose}>
+      <Dialog.Root open={isOpen} onOpenChange={handleClose}>
         <Dialog.Portal>
           <Dialog.Overlay className='fixed inset-0 bg-black/50 backdrop-blur-md' />
-          <Dialog.Content className='fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-cosmic-dark/95 rounded-3xl border border-gold-600 overflow-hidden max-h-[80vh] w-full max-w-4xl'>
+          <Dialog.Content 
+            className='fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-cosmic-dark/95 rounded-3xl border border-gold-600 overflow-hidden max-h-[80vh] w-full max-w-4xl'
+            onKeyDown={handleKeyDown}
+          >
             <div className='py-6 border-b bg-gradient-to-b from-cosmic-dark/98 to-cosmic-dark/85 border-gold-600'>
               <div className='flex items-center justify-between px-6'>
                 <h2 className='flex-1 text-3xl font-bold text-center text-gold-300 font-cinzel'>
@@ -31,8 +59,10 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = React.memo(
                 </h2>
                 <Dialog.Close asChild>
                   <button
-                    className='text-gold-300 hover:text-gold-400'
-                    aria-label='Close'
+                    ref={closeButtonRef}
+                    className='text-gold-300 hover:text-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-300/50 rounded-md p-1'
+                    aria-label='Close astrology guide'
+                    onClick={handleClose}
                   >
                     <svg
                       className='w-6 h-6'
@@ -54,7 +84,7 @@ export const AstrologyGuide: React.FC<AstrologyGuideProps> = React.memo(
             <div className='p-0 overflow-y-auto'>
               <Tabs.Root
                 defaultValue={activeTab.toString()}
-                onValueChange={value => setActiveTab(parseInt(value))}
+                onValueChange={handleTabChange}
               >
                 <Tabs.List
                   className='sticky top-0 z-10 flex px-4 border-b border-gold-600 bg-cosmic-dark/95'

@@ -12,12 +12,12 @@ interface ExtractedSystem {
   id: string;
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   path: string;
   tier: 'free' | 'premium' | 'elite';
 }
 
-export const ExtractedSystemsNavigation: React.FC<ExtractedSystemsNavigationProps> = ({ 
+const ExtractedSystemsNavigation: React.FC<ExtractedSystemsNavigationProps> = ({ 
   birthData,
   className = ''
 }) => {
@@ -90,7 +90,7 @@ export const ExtractedSystemsNavigation: React.FC<ExtractedSystemsNavigationProp
             return (
               <button
                 key={system.id}
-                onClick={() => handleNavigate(system.path)}
+                onClick={() => handleNavigate(system.path)} aria-label="Button"
                 className='cosmic-card bg-cosmic-dark/50 hover:bg-cosmic-purple/20 border border-cosmic-silver/10 hover:border-cosmic-purple/30 transition-all duration-200 p-4 text-left group'
                 disabled={!birthData}
                 title={!birthData ? 'Enter birth data first' : `Navigate to ${system.title}`}
@@ -141,4 +141,10 @@ export const ExtractedSystemsNavigation: React.FC<ExtractedSystemsNavigationProp
   );
 };
 
-export default ExtractedSystemsNavigation;
+
+// Memoize the component to prevent unnecessary re-renders
+const MemoizedExtractedSystemsNavigation = React.memo(ExtractedSystemsNavigation);
+MemoizedExtractedSystemsNavigation.displayName = 'ExtractedSystemsNavigation';
+
+export { MemoizedExtractedSystemsNavigation as ExtractedSystemsNavigation };
+export default MemoizedExtractedSystemsNavigation;

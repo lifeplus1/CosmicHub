@@ -5,7 +5,7 @@
  * Implements AI #5 requirements for certification frameworks and digital credentials.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, Button } from '@cosmichub/ui';
 import * as Tabs from '@radix-ui/react-tabs';
 import { 
@@ -217,6 +217,45 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
     // Would navigate to certification requirements
   }, []);
 
+  const handleKeyDown = useCallback((action: () => void) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  }, []);
+
+  // Memoized expensive calculations
+  const statsData = useMemo(() => {
+    const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
+    const completedCertifications = certifications.filter(cert => cert.status === 'completed').length;
+    const masterCertifications = certifications.filter(c => c.level === 'master').length;
+    
+    return {
+      totalPoints,
+      completedCertifications,
+      masterCertifications,
+      totalAchievements: achievements.length
+    };
+  }, [achievements, certifications]);
+
+  const filteredCertifications = useMemo(() => {
+    return certifications.filter(cert => 
+      selectedCategory === 'all' || cert.category === selectedCategory
+    );
+  }, [certifications, selectedCategory]);
+
+  const inProgressCertifications = useMemo(() => {
+    return certifications.filter(cert => cert.status === 'in_progress');
+  }, [certifications]);
+
+  const availableCertifications = useMemo(() => {
+    return certifications.filter(cert => cert.status === 'available').slice(0, 2);
+  }, [certifications]);
+
+  const latestAchievement = useMemo(() => {
+    return achievements.length > 0 ? achievements[achievements.length - 1] : null;
+  }, [achievements]);
+
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'common': return 'text-gray-400';
@@ -247,8 +286,8 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
     }
   };
 
-  const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
-  const completedCertifications = certifications.filter(cert => cert.status === 'completed').length;
+  const totalPoints = statsData.totalPoints;
+  const completedCertifications = statsData.completedCertifications;
 
   return (
     <div className="space-y-8">
@@ -283,7 +322,7 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
         <Card className="text-center">
           <div className="p-4">
             <FaMedal className="text-2xl text-purple-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-cosmic-silver mb-1">{achievements.length}</div>
+            <div className="text-2xl font-bold text-cosmic-silver mb-1">{statsData.totalAchievements}</div>
             <div className="text-sm text-cosmic-silver/70">Achievements</div>
           </div>
         </Card>
@@ -291,9 +330,7 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
         <Card className="text-center">
           <div className="p-4">
             <FaCrown className="text-2xl text-golden-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-cosmic-silver mb-1">
-              {certifications.filter(c => c.level === 'master').length}
-            </div>
+            <div className="text-2xl font-bold text-cosmic-silver mb-1">{statsData.masterCertifications}</div>
             <div className="text-sm text-cosmic-silver/70">Master Level</div>
           </div>
         </Card>
@@ -361,9 +398,7 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
                 {/* Latest Achievement */}
                 <div>
                   <h3 className="font-semibold text-cosmic-silver mb-4">Latest Achievement</h3>
-                  {achievements.length > 0 && (() => {
-                    const latestAchievement = achievements[achievements.length - 1];
-                    if (!latestAchievement) return null;
+                  {latestAchievement && (() => {
                     const IconComponent = latestAchievement.icon;
                     return (
                       <div className="flex items-center gap-4 p-4 bg-cosmic-purple/10 rounded-lg">
@@ -389,9 +424,7 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
                 {/* In Progress Certifications */}
                 <div>
                   <h3 className="font-semibold text-cosmic-silver mb-4">Current Progress</h3>
-                  {certifications
-                    .filter(cert => cert.status === 'in_progress')
-                    .map((cert) => (
+                  {inProgressCertifications.map((cert) => (
                       <div key={cert.id} className="p-4 bg-cosmic-dark/30 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h4 className="font-semibold text-cosmic-silver">{cert.title}</h4>
@@ -414,10 +447,7 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
                 <div>
                   <h3 className="font-semibold text-cosmic-silver mb-4">Recommended Next Steps</h3>
                   <div className="space-y-3">
-                    {certifications
-                      .filter(cert => cert.status === 'available')
-                      .slice(0, 2)
-                      .map((cert) => (
+                    {availableCertifications.map((cert) => (
                         <div key={cert.id} className="flex items-center justify-between p-3 bg-cosmic-purple/10 rounded-lg">
                           <div>
                             <h4 className="font-semibold text-cosmic-silver text-sm">{cert.title}</h4>
@@ -456,9 +486,7 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
             </div>
 
             <div className="space-y-6">
-              {certifications
-                .filter(cert => selectedCategory === 'all' || cert.category === selectedCategory)
-                .map((cert) => (
+              {filteredCertifications.map((cert) => (
                   <Card key={cert.id}>
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -551,13 +579,19 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
                         </div>
                         
                         {cert.status === 'available' && (
-                          <Button onClick={() => handleStartCertification(cert.id)}>
+                          <Button 
+                            onClick={() => handleStartCertification(cert.id)}
+                            onKeyDown={handleKeyDown(() => handleStartCertification(cert.id))}
+                          >
                             Start Certification
                           </Button>
                         )}
                         
                         {cert.status === 'in_progress' && (
-                          <Button onClick={() => handleStartCertification(cert.id)}>
+                          <Button 
+                            onClick={() => handleStartCertification(cert.id)}
+                            onKeyDown={handleKeyDown(() => handleStartCertification(cert.id))}
+                          >
                             Continue
                           </Button>
                         )}
@@ -641,4 +675,6 @@ const CertificationCenter: React.FC<CertificationCenterProps> = ({ userId: _user
   );
 };
 
-export default CertificationCenter;
+CertificationCenter.displayName = 'CertificationCenter';
+
+export default React.memo(CertificationCenter);

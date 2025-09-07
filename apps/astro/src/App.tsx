@@ -60,6 +60,7 @@ const Psychology = lazy(() => import('./pages/Psychology'));
 const Spiritual = lazy(() => import('./pages/Spiritual'));
 const TCM = lazy(() => import('./pages/TCM'));
 const Synthesis = lazy(() => import('./pages/Synthesis'));
+const SacredGeometry = lazy(() => import('./pages/SacredGeometry'));
 
 const MainApp: React.FC = React.memo(function MainApp() {
   const config = getAppConfig('astro');
@@ -117,6 +118,7 @@ const MainApp: React.FC = React.memo(function MainApp() {
               <Route path='/spiritual' element={<Spiritual />} />
               <Route path='/wellness' element={<TCM />} />
               <Route path='/synthesis' element={<Synthesis />} />
+              <Route path='/sacred-geometry' element={<SacredGeometry />} />
             </Routes>
           </Suspense>
         </main>

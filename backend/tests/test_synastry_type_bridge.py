@@ -1,6 +1,6 @@
 from datetime import datetime
 from backend.api.bridges.synastry_type_bridge import SynastryTypeBridge
-from backend.types.synastry_systems import (
+from backend_types.synastry_systems import (
     SynastryAnalysisResponse, RelationshipMatchResponse,
 )
 

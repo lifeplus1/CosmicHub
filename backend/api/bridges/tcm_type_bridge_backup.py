@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Union, Tuple
 from enum import Enum
 from datetime import datetime
 
-from backend.types.tcm_systems import (
+from backend_types.tcm_systems import (
     # Core / previously used
     ElementInfo,
     ElementInfoResponse,
@@ -60,7 +60,15 @@ DEFAULT_ELEMENTAL_BALANCE: Dict[str, float] = {
     "water": 0.2,
 }
 
-DEFAULT_ELEMENT_INFO = ElementInfo()
+DEFAULT_ELEMENT_INFO = ElementInfo(
+    season="spring",
+    organ_yin="liver", 
+    organ_yang="gallbladder",
+    emotion_balanced="patience",
+    emotion_imbalanced="anger",
+    planets=["mars"],
+    hours={"start": 23, "end": 1}
+)
 
 # Mapping from potential alternative engine keys to our canonical names
 FIELD_MAPPINGS: Dict[str, str] = {

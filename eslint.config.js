@@ -37,6 +37,17 @@ export default [
       '**/cleanup-backup-*/**',
       '**/tree-shaking-backup/**',
 
+      // Backup files (individual files with backup patterns)
+      '**/*_backup.*',
+      '**/*.backup.*',
+      '**/*_old.*',
+      '**/*.old.*',
+      '**/*_temp.*',
+      '**/*.temp.*',
+      '**/*_deprecated.*',
+      '**/*.deprecated.*',
+      '**/tcm_type_bridge_backup.py',
+
       // Configuration and tooling files that shouldn't be linted
       '**/.storybook/**',
       '**/storybook-static/**',

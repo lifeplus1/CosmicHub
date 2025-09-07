@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UnifiedAspectTable, BaseAspectData, EnhancedAspectData } from './UnifiedAspectTable';
 import type { AspectRow } from './AspectTable';
 import type { EnhancedAspect } from './EnhancedAspectTable';
@@ -45,8 +45,9 @@ export const convertVirtualizedAspectRow = (aspect: VirtualizedAspectRow): BaseA
  * Drop-in replacement for legacy AspectTable
  * @deprecated Use UnifiedAspectTable directly for new components
  */
-export const LegacyAspectTableWrapper: React.FC<{ aspects: AspectRow[] }> = ({ aspects }) => {
-  const convertedAspects = aspects.map(convertLegacyAspectRow);
+export const LegacyAspectTableWrapper: React.FC<{ aspects: AspectRow[] }> = React.memo(({ aspects }) => {
+  const convertedAspects = useMemo(() => aspects.map(convertLegacyAspectRow), [aspects]);
+  
   return (
     <div className="legacy-aspect-table-wrapper">
       <div className="mb-2 text-xs text-amber-500 bg-amber-100/10 border border-amber-500/20 p-2 rounded">
@@ -59,7 +60,9 @@ export const LegacyAspectTableWrapper: React.FC<{ aspects: AspectRow[] }> = ({ a
       />
     </div>
   );
-};
+});
+
+LegacyAspectTableWrapper.displayName = 'LegacyAspectTableWrapper';
 
 /**
  * Drop-in replacement for legacy EnhancedAspectTable
@@ -69,8 +72,9 @@ export const LegacyEnhancedAspectTableWrapper: React.FC<{
   aspects: EnhancedAspect[];
   includeMinorAspects?: boolean;
   showStatistics?: boolean;
-}> = ({ aspects, includeMinorAspects = true, showStatistics = false }) => {
-  const convertedAspects = aspects.map(convertEnhancedAspect);
+}> = React.memo(({ aspects, includeMinorAspects = true, showStatistics = false }) => {
+  const convertedAspects = useMemo(() => aspects.map(convertEnhancedAspect), [aspects]);
+  
   return (
     <div className="legacy-enhanced-aspect-table-wrapper">
       <div className="mb-2 text-xs text-amber-500 bg-amber-100/10 border border-amber-500/20 p-2 rounded">
@@ -87,7 +91,9 @@ export const LegacyEnhancedAspectTableWrapper: React.FC<{
       />
     </div>
   );
-};
+});
+
+LegacyEnhancedAspectTableWrapper.displayName = 'LegacyEnhancedAspectTableWrapper';
 
 /**
  * Drop-in replacement for legacy VirtualizedAspectTable
@@ -97,8 +103,9 @@ export const LegacyVirtualizedAspectTableWrapper: React.FC<{
   aspects: VirtualizedAspectRow[];
   height?: number;
   itemHeight?: number;
-}> = ({ aspects, height = 400, itemHeight = 60 }) => {
-  const convertedAspects = aspects.map(convertVirtualizedAspectRow);
+}> = React.memo(({ aspects, height = 400, itemHeight = 60 }) => {
+  const convertedAspects = useMemo(() => aspects.map(convertVirtualizedAspectRow), [aspects]);
+  
   return (
     <div className="legacy-virtualized-aspect-table-wrapper">
       <div className="mb-2 text-xs text-amber-500 bg-amber-100/10 border border-amber-500/20 p-2 rounded">
@@ -115,4 +122,6 @@ export const LegacyVirtualizedAspectTableWrapper: React.FC<{
       />
     </div>
   );
-};
+});
+
+LegacyVirtualizedAspectTableWrapper.displayName = 'LegacyVirtualizedAspectTableWrapper';

@@ -3,7 +3,7 @@
  * Professional micro-interactions and animation refinements for enhanced user engagement
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { cn } from '../../utils/cn';
 import '../styles/animation-system.css';
 
@@ -17,7 +17,7 @@ export interface StaggerAnimationProps {
   threshold?: number;
 }
 
-export const StaggerAnimation: React.FC<StaggerAnimationProps> = ({
+export const StaggerAnimation: React.FC<StaggerAnimationProps> = React.memo(({
   children,
   staggerDelay = 100,
   initialDelay = 0,
@@ -72,7 +72,9 @@ export const StaggerAnimation: React.FC<StaggerAnimationProps> = ({
       ))}
     </div>
   );
-};
+});
+
+StaggerAnimation.displayName = 'StaggerAnimation';
 
 // Morphing button with smooth state transitions
 export interface MorphingButtonProps {
@@ -87,7 +89,7 @@ export interface MorphingButtonProps {
   resetDelay?: number;
 }
 
-export const MorphingButton: React.FC<MorphingButtonProps> = ({
+export const MorphingButton: React.FC<MorphingButtonProps> = React.memo(({
   children,
   loadingChildren = 'Loading...',
   successChildren = '✓ Success',
@@ -100,6 +102,19 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
 }) => {
   const [displayState, setDisplayState] = useState(state);
   const [isResetting, setIsResetting] = useState(false);
+
+  const handleClick = useCallback(() => {
+    if (onClick && displayState !== 'loading') {
+      onClick();
+    }
+  }, [onClick, displayState]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick();
+    }
+  }, [handleClick]);
 
   useEffect(() => {
     if (state === 'success' || state === 'error') {
@@ -136,14 +151,16 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
   return (
     <button
       type='button'
-      onClick={onClick}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       disabled={disabled ?? displayState === 'loading'}
       className={cn(
-        'relative px-6 py-3 rounded-lg font-medium text-white transition-all duration-300 ease-in-out overflow-hidden group',
+        'relative px-6 py-3 rounded-lg font-medium text-white transition-all duration-300 ease-in-out overflow-hidden group focus:outline-none focus:ring-2 focus:ring-cosmic-purple',
         stateClasses[displayState],
         isResetting && 'transform scale-100',
         className
       )}
+      aria-label={`Button in ${displayState} state`}
     >
       {/* Background ripple effect */}
       <div className='absolute inset-0 bg-white/20 rounded-lg transform scale-0 transition-transform duration-300 group-active:scale-100 opacity-0 group-active:opacity-100' />
@@ -166,7 +183,9 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
       )}
     </button>
   );
-};
+});
+
+MorphingButton.displayName = 'MorphingButton';
 
 // Floating Action Button with magnetic effect
 export interface FloatingActionButtonProps {
@@ -178,7 +197,7 @@ export interface FloatingActionButtonProps {
   className?: string;
 }
 
-export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
+export const FloatingActionButton: React.FC<FloatingActionButtonProps> = React.memo(({
   icon,
   label,
   onClick,
@@ -190,7 +209,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   const [isHovering, setIsHovering] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!buttonRef.current) return;
 
     const rect = buttonRef.current.getBoundingClientRect();
@@ -202,12 +221,29 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     const scale = isHovering ? 1.1 : 1;
 
     setTransform(`translate(${deltaX}px, ${deltaY}px) scale(${scale})`);
-  };
+  }, [magneticStrength, isHovering]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setTransform('translate(0px, 0px) scale(1)');
     setIsHovering(false);
-  };
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovering(true);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (onClick) {
+      onClick();
+    }
+  }, [onClick]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick();
+    }
+  }, [handleClick]);
 
   const positionClasses = {
     'bottom-right': 'fab-position-bottom-right',
@@ -227,18 +263,19 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     <button
       type='button'
       ref={buttonRef}
-      onClick={onClick}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovering(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
         'fixed z-50 w-14 h-14 bg-cosmic-purple hover:bg-cosmic-purple/90 text-white rounded-full shadow-lg transition-all duration-200 ease-out group',
-        'hover:shadow-xl active:scale-95',
+        'hover:shadow-xl active:scale-95 focus:outline-none focus:ring-2 focus:ring-cosmic-purple',
         positionClasses[position],
         className
       )}
       data-transform={transform}
-      aria-label={label}
+      aria-label={label ?? 'Floating action button'}
     >
       {/* Ripple effect */}
       <div className='absolute inset-0 rounded-full bg-white/20 scale-0 group-active:scale-100 transition-transform duration-200' />
@@ -264,7 +301,9 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
       )}
     </button>
   );
-};
+});
+
+FloatingActionButton.displayName = 'FloatingActionButton';
 
 // Parallax scroll container
 export interface ParallaxContainerProps {
@@ -274,7 +313,7 @@ export interface ParallaxContainerProps {
   disabled?: boolean;
 }
 
-export const ParallaxContainer: React.FC<ParallaxContainerProps> = ({
+export const ParallaxContainer: React.FC<ParallaxContainerProps> = React.memo(({
   children,
   speed = 0.5,
   className,
@@ -310,7 +349,9 @@ export const ParallaxContainer: React.FC<ParallaxContainerProps> = ({
       {children}
     </div>
   );
-};
+});
+
+ParallaxContainer.displayName = 'ParallaxContainer';
 
 // Attention-seeking animation for important elements
 export interface AttentionAnimationProps {
@@ -321,7 +362,7 @@ export interface AttentionAnimationProps {
   className?: string;
 }
 
-export const AttentionAnimation: React.FC<AttentionAnimationProps> = ({
+export const AttentionAnimation: React.FC<AttentionAnimationProps> = React.memo(({
   children,
   trigger = false,
   animation = 'pulse',
@@ -358,7 +399,9 @@ export const AttentionAnimation: React.FC<AttentionAnimationProps> = ({
       {children}
     </div>
   );
-};
+});
+
+AttentionAnimation.displayName = 'AttentionAnimation';
 
 // Smooth progress indicator with easing
 export interface SmoothProgressProps {
@@ -371,7 +414,7 @@ export interface SmoothProgressProps {
   className?: string;
 }
 
-export const SmoothProgress: React.FC<SmoothProgressProps> = ({
+export const SmoothProgress: React.FC<SmoothProgressProps> = React.memo(({
   value,
   max = 100,
   showLabel = true,
@@ -478,7 +521,9 @@ export const SmoothProgress: React.FC<SmoothProgressProps> = ({
       </div>
     </div>
   );
-};
+});
+
+SmoothProgress.displayName = 'SmoothProgress';
 
 // Card hover effect with 3D tilt
 export interface TiltCardProps {
@@ -488,7 +533,7 @@ export interface TiltCardProps {
   className?: string;
 }
 
-export const TiltCard: React.FC<TiltCardProps> = ({
+export const TiltCard: React.FC<TiltCardProps> = React.memo(({
   children,
   tiltStrength = 15,
   glareEffect = true,
@@ -498,7 +543,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return;
 
     const rect = cardRef.current.getBoundingClientRect();
@@ -515,12 +560,12 @@ export const TiltCard: React.FC<TiltCardProps> = ({
       const glareY = ((e.clientY - rect.top) / rect.height) * 100;
       setGlare({ x: glareX, y: glareY, opacity: 0.1 });
     }
-  };
+  }, [tiltStrength, glareEffect]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setTilt({ x: 0, y: 0 });
     setGlare(prev => ({ ...prev, opacity: 0 }));
-  };
+  }, []);
 
   return (
     <div
@@ -546,4 +591,6 @@ export const TiltCard: React.FC<TiltCardProps> = ({
       )}
     </div>
   );
-};
+});
+
+TiltCard.displayName = 'TiltCard';

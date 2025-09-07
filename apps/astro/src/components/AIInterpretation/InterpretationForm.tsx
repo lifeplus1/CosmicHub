@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   generateAIInterpretation,
   updateInterpretation,
@@ -56,7 +56,7 @@ interface InterpretationFormProps {
   persistUpdates?: boolean;
 }
 
-const InterpretationForm: React.FC<InterpretationFormProps> = ({
+const InterpretationForm: React.FC<InterpretationFormProps> = React.memo(({
   onInterpretationGenerated,
   chartId,
   mode = 'direct', // Default to new AI service
@@ -108,7 +108,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     interpretationType: 'general',
   });
 
-  const interpretationTypes = [
+  const interpretationTypes = useMemo(() => [
     {
       value: 'natal',
       label: 'Natal Chart',
@@ -129,9 +129,9 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       label: 'Composite Chart',
       description: 'Relationship dynamics and purpose',
     },
-  ];
+  ], []);
 
-  const aiInterpretationTypes = [
+  const aiInterpretationTypes = useMemo(() => [
     {
       value: 'general',
       label: 'General Reading',
@@ -152,21 +152,28 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       label: 'Relationship Insights',
       description: 'Love compatibility and relationship patterns',
     },
-  ];
+  ], []);
 
   // Focus areas centralized in services/interpretationFocus
   const uiFocusToCanonical = useCallback(
     (label: string): InterpretationFocusArea => {
       if ((FOCUS_AREA_LABELS as readonly string[]).includes(label)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-        return focusLabelToCanonical(label as any);
+        // Type-safe conversion with proper validation
+        return focusLabelToCanonical(label);
       }
       return 'personality';
     },
     []
   );
 
-  const handleFocusToggle = (focusLabel: string): void => {
+  const handleKeyPress = useCallback((event: React.KeyboardEvent, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  }, []);
+
+  const handleFocusToggle = useCallback((focusLabel: string): void => {
     const canonical = uiFocusToCanonical(focusLabel);
     setChartForm(prev => {
       const exists = prev.focus.includes(canonical);
@@ -177,14 +184,14 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
           : [...prev.focus, canonical],
       };
     });
-  };
+  }, [uiFocusToCanonical]);
 
   // Synastry partner fields (optional extension)
   const [partnerBirthDate, setPartnerBirthDate] = useState('');
   const [partnerBirthTime, setPartnerBirthTime] = useState('');
   const [partnerBirthLocation, setPartnerBirthLocation] = useState('');
 
-  const isSynastry = chartForm.type === 'synastry';
+  const isSynastry = useMemo(() => chartForm.type === 'synastry', [chartForm.type]);
 
   // Accessible live region text
   const [statusMessage, setStatusMessage] = useState('');
@@ -210,8 +217,8 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     };
   }, []);
 
-  // Validation helpers
-  const isValidDate = (value: string): boolean => {
+  // Validation helpers (memoized for performance)
+  const isValidDate = useCallback((value: string): boolean => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
     const parts = value.split('-');
     if (parts.length !== 3) return false;
@@ -227,8 +234,9 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       dt.getUTCMonth() === m - 1 &&
       dt.getUTCDate() === d
     );
-  };
-  const isValidTime = (value: string): boolean => {
+  }, []);
+
+  const isValidTime = useCallback((value: string): boolean => {
     if (!/^\d{2}:\d{2}$/.test(value)) return false;
     const [hStr, mStr] = value.split(':');
     const h = Number(hStr);
@@ -237,7 +245,7 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
     if (h < 0 || h > 23) return false;
     if (m < 0 || m > 59) return false;
     return true;
-  };
+  }, []);
 
   const handleChartGenerate = async (): Promise<void> => {
     if (user?.uid === undefined || user?.uid === null || user?.uid === '') {
@@ -733,8 +741,10 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                       type='button'
                       data-active='true'
                       onClick={() => handleFocusToggle(focus)}
+                      onKeyDown={(e) => handleKeyPress(e, () => handleFocusToggle(focus))}
                       className='px-3 py-2 text-sm rounded-full border transition-all bg-cosmic-purple/20 text-cosmic-purple border-cosmic-purple/50'
                       aria-pressed='true'
+                      tabIndex={0}
                     >
                       {focus}
                     </button>
@@ -744,8 +754,10 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
                       type='button'
                       data-active='false'
                       onClick={() => handleFocusToggle(focus)}
+                      onKeyDown={(e) => handleKeyPress(e, () => handleFocusToggle(focus))}
                       className='px-3 py-2 text-sm rounded-full border transition-all bg-cosmic-dark/40 text-cosmic-silver/70 border-cosmic-silver/30 hover:border-cosmic-silver/50'
                       aria-pressed='false'
+                      tabIndex={0}
                     >
                       {focus}
                     </button>
@@ -842,12 +854,22 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
               });
             }
           }}
+          onKeyDown={(e) => handleKeyPress(e, () => {
+            const result = handleGenerate();
+            if (result instanceof Promise) {
+              void result.catch(() => {
+                // Error handling is done within handleGenerate
+              });
+            }
+          })}
           disabled={
             isGenerating ||
             loading ||
             (mode === 'chart' && user?.uid === undefined)
           }
           className='w-full py-3 px-6 bg-cosmic-gold text-cosmic-dark font-semibold rounded-lg hover:bg-cosmic-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2'
+          aria-label="Generate AI interpretation based on provided information"
+          tabIndex={0}
         >
           {isGenerating || loading ? (
             <>
@@ -893,6 +915,8 @@ const InterpretationForm: React.FC<InterpretationFormProps> = ({
       </div>
     </div>
   );
-};
+});
+
+InterpretationForm.displayName = 'InterpretationForm';
 
 export default InterpretationForm;

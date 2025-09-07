@@ -333,6 +333,11 @@ class VectorizedPerformanceMonitor:
             else 0
         )
 
+        # Initialize stats dictionaries
+        duration_stats: Dict[str, float] = {}
+        memory_stats: Dict[str, float] = {}
+        throughput_stats: Dict[str, float] = {}
+
         if successful_metrics:
             durations = [m.duration_ms for m in successful_metrics]
             memory_deltas = [
@@ -343,28 +348,26 @@ class VectorizedPerformanceMonitor:
             ]
 
             duration_stats = {
-                "min_ms": min(durations),
-                "max_ms": max(durations),
-                "avg_ms": sum(durations) / len(durations),
-                "p50_ms": np.percentile(durations, 50),
-                "p95_ms": np.percentile(durations, 95),
-                "p99_ms": np.percentile(durations, 99),
+                "min_ms": float(min(durations)),
+                "max_ms": float(max(durations)),
+                "avg_ms": float(sum(durations) / len(durations)),
+                "p50_ms": float(np.percentile(durations, 50)),
+                "p95_ms": float(np.percentile(durations, 95)),
+                "p99_ms": float(np.percentile(durations, 99)),
             }
 
             memory_stats = {
-                "min_mb": min(memory_deltas),
-                "max_mb": max(memory_deltas),
-                "avg_mb": sum(memory_deltas) / len(memory_deltas),
+                "min_mb": float(min(memory_deltas)),
+                "max_mb": float(max(memory_deltas)),
+                "avg_mb": float(sum(memory_deltas) / len(memory_deltas)),
             }
 
             throughput_stats = {
-                "min_calc_per_sec": min(calculations_per_sec),
-                "max_calc_per_sec": max(calculations_per_sec),
-                "avg_calc_per_sec": sum(calculations_per_sec)
-                / len(calculations_per_sec),
+                "min_calc_per_sec": float(min(calculations_per_sec)),
+                "max_calc_per_sec": float(max(calculations_per_sec)),
+                "avg_calc_per_sec": float(sum(calculations_per_sec)
+                / len(calculations_per_sec)),
             }
-        else:
-            duration_stats = memory_stats = throughput_stats = {}
 
         # Recent performance trend
         recent_metrics = (
