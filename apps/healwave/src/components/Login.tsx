@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { logIn, useAuth } from '@cosmichub/auth';
-import ErrorBoundary from './ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 // Removed unused useNavigate import
 
 interface LoginProps {

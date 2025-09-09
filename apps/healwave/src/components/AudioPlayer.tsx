@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { logger } from '@cosmichub/config';
-import ErrorBoundary from './ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 
 // Create component-specific logger
 const audioLogger = logger.child ? logger.child({ module: 'AudioPlayer' }) : logger;

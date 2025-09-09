@@ -27,7 +27,8 @@ import { CategoryFilter } from './ui/ControlComponents';
 import CompactFrequencyList from './ui/CompactFrequencyList';
 import { 
   getUnifiedFrequencyPresets, 
-  getAvailableCategories
+  getAvailableCategories,
+  convertPresetToFrequencyData
 } from '../data/unifiedFrequencyData';
 
 export interface EnhancedFrequencyGeneratorProps {
@@ -366,12 +367,19 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
         throw new Error(`Invalid frequency: ${selectedPreset.frequency}Hz. Must be between 1-20000 Hz`);
       }
 
+      // Handle binaural beats correctly
+      const isBinauralPreset = selectedPreset.metadata?.isBinaural;
+      const presetBinauralBeat = selectedPreset.metadata?.binauralBeat as number | undefined;
+      const presetBaseFreq = selectedPreset.metadata?.baseFrequency as number | undefined;
+
       const preset: FrequencyPreset = {
         id: selectedPreset.label.toLowerCase().replace(/\s+/g, '-'),
         name: selectedPreset.label,
         category: getCategoryMapping(selectedPreset.category),
-        baseFrequency: selectedPreset.frequency,
-        binauralBeat: binauralEnabled ? binauralBeat : undefined,
+        // For binaural presets, use the original base frequency
+        baseFrequency: isBinauralPreset && presetBaseFreq ? presetBaseFreq : selectedPreset.frequency,
+        // For binaural presets, use the preset's binaural beat, otherwise use UI setting
+        binauralBeat: isBinauralPreset ? presetBinauralBeat : (binauralEnabled ? binauralBeat : undefined),
         description: selectedPreset.benefits?.join(', '),
         benefits: selectedPreset.benefits || []
       };
@@ -475,16 +483,11 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
       setSelectedChakra(chakraKey);
     }
 
-    // Convert to FrequencyData format
+    // Convert to FrequencyData format using the improved conversion function
     const frequencyData: FrequencyData = {
-      frequency: preset.baseFrequency,
+      ...convertPresetToFrequencyData(preset),
       amplitude: volume,
-      phase: 0,
-      label: preset.name,
       color: CHAKRA_FREQUENCIES[chakraKey]?.color ?? '#ffffff',
-      category: 'chakra',
-      timestamp: Date.now(),
-      benefits: preset.benefits ? [...preset.benefits] : []
     };
 
     handlePresetSelect(frequencyData);

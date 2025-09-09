@@ -523,55 +523,55 @@ const BRAINWAVE_FREQUENCIES = [
     id: 'delta-sleep',
     name: 'Delta Sleep',
     category: 'brainwave',
-    baseFrequency: 40,
-    binauralBeat: 2,
+    baseFrequency: 100, // Carrier frequency for binaural beat
+    binauralBeat: 2,    // Target delta frequency (0.5-4Hz)
     description: 'Deep sleep and healing',
     benefits: ['Deep sleep', 'Healing', 'Growth hormone release'],
-    metadata: { state: 'delta', frequency_range: '0.5-4Hz' },
+    metadata: { state: 'delta', frequency_range: '0.5-4Hz', leftEar: 100, rightEar: 102 },
   },
   {
     id: 'theta-meditation',
     name: 'Theta Meditation',
     category: 'brainwave',
-    baseFrequency: 40,
-    binauralBeat: 6,
+    baseFrequency: 150, // Carrier frequency for binaural beat
+    binauralBeat: 6,    // Target theta frequency (4-8Hz)
     description: 'Deep meditation and intuition',
     benefits: ['Deep meditation', 'Intuition', 'Creativity'],
-    metadata: { state: 'theta', frequency_range: '4-8Hz' },
+    metadata: { state: 'theta', frequency_range: '4-8Hz', leftEar: 150, rightEar: 156 },
   },
   {
     id: 'alpha-relaxation',
     name: 'Alpha Relaxation',
     category: 'brainwave',
-    baseFrequency: 40,
-    binauralBeat: 10,
+    baseFrequency: 200, // Carrier frequency for binaural beat
+    binauralBeat: 10,   // Target alpha frequency (8-14Hz)
     description: 'Relaxed awareness',
     benefits: ['Relaxation', 'Learning', 'Stress reduction'],
-    metadata: { state: 'alpha', frequency_range: '8-14Hz' },
+    metadata: { state: 'alpha', frequency_range: '8-14Hz', leftEar: 200, rightEar: 210 },
   },
   {
     id: 'beta-focus',
     name: 'Beta Focus',
     category: 'brainwave',
-    baseFrequency: 40,
-    binauralBeat: 20,
+    baseFrequency: 250, // Carrier frequency for binaural beat
+    binauralBeat: 20,   // Target beta frequency (14-30Hz)
     description: 'Alert concentration',
     benefits: ['Mental alertness', 'Concentration', 'Problem solving'],
-    metadata: { state: 'beta', frequency_range: '14-30Hz' },
+    metadata: { state: 'beta', frequency_range: '14-30Hz', leftEar: 250, rightEar: 270 },
   },
   {
     id: 'gamma-awareness',
     name: 'Gamma Awareness',
     category: 'brainwave',
-    baseFrequency: 40,
-    binauralBeat: 40,
+    baseFrequency: 300, // Carrier frequency for binaural beat
+    binauralBeat: 40,   // Target gamma frequency (30-100Hz)
     description: 'Heightened awareness',
     benefits: [
       'Peak awareness',
       'Cognitive enhancement',
       'Binding consciousness',
     ],
-    metadata: { state: 'gamma', frequency_range: '30-100Hz' },
+    metadata: { state: 'gamma', frequency_range: '30-100Hz', leftEar: 300, rightEar: 340 },
   },
 ] as const satisfies readonly FrequencyPreset[];
 

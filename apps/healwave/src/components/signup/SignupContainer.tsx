@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { signUp } from '@cosmichub/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { UserProfile } from '@cosmichub/types';
-import ErrorBoundary from '../ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 
 import { BasicAccountForm, type BasicAccountData } from './BasicAccountForm';
 import { PersonalInfoForm, type PersonalInfoData } from './PersonalInfoForm';

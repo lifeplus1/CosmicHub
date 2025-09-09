@@ -49,17 +49,40 @@ const getChakraColor = (chakraKey: ChakraKey): string => {
 
 /**
  * Convert FrequencyPreset to FrequencyData format
+ * Handles both regular frequencies and binaural beats properly
  */
-export const convertPresetToFrequencyData = (preset: FrequencyPreset): FrequencyData => ({
-  frequency: preset.baseFrequency,
-  amplitude: 0.8,
-  phase: 0,
-  label: preset.name,
-  color: getCategoryColor(preset.category),
-  category: preset.category as FrequencyData['category'],
-  timestamp: Date.now(),
-  benefits: preset.benefits ? [...preset.benefits] : []
-});
+export const convertPresetToFrequencyData = (preset: FrequencyPreset): FrequencyData => {
+  // For binaural beats, use the binaural beat frequency as the primary frequency
+  // since that's what the brain perceives/entrains to
+  const displayFrequency = preset.binauralBeat && preset.binauralBeat > 0 
+    ? preset.binauralBeat 
+    : preset.baseFrequency;
+  
+  // Create enhanced label for binaural beats
+  const enhancedLabel = preset.binauralBeat && preset.binauralBeat > 0
+    ? `${preset.name} (${preset.binauralBeat} Hz binaural)`
+    : preset.name;
+
+  return {
+    frequency: displayFrequency,
+    amplitude: 0.8,
+    phase: 0,
+    label: enhancedLabel,
+    color: getCategoryColor(preset.category),
+    category: preset.category as FrequencyData['category'],
+    timestamp: Date.now(),
+    benefits: preset.benefits ? [...preset.benefits] : [],
+    // Store binaural beat metadata for UI components
+    metadata: {
+      ...preset.metadata,
+      isBinaural: !!(preset.binauralBeat && preset.binauralBeat > 0),
+      baseFrequency: preset.baseFrequency,
+      binauralBeat: preset.binauralBeat,
+      leftEar: preset.metadata?.leftEar || preset.baseFrequency,
+      rightEar: preset.metadata?.rightEar || (preset.baseFrequency + (preset.binauralBeat || 0))
+    }
+  };
+};
 
 /**
  * Frequency category interface for better organization

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { useAppNavigation } from '../hooks/useAppNavigation';
 import { getStripeService, StripeSession } from '@cosmichub/integrations';
-import ErrorBoundary from './ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 
 const Subscribe: React.FC = React.memo(() => {
   const { user } = useAuth();

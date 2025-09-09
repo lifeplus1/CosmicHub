@@ -34,6 +34,7 @@ export const FrequencyDataSchema = z.object({
   category: FrequencyCategorySchema,
   benefits: z.array(z.string()).optional(),
   duration: z.number().positive().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(), // Allow metadata for binaural beats and other extended data
 });
 
 // Infer TypeScript types from Zod schemas

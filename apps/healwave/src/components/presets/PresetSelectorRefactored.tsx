@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { FrequencyPreset, AudioSettings } from '@cosmichub/integrations';
 import { savePreset, getUserPresets, deletePreset } from '../../services/api';
-import ErrorBoundary from '../ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 
 // Import the new modular components
 import BuiltInPresets from './BuiltInPresets';

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import ErrorBoundary from './ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 
 interface ErrorTestComponentProps {
   title?: string;

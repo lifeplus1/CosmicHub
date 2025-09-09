@@ -47,7 +47,7 @@ import {
   AudioErrorSchema,
   validateFrequency,
 } from '../schemas/frequency.schema';
-import ErrorBoundary from './ErrorBoundary';
+import { ErrorBoundary } from '@cosmichub/ui';
 
 // Internal logger for audio player - production ready
 const audioLogger = {
