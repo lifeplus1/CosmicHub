@@ -22,9 +22,11 @@ export const CompactFrequencyList: React.FC<CompactFrequencyListProps> = ({
   frequencies,
   selectedFrequency,
   onFrequencySelect,
-  categoryFilter = 'all',
-  className = ''
+  categoryFilter,
+  className = ""
 }) => {
+  // DEBUG: Log what frequencies we're receiving
+  console.log('📊 CompactFrequencyList DEBUG: frequencies received', frequencies?.length, frequencies?.slice(0, 3));
   const [selectedEducation, setSelectedEducation] = useState<FrequencyEducation | null>(null);
   const [isEducationOpen, setIsEducationOpen] = useState(false);
 
@@ -85,11 +87,31 @@ export const CompactFrequencyList: React.FC<CompactFrequencyListProps> = ({
     return colors[category] ?? 'text-gray-400 bg-gray-500/10 border-gray-500/30';
   };
 
+  // Early return if no frequencies are available
+  if (!frequencies || frequencies.length === 0) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="text-center p-8 text-cosmic-silver">
+          <div className="text-2xl mb-2">🎵</div>
+          <p className="text-sm">No frequencies available</p>
+          <p className="text-xs text-cosmic-silver/60 mt-1">Check your category filter or try refreshing</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Compact List View */}
       <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-track-cosmic-purple/10 scrollbar-thumb-cosmic-purple/30">
-        {Object.entries(groupedFrequencies).map(([category, categoryFreqs]) => (
+        {Object.entries(groupedFrequencies).length === 0 ? (
+          <div className="text-center p-4 text-cosmic-silver">
+            <div className="text-xl mb-2">🔍</div>
+            <p className="text-sm">No frequencies match your filter</p>
+            <p className="text-xs text-cosmic-silver/60 mt-1">Try selecting 'all' categories</p>
+          </div>
+        ) : (
+          Object.entries(groupedFrequencies).map(([category, categoryFreqs]) => (
           <div key={category} className="mb-4">
             <div className={`text-xs font-semibold mb-2 px-2 py-1 rounded capitalize inline-block ${getCategoryColor(category)}`}>
               {category} ({categoryFreqs.length})
@@ -245,7 +267,8 @@ export const CompactFrequencyList: React.FC<CompactFrequencyListProps> = ({
               })}
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Educational Content Modal */}

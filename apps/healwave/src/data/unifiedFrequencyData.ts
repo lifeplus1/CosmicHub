@@ -387,8 +387,7 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
         }
         
         return convertPresetToFrequencyData(preset);
-      } catch (error) {
-         
+      } catch {
         // Conversion failed silently - remove console.error for production
         return null;
       }
@@ -396,7 +395,15 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
     .filter((preset): preset is FrequencyData => preset !== null);
 
   // Get all healing frequencies with validation
-  const healingFrequencies = getAllHealingFrequencies()
+  const healingFrequencies = getAllHealingFrequencies();
+  
+  // Debug: Check healing frequencies count
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    console.log('🔍 DEBUG: Healing frequencies count:', healingFrequencies.length);
+    console.log('🔍 DEBUG: First 3 healing frequencies:', healingFrequencies.slice(0, 3));
+  }
+  
+  const validatedHealingFrequencies = healingFrequencies
     .map(freq => {
       // Debug Beta High Focus specifically
       if (freq.label?.includes('Beta High Focus')) {
@@ -422,7 +429,7 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
   // Combine and deduplicate (integration presets take priority for exact matches)
   const combinedFrequencies = [...convertedIntegrationPresets];
   
-  healingFrequencies.forEach(healingFreq => {
+  validatedHealingFrequencies.forEach(healingFreq => {
     const existingIndex = combinedFrequencies.findIndex(existing => 
       Math.abs(existing.frequency - healingFreq.frequency) < 0.1
     );
@@ -462,7 +469,14 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
     .filter((freq): freq is FrequencyData => freq !== null);
 
   // Debug category information
-  // Unified frequency presets loaded - logging removed for production
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    console.log('🎯 DEBUG: Final unified frequency presets:', finalValidatedFrequencies.length);
+    const categories: Record<string, number> = {};
+    finalValidatedFrequencies.forEach(f => {
+      categories[f.category] = (categories[f.category] || 0) + 1;
+    });
+    console.log('🎯 DEBUG: Categories breakdown:', categories);
+  }
   
   return finalValidatedFrequencies;
 };
@@ -470,7 +484,7 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
 /**
  * Get presets filtered by category
  */
-export const getPresetsByCategory = (category: 'all' | string): FrequencyData[] => {
+export const getPresetsByCategory = (category: string): FrequencyData[] => {
   const allPresets = getUnifiedFrequencyPresets();
   
   if (category === 'all') {

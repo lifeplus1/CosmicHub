@@ -19,13 +19,19 @@ export const FrequencyControls: React.FC<FrequencyControlsProps> = ({
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   
   // Get all available frequencies
-  const allFrequencies = useMemo(() => getUnifiedFrequencyPresets(), []);
+  const allFrequencies = useMemo(() => {
+    const frequencies = getUnifiedFrequencyPresets();
+    console.log('🎛️ FrequencyControls DEBUG: allFrequencies', frequencies?.length, frequencies?.slice(0, 2));
+    return frequencies;
+  }, []);
   
   // Get filtered frequencies based on category
   const filteredFrequencies = useMemo(() => {
-    return categoryFilter === 'all' 
+    const result = categoryFilter === 'all' 
       ? allFrequencies 
       : getPresetsByCategory(categoryFilter);
+    console.log('🔍 FrequencyControls DEBUG: filteredFrequencies', result?.length, 'category:', categoryFilter);
+    return result;
   }, [allFrequencies, categoryFilter]);
 
   // Find currently selected frequency data

@@ -11,7 +11,7 @@ import '@testing-library/jest-dom';
 vi.mock('@radix-ui/react-slider', () => ({
   Root: ({ children, onValueChange, value, disabled, ...props }: {
     children: React.ReactNode;
-    onValueChange: (_value: number[]) => void;
+    onValueChange: (value: number[]) => void;
     value: number[];
     disabled?: boolean;
     [key: string]: unknown;

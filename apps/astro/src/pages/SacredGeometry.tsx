@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo } from 'react';
-import { SacredGeometryDemo } from '../components/demos/SacredGeometryDemo';
 import DomainPageFrame from '../components/layout/DomainPageFrame';
 import { safeParseDomainPageFrameProps, type DomainPageFramePropsType } from '../schemas';
 import { logger } from '@cosmichub/config';
@@ -71,11 +70,18 @@ const SacredGeometryPage: React.FC<SacredGeometryPageProps> = ({
   return (
     <DomainPageFrame {...domainPageFrameProps}>
       <div 
-        className="min-h-screen bg-gray-950"
+        className="min-h-screen bg-gray-950 flex items-center justify-center"
         role="main"
         aria-label="Sacred Geometry Visualization Interface"
       >
-        <SacredGeometryDemo />
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-purple-300 mb-4">
+            Sacred Geometry Visualization
+          </h2>
+          <p className="text-gray-400">
+            Coming soon - Interactive sacred geometry visualization
+          </p>
+        </div>
       </div>
     </DomainPageFrame>
   );

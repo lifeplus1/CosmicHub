@@ -10,7 +10,7 @@ vi.mock('@cosmichub/auth', () => ({
 
 // Mock the frequency control components
 vi.mock('../../components/FrequencyControls', () => ({
-  default: ({ onFrequencyChange }: { onFrequencyChange?: (_freq: number) => void }) => (
+  default: ({ onFrequencyChange }: { onFrequencyChange?: (freq: number) => void }) => (
     <div data-testid="frequency-controls-current">
       Current Controls
       <button onClick={() => onFrequencyChange?.(528)} data-testid="basic-frequency-btn">

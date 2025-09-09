@@ -107,9 +107,11 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
     };
 
     if (isPlaying) {
-      void stopFrequency();
+      stopFrequency();
     } else {
-      void playFrequency(frequencyData, volume, duration, binauralEnabled, binauralBeat);
+      playFrequency(frequencyData, volume, duration, binauralEnabled, binauralBeat).catch(() => {
+        // Handle error silently - error already logged in playFrequency
+      });
     }
   }, [isPlaying, stopFrequency, playFrequency, currentFrequency, volume, duration, binauralEnabled, binauralBeat]);
 

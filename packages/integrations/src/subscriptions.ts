@@ -110,9 +110,53 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
 class SubscriptionManager extends SimpleEventEmitter {
   private currentSubscription: UserSubscription | null = null;
   private plans: SubscriptionPlan[] = SUBSCRIPTION_PLANS;
+  private isLoading: boolean = false;
 
   constructor() {
     super();
+  }
+
+  // Load user subscription data (matches expected interface)
+  async loadUserSubscription(user: { uid: string } | null): Promise<void> {
+    if (!user || this.isLoading) return;
+    
+    this.isLoading = true;
+    this.emit('subscription:loading', true);
+
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // For now, set up a basic free subscription
+      // In a real implementation, this would fetch from your backend
+      const subscription: UserSubscription = {
+        userId: user.uid,
+        planId: 'free',
+        status: 'active',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        cancelAtPeriodEnd: false,
+        apps: ['astro', 'healwave'],
+      };
+
+      this.currentSubscription = subscription;
+      this.emit('subscription:loaded', subscription);
+    } catch (error) {
+      this.emit('subscription:error', error);
+      // Set fallback free subscription on error
+      this.currentSubscription = {
+        userId: user.uid,
+        planId: 'free',
+        status: 'active',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        cancelAtPeriodEnd: false,
+        apps: ['astro', 'healwave'],
+      };
+    } finally {
+      this.isLoading = false;
+      this.emit('subscription:loading', false);
+    }
   }
 
   // Initialize with user subscription data
@@ -131,9 +175,8 @@ class SubscriptionManager extends SimpleEventEmitter {
     if (!this.currentSubscription) {
       return this.plans.find(p => p.id === 'free') ?? null;
     }
-    return (
-      this.plans.find(p => p.id === this.currentSubscription!.planId) ?? null
-    );
+    const plan = this.plans.find(p => p.id === this.currentSubscription!.planId);
+    return plan ?? this.plans.find(p => p.id === 'free') ?? null;
   }
 
   // Check feature access
