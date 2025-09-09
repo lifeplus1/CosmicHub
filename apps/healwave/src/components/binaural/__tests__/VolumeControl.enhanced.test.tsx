@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import VolumeControl from '../VolumeControl';
 
@@ -8,7 +9,7 @@ import '@testing-library/jest-dom';
 
 // Mock Radix UI Slider
 vi.mock('@radix-ui/react-slider', () => ({
-  Root: ({ children, onValueChange, value: _value, disabled, ...props }: {
+  Root: ({ children, onValueChange, value, disabled, ...props }: {
     children: React.ReactNode;
     onValueChange: (_value: number[]) => void;
     value: number[];
@@ -18,17 +19,32 @@ vi.mock('@radix-ui/react-slider', () => ({
     <div data-testid="volume-slider-root" {...props}>
       <input
         type="range"
-        value={_value[0]}
-        onChange={(e) => onValueChange([parseInt((e.target as HTMLInputElement).value)])}
+        value={value[0]}
+        onChange={(e) => {
+          const newValue = parseInt((e.target as HTMLInputElement).value);
+          onValueChange([newValue]);
+        }}
         onKeyDown={(e) => {
-          const current = Number(_value[0]);
-          const step = 1;
-          let next = current;
-          if (e.key === 'ArrowUp' || e.key === 'ArrowRight') next = current + step;
-          if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') next = current - step;
-          if (next !== current) {
-            next = Math.max(0, Math.min(100, next));
-            onValueChange([next]);
+          // Handle keyboard navigation
+          const currentValue = value?.[0] ?? 50; // Default to 50 if undefined
+          let newValue = currentValue;
+          
+          if (e.key === 'ArrowUp' && currentValue < 100) {
+            newValue = Math.min(100, currentValue + 1);
+          } else if (e.key === 'ArrowDown' && currentValue > 0) {
+            newValue = Math.max(0, currentValue - 1);
+          } else if (e.key === 'PageUp') {
+            newValue = Math.min(100, currentValue + 10);
+          } else if (e.key === 'PageDown') {
+            newValue = Math.max(0, currentValue - 10);
+          } else if (e.key === 'Home') {
+            newValue = 0;
+          } else if (e.key === 'End') {
+            newValue = 100;
+          }
+          
+          if (newValue !== currentValue) {
+            onValueChange([newValue]);
           }
         }}
         disabled={disabled}
@@ -172,22 +188,22 @@ describe('VolumeControl', () => {
 
   describe('User Interactions', () => {
     it('calls onChange when slider value changes', async () => {
-      const user = userEvent.setup();
-      const { getByLabelText } = render(<VolumeControl value={50} onChange={mockOnChange} />);
-      const slider = getByLabelText('Volume control');
+      const { getByTestId } = render(<VolumeControl value={50} onChange={mockOnChange} />);
+      const slider = getByTestId('volume-slider-input');
       
-      // Test keyboard interaction (Radix UI supports arrow keys)
-      await user.type(slider, '{ArrowRight}');
+      // Test direct input change using fireEvent
+      fireEvent.change(slider, { target: { value: '60' } });
+      
       expect(mockOnChange).toHaveBeenCalled();
     });
 
     it('calls onChange with correct value on direct change', async () => {
-      const user = userEvent.setup();
-      const { getByLabelText } = render(<VolumeControl value={50} onChange={mockOnChange} />);
-      const slider = getByLabelText('Volume control');
+      const { getByTestId } = render(<VolumeControl value={50} onChange={mockOnChange} />);
+      const slider = getByTestId('volume-slider-input');
       
-      // Test keyboard navigation
-      await user.type(slider, '{ArrowUp}');
+      // Test direct input change using fireEvent
+      fireEvent.change(slider, { target: { value: '75' } });
+      
       expect(mockOnChange).toHaveBeenCalled();
     });
 

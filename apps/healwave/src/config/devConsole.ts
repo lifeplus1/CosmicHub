@@ -1,5 +1,13 @@
 /*
- Centralized logger for HealWave app using structured logging.
+ Centralized const testAware: ConsoleLike = {
+  info: (...args) => {
+    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') {
+      // Mirror to console.info so tests can spy
+      // eslint-disable-next-line no-console
+      console.info(...args);
+    }
+    (base as unknown as ConsoleLike)?.info?.(...args);
+  },r HealWave app using structured logging.
  Replaces devConsole with proper logger instance.
 */
 

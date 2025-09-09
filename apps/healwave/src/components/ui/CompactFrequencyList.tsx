@@ -112,44 +112,105 @@ export const CompactFrequencyList: React.FC<CompactFrequencyListProps> = ({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {/* Frequency Info */}
+                    {/* Frequency Info with Enhanced Display */}
                     <div className="flex items-center space-x-3 flex-1">
-                      <div
-                        className="w-3 h-3 rounded-full border"
-                        data-color={frequency.color}
-                      />
-                      <div>
+                      <Tooltip.Provider delayDuration={200}>
+                        <Tooltip.Root>
+                          <Tooltip.Trigger asChild>
+                            <FrequencyColorDot color={frequency.color} />
+                          </Tooltip.Trigger>
+                          <Tooltip.Content className="px-2 py-1 text-xs bg-black/90 rounded border border-white/20">
+                            {frequency.category.charAt(0).toUpperCase() + frequency.category.slice(1)} Category
+                          </Tooltip.Content>
+                        </Tooltip.Root>
+                      </Tooltip.Provider>
+                      <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-white">
                           {frequency.frequency.toFixed(1)} Hz
                         </div>
-                        <div className="text-xs text-cosmic-silver/70 truncate max-w-32">
-                          {frequency.label}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Benefits Preview */}
-                    <div className="flex-1 px-2">
-                      {frequency.benefits && frequency.benefits.length > 0 && (
-                        <Tooltip.Provider>
+                        <Tooltip.Provider delayDuration={400}>
                           <Tooltip.Root>
                             <Tooltip.Trigger asChild>
-                              <div className="text-xs text-cosmic-silver/60 truncate">
-                                {frequency.benefits.slice(0, 2).join(', ')}
-                                {frequency.benefits.length > 2 && '...'}
+                              <div className="text-xs text-cosmic-silver/70 truncate max-w-32 cursor-help hover:text-cosmic-silver transition-colors">
+                                {frequency.label}
                               </div>
                             </Tooltip.Trigger>
-                            <Tooltip.Content className="max-w-xs p-2 text-xs text-white bg-black rounded-lg border border-white/20">
-                              <div className="font-medium mb-1">Benefits:</div>
-                              <ul className="list-disc list-inside space-y-1">
-                                {frequency.benefits.map((benefit, index) => (
-                                  <li key={index}>{benefit}</li>
-                                ))}
-                              </ul>
+                            <Tooltip.Content 
+                              className="max-w-xs p-2 text-xs bg-black/90 rounded-lg border border-white/20"
+                              side="top"
+                              align="start"
+                            >
+                              <div className="font-medium text-cosmic-gold mb-1">
+                                {frequency.label}
+                              </div>
+                              <div className="text-cosmic-silver">
+                                {frequency.category.charAt(0).toUpperCase() + frequency.category.slice(1)} frequency at {frequency.frequency.toFixed(1)} Hz
+                              </div>
                             </Tooltip.Content>
                           </Tooltip.Root>
                         </Tooltip.Provider>
-                      )}
+                      </div>
+                    </div>
+
+                    {/* Benefits Preview with Enhanced Tooltips */}
+                    <div className="flex-1 px-2">
+                      <Tooltip.Provider delayDuration={300}>
+                        <Tooltip.Root>
+                          <Tooltip.Trigger asChild>
+                            <div className="text-xs text-cosmic-silver/60 truncate cursor-help hover:text-cosmic-silver transition-colors">
+                              {frequency.benefits && frequency.benefits.length > 0 ? (
+                                <>
+                                  {frequency.benefits.slice(0, 2).join(', ')}
+                                  {frequency.benefits.length > 2 && '...'}
+                                </>
+                              ) : (
+                                <span className="text-cosmic-silver/40 italic">Hover for info</span>
+                              )}
+                            </div>
+                          </Tooltip.Trigger>
+                          <Tooltip.Content 
+                            className="max-w-sm p-3 text-sm text-white bg-gradient-to-b from-cosmic-purple/90 to-black/90 rounded-lg border border-cosmic-purple/50 shadow-xl backdrop-blur-sm z-50"
+                            side="top"
+                            align="start"
+                            sideOffset={8}
+                          >
+                            <div className="space-y-2">
+                              {/* Frequency Info */}
+                              <div className="border-b border-white/20 pb-2 mb-2">
+                                <div className="font-semibold text-cosmic-gold">
+                                  {frequency.label}
+                                </div>
+                                <div className="text-xs text-cosmic-silver opacity-75">
+                                  {frequency.frequency.toFixed(1)} Hz • {frequency.category.charAt(0).toUpperCase() + frequency.category.slice(1)}
+                                </div>
+                              </div>
+                              
+                              {/* Benefits */}
+                              {frequency.benefits && frequency.benefits.length > 0 ? (
+                                <div>
+                                  <div className="font-medium text-cosmic-gold mb-1 text-xs">Benefits:</div>
+                                  <ul className="list-disc list-inside space-y-1 text-xs">
+                                    {frequency.benefits.map((benefit, index) => (
+                                      <li key={index} className="text-cosmic-silver">{benefit}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ) : (
+                                <div className="text-xs text-cosmic-silver italic">
+                                  Frequency for {frequency.category} healing and wellness.
+                                </div>
+                              )}
+                              
+                              {/* Usage Hint */}
+                              <div className="border-t border-white/20 pt-2 mt-2">
+                                <div className="text-xs text-cosmic-silver/70 italic">
+                                  💡 Click to select this frequency
+                                </div>
+                              </div>
+                            </div>
+                          </Tooltip.Content>
+                        </Tooltip.Root>
+                      </Tooltip.Provider>
                     </div>
 
                     {/* Action Buttons */}
@@ -358,6 +419,16 @@ const EffectCard: React.FC<EffectCardProps> = ({ title, effects, color }) => {
         )}
       </ul>
     </div>
+  );
+};
+
+// Component for displaying colored frequency dots
+const FrequencyColorDot: React.FC<{ color: string }> = ({ color }) => {
+  return (
+    <div
+      className="w-3 h-3 rounded-full border-2 cursor-help transition-all duration-200 hover:scale-125 bg-cosmic-purple border-cosmic-purple"
+      data-frequency-color={color}
+    />
   );
 };
 

@@ -8,7 +8,7 @@ import {
   getAllPresets, 
   FrequencyPreset
 } from '@cosmichub/integrations';
-import { CHAKRA_FREQUENCIES } from '../components/enhancements/chakraConstants';
+import { CHAKRA_FREQUENCIES, ChakraKey } from '../components/enhancements/chakraConstants';
 import { 
   ValidatedFrequencyData,
   validateFrequencyData,
@@ -17,7 +17,6 @@ import {
 
 // Use ValidatedFrequencyData instead of importing from UI to ensure type consistency
 type FrequencyData = ValidatedFrequencyData;
-import { ChakraKey } from '../components/enhancements/chakraConstants';
 
 /**
  * Get color based on category
@@ -89,17 +88,8 @@ export const convertPresetToFrequencyData = (preset: FrequencyPreset): Frequency
   const validation = safeValidateFrequencyData(frequencyData);
   
   if (!validation.success) {
-    // eslint-disable-next-line no-console
-    console.warn(`⚠️ Frequency validation failed for preset "${preset.name}":`, {
-      preset: preset.name,
-      frequency: displayFrequency,
-      category: preset.category,
-      errors: validation.error.issues.map((issue) => 
-        `${issue.path.join('.')}: ${issue.message}`
-      ).join(', ')
-    });
-    
-    // Return a safe fallback with validated structure
+     
+    // Frequency validation failed silently - remove console.warn for production    // Return a safe fallback with validated structure
     return validateFrequencyData({
       frequency: Math.max(1, Math.min(20000, displayFrequency || 440)), // Clamp to valid range
       amplitude: 0.8,
@@ -377,6 +367,11 @@ const getAllHealingFrequencies = (): FrequencyData[] => {
 export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
   const integrationPresets = getAllPresets();
   
+  // Debug: Check if we're getting integration presets
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    console.log('🔍 DEBUG: Integration presets count:', integrationPresets.length);
+  }
+  
   // Convert integration presets to FrequencyData format with validation
   const convertedIntegrationPresets = integrationPresets
     .map(preset => {
@@ -393,8 +388,8 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
         
         return convertPresetToFrequencyData(preset);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(`❌ Failed to convert preset "${preset.name}":`, error);
+         
+        // Conversion failed silently - remove console.error for production
         return null;
       }
     })
@@ -405,31 +400,19 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
     .map(freq => {
       // Debug Beta High Focus specifically
       if (freq.label?.includes('Beta High Focus')) {
-        // eslint-disable-next-line no-console
-        console.log('🔍 DEBUG: Found Beta High Focus frequency:', {
-          frequency: freq.frequency,
-          label: freq.label,
-          category: freq.category,
-          benefits: freq.benefits
-        });
+        // DEBUG: Found Beta High Focus frequency - logging removed for production
       }
       
       const validation = safeValidateFrequencyData(freq);
       if (!validation.success) {
-        // eslint-disable-next-line no-console
-        console.warn(`⚠️ Invalid healing frequency "${freq.label}":`, {
-          frequency: freq.frequency,
-          errors: validation.error.issues.map(issue => 
-            `${issue.path.join('.')}: ${issue.message}`
-          ).join(', ')
-        });
+        // Invalid healing frequency - warning removed for production
         return null;
       }
       
       // Debug successful Beta High Focus validation
       if (freq.label?.includes('Beta High Focus')) {
-        // eslint-disable-next-line no-console
-        console.log('✅ DEBUG: Beta High Focus passed validation:', validation.data);
+         
+        // DEBUG: Beta High Focus passed validation - logging removed for production
       }
       
       return validation.data;
@@ -471,14 +454,7 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
     .map(freq => {
       const validation = safeValidateFrequencyData(freq);
       if (!validation.success) {
-        // eslint-disable-next-line no-console
-        console.warn(`⚠️ Combined frequency failed final validation "${freq.label}":`, {
-          frequency: freq.frequency,
-          category: freq.category,
-          errors: validation.error.issues.map(issue => 
-            `${issue.path.join('.')}: ${issue.message}`
-          ).join(', ')
-        });
+        // Combined frequency failed final validation - warning removed for production
         return null;
       }
       return validation.data;
@@ -486,15 +462,7 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
     .filter((freq): freq is FrequencyData => freq !== null);
 
   // Debug category information
-  const categoryCount = finalValidatedFrequencies.reduce((acc, freq) => {
-    acc[freq.category] = (acc[freq.category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // eslint-disable-next-line no-console
-  console.info(`✅ Unified frequency presets loaded: ${finalValidatedFrequencies.length} validated frequencies`);
-  // eslint-disable-next-line no-console
-  console.info('📊 Frequencies by category:', categoryCount);
+  // Unified frequency presets loaded - logging removed for production
   
   return finalValidatedFrequencies;
 };
@@ -591,7 +559,7 @@ export const suggestFrequencyForPurpose = (purpose: string): FrequencyData[] => 
   const suggestions: FrequencyData[] = [];
 
   categories.forEach(category => {
-    const categoryFreqs = getFrequenciesByCategory(category as keyof typeof HEALING_FREQUENCIES);
+    const categoryFreqs = getFrequenciesByCategory(category);
     suggestions.push(...categoryFreqs.slice(0, 3)); // Top 3 from each category
   });
 

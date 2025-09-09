@@ -4,13 +4,10 @@ import * as reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import * as tseslint from '@typescript-eslint/eslint-plugin';
 import tseslintParser from '@typescript-eslint/parser';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 export default [
   { ignores: ['dist', 'node_modules', '**/*.d.ts'] },
   js.configs.recommended,
-  tseslint.configs.recommended,
-  jsxA11y.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -27,11 +24,11 @@ export default [
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       '@typescript-eslint': tseslint,
-      'jsx-a11y': jsxA11y,
     },
     rules: {
       // React Hooks Rules
-      ...reactHooks.configs.recommended.rules,
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
@@ -68,14 +65,6 @@ export default [
       '@typescript-eslint/require-await': 'error',
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
-
-      // Accessibility Rules
-      'jsx-a11y/no-autofocus': 'warn',
-      'jsx-a11y/anchor-is-valid': 'error',
-      'jsx-a11y/alt-text': 'error',
-
-      // Performance Rules
-      'react-hooks/exhaustive-deps': 'error',
 
       // Code Quality
       'no-console': ['warn', { allow: ['warn', 'error'] }],

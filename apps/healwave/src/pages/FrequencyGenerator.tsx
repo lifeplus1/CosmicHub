@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { EnhancedFrequencyGenerator } from '../components/EnhancedFrequencyGenerator';
 import { ValidatedFrequencyData as FrequencyData } from '../schemas/frequencySchemas';
 import { devConsole } from '../config/devConsole';
-import CymaticVisualizer from '../components/CymaticVisualizer';
 
 const FrequencyGenerator: React.FC = () => {
   const [sessionStats, setSessionStats] = useState({
@@ -11,19 +10,19 @@ const FrequencyGenerator: React.FC = () => {
     favoriteFrequency: null as number | null
   });
 
-  // State for cymatics visualizer
-  const [currentFrequency, setCurrentFrequency] = useState(528);
-  const [isPlaying, setIsPlaying] = useState(false);
+  // State for future cymatics visualizer
+  const [_currentFrequency, _setCurrentFrequency] = useState(528);
+  const [_isPlaying, _setIsPlaying] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const handleFrequencyChange = useCallback((frequency: number) => {
     devConsole.info('🎵 Frequency changed:', frequency);
-    setCurrentFrequency(frequency);
+    _setCurrentFrequency(frequency);
   }, []);
 
   const handlePresetSelect = useCallback((preset: FrequencyData) => {
     devConsole.info('🎵 Preset selected:', preset);
-    setCurrentFrequency(preset.frequency);
+    _setCurrentFrequency(preset.frequency);
     setSessionStats(prev => ({
       ...prev,
       favoriteFrequency: preset.frequency,
@@ -45,7 +44,7 @@ const FrequencyGenerator: React.FC = () => {
 
   // Initialize audio context for cymatics visualizer
   useEffect(() => {
-    const initAudioContext = async () => {
+    const initAudioContext = () => {
       try {
         interface ExtendedWindow extends Window {
           webkitAudioContext?: typeof AudioContext;
@@ -64,14 +63,14 @@ const FrequencyGenerator: React.FC = () => {
     
     return () => {
       if (audioContextRef.current) {
-        audioContextRef.current.close();
+        void audioContextRef.current.close();
       }
     };
   }, []);
 
   // Track playing state from EnhancedFrequencyGenerator
   const handlePlayStateChange = useCallback((playing: boolean) => {
-    setIsPlaying(playing);
+    _setIsPlaying(playing);
   }, []);
 
   return (
@@ -124,21 +123,24 @@ const FrequencyGenerator: React.FC = () => {
         className="max-w-7xl mx-auto"
       />
 
-      {/* Cymatics Visualization */}
+      {/* Cymatics Visualization - Coming Soon */}
       <div className='mt-8 max-w-4xl mx-auto'>
         <div className='bg-cosmic-purple/10 rounded-lg p-6 border border-cosmic-purple/20'>
           <h3 className='text-xl font-semibold text-cosmic-gold mb-4 text-center'>
-            🌊 Cymatics Visualization
+            🌊 Cymatics Visualization (Coming Soon)
           </h3>
           <p className='text-sm text-cosmic-silver/70 mb-6 text-center max-w-2xl mx-auto'>
-            Watch how sound creates beautiful geometric patterns. This visualization shows the 
-            vibration patterns that would form if the current frequency were played through sand or water.
+            Watch how sound creates beautiful geometric patterns. This visualization will show the 
+            vibration patterns that form when frequencies are played through sand or water.
           </p>
-          <CymaticVisualizer
-            frequency={currentFrequency}
-            isPlaying={isPlaying}
-            audioContext={audioContextRef.current || undefined}
-          />
+          <div className='flex items-center justify-center h-32 bg-black/20 rounded-lg border border-white/10'>
+            <div className='text-center'>
+              <div className='text-4xl mb-2'>🔧</div>
+              <div className='text-sm text-cosmic-silver'>
+                Advanced cymatics visualization in development
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

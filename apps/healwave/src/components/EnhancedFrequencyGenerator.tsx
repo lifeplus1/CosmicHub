@@ -1,11 +1,11 @@
 import React, { memo, useState, useCallback, useId } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { cn } from '@/lib/utils';
+import { cn } from '../utils/cn';
 import { Waves } from 'lucide-react';
 
 // Import new modular components
-import { FrequencyControls } from './enhanced/FrequencyControls';
+import { FrequencyControls } from './enhanced';
 import { AudioControls } from './AudioControls';
 import { BinauralControls } from './BinauralControls';
 import { AdvancedControls } from './AdvancedControls';
@@ -16,7 +16,7 @@ import { StatusDisplay } from './StatusDisplay';
 import { SacredGeometryCanvas } from './enhancements/SacredGeometryCanvas';
 
 // Import constants and schemas
-import { FREQUENCY_CONSTANTS, FREQUENCY_CATEGORIES, TAB_OPTIONS } from './constants/frequencyConstants';
+import { FREQUENCY_CONSTANTS } from './constants/frequencyConstants';
 
 // Import hooks
 import { useAudioEngineManager } from './hooks/useAudioEngineManager';
@@ -24,7 +24,6 @@ import { useAudioEngineManager } from './hooks/useAudioEngineManager';
 // Import types
 import type { ValidatedFrequencyData as FrequencyData } from '../schemas/frequencySchemas';
 import type { GeometryPattern } from './enhancements/sacredGeometry';
-import type { ChakraKey } from './enhancements/chakraConstants';
 
 export interface EnhancedFrequencyGeneratorProps {
   className?: string;
@@ -46,7 +45,6 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
   showVisualization = true,
   realTimeUpdates: _realTimeUpdates = true,
   onFrequencyChange,
-  onPresetSelect,
   onVolumeChange,
   onDurationChange,
   onPlayStateChange
@@ -57,31 +55,22 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
   });
 
   // Core state
-  const [currentFrequency, setCurrentFrequency] = useState(initialFrequency);
-  const [selectedPreset, setSelectedPreset] = useState<FrequencyData | null>(null);
-  const [volume, setVolume] = useState(FREQUENCY_CONSTANTS.DEFAULT_VOLUME);
-  const [duration, setDuration] = useState(FREQUENCY_CONSTANTS.DEFAULT_DURATION);
+  const [currentFrequency, setCurrentFrequency] = useState<number>(initialFrequency);
+  const [volume, setVolume] = useState<number>(FREQUENCY_CONSTANTS.DEFAULT_VOLUME);
+  const [duration, setDuration] = useState<number>(FREQUENCY_CONSTANTS.DEFAULT_DURATION);
 
   // Advanced features state
   const [binauralEnabled, setBinauralEnabled] = useState(false);
-  const [binauralBeat, setBinauralBeat] = useState(FREQUENCY_CONSTANTS.DEFAULT_BINAURAL_BEAT);
+  const [binauralBeat, setBinauralBeat] = useState<number>(FREQUENCY_CONSTANTS.DEFAULT_BINAURAL_BEAT);
   const [showSacredGeometry, setShowSacredGeometry] = useState(false);
-  const [selectedChakra, setSelectedChakra] = useState<ChakraKey | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<typeof FREQUENCY_CATEGORIES[number]>('all');
-  const [customPresets, setCustomPresets] = useState<FrequencyData[]>([]);
-  const [presetName, setPresetName] = useState('');
-  const [showPresetCreator, setShowPresetCreator] = useState(false);
 
   // UI state
-  const [visualizationData, setVisualizationData] = useState<FrequencyData[]>([]);
-  const [geometryPattern, setGeometryPattern] = useState<GeometryPattern | null>(null);
-  const [activeTab, setActiveTab] = useState<typeof TAB_OPTIONS[number]>('frequencies');
+  const [_geometryPattern, _setGeometryPattern] = useState<GeometryPattern | null>(null);
 
   // Refs and IDs
-  const volumeLabelId = useId();
   const durationLabelId = useId();
 
-  const { ref: inViewRef, inView } = useInView({
+  const { ref: inViewRef } = useInView({
     threshold: 0.1,
     triggerOnce: true
   });
@@ -105,71 +94,34 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
     onDurationChange?.(newDuration);
   }, [onDurationChange]);
 
-  // Handle preset selection
-  const handlePresetSelect = useCallback((preset: FrequencyData) => {
-    setSelectedPreset(preset);
-    setCurrentFrequency(preset.frequency);
-    onPresetSelect?.(preset);
-  }, [onPresetSelect]);
-
   // Handle play/pause
-  const handlePlayPause = useCallback(async () => {
+  const handlePlayPause = useCallback(() => {
+    const frequencyData: FrequencyData = {
+      frequency: currentFrequency,
+      amplitude: volume,
+      phase: 0,
+      label: `Custom: ${currentFrequency}Hz`,
+      color: '#00ff88',
+      category: 'custom',
+      benefits: ['Custom frequency']
+    };
+
     if (isPlaying) {
-      await stopFrequency();
+      void stopFrequency();
     } else {
-      await playFrequency(currentFrequency, {
-        volume,
-        duration,
-        binauralEnabled,
-        binauralBeat,
-        selectedChakra
-      });
+      void playFrequency(frequencyData, volume, duration, binauralEnabled, binauralBeat);
     }
-  }, [isPlaying, stopFrequency, playFrequency, currentFrequency, volume, duration, binauralEnabled, binauralBeat, selectedChakra]);
+  }, [isPlaying, stopFrequency, playFrequency, currentFrequency, volume, duration, binauralEnabled, binauralBeat]);
 
   // Handle binaural beat changes
   const handleBinauralBeatChange = useCallback((beat: number) => {
     setBinauralBeat(beat);
   }, []);
 
-  // Handle chakra selection
-  const handleChakraSelect = useCallback((chakra: ChakraKey | null) => {
-    setSelectedChakra(chakra);
-  }, []);
-
-  // Handle category filter changes
-  const handleCategoryFilterChange = useCallback((category: typeof FREQUENCY_CATEGORIES[number]) => {
-    setCategoryFilter(category);
-  }, []);
-
-  // Handle tab changes
-  const handleTabChange = useCallback((tab: typeof TAB_OPTIONS[number]) => {
-    setActiveTab(tab);
-  }, []);
-
   // Handle sacred geometry toggle
   const handleSacredGeometryToggle = useCallback((enabled: boolean) => {
     setShowSacredGeometry(enabled);
   }, []);
-
-  // Handle custom preset creation
-  const handleCreateCustomPreset = useCallback(() => {
-    if (presetName.trim()) {
-      const newPreset: FrequencyData = {
-        id: `custom-${Date.now()}`,
-        name: presetName.trim(),
-        frequency: currentFrequency,
-        category: 'other',
-        description: `Custom preset at ${currentFrequency}Hz`,
-        benefits: ['Custom frequency'],
-        duration: duration,
-        volume: volume
-      };
-      setCustomPresets(prev => [...prev, newPreset]);
-      setPresetName('');
-      setShowPresetCreator(false);
-    }
-  }, [presetName, currentFrequency, duration, volume]);
 
   return (
     <div
@@ -193,30 +145,34 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
       </div>
 
       {/* Main Controls Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {/* Frequency Controls */}
-        <FrequencyControls
-          currentFrequency={currentFrequency}
-          onFrequencyChange={handleFrequencyChange}
-          volumeLabelId={volumeLabelId}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Frequency Controls - Takes up 2 columns on large screens */}
+        <div className="lg:col-span-2">
+          <FrequencyControls
+            currentFrequency={currentFrequency}
+            onFrequencyChange={handleFrequencyChange}
+          />
+        </div>
 
-        {/* Audio Controls */}
-        <AudioControls
-          volume={volume}
-          duration={duration}
-          onVolumeChange={handleVolumeChange}
-          onDurationChange={handleDurationChange}
-          durationLabelId={durationLabelId}
-        />
+        {/* Right Column Controls */}
+        <div className="space-y-6">
+          {/* Audio Controls */}
+          <AudioControls
+            volume={volume}
+            duration={duration}
+            onVolumeChange={handleVolumeChange}
+            onDurationChange={handleDurationChange}
+            durationLabelId={durationLabelId}
+          />
 
-        {/* Binaural Controls */}
-        <BinauralControls
-          binauralEnabled={binauralEnabled}
-          onBinauralEnabledChange={setBinauralEnabled}
-          binauralBeat={binauralBeat}
-          onBinauralBeatChange={handleBinauralBeatChange}
-        />
+          {/* Binaural Controls */}
+          <BinauralControls
+            binauralEnabled={binauralEnabled}
+            onBinauralEnabledChange={setBinauralEnabled}
+            binauralBeat={binauralBeat}
+            onBinauralBeatChange={handleBinauralBeatChange}
+          />
+        </div>
       </div>
 
       {/* Advanced Controls */}
@@ -226,7 +182,7 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
       />
 
       {/* Sacred Geometry Visualization */}
-      {showVisualization && showSacredGeometry && geometryPattern && (
+      {showVisualization && showSacredGeometry && _geometryPattern && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -234,7 +190,7 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
           className="flex justify-center"
         >
           <SacredGeometryCanvas
-            pattern={geometryPattern}
+            pattern={_geometryPattern}
             className="w-full max-w-md h-64"
           />
         </motion.div>

@@ -299,10 +299,10 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
         .attr('dominant-baseline', 'middle')
         .attr('font-size', interactive ? '24' : '20')
         .attr('font-weight', 'bold')
-        .attr('fill', signColors[index] || '#666666')
+        .attr('fill', signColors[index] ?? '#666666')
         .attr('stroke', '#ffffff')
         .attr('stroke-width', 0.5)
-        .text(signSymbols[index] || '?')
+        .text(signSymbols[index] ?? '?')
         .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.3)');
     });
 
@@ -339,7 +339,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
           .style('cursor', 'pointer')
           .on('mouseover', function (event: MouseEvent) {
             showTooltip(
-              `<strong>House ${i + 1}</strong><br/>Sign: ${houseData?.sign || 'Unknown'}<br/>Planets: None`,
+              `<strong>House ${i + 1}</strong><br/>Sign: ${houseData?.sign ?? 'Unknown'}<br/>Planets: None`,
               { pageX: event.pageX, pageY: event.pageY }
             );
           })
@@ -389,8 +389,8 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
           .attr('cx', Math.cos(angle) * planetRadius)
           .attr('cy', Math.sin(angle) * planetRadius)
           .attr('r', planetRadius_local)
-          .attr('fill', isSelected ? (planetColors[name] || '#ffffff') : '#ffffff')
-          .attr('stroke', planetColors[name] || '#333333')
+          .attr('fill', isSelected ? (planetColors[name] ?? '#ffffff') : '#ffffff')
+          .attr('stroke', planetColors[name] ?? '#333333')
           .attr('stroke-width', isHighlighted ? 4 : 2)
           .attr('fill-opacity', 0.9)
           .style('filter', isSelected ? 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' : 'none');
@@ -404,8 +404,8 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
           .attr('dominant-baseline', 'middle')
           .attr('font-size', isSelected ? '20' : (size === 'sm' ? '14' : '16'))
           .attr('font-weight', 'bold')
-          .attr('fill', isSelected ? '#ffffff' : (planetColors[name] || '#333333'))
-          .text(planetSymbols[name] || name.slice(0, 2).toUpperCase());
+          .attr('fill', isSelected ? '#ffffff' : (planetColors[name] ?? '#333333'))
+          .text(planetSymbols[name] ?? name.slice(0, 2).toUpperCase());
 
         // Retrograde indicator
         if (planet.retrograde) {
@@ -461,7 +461,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
           .attr('y1', Math.sin(angle1) * aspectRadius)
           .attr('x2', Math.cos(angle2) * aspectRadius)
           .attr('y2', Math.sin(angle2) * aspectRadius)
-          .attr('stroke', aspectColors[aspect.aspect_type] || '#666666')
+          .attr('stroke', aspectColors[aspect.aspect_type] ?? '#666666')
           .attr('stroke-width', isHighlighted ? 3 : aspect.orb <= 2 ? 2 : 1)
           .attr('stroke-opacity', isHighlighted ? 0.8 : 0.4)
           .attr('stroke-dasharray', getAspectDashArray(aspect.aspect_type))
@@ -535,7 +535,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
     ];
     const degreeInSign = Math.floor(degree % 30);
     const minutes = Math.floor((degree % 1) * 60);
-    const signName = signs[signIndex] || 'Unknown';
+    const signName = signs[signIndex] ?? 'Unknown';
     return `${degreeInSign}°${minutes.toString().padStart(2, '0')}' ${signName}`;
   };
 
@@ -545,7 +545,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
       Leo: 'Fire', Virgo: 'Earth', Libra: 'Air', Scorpio: 'Water',
       Sagittarius: 'Fire', Capricorn: 'Earth', Aquarius: 'Air', Pisces: 'Water',
     };
-    return elements[sign] || 'Unknown';
+    return elements[sign] ?? 'Unknown';
   };
 
   const getSignQuality = (sign: string): string => {
@@ -554,7 +554,7 @@ const ChartWheelUnified: React.FC<ChartWheelUnifiedProps> = ({
       Leo: 'Fixed', Virgo: 'Mutable', Libra: 'Cardinal', Scorpio: 'Fixed',
       Sagittarius: 'Mutable', Capricorn: 'Cardinal', Aquarius: 'Fixed', Pisces: 'Mutable',
     };
-    return qualities[sign] || 'Unknown';
+    return qualities[sign] ?? 'Unknown';
   };
 
   const getAspectDashArray = (aspectType: string): string => {

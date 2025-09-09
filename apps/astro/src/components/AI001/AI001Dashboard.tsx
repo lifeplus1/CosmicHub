@@ -8,8 +8,8 @@ import {
   CardTitle,
   Button,
   Badge,
+  ProgressBar,
 } from '@cosmichub/ui';
-import { ProgressBar } from '@cosmichub/ui';
 import type { ChartData, SavedChart } from '../../services/api.types';
 import {
   TransitPrediction,

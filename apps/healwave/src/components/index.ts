@@ -12,3 +12,6 @@ export { default as SessionPlayer } from './audio/SessionPlayer';
 
 // Session templates and utilities
 export * from '../audio/sessionTemplates';
+
+// Visualization components
+export { default as CymaticsVisualizer } from './CymaticsVisualizer';

@@ -18,7 +18,7 @@ import {
   FaArrowUp,
   FaHistory,
 } from 'react-icons/fa';
-import { ProgressBar } from '@cosmichub/ui';
+import { ProgressBar, stylesModules } from '@cosmichub/ui';
 
 // Local tier configuration until package exports are resolved
 const ASTRO_TIERS = {
@@ -44,8 +44,6 @@ const ASTRO_TIERS = {
     features: ['All Premium features', 'AI interpretations', 'Custom chart styles', 'Priority support']
   },
 } as const;
-
-import { stylesModules } from '@cosmichub/ui';
 import {
   serializeAstrologyData,
   type UserProfile as UserProfileType,

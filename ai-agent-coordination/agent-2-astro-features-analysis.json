@@ -1,10 +1,10 @@
 {
-  "runId": "run-1757402841960",
+  "runId": "run-1757414001027",
   "agentId": "agent-2-astro-features",
   "agent": "FeatureFixAgent",
-  "timestamp": "2025-09-09T07:27:41.250Z",
+  "timestamp": "2025-09-09T10:33:34.453Z",
   "success": true,
-  "duration": 19282,
+  "duration": 13421,
   "targets": [
     "apps/astro/src/features"
   ],
@@ -20,11 +20,11 @@
   ],
   "conflictRisk": "low",
   "lintOutput": "npm warn Unknown env config \"auto-install-peers\". This will stop working in the next major version of npm.\nnpm warn Unknown project config \"auto-install-peers\". This will stop working in the next major version of npm.\n",
-  "errors": "\n/Users/Chris/Projects/CosmicHub/apps/astro/src/features/ChartWheelUnified.tsx\n  302:41  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  305:34  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  342:76  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  392:58  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  393:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  407:70  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  408:37  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  464:60  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  538:39  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  548:27  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n  557:28  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing\n\n✖ 11 problems (0 errors, 11 warnings)\n\n",
+  "errors": "",
   "exitCode": 0,
   "errorCount": 0,
-  "warningCount": 11,
-  "hasLintOutput": true,
+  "warningCount": 0,
+  "hasLintOutput": false,
   "readyForExecution": true,
   "coordinatorVersion": "1.0.0",
   "fileType": "current-analysis",

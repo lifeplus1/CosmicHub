@@ -74,7 +74,7 @@ describe('PresetSelector', () => {
     );
     // Await for effect-driven updates to settle
     expect(
-      await findByRole('button', { name: /save current settings/i })
+      await findByRole('button', { name: /save current/i })
     ).toBeDefined();
     expect(await findByText('Built-in Presets')).toBeDefined();
     expect(await findByText('Your Presets')).toBeDefined();
@@ -129,9 +129,9 @@ describe('PresetSelector', () => {
         currentPreset={mockCurrentPreset}
       />
     );
-    // ProgressiveLoading message currently: 'Loading your custom frequency presets...'
+    // ProgressiveLoading message currently: 'Loading presets...'
     expect(
-      await findByText('Loading your custom frequency presets...')
+      await findByText('Loading presets...')
     ).toBeDefined();
   });
 
@@ -146,7 +146,7 @@ describe('PresetSelector', () => {
     // Check accessibility attributes after async updates
     expect(await findByLabelText('Frequency Presets')).toBeDefined();
     expect(
-      await findByRole('button', { name: /save current settings/i })
+      await findByRole('button', { name: /save current/i })
     ).toBeDefined();
     expect(await findByText('Built-in Presets')).toBeDefined();
     expect(await findByText('Your Presets')).toBeDefined();

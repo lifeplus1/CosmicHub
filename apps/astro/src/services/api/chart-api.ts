@@ -13,12 +13,14 @@ import type {
   SavedChartsResponse,
   SaveChartRequest,
   SaveChartResponse,
+  ZodiacSign,
 } from '../api.types';
 import { csrfAxios, BACKEND_URL, apiClient } from './api-client';
 import { getAuthHeaders } from './auth-api';
 import { transformBackendResponse } from '../data-transformers';
 import { getCachedChartData, setCachedChartData } from '../api-cache';
 import { ZODIAC_SIGNS_CAPITALIZED } from '../../utils/astrologyUtils';
+import { isZodiacSign } from '../validation';
 
 // Multi-system response interface for enhanced chart data
 interface MultiSystemResponse {
@@ -250,11 +252,14 @@ export const fetchChartDataUnified = async (
           north_node: { name: 'north_node', position: 45.2, sign: 'taurus' as const, house: 3, degree: 15.2, retrograde: true },
           south_node: { name: 'south_node', position: 225.2, sign: 'scorpio' as const, house: 9, degree: 15.2, retrograde: true },
         },
-        houses: Array.from({ length: 12 }, (_, i) => ({
-          cusp: i * 30 + 15,
-          sign: ZODIAC_SIGNS_CAPITALIZED[Math.floor((i * 30 + 15) / 30) % 12]?.toLowerCase() as any || 'aries',
-          number: (i + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
-        })),
+        houses: Array.from({ length: 12 }, (_, i) => {
+          const signValue = ZODIAC_SIGNS_CAPITALIZED[Math.floor((i * 30 + 15) / 30) % 12]?.toLowerCase();
+          return {
+            cusp: i * 30 + 15,
+            sign: (signValue && isZodiacSign(signValue) ? signValue : 'aries') as ZodiacSign,
+            number: (i + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
+          };
+        }),
         aspects: [
           { aspect_type: 'trine', planet1: 'sun', planet2: 'moon', orb: 2.1, applying: true },
           { aspect_type: 'square', planet1: 'venus', planet2: 'mars', orb: 3.4, applying: false },

@@ -85,7 +85,7 @@ export default defineConfig(({ mode }) => {
             'cosmichub-integrations': ['@cosmichub/integrations'],
             // Audio components chunk
             'audio-components': [
-              './src/components/AudioPlayer.enhanced',
+              './src/components/AudioPlayer',
               './src/components/FrequencyControls',
               './src/components/DurationTimer',
             ],

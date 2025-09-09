@@ -2,14 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { devConsole } from '../config/devConsole';
 
-// Import both implementations
-import FrequencyControlsEnhanced from '../components/FrequencyControls.enhanced';
+// Import frequency controls component
 import FrequencyControls from '../components/FrequencyControls';
 
 interface ABTestProps {
   onFrequencyChange?: (frequency: number) => void;
-  onVolumeChange?: (volume: number) => void;
-  onDurationChange?: (duration: number) => void;
 }
 
 // Simple variant interface for AB testing
@@ -87,9 +84,7 @@ const trackExperimentEvent = (
 };
 
 export const RifeFrequencyABTest: React.FC<ABTestProps> = ({
-  onFrequencyChange,
-  onVolumeChange,
-  onDurationChange
+  onFrequencyChange
 }) => {
   const { user } = useAuth();
   const [variant, setVariant] = useState<ABTestVariant | null>(null);
@@ -123,16 +118,6 @@ export const RifeFrequencyABTest: React.FC<ABTestProps> = ({
     onFrequencyChange?.(frequency);
   }, [onFrequencyChange, trackInteraction]);
 
-  const handleVolumeChange = useCallback((volume: number) => {
-    trackInteraction('volume_adjusted', { volume });
-    onVolumeChange?.(volume);
-  }, [onVolumeChange, trackInteraction]);
-
-  const handleDurationChange = useCallback((duration: number) => {
-    trackInteraction('duration_set', { duration });
-    onDurationChange?.(duration);
-  }, [onDurationChange, trackInteraction]);
-
   // Loading state
   if (!variant) {
     return (
@@ -151,10 +136,8 @@ export const RifeFrequencyABTest: React.FC<ABTestProps> = ({
             🧪 You&apos;re seeing our enhanced frequency interface with Rife healing frequencies
           </p>
         </div>
-        <FrequencyControlsEnhanced
+        <FrequencyControls
           onFrequencyChange={handleFrequencyChange}
-          onVolumeChange={handleVolumeChange}
-          onDurationChange={handleDurationChange}
         />
       </div>
     );

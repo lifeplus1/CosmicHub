@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Card, Button } from '@cosmichub/ui';
+import { Card, Button, ProgressBar } from '@cosmichub/ui';
 import * as Tabs from '@radix-ui/react-tabs';
 import { 
   FaChartLine, 
@@ -19,7 +19,6 @@ import {
   FaClock,
   FaGraduationCap
 } from 'react-icons/fa';
-import { ProgressBar } from '@cosmichub/ui';
 import { formatDate } from '@cosmichub/config';
 
 // Types for progress tracking

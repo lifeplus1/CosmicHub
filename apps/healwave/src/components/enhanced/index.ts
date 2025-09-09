@@ -1,4 +1,4 @@
-export { FrequencyControls } from './FrequencyControls';
+export { default as FrequencyControls } from '../FrequencyControls';
 export { AudioControls } from './AudioControls';
 export { BinauralControls } from './BinauralControls';
 export { AdvancedControls } from './AdvancedControls';

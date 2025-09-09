@@ -23,72 +23,82 @@ process.env.NODE_ENV = 'test';
 // Must be set before pwa.ts is imported anywhere in tests
 (globalThis as Record<string, unknown>).HEALWAVE_PWA_MANUAL_INIT = true;
 
-// Mock @cosmichub/config completely to prevent Firebase initialization
-vi.mock('@cosmichub/config', () => ({
-  logger: {
+// CRITICAL: Mock @cosmichub/config FIRST before any other imports
+vi.mock('@cosmichub/config', () => {
+  const mockLogger = {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
     debug: vi.fn(),
-  },
-  // Firebase mocks
-  app: {},
-  auth: {},
-  db: {},
-  hasAuthAvailable: false,
-  isEmulator: false,
-  isDevelopment: true,
-  projectId: 'mock-project-id',
-  enableFirestoreNetwork: vi.fn().mockResolvedValue(undefined),
-  disableFirestoreNetwork: vi.fn().mockResolvedValue(undefined),
-  getFirebasePerformanceInfo: vi.fn(() => ({
-    projectId: 'mock-project-id',
-    authDomain: 'mock-auth-domain',
+    child: vi.fn(() => ({
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    })),
+  };
+
+  return {
+    logger: mockLogger,
+    // Firebase mocks
+    app: {},
+    auth: {},
+    db: {},
+    hasAuthAvailable: false,
     isEmulator: false,
     isDevelopment: true,
-    timestamp: Date.now(),
-  })),
-  // API Result helpers for test compatibility
-  ok: vi.fn((data: unknown, message?: string) => ({
-    success: true,
-    data,
-    message: message || 'Success',
-  })),
-  fail: vi.fn((error: string, statusCode?: string) => ({
-    success: false,
-    error,
-    statusCode: statusCode || '500',
-  })),
-  toFailure: vi.fn((error: Error | { message?: string; response?: { status?: number } }) => ({
-    success: false,
-    error: error?.message || 'Error',
-    statusCode: 'response' in error && error.response?.status ? String(error.response.status) : '500',
-  })),
-  unwrap: vi.fn((result: { success: boolean; data?: unknown; error?: string }) => {
-    if (result.success) return result.data;
-    throw new Error(result.error);
-  }),
-  unwrapOr: vi.fn((result: { success: boolean; data?: unknown }, fallback: unknown) => {
-    return result.success ? result.data : fallback;
-  }),
-  mapSuccess: vi.fn((result: { success: boolean; data?: unknown }, fn: (data: unknown) => unknown) => {
-    if (result.success) {
-      return { ...result, data: fn(result.data) };
-    }
-    return result;
-  }),
-  mapFailure: vi.fn((result: { success: boolean }, fn: (result: unknown) => unknown) => {
-    if (!result.success) {
-      return fn(result);
-    }
-    return result;
-  }),
-  isSuccess: vi.fn((result: { success: boolean }) => result.success === true),
-  isFailure: vi.fn((result: { success: boolean }) => result.success === false),
-  mapResult: vi.fn((result: { success: boolean; data?: unknown }, successFn: (data: unknown) => unknown, failureFn: (result: unknown) => unknown) => {
-    return result.success ? successFn(result.data) : failureFn(result);
-  }),
-}));
+    projectId: 'mock-project-id',
+    enableFirestoreNetwork: vi.fn().mockResolvedValue(undefined),
+    disableFirestoreNetwork: vi.fn().mockResolvedValue(undefined),
+    getFirebasePerformanceInfo: vi.fn(() => ({
+      projectId: 'mock-project-id',
+      authDomain: 'mock-auth-domain',
+      isEmulator: false,
+      isDevelopment: true,
+      timestamp: Date.now(),
+    })),
+    // API Result helpers for test compatibility
+    ok: vi.fn((data: unknown, message?: string) => ({
+      success: true,
+      data,
+      message: message || 'Success',
+    })),
+    fail: vi.fn((error: string, statusCode?: string) => ({
+      success: false,
+      error,
+      statusCode: statusCode || '500',
+    })),
+    toFailure: vi.fn((error: Error | { message?: string; response?: { status?: number } }) => ({
+      success: false,
+      error: error?.message || 'Error',
+      statusCode: 'response' in error && error.response?.status ? String(error.response.status) : '500',
+    })),
+    unwrap: vi.fn((result: { success: boolean; data?: unknown; error?: string }) => {
+      if (result.success) return result.data;
+      throw new Error(result.error);
+    }),
+    unwrapOr: vi.fn((result: { success: boolean; data?: unknown }, fallback: unknown) => {
+      return result.success ? result.data : fallback;
+    }),
+    mapSuccess: vi.fn((result: { success: boolean; data?: unknown }, fn: (data: unknown) => unknown) => {
+      if (result.success) {
+        return { ...result, data: fn(result.data) };
+      }
+      return result;
+    }),
+    mapFailure: vi.fn((result: { success: boolean }, fn: (result: unknown) => unknown) => {
+      if (!result.success) {
+        return fn(result);
+      }
+      return result;
+    }),
+    isSuccess: vi.fn((result: { success: boolean }) => result.success === true),
+    isFailure: vi.fn((result: { success: boolean }) => result.success === false),
+    mapResult: vi.fn((result: { success: boolean; data?: unknown }, successFn: (data: unknown) => unknown, failureFn: (result: unknown) => unknown) => {
+      return result.success ? successFn(result.data) : failureFn(result);
+    }),
+  };
+});
 
 // Prevent hard reloads in tests if any code calls it
 Object.defineProperty(window, 'location', {
@@ -328,6 +338,11 @@ vi.mock('@cosmichub/ui', () => ({
     React.createElement('div', { 'data-testid': 'ui-progress', 'data-value': value, ...props }, `${value}%`)
   ),
 
+  // Frequency visualization components
+  FrequencyWaveform: vi.fn(({ data, config, ...props }: { data?: unknown; config?: unknown; [key: string]: unknown }) => 
+    React.createElement('div', { 'data-testid': 'ui-frequency-waveform', ...props }, 'Frequency Waveform')
+  ),
+
   // Utility components
   Tooltip: {
     Provider: vi.fn(({ children }: { children: React.ReactNode }) => children),
@@ -438,3 +453,24 @@ vi.mock('@testing-library/react', async (importOriginal) => {
     }),
   };
 });
+
+// Mock the useUnrestrictedSubscription hook
+vi.mock('./providers/useUnrestrictedSubscription', () => ({
+  useUnrestrictedSubscription: vi.fn(() => ({
+    userTier: 'premium',
+    hasFeature: vi.fn(() => true),
+    upgradeRequired: vi.fn(),
+    checkUsageLimit: vi.fn(() => ({ allowed: true, current: 0, limit: -1 })),
+    subscription: {
+      tier: 'premium',
+      status: 'active',
+      features: ['*'],
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    },
+    usageData: {
+      chartsGenerated: 0,
+      apiCallsUsed: 0,
+      storageUsed: 0
+    }
+  })),
+}));

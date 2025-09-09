@@ -2,11 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@cosmichub/auth';
 import { devConsole } from '../config/devConsole';
 
-// Import all frequency generator implementations
+// Import frequency generator implementations
 import { HealWaveFrequencyGeneratorUnrestricted } from '../components/FrequencyGeneratorUnrestricted';
-import FrequencyControlsUnrestricted from '../components/FrequencyControlsUnrestricted';
 import { EnhancedFrequencyGenerator } from '../components/EnhancedFrequencyGenerator';
 import { EnhancedHealWave } from '../components/enhancements/EnhancedHealWave';
+import FrequencyControls from '../components/FrequencyControls';
 
 interface FrequencyGeneratorABTestProps {
   onFrequencyChange?: (frequency: number) => void;
@@ -60,7 +60,7 @@ const FREQUENCY_GENERATOR_VARIANTS: readonly ABTestVariant[] = [
     id: 'enhanced-controls',
     name: 'Enhanced Controls',
     description: 'Advanced controls with full access and custom presets',
-    component: FrequencyControlsUnrestricted,
+    component: FrequencyControls,
     config: {
       implementation: 'enhanced-controls',
       features: {

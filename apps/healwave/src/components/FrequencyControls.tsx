@@ -4,13 +4,11 @@ import { Waves, Plus } from 'lucide-react';
 interface FrequencyControlsProps {
   currentFrequency?: number;
   onFrequencyChange?: (frequency: number) => void;
-  volumeLabelId?: string;
 }
 
 const FrequencyControls: React.FC<FrequencyControlsProps> = ({
   currentFrequency = 528,
-  onFrequencyChange,
-  volumeLabelId
+  onFrequencyChange
 }) => {
   const [frequency, setFrequency] = useState(currentFrequency);
   const [presetName, setPresetName] = useState('');
@@ -29,11 +27,10 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
   const handleCreatePreset = useCallback(() => {
     if (presetName.trim()) {
       // Handle preset creation logic here
-      console.log('Creating preset:', presetName, frequency);
       setPresetName('');
       setShowPresetCreator(false);
     }
-  }, [presetName, frequency]);
+  }, [presetName]);
 
   return (
     <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
@@ -45,10 +42,11 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
       <div className="space-y-4">
         {/* Frequency Input */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-300">
+          <label htmlFor="frequency-input" className="text-sm font-medium text-slate-300">
             Frequency (Hz)
           </label>
           <input
+            id="frequency-input"
             type="number"
             value={frequency}
             onChange={handleFrequencyChange}
@@ -56,6 +54,7 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
             max="20000"
             step="1"
             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+            title="Frequency in Hz"
           />
         </div>
 
