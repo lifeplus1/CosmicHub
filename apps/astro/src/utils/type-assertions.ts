@@ -90,24 +90,21 @@ export function assertPlanetType(obj: unknown): Planet {
   const planetName = isValidPlanetName(name) ? name : 'sun';
 
   // Type-safe dignity validation
-  const dignity = typeof obj.dignity === 'string' && isValidDignity(obj.dignity)
-    ? obj.dignity
-    : undefined;
+  const dignityStr = typeof obj.dignity === 'string' ? obj.dignity.toLowerCase() : '';
+  const dignity = isValidDignity(dignityStr) ? dignityStr : undefined;
 
   // Type-safe element validation
-  const element = typeof obj.element === 'string' && isValidElement(obj.element)
-    ? obj.element
-    : undefined;
+  const elementStr = typeof obj.element === 'string' ? obj.element.toLowerCase() : '';
+  console.log('DEBUG - elementStr:', elementStr, 'isValidElement(elementStr):', isValidElement(elementStr));
+  const element = isValidElement(elementStr) ? elementStr : undefined;
 
   // Type-safe modality validation
-  const modality = typeof obj.modality === 'string' && isValidModality(obj.modality)
-    ? obj.modality
-    : undefined;
+  const modalityStr = typeof obj.modality === 'string' ? obj.modality.toLowerCase() : '';
+  const modality = isValidModality(modalityStr) ? modalityStr : undefined;
 
   // Type-safe house position validation
-  const housePosition = typeof obj.house_position === 'string' && isValidHousePosition(obj.house_position)
-    ? obj.house_position
-    : undefined;
+  const housePositionStr = typeof obj.house_position === 'string' ? obj.house_position.toLowerCase() : '';
+  const housePosition = isValidHousePosition(housePositionStr) ? housePositionStr : undefined;
 
   // Type-safe zodiac sign validation
   const signStr = typeof obj.sign === 'string' ? obj.sign.toLowerCase() : 'aries';
@@ -116,7 +113,7 @@ export function assertPlanetType(obj: unknown): Planet {
   return {
     name: planetName as PlanetName,
     position: Number(obj.position) || 0,
-    degree: Number(obj.degree) ?? Number(obj.position) ?? 0,
+    degree: (obj.degree !== undefined ? Number(obj.degree) : Number(obj.position)) || 0,
     sign,
     house: typeof obj.house === 'string' ? (parseInt(obj.house, 10) || 1) : (Number(obj.house) || 1),
     retrograde: Boolean(obj.retrograde),

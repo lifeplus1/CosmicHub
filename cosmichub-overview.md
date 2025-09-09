@@ -41,6 +41,7 @@ Reason: Consolidated project structure under Architecture per docs/06-OPERATIONS
 ├── ⚙️ type-bridge-report.json
 └── 🔧 verify-css-migration.sh
 ---
+
 title: CosmicHub Overview
 owner: platform
 status: moved

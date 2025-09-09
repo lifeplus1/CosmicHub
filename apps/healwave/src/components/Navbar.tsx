@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Cross2Icon, ChevronDownIcon } from '@radix-ui/react-icons';
@@ -10,19 +11,27 @@ import {
   FaMusic, 
   FaArrowUp,
   FaSignOutAlt,
-  FaHeadphones
+  FaHeadphones,
+  FaList
 } from 'react-icons/fa';
-import { useAuth, useSubscription } from '@cosmichub/auth';
+import { useAuth } from '@cosmichub/auth';
+import { useUnrestrictedSubscription } from '../providers/useUnrestrictedSubscription';
 import { useAppNavigation } from '../hooks/useAppNavigation';
 import Login from './Login';
 import SignupContainer from './signup/SignupContainer';
 
 const Navbar: React.FC = React.memo(() => {
   const { user, signOut } = useAuth();
-  const { tier: userTier } = useSubscription();
-  const { goToHome, goToProfile, goToUpgrade } = useAppNavigation();
+  const { userTier } = useUnrestrictedSubscription();
+  const { goToHome, goToProfile, goToUpgrade, goToPresets } = useAppNavigation();
+  const location = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+
+  // Helper function to determine if we're on the current page
+  const isCurrentPage = useCallback((path: string) => {
+    return location.pathname === path;
+  }, [location.pathname]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -44,6 +53,10 @@ const Navbar: React.FC = React.memo(() => {
   const handleNavigateToHome = useCallback(() => {
     goToHome();
   }, [goToHome]);
+
+  const handleNavigateToPresets = useCallback(() => {
+    goToPresets();
+  }, [goToPresets]);
 
   const getTierIcon = useCallback((tier: string) => {
     switch (tier?.toLowerCase()) {
@@ -189,7 +202,11 @@ const Navbar: React.FC = React.memo(() => {
                       
                       {/* Menu Items */}
                       <DropdownMenu.Item 
-                        className='flex items-center px-3 py-2 space-x-3 text-sm text-white transition-colors rounded-md cursor-pointer hover:bg-white/10 focus:outline-none focus:bg-white/10'
+                        className={`flex items-center px-3 py-2 space-x-3 text-sm transition-colors rounded-md cursor-pointer focus:outline-none ${
+                          isCurrentPage('/') 
+                            ? 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 focus:bg-cyan-500/30' 
+                            : 'text-white hover:bg-white/10 focus:bg-white/10'
+                        }`}
                         onSelect={handleNavigateToHome}
                       >
                         <FaMusic className='w-4 h-4' />
@@ -197,15 +214,34 @@ const Navbar: React.FC = React.memo(() => {
                       </DropdownMenu.Item>
                       
                       <DropdownMenu.Item 
-                        className='flex items-center px-3 py-2 space-x-3 text-sm text-white transition-colors rounded-md cursor-pointer hover:bg-white/10 focus:outline-none focus:bg-white/10'
+                        className='flex items-center px-3 py-2 space-x-3 text-sm text-emerald-300 transition-colors rounded-md cursor-pointer hover:bg-emerald-500/20 focus:outline-none focus:bg-emerald-500/20'
+                        onSelect={() => window.location.href = '/sessions'}
+                      >
+                        <FaHeadphones className='w-4 h-4' />
+                        <span>Healing Sessions</span>
+                      </DropdownMenu.Item>
+                      
+                      <DropdownMenu.Item 
+                        className={`flex items-center px-3 py-2 space-x-3 text-sm transition-colors rounded-md cursor-pointer focus:outline-none ${
+                          isCurrentPage('/profile') 
+                            ? 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 focus:bg-cyan-500/30' 
+                            : 'text-white hover:bg-white/10 focus:bg-white/10'
+                        }`}
                         onSelect={handleNavigateToProfile}
                       >
                         <FaCog className='w-4 h-4' />
                         <span>Profile & Settings</span>
                       </DropdownMenu.Item>
                       
-                      <DropdownMenu.Item className='flex items-center px-3 py-2 space-x-3 text-sm text-white transition-colors rounded-md cursor-pointer hover:bg-white/10 focus:outline-none focus:bg-white/10'>
-                        <FaMusic className='w-4 h-4' />
+                      <DropdownMenu.Item 
+                        className={`flex items-center px-3 py-2 space-x-3 text-sm transition-colors rounded-md cursor-pointer focus:outline-none ${
+                          isCurrentPage('/presets') 
+                            ? 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 focus:bg-cyan-500/30' 
+                            : 'text-white hover:bg-white/10 focus:bg-white/10'
+                        }`}
+                        onSelect={handleNavigateToPresets}
+                      >
+                        <FaList className='w-4 h-4' />
                         <span>My Presets</span>
                       </DropdownMenu.Item>
                       

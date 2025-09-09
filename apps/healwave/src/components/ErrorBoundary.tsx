@@ -47,7 +47,7 @@ const DefaultErrorFallback: React.FC<{ error?: Error }> = React.memo(({ error })
       >
         Refresh Page
       </button>
-      {process.env.NODE_ENV === 'development' && error && (
+      {(typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') && error && (
         <details className='max-w-full p-3 mt-4 overflow-auto text-left border rounded bg-black/50 border-red-500/50'>
           <summary className='font-medium text-red-400 cursor-pointer'>
             Error Details (Development)

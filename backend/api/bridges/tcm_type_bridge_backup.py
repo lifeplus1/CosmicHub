@@ -22,7 +22,8 @@ Design Goals:
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union, Tuple
+from typing import cast, Any, Dict, List, Optional, Union
+from typing_extensions import Literal, Tuple
 from enum import Enum
 from datetime import datetime
 
@@ -232,7 +233,7 @@ class TCMTypeBridge:
                 season=str(raw.get("season", "")),
                 organ=str(raw.get("organ", "")),
                 emotion=str(raw.get("emotion", "")),
-                balance_level=raw.get("balance_level", raw.get("balanceLevel", "medium")),
+                balance_level=cast(Literal['high', 'medium', 'low'], "medium" if raw.get("balance_level", raw.get("balanceLevel", "medium")) not in ['high', 'medium', 'low'] else raw.get("balance_level", raw.get("balanceLevel", "medium"))),
                 percentage=TCMTypeBridge.validate_percentage(raw.get("percentage", raw.get("pct", 0.0)), 0.0),
                 characteristics=raw.get("characteristics", []) or [],
                 vulnerabilities=raw.get("vulnerabilities", []) or [],
@@ -270,7 +271,7 @@ class TCMTypeBridge:
                 time_window=str(raw.get("time_window", raw.get("timeWindow", ""))),
                 energy_level=TCMTypeBridge.validate_percentage(raw.get("energy_level", raw.get("energyLevel", 0.0)), 0.0),
                 blockages=raw.get("blockages"),
-                flow_direction=raw.get("flow_direction", raw.get("flowDirection", "circular")),
+                flow_direction=cast(Literal['ascending', 'descending', 'circular'], "circular" if raw.get("flow_direction", raw.get("flowDirection", "circular")) not in ['ascending', 'descending', 'circular'] else raw.get("flow_direction", raw.get("flowDirection", "circular"))),
             )
         except Exception as e:
             log_conversion_error(BridgeError.ANALYSIS_CONVERSION, "engine_to_meridian_flow_data", e)

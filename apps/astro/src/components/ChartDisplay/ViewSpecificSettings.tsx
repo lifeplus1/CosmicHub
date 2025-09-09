@@ -47,7 +47,7 @@ const ViewSpecificSettings: React.FC<ViewSpecificSettingsProps> = ({
         onClick={onToggle}
         onKeyDown={handleToggleKeyDown}
         className='settings-toggle-btn flex items-center gap-2 px-4 py-2 bg-cosmic-purple/20 hover:bg-cosmic-purple/30 rounded-lg transition-colors border border-cosmic-purple/30 text-cosmic-silver hover:text-white focus:outline-none focus:ring-2 focus:ring-cosmic-purple/50'
-        aria-expanded={isOpen}
+        aria-expanded="true"
         aria-controls='settings-panel'
         aria-label={isOpen ? 'Collapse settings panel' : 'Expand settings panel'}
       >

@@ -20,7 +20,7 @@ export const BuiltInPresets: React.FC<BuiltInPresetsProps> = ({
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white mb-4">Built-in Presets</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, index) => (
+          {[...Array(6) as unknown[]].map((_, index) => (
             <div
               key={index}
               className="h-32 bg-slate-700/50 rounded-lg animate-pulse"

@@ -1,23 +1,4 @@
-import { useState, useCallback } from 'react';
 import type { Planet, House, Aspect } from '@cosmichub/types';
-
-// Simple logger for integrations package
-const logger = {
-  info: (message: string, data?: object | string | number | boolean | null) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Integrations] ${message}`, data);
-    }
-  },
-  warn: (message: string, data?: object | string | number | boolean | null) => {
-    console.warn(`[Integrations] ${message}`, data);
-  },
-  error: (
-    message: string,
-    data?: object | string | number | boolean | null
-  ) => {
-    console.error(`[Integrations] ${message}`, data);
-  },
-};
 
 export interface UserSubscription {
   id: string;
@@ -85,22 +66,12 @@ export interface CrossAppStore {
   clearNotifications: () => void;
 }
 
-export const useCrossAppStore = (): CrossAppStore => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  const addNotification = useCallback((notification: Notification): void => {
-    logger.info('Cross-app notification:', notification);
-    setNotifications(prev => [...prev, notification]);
-  }, []);
-
-  const clearNotifications = useCallback((): void => {
-    setNotifications([]);
-  }, []);
-
-  return { addNotification, notifications, clearNotifications };
-};
-
 export * from './api';
 export * from './ephemeris';
 export * from './stripe';
 export * from './frequency/index';
+export * from './subscriptions';
+
+// Enhanced Cross-App Integration
+export * from './cross-app-store';
+export * from './cross-app-hooks';

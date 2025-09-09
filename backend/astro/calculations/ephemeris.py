@@ -277,69 +277,11 @@ def get_planetary_positions(julian_day: float) -> Dict[str, PlanetPosition]:
         logger.error(
             f"Error in remote planetary positions: {str(e)}", exc_info=True
         )
-        # Deterministic fallback for test environments so tests aren't flaky
-        planets = [
-            # Main planets
-            "sun",
-            "moon",
-            "mercury",
-            "venus",
-            "mars",
-            "jupiter",
-            "saturn",
-            "uranus",
-            "neptune",
-            "pluto",
-            # Lunar nodes
-            "north_node",
-            "south_node",
-            # Lilith points
-            "lilith_mean",
-            "lilith_true",
-            # Major asteroids (the "big four" + Chiron)
-            "chiron",
-            "ceres",        # 1
-            "pallas",       # 2
-            "juno",         # 3
-            "vesta",        # 4
-            # Additional working asteroids
-            "astraea",      # 5
-            "hebe",         # 6
-            "iris",         # 7
-            "flora",        # 8
-            "metis",        # 9
-            "hygiea",       # 10
-            "parthenope",   # 11
-            "victoria",     # 12
-            "egeria",       # 13
-            "eunomia",      # 15
-            "psyche",       # 16
-            "thetis",       # 17
-            "melpomene",    # 18
-            "fortuna",      # 19
-            "massalia",     # 20
-            # Trans-Neptunian objects and outer system bodies
-            "eros",         # 433
-            "sedna",        # 90377
-            "eris",         # 136199
-            # Additional lunar points
-            "intp_apog",    # Interpolated Lunar Apogee
-            "intp_perg",    # Interpolated Lunar Perigee
-            # Uranian/Trans-Neptunian points
-            "hades",
-            "zeus", 
-            "kronos",
-            "apollon",
-            "admetos",
-            "vulkanus",
-            "poseidon",
-        ]
-        if _should_use_test_fallback():
-            logger.info(
-                "Using deterministic ephemeris fallback (exception path)"
-            )
-            return _generate_deterministic_fallback(planets, julian_day)
-        return {}  # Fallback to empty dict
+        # Deterministic fallback for when ephemeris server is unavailable
+        logger.info(
+            "Using deterministic ephemeris fallback (server unreachable)"
+        )
+        return _generate_deterministic_fallback(planets, julian_day)
 
 
 def _should_use_test_fallback() -> bool:

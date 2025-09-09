@@ -29,7 +29,7 @@ describe('Import Test', () => {
     expect(typeof Card).toBe('object'); // Card is a compound component (object)
     expect(typeof InteractiveCard).toBe('object'); // InteractiveCard uses forwardRef (object)
     expect(typeof LoadingCard).toBe('function');
-    expect(typeof ErrorCard).toBe('function');
+    expect(typeof ErrorCard).toBe('object'); // ErrorCard uses React.memo (object)
     expect(typeof ChartCard).toBe('function');
   });
 

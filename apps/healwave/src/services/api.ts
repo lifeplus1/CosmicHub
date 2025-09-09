@@ -38,9 +38,7 @@ function getSafeCurrentUser(): User | null {
 const maybeEnv = import.meta?.env as
   | { VITE_HEALWAVE_API_BASE?: string }
   | undefined;
-const API_BASE = (maybeEnv?.VITE_HEALWAVE_API_BASE ??
-  process?.env?.VITE_HEALWAVE_API_BASE ??
-  '');
+const API_BASE = (maybeEnv?.VITE_HEALWAVE_API_BASE ?? '');
 
 function apiUrl(path: string): string {
   const base = API_BASE.replace(/\/$/, '');

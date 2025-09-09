@@ -4,7 +4,7 @@ Generated on: 2025-09-05 12:37:42
 
 ## Directory Tree
 
-```
+```text
 ./
 ├── ai-agent-coordination/
 │   ├── ai-agent-coordination/

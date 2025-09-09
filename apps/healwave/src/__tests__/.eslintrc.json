@@ -1,0 +1,30 @@
+{
+  "extends": ["../../../eslint.config.js"],
+  "env": {
+    "node": true,
+    "jest": true,
+    "vitest-globals/env": true
+  },
+  "globals": {
+    "React": "readonly",
+    "fireEvent": "readonly", 
+    "screen": "readonly",
+    "NodeJS": "readonly",
+    "NodeListOf": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "no-undef": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/__tests__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+      "rules": {
+        "no-undef": "off",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ]
+}

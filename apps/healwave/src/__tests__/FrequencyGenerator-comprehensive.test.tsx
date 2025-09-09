@@ -60,6 +60,28 @@ vi.mock('@cosmichub/integrations', () => ({
 }));
 
 /**
+ * Provide a minimal auth mock so feature hooks can derive tier without a real provider
+ */
+vi.mock('@cosmichub/auth', () => ({
+  useAuth: () => ({ user: null }),
+  useSubscription: () => ({ 
+    userTier: 'free',
+    hasFeature: () => false,
+  }),
+}));
+
+/**
+ * Mock navigation hook to avoid Router dependency in tests
+ */
+vi.mock('../hooks/useAppNavigation', () => ({
+  useAppNavigation: () => ({
+    goToUpgrade: vi.fn(),
+    goToHome: vi.fn(),
+    goToSettings: vi.fn(),
+  }),
+}));
+
+/**
  * Mock dev console for error tracking
  */
 vi.mock('../config/devConsole', () => ({
@@ -77,17 +99,17 @@ vi.mock('@radix-ui/react-slider', () => ({
   Root: ({ 
     children, 
     onValueChange, 
-    value = [50],
+    value: _value = [50],
     ...props 
   }: { 
     children: React.ReactNode; 
-    onValueChange?: (value: number[]) => void; 
+    onValueChange?: (_value: number[]) => void; 
     value?: number[];
     [key: string]: unknown;
   }) => (
     <div
       data-testid="slider-root"
-      data-value={value[0]}
+      data-value={_value[0]}
       onClick={() => onValueChange && onValueChange([50])}
       {...props}
     >

@@ -14,9 +14,8 @@ describe('ErrorBoundary', () => {
         <Boom />
       </ErrorBoundary>
     );
-    expect(screen.getAllByText(/Something went wrong/i).length).toBeGreaterThan(
-      0
-    );
-    expect(screen.getByText(/TestBoundary/i)).toBeInTheDocument();
+    // The mock ErrorBoundary renders "Component Error"
+    expect(screen.getByText(/Component Error/i)).toBeInTheDocument();
+    expect(screen.getByTestId('integration-error-boundary')).toBeInTheDocument();
   });
 });

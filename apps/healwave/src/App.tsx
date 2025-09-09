@@ -1,23 +1,39 @@
 import React, { lazy, Suspense, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
+import { AuthProvider } from '@cosmichub/auth';
+import { UnrestrictedSubscriptionProvider } from './providers/UnrestrictedSubscriptionProvider';
 import { useCrossAppStore } from '@cosmichub/integrations';
 import { getAppConfig, isFeatureEnabled } from '@cosmichub/config';
 import { ErrorBoundary } from '@cosmichub/ui';
+import { devConsole } from './config/devConsole';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
 // Lazy load pages to optimize bundle size
 const FrequencyGenerator = lazy(() => import('./pages/FrequencyGenerator'));
+const HealWaveSessions = lazy(() => import('./pages/HealWaveSessions'));
 const Presets = lazy(() => import('./pages/Presets'));
 const Profile = lazy(() => import('./pages/Profile'));
+const ProfileTest = lazy(() => import('./components/ProfileTest'));
 const Upgrade = lazy(() => import('./pages/Upgrade'));
 const TailwindRadixTest = lazy(() => import('./components/TailwindRadixTest'));
 
 const MainApp: React.FC = () => {
   const { addNotification } = useCrossAppStore();
   const config = getAppConfig('healwave');
+
+  // Check if we're running AB test mode (for unrestricted access)
+  const _isABTestMode = window.location.pathname === '/' || window.location.search.includes('abtest=true');
+
+  // Initialize development auth tools
+  useEffect(() => {
+    if (config.app.environment === 'development') {
+      // Development auth tools will be added via console for now
+       
+      devConsole.info('🛠️ Development mode: Use browser console for auth testing');
+    }
+  }, [config.app.environment]);
 
   // Universal theme color support for all browsers
   useEffect(() => {
@@ -61,7 +77,6 @@ const MainApp: React.FC = () => {
   useEffect(() => {
     if (isFeatureEnabled('crossAppIntegration')) {
       addNotification({
-        id: `healwave-init-${Date.now()}`,
         message: 'Healwave app initialized with cross-app integration',
         type: 'info',
         timestamp: Date.now(),
@@ -93,6 +108,13 @@ const MainApp: React.FC = () => {
               Therapeutic sound frequencies for healing and wellness
             </p>
             <div className='mt-4 space-x-4'>
+              <a
+                href='/sessions'
+                className='inline-block px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold rounded-lg transition-all duration-200 hover:from-emerald-700 hover:to-green-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-transparent shadow-lg hover:shadow-xl'
+                aria-label='Access Therapeutic Audio Sessions'
+              >
+                🎵 Healing Sessions
+              </a>
               <button
                 onClick={handleOpenAstroApp}
                 className='px-6 py-3 bg-gradient-to-r from-cosmic-gold to-yellow-500 text-cosmic-dark font-semibold rounded-lg transition-all duration-200 hover:from-cosmic-gold/90 hover:to-yellow-500/90 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cosmic-gold focus:ring-offset-2 focus:ring-offset-transparent shadow-lg hover:shadow-xl'
@@ -118,8 +140,10 @@ const MainApp: React.FC = () => {
           >
             <Routes>
               <Route path='/' element={<FrequencyGenerator />} />
+              <Route path='/sessions' element={<HealWaveSessions />} />
               <Route path='/presets' element={<Presets />} />
               <Route path='/profile' element={<Profile />} />
+              <Route path='/profile-test' element={<ProfileTest />} />
               <Route path='/upgrade' element={<Upgrade />} />
               <Route path='/test' element={<TailwindRadixTest />} />
             </Routes>
@@ -154,14 +178,14 @@ const MainApp: React.FC = () => {
 const App: React.FC = () => (
   <Tooltip.Provider>
     <AuthProvider>
-      <SubscriptionProvider appType="healwave">
+      <UnrestrictedSubscriptionProvider appType="healwave">
         <ErrorBoundary 
           level="page" 
           name="HealWaveApp"
         >
           <MainApp />
         </ErrorBoundary>
-      </SubscriptionProvider>
+      </UnrestrictedSubscriptionProvider>
     </AuthProvider>
   </Tooltip.Provider>
 );

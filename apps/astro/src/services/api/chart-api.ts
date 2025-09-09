@@ -18,6 +18,7 @@ import { csrfAxios, BACKEND_URL, apiClient } from './api-client';
 import { getAuthHeaders } from './auth-api';
 import { transformBackendResponse } from '../data-transformers';
 import { getCachedChartData, setCachedChartData } from '../api-cache';
+import { ZODIAC_SIGNS_CAPITALIZED } from '../../utils/astrologyUtils';
 
 // Multi-system response interface for enhanced chart data
 interface MultiSystemResponse {
@@ -177,17 +178,25 @@ export const fetchChartDataUnified = async (
   }
 
   try {
-    const response = await apiClient.post('/charts/chart', {
-      year: birthData.year,
-      month: birthData.month,
-      day: birthData.day,
-      hour: birthData.hour,
-      minute: birthData.minute,
-      lat: birthData.lat,
-      lon: birthData.lon,
+    // Parse birth_date and birth_time to individual components for backend
+    const [year, month, day] = birthData.birth_date.split('-').map(Number);
+    const [hour, minute] = birthData.birth_time.split(':').map(Number);
+
+    const requestData = {
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      lat: birthData.latitude,
+      lon: birthData.longitude,
       city: birthData.city,
       timezone: birthData.timezone,
-    });
+    };
+
+    devConsole.log?.('📤 Sending request to /calculate:', requestData);
+
+    const response = await apiClient.post('/calculate', requestData);
 
     devConsole.log?.('✅ Birth chart response received:', response);
 
@@ -211,10 +220,68 @@ export const fetchChartDataUnified = async (
     return ok(resultWithRawData);
   } catch (err) {
     devConsole.error('❌ Error fetching unified chart data:', err);
+    
+    // Enhanced error logging for debugging
+    if (err instanceof Error) {
+      devConsole.error('📋 Error details:', {
+        message: err.message,
+        name: err.name,
+        stack: err.stack?.split('\n').slice(0, 3).join('\n'), // First 3 lines of stack
+      });
+    }
+
+    // TEMPORARY FALLBACK: Use mock data for development
+    if (process.env.NODE_ENV === 'development') {
+      devConsole.warn('🔄 Backend unavailable, using mock chart data for development');
+      
+      const mockChartData: ChartData = {
+        planets: {
+          sun: { name: 'sun', position: 315.7, sign: 'aquarius' as const, house: 1, degree: 15.7, retrograde: false },
+          moon: { name: 'moon', position: 78.3, sign: 'gemini' as const, house: 5, degree: 18.3, retrograde: false },
+          mercury: { name: 'mercury', position: 302.1, sign: 'aquarius' as const, house: 1, degree: 2.1, retrograde: false },
+          venus: { name: 'venus', position: 275.5, sign: 'capricorn' as const, house: 12, degree: 5.5, retrograde: false },
+          mars: { name: 'mars', position: 243.8, sign: 'sagittarius' as const, house: 10, degree: 3.8, retrograde: false },
+          jupiter: { name: 'jupiter', position: 147.2, sign: 'leo' as const, house: 7, degree: 27.2, retrograde: false },
+          saturn: { name: 'saturn', position: 326.4, sign: 'aquarius' as const, house: 2, degree: 26.4, retrograde: false },
+          uranus: { name: 'uranus', position: 284.9, sign: 'capricorn' as const, house: 1, degree: 14.9, retrograde: false },
+          neptune: { name: 'neptune', position: 288.7, sign: 'capricorn' as const, house: 1, degree: 18.7, retrograde: false },
+          pluto: { name: 'pluto', position: 222.1, sign: 'scorpio' as const, house: 9, degree: 12.1, retrograde: false },
+          chiron: { name: 'chiron', position: 198.5, sign: 'libra' as const, house: 8, degree: 18.5, retrograde: false },
+          north_node: { name: 'north_node', position: 45.2, sign: 'taurus' as const, house: 3, degree: 15.2, retrograde: true },
+          south_node: { name: 'south_node', position: 225.2, sign: 'scorpio' as const, house: 9, degree: 15.2, retrograde: true },
+        },
+        houses: Array.from({ length: 12 }, (_, i) => ({
+          cusp: i * 30 + 15,
+          sign: ZODIAC_SIGNS_CAPITALIZED[Math.floor((i * 30 + 15) / 30) % 12]?.toLowerCase() as any || 'aries',
+          number: (i + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
+        })),
+        aspects: [
+          { aspect_type: 'trine', planet1: 'sun', planet2: 'moon', orb: 2.1, applying: true },
+          { aspect_type: 'square', planet1: 'venus', planet2: 'mars', orb: 3.4, applying: false },
+          { aspect_type: 'opposition', planet1: 'mercury', planet2: 'jupiter', orb: 1.8, applying: true },
+        ],
+        angles: {
+          ascendant: 290.5,
+          midheaven: 220.3,
+          descendant: 110.5,
+          imumcoeli: 40.3,
+        },
+      };
+
+      // Add raw backend response for processing hooks
+      const mockResult = {
+        ...mockChartData,
+        __raw_backend_response: mockChartData,
+      };
+
+      devConsole.log?.('🎭 Using mock chart data:', mockResult);
+      return ok(mockResult);
+    }
+
     return toFailure(err, {
       auth: 'Authentication required to fetch chart data',
-      notFound: 'Chart data not found',
-      defaultMsg: 'Failed to fetch chart data',
+      notFound: 'Chart calculation endpoint not found - check if backend is running properly',
+      defaultMsg: 'Failed to fetch chart data - backend may be unavailable',
     });
   }
 };

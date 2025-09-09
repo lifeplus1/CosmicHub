@@ -21,6 +21,8 @@ from backend_types.tcm_systems import (
 )
 
 # Import TCM calculation engine
+tcm_engine: Optional[Any] = None
+
 try:
     from astro.calculations.tcm_engine import calculate_tcm_constitution
     # Import the engine with a specific alias to avoid type conflicts
@@ -34,7 +36,7 @@ except ImportError as e:
     try:
         from astro.calculations.tcm_calculations import calculate_tcm_constitution
         try:
-            from astro.calculations.tcm_calculations import TCMCalculationEngine as _tcm_engine_class
+            from astro.calculations.tcm_calculations import TCMCalculationEngine as _tcm_engine_class  # type: ignore[assignment]
             tcm_engine = _tcm_engine_class()
         except ImportError:
             tcm_engine = None

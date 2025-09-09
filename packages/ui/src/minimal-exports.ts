@@ -48,6 +48,15 @@ export {
   withErrorBoundary,
 } from './components/feedback/ErrorBoundaries';
 
+// Frequency visualization components  
+export {
+  FrequencyVisualization,
+  FrequencyWaveform,
+  type FrequencyData,
+  type FrequencyVisualizationConfig,
+  type FrequencyVisualizationProps
+} from './components/charts/SharedFrequencyVisualization';
+
 // Export centralized CSS modules
 export * as stylesModules from './styles/modules';
 

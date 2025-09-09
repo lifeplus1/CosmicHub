@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
   "pythonVersion": "3.11",
-  "venvPath": "backend/.venv",
+  "venvPath": ".",
   "venv": ".venv",
   "include": ["backend"],
-  "exclude": ["**/tests", "**/__pycache__", "backend/tests"],
+  "exclude": ["**/tests", "**/__pycache__", "backend/tests", "backend/data_export", "backend/validate_parquet_foundation.py"],
   "stubPath": "typings",
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,

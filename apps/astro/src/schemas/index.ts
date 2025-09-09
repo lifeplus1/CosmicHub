@@ -39,3 +39,6 @@ export * from './psychologyChart';
 
 // AI Interpretation Form Component Schemas
 export * from './interpretationForm';
+
+// Domain Page Frame Component Schemas
+export * from './domainPageFrame';

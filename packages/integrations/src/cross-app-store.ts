@@ -1,9 +1,16 @@
 /**
- * Cross-app state management for CosmicHub monorepo
- * Enables seamless data sharing between astro and healwave apps
+ * Enhanced Cross-App State Management for CosmicHub Integration
+ * Complete HealWave-Astrology integration with TCM and real-time sync
  */
 
-// Simple logger for integrations package
+import type { 
+  BirthData,
+  ElementalBalance,
+  TransitResult,
+  AstrologyChart
+} from '@cosmichub/types';
+
+// Enhanced logger for cross-app integrations
 const logger = {
   info: (message: string, data?: unknown) => {
     if (process.env.NODE_ENV === 'development') {
@@ -16,7 +23,106 @@ const logger = {
   error: (message: string, data?: unknown) => {
     console.error(`[CrossAppStore] ${message}`, data);
   },
+  debug: (message: string, data?: unknown) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`[CrossAppStore] ${message}`, data);
+    }
+  },
 };
+
+// Integration-specific types
+export interface HealingSession {
+  id: string;
+  userId: string;
+  frequency: number;
+  category: 'solfeggio' | 'rife' | 'chakra' | 'planetary' | 'custom';
+  duration: number; // in minutes
+  volume: number; // 0-100
+  binauralBeat?: number;
+  startTime: Date;
+  endTime?: Date;
+  moodBefore?: number; // 1-10 scale
+  moodAfter?: number; // 1-10 scale
+  notes?: string;
+  astrologyFactors?: string[];
+  tcmFactors?: string[];
+  effectiveness?: number; // 1-10 scale
+}
+
+export interface FrequencyRecommendation {
+  id: string;
+  frequency: number;
+  category: string;
+  name: string;
+  description: string;
+  reason: string;
+  confidence: number; // 0-1
+  astrologyFactor?: string;
+  tcmFactor?: string;
+  optimalTiming: Date[];
+  duration: number;
+  binauralBeat?: number;
+}
+
+export interface MeridianWindow {
+  organ: string;
+  element: keyof ElementalBalance;
+  peakTime: string; // HH:mm format
+  optimalFrequencies: number[];
+  currentStrength: number; // 0-1
+  description: string;
+}
+
+export interface TCMInsight {
+  primaryElement: keyof ElementalBalance;
+  elementBalance: ElementalBalance;
+  constitutionalType: string;
+  recommendations: string[];
+  seasonalGuidance: Record<string, string>;
+  meridianTiming: MeridianWindow[];
+  lastUpdated: Date;
+}
+
+export interface CrossAppNotification {
+  id: string;
+  type: 'info' | 'success' | 'warning' | 'error' | 'recommendation';
+  title: string;
+  message: string;
+  timestamp: Date;
+  source: 'astro' | 'healwave' | 'system';
+  actionable?: boolean;
+  action?: {
+    label: string;
+    callback: () => void;
+  };
+  read: boolean;
+  persistent: boolean;
+}
+
+export interface SyncState {
+  lastSync: Date;
+  conflictResolution: 'client' | 'server' | 'merge';
+  pendingChanges: AppStateChange[];
+  isOnline: boolean;
+}
+
+export interface ConflictState {
+  id: string;
+  type: 'session' | 'preference' | 'chart' | 'tcm';
+  localData: unknown;
+  remoteData: unknown;
+  timestamp: Date;
+  resolved: boolean;
+  resolution?: 'local' | 'remote' | 'merge';
+}
+
+export interface IntegrationEvent<T = unknown> {
+  type: string;
+  payload: T;
+  source: 'astro' | 'healwave' | 'system';
+  timestamp: Date;
+  id: string;
+}
 
 // Simple EventEmitter implementation for browser compatibility
 type Listener<T = unknown> = (data: T) => void;
@@ -46,21 +152,81 @@ class SimpleEventEmitter {
   }
 }
 
-interface UserState {
-  data: Record<string, unknown> | null;
-  name: string;
-}
+
 
 export interface ChartData {
   // Chart data structure - can be extended as needed
   [key: string]: unknown;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  birthData?: BirthData;
+  preferences: UserPreferences;
+  subscription: SubscriptionTier;
+  clinicalAccess: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'cosmic';
+  notifications: boolean;
+  soundEnabled: boolean;
+  visualizationsEnabled: boolean;
+  preferredFrequencies: string[];
+  sessionDuration: number;
+  volumeLevel: number;
+}
+
+type SubscriptionTier = 'free' | 'basic' | 'pro' | 'clinical';
+
 export interface AppState {
-  user: UserState | null;
-  currentChart: ChartData | null;
+  // User state
+  user: UserProfile | null;
+  
+  // Chart state
+  currentChart: AstrologyChart | null;
+  
+  // HealWave state
+  healwave: {
+    currentSession: HealingSession | null;
+    sessionHistory: HealingSession[];
+    isPlaying: boolean;
+    lastFrequency: number | null;
+    recommendations: FrequencyRecommendation[];
+  };
+  
+  // TCM Integration state
+  tcm: {
+    insights: TCMInsight | null;
+    meridianTiming: MeridianWindow[];
+    seasonalAdjustments: SeasonalFrequency[];
+  };
+  
+  // Astrology state
+  astrology: {
+    currentTransits: TransitResult[];
+    recommendations: FrequencyRecommendation[];
+    lastCalculation: Date | null;
+  };
+  
+  // Cross-app state
   theme: 'light' | 'dark' | 'cosmic';
   activeApp: 'astro' | 'healwave';
+  notifications: CrossAppNotification[];
+  sync: SyncState;
+}
+
+export interface SeasonalFrequency {
+  season: 'spring' | 'summer' | 'autumn' | 'winter';
+  element: keyof ElementalBalance;
+  baseFrequency: number;
+  modifier: number;
+  description: string;
+  optimalTimes: string[]; // HH:mm format
 }
 
 interface CrossAppEvent<P = unknown> {
@@ -70,15 +236,45 @@ interface CrossAppEvent<P = unknown> {
   timestamp: number;
 }
 
+interface AppStateChange {
+  id: string;
+  type: string;
+  timestamp: Date;
+  data: Record<string, unknown>;
+}
+
 class CrossAppStore extends SimpleEventEmitter {
+  private storageKey = 'cosmichub-cross-app-state';
   private state: AppState = {
     user: null,
     currentChart: null,
+    healwave: {
+      currentSession: null,
+      sessionHistory: [],
+      isPlaying: false,
+      lastFrequency: null,
+      recommendations: [],
+    },
+    tcm: {
+      insights: null,
+      meridianTiming: [],
+      seasonalAdjustments: [],
+    },
+    astrology: {
+      currentTransits: [],
+      recommendations: [],
+      lastCalculation: null,
+    },
     theme: 'cosmic',
     activeApp: 'astro',
+    notifications: [],
+    sync: {
+      lastSync: new Date(),
+      conflictResolution: 'merge',
+      pendingChanges: [],
+      isOnline: navigator?.onLine ?? true,
+    },
   };
-
-  private storageKey = 'cosmichub-cross-app-state';
 
   constructor() {
     super();
@@ -198,13 +394,128 @@ class CrossAppStore extends SimpleEventEmitter {
     }
   }
 
+  // Healing session methods
+  startHealingSession(session: HealingSession): void {
+    this.state.healwave.currentSession = session;
+    this.state.healwave.isPlaying = true;
+    this.emit('healwave:updated', this.state.healwave);
+    this.emit('state:updated', this.state);
+    logger.info('Healing session started', { sessionId: session.id });
+  }
+
+  endHealingSession(sessionId: string, effectiveness?: number, notes?: string): void {
+    const session = this.state.healwave.currentSession;
+    if (session && session.id === sessionId) {
+      const completedSession = {
+        ...session,
+        endTime: new Date(),
+        effectiveness,
+        notes,
+      };
+      this.state.healwave.sessionHistory.push(completedSession);
+      this.state.healwave.currentSession = null;
+      this.state.healwave.isPlaying = false;
+      this.emit('healwave:updated', this.state.healwave);
+      this.emit('state:updated', this.state);
+      logger.info('Healing session ended', { sessionId, effectiveness });
+    }
+  }
+
+  updateFrequencyRecommendations(recommendations: FrequencyRecommendation[]): void {
+    this.state.healwave.recommendations = recommendations;
+    this.emit('healwave:updated', this.state.healwave);
+    this.emit('state:updated', this.state);
+  }
+
+  // TCM methods
+  updateTCMInsights(insights: TCMInsight): void {
+    this.state.tcm.insights = insights;
+    this.emit('tcm:updated', this.state.tcm);
+    this.emit('state:updated', this.state);
+  }
+
+  updateMeridianTiming(timing: MeridianWindow[]): void {
+    this.state.tcm.meridianTiming = timing;
+    this.emit('tcm:updated', this.state.tcm);
+    this.emit('state:updated', this.state);
+  }
+
+  // Astrology methods
+  updateCurrentTransits(transits: AppState['astrology']['currentTransits']): void {
+    this.state.astrology.currentTransits = transits;
+    this.state.astrology.lastCalculation = new Date();
+    this.emit('astrology:updated', this.state.astrology);
+    this.emit('state:updated', this.state);
+  }
+
+  updateAstrologyRecommendations(recommendations: FrequencyRecommendation[]): void {
+    this.state.astrology.recommendations = recommendations;
+    this.emit('astrology:updated', this.state.astrology);
+    this.emit('state:updated', this.state);
+  }
+
+  // Notification methods
+  addNotification(notification: CrossAppNotification): void {
+    this.state.notifications.push(notification);
+    this.emit('notifications:updated', this.state.notifications);
+    this.emit('state:updated', this.state);
+  }
+
+  markNotificationAsRead(notificationId: string): void {
+    const notification = this.state.notifications.find(n => n.id === notificationId);
+    if (notification) {
+      notification.read = true;
+      this.emit('notifications:updated', this.state.notifications);
+      this.emit('state:updated', this.state);
+    }
+  }
+
+  clearNotifications(): void {
+    this.state.notifications = [];
+    this.emit('notifications:updated', this.state.notifications);
+    this.emit('state:updated', this.state);
+  }
+
+  // Sync methods
+  syncData(): void {
+    this.state.sync.lastSync = new Date();
+    this.state.sync.pendingChanges = [];
+    this.emit('sync:updated', this.state.sync);
+    this.emit('state:updated', this.state);
+    logger.info('Data synchronized');
+  }
+
   // Clear all state
   clear(): void {
     this.state = {
       user: null,
       currentChart: null,
+      healwave: {
+        currentSession: null,
+        sessionHistory: [],
+        isPlaying: false,
+        lastFrequency: null,
+        recommendations: [],
+      },
+      tcm: {
+        insights: null,
+        meridianTiming: [],
+        seasonalAdjustments: [],
+      },
+      astrology: {
+        currentTransits: [],
+        recommendations: [],
+        lastCalculation: null,
+      },
       theme: 'cosmic',
       activeApp: 'astro',
+      notifications: [],
+      sync: {
+        lastSync: new Date(),
+        conflictResolution: 'merge',
+        pendingChanges: [],
+        isOnline: navigator?.onLine ?? true,
+      },
     };
     this.saveState();
     this.emit('state:cleared', this.state);

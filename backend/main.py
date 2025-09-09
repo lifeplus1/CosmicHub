@@ -1039,7 +1039,7 @@ async def root_health():
 from api.routers import (  # noqa: E402
     # ai,
     calculations,
-    # charts,  # consolidated charts router
+    charts,  # consolidated charts router
     csp_router,
     # ephemeris,
     # presets,
@@ -1069,7 +1069,7 @@ from api.endpoints.sacred_geometry_systems import sacred_geometry_router  # noqa
 app.include_router(calculations.router, prefix="/api")  # Multi-system calculations router
 app.include_router(tcm_router)  # TCM analysis endpoints (already includes /api/tcm prefix)
 app.include_router(sacred_geometry_router)  # Sacred Geometry analysis endpoints
-# app.include_router(charts.router, prefix="/api")  # consolidated charts router
+app.include_router(charts.router, prefix="/api")  # consolidated charts router
 # app.include_router(interpretations.router)  # AI Interpretations router
 # app.include_router(analytics_router)  # Analytics tracking and dashboards
 # app.include_router(psychology_router)  # Psychology assessments/profile endpoints

@@ -11,6 +11,7 @@ Successfully implemented the missing advanced synastry features that were tested
 **Endpoint**: `POST /synastry/advanced`
 
 **Request Model**: `AdvancedSynastryRequest`
+
 - `person1: BirthData` - First person's birth information
 - `person2: BirthData` - Second person's birth information  
 - `include_aspects: bool = True` - Include aspect analysis
@@ -19,6 +20,7 @@ Successfully implemented the missing advanced synastry features that were tested
 - `analysis_level: AnalysisLevel = "intermediate"` - Analysis depth
 
 **Response Model**: `SynastryAnalysisResponse`
+
 - Complete synastry analysis with compatibility scores
 - Detailed aspect analysis with interpretations
 - House overlays and relationship dynamics
@@ -26,6 +28,7 @@ Successfully implemented the missing advanced synastry features that were tested
 - Processing metadata and insights
 
 **Features**:
+
 - Comprehensive compatibility scoring (romantic, emotional, mental, physical, spiritual, communication, conflict resolution)
 - Synastry aspect analysis with harmony scores and interpretations
 - Elemental and modal compatibility assessment
@@ -37,11 +40,13 @@ Successfully implemented the missing advanced synastry features that were tested
 **Endpoint**: `POST /synastry/timing`
 
 **Request Model**: `SynastryTimingRequest`
+
 - `current_phase: RelationshipPhase` - Current relationship phase
 - `next_phase: RelationshipPhase` - Expected next phase
 - `transition_period: str = "2-3 months"` - Transition timeline
 
 **Response Model**: `SynastryTimingResponse`
+
 - Current timing analysis with phase information
 - Significant upcoming transits affecting the relationship
 - Best timing windows for relationship milestones
@@ -49,6 +54,7 @@ Successfully implemented the missing advanced synastry features that were tested
 - Long-term relationship outlook
 
 **Features**:
+
 - Relationship phase analysis (attraction, bonding, commitment, challenge, growth, transformation)
 - Transit predictions with intensity and impact analysis
 - Timing recommendations for important decisions
@@ -59,20 +65,24 @@ Successfully implemented the missing advanced synastry features that were tested
 **Endpoint**: `POST /synastry/compare`
 
 **Request Model**: `SynastryComparisonRequest`
+
 - `base_person_id: str` - Reference person for comparisons
 - `comparisons: List[SynastryComparisonInput]` - List of matches to compare
 
 **SynastryComparisonInput**:
+
 - Person IDs and match scores
 - Compatibility breakdowns (sun, moon, venus-mars, mercury)
 - Growth potential assessments
 
 **Response Model**: `SynastryComparisonResponse`
+
 - Ranked list of compatibility matches
 - Detailed comparison insights
 - Best match recommendations based on compatibility scores
 
 **Features**:
+
 - Multi-person compatibility ranking
 - Automatic sorting by match scores
 - Comparative analysis insights
@@ -83,6 +93,7 @@ Successfully implemented the missing advanced synastry features that were tested
 ### Type Bridge Integration
 
 Leveraged the existing `SynastryTypeBridge` class for:
+
 - Universal birth data coercion (API, flat config, mock flows)
 - Synastry aspect creation with validation
 - Compatibility score normalization
@@ -105,6 +116,7 @@ The implementation supports all three documented data flows:
 ### Testing
 
 All tests in `test_synastry_endpoints.py` are now enabled and passing:
+
 - `test_calculate_synastry_advanced_basic_fields()` - Tests advanced analysis structure
 - `test_synastry_timing_endpoint_defaults()` - Tests timing analysis functionality  
 - `test_synastry_compare_ranking_logic()` - Tests comparison ranking accuracy
@@ -112,6 +124,7 @@ All tests in `test_synastry_endpoints.py` are now enabled and passing:
 ## Usage Examples
 
 ### Advanced Analysis
+
 ```python
 req = AdvancedSynastryRequest(
     person1=birth_data_1,
@@ -124,6 +137,7 @@ response = await calculate_synastry_advanced(req)
 ```
 
 ### Timing Analysis
+
 ```python
 req = SynastryTimingRequest(
     current_phase="growth",
@@ -134,6 +148,7 @@ response = await synastry_timing(req)
 ```
 
 ### Comparison Analysis
+
 ```python
 req = SynastryComparisonRequest(
     base_person_id="person_a",

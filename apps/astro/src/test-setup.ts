@@ -249,7 +249,11 @@ vi.mock('@cosmichub/ui', () => ({
           'data-testid': 'integration-error-boundary' 
         }, 'Component Error');
       }
-      return this.props.children;
+      // Always render with testid wrapper for integration tests
+      return React.createElement('div', { 
+        'data-testid': 'integration-error-boundary',
+        style: { display: 'contents' } // Don't affect layout
+      }, this.props.children);
     }
   },
   ChartErrorBoundary: ({

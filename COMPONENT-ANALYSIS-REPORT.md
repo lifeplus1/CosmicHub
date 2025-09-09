@@ -1,41 +1,187 @@
 # 🎯 CosmicHub Project-Wide Component Analysis Report
 
-**Generated:** 2025-09-07T06:32:36.932Z
+**Generated:** 2025-09-07T04:37:48.946Z
 **Components Analyzed:** 285/285
-**Components Needing Optimization:** 131
+**Components Needing Optimization:** 157
 
 ## 📊 Analysis Summary
 
 ### Issue Distribution
-- 🚀 **Performance Issues:** 89
-- ♿ **Accessibility Issues:** 62
+
+- 🚀 **Performance Issues:** 122
+- ♿ **Accessibility Issues:** 80
 - 🛡️ **Quality Issues:** 28
 
 ### Components by Application
-- **astro**: 86 components need optimization
+
+- **astro**: 109 components need optimization
+- **packages/ui**: 45 components need optimization
 - **mobile**: 2 components need optimization
-- **packages/ui**: 41 components need optimization
-- **healwave**: 1 components need optimization
 - **packages/personalization**: 1 components need optimization
 
 ### Top Components Requiring Attention
 
+#### 1. AyurvedaChart-original
 
-#### 1. index
-**Path:** `apps/astro/src/components/MultiSystemChart/TCMChart/index.tsx`
+**Path:** `apps/astro/src/components/MultiSystemChart/AyurvedaChart-original.tsx`
+**Score:** 60/100
+**Issues:** 3
+
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 2. EnhancedCard
+
+**Path:** `packages/ui/src/components/enhanced/EnhancedCard.tsx`
 **Score:** 65/100
 **Issues:** 3
 
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
 - 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
+- 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
+
+#### 3. EnhancedChartDisplay
+
+**Path:** `packages/ui/src/components/enhanced/EnhancedChartDisplay.tsx`
+**Score:** 70/100
+**Issues:** 3
+
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
+- 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+- 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
+
+#### 4. ErrorBoundaries
+
+**Path:** `packages/ui/src/components/feedback/ErrorBoundaries.tsx`
+**Score:** 60/100
+**Issues:** 3
+
+- 🟡 **missing-memo**: Component not memoized - may cause unnecessary re-renders
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 5. ErrorHandling
+
+**Path:** `packages/ui/src/components/feedback/ErrorHandling.tsx`
+**Score:** 60/100
+**Issues:** 3
+
+- 🟡 **missing-memo**: Component not memoized - may cause unnecessary re-renders
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 6. Dropdown
+
+**Path:** `packages/ui/src/components/ui/Dropdown.tsx`
+**Score:** 60/100
+**Issues:** 3
+
+- 🟡 **missing-memo**: Component not memoized - may cause unnecessary re-renders
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-focus-management**: Modal/dropdown without focus management
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 7. InterpretationCard
+
+**Path:** `apps/astro/src/components/AIInterpretation/InterpretationCard.tsx`
+**Score:** 80/100
+**Issues:** 2
+
 - 🟡 **missing-keyboard-support**: Click handlers without keyboard support
 - 🟡 **missing-focus-management**: Modal/dropdown without focus management
 
 **Recommendations:**
+
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 8. AstrologyGuide
+
+**Path:** `apps/astro/src/components/AstrologyGuide/AstrologyGuide.tsx`
+**Score:** 75/100
+**Issues:** 2
+
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-focus-management**: Modal/dropdown without focus management
+
+**Recommendations:**
+
 - 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
 - ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
 
+#### 9. BlogAuthor
 
-#### 2. ChartDisplay
+**Path:** `apps/astro/src/components/BlogAuthor.tsx`
+**Score:** 70/100
+**Issues:** 2
+
+- 🟡 **missing-memo**: Component not memoized - may cause unnecessary re-renders
+- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+
+#### 10. BlogSubscription
+
+**Path:** `apps/astro/src/components/BlogSubscription.tsx`
+**Score:** 75/100
+**Issues:** 2
+
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟠 **missing-aria-label**: Interactive elements missing accessible labels
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 11. AstrologySettings
+
+**Path:** `apps/astro/src/components/ChartDisplay/AstrologySettings.tsx`
+**Score:** 75/100
+**Issues:** 2
+
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 12. ChartDisplay
+
 **Path:** `apps/astro/src/components/ChartDisplay/ChartDisplay.tsx`
 **Score:** 80/100
 **Issues:** 2
@@ -44,10 +190,39 @@
 - 🟡 **missing-focus-management**: Modal/dropdown without focus management
 
 **Recommendations:**
+
 - ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
 
+#### 13. ChartEmptyState
 
-#### 3. EnhancedChartWrapper
+**Path:** `apps/astro/src/components/ChartDisplay/ChartEmptyState.tsx`
+**Score:** 75/100
+**Issues:** 2
+
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 14. ChartHeader
+
+**Path:** `apps/astro/src/components/ChartDisplay/ChartHeader.tsx`
+**Score:** 75/100
+**Issues:** 2
+
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
+
+**Recommendations:**
+
+- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
+
+#### 15. EnhancedChartWrapper
+
 **Path:** `apps/astro/src/components/ChartDisplay/EnhancedChartWrapper.tsx`
 **Score:** 85/100
 **Issues:** 2
@@ -56,77 +231,41 @@
 - 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
 
 **Recommendations:**
+
 - ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
 - 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
 
+#### 16. ViewSpecificSettings
 
-#### 4. CommunityHub
-**Path:** `apps/astro/src/components/EducationPlatform/CommunityHub.tsx`
+**Path:** `apps/astro/src/components/ChartDisplay/ViewSpecificSettings.tsx`
 **Score:** 75/100
-**Issues:** 2
-
-- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-
-**Recommendations:**
-- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 5. EducationDashboard
-**Path:** `apps/astro/src/components/EducationPlatform/EducationDashboard.tsx`
-**Score:** 80/100
 **Issues:** 2
 
 - 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
-- 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
+- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
 
 **Recommendations:**
+
 - 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
+- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
 
+#### 17. ViewToggleControls
 
-#### 6. LearningPathViewer
-**Path:** `apps/astro/src/components/EducationPlatform/LearningPathViewer.tsx`
+**Path:** `apps/astro/src/components/ChartDisplay/ViewToggleControls.tsx`
 **Score:** 75/100
 **Issues:** 2
 
-- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
+- 🟡 **missing-useCallback**: Multiple event handlers without useCallback - may cause child re-renders
 - 🟡 **missing-keyboard-support**: Click handlers without keyboard support
 
 **Recommendations:**
+
 - 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
 - ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
 
+#### 18. MigrationHelpers
 
-#### 7. ErrorTestComponent
-**Path:** `apps/astro/src/components/ErrorTestComponent.tsx`
-**Score:** 85/100
-**Issues:** 2
-
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-- 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
-
-**Recommendations:**
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-- 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
-
-
-#### 8. GeneKeysChart
-**Path:** `apps/astro/src/components/GeneKeysChart/GeneKeysChart.tsx`
-**Score:** 85/100
-**Issues:** 2
-
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-- 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
-
-**Recommendations:**
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-- 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
-
-
-#### 9. GeneKeysComponents
-**Path:** `apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx`
+**Path:** `apps/astro/src/components/ChartDisplay/tables/MigrationHelpers.tsx`
 **Score:** 70/100
 **Issues:** 2
 
@@ -134,23 +273,12 @@
 - 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
 
 **Recommendations:**
+
 - 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
 
+#### 19. ChartPreferences
 
-#### 10. GatesChannelsTab
-**Path:** `apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx`
-**Score:** 80/100
-**Issues:** 2
-
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-- 🟡 **missing-focus-management**: Modal/dropdown without focus management
-
-**Recommendations:**
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 11. HumanDesignChart
-**Path:** `apps/astro/src/components/HumanDesignChart/HumanDesignChart.tsx`
+**Path:** `apps/astro/src/components/ChartPreferences.tsx`
 **Score:** 85/100
 **Issues:** 2
 
@@ -158,37 +286,13 @@
 - 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
 
 **Recommendations:**
+
 - ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
 - 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
 
+#### 20. CertificationCenter
 
-#### 12. Login
-**Path:** `apps/astro/src/components/Login.tsx`
-**Score:** 85/100
-**Issues:** 2
-
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-- 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
-
-**Recommendations:**
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-- 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
-
-
-#### 13. AyurvedaChartDisplay
-**Path:** `apps/astro/src/components/MultiSystemChart/AyurvedaChart/AyurvedaChartDisplay.tsx`
-**Score:** 80/100
-**Issues:** 2
-
-- 🟠 **missing-aria-label**: Interactive elements missing accessible labels
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-
-**Recommendations:**
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 14. EnneagramDetailView
-**Path:** `apps/astro/src/components/MultiSystemChart/PsychologyChart/EnneagramDetailView.tsx`
+**Path:** `apps/astro/src/components/EducationPlatform/CertificationCenter.tsx`
 **Score:** 75/100
 **Issues:** 2
 
@@ -196,143 +300,70 @@
 - 🟡 **missing-keyboard-support**: Click handlers without keyboard support
 
 **Recommendations:**
+
 - 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
 - ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 15. MBTIDetailView
-**Path:** `apps/astro/src/components/MultiSystemChart/PsychologyChart/MBTIDetailView.tsx`
-**Score:** 75/100
-**Issues:** 2
-
-- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-
-**Recommendations:**
-- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 16. PsychologySynthesisView
-**Path:** `apps/astro/src/components/MultiSystemChart/PsychologyChart/PsychologySynthesisView.tsx`
-**Score:** 75/100
-**Issues:** 2
-
-- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-
-**Recommendations:**
-- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 17. PsychologyTab
-**Path:** `apps/astro/src/components/MultiSystemChart/PsychologyTab.tsx`
-**Score:** 80/100
-**Issues:** 2
-
-- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
-- 🟢 **missing-error-boundary**: Component handles errors but not wrapped in ErrorBoundary
-
-**Recommendations:**
-- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- 🛡️ **Quality**: Improve TypeScript typing and add proper cleanup
-
-
-#### 18. ResponsiveComponents
-**Path:** `apps/astro/src/components/MultiSystemChart/ResponsiveComponents.tsx`
-**Score:** 75/100
-**Issues:** 2
-
-- 🟡 **missing-memo**: Component not memoized - may cause unnecessary re-renders
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-
-**Recommendations:**
-- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 19. SpiritualChart-original
-**Path:** `apps/astro/src/components/MultiSystemChart/SpiritualChart-original.tsx`
-**Score:** 75/100
-**Issues:** 2
-
-- 🟡 **missing-useMemo**: Expensive operations without memoization - may cause performance issues
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-
-**Recommendations:**
-- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
-
-#### 20. NotificationSettings
-**Path:** `apps/astro/src/components/NotificationSettings.tsx`
-**Score:** 75/100
-**Issues:** 2
-
-- 🟡 **missing-memo**: Component not memoized - may cause unnecessary re-renders
-- 🟡 **missing-keyboard-support**: Click handlers without keyboard support
-
-**Recommendations:**
-- 🚀 **Performance**: Apply React.memo, useCallback, and useMemo optimizations
-- ♿ **Accessibility**: Add ARIA attributes and keyboard navigation support
-
 
 ## 🚀 Performance Optimization Opportunities
 
-### MISSING MEMO (43 components)
+### MISSING USECALLBACK (41 components)
+
+- **ChartModeForm** (`apps/astro/src/components/AIInterpretation/ChartModeForm.tsx`): Multiple event handlers without useCallback - may cause child re-renders
+- **DirectModeForm** (`apps/astro/src/components/AIInterpretation/DirectModeForm.tsx`): Multiple event handlers without useCallback - may cause child re-renders
+- **AstrologyGuide** (`apps/astro/src/components/AstrologyGuide/AstrologyGuide.tsx`): Multiple event handlers without useCallback - may cause child re-renders
+- **BlogSubscription** (`apps/astro/src/components/BlogSubscription.tsx`): Multiple event handlers without useCallback - may cause child re-renders
+- **AstrologySettings** (`apps/astro/src/components/ChartDisplay/AstrologySettings.tsx`): Multiple event handlers without useCallback - may cause child re-renders
+- ...and 36 more
+
+### MISSING MEMO (54 components)
+
+- **AuthProvider** (`apps/astro/src/components/AuthProvider.tsx`): Component not memoized - may cause unnecessary re-renders
+- **BlogAuthor** (`apps/astro/src/components/BlogAuthor.tsx`): Component not memoized - may cause unnecessary re-renders
+- **AstroSymbol** (`apps/astro/src/components/ChartDisplay/AstroSymbol.tsx`): Component not memoized - may cause unnecessary re-renders
 - **ChartDisplay.stories** (`apps/astro/src/components/ChartDisplay/ChartDisplay.stories.tsx`): Component not memoized - may cause unnecessary re-renders
-- **CosmicLoading** (`apps/astro/src/components/CosmicLoading.tsx`): Component not memoized - may cause unnecessary re-renders
-- **EnvironmentStatus** (`apps/astro/src/components/EnvironmentStatus.tsx`): Component not memoized - may cause unnecessary re-renders
-- **GeneKeysComponents** (`apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx`): Component not memoized - may cause unnecessary re-renders
-- **MultiSystemChartDisplay** (`apps/astro/src/components/MultiSystemChart/MultiSystemChartDisplay.tsx`): Component not memoized - may cause unnecessary re-renders
-- ...and 38 more
+- **CollapsibleTable** (`apps/astro/src/components/ChartDisplay/CollapsibleTable.tsx`): Component not memoized - may cause unnecessary re-renders
+- ...and 49 more
 
-### MISSING USEMEMO (21 components)
-- **CommunityHub** (`apps/astro/src/components/EducationPlatform/CommunityHub.tsx`): Expensive operations without memoization - may cause performance issues
-- **LearningPathViewer** (`apps/astro/src/components/EducationPlatform/LearningPathViewer.tsx`): Expensive operations without memoization - may cause performance issues
-- **GeneKeysComponents** (`apps/astro/src/components/GeneKeysChart/GeneKeysComponents.tsx`): Expensive operations without memoization - may cause performance issues
-- **ConstitutionTab** (`apps/astro/src/components/MultiSystemChart/AyurvedaChart/ConstitutionTab.tsx`): Expensive operations without memoization - may cause performance issues
-- **DoshasTab** (`apps/astro/src/components/MultiSystemChart/AyurvedaChart/DoshasTab.tsx`): Expensive operations without memoization - may cause performance issues
-- ...and 16 more
+### MISSING USEMEMO (27 components)
 
-### MISSING USECALLBACK (25 components)
-- **EducationDashboard** (`apps/astro/src/components/EducationPlatform/EducationDashboard.tsx`): Multiple event handlers without useCallback - may cause child re-renders
-- **HumanDesignModal** (`apps/astro/src/components/HumanDesignChart/HumanDesignModal.tsx`): Multiple event handlers without useCallback - may cause child re-renders
-- **InlineTooltip** (`apps/astro/src/components/HumanDesignChart/InlineTooltip.tsx`): Multiple event handlers without useCallback - may cause child re-renders
-- **NumerologyForm** (`apps/astro/src/components/NumerologyCalculator/NumerologyForm.tsx`): Multiple event handlers without useCallback - may cause child re-renders
-- **SaveChart** (`apps/astro/src/components/SaveChart.tsx`): Multiple event handlers without useCallback - may cause child re-renders
-- ...and 20 more
-
+- **BlogAuthor** (`apps/astro/src/components/BlogAuthor.tsx`): Expensive operations without memoization - may cause performance issues
+- **CelestialBodiesTable** (`apps/astro/src/components/ChartDisplay/tables/CelestialBodiesTable.tsx`): Expensive operations without memoization - may cause performance issues
+- **EnhancedAspectTable** (`apps/astro/src/components/ChartDisplay/tables/EnhancedAspectTable.tsx`): Expensive operations without memoization - may cause performance issues
+- **MigrationHelpers** (`apps/astro/src/components/ChartDisplay/tables/MigrationHelpers.tsx`): Expensive operations without memoization - may cause performance issues
+- **CertificationCenter** (`apps/astro/src/components/EducationPlatform/CertificationCenter.tsx`): Expensive operations without memoization - may cause performance issues
+- ...and 22 more
 
 ## ♿ Accessibility Enhancement Opportunities
 
-### MISSING KEYBOARD SUPPORT (52 components)
-- **AudioPlayer.enhanced** (`apps/healwave/src/components/AudioPlayer.enhanced.tsx`): Click handlers without keyboard support
-- **ChartDisplay** (`apps/astro/src/components/ChartDisplay/ChartDisplay.tsx`): Click handlers without keyboard support
-- **ChartErrorState** (`apps/astro/src/components/ChartDisplay/ChartErrorState.tsx`): Click handlers without keyboard support
-- **ChartHeaderComponent** (`apps/astro/src/components/ChartDisplay/ChartHeaderComponent.tsx`): Click handlers without keyboard support
-- **ChartNavigation** (`apps/astro/src/components/ChartDisplay/ChartNavigation.tsx`): Click handlers without keyboard support
-- ...and 47 more
+### MISSING KEYBOARD SUPPORT (66 components)
 
-### MISSING FOCUS MANAGEMENT (7 components)
+- **InterpretationCard** (`apps/astro/src/components/AIInterpretation/InterpretationCard.tsx`): Click handlers without keyboard support
+- **InterpretationDisplay** (`apps/astro/src/components/AIInterpretation/InterpretationDisplay.tsx`): Click handlers without keyboard support
+- **AstrologySettings** (`apps/astro/src/components/ChartDisplay/AstrologySettings.tsx`): Click handlers without keyboard support
+- **AstrologySettingsPanel** (`apps/astro/src/components/ChartDisplay/AstrologySettingsPanel.tsx`): Click handlers without keyboard support
+- **ChartDataExport** (`apps/astro/src/components/ChartDisplay/ChartDataExport.tsx`): Click handlers without keyboard support
+- ...and 61 more
+
+### MISSING FOCUS MANAGEMENT (10 components)
+
+- **InterpretationCard** (`apps/astro/src/components/AIInterpretation/InterpretationCard.tsx`): Modal/dropdown without focus management
+- **AstrologyGuide** (`apps/astro/src/components/AstrologyGuide/AstrologyGuide.tsx`): Modal/dropdown without focus management
 - **BlogComments** (`apps/astro/src/components/BlogComments.tsx`): Modal/dropdown without focus management
 - **ChartDisplay** (`apps/astro/src/components/ChartDisplay/ChartDisplay.tsx`): Modal/dropdown without focus management
 - **GatesChannelsTab** (`apps/astro/src/components/HumanDesignChart/GatesChannelsTab.tsx`): Modal/dropdown without focus management
-- **PersonalityAssessment** (`apps/astro/src/components/MultiSystemChart/PersonalityAssessment.tsx`): Modal/dropdown without focus management
-- **index** (`apps/astro/src/components/MultiSystemChart/TCMChart/index.tsx`): Modal/dropdown without focus management
-- ...and 2 more
+- ...and 5 more
 
-### MISSING ARIA LABEL (3 components)
+### MISSING ARIA LABEL (4 components)
+
+- **BlogSubscription** (`apps/astro/src/components/BlogSubscription.tsx`): Interactive elements missing accessible labels
 - **AyurvedaChartDisplay** (`apps/astro/src/components/MultiSystemChart/AyurvedaChart/AyurvedaChartDisplay.tsx`): Interactive elements missing accessible labels
 - **EnneagramDetailView** (`apps/astro/src/components/PsychologyChart/EnneagramDetailView.tsx`): Interactive elements missing accessible labels
 - **ExportTools** (`packages/ui/src/components/tools/ExportTools.tsx`): Interactive elements missing accessible labels
 
-
-
 ## 🛡️ Code Quality Improvements
 
 ### MISSING ERROR BOUNDARY (28 components)
+
 - **AI001Dashboard** (`apps/astro/src/components/AI001/AI001Dashboard.tsx`): Component handles errors but not wrapped in ErrorBoundary
 - **InterpretationForm** (`apps/astro/src/components/AIInterpretation/InterpretationForm.tsx`): Component handles errors but not wrapped in ErrorBoundary
 - **InterpretationFormRefactored** (`apps/astro/src/components/AIInterpretation/InterpretationFormRefactored.tsx`): Component handles errors but not wrapped in ErrorBoundary
@@ -340,24 +371,26 @@
 - **ChartCalculator** (`apps/astro/src/components/ChartCalculator.tsx`): Component handles errors but not wrapped in ErrorBoundary
 - ...and 23 more
 
-
 ## 🎯 Next Steps
 
 ### Immediate Actions (High Priority)
-1. **Implement React.memo** for 43 components
-2. **Add ARIA labels** for 3 interactive elements
+
+1. **Implement React.memo** for 54 components
+2. **Add ARIA labels** for 4 interactive elements
 3. **Fix memory leaks** in 0 components
 
 ### Medium Priority
+
 1. **Add useCallback/useMemo** optimizations
 2. **Implement keyboard navigation** support
 3. **Improve TypeScript typing**
 
 ### Automation Opportunities
+
 1. **ESLint rules** for performance patterns
 2. **Automated memoization** suggestions
 3. **Accessibility testing** integration
 
 ---
 
-**Generated by CosmicHub Project-Wide Component Analyzer v1.0**
+## Generated by CosmicHub Project-Wide Component Analyzer v1.0

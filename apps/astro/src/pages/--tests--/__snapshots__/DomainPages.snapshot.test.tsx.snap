@@ -2,131 +2,188 @@
 
 exports[`Domain page snapshots > PsychologyPage renders consistently 1`] = `
 <div
-  className="p-4 max-w-6xl mx-auto"
+  aria-label="Psychology Profile page"
+  className="p-4 max-w-6xl mx-auto "
 >
   <header
     className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+    role="banner"
   >
     <h1
       className="text-2xl font-semibold text-cosmic-silver"
+      id="page-title"
     >
       Psychology Profile
     </h1>
     <div
+      aria-label="Page actions"
       className="flex gap-2"
+      role="toolbar"
     >
       <button
-        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm"
+        aria-label="Refresh Psychology Profile page"
+        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue focus:ring-offset-2 focus:ring-offset-cosmic-dark transition-colors duration-200"
         disabled={false}
         onClick={[Function]}
+        onKeyDown={[Function]}
+        type="button"
       >
-        Refresh
+        <span
+          aria-hidden="true"
+        >
+          ↻
+        </span>
+         Refresh
       </button>
     </div>
   </header>
-  <div
-    className="p-6 border border-yellow-500 rounded-md bg-yellow-900/50"
+  <main
+    aria-labelledby="page-title"
+    className="min-h-0 flex-1"
+    role="main"
   >
     <div
-      className="text-center"
+      className="p-6 border border-yellow-500 rounded-md bg-yellow-900/50"
     >
-      <h3
-        className="font-bold text-cosmic-silver"
+      <div
+        className="text-center"
       >
-        No Chart Data
-      </h3>
-      <p
-        className="text-cosmic-silver/70"
-      >
-        Please calculate a chart to see the multi-system analysis.
-      </p>
+        <h3
+          className="font-bold text-cosmic-silver"
+        >
+          No Chart Data
+        </h3>
+        <p
+          className="text-cosmic-silver/70"
+        >
+          Please calculate a chart to see the multi-system analysis.
+        </p>
+      </div>
     </div>
-  </div>
+  </main>
 </div>
 `;
 
 exports[`Domain page snapshots > SpiritualPage renders consistently 1`] = `
 <div
-  className="p-4 max-w-6xl mx-auto"
+  aria-label="Spiritual Systems page"
+  className="p-4 max-w-6xl mx-auto "
 >
   <header
     className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+    role="banner"
   >
     <h1
       className="text-2xl font-semibold text-cosmic-silver"
+      id="page-title"
     >
       Spiritual Systems
     </h1>
     <div
+      aria-label="Page actions"
       className="flex gap-2"
+      role="toolbar"
     >
       <button
-        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm"
+        aria-label="Refreshing page content"
+        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue focus:ring-offset-2 focus:ring-offset-cosmic-dark transition-colors duration-200"
         disabled={true}
         onClick={[Function]}
+        onKeyDown={[Function]}
+        type="button"
       >
-        Refreshing...
+        <span
+          aria-hidden="true"
+        >
+          ⟳
+        </span>
+         Refreshing...
       </button>
     </div>
   </header>
-  <div
-    className="cosmic-card p-6 rounded-lg"
+  <main
+    aria-labelledby="page-title"
+    className="min-h-0 flex-1"
+    role="main"
   >
     <div
-      className="flex items-center justify-center space-x-3"
+      className="cosmic-card p-6 rounded-lg"
     >
       <div
-        className="w-5 h-5 border-b-2 border-cosmic-purple rounded-full animate-spin"
-      />
-      <p
-        className="text-center text-cosmic-silver"
+        className="flex items-center justify-center space-x-3"
       >
-        Calculating multi-system chart...
-      </p>
+        <div
+          className="w-5 h-5 border-b-2 border-cosmic-purple rounded-full animate-spin"
+        />
+        <p
+          className="text-center text-cosmic-silver"
+        >
+          Calculating multi-system chart...
+        </p>
+      </div>
     </div>
-  </div>
+  </main>
 </div>
 `;
 
 exports[`Domain page snapshots > TCMPage renders consistently 1`] = `
 <div
-  className="p-4 max-w-6xl mx-auto"
+  aria-label="TCM Analysis page"
+  className="p-4 max-w-6xl mx-auto "
 >
   <header
     className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+    role="banner"
   >
     <h1
       className="text-2xl font-semibold text-cosmic-silver"
+      id="page-title"
     >
       TCM Analysis
     </h1>
     <div
+      aria-label="Page actions"
       className="flex gap-2"
+      role="toolbar"
     >
       <button
-        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm"
+        aria-label="Refreshing page content"
+        className="px-3 py-1 rounded bg-cosmic-blue/20 hover:bg-cosmic-blue/30 disabled:opacity-50 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue focus:ring-offset-2 focus:ring-offset-cosmic-dark transition-colors duration-200"
         disabled={true}
         onClick={[Function]}
+        onKeyDown={[Function]}
+        type="button"
       >
-        Refreshing...
+        <span
+          aria-hidden="true"
+        >
+          ⟳
+        </span>
+         Refreshing...
       </button>
     </div>
   </header>
-  <div
-    className="cosmic-card p-6 rounded-lg"
+  <main
+    aria-labelledby="page-title"
+    className="min-h-0 flex-1"
+    role="main"
   >
     <div
-      className="flex items-center justify-center space-x-3"
+      className="cosmic-card p-6 rounded-lg"
     >
       <div
-        className="w-5 h-5 border-b-2 border-cosmic-purple rounded-full animate-spin"
-      />
-      <p
-        className="text-center text-cosmic-silver"
+        className="flex items-center justify-center space-x-3"
       >
-        Calculating multi-system chart...
-      </p>
+        <div
+          className="w-5 h-5 border-b-2 border-cosmic-purple rounded-full animate-spin"
+        />
+        <p
+          className="text-center text-cosmic-silver"
+        >
+          Calculating multi-system chart...
+        </p>
+      </div>
     </div>
-  </div>
+  </main>
 </div>
 `;

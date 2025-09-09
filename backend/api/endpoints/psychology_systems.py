@@ -76,7 +76,7 @@ async def run_psychology_assessment(request: PsychologyAssessmentRequest) -> Psy
             processing_time_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
         )
 
-        return assessment.model_dump()  # type: ignore[attr-defined]
+        return assessment  # type: ignore[return-value]
     except Exception as e:
         logger.error(f"Psychology assessment failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

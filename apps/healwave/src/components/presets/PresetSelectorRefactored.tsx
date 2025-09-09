@@ -19,7 +19,8 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
   ({ onSelectPreset, currentSettings, currentPreset }) => {
     const { user } = useAuth();
     const [presets, setPresets] = useState<FrequencyPreset[]>([]);
-    const [loading, setLoading] = useState(false);
+  // Separate loading state for user presets so built-ins remain interactive
+  const [userLoading, setUserLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
@@ -72,7 +73,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
 
     const loadUserPresets = useCallback(async () => {
       try {
-        setLoading(true);
+        setUserLoading(true);
         setError(null);
         const userPresets = await getUserPresets();
         if (userPresets.success) {
@@ -85,12 +86,12 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
           setError(userPresets.error);
           setPresets([]);
         }
-      } catch (err) {
+      } catch {
         // Handle error with better UX
         setError('Failed to load presets. Please try again.');
         setPresets([]);
       } finally {
-        setLoading(false);
+        setUserLoading(false);
       }
     }, []);
 
@@ -153,7 +154,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
       if (!user) return;
 
       try {
-        setLoading(true);
+  setUserLoading(true);
         setError(null);
         const result = await deletePreset(presetId);
         if (result.success) {
@@ -162,10 +163,10 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
         } else {
           setError(result.error || 'Failed to delete preset');
         }
-      } catch (err) {
+      } catch {
         setError('Failed to delete preset. Please try again.');
       } finally {
-        setLoading(false);
+  setUserLoading(false);
       }
     }, [user]);
 
@@ -173,14 +174,13 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
 
     return (
       <ErrorBoundary>
-        <div className="space-y-8">
+        <section aria-label="Frequency Presets" className="space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-white">Frequency Presets</h2>
             {canSavePreset && (
               <button
                 onClick={() => setShowSaveDialog(true)}
-                disabled={loading}
                 className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 flex items-center space-x-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,6 +189,22 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
                 <span>Save Current</span>
               </button>
             )}
+          </div>
+
+          {/* Current settings quick summary for context */}
+          <div className="text-sm text-slate-300">
+            <span className="mr-4">
+              Volume: {typeof currentSettings.volume === 'number' && currentSettings.volume > 1
+                ? Math.round(currentSettings.volume)
+                : Math.round((currentSettings.volume || 0) * 100)}%
+            </span>
+            <span>
+              {(() => {
+                const mins = Number(currentSettings.duration) || 0;
+                const hours = Math.round((mins / 60) * 10) / 10;
+                return `Duration: ${hours}h`;
+              })()}
+            </span>
           </div>
 
           {/* Error Display */}
@@ -217,7 +233,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
             presets={builtInPresets}
             selectedPreset={currentPreset}
             onSelectPreset={onSelectPreset}
-            loading={loading}
+            loading={false}
           />
 
           {/* User Presets */}
@@ -225,14 +241,14 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
             presets={presets}
             selectedPreset={currentPreset}
             onSelectPreset={onSelectPreset}
-            onDeletePreset={handleDeletePreset}
-            loading={loading}
+            onDeletePreset={(presetId: string) => void handleDeletePreset(presetId)}
+            loading={userLoading}
             error={error}
             user={user}
           />
 
           {/* Loading State */}
-          {loading && (
+          {userLoading && (
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center space-x-2 text-slate-400">
                 <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -252,7 +268,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = React.memo(
             currentSettings={currentSettings}
             currentPreset={currentPreset}
           />
-        </div>
+  </section>
       </ErrorBoundary>
     );
   }

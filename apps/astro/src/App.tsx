@@ -6,6 +6,7 @@ import { AuthProvider, SubscriptionProvider } from '@cosmichub/auth';
 import { getAppConfig, isFeatureEnabled, logger } from '@cosmichub/config';
 import { BirthDataProvider } from './contexts/BirthDataContext';
 import { ErrorBoundary } from '@cosmichub/ui';
+import { DynamicImportErrorBoundary } from './components/DynamicImportErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { CosmicLoading } from './components/CosmicLoading';
@@ -61,6 +62,7 @@ const Spiritual = lazy(() => import('./pages/Spiritual'));
 const TCM = lazy(() => import('./pages/TCM'));
 const Synthesis = lazy(() => import('./pages/Synthesis'));
 const SacredGeometry = lazy(() => import('./pages/SacredGeometry'));
+const EnhancedUIDemo = lazy(() => import('./pages/EnhancedUIDemo'));
 
 const MainApp: React.FC = React.memo(function MainApp() {
   const config = getAppConfig('astro');
@@ -77,12 +79,13 @@ const MainApp: React.FC = React.memo(function MainApp() {
       <div className='min-h-screen bg-cosmic-dark text-cosmic-silver'>
         <Navbar />
         <main className='container px-4 py-8 mx-auto'>
-          <Suspense
-            fallback={
-              <CosmicLoading size='lg' message='Loading cosmic insights...' />
-            }
-          >
-            <Routes>
+          <DynamicImportErrorBoundary componentName="LazyRoutes">
+            <Suspense
+              fallback={
+                <CosmicLoading size='lg' message='Loading cosmic insights...' />
+              }
+            >
+              <Routes>
               <Route path='/' element={<Dashboard />} />
               <Route path='/chart' element={<UnifiedChart />} />
               <Route path='/chartwheel' element={<ChartWheelPage />} />
@@ -119,8 +122,10 @@ const MainApp: React.FC = React.memo(function MainApp() {
               <Route path='/wellness' element={<TCM />} />
               <Route path='/synthesis' element={<Synthesis />} />
               <Route path='/sacred-geometry' element={<SacredGeometry />} />
+              <Route path='/enhanced-ui-demo' element={<EnhancedUIDemo />} />
             </Routes>
-          </Suspense>
+            </Suspense>
+          </DynamicImportErrorBoundary>
         </main>
         <Footer />
 

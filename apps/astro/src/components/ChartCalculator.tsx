@@ -285,7 +285,7 @@ const ChartCalculator: React.FC = React.memo(function ChartCalculator() {
             onKeyDown={handleKeyDown}
             className='flex items-center justify-between w-full font-semibold text-white'
             aria-controls='guide-content'
-            aria-expanded={isGuideOpen ? 'true' : 'false'}
+            aria-expanded="true"
             aria-label={isGuideOpen ? 'Hide astrology chart guide' : 'Show astrology chart guide'}
             type='button'
           >

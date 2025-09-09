@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
-import { useAuth, useSubscription } from '@cosmichub/auth';
+import { useAuth } from '@cosmichub/auth';
+import { useUnrestrictedSubscription } from '../providers/useUnrestrictedSubscription';
 import { useAppNavigation } from '../hooks/useAppNavigation';
 import { FaCrown, FaStar, FaLock } from 'react-icons/fa';
 
@@ -26,7 +27,7 @@ const FeatureGuard: React.FC<FeatureGuardProps> = ({
   upgradeMessage
 }) => {
   const { user } = useAuth();
-  const { userTier, hasFeature } = useSubscription();
+  const { userTier, hasFeature } = useUnrestrictedSubscription();
   const { goToUpgrade } = useAppNavigation();
 
   // Determine if user has access to this feature
@@ -90,10 +91,10 @@ const FeatureGuard: React.FC<FeatureGuardProps> = ({
     }
   }), []);
 
-  const featureDetails = featureMap[feature] || {
+  const featureDetails = featureMap[feature] ?? {
     icon: <FaLock className="w-8 h-8 text-cosmic-silver" />,
     title: `${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)} Feature`,
-    description: upgradeMessage || `This feature requires a ${requiredTier} subscription.`,
+    description: upgradeMessage ?? `This feature requires a ${requiredTier} subscription.`,
     benefits: ['Enhanced healing capabilities', 'Professional tools', 'Advanced features']
   };
 

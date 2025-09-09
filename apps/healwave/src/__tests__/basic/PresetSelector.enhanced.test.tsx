@@ -193,7 +193,7 @@ describe('PresetSelector Enhanced Tests', () => {
       />
     );
 
-    const saveButton = getByRole('button', { name: /save current settings/i });
+    const saveButton = getByRole('button', { name: /save current/i });
     await user.click(saveButton);
 
     expect(getByText(/preset name/i) || getByText(/save preset/i)).toBeInTheDocument();
@@ -211,7 +211,7 @@ describe('PresetSelector Enhanced Tests', () => {
     );
 
     // Open save dialog
-    const saveButton = getByRole('button', { name: /save current settings/i });
+    const saveButton = getByRole('button', { name: /save current/i });
     await user.click(saveButton);
 
     // Fill in preset name
@@ -315,7 +315,7 @@ describe('PresetSelector Enhanced Tests', () => {
     );
 
     // Open save dialog
-    const saveButton = getByRole('button', { name: /save current settings/i });
+    const saveButton = getByRole('button', { name: /save current/i });
     await user.click(saveButton);
 
     // Try to submit without name
@@ -336,7 +336,7 @@ describe('PresetSelector Enhanced Tests', () => {
     );
 
     // Open save dialog and fill form
-    const saveButton = getByRole('button', { name: /save current settings/i });
+    const saveButton = getByRole('button', { name: /save current/i });
     await user.click(saveButton);
 
     const nameInput = getByLabelText(/preset name/i);
@@ -372,6 +372,6 @@ describe('PresetSelector Enhanced Tests', () => {
     );
 
     expect(getByLabelText('Frequency Presets')).toBeInTheDocument();
-    expect(getByRole('button', { name: /save current settings/i })).toBeInTheDocument();
+    expect(getByRole('button', { name: /save current/i })).toBeInTheDocument();
   });
 });

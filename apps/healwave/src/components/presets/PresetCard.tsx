@@ -56,7 +56,7 @@ export const PresetCard: React.FC<PresetCardProps> = ({
   };
 
   const getBinauralRangeInfo = () => {
-    const beat = preset.binauralBeat || 0;
+    const beat = preset.binauralBeat ?? 0;
     if (beat >= 0.5 && beat <= 4) return { name: 'Delta', color: 'purple', description: 'Deep Sleep' };
     if (beat > 4 && beat <= 8) return { name: 'Theta', color: 'blue', description: 'Meditation' };
     if (beat > 8 && beat <= 14) return { name: 'Alpha', color: 'green', description: 'Relaxation' };

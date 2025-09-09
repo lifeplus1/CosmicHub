@@ -1,9 +1,9 @@
 import React from 'react';
 import { FaCrown, FaStar, FaHeadphones, FaCheck, FaArrowUp } from 'react-icons/fa';
-import { useSubscription } from '@cosmichub/auth';
+import { useUnrestrictedSubscription } from '../providers/useUnrestrictedSubscription';
 
 const Upgrade: React.FC = () => {
-  const { tier: currentTier } = useSubscription();
+  const { userTier: currentTier } = useUnrestrictedSubscription();
 
   const plans = [
     {
@@ -202,7 +202,7 @@ const Upgrade: React.FC = () => {
           <div className="space-y-6">
             <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-3">
-                What's the difference between Premium and Clinical?
+                What&apos;s the difference between Premium and Clinical?
               </h3>
               <p className="text-blue-200">
                 Premium is perfect for personal wellness and meditation practices, while Clinical 
@@ -215,7 +215,7 @@ const Upgrade: React.FC = () => {
                 Can I cancel my subscription anytime?
               </h3>
               <p className="text-blue-200">
-                Yes, you can cancel your subscription at any time. You'll continue to have access 
+                Yes, you can cancel your subscription at any time. You&apos;ll continue to have access 
                 to premium features until the end of your current billing period.
               </p>
             </div>

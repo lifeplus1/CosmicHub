@@ -38,7 +38,7 @@ export const SavePresetDialog: React.FC<SavePresetDialogProps> = ({
       setSaving(true);
       await onSave(name.trim(), description.trim() || undefined);
       onClose();
-    } catch (error) {
+    } catch {
       // Error handling is managed by parent component
       // Silently fail - parent should show error UI
     } finally {
@@ -87,7 +87,7 @@ export const SavePresetDialog: React.FC<SavePresetDialogProps> = ({
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={(e) => void handleSubmit(e)} className="p-6 space-y-4">
           {/* Current Settings Summary */}
           <div className="bg-slate-700/50 rounded-lg p-4 space-y-2">
             <h3 className="text-sm font-medium text-slate-300 mb-2">Current Settings:</h3>

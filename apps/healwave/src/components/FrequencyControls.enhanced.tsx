@@ -335,7 +335,7 @@ const FrequencyControls: React.FC<FrequencyControlsProps> = ({
                 className="flex-1 p-2 bg-cosmic-dark/50 border border-cosmic-silver/20 rounded-lg text-white"
               />
               <button
-                onClick={handleSavePreset}
+                onClick={() => void handleSavePreset()}
                 disabled={!presetName.trim()}
                 className="px-4 py-2 bg-cosmic-purple text-white rounded-lg disabled:opacity-50"
               >

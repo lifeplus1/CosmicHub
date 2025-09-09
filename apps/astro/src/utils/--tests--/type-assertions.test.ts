@@ -373,7 +373,7 @@ describe('type-assertions', () => {
         contains_planets: ['sun', 'MOON', 'invalid_planet', 'mars', 123, null]
       };
       const result = assertHouseType(input);
-      expect(result.contains_planets).toEqual(['moon', 'mars']);
+      expect(result.contains_planets).toEqual(['sun', 'moon', 'mars']);
     });
 
     it('defaults to empty array for non-array contains_planets', () => {
@@ -404,6 +404,11 @@ describe('type-assertions', () => {
       };
 
       const result = assertPlanetType(input);
+      
+      // Debug logging
+      console.log('Input element:', input.element);
+      console.log('Result element:', result.element);
+      console.log('Element validation for "fire":', ['fire', 'earth', 'air', 'water'].includes('fire'));
 
       expect(result.name).toBe('jupiter');
       expect(result.sign).toBe('leo');
@@ -444,7 +449,7 @@ describe('type-assertions', () => {
       expect(result.number).toBe(10);
       expect(result.cusp).toBe(280.5);
       expect(result.sign).toBe('aquarius');
-      expect(result.contains_planets).toEqual(['saturn']); // uranus gets filtered out as invalid
+      expect(result.contains_planets).toEqual(['uranus', 'saturn']); // uranus and saturn are both valid
     });
   });
 });

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a2e; color: #fff; }
+        .step { margin: 10px 0; padding: 10px; border: 1px solid #333; }
+        .success { background-color: #2d4a2d; }
+        .error { background-color: #4a2d2d; }
+        .warning { background-color: #4a3d2d; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #333; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 HealWave Profile Loading Debug</h1>
+    
+    <div id="steps"></div>
+    
+    <h2>Quick Actions</h2>
+    <button onclick="testMockAuth()">Test Mock Authentication</button>
+    <button onclick="checkLocalStorage()">Check Local Storage</button>
+    <button onclick="navigateToProfile()">Navigate to Profile</button>
+    <button onclick="clearStorage()">Clear Storage & Reload</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const steps = document.getElementById('steps');
+        const results = document.getElementById('results');
+        
+        function addStep(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `step ${type}`;
+            div.textContent = message;
+            steps.appendChild(div);
+        }
+        
+        function showResults(content) {
+            results.innerHTML = '<h3>Results:</h3><pre>' + content + '</pre>';
+        }
+        
+        // Check if we're on the correct port
+        addStep('✅ Test page loaded on: ' + window.location.origin, 'success');
+        
+        if (window.location.port !== '3000') {
+            addStep('⚠️ WARNING: You should access HealWave on port 3000, not ' + window.location.port, 'warning');
+        }
+        
+        function testMockAuth() {
+            addStep('🧪 Testing mock authentication...');
+            
+            // Simulate the mock login process
+            const mockUser = {
+                uid: 'test-user-123',
+                email: 'test@test.com',
+                emailVerified: true,
+                displayName: 'Test User',
+                metadata: {
+                    creationTime: new Date().toISOString(),
+                    lastSignInTime: new Date().toISOString()
+                }
+            };
+            
+            try {
+                sessionStorage.setItem('cosmichub_mock_user', JSON.stringify(mockUser));
+                addStep('✅ Mock user stored in sessionStorage', 'success');
+                showResults('Mock user data:\n' + JSON.stringify(mockUser, null, 2));
+            } catch (error) {
+                addStep('❌ Failed to store mock user: ' + error.message, 'error');
+            }
+        }
+        
+        function checkLocalStorage() {
+            addStep('🔍 Checking storage...');
+            
+            const sessionData = sessionStorage.getItem('cosmichub_mock_user');
+            const localData = localStorage.getItem('cosmichub_mock_user');
+            
+            let content = 'Session Storage:\n';
+            content += sessionData ? JSON.stringify(JSON.parse(sessionData), null, 2) : 'null\n';
+            content += '\nLocal Storage:\n';
+            content += localData ? JSON.stringify(JSON.parse(localData), null, 2) : 'null\n';
+            
+            showResults(content);
+            
+            if (sessionData) {
+                addStep('✅ Found mock user in sessionStorage', 'success');
+            } else {
+                addStep('⚠️ No mock user found in sessionStorage', 'warning');
+            }
+        }
+        
+        function navigateToProfile() {
+            addStep('🔄 Navigating to profile page...');
+            const profileUrl = 'http://localhost:3000/profile';
+            window.open(profileUrl, '_blank');
+        }
+        
+        function clearStorage() {
+            addStep('🧹 Clearing storage and reloading...');
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.reload();
+        }
+        
+        // Auto-check on load
+        setTimeout(() => {
+            checkLocalStorage();
+        }, 1000);
+    </script>
+</body>
+</html>

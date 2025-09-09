@@ -207,7 +207,7 @@ def _resolve_coordinates(
         resolved_lon = lon
         timezone = "UTC"
     
-    if not resolved_lat or not resolved_lon:
+    if resolved_lat is None or resolved_lon is None:
         logger.error("Latitude and longitude are required")
         raise ValueError("Latitude and longitude are required")
     

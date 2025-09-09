@@ -1,0 +1,179 @@
+/* D3 Components Styles */
+.d3-chart-container {
+  position: relative;
+}
+
+.d3-chart-svg {
+  overflow: visible;
+}
+
+.d3-tooltip {
+  position: absolute;
+  z-index: 10;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.9);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  max-width: 20rem;
+}
+
+.d3-tooltip-center {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.d3-frequency-indicator {
+  animation: pulse 2s infinite;
+}
+
+.d3-waveform-path {
+  fill: none;
+  stroke-width: 2;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.d3-waveform-path.active {
+  stroke-width: 3;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.6));
+}
+
+.d3-frequency-point {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  filter: none;
+}
+
+.d3-frequency-point.active {
+  filter: drop-shadow(0 0 12px rgba(255, 107, 107, 0.8));
+}
+
+.d3-axis {
+  color: var(--cosmic-primary, #8b5cf6);
+  font-size: 12px;
+}
+
+.d3-axis line,
+.d3-axis path {
+  stroke: var(--cosmic-primary, #8b5cf6);
+}
+
+.d3-grid line {
+  stroke: var(--cosmic-secondary, #553c9a);
+  stroke-opacity: 0.1;
+  stroke-dasharray: 2, 2;
+}
+
+.d3-zodiac-segment {
+  opacity: 0.3;
+  cursor: pointer;
+}
+
+.d3-zodiac-symbol {
+  font-size: 16px;
+  fill: #ffffff;
+  font-weight: bold;
+}
+
+.d3-house-segment {
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+.d3-planet-symbol {
+  font-size: 20px;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+  cursor: pointer;
+}
+
+.d3-retrograde-indicator {
+  font-size: 12px;
+  fill: #ff6b6b;
+}
+
+.d3-aspect-line {
+  stroke-width: 2;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.d3-aspect-line.applying {
+  opacity: 1;
+  stroke-dasharray: none;
+}
+
+.d3-aspect-line.separating {
+  stroke-dasharray: 5, 5;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .d3-tooltip {
+    padding: 0.75rem;
+    max-width: 16rem;
+  }
+
+  .d3-zodiac-symbol {
+    font-size: 14px;
+  }
+
+  .d3-planet-symbol {
+    font-size: 18px;
+  }
+
+  .d3-axis {
+    font-size: 10px;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .d3-tooltip {
+    background: rgba(0, 0, 0, 0.95);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .d3-frequency-indicator,
+  .d3-waveform-path,
+  .d3-frequency-point {
+    animation: none;
+    transition: none;
+  }
+}

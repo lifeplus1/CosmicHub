@@ -6,7 +6,7 @@ import { ToastContext } from '../components/ToastProvider';
 import UserProfile from '../components/UserProfile';
 
 const Profile: React.FC = React.memo(() => {
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const { goToHome } = useAppNavigation();
   const toastContext = useContext(ToastContext);
 
@@ -19,6 +19,25 @@ const Profile: React.FC = React.memo(() => {
       toastContext?.toast({ message: 'Error signing out', type: 'error' });
     }
   }, [signOut, goToHome, toastContext]);
+
+  // Show loading state while authentication is being determined
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen bg-cosmic-dark'>
+        <div className='text-center'>
+          <div
+            className='mx-auto text-4xl text-cosmic-purple animate-spin'
+            aria-hidden='true'
+          >
+            🎵
+          </div>
+          <p className='mt-4 text-cosmic-silver'>
+            Loading your profile...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

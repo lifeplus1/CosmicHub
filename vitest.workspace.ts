@@ -31,6 +31,20 @@ export default defineWorkspace([
         'packages/**/node_modules/**',
         'packages/**/dist/**',
         'packages/**/*.d.ts',
+        // Exclude ALL third-party test files that use Jest APIs
+        'packages/**/node-modules/**/*.test.ts',
+        'packages/**/node-modules/**/*.spec.ts',
+        'packages/**/node_modules/.ignored/**/*.test.ts',
+        'packages/**/node_modules/.pnpm/**/*.test.ts',
+        'packages/**/.pnpm/**/*.test.ts',
+        'packages/**/.ignored/**/*.test.ts',
+        // Specifically exclude Stripe test files
+        'packages/integrations/node-modules/@stripe/**/*.test.ts',
+        'packages/integrations/node-modules/.ignored/@stripe/**/*.test.ts',
+        'packages/integrations/node-modules/.pnpm/@stripe/**/*.test.ts',
+        // Exclude any test files in symlinked node_modules directories
+        '**/node-modules/**/*.{test,spec}.{ts,tsx,js,jsx}',
+        '**/node_modules/**/*.{test,spec}.{ts,tsx,js,jsx}',
       ],
       environment: 'jsdom',
       globals: true,

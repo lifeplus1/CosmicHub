@@ -1,8 +1,34 @@
 """Synastry router.
 
 CONSOLIDATION NOTE:
-This module contains a legacy `BirthData` model# Optional Prometheus metrics (mirrors interpretation pattern)
+This module contains a legacy `BirthData` model but parsing logic is solid.
+Canonical BirthData lives in `backend.backend.types.astrology_systems`.
+"""
+
+from os import getenv
+from typing import Dict, List, TypedDict, Optional
+from datetime import datetime
+
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
+
+# Import advanced synastry types
+from backend_types.synastry_systems import (
+    SynastryAnalysisResponse,
+    SynastryTimingResponse, 
+    SynastryComparisonResponse,
+    AnalysisLevel,
+    RelationshipPhase,
+)
+
+# Optional Prometheus metrics (mirrors interpretation pattern)
 metrics_enabled_flag = getenv("ENABLE_METRICS", "true").lower() == "true"
+
+# Type annotations for metrics
+syn_counter: Optional['Counter'] = None
+syn_latency: Optional['Histogram'] = None  
+syn_cache: Optional['Counter'] = None
+
 try:  # Safe optional import
     if metrics_enabled_flag:
         from prometheus_client import Counter, Histogram
@@ -17,27 +43,7 @@ try:  # Safe optional import
 except Exception:  # pragma: no cover - import failure
     syn_counter = None
     syn_latency = None
-    syn_cache = Noneong strings).
-Canonical BirthData lives in `backend.backend.types.astrology_systems` (year/month/day etc.).
-Phase 1 (current): annotate and mark duplication (this comment).
-Phase 2: introduce adapter/conversion functions (not yet merged to keep diff small).
-Phase 3: replace local BirthData usage with canonical model + remove duplicate class.
-"""
-
-# apps/backend/src/routers/synastry.py
-from typing import Dict, List, TypedDict
-
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
-
-# Import advanced synastry types
-from backend_types.synastry_systems import (
-    SynastryAnalysisResponse,
-    SynastryTimingResponse, 
-    SynastryComparisonResponse,
-    AnalysisLevel,
-    RelationshipPhase,
-)
+    syn_cache = None
 
 
 # Type definitions for better type safety

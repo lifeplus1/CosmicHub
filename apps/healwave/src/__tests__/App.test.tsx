@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
+import { render, waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { act } from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from 'vitest';
 import App from '../App';
@@ -167,11 +167,12 @@ describe('App Component', () => {
     expect(screen.getByText('Test Tailwind & Radix UI')).toBeInTheDocument();
   });
 
-  it('opens astrology app when button is clicked', () => {
+  it('opens astrology app when button is clicked', async () => {
+    const user = userEvent.setup();
     render(<App />);
     
     const openAstroButton = screen.getByLabelText('Open Astrology App in a new tab');
-    fireEvent.click(openAstroButton);
+    await user.click(openAstroButton);
     
     expect(mockWindowOpen).toHaveBeenCalledWith('/astro', '_blank', 'noopener,noreferrer');
   });
@@ -224,11 +225,11 @@ describe('App Component', () => {
   it('handles theme change events', () => {
     render(<App />);
     
-    const changeHandler = mockAddEventListener.mock.calls[0][1];
+    const changeHandler = mockAddEventListener.mock.calls[0]?.[1];
     const mockEvent = { matches: true } as MediaQueryListEvent;
     
     act(() => {
-      changeHandler(mockEvent);
+      changeHandler?.(mockEvent);
     });
     
     expect(mockSetAttribute).toHaveBeenCalledWith('content', '#7c3aed');

@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, waitFor, act } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import AudioPlayer from '../components/AudioPlayer.enhanced';
 

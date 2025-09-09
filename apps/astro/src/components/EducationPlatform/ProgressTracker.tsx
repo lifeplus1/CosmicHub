@@ -206,10 +206,11 @@ const ProgressTracker: React.FC = React.memo(() => {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   }, []);
 
-  const handleTabChange = useCallback((value: string) => {
+  const _handleTabChange = useCallback((value: string) => {
     setActiveTab(value);
   }, []);
 
+  // Keyboard handler for accessibility
   const _handleKeyPress = useCallback((event: React.KeyboardEvent, action: () => void) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -268,7 +269,7 @@ const ProgressTracker: React.FC = React.memo(() => {
 
       <Tabs.Root
         value={activeTab}
-        onValueChange={handleTabChange}
+        onValueChange={_handleTabChange}
         className="w-full"
       >
         <Tabs.List className="flex flex-wrap gap-2 p-2 bg-cosmic-blue/30 backdrop-blur-lg border border-cosmic-silver/20 rounded-xl">

@@ -132,7 +132,7 @@ const FocusAreaSelector: React.FC<FocusAreaSelectorProps> = ({
                         : 'hover:border-cosmic-silver/50 hover:text-cosmic-silver',
                     ].join(' ')
               }
-              aria-pressed={isSelected ? 'true' : 'false'}
+              aria-pressed="true"
               aria-label={`${focus}: ${isSelected ? 'selected' : 'not selected'}`}
               tabIndex={disabled ? -1 : 0}
             >

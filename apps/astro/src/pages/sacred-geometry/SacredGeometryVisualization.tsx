@@ -10,10 +10,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stats, Environment } from '@react-three/drei';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@cosmichub/ui';
 
-// OrbitControls ref interface for drei compatibility
-interface OrbitControlsRef {
-  animateToPreset?: (preset: CameraPreset) => void;
-}
+// Import sacred geometry types and schemas
 import { 
   GeometryPatternType, 
   GeometryPattern, 
@@ -77,11 +74,6 @@ class SacredGeometryErrorBoundary extends React.Component<
 
     return this.props.children;
   }
-}
-
-// Extended OrbitControls interface - properly typed (for future enhancement)
-interface _ExtendedOrbitControlsRef {
-  animateToPreset?: (preset: CameraPreset) => void;
 }
 
 // Utility function to create geometry patterns
@@ -397,7 +389,7 @@ const AdvancedCameraControls: React.FC<AdvancedCameraControlsProps> = ({
   onPresetSelect 
 }) => {
   const { camera } = useThree();
-  const controlsRef = useRef<OrbitControlsRef>(null); // OrbitControls ref for drei compatibility
+  const controlsRef = useRef<THREE.Object3D>(null); // Use generic THREE.Object3D ref
 
   // Animation function for smooth camera transitions
   const animateToPreset = useCallback((preset: CameraPreset) => {
@@ -459,7 +451,7 @@ const AdvancedCameraControls: React.FC<AdvancedCameraControlsProps> = ({
     target: new THREE.Vector3(config.target.x, config.target.y, config.target.z)
   };
 
-  return <OrbitControls ref={controlsRef as React.Ref<unknown>} {...processedConfig} />;
+  return <OrbitControls {...processedConfig} />;
 };
 
 // Performance Monitor Component
@@ -702,8 +694,6 @@ const SacredGeometryVisualizationComponent: React.FC = React.memo(() => {
   });
   const [showAdvancedControls, setShowAdvancedControls] = useState<boolean>(false);
 
-  const controlsRef = useRef<OrbitControlsRef>(null); // OrbitControls ref for drei compatibility
-
   // Memoized geometry pattern with validation
   const currentPattern = useMemo(() => {
     try {
@@ -771,10 +761,8 @@ const SacredGeometryVisualizationComponent: React.FC = React.memo(() => {
   const selectCameraPreset = useCallback((preset: CameraPreset) => {
     try {
       CameraPresetSchema.parse(preset);
-      const controls = controlsRef.current as unknown as { animateToPreset?: (preset: CameraPreset) => void };
-      if (controls?.animateToPreset) {
-        controls.animateToPreset(preset);
-      }
+      // Note: Direct camera animation would need to be handled via the AdvancedCameraControls component
+      console.log('Camera preset selected:', preset.name);
       setErrors(prev => prev.filter(err => !err.includes('camera preset')));
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);

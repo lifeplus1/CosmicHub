@@ -104,7 +104,7 @@ try:
     }
 except ImportError:
     try:
-        from ayurveda_schema import (  # type: ignore[import-untyped,import-not-found]
+        from ayurveda_schema import (  # type: ignore[import-untyped,import-not-found,no-redef]
             AyurvedaAnalysisResult,  # type: ignore[attr-defined]
             AyurvedaConstitution,  # type: ignore[attr-defined]
             AyurvedaHealthGuidance,  # type: ignore[attr-defined]

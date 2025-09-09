@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAppNavigation } from '../hooks/useAppNavigation';
-import { useAuth, useSubscription } from '@cosmichub/auth';
+import { useAuth } from '@cosmichub/auth';
+import { useUnrestrictedSubscription } from '../providers/useUnrestrictedSubscription';
 import * as Tabs from '@radix-ui/react-tabs';
 import {
   FaUser,
@@ -27,24 +28,12 @@ interface SubscriptionUsage {
   current: number;
   limit: number;
 }
-interface SubscriptionInfo {
-  currentPeriodEnd?: string | number | Date | null | undefined;
-  name?: string;
-  price?: { monthly?: number | null | undefined };
-}
-interface SubscriptionHookData {
-  subscription?: SubscriptionInfo | null;
-  userTier: string;
-  isLoading: boolean;
-  checkUsageLimit?: (key: string) => SubscriptionUsage | undefined;
-}
 
 const UserProfile: React.FC = React.memo(() => {
   const { user } = useAuth();
-  const subscriptionData = useSubscription() as unknown as SubscriptionHookData; // Narrowing locally; upstream hook lacks exported type
+  const subscriptionData = useUnrestrictedSubscription();
   const { goTo } = useAppNavigation();
-  const { subscription, userTier, isLoading, checkUsageLimit } =
-    subscriptionData;
+  const { subscription, userTier, checkUsageLimit } = subscriptionData;
 
   const [userStats, setUserStats] = useState<UserStats>({
     totalSessions: 0,
@@ -127,7 +116,7 @@ const UserProfile: React.FC = React.memo(() => {
       ? (checkUsageLimit('sessionsPerDay') ?? { current: 0, limit: 2 })
       : { current: 0, limit: 2 };
 
-  if (isLoading === true || user === null || user === undefined) {
+  if (user === null || user === undefined) {
     return (
       <div className='py-10 text-center'>
         <div

@@ -109,7 +109,7 @@ export const VolumeControl: React.FC<VolumeControlProps> = React.memo(({
 
       {/* Volume Level Indicator */}
       <div className="flex items-center space-x-1">
-        {[...Array(5)].map((_, index) => {
+        {[...Array(5) as unknown[]].map((_, index) => {
           const threshold = (index + 1) * 20;
           const isActive = value >= threshold;
           

@@ -3,18 +3,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PresetCard } from '../PresetCard';
 
-// Type definitions for test data
-interface TestFrequencyPreset {
-  id: string;
-  name: string;
-  description?: string;
-  baseFrequency: number;
-  binauralBeat?: number;
-  category: 'brainwave' | 'solfeggio' | 'rife' | 'planetary' | 'chakra' | 'custom';
-  benefits?: string[];
-  metadata?: Record<string, unknown>;
-}
-
 // Mock the integrations
 vi.mock('@cosmichub/integrations', () => ({
   FrequencyPreset: {},
@@ -26,23 +14,23 @@ describe('PresetCard', () => {
   });
 
   // Test Data
-  const mockBuiltInPreset: TestFrequencyPreset = {
+  const mockBuiltInPreset = {
     id: 'preset-1',
     name: 'Alpha Focus',
     description: 'Enhance focus and concentration',
     baseFrequency: 440,
     binauralBeat: 10,
-    category: 'brainwave',
+    category: 'brainwave' as const,
     benefits: ['Focus', 'Concentration', 'Mental clarity'],
   };
 
-  const mockUserPreset: TestFrequencyPreset = {
+  const mockUserPreset = {
     id: 'user-preset-1',
     name: 'My Custom Preset',
     description: 'Personal meditation preset',
     baseFrequency: 528,
     binauralBeat: 7.5,
-    category: 'custom',
+    category: 'custom' as const,
     benefits: ['Relaxation', 'Healing'],
     metadata: {
       volume: 0.8,
@@ -237,10 +225,11 @@ describe('PresetCard', () => {
       );
 
       expect(screen.getByText('Custom Settings:')).toBeInTheDocument();
-      expect(screen.getByText('Volume:')).toBeInTheDocument();
+      // Check that unique metadata values are displayed
       expect(screen.getByText('0.8')).toBeInTheDocument();
-      expect(screen.getByText('Duration:')).toBeInTheDocument();
       expect(screen.getByText('1800')).toBeInTheDocument();
+      // Check that all metadata entries are rendered by checking there are multiple '10' values
+      expect(screen.getAllByText('10')).toHaveLength(2); // fadeIn and fadeOut both have value 10
     });
 
     it('does not display metadata for built-in presets', () => {
@@ -475,7 +464,7 @@ describe('PresetCard', () => {
         />
       );
 
-      const card = screen.getByRole('button');
+      screen.getByRole('button');
       await user.keyboard('{Enter}');
 
       expect(mockCallbacks.onSelect).not.toHaveBeenCalled();
@@ -585,10 +574,10 @@ describe('PresetCard', () => {
 
     categoryTests.forEach(({ category, expectedIcon }) => {
       it(`displays ${expectedIcon} icon for ${category} category`, () => {
-        const preset = { ...mockBuiltInPreset, category } as TestFrequencyPreset;
+        const preset = { ...mockBuiltInPreset, category: category as typeof mockBuiltInPreset.category };
         render(
           <PresetCard
-            preset={preset as any}
+            preset={preset}
             onSelect={mockCallbacks.onSelect}
           />
         );

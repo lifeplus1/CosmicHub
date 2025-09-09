@@ -176,11 +176,11 @@ async def get_user_subscription_status(user_id: str) -> Dict[str, Any]:
             except Exception as e:
                 logger.warning(f"Stripe verification failed for user {user_id}: {e}")
         plan_id = sub_data.get("plan_id", "")
-        plan = SUBSCRIPTION_PLANS.get(plan_id, {})
+        plan = SUBSCRIPTION_PLANS.get(plan_id)
         return {
             "status": "active" if sub_data.get("is_active", False) else "inactive",
             "tier": plan_id or "free",
-            "features": plan.get("features", []),  # type: ignore[arg-type]
+            "features": plan["features"] if plan else [],
             "expires_at": sub_data.get("current_period_end"),
             "stripe_subscription_id": sub_id,
         }

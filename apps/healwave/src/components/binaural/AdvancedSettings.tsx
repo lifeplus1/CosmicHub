@@ -310,6 +310,7 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = React.memo(({
         <div className="flex items-center justify-between">
           <Tooltip.Provider>
             <Tooltip.Root>
+              {/* @ts-ignore - Radix UI asChild typing issue */}
               <Tooltip.Trigger asChild>
                 <div
                   className="flex items-center space-x-2 cursor-help"

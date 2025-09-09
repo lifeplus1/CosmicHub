@@ -24,6 +24,11 @@ export const ChakraFrequencySelector: React.FC<ChakraFrequencySelectorProps> = R
     Object.keys(CHAKRA_FREQUENCIES) as ChakraKey[], []
   );
 
+  // Type guard to ensure selectedChakra is a valid ChakraKey
+  const isValidChakraKey = (key: ChakraKey | null | undefined): key is ChakraKey => {
+    return key !== null && key !== undefined && key in CHAKRA_FREQUENCIES;
+  };
+
   const createChakraPreset = useCallback((chakraKey: ChakraKey): FrequencyPreset => {
     const chakra = CHAKRA_FREQUENCIES[chakraKey];
     return {
@@ -67,12 +72,15 @@ export const ChakraFrequencySelector: React.FC<ChakraFrequencySelectorProps> = R
           const chakra = CHAKRA_FREQUENCIES[chakraKey];
           const isSelected = selectedChakra === chakraKey;
           const isHovered = hoveredChakra === chakraKey;
+          const ariaPressed: 'true' | 'false' = isSelected ? 'true' : 'false';
           
           return (
             <Tooltip.Provider key={chakraKey}>
               <Tooltip.Root>
+                {/* @ts-ignore - Radix UI asChild typing issue */}
                 <Tooltip.Trigger asChild>
                   <button
+                    type="button"
                     onClick={() => handleChakraSelect(chakraKey)}
                     onKeyDown={(event) => handleKeyDown(event, chakraKey)}
                     onMouseEnter={() => setHoveredChakra(chakraKey)}
@@ -89,7 +97,7 @@ export const ChakraFrequencySelector: React.FC<ChakraFrequencySelectorProps> = R
                     `}
                     data-chakra-color={chakra.color}
                     aria-label={`Select ${chakra.name} frequency (${chakra.frequency} Hz)`}
-                    aria-pressed={isSelected ? 'true' : 'false'}
+                    aria-pressed={ariaPressed}
                   >
                     {/* Chakra Symbol/Color Indicator */}
                     <div 
@@ -148,7 +156,7 @@ export const ChakraFrequencySelector: React.FC<ChakraFrequencySelectorProps> = R
                         Click to activate this chakra frequency
                       </div>
                     </div>
-                    <Tooltip.Arrow className="fill-black/95" />
+                    <Tooltip.Arrow />
                   </Tooltip.Content>
                 </Tooltip.Portal>
               </Tooltip.Root>
@@ -158,7 +166,7 @@ export const ChakraFrequencySelector: React.FC<ChakraFrequencySelectorProps> = R
       </div>
       
       {/* Chakra Information Panel */}
-      {selectedChakra && (
+      {isValidChakraKey(selectedChakra) && (
         <div className="mt-6 p-4 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10">
           <ChakraInfoPanel chakraKey={selectedChakra} />
         </div>

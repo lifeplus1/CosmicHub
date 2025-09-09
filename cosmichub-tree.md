@@ -1,9 +1,9 @@
 # CosmicHub Project Structure
 
 ---
-title: Project Structure (Tree View)
----
-title: Project Structure (Tree View)
+
+## Project Structure (Tree View)
+
 owner: docs
 status: moved
 last_reviewed: 2025-09-07
@@ -1134,13 +1134,13 @@ This document has moved. Please see docs/04-ARCHITECTURE/PROJECT-STRUCTURE.md
 │   │   ├── 🐍 _messaging_encoder.pyi
 │   │   ├── 🐍 _messaging_utils.pyi
 │   │   ├── 🐍 _retry.pyi
-│   │   ├── 🐍 _rfc3339.pyi
+│   │   ├── 🐍_rfc3339.pyi
 │   │   ├── 🐍 _sseclient.pyi
-│   │   ├── 🐍 _token_gen.pyi
-│   │   ├── 🐍 _user_identifier.pyi
-│   │   ├── 🐍 _user_import.pyi
-│   │   ├── 🐍 _user_mgt.pyi
-│   │   ├── 🐍 _utils.pyi
+│   │   ├── 🐍_token_gen.pyi
+│   │   ├── 🐍_user_identifier.pyi
+│   │   ├── 🐍_user_import.pyi
+│   │   ├── 🐍_user_mgt.pyi
+│   │   ├── 🐍_utils.pyi
 │   │   ├── 🐍 app_check.pyi
 │   │   ├── 🐍 auth.pyi
 │   │   ├── 🐍 credentials.pyi
@@ -1220,7 +1220,8 @@ This document has moved. Please see docs/04-ARCHITECTURE/PROJECT-STRUCTURE.md
 ├── ⚙️ type-bridge-report.json
 ├── 🔧 verify-css-migration.sh
 └── 🔷 vitest.workspace.ts
-```
+
+```text
 
 ## Project Statistics
 

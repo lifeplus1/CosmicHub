@@ -7,7 +7,6 @@
  */
 
 import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -69,11 +68,9 @@ const BATCHES = [
       'apps/healwave/src',
       'apps/mobile/src',
       'packages/auth/src',
-      'packages/auth/src',
       'packages/hooks/src',
       'packages/integrations/src',
       'packages/pwa/src',
-      'packages/subscriptions/src',
       'packages/types/src',
     ],
     estimatedFiles: 181,

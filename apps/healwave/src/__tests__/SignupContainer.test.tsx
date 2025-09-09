@@ -131,7 +131,7 @@ describe('SignupContainer', () => {
       const { getByText } = render(<SignupContainer onClose={mockOnClose} />);
       
       const emailInput = document.querySelector('input[type="email"]') as HTMLInputElement;
-      const passwordInputs = document.querySelectorAll('input[type="password"]') as NodeListOf<HTMLInputElement>;
+      const passwordInputs = document.querySelectorAll('input[type="password"]');
       
       expect(emailInput).toBeInTheDocument();
       expect(passwordInputs).toHaveLength(2);
@@ -153,7 +153,7 @@ describe('SignupContainer', () => {
       const { getByText } = render(<SignupContainer onClose={mockOnClose} />);
       
       const emailInput = document.querySelector('input[type="email"]') as HTMLInputElement;
-      const passwordInputs = document.querySelectorAll('input[type="password"]') as NodeListOf<HTMLInputElement>;
+      const passwordInputs = document.querySelectorAll('input[type="password"]');
       
       // Fill out the form
       await user.type(emailInput, 'test@example.com');
@@ -210,9 +210,9 @@ describe('SignupContainer', () => {
     });
 
     it('shows loading state during account creation', async () => {
-      let resolveSignUp: ((value: { uid: string }) => void) | undefined;
+      let resolveSignUp: (() => void) | undefined;
       const signUpPromise = new Promise<{ uid: string }>((resolve) => {
-        resolveSignUp = resolve;
+        resolveSignUp = () => resolve({ uid: 'test-uid' });
       });
       mockSignUp.mockReturnValue(signUpPromise);
       
@@ -223,7 +223,7 @@ describe('SignupContainer', () => {
       
       // Clean up
       if (resolveSignUp) {
-        resolveSignUp({ uid: 'test-uid' });
+        resolveSignUp();
       }
     });
   });

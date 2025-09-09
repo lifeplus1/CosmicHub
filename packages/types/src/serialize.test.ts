@@ -2,135 +2,89 @@ import { describe, it, expect } from 'vitest';
 import {
   serializeAstrologyData,
   deserializeAstrologyData,
-} from './serialize.js';
+} from './serialize';
 import type {
   AstrologyChart,
   UserProfile,
   NumerologyData,
-} from './astrology.types.js';
+} from './astrology.types';
 import {
   isAstrologyChart,
   isUserProfile,
   isNumerologyData,
   validateAstrologyChart,
   safeParseAstrologyChart,
-} from './type-guards.js';
+} from './type-guards';
 
 // Typed sample chart aligning with ChartSchema and AstrologyChart interface
 const sampleChart: AstrologyChart = {
-  planets: [
-    {
+  planets: {
+    Sun: {
       name: 'Sun',
+      position: 120.5,
+      degree: 120.5,
       sign: 'Leo',
-      degree: 15.25,
-      position: 135.25,
-      house: '5',
-      aspects: [],
-    },
-    {
-      name: 'Moon',
-      sign: 'Aries',
-      degree: 2.5,
-      position: 12.5,
-      house: '1',
-      aspects: [],
-    },
-  ],
+      house: 5,
+      retrograde: false,
+      speed: 1,
+      dignity: 'domicile',
+      element: 'fire',
+      modality: 'fixed'
+    }
+  },
   houses: [
-    { house: 1, number: 1, sign: 'Aries', degree: 0, cusp: 0, ruler: 'Mars' },
-    {
-      house: 2,
-      number: 2,
-      sign: 'Taurus',
-      degree: 30,
-      cusp: 30,
-      ruler: 'Venus',
-    },
-    {
-      house: 3,
-      number: 3,
-      sign: 'Gemini',
-      degree: 60,
-      cusp: 60,
-      ruler: 'Mercury',
-    },
-    {
-      house: 4,
-      number: 4,
-      sign: 'Cancer',
-      degree: 90,
-      cusp: 90,
-      ruler: 'Moon',
-    },
-    { house: 5, number: 5, sign: 'Leo', degree: 120, cusp: 120, ruler: 'Sun' },
-    {
-      house: 6,
-      number: 6,
-      sign: 'Virgo',
-      degree: 150,
-      cusp: 150,
-      ruler: 'Mercury',
-    },
-    {
-      house: 7,
-      number: 7,
-      sign: 'Libra',
-      degree: 180,
-      cusp: 180,
-      ruler: 'Venus',
-    },
-    {
-      house: 8,
-      number: 8,
-      sign: 'Scorpio',
-      degree: 210,
-      cusp: 210,
-      ruler: 'Pluto',
-    },
-    {
-      house: 9,
-      number: 9,
-      sign: 'Sagittarius',
-      degree: 240,
-      cusp: 240,
-      ruler: 'Jupiter',
-    },
-    {
-      house: 10,
-      number: 10,
-      sign: 'Capricorn',
-      degree: 270,
-      cusp: 270,
-      ruler: 'Saturn',
-    },
-    {
-      house: 11,
-      number: 11,
-      sign: 'Aquarius',
-      degree: 300,
-      cusp: 300,
-      ruler: 'Uranus',
-    },
-    {
-      house: 12,
-      number: 12,
-      sign: 'Pisces',
-      degree: 330,
-      cusp: 330,
-      ruler: 'Neptune',
-    },
+    { number: 1, cusp: 0, sign: 'Aries', ruler: 'Mars', degree: 0, size: 30 },
+    { number: 2, cusp: 30, sign: 'Taurus', ruler: 'Venus', degree: 30, size: 30 },
+    { number: 3, cusp: 60, sign: 'Gemini', ruler: 'Mercury', degree: 60, size: 30 },
+    { number: 4, cusp: 90, sign: 'Cancer', ruler: 'Moon', degree: 90, size: 30 },
+    { number: 5, cusp: 120, sign: 'Leo', ruler: 'Sun', degree: 120, size: 30 },
+    { number: 6, cusp: 150, sign: 'Virgo', ruler: 'Mercury', degree: 150, size: 30 },
+    { number: 7, cusp: 180, sign: 'Libra', ruler: 'Venus', degree: 180, size: 30 },
+    { number: 8, cusp: 210, sign: 'Scorpio', ruler: 'Mars', degree: 210, size: 30 },
+    { number: 9, cusp: 240, sign: 'Sagittarius', ruler: 'Jupiter', degree: 240, size: 30 },
+    { number: 10, cusp: 270, sign: 'Capricorn', ruler: 'Saturn', degree: 270, size: 30 },
+    { number: 11, cusp: 300, sign: 'Aquarius', ruler: 'Saturn', degree: 300, size: 30 },
+    { number: 12, cusp: 330, sign: 'Pisces', ruler: 'Jupiter', degree: 330, size: 30 }
   ],
   aspects: [
-    {
-      planet1: 'Sun',
-      planet2: 'Moon',
-      type: 'Trine',
-      orb: 5.0,
-      applying: 'true',
-    },
+    { 
+      aspect_type: 'square', 
+      planet1: 'Sun', 
+      planet2: 'Moon', 
+      orb: 2, 
+      applying: true, 
+      exact: false, 
+      power: 75,
+      aspect_angle: 90
+    }
   ],
-  asteroids: [{ name: 'Ceres', sign: 'Virgo', degree: 10.0, house: '6' }],
-  angles: [{ name: 'Ascendant', sign: 'Aries', degree: 0, position: 0 }],
+  asteroids: {
+    Chiron: { 
+      name: 'Chiron', 
+      position: 45.2, 
+      degree: 45.2,
+      sign: 'Taurus', 
+      house: 2, 
+      retrograde: false, 
+      speed: 0.5 
+    }
+  },
+  angles: {
+    ascendant: 0,
+    midheaven: 90,
+    descendant: 180,
+    imumcoeli: 270
+  },
+  latitude: 40.7128,
+  longitude: -74.0060,
+  timezone: 'America/New_York',
+  julian_day: 2447892.0,
+  house_system: 'placidus',
+  chart_metadata: {
+    calculation_timestamp: '2023-01-01T12:00:00Z',
+    ephemeris_source: 'swiss',
+    coordinate_system: 'tropical'
+  }
 };
 
 // Sample user profile
@@ -155,11 +109,21 @@ describe('serializeAstrologyData round-trip', () => {
     const json = serializeAstrologyData(sampleChart);
     expect(typeof json).toBe('string');
     const parsed = deserializeAstrologyData<AstrologyChart>(json);
-    expect(parsed.planets.length).toBe(2);
-    const firstPlanet = parsed.planets.at(0);
-    expect(firstPlanet && firstPlanet.name).toBe('Sun');
-    const firstAspect = parsed.aspects.at(0);
-    expect(firstAspect && firstAspect.type).toBe('Trine');
+    expect(Object.keys(parsed.planets)).toHaveLength(1);
+    const firstPlanet = parsed.planets.Sun;
+    expect(firstPlanet?.name).toBe('Sun');
+    expect(parsed.aspects).toEqual([
+      { 
+        aspect_type: 'square', 
+        planet1: 'Sun', 
+        planet2: 'Moon', 
+        orb: 2, 
+        applying: true, 
+        exact: false, 
+        power: 75,
+        aspect_angle: 90
+      }
+    ]);
   });
 
   it('throws on unknown type', () => {
@@ -194,10 +158,14 @@ describe('Type guards', () => {
 
   it('validates AstrologyChart structure', () => {
     const errors = validateAstrologyChart(sampleChart);
+    // Debug: print actual errors
+    if (errors.length > 0) {
+      console.error('Validation errors found:', errors);
+    }
     expect(errors.length).toBe(0);
 
     // Test invalid chart
-    const invalidChart = { ...sampleChart, planets: 'not an array' };
+    const invalidChart = { ...sampleChart, planets: 'not a record' };
     const invalidErrors = validateAstrologyChart(invalidChart);
     expect(invalidErrors.length).toBeGreaterThan(0);
   });
@@ -208,7 +176,7 @@ describe('Type guards', () => {
 
     expect(errors.length).toBe(0);
     expect(parsed).not.toBeNull();
-    expect(parsed?.planets.length).toBe(2);
+    expect(Object.keys(parsed?.planets || {})).toHaveLength(1);
 
     // Test invalid JSON
     const [invalidParsed, invalidErrors] =

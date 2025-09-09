@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useSubscription } from '@cosmichub/auth';
+import { useUnrestrictedSubscription } from '../providers/useUnrestrictedSubscription';
 
 export interface FeatureRestriction {
   isAllowed: boolean;
@@ -39,9 +39,13 @@ export interface HealwaveFeatures {
 }
 
 export const useHealwaveFeatures = (): HealwaveFeatures => {
-  const { userTier } = useSubscription();
+  const { userTier } = useUnrestrictedSubscription();
   
-  const currentTier = userTier?.toLowerCase() || 'free';
+  // Development override: Check URL params for tier override
+  const urlParams = new URLSearchParams(window.location.search);
+  const tierOverride = urlParams.get('tier');
+  
+  const currentTier = (tierOverride ?? userTier?.toLowerCase() ?? 'free');
   
   return useMemo(() => {
     const createRestriction = (
@@ -97,7 +101,7 @@ export const useHealwaveFeatures = (): HealwaveFeatures => {
 
 // Usage limits for free tier
 export const useUsageLimits = () => {
-  const { userTier } = useSubscription();
+  const { userTier } = useUnrestrictedSubscription();
   
   return useMemo(() => {
     if (userTier !== 'free') {

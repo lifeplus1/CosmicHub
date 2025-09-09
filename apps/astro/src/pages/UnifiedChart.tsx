@@ -61,6 +61,7 @@ const UnifiedChart: React.FC = () => {
     'new_calculation' | 'saved_chart' | 'url_param' | null
   >(null);
   const isLoadingFromSavedRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
   // Extract chartId from URL path params
   const chartId =
@@ -487,21 +488,19 @@ const UnifiedChart: React.FC = () => {
       }
     };
 
-    // Skip loading if we're in the middle of a saved chart operation
-    if (!isLoadingFromSavedRef.current) {
+    // Skip loading if we're in the middle of a saved chart operation or already initialized
+    if (!isLoadingFromSavedRef.current && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
       void loadChartData();
     }
-    // Added missing dependencies (birthData, searchParams, chartData, setBirthData) to satisfy exhaustive-deps rule.
-    // searchParams is stable per react-router docs; including it for completeness.
+    // Only depend on stable identifiers and external params that should trigger reloading
+    // Remove birthData, chartData, and setBirthData to prevent infinite loops
   }, [
     chartId,
     shouldCalculate,
     location.pathname,
     navigate,
-    birthData,
-    searchParams,
-    chartData,
-    setBirthData,
+    // Removed: birthData, searchParams, chartData, setBirthData - these cause infinite loops
   ]);
 
   // Navigation handlers

@@ -18,6 +18,9 @@ import * as Slider from '@radix-ui/react-slider';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import FeatureGuard from './FeatureGuard';
 import { useHealwaveFeatures } from '../hooks/useHealwaveFeatures';
+import MiniPlayer from './MiniPlayer';
+import { FrequencyWaveform, FrequencyData, FrequencyVisualizationConfig } from '@cosmichub/ui';
+import * as d3 from 'd3';
 
 /**
  * HealWave Standalone Frequency Generator
@@ -36,6 +39,68 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
     fadeIn: 2,
     fadeOut: 2,
   });
+  const [categoryFilter, setCategoryFilter] = useState<
+    'all' | 'solfeggio' | 'chakra' | 'brainwave'
+  >('all');
+  const [hoveredFrequency, setHoveredFrequency] = useState<FrequencyData | null>(null);
+
+  // Frequency visualization data
+  const frequencyData = useMemo<FrequencyData[]>(() => {
+    if (!selectedPreset) return [];
+
+    const baseData: FrequencyData = {
+      frequency: selectedPreset.baseFrequency,
+      amplitude: settings.volume,
+      phase: 0,
+      label: selectedPreset.name,
+      color: selectedPreset.category === 'solfeggio' ? '#00ffff' :
+             selectedPreset.category === 'chakra' ? '#ff6b6b' :
+             selectedPreset.category === 'brainwave' ? '#a855f7' : '#fbbf24',
+      category: selectedPreset.category as FrequencyData['category'],
+      benefits: [...(selectedPreset.benefits ?? [])],
+      duration: settings.duration * 60, // Convert to seconds
+    };
+
+    // Add binaural beat as second frequency if present
+    if (selectedPreset.binauralBeat) {
+      return [
+        baseData,
+        {
+          ...baseData,
+          frequency: selectedPreset.binauralBeat,
+          label: `${selectedPreset.name} (Binaural)`,
+          color: '#ec4899', // Pink for binaural
+          category: 'binaural' as const,
+        }
+      ];
+    }
+
+    return [baseData];
+  }, [selectedPreset, settings.volume, settings.duration]);
+
+  // Frequency visualization config
+  const visualizationConfig: FrequencyVisualizationConfig = useMemo(() => ({
+    width: 800,
+    height: 300,
+    showWaveform: true,
+    showSpectrum: true,
+    showFrequencyLabels: true,
+    animation: {
+      duration: 1000,
+      easing: d3.easeCubicInOut,
+    },
+    theme: {
+      background: 'transparent',
+      wave: '#ffffff',
+      spectrum: '#00ffff',
+      labels: '#ffffff',
+      grid: '#ffffff20',
+    },
+    accessibility: {
+      title: 'Frequency Visualization',
+      description: 'Real-time visualization of the selected frequency waveform and spectrum',
+    },
+  }), []);
 
   // Accessible ids
   // const presetsLabelId = useId(); // reserved for future grouping label
@@ -48,15 +113,32 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
   // Filter presets based on user tier
   const presets = useMemo<readonly FrequencyPreset[]>(() => {
     const allPresets = getAllPresets();
-    return allPresets.filter(preset => {
-      // Free tier: Only solfeggio and basic chakra frequencies
+    const tierFiltered = allPresets.filter(preset => {
+      // Free tier: Include solfeggio, chakra frequencies, and basic brainwave frequencies with binaural beats
       if (!features.advancedFrequencies.isAllowed) {
-        return preset.category === 'solfeggio' || preset.category === 'chakra';
+        const isBasicBrainwave = preset.category === 'brainwave' && 
+          ['delta-sleep', 'theta-meditation', 'alpha-relaxation'].includes(preset.id);
+        return preset.category === 'solfeggio' || 
+               preset.category === 'chakra' || 
+               isBasicBrainwave;
       }
       // Premium/Clinical: All presets available
       return true;
     });
-  }, [features.advancedFrequencies.isAllowed]);
+    const filteredPresets = tierFiltered.filter(preset =>
+      categoryFilter === 'all' ? true : preset.category === categoryFilter
+    );
+    
+    // Debug logging
+    devConsole.info('🎵 HealWave Debug - Preset loading:', {
+      totalPresets: allPresets.length,
+      filteredPresets: filteredPresets.length,
+      advancedFrequenciesAllowed: features.advancedFrequencies.isAllowed,
+      presetNames: filteredPresets.map(p => p.name)
+    });
+    
+    return filteredPresets;
+  }, [features.advancedFrequencies.isAllowed, categoryFilter]);
   // Stop any playing audio on unmount for cleanup
   useEffect(() => {
     return () => {
@@ -77,27 +159,27 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
       ];
       if (!keys.includes(e.key)) return;
       e.preventDefault();
-      const buttons =
-        radioGroupRef.current?.querySelectorAll<HTMLButtonElement>(
-          'button[role="radio"]'
+      const radios =
+        radioGroupRef.current?.querySelectorAll<HTMLInputElement>(
+          'input[type="radio"][name="healwave-preset"]'
         );
-      if (!buttons || buttons.length === 0) return;
+      if (!radios || radios.length === 0) return;
       const currentIndex = selectedPreset
         ? presets.findIndex(p => p.id === selectedPreset.id)
         : 0;
       let nextIndex = currentIndex;
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown')
-        nextIndex = (currentIndex + 1) % buttons.length;
+        nextIndex = (currentIndex + 1) % radios.length;
       if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')
-        nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+        nextIndex = (currentIndex - 1 + radios.length) % radios.length;
       if (e.key === 'Home') nextIndex = 0;
-      if (e.key === 'End') nextIndex = buttons.length - 1;
+      if (e.key === 'End') nextIndex = radios.length - 1;
       const nextPreset = presets[nextIndex];
       if (nextPreset) {
         setSelectedPreset(nextPreset);
-        const btn = buttons[nextIndex];
-        if (btn) {
-          btn.focus();
+        const radio = radios[nextIndex];
+        if (radio) {
+          radio.focus();
         }
       }
     },
@@ -142,19 +224,61 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
     >
       <h2 className='mb-6 text-2xl font-bold'>HealWave Frequency Generator</h2>
 
+      {/* Quick Filters */}
+      <div className='mb-4 flex flex-wrap items-center gap-2' aria-label='Filter presets by category'>
+        {([
+          { id: 'all', label: 'All' },
+          { id: 'solfeggio', label: 'Solfeggio' },
+          { id: 'chakra', label: 'Chakra' },
+          { id: 'brainwave', label: 'Brainwave' },
+        ] as const).map(btn => (
+          <button
+            key={btn.id}
+            type='button'
+            onClick={() => setCategoryFilter(btn.id)}
+            className={`px-3 py-1.5 text-sm rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+              categoryFilter === btn.id
+                ? 'bg-cyan-500/20 border-cyan-400 text-white'
+                : 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/30'
+            }`}
+            aria-pressed={categoryFilter === btn.id ? true : false}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Debug Info */}
+      {(typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') && (
+        <div className='mb-4 p-2 bg-blue-900/20 border border-blue-500/30 rounded text-xs'>
+          Debug: {presets.length} presets loaded, Advanced: {features.advancedFrequencies.isAllowed ? 'Yes' : 'No'}
+          <br />
+          <strong>Current Tier:</strong> {(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('tier') ?? 'free (default)';
+          })()}
+        </div>
+      )}
+
       {/* Preset Selection */}
-      <fieldset className='mb-6'>
+  <fieldset className='mb-6' role='group' aria-label='Select Frequency'>
         <legend className='mb-3 text-lg font-semibold'>Select Frequency</legend>
-        <div
-          className='grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'
-          ref={radioGroupRef}
-          onKeyDown={handleRadioKeyDown}
-        >
-          {presets.map(preset => {
+        {presets.length === 0 ? (
+          <div className='p-4 border border-red-500/30 bg-red-900/20 rounded text-red-300'>
+            No presets available. This might indicate a loading issue.
+          </div>
+        ) : (
+          <div
+            className='grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'
+            ref={radioGroupRef}
+            onKeyDown={handleRadioKeyDown}
+          >
+            {presets.map(preset => {
             const isSelected = selectedPreset?.id === preset.id;
             return (
               <Tooltip.Provider key={preset.id}>
                 <Tooltip.Root>
+                  {/* @ts-ignore - Radix UI asChild typing issue */}
                   <Tooltip.Trigger asChild>
                     <label
                       className={`p-3 rounded-lg border text-left transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-cyan-400 ${
@@ -178,6 +302,11 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                       <div className='text-sm text-cyan-300'>
                         {preset.baseFrequency} Hz
                       </div>
+                      {preset.binauralBeat && (
+                        <div className='text-xs text-purple-300'>
+                          🎵 Binaural Beat: {preset.binauralBeat} Hz
+                        </div>
+                      )}
                       <div className='mt-1 text-xs text-white/70'>
                         {preset.description}
                       </div>
@@ -196,6 +325,7 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
             );
           })}
         </div>
+        )}
       </fieldset>
 
       {/* Premium Preset Preview */}
@@ -229,10 +359,16 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
 
       {/* Controls */}
       {selectedPreset && (
-        <div className='p-4 mb-6 border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg'>
+        <div id='healwave-session-settings' className='p-4 mb-6 border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg'>
           <h4 className='mb-3 font-semibold text-white'>Session Settings</h4>
 
-          <div className='grid grid-cols-2 gap-4'>
+          {selectedPreset?.binauralBeat ? (
+            <div className='mb-3 rounded-lg border border-purple-400/30 bg-purple-500/10 p-3 text-xs text-purple-200'>
+              For binaural beats, use stereo headphones for best results.
+            </div>
+          ) : null}
+
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
             <div>
               <div
                 className='block mb-1 text-sm font-medium text-white/90'
@@ -296,6 +432,56 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
                 {settings.duration} min
               </span>
             </div>
+            {/* Fade In */}
+            <div>
+              <div className='block mb-1 text-sm font-medium text-white/90'>
+                Fade In (seconds)
+              </div>
+              <Slider.Root
+                className='relative flex items-center w-full h-5 select-none touch-none'
+                value={[settings.fadeIn ?? 0]}
+                min={0}
+                max={10}
+                step={1}
+                onValueChange={([value]) => {
+                  if (typeof value === 'number') {
+                    updateSettings('fadeIn', value);
+                  }
+                }}
+                aria-label='Fade In (seconds)'
+              >
+                <Slider.Track className='relative flex-grow h-1 rounded-full bg-white/20'>
+                  <Slider.Range className='absolute h-1 rounded-full bg-gradient-to-r from-emerald-400 to-green-400' />
+                </Slider.Track>
+                <Slider.Thumb className='block h-4 w-4 rounded-full border-2 border-emerald-400 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400' />
+              </Slider.Root>
+              <span className='text-sm text-white/70'>{settings.fadeIn ?? 0}s</span>
+            </div>
+            {/* Fade Out */}
+            <div>
+              <div className='block mb-1 text-sm font-medium text-white/90'>
+                Fade Out (seconds)
+              </div>
+              <Slider.Root
+                className='relative flex items-center w-full h-5 select-none touch-none'
+                value={[settings.fadeOut ?? 0]}
+                min={0}
+                max={10}
+                step={1}
+                onValueChange={([value]) => {
+                  if (typeof value === 'number') {
+                    updateSettings('fadeOut', value);
+                  }
+                }}
+                aria-label='Fade Out (seconds)'
+              >
+                <Slider.Track className='relative flex-grow h-1 rounded-full bg-white/20'>
+                  <Slider.Range className='absolute h-1 rounded-full bg-gradient-to-r from-rose-400 to-red-400' />
+                </Slider.Track>
+                <Slider.Thumb className='block h-4 w-4 rounded-full border-2 border-rose-400 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400' />
+              </Slider.Root>
+              <span className='text-sm text-white/70'>{settings.fadeOut ?? 0}s</span>
+            </div>
           </div>
 
           <div className='flex gap-3 mt-4'>
@@ -322,6 +508,34 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
         </div>
       )}
 
+      {/* Frequency Visualization */}
+      {selectedPreset && frequencyData.length > 0 && (
+        <div className='mb-6 p-4 border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg'>
+          <h4 className='mb-4 font-semibold text-white'>Frequency Visualization</h4>
+          <FrequencyWaveform
+            data={frequencyData}
+            config={visualizationConfig}
+            currentFrequency={isPlaying ? selectedPreset.baseFrequency : undefined}
+            isPlaying={isPlaying}
+            onFrequencyHover={setHoveredFrequency}
+            className="w-full"
+            testId="healwave-frequency-visualization"
+          />
+          {hoveredFrequency && (
+            <div className='mt-4 p-3 bg-black/50 rounded-lg'>
+              <div className='text-sm text-white/80'>
+                <strong>{hoveredFrequency.label}</strong> - {hoveredFrequency.frequency} Hz
+                {hoveredFrequency.benefits && hoveredFrequency.benefits.length > 0 && (
+                  <div className='mt-1 text-xs text-cyan-300'>
+                    Benefits: {hoveredFrequency.benefits.join(', ')}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Frequency Info */}
       {selectedPreset && (
         <div className='p-4 border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg'>
@@ -335,7 +549,14 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
             <div>Frequency: {selectedPreset.baseFrequency} Hz</div>
             <div>Category: {selectedPreset.category}</div>
             {selectedPreset.binauralBeat && (
-              <div>Binaural Beat: {selectedPreset.binauralBeat} Hz</div>
+              <div className='text-purple-300 font-medium'>
+                <span>
+                  Binaural Beat: {selectedPreset.binauralBeat} Hz
+                </span>
+                <span className='text-white/60 ml-2'>
+                  (Use stereo headphones for best effect)
+                </span>
+              </div>
             )}
             {selectedPreset.benefits && (
               <div className='mt-2'>
@@ -359,14 +580,18 @@ export const HealWaveFrequencyGenerator: React.FC = React.memo(() => {
           ? 'Frequency playback started'
           : 'Frequency playback stopped'}
       </div>
+
+      {/* Sticky Mini Player */}
+      <MiniPlayer
+        isPlaying={isPlaying}
+        title={selectedPreset ? `${selectedPreset.name} • ${selectedPreset.baseFrequency} Hz` : 'No preset selected'}
+        subtitle={selectedPreset?.binauralBeat ? `Binaural • ${selectedPreset.binauralBeat} Hz` : undefined}
+        onStop={handleStop}
+      />
     </div>
   );
 });
 
 HealWaveFrequencyGenerator.displayName = 'HealWaveFrequencyGenerator';
 
-// Suggested Vitest test:
-// test('renders presets without errors', async () => {
-//   render(<HealWaveFrequencyGenerator />);
-//   await waitFor(() => expect(screen.getByText('Select Frequency')).toBeInTheDocument());
-// });
+export default React.memo(HealWaveFrequencyGenerator);

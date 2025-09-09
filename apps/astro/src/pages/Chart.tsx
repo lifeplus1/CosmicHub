@@ -357,7 +357,8 @@ const Chart: React.FC<ChartPageProps> = ({ fetchFn }) => {
       componentLogger.info('Chart', 'Skipping chart calculation');
     }
     // deps: birthData triggers recalculation; calculateChartData memoized on birthData only.
-  }, [birthData, calculateChartData, chartData]);
+    // Removed chartData from deps to prevent infinite loops
+  }, [birthData, calculateChartData]);
 
   const handleRecalculate = useCallback((): void => {
     if (birthData !== null) {
