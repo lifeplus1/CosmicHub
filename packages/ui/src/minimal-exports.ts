@@ -15,6 +15,9 @@ export * from './components/ui/Loading';
 export * from './components/ui/Badge';
 export * from './components/ui/Spinner';
 export * from './components/ui/Progress';
+
+// Consolidated shared components
+export { default as ProgressBar } from './components/ProgressBar';
 export * from './components/modals/UpgradeModal';
 export * from './components/analytics/PerformanceDashboard';
 

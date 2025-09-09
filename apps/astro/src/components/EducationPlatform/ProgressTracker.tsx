@@ -19,7 +19,7 @@ import {
   FaClock,
   FaGraduationCap
 } from 'react-icons/fa';
-import { ProgressBar } from '../ui/ProgressBar';
+import { ProgressBar } from '@cosmichub/ui';
 import { formatDate } from '@cosmichub/config';
 
 // Types for progress tracking

@@ -14,7 +14,7 @@ import {
   FaHistory,
 } from 'react-icons/fa';
 import { HEALWAVE_TIERS, type HealwaveSubscriptionTier } from '@cosmichub/config';
-import ProgressBar from './ProgressBar';
+import { ProgressBar } from '@cosmichub/ui';
 
 interface UserStats {
   totalSessions: number;

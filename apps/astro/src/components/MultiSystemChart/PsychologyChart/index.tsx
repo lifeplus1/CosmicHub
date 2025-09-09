@@ -2,7 +2,7 @@ import React, { useState, Suspense, lazy, useCallback, useMemo } from 'react';
 import type { UnifiedBirthData } from '@cosmichub/types';
 import { AccessibleButton } from '@cosmichub/ui';
 // Prefix unused imports with underscore to indicate future use
-import { ProgressBar as _ProgressBar } from '../../ui/ProgressBar';
+import { ProgressBar as _ProgressBar } from '@cosmichub/ui';
 import { trackCosmicHubAIInteraction as _trackCosmicHubAIInteraction } from '../../../services/analytics';
 
 // Lazy-loaded components for performance

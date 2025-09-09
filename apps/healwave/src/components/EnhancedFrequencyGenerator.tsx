@@ -132,27 +132,33 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
   // Initialize AudioEngine with proper cleanup
   const initializeAudioEngine = useCallback((): boolean => {
     try {
-      // Only destroy and recreate if necessary
-      if (audioEngineRef.current) {
-        // Check if the current engine is in a good state
-        try {
-          const state = audioEngineRef.current.getState();
-          devConsole.info('🎵 Current AudioEngine state:', state);
-          // If engine exists and is not playing, we can reuse it
-          if (!state.isPlaying) {
-            devConsole.info('✅ Reusing existing AudioEngine');
-            return true;
-          }
-        } catch {
-          // If getting state fails, destroy and recreate
-          devConsole.info('🔄 AudioEngine state check failed, recreating...');
-          audioEngineRef.current.destroy();
-        }
+      // Only create if it doesn't exist
+      if (!audioEngineRef.current) {
+        audioEngineRef.current = new AudioEngine();
+        devConsole.info('✅ AudioEngine initialized successfully');
+        return true;
       }
       
-      audioEngineRef.current = new AudioEngine();
-      devConsole.info('✅ AudioEngine initialized successfully');
-      return true;
+      // Check if existing engine is in a good state
+      try {
+        const state = audioEngineRef.current.getState();
+        devConsole.info('🎵 Current AudioEngine state:', state);
+        
+        // If engine exists, we can reuse it (don't destroy unless necessary)
+        devConsole.info('✅ Reusing existing AudioEngine');
+        return true;
+      } catch (stateError) {
+        // If getting state fails, the engine might be corrupted, recreate it
+        devConsole.warn('🔄 AudioEngine state check failed, recreating...', stateError);
+        try {
+          audioEngineRef.current.destroy();
+        } catch {
+          // Ignore destroy errors
+        }
+        audioEngineRef.current = new AudioEngine();
+        devConsole.info('✅ AudioEngine recreated successfully');
+        return true;
+      }
     } catch (error) {
       devConsole.error('❌ Failed to initialize AudioEngine:', error instanceof Error ? error.message : String(error));
       return false;
@@ -271,7 +277,7 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
       // Update audio engine volume if playing
       if (audioEngineRef.current && isPlaying) {
         try {
-          await audioEngineRef.current.setVolume(newVolume);
+          await audioEngineRef.current.setVolume(newVolume * 100); // Convert 0-1 to 0-100
         } catch (error) {
           devConsole.error('Failed to update volume:', error);
         }
@@ -293,6 +299,12 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
       return;
     }
 
+    // Ensure AudioEngine exists and try to activate AudioContext with user gesture
+    if (!initializeAudioEngine()) {
+      devConsole.error('❌ Failed to initialize AudioEngine');
+      return;
+    }
+
     try {
       devConsole.info('▶️ Starting enhanced audio session:', {
         preset: selectedPreset.label,
@@ -303,34 +315,33 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
         binauralBeat: binauralEnabled ? binauralBeat : undefined
       });
 
+      // Try to activate AudioContext with user gesture first
+      if (!audioEngineRef.current) {
+        throw new Error('AudioEngine not available');
+      }
+      
+      // Check if the activateAudioContext method exists before calling it
+      if (typeof audioEngineRef.current.activateAudioContext === 'function') {
+        const activated = await audioEngineRef.current.activateAudioContext();
+        if (!activated) {
+          devConsole.warn('AudioContext activation returned false, but continuing...');
+        }
+      } else {
+        devConsole.info('activateAudioContext method not available, relying on startFrequency for activation');
+      }
+
       // Check AudioEngine state before starting
       const engineState = audioEngineRef.current.getState();
-      devConsole.info('🎵 AudioEngine state:', engineState);
-
-      // Ensure AudioContext is properly activated by user interaction
-      // This is required by modern browser audio policies
-      try {
-        interface ExtendedWindow extends Window {
-          webkitAudioContext?: typeof AudioContext;
-        }
-        const win = window as ExtendedWindow;
-        const AudioContextClass = window.AudioContext ?? win.webkitAudioContext;
-        
-        if (!AudioContextClass) {
-          throw new Error('AudioContext not supported in this browser');
-        }
-        
-        // Create a temporary audio context to test browser support
-        const testContext = new AudioContextClass();
-        if (testContext.state === 'suspended') {
-          await testContext.resume();
-        }
-        await testContext.close();
-        devConsole.info('🎵 Browser audio context test passed');
-      } catch (contextError) {
-        devConsole.error('❌ Browser audio context test failed:', contextError instanceof Error ? contextError.message : String(contextError));
-        throw new Error('Audio context activation failed - please ensure you have clicked to activate audio');
+      devConsole.info('🎵 AudioEngine state before start:', engineState);
+      
+      // Ensure we stop any current playback first
+      if (engineState.isPlaying) {
+        devConsole.info('🛑 Stopping current playback before starting new session');
+        audioEngineRef.current.stopFrequency();
       }
+
+      // AudioContext activation is handled by AudioEngine internally
+      // No need for separate context testing as it may interfere
 
       // Convert FrequencyData to FrequencyPreset for AudioEngine
       // Map extended categories to compatible AudioEngine categories
@@ -350,6 +361,11 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
         }
       };
 
+      // Validate frequency before creating preset
+      if (selectedPreset.frequency < 1 || selectedPreset.frequency > 20000) {
+        throw new Error(`Invalid frequency: ${selectedPreset.frequency}Hz. Must be between 1-20000 Hz`);
+      }
+
       const preset: FrequencyPreset = {
         id: selectedPreset.label.toLowerCase().replace(/\s+/g, '-'),
         name: selectedPreset.label,
@@ -360,8 +376,10 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
         benefits: selectedPreset.benefits || []
       };
 
+      devConsole.info('🎵 Created preset for AudioEngine:', preset);
+
       const settings = {
-        volume,
+        volume: volume * 100, // Convert from 0-1 to 0-100 for AudioEngine
         duration,
         fadeIn: 2, // 2 second fade in
         fadeOut: 2  // 2 second fade out
@@ -381,6 +399,18 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
       const errorMessage = error instanceof Error ? error.message : String(error);
       devConsole.error('❌ Failed to start audio session:', errorMessage);
       
+      // Show user-friendly error message based on error type
+      if (errorMessage.includes('suspended') || errorMessage.includes('CONTEXT_UNAVAILABLE') || errorMessage.includes('CONTEXT_NOT_RUNNING')) {
+        devConsole.warn('💡 Audio needs user interaction. Click play again to activate audio.');
+        // Don't try to reinitialize for context issues - user needs to click again
+        updatePlayingState(false);
+        return;
+      } else if (errorMessage.includes('frequency')) {
+        devConsole.warn('💡 Invalid frequency detected. Please select a different preset.');
+      } else {
+        devConsole.warn('💡 Audio failed to start. Attempting to recover...');
+      }
+      
       // If AudioEngine fails, try reinitializing
       devConsole.info('🔄 Attempting to reinitialize AudioEngine...');
       updatePlayingState(false); // Ensure state is reset
@@ -399,7 +429,7 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
           };
           
           await audioEngineRef.current.startFrequency(presetForEngine, {
-            volume: volume,
+            volume: volume * 100, // Convert 0-1 to 0-100
             duration: duration,
             fadeIn: 2,
             fadeOut: 2
@@ -777,7 +807,7 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
                       : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-green-500/25 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed'
                   }`}
                 >
-                  <span className="text-2xl">{isPlaying ? '⏸️' : '▶️'}</span>
+                  <span className="text-2xl">{isPlaying ? '⏹️' : '▶️'}</span>
                   <span>{isPlaying ? 'Stop Session' : 'Start Healing Session'}</span>
                 </button>
               </Tooltip.Trigger>

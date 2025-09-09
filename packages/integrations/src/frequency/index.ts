@@ -100,9 +100,22 @@ export class AudioEngine {
     preset: FrequencyPreset,
     settings: AudioSettings
   ): Promise<void> {
+    // Check if AudioContext exists and is not closed
+    if (!this.audioContext || this.audioContext.state === 'closed') {
+      logger.warn('AudioContext is closed or null, reinitializing...');
+      try {
+        this.initializeAudioContext();
+      } catch {
+        throw new AudioEngineError(
+          'Failed to reinitialize audio context',
+          'REINITIALIZATION_FAILED'
+        );
+      }
+    }
+
     if (!this.audioContext) {
       throw new AudioEngineError(
-        'Audio context not available',
+        'Audio context not available after initialization',
         'CONTEXT_UNAVAILABLE'
       );
     }
@@ -111,17 +124,28 @@ export class AudioEngine {
     this.validatePreset(preset);
     this.validateSettings(settings);
 
+    // Handle suspended state - this is common with user interaction requirements
     if (this.audioContext.state === 'suspended') {
+      logger.info('AudioContext is suspended, attempting to resume...');
       try {
         await this.audioContext.resume();
+        logger.info('AudioContext resumed successfully');
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Unknown error';
         throw new AudioEngineError(
-          `Failed to resume audio context: ${message}`,
+          `Failed to resume audio context: ${message}. This may require user interaction.`,
           'RESUME_FAILED'
         );
       }
+    }
+
+    // Ensure AudioContext is in running state before proceeding
+    if (this.audioContext.state !== 'running') {
+      throw new AudioEngineError(
+        `AudioContext is in "${this.audioContext.state}" state. Audio requires user interaction to activate.`,
+        'CONTEXT_NOT_RUNNING'
+      );
     }
 
     this.stopFrequency();
@@ -389,6 +413,38 @@ export class AudioEngine {
         'INVALID_FADE_OUT'
       );
     }
+  }
+
+  /**
+   * Attempts to activate the AudioContext with user gesture
+   * Call this in response to user interaction before starting audio
+   */
+  public async activateAudioContext(): Promise<boolean> {
+    if (!this.audioContext) {
+      try {
+        this.initializeAudioContext();
+      } catch (error) {
+        logger.error('Failed to initialize AudioContext during activation:', error);
+        return false;
+      }
+    }
+
+    if (!this.audioContext) {
+      return false;
+    }
+
+    if (this.audioContext.state === 'suspended') {
+      try {
+        await this.audioContext.resume();
+        logger.info('AudioContext activated successfully');
+        return true;
+      } catch (error) {
+        logger.error('Failed to resume AudioContext:', error);
+        return false;
+      }
+    }
+
+    return this.audioContext.state === 'running';
   }
 
   public destroy(): void {

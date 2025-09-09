@@ -18,7 +18,7 @@ import {
   FaArrowUp,
   FaHistory,
 } from 'react-icons/fa';
-import ProgressBar from './ProgressBar';
+import { ProgressBar } from '@cosmichub/ui';
 
 // Local tier configuration until package exports are resolved
 const ASTRO_TIERS = {
