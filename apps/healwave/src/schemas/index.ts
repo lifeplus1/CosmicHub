@@ -4,6 +4,7 @@
  */
 
 export * from './frequency.schema';
+export * from './enhancedFrequencyGenerator.schema';
 
 // Re-export common validation helpers
 export {
@@ -16,6 +17,14 @@ export {
   validateBrainwaveFrequency,
   validateBinauralBeat,
 } from './frequency.schema';
+
+// Re-export enhanced frequency generator validation helpers
+export {
+  validateComponentProps,
+  validateComponentState,
+  safeValidateComponentProps,
+  safeValidateComponentState,
+} from './enhancedFrequencyGenerator.schema';
 
 // Re-export all schema types for easy consumption
 export type {
@@ -36,3 +45,13 @@ export type {
   FrequencyAnalysis,
   AudioError,
 } from './frequency.schema';
+
+export type {
+  EnhancedFrequencyGeneratorProps,
+  AudioEngineState,
+  VisualizationState,
+  PresetState,
+  UIState,
+  EnhancedFrequencyGeneratorState,
+  ComponentAudioConfig,
+} from './enhancedFrequencyGenerator.schema';

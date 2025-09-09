@@ -1,35 +1,28 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useRef,
-  useId,
-  memo
-} from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { memo, useState, useCallback, useId } from 'react';
+import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import * as Slider from '@radix-ui/react-slider';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import {
-  ErrorBoundary
-} from '@cosmichub/ui';
-import { ValidatedFrequencyData as FrequencyData } from '../schemas/frequencySchemas';
-import HealWaveFrequencyVisualization from './visualization/HealWaveFrequencyVisualization';
-import { AudioEngine, FrequencyPreset } from '@cosmichub/integrations';
-import { devConsole } from '../config/devConsole';
-import { ChakraFrequencySelector } from './enhancements/ChakraFrequencySelector';
-import { ChakraKey, CHAKRA_FREQUENCIES } from './enhancements/chakraConstants';
-import { calculateSacredPattern, GeometryPattern } from './enhancements/sacredGeometry';
-import MiniPlayer from './MiniPlayer';
-import DurationTimer from './DurationTimer';
-import { CategoryFilter } from './ui/ControlComponents';
-import CompactFrequencyList from './ui/CompactFrequencyList';
-import { 
-  getUnifiedFrequencyPresets, 
-  getAvailableCategories,
-  convertPresetToFrequencyData
-} from '../data/unifiedFrequencyData';
+import { cn } from '@/lib/utils';
+import { Waves } from 'lucide-react';
+
+// Import new modular components
+import { FrequencyControls } from './FrequencyControls';
+import { AudioControls } from './AudioControls';
+import { BinauralControls } from './BinauralControls';
+import { AdvancedControls } from './AdvancedControls';
+import { PlaybackControls } from './PlaybackControls';
+import { StatusDisplay } from './StatusDisplay';
+
+// Import shared components
+import { SacredGeometryCanvas } from './SacredGeometryCanvas';
+
+// Import constants and schemas
+import { FREQUENCY_CONSTANTS, FREQUENCY_CATEGORIES, TAB_OPTIONS } from './frequencyConstants';
+
+// Import hooks
+import { useAudioEngineManager } from './useAudioEngineManager';
+
+// Import types
+import type { FrequencyData, GeometryPattern, ChakraKey } from './types/frequency.types';
 
 export interface EnhancedFrequencyGeneratorProps {
   className?: string;
@@ -47,7 +40,7 @@ export interface EnhancedFrequencyGeneratorProps {
 // Enhanced Frequency Generator with comprehensive features
 export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(({
   className = '',
-  initialFrequency = 528,
+  initialFrequency = FREQUENCY_CONSTANTS.DEFAULT_FREQUENCY,
   showVisualization = true,
   realTimeUpdates: _realTimeUpdates = true,
   onFrequencyChange,
@@ -56,136 +49,40 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
   onDurationChange,
   onPlayStateChange
 }) => {
+  // Use the new audio engine hook
+  const { isPlaying, playFrequency, stopFrequency, updateVolume } = useAudioEngineManager({
+    onPlayStateChange
+  });
+
   // Core state
   const [currentFrequency, setCurrentFrequency] = useState(initialFrequency);
   const [selectedPreset, setSelectedPreset] = useState<FrequencyData | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.7);
-  const [duration, setDuration] = useState(15);
-  
+  const [volume, setVolume] = useState(FREQUENCY_CONSTANTS.DEFAULT_VOLUME);
+  const [duration, setDuration] = useState(FREQUENCY_CONSTANTS.DEFAULT_DURATION);
+
   // Advanced features state
   const [binauralEnabled, setBinauralEnabled] = useState(false);
-  const [binauralBeat, setBinauralBeat] = useState(0);
+  const [binauralBeat, setBinauralBeat] = useState(FREQUENCY_CONSTANTS.DEFAULT_BINAURAL_BEAT);
   const [showSacredGeometry, setShowSacredGeometry] = useState(false);
-  const [_showChakraSelector, setShowChakraSelector] = useState(false);
   const [selectedChakra, setSelectedChakra] = useState<ChakraKey | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'solfeggio' | 'chakra' | 'brainwave' | 'planetary' | 'rife'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<typeof FREQUENCY_CATEGORIES[number]>('all');
   const [customPresets, setCustomPresets] = useState<FrequencyData[]>([]);
   const [presetName, setPresetName] = useState('');
   const [showPresetCreator, setShowPresetCreator] = useState(false);
-  
+
   // UI state
   const [visualizationData, setVisualizationData] = useState<FrequencyData[]>([]);
   const [geometryPattern, setGeometryPattern] = useState<GeometryPattern | null>(null);
-  const [activeTab, setActiveTab] = useState<'frequencies' | 'chakras' | 'custom'>('frequencies');
-  
+  const [activeTab, setActiveTab] = useState<typeof TAB_OPTIONS[number]>('frequencies');
+
   // Refs and IDs
-  const audioEngineRef = useRef<AudioEngine | null>(null);
   const volumeLabelId = useId();
   const durationLabelId = useId();
-  
+
   const { ref: inViewRef, inView } = useInView({
     threshold: 0.1,
     triggerOnce: true
   });
-
-  // Helper to update playing state and notify parent
-  const updatePlayingState = useCallback((playing: boolean) => {
-    setIsPlaying(playing);
-    onPlayStateChange?.(playing);
-  }, [onPlayStateChange]);
-
-  // Test AudioContext availability with user interaction requirement
-  const _testAudioContext = useCallback(async (): Promise<boolean> => {
-    try {
-      // Check if AudioContext is available
-      interface ExtendedWindow extends Window {
-        webkitAudioContext?: typeof AudioContext;
-      }
-      const win = window as ExtendedWindow;
-      const AudioContextClass = window.AudioContext || win.webkitAudioContext;
-      if (!AudioContextClass) {
-        devConsole.warn('AudioContext not supported in this browser');
-        return false;
-      }
-      
-      // Create a test context to check functionality
-      const testContext = new AudioContextClass();
-      
-      // Modern browsers require user interaction to start AudioContext
-      if (testContext.state === 'suspended') {
-        try {
-          await testContext.resume();
-        } catch (resumeError) {
-          devConsole.warn('AudioContext requires user interaction:', resumeError);
-          // This is expected - we'll handle it in the actual audio start
-        }
-      }
-      
-      await testContext.close();
-      return true;
-    } catch (error) {
-      devConsole.error('AudioContext test failed:', error);
-      return false;
-    }
-  }, []);
-
-  // Initialize AudioEngine with proper cleanup
-  const initializeAudioEngine = useCallback((): boolean => {
-    try {
-      // Only create if it doesn't exist
-      if (!audioEngineRef.current) {
-        audioEngineRef.current = new AudioEngine();
-        devConsole.info('✅ AudioEngine initialized successfully');
-        return true;
-      }
-      
-      // Check if existing engine is in a good state
-      try {
-        const state = audioEngineRef.current.getState();
-        devConsole.info('🎵 Current AudioEngine state:', state);
-        
-        // If engine exists, we can reuse it (don't destroy unless necessary)
-        devConsole.info('✅ Reusing existing AudioEngine');
-        return true;
-      } catch (stateError) {
-        // If getting state fails, the engine might be corrupted, recreate it
-        devConsole.warn('🔄 AudioEngine state check failed, recreating...', stateError);
-        try {
-          audioEngineRef.current.destroy();
-        } catch {
-          // Ignore destroy errors
-        }
-        audioEngineRef.current = new AudioEngine();
-        devConsole.info('✅ AudioEngine recreated successfully');
-        return true;
-      }
-    } catch (error) {
-      devConsole.error('❌ Failed to initialize AudioEngine:', error instanceof Error ? error.message : String(error));
-      return false;
-    }
-  }, []);  // Initialize audio engine
-  useEffect(() => {
-    initializeAudioEngine();
-    
-    return () => {
-      if (audioEngineRef.current) {
-        try {
-          // Stop any playing audio before destroying
-          if (audioEngineRef.current.getState().isPlaying) {
-            audioEngineRef.current.stopFrequency();
-          }
-          audioEngineRef.current.destroy();
-          devConsole.info('🗑️ AudioEngine destroyed successfully');
-        } catch (error) {
-          devConsole.error('❌ Failed to destroy AudioEngine:', error instanceof Error ? error.message : String(error));
-        } finally {
-          // Ensure state is reset
-          setIsPlaying(false);
-        }
-      }
-    };
-  }, [initializeAudioEngine]);
 
   // Enhanced preset data with filtering using unified data layer
   const allPresets = useMemo(() => {
@@ -252,21 +149,32 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
   }, [onFrequencyChange]);
 
   const handlePresetSelect = useCallback((preset: FrequencyData) => {
-    if (!preset || typeof preset.frequency !== 'number') {
-      devConsole.error('Invalid preset selected:', preset);
+    // Validate preset before using it
+    const validation = safeValidateFrequencyData(preset);
+    
+    if (!validation.success) {
+      devConsole.error('❌ Invalid preset selected, validation failed:', {
+        preset: preset?.label || 'Unknown',
+        errors: validation.error.issues.map(issue => 
+          `${issue.path.join('.')}: ${issue.message}`
+        ).join(', ')
+      });
       return;
     }
+
+    const validPreset = validation.data;
     
-    devConsole.info('🎵 Preset selected:', {
-      name: preset.label,
-      frequency: preset.frequency,
-      category: preset.category
+    devConsole.info('🎵 Preset selected and validated:', {
+      name: validPreset.label,
+      frequency: validPreset.frequency,
+      category: validPreset.category,
+      isBinaural: validPreset.metadata?.isBinaural
     });
     
-    setSelectedPreset(preset);
-    setCurrentFrequency(preset.frequency);
-    onPresetSelect?.(preset);
-    onFrequencyChange?.(preset.frequency);
+    setSelectedPreset(validPreset);
+    setCurrentFrequency(validPreset.frequency);
+    onPresetSelect?.(validPreset);
+    onFrequencyChange?.(validPreset.frequency);
   }, [onPresetSelect, onFrequencyChange]);
 
   const handleVolumeChange = useCallback(async (values: number[]) => {
@@ -315,6 +223,16 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
         binauralEnabled,
         binauralBeat: binauralEnabled ? binauralBeat : undefined
       });
+
+      // Debug Beta High Focus specifically
+      if (selectedPreset.label?.includes('Beta High Focus')) {
+        devConsole.info('🔍 DEBUG: Beta High Focus audio parameters:', {
+          selectedPreset: selectedPreset,
+          metadata: selectedPreset.metadata,
+          isBinauralPreset: selectedPreset.metadata?.isBinaural,
+          audioEngineRef: !!audioEngineRef.current
+        });
+      }
 
       // Try to activate AudioContext with user gesture first
       if (!audioEngineRef.current) {
@@ -555,564 +473,102 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
   }, [binauralEnabled, binauralBeat, currentFrequency, volume]);
 
   return (
-    <ErrorBoundary
-      name="UltimateFrequencyGenerator"
-      level="component"
-      onError={(_error, _errorInfo) => {
-        devConsole.error('UltimateFrequencyGenerator Error:', _error);
-      }}
+    <div
+      ref={inViewRef}
+      className={cn(
+        'enhanced-frequency-generator',
+        'flex flex-col gap-6 p-6',
+        'bg-gradient-to-br from-slate-900/95 to-slate-800/95',
+        'backdrop-blur-sm rounded-xl border border-slate-700/50',
+        'shadow-2xl min-h-[600px]',
+        className
+      )}
     >
-      <motion.div
-        ref={inViewRef}
-        className={`space-y-6 ${className}`}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Enhanced Header with No Restrictions Notice */}
-        <div className="text-center">
-          <motion.h2
-            className="text-3xl font-bold text-cosmic-gold mb-2"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            🎵 Ultimate Frequency Generator
-          </motion.h2>
-          <motion.p
-            className="text-cosmic-silver mb-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            Professional D3.js visualization • Sacred geometry • Chakra alignment • Unlimited access
-          </motion.p>
-          
-          {/* Premium Features Unlocked Notice */}
-          <motion.div
-            className="mb-6 p-3 bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-500/30 rounded-lg backdrop-blur-sm"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-green-300">✨</span>
-              <p className="text-sm font-medium text-green-200">
-                Ultimate Mode: All premium features unlocked - D3.js visualization, sacred geometry, unlimited duration
-              </p>
-            </div>
-          </motion.div>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Waves className="w-6 h-6 text-cyan-400" />
+          Enhanced Frequency Generator
+        </h2>
+        <StatusDisplay isPlaying={isPlaying} />
+      </div>
 
-        {/* Feature Tabs */}
-        <motion.div
-          className="flex flex-wrap gap-2 justify-center mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          {(['frequencies', 'chakras', 'custom'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => handleTabChange(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all capitalize ${
-                activeTab === tab
-                  ? 'bg-cosmic-gold text-black shadow-lg'
-                  : 'bg-white/10 text-white/80 hover:bg-white/20'
-              }`}
-            >
-              {tab === 'frequencies' && '🎛️ All Frequencies'}
-              {tab === 'chakras' && '🌈 Chakra System'}
-              {tab === 'custom' && '💾 Custom Presets'}
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Enhanced Controls Grid */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          {/* Frequency Control */}
-          <div className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30">
-            <h3 className="text-lg font-semibold text-cosmic-gold mb-4">🎚️ Frequency</h3>
-            <div className="space-y-4">
-              <div>
-                <label 
-                  id={volumeLabelId}
-                  className="block text-sm text-cosmic-silver mb-2"
-                >
-                  Current: {currentFrequency.toFixed(1)} Hz
-                </label>
-                <Slider.Root
-                  value={[currentFrequency]}
-                  onValueChange={(values) => handleFrequencyChange(values[0] ?? 528)}
-                  min={0.1}
-                  max={20000}
-                  step={0.1}
-                  aria-labelledby={volumeLabelId}
-                  className="relative flex items-center w-full h-5"
-                >
-                  <Slider.Track className="relative flex-1 h-2 bg-white/20 rounded-full">
-                    <Slider.Range className="absolute h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full" />
-                  </Slider.Track>
-                  <Slider.Thumb className="block w-5 h-5 bg-white rounded-full shadow-lg cursor-pointer hover:scale-110 transition-transform" />
-                </Slider.Root>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[174, 285, 528, 741, 852, 963].map((freq) => (
-                  <button
-                    key={freq}
-                    onClick={() => handleFrequencyChange(freq)}
-                    className="px-2 py-1 text-xs bg-cosmic-purple/20 text-cosmic-purple rounded hover:bg-cosmic-purple/30 transition-colors"
-                  >
-                    {freq} Hz
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Volume & Duration */}
-          <div className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30">
-            <h3 className="text-lg font-semibold text-cosmic-gold mb-4">🔊 Audio</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-cosmic-silver mb-2">
-                  Volume: {Math.round(volume * 100)}%
-                </label>
-                <Slider.Root
-                  value={[volume]}
-                  onValueChange={handleVolumeChange}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  className="relative flex items-center w-full h-5"
-                >
-                  <Slider.Track className="relative flex-1 h-2 bg-white/20 rounded-full">
-                    <Slider.Range className="absolute h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" />
-                  </Slider.Track>
-                  <Slider.Thumb className="block w-5 h-5 bg-white rounded-full shadow-lg cursor-pointer hover:scale-110 transition-transform" />
-                </Slider.Root>
-              </div>
-              <div>
-                <label 
-                  id={durationLabelId}
-                  className="block text-sm text-cosmic-silver mb-2"
-                >
-                  Duration: {duration} min (Unlimited ✨)
-                </label>
-                <Slider.Root
-                  value={[duration]}
-                  onValueChange={handleDurationChange}
-                  min={1}
-                  max={180}
-                  step={1}
-                  aria-labelledby={durationLabelId}
-                  className="relative flex items-center w-full h-5"
-                >
-                  <Slider.Track className="relative flex-1 h-2 bg-white/20 rounded-full">
-                    <Slider.Range className="absolute h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" />
-                  </Slider.Track>
-                  <Slider.Thumb className="block w-5 h-5 bg-white rounded-full shadow-lg cursor-pointer hover:scale-110 transition-transform" />
-                </Slider.Root>
-              </div>
-            </div>
-          </div>
-
-          {/* Binaural Controls */}
-          <div className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30">
-            <h3 className="text-lg font-semibold text-cosmic-gold mb-4">🎧 Binaural</h3>
-            <div className="space-y-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={binauralEnabled}
-                  onChange={(e) => setBinauralEnabled(e.target.checked)}
-                  className="rounded border-cosmic-purple/30 bg-cosmic-purple/10"
-                />
-                <span className="text-cosmic-silver">Enable Beats</span>
-              </label>
-
-              <AnimatePresence>
-                {binauralEnabled && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <label className="block text-sm text-cosmic-silver mb-2">
-                      Beat: {binauralBeat.toFixed(1)} Hz
-                    </label>
-                    <Slider.Root
-                      value={[binauralBeat]}
-                      onValueChange={(values) => setBinauralBeat(values[0] ?? 0)}
-                      min={0.1}
-                      max={40}
-                      step={0.1}
-                      className="relative flex items-center w-full h-5"
-                    >
-                      <Slider.Track className="relative flex-1 h-2 bg-white/20 rounded-full">
-                        <Slider.Range className="absolute h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
-                      </Slider.Track>
-                      <Slider.Thumb className="block w-5 h-5 bg-white rounded-full shadow-lg cursor-pointer hover:scale-110 transition-transform" />
-                    </Slider.Root>
-                    <div className="text-xs text-cosmic-silver mt-1">
-                      Use stereo headphones
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Advanced Features */}
-          <div className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30">
-            <h3 className="text-lg font-semibold text-cosmic-gold mb-4">🔮 Advanced</h3>
-            <div className="space-y-3">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={showSacredGeometry}
-                  onChange={(e) => setShowSacredGeometry(e.target.checked)}
-                  className="rounded border-cosmic-purple/30 bg-cosmic-purple/10"
-                />
-                <span className="text-cosmic-silver text-sm">Sacred Geometry ✨</span>
-              </label>
-              
-              <button
-                onClick={() => setShowPresetCreator(!showPresetCreator)}
-                className="w-full py-2 px-3 text-sm bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-lg hover:from-cyan-500/30 hover:to-blue-500/30 text-white transition-all"
-              >
-                💾 Create Preset
-              </button>
-
-              <DurationTimer
-                duration={duration}
-                isActive={isPlaying}
-                onComplete={handleStop}
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Playback Controls */}
-        <motion.div
-          className="flex justify-center space-x-4 py-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-        >
-          <Tooltip.Provider>
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <button
-                  onClick={isPlaying ? handleStop : handlePlay}
-                  disabled={!selectedPreset}
-                  className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center space-x-3 ${
-                    isPlaying
-                      ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg hover:shadow-red-500/25'
-                      : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-green-500/25 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed'
-                  }`}
-                >
-                  <span className="text-2xl">{isPlaying ? '⏹️' : '▶️'}</span>
-                  <span>{isPlaying ? 'Stop Session' : 'Start Healing Session'}</span>
-                </button>
-              </Tooltip.Trigger>
-              <Tooltip.Content className="px-3 py-2 text-sm text-white bg-black rounded-lg">
-                {selectedPreset ? `${isPlaying ? 'Stop' : 'Start'} ${selectedPreset.label} session` : 'Select a frequency preset first'}
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Tooltip.Provider>
-        </motion.div>
-
-        {/* Content Based on Active Tab */}
-        <AnimatePresence mode="wait">
-          {activeTab === 'frequencies' && (
-            <motion.div
-              key="frequencies"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Category Filter */}
-              <div className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30 mb-6">
-                <h3 className="text-lg font-semibold text-cosmic-gold mb-4">🎛️ Filter by Category</h3>
-                <CategoryFilter
-                  categories={availableCategories}
-                  currentCategory={categoryFilter}
-                  onChange={(category) => handleCategoryFilter(category as typeof categoryFilter)}
-                  getCount={(category) => {
-                    const unifiedPresets = getUnifiedFrequencyPresets();
-                    return category === 'all' 
-                      ? unifiedPresets.length 
-                      : unifiedPresets.filter(p => p.category === category).length;
-                  }}
-                />
-              </div>
-
-              {/* Enhanced Frequency Library with Educational Content */}
-              <CompactFrequencyList
-                frequencies={allPresets}
-                selectedFrequency={selectedPreset ?? undefined}
-                onFrequencySelect={handlePresetSelect}
-                categoryFilter={categoryFilter}
-                className="cosmic-glass"
-              />
-            </motion.div>
-          )}
-
-          {activeTab === 'chakras' && (
-            <motion.div
-              key="chakras"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ChakraFrequencySelector
-                onChakraSelect={handleChakraSelect}
-                selectedChakra={selectedChakra}
-                className="mb-6"
-              />
-            </motion.div>
-          )}
-
-          {activeTab === 'custom' && (
-            <motion.div
-              key="custom"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30">
-                <h3 className="text-xl font-semibold text-cosmic-gold mb-4">
-                  💾 Custom Preset Creator (Premium Feature ✨)
-                </h3>
-                
-                <AnimatePresence>
-                  {showPresetCreator && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-4 mb-6"
-                    >
-                      <input
-                        type="text"
-                        placeholder="Enter preset name..."
-                        value={presetName}
-                        onChange={(e) => setPresetName(e.target.value)}
-                        className="w-full p-3 text-white bg-white/10 border border-white/20 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cosmic-gold"
-                      />
-                      <button
-                        onClick={handleSaveCustomPreset}
-                        disabled={!presetName.trim()}
-                        className="w-full py-3 px-6 bg-gradient-to-r from-cosmic-gold to-yellow-500 text-black font-semibold rounded-xl hover:from-yellow-400 hover:to-cosmic-gold disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed transition-all"
-                      >
-                        💾 Save Custom Preset
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Display Custom Presets */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {customPresets.map((preset, index) => (
-                    <motion.button
-                      key={`custom-${index}`}
-                      onClick={() => handlePresetSelect(preset)}
-                      className={`p-4 rounded-lg border transition-all duration-200 text-center ${
-                        selectedPreset === preset
-                          ? 'border-cosmic-gold bg-cosmic-gold/20 shadow-lg'
-                          : 'border-cosmic-purple/30 bg-cosmic-purple/10 hover:border-cosmic-purple/50'
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <div className="w-4 h-4 rounded-full mx-auto mb-2 bg-purple-500"></div>
-                      <div className="text-xs font-bold text-white">
-                        {preset.frequency} Hz
-                      </div>
-                      <div className="text-xs text-cosmic-silver/70 truncate">
-                        {preset.label}
-                      </div>
-                      <div className="text-xs text-purple-400 mt-1">Custom</div>
-                    </motion.button>
-                  ))}
-                  
-                  {customPresets.length === 0 && (
-                    <div className="col-span-full text-center py-8 text-cosmic-silver/60">
-                      No custom presets yet. Create your first one above!
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Sacred Geometry Visualization */}
-        <AnimatePresence>
-          {showSacredGeometry && geometryPattern && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30"
-            >
-              <h3 className="text-xl font-semibold text-cosmic-gold mb-4">
-                🔮 Sacred Geometry Pattern
-              </h3>
-              <div className="flex justify-center">
-                <SacredGeometryCanvas 
-                  pattern={geometryPattern}
-                  className="w-full max-w-md h-80 rounded-lg border border-white/20 bg-black/50"
-                />
-              </div>
-              <div className="mt-4 text-center text-cosmic-silver">
-                <div className="text-sm">
-                  Pattern: {geometryPattern.type.replace('_', ' ').toUpperCase()}
-                </div>
-                <div className="text-xs text-cosmic-silver/70">
-                  Resonance: {Math.round(geometryPattern.resonance * 100)}% • Frequency: {currentFrequency} Hz
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Enhanced Visualization */}
-        <AnimatePresence>
-          {showVisualization && inView && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ delay: 1.0 }}
-              className="cosmic-glass p-6 rounded-xl border border-cosmic-purple/30"
-            >
-              <h3 className="text-xl font-semibold text-cosmic-gold mb-4">
-                📊 Professional D3.js Visualization
-              </h3>
-              
-              {/* HealWave-specific D3.js Visualization */}
-              <div className="space-y-6">
-                <HealWaveFrequencyVisualization
-                  data={[...visualizationData, ...binauralData]}
-                  width={800}
-                  height={400}
-                  currentFrequency={currentFrequency}
-                  isPlaying={isPlaying}
-                  onFrequencySelect={handleFrequencyChange}
-                  className="w-full"
-                  testId="healwave-frequency-visualization"
-                />
-                
-                {selectedPreset && (
-                  <div className="mt-4 p-4 bg-cosmic-dark/40 rounded-lg border border-cosmic-purple/30">
-                    <h4 className="text-cosmic-gold font-medium mb-2">Frequency Waveform</h4>
-                    <div className="h-32 bg-black/30 rounded flex items-center justify-center border border-cosmic-purple/20">
-                      <div className="text-cosmic-silver/60 text-center">
-                        <div className="text-2xl mb-1">{selectedPreset.frequency.toFixed(2)} Hz</div>
-                        <div className="text-sm">{isPlaying ? 'Playing' : 'Ready'}</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Current Frequency Information Panel */}
-              {selectedPreset && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 p-4 bg-black/50 rounded-lg border border-white/20"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-white font-bold text-lg">{selectedPreset.label}</div>
-                      <div className="text-cosmic-gold text-xl font-mono">
-                        {selectedPreset.frequency.toFixed(1)} Hz
-                      </div>
-                      <div className="text-cosmic-silver text-sm capitalize">
-                        Category: {selectedPreset.category}
-                      </div>
-                    </div>
-                    {selectedPreset.benefits && selectedPreset.benefits.length > 0 && (
-                      <div>
-                        <div className="text-white/70 text-sm font-medium mb-1">Benefits:</div>
-                        <ul className="text-cyan-300 text-sm space-y-1">
-                          {selectedPreset.benefits.slice(0, 3).map((benefit: string, index: number) => (
-                            <li key={index}>• {benefit}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Enhanced Status Display */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-        >
-          <div className="inline-flex items-center space-x-6 bg-cosmic-purple/10 px-8 py-4 rounded-full border border-cosmic-purple/30">
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${isPlaying ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
-              <span className="text-sm font-medium text-white">
-                {isPlaying ? 'Playing' : 'Stopped'}
-              </span>
-            </div>
-            <div className="text-sm text-cosmic-gold font-mono">
-              {currentFrequency.toFixed(1)} Hz
-            </div>
-            {binauralEnabled && binauralBeat > 0 && (
-              <div className="text-sm text-purple-400 font-medium">
-                Binaural: ±{binauralBeat.toFixed(1)} Hz
-              </div>
-            )}
-            {selectedPreset && (
-              <div className="text-sm text-cyan-400 capitalize">
-                {selectedPreset.category}
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Hidden Components for Functionality */}
-        {/* AudioPlayer disabled to prevent conflicts with AudioEngine */}
-        <div className="hidden">
-          {/* 
-          <AudioPlayer
-            frequency={currentFrequency}
-            volume={volume}
-            isPlaying={isPlaying}
-            binauralBeat={binauralEnabled ? binauralBeat : 0}
-            onPlayStateChange={updatePlayingState}
-          />
-          */}
-        </div>
-
-        {/* Sticky Mini Player */}
-        <MiniPlayer
-          isPlaying={isPlaying}
-          title={selectedPreset ? `${selectedPreset.label} • ${selectedPreset.frequency} Hz` : 'Ultimate Frequency Generator'}
-          subtitle={binauralEnabled && binauralBeat > 0 ? `Binaural • ±${binauralBeat} Hz` : undefined}
-          onStop={handleStop}
+      {/* Main Controls Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* Frequency Controls */}
+        <FrequencyControls
+          currentFrequency={currentFrequency}
+          onFrequencyChange={handleFrequencyChange}
+          selectedPreset={selectedPreset}
+          onPresetSelect={handlePresetSelect}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={handleCategoryFilterChange}
+          customPresets={customPresets}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          presetName={presetName}
+          onPresetNameChange={setPresetName}
+          showPresetCreator={showPresetCreator}
+          onShowPresetCreatorChange={setShowPresetCreator}
+          onCreateCustomPreset={handleCreateCustomPreset}
         />
-      </motion.div>
-    </ErrorBoundary>
+
+        {/* Audio Controls */}
+        <AudioControls
+          volume={volume}
+          onVolumeChange={handleVolumeChange}
+          duration={duration}
+          onDurationChange={handleDurationChange}
+          isPlaying={isPlaying}
+          onPlayPause={handlePlayPause}
+          volumeLabelId={volumeLabelId}
+          durationLabelId={durationLabelId}
+        />
+
+        {/* Binaural Controls */}
+        <BinauralControls
+          binauralEnabled={binauralEnabled}
+          onBinauralEnabledChange={setBinauralEnabled}
+          binauralBeat={binauralBeat}
+          onBinauralBeatChange={handleBinauralBeatChange}
+          selectedChakra={selectedChakra}
+          onChakraSelect={handleChakraSelect}
+        />
+      </div>
+
+      {/* Advanced Controls */}
+      <AdvancedControls
+        showSacredGeometry={showSacredGeometry}
+        onSacredGeometryToggle={handleSacredGeometryToggle}
+        geometryPattern={geometryPattern}
+        onGeometryPatternChange={setGeometryPattern}
+        visualizationData={visualizationData}
+        onVisualizationDataChange={setVisualizationData}
+      />
+
+      {/* Sacred Geometry Visualization */}
+      {showVisualization && showSacredGeometry && geometryPattern && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-center"
+        >
+          <SacredGeometryCanvas
+            pattern={geometryPattern}
+            className="w-full max-w-md h-64"
+          />
+        </motion.div>
+      )}
+
+      {/* Playback Controls */}
+      <PlaybackControls
+        isPlaying={isPlaying}
+        onPlayPause={handlePlayPause}
+        currentFrequency={currentFrequency}
+        selectedPreset={selectedPreset}
+      />
+    </div>
   );
 });
 

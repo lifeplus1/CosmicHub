@@ -289,7 +289,23 @@ const HEALING_FREQUENCIES: Record<string, FrequencyCategory> = {
       { frequency: 12, amplitude: 0.7, phase: 0, label: 'Beta Focus', color: '#10b981', category: 'brainwave', timestamp: Date.now(), benefits: ['Focus', 'Concentration', 'Alert thinking'] },
       { frequency: 14, amplitude: 0.7, phase: 0, label: 'High Alpha', color: '#059669', category: 'brainwave', timestamp: Date.now(), benefits: ['Enhanced learning', 'Cognitive clarity', 'Memory retention'] },
       { frequency: 20, amplitude: 0.7, phase: 0, label: 'Beta (12-30 Hz)', color: '#10b981', category: 'brainwave', timestamp: Date.now(), benefits: ['Active thinking', 'Focus', 'Problem-solving'] },
-      { frequency: 25, amplitude: 0.7, phase: 0, label: 'Beta High Focus', color: '#84cc16', category: 'brainwave', timestamp: Date.now(), benefits: ['High performance', 'Problem solving', 'Peak alertness'] },
+      { 
+        frequency: 25, 
+        amplitude: 0.7, 
+        phase: 0, 
+        label: 'Beta High Focus', 
+        color: '#84cc16', 
+        category: 'brainwave', 
+        timestamp: Date.now(), 
+        benefits: ['High performance', 'Problem solving', 'Peak alertness'],
+        metadata: {
+          isBinaural: true,
+          baseFrequency: 250, // Carrier frequency for 25Hz binaural beat
+          binauralBeat: 25,   // The binaural beat frequency
+          leftEar: 250,
+          rightEar: 275       // 250 + 25 = 275Hz
+        }
+      },
       { frequency: 40, amplitude: 0.7, phase: 0, label: 'Gamma Peak', color: '#f59e0b', category: 'brainwave', timestamp: Date.now(), benefits: ['Consciousness', 'Binding perception', 'Higher awareness'] }
     ]
   },
@@ -384,8 +400,41 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
     })
     .filter((preset): preset is FrequencyData => preset !== null);
 
-  // Get all healing frequencies
-  const healingFrequencies = getAllHealingFrequencies();
+  // Get all healing frequencies with validation
+  const healingFrequencies = getAllHealingFrequencies()
+    .map(freq => {
+      // Debug Beta High Focus specifically
+      if (freq.label?.includes('Beta High Focus')) {
+        // eslint-disable-next-line no-console
+        console.log('🔍 DEBUG: Found Beta High Focus frequency:', {
+          frequency: freq.frequency,
+          label: freq.label,
+          category: freq.category,
+          benefits: freq.benefits
+        });
+      }
+      
+      const validation = safeValidateFrequencyData(freq);
+      if (!validation.success) {
+        // eslint-disable-next-line no-console
+        console.warn(`⚠️ Invalid healing frequency "${freq.label}":`, {
+          frequency: freq.frequency,
+          errors: validation.error.issues.map(issue => 
+            `${issue.path.join('.')}: ${issue.message}`
+          ).join(', ')
+        });
+        return null;
+      }
+      
+      // Debug successful Beta High Focus validation
+      if (freq.label?.includes('Beta High Focus')) {
+        // eslint-disable-next-line no-console
+        console.log('✅ DEBUG: Beta High Focus passed validation:', validation.data);
+      }
+      
+      return validation.data;
+    })
+    .filter((freq): freq is FrequencyData => freq !== null);
 
   // Combine and deduplicate (integration presets take priority for exact matches)
   const combinedFrequencies = [...convertedIntegrationPresets];
@@ -417,7 +466,37 @@ export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
     }
   });
 
-  return combinedFrequencies;
+  // Final validation of combined frequencies
+  const finalValidatedFrequencies = combinedFrequencies
+    .map(freq => {
+      const validation = safeValidateFrequencyData(freq);
+      if (!validation.success) {
+        // eslint-disable-next-line no-console
+        console.warn(`⚠️ Combined frequency failed final validation "${freq.label}":`, {
+          frequency: freq.frequency,
+          category: freq.category,
+          errors: validation.error.issues.map(issue => 
+            `${issue.path.join('.')}: ${issue.message}`
+          ).join(', ')
+        });
+        return null;
+      }
+      return validation.data;
+    })
+    .filter((freq): freq is FrequencyData => freq !== null);
+
+  // Debug category information
+  const categoryCount = finalValidatedFrequencies.reduce((acc, freq) => {
+    acc[freq.category] = (acc[freq.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // eslint-disable-next-line no-console
+  console.info(`✅ Unified frequency presets loaded: ${finalValidatedFrequencies.length} validated frequencies`);
+  // eslint-disable-next-line no-console
+  console.info('📊 Frequencies by category:', categoryCount);
+  
+  return finalValidatedFrequencies;
 };
 
 /**
