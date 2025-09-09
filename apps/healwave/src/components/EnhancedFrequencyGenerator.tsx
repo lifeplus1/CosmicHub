@@ -362,6 +362,14 @@ export const EnhancedFrequencyGenerator = memo<EnhancedFrequencyGeneratorProps>(
         }
       };
 
+      // Debug: Log selected preset details
+      devConsole.info('🔍 Selected preset details:', {
+        frequency: selectedPreset.frequency,
+        label: selectedPreset.label,
+        category: selectedPreset.category,
+        metadata: selectedPreset.metadata
+      });
+
       // Validate frequency before creating preset
       if (selectedPreset.frequency < 1 || selectedPreset.frequency > 20000) {
         throw new Error(`Invalid frequency: ${selectedPreset.frequency}Hz. Must be between 1-20000 Hz`);

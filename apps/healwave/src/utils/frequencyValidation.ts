@@ -109,18 +109,20 @@ export const deduplicateFrequencies = (frequencies: FrequencyData[], tolerance =
       result.push(freq);
     } else {
       // Merge benefits and keep the more detailed entry
-      const existing = result[existingIndex]!;
-      const mergedBenefits = Array.from(new Set([
-        ...(existing.benefits || []),
-        ...(freq.benefits || [])
-      ]));
-      
-      result[existingIndex] = {
-        ...existing,
-        benefits: mergedBenefits,
-        // Use the longer, more descriptive label
-        label: freq.label.length > existing.label.length ? freq.label : existing.label
-      };
+      const existing = result[existingIndex];
+      if (existing) {
+        const mergedBenefits = Array.from(new Set([
+          ...(existing.benefits || []),
+          ...(freq.benefits || [])
+        ]));
+        
+        result[existingIndex] = {
+          ...existing,
+          benefits: mergedBenefits,
+          // Use the longer, more descriptive label
+          label: freq.label.length > existing.label.length ? freq.label : existing.label
+        };
+      }
     }
   });
   

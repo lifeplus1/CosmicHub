@@ -10,7 +10,9 @@ import {
 } from '@cosmichub/integrations';
 import { CHAKRA_FREQUENCIES } from '../components/enhancements/chakraConstants';
 import { 
-  ValidatedFrequencyData
+  ValidatedFrequencyData,
+  validateFrequencyData,
+  safeValidateFrequencyData
 } from '../schemas/frequencySchemas';
 
 // Use ValidatedFrequencyData instead of importing from UI to ensure type consistency
@@ -63,7 +65,7 @@ export const convertPresetToFrequencyData = (preset: FrequencyPreset): Frequency
     ? `${preset.name} (${preset.binauralBeat} Hz binaural)`
     : preset.name;
 
-  return {
+  const frequencyData = {
     frequency: displayFrequency,
     amplitude: 0.8,
     phase: 0,
@@ -82,6 +84,43 @@ export const convertPresetToFrequencyData = (preset: FrequencyPreset): Frequency
       rightEar: preset.metadata?.rightEar || (preset.baseFrequency + (preset.binauralBeat || 0))
     }
   };
+
+  // Validate the converted frequency data
+  const validation = safeValidateFrequencyData(frequencyData);
+  
+  if (!validation.success) {
+    // eslint-disable-next-line no-console
+    console.warn(`⚠️ Frequency validation failed for preset "${preset.name}":`, {
+      preset: preset.name,
+      frequency: displayFrequency,
+      category: preset.category,
+      errors: validation.error.issues.map((issue) => 
+        `${issue.path.join('.')}: ${issue.message}`
+      ).join(', ')
+    });
+    
+    // Return a safe fallback with validated structure
+    return validateFrequencyData({
+      frequency: Math.max(1, Math.min(20000, displayFrequency || 440)), // Clamp to valid range
+      amplitude: 0.8,
+      phase: 0,
+      label: enhancedLabel || 'Unknown Frequency',
+      color: getCategoryColor('healing'), // Safe fallback category
+      category: 'healing',
+      timestamp: Date.now(),
+      benefits: preset.benefits ? [...preset.benefits] : [],
+      metadata: {
+        isBinaural: false,
+        baseFrequency: preset.baseFrequency || 440,
+        binauralBeat: preset.binauralBeat,
+        leftEar: preset.baseFrequency || 440,
+        rightEar: (preset.baseFrequency || 440) + (preset.binauralBeat || 0),
+        validationFailed: true
+      }
+    });
+  }
+
+  return validation.data;
 };
 
 /**
@@ -322,19 +361,28 @@ const getAllHealingFrequencies = (): FrequencyData[] => {
 export const getUnifiedFrequencyPresets = (): FrequencyData[] => {
   const integrationPresets = getAllPresets();
   
-  // Convert integration presets to FrequencyData format
-  const convertedIntegrationPresets = integrationPresets.map(preset => {
-    // Handle chakra frequencies with enhanced colors
-    if (preset.category === 'chakra' && preset.metadata?.chakra) {
-      const chakraKey = preset.metadata.chakra as ChakraKey;
-      return {
-        ...convertPresetToFrequencyData(preset),
-        color: getChakraColor(chakraKey)
-      };
-    }
-    
-    return convertPresetToFrequencyData(preset);
-  });
+  // Convert integration presets to FrequencyData format with validation
+  const convertedIntegrationPresets = integrationPresets
+    .map(preset => {
+      try {
+        // Handle chakra frequencies with enhanced colors
+        if (preset.category === 'chakra' && preset.metadata?.chakra) {
+          const chakraKey = preset.metadata.chakra as ChakraKey;
+          const converted = convertPresetToFrequencyData(preset);
+          return {
+            ...converted,
+            color: getChakraColor(chakraKey)
+          };
+        }
+        
+        return convertPresetToFrequencyData(preset);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`❌ Failed to convert preset "${preset.name}":`, error);
+        return null;
+      }
+    })
+    .filter((preset): preset is FrequencyData => preset !== null);
 
   // Get all healing frequencies
   const healingFrequencies = getAllHealingFrequencies();
